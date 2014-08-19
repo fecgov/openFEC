@@ -16,6 +16,9 @@ import requests
 import simplejson as json
 from elasticsearch import Elasticsearch
 
+# Local
+from openfec.entities import annotate
+
 ###
 # Settings settings settings
 ###
@@ -172,7 +175,7 @@ class CleanData(luigi.Task):
             candidate = json.loads(candidate)
             cleaned_candidate = {}
             
-            # We'll first iterate through all the elections a candidate has participated in
+            """ We'll first iterate through all the elections a candidate has participated in. This combines DIMCANDOFFICE, DIMCANDSTATUSICI, DIMOFFICE, and DIMPARTY """
             elections = []
             try:
                 # We iterate through each item in DIMCANDOFFICE, which represent offices the candidate has run for.
@@ -184,28 +187,35 @@ class CleanData(luigi.Task):
                     election['ELECTION_YEAR'] = item['CAND_ELECTION_YR']
 
                     # We can now try and see if we can connect this election to the Incumbent/Challenger Indicator
+                    # We set up a quick list of all the years we have appended
+                    appended_ici_entries = []
                     try:
+                        # And now iterate through each ICI entry
                         for ici in candidate['DIMCANDSTATUSICI']:
                             if ici['ELECTION_YR'] == election['ELECTION_YEAR']:
                                 # First We set the candidate status
-                                if ici['CAND_STATUS'] == "C":
-                                    election['STATUS'] = "Statutory Candidate"
-                                elif ici['CAND_STATUS'] == "F":
-                                    election['STATUS'] = "Statutory Candidate for Future Election"
-                                elif ici['CAND_STATUS'] == "N":
-                                    election['STATUS'] = "Not Yet a Statutory Candidate"
-                                elif ici['CAND_STATUS'] == "P":
-                                    election['STATUS'] = "Statutory Candidate in Prior Cycle"
+                                election['STATUS'] = annotate.candidate_status(ici['CAND_STATUS'])
 
                                 # Now set the Incumbent Challenger Status
-                                if ici['ICI_CODE'] == "C":
-                                    election['INCUMBENT_CHALLENGER_STATUS'] = "Challenger"
-                                elif ici['ICI_CODE'] == "I":
-                                    election['INCUMBENT_CHALLENGER_STATUS'] = "Incumbent"
-                                elif ici['ICI_CODE'] == "O":
-                                    election['INCUMBENT_CHALLENGER_STATUS'] = "Open Seat"
+                                election['INCUMBENT_CHALLENGER_STATUS'] = annotate.candidate_ici_status(ici['ICI_CODE'])
+                            # Make sure the fact that we wrote this year gets logged
+                            appended_ici_entries.append(ici['ELECTION_YR'])
                     except KeyError:
-                        print("Key Error!")
+                        pass
+
+                    # We repeat the loop to catch things that weren't appended
+                    try:
+                        for ici in candidate['DIMCANDSTATUSICI']:
+                            if ici['ELECTION_YR'] not in appended_ici_entries:
+                                extra_ici = {}
+                                # First We set the candidate status
+                                extra_ici['STATUS'] = annotate.candidate_status(ici['CAND_STATUS'])
+
+                                # Now set the Incumbent Challenger Status
+                                extra_ici['INCUMBENT_CHALLENGER_STATUS'] = annotate.candidate_ici_status(ici['ICI_CODE'])
+                                elections.append(extra_ici)
+                    except KeyError:
+                        pass
 
                     # Grab the actual office information (rather than just the key) from our combined_data db and insert that data directly
                     office = json.loads(combined_data.Get('OFFICE!%s' % item['OFFICE_SK']))
@@ -221,14 +231,15 @@ class CleanData(luigi.Task):
 
                     # Finally, append the new dictionary to our elections list
                     elections.append(election)
-
             # Sometimes we get a Key Error because the candidate doesn't have any related campaigns. Not sure why that would happen.   
             except KeyError:
-                print("Key Error!")
-            
+                pass
+
+
+
             # Add our elections list to our cleaned_candidate entry
-            print elections
             cleaned_candidate['ELECTIONS'] = elections
+            print elections
             
 
 

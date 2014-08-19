@@ -7,7 +7,7 @@ This is a experiment in taking data from the Federal Election Commission and har
 ## Installation
 This will work best when installed in to its own [Virtual Environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
 
-- `$ pip install -r requirements.txt`
+- `$ python setup.py develop`
 - `$ python openfec/entities/pipeline.py CleanData --local-scheduler`
 
 This will showcase work so far, which includes combining data from a number of different raw exports from FEC's Data Warehouse (sample files are downloaded) in to a single local database powered by LevelDB for analysis, then beginning the steps of cleaning this data to be a little more sane.

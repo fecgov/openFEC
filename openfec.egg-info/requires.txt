@@ -1,0 +1,12 @@
+click
+luigi
+nose
+python-gflags
+pyyaml
+simplejson
+xmltodict
+scrapelib
+leveldb
+simplejson
+requests
+elasticsearch
