@@ -174,10 +174,14 @@ class CleanData(luigi.Task):
         for key, value in combined_db.RangeIter(key_from="CAND!!", key_to="CAND!~"):
             candidate = json.loads(value)
             cleaned_candidate = {}
-
+            # Add the Candidate ID to the main top-level entry
+            cleaned_candidate['ID'] = candidate['CAND_ID']
+            
             # Add our elections list to our cleaned_candidate entry
             cleaned_candidate['ELECTIONS'] = annotate.create_elections_entry(candidate, combined_db)
-            print cleaned_candidate
+
+            annotate.create_properties_entry(candidate['DIMCANDPROPERTIES'])
+            #print cleaned_candidate
 
 
 

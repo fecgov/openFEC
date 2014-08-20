@@ -5,6 +5,9 @@ Tools for annotating records
 # Third Party Dependences
 import simplejson as json
 
+def keytry():
+    print hello
+
 def candidate_status(status_code):
     """ Return a status description for a given candidate status code """
     if status_code == "C":
@@ -92,5 +95,42 @@ def create_elections_entry(candidate, combined_db):
         pass
 
     return elections
+
+def create_properties_entry(properties):
+    """Iterate through all properties of a candidate. Return the most recent as a main record, the rest as a 'history' record """
+    fields_to_keep = [
+        {
+            "original_key": "CAND_ST1",
+            "new_key": "STREET1"
+        },
+        {
+            "original_key": "CAND_ST2",
+            "new_key": "STREET2"
+        }
+    ]
+    main_properties = {}
+    historical_properties = []
+    property_ids = []
+
+    # We're going to store a list of all the information so that we can pull out the most recent record later on. This is identified by sorting the CANDPROPERTIES_SK
+    for property in properties:
+        # Add this to our list of historical things
+        property_ids.append(property['CANDPROPERTIES_SK'])
+
+    # Now that we have a list of keys, we'll iterate over again and compare to see if this should be the main entry or a historical entry
+    for property in properties:
+        for key, value in property.items():
+            for item in fields_to_keep:
+                if key in item.keys():
+                    print "hello"
+                    print key
+                    print value
+        #cleaned_property = {}
+        #cleaned_property['ST1'] = property['CAND_ST1']
+        #cleaned_property['ST2'] = property['CAND_ST2']
+        #if property['CANDPROPERTIES_SK'] == max(property_ids):
+
+
+
 
 
