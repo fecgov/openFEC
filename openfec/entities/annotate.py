@@ -141,5 +141,37 @@ def create_properties_entry(properties):
     return main_properties, historical_properties
 
 
+def create_revision_history(fields_to_keep, entity, entity_iterator, entity_sk):
+    """Iterate through all properties of a candidate. Return the most recent as a main record, the rest as a 'history' record """
+    main_entry = {}
+    historical_entries = []
+    entry_keys = []
+
+    # We're going to store a list of all the information so that we can pull out the most recent record later on. This is identified by sorting the CANDPROPERTIES_SK
+    try:
+        for entry in entity[entity_iterator]:
+            # Add this to our list of historical things
+            entry_keys.append(int(entry[entity_sk]))
+    except KeyError:
+        print("KeyError")
+
+    # Now that we have a list of keys, we'll iterate over again and compare to see if this should be the main entry or a historical entry
+    try:
+        for entry in entity[entity_iterator]:
+            cleaned_entry = {}
+            for key, value in entry.items():
+                if key in fields_to_keep:
+                    cleaned_entry_name = fields_to_keep[key]
+                    cleaned_entry[cleaned_entry_name] = entry[key]
+            if int(entry[entity_sk]) == max(entry_keys):
+                main_entry = cleaned_entry
+            else:
+                historical_entries.append(cleaned_entry)
+    except KeyError:
+        pass
+
+    return main_entry, historical_entries
+
+
 
 

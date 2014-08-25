@@ -123,7 +123,7 @@ class CombineData(luigi.Task):
                 combined_entry = combine_json(source_data_name, entity, entry)
                 db.Put('%s!%s' % (namespace, entity[key_name]), json.dumps(combined_entry))
 
-        def add_metadata():
+        def _add_metadata():
             """ This function will take in two items of metadata, DIMOFFICE and DIMPARTY, and make them accessible in our local store """
             DIMOFFICE = open_json('dimoffice.json')
             DIMPARTY = open_json('dimparty.json')
@@ -134,8 +134,6 @@ class CombineData(luigi.Task):
             for party in DIMPARTY:
                 db.Put('PARTY!%s' % party['PARTY_SK'], json.dumps(party))
 
-        # And we'll just run that metadata add function while we're here
-        add_metadata()
 
         def _combine_candidates():
             """Iterate through all candidates, create a unique entity for them in our local store, and add in additional metadata.
@@ -157,7 +155,26 @@ class CombineData(luigi.Task):
             add_entity_to_db('CAND', 'CAND_SK', DIMCANDPROPERTIES, 'DIMCANDPROPERTIES')
             add_entity_to_db('CAND', 'CAND_SK', DIMCANDSTATUSICI, 'DIMCANDSTATUSICI')
 
+
+        def _combine_committees():
+            """Iterate through all committees, creates a unique entity for them in our local store, and add in additional metadata.
+            """
+            DIMCMTE = open_json('DIMCMTE.json')
+            DIMCMTEPROPERTIES = open_json('DIMCMTEPROPERTIES.json')
+            DIMCMTETPDSGN = open_json('DIMCMTETPDSGN.json')
+
+            # Iterate through DIMCMTE and create entities for each committee
+            for committee in DIMCMTE:
+                # We use CMTE!{CMTE_SK} for our key. Note that CMTE_SK is different than CMTE_ID and doesn't need to be exposed to the end-user.
+                db.Put('%s!%s' % ('CMTE', committee["CMTE_SK"]), json.dumps(committee))
+
+            add_entity_to_db('CMTE', 'CMTE_SK', DIMCMTEPROPERTIES, 'DIMCMTEPROPERTIES')
+            add_entity_to_db('CMTE', 'CMTE_SK', DIMCMTETPDSGN, 'DIMCMTETPDSGN')
+
+        # Run the three database store creation functions
+        _add_metadata()
         _combine_candidates()
+        _combine_committees()
 
 class CleanData(luigi.Task):
     def requires(self):
@@ -180,9 +197,39 @@ class CleanData(luigi.Task):
             # Add our elections list to our cleaned_candidate entry
             cleaned_candidate['ELECTIONS'] = annotate.create_elections_entry(candidate, combined_db)
 
-            cleaned_candidate['PROPERTIES'], cleaned_candidate['HISTORICAL_PROPERTIES'] = annotate.create_properties_entry(candidate)
-            print json.dumps(cleaned_candidate)
+            property_fields_to_keep = {
+                'CAND_ST1':'STREET_1',
+                'CAND_ST2':'STREET_2',
+                'CAND_ZIP':'ZIP',
+                'CAND_CITY':'CITY',
+                'CAND_ST':'STATE',
+                'CAND_NM':'NAME',
+                'CAND_STATUS_DESC':'STATUS_DESC',
+                'CAND_STATUS_CD':'STATUS_CD',
+                'LOAD_DATE': 'DATE'
+            }
 
+            cleaned_candidate['PROPERTIES'], cleaned_candidate['HISTORICAL_PROPERTIES'] = annotate.create_revision_history(property_fields_to_keep, candidate, 'DIMCANDPROPERTIES', 'CANDPROPERTIES_SK')
+            
+            cleaned_db.Put("CAND!%s" % cleaned_candidate['ID'], json.dumps(cleaned_candidate))
+
+        """ Iterate through each committee and clean it up! """
+        for key, value in combined_db.RangeIter(key_from="CMTE!!", key_to="CMTE!~"):
+            committee = json.loads(value)
+            cleaned_committee = {}
+
+            # Add the Committee ID to the main top-level entry
+            cleaned_committee['ID'] = committee['CMTE_ID']
+
+            properties_fields_to_keep = {
+                "CMTE_NM": "NAME",
+                "CMTE_ST1": "STREET_1",
+                "CMTE_ST2": "STREET_2",
+                "CMTE_CITY": "CITY"
+            }
+            cleaned_committee['PROPERTIES'], cleaned_committee['HISTORICAL_PROPERTIES'] = annotate.create_revision_history(properties_fields_to_keep, committee, 'DIMCMTEPROPERTIES', 'CMTE_SK')
+
+            print json.dumps(cleaned_committee)
 
 if __name__ == '__main__':
     logging.basicConfig(
