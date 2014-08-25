@@ -180,9 +180,8 @@ class CleanData(luigi.Task):
             # Add our elections list to our cleaned_candidate entry
             cleaned_candidate['ELECTIONS'] = annotate.create_elections_entry(candidate, combined_db)
 
-            annotate.create_properties_entry(candidate)
-            #print cleaned_candidate
-
+            cleaned_candidate['PROPERTIES'], cleaned_candidate['HISTORICAL_PROPERTIES'] = annotate.create_properties_entry(candidate)
+            print json.dumps(cleaned_candidate)
 
 
 if __name__ == '__main__':

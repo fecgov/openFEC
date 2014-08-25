@@ -106,7 +106,8 @@ def create_properties_entry(properties):
         'CAND_ST':'STATE',
         'CAND_NM':'NAME',
         'CAND_STATUS_DESC':'STATUS_DESC',
-        'CAND_STATUS_CD':'STATUS_CD'
+        'CAND_STATUS_CD':'STATUS_CD',
+        'LOAD_DATE': 'DATE'
     }
     main_properties = {}
     historical_properties = []
@@ -125,29 +126,19 @@ def create_properties_entry(properties):
     # Now that we have a list of keys, we'll iterate over again and compare to see if this should be the main entry or a historical entry
     try:
         for property in properties['DIMCANDPROPERTIES']:
-            print property_ids
-            print int(property['CANDPROPERTIES_SK'])
-            if int(property['CANDPROPERTIES_SK']) == max(property_ids):
-                print "MAX"
-            else:
-                print "NOTMAX"
-
             cleaned_property = {}
             for key, value in property.items():
-                if fields_to_keep[key]:
+                if key in fields_to_keep:
                     cleaned_property_name = fields_to_keep[key]
                     cleaned_property[cleaned_property_name] = property[key]
-
-
-            if property['CANDPROPERTIES_SK'] == max(property_ids):
+            if int(property['CANDPROPERTIES_SK']) == max(property_ids):
                 main_properties = cleaned_property
             else:
                 historical_properties.append(cleaned_property)
     except KeyError:
         pass
 
-    #print main_properties
-    #print historical_properties
+    return main_properties, historical_properties
 
 
 
