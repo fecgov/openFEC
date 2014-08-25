@@ -38,7 +38,7 @@ def create_elections_entry(candidate, combined_db):
             election = {}
 
             # Transfer over the election year of the candidate
-            election['ELECTION_YEAR'] = office['CAND_ELECTION_YR']
+            election['election_year'] = office['CAND_ELECTION_YR']
 
             # We can now try and see if we can connect this election to the Incumbent/Challenger Indicator
             # We set up a quick list of all the years we have appended
@@ -46,12 +46,12 @@ def create_elections_entry(candidate, combined_db):
             try:
                 # And now iterate through each ICI entry
                 for ici in candidate['DIMCANDSTATUSICI']:
-                    if ici['ELECTION_YR'] == election['ELECTION_YEAR']:
+                    if ici['ELECTION_YR'] == election['election_year']:
                         # First We set the candidate status
-                        election['STATUS'] = candidate_status(ici['CAND_STATUS'])
+                        election['status'] = candidate_status(ici['CAND_STATUS'])
 
                         # Now set the Incumbent Challenger Status
-                        election['INCUMBENT_CHALLENGER_STATUS'] = candidate_ici_status(ici['ICI_CODE'])
+                        election['incumbent_challenger_status'] = candidate_ici_status(ici['ICI_CODE'])
                     # Make sure the fact that we wrote this year gets logged
                     appended_ici_entries.append(ici['ELECTION_YR'])
             except KeyError:
@@ -63,30 +63,30 @@ def create_elections_entry(candidate, combined_db):
                     if ici['ELECTION_YR'] not in appended_ici_entries:
                         extra_ici = {}
                         # First We set the candidate status
-                        extra_ici['STATUS'] = candidate_status(ici['CAND_STATUS'])
+                        extra_ici['status'] = candidate_status(ici['CAND_STATUS'])
 
                         # Now set the Incumbent Challenger Status
-                        extra_ici['INCUMBENT_CHALLENGER_STATUS'] = candidate_ici_status(ici['ICI_CODE'])
+                        extra_ici['incumbent_challenger_status'] = candidate_ici_status(ici['ICI_CODE'])
                         elections.append(extra_ici)
             except KeyError:
                 pass
 
             # Grab the actual office information (rather than just the key) from our combined_db db and insert that data directly
             office_meta = json.loads(combined_db.Get('OFFICE!%s' % office['OFFICE_SK']))
-            election['OFFICE'] = office_meta['OFFICE_TP_DESC']
+            election['office'] = office_meta['OFFICE_TP_DESC']
 
             # This is annoying - if the candidate is running for President, the state is listed as "US". We don't need to include that that.
-            if election['OFFICE'] is not "President":
-                election['STATE'] = office_meta['OFFICE_STATE']
+            if election['office'] is not "President":
+                election['state'] = office_meta['OFFICE_STATE']
 
             # We'll also include the district if the candidate is running for the House of Representatives
-            if election['OFFICE'] is "House":
-                election['DISTRICT'] = office_meta['OFFICE_DISTRICT']
+            if election['office'] is "House":
+                election['district'] = office_meta['OFFICE_DISTRICT']
 
             # Grab the party information
             party_meta = json.loads(combined_db.Get('PARTY!%s' % office['PARTY_SK']))
-            election['POLITICAL_PARTY_ABBREVIATION'] = party_meta['PARTY_AFFILIATION']
-            election['POLITICAL_PARTY'] = party_meta['PARTY_AFFILIATION_DESC']
+            election['political_party_abbreviation'] = party_meta['PARTY_AFFILIATION']
+            election['political_party'] = party_meta['PARTY_AFFILIATION_DESC']
 
             # Finally, append the new dictionary to our elections list
             elections.append(election)
@@ -95,51 +95,6 @@ def create_elections_entry(candidate, combined_db):
         pass
 
     return elections
-
-def create_properties_entry(properties):
-    """Iterate through all properties of a candidate. Return the most recent as a main record, the rest as a 'history' record """
-    fields_to_keep = {
-        'CAND_ST1':'STREET_1',
-        'CAND_ST2':'STREET_2',
-        'CAND_ZIP':'ZIP',
-        'CAND_CITY':'CITY',
-        'CAND_ST':'STATE',
-        'CAND_NM':'NAME',
-        'CAND_STATUS_DESC':'STATUS_DESC',
-        'CAND_STATUS_CD':'STATUS_CD',
-        'LOAD_DATE': 'DATE'
-    }
-    main_properties = {}
-    historical_properties = []
-    property_ids = []
-
-    # We're going to store a list of all the information so that we can pull out the most recent record later on. This is identified by sorting the CANDPROPERTIES_SK
-    try:
-        for property in properties['DIMCANDPROPERTIES']:
-            # Add this to our list of historical things
-            property_ids.append(int(property['CANDPROPERTIES_SK']))
-    except KeyError:
-        print("KeyError")
-
-
-
-    # Now that we have a list of keys, we'll iterate over again and compare to see if this should be the main entry or a historical entry
-    try:
-        for property in properties['DIMCANDPROPERTIES']:
-            cleaned_property = {}
-            for key, value in property.items():
-                if key in fields_to_keep:
-                    cleaned_property_name = fields_to_keep[key]
-                    cleaned_property[cleaned_property_name] = property[key]
-            if int(property['CANDPROPERTIES_SK']) == max(property_ids):
-                main_properties = cleaned_property
-            else:
-                historical_properties.append(cleaned_property)
-    except KeyError:
-        pass
-
-    return main_properties, historical_properties
-
 
 def create_revision_history(fields_to_keep, entity, entity_iterator, entity_sk):
     """Iterate through all properties of a candidate. Return the most recent as a main record, the rest as a 'history' record """

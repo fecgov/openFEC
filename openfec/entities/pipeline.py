@@ -192,26 +192,26 @@ class CleanData(luigi.Task):
             candidate = json.loads(value)
             cleaned_candidate = {}
             # Add the Candidate ID to the main top-level entry
-            cleaned_candidate['ID'] = candidate['CAND_ID']
+            cleaned_candidate['id'] = candidate['CAND_ID']
             
             # Add our elections list to our cleaned_candidate entry
-            cleaned_candidate['ELECTIONS'] = annotate.create_elections_entry(candidate, combined_db)
+            cleaned_candidate['elections'] = annotate.create_elections_entry(candidate, combined_db)
 
             property_fields_to_keep = {
-                'CAND_ST1':'STREET_1',
-                'CAND_ST2':'STREET_2',
-                'CAND_ZIP':'ZIP',
-                'CAND_CITY':'CITY',
-                'CAND_ST':'STATE',
-                'CAND_NM':'NAME',
-                'CAND_STATUS_DESC':'STATUS_DESC',
-                'CAND_STATUS_CD':'STATUS_CD',
-                'LOAD_DATE': 'DATE'
+                'CAND_ST1':'street',
+                'CAND_ST2':'street_2',
+                'CAND_ZIP':'zipcode',
+                'CAND_CITY':'city',
+                'CAND_ST':'state',
+                'CAND_NM':'name',
+                'CAND_STATUS_DESC':'status_description',
+                'CAND_STATUS_CD':'status_code',
+                'LOAD_DATE': 'date'
             }
 
-            cleaned_candidate['PROPERTIES'], cleaned_candidate['HISTORICAL_PROPERTIES'] = annotate.create_revision_history(property_fields_to_keep, candidate, 'DIMCANDPROPERTIES', 'CANDPROPERTIES_SK')
+            cleaned_candidate['properties'], cleaned_candidate['historical_properties'] = annotate.create_revision_history(property_fields_to_keep, candidate, 'DIMCANDPROPERTIES', 'CANDPROPERTIES_SK')
             
-            cleaned_db.Put("CAND!%s" % cleaned_candidate['ID'], json.dumps(cleaned_candidate))
+            cleaned_db.Put("CAND!%s" % cleaned_candidate['id'], json.dumps(cleaned_candidate))
 
         """ Iterate through each committee and clean it up! """
         for key, value in combined_db.RangeIter(key_from="CMTE!!", key_to="CMTE!~"):
@@ -219,15 +219,15 @@ class CleanData(luigi.Task):
             cleaned_committee = {}
 
             # Add the Committee ID to the main top-level entry
-            cleaned_committee['ID'] = committee['CMTE_ID']
+            cleaned_committee['id'] = committee['CMTE_ID']
 
             properties_fields_to_keep = {
-                "CMTE_NM": "NAME",
-                "CMTE_ST1": "STREET_1",
-                "CMTE_ST2": "STREET_2",
-                "CMTE_CITY": "CITY"
+                "CMTE_NM": "name",
+                "CMTE_ST1": "street",
+                "CMTE_ST2": "street_2",
+                "CMTE_CITY": "city"
             }
-            cleaned_committee['PROPERTIES'], cleaned_committee['HISTORICAL_PROPERTIES'] = annotate.create_revision_history(properties_fields_to_keep, committee, 'DIMCMTEPROPERTIES', 'CMTE_SK')
+            cleaned_committee['properties'], cleaned_committee['historical_properties'] = annotate.create_revision_history(properties_fields_to_keep, committee, 'DIMCMTEPROPERTIES', 'CMTE_SK')
 
             print json.dumps(cleaned_committee)
 
