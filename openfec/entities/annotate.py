@@ -98,7 +98,16 @@ def create_elections_entry(candidate, combined_db):
 
 def create_properties_entry(properties):
     """Iterate through all properties of a candidate. Return the most recent as a main record, the rest as a 'history' record """
-    fields_to_keep = ['CAND_ST1', 'CANS_ST1']
+    fields_to_keep = {
+        'CAND_ST1':'STREET_1',
+        'CAND_ST2':'STREET_2',
+        'CAND_ZIP':'ZIP',
+        'CAND_CITY':'CITY',
+        'CAND_ST':'STATE',
+        'CAND_NM':'NAME',
+        'CAND_STATUS_DESC':'STATUS_DESC',
+        'CAND_STATUS_CD':'STATUS_CD'
+    }
     main_properties = {}
     historical_properties = []
     property_ids = []
@@ -107,24 +116,38 @@ def create_properties_entry(properties):
     try:
         for property in properties['DIMCANDPROPERTIES']:
             # Add this to our list of historical things
-            property_ids.append(property['CANDPROPERTIES_SK'])
+            property_ids.append(int(property['CANDPROPERTIES_SK']))
     except KeyError:
         print("KeyError")
+
+
 
     # Now that we have a list of keys, we'll iterate over again and compare to see if this should be the main entry or a historical entry
     try:
         for property in properties['DIMCANDPROPERTIES']:
+            print property_ids
+            print int(property['CANDPROPERTIES_SK'])
+            if int(property['CANDPROPERTIES_SK']) == max(property_ids):
+                print "MAX"
+            else:
+                print "NOTMAX"
+
             cleaned_property = {}
             for key, value in property.items():
-                if key in fields_to_keep:
-                    cleaned_property[key] = property[key]
+                if fields_to_keep[key]:
+                    cleaned_property_name = fields_to_keep[key]
+                    cleaned_property[cleaned_property_name] = property[key]
+
+
             if property['CANDPROPERTIES_SK'] == max(property_ids):
                 main_properties = cleaned_property
             else:
                 historical_properties.append(cleaned_property)
     except KeyError:
-        print("keyError")
+        pass
 
+    #print main_properties
+    #print historical_properties
 
 
 
