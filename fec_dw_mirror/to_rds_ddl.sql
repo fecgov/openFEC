@@ -3,32 +3,30 @@
 -- ex: DESC SCHED_D - SEE OUTSTG_BAL_BOP
 -- had to change _id and _sk integers to bigint, all others to numeric
 
-CREATE EXTENSION oracle_fdw;
-DROP SERVER oradb CASCADE;
-CREATE SERVER oradb FOREIGN DATA WRAPPER oracle_fdw
-          OPTIONS (dbserver '//172.16.129.22/PROCUAT.FEC.GOV');
-GRANT USAGE ON FOREIGN SERVER oradb TO "ec2-user";
+CREATE EXTENSION postgres_fdw;
+DROP SERVER rds CASCADE;
+CREATE SERVER rds FOREIGN DATA WRAPPER postgres_fdw
+          OPTIONS (host :rds_host_loc, dbname 'cfdm');
+GRANT USAGE ON FOREIGN SERVER rds TO openfec;
 
-DROP USER MAPPING FOR "ec2-user" SERVER oradb;
-CREATE USER MAPPING FOR "ec2-user" SERVER oradb
-          OPTIONS (user 'READONLY', 
-                   password 'password-not-really-in-version-control-of-course');
+DROP USER MAPPING FOR "openfec" SERVER rds;
+CREATE USER MAPPING FOR "openfec" SERVER rds
+          OPTIONS (user 'openfec', 
+                   password :rds_password);
 
-DROP SCHEMA frn;
-CREATE SCHEMA frn;
+DROP SCHEMA rds;
+CREATE SCHEMA rds;
 
-CREATE FOREIGN TABLE frn.dimcand (
+CREATE FOREIGN TABLE rds.dimcand (
     cand_sk bigint NOT NULL,
     cand_id text,
     form_sk bigint,
     form_tp text,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMCAND');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcand');
 
-SELECT * FROM frn.dimcand LIMIT 1;
-
-CREATE FOREIGN TABLE frn.dimcandoffice (
+CREATE FOREIGN TABLE rds.dimcandoffice (
     candoffice_sk bigint NOT NULL,
     cand_sk bigint,
     office_sk bigint,
@@ -38,16 +36,10 @@ CREATE FOREIGN TABLE frn.dimcandoffice (
     cand_election_yr numeric,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMCANDOFFICE');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandoffice');
 
 
-ALTER TABLE public.dimcandoffice OWNER TO "ec2-user";
-
---
--- Name: dimcandproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimcandproperties (
+CREATE FOREIGN TABLE rds.dimcandproperties (
     candproperties_sk bigint NOT NULL,
     cand_sk bigint NOT NULL,
     form_sk bigint,
@@ -71,50 +63,29 @@ CREATE FOREIGN TABLE frn.dimcandproperties (
     gen_pers_funds_decl numeric,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMCANDPROPERTIES');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandproperties');
 
-
-ALTER TABLE public.dimcandproperties OWNER TO "ec2-user";
-
---
--- Name: dimcandstatusici; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimcandstatusici (
+CREATE FOREIGN TABLE rds.dimcandstatusici (
     candstatusici_sk bigint NOT NULL,
     cand_sk bigint,
-    election_yr number NOT NULL,
+    election_yr numeric NOT NULL,
     ici_code text,
     cand_status text,
     cand_inactive_flg text,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMCANDSTATUSICI');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandstatusici');
 
-
-ALTER TABLE public.dimcandstatusici OWNER TO "ec2-user";
-
---
--- Name: dimcmte; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimcmte (
+CREATE FOREIGN TABLE rds.dimcmte (
     cmte_sk bigint NOT NULL,
     cmte_id text,
     form_sk bigint,
     form_tp text,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMCMTE');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmte');
 
-
-ALTER TABLE public.dimcmte OWNER TO "ec2-user";
-
---
--- Name: dimcmteproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimcmteproperties (
+CREATE FOREIGN TABLE rds.dimcmteproperties (
     cmteproperties_sk bigint NOT NULL,
     cmte_sk bigint,
     form_sk bigint,
@@ -202,16 +173,10 @@ CREATE FOREIGN TABLE frn.dimcmteproperties (
     fith_cand_contb_dt timestamp without time zone,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMCMTEPROPERTIES');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmteproperties');
 
 
-ALTER TABLE public.dimcmteproperties OWNER TO "ec2-user";
-
---
--- Name: dimcmtetpdsgn; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimcmtetpdsgn (
+CREATE FOREIGN TABLE rds.dimcmtetpdsgn (
     cmte_tpdgn_sk bigint NOT NULL,
     cmte_sk bigint NOT NULL,
     cmte_tp text,
@@ -219,44 +184,23 @@ CREATE FOREIGN TABLE frn.dimcmtetpdsgn (
     receipt_date timestamp without time zone,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMCMTETPDSGN');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmtetpdsgn');
 
-
-ALTER TABLE public.dimcmtetpdsgn OWNER TO "ec2-user";
-
---
--- Name: dimdates; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimdates (
+CREATE FOREIGN TABLE rds.dimdates (
     date_sk bigint NOT NULL,
     dw_date timestamp without time zone,
     load_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMDATES');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimdates');
 
-
-ALTER TABLE public.dimdates OWNER TO "ec2-user";
-
---
--- Name: dimelectiontp; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimelectiontp (
+CREATE FOREIGN TABLE rds.dimelectiontp (
     electiontp_sk bigint NOT NULL,
     election_type_id text NOT NULL,
     election_type_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMELECTIONTP');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimelectiontp');
 
-
-ALTER TABLE public.dimelectiontp OWNER TO "ec2-user";
-
---
--- Name: dimlinkages; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimlinkages (
+CREATE FOREIGN TABLE rds.dimlinkages (
     linkages_sk bigint NOT NULL,
     cand_sk bigint NOT NULL,
     cmte_sk bigint NOT NULL,
@@ -268,16 +212,9 @@ CREATE FOREIGN TABLE frn.dimlinkages (
     link_date timestamp without time zone,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMLINKAGES');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimlinkages');
 
-
-ALTER TABLE public.dimlinkages OWNER TO "ec2-user";
-
---
--- Name: dimoffice; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimoffice (
+CREATE FOREIGN TABLE rds.dimoffice (
     office_sk bigint NOT NULL,
     office_tp text,
     office_tp_desc text,
@@ -285,59 +222,31 @@ CREATE FOREIGN TABLE frn.dimoffice (
     office_district text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMOFFICE');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimoffice');
 
-
-ALTER TABLE public.dimoffice OWNER TO "ec2-user";
-
---
--- Name: dimparty; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimparty (
+CREATE FOREIGN TABLE rds.dimparty (
     party_sk bigint NOT NULL,
     party_affiliation text,
     party_affiliation_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMPARTY');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimparty');
 
-
-ALTER TABLE public.dimparty OWNER TO "ec2-user";
-
---
--- Name: dimreporttype; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimreporttype (
+CREATE FOREIGN TABLE rds.dimreporttype (
     reporttype_sk bigint NOT NULL,
     rpt_tp text,
     rpt_tp_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMREPORTTYPE');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimreporttype');
 
-
-ALTER TABLE public.dimreporttype OWNER TO "ec2-user";
-
---
--- Name: dimyears; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.dimyears (
+CREATE FOREIGN TABLE rds.dimyears (
     year_sk bigint NOT NULL,
     year numeric,
     load_date timestamp without time zone NOT NULL
-) SERVER oradb OPTIONS (schema 'CFDM', table 'DIMYEARS');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimyears');
 
-
-ALTER TABLE public.dimyears OWNER TO "ec2-user";
-
---
--- Name: facthousesenate_f3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.facthousesenate_f3 (
+CREATE FOREIGN TABLE rds.facthousesenate_f3 (
     facthousesenate_f3_sk bigint NOT NULL,
     form_3_sk bigint,
     cmte_sk bigint,
@@ -428,16 +337,9 @@ CREATE FOREIGN TABLE frn.facthousesenate_f3 (
     end_image_num numeric,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FACTHOUSESENATE_F3');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'facthousesenate_f3');
 
-
-ALTER TABLE public.facthousesenate_f3 OWNER TO "ec2-user";
-
---
--- Name: factpacsandparties_f3x; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.factpacsandparties_f3x (
+CREATE FOREIGN TABLE rds.factpacsandparties_f3x (
     factpacsandparties_f3x_sk bigint NOT NULL,
     form_3x_sk bigint,
     cmte_sk bigint,
@@ -553,16 +455,10 @@ CREATE FOREIGN TABLE frn.factpacsandparties_f3x (
     end_image_num numeric,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FACTPACSANDPARTIES_F3X');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'factpacsandparties_f3x');
 
 
-ALTER TABLE public.factpacsandparties_f3x OWNER TO "ec2-user";
-
---
--- Name: factpresidential_f3p; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.factpresidential_f3p (
+CREATE FOREIGN TABLE rds.factpresidential_f3p (
     factpresidential_f3p_sk bigint NOT NULL,
     form_3p_sk bigint,
     cmte_sk bigint,
@@ -756,16 +652,10 @@ CREATE FOREIGN TABLE frn.factpresidential_f3p (
     end_image_num numeric,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FACTPRESIDENTIAL_F3P');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'factpresidential_f3p');
 
 
-ALTER TABLE public.factpresidential_f3p OWNER TO "ec2-user";
-
---
--- Name: form_105; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_105 (
+CREATE FOREIGN TABLE rds.form_105 (
     form_105_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -786,16 +676,10 @@ CREATE FOREIGN TABLE frn.form_105 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_105');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_105');
 
 
-ALTER TABLE public.form_105 OWNER TO "ec2-user";
-
---
--- Name: form_56; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_56 (
+CREATE FOREIGN TABLE rds.form_56 (
     form_56_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -833,16 +717,10 @@ CREATE FOREIGN TABLE frn.form_56 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_56');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_56');
 
 
-ALTER TABLE public.form_56 OWNER TO "ec2-user";
-
---
--- Name: form_57; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_57 (
+CREATE FOREIGN TABLE rds.form_57 (
     form_57_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -887,16 +765,10 @@ CREATE FOREIGN TABLE frn.form_57 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_57');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_57');
 
 
-ALTER TABLE public.form_57 OWNER TO "ec2-user";
-
---
--- Name: form_65; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_65 (
+CREATE FOREIGN TABLE rds.form_65 (
     form_65_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -934,16 +806,10 @@ CREATE FOREIGN TABLE frn.form_65 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_65');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_65');
 
 
-ALTER TABLE public.form_65 OWNER TO "ec2-user";
-
---
--- Name: form_76; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_76 (
+CREATE FOREIGN TABLE rds.form_76 (
     form_76_sk bigint NOT NULL,
     form_tp text,
     org_id text,
@@ -972,16 +838,10 @@ CREATE FOREIGN TABLE frn.form_76 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_76');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_76');
 
 
-ALTER TABLE public.form_76 OWNER TO "ec2-user";
-
---
--- Name: form_82; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_82 (
+CREATE FOREIGN TABLE rds.form_82 (
     form_82_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1022,16 +882,10 @@ CREATE FOREIGN TABLE frn.form_82 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_82');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_82');
 
 
-ALTER TABLE public.form_82 OWNER TO "ec2-user";
-
---
--- Name: form_83; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_83 (
+CREATE FOREIGN TABLE rds.form_83 (
     form_83_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1064,16 +918,10 @@ CREATE FOREIGN TABLE frn.form_83 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_83');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_83');
 
 
-ALTER TABLE public.form_83 OWNER TO "ec2-user";
-
---
--- Name: form_91; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_91 (
+CREATE FOREIGN TABLE rds.form_91 (
     form_91_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1097,16 +945,9 @@ CREATE FOREIGN TABLE frn.form_91 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_91');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_91');
 
-
-ALTER TABLE public.form_91 OWNER TO "ec2-user";
-
---
--- Name: form_94; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.form_94 (
+CREATE FOREIGN TABLE rds.form_94 (
     form_94_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1132,16 +973,10 @@ CREATE FOREIGN TABLE frn.form_94 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'FORM_94');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_94');
 
 
-ALTER TABLE public.form_94 OWNER TO "ec2-user";
-
---
--- Name: log_audit_dml; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.log_audit_dml (
+CREATE FOREIGN TABLE rds.log_audit_dml (
     dml_id bigint NOT NULL,
     run_id bigint,
     audit_id bigint,
@@ -1152,18 +987,12 @@ CREATE FOREIGN TABLE frn.log_audit_dml (
     dml_desc text,
     cpu_minutes numeric,
     elapsed_minutes numeric,
-    start_cpu_time number NOT NULL,
-    start_clock_time number NOT NULL
-) SERVER oradb OPTIONS (schema 'CFDM', table 'LOG_AUDIT_DML');
+    start_cpu_time numeric NOT NULL,
+    start_clock_time numeric NOT NULL
+) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_dml');
 
 
-ALTER TABLE public.log_audit_dml OWNER TO "ec2-user";
-
---
--- Name: log_audit_module; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.log_audit_module (
+CREATE FOREIGN TABLE rds.log_audit_module (
     audit_id bigint NOT NULL,
     run_id bigint,
     module_name text NOT NULL,
@@ -1172,18 +1001,12 @@ CREATE FOREIGN TABLE frn.log_audit_module (
     error_message text,
     cpu_minutes numeric,
     elapsed_minutes numeric,
-    start_cpu_time number NOT NULL,
-    start_clock_time number NOT NULL
-) SERVER oradb OPTIONS (schema 'CFDM', table 'LOG_AUDIT_MODULE');
+    start_cpu_time numeric NOT NULL,
+    start_clock_time numeric NOT NULL
+) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_module');
 
 
-ALTER TABLE public.log_audit_module OWNER TO "ec2-user";
-
---
--- Name: log_audit_process; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.log_audit_process (
+CREATE FOREIGN TABLE rds.log_audit_process (
     run_id bigint NOT NULL,
     session_id bigint NOT NULL,
     process_name text,
@@ -1194,18 +1017,12 @@ CREATE FOREIGN TABLE frn.log_audit_process (
     messages text,
     cpu_minutes numeric,
     elapsed_minutes numeric,
-    start_cpu_time number NOT NULL,
-    start_clock_time number NOT NULL
-) SERVER oradb OPTIONS (schema 'CFDM', table 'LOG_AUDIT_PROCESS');
+    start_cpu_time numeric NOT NULL,
+    start_clock_time numeric NOT NULL
+) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_process');
 
 
-ALTER TABLE public.log_audit_process OWNER TO "ec2-user";
-
---
--- Name: sched_a; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_a (
+CREATE FOREIGN TABLE rds.sched_a (
     sched_a_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1266,16 +1083,10 @@ CREATE FOREIGN TABLE frn.sched_a (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_A');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_a');
 
 
-ALTER TABLE public.sched_a OWNER TO "ec2-user";
-
---
--- Name: sched_b; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_b (
+CREATE FOREIGN TABLE rds.sched_b (
     sched_b_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1338,16 +1149,10 @@ CREATE FOREIGN TABLE frn.sched_b (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_B');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_b');
 
 
-ALTER TABLE public.sched_b OWNER TO "ec2-user";
-
---
--- Name: sched_c; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_c (
+CREATE FOREIGN TABLE rds.sched_c (
     sched_c_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1397,16 +1202,10 @@ CREATE FOREIGN TABLE frn.sched_c (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_C');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c');
 
 
-ALTER TABLE public.sched_c OWNER TO "ec2-user";
-
---
--- Name: sched_c1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_c1 (
+CREATE FOREIGN TABLE rds.sched_c1 (
     sched_c1_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1467,16 +1266,9 @@ CREATE FOREIGN TABLE frn.sched_c1 (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_C1');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c1');
 
-
-ALTER TABLE public.sched_c1 OWNER TO "ec2-user";
-
---
--- Name: sched_c2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_c2 (
+CREATE FOREIGN TABLE rds.sched_c2 (
     sched_c2_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1508,16 +1300,10 @@ CREATE FOREIGN TABLE frn.sched_c2 (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_C2');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c2');
 
 
-ALTER TABLE public.sched_c2 OWNER TO "ec2-user";
-
---
--- Name: sched_d; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_d (
+CREATE FOREIGN TABLE rds.sched_d (
     sched_d_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1566,16 +1352,10 @@ CREATE FOREIGN TABLE frn.sched_d (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_D');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_d');
 
 
-ALTER TABLE public.sched_d OWNER TO "ec2-user";
-
---
--- Name: sched_e; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_e (
+CREATE FOREIGN TABLE rds.sched_e (
     sched_e_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1637,16 +1417,10 @@ CREATE FOREIGN TABLE frn.sched_e (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_E');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_e');
 
 
-ALTER TABLE public.sched_e OWNER TO "ec2-user";
-
---
--- Name: sched_f; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_f (
+CREATE FOREIGN TABLE rds.sched_f (
     sched_f_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1712,16 +1486,10 @@ CREATE FOREIGN TABLE frn.sched_f (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_F');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_f');
 
 
-ALTER TABLE public.sched_f OWNER TO "ec2-user";
-
---
--- Name: sched_h1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_h1 (
+CREATE FOREIGN TABLE rds.sched_h1 (
     sched_h1_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1779,16 +1547,10 @@ CREATE FOREIGN TABLE frn.sched_h1 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_H1');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h1');
 
 
-ALTER TABLE public.sched_h1 OWNER TO "ec2-user";
-
---
--- Name: sched_h2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_h2 (
+CREATE FOREIGN TABLE rds.sched_h2 (
     sched_h2_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1818,16 +1580,10 @@ CREATE FOREIGN TABLE frn.sched_h2 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_H2');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h2');
 
 
-ALTER TABLE public.sched_h2 OWNER TO "ec2-user";
-
---
--- Name: sched_h3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_h3 (
+CREATE FOREIGN TABLE rds.sched_h3 (
     sched_h3_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1857,16 +1613,10 @@ CREATE FOREIGN TABLE frn.sched_h3 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_H3');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h3');
 
 
-ALTER TABLE public.sched_h3 OWNER TO "ec2-user";
-
---
--- Name: sched_h4; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_h4 (
+CREATE FOREIGN TABLE rds.sched_h4 (
     sched_h4_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1932,16 +1682,9 @@ CREATE FOREIGN TABLE frn.sched_h4 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_H4');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h4');
 
-
-ALTER TABLE public.sched_h4 OWNER TO "ec2-user";
-
---
--- Name: sched_h5; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_h5 (
+CREATE FOREIGN TABLE rds.sched_h5 (
     sched_h5_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1970,16 +1713,10 @@ CREATE FOREIGN TABLE frn.sched_h5 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_H5');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h5');
 
 
-ALTER TABLE public.sched_h5 OWNER TO "ec2-user";
-
---
--- Name: sched_h6; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_h6 (
+CREATE FOREIGN TABLE rds.sched_h6 (
     sched_h6_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -2039,16 +1776,10 @@ CREATE FOREIGN TABLE frn.sched_h6 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_H6');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h6');
 
 
-ALTER TABLE public.sched_h6 OWNER TO "ec2-user";
-
---
--- Name: sched_i; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_i (
+CREATE FOREIGN TABLE rds.sched_i (
     sched_i_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -2099,16 +1830,10 @@ CREATE FOREIGN TABLE frn.sched_i (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_I');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_i');
 
 
-ALTER TABLE public.sched_i OWNER TO "ec2-user";
-
---
--- Name: sched_l; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
---
-
-CREATE FOREIGN TABLE frn.sched_l (
+CREATE FOREIGN TABLE rds.sched_l (
     sched_l_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -2169,22 +1894,9 @@ CREATE FOREIGN TABLE frn.sched_l (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_L');
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_l');
 
+GRANT ALL PRIVILEGES ON SCHEMA rds TO openfec;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA rds TO openfec;
 
-ALTER TABLE public.sched_l OWNER TO "ec2-user";
-
---
--- Name: public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM postgres;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-
-
---
--- PostgreSQL database dump complete
---
 

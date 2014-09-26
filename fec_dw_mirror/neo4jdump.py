@@ -85,7 +85,6 @@ for contribution in session.query(Sched_a):
         query = neo4j.CypherQuery(graph_db, qry_text)
         existing_contributors = list(query.execute(contbr_id=contribution.contbr_id, contbr_nm=contribution.contbr_nm))
         if existing_contributors:
-            import ipdb; ipdb.set_trace()
             contributor = existing_contributors[0].ct
         else:
             contributor_attributes = {'contbr_id': contribution.contbr_id,
