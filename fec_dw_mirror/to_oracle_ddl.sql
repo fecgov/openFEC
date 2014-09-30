@@ -14,6 +14,11 @@ CREATE USER MAPPING FOR "ec2-user" SERVER oradb
           OPTIONS (user 'READONLY', 
                    password :oracle_password);
 
+DROP USER MAPPING FOR openfec SERVER oradb;
+CREATE USER MAPPING FOR openfec SERVER oradb
+          OPTIONS (user 'READONLY', 
+                   password :oracle_password);
+                   
 DROP SCHEMA frn;
 CREATE SCHEMA frn;
 
@@ -2174,17 +2179,5 @@ CREATE FOREIGN TABLE frn.sched_l (
 
 ALTER TABLE public.sched_l OWNER TO "ec2-user";
 
---
--- Name: public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-REVOKE ALL ON SCHEMA public FROM postgres;
-GRANT ALL ON SCHEMA public TO postgres;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-
-
---
--- PostgreSQL database dump complete
---
-
+GRANT ALL PRIVILEGES ON SCHEMA frn TO openfec;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA frn TO openfec;

@@ -14,10 +14,10 @@ CREATE USER MAPPING FOR "openfec" SERVER rds
           OPTIONS (user 'openfec', 
                    password :rds_password);
 
-DROP SCHEMA rds;
-CREATE SCHEMA rds;
+DROP SCHEMA public;
+CREATE SCHEMA public;
 
-CREATE FOREIGN TABLE rds.dimcand (
+CREATE FOREIGN TABLE public.dimcand (
     cand_sk bigint NOT NULL,
     cand_id text,
     form_sk bigint,
@@ -26,7 +26,7 @@ CREATE FOREIGN TABLE rds.dimcand (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcand');
 
-CREATE FOREIGN TABLE rds.dimcandoffice (
+CREATE FOREIGN TABLE public.dimcandoffice (
     candoffice_sk bigint NOT NULL,
     cand_sk bigint,
     office_sk bigint,
@@ -39,7 +39,7 @@ CREATE FOREIGN TABLE rds.dimcandoffice (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandoffice');
 
 
-CREATE FOREIGN TABLE rds.dimcandproperties (
+CREATE FOREIGN TABLE public.dimcandproperties (
     candproperties_sk bigint NOT NULL,
     cand_sk bigint NOT NULL,
     form_sk bigint,
@@ -65,7 +65,7 @@ CREATE FOREIGN TABLE rds.dimcandproperties (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandproperties');
 
-CREATE FOREIGN TABLE rds.dimcandstatusici (
+CREATE FOREIGN TABLE public.dimcandstatusici (
     candstatusici_sk bigint NOT NULL,
     cand_sk bigint,
     election_yr numeric NOT NULL,
@@ -76,7 +76,7 @@ CREATE FOREIGN TABLE rds.dimcandstatusici (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandstatusici');
 
-CREATE FOREIGN TABLE rds.dimcmte (
+CREATE FOREIGN TABLE public.dimcmte (
     cmte_sk bigint NOT NULL,
     cmte_id text,
     form_sk bigint,
@@ -85,7 +85,7 @@ CREATE FOREIGN TABLE rds.dimcmte (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmte');
 
-CREATE FOREIGN TABLE rds.dimcmteproperties (
+CREATE FOREIGN TABLE public.dimcmteproperties (
     cmteproperties_sk bigint NOT NULL,
     cmte_sk bigint,
     form_sk bigint,
@@ -176,7 +176,7 @@ CREATE FOREIGN TABLE rds.dimcmteproperties (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmteproperties');
 
 
-CREATE FOREIGN TABLE rds.dimcmtetpdsgn (
+CREATE FOREIGN TABLE public.dimcmtetpdsgn (
     cmte_tpdgn_sk bigint NOT NULL,
     cmte_sk bigint NOT NULL,
     cmte_tp text,
@@ -186,13 +186,13 @@ CREATE FOREIGN TABLE rds.dimcmtetpdsgn (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmtetpdsgn');
 
-CREATE FOREIGN TABLE rds.dimdates (
+CREATE FOREIGN TABLE public.dimdates (
     date_sk bigint NOT NULL,
     dw_date timestamp without time zone,
     load_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimdates');
 
-CREATE FOREIGN TABLE rds.dimelectiontp (
+CREATE FOREIGN TABLE public.dimelectiontp (
     electiontp_sk bigint NOT NULL,
     election_type_id text NOT NULL,
     election_type_desc text,
@@ -200,7 +200,7 @@ CREATE FOREIGN TABLE rds.dimelectiontp (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimelectiontp');
 
-CREATE FOREIGN TABLE rds.dimlinkages (
+CREATE FOREIGN TABLE public.dimlinkages (
     linkages_sk bigint NOT NULL,
     cand_sk bigint NOT NULL,
     cmte_sk bigint NOT NULL,
@@ -214,7 +214,7 @@ CREATE FOREIGN TABLE rds.dimlinkages (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimlinkages');
 
-CREATE FOREIGN TABLE rds.dimoffice (
+CREATE FOREIGN TABLE public.dimoffice (
     office_sk bigint NOT NULL,
     office_tp text,
     office_tp_desc text,
@@ -224,7 +224,7 @@ CREATE FOREIGN TABLE rds.dimoffice (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimoffice');
 
-CREATE FOREIGN TABLE rds.dimparty (
+CREATE FOREIGN TABLE public.dimparty (
     party_sk bigint NOT NULL,
     party_affiliation text,
     party_affiliation_desc text,
@@ -232,7 +232,7 @@ CREATE FOREIGN TABLE rds.dimparty (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimparty');
 
-CREATE FOREIGN TABLE rds.dimreporttype (
+CREATE FOREIGN TABLE public.dimreporttype (
     reporttype_sk bigint NOT NULL,
     rpt_tp text,
     rpt_tp_desc text,
@@ -240,13 +240,13 @@ CREATE FOREIGN TABLE rds.dimreporttype (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimreporttype');
 
-CREATE FOREIGN TABLE rds.dimyears (
+CREATE FOREIGN TABLE public.dimyears (
     year_sk bigint NOT NULL,
     year numeric,
     load_date timestamp without time zone NOT NULL
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimyears');
 
-CREATE FOREIGN TABLE rds.facthousesenate_f3 (
+CREATE FOREIGN TABLE public.facthousesenate_f3 (
     facthousesenate_f3_sk bigint NOT NULL,
     form_3_sk bigint,
     cmte_sk bigint,
@@ -339,7 +339,7 @@ CREATE FOREIGN TABLE rds.facthousesenate_f3 (
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'facthousesenate_f3');
 
-CREATE FOREIGN TABLE rds.factpacsandparties_f3x (
+CREATE FOREIGN TABLE public.factpacsandparties_f3x (
     factpacsandparties_f3x_sk bigint NOT NULL,
     form_3x_sk bigint,
     cmte_sk bigint,
@@ -458,7 +458,7 @@ CREATE FOREIGN TABLE rds.factpacsandparties_f3x (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'factpacsandparties_f3x');
 
 
-CREATE FOREIGN TABLE rds.factpresidential_f3p (
+CREATE FOREIGN TABLE public.factpresidential_f3p (
     factpresidential_f3p_sk bigint NOT NULL,
     form_3p_sk bigint,
     cmte_sk bigint,
@@ -655,7 +655,7 @@ CREATE FOREIGN TABLE rds.factpresidential_f3p (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'factpresidential_f3p');
 
 
-CREATE FOREIGN TABLE rds.form_105 (
+CREATE FOREIGN TABLE public.form_105 (
     form_105_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -679,7 +679,7 @@ CREATE FOREIGN TABLE rds.form_105 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_105');
 
 
-CREATE FOREIGN TABLE rds.form_56 (
+CREATE FOREIGN TABLE public.form_56 (
     form_56_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -720,7 +720,7 @@ CREATE FOREIGN TABLE rds.form_56 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_56');
 
 
-CREATE FOREIGN TABLE rds.form_57 (
+CREATE FOREIGN TABLE public.form_57 (
     form_57_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -768,7 +768,7 @@ CREATE FOREIGN TABLE rds.form_57 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_57');
 
 
-CREATE FOREIGN TABLE rds.form_65 (
+CREATE FOREIGN TABLE public.form_65 (
     form_65_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -809,7 +809,7 @@ CREATE FOREIGN TABLE rds.form_65 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_65');
 
 
-CREATE FOREIGN TABLE rds.form_76 (
+CREATE FOREIGN TABLE public.form_76 (
     form_76_sk bigint NOT NULL,
     form_tp text,
     org_id text,
@@ -841,7 +841,7 @@ CREATE FOREIGN TABLE rds.form_76 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_76');
 
 
-CREATE FOREIGN TABLE rds.form_82 (
+CREATE FOREIGN TABLE public.form_82 (
     form_82_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -885,7 +885,7 @@ CREATE FOREIGN TABLE rds.form_82 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_82');
 
 
-CREATE FOREIGN TABLE rds.form_83 (
+CREATE FOREIGN TABLE public.form_83 (
     form_83_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -921,7 +921,7 @@ CREATE FOREIGN TABLE rds.form_83 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_83');
 
 
-CREATE FOREIGN TABLE rds.form_91 (
+CREATE FOREIGN TABLE public.form_91 (
     form_91_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -947,7 +947,7 @@ CREATE FOREIGN TABLE rds.form_91 (
     update_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_91');
 
-CREATE FOREIGN TABLE rds.form_94 (
+CREATE FOREIGN TABLE public.form_94 (
     form_94_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -976,7 +976,7 @@ CREATE FOREIGN TABLE rds.form_94 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'form_94');
 
 
-CREATE FOREIGN TABLE rds.log_audit_dml (
+CREATE FOREIGN TABLE public.log_audit_dml (
     dml_id bigint NOT NULL,
     run_id bigint,
     audit_id bigint,
@@ -992,7 +992,7 @@ CREATE FOREIGN TABLE rds.log_audit_dml (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_dml');
 
 
-CREATE FOREIGN TABLE rds.log_audit_module (
+CREATE FOREIGN TABLE public.log_audit_module (
     audit_id bigint NOT NULL,
     run_id bigint,
     module_name text NOT NULL,
@@ -1006,7 +1006,7 @@ CREATE FOREIGN TABLE rds.log_audit_module (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_module');
 
 
-CREATE FOREIGN TABLE rds.log_audit_process (
+CREATE FOREIGN TABLE public.log_audit_process (
     run_id bigint NOT NULL,
     session_id bigint NOT NULL,
     process_name text,
@@ -1022,7 +1022,7 @@ CREATE FOREIGN TABLE rds.log_audit_process (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_process');
 
 
-CREATE FOREIGN TABLE rds.sched_a (
+CREATE FOREIGN TABLE public.sched_a (
     sched_a_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1086,7 +1086,7 @@ CREATE FOREIGN TABLE rds.sched_a (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_a');
 
 
-CREATE FOREIGN TABLE rds.sched_b (
+CREATE FOREIGN TABLE public.sched_b (
     sched_b_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1152,7 +1152,7 @@ CREATE FOREIGN TABLE rds.sched_b (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_b');
 
 
-CREATE FOREIGN TABLE rds.sched_c (
+CREATE FOREIGN TABLE public.sched_c (
     sched_c_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1205,7 +1205,7 @@ CREATE FOREIGN TABLE rds.sched_c (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c');
 
 
-CREATE FOREIGN TABLE rds.sched_c1 (
+CREATE FOREIGN TABLE public.sched_c1 (
     sched_c1_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1268,7 +1268,7 @@ CREATE FOREIGN TABLE rds.sched_c1 (
     update_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c1');
 
-CREATE FOREIGN TABLE rds.sched_c2 (
+CREATE FOREIGN TABLE public.sched_c2 (
     sched_c2_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1303,7 +1303,7 @@ CREATE FOREIGN TABLE rds.sched_c2 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c2');
 
 
-CREATE FOREIGN TABLE rds.sched_d (
+CREATE FOREIGN TABLE public.sched_d (
     sched_d_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1355,7 +1355,7 @@ CREATE FOREIGN TABLE rds.sched_d (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_d');
 
 
-CREATE FOREIGN TABLE rds.sched_e (
+CREATE FOREIGN TABLE public.sched_e (
     sched_e_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1420,7 +1420,7 @@ CREATE FOREIGN TABLE rds.sched_e (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_e');
 
 
-CREATE FOREIGN TABLE rds.sched_f (
+CREATE FOREIGN TABLE public.sched_f (
     sched_f_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1489,7 +1489,7 @@ CREATE FOREIGN TABLE rds.sched_f (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_f');
 
 
-CREATE FOREIGN TABLE rds.sched_h1 (
+CREATE FOREIGN TABLE public.sched_h1 (
     sched_h1_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1550,7 +1550,7 @@ CREATE FOREIGN TABLE rds.sched_h1 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h1');
 
 
-CREATE FOREIGN TABLE rds.sched_h2 (
+CREATE FOREIGN TABLE public.sched_h2 (
     sched_h2_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1583,7 +1583,7 @@ CREATE FOREIGN TABLE rds.sched_h2 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h2');
 
 
-CREATE FOREIGN TABLE rds.sched_h3 (
+CREATE FOREIGN TABLE public.sched_h3 (
     sched_h3_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1616,7 +1616,7 @@ CREATE FOREIGN TABLE rds.sched_h3 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h3');
 
 
-CREATE FOREIGN TABLE rds.sched_h4 (
+CREATE FOREIGN TABLE public.sched_h4 (
     sched_h4_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1684,7 +1684,7 @@ CREATE FOREIGN TABLE rds.sched_h4 (
     update_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h4');
 
-CREATE FOREIGN TABLE rds.sched_h5 (
+CREATE FOREIGN TABLE public.sched_h5 (
     sched_h5_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1716,7 +1716,7 @@ CREATE FOREIGN TABLE rds.sched_h5 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h5');
 
 
-CREATE FOREIGN TABLE rds.sched_h6 (
+CREATE FOREIGN TABLE public.sched_h6 (
     sched_h6_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1779,7 +1779,7 @@ CREATE FOREIGN TABLE rds.sched_h6 (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h6');
 
 
-CREATE FOREIGN TABLE rds.sched_i (
+CREATE FOREIGN TABLE public.sched_i (
     sched_i_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1833,7 +1833,7 @@ CREATE FOREIGN TABLE rds.sched_i (
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_i');
 
 
-CREATE FOREIGN TABLE rds.sched_l (
+CREATE FOREIGN TABLE public.sched_l (
     sched_l_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1896,7 +1896,7 @@ CREATE FOREIGN TABLE rds.sched_l (
     update_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_l');
 
-GRANT ALL PRIVILEGES ON SCHEMA rds TO openfec;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA rds TO openfec;
+GRANT ALL PRIVILEGES ON SCHEMA public TO openfec;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO openfec;
 
 
