@@ -1,3 +1,5 @@
+-- Initial population of the RDS mirror of FEC's CFDM.
+
 INSERT INTO public.dimcand SELECT * FROM frn.dimcand;
 INSERT INTO public.dimcandoffice SELECT * FROM frn.dimcandoffice;
 INSERT INTO public.dimcandproperties SELECT * FROM frn.dimcandproperties;

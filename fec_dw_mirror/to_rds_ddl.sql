@@ -13,6 +13,12 @@ DROP USER MAPPING FOR "openfec" SERVER rds;
 CREATE USER MAPPING FOR "openfec" SERVER rds
           OPTIONS (user 'openfec', 
                    password :rds_password);
+                   
+DROP USER MAPPING FOR "ec2-user" SERVER rds;
+CREATE USER MAPPING FOR "ec2-user" SERVER rds
+          OPTIONS (user 'openfec', 
+                   password :rds_password);
+ 
 
 DROP SCHEMA public;
 CREATE SCHEMA public;

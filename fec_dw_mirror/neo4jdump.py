@@ -9,10 +9,10 @@ import sqlalchemy.orm as orm
 from sqlalchemy.ext.declarative import declarative_base
 
 graph_db = neo4j.GraphDatabaseService("http://localhost:7474/db/data/")
-(pg_username, pg_password) = ( os.getenv('PG_USERNAME'), os.getenv('PG_PASSWORD') )
-if not pg_username or not pg_password:
-    raise EnvironmentError("Please set environment variables PG_USERNAME and PG_PASSWORD")
-connection_string = "postgresql://%s:%s@127.0.0.1:63333/cfdm" % (pg_username, pg_password)
+(pg_host, pg_password) = ( os.getenv('RDS_HOST'), os.getenv('RDS_PASSWORD') )
+if not pg_host or not pg_password:
+    raise EnvironmentError("Please set environment variables RDS_HOST and RDS_PASSWORD")
+connection_string = "postgresql://openfec:%s@%s/cfdm" % (pg_password, pg_host)
 engine = sa.create_engine(connection_string)
 
 meta = sa.MetaData(bind=engine, schema='mirror')

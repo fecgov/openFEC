@@ -88,7 +88,7 @@ ALTER TABLE public.dimcandproperties OWNER TO "ec2-user";
 CREATE FOREIGN TABLE frn.dimcandstatusici (
     candstatusici_sk bigint NOT NULL,
     cand_sk bigint,
-    election_yr number NOT NULL,
+    election_yr numeric NOT NULL,
     ici_code text,
     cand_status text,
     cand_inactive_flg text,
@@ -1157,8 +1157,8 @@ CREATE FOREIGN TABLE frn.log_audit_dml (
     dml_desc text,
     cpu_minutes numeric,
     elapsed_minutes numeric,
-    start_cpu_time number NOT NULL,
-    start_clock_time number NOT NULL
+    start_cpu_time numeric NOT NULL,
+    start_clock_time numeric NOT NULL
 ) SERVER oradb OPTIONS (schema 'CFDM', table 'LOG_AUDIT_DML');
 
 
@@ -1177,8 +1177,8 @@ CREATE FOREIGN TABLE frn.log_audit_module (
     error_message text,
     cpu_minutes numeric,
     elapsed_minutes numeric,
-    start_cpu_time number NOT NULL,
-    start_clock_time number NOT NULL
+    start_cpu_time numeric NOT NULL,
+    start_clock_time numeric NOT NULL
 ) SERVER oradb OPTIONS (schema 'CFDM', table 'LOG_AUDIT_MODULE');
 
 
@@ -1199,8 +1199,8 @@ CREATE FOREIGN TABLE frn.log_audit_process (
     messages text,
     cpu_minutes numeric,
     elapsed_minutes numeric,
-    start_cpu_time number NOT NULL,
-    start_clock_time number NOT NULL
+    start_cpu_time numeric NOT NULL,
+    start_clock_time numeric NOT NULL
 ) SERVER oradb OPTIONS (schema 'CFDM', table 'LOG_AUDIT_PROCESS');
 
 
