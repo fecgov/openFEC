@@ -1,5 +1,59 @@
 -- Initial population of the RDS mirror of FEC's CFDM.
 
+SELECT 'DELETE FROM public.' || table_name || ';'
+FROM   information_schema.tables
+WHERE  table_schema = 'public'
+AND    table_name NOT IN ('sched_a', 'sched_b');
+
+ DELETE FROM public.dimelectiontp;
+ DELETE FROM public.pinglog;
+ DELETE FROM public.dimcand;
+ DELETE FROM public.dimcandoffice;
+ DELETE FROM public.dimcandproperties;
+ DELETE FROM public.dimcandstatusici;
+ DELETE FROM public.dimcmte;
+ DELETE FROM public.dimcmteproperties;
+ DELETE FROM public.dimcmtetpdsgn;
+ DELETE FROM public.dimdates;
+ DELETE FROM public.dimlinkages;
+ DELETE FROM public.dimoffice;
+ DELETE FROM public.dimparty;
+ DELETE FROM public.dimreporttype;
+ DELETE FROM public.dimyears;
+ DELETE FROM public.facthousesenate_f3;
+ DELETE FROM public.factpacsandparties_f3x;
+ DELETE FROM public.factpresidential_f3p;
+ DELETE FROM public.form_105;
+ DELETE FROM public.form_56;
+ DELETE FROM public.form_57;
+ DELETE FROM public.form_65;
+ DELETE FROM public.form_76;
+ DELETE FROM public.form_82;
+ DELETE FROM public.form_83;
+ DELETE FROM public.form_91;
+ DELETE FROM public.form_94;
+ DELETE FROM public.log_audit_dml;
+ DELETE FROM public.log_audit_module;
+ DELETE FROM public.log_audit_process;
+ DELETE FROM public.sched_c;
+ DELETE FROM public.sched_c1;
+ DELETE FROM public.sched_c2;
+ DELETE FROM public.sched_d;
+ DELETE FROM public.sched_e;
+ DELETE FROM public.sched_f;
+ DELETE FROM public.sched_h1;
+ DELETE FROM public.sched_h2;
+ DELETE FROM public.sched_h3;
+ DELETE FROM public.sched_h4;
+ DELETE FROM public.sched_h5;
+ DELETE FROM public.sched_h6;
+ DELETE FROM public.sched_i;
+ DELETE FROM public.sched_l;
+ DELETE FROM public.synch_successes;
+ DELETE FROM public.candidate;
+
+
+
 INSERT INTO public.dimcand SELECT * FROM frn.dimcand;
 INSERT INTO public.dimcandoffice SELECT * FROM frn.dimcandoffice;
 INSERT INTO public.dimcandproperties SELECT * FROM frn.dimcandproperties;
@@ -7,6 +61,8 @@ INSERT INTO public.dimcandstatusici SELECT * FROM frn.dimcandstatusici;
 INSERT INTO public.dimcmte SELECT * FROM frn.dimcmte;
 INSERT INTO public.dimcmteproperties SELECT * FROM frn.dimcmteproperties;
 INSERT INTO public.dimcmtetpdsgn SELECT * FROM frn.dimcmtetpdsgn;
+-- INSERT INTO public.sched_a SELECT * FROM frn.sched_a;
+-- INSERT INTO public.sched_b SELECT * FROM frn.sched_b;
 INSERT INTO public.dimdates SELECT * FROM frn.dimdates;
 INSERT INTO public.dimelectiontp SELECT * FROM frn.dimelectiontp;
 INSERT INTO public.dimlinkages SELECT * FROM frn.dimlinkages;
@@ -29,8 +85,6 @@ INSERT INTO public.form_94 SELECT * FROM frn.form_94;
 INSERT INTO public.log_audit_dml SELECT * FROM frn.log_audit_dml;
 INSERT INTO public.log_audit_module SELECT * FROM frn.log_audit_module;
 INSERT INTO public.log_audit_process SELECT * FROM frn.log_audit_process;
-INSERT INTO public.sched_a SELECT * FROM frn.sched_a;
-INSERT INTO public.sched_b SELECT * FROM frn.sched_b;
 INSERT INTO public.sched_c SELECT * FROM frn.sched_c;
 INSERT INTO public.sched_c1 SELECT * FROM frn.sched_c1;
 INSERT INTO public.sched_c2 SELECT * FROM frn.sched_c2;

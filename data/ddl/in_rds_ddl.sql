@@ -1,6 +1,5 @@
 create table pinglog (at timestamp primary key, up boolean);
 
-
 CREATE TABLE dimcand (
     cand_sk bigint NOT NULL,
     cand_id text,

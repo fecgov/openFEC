@@ -23,6 +23,11 @@ CREATE USER MAPPING FOR "ec2-user" SERVER rds
 DROP SCHEMA public;
 CREATE SCHEMA public;
 
+DROP FOREIGN TABLE public.pinglog;
+CREATE FOREIGN TABLE public.pinglog 
+( at timestamp, up boolean
+) SERVER rds OPTIONS (schema_name 'public', table_name 'pinglog');
+
 CREATE FOREIGN TABLE public.dimcand (
     cand_sk bigint NOT NULL,
     cand_id text,
