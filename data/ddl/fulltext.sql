@@ -19,12 +19,11 @@ WITH cnd AS (
   GROUP BY c.cand_sk)
 UPDATE dimcand_fulltext 
 SET    fulltxt = (SELECT weights FROM cnd
-                  WHERE  dimcand_fulltext.cand_sk = cnd.cand_sk);             
+                  WHERE  dimcand_fulltext.cand_sk = cnd.cand_sk);                          
              
-             
-CREATE INDEX cand_fts_idx ON cand USING gin(fulltxt);    
+CREATE INDEX cand_fts_idx ON dimcand_fulltext USING gin(fulltxt);    
 
-select * from cand where 
-'turner' @@ fulltxt
-order by ts_rank_cd(fulltxt, 'turner') desc;
+select cand_sk from dimcand_fulltext 
+where 'obama' @@ fulltxt
+order by ts_rank_cd(fulltxt, 'obama') desc;
 
