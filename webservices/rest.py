@@ -21,14 +21,12 @@ from json_encoding import TolerantJSONEncoder
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
         
-(uname, passwd) = (os.getenv('RDS_USERNAME'), os.getenv('RDS_PASSWORD'))
-htsql_conn = HTSQL("pgsql://%s:%s@localhost:63336/cfdm" % (uname, passwd))
-
-engine = sa.create_engine("postgresql://%s:%s@127.0.0.1:63336/cfdm" % 
-                          (uname, passwd))
+sqla_conn_string = os.getenv('SQLA_CONN')
+engine = sa.create_engine(sqla_conn_string)
 conn = engine.connect()
-metadata = sa.MetaData(bind=engine)
-metadata.reflect()
+
+htsql_conn_string = sqla_conn_string.replace('postgresql', 'pgsql')
+htsql_conn = HTSQL(htsql_conn_string)
 
 app = Flask(__name__)
 api = restful.Api(app)
