@@ -27,3 +27,31 @@ select cand_sk from dimcand_fulltext
 where 'obama' @@ fulltxt
 order by ts_rank_cd(fulltxt, 'obama') desc;
 
+
+DROP TABLE IF EXISTS dimcmte_fulltext;
+CREATE TABLE dimcmte_fulltext AS
+  SELECT cmte_sk, 
+         NULL::tsvector AS fulltxt
+  FROM   dimcmte;
+                         
+WITH cmte AS (
+  SELECT c.cmte_sk,
+         setweight(to_tsvector(string_agg(p.cmte_nm, ' ')), 'A') ||
+         setweight(to_tsvector(string_agg(p.cmte_city, ' ')), 'B  ') ||
+         setweight(to_tsvector(string_agg(p.cmte_st, ' ')), 'B') || 
+         setweight(to_tsvector(string_agg(p.cmte_st_desc, ' ')), 'B') || 
+         setweight(to_tsvector(string_agg(p.cmte_web_url, ' ')), 'B') || 
+         setweight(to_tsvector(string_agg(p.fst_cand_nm, ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(p.sec_cand_nm, ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(p.trd_cand_nm, ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(p.frth_cand_nm, ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(p.fith_cand_nm, ' ')), 'A')  
+         AS weights
+  FROM   dimcmte c
+  JOIN   dimcmteproperties p ON (c.cmte_sk = p.cmte_sk)
+  GROUP BY c.cmte_sk)
+UPDATE dimcmte_fulltext 
+SET    fulltxt = (SELECT weights FROM cmte
+                  WHERE  dimcmte_fulltext.cmte_sk = cmte.cmte_sk);                          
+             
+CREATE INDEX cmte_fts_idx ON dimcmte_fulltext USING gin(fulltxt);    
