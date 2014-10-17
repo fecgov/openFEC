@@ -10,6 +10,8 @@ Supported for /candidate ::
     office=    (governmental office run for)
     state=     (two-letter code)
     name=      (candidate's name)
+    party=     (3-letter abbreviation)
+    year=      (any year in which candidate ran)
     
 Supported for /committee ::
 
@@ -96,18 +98,24 @@ class Searchable(restful.Resource):
 class Candidate(Searchable):
     
     table_name_stem = 'cand'
-    htsql_qry = '/dimcand{*,/dimcandproperties,/dimcandoffice{dimoffice,dimparty}}'
+    htsql_qry = '/dimcand{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty}}'
     field_name_map = {"office": 
                       string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
                       "state": string.Template("exists(dimcandproperties?cand_st~'$arg')"),
                       "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
+                      "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
+                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
                       }
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
+    parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
-    parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
- 
+    parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
+    parser.add_argument('year', type=int, help="Year in which a candidate runs for office")
+    
+    # note: each argument is applied separately, so if you ran as REP in 1996 and IND in 1998,
+    # you *will* show up under /candidate?year=1998&party=REP
 
 class Committee( Searchable):
     
