@@ -41,8 +41,6 @@ htsql_conn = HTSQL(htsql_conn_string)
 
 app = Flask(__name__)
 api = restful.Api(app)
-parser = reqparse.RequestParser()
-parser.add_argument('q', type=str, help='Text to search all fields for')
   
 
 def as_dicts(data):
@@ -69,18 +67,18 @@ class Searchable(restful.Resource):
         args = self.parser.parse_args()
         elements = []
         for arg in args:
-            if arg == 'q':    
-                qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
-                qry = sa.sql.text(qry)
-                fts_result = conn.execute(qry, findme = args['q']).fetchall()
-                if not fts_result:
-                    return []
-                elements.append("%s_sk={%s}" % 
-                                (self.table_name_stem, 
-                                 ",".join(str(id[0]) 
-                                for id in fts_result)))
-            else:
-                if args[arg]:
+            if args[arg]:
+                if arg == 'q':    
+                    qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
+                    qry = sa.sql.text(qry)
+                    fts_result = conn.execute(qry, findme = args['q']).fetchall()
+                    if not fts_result:
+                        return []
+                    elements.append("%s_sk={%s}" % 
+                                    (self.table_name_stem, 
+                                     ",".join(str(id[0]) 
+                                    for id in fts_result)))
+                else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
             
@@ -118,7 +116,7 @@ class Committee( Searchable):
     field_name_map = {"candidate": 
                       string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?sec_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?thd_cand_nm~'$arg')"
+                                      "|exists(dimcmteproperties?trd_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?frth_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?fith_cand_nm~'$arg')")
                       ,

@@ -7,10 +7,10 @@ CREATE TABLE dimcand_fulltext AS
                          
 WITH cnd AS (
   SELECT c.cand_sk,
-         setweight(to_tsvector(string_agg(p.cand_nm, ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(p.cand_city, ' ')), 'B  ') ||
-         setweight(to_tsvector(string_agg(p.cand_st, ' ')), 'A') || 
-         setweight(to_tsvector(string_agg(o.office_tp_desc, ' ')), 'A')
+         setweight(to_tsvector(string_agg(coalesce(p.cand_nm, ''), ' ')), 'A') ||
+         setweight(to_tsvector(string_agg(coalesce(p.cand_city, ''), ' ')), 'B  ') ||
+         setweight(to_tsvector(string_agg(coalesce(p.cand_st, ''), ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(coalesce(o.office_tp_desc, ''), ' ')), 'A')
          AS weights
   FROM   dimcand c
   JOIN   dimcandproperties p ON (c.cand_sk = p.cand_sk)
@@ -23,11 +23,6 @@ SET    fulltxt = (SELECT weights FROM cnd
              
 CREATE INDEX cand_fts_idx ON dimcand_fulltext USING gin(fulltxt);    
 
-select cand_sk from dimcand_fulltext 
-where 'obama' @@ fulltxt
-order by ts_rank_cd(fulltxt, 'obama') desc;
-
-
 DROP TABLE IF EXISTS dimcmte_fulltext;
 CREATE TABLE dimcmte_fulltext AS
   SELECT cmte_sk, 
@@ -36,16 +31,16 @@ CREATE TABLE dimcmte_fulltext AS
                          
 WITH cmte AS (
   SELECT c.cmte_sk,
-         setweight(to_tsvector(string_agg(p.cmte_nm, ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(p.cmte_city, ' ')), 'B  ') ||
-         setweight(to_tsvector(string_agg(p.cmte_st, ' ')), 'B') || 
-         setweight(to_tsvector(string_agg(p.cmte_st_desc, ' ')), 'B') || 
-         setweight(to_tsvector(string_agg(p.cmte_web_url, ' ')), 'B') || 
-         setweight(to_tsvector(string_agg(p.fst_cand_nm, ' ')), 'A') || 
-         setweight(to_tsvector(string_agg(p.sec_cand_nm, ' ')), 'A') || 
-         setweight(to_tsvector(string_agg(p.trd_cand_nm, ' ')), 'A') || 
-         setweight(to_tsvector(string_agg(p.frth_cand_nm, ' ')), 'A') || 
-         setweight(to_tsvector(string_agg(p.fith_cand_nm, ' ')), 'A')  
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_nm, ''), ' ')), 'A') ||
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_city, ''), ' ')), 'B') ||
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_st, ''), ' ')), 'B') || 
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_st_desc, ''), ' ')), 'B') || 
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_web_url, ''), ' ')), 'B') || 
+         setweight(to_tsvector(string_agg(coalesce(p.fst_cand_nm, ''), ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(coalesce(p.sec_cand_nm, ''), ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(coalesce(p.trd_cand_nm, ''), ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(coalesce(p.frth_cand_nm, ''), ' ')), 'A') || 
+         setweight(to_tsvector(string_agg(coalesce(p.fith_cand_nm, ''), ' ')), 'A')  
          AS weights
   FROM   dimcmte c
   JOIN   dimcmteproperties p ON (c.cmte_sk = p.cmte_sk)
@@ -55,3 +50,4 @@ SET    fulltxt = (SELECT weights FROM cmte
                   WHERE  dimcmte_fulltext.cmte_sk = cmte.cmte_sk);                          
              
 CREATE INDEX cmte_fts_idx ON dimcmte_fulltext USING gin(fulltxt);    
+
