@@ -4,7 +4,11 @@ to those in FEC's Oracle data warehouse
 """
 import blaze
 import sqlalchemy as sa
-engine = sa.create_engine("oracle://READONLY:password-not-in-version-control@172.16.129.22/PROCUAT")
+engine = sa.create_engine("oracle://READONLY:%s@%s/%s" %
+                          (os.getenv('ORACLE_PASSWORD'),
+                           os.getenv('ORACLE_HOST_IP')
+                           os.getenv('ORACLE_INSTANCE_NAME')))
+
 pg_engine = sa.create_engine("postgresql://:@/cfdm")
 
 table_names = [

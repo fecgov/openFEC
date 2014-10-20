@@ -1,0 +1,101 @@
+-- Initial population of the RDS mirror of FEC's CFDM.
+
+SELECT 'DELETE FROM public.' || table_name || ';'
+FROM   information_schema.tables
+WHERE  table_schema = 'public'
+AND    table_name NOT IN ('sched_a', 'sched_b');
+
+ DELETE FROM public.dimelectiontp;
+ DELETE FROM public.pinglog;
+ DELETE FROM public.dimcand;
+ DELETE FROM public.dimcandoffice;
+ DELETE FROM public.dimcandproperties;
+ DELETE FROM public.dimcandstatusici;
+ DELETE FROM public.dimcmte;
+ DELETE FROM public.dimcmteproperties;
+ DELETE FROM public.dimcmtetpdsgn;
+ DELETE FROM public.dimdates;
+ DELETE FROM public.dimlinkages;
+ DELETE FROM public.dimoffice;
+ DELETE FROM public.dimparty;
+ DELETE FROM public.dimreporttype;
+ DELETE FROM public.dimyears;
+ DELETE FROM public.facthousesenate_f3;
+ DELETE FROM public.factpacsandparties_f3x;
+ DELETE FROM public.factpresidential_f3p;
+ DELETE FROM public.form_105;
+ DELETE FROM public.form_56;
+ DELETE FROM public.form_57;
+ DELETE FROM public.form_65;
+ DELETE FROM public.form_76;
+ DELETE FROM public.form_82;
+ DELETE FROM public.form_83;
+ DELETE FROM public.form_91;
+ DELETE FROM public.form_94;
+ DELETE FROM public.log_audit_dml;
+ DELETE FROM public.log_audit_module;
+ DELETE FROM public.log_audit_process;
+ DELETE FROM public.sched_c;
+ DELETE FROM public.sched_c1;
+ DELETE FROM public.sched_c2;
+ DELETE FROM public.sched_d;
+ DELETE FROM public.sched_e;
+ DELETE FROM public.sched_f;
+ DELETE FROM public.sched_h1;
+ DELETE FROM public.sched_h2;
+ DELETE FROM public.sched_h3;
+ DELETE FROM public.sched_h4;
+ DELETE FROM public.sched_h5;
+ DELETE FROM public.sched_h6;
+ DELETE FROM public.sched_i;
+ DELETE FROM public.sched_l;
+ DELETE FROM public.synch_successes;
+ DELETE FROM public.candidate;
+
+
+
+INSERT INTO public.dimcand SELECT * FROM frn.dimcand;
+INSERT INTO public.dimcandoffice SELECT * FROM frn.dimcandoffice;
+INSERT INTO public.dimcandproperties SELECT * FROM frn.dimcandproperties;
+INSERT INTO public.dimcandstatusici SELECT * FROM frn.dimcandstatusici;
+INSERT INTO public.dimcmte SELECT * FROM frn.dimcmte;
+INSERT INTO public.dimcmteproperties SELECT * FROM frn.dimcmteproperties;
+INSERT INTO public.dimcmtetpdsgn SELECT * FROM frn.dimcmtetpdsgn;
+-- INSERT INTO public.sched_a SELECT * FROM frn.sched_a;
+-- INSERT INTO public.sched_b SELECT * FROM frn.sched_b;
+INSERT INTO public.dimdates SELECT * FROM frn.dimdates;
+INSERT INTO public.dimelectiontp SELECT * FROM frn.dimelectiontp;
+INSERT INTO public.dimlinkages SELECT * FROM frn.dimlinkages;
+INSERT INTO public.dimoffice SELECT * FROM frn.dimoffice;
+INSERT INTO public.dimparty SELECT * FROM frn.dimparty;
+INSERT INTO public.dimreporttype SELECT * FROM frn.dimreporttype;
+INSERT INTO public.dimyears SELECT * FROM frn.dimyears;
+INSERT INTO public.facthousesenate_f3 SELECT * FROM frn.facthousesenate_f3;
+INSERT INTO public.factpacsandparties_f3x SELECT * FROM frn.factpacsandparties_f3x;
+INSERT INTO public.factpresidential_f3p SELECT * FROM frn.factpresidential_f3p;
+INSERT INTO public.form_105 SELECT * FROM frn.form_105;
+INSERT INTO public.form_56 SELECT * FROM frn.form_56;
+INSERT INTO public.form_57 SELECT * FROM frn.form_57;
+INSERT INTO public.form_65 SELECT * FROM frn.form_65;
+INSERT INTO public.form_76 SELECT * FROM frn.form_76;
+INSERT INTO public.form_82 SELECT * FROM frn.form_82;
+INSERT INTO public.form_83 SELECT * FROM frn.form_83;
+INSERT INTO public.form_91 SELECT * FROM frn.form_91;
+INSERT INTO public.form_94 SELECT * FROM frn.form_94;
+INSERT INTO public.log_audit_dml SELECT * FROM frn.log_audit_dml;
+INSERT INTO public.log_audit_module SELECT * FROM frn.log_audit_module;
+INSERT INTO public.log_audit_process SELECT * FROM frn.log_audit_process;
+INSERT INTO public.sched_c SELECT * FROM frn.sched_c;
+INSERT INTO public.sched_c1 SELECT * FROM frn.sched_c1;
+INSERT INTO public.sched_c2 SELECT * FROM frn.sched_c2;
+INSERT INTO public.sched_d SELECT * FROM frn.sched_d;
+INSERT INTO public.sched_e SELECT * FROM frn.sched_e;
+INSERT INTO public.sched_f SELECT * FROM frn.sched_f;
+INSERT INTO public.sched_h1 SELECT * FROM frn.sched_h1;
+INSERT INTO public.sched_h2 SELECT * FROM frn.sched_h2 ;
+INSERT INTO public.sched_h3 SELECT * FROM frn.sched_h3 ;
+INSERT INTO public.sched_h4 SELECT * FROM frn.sched_h4 ;
+INSERT INTO public.sched_h5 SELECT * FROM frn.sched_h5 ;
+INSERT INTO public.sched_h6 SELECT * FROM frn.sched_h6 ;
+INSERT INTO public.sched_i SELECT * FROM frn.sched_i ;
+INSERT INTO public.sched_l SELECT * FROM frn.sched_l ;
