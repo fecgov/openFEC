@@ -68,7 +68,6 @@ def format_candids(data, page):
   for cands in data:
     for cand in data:
       cand_data = {'name':{}}
-      print cand, "\n\n\n"
       cand_data['candate_id'] = cand['cand_id']
       # I am guessing this might need to be flexible, and might work well as a dictionary.
       # I am going by most recent name on this but I would like to loops through all the names and have all the name variations, or perhaps former names. Though, there is also going to be names with different prefixes etc. perhaps we can add filtering later.
@@ -83,8 +82,8 @@ def format_candids(data, page):
         elections[year]['district'] = office['dimoffice']['office_district']
         elections[year]['state'] = office['dimoffice']['office_state']
         # these are temporary I want to see if the different table load dates match up
-        elections[year]['dim_office_load_date'] = office['dimoffice']['load_date']
-        elections[year]['dimparty_load_date'] = office['dimparty']['load_date']
+        #elections[year]['dim_office_load_date'] = office['dimoffice']['load_date']
+        #elections[year]['dimparty_load_date'] = office['dimparty']['load_date']
         elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
 
 
