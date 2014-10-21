@@ -8,6 +8,8 @@ Supported parameters across all objects::
 Supported for /candidate ::
 
     /<cand_id>   Single candidate's record
+    cand_id=     Synonym for /<cand_id>
+    fec_id=      Synonym for /<cand_id>
     office=      (governmental office run for)
     state=       (two-letter code)
     district=
@@ -18,6 +20,8 @@ Supported for /candidate ::
 Supported for /committee ::
 
     /<cmte_id>   Single candidate's record
+    cmte_id=     Synonym for /<cmte_id>
+    fec_id=      Synonym for /<cmte_id>
     name=        (committee's name)
     state=       (two-letter code)
     candidate=   (associated candidate's name)
@@ -80,6 +84,7 @@ class Searchable(restful.Resource):
     def get(self):
         args = self.parser.parse_args()
         elements = []
+        page_num = 1
         for arg in args:
             if args[arg]:
                 if arg == 'q':    
@@ -97,9 +102,10 @@ class Searchable(restful.Resource):
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
-            
+           
+        qry = self.htsql_qry
         if elements:
-            qry = self.htsql_qry + "?" + "&".join(elements)
+            qry += "?" + "&".join(elements)
     
         offset = self.PAGESIZE * (page_num-1)
         qry = "/(%s).limit(%d,%d)" % (qry, self.PAGESIZE, offset)
@@ -127,6 +133,8 @@ class CandidateSearch(Searchable, Candidate):
     
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
+    parser.add_argument('cand_id', type=str, help="Candidate's FEC ID")
+    parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
@@ -137,7 +145,9 @@ class CandidateSearch(Searchable, Candidate):
     # note: each argument is applied separately, so if you ran as REP in 1996 and IND in 1998,
     # you *will* show up under /candidate?year=1998&party=REP
     
-    field_name_map = {"office":
+    field_name_map = {"cand_id": string.Template("cand_id='$arg'"),
+                      "fec_id": string.Template("cand_id='$arg'"),
+                      "office":
                       string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
                       "district":
                       string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
@@ -160,7 +170,9 @@ class CommitteeResource(SingleResource, Committee):
 
 class CommitteeSearch(Searchable, Committee):
     
-    field_name_map = {"candidate": 
+    field_name_map = {"cmte_id": string.Template("cmte_id='$arg'"),
+                      "fec_id": string.Template("cmte_id='$arg'"),
+                      "candidate": 
                       string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?sec_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?trd_cand_nm~'$arg')"
@@ -171,6 +183,8 @@ class CommitteeSearch(Searchable, Committee):
                       }
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
+    parser.add_argument('cmte_id', type=str, help="Committee's FEC ID")
+    parser.add_argument('fec_id', type=str, help="Committee's FEC ID")
     parser.add_argument('state', type=str, help='U. S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
     parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
