@@ -1,5 +1,7 @@
 cache
 
+bin/set_env_vars.real.sh
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
