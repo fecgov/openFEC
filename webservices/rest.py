@@ -7,17 +7,20 @@ Supported parameters across all objects::
     
 Supported for /candidate ::
 
-    office=    (governmental office run for)
-    state=     (two-letter code)
-    name=      (candidate's name)
-    party=     (3-letter abbreviation)
-    year=      (any year in which candidate ran)
+    /<cand_id>   Single candidate's record
+    office=      (governmental office run for)
+    state=       (two-letter code)
+    district=
+    name=        (candidate's name)
+    party=       (3-letter abbreviation)
+    year=        (any year in which candidate ran)
     
 Supported for /committee ::
 
-    name=      (committee's name)
-    state=     (two-letter code)
-    candidate= (associated candidate's name)
+    /<cmte_id>   Single candidate's record
+    name=        (committee's name)
+    state=       (two-letter code)
+    candidate=   (associated candidate's name)
     
 """
 import os
@@ -58,12 +61,21 @@ def as_dicts(data):
     else:
         return data
     
+ 
+class SingleResource(restful.Resource):
+    
+    def get(self, id):
+        qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
+        data = htsql_conn.produce(qry) or [None, ]
+        return as_dicts(data)[0]
+    
 
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk 
                       FROM   dim%s_fulltext
                       WHERE  :findme @@ fulltxt
                       ORDER BY ts_rank_cd(fulltxt, :findme) desc"""
+    PAGESIZE=20
     
     def get(self):
         args = self.parser.parse_args()
@@ -80,34 +92,42 @@ class Searchable(restful.Resource):
                                     (self.table_name_stem, 
                                      ",".join(str(id[0]) 
                                     for id in fts_result)))
+                elif arg == 'page':
+                    page_num = args[arg]
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
             
-        qry = '/dimcand{*,/dimcandproperties,/dimcandoffice{dimoffice,dimparty}}'
         if elements:
             qry = self.htsql_qry + "?" + "&".join(elements)
-        else:
-            qry = self.htsql_qry + '.limit(1000)'
+    
+        offset = self.PAGESIZE * (page_num-1)
+        qry = "/(%s).limit(%d,%d)" % (qry, self.PAGESIZE, offset)
         
         print(qry)
         data = htsql_conn.produce(qry)
         return as_dicts(data)
 
-    
-class Candidate(Searchable):
+
+class Candidate(object):
     
     table_name_stem = 'cand'
-    htsql_qry = '/dimcand{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty}}'
-    field_name_map = {"office": 
-                      string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
-                      "state": string.Template("exists(dimcandproperties?cand_st~'$arg')"),
-                      "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
-                      "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
-                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
-                      }
+    htsql_qry = """dimcand{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
+                           /dimlinkages{cmte_id}?cmte_tp={'H','S','P'} :as primary_committee,
+                           /dimlinkages{cmte_id}?cmte_tp='U' :as affiliated_committees,
+                           /dimcandstatusici}
+                           """
+    
+    
+class CandidateResource(SingleResource, Candidate):
+
+    pass
+ 
+class CandidateSearch(Searchable, Candidate):
+    
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
+    parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
@@ -116,18 +136,36 @@ class Candidate(Searchable):
     
     # note: each argument is applied separately, so if you ran as REP in 1996 and IND in 1998,
     # you *will* show up under /candidate?year=1998&party=REP
-
-class Committee( Searchable):
+    
+    field_name_map = {"office":
+                      string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
+                      "district":
+                      string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
+                      "state": string.Template("exists(dimcandproperties?cand_st~'$arg')"),
+                      "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
+                      "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
+                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
+                      }
+ 
+class Committee(object):
     
     table_name_stem = 'cmte'
-    htsql_qry = '/dimcmte{*,/dimcmteproperties}'
+    htsql_qry = 'dimcmte{*,/dimcmteproperties}'
+ 
+   
+class CommitteeResource(SingleResource, Committee):
+
+    pass
+ 
+
+class CommitteeSearch(Searchable, Committee):
+    
     field_name_map = {"candidate": 
                       string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?sec_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?trd_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?frth_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?fith_cand_nm~'$arg')")
-                      ,
+                                      "|exists(dimcmteproperties?fith_cand_nm~'$arg')"),
                       "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
                       }
@@ -144,8 +182,10 @@ class Help(restful.Resource):
         
     
 api.add_resource(Help, '/')
-api.add_resource(Candidate, '/candidate')
-api.add_resource(Committee, '/committee')
+api.add_resource(CandidateResource, '/candidate/<string:id>')
+api.add_resource(CandidateSearch, '/candidate')
+api.add_resource(CommitteeResource, '/committee/<string:id>')
+api.add_resource(CommitteeSearch, '/committee')
 
 if __name__ == '__main__':
     app.run(debug=True)

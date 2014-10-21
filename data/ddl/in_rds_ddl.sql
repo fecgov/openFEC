@@ -16,10 +16,12 @@ CREATE TABLE dimcandoffice (
     party_sk bigint,
     form_sk bigint,
     form_tp text,
-    cand_election_yr numeric,
+    cand_election_yr int,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
 ) ;
+
+ALTER TABLE dimcandoffice ALTER COLUMN cand_election_yr TYPE integer;
 
 
 CREATE TABLE dimcandproperties (
