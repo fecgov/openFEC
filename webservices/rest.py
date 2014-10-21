@@ -90,7 +90,17 @@ def format_candids(data, page):
         #elections[year]['dimparty_load_date'] = office['dimparty']['load_date']
         elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
 
+      for status in cand['dimcandstatusici']:
+        year = status['election_yr']
+        elections[year]['candidate_inactive'] = status['cand_inactive_flg']
 
+        status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
+        if status['cand_status'] != None:
+          elections[year]['candidate_status'] = status_decoder[status['cand_status']]
+        else:
+          elections[year]['candidate_status'] = None
+
+        #elections[year]['dimcandstatusici_load_date'] = status['load_date']
 
       cand_data['elections'] = elections
 
