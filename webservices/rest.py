@@ -75,10 +75,56 @@ def format_candids(data, page):
       cand_data['candate_id'] = cand['cand_id']
       # I am guessing this might need to be flexible, and might work well as a dictionary.
       # I am going by most recent name on this but I would like to loops through all the names and have all the name variations, or perhaps former names. Though, there is also going to be names with different prefixes etc. perhaps we can add filtering later.
-      cand_data['name']['full_name'] = cand['dimcandproperties'][0]['cand_nm']
+      # Using most recent name as full name
+      cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
 
-      #I am making this into a dictionary so we can aggrigate data accross the tables
+      #I am making this into a dictionary so we can aggregate data for each election across the tables
       elections = {}
+
+      # would rather have these with the election year
+      addresses = []
+      for prop in cand['dimcandproperties']:
+        print prop
+        mailing_address = {}
+        mailing_address['street_1'] = prop['cand_st1']
+        mailing_address['street_2'] = prop['cand_st2']
+        mailing_address['city'] = prop['cand_city']
+        mailing_address['state'] = prop['cand_st']
+        mailing_address['zip'] = prop['cand_zip']
+        mailing_address['expire_date'] = prop['expire_date']
+        # need year for it to go with the election
+        # elections[year] = {'mailing_address': mailing_address}
+
+        # Names
+        other_names = []
+        # perhaps add formatting for white space?
+        if (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
+          other_names.append(prop['cand_nm'])
+          cand_data['name']['additional_names'] = other_names
+
+        #form type
+        # form id?
+
+        # if we can't find pin to election cycles, might as well not be repetitive
+        if mailing_address not in addresses:
+          addresses.append(mailing_address)
+
+      cand_data['addresses']= addresses
+
+      # would rather have this with election year
+      # would like to add committee type
+      primary_committees = []
+      for cmte in cand['primary_committee']:
+        primary_committees.append(cmte['cmte_id'])
+      cand_data['primary_committee_ids'] = primary_committees
+
+      affiliated_committees = []
+
+      for cmte in cand['affiliated_committees']:
+        affiliated_committees.append(cmte['cmte_id'])
+      cand_data['affiliated_committee_ids'] = affiliated_committees
+
+
       for office in cand['dimcandoffice']:
         year = office['cand_election_yr']
         elections[year] = {'election_year': year}
@@ -99,6 +145,12 @@ def format_candids(data, page):
           elections[year]['candidate_status'] = status_decoder[status['cand_status']]
         else:
           elections[year]['candidate_status'] = None
+
+        ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+        if status['ici_code'] != None:
+          elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
+        else:
+          elections[year]['incumbent_challenger'] = None
 
         #elections[year]['dimcandstatusici_load_date'] = status['load_date']
 
