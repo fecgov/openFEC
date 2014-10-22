@@ -66,7 +66,7 @@ def as_dicts(data):
         return data
 
 # I am not sure if this will scale but it should make it prettier
-def format_candids(data, page):
+def format_candids(data, page_data):
   results = []
   # stripping outer list
   for cands in data:
@@ -74,7 +74,7 @@ def format_candids(data, page):
       cand_data = {'name':{}}
       cand_data['candate_id'] = cand['cand_id']
       # I am guessing this might need to be flexible, and might work well as a dictionary.
-      # I am going by most recent name on this but I would like to loops through all the names and have all the name variations, or perhaps former names. Though, there is also going to be names with different prefixes etc. perhaps we can add filtering later.
+      # I am going by most recent name on this but I would like to loops through all the names and have all the name variations, or perhaps former names. Though, there is also going to be names with different prefixes etc. Perhaps we can add filtering later. It will be convenient for search to pick up as many nicknames as we can.
       # Using most recent name as full name
       cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
 
@@ -158,8 +158,7 @@ def format_candids(data, page):
 
       results.append(cand_data)
 
-
-  return [{'api_version':0.1},{'pagination':{'page': page,'per_page': 'placeholder','count': 'placeholder'}},{'results': results}]
+  return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
 
 
 class SingleResource(restful.Resource):
@@ -209,7 +208,8 @@ class Searchable(restful.Resource):
         print(qry)
         data = htsql_conn.produce(qry)
         data_dict = as_dicts(data)
-        return format_candids(data_dict, page_num) # add per_page and count
+        page_data = {'per-page': self.PAGESIZE, 'page':page_num, 'count':'placeholder'}
+        return format_candids(data_dict, page_data) # add per_page and count
 
 
 
