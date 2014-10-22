@@ -209,7 +209,7 @@ class Searchable(restful.Resource):
         print(qry)
         data = htsql_conn.produce(qry)
         data_dict = as_dicts(data)
-        page_data = {'per_page': per_page, 'page':page_num, 'count':'placeholder'}
+        page_data = {'per_page': per_page, 'page':page_num, 'count': len(data_dict)}
         return format_candids(data_dict, page_data)
 
 
