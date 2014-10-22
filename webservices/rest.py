@@ -77,8 +77,8 @@ class SingleResource(restful.Resource):
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk 
                       FROM   dim%s_fulltext
-                      WHERE  :findme @@ fulltxt
-                      ORDER BY ts_rank_cd(fulltxt, :findme) desc"""
+                      WHERE  fulltxt @@ to_tsquery(:findme)
+                      ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
     PAGESIZE=20
     
     def get(self):
