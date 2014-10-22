@@ -174,7 +174,6 @@ class Searchable(restful.Resource):
                       FROM   dim%s_fulltext
                       WHERE  fulltxt @@ to_tsquery(:findme)
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
-    PAGESIZE=20
 
     def get(self):
         args = self.parser.parse_args()
@@ -194,6 +193,8 @@ class Searchable(restful.Resource):
                                     for id in fts_result)))
                 elif arg == 'page':
                     page_num = args[arg]
+                elif arg == 'per_page':
+                    per_page = args[arg]
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
@@ -202,15 +203,14 @@ class Searchable(restful.Resource):
         if elements:
             qry += "?" + "&".join(elements)
 
-        offset = self.PAGESIZE * (page_num-1)
-        qry = "/(%s).limit(%d,%d)" % (qry, self.PAGESIZE, offset)
+        offset = per_page * (page_num-1)
+        qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
 
         print(qry)
         data = htsql_conn.produce(qry)
         data_dict = as_dicts(data)
-        page_data = {'per-page': self.PAGESIZE, 'page':page_num, 'count':'placeholder'}
-        return format_candids(data_dict, page_data) # add per_page and count
-
+        page_data = {'per_page': per_page, 'page':page_num, 'count':'placeholder'}
+        return format_candids(data_dict, page_data)
 
 
 class Candidate(object):
@@ -234,6 +234,7 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('cand_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
+    parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
