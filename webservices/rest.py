@@ -301,4 +301,5 @@ api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    debug = not os.getenv('PRODUCTION')
+    app.run(debug=debug)
