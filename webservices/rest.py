@@ -14,7 +14,9 @@ Supported for /candidate ::
     state=       (two-letter code)
     district=
     name=        (candidate's name)
+    page=        Page number
     party=       (3-letter abbreviation)
+    per_page=    Number of records per page
     year=        (any year in which candidate ran)
 
 Supported for /committee ::
@@ -287,11 +289,19 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('state', type=str, help='U. S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
     parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
-
+    parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
+    parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
+ 
 
 class Help(restful.Resource):
     def get(self):
-        return sys.modules[__name__].__doc__
+        result = {'doc': sys.modules[__name__].__doc__,
+                  'endpoints': {}}
+        for cls in (CandidateSearch, CommitteeSearch):
+            name = cls.__name__[:-6].lower()
+            result['endpoints'][name] = {'arguments supported':
+                                         {a.name: a.help for a in sorted(cls.parser.args)}}
+        return result
 
 
 api.add_resource(Help, '/')
