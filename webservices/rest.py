@@ -40,6 +40,7 @@ import flask.ext.restful.representations.json
 from htsql import HTSQL
 import htsql.core.domain
 from json_encoding import TolerantJSONEncoder
+from datetime import datetime
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
@@ -66,6 +67,43 @@ def as_dicts(data):
         return [as_dicts(d) for d in data]
     else:
         return data
+
+# returns a list of election cycles that pertain to an item, like a committee
+def election_cycles(start, end):
+  years = []
+  # add some check for December? I don't think this will happen much but it is feasible
+  start_year = int(datetime.strftime(start, '%Y'))
+
+  if end == None:
+    end_year = int(datetime.strftime(datetime.now(), '%Y'))
+  else:
+    end_year = int(datetime.strftime(end, '%Y'))
+
+  print "start year: ", start_year
+  print "end year: ", end_year
+
+  if start_year > end_year:
+    print "\n\nWHAT????\n\n"
+    print "start: ", start_year
+    print "end: ", end_year, "\n\n"
+    return False
+
+
+  while start_year <= end_year:
+    # eleciton cycles are on even-numbered years
+    if start_year % 2 == 0:
+      years.append(start_year)
+      print "adding ", start_year
+    start_year += 1
+    print start_year
+
+  # for new committees formed in the beginning of the election cycle
+  if len(years) == 0:
+    year = start_year + 1
+    years.append(year)
+
+  print years
+  return years
 
 # I am not sure if this will scale but it should make it prettier
 def format_candids(data, page_data):
@@ -94,8 +132,11 @@ def format_candids(data, page_data):
         mailing_address['state'] = prop['cand_st']
         mailing_address['zip'] = prop['cand_zip']
         mailing_address['expire_date'] = prop['expire_date']
-        # need year for it to go with the election
-        # elections[year] = {'mailing_address': mailing_address}
+
+        election_years = election_cycles(prop['load_date'], prop['expire_date'])
+        for year in election_years:
+          elections[year] = []
+          elections[year].append({'mailing_address': mailing_address})
 
         # Names
         other_names = []
@@ -106,12 +147,6 @@ def format_candids(data, page_data):
 
         #form type
         # form id?
-
-        # if we can't find pin to election cycles, might as well not be repetitive
-        if mailing_address not in addresses:
-          addresses.append(mailing_address)
-
-      cand_data['addresses']= addresses
 
       # would rather have this with election year
       # would like to add committee type
@@ -291,7 +326,7 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
- 
+
 
 class Help(restful.Resource):
     def get(self):
