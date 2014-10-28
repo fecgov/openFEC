@@ -30,6 +30,7 @@ Supported for /committee ::
 
 """
 import os
+import re
 import string
 import sys
 import sqlalchemy as sa
@@ -68,14 +69,21 @@ def as_dicts(data):
     else:
         return data
 
+def cleantext(text):
+    if type(text) is str:
+        text = re.sub(' +',' ', text)
+        text = re.sub('\\r|\\n','', text)
+        text = text.strip()
+        return text
+    else:
+        return text
 
-# I am not sure if this will scale but it should make it prettier
+
 def format_candids(data, page_data):
   results = []
-  # stripping outer list
   for cands in data:
     for cand in data:
-      #I am making this into a dictionary so we can aggregate data for each election across the tables
+      #aggregating data for each election across the tables
       elections = {}
 
       cand_data = {'name':{}}
@@ -84,6 +92,7 @@ def format_candids(data, page_data):
       # Using most recent name as full name
       cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
 
+      # Committee information
       for cmte in cand['related_committees']:
         year = str(cmte['cand_election_yr'])
         if not elections.has_key(year):
@@ -94,30 +103,38 @@ def format_candids(data, page_data):
 
         if cmte['cmte_dsgn'] in ['P', 'H', 'S']:
           prmary_cmte['designation'] = cmte_decoder[cmte['cmte_dsgn']]
+          prmary_cmte['type'] = cmte['cmte_tp']
           # if they are running as house and president they will have a different candidate id records
           elections[year]['primary_cmte'] = prmary_cmte
         else:
           # add a decoder here too
-          if not elections[year].has_key('affiliated_cmte_ids'):
-            elections[year]['affiliated_cmte_ids'] =[{'cmte_id': cmte['cmte_id'], 'designation':cmte['cmte_dsgn']}]
+          if not elections[year].has_key('related_cmtes'):
+            elections[year]['related_cmtes'] =[{
+                  'cmte_id': cmte['cmte_id'],
+                  'type':cmte['cmte_tp'],
+                  'designation':cmte['cmte_dsgn']
+            }]
           else:
-            elections[year]['affiliated_cmte_ids'].append({'cmte_id': cmte['cmte_id'], 'designation':cmte['cmte_dsgn']})
+            elections[year]['related_cmtes'].append({
+                  'cmte_id': cmte['cmte_id'],
+                  'type':cmte['cmte_tp'],
+                  'designation':cmte['cmte_dsgn'],
+            })
 
+      # Office information
       for office in cand['dimcandoffice']:
         year = str(office['cand_election_yr'])
+
         if not elections.has_key(year):
           elections[year] = {}
 
-# could have more than one election in a year
         elections[year]['office_sought'] = office['dimoffice']['office_tp_desc']
         elections[year]['district'] = office['dimoffice']['office_district']
         elections[year]['state'] = office['dimoffice']['office_state']
-        # these are temporary I want to see if the different table load dates match up
-        #elections[year]['dim_office_load_date'] = office['dimoffice']['load_date']
-        #elections[year]['dimparty_load_date'] = office['dimparty']['load_date']
+
         elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
 
-      print elections
+      # status information
       for status in cand['dimcandstatusici']:
         year = str(status['election_yr'])
         if elections.has_key(year):
@@ -142,17 +159,26 @@ def format_candids(data, page_data):
       addresses = []
       for prop in cand['dimcandproperties']:
         mailing_address = {}
-        mailing_address['street_1'] = prop['cand_st1']
-        mailing_address['street_2'] = prop['cand_st2']
-        mailing_address['city'] = prop['cand_city']
-        mailing_address['state'] = prop['cand_st']
-        mailing_address['zip'] = prop['cand_zip']
+        mailing_address['street_1'] = cleantext(prop['cand_st1'])
+        mailing_address['street_2'] = cleantext(prop['cand_st2'])
+        mailing_address['city'] = cleantext(prop['cand_city'])
+        mailing_address['state'] = cleantext(prop['cand_st'])
+        mailing_address['zip'] = cleantext(prop['cand_zip'])
         mailing_address['expire_date'] = prop['expire_date']
 
-        #elections[year]['mailing_address']= mailing_address
+        if mailing_address not in addresses:
+          addresses.append(mailing_address)
 
-        # #form type
-        # # form id?
+        # this will help improve search based on nick names
+        name = cleantext(prop['cand_nm'])
+        if (cand_data['name']['full_name'] != name) and (name not in other_names):
+          if cand_data['name'].has_key('additional_names'):
+            cand_data['name']['additional_names'].append(name)
+          else:
+            cand_data['name']['additional_names'] = [name]
+
+      cand_data['mailing_addresses'] = addresses
+      #elections[year]['mailing_address']= mailing_address
 
       cand_data['elections'] = elections
 
