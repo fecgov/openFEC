@@ -68,25 +68,29 @@ def as_dicts(data):
     else:
         return data
 
+
 # returns a list of election cycles that pertain to an item, like a committee
+### The load date seems to be wrong, if we can't fix that, we should look for the committee's first filing and their last non-amendment filing(you have an infinite amount of time to file corrections)
 def election_cycles(start, end):
   years = []
+
+  if end == None or start == None:
+    print "\n\n\n", "no start or end", "\n\n\n"
+    return None
+
+  end_year = int(datetime.strftime(end, '%Y'))
   # add some check for December? I don't think this will happen much but it is feasible
   start_year = int(datetime.strftime(start, '%Y'))
-
-  if end == None:
-    end_year = int(datetime.strftime(datetime.now(), '%Y'))
-  else:
-    end_year = int(datetime.strftime(end, '%Y'))
 
   print "start year: ", start_year
   print "end year: ", end_year
 
+  ### this shouldn't happen
   if start_year > end_year:
     print "\n\nWHAT????\n\n"
     print "start: ", start_year
     print "end: ", end_year, "\n\n"
-    return False
+    return None
 
 
   while start_year <= end_year:
@@ -105,6 +109,11 @@ def election_cycles(start, end):
   print years
   return years
 
+def find_com_info(com_id):
+  qry =
+  data = htsql_conn.produce(qry)
+  data_dict = as_dicts(data)
+
 # I am not sure if this will scale but it should make it prettier
 def format_candids(data, page_data):
   results = []
@@ -121,37 +130,11 @@ def format_candids(data, page_data):
       #I am making this into a dictionary so we can aggregate data for each election across the tables
       elections = {}
 
-      # would rather have these with the election year
-      addresses = []
-      for prop in cand['dimcandproperties']:
-        print prop
-        mailing_address = {}
-        mailing_address['street_1'] = prop['cand_st1']
-        mailing_address['street_2'] = prop['cand_st2']
-        mailing_address['city'] = prop['cand_city']
-        mailing_address['state'] = prop['cand_st']
-        mailing_address['zip'] = prop['cand_zip']
-        mailing_address['expire_date'] = prop['expire_date']
-
-        election_years = election_cycles(prop['load_date'], prop['expire_date'])
-        for year in election_years:
-          elections[year] = []
-          elections[year].append({'mailing_address': mailing_address})
-
-        # Names
-        other_names = []
-        # perhaps add formatting for white space?
-        if (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
-          other_names.append(prop['cand_nm'])
-          cand_data['name']['additional_names'] = other_names
-
-        #form type
-        # form id?
-
       # would rather have this with election year
       # would like to add committee type
       primary_committees = []
       for cmte in cand['primary_committee']:
+  ##
         primary_committees.append(cmte['cmte_id'])
       cand_data['primary_committee_ids'] = primary_committees
 
@@ -190,6 +173,46 @@ def format_candids(data, page_data):
           elections[year]['incumbent_challenger'] = None
 
         #elections[year]['dimcandstatusici_load_date'] = status['load_date']
+
+            # would rather have these with the election year
+      addresses = []
+      for prop in cand['dimcandproperties']:
+        print prop
+        mailing_address = {}
+        mailing_address['street_1'] = prop['cand_st1']
+        mailing_address['street_2'] = prop['cand_st2']
+        mailing_address['city'] = prop['cand_city']
+        mailing_address['state'] = prop['cand_st']
+        mailing_address['zip'] = prop['cand_zip']
+        mailing_address['expire_date'] = prop['expire_date']
+
+        election_years = election_cycles(prop['begin_date'], prop['expire_date'])
+
+        # check for sane output
+        if election_years != None:
+          for year in election_years:
+            print year
+            #elections[str(year)]['mailing_address'] = mailing_address
+        else:
+          #data quality check, if there is only one property result, we can safely apply it to all the elections
+          if len(cand['dimcandproperties']) == 1:
+            print "it is ok"
+          else:
+            print "\n\n     WHY ARE THESE DATES MISSING?????? There should be %s \n\n" % (len(cand['dimcandproperties']))
+
+          for year in elections:
+            elections[year]['mailing_address']= mailing_address
+
+
+        # Names
+        other_names = []
+        # perhaps add formatting for white space?
+        if (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
+          other_names.append(prop['cand_nm'])
+          cand_data['name']['additional_names'] = other_names
+
+        #form type
+        # form id?
 
       cand_data['elections'] = elections
 
