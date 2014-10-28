@@ -44,4 +44,5 @@ sudo cp /usr/local/home/$CURRENT_USER/tls-standards/configuration/nginx/dhparam4
 sudo cp /usr/local/home/$CURRENT_USER/tls-standards/sites/star.18f.us/star.18f.us-chain.crt /etc/nginx/ssl/keys/
 sudo cp /usr/local/home/$CURRENT_USER/setup/star.18f.us.key /etc/nginx/ssl/keys/ # will fail, not checked in
 
+cd /usr/local/home/$CURRENT_USER/openFEC
 sudo service nginx restart 
