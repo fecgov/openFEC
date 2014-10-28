@@ -1,0 +1,41 @@
+server {
+  listen 80;
+  server_name  fec.18f.us;
+
+        location /rest/ {
+                        proxy_pass http://localhost:5000/;
+          }
+
+        location /htsql/ {
+                        proxy_pass http://localhost:8080/;
+          }
+
+        location / {
+                        proxy_pass http://localhost:3000/;
+          }
+}
+
+
+# HTTPS server (with SPDY enabled)
+server {
+  listen 443 ssl spdy;
+  server_name  fec.18f.us;
+
+  ssl_certificate      /etc/nginx/ssl/keys/star.18f.us-chain.crt;
+  ssl_certificate_key  /etc/nginx/ssl/keys/star.18f.us.key;
+
+  include ssl/ssl.rules;
+
+  location /rest/ {
+		proxy_pass http://localhost:5000/;
+  }
+
+  location /htsql/ {
+		proxy_pass http://localhost:8080/;
+  }
+
+  location / {
+		proxy_pass http://localhost:3000/;
+  }
+}
+
