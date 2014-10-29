@@ -366,4 +366,4 @@ api.add_resource(CommitteeSearch, '/committee')
 
 if __name__ == '__main__':
     debug = not os.getenv('PRODUCTION')
-    app.run(debug=debug,port=5001)
+    app.run(debug=debug)
