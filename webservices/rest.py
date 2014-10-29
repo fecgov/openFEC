@@ -84,136 +84,135 @@ def cleantext(text):
 
 def format_candids(data, page_data):
   results = []
-  for cands in data:
-    for cand in data:
-      #aggregating data for each election across the tables
-      elections = {}
+  for cand in data:
+    #aggregating data for each election across the tables
+    elections = {}
 
-      cand_data = {'name':{}}
-      cand_data['candate_id'] = cand['cand_id']
-      #It will be convenient for search to pick up as many nicknames as we can.
-      # Using most recent name as full name
-      cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
+    cand_data = {'name':{}}
+    cand_data['candate_id'] = cand['cand_id']
+    #It will be convenient for search to pick up as many nicknames as we can.
+    # Using most recent name as full name
+    cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
 
-      # Committee information
-      for cmte in cand['related_committees']:
-        year = str(cmte['cand_election_yr'])
-        if not elections.has_key(year):
-          elections[year] = {}
-        prmary_cmte = {}
-        prmary_cmte['cmte_id'] = cmte['cmte_id']
-        cmte_decoder = {'P': 'Presidential',
-                        'H': 'House',
-                        'S': 'Senate',
-                        'C': 'Communication Cost',
-                        'D': 'Delegate Committee',
-                        'E': 'Electioneering Communication',
-                        'I': 'Independent Expenditor (Person or Group)',
-                        'N': 'PAC - Nonqualified',
-                        'O': 'Independent Expenditure-Only (Super PACs)',
-                        'Q': 'PAC - Qualified',
-                        'U': 'Single Candidate Independent Expenditure',
-                        'V': 'PAC with Non-Contribution Account - Nonqualified',
-                        'W': 'PAC with Non-Contribution Account - Qualified',
-                        'X': 'Party - Nonqualified',
-                        'Y': 'Party - Qualified',
-                        'Z': 'National Party Nonfederal Account'
-        }
-        designation_decoder = {'A': 'Authorized by a candidate',
-                        'J': 'Joint fundraising committee',
-                        'P': 'Principal campaign committee',
-                        'U': 'Unauthorized',
-                        'B': 'Lobbyist/Registrant PAC',
-                        'D': 'Leadership PAC',
-        }
+    # Committee information
+    for cmte in cand['related_committees']:
+      year = str(cmte['cand_election_yr'])
+      if not elections.has_key(year):
+        elections[year] = {}
+      prmary_cmte = {}
+      prmary_cmte['cmte_id'] = cmte['cmte_id']
+      cmte_decoder = {'P': 'Presidential',
+                      'H': 'House',
+                      'S': 'Senate',
+                      'C': 'Communication Cost',
+                      'D': 'Delegate Committee',
+                      'E': 'Electioneering Communication',
+                      'I': 'Independent Expenditor (Person or Group)',
+                      'N': 'PAC - Nonqualified',
+                      'O': 'Independent Expenditure-Only (Super PACs)',
+                      'Q': 'PAC - Qualified',
+                      'U': 'Single Candidate Independent Expenditure',
+                      'V': 'PAC with Non-Contribution Account - Nonqualified',
+                      'W': 'PAC with Non-Contribution Account - Qualified',
+                      'X': 'Party - Nonqualified',
+                      'Y': 'Party - Qualified',
+                      'Z': 'National Party Nonfederal Account'
+      }
+      designation_decoder = {'A': 'Authorized by a candidate',
+                      'J': 'Joint fundraising committee',
+                      'P': 'Principal campaign committee',
+                      'U': 'Unauthorized',
+                      'B': 'Lobbyist/Registrant PAC',
+                      'D': 'Leadership PAC',
+      }
 
-        if cmte['cmte_dsgn'] in ['P', 'H', 'S']:
-          prmary_cmte['designation_code'] = cmte['cmte_dsgn']
-          prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
-          prmary_cmte['type_code'] = cmte['cmte_tp']
-          prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
-          # if they are running as house and president they will have a different candidate id records
-          elections[year]['primary_cmte'] = prmary_cmte
+      if cmte['cmte_dsgn'] in ['P', 'H', 'S']:
+        prmary_cmte['designation_code'] = cmte['cmte_dsgn']
+        prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
+        prmary_cmte['type_code'] = cmte['cmte_tp']
+        prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
+        # if they are running as house and president they will have a different candidate id records
+        elections[year]['primary_cmte'] = prmary_cmte
+      else:
+        # add a decoder here too
+        if not elections[year].has_key('related_cmtes'):
+          elections[year]['related_cmtes'] =[{
+                'cmte_id': cmte['cmte_id'],
+                'type_code': cmte['cmte_tp'],
+                'type': cmte_decoder[cmte['cmte_tp']],
+                'designation_code': cmte['cmte_dsgn'],
+                'designation': designation_decoder[cmte['cmte_dsgn']],
+          }]
         else:
-          # add a decoder here too
-          if not elections[year].has_key('related_cmtes'):
-            elections[year]['related_cmtes'] =[{
-                  'cmte_id': cmte['cmte_id'],
-                  'type_code': cmte['cmte_tp'],
-                  'type': cmte_decoder[cmte['cmte_tp']],
-                  'designation_code': cmte['cmte_dsgn'],
-                  'designation': designation_decoder[cmte['cmte_dsgn']],
-            }]
-          else:
-            elections[year]['related_cmtes'].append({
-                  'cmte_id': cmte['cmte_id'],
-                  'type_code': cmte['cmte_tp'],
-                  'type': cmte_decoder[cmte['cmte_tp']],
-                  'designation_code': cmte['cmte_dsgn'],
-                  'designation': designation_decoder[cmte['cmte_dsgn']],
-            })
+          elections[year]['related_cmtes'].append({
+                'cmte_id': cmte['cmte_id'],
+                'type_code': cmte['cmte_tp'],
+                'type': cmte_decoder[cmte['cmte_tp']],
+                'designation_code': cmte['cmte_dsgn'],
+                'designation': designation_decoder[cmte['cmte_dsgn']],
+          })
 
-      # Office information
-      for office in cand['dimcandoffice']:
-        year = str(office['cand_election_yr'])
+    # Office information
+    for office in cand['dimcandoffice']:
+      year = str(office['cand_election_yr'])
 
-        if not elections.has_key(year):
-          elections[year] = {}
+      if not elections.has_key(year):
+        elections[year] = {}
 
-        elections[year]['office_sought'] = office['dimoffice']['office_tp_desc']
-        elections[year]['district'] = office['dimoffice']['office_district']
-        elections[year]['state'] = office['dimoffice']['office_state']
+      elections[year]['office_sought'] = office['dimoffice']['office_tp_desc']
+      elections[year]['district'] = office['dimoffice']['office_district']
+      elections[year]['state'] = office['dimoffice']['office_state']
 
-        elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
+      elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
 
-      # status information
-      for status in cand['dimcandstatusici']:
-        year = str(status['election_yr'])
-        if elections.has_key(year):
-          elections[year]['candidate_inactive'] = status['cand_inactive_flg']
-        else:
-          elections[year] = {}
-          elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+    # status information
+    for status in cand['dimcandstatusici']:
+      year = str(status['election_yr'])
+      if elections.has_key(year):
+        elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+      else:
+        elections[year] = {}
+        elections[year]['candidate_inactive'] = status['cand_inactive_flg']
 
-        status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
-        if status['cand_status'] != None:
-          elections[year]['candidate_status'] = status_decoder[status['cand_status']]
-        else:
-          elections[year]['candidate_status'] = None
+      status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
+      if status['cand_status'] != None:
+        elections[year]['candidate_status'] = status_decoder[status['cand_status']]
+      else:
+        elections[year]['candidate_status'] = None
 
-        ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-        if status['ici_code'] != None:
-          elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
-        else:
-          elections[year]['incumbent_challenger'] = None
+      ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+      if status['ici_code'] != None:
+        elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
+      else:
+        elections[year]['incumbent_challenger'] = None
 
-            # would rather have these with the election year
-      addresses = []
-      other_names = []
-      for prop in cand['dimcandproperties']:
-        mailing_address = {}
-        mailing_address['street_1'] = cleantext(prop['cand_st1'])
-        mailing_address['street_2'] = cleantext(prop['cand_st2'])
-        mailing_address['city'] = cleantext(prop['cand_city'])
-        mailing_address['state'] = cleantext(prop['cand_st'])
-        mailing_address['zip'] = cleantext(prop['cand_zip'])
-        if prop['expire_date'] != None:
-          mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
+          # would rather have these with the election year
+    addresses = []
+    other_names = []
+    for prop in cand['dimcandproperties']:
+      mailing_address = {}
+      mailing_address['street_1'] = cleantext(prop['cand_st1'])
+      mailing_address['street_2'] = cleantext(prop['cand_st2'])
+      mailing_address['city'] = cleantext(prop['cand_city'])
+      mailing_address['state'] = cleantext(prop['cand_st'])
+      mailing_address['zip'] = cleantext(prop['cand_zip'])
+      if prop['expire_date'] != None:
+        mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
 
-        if mailing_address not in addresses:
-          addresses.append(mailing_address)
+      if mailing_address not in addresses:
+        addresses.append(mailing_address)
 
-        # this will help improve search based on nick names
-        name = cleantext(prop['cand_nm'])
-        if (cand_data['name']['full_name'] != name) and (name not in other_names):
-          other_names.append(name)
+      # this will help improve search based on nick names
+      name = cleantext(prop['cand_nm'])
+      if (cand_data['name']['full_name'] != name) and (name not in other_names):
+        other_names.append(name)
 
-      cand_data['mailing_addresses'] = addresses
-      if len(other_names) > 0:
-        cand_data['name']['other_names'] = other_names
-      cand_data['elections'] = elections
+    cand_data['mailing_addresses'] = addresses
+    if len(other_names) > 0:
+      cand_data['name']['other_names'] = other_names
+    cand_data['elections'] = elections
 
-      results.append(cand_data)
+    results.append(cand_data)
 
   return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
 
