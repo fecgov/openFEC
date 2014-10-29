@@ -42,6 +42,7 @@ from htsql import HTSQL
 import htsql.core.domain
 from json_encoding import TolerantJSONEncoder
 from datetime import datetime
+from psycopg2._range import DateTimeRange
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
@@ -63,6 +64,8 @@ def as_dicts(data):
     """
     if isinstance(data, htsql.core.domain.Record):
         return dict(zip(data.__fields__, [as_dicts(d) for d in data]))
+    elif isinstance(data, DateTimeRange):
+        return {'begin': data.upper, 'end': data.lower}
     elif isinstance(data, htsql.core.domain.Product) or \
          isinstance(data, list):
         return [as_dicts(d) for d in data]
@@ -363,4 +366,4 @@ api.add_resource(CommitteeSearch, '/committee')
 
 if __name__ == '__main__':
     debug = not os.getenv('PRODUCTION')
-    app.run(debug=debug)
+    app.run(debug=debug,port=5001)
