@@ -99,11 +99,36 @@ def format_candids(data, page_data):
           elections[year] = {}
         prmary_cmte = {}
         prmary_cmte['cmte_id'] = cmte['cmte_id']
-        cmte_decoder = {'P': 'presidential', 'H': 'house', 'S': 'senate'}
+        cmte_decoder = {'P': 'Presidential',
+                        'H': 'House',
+                        'S': 'Senate',
+                        'C': 'Communication Cost',
+                        'D': 'Delegate Committee',
+                        'E': 'Electioneering Communication',
+                        'I': 'Independent Expenditor (Person or Group)',
+                        'N': 'PAC - Nonqualified',
+                        'O': 'Independent Expenditure-Only (Super PACs)',
+                        'Q': 'PAC - Qualified',
+                        'U': 'Single Candidate Independent Expenditure',
+                        'V': 'PAC with Non-Contribution Account - Nonqualified',
+                        'W': 'PAC with Non-Contribution Account - Qualified',
+                        'X': 'Party - Nonqualified',
+                        'Y': 'Party - Qualified',
+                        'Z': 'National Party Nonfederal Account'
+        }
+        designation_decoder = {'A': 'Authorized by a candidate',
+                        'J': 'Joint fundraising committee',
+                        'P': 'Principal campaign committee',
+                        'U': 'Unauthorized',
+                        'B': 'Lobbyist/Registrant PAC',
+                        'D': 'Leadership PAC',
+        }
 
         if cmte['cmte_dsgn'] in ['P', 'H', 'S']:
-          prmary_cmte['designation'] = cmte_decoder[cmte['cmte_dsgn']]
-          prmary_cmte['type'] = cmte['cmte_tp']
+          prmary_cmte['designation_code'] = cmte['cmte_dsgn']
+          prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
+          prmary_cmte['type_code'] = cmte['cmte_tp']
+          prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
           # if they are running as house and president they will have a different candidate id records
           elections[year]['primary_cmte'] = prmary_cmte
         else:
@@ -111,14 +136,18 @@ def format_candids(data, page_data):
           if not elections[year].has_key('related_cmtes'):
             elections[year]['related_cmtes'] =[{
                   'cmte_id': cmte['cmte_id'],
-                  'type':cmte['cmte_tp'],
-                  'designation':cmte['cmte_dsgn']
+                  'type_code': cmte['cmte_tp'],
+                  'type': cmte_decoder[cmte['cmte_tp']],
+                  'designation_code': cmte['cmte_dsgn'],
+                  'designation': designation_decoder[cmte['cmte_dsgn']],
             }]
           else:
             elections[year]['related_cmtes'].append({
                   'cmte_id': cmte['cmte_id'],
-                  'type':cmte['cmte_tp'],
-                  'designation':cmte['cmte_dsgn'],
+                  'type_code': cmte['cmte_tp'],
+                  'type': cmte_decoder[cmte['cmte_tp']],
+                  'designation_code': cmte['cmte_dsgn'],
+                  'designation': designation_decoder[cmte['cmte_dsgn']],
             })
 
       # Office information
@@ -157,6 +186,7 @@ def format_candids(data, page_data):
 
             # would rather have these with the election year
       addresses = []
+      other_names = []
       for prop in cand['dimcandproperties']:
         mailing_address = {}
         mailing_address['street_1'] = cleantext(prop['cand_st1'])
@@ -164,7 +194,8 @@ def format_candids(data, page_data):
         mailing_address['city'] = cleantext(prop['cand_city'])
         mailing_address['state'] = cleantext(prop['cand_st'])
         mailing_address['zip'] = cleantext(prop['cand_zip'])
-        mailing_address['expire_date'] = prop['expire_date']
+        if prop['expire_date'] != None:
+          mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
 
         if mailing_address not in addresses:
           addresses.append(mailing_address)
@@ -172,14 +203,11 @@ def format_candids(data, page_data):
         # this will help improve search based on nick names
         name = cleantext(prop['cand_nm'])
         if (cand_data['name']['full_name'] != name) and (name not in other_names):
-          if cand_data['name'].has_key('additional_names'):
-            cand_data['name']['additional_names'].append(name)
-          else:
-            cand_data['name']['additional_names'] = [name]
+          other_names.append(name)
 
       cand_data['mailing_addresses'] = addresses
-      #elections[year]['mailing_address']= mailing_address
-
+      if len(other_names) > 0:
+        cand_data['name']['other_names'] = other_names
       cand_data['elections'] = elections
 
       results.append(cand_data)
