@@ -30,6 +30,7 @@ Supported for /committee ::
 
 """
 import os
+import re
 import string
 import sys
 import sqlalchemy as sa
@@ -40,6 +41,7 @@ import flask.ext.restful.representations.json
 from htsql import HTSQL
 import htsql.core.domain
 from json_encoding import TolerantJSONEncoder
+from datetime import datetime
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
@@ -67,80 +69,108 @@ def as_dicts(data):
     else:
         return data
 
-# I am not sure if this will scale but it should make it prettier
+def cleantext(text):
+    if type(text) is str:
+        text = re.sub(' +',' ', text)
+        text = re.sub('\\r|\\n','', text)
+        text = text.strip()
+        return text
+    else:
+        return text
+
+
 def format_candids(data, page_data):
   results = []
-  # stripping outer list
   for cands in data:
     for cand in data:
+      #aggregating data for each election across the tables
+      elections = {}
+
       cand_data = {'name':{}}
       cand_data['candate_id'] = cand['cand_id']
-      # I am guessing this might need to be flexible, and might work well as a dictionary.
-      # I am going by most recent name on this but I would like to loops through all the names and have all the name variations, or perhaps former names. Though, there is also going to be names with different prefixes etc. Perhaps we can add filtering later. It will be convenient for search to pick up as many nicknames as we can.
+      #It will be convenient for search to pick up as many nicknames as we can.
       # Using most recent name as full name
       cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
 
-      #I am making this into a dictionary so we can aggregate data for each election across the tables
-      elections = {}
+      # Committee information
+      for cmte in cand['related_committees']:
+        year = str(cmte['cand_election_yr'])
+        if not elections.has_key(year):
+          elections[year] = {}
+        prmary_cmte = {}
+        prmary_cmte['cmte_id'] = cmte['cmte_id']
+        cmte_decoder = {'P': 'Presidential',
+                        'H': 'House',
+                        'S': 'Senate',
+                        'C': 'Communication Cost',
+                        'D': 'Delegate Committee',
+                        'E': 'Electioneering Communication',
+                        'I': 'Independent Expenditor (Person or Group)',
+                        'N': 'PAC - Nonqualified',
+                        'O': 'Independent Expenditure-Only (Super PACs)',
+                        'Q': 'PAC - Qualified',
+                        'U': 'Single Candidate Independent Expenditure',
+                        'V': 'PAC with Non-Contribution Account - Nonqualified',
+                        'W': 'PAC with Non-Contribution Account - Qualified',
+                        'X': 'Party - Nonqualified',
+                        'Y': 'Party - Qualified',
+                        'Z': 'National Party Nonfederal Account'
+        }
+        designation_decoder = {'A': 'Authorized by a candidate',
+                        'J': 'Joint fundraising committee',
+                        'P': 'Principal campaign committee',
+                        'U': 'Unauthorized',
+                        'B': 'Lobbyist/Registrant PAC',
+                        'D': 'Leadership PAC',
+        }
 
-      # would rather have these with the election year
-      addresses = []
-      for prop in cand['dimcandproperties']:
-        print prop
-        mailing_address = {}
-        mailing_address['street_1'] = prop['cand_st1']
-        mailing_address['street_2'] = prop['cand_st2']
-        mailing_address['city'] = prop['cand_city']
-        mailing_address['state'] = prop['cand_st']
-        mailing_address['zip'] = prop['cand_zip']
-        mailing_address['expire_date'] = prop['expire_date']
-        # need year for it to go with the election
-        # elections[year] = {'mailing_address': mailing_address}
+        if cmte['cmte_dsgn'] in ['P', 'H', 'S']:
+          prmary_cmte['designation_code'] = cmte['cmte_dsgn']
+          prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
+          prmary_cmte['type_code'] = cmte['cmte_tp']
+          prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
+          # if they are running as house and president they will have a different candidate id records
+          elections[year]['primary_cmte'] = prmary_cmte
+        else:
+          # add a decoder here too
+          if not elections[year].has_key('related_cmtes'):
+            elections[year]['related_cmtes'] =[{
+                  'cmte_id': cmte['cmte_id'],
+                  'type_code': cmte['cmte_tp'],
+                  'type': cmte_decoder[cmte['cmte_tp']],
+                  'designation_code': cmte['cmte_dsgn'],
+                  'designation': designation_decoder[cmte['cmte_dsgn']],
+            }]
+          else:
+            elections[year]['related_cmtes'].append({
+                  'cmte_id': cmte['cmte_id'],
+                  'type_code': cmte['cmte_tp'],
+                  'type': cmte_decoder[cmte['cmte_tp']],
+                  'designation_code': cmte['cmte_dsgn'],
+                  'designation': designation_decoder[cmte['cmte_dsgn']],
+            })
 
-        # Names
-        other_names = []
-        # perhaps add formatting for white space?
-        if (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
-          other_names.append(prop['cand_nm'])
-          cand_data['name']['additional_names'] = other_names
-
-        #form type
-        # form id?
-
-        # if we can't find pin to election cycles, might as well not be repetitive
-        if mailing_address not in addresses:
-          addresses.append(mailing_address)
-
-      cand_data['addresses']= addresses
-
-      # would rather have this with election year
-      # would like to add committee type
-      primary_committees = []
-      for cmte in cand['primary_committee']:
-        primary_committees.append(cmte['cmte_id'])
-      cand_data['primary_committee_ids'] = primary_committees
-
-      affiliated_committees = []
-
-      for cmte in cand['affiliated_committees']:
-        affiliated_committees.append(cmte['cmte_id'])
-      cand_data['affiliated_committee_ids'] = affiliated_committees
-
-
+      # Office information
       for office in cand['dimcandoffice']:
-        year = office['cand_election_yr']
-        elections[year] = {'election_year': year}
+        year = str(office['cand_election_yr'])
+
+        if not elections.has_key(year):
+          elections[year] = {}
+
         elections[year]['office_sought'] = office['dimoffice']['office_tp_desc']
         elections[year]['district'] = office['dimoffice']['office_district']
         elections[year]['state'] = office['dimoffice']['office_state']
-        # these are temporary I want to see if the different table load dates match up
-        #elections[year]['dim_office_load_date'] = office['dimoffice']['load_date']
-        #elections[year]['dimparty_load_date'] = office['dimparty']['load_date']
+
         elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
 
+      # status information
       for status in cand['dimcandstatusici']:
-        year = status['election_yr']
-        elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+        year = str(status['election_yr'])
+        if elections.has_key(year):
+          elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+        else:
+          elections[year] = {}
+          elections[year]['candidate_inactive'] = status['cand_inactive_flg']
 
         status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
         if status['cand_status'] != None:
@@ -154,8 +184,30 @@ def format_candids(data, page_data):
         else:
           elections[year]['incumbent_challenger'] = None
 
-        #elections[year]['dimcandstatusici_load_date'] = status['load_date']
+            # would rather have these with the election year
+      addresses = []
+      other_names = []
+      for prop in cand['dimcandproperties']:
+        mailing_address = {}
+        mailing_address['street_1'] = cleantext(prop['cand_st1'])
+        mailing_address['street_2'] = cleantext(prop['cand_st2'])
+        mailing_address['city'] = cleantext(prop['cand_city'])
+        mailing_address['state'] = cleantext(prop['cand_st'])
+        mailing_address['zip'] = cleantext(prop['cand_zip'])
+        if prop['expire_date'] != None:
+          mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
 
+        if mailing_address not in addresses:
+          addresses.append(mailing_address)
+
+        # this will help improve search based on nick names
+        name = cleantext(prop['cand_nm'])
+        if (cand_data['name']['full_name'] != name) and (name not in other_names):
+          other_names.append(name)
+
+      cand_data['mailing_addresses'] = addresses
+      if len(other_names) > 0:
+        cand_data['name']['other_names'] = other_names
       cand_data['elections'] = elections
 
       results.append(cand_data)
@@ -219,8 +271,7 @@ class Candidate(object):
 
     table_name_stem = 'cand'
     htsql_qry = """dimcand{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
-                           /dimlinkages{cmte_id}?cmte_tp={'H','S','P'} :as primary_committee,
-                           /dimlinkages{cmte_id}?cmte_tp='U' :as affiliated_committees,
+                           /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as related_committees,
                            /dimcandstatusici}
                            """
 
@@ -291,7 +342,7 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
- 
+
 
 class Help(restful.Resource):
     def get(self):
