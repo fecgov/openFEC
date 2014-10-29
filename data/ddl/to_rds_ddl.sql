@@ -44,7 +44,7 @@ CREATE FOREIGN TABLE public.dimcandoffice (
     party_sk bigint,
     form_sk bigint,
     form_tp text,
-    cand_election_yr numeric,
+    cand_election_yr integer,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandoffice');

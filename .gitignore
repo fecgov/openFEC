@@ -1,5 +1,8 @@
 cache
 
+data/bin/set_env_vars.real.sh
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
