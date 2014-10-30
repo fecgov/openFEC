@@ -296,12 +296,16 @@ class Searchable(restful.Resource):
         print("\n%s\n" % (qry))
         data = htsql_conn.produce(qry)
         count = htsql_conn.produce(count_qry)
-        print count, "!!!!!!!!!!"
-        print type(data)
 
         data_dict = as_dicts(data)
+        data_count = int(count[0])
+        pages = data_count/20
+        if data_count % 20 != 0:
+          pages += 1
+        if data_count < 20:
+          per_page = data_count
 
-        page_data = {'per_page': per_page, 'page':page_num, 'count': len(data_dict)}
+        page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
         if args['fields'] == None:
           fields = ['cand_id', 'district', 'office_saught', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'candidate_inactive']
