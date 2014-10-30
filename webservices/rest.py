@@ -234,7 +234,6 @@ def format_candids(data, page_data, fields):
     if len(other_names) > 0 and ('name' in fields):
       cand_data['name']['other_names'] = other_names
 
-    print len(elections)
     cand_data['elections'] = elections
     results.append(cand_data)
   return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
@@ -284,14 +283,22 @@ class Searchable(restful.Resource):
                     elements.append(element)
 
         qry = self.htsql_qry
+
         if elements:
             qry += "?" + "&".join(elements)
+            count_qry = "/count(dimcand?%s)" % ("&".join(elements))
+        else:
+            count_qry = "/count(dimcand?exists(dimcandoffice))"
 
         offset = per_page * (page_num-1)
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
 
-        print(qry)
+        print("\n%s\n" % (qry))
         data = htsql_conn.produce(qry)
+        count = htsql_conn.produce(count_qry)
+        print count, "!!!!!!!!!!"
+        print type(data)
+
         data_dict = as_dicts(data)
 
         page_data = {'per_page': per_page, 'page':page_num, 'count': len(data_dict)}
@@ -311,8 +318,6 @@ class Candidate(object):
                            /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as related_committees,
                            /dimcandstatusici}
                            """
-
-
 
 class CandidateResource(SingleResource, Candidate):
 
