@@ -39,7 +39,7 @@ from flask.ext.restful import reqparse
 from flask.ext import restful
 import flask.ext.restful.representations.json
 from htsql import HTSQL
-import htsql.core.domain
+import htsql.core.domain    
 from json_encoding import TolerantJSONEncoder
 from datetime import datetime
 from psycopg2._range import DateTimeRange
@@ -47,6 +47,9 @@ from psycopg2._range import DateTimeRange
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
 sqla_conn_string = os.getenv('SQLA_CONN')
+if not sqla_conn_string:
+    raise EnvironmentError('Environment variable SQLA_CONN is empty.  '
+                           'Have you run a version of set_env_vars.sh with actual values added?')
 engine = sa.create_engine(sqla_conn_string)
 conn = engine.connect()
 
