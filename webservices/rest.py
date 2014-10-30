@@ -85,11 +85,18 @@ def cleantext(text):
 
 def format_candids(data, page_data, fields):
   results = []
+
+  if 'elections' in fields:
+    fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'related_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+  elif fields == ['*']:
+    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'related_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+
   for cand in data:
     #aggregating data for each election across the tables
     elections = {}
-
-    cand_data = {'name':{}}
+    cand_data = {}
+    if 'name' in fields or 'full_name' in fields or 'other_names' in fields:
+      cand_data = {'name':{}}
     if 'cand_id' in fields:
       cand_data['cand_id'] = cand['cand_id']
 
@@ -139,7 +146,7 @@ def format_candids(data, page_data, fields):
         # if they are running as house and president they will have a different candidate id records
         elections[year]['primary_cmte'] = prmary_cmte
 
-      elif 'related_committees' in fields:
+      elif 'related_cmtes' in fields:
         # add a decoder here too
         if not elections[year].has_key('related_cmtes'):
           elections[year]['related_cmtes'] =[{
@@ -227,6 +234,7 @@ def format_candids(data, page_data, fields):
     if len(other_names) > 0 and ('name' in fields):
       cand_data['name']['other_names'] = other_names
 
+    print len(elections)
     cand_data['elections'] = elections
     results.append(cand_data)
   return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
