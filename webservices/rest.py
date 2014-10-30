@@ -48,6 +48,9 @@ from psycopg2._range import DateTimeRange
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
 sqla_conn_string = os.getenv('SQLA_CONN')
+if not sqla_conn_string:
+    raise EnvironmentError('Environment variable SQLA_CONN is empty.  '
+                           'Have you run a version of set_env_vars.sh with actual values added?')
 engine = sa.create_engine(sqla_conn_string)
 conn = engine.connect()
 
@@ -57,6 +60,11 @@ htsql_conn = HTSQL(htsql_conn_string)
 app = Flask(__name__)
 api = restful.Api(app)
 
+def natural_number(n):
+    result = int(n)
+    if result < 1:
+        raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
+    return result
 
 def as_dicts(data):
     """
@@ -206,9 +214,9 @@ def format_candids(data, page_data, fields):
         else:
           elections[year]['incumbent_challenger'] = None
 
-          # would rather have these with the election year
     addresses = []
     other_names = []
+
     if 'name' or 'mailing_address' in fields:
       for prop in cand['dimcandproperties']:
         mailing_address = {}
@@ -333,8 +341,8 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('q', type=str, help='Text to search all fields for')
     parser.add_argument('cand_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
-    parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
+    parser.add_argument('page', type=natural_number, default=1, help='For paginating through results, starting at page 1')
+    parser.add_argument('per_page', type=natural_number, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
@@ -412,4 +420,4 @@ api.add_resource(CommitteeSearch, '/committee')
 
 if __name__ == '__main__':
     debug = not os.getenv('PRODUCTION')
-    app.run(debug=debug,port=5001)
+    app.run(debug=debug)
