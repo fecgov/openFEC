@@ -1,0 +1,5 @@
+luigi
+scrapelib
+leveldb
+simplejson
+elasticsearch

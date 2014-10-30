@@ -51,5 +51,6 @@ class OverallTest(unittest.TestCase):
         page_one_and_two = self._results('/candidate?per_page=10&page=1')
         page_two = self._results('/candidate?per_page=5&page=2')
         self.assertEqual(page_two[0], page_one_and_two[5])
-        self.assertIn(page_two, page_one_and_two)
+        for itm in page_two:
+            self.assertIn(itm, page_one_and_two)
     
