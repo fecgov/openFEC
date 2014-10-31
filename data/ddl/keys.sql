@@ -134,7 +134,6 @@ ALTER TABLE public.factpresidential_f3p ADD FOREIGN KEY (electiontp_sk) REFERENC
 
 ALTER TABLE public.factpresidential_f3p ADD FOREIGN KEY (reporttype_sk) REFERENCES public.dimreporttype (reporttype_sk);
 ALTER TABLE public.factpacsandparties_f3x ADD FOREIGN KEY (reporttype_sk) REFERENCES public.dimreporttype (reporttype_sk);
-ALTER TABLE public.factpresidential_f3p ADD FOREIGN KEY (reporttype_sk) REFERENCES public.dimreporttype (reporttype_sk);
 
  ALTER TABLE sched_a ADD PRIMARY KEY (sched_a_sk);
  ALTER TABLE sched_b ADD PRIMARY KEY (sched_b_sk);
