@@ -111,7 +111,12 @@ def format_candids(data, page_data, fields):
     #It will be convenient for search to pick up as many nicknames as we can.
     # Using most recent name as full name
     if 'name' in fields or 'full_name' in fields:
-      cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
+      name = cand['dimcandproperties'][-1]['cand_nm']
+      cand_data['name']['full_name'] = name
+      # let's do this for now, we could look for improvements in the future
+      if len(name.split(',')) == 2 and len(name.split(',')[0].strip()) > 0 and len(name.split(',')[1].strip()) > 0:
+        cand_data['name']['name_1'] = name.split(',')[1].strip()
+        cand_data['name']['name_2'] = name.split(',')[0].strip()
 
     # Committee information
     for cmte in cand['related_committees']:
