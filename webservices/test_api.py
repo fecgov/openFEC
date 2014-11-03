@@ -25,12 +25,12 @@ class OverallTest(unittest.TestCase):
         response = self._response(qry)
         return response[2]['results']
 
-    # def test_full_text_search(self):
-    #     results = self._results('/candidate?q=stapleton')
-    #     for r in results:
-    #         txt = json.dumps(r).lower()
-    #         print "\n\n", txt, "\n\n"
-    #         self.assertIn('stapleton', txt)
+    def test_full_text_search(self):
+        results = self._results('/candidate?q=stapleton&fields=*')
+        for r in results:
+            txt = json.dumps(r).lower()
+            print "\n\n", txt, "\n\n"
+            self.assertIn('stapleton', txt)
 
     def test_per_page_defaults_to_20(self):
         results = self._results('/candidate')
