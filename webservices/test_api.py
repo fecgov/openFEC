@@ -67,9 +67,16 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response[0]['elections']['2008']['incumbent_challenge'], 'open_seat')
         self.assertEquals(response[0]['elections']['2012']['district'], None)
         self.assertEquals(response[0]['elections']['2012']['incumbent_challenge'], 'incumbent')
-        self.assertEquals(response[0]['elections']['2012']['designation'], 'Principal campaign committee')
-
-        self.assertEquals(1,2)
+        self.assertEquals(response[0]['elections']['2012']['primary_cmte']['designation'], 'Principal campaign committee')
+        self.assertEquals(response[0]['elections']['2012'].has_key('affiliated_cmtes'), False)
+        self.assertEquals(response[0]['elections']['2012'].has_key('mailing_addresses'), False)
 
     def test_extra_fields(self):
-        response = self._results('/candidate?cand_id=P80003338')
+        response = self._results('/candidate?cand_id=P80003338&fields=mailing_addresses,affiliated_cmtes')
+        self.assertEquals(response[0]['elections']['2008']['affiliated_cmtes'][0]['cmte_id'], 'C00430892')
+        self.assertEquals(response[0]['mailing_addresses'][0]['street_1'], '5450 SOUTH EAST VIEW PARK')
+        self.assertEquals(response[0].has_key('cand_id'), False)
+        self.assertEquals(response[0].has_key('name'), False)
+        ## It also shouldn't show elections
+
+
