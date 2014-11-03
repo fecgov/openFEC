@@ -120,64 +120,65 @@ def format_candids(data, page_data, fields):
 
 
     # Committee information
-    for cmte in cand['affiliated_committees']:
-      year = str(cmte['cand_election_yr'])
-      if not elections.has_key(year):
-        elections[year] = {}
-      prmary_cmte = {}
-      prmary_cmte['cmte_id'] = cmte['cmte_id']
+    if 'primary_cmte' or 'affiliated_committees' in fields:
+      for cmte in cand['affiliated_committees']:
+        year = str(cmte['cand_election_yr'])
+        if not elections.has_key(year):
+          elections[year] = {}
+        prmary_cmte = {}
+        prmary_cmte['cmte_id'] = cmte['cmte_id']
 
-      cmte_decoder = {'P': 'Presidential',
-                      'H': 'House',
-                      'S': 'Senate',
-                      'C': 'Communication Cost',
-                      'D': 'Delegate Committee',
-                      'E': 'Electioneering Communication',
-                      'I': 'Independent Expenditor (Person or Group)',
-                      'N': 'PAC - Nonqualified',
-                      'O': 'Independent Expenditure-Only (Super PACs)',
-                      'Q': 'PAC - Qualified',
-                      'U': 'Single Candidate Independent Expenditure',
-                      'V': 'PAC with Non-Contribution Account - Nonqualified',
-                      'W': 'PAC with Non-Contribution Account - Qualified',
-                      'X': 'Party - Nonqualified',
-                      'Y': 'Party - Qualified',
-                      'Z': 'National Party Nonfederal Account'
-      }
-      designation_decoder = {'A': 'Authorized by a candidate',
-                      'J': 'Joint fundraising committee',
-                      'P': 'Principal campaign committee',
-                      'U': 'Unauthorized',
-                      'B': 'Lobbyist/Registrant PAC',
-                      'D': 'Leadership PAC',
-      }
+        cmte_decoder = {'P': 'Presidential',
+                        'H': 'House',
+                        'S': 'Senate',
+                        'C': 'Communication Cost',
+                        'D': 'Delegate Committee',
+                        'E': 'Electioneering Communication',
+                        'I': 'Independent Expenditor (Person or Group)',
+                        'N': 'PAC - Nonqualified',
+                        'O': 'Independent Expenditure-Only (Super PACs)',
+                        'Q': 'PAC - Qualified',
+                        'U': 'Single Candidate Independent Expenditure',
+                        'V': 'PAC with Non-Contribution Account - Nonqualified',
+                        'W': 'PAC with Non-Contribution Account - Qualified',
+                        'X': 'Party - Nonqualified',
+                        'Y': 'Party - Qualified',
+                        'Z': 'National Party Nonfederal Account'
+        }
+        designation_decoder = {'A': 'Authorized by a candidate',
+                        'J': 'Joint fundraising committee',
+                        'P': 'Principal campaign committee',
+                        'U': 'Unauthorized',
+                        'B': 'Lobbyist/Registrant PAC',
+                        'D': 'Leadership PAC',
+        }
+  # look for primary committee not just house etc.
+        if cmte['cmte_dsgn'] in ['P', 'H', 'S'] and "primary_cmte" in fields:
+          prmary_cmte['designation_code'] = cmte['cmte_dsgn']
+          prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
+          prmary_cmte['type_code'] = cmte['cmte_tp']
+          prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
+          # if they are running as house and president they will have a different candidate id records
+          elections[year]['primary_cmte'] = prmary_cmte
 
-      if cmte['cmte_dsgn'] in ['P', 'H', 'S'] and "primary_cmte" in fields:
-        prmary_cmte['designation_code'] = cmte['cmte_dsgn']
-        prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
-        prmary_cmte['type_code'] = cmte['cmte_tp']
-        prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
-        # if they are running as house and president they will have a different candidate id records
-        elections[year]['primary_cmte'] = prmary_cmte
-
-      elif 'affiliated_cmtes' in fields:
-        # add a decoder here too
-        if not elections[year].has_key('affiliated_cmtes'):
-          elections[year]['affiliated_cmtes'] =[{
-                'cmte_id': cmte['cmte_id'],
-                'type_code': cmte['cmte_tp'],
-                'type': cmte_decoder[cmte['cmte_tp']],
-                'designation_code': cmte['cmte_dsgn'],
-                'designation': designation_decoder[cmte['cmte_dsgn']],
-          }]
-        else:
-          elections[year]['affiliated_cmtes'].append({
-                'cmte_id': cmte['cmte_id'],
-                'type_code': cmte['cmte_tp'],
-                'type': cmte_decoder[cmte['cmte_tp']],
-                'designation_code': cmte['cmte_dsgn'],
-                'designation': designation_decoder[cmte['cmte_dsgn']],
-          })
+        elif 'affiliated_cmtes' in fields:
+          # add a decoder here too
+          if not elections[year].has_key('affiliated_cmtes'):
+            elections[year]['affiliated_cmtes'] =[{
+                  'cmte_id': cmte['cmte_id'],
+                  'type_code': cmte['cmte_tp'],
+                  'type': cmte_decoder[cmte['cmte_tp']],
+                  'designation_code': cmte['cmte_dsgn'],
+                  'designation': designation_decoder[cmte['cmte_dsgn']],
+            }]
+          else:
+            elections[year]['affiliated_cmtes'].append({
+                  'cmte_id': cmte['cmte_id'],
+                  'type_code': cmte['cmte_tp'],
+                  'type': cmte_decoder[cmte['cmte_tp']],
+                  'designation_code': cmte['cmte_dsgn'],
+                  'designation': designation_decoder[cmte['cmte_dsgn']],
+            })
 
     # Office information
     for office in cand['dimcandoffice']:
@@ -248,7 +249,10 @@ def format_candids(data, page_data, fields):
     if len(other_names) > 0 and ('name' in fields):
       cand_data['name']['other_names'] = other_names
 
-    cand_data['elections'] = elections
+    if 'district'in fields or 'party_affiliation'in fields or 'primary_cmte'in fields or 'affiliated_cmtes'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'cand_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
+      print fields
+      cand_data['elections'] = elections
+
     results.append(cand_data)
   return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
 
