@@ -152,8 +152,8 @@ def format_candids(data, page_data, fields):
                         'B': 'Lobbyist/Registrant PAC',
                         'D': 'Leadership PAC',
         }
-  # look for primary committee not just house etc.
-        if cmte['cmte_dsgn'] in ['P', 'H', 'S'] and "primary_cmte" in fields:
+
+        if cmte['cmte_dsgn'] == 'P' and "primary_cmte" in fields:
           prmary_cmte['designation_code'] = cmte['cmte_dsgn']
           prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
           prmary_cmte['type_code'] = cmte['cmte_tp']
