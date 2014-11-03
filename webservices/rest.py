@@ -95,9 +95,9 @@ def format_candids(data, page_data, fields):
   results = []
 
   if 'elections' in fields:
-    fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'related_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+    fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
   elif fields == ['*']:
-    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'related_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
 
   for cand in data:
     #aggregating data for each election across the tables
@@ -118,8 +118,9 @@ def format_candids(data, page_data, fields):
         cand_data['name']['name_1'] = name.split(',')[1].strip()
         cand_data['name']['name_2'] = name.split(',')[0].strip()
 
+
     # Committee information
-    for cmte in cand['related_committees']:
+    for cmte in cand['affiliated_committees']:
       year = str(cmte['cand_election_yr'])
       if not elections.has_key(year):
         elections[year] = {}
@@ -159,10 +160,10 @@ def format_candids(data, page_data, fields):
         # if they are running as house and president they will have a different candidate id records
         elections[year]['primary_cmte'] = prmary_cmte
 
-      elif 'related_cmtes' in fields:
+      elif 'affiliated_cmtes' in fields:
         # add a decoder here too
-        if not elections[year].has_key('related_cmtes'):
-          elections[year]['related_cmtes'] =[{
+        if not elections[year].has_key('affiliated_cmtes'):
+          elections[year]['affiliated_cmtes'] =[{
                 'cmte_id': cmte['cmte_id'],
                 'type_code': cmte['cmte_tp'],
                 'type': cmte_decoder[cmte['cmte_tp']],
@@ -170,7 +171,7 @@ def format_candids(data, page_data, fields):
                 'designation': designation_decoder[cmte['cmte_dsgn']],
           }]
         else:
-          elections[year]['related_cmtes'].append({
+          elections[year]['affiliated_cmtes'].append({
                 'cmte_id': cmte['cmte_id'],
                 'type_code': cmte['cmte_tp'],
                 'type': cmte_decoder[cmte['cmte_tp']],
@@ -272,7 +273,6 @@ class Searchable(restful.Resource):
         elements = []
         page_num = 1
 
-
         for arg in args:
             if args[arg]:
                 if arg == 'q':
@@ -332,7 +332,7 @@ class Candidate(object):
 
     table_name_stem = 'cand'
     htsql_qry = """dimcand{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
-                           /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as related_committees,
+                           /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as affiliated_committees,
                            /dimcandstatusici}
                            """
 
