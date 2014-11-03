@@ -77,6 +77,8 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response[0]['mailing_addresses'][0]['street_1'], '5450 SOUTH EAST VIEW PARK')
         self.assertEquals(response[0].has_key('cand_id'), False)
         self.assertEquals(response[0].has_key('name'), False)
-        ## It also shouldn't show elections
 
+    def test_no_fields(self):
+        response = self._results('/candidate?cand_id=P80003338&fields=wrong')
+        self.assertEquals(response[0], {})
 
