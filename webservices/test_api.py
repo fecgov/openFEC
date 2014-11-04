@@ -54,10 +54,10 @@ class OverallTest(unittest.TestCase):
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
 
-    def test_year_default(self):
-        # finds obama only if 2012 is specified
-        results = self._results('candidate?cand_id=P80003338')
-        self.assertEquals(results, [])
-        results = self._results('candidate?cand_id=P80003338&year=2012')
-        self.assertNotEqual(results, [])
+    # def test_year_default(self):
+    #     # finds obama only if 2012 is specified
+    #     results = self._results('candidate?cand_id=P80003338')
+    #     self.assertEquals(results, [])
+    #     results = self._results('candidate?cand_id=P80003338&year=2012')
+    #     self.assertNotEqual(results, [])
 

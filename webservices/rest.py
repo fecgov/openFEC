@@ -61,8 +61,8 @@ api = restful.Api(app)
 
 # DEFAULTING TO 2012 FOR THE DEMO
 def default_year():
-    year = str(datetime.now().strftime("%Y"))
-    # year = '2012'
+    # year = str(datetime.now().strftime("%Y"))
+    year = '2012'
     return year
 
 def natural_number(n):
