@@ -2,6 +2,7 @@
 ##List of party codes and their meaning
 
 |   Party Code | Party Code Description | Notes |
+|-----|-----|-----|
 |   ACE |   Ace Party   |       |
 |   AKI |   Alaskan Independence Party  |       |
 |   AIC |   American Independent Conservative   |       |

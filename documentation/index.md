@@ -6,6 +6,7 @@ A RESTful web service supporting full-text and field-specific searches on Federa
 
 ## Methods
 | Path | Description |
+|-----|-----|
 | [/candidates](candidates) | Basic information about candidates |
 | [/committees](committees) | Basic information about committees |
 

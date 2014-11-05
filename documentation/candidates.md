@@ -4,6 +4,8 @@
 
 ## Supported parameters for candidate
 
+| Parameter | Description |
+|-----|-----|
 | q=          | Full-text search |
 | /<cand_id>  | Single candidate's record |
 | cand_id=    | Synonym for /<cand_id> |
