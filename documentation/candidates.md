@@ -15,7 +15,7 @@
 | party=      | 3-letter party abbreviation |
 | per_page=   | Number of records per page |
 | year=       | Any year in which candidate ran |
-| fields =    | Comma separated list of fields to display |
+| fields =    | Comma separated list of fields to display or `*` for all |
 
 
 ---
@@ -63,7 +63,7 @@ The candidate's statutory standing in an election.
 `not_yet_candidate` Not yet a statutory candidate.
 `prior_candidate`  Statutory candidate in prior cycle.
 
-#### candidate_inactive
+#### cand_inactive
 
 Whether or not a candidate is active in an election.
 
@@ -138,12 +138,15 @@ The type of the committee. See full list of types and type codes [here](committe
 
 The type of the committee code. See full list of types and type codes [here](committee_type).
 
-
 ### state
+
+The two-letter postal abbreviation for the state
 
 ---
 
 ## Sample output
+
+
 
 
 
