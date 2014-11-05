@@ -1,5 +1,6 @@
 ## Team Processes
 
+* Use PEP8 as the coding standard for Python.
 * Pull requests for all commits, even typos.
 * Don't merge your own pull request. Find a friend to review your code and merge your pull request.
 * Pull requests contain some tests. Ideally they would contain decent test coverage.
