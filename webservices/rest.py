@@ -272,7 +272,6 @@ class Searchable(restful.Resource):
                       WHERE  fulltxt @@ to_tsquery(:findme)
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
-    _whitespace = re.compile('\s+')
     def get(self):
         args = self.parser.parse_args()
         elements = []
@@ -283,7 +282,7 @@ class Searchable(restful.Resource):
                 if arg == 'q':
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
                     qry = sa.sql.text(qry)
-                    findme = self._whitespace.sub(' & ', args['q'])
+                    findme = ' & '.join(args['q'].split())
                     fts_result = conn.execute(qry, findme = findme).fetchall()
                     if not fts_result:
                         return []
