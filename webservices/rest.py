@@ -282,7 +282,8 @@ class Searchable(restful.Resource):
                 if arg == 'q':
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
                     qry = sa.sql.text(qry)
-                    fts_result = conn.execute(qry, findme = args['q']).fetchall()
+                    findme = self._whitespace.sub(' & ', args['q'])
+                    fts_result = conn.execute(qry, findme = findme).fetchall()
                     if not fts_result:
                         return []
                     elements.append("%s_sk={%s}" %
