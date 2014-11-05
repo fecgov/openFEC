@@ -325,7 +325,7 @@ class Searchable(restful.Resource):
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
         if args['fields'] == None:
-          fields = ['cand_id', 'district', 'office_saught', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'candidate_inactive']
+          fields = ['cand_id', 'district', 'office_sought', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'candidate_inactive']
         else:
           fields =  args['fields'].split(',')
 
