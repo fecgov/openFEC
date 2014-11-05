@@ -272,6 +272,7 @@ class Searchable(restful.Resource):
                       WHERE  fulltxt @@ to_tsquery(:findme)
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
+    _whitespace = re.compile('\s+')
     def get(self):
         args = self.parser.parse_args()
         elements = []
