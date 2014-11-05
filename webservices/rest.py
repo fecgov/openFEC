@@ -1,6 +1,9 @@
 """
 A RESTful web service supporting fulltext and field-specific searches on FEC candidate data.
 
+SEE DOCUMENTATION FOLDER
+(We can leave this here for now but this is all covered in the documentaion and changes should be reflected there)
+
 Supported parameters across all objects::
 
     q=         (fulltext search)
