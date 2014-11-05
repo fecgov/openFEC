@@ -2,7 +2,7 @@
 
 * Pull requests for all commits, even typos.
 * Don't merge your own pull request. Find a friend to review your code and merge your pull request.
-* Pull requests some contain some tests. Ideally they would contain decent test coverage.
+* Pull requests contain some tests. Ideally they would contain decent test coverage.
 
 When creating a task through the issue tracker, please include the following where applicable: 
 
