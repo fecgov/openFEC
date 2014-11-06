@@ -18,12 +18,12 @@ class OverallTest(unittest.TestCase):
 
     def test_header_info(self):
         response = self._response('/candidate')
-        self.assertIn('api_version', response[0])
-        self.assertIn('pagination', response[1])
+        self.assertIn('api_version', response)
+        self.assertIn('pagination', response)
 
     def _results(self, qry):
         response = self._response(qry)
-        return response[2]['results']
+        return response['results']
 
     def test_full_text_search(self):
         results = self._results('/candidate?q=stapleton&fields=*')
@@ -57,28 +57,28 @@ class OverallTest(unittest.TestCase):
 
     def test_fields(self):
         # testing key defaults
-        response = self._results('/candidate?cand_id=P80003338')
-        self.assertEquals(response[0]['cand_id'], 'P80003338')
+        response = self._results('/candidate?candidate_id=P80003338')
+        self.assertEquals(response[0]['candidate_id'], 'P80003338')
         self.assertEquals(response[0]['name']['full_name'], 'OBAMA, BARACK')
         self.assertEquals(response[0]['elections']['2008']['party_affiliation'], "Democratic Party")
-        self.assertEquals(response[0]['elections']['2008']['primary_cmte']['cmte_id'], 'C00431445')
-        self.assertEquals(response[0]['elections']['2008']['primary_cmte']['designation'], "Principal campaign committee")
+        self.assertEquals(response[0]['elections']['2008']['primary_committee']['committee_id'], 'C00431445')
+        self.assertEquals(response[0]['elections']['2008']['primary_committee']['designation'], "Principal campaign committee")
         self.assertEquals(response[0]['elections']['2008']['state'], "US")
         self.assertEquals(response[0]['elections']['2008']['incumbent_challenge'], 'open_seat')
         self.assertEquals(response[0]['elections']['2012']['district'], None)
         self.assertEquals(response[0]['elections']['2012']['incumbent_challenge'], 'incumbent')
-        self.assertEquals(response[0]['elections']['2012']['primary_cmte']['designation'], 'Principal campaign committee')
-        self.assertEquals(response[0]['elections']['2012'].has_key('affiliated_cmtes'), False)
+        self.assertEquals(response[0]['elections']['2012']['primary_committee']['designation'], 'Principal campaign committee')
+        self.assertEquals(response[0]['elections']['2012'].has_key('affiliated_committees'), False)
         self.assertEquals(response[0]['elections']['2012'].has_key('mailing_addresses'), False)
 
     def test_extra_fields(self):
-        response = self._results('/candidate?cand_id=P80003338&fields=mailing_addresses,affiliated_cmtes')
-        self.assertEquals(response[0]['elections']['2008']['affiliated_cmtes'][0]['cmte_id'], 'C00430892')
+        response = self._results('/candidate?candidate_id=P80003338&fields=mailing_addresses,affiliated_committees')
+        self.assertEquals(response[0]['elections']['2008']['affiliated_committees'][0]['committee_id'], 'C00430892')
         self.assertEquals(response[0]['mailing_addresses'][0]['street_1'], '5450 SOUTH EAST VIEW PARK')
-        self.assertEquals(response[0].has_key('cand_id'), False)
+        self.assertEquals(response[0].has_key('candidate_id'), False)
         self.assertEquals(response[0].has_key('name'), False)
 
     def test_no_fields(self):
-        response = self._results('/candidate?cand_id=P80003338&fields=wrong')
+        response = self._results('/candidate?candidate_id=P80003338&fields=wrong')
         self.assertEquals(response[0], {})
 

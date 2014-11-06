@@ -7,9 +7,9 @@ Supported parameters across all objects::
 
 Supported for /candidate ::
 
-    /<cand_id>   Single candidate's record
-    cand_id=     Synonym for /<cand_id>
-    fec_id=      Synonym for /<cand_id>
+    /<candidate_id>   Single candidate's record
+    candidate_id=     Synonym for /<candidate_id>
+    fec_id=      Synonym for /<candidate_id>
     office=      (governmental office run for)
     state=       (two-letter code)
     district=    two-digit number
@@ -22,9 +22,9 @@ Supported for /candidate ::
 
 Supported for /committee ::
 
-    /<cmte_id>   Single candidate's record
-    cmte_id=     Synonym for /<cmte_id>
-    fec_id=      Synonym for /<cmte_id>
+    /<committee_id>   Single candidate's record
+    committee_id=     Synonym for /<committee_id>
+    fec_id=      Synonym for /<committee_id>
     name=        (committee's name)
     state=       (two-letter code)
     candidate=   (associated candidate's name)
@@ -95,9 +95,9 @@ def format_candids(data, page_data, fields):
   results = []
 
   if 'elections' in fields:
-    fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+    fields = fields + ['district', 'party_affiliation', 'party_code', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought']
   elif fields == ['*']:
-    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+    fields = ['name', 'candidate_id', 'mailing_addresses', 'district', 'party_affiliation', 'party_code', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought']
 
   for cand in data:
     #aggregating data for each election across the tables
@@ -105,8 +105,8 @@ def format_candids(data, page_data, fields):
     cand_data = {}
     if 'name' in fields or 'full_name' in fields or 'other_names' in fields:
       cand_data = {'name':{}}
-    if 'cand_id' in fields:
-      cand_data['cand_id'] = cand['cand_id']
+    if 'candidate_id' in fields:
+      cand_data['candidate_id'] = cand['cand_id']
 
     #It will be convenient for search to pick up as many nicknames as we can.
     # Using most recent name as full name
@@ -120,13 +120,13 @@ def format_candids(data, page_data, fields):
 
 
     # Committee information
-    if 'primary_cmte' or 'affiliated_committees' in fields:
+    if 'primary_committee' or 'affiliated_committees' in fields:
       for cmte in cand['affiliated_committees']:
         year = str(cmte['cand_election_yr'])
         if not elections.has_key(year):
           elections[year] = {}
         prmary_cmte = {}
-        prmary_cmte['cmte_id'] = cmte['cmte_id']
+        prmary_cmte['committee_id'] = cmte['cmte_id']
 
         cmte_decoder = {'P': 'Presidential',
                         'H': 'House',
@@ -153,27 +153,27 @@ def format_candids(data, page_data, fields):
                         'D': 'Leadership PAC',
         }
 
-        if cmte['cmte_dsgn'] == 'P' and "primary_cmte" in fields:
+        if cmte['cmte_dsgn'] == 'P' and "primary_committee" in fields:
           prmary_cmte['designation_code'] = cmte['cmte_dsgn']
           prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
           prmary_cmte['type_code'] = cmte['cmte_tp']
           prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
           # if they are running as house and president they will have a different candidate id records
-          elections[year]['primary_cmte'] = prmary_cmte
+          elections[year]['primary_committee'] = prmary_cmte
 
-        elif 'affiliated_cmtes' in fields:
+        elif 'affiliated_committees' in fields:
           # add a decoder here too
-          if not elections[year].has_key('affiliated_cmtes'):
-            elections[year]['affiliated_cmtes'] =[{
-                  'cmte_id': cmte['cmte_id'],
+          if not elections[year].has_key('affiliated_committees'):
+            elections[year]['affiliated_committees'] =[{
+                  'committee_id': cmte['cmte_id'],
                   'type_code': cmte['cmte_tp'],
                   'type': cmte_decoder[cmte['cmte_tp']],
                   'designation_code': cmte['cmte_dsgn'],
                   'designation': designation_decoder[cmte['cmte_dsgn']],
             }]
           else:
-            elections[year]['affiliated_cmtes'].append({
-                  'cmte_id': cmte['cmte_id'],
+            elections[year]['affiliated_committees'].append({
+                  'committee_id': cmte['cmte_id'],
                   'type_code': cmte['cmte_tp'],
                   'type': cmte_decoder[cmte['cmte_tp']],
                   'designation_code': cmte['cmte_dsgn'],
@@ -194,6 +194,8 @@ def format_candids(data, page_data, fields):
         elections[year]['state'] = office['dimoffice']['office_state']
       if 'party_affiliation'in fields:
         elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
+      if 'party_code' in fields:
+        elections[year]['party_code'] = office['dimparty']['party_affiliation']
 
     # status information
 
@@ -207,7 +209,7 @@ def format_candids(data, page_data, fields):
           elections[year] = {}
           elections[year]['candidate_inactive'] = status['cand_inactive_flg']
 
-      if 'cand_status' in fields:
+      if 'candidate_status' in fields:
         status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
         if status['cand_status'] != None:
           elections[year]['candidate_status'] = status_decoder[status['cand_status']]
@@ -249,13 +251,12 @@ def format_candids(data, page_data, fields):
     if len(other_names) > 0 and ('name' in fields):
       cand_data['name']['other_names'] = other_names
 
-    if 'district'in fields or 'party_affiliation'in fields or 'primary_cmte'in fields or 'affiliated_cmtes'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'cand_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
+    if 'district'in fields or 'party_affiliation'in fields or 'party_code' in fields or 'primary_committee'in fields or 'affiliated_committees'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'candidate_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
       print fields
       cand_data['elections'] = elections
 
     results.append(cand_data)
   return {'api_version':'0.2', 'pagination':page_data, 'results': results}
-
 
 
 class SingleResource(restful.Resource):
@@ -325,11 +326,14 @@ class Searchable(restful.Resource):
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
         if args['fields'] == None:
-          fields = ['cand_id', 'district', 'office_saught', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'candidate_inactive']
+          fields = ['candidate_id', 'district', 'office_saught', 'party_affiliation', 'party_code', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive']
         else:
           fields =  args['fields'].split(',')
 
-        return format_candids(data_dict, page_data, fields)
+        if "Candidate" in self.__class__.__name__:
+          return format_candids(data_dict, page_data, fields)
+        else:
+          return data_dict
 
 
 class Candidate(object):
@@ -348,7 +352,7 @@ class CandidateSearch(Searchable, Candidate):
 
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
-    parser.add_argument('cand_id', type=str, help="Candidate's FEC ID")
+    parser.add_argument('candidate_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('page', type=natural_number, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=natural_number, default=20, help='The number of results returned per page. Defaults to 20.')
@@ -362,7 +366,7 @@ class CandidateSearch(Searchable, Candidate):
     # note: each argument is applied separately, so if you ran as REP in 1996 and IND in 1998,
     # you *will* show up under /candidate?year=1998&party=REP
 
-    field_name_map = {"cand_id": string.Template("cand_id='$arg'"),
+    field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
                       "fec_id": string.Template("cand_id='$arg'"),
                       "office":
                       string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
@@ -408,6 +412,8 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
+    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+
 
 
 class Help(restful.Resource):
