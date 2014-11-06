@@ -61,6 +61,7 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response[0]['candidate_id'], 'P80003338')
         self.assertEquals(response[0]['name']['full_name'], 'OBAMA, BARACK')
         self.assertEquals(response[0]['elections']['2008']['party_affiliation'], "Democratic Party")
+        self.assertEquals(response[0]['elections']['2008']['party_code'], "DEM")
         self.assertEquals(response[0]['elections']['2008']['primary_committee']['committee_id'], 'C00431445')
         self.assertEquals(response[0]['elections']['2008']['primary_committee']['designation'], "Principal campaign committee")
         self.assertEquals(response[0]['elections']['2008']['state'], "US")
