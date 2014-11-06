@@ -254,7 +254,7 @@ def format_candids(data, page_data, fields):
       cand_data['elections'] = elections
 
     results.append(cand_data)
-  return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
+  return {'api_version':'0.2', 'pagination':page_data, 'results': results}
 
 
 
