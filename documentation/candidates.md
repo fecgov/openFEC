@@ -7,8 +7,8 @@
 | Parameter | Description |
 |-----|-----|
 | q=          | Full-text search |
-| /<cand_id>  | Single candidate's record |
-| cand_id=    | Synonym for /<cand_id> |
+| /<candidate_id>  | Single candidate's record |
+| candidate_id=    | Synonym for /<candidate_id> |
 | office=     | Governmental office sought |
 | state=      | Two-letter state abbreviation |
 | district=   | Two-digit number(00 - if no district or at large) |
@@ -24,11 +24,11 @@
 
 ## Supported fields for candidate
 
-### cand_id
+### candidate_id
 
-Unique id given to a candidate running for an office. Note that a candidate that runs for different offices such as Senate and President, that individual will have multiple `cand_id`s. Candidates with multiple elections in the same chamber do not change `cand_id`s.
+Unique id given to a candidate running for an office. Note that a candidate that runs for different offices such as Senate and President, that individual will have multiple `candidate_id`s. Candidates with multiple elections in the same chamber do not change `candidate_id`s.
 
-`cand_id`s beginning with an 'H' are for House candidates, ids beginning with a 'S' are Senate candidates and ids beginning with 'P' are presidential candidates.
+`candidate_id`s beginning with an 'H' are for House candidates, ids beginning with a 'S' are Senate candidates and ids beginning with 'P' are presidential candidates.
 
 ### name
 
@@ -56,7 +56,7 @@ A hash of information specific to each election with the election cycle year as 
 
 `elections` has the following children:
 
-#### cand_status / candidate_status
+#### candidate_status
 
 The candidate's statutory standing in an election.
 
@@ -65,7 +65,7 @@ The candidate's statutory standing in an election.
 `not_yet_candidate` Not yet a statutory candidate.
 `prior_candidate`  Statutory candidate in prior cycle.
 
-#### cand_inactive
+#### candidate_inactive
 
 Whether or not a candidate is active in an election.
 
@@ -86,15 +86,22 @@ The office the candidate is seeking, either `President`, `Senate` or `House`.
 
 #### party_affiliation
 
-The Candidate's political party. See full list of political party and party codes [here](party_codes)
+The candidate's political party. See full list of political party and party codes [here](party_codes).
 
-#### primary_cmte
+#### party_code
+
+The three-letter code for the political party of the candidate. See full list of political party and party codes [here](party_codes).
+
+#### party_code
+
+
+#### primary_committee
 
 The primary committee for the candidate. See full list of political party and party codes [here](party_codes)
 
-`primary_cmte` has the following children:
+`primary_committee` has the following children:
 
-##### cmte_id
+##### committee_id
 
 Unique id of the committee.
 
@@ -114,13 +121,13 @@ The type of the committee. See full list of types and type codes [here](committe
 
 The type of the committee code. See full list of types and type codes [here](committee_type).
 
-#### affiliated_cmtes
+#### affiliated_committees
 
 A committee affiliated with the candidate. For example, an unauthorized single-candidate PAC.
 
 Each of the affiliated committee has the following children:
 
-##### cmte_id
+##### committee_id
 
 Unique id of the committee.
 
