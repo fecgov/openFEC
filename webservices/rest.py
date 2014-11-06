@@ -257,6 +257,19 @@ def format_candids(data, page_data, fields):
   return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
 
 
+def format_committees(data, page, fields):
+  results = []
+  for cmte in data:
+    committe = {}
+    committe['committee_id'] = cmte['cmte_id']
+    committe['expire_date'] = cmte['expire_date']
+    committe['form_type'] = cmte['form_tp']
+
+    results.append(committe)
+
+
+  return {'api_version':"0.2", 'pagination':page, 'results': results}
+
 
 class SingleResource(restful.Resource):
 
@@ -304,23 +317,25 @@ class Searchable(restful.Resource):
 
         if elements:
             qry += "?" + "&".join(elements)
-            count_qry = "/count(dimcand?%s)" % ("&".join(elements))
+            count_qry = self.count + "?%s)" % ("&".join(elements))
         else:
-            count_qry = "/count(dimcand?exists(dimcandoffice))"
+            count_qry = self.count + ")"
 
         offset = per_page * (page_num-1)
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
 
         print("\n%s\n" % (qry))
         data = htsql_conn.produce(qry)
+
         count = htsql_conn.produce(count_qry)
+        print count
 
         data_dict = as_dicts(data)
         data_count = int(count[0])
-        pages = data_count/20
-        if data_count % 20 != 0:
+        pages = data_count/per_page
+        if data_count % per_page != 0:
           pages += 1
-        if data_count < 20:
+        if data_count < per_page:
           per_page = data_count
 
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
@@ -330,7 +345,13 @@ class Searchable(restful.Resource):
         else:
           fields =  args['fields'].split(',')
 
-        return format_candids(data_dict, page_data, fields)
+### do this better
+        if 'Candidate' in self.__class__.__name__:
+          return format_candids(data_dict, page_data, fields)
+        elif 'Committee' in self.__class__.__name__:
+          return format_committees(data_dict, page_data, fields)
+        else:
+          return data_dict
 
 
 class Candidate(object):
@@ -340,6 +361,8 @@ class Candidate(object):
                            /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as affiliated_committees,
                            /dimcandstatusici}
                            """
+    count = "/count(dimcand"
+
 
 class CandidateResource(SingleResource, Candidate):
 
@@ -379,7 +402,8 @@ class CandidateSearch(Searchable, Candidate):
 class Committee(object):
 
     table_name_stem = 'cmte'
-    htsql_qry = 'dimcmte{*,/dimcmteproperties}'
+    htsql_qry = 'dimcmte{*,/dimcmteproperties,/dimlinkages}'
+    count = '/count(dimcmte'
 
 
 class CommitteeResource(SingleResource, Committee):
@@ -389,7 +413,7 @@ class CommitteeResource(SingleResource, Committee):
 
 class CommitteeSearch(Searchable, Committee):
 
-    field_name_map = {"cmte_id": string.Template("cmte_id='$arg'"),
+    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                       "fec_id": string.Template("cmte_id='$arg'"),
                       "candidate":
                       string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
@@ -402,13 +426,14 @@ class CommitteeSearch(Searchable, Committee):
                       }
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
-    parser.add_argument('cmte_id', type=str, help="Committee's FEC ID")
+    parser.add_argument('committee_id', type=str, help="Committee's FEC ID")
     parser.add_argument('fec_id', type=str, help="Committee's FEC ID")
     parser.add_argument('state', type=str, help='U. S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
     parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
+    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
 
 class Help(restful.Resource):
