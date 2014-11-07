@@ -260,16 +260,28 @@ def format_candids(data, page_data, fields):
 def format_committees(data, page, fields):
   results = []
   for cmte in data:
-    committe = {}
-    committe['committee_id'] = cmte['cmte_id']
-    committe['expire_date'] = cmte['expire_date']
-    committe['form_type'] = cmte['form_tp']
+    committee = {}
+    committee['committee_id'] = cmte['cmte_id']
+    committee['expire_date'] = cmte['expire_date']
+    committee['form_type'] = cmte['form_tp']
+    for item in cmte['dimcmteproperties']:
+      address = {}
+      address['street_1'] = item['cmte_st1']
+      address['street_2'] = item['cmte_st2']
+      address['city'] = item['cmte_city']
+      address['state'] = item['cmte_st']
+      address['zip'] = item['cmte_zip']
+      address['state_long'] = item['cmte_st_desc'].strip()
+      committee['address'] = address
 
-    results.append(committe)
+
+    org_decoder = {'C': 'Corporation', 'L': 'Labor Organization', 'M': 'Membership Organization', 'T': 'Trade Association', 'V': 'Cooperative', 'W': 'Corporation Without Capital Stock'}
+
+    results.append(committee)
 
 
   return {'api_version':"0.2", 'pagination':page, 'results': results}
-
+  return data
 
 class SingleResource(restful.Resource):
 
