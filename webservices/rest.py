@@ -49,8 +49,8 @@ flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
 sqla_conn_string = os.getenv('SQLA_CONN')
 if not sqla_conn_string:
-    raise EnvironmentError('Environment variable SQLA_CONN is empty.  '
-                           'Have you run a version of set_env_vars.sh with actual values added?')
+    print("Environment variable SQLA_CONN is empty; running against local `cfdm_test`")
+    sqla_conn_string = 'postgresql://:@/cfdm_test'
 engine = sa.create_engine(sqla_conn_string)
 conn = engine.connect()
 
