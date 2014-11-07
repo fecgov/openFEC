@@ -1,6 +1,9 @@
 """
 A RESTful web service supporting fulltext and field-specific searches on FEC candidate data.
 
+SEE DOCUMENTATION FOLDER
+(We can leave this here for now but this is all covered in the documentaion and changes should be reflected there)
+
 Supported parameters across all objects::
 
     q=         (fulltext search)
@@ -95,9 +98,9 @@ def format_candids(data, page_data, fields):
   results = []
 
   if 'elections' in fields:
-    fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+    fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought']
   elif fields == ['*']:
-    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'candidate_inactive', 'office_sought']
+    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought']
 
   for cand in data:
     #aggregating data for each election across the tables
@@ -200,19 +203,19 @@ def format_candids(data, page_data, fields):
     for status in cand['dimcandstatusici']:
       year = str(status['election_yr'])
 
-      if 'candidate_inactive' in fields:
+      if 'cand_inactive' in fields:
         if elections.has_key(year):
-          elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+          elections[year]['cand_inactive'] = status['cand_inactive_flg']
         else:
           elections[year] = {}
-          elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+          elections[year]['cand_inactive'] = status['cand_inactive_flg']
 
       if 'cand_status' in fields:
         status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
         if status['cand_status'] != None:
-          elections[year]['candidate_status'] = status_decoder[status['cand_status']]
+          elections[year]['cand_status'] = status_decoder[status['cand_status']]
         else:
-          elections[year]['candidate_status'] = None
+          elections[year]['cand_status'] = None
 
       if 'incumbent_challenge' in fields:
         ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
@@ -249,7 +252,7 @@ def format_candids(data, page_data, fields):
     if len(other_names) > 0 and ('name' in fields):
       cand_data['name']['other_names'] = other_names
 
-    if 'district'in fields or 'party_affiliation'in fields or 'primary_cmte'in fields or 'affiliated_cmtes'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'cand_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
+    if 'district'in fields or 'party_affiliation'in fields or 'primary_cmte'in fields or 'affiliated_cmtes'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'cand_status'in fields or 'cand_inactive'in fields or 'office_sought' in fields:
       print fields
       cand_data['elections'] = elections
 
@@ -326,7 +329,7 @@ class Searchable(restful.Resource):
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
         if args['fields'] == None:
-          fields = ['cand_id', 'district', 'office_saught', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'candidate_inactive']
+          fields = ['cand_id', 'district', 'office_sought', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'cand_inactive']
         else:
           fields =  args['fields'].split(',')
 
