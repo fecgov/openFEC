@@ -304,9 +304,10 @@ class Searchable(restful.Resource):
 
         if elements:
             qry += "?" + "&".join(elements)
-            count_qry = "/count(dimcand?%s)" % ("&".join(elements))
+            count_qry = "/count(%s?%s)" % (self.viewable_table_name, 
+                                           "&".join(elements))
         else:
-            count_qry = "/count(dimcand?exists(dimcandoffice))"
+            count_qry = "/count(%s)" % self.viewable_table_name
 
         offset = per_page * (page_num-1)
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
@@ -336,10 +337,10 @@ class Searchable(restful.Resource):
 class Candidate(object):
 
     table_name_stem = 'cand'
-    htsql_qry = """dimcand{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
-                           /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as affiliated_committees,
-                           /dimcandstatusici}
-                           """
+    viewable_table_name = "(dimcand?exists(dimcandproperties)&exists(dimcandoffice))" 
+    htsql_qry = """%s{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
+                      /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as affiliated_committees,
+                      /dimcandstatusici} """ % viewable_table_name
 
 class CandidateResource(SingleResource, Candidate):
 
@@ -379,7 +380,8 @@ class CandidateSearch(Searchable, Candidate):
 class Committee(object):
 
     table_name_stem = 'cmte'
-    htsql_qry = 'dimcmte{*,/dimcmteproperties}'
+    viewable_table_name = "(dimcmte?exists(dimcmteproperties))" 
+    htsql_qry = '(%s{*,/dimcmteproperties})' % viewable_table_name
 
 
 class CommitteeResource(SingleResource, Committee):
