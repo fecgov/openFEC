@@ -1,10 +1,11 @@
 language: python
 python:
-    - "2.7"
-install: python webservices/setup.py develop
+  - "2.7"
+addons:
+  postgresql: "9.3"
 env: SQLA_CONN="postgresql://:@/cfdm_test"
-before_script: 
-    - createdb cfdm_test
-    - psql -f data/cfdm_test.pgdump.sql
-# script: python openfec/entities/pipeline.py CleanData --local-scheduler
+before_script:
+  - psql -c 'create database cfdm_test;' -U postgres 
+  - psql -f data/cfdm_test.pgdump.sql -U postgres
+  - pip install -r webservices/requirements.txt
 script: nosetests
