@@ -26,11 +26,11 @@ class OverallTest(unittest.TestCase):
         return response[2]['results']
 
     def test_full_text_search(self):
-        results = self._results('/candidate?q=turner&fields=*')
+        results = self._results('/candidate?q=james&fields=*')
         for r in results:
             txt = json.dumps(r).lower()
             print "\n\n", txt, "\n\n"
-            self.assertIn('turner', txt)
+            self.assertIn('james', txt)
             
     def test_full_text_search_with_whitespace(self):
         results = self._results('/candidate?q=barack obama&fields=*')
