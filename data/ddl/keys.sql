@@ -143,4 +143,16 @@ ALTER TABLE public.sched_a ADD FOREIGN KEY (cmte_id) REFERENCES public.dimcmte (
 ALTER TABLE public.sched_b ADD FOREIGN KEY (cmte_id) REFERENCES public.dimcmte (cmte_id);
 ALTER TABLE public.sched_a ADD FOREIGN KEY (conduit_cmte_id) REFERENCES public.dimcmte (cmte_id);
 
+CREATE INDEX ON public.sched_a(conduit_cmte_id);
+CREATE INDEX ON public.sched_h4(conduit_cmte_id);
+CREATE INDEX ON public.factpacsandparties_f3x(cmte_sk);
+CREATE INDEX ON public.factpacsandparties_f3x(electiontp_sk);
+CREATE INDEX ON public.factpacsandparties_f3x(reporttype_sk);
+CREATE INDEX ON public.facthousesenate_f3(cmte_sk);
+CREATE INDEX ON public.facthousesenate_f3(electiontp_sk);
+CREATE INDEX ON public.sched_d(conduit_cmte_id);
+CREATE INDEX ON public.dimcmteproperties(cmte_sk);
+CREATE INDEX ON public.sched_h3(filer_cmte_id);
+CREATE INDEX ON public.dimcandoffice(office_sk);
+CREATE INDEX ON public.dimcandoffice(party_sk);
 
