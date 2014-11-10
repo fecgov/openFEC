@@ -116,7 +116,7 @@ def format_candids(data, page_data, fields):
   if 'elections' in fields:
     fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought']
   elif fields == ['*']:
-    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought']
+    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought', 'other_names']
 
   for cand in data:
       #aggregating data for each election across the tables
