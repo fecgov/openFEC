@@ -245,21 +245,22 @@ def format_candids(data, page_data, fields):
 
       if 'name' or 'mailing_address' in fields:
         for prop in cand['dimcandproperties']:
-          mailing_address = {}
-          mailing_address['street_1'] = cleantext(prop['cand_st1'])
-          mailing_address['street_2'] = cleantext(prop['cand_st2'])
-          mailing_address['city'] = cleantext(prop['cand_city'])
-          mailing_address['state'] = cleantext(prop['cand_st'])
-          mailing_address['zip'] = cleantext(prop['cand_zip'])
-          if prop['expire_date'] != None:
-            mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
-          if mailing_address not in addresses:
-            addresses.append(mailing_address)
 
-          if 'name' in fields or 'other_names' in fields:
-            # other_names will help improve search based on nick names
-            name = cleantext(prop['cand_nm'])
-            if (cand_data['name']['full_name'] != name) and (name not in other_names):
+            mailing_address = {}
+            mailing_address['street_1'] = cleantext(prop['cand_st1'])
+            mailing_address['street_2'] = cleantext(prop['cand_st2'])
+            mailing_address['city'] = cleantext(prop['cand_city'])
+            mailing_address['state'] = cleantext(prop['cand_st'])
+            mailing_address['zip'] = cleantext(prop['cand_zip'])
+            if prop['expire_date'] != None:
+                mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
+            if mailing_address not in addresses:
+                addresses.append(mailing_address)
+
+            if 'name' in fields or 'other_names' in fields:
+                # other_names will help improve search based on nick names
+                name = cleantext(prop['cand_nm'])
+            if (other_names in fields) and (cand_data['name']['full_name'] != name) and (name not in other_names):
               other_names.append(name)
 
       if "mailing_addresses" in fields:
@@ -279,12 +280,14 @@ def format_candids(data, page_data, fields):
 def format_committees(data, page, fields):
     results = []
     for cmte in data:
-        committee = {}
-        committee['committee_id'] = cmte['cmte_id']
-        committee['expire_date'] = cmte['expire_date']
-        committee['form_type'] = cmte['form_tp']
+        committee = []
+
         for item in cmte['dimcmteproperties']:
-            name = item['cmte_nm']
+            record = {}
+            record['name'] = item['cmte_nm']
+            record['committee_id'] = cmte['cmte_id']
+            record['expire_date'] = cmte['expire_date']
+            record['form_type'] = item['form_tp']
 
             address = {}
             address['street_1'] = item['cmte_st1']
@@ -293,15 +296,74 @@ def format_committees(data, page, fields):
             address['state'] = item['cmte_st']
             address['zip'] = item['cmte_zip']
             address['state_long'] = item['cmte_st_desc'].strip()
-            committee['address'] = address
+            record['address'] = address
+            record['email'] = item['cmte_email']
+            record['web_address'] = item['cmte_web_url']
+
+            # 'lobbyist_registrant_pac_flg' = "lobbyist_registrant_pac_flg"
+            # 'type_code' "org_tp"
+            # 'type' "org_tp_desc"
+            # 'original_registration_date' "orig_registration_dt"
+            # "party_cmte_type"
+            # "party_cmte_type_desc"
+            # "qual_dt"
+
+            custodian_mappings = [
+                ('cmte_custodian_city', 'city'),
+                ('cmte_custodian_f_nm', 'name_1'),
+                ('cmte_custodian_l_nm', 'name_2'),
+                ('cmte_custodian_m_nm', 'name_middle'),
+                ('cmte_custodian_nm', 'name_full'),
+                ('cmte_custodian_ph_num', 'phone'),
+                ('cmte_custodian_prefix', 'name_prefix'),
+                ('cmte_custodian_st', 'state'),
+                ('cmte_custodian_st1', 'street_1'),
+                ('cmte_custodian_st2', 'street_2'),
+                ('cmte_custodian_suffix', 'name_suffix'),
+                ('cmte_custodian_title', 'name_title'),
+                ('cmte_custodian_zip', 'zip'),
+            ]
+
+            custodian = {}
+            for f,v in custodian_mappings:
+                    if item[f] is not None:
+                            custodian[v] = item[f]
+            if len(custodian) > 0:
+                record['custodian'] = custodian
+
+            treasurer_mappings=[
+                ('cmte_treasurer_city', 'city'),
+                ('cmte_treasurer_f_nm', 'name_1'),
+                ('cmte_treasurer_l_nm', 'name_2'),
+                ('cmte_treasurer_m_nm', 'name_middle'),
+                ('cmte_treasurer_nm', 'name_full'),
+                ('cmte_treasurer_ph_num', 'phone'),
+                ('cmte_treasurer_prefix', 'name_prefix'),
+                ('cmte_treasurer_st', 'state'),
+                ('cmte_treasurer_st1', 'street_1'),
+                ('cmte_treasurer_st2', 'street_2'),
+                ('cmte_treasurer_suffix', 'name_suffix'),
+                ('cmte_treasurer_title', 'name_title'),
+                ('cmte_treasurer_zip', 'zip'),
+            ]
+
+            treasurer = {}
+            for f,v in treasurer_mappings:
+                    if item[f] is not None:
+                            treasurer[v] = item[f]
+            if len(treasurer) > 0:
+                record['treasurer'] = treasurer
 
 
-        org_decoder = {'C': 'Corporation', 'L': 'Labor Organization', 'M': 'Membership Organization', 'T': 'Trade Association', 'V': 'Cooperative', 'W': 'Corporation Without Capital Stock'}
+            # candidates
+
+            committee.append(record)
+
 
         results.append(committee)
 
-    #return {'api_version':"0.2", 'pagination':page, 'results': results}
-    return data
+    return {'api_version':"0.2", 'pagination':page, 'results': results}
+    # return data
 
 class SingleResource(restful.Resource):
 

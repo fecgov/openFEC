@@ -106,3 +106,8 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response[0]['elections']['2012']['primary_cmte'].has_key('designation_code'), True)
         self.assertEquals(response[0]['elections']['2012']['primary_cmte'].has_key('type'), True)
         self.assertEquals(response[0]['elections']['2012']['primary_cmte'].has_key('type_code'), True)
+
+    def test_committee_basics(self):
+        response = self._response('/committee')
+        results = response['results']
+        self.assertEquals(results[0][0].has_key('committee_id'), True)
