@@ -26,11 +26,11 @@ class OverallTest(unittest.TestCase):
         return response[2]['results']
 
     def test_full_text_search(self):
-        results = self._results('/candidate?q=stapleton&fields=*')
+        results = self._results('/candidate?q=james&fields=*')
         for r in results:
             txt = json.dumps(r).lower()
             print "\n\n", txt, "\n\n"
-            self.assertIn('stapleton', txt)
+            self.assertIn('james', txt)
             
     def test_full_text_search_with_whitespace(self):
         results = self._results('/candidate?q=barack obama&fields=*')
@@ -83,7 +83,7 @@ class OverallTest(unittest.TestCase):
 
     def test_extra_fields(self):
         response = self._results('/candidate?cand_id=P80003338&fields=mailing_addresses,affiliated_cmtes')
-        self.assertEquals(response[0]['elections']['2008']['affiliated_cmtes'][0]['cmte_id'], 'C00430892')
+        self.assertIn('C00431486', [c['cmte_id'] for c in response[0]['elections']['2008']['affiliated_cmtes']])
         self.assertEquals(response[0]['mailing_addresses'][0]['street_1'], '5450 SOUTH EAST VIEW PARK')
         self.assertEquals(response[0].has_key('cand_id'), False)
         self.assertEquals(response[0].has_key('name'), False)
