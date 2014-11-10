@@ -30,13 +30,8 @@ class OverallTest(unittest.TestCase):
         for r in results:
             txt = json.dumps(r).lower()
             print "\n\n", txt, "\n\n"
-<<<<<<< HEAD
-            self.assertIn('stapleton', txt)
-
-=======
             self.assertIn('james', txt)
-            
->>>>>>> master
+
     def test_full_text_search_with_whitespace(self):
         results = self._results('/candidate?q=barack obama&fields=*')
         for r in results:
