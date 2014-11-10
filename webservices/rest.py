@@ -2,7 +2,7 @@
 A RESTful web service supporting fulltext and field-specific searches on FEC candidate data.
 
 SEE DOCUMENTATION FOLDER
-(We can leave this here for now but this is all covered in the documentaion and changes should be reflected there)
+(We can leave this here for now but this is all covered in the documentation and changes should be reflected there)
 
 Supported parameters across all objects::
 
@@ -68,6 +68,21 @@ def natural_number(n):
     if result < 1:
         raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
     return result
+
+
+def assign_formatting(self, data_dict, page_data):
+    args = self.parser.parse_args()
+    if args['fields'] == None:
+        fields = ['cand_id', 'district', 'office_sought', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'cand_inactive']
+    else:
+        fields =  args['fields'].split(',')
+
+    if self.table_name_stem == 'cand':
+        return format_candids(data_dict, page_data, fields)
+    elif self.table_name_stem == 'cmte':
+        return format_committees(data_dict, page_data, fields)
+    else:
+        return data_dict
 
 def as_dicts(data):
     """
@@ -284,14 +299,18 @@ def format_committees(data, page, fields):
 
 
   return {'api_version':"0.2", 'pagination':page, 'results': results}
-  return data
+  #return data
 
 class SingleResource(restful.Resource):
 
     def get(self, id):
         qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
         data = htsql_conn.produce(qry) or [None, ]
-        return as_dicts(data)[0]
+        data_dict = as_dicts(data)
+        page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
+        args = self.parser.parse_args()
+        results = assign_formatting(self, data_dict, page_data)
+        return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
 class Searchable(restful.Resource):
@@ -356,18 +375,7 @@ class Searchable(restful.Resource):
 
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
-        if args['fields'] == None:
-          fields = ['cand_id', 'district', 'office_sought', 'party_affiliation', 'primary_cmte', 'state', 'name', 'incumbent_challenge', 'cand_status', 'cand_inactive']
-        else:
-          fields =  args['fields'].split(',')
-
-### do this better
-        if 'Candidate' in self.__class__.__name__:
-          return format_candids(data_dict, page_data, fields)
-        elif 'Committee' in self.__class__.__name__:
-          return format_committees(data_dict, page_data, fields)
-        else:
-          return data_dict
+        return assign_formatting(self, data_dict, page_data)
 
 
 class Candidate(object):
@@ -380,7 +388,8 @@ class Candidate(object):
 
 class CandidateResource(SingleResource, Candidate):
 
-    pass
+    parser = reqparse.RequestParser()
+    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
 class CandidateSearch(Searchable, Candidate):
 
@@ -422,7 +431,8 @@ class Committee(object):
 
 class CommitteeResource(SingleResource, Committee):
 
-    pass
+    parser = reqparse.RequestParser()
+    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
 
 class CommitteeSearch(Searchable, Committee):
