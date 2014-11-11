@@ -265,6 +265,7 @@ class SingleResource(restful.Resource):
 
     def get(self, id):
         qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
+        print(qry)
         data = htsql_conn.produce(qry) or [None, ]
         return as_dicts(data)[0]
 
