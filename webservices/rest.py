@@ -111,22 +111,24 @@ def cleantext(text):
 
 
 def format_candids(data, page_data, fields):
-  results = []
+    results = []
 
-  if 'elections' in fields:
-    fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought']
-  elif fields == ['*']:
-    fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought', 'other_names']
+    if 'elections' in fields:
+        fields = fields + ['district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought']
+    elif fields == ['*']:
+        fields = ['name', 'cand_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_cmte', 'affiliated_cmtes', 'state', 'incumbent_challenge', 'cand_status', 'cand_inactive', 'office_sought', 'other_names']
 
     for cand in data:
         #aggregating data for each election across the tables
         elections = {}
         cand_data = {}
-        if 'cand_id' in fields:
-            cand_data['cand_id'] = cand['cand_id']
 
         if ('name' in fields) or ('full_name' in fields) or ('other_names' in fields):
             cand_data = {'name':{}}
+
+        if 'cand_id' in fields:
+            cand_data['cand_id'] = cand['cand_id']
+
         # nicknames are useful
         # Using most recent name as full name
         if 'name' in fields or 'full_name' in fields:
@@ -274,8 +276,9 @@ def format_candids(data, page_data, fields):
 
             cand_data['elections'] = elections
 
-      results.append(cand_data)
-  return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
+        results.append(cand_data)
+
+    return [{'api_version':0.1},{'pagination':page_data},{'results': results}]
 
 
 def format_committees(data, page, fields):
