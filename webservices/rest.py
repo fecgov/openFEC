@@ -63,6 +63,34 @@ htsql_conn = HTSQL(htsql_conn_string)
 app = Flask(__name__)
 api = restful.Api(app)
 
+
+cmte_decoder = {'P': 'Presidential',
+                'H': 'House',
+                'S': 'Senate',
+                'C': 'Communication Cost',
+                'D': 'Delegate Committee',
+                'E': 'Electioneering Communication',
+                'I': 'Independent Expenditor (Person or Group)',
+                'N': 'PAC - Nonqualified',
+                'O': 'Independent Expenditure-Only (Super PACs)',
+                'Q': 'PAC - Qualified',
+                'U': 'Single Candidate Independent Expenditure',
+                'V': 'PAC with Non-Contribution Account - Nonqualified',
+                'W': 'PAC with Non-Contribution Account - Qualified',
+                'X': 'Party - Nonqualified',
+                'Y': 'Party - Qualified',
+                'Z': 'National Party Nonfederal Account'
+}
+designation_decoder = {'A': 'Authorized by a candidate',
+                'J': 'Joint fundraising committee',
+                'P': 'Principal campaign committee',
+                'U': 'Unauthorized',
+                'B': 'Lobbyist/Registrant PAC',
+                'D': 'Leadership PAC',
+}
+
+
+
 # DEFAULTING TO 2012 FOR THE DEMO
 def default_year():
     # year = str(datetime.now().strftime("%Y"))
@@ -155,31 +183,6 @@ def format_candids(data, page_data, fields):
                     elections[year] = {}
                 prmary_cmte = {}
                 prmary_cmte['cmte_id'] = cmte['cmte_id']
-
-                cmte_decoder = {'P': 'Presidential',
-                                'H': 'House',
-                                'S': 'Senate',
-                                'C': 'Communication Cost',
-                                'D': 'Delegate Committee',
-                                'E': 'Electioneering Communication',
-                                'I': 'Independent Expenditor (Person or Group)',
-                                'N': 'PAC - Nonqualified',
-                                'O': 'Independent Expenditure-Only (Super PACs)',
-                                'Q': 'PAC - Qualified',
-                                'U': 'Single Candidate Independent Expenditure',
-                                'V': 'PAC with Non-Contribution Account - Nonqualified',
-                                'W': 'PAC with Non-Contribution Account - Qualified',
-                                'X': 'Party - Nonqualified',
-                                'Y': 'Party - Qualified',
-                                'Z': 'National Party Nonfederal Account'
-                }
-                designation_decoder = {'A': 'Authorized by a candidate',
-                                'J': 'Joint fundraising committee',
-                                'P': 'Principal campaign committee',
-                                'U': 'Unauthorized',
-                                'B': 'Lobbyist/Registrant PAC',
-                                'D': 'Leadership PAC',
-                }
 
                 if cmte['cmte_dsgn'] == 'P' and "primary_cmte" in fields:
                     prmary_cmte['designation_code'] = cmte['cmte_dsgn']
@@ -359,21 +362,39 @@ def format_committees(data, page, fields):
 
             info_mappings=[
                 ('lobbyist_registrant_pac_flg', 'lobbyist_registrant_pac_flg'),
-                ('type_code', 'org_tp'),
-                ('type', 'org_tp_desc'),
-                ('original_registration_date', 'orig_registration_dt'),
-                ('party_cmte_type', 'party_cmte_type_desc'),
-                # "qual_dt"
+                ('org_tp', 'type_code'),
+                ('org_tp_desc', 'type'),
+                ('orig_registration_dt', 'original_registration_date'),
+                ('party_cmte_type_desc', 'party_cmte_type'),
+                # Want to research this
+                ('qual_dt', 'qual_dt'),
             ]
 
-                # candidates
+            for f,v in info_mappings:
+                    if item[f] is not None:
+                        record[v] = item[f]
+
+            candidates = []
+            for cand in cmte['dimlinkages']:
+                candidate ={}
+                candidate['candidate_id'] = cand['cand_id']
+                candidate['type_code'] = cand['cmte_tp']
+                candidate['type'] = cmte_decoder[cand['cmte_tp']]
+                candidate['designation_code'] = cand['cmte_dsgn']
+                candidate['designation'] = designation_decoder[cand['cmte_dsgn']]
+                candidate['election_year'] = cand['cand_election_yr']
+                candidate['expire_date'] = cand['expire_date']
+                candidate['link_date'] = cand['link_date']
+                candidates.append(candidate)
+            if len(candidates) > 0:
+                record['candidates'] = candidates
 
             committee.append(record)
 
 
         results.append(committee)
 
-    #return {'api_version':"0.2", 'pagination':page, 'results': results}
+    return {'api_version':"0.2", 'pagination':page, 'results': results}
     return data
 
 class SingleResource(restful.Resource):
@@ -505,7 +526,7 @@ class Committee(object):
 
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
-    htsql_qry = '(%s{*,/dimcmteproperties})' % viewable_table_name
+    htsql_qry = '(%s{*,/dimcmteproperties, /dimlinkages})' % viewable_table_name
 
 
 class CommitteeResource(SingleResource, Committee):
