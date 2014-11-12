@@ -31,7 +31,7 @@ class OverallTest(unittest.TestCase):
             txt = json.dumps(r).lower()
             print "\n\n", txt, "\n\n"
             self.assertIn('james', txt)
-            
+
     def test_full_text_search_with_whitespace(self):
         results = self._results('/candidate?q=barack obama&fields=*')
         for r in results:
@@ -61,6 +61,13 @@ class OverallTest(unittest.TestCase):
         self.assertEqual(page_two[0], page_one_and_two[5])
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
+
+    # def test_year_default(self):
+    #     # finds obama only if 2012 is specified
+    #     results = self._results('candidate?cand_id=P80003338')
+    #     self.assertEquals(results, [])
+    #     results = self._results('candidate?cand_id=P80003338&year=2012')
+    #     self.assertNotEqual(results, [])
 
     def test_fields(self):
         # testing key defaults
@@ -106,3 +113,4 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response[0]['elections']['2012']['primary_cmte'].has_key('designation_code'), True)
         self.assertEquals(response[0]['elections']['2012']['primary_cmte'].has_key('type'), True)
         self.assertEquals(response[0]['elections']['2012']['primary_cmte'].has_key('type_code'), True)
+

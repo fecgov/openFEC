@@ -63,6 +63,12 @@ htsql_conn = HTSQL(htsql_conn_string)
 app = Flask(__name__)
 api = restful.Api(app)
 
+# DEFAULTING TO 2012 FOR THE DEMO
+def default_year():
+    # year = str(datetime.now().strftime("%Y"))
+    year = '2012'
+    return year
+
 def natural_number(n):
     result = int(n)
     if result < 1:
@@ -283,7 +289,10 @@ class Searchable(restful.Resource):
 
         for arg in args:
             if args[arg]:
+                if arg == 'year':
+                  print "Found year "
                 if arg == 'q':
+                    print "found query"
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
                     qry = sa.sql.text(qry)
                     findme = ' & '.join(args['q'].split())
@@ -364,6 +373,7 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
     parser.add_argument('year', type=int, help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+
 
     # note: each argument is applied separately, so if you ran as REP in 1996 and IND in 1998,
     # you *will* show up under /candidate?year=1998&party=REP
