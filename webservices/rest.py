@@ -304,14 +304,6 @@ def format_committees(data, page, fields):
             record['email'] = item['cmte_email']
             record['web_address'] = item['cmte_web_url']
 
-            # 'lobbyist_registrant_pac_flg' = "lobbyist_registrant_pac_flg"
-            # 'type_code' "org_tp"
-            # 'type' "org_tp_desc"
-            # 'original_registration_date' "orig_registration_dt"
-            # "party_cmte_type"
-            # "party_cmte_type_desc"
-            # "qual_dt"
-
             custodian_mappings = [
                 ('cmte_custodian_city', 'city'),
                 ('cmte_custodian_f_nm', 'name_1'),
@@ -359,15 +351,24 @@ def format_committees(data, page, fields):
                 record['treasurer'] = treasurer
 
 
-            # candidates
+            info_mappings=[
+                ('lobbyist_registrant_pac_flg', 'lobbyist_registrant_pac_flg'),
+                ('type_code', 'org_tp'),
+                ('type', 'org_tp_desc'),
+                ('original_registration_date', 'orig_registration_dt'),
+                ('party_cmte_type', 'party_cmte_type_desc'),
+                # "qual_dt"
+            ]
+
+                # candidates
 
             committee.append(record)
 
 
         results.append(committee)
 
-    return {'api_version':"0.2", 'pagination':page, 'results': results}
-    # return data
+    #return {'api_version':"0.2", 'pagination':page, 'results': results}
+    return data
 
 class SingleResource(restful.Resource):
 
