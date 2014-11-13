@@ -286,7 +286,7 @@ def format_candids(data, page_data, fields):
 
         results.append(cand_data)
     print results
-    return {'api_version':0.1, 'pagination':page_data, 'results': results}
+    return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
 def format_committees(data, page, fields):
