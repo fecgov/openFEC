@@ -406,8 +406,8 @@ def format_committees(data, page, fields):
 
         results.append(committee)
 
-    #return {'api_version':"0.2", 'pagination':page, 'results': results}
-    return data
+    return {'api_version':"0.2", 'pagination':page, 'results': results}
+    #return data
 
 class SingleResource(restful.Resource):
 
