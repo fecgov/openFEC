@@ -31,6 +31,9 @@ Supported for /committee ::
     name=        (committee's name)
     state=       (two-letter code)
     candidate=   (associated candidate's name)
+    type_code=   one-letter code see cmte_decoder
+    designation_code=  one-letter code see designation_decoder
+    year=        four-digit year
 
 """
 import os
@@ -548,6 +551,7 @@ class CommitteeSearch(Searchable, Committee):
 
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                       "fec_id": string.Template("cmte_id='$arg'"),
+                      # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
                       "candidate":
                       string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?sec_cand_nm~'$arg')"
@@ -556,6 +560,10 @@ class CommitteeSearch(Searchable, Committee):
                                       "|exists(dimcmteproperties?fith_cand_nm~'$arg')"),
                       "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
+                      "type_code": string.Template("exists(dimlinkages?cmte_tp~'$arg')"),
+                      "designation_code": string.Template("exists(dimlinkages?cmte_dsgn~'$arg')"),
+                      # we need
+                      #"year": We have an expire date so we want to query the dimcmteproperties for expire_date that expires during or after the year we are looking for. (If it is helpful, it will not be form_tp F1Z Those are old.)
                       }
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
@@ -567,6 +575,9 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument('type_code', type=str, help='The one-letter type code of the organization')
+    parser.add_argument('designation_code', type=str, help='The one-letter designation code of the organization')
+    parser.add_argument('year', type=int, help='The four-digit year of the election cycle')
 
 
 class Help(restful.Resource):

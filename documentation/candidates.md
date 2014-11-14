@@ -76,6 +76,10 @@ Whether or not a candidate is active in an election.
 
 The district of the office the candidate is running for. In cases the code is, `00`, it means there is no district for the office, such as President and Senate, or the member is "at large" for House members.
 
+#### election_year
+
+Year of the election. Elections are in two-year election cycles.
+
 #### incumbent_challenge
 
 Indicates whether a candidate is an `incumbent`, already in office; a `challenger` to an incumbent; or if it is an `open_seat` and no incumbent is running in the race.
