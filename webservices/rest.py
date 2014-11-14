@@ -377,7 +377,7 @@ def format_committees(data, page, fields):
                 ('org_tp', 'type_code'),
                 ('org_tp_desc', 'type'),
                 ('orig_registration_dt', 'original_registration_date'),
-                ('party_cmte_type_desc', 'party_cmte_type'),
+                ('party_cmte_type', 'party_cmte_type'),
                 # Want to research this
                 ('qual_dt', 'qual_dt'),
             ]
@@ -406,7 +406,7 @@ def format_committees(data, page, fields):
 
         results.append(committee)
 
-    return {'api_version':"0.2", 'pagination':page, 'results': results}
+    #return {'api_version':"0.2", 'pagination':page, 'results': results}
     return data
 
 class SingleResource(restful.Resource):
@@ -562,8 +562,8 @@ class CommitteeSearch(Searchable, Committee):
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
                       "type_code": string.Template("exists(dimlinkages?cmte_tp~'$arg')"),
                       "designation_code": string.Template("exists(dimlinkages?cmte_dsgn~'$arg')"),
-                      # we need
-                      #"year": We have an expire date so we want to query the dimcmteproperties for expire_date that expires during or after the year we are looking for. (If it is helpful, it will not be form_tp F1Z Those are old.)
+                      #"year": We have an expire date so we want to query the dimcmteproperties for expire_date that expires during or after the year we are looking for and is not null. (If it is helpful, it will not be form_tp F1Z Those are old.)
+                      # example- (dimcmteproperties?year(expire_date)>=2010).limit(100)
                       }
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
