@@ -93,7 +93,7 @@ class OverallTest(unittest.TestCase):
     def test_extra_fields(self):
         response = self._results('/candidate?candidate_id=P80003338&fields=mailing_addresses,affiliated_committees')
         self.assertIn('C00507830', [c['committee_id'] for c in response[0]['elections'][0]['affiliated_committees']])
-        self.assertEquals(response[0]['mailing_addresses'][0]['street_1'], '5450 SOUTH EAST VIEW PARK')
+        self.assertIn('233 NORTH MICHIGAN AVE STE 1720', [a['street_1'] for a in response[0]['mailing_addresses']])
         self.assertEquals(response[0].has_key('candidate_id'), False)
         self.assertEquals(response[0].has_key('name'), False)
 
