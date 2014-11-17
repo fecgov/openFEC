@@ -48,8 +48,15 @@ import flask.ext.restful.representations.json
 from htsql import HTSQL
 import htsql.core.domain
 from json_encoding import TolerantJSONEncoder
+import logging
+import pprint
+import time
 from datetime import datetime
 from psycopg2._range import DateTimeRange
+
+speedlogger = logging.getLogger('speed')
+speedlogger.setLevel(logging.INFO)
+speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
@@ -407,16 +414,23 @@ def format_committees(data, page, fields):
     return {'api_version':"0.2", 'pagination':page, 'results': results}
     #return data
 
+
 class SingleResource(restful.Resource):
 
     def get(self, id):
+        overall_start_time = time.time()
         qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
         print(qry)
+        speedlogger.info('--------------------------------------------------')
+        speedlogger.info('\nHTSQL query: \n%s' % qry)
+        start_time = time.time()
         data = htsql_conn.produce(qry) or [None, ]
+        speedlogger.info('HTSQL query time: %f' % (time.time() - start_time))
         data_dict = as_dicts(data)
         page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
         args = self.parser.parse_args()
         results = assign_formatting(self, data_dict, page_data)
+        speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
         return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
@@ -427,6 +441,8 @@ class Searchable(restful.Resource):
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
     def get(self):
+        overall_start_time = time.time()
+        speedlogger.info('--------------------------------------------------')
         args = self.parser.parse_args()
         elements = []
         page_num = 1
@@ -439,8 +455,11 @@ class Searchable(restful.Resource):
                     print "found query"
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
                     qry = sa.sql.text(qry)
+                    speedlogger.info('\nfulltext query: \n%s' % qry)
+                    start_time = time.time()
                     findme = ' & '.join(args['q'].split())
                     fts_result = conn.execute(qry, findme = findme).fetchall()
+                    speedlogger.info('fulltext query time: %f' % (time.time() - start_time))
                     if not fts_result:
                         return []
                     elements.append("%s_sk={%s}" %
@@ -470,7 +489,10 @@ class Searchable(restful.Resource):
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
 
         print("\n%s\n" % (qry))
+        speedlogger.info('\n\nHTSQL query: \n%s' % qry)
+        start_time = time.time()
         data = htsql_conn.produce(qry)
+        speedlogger.info('HTSQL query time: %f' % (time.time() - start_time))
 
         count = htsql_conn.produce(count_qry)
 
@@ -484,6 +506,7 @@ class Searchable(restful.Resource):
 
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
+        speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
         return assign_formatting(self, data_dict, page_data)
 
 
