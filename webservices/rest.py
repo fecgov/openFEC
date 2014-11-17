@@ -297,7 +297,7 @@ def format_candids(data, page_data, fields):
                 cand_data['elections'].append(elections[year])
 
         results.append(cand_data)
-    print results
+
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
@@ -373,8 +373,8 @@ def format_committees(data, page, fields):
 
             info_mappings=[
                 ('lobbyist_registrant_pac_flg', 'lobbyist_registrant_pac_flg'),
-                ('org_tp', 'type_code'),
-                ('org_tp_desc', 'type'),
+                ('org_tp', 'organization_type_code'),
+                ('org_tp_desc', 'organization_type'),
                 ('orig_registration_dt', 'original_registration_date'),
                 ('party_cmte_type', 'party_cmte_type'),
                 # Want to research this
@@ -399,6 +399,22 @@ def format_committees(data, page, fields):
                 candidates.append(candidate)
             if len(candidates) > 0:
                 record['candidates'] = candidates
+
+            statuses = []
+            for info in cmte['dimcmtetpdsgn']:
+                status_mappings = [
+                    ('cmte_dsgn', 'designation_code'),
+                    ('cmte_tp', 'type_code'),
+                    #('expire_date', 'expire_date'),
+                    ('receipt_date', 'receipt_date'),
+                ]
+                status = {}
+                for f,v in status_mappings:
+                    status[v] = info[f]
+                status['designation'] = designation_decoder[status['designation_code']]
+                status['type'] = cmte_decoder[status['type_code']]
+                statuses.append(status)
+            record['status'] = sorted(statuses, key=lambda k: k['receipt_date'], reverse=True)
 
             committee.append(record)
 
@@ -516,9 +532,6 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
 
-    # note: each argument is applied separately, so if you ran as REP in 1996 and IND in 1998,
-    # you *will* show up under /candidate?year=1998&party=REP
-
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
                       "fec_id": string.Template("cand_id='$arg'"),
                       "office":
@@ -536,7 +549,7 @@ class Committee(object):
 
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
-    htsql_qry = '(%s{*,/dimcmteproperties, /dimlinkages})' % viewable_table_name
+    htsql_qry = '(%s{*,/dimcmteproperties, /dimlinkages, /dimcmtetpdsgn})' % viewable_table_name
 
 
 class CommitteeResource(SingleResource, Committee):
@@ -558,9 +571,9 @@ class CommitteeSearch(Searchable, Committee):
                                       "|exists(dimcmteproperties?fith_cand_nm~'$arg')"),
                       "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
-                      "type_code": string.Template("exists(dimlinkages?cmte_tp~'$arg')"),
-                      "designation_code": string.Template("exists(dimlinkages?cmte_dsgn~'$arg')"),
-                      "type_code": string.Template("exists(dimlinkages?org_tp~'$arg')"),
+                      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
+                      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~'$arg')"),
+                      "org_type_code": string.Template("exists(dimlinkages?org_tp~'$arg')"),
     }
 
     parser = reqparse.RequestParser()

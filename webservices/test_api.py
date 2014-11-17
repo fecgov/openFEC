@@ -120,18 +120,21 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee')
         results = response['results']
         self.assertEquals(results[0][0].has_key('committee_id'), True)
+        self.assertEquals(results[0][0].has_key('form_type'), True)
+        self.assertEquals(results[0][0].has_key('name'), True)
+        self.assertEquals(results[0][0]['status'][0].has_key('designation'), True)
+        self.assertEquals(results[0][0]['status'][0].has_key('designation_code'), True)
+        self.assertEquals(results[0][0]['status'][0].has_key('type_code'), True)
+        self.assertEquals(results[0][0]['status'][0].has_key('type'), True)
 
     def test_committee_filter(self):
         response = self._response('/committee')
         type_response = self._response('/committee?type_code=P')
         desig_response = self._response('/committee?designation_code=P')
-        year_response = self._response('/committee?year=2012')
 
         original_count = response['pagination']['count']
         type_count = type_response['pagination']['count']
         desig_count = desig_response['pagination']['count']
-        year_count = year_response['pagination']['count']
 
         self.assertEquals((original_count > type_count), True)
         self.assertEquals((original_count > desig_count), True)
-        self.assertEquals((original_count > year_count), True)
