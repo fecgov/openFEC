@@ -319,7 +319,8 @@ def format_committees(data, page, fields):
             address['city'] = item['cmte_city']
             address['state'] = item['cmte_st']
             address['zip'] = item['cmte_zip']
-            address['state_long'] = item['cmte_st_desc'].strip()
+            if item['cmte_st_desc'] is not None:
+                address['state_long'] = item['cmte_st_desc'].strip()
             record['address'] = address
             record['email'] = item['cmte_email']
             record['web_address'] = item['cmte_web_url']
@@ -410,9 +411,12 @@ def format_committees(data, page, fields):
                 ]
                 status = {}
                 for f,v in status_mappings:
-                    status[v] = info[f]
-                status['designation'] = designation_decoder[status['designation_code']]
-                status['type'] = cmte_decoder[status['type_code']]
+                    if info[f] is not None:
+                        status[v] = info[f]
+                        if f == 'cmte_dsgn' and designation_decoder.has_key(info[f]):
+                            status['designation'] = designation_decoder[info[f]]
+                        if f == 'cmte_tp' and cmte_decoder.has_key(info[f]):
+                            status['type'] = cmte_decoder[info[f]]
                 statuses.append(status)
             record['status'] = sorted(statuses, key=lambda k: k['receipt_date'], reverse=True)
 
@@ -573,7 +577,7 @@ class CommitteeSearch(Searchable, Committee):
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
                       "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
                       "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~'$arg')"),
-                      "org_type_code": string.Template("exists(dimlinkages?org_tp~'$arg')"),
+                      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~'$arg')"),
     }
 
     parser = reqparse.RequestParser()
@@ -588,6 +592,7 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
     parser.add_argument('type_code', type=str, help='The one-letter type code of the organization')
     parser.add_argument('designation_code', type=str, help='The one-letter designation code of the organization')
+    parser.add_argument('organization_type_code', type=str, help='The one-letter code for the kind for orgnization')
 
 
 class Help(restful.Resource):

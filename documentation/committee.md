@@ -12,8 +12,9 @@ Endpoint:
 | cmte_id=    | Synonym for /<cmte_id> |
 | name=       | Committee's name |
 | state=      | Two-letter state abbreviation |
-| type_code=   one-letter code see cmte_decoder
-| designation_code=  one-letter code see designation_decoder
+| type_code=   |one-letter code of committee type  |
+| designation_code=  |one-letter code of committee designation  |
+| organization_type_code= |one-letter code of organization type |
 
 
 
