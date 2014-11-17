@@ -31,6 +31,9 @@ Supported for /committee ::
     name=        (committee's name)
     state=       (two-letter code)
     candidate=   (associated candidate's name)
+    type_code=   one-letter code see cmte_decoder
+    designation_code=  one-letter code see designation_decoder
+    year=        The four-digit election year
 
 """
 import os
@@ -247,11 +250,11 @@ def format_candids(data, page_data, fields):
                     elections[year]['candidate_status'] = None
 
             if 'incumbent_challenge' in fields:
-              ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-              if status['ici_code'] != None:
-                  elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
-              else:
-                  elections[year]['incumbent_challenger'] = None
+                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+                if status['ici_code'] != None:
+                    elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
+                else:
+                    elections[year]['incumbent_challenger'] = None
 
         addresses = []
         other_names = []
@@ -292,7 +295,6 @@ def format_candids(data, page_data, fields):
             for year in years:
                 elections[year]['election_year'] = year
                 cand_data['elections'].append(elections[year])
-
 
         results.append(cand_data)
     print results
@@ -374,7 +376,7 @@ def format_committees(data, page, fields):
                 ('org_tp', 'type_code'),
                 ('org_tp_desc', 'type'),
                 ('orig_registration_dt', 'original_registration_date'),
-                ('party_cmte_type_desc', 'party_cmte_type'),
+                ('party_cmte_type', 'party_cmte_type'),
                 # Want to research this
                 ('qual_dt', 'qual_dt'),
             ]
@@ -400,11 +402,10 @@ def format_committees(data, page, fields):
 
             committee.append(record)
 
-
         results.append(committee)
 
     return {'api_version':"0.2", 'pagination':page, 'results': results}
-    return data
+    #return data
 
 class SingleResource(restful.Resource):
 
@@ -548,6 +549,7 @@ class CommitteeSearch(Searchable, Committee):
 
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                       "fec_id": string.Template("cmte_id='$arg'"),
+                      # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
                       "candidate":
                       string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
                                       "|exists(dimcmteproperties?sec_cand_nm~'$arg')"
@@ -556,7 +558,11 @@ class CommitteeSearch(Searchable, Committee):
                                       "|exists(dimcmteproperties?fith_cand_nm~'$arg')"),
                       "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
-                      }
+                      "type_code": string.Template("exists(dimlinkages?cmte_tp~'$arg')"),
+                      "designation_code": string.Template("exists(dimlinkages?cmte_dsgn~'$arg')"),
+                      "year": string.Template("exists(dimcmteproperties?year(expire_date)>='$arg')"),
+    }
+
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
     parser.add_argument('committee_id', type=str, help="Committee's FEC ID")
@@ -567,6 +573,9 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument('type_code', type=str, help='The one-letter type code of the organization')
+    parser.add_argument('designation_code', type=str, help='The one-letter designation code of the organization')
+    parser.add_argument('year', type=int, help='The four-digit election year')
 
 
 class Help(restful.Resource):
