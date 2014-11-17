@@ -20,8 +20,6 @@ Endpoint:
 \# I don't think this one is reliable
 | candidate=  | Associated candidate's name |
 
-
-
 ## Fields
 
 

@@ -33,7 +33,7 @@ Supported for /committee ::
     candidate=   (associated candidate's name)
     type_code=   one-letter code see cmte_decoder
     designation_code=  one-letter code see designation_decoder
-    year=        four-digit year
+    year=        The four-digit election year
 
 """
 import os
@@ -250,11 +250,11 @@ def format_candids(data, page_data, fields):
                     elections[year]['candidate_status'] = None
 
             if 'incumbent_challenge' in fields:
-              ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-              if status['ici_code'] != None:
-                  elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
-              else:
-                  elections[year]['incumbent_challenger'] = None
+                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+                if status['ici_code'] != None:
+                    elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
+                else:
+                    elections[year]['incumbent_challenger'] = None
 
         addresses = []
         other_names = []
@@ -295,7 +295,6 @@ def format_candids(data, page_data, fields):
             for year in years:
                 elections[year]['election_year'] = year
                 cand_data['elections'].append(elections[year])
-
 
         results.append(cand_data)
     print results
@@ -402,7 +401,6 @@ def format_committees(data, page, fields):
                 record['candidates'] = candidates
 
             committee.append(record)
-
 
         results.append(committee)
 
@@ -562,9 +560,9 @@ class CommitteeSearch(Searchable, Committee):
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
                       "type_code": string.Template("exists(dimlinkages?cmte_tp~'$arg')"),
                       "designation_code": string.Template("exists(dimlinkages?cmte_dsgn~'$arg')"),
-                      #"year": We have an expire date so we want to query the dimcmteproperties for expire_date that expires during or after the year we are looking for and is not null. (If it is helpful, it will not be form_tp F1Z Those are old.)
-                      # example- (dimcmteproperties?year(expire_date)>=2010).limit(100)
-                      }
+                      "year": string.Template("exists(dimcmteproperties?year(expire_date)>='$arg')"),
+    }
+
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
     parser.add_argument('committee_id', type=str, help="Committee's FEC ID")
@@ -577,7 +575,7 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
     parser.add_argument('type_code', type=str, help='The one-letter type code of the organization')
     parser.add_argument('designation_code', type=str, help='The one-letter designation code of the organization')
-    parser.add_argument('year', type=int, help='The four-digit year of the election cycle')
+    parser.add_argument('year', type=int, help='The four-digit election year')
 
 
 class Help(restful.Resource):

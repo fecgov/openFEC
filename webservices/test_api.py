@@ -125,10 +125,13 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee')
         type_response = self._response('/committee?type_code=P')
         desig_response = self._response('/committee?designation_code=P')
+        year_response = self._response('/committee?year=2012')
 
         original_count = response['pagination']['count']
         type_count = type_response['pagination']['count']
         desig_count = desig_response['pagination']['count']
+        year_count = year_response['pagination']['count']
 
         self.assertEquals((original_count > type_count), True)
         self.assertEquals((original_count > desig_count), True)
+        self.assertEquals((original_count > year_count), True)
