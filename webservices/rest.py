@@ -560,7 +560,7 @@ class CommitteeSearch(Searchable, Committee):
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
                       "type_code": string.Template("exists(dimlinkages?cmte_tp~'$arg')"),
                       "designation_code": string.Template("exists(dimlinkages?cmte_dsgn~'$arg')"),
-                      "year": string.Template("exists(dimcmteproperties?year(expire_date)>='$arg')"),
+                      "type_code": string.Template("exists(dimlinkages?org_tp~'$arg')"),
     }
 
     parser = reqparse.RequestParser()
@@ -575,7 +575,6 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
     parser.add_argument('type_code', type=str, help='The one-letter type code of the organization')
     parser.add_argument('designation_code', type=str, help='The one-letter designation code of the organization')
-    parser.add_argument('year', type=int, help='The four-digit election year')
 
 
 class Help(restful.Resource):
