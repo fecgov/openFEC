@@ -236,6 +236,7 @@ def format_candids(data, page_data, fields):
                 elections[year]['state'] = office['dimoffice']['office_state']
             if 'party_affiliation'in fields:
                 elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
+                elections[year]['party_code'] = office['dimparty']['party_affiliation']
 
         # status information
 
