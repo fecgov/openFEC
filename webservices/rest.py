@@ -576,7 +576,7 @@ class CandidateSearch(Searchable, Candidate):
                       string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
                       "district":
                       string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
-                      "state": string.Template("exists(dimcandproperties?cand_st~'$arg')"),
+                      "state": string.Template("exists(dimcandoffice?dimoffice.office_state~'$arg')"),
                       "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
                       "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
                       "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
@@ -601,12 +601,7 @@ class CommitteeSearch(Searchable, Committee):
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                       "fec_id": string.Template("cmte_id='$arg'"),
                       # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
-                      "candidate":
-                      string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?sec_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?trd_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?frth_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?fith_cand_nm~'$arg')"),
+                      "candidate_id":string.Template("exists(dimlinkages?cand_id~'$arg')"),
                       "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
                       "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
@@ -621,7 +616,7 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('fec_id', type=str, help="Committee's FEC ID")
     parser.add_argument('state', type=str, help='U. S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
-    parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
+    parser.add_argument('candidate_id', type=str, help="Associated candidate's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
