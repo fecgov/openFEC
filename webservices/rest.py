@@ -567,6 +567,7 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
     parser.add_argument('year', type=int, help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument('district', type=int, help='Two digit district number')
 
 
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
