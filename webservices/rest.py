@@ -332,6 +332,16 @@ def format_committees(data, page, fields):
             record['email'] = item['cmte_email']
             record['web_address'] = item['cmte_web_url']
 
+            # We don't have party info so I am going to mock up what it would be like
+            name = str(item['cmte_nm']).upper()
+            if 'DEMOCRAT' in name:
+                record['fake_party'] = 'Democratic Party'
+                record['fake_party_code'] = 'DEM'
+            if 'REPUBLICAN' in name:
+                record['fake_party'] = 'Republican Party'
+                record['fake_party_code'] = 'REP'
+
+
             custodian_mappings = [
                 ('cmte_custodian_city', 'city'),
                 ('cmte_custodian_f_nm', 'name_1'),
@@ -601,6 +611,7 @@ class CommitteeSearch(Searchable, Committee):
                       "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
                       "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~'$arg')"),
                       "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~'$arg')"),
+                      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
     }
 
     parser = reqparse.RequestParser()
@@ -616,6 +627,7 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('type_code', type=str, help='The one-letter type code of the organization')
     parser.add_argument('designation_code', type=str, help='The one-letter designation code of the organization')
     parser.add_argument('organization_type_code', type=str, help='The one-letter code for the kind for orgnization')
+    parser.add_argument('fake_party', type=str, help='This is just a name search that is standing in until we can get the real data. Use "democrat" or "republican" and it will assign a fake party off of names.')
 
 
 class Help(restful.Resource):
