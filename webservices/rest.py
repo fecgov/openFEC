@@ -332,16 +332,6 @@ def format_committees(data, page, fields):
             record['email'] = item['cmte_email']
             record['web_address'] = item['cmte_web_url']
 
-            # We don't have party info so I am going to mock up what it would be like
-            name = str(item['cmte_nm']).upper()
-            if 'DEMOCRAT' in name:
-                record['fake_party'] = 'Democratic Party'
-                record['fake_party_code'] = 'DEM'
-            if 'REPUBLICAN' in name:
-                record['fake_party'] = 'Republican Party'
-                record['fake_party_code'] = 'REP'
-
-
             custodian_mappings = [
                 ('cmte_custodian_city', 'city'),
                 ('cmte_custodian_f_nm', 'name_1'),
@@ -436,6 +426,16 @@ def format_committees(data, page, fields):
                             status['type'] = cmte_decoder[info[f]]
                 statuses.append(status)
             record['status'] = sorted(statuses, key=lambda k: k['receipt_date'], reverse=True)
+
+            # We don't have party info so I am going to mock up what it would be like
+            if record['status'][0]["type_code"] in ['X', 'Y']:
+                name = str(item['cmte_nm']).upper()
+                if 'DEMOCRAT' in name:
+                    record['fake_party'] = 'Democratic Party'
+                    record['fake_party_code'] = 'DEM'
+                if 'REPUBLICAN' in name:
+                    record['fake_party'] = 'Republican Party'
+                    record['fake_party_code'] = 'REP'
 
             committee.append(record)
 
