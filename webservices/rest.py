@@ -114,7 +114,7 @@ def natural_number(n):
     return result
 
 
-def assign_formatting(self, data_dict, page_data):
+def assign_formatting(self, data_dict, page_data, year):
     args = self.parser.parse_args()
     if args['fields'] == None:
         fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
@@ -122,7 +122,7 @@ def assign_formatting(self, data_dict, page_data):
         fields =  args['fields'].split(',')
 
     if self.table_name_stem == 'cand':
-        return format_candids(data_dict, page_data, fields)
+        return format_candids(data_dict, page_data, fields, year)
     elif self.table_name_stem == 'cmte':
         return format_committees(data_dict, page_data, fields)
     else:
@@ -154,7 +154,7 @@ def cleantext(text):
         return text
 
 
-def format_candids(data, page_data, fields):
+def format_candids(data, page_data, fields, default_year):
     results = []
 
     if 'elections' in fields:
@@ -293,12 +293,17 @@ def format_candids(data, page_data, fields):
         if len(other_names) > 0 and ('name' in fields):
             cand_data['name']['other_names'] = other_names
 
+
         if 'district'in fields or 'party_affiliation'in fields or 'primary_committee'in fields or 'affiliated_committees'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'candidate_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
 
             cand_data['elections'] = []
             years = []
             for year in elections:
-                years.append(year)
+                if default_year is not None:
+                    if str(default_year) == year:
+                        years.append(year)
+                else:
+                    years.append(year)
             years.sort(reverse=True)
             for year in years:
                 elections[year]['election_year'] = year
@@ -480,8 +485,6 @@ class Searchable(restful.Resource):
 
         for arg in args:
             if args[arg]:
-                if arg == 'year':
-                  print "Found year "
                 if arg == 'q':
                     print "found query"
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
@@ -537,8 +540,12 @@ class Searchable(restful.Resource):
 
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
+        # make this better later
+        if not args.has_key("year"):
+            args['year'] = None
+
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return assign_formatting(self, data_dict, page_data)
+        return assign_formatting(self, data_dict, page_data, args['year'])
 
 
 class Candidate(object):
@@ -566,7 +573,7 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
-    parser.add_argument('year', type=int, help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=int, default=2012, help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
     parser.add_argument('district', type=int, help='Two digit district number')
 
