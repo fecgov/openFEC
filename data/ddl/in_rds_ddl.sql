@@ -1885,7 +1885,7 @@ CREATE TABLE sched_l (
 ) ;
 
 CREATE TABLE form_1 (
-   form_1_sk				   bigint,
+   form_1_sk				   bigint NOT NULL PRIMARY KEY,
    form_tp					    text,
    cmte_id					    text,
    cmte_nm					    text,

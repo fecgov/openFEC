@@ -11,14 +11,14 @@ GRANT USAGE ON FOREIGN SERVER oradb TO "ec2-user";
 
 DROP USER MAPPING FOR "ec2-user" SERVER oradb;
 CREATE USER MAPPING FOR "ec2-user" SERVER oradb
-          OPTIONS (user 'READONLY', 
+          OPTIONS (user 'READONLY',
                    password :oracle_password);
 
 DROP USER MAPPING FOR openfec SERVER oradb;
 CREATE USER MAPPING FOR openfec SERVER oradb
-          OPTIONS (user 'READONLY', 
+          OPTIONS (user 'READONLY',
                    password :oracle_password);
-                   
+
 DROP SCHEMA frn;
 CREATE SCHEMA frn;
 
@@ -49,7 +49,7 @@ CREATE FOREIGN TABLE frn.dimcandoffice (
 ALTER TABLE public.dimcandoffice OWNER TO "ec2-user";
 
 --
--- Name: dimcandproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcandproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcandproperties (
@@ -82,7 +82,7 @@ CREATE FOREIGN TABLE frn.dimcandproperties (
 ALTER TABLE public.dimcandproperties OWNER TO "ec2-user";
 
 --
--- Name: dimcandstatusici; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcandstatusici; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcandstatusici (
@@ -100,7 +100,7 @@ CREATE FOREIGN TABLE frn.dimcandstatusici (
 ALTER TABLE public.dimcandstatusici OWNER TO "ec2-user";
 
 --
--- Name: dimcmte; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcmte; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcmte (
@@ -116,7 +116,7 @@ CREATE FOREIGN TABLE frn.dimcmte (
 ALTER TABLE public.dimcmte OWNER TO "ec2-user";
 
 --
--- Name: dimcmteproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcmteproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcmteproperties (
@@ -213,7 +213,7 @@ CREATE FOREIGN TABLE frn.dimcmteproperties (
 ALTER TABLE public.dimcmteproperties OWNER TO "ec2-user";
 
 --
--- Name: dimcmtetpdsgn; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcmtetpdsgn; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcmtetpdsgn (
@@ -230,7 +230,7 @@ CREATE FOREIGN TABLE frn.dimcmtetpdsgn (
 ALTER TABLE public.dimcmtetpdsgn OWNER TO "ec2-user";
 
 --
--- Name: dimdates; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimdates; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimdates (
@@ -243,7 +243,7 @@ CREATE FOREIGN TABLE frn.dimdates (
 ALTER TABLE public.dimdates OWNER TO "ec2-user";
 
 --
--- Name: dimelectiontp; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimelectiontp; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimelectiontp (
@@ -258,7 +258,7 @@ CREATE FOREIGN TABLE frn.dimelectiontp (
 ALTER TABLE public.dimelectiontp OWNER TO "ec2-user";
 
 --
--- Name: dimlinkages; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimlinkages; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimlinkages (
@@ -279,7 +279,7 @@ CREATE FOREIGN TABLE frn.dimlinkages (
 ALTER TABLE public.dimlinkages OWNER TO "ec2-user";
 
 --
--- Name: dimoffice; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimoffice; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimoffice (
@@ -296,7 +296,7 @@ CREATE FOREIGN TABLE frn.dimoffice (
 ALTER TABLE public.dimoffice OWNER TO "ec2-user";
 
 --
--- Name: dimparty; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimparty; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimparty (
@@ -311,7 +311,7 @@ CREATE FOREIGN TABLE frn.dimparty (
 ALTER TABLE public.dimparty OWNER TO "ec2-user";
 
 --
--- Name: dimreporttype; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimreporttype; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimreporttype (
@@ -326,7 +326,7 @@ CREATE FOREIGN TABLE frn.dimreporttype (
 ALTER TABLE public.dimreporttype OWNER TO "ec2-user";
 
 --
--- Name: dimyears; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimyears; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimyears (
@@ -339,7 +339,7 @@ CREATE FOREIGN TABLE frn.dimyears (
 ALTER TABLE public.dimyears OWNER TO "ec2-user";
 
 --
--- Name: facthousesenate_f3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: facthousesenate_f3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.facthousesenate_f3 (
@@ -439,7 +439,7 @@ CREATE FOREIGN TABLE frn.facthousesenate_f3 (
 ALTER TABLE public.facthousesenate_f3 OWNER TO "ec2-user";
 
 --
--- Name: factpacsandparties_f3x; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: factpacsandparties_f3x; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.factpacsandparties_f3x (
@@ -564,7 +564,7 @@ CREATE FOREIGN TABLE frn.factpacsandparties_f3x (
 ALTER TABLE public.factpacsandparties_f3x OWNER TO "ec2-user";
 
 --
--- Name: factpresidential_f3p; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: factpresidential_f3p; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.factpresidential_f3p (
@@ -767,7 +767,7 @@ CREATE FOREIGN TABLE frn.factpresidential_f3p (
 ALTER TABLE public.factpresidential_f3p OWNER TO "ec2-user";
 
 --
--- Name: form_105; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_105; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_105 (
@@ -797,7 +797,7 @@ CREATE FOREIGN TABLE frn.form_105 (
 ALTER TABLE public.form_105 OWNER TO "ec2-user";
 
 --
--- Name: form_56; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_56; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_56 (
@@ -844,7 +844,7 @@ CREATE FOREIGN TABLE frn.form_56 (
 ALTER TABLE public.form_56 OWNER TO "ec2-user";
 
 --
--- Name: form_57; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_57; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_57 (
@@ -898,7 +898,7 @@ CREATE FOREIGN TABLE frn.form_57 (
 ALTER TABLE public.form_57 OWNER TO "ec2-user";
 
 --
--- Name: form_65; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_65; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_65 (
@@ -945,7 +945,7 @@ CREATE FOREIGN TABLE frn.form_65 (
 ALTER TABLE public.form_65 OWNER TO "ec2-user";
 
 --
--- Name: form_76; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_76; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_76 (
@@ -983,7 +983,7 @@ CREATE FOREIGN TABLE frn.form_76 (
 ALTER TABLE public.form_76 OWNER TO "ec2-user";
 
 --
--- Name: form_82; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_82; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_82 (
@@ -1033,7 +1033,7 @@ CREATE FOREIGN TABLE frn.form_82 (
 ALTER TABLE public.form_82 OWNER TO "ec2-user";
 
 --
--- Name: form_83; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_83; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_83 (
@@ -1075,7 +1075,7 @@ CREATE FOREIGN TABLE frn.form_83 (
 ALTER TABLE public.form_83 OWNER TO "ec2-user";
 
 --
--- Name: form_91; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_91; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_91 (
@@ -1108,7 +1108,7 @@ CREATE FOREIGN TABLE frn.form_91 (
 ALTER TABLE public.form_91 OWNER TO "ec2-user";
 
 --
--- Name: form_94; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_94; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_94 (
@@ -1143,7 +1143,7 @@ CREATE FOREIGN TABLE frn.form_94 (
 ALTER TABLE public.form_94 OWNER TO "ec2-user";
 
 --
--- Name: log_audit_dml; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: log_audit_dml; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.log_audit_dml (
@@ -1165,7 +1165,7 @@ CREATE FOREIGN TABLE frn.log_audit_dml (
 ALTER TABLE public.log_audit_dml OWNER TO "ec2-user";
 
 --
--- Name: log_audit_module; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: log_audit_module; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.log_audit_module (
@@ -1185,7 +1185,7 @@ CREATE FOREIGN TABLE frn.log_audit_module (
 ALTER TABLE public.log_audit_module OWNER TO "ec2-user";
 
 --
--- Name: log_audit_process; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: log_audit_process; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.log_audit_process (
@@ -1207,7 +1207,7 @@ CREATE FOREIGN TABLE frn.log_audit_process (
 ALTER TABLE public.log_audit_process OWNER TO "ec2-user";
 
 --
--- Name: sched_a; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_a; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_a (
@@ -1277,7 +1277,7 @@ CREATE FOREIGN TABLE frn.sched_a (
 ALTER TABLE public.sched_a OWNER TO "ec2-user";
 
 --
--- Name: sched_b; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_b; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_b (
@@ -1349,7 +1349,7 @@ CREATE FOREIGN TABLE frn.sched_b (
 ALTER TABLE public.sched_b OWNER TO "ec2-user";
 
 --
--- Name: sched_c; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_c; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_c (
@@ -1408,7 +1408,7 @@ CREATE FOREIGN TABLE frn.sched_c (
 ALTER TABLE public.sched_c OWNER TO "ec2-user";
 
 --
--- Name: sched_c1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_c1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_c1 (
@@ -1478,7 +1478,7 @@ CREATE FOREIGN TABLE frn.sched_c1 (
 ALTER TABLE public.sched_c1 OWNER TO "ec2-user";
 
 --
--- Name: sched_c2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_c2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_c2 (
@@ -1519,7 +1519,7 @@ CREATE FOREIGN TABLE frn.sched_c2 (
 ALTER TABLE public.sched_c2 OWNER TO "ec2-user";
 
 --
--- Name: sched_d; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_d; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_d (
@@ -1577,7 +1577,7 @@ CREATE FOREIGN TABLE frn.sched_d (
 ALTER TABLE public.sched_d OWNER TO "ec2-user";
 
 --
--- Name: sched_e; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_e; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_e (
@@ -1648,7 +1648,7 @@ CREATE FOREIGN TABLE frn.sched_e (
 ALTER TABLE public.sched_e OWNER TO "ec2-user";
 
 --
--- Name: sched_f; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_f; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_f (
@@ -1723,7 +1723,7 @@ CREATE FOREIGN TABLE frn.sched_f (
 ALTER TABLE public.sched_f OWNER TO "ec2-user";
 
 --
--- Name: sched_h1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h1 (
@@ -1790,7 +1790,7 @@ CREATE FOREIGN TABLE frn.sched_h1 (
 ALTER TABLE public.sched_h1 OWNER TO "ec2-user";
 
 --
--- Name: sched_h2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h2 (
@@ -1829,7 +1829,7 @@ CREATE FOREIGN TABLE frn.sched_h2 (
 ALTER TABLE public.sched_h2 OWNER TO "ec2-user";
 
 --
--- Name: sched_h3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h3 (
@@ -1868,7 +1868,7 @@ CREATE FOREIGN TABLE frn.sched_h3 (
 ALTER TABLE public.sched_h3 OWNER TO "ec2-user";
 
 --
--- Name: sched_h4; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h4; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h4 (
@@ -1943,7 +1943,7 @@ CREATE FOREIGN TABLE frn.sched_h4 (
 ALTER TABLE public.sched_h4 OWNER TO "ec2-user";
 
 --
--- Name: sched_h5; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h5; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h5 (
@@ -1981,7 +1981,7 @@ CREATE FOREIGN TABLE frn.sched_h5 (
 ALTER TABLE public.sched_h5 OWNER TO "ec2-user";
 
 --
--- Name: sched_h6; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h6; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h6 (
@@ -2050,7 +2050,7 @@ CREATE FOREIGN TABLE frn.sched_h6 (
 ALTER TABLE public.sched_h6 OWNER TO "ec2-user";
 
 --
--- Name: sched_i; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_i; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_i (
@@ -2110,7 +2110,7 @@ CREATE FOREIGN TABLE frn.sched_i (
 ALTER TABLE public.sched_i OWNER TO "ec2-user";
 
 --
--- Name: sched_l; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_l; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_l (
@@ -2176,6 +2176,125 @@ CREATE FOREIGN TABLE frn.sched_l (
     update_date timestamp without time zone
 ) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_L');
 
+CREATE FOREIGN TABLE frn.form_1 (
+   form_1_sk				   bigint,
+   form_tp					    text,
+   cmte_id					    text,
+   cmte_nm					    text,
+   cmte_st1					    text,
+   cmte_st2					    text,
+   cmte_city					    text,
+   cmte_st					    text,
+   cmte_zip					    text,
+   submit_dt					    timestamp without time zone,
+   cmte_nm_chg_flg				    text,
+   cmte_addr_chg_flg				    text,
+   cmte_tp					    text,
+   cand_id					    text,
+   cand_nm					    text,
+   cand_office					    text,
+   cand_office_st 				    text,
+   cand_office_district				    text,
+   cand_pty_affiliation				    text,
+   cand_pty_tp					    text,
+   affiliated_cmte_id				    text,
+   affiliated_cmte_nm				    text,
+   affiliated_cmte_st1				    text,
+   affiliated_cmte_st2				    text,
+   affiliated_cmte_city				    text,
+   affiliated_cmte_st				    text,
+   affiliated_cmte_zip				    text,
+   cmte_rltshp					    text,
+   org_tp 					    text,
+   cust_rec_nm					    text,
+   cust_rec_st1					    text,
+   cust_rec_st2					    text,
+   cust_rec_city					    text,
+   cust_rec_st					    text,
+   cust_rec_zip					    text,
+   cust_rec_title 				    text,
+   cust_rec_ph_num				    text,
+   tres_nm					    text,
+   tres_st1					    text,
+   tres_st2					    text,
+   tres_city					    text,
+   tres_st					    text,
+   tres_zip					    text,
+   tres_title					    text,
+   tres_ph_num					    text,
+   designated_agent_nm				    text,
+   designated_agent_st1				    text,
+   designated_agent_st2				    text,
+   designated_agent_city				    text,
+   designated_agent_st				    text,
+   designated_agent_zip				    text,
+   designated_agent_title 			    text,
+   designated_agent_ph_num			    text,
+   bank_depository_nm				    text,
+   bank_depository_st1				    text,
+   bank_depository_st2				    text,
+   bank_depository_city				    text,
+   bank_depository_st				    text,
+   bank_depository_zip				    text,
+   sec_bank_depository_nm 			    text,
+   sec_bank_depository_st1			    text,
+   sec_bank_depository_st2			    text,
+   sec_bank_depository_city			    text,
+   sec_bank_depository_st 			    text,
+   sec_bank_depository_zip			    text,
+   tres_sign_nm					    text,
+   tres_sign_dt					    timestamp without time zone,
+   cmte_email					    text,
+   cmte_web_url					    text,
+   receipt_dt					    timestamp without time zone,
+   filing_freq					    text,
+   cmte_dsgn					    text,
+   qual_dt					    timestamp without time zone,
+   cmte_fax					    text,
+   efiling_cmte_tp				    text,
+   rpt_yr 					    integer,
+   leadership_pac 				    text,
+   affiliated_relationship_cd			    text,
+   cmte_email_chg_flg				    text,
+   cmte_url_chg_flg				    text,
+   lobbyist_registrant_pac			    text,
+   affiliated_cand_id				    text,
+   affiliated_cand_l_nm				    text,
+   affiliated_cand_f_nm				    text,
+   affiliated_cand_m_nm				    text,
+   affiliated_cand_prefix 			    text,
+   affiliated_cand_suffix 			    text,
+   cand_l_nm					    text,
+   cand_f_nm					    text,
+   cand_m_nm					    text,
+   cand_prefix					    text,
+   cand_suffix					    text,
+   cust_rec_l_nm					    text,
+   cust_rec_f_nm					    text,
+   cust_rec_m_nm					    text,
+   cust_rec_prefix				    text,
+   cust_rec_suffix				    text,
+   tres_l_nm					    text,
+   tres_f_nm					    text,
+   tres_m_nm					    text,
+   tres_prefix					    text,
+   tres_suffix					    text,
+   designated_agent_l_nm				    text,
+   designated_agent_f_nm				    text,
+   designated_agent_m_nm				    text,
+   designated_agent_prefix			    text,
+   designated_agent_suffix			    text,
+   f3l_filing_freq				    text,
+   begin_image_num				    text,
+   end_image_num					    text,
+   sub_id 					          bigint,
+   etl_invalid_flg				    text,
+   etl_complete_date				    timestamp without time zone,
+   filing_type					    text,
+   record_ind					    text,
+   load_date				   timestamp without time zone not null,
+   update_date					    timestamp without time zone
+) SERVER oradb OPTIONS (schema 'PROCESSED', table 'FORM_1');
 
 ALTER TABLE public.sched_l OWNER TO "ec2-user";
 
