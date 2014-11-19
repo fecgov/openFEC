@@ -11,20 +11,20 @@ GRANT USAGE ON FOREIGN SERVER rds TO openfec;
 
 DROP USER MAPPING FOR "openfec" SERVER rds;
 CREATE USER MAPPING FOR "openfec" SERVER rds
-          OPTIONS (user 'openfec', 
+          OPTIONS (user 'openfec',
                    password :rds_password);
-                   
+
 DROP USER MAPPING FOR "ec2-user" SERVER rds;
 CREATE USER MAPPING FOR "ec2-user" SERVER rds
-          OPTIONS (user 'openfec', 
+          OPTIONS (user 'openfec',
                    password :rds_password);
- 
+
 
 DROP SCHEMA public;
 CREATE SCHEMA public;
 
 DROP FOREIGN TABLE public.pinglog;
-CREATE FOREIGN TABLE public.pinglog 
+CREATE FOREIGN TABLE public.pinglog
 ( at timestamp, up boolean
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'pinglog');
 
@@ -1907,7 +1907,125 @@ CREATE FOREIGN TABLE public.sched_l (
     update_date timestamp without time zone
 ) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_l');
 
+CREATE FOREIGN TABLE public.form_1 (
+   form_1_sk				   bigint,
+   form_tp					    text,
+   cmte_id					    text,
+   cmte_nm					    text,
+   cmte_st1					    text,
+   cmte_st2					    text,
+   cmte_city					    text,
+   cmte_st					    text,
+   cmte_zip					    text,
+   submit_dt					    timestamp without time zone,
+   cmte_nm_chg_flg				    text,
+   cmte_addr_chg_flg				    text,
+   cmte_tp					    text,
+   cand_id					    text,
+   cand_nm					    text,
+   cand_office					    text,
+   cand_office_st 				    text,
+   cand_office_district				    text,
+   cand_pty_affiliation				    text,
+   cand_pty_tp					    text,
+   affiliated_cmte_id				    text,
+   affiliated_cmte_nm				    text,
+   affiliated_cmte_st1				    text,
+   affiliated_cmte_st2				    text,
+   affiliated_cmte_city				    text,
+   affiliated_cmte_st				    text,
+   affiliated_cmte_zip				    text,
+   cmte_rltshp					    text,
+   org_tp 					    text,
+   cust_rec_nm					    text,
+   cust_rec_st1					    text,
+   cust_rec_st2					    text,
+   cust_rec_city					    text,
+   cust_rec_st					    text,
+   cust_rec_zip					    text,
+   cust_rec_title 				    text,
+   cust_rec_ph_num				    text,
+   tres_nm					    text,
+   tres_st1					    text,
+   tres_st2					    text,
+   tres_city					    text,
+   tres_st					    text,
+   tres_zip					    text,
+   tres_title					    text,
+   tres_ph_num					    text,
+   designated_agent_nm				    text,
+   designated_agent_st1				    text,
+   designated_agent_st2				    text,
+   designated_agent_city				    text,
+   designated_agent_st				    text,
+   designated_agent_zip				    text,
+   designated_agent_title 			    text,
+   designated_agent_ph_num			    text,
+   bank_depository_nm				    text,
+   bank_depository_st1				    text,
+   bank_depository_st2				    text,
+   bank_depository_city				    text,
+   bank_depository_st				    text,
+   bank_depository_zip				    text,
+   sec_bank_depository_nm 			    text,
+   sec_bank_depository_st1			    text,
+   sec_bank_depository_st2			    text,
+   sec_bank_depository_city			    text,
+   sec_bank_depository_st 			    text,
+   sec_bank_depository_zip			    text,
+   tres_sign_nm					    text,
+   tres_sign_dt					    timestamp without time zone,
+   cmte_email					    text,
+   cmte_web_url					    text,
+   receipt_dt					    timestamp without time zone,
+   filing_freq					    text,
+   cmte_dsgn					    text,
+   qual_dt					    timestamp without time zone,
+   cmte_fax					    text,
+   efiling_cmte_tp				    text,
+   rpt_yr 					    integer,
+   leadership_pac 				    text,
+   affiliated_relationship_cd			    text,
+   cmte_email_chg_flg				    text,
+   cmte_url_chg_flg				    text,
+   lobbyist_registrant_pac			    text,
+   affiliated_cand_id				    text,
+   affiliated_cand_l_nm				    text,
+   affiliated_cand_f_nm				    text,
+   affiliated_cand_m_nm				    text,
+   affiliated_cand_prefix 			    text,
+   affiliated_cand_suffix 			    text,
+   cand_l_nm					    text,
+   cand_f_nm					    text,
+   cand_m_nm					    text,
+   cand_prefix					    text,
+   cand_suffix					    text,
+   cust_rec_l_nm					    text,
+   cust_rec_f_nm					    text,
+   cust_rec_m_nm					    text,
+   cust_rec_prefix				    text,
+   cust_rec_suffix				    text,
+   tres_l_nm					    text,
+   tres_f_nm					    text,
+   tres_m_nm					    text,
+   tres_prefix					    text,
+   tres_suffix					    text,
+   designated_agent_l_nm				    text,
+   designated_agent_f_nm				    text,
+   designated_agent_m_nm				    text,
+   designated_agent_prefix			    text,
+   designated_agent_suffix			    text,
+   f3l_filing_freq				    text,
+   begin_image_num				    text,
+   end_image_num					    text,
+   sub_id 					          bigint,
+   etl_invalid_flg				    text,
+   etl_complete_date				    timestamp without time zone,
+   filing_type					    text,
+   record_ind					    text,
+   load_date				   timestamp without time zone not null,
+   update_date					    timestamp without time zone
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_1');
+
 GRANT ALL PRIVILEGES ON SCHEMA public TO openfec;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO openfec;
-
-
