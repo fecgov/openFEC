@@ -2,6 +2,8 @@
 # FEC API Documentation
 ## Candidate
 
+Provides descriptive information about campaign finance report filers.
+
 ## Supported parameters for candidate
 
 | Parameter | Description |
@@ -159,9 +161,119 @@ The two-letter postal abbreviation for the state
 
 ## Sample output
 
+Sample call
+```
+http://localhost:5000/candidate?office=H&state=CA&name=JENSEN&fields=*
+```
 
+Sample response
+```
+{
+    "api_version": "0.2",
+    "pagination": {
+        "count": 2,
+        "page": 1,
+        "pages": 1,
+        "per_page": 2
+    },
+    "results": [
+        {
+            "candidate_id": "H0CA02146",
+            "elections": [
+                {
+                    "district": "02",
+                    "election_year": "2010",
+                    "office_sought": "House",
+                    "party_affiliation": "Invalid Party Code",
+                    "state": "CA"
+                }
+            ],
+            "mailing_addresses": [
+                {
+                    "city": "DURHAM ",
+                    "expire_date": "2012-10-23",
+                    "state": "CA",
+                    "street_1": "PO BOX 156 ",
+                    "street_2": null,
+                    "zip": "95938"
+                },
+                {
+                    "city": "DURHAM ",
+                    "state": "CA",
+                    "street_1": "PO BOX 156",
+                    "street_2": null,
+                    "zip": "95938"
+                }
+            ],
+            "name": {
+                "full_name": "JENSEN, MARK A.",
+                "name_1": "MARK A.",
+                "name_2": "JENSEN"
+            }
+        },
+        {
+            "candidate_id": "H2CA08172",
+            "elections": [
+                {
+                    "candidate_inactive": null,
+                    "candidate_status": "candidate",
+                    "district": "08",
+                    "election_year": "2012",
+                    "incumbent_challenge": "challenger",
+                    "office_sought": "House",
+                    "party_affiliation": "Republican Party",
+                    "primary_committee": {
+                        "committee_id": "C00512806",
+                        "designation": "Principal campaign committee",
+                        "designation_code": "P",
+                        "type": "House",
+                        "type_code": "H"
+                    },
+                    "state": "CA"
+                }
+            ],
+            "mailing_addresses": [
+                {
+                    "city": "HESPERIA",
+                    "expire_date": "2010-10-23",
+                    "state": "CA",
+                    "street_1": "8075 E AVE",
+                    "street_2": null,
+                    "zip": "92345"
+                },
+                {
+                    "city": "HESPERIA",
+                    "expire_date": "2011-10-23",
+                    "state": "CA",
+                    "street_1": "8075 E AVE",
+                    "street_2": null,
+                    "zip": "92345"
+                },
+                {
+                    "city": "HESPERIA",
+                    "expire_date": "2012-10-23",
+                    "state": "CA",
+                    "street_1": "P.O. BOX 400346",
+                    "street_2": null,
+                    "zip": "92340"
+                },
+                {
+                    "city": "HESPERIA",
+                    "state": "CA",
+                    "street_1": "P.O. BOX 400346",
+                    "street_2": null,
+                    "zip": "92340"
+                }
+            ],
+            "name": {
+                "full_name": "JENSEN, WILLIAM O'NEIL JR",
+                "name_1": "WILLIAM O'NEIL JR",
+                "name_2": "JENSEN"
+            }
+        }
+    ]
+}
 
-
-
+```
 
 ---

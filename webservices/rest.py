@@ -114,7 +114,7 @@ def natural_number(n):
     return result
 
 
-def assign_formatting(self, data_dict, page_data):
+def assign_formatting(self, data_dict, page_data, year):
     args = self.parser.parse_args()
     if args['fields'] == None:
         fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
@@ -122,9 +122,9 @@ def assign_formatting(self, data_dict, page_data):
         fields =  args['fields'].split(',')
 
     if self.table_name_stem == 'cand':
-        return format_candids(data_dict, page_data, fields)
+        return format_candids(data_dict, page_data, fields, year)
     elif self.table_name_stem == 'cmte':
-        return format_committees(data_dict, page_data, fields)
+        return format_committees(data_dict, page_data, fields, year)
     else:
         return data_dict
 
@@ -154,7 +154,7 @@ def cleantext(text):
         return text
 
 
-def format_candids(data, page_data, fields):
+def format_candids(data, page_data, fields, default_year):
     results = []
 
     if 'elections' in fields:
@@ -236,6 +236,7 @@ def format_candids(data, page_data, fields):
                 elections[year]['state'] = office['dimoffice']['office_state']
             if 'party_affiliation'in fields:
                 elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
+                elections[year]['party_code'] = office['dimparty']['party_affiliation']
 
         # status information
 
@@ -292,12 +293,17 @@ def format_candids(data, page_data, fields):
         if len(other_names) > 0 and ('name' in fields):
             cand_data['name']['other_names'] = other_names
 
+
         if 'district'in fields or 'party_affiliation'in fields or 'primary_committee'in fields or 'affiliated_committees'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'candidate_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
 
             cand_data['elections'] = []
             years = []
             for year in elections:
-                years.append(year)
+                if default_year is not None:
+                    if str(default_year) == year:
+                        years.append(year)
+                else:
+                    years.append(year)
             years.sort(reverse=True)
             for year in years:
                 elections[year]['election_year'] = year
@@ -307,8 +313,8 @@ def format_candids(data, page_data, fields):
 
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
-
-def format_committees(data, page, fields):
+# still need to implement year
+def format_committees(data, page, fields, year):
     results = []
     for cmte in data:
         committee = []
@@ -331,16 +337,6 @@ def format_committees(data, page, fields):
             record['address'] = address
             record['email'] = item['cmte_email']
             record['web_address'] = item['cmte_web_url']
-
-            # We don't have party info so I am going to mock up what it would be like
-            name = str(item['cmte_nm']).upper()
-            if 'DEMOCRAT' in name:
-                record['fake_party'] = 'Democratic Party'
-                record['fake_party_code'] = 'DEM'
-            if 'REPUBLICAN' in name:
-                record['fake_party'] = 'Republican Party'
-                record['fake_party_code'] = 'REP'
-
 
             custodian_mappings = [
                 ('cmte_custodian_city', 'city'),
@@ -437,6 +433,16 @@ def format_committees(data, page, fields):
                 statuses.append(status)
             record['status'] = sorted(statuses, key=lambda k: k['receipt_date'], reverse=True)
 
+            # We don't have party info so I am going to mock up what it would be like
+            if record['status'] and record['status'][0]["type_code"] in ['X', 'Y']:
+                name = str(item['cmte_nm']).upper()
+                if 'DEMOCRAT' in name:
+                    record['fake_party'] = 'Democratic Party'
+                    record['fake_party_code'] = 'DEM'
+                if 'REPUBLICAN' in name:
+                    record['fake_party'] = 'Republican Party'
+                    record['fake_party_code'] = 'REP'
+
             committee.append(record)
 
         results.append(committee)
@@ -446,7 +452,7 @@ def format_committees(data, page, fields):
 
 
 class SingleResource(restful.Resource):
-
+    # add fields and year to this
     def get(self, id):
         overall_start_time = time.time()
         qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
@@ -459,10 +465,8 @@ class SingleResource(restful.Resource):
         data_dict = as_dicts(data)
         page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
         args = self.parser.parse_args()
-        results = assign_formatting(self, data_dict, page_data)
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return {'api_version':"0.2", 'pagination':page_data, 'results': results}
-
+        return assign_formatting(self, data_dict, page_data, None)
 
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
@@ -479,8 +483,6 @@ class Searchable(restful.Resource):
 
         for arg in args:
             if args[arg]:
-                if arg == 'year':
-                  print "Found year "
                 if arg == 'q':
                     print "found query"
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
@@ -536,8 +538,12 @@ class Searchable(restful.Resource):
 
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
+        # make this better later
+        if not args.has_key("year"):
+            args['year'] = None
+
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return assign_formatting(self, data_dict, page_data)
+        return assign_formatting(self, data_dict, page_data, args['year'])
 
 
 class Candidate(object):
@@ -565,8 +571,9 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
-    parser.add_argument('year', type=int, help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=int, default=2012, help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument('district', type=int, help='Two digit district number')
 
 
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
@@ -575,9 +582,9 @@ class CandidateSearch(Searchable, Candidate):
                       string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
                       "district":
                       string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
-                      "state": string.Template("exists(dimcandproperties?cand_st~'$arg')"),
+                      "state": string.Template("exists(dimcandoffice?dimoffice.office_state~'$arg')"),
                       "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
-                      "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
+                      "year": string.Template("exists(dimcandoffice?cand_election_yr='$arg')"),
                       "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
                       }
 
@@ -600,12 +607,7 @@ class CommitteeSearch(Searchable, Committee):
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                       "fec_id": string.Template("cmte_id='$arg'"),
                       # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
-                      "candidate":
-                      string.Template("exists(dimcmteproperties?fst_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?sec_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?trd_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?frth_cand_nm~'$arg')"
-                                      "|exists(dimcmteproperties?fith_cand_nm~'$arg')"),
+                      "candidate_id":string.Template("exists(dimlinkages?cand_id~'$arg')"),
                       "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
                       "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
                       "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
@@ -620,7 +622,7 @@ class CommitteeSearch(Searchable, Committee):
     parser.add_argument('fec_id', type=str, help="Committee's FEC ID")
     parser.add_argument('state', type=str, help='U. S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
-    parser.add_argument('candidate', type=str, help="Associated candidate's name (full or partial)")
+    parser.add_argument('candidate_id', type=str, help="Associated candidate's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')

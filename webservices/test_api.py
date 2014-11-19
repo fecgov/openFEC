@@ -72,14 +72,13 @@ class OverallTest(unittest.TestCase):
 
     def test_fields(self):
         # testing key defaults
-        response = self._results('/candidate?candidate_id=P80003338')
+        response = self._results('/candidate?candidate_id=P80003338&year=2012')
         self.assertEquals(response[0]['candidate_id'], 'P80003338')
         self.assertEquals(response[0]['name']['full_name'], 'OBAMA, BARACK')
         self.assertEquals(response[0]['elections'][0]['party_affiliation'], "Democratic Party")
         self.assertEquals(response[0]['elections'][0]['primary_committee']['committee_id'], 'C00431445')
         self.assertEquals(response[0]['elections'][0]['primary_committee']['designation'], "Principal campaign committee")
         self.assertEquals(response[0]['elections'][0]['state'], "US")
-        self.assertEquals(response[0]['elections'][1]['incumbent_challenge'], 'open_seat')
         self.assertEquals(response[0]['elections'][0]['district'], None)
         self.assertEquals(response[0]['elections'][0]['incumbent_challenge'], 'incumbent')
         self.assertEquals(response[0]['elections'][0]['primary_committee']['designation'], 'Principal campaign committee')
@@ -119,19 +118,36 @@ class OverallTest(unittest.TestCase):
     def test_committee_basics(self):
         response = self._response('/committee')
         results = response['results']
-        self.assertEquals(results[0][0].has_key('committee_id'), True)
-        self.assertEquals(results[0][0].has_key('form_type'), True)
-        self.assertEquals(results[0][0].has_key('name'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('designation'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('designation_code'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('type_code'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('type'), True)
+        # not all records in the test db have statuses; find one that does
+        result = [r[0] for r in results if r[0]['status']][0]
+        self.assertEquals(result.has_key('committee_id'), True)
+        self.assertEquals(result.has_key('form_type'), True)
+        self.assertEquals(result.has_key('expire_date'), True)
+        self.assertEquals(result.has_key('name'), True)
+        self.assertEquals(result['status'][0].has_key('designation'), True)
+        self.assertEquals(result['status'][0].has_key('designation_code'), True)
+        self.assertEquals(result['status'][0].has_key('type_code'), True)
+        self.assertEquals(result['status'][0].has_key('type'), True)
+        self.assertEquals(result.has_key('address'), True)
+
+    def test_committee_candidate(self):
+        response = self._response('/committee/C00431445')
+        print response['results']
+        cand = response['results'][0][0]['candidates'][0]
+
+        fields = ('candidate_id', 'designation','designation_code',
+                    'election_year', 'expire_date', 'link_date', 'type', 'type_code'
+        )
+
+        for field in fields:
+            self.assertEquals(cand.has_key(field), True)
 
     def test_committee_filter(self):
         response = self._response('/committee')
         type_response = self._response('/committee?type_code=P')
         desig_response = self._response('/committee?designation_code=P')
         org_response = self._response('/committee?organization_type_code=C')
+
 
         original_count = response['pagination']['count']
         type_count = type_response['pagination']['count']
