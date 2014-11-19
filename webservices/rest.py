@@ -124,7 +124,7 @@ def assign_formatting(self, data_dict, page_data, year):
     if self.table_name_stem == 'cand':
         return format_candids(data_dict, page_data, fields, year)
     elif self.table_name_stem == 'cmte':
-        return format_committees(data_dict, page_data, fields)
+        return format_committees(data_dict, page_data, fields, year)
     else:
         return data_dict
 
@@ -313,8 +313,8 @@ def format_candids(data, page_data, fields, default_year):
 
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
-
-def format_committees(data, page, fields):
+# still need to implement year
+def format_committees(data, page, fields, year):
     results = []
     for cmte in data:
         committee = []
@@ -452,7 +452,7 @@ def format_committees(data, page, fields):
 
 
 class SingleResource(restful.Resource):
-
+    # add fields and year to this
     def get(self, id):
         overall_start_time = time.time()
         qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
@@ -465,10 +465,8 @@ class SingleResource(restful.Resource):
         data_dict = as_dicts(data)
         page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
         args = self.parser.parse_args()
-        results = assign_formatting(self, data_dict, page_data)
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return {'api_version':"0.2", 'pagination':page_data, 'results': results}
-
+        return assign_formatting(self, data_dict, page_data, None)
 
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
@@ -586,7 +584,7 @@ class CandidateSearch(Searchable, Candidate):
                       string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
                       "state": string.Template("exists(dimcandoffice?dimoffice.office_state~'$arg')"),
                       "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
-                      "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
+                      "year": string.Template("exists(dimcandoffice?cand_election_yr='$arg')"),
                       "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
                       }
 

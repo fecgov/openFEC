@@ -15,11 +15,7 @@ Endpoint:
 | type_code=   |one-letter code of committee type  |
 | designation_code=  |one-letter code of committee designation  |
 | organization_type_code= |one-letter code of organization type |
-
-
-
-\# I don't think this one is reliable
-| candidate=  | Associated candidate's name |
+| candidate_id=  | Associated candidate's id number |
 
 ## Fields
 
