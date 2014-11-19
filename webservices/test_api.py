@@ -118,15 +118,17 @@ class OverallTest(unittest.TestCase):
     def test_committee_basics(self):
         response = self._response('/committee')
         results = response['results']
-        self.assertEquals(results[0][0].has_key('committee_id'), True)
-        self.assertEquals(results[0][0].has_key('form_type'), True)
-        self.assertEquals(results[0][0].has_key('expire_date'), True)
-        self.assertEquals(results[0][0].has_key('name'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('designation'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('designation_code'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('type_code'), True)
-        self.assertEquals(results[0][0]['status'][0].has_key('type'), True)
-        self.assertEquals(results[0][0].has_key('address'), True)
+        # not all records in the test db have statuses; find one that does
+        result = [r[0] for r in results if r[0]['status']][0]
+        self.assertEquals(result.has_key('committee_id'), True)
+        self.assertEquals(result.has_key('form_type'), True)
+        self.assertEquals(result.has_key('expire_date'), True)
+        self.assertEquals(result.has_key('name'), True)
+        self.assertEquals(result['status'][0].has_key('designation'), True)
+        self.assertEquals(result['status'][0].has_key('designation_code'), True)
+        self.assertEquals(result['status'][0].has_key('type_code'), True)
+        self.assertEquals(result['status'][0].has_key('type'), True)
+        self.assertEquals(result.has_key('address'), True)
 
     def test_committee_candidate(self):
         response = self._response('/committee/C00431445')

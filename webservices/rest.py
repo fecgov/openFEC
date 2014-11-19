@@ -434,7 +434,7 @@ def format_committees(data, page, fields, year):
             record['status'] = sorted(statuses, key=lambda k: k['receipt_date'], reverse=True)
 
             # We don't have party info so I am going to mock up what it would be like
-            if record['status'][0]["type_code"] in ['X', 'Y']:
+            if record['status'] and record['status'][0]["type_code"] in ['X', 'Y']:
                 name = str(item['cmte_nm']).upper()
                 if 'DEMOCRAT' in name:
                     record['fake_party'] = 'Democratic Party'
