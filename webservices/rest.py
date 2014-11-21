@@ -469,7 +469,7 @@ class SingleResource(restful.Resource):
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
         return assign_formatting(self, data_dict, page_data, None)
 
-_child_table_pattern = re.compile(r"^exists\((\a+)\?(.*)")
+_child_table_pattern = re.compile("^exists\((\w+)\?(.*?)\)\s*$")
 def combine_filters(elements):
     """
     For HTSQL filter elements like "exists(tablename?...)", 
@@ -481,12 +481,12 @@ def combine_filters(elements):
     for element in elements:
         match = _child_table_pattern.search(element)
         if match:
-            (tablename, condition) = (match.groups(1), match.groups(2))
-            conditions[tablename] = condition
+            (tablename, condition) = match.groups()
+            conditions[tablename].append(condition)
         else:
             results.append(element)
-    for (tablename, conditions) in conditions.items():
-        condition = "&".join("(%s)" % c for c in conditions)
+    for (tablename, table_conditions) in conditions.items():
+        condition = "&".join("(%s)" % c for c in table_conditions)
         results.append("exists(%s?%s)" % (tablename, condition))
     return results
            
