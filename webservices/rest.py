@@ -36,6 +36,7 @@ Supported for /committee ::
     year=        The four-digit election year
 
 """
+from collections import defaultdict
 import os
 import re
 import string
@@ -468,6 +469,28 @@ class SingleResource(restful.Resource):
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
         return assign_formatting(self, data_dict, page_data, None)
 
+_child_table_pattern = re.compile("^exists\((\w+)\?(.*?)\)\s*$")
+def combine_filters(elements):
+    """
+    For HTSQL filter elements like "exists(tablename?...)", 
+    collapse multiple filters on a single table into 
+    one filter with all conditions combined into an AND.
+    """
+    conditions = defaultdict(list)
+    results = []
+    for element in elements:
+        match = _child_table_pattern.search(element)
+        if match:
+            (tablename, condition) = match.groups()
+            conditions[tablename].append(condition)
+        else:
+            results.append(element)
+    for (tablename, table_conditions) in conditions.items():
+        condition = "&".join("(%s)" % c for c in table_conditions)
+        results.append("exists(%s?%s)" % (tablename, condition))
+    return results
+           
+
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
                       FROM   dim%s_fulltext
@@ -511,6 +534,7 @@ class Searchable(restful.Resource):
         qry = self.htsql_qry
 
         if elements:
+            elements = combine_filters(elements)
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
