@@ -75,6 +75,8 @@ app = Flask(__name__)
 api = restful.Api(app)
 
 
+# Dictionaries used for spelling out FEC codes
+
 cmte_decoder = {'P': 'Presidential',
                 'H': 'House',
                 'S': 'Senate',
@@ -101,6 +103,7 @@ designation_decoder = {'A': 'Authorized by a candidate',
 }
 
 
+# Formatting helpers
 
 # DEFAULTING TO 2012 FOR THE DEMO
 def default_year():
@@ -114,20 +117,14 @@ def natural_number(n):
         raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
     return result
 
-
-def assign_formatting(self, data_dict, page_data, year):
-    args = self.parser.parse_args()
-    if args['fields'] == None:
-        fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
+def cleantext(text):
+    if type(text) is str:
+        text = re.sub(' +',' ', text)
+        text = re.sub('\\r|\\n','', text)
+        text = text.strip()
+        return text
     else:
-        fields =  args['fields'].split(',')
-
-    if self.table_name_stem == 'cand':
-        return format_candids(data_dict, page_data, fields, year)
-    elif self.table_name_stem == 'cmte':
-        return format_committees(data_dict, page_data, fields, year)
-    else:
-        return data_dict
+        return text
 
 
 def as_dicts(data):
@@ -155,6 +152,22 @@ def cleantext(text):
         return text
 
 
+def assign_formatting(self, data_dict, page_data, year):
+    args = self.parser.parse_args()
+    if args['fields'] == None:
+        fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
+    else:
+        fields =  args['fields'].split(',')
+
+    if self.table_name_stem == 'cand':
+        return format_candids(data_dict, page_data, fields, year)
+    elif self.table_name_stem == 'cmte':
+        return format_committees(data_dict, page_data, fields, year)
+    else:
+        return data_dict
+
+
+# Candidate formatting
 def format_candids(data, page_data, fields, default_year):
     results = []
 
@@ -314,6 +327,7 @@ def format_candids(data, page_data, fields, default_year):
 
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
+# committee formatting
 # still need to implement year
 def format_committees(data, page, fields, year):
     results = []
@@ -472,8 +486,8 @@ class SingleResource(restful.Resource):
 _child_table_pattern = re.compile("^exists\((\w+)\?(.*?)\)\s*$")
 def combine_filters(elements):
     """
-    For HTSQL filter elements like "exists(tablename?...)", 
-    collapse multiple filters on a single table into 
+    For HTSQL filter elements like "exists(tablename?...)",
+    collapse multiple filters on a single table into
     one filter with all conditions combined into an AND.
     """
     conditions = defaultdict(list)
@@ -489,7 +503,7 @@ def combine_filters(elements):
         condition = "&".join("(%s)" % c for c in table_conditions)
         results.append("exists(%s?%s)" % (tablename, condition))
     return results
-           
+
 
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
@@ -507,7 +521,6 @@ class Searchable(restful.Resource):
         for arg in args:
             if args[arg]:
                 if arg == 'q':
-                    print "found query"
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
                     qry = sa.sql.text(qry)
                     speedlogger.info('\nfulltext query: \n%s' % qry)
@@ -525,10 +538,19 @@ class Searchable(restful.Resource):
                     page_num = args[arg]
                 elif arg == 'per_page':
                     per_page = args[arg]
+
+                # With the mapping, break this out into a list and pass them into the query
                 elif arg == 'fields':
                     fields = args[arg]
+
                 else:
-                    element = self.field_name_map[arg].substitute(arg=args[arg])
+                    if ',' in str(args[arg]):
+                        arg_list = str(args[arg]).split(',')
+                        arguement = "{'" + "','".join(arg_list) + "'}"
+                    else:
+                        arguement = "'%s'" % (args[arg])
+
+                    element = self.field_name_map[arg].substitute(arg=arguement)
                     elements.append(element)
 
         qry = self.htsql_qry
@@ -542,7 +564,9 @@ class Searchable(restful.Resource):
             count_qry = "/count(%s)" % self.viewable_table_name
 
         offset = per_page * (page_num-1)
+
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
+
 
         print("\n%s\n" % (qry))
         speedlogger.info('\n\nHTSQL query: \n%s' % qry)
@@ -583,6 +607,18 @@ class CandidateResource(SingleResource, Candidate):
     parser = reqparse.RequestParser()
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
+    candidate_variable_mapping = [
+        # (API_output, FEC_input)
+        ("candidate_id", "cand_id"),
+        ("fec_id","cand_id"),
+        ("office", "office_tp"),
+        ("district", "office_district"),
+        ("state", "office_state"),
+        ("name","cand_nm"),
+        ("year", "cand_election_yr"),
+        ("party", "party_affiliation"),
+    ]
+
 class CandidateSearch(Searchable, Candidate):
 
     parser = reqparse.RequestParser()
@@ -597,19 +633,19 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
     parser.add_argument('year', type=int, default=2012, help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
-    parser.add_argument('district', type=int, help='Two digit district number')
+    parser.add_argument('district', type=str, help='Two digit district number')
 
 
-    field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
-                      "fec_id": string.Template("cand_id='$arg'"),
+    field_name_map = {"candidate_id": string.Template("cand_id=$arg"),
+                      "fec_id": string.Template("cand_id=$arg"),
                       "office":
-                      string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
+                      string.Template("exists(dimcandoffice?dimoffice.office_tp~$arg)"),
                       "district":
-                      string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
-                      "state": string.Template("exists(dimcandoffice?dimoffice.office_state~'$arg')"),
-                      "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
-                      "year": string.Template("exists(dimcandoffice?cand_election_yr='$arg')"),
-                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
+                      string.Template("exists(dimcandoffice?dimoffice.office_district~$arg)"),
+                      "state": string.Template("exists(dimcandoffice?dimoffice.office_state~$arg)"),
+                      "name": string.Template("exists(dimcandproperties?cand_nm~$arg)"),
+                      "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
+                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~$arg)")
                       }
 
 
@@ -628,16 +664,16 @@ class CommitteeResource(SingleResource, Committee):
 
 class CommitteeSearch(Searchable, Committee):
 
-    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
-                      "fec_id": string.Template("cmte_id='$arg'"),
+    field_name_map = {"committee_id": string.Template("cmte_id=$arg"),
+                      "fec_id": string.Template("cmte_id=$arg"),
                       # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
-                      "candidate_id":string.Template("exists(dimlinkages?cand_id~'$arg')"),
-                      "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
-                      "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
-                      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
-                      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~'$arg')"),
-                      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~'$arg')"),
-                      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
+                      "candidate_id":string.Template("exists(dimlinkages?cand_id~$arg)"),
+                      "state": string.Template("exists(dimcmteproperties?cmte_st~$arg)"),
+                      "name": string.Template("exists(dimcmteproperties?cmte_nm~$arg)"),
+                      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~$arg)"),
+                      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~$arg)"),
+                      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~$arg)"),
+                      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~$arg)&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
     }
 
     parser = reqparse.RequestParser()
