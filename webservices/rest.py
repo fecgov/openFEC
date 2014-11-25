@@ -243,14 +243,15 @@ def format_candids(data, page_data, fields, default_year):
             if not elections.has_key(year):
                 elections[year] = {}
             if 'office_sought' in fields:
-                elections[year]['office_sought'] = office['dimoffice']['office_tp_desc']
+                elections[year]['office_sought_full'] = office['dimoffice']['office_tp_desc']
+                elections[year]['office_sought'] = office['dimoffice']['office_tp']
             if 'district'in fields:
                 elections[year]['district'] = office['dimoffice']['office_district']
             if 'state' in fields:
                 elections[year]['state'] = office['dimoffice']['office_state']
             if 'party_affiliation'in fields:
                 elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
-                elections[year]['party_code'] = office['dimparty']['party_affiliation']
+                elections[year]['party'] = office['dimparty']['party_affiliation']
 
         # status information
 
@@ -539,9 +540,20 @@ class Searchable(restful.Resource):
                 elif arg == 'per_page':
                     per_page = args[arg]
 
-                # With the mapping, break this out into a list and pass them into the query
                 elif arg == 'fields':
-                    fields = args[arg]
+                    if ',' in str(args[arg]):
+                        field_list = args[arg].split(',')
+                        qry_fields = []
+                        for field in field_list:
+                            for l, n in self.field_mapping:
+                                if l == field:
+                                    qry_fields.append(n)
+                        self.fields = "{'" + ",".join(qry_fields) + "'}"
+                    else:
+                        for l, n in self.field_mapping:
+                            if l == args[arg]:
+                                self.fields = "'" + args[arg] + "'"
+
 
                 else:
                     if ',' in str(args[arg]):
@@ -595,29 +607,63 @@ class Searchable(restful.Resource):
 
 
 class Candidate(object):
-
+    fields = "{'cand_id','cand_nm','cmte_dsgn','cmte_tp'}"
     table_name_stem = 'cand'
     viewable_table_name = "(dimcand?exists(dimcandproperties)&exists(dimcandoffice))"
-    htsql_qry = """%s{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
+    htsql_qry = """%s{%s,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
                       /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as affiliated_committees,
-                      /dimcandstatusici} """ % viewable_table_name
+                      /dimcandstatusici} """ % (viewable_table_name, fields)
+
+    # Field mappings (API_output, FEC_input)
+    # basic candidate information
+    dimcand_mapping = [
+        ('candidate_id', 'cand_id'),
+        ('fec_id','cand_id'),
+        ('name', 'cand_nm'),
+    ]
+    #affiliated committees
+    cand_committee_mapping = [
+        ('committee_id', 'cmte_id'),
+        ('designation_code', 'cmte_dsgn'),
+        ('type_code', 'cmte_tp'),
+    ]
+    # dimcandoffice
+    office_mapping = [
+        ('year', 'cand_election_yr'),
+        ('office', 'office_tp'),
+        ('district', 'office_district'),
+        ('state', 'office_state'),
+        ('office_sought_full', 'office_tp_desc'),
+        ('office_sought', 'office_tp'),
+        ('party', 'party_affiliation'),
+        ('party_affiliation', 'party_affiliation_desc'),
+    ]
+    # dimcandstatus
+    status_mapping = [
+        ('year', 'eleciton_year'),
+        ('candidate_inactive', 'cand_inactive_flg'),
+        ('candidate_status', 'cand_status'),
+        ('incumbent_challenge', 'ici_code'),
+    ]
+    # dimcandproperties
+    properties_mapping = [
+        ('street_1', 'cand_st1'),
+        ('street_2','cand_st2'),
+        ('city', 'cand_city'),
+        ('state', 'cand_st'),
+        ('zip', 'cand_zip'),
+        ('expire_date', 'expire_date'),
+    ]
+
+    # using the master mapping to ask for fields, using the sub mappings to format the data later
+    field_mapping = [('*', '*')] + dimcand_mapping + cand_committee_mapping + status_mapping + office_mapping + properties_mapping
+
 
 class CandidateResource(SingleResource, Candidate):
 
     parser = reqparse.RequestParser()
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
-    candidate_variable_mapping = [
-        # (API_output, FEC_input)
-        ("candidate_id", "cand_id"),
-        ("fec_id","cand_id"),
-        ("office", "office_tp"),
-        ("district", "office_district"),
-        ("state", "office_state"),
-        ("name","cand_nm"),
-        ("year", "cand_election_yr"),
-        ("party", "party_affiliation"),
-    ]
 
 class CandidateSearch(Searchable, Candidate):
 
