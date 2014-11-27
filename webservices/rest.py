@@ -199,7 +199,6 @@ def format_candids(data, page_data, fields, default_year):
               cand_data['name']['name_1'] = name.split(',')[1].strip()
               cand_data['name']['name_2'] = name.split(',')[0].strip()
 
-
         # Committee information
         if 'primary_committee' or 'affiliated_committees' in fields:
             for cmte in cand['affiliated_committees']:
@@ -540,28 +539,30 @@ class Searchable(restful.Resource):
                     page_num = args[arg]
                 elif arg == 'per_page':
                     per_page = args[arg]
-
                 elif arg == 'fields':
+                    print args[arg]
                     if ',' in str(args[arg]):
                         field_list = args[arg].split(',')
                     else:
                         field_list = [str(args[arg])]
                     #looking at each field the user requested
                     for field in field_list:
+                        show_fields = {}
                         #going through the different kinds of mappings and fields
-                        for maps, fields in self.maps_fields:
-                            # override defaults
-                            fields = ''
+                        for maps, field_name in self.maps_fields:
                             # for each mapping, see if there is a field match. If so, add it to the field list
+                            show_fields[field_name] = ''
                             for m in maps:
-                                if field == m[0]:
-                                    fields += m[1] + ','
-                            fields = "{" + fields + "},"
-
-                    element = self.field_name_map[arg].substitute(arg=arguement)
+                                if m[0] == field:
+                                    show_fields[field_name] = show_fields[field_name] + m[1] + ','
+                else:
+                    element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
 
-        qry = self.htsql_qry
+
+        qry = self.query_text(show_fields)
+
+        print "HERE: ",qry, "\n"
 
         if elements:
             elements = combine_filters(elements)
@@ -584,6 +585,8 @@ class Searchable(restful.Resource):
         count = htsql_conn.produce(count_qry)
 
         data_dict = as_dicts(data)
+
+        # page ingo
         data_count = int(count[0])
         pages = data_count/per_page
         if data_count % per_page != 0:
@@ -603,97 +606,107 @@ class Searchable(restful.Resource):
 
 class Candidate(object):
     # default fields for search
-    dimcand_fields = ''
-    properties_fields = 'cand_city'
-    office_fields = 'office_sk'
-    party_fields = 'party_affiliation'
-    cand_committee_link_fields = 'cmte_id'
-    status_fields = 'ici_code'
+    default_fields = {
+        'dimcand_fields': '',
+        'cand_committee_link_fields': 'cmte_id,cmte_dsgn,cmte_tp,cand_election_yr',
+        'office_fields': 'office_district,office_state,office_tp',
+        'party_fields': 'party_affiliation_desc,party_affiliation',
+        'status_fields': 'election_yr,cand_status,ici_code',
+        'properties_fields': 'cand_nm',
+    }
 
     # Query
     table_name_stem = 'cand'
     viewable_table_name = "(dimcand?exists(dimcandproperties)&exists(dimcandoffice))"
-    htsql_qry = """%s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
-                      /dimlinkages{%s} :as affiliated_committees,
-                      /dimcandstatusici{%s}}""" % (viewable_table_name, dimcand_fields, properties_fields, office_fields, party_fields, cand_committee_link_fields, status_fields )
+
+    def query_text(self, show_fields):
+        print show_fields['dimcand_fields'],
+        print show_fields['properties_fields'],
+        print show_fields['office_fields'],
+        print show_fields['party_fields'],
+        print show_fields['cand_committee_link_fields'],
+        print show_fields['status_fields'],
+        return """
+            %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
+                              /dimlinkages{%s} :as affiliated_committees,
+                              /dimcandstatusici{%s}}
+        """ % (
+                self.viewable_table_name,
+                show_fields['dimcand_fields'],
+                show_fields['properties_fields'],
+                show_fields['office_fields'],
+                show_fields['party_fields'],
+                show_fields['cand_committee_link_fields'],
+                show_fields['status_fields'],
+        )
+
 
     # Field mappings (API_output, FEC_input)
     # basic candidate information
-    dimcand_mapping = [
+    dimcand_mapping = (
         ('candidate_id', 'cand_id'),
         ('fec_id','cand_id'),
         ('form_type', 'form_tp'),
         ## we don't have this data yet
         #('expire_date','expire_date'),
         #('load_date','load_date'),
-    ]
+        ('*', '*'),
+    )
     #affiliated committees
-    cand_committee_link_mapping = [
+    cand_committee_link_mapping = (
         ('committee_id', 'cmte_id'),
         ('designation_code', 'cmte_dsgn'),
         ('type', 'cmte_tp'),
         ('year', 'cand_election_yr'),
-    ]
+        ('*', '*'),
+    )
     # dimoffice
-    office_mapping = [
+    office_mapping = (
         ('office', 'office_tp'),
         ('district', 'office_district'),
         ('state', 'office_state'),
         ('office_sought_full', 'office_tp_desc'),
         ('office_sought', 'office_tp'),
-    ]
+        ('*', '*'),
+    )
     #dimparty
-    party_mapping = [
+    party_mapping = (
         ('party', 'party_affiliation'),
         ('party_affiliation', 'party_affiliation_desc'),
-    ]
+        ('*', '*'),
+    )
     # dimcandstatus
-    status_mapping = [
-        ('year', 'eleciton_year'),
+    status_mapping = (
+        ('year', 'election_yr'),
         ('candidate_inactive', 'cand_inactive_flg'),
         ('candidate_status', 'cand_status'),
         ('incumbent_challenge', 'ici_code'),
-    ]
+        ('*', '*'),
+    )
     # dimcandproperties
-    properties_mapping = [
+    properties_mapping = (
+        ('name', 'cand_nm'),
         ('street_1', 'cand_st1'),
         ('street_2','cand_st2'),
         ('city', 'cand_city'),
         ('state', 'cand_st'),
         ('zip', 'cand_zip'),
         ('expire_date', 'expire_date'),
-    ]
+        ('*', '*'),
+    )
 
-    # connects mappings to fields
+    # connects mappings to field names
     maps_fields = (
-        (
-            dimcand_mapping,
-            dimcand_fields,
-        ),
-        (
-            cand_committee_link_mapping,
-            cand_committee_link_fields,
-        ),
-        (
-            office_mapping,
-            office_fields,
-        ),
-        (
-            party_mapping,
-            party_fields,
-        ),
-        (
-            status_mapping,
-            status_fields,
-        ),
-        (
-            properties_mapping,
-            properties_fields,
-        ),
+        (dimcand_mapping, 'dimcand_fields'),
+        (cand_committee_link_mapping, 'cand_committee_link_fields'),
+        (office_mapping, 'office_fields'),
+        (party_mapping, 'party_fields'),
+        (status_mapping,'status_fields'),
+        (properties_mapping, 'properties_fields'),
     )
 
     # using the master mapping to ask for fields, using the sub mappings to format the data later
-    full_field_mapping = [('*', '*')] + dimcand_mapping + cand_committee_link_mapping + status_mapping + party_mapping + office_mapping + properties_mapping
+    full_field_mapping = dimcand_mapping + cand_committee_link_mapping + status_mapping + party_mapping + office_mapping + properties_mapping
 
 
 class CandidateResource(SingleResource, Candidate):
@@ -719,17 +732,18 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('district', type=str, help='Two digit district number')
 
 
-    field_name_map = {"candidate_id": string.Template("cand_id=$arg"),
-                      "fec_id": string.Template("cand_id=$arg"),
-                      "office":
-                      string.Template("exists(dimcandoffice?dimoffice.office_tp~$arg)"),
-                      "district":
-                      string.Template("exists(dimcandoffice?dimoffice.office_district~$arg)"),
-                      "state": string.Template("exists(dimcandoffice?dimoffice.office_state~$arg)"),
-                      "name": string.Template("exists(dimcandproperties?cand_nm~$arg)"),
-                      "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
-                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~$arg)")
-                      }
+    field_name_map = {
+        "candidate_id": string.Template("cand_id=$arg"),
+        "fec_id": string.Template("cand_id=$arg"),
+        "office":
+        string.Template("exists(dimcandoffice?dimoffice.office_tp~$arg)"),
+        "district":
+        string.Template("exists(dimcandoffice?dimoffice.office_district~$arg)"),
+        "state": string.Template("exists(dimcandoffice?dimoffice.office_state~$arg)"),
+        "name": string.Template("exists(dimcandproperties?cand_nm~$arg)"),
+        "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
+        "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~$arg)")
+    }
 
 
 class Committee(object):
@@ -747,16 +761,17 @@ class CommitteeResource(SingleResource, Committee):
 
 class CommitteeSearch(Searchable, Committee):
 
-    field_name_map = {"committee_id": string.Template("cmte_id=$arg"),
-                      "fec_id": string.Template("cmte_id=$arg"),
-                      # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
-                      "candidate_id":string.Template("exists(dimlinkages?cand_id~$arg)"),
-                      "state": string.Template("exists(dimcmteproperties?cmte_st~$arg)"),
-                      "name": string.Template("exists(dimcmteproperties?cmte_nm~$arg)"),
-                      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~$arg)"),
-                      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~$arg)"),
-                      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~$arg)"),
-                      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~$arg)&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
+    field_name_map = {
+        "committee_id": string.Template("cmte_id=$arg"),
+      "fec_id": string.Template("cmte_id=$arg"),
+      # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
+      "candidate_id":string.Template("exists(dimlinkages?cand_id~$arg)"),
+      "state": string.Template("exists(dimcmteproperties?cmte_st~$arg)"),
+      "name": string.Template("exists(dimcmteproperties?cmte_nm~$arg)"),
+      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~$arg)"),
+      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~$arg)"),
+      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~$arg)"),
+      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~$arg)&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
     }
 
     parser = reqparse.RequestParser()
