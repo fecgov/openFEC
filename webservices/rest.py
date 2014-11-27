@@ -160,7 +160,7 @@ def assign_formatting(self, data_dict, page_data, year):
         fields =  args['fields'].split(',')
 
     if self.table_name_stem == 'cand':
-        return format_candids(data_dict, page_data, fields, year)
+        return format_candids(self, data_dict, page_data, fields, year)
     elif self.table_name_stem == 'cmte':
         return format_committees(data_dict, page_data, fields, year)
     else:
@@ -168,25 +168,24 @@ def assign_formatting(self, data_dict, page_data, year):
 
 
 # Candidate formatting
-def format_candids(data, page_data, fields, default_year):
+def format_candids(self, data, page_data, fields, default_year):
     results = []
     return data
 
-    if 'elections' in fields:
-        fields = fields + ['district', 'party_affiliation', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought', 'election_year']
-    elif fields == ['*']:
-        fields = ['name', 'candidate_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought', 'other_names', 'election_year']
+    # if 'elections' in fields:
+    #     fields = fields + ['district', 'party_affiliation', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought', 'election_year']
 
     for cand in data:
         #aggregating data for each election across the tables
         elections = {}
         cand_data = {}
 
+        for api_name, fec_name in self.dimcand_mapping:
+            if cand.has_key(fec_name):
+                cand_data[api_name] = cand_data[fec_name]
+
         if ('name' in fields) or ('full_name' in fields) or ('other_names' in fields):
             cand_data = {'name':{}}
-
-        if 'candidate_id' in fields:
-            cand_data['candidate_id'] = cand['cand_id']
 
         # nicknames are useful
         # Using most recent name as full name
@@ -200,6 +199,10 @@ def format_candids(data, page_data, fields, default_year):
               cand_data['name']['name_2'] = name.split(',')[0].strip()
 
         # Committee information
+        # for api_name, fec_name in self.cand_committee_link_mapping:
+        #     if cand.has_key(fec_name)
+        #         cand_data[api_name] = cand[fec_name]
+
         if 'primary_committee' or 'affiliated_committees' in fields:
             for cmte in cand['affiliated_committees']:
                 year = str(cmte['cand_election_yr'])
@@ -237,6 +240,7 @@ def format_candids(data, page_data, fields, default_year):
                         })
 
         # Office information
+
         for office in cand['dimcandoffice']:
             year = str(office['cand_election_yr'])
 
@@ -518,6 +522,7 @@ class Searchable(restful.Resource):
         args = self.parser.parse_args()
         elements = []
         page_num = 1
+        show_fields = self.default_fields
 
         for arg in args:
             if args[arg]:
@@ -545,24 +550,26 @@ class Searchable(restful.Resource):
                         field_list = args[arg].split(',')
                     else:
                         field_list = [str(args[arg])]
-                    #looking at each field the user requested
-                    for field in field_list:
-                        show_fields = {}
-                        #going through the different kinds of mappings and fields
-                        for maps, field_name in self.maps_fields:
+
+                    #going through the different kinds of mappings and fields
+                    for maps, field_name in self.maps_fields:
+                        show_fields[field_name] = ''
+                        #looking at each field the user requested
+                        for field in field_list:
                             # for each mapping, see if there is a field match. If so, add it to the field list
-                            show_fields[field_name] = ''
                             for m in maps:
                                 if m[0] == field:
                                     show_fields[field_name] = show_fields[field_name] + m[1] + ','
+                    print "end of loop", show_fields
+
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
 
-
+        print show_fields
         qry = self.query_text(show_fields)
 
-        print "HERE: ",qry, "\n"
+        #print "\n%s\n" % qry
 
         if elements:
             elements = combine_filters(elements)
@@ -620,12 +627,14 @@ class Candidate(object):
     viewable_table_name = "(dimcand?exists(dimcandproperties)&exists(dimcandoffice))"
 
     def query_text(self, show_fields):
+        print "Starting NOW"
         print show_fields['dimcand_fields'],
         print show_fields['properties_fields'],
         print show_fields['office_fields'],
         print show_fields['party_fields'],
         print show_fields['cand_committee_link_fields'],
         print show_fields['status_fields'],
+        print "end"
         return """
             %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
                               /dimlinkages{%s} :as affiliated_committees,
