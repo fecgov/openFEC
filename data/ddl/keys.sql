@@ -59,7 +59,8 @@
 -- orig_sub_id is a foreign key, but to what?
 -- cand_id
 ALTER TABLE public.dimcmteproperties ADD FOREIGN KEY (cand_id) REFERENCES public.dimcand (cand_id);
-ALTER TABLE public.dimlinkages ADD FOREIGN KEY (cand_id) REFERENCES public.dimcand (cand_id);
+-- don't create this one, it creates confusing double-linkage b/t dimlinkages and dimcand
+-- ALTER TABLE public.dimlinkages ADD FOREIGN KEY (cand_id) REFERENCES public.dimcand (cand_id);
 ALTER TABLE public.form_56 ADD FOREIGN KEY (cand_id) REFERENCES public.dimcand (cand_id);
 ALTER TABLE public.form_65 ADD FOREIGN KEY (cand_id) REFERENCES public.dimcand (cand_id);
 ALTER TABLE public.form_82 ADD FOREIGN KEY (cand_id) REFERENCES public.dimcand (cand_id);
