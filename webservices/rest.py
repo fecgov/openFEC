@@ -169,8 +169,8 @@ def assign_formatting(self, data_dict, page_data, year):
 
 # Candidate formatting
 def format_candids(self, data, page_data, fields, default_year):
+    #return data
     results = []
-    return data
 
     # if 'elections' in fields:
     #     fields = fields + ['district', 'party_affiliation', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought', 'election_year']
@@ -181,152 +181,117 @@ def format_candids(self, data, page_data, fields, default_year):
         cand_data = {}
 
         for api_name, fec_name in self.dimcand_mapping:
-            if cand.has_key(fec_name):
-                cand_data[api_name] = cand_data[fec_name]
-
-        if ('name' in fields) or ('full_name' in fields) or ('other_names' in fields):
-            cand_data = {'name':{}}
-
-        # nicknames are useful
-        # Using most recent name as full name
-        if 'name' in fields or 'full_name' in fields:
-          cand_data['name'] = {}
-          name = cand['dimcandproperties'][-1]['cand_nm']
-          cand_data['name']['full_name'] = name
-          # let's do this for now, we could look for improvements in the future
-          if len(name.split(',')) == 2 and len(name.split(',')[0].strip()) > 0 and len(name.split(',')[1].strip()) > 0:
-              cand_data['name']['name_1'] = name.split(',')[1].strip()
-              cand_data['name']['name_2'] = name.split(',')[0].strip()
+            if cand['dimcand'].has_key(fec_name):
+                cand_data[api_name] = cand['dimcand'][fec_name]
 
         # Committee information
-        # for api_name, fec_name in self.cand_committee_link_mapping:
-        #     if cand.has_key(fec_name)
-        #         cand_data[api_name] = cand[fec_name]
-
-        if 'primary_committee' or 'affiliated_committees' in fields:
+        if cand.has_key('affiliated_committees'):
             for cmte in cand['affiliated_committees']:
                 year = str(cmte['cand_election_yr'])
                 if not elections.has_key(year):
                     elections[year] = {}
-                prmary_cmte = {}
-                prmary_cmte['committee_id'] = cmte['cmte_id']
 
-                if cmte['cmte_dsgn'] == 'P' and "primary_committee" in fields:
+                committee = {}
+                for api_name, fec_name in self.cand_committee_link_mapping:
+                    if cmte.has_key(fec_name):
+                        committee[api_name] = cmte[fec_name]
 
-                    prmary_cmte['designation_code'] = cmte['cmte_dsgn']
-                    prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
-                    prmary_cmte['type'] = cmte['cmte_tp']
-                    prmary_cmte['type_full'] = cmte_decoder[cmte['cmte_tp']]
-                    # if they are running as house and president they will have a different candidate id records
-                    elections[year]['primary_committee'] = prmary_cmte
+                if cmte['cmte_dsgn']:
+                    committee['designation'] = designation_decoder[cmte['cmte_dsgn']]
+                if cmte['cmte_tp']:
+                    committee['type_full'] = cmte_decoder[cmte['cmte_tp']]
 
-                elif 'affiliated_committees' in fields:
-                    # add a decoder here too
-                    if not elections[year].has_key('affiliated_committees'):
-                        elections[year]['affiliated_committees'] =[{
-                            'committee_id': cmte['cmte_id'],
-                            'type_code': cmte['cmte_tp'],
-                            'type': cmte_decoder[cmte['cmte_tp']],
-                            'designation_code': cmte['cmte_dsgn'],
-                            'designation': designation_decoder[cmte['cmte_dsgn']],
-                        }]
-                    else:
-                        elections[year]['affiliated_committees'].append({
-                            'committee_id': cmte['cmte_id'],
-                            'type_code': cmte['cmte_tp'],
-                            'type': cmte_decoder[cmte['cmte_tp']],
-                            'designation_code': cmte['cmte_dsgn'],
-                            'designation': designation_decoder[cmte['cmte_dsgn']],
-                        })
+                if cmte['cmte_dsgn'] == 'P':
+                    elections[year]['primary_committee'] = committee
+                elif not elections[year].has_key('affiliated_committees'):
+                    elections[year]['affiliated_committees']  = [committee]
+                else:
+                    elections[year]['affiliated_committees'].append(committee)
 
-        # Office information
 
         for office in cand['dimcandoffice']:
             year = str(office['cand_election_yr'])
-
             if not elections.has_key(year):
                 elections[year] = {}
-            if 'office_sought' in fields:
-                elections[year]['office_sought_full'] = office['dimoffice']['office_tp_desc']
-                elections[year]['office_sought'] = office['dimoffice']['office_tp']
-            if 'district'in fields:
-                elections[year]['district'] = office['dimoffice']['office_district']
-            if 'state' in fields:
-                elections[year]['state'] = office['dimoffice']['office_state']
-            if 'party_affiliation'in fields:
-                elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
-                elections[year]['party'] = office['dimparty']['party_affiliation']
+            # Office information
+            for api_name, fec_name in self.office_mapping:
+                if office['dimoffice'].has_key(fec_name):
+                    elections[year][api_name] = office['dimoffice'][fec_name]
+            # Party information
+            for api_name, fec_name in self.party_mapping:
+                if office['dimparty'].has_key(fec_name):
+                    elections[year][api_name] = office['dimparty'][fec_name]
 
         # status information
-
         for status in cand['dimcandstatusici']:
-            year = str(status['election_yr'])
+            if status.has_key('election_yr') and not elections.has_key(year):
+                year = str(status['election_yr'])
+                elections[year] = {}
 
-            if 'candidate_inactive' in fields:
-                if elections.has_key(year):
-                    elections[year]['candidate_inactive'] = status['cand_inactive_flg']
-                else:
-                    elections[year] = {}
-                    elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+            for api_name, fec_name in self.status_mapping:
+                if status.has_key(fec_name):
+                    elections[year][api_name] = status[fec_name]
 
-            if 'candidate_status' in fields:
-                status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
-                if status['cand_status'] is not None:
-                    elections[year]['candidate_status'] = status_decoder[status['cand_status']]
-                else:
-                    elections[year]['candidate_status'] = None
+            status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
 
-            if 'incumbent_challenge' in fields:
-                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-                if status['ici_code'] != None:
-                    elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
-                else:
-                    elections[year]['incumbent_challenger'] = None
+            if status.has_key('cand_status') and status['cand_status'] is not None:
+                elections[year]['candidate_status'] = status_decoder[status['cand_status']]
 
+            ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+            if status.has_key('ici_code') and status['ici_code'] is not None:
+                elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
+
+        # Using most recent name as full name
+        if cand['dimcandproperties'][0].has_key('cand_nm'):
+            name = cand['dimcandproperties'][0]['cand_nm']
+            cand_data['name'] = {}
+            cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
+            # let's do this for now, we could look for improvements in the future
+            if len(name.split(',')) == 2 and len(name.split(',')[0].strip()) > 0 and len(name.split(',')[1].strip()) > 0:
+                cand_data['name']['name_1'] = name.split(',')[1].strip()
+                cand_data['name']['name_2'] = name.split(',')[0].strip()
+                print "formatted name"
+
+        # properties has names and addresses
         addresses = []
         other_names = []
+        for prop in cand['dimcandproperties']:
+            if prop.has_key('election_yr') and not elections.has_key(year):
+                elections[year] = {}
 
-        if 'name' or 'mailing_address' in fields:
-            for prop in cand['dimcandproperties']:
+            # Addresses
+            address = {}
+            for api_name, fec_name in self.properties_mapping:
+                if prop.has_key(fec_name) and fec_name != "cand_nm" and fec_name != "expire_date":
+                    address[api_name] = cleantext(prop[fec_name])
+                if prop.has_key('expire_date') and prop['expire_date'] is not None:
+                    address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
+            if address not in addresses:
+                addresses.append(address)
 
-                mailing_address = {}
-                mailing_address['street_1'] = cleantext(prop['cand_st1'])
-                mailing_address['street_2'] = cleantext(prop['cand_st2'])
-                mailing_address['city'] = cleantext(prop['cand_city'])
-                mailing_address['state'] = cleantext(prop['cand_st'])
-                mailing_address['zip'] = cleantext(prop['cand_zip'])
-                if prop['expire_date'] != None:
-                    mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
-                if mailing_address not in addresses:
-                    addresses.append(mailing_address)
+            # Names (picking up name variations)
+            if prop.has_key('cand_nm') and (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
+                name = cleantext(prop['cand_nm'])
+                other_names.append(name)
 
-                if 'name' in fields or 'other_names' in fields:
-                    # other_names will help improve search based on nick names
-                    name = cleantext(prop['cand_nm'])
-                if ('other_names' in fields) and (cand_data['name']['full_name'] != name) and (name not in other_names):
-                    other_names.append(name)
-
-        if "mailing_addresses" in fields:
-            cand_data['mailing_addresses'] = addresses
-
-        if len(other_names) > 0 and ('name' in fields):
+        if len(addresses) > 0:
+            cand['mailing_addresses'] = addresses
+        if len(other_names) > 0:
             cand_data['name']['other_names'] = other_names
 
-
-        if 'district'in fields or 'party_affiliation'in fields or 'primary_committee'in fields or 'affiliated_committees'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'candidate_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
-
-            cand_data['elections'] = []
-            years = []
-            for year in elections:
-                if default_year is not None:
-                    if str(default_year) == year:
-                        years.append(year)
-                else:
+        # Order eleciton data so the most recent is first and just show years requested
+        cand_data['elections'] = []
+        years = []
+        for year in elections:
+            if default_year is not None:
+                if str(default_year) == year:
                     years.append(year)
-            years.sort(reverse=True)
-            for year in years:
-                elections[year]['election_year'] = year
-                cand_data['elections'].append(elections[year])
+            else:
+                years.append(year)
+        years.sort(reverse=True)
+        for year in years:
+            elections[year]['election_year'] = year
+            cand_data['elections'].append(elections[year])
 
         results.append(cand_data)
 
@@ -545,7 +510,7 @@ class Searchable(restful.Resource):
                 elif arg == 'per_page':
                     per_page = args[arg]
                 elif arg == 'fields':
-                    print args[arg]
+                    # queries need year to link the data
                     if ',' in str(args[arg]):
                         field_list = args[arg].split(',')
                     else:
@@ -560,16 +525,12 @@ class Searchable(restful.Resource):
                             for m in maps:
                                 if m[0] == field:
                                     show_fields[field_name] = show_fields[field_name] + m[1] + ','
-                    print "end of loop", show_fields
 
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
 
-        print show_fields
         qry = self.query_text(show_fields)
-
-        #print "\n%s\n" % qry
 
         if elements:
             elements = combine_filters(elements)
@@ -620,6 +581,7 @@ class Candidate(object):
         'party_fields': 'party_affiliation_desc,party_affiliation',
         'status_fields': 'election_yr,cand_status,ici_code',
         'properties_fields': 'cand_nm',
+        'cmte_fields': "'P'",
     }
 
     # Query
@@ -627,17 +589,13 @@ class Candidate(object):
     viewable_table_name = "(dimcand?exists(dimcandproperties)&exists(dimcandoffice))"
 
     def query_text(self, show_fields):
-        print "Starting NOW"
-        print show_fields['dimcand_fields'],
-        print show_fields['properties_fields'],
-        print show_fields['office_fields'],
-        print show_fields['party_fields'],
-        print show_fields['cand_committee_link_fields'],
-        print show_fields['status_fields'],
-        print "end"
+        if show_fields['cmte_fields'] != '':
+            show_fields['cmte_fields'] = "/dimlinkages?cmte_dsgn={%s}  :as affiliated_committees," % (show_fields['cmte_fields'])
+            show_fields['status_fields'] += ',election_yr'
+
         return """
             %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
-                              /dimlinkages{%s} :as affiliated_committees,
+                              %s
                               /dimcandstatusici{%s}}
         """ % (
                 self.viewable_table_name,
@@ -645,7 +603,8 @@ class Candidate(object):
                 show_fields['properties_fields'],
                 show_fields['office_fields'],
                 show_fields['party_fields'],
-                show_fields['cand_committee_link_fields'],
+                show_fields['cmte_fields'],
+                #show_fields['cand_committee_link_fields'],
                 show_fields['status_fields'],
         )
 
@@ -654,7 +613,7 @@ class Candidate(object):
     # basic candidate information
     dimcand_mapping = (
         ('candidate_id', 'cand_id'),
-        ('fec_id','cand_id'),
+        #('fec_id','cand_id'),
         ('form_type', 'form_tp'),
         ## we don't have this data yet
         #('expire_date','expire_date'),
@@ -703,8 +662,15 @@ class Candidate(object):
         ('expire_date', 'expire_date'),
         ('*', '*'),
     )
+    # to filter primary from affiliated committees
+    cmte_mapping = (
+        ('primary_committee', "'P'"),
+        ('affiliated_committees', "'U'"),
+        ('*', "'P', 'U'")
+    )
 
     # connects mappings to field names
+    fields = ''
     maps_fields = (
         (dimcand_mapping, 'dimcand_fields'),
         (cand_committee_link_mapping, 'cand_committee_link_fields'),
@@ -712,10 +678,8 @@ class Candidate(object):
         (party_mapping, 'party_fields'),
         (status_mapping,'status_fields'),
         (properties_mapping, 'properties_fields'),
+        (cmte_mapping, 'cmte_fields'),
     )
-
-    # using the master mapping to ask for fields, using the sub mappings to format the data later
-    full_field_mapping = dimcand_mapping + cand_committee_link_mapping + status_mapping + party_mapping + office_mapping + properties_mapping
 
 
 class CandidateResource(SingleResource, Candidate):
