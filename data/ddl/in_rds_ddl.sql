@@ -1884,4 +1884,5 @@ CREATE TABLE sched_l (
     update_date timestamp without time zone
 ) ;
 
-
+GRANT USAGE ON SCHEMA public TO webro;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO webro;

@@ -591,7 +591,7 @@ class CandidateSearch(Searchable, Candidate):
                       "office":
                       string.Template("top(dimcandoffice.sort(expire_date-)).office_tp~'$arg'"),
                       "district":
-                      string.Template("top(dimcandoffice.sort(expire_date-)).dimoffice.office_district~'$arg'"),
+                      string.Template("top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"),
                       "state": string.Template("top(dimcandoffice.sort(expire_date-)).dimoffice.office_state~'$arg'"),
                       "name": string.Template("top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"),
                       "party": string.Template("top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation~'$arg'")
