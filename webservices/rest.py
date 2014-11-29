@@ -172,9 +172,6 @@ def format_candids(self, data, page_data, fields, default_year):
     #return data
     results = []
 
-    # if 'elections' in fields:
-    #     fields = fields + ['district', 'party_affiliation', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought', 'election_year']
-
     for cand in data:
         #aggregating data for each election across the tables
         elections = {}
@@ -188,7 +185,7 @@ def format_candids(self, data, page_data, fields, default_year):
         if cand.has_key('affiliated_committees'):
             for cmte in cand['affiliated_committees']:
                 year = str(cmte['cand_election_yr'])
-                if not elections.has_key(year):
+                if len(cmte) > 0 and not elections.has_key(year):
                     elections[year] = {}
 
                 committee = {}
@@ -211,8 +208,9 @@ def format_candids(self, data, page_data, fields, default_year):
 
         for office in cand['dimcandoffice']:
             year = str(office['cand_election_yr'])
-            if not elections.has_key(year):
+            if len(office) > 0 and not elections.has_key(year):
                 elections[year] = {}
+
             # Office information
             for api_name, fec_name in self.office_mapping:
                 if office['dimoffice'].has_key(fec_name):
@@ -250,7 +248,6 @@ def format_candids(self, data, page_data, fields, default_year):
             if len(name.split(',')) == 2 and len(name.split(',')[0].strip()) > 0 and len(name.split(',')[1].strip()) > 0:
                 cand_data['name']['name_1'] = name.split(',')[1].strip()
                 cand_data['name']['name_2'] = name.split(',')[0].strip()
-                print "formatted name"
 
         # properties has names and addresses
         addresses = []
@@ -280,7 +277,6 @@ def format_candids(self, data, page_data, fields, default_year):
             cand_data['name']['other_names'] = other_names
 
         # Order eleciton data so the most recent is first and just show years requested
-        cand_data['elections'] = []
         years = []
         for year in elections:
             if default_year is not None:
@@ -290,8 +286,11 @@ def format_candids(self, data, page_data, fields, default_year):
                 years.append(year)
         years.sort(reverse=True)
         for year in years:
-            elections[year]['election_year'] = year
-            cand_data['elections'].append(elections[year])
+            if len(elections[year]) > 0:
+                if not cand_data.has_key('elections'):
+                    cand_data['elections'] = []
+                elections[year]['election_year'] = year
+                cand_data['elections'].append(elections[year])
 
         results.append(cand_data)
 
@@ -590,8 +589,9 @@ class Candidate(object):
 
     def query_text(self, show_fields):
         if show_fields['cmte_fields'] != '':
+            print "NOW"
             show_fields['cmte_fields'] = "/dimlinkages?cmte_dsgn={%s}  :as affiliated_committees," % (show_fields['cmte_fields'])
-            show_fields['status_fields'] += ',election_yr'
+            show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
 
         return """
             %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
@@ -616,8 +616,8 @@ class Candidate(object):
         #('fec_id','cand_id'),
         ('form_type', 'form_tp'),
         ## we don't have this data yet
-        #('expire_date','expire_date'),
-        #('load_date','load_date'),
+        ('expire_date','expire_date'),
+        ('load_date','load_date'),
         ('*', '*'),
     )
     #affiliated committees
