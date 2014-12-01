@@ -62,6 +62,10 @@ table_names = [
 # queried by SELECT '''' || LOWER(TABLE_NAME) || ''',' FROM ALL_TABLES WHERE OWNER = 'CFDM';
 # can't query in blaze from ALL_TABLES because it's a view...
 
-for table_name in table_names:
-    ora = blaze.SQL (engine, 'CFDM.%s' % table_name)
-    pg = blaze.SQL (pg_engine, table_name, schema=ora.schema)
+if False:
+    for table_name in table_names:
+        ora = blaze.SQL (engine, 'CFDM.%s' % table_name)
+        pg = blaze.SQL (pg_engine, table_name, schema=ora.schema)
+
+ora = blaze.SQL (engine, 'PROCESSED.FORM_1')
+pg = blaze.SQL (pg_engine, 'form_1', schema='cfdm')
