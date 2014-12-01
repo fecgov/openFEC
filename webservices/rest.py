@@ -56,7 +56,7 @@ from datetime import datetime
 from psycopg2._range import DateTimeRange
 
 speedlogger = logging.getLogger('speed')
-speedlogger.setLevel(logging.INFO)
+speedlogger.setLevel(logging.CRITICAL)
 speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder

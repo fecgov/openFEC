@@ -17,7 +17,7 @@ CREATE TABLE dimcandoffice (
     form_sk bigint,
     form_tp text,
     cand_election_yr int,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     expire_date timestamp without time zone
 ) ;
 
@@ -57,7 +57,7 @@ CREATE TABLE dimcandstatusici (
     ici_code text,
     cand_status text,
     cand_inactive_flg text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     expire_date timestamp without time zone
 ) ;
 
@@ -66,7 +66,7 @@ CREATE TABLE dimcmte (
     cmte_id text,
     form_sk bigint,
     form_tp text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     expire_date timestamp without time zone
 ) ;
 
@@ -88,6 +88,7 @@ CREATE TABLE dimcmteproperties (
     cmte_web_url text,
     party_cmte_type text,
     party_cmte_type_desc text,
+    cand_pty_affiliation text,
     filing_freq text,
     qual_dt timestamp without time zone,
     cand_id text,
@@ -167,7 +168,7 @@ CREATE TABLE dimcmtetpdsgn (
     cmte_tp text,
     cmte_dsgn text,
     receipt_date timestamp without time zone,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     expire_date timestamp without time zone
 ) ;
 
@@ -320,7 +321,7 @@ CREATE TABLE facthousesenate_f3 (
     grs_rcpt_min_pers_contrib_gen numeric,
     begin_image_num numeric,
     end_image_num numeric,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     expire_date timestamp without time zone
 ) ;
 
@@ -438,7 +439,7 @@ CREATE TABLE factpacsandparties_f3x (
     ttl_fed_elect_actvy_ytd numeric,
     begin_image_num numeric,
     end_image_num numeric,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     expire_date timestamp without time zone
 ) ;
 
@@ -635,7 +636,7 @@ CREATE TABLE factpresidential_f3p (
     ttl_ytd numeric,
     begin_image_num numeric,
     end_image_num numeric,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     expire_date timestamp without time zone
 ) ;
 
@@ -659,7 +660,7 @@ CREATE TABLE form_105 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -700,7 +701,7 @@ CREATE TABLE form_56 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -748,7 +749,7 @@ CREATE TABLE form_57 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -789,7 +790,7 @@ CREATE TABLE form_65 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -821,7 +822,7 @@ CREATE TABLE form_76 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -865,7 +866,7 @@ CREATE TABLE form_82 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -901,7 +902,7 @@ CREATE TABLE form_83 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -928,7 +929,7 @@ CREATE TABLE form_91 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -957,7 +958,7 @@ CREATE TABLE form_94 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1067,7 +1068,7 @@ CREATE TABLE sched_a (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1133,7 +1134,7 @@ CREATE TABLE sched_b (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1186,7 +1187,7 @@ CREATE TABLE sched_c (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1250,7 +1251,7 @@ CREATE TABLE sched_c1 (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1285,7 +1286,7 @@ CREATE TABLE sched_c2 (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1337,7 +1338,7 @@ CREATE TABLE sched_d (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1402,7 +1403,7 @@ CREATE TABLE sched_e (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1471,7 +1472,7 @@ CREATE TABLE sched_f (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1532,7 +1533,7 @@ CREATE TABLE sched_h1 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1565,7 +1566,7 @@ CREATE TABLE sched_h2 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1598,7 +1599,7 @@ CREATE TABLE sched_h3 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1667,7 +1668,7 @@ CREATE TABLE sched_h4 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1699,7 +1700,7 @@ CREATE TABLE sched_h5 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1762,7 +1763,7 @@ CREATE TABLE sched_h6 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1816,7 +1817,7 @@ CREATE TABLE sched_i (
     end_image_num text,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
@@ -1880,8 +1881,128 @@ CREATE TABLE sched_l (
     orig_sub_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone NOT NULL,
+    load_date timestamp without time zone,
     update_date timestamp without time zone
 ) ;
 
-
+/*
+CREATE TABLE form_1 (
+   form_1_sk				   bigint NOT NULL PRIMARY KEY,
+   form_tp					    text,
+   cmte_id					    text,
+   cmte_nm					    text,
+   cmte_st1					    text,
+   cmte_st2					    text,
+   cmte_city					    text,
+   cmte_st					    text,
+   cmte_zip					    text,
+   submit_dt					    timestamp without time zone,
+   cmte_nm_chg_flg				    text,
+   cmte_addr_chg_flg				    text,
+   cmte_tp					    text,
+   cand_id					    text,
+   cand_nm					    text,
+   cand_office					    text,
+   cand_office_st 				    text,
+   cand_office_district				    text,
+   cand_pty_affiliation				    text,
+   cand_pty_tp					    text,
+   affiliated_cmte_id				    text,
+   affiliated_cmte_nm				    text,
+   affiliated_cmte_st1				    text,
+   affiliated_cmte_st2				    text,
+   affiliated_cmte_city				    text,
+   affiliated_cmte_st				    text,
+   affiliated_cmte_zip				    text,
+   cmte_rltshp					    text,
+   org_tp 					    text,
+   cust_rec_nm					    text,
+   cust_rec_st1					    text,
+   cust_rec_st2					    text,
+   cust_rec_city					    text,
+   cust_rec_st					    text,
+   cust_rec_zip					    text,
+   cust_rec_title 				    text,
+   cust_rec_ph_num				    text,
+   tres_nm					    text,
+   tres_st1					    text,
+   tres_st2					    text,
+   tres_city					    text,
+   tres_st					    text,
+   tres_zip					    text,
+   tres_title					    text,
+   tres_ph_num					    text,
+   designated_agent_nm				    text,
+   designated_agent_st1				    text,
+   designated_agent_st2				    text,
+   designated_agent_city				    text,
+   designated_agent_st				    text,
+   designated_agent_zip				    text,
+   designated_agent_title 			    text,
+   designated_agent_ph_num			    text,
+   bank_depository_nm				    text,
+   bank_depository_st1				    text,
+   bank_depository_st2				    text,
+   bank_depository_city				    text,
+   bank_depository_st				    text,
+   bank_depository_zip				    text,
+   sec_bank_depository_nm 			    text,
+   sec_bank_depository_st1			    text,
+   sec_bank_depository_st2			    text,
+   sec_bank_depository_city			    text,
+   sec_bank_depository_st 			    text,
+   sec_bank_depository_zip			    text,
+   tres_sign_nm					    text,
+   tres_sign_dt					    timestamp without time zone,
+   cmte_email					    text,
+   cmte_web_url					    text,
+   receipt_dt					    timestamp without time zone,
+   filing_freq					    text,
+   cmte_dsgn					    text,
+   qual_dt					    timestamp without time zone,
+   cmte_fax					    text,
+   efiling_cmte_tp				    text,
+   rpt_yr 					    integer,
+   leadership_pac 				    text,
+   affiliated_relationship_cd			    text,
+   cmte_email_chg_flg				    text,
+   cmte_url_chg_flg				    text,
+   lobbyist_registrant_pac			    text,
+   affiliated_cand_id				    text,
+   affiliated_cand_l_nm				    text,
+   affiliated_cand_f_nm				    text,
+   affiliated_cand_m_nm				    text,
+   affiliated_cand_prefix 			    text,
+   affiliated_cand_suffix 			    text,
+   cand_l_nm					    text,
+   cand_f_nm					    text,
+   cand_m_nm					    text,
+   cand_prefix					    text,
+   cand_suffix					    text,
+   cust_rec_l_nm					    text,
+   cust_rec_f_nm					    text,
+   cust_rec_m_nm					    text,
+   cust_rec_prefix				    text,
+   cust_rec_suffix				    text,
+   tres_l_nm					    text,
+   tres_f_nm					    text,
+   tres_m_nm					    text,
+   tres_prefix					    text,
+   tres_suffix					    text,
+   designated_agent_l_nm				    text,
+   designated_agent_f_nm				    text,
+   designated_agent_m_nm				    text,
+   designated_agent_prefix			    text,
+   designated_agent_suffix			    text,
+   f3l_filing_freq				    text,
+   begin_image_num				    text,
+   end_image_num					    text,
+   sub_id 					          bigint,
+   etl_invalid_flg				    text,
+   etl_complete_date				    timestamp without time zone,
+   filing_type					    text,
+   record_ind					    text,
+   load_date				   timestamp without time zone not null,
+   update_date					    timestamp without time zone
+);
+*/
