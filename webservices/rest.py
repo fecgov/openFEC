@@ -37,6 +37,7 @@ Supported for /committee ::
 
 """
 from collections import defaultdict
+import doctest
 import os
 import re
 import string
@@ -468,29 +469,8 @@ class SingleResource(restful.Resource):
         args = self.parser.parse_args()
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
         return assign_formatting(self, data_dict, page_data, None)
-
-_child_table_pattern = re.compile("^exists\((\w+)\?(.*?)\)\s*$")
-def combine_filters(elements):
-    """
-    For HTSQL filter elements like "exists(tablename?...)", 
-    collapse multiple filters on a single table into 
-    one filter with all conditions combined into an AND.
-    """
-    conditions = defaultdict(list)
-    results = []
-    for element in elements:
-        match = _child_table_pattern.search(element)
-        if match:
-            (tablename, condition) = match.groups()
-            conditions[tablename].append(condition)
-        else:
-            results.append(element)
-    for (tablename, table_conditions) in conditions.items():
-        condition = "&".join("(%s)" % c for c in table_conditions)
-        results.append("exists(%s?%s)" % (tablename, condition))
-    return results
-           
-
+ 
+    
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
                       FROM   dim%s_fulltext
@@ -503,7 +483,8 @@ class Searchable(restful.Resource):
         args = self.parser.parse_args()
         elements = []
         page_num = 1
-
+        year = None
+        
         for arg in args:
             if args[arg]:
                 if arg == 'q':
@@ -527,14 +508,19 @@ class Searchable(restful.Resource):
                     per_page = args[arg]
                 elif arg == 'fields':
                     fields = args[arg]
+                elif arg == 'year':
+                    year = args[arg]
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
 
         qry = self.htsql_qry
 
+        for element in elements:
+            if year:
+                element = element.replace('dimcandoffice', 
+                                          '(dimcandoffice?cand_election_yr=%s)' % year)
         if elements:
-            elements = combine_filters(elements)
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
@@ -603,13 +589,12 @@ class CandidateSearch(Searchable, Candidate):
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
                       "fec_id": string.Template("cand_id='$arg'"),
                       "office":
-                      string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
+                      string.Template("top(dimcandoffice.sort(expire_date-)).office_tp~'$arg'"),
                       "district":
-                      string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
-                      "state": string.Template("exists(dimcandoffice?dimoffice.office_state~'$arg')"),
-                      "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
-                      "year": string.Template("exists(dimcandoffice?cand_election_yr='$arg')"),
-                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
+                      string.Template("top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"),
+                      "state": string.Template("top(dimcandoffice.sort(expire_date-)).dimoffice.office_state~'$arg'"),
+                      "name": string.Template("top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"),
+                      "party": string.Template("top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation~'$arg'")
                       }
 
 
@@ -631,13 +616,13 @@ class CommitteeSearch(Searchable, Committee):
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                       "fec_id": string.Template("cmte_id='$arg'"),
                       # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
-                      "candidate_id":string.Template("exists(dimlinkages?cand_id~'$arg')"),
-                      "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
-                      "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
-                      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
-                      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~'$arg')"),
-                      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~'$arg')"),
-                      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
+                      "candidate_id":string.Template("top(dimlinkages.sort(expire_date-)).cand_id~'$arg'"),
+                      "state": string.Template("top(dimcmteproperties.sort(expire_date-)).cmte_st~'$arg'"),
+                      "name": string.Template("top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'"),
+                      "type_code": string.Template("top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp~'$arg'"),
+                      "designation_code": string.Template("top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn~'$arg'"),
+                      "organization_type_code": string.Template("top(dimcmteproperties.sort(expire_date-)).org_tp~'$arg'"),
+                      "fake_party": string.Template("top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'&top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp={'X','Y'}")
     }
 
     parser = reqparse.RequestParser()
@@ -674,5 +659,8 @@ api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 
 if __name__ == '__main__':
-    debug = not os.getenv('PRODUCTION')
-    app.run(debug=debug)
+    if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
+        doctest.testmod()
+    else:
+        debug = not os.getenv('PRODUCTION')
+        app.run(debug=debug)
