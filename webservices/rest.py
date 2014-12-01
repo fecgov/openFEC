@@ -481,6 +481,7 @@ class Searchable(restful.Resource):
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
     def get(self):
+        print "STARTING"
         overall_start_time = time.time()
         speedlogger.info('--------------------------------------------------')
         args = self.parser.parse_args()
@@ -529,6 +530,7 @@ class Searchable(restful.Resource):
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
 
+        print "THESE_______", show_fields
         qry = self.query_text(show_fields)
 
         if elements:
@@ -589,9 +591,10 @@ class Candidate(object):
 
     def query_text(self, show_fields):
         if show_fields['cmte_fields'] != '':
-            print "NOW"
-            show_fields['cmte_fields'] = "/dimlinkages?cmte_dsgn={%s}  :as affiliated_committees," % (show_fields['cmte_fields'])
+            com_query = "/dimlinkages?cmte_dsgn={%s}  :as affiliated_committees," % (show_fields['cmte_fields'])
             show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
+        else:
+            com_query = ''
 
         return """
             %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
@@ -603,7 +606,7 @@ class Candidate(object):
                 show_fields['properties_fields'],
                 show_fields['office_fields'],
                 show_fields['party_fields'],
-                show_fields['cmte_fields'],
+                com_query,
                 #show_fields['cand_committee_link_fields'],
                 show_fields['status_fields'],
         )
