@@ -46,3 +46,6 @@ sudo cp /usr/local/home/$CURRENT_USER/setup/star.18f.us.key /etc/nginx/ssl/keys/
 
 cd /usr/local/home/$CURRENT_USER/openFEC
 sudo service nginx restart 
+
+
+sudo cp /usr/local/home/$CURRENT_USER/openFEC/webservices/setup/rest_server.conf /etc/init
