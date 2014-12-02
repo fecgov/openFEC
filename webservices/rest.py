@@ -75,8 +75,6 @@ app = Flask(__name__)
 api = restful.Api(app)
 
 
-# Dictionaries used for spelling out FEC codes
-
 cmte_decoder = {'P': 'Presidential',
                 'H': 'House',
                 'S': 'Senate',
@@ -103,7 +101,6 @@ designation_decoder = {'A': 'Authorized by a candidate',
 }
 
 
-# Formatting helpers
 
 # DEFAULTING TO 2012 FOR THE DEMO
 def default_year():
@@ -117,14 +114,20 @@ def natural_number(n):
         raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
     return result
 
-def cleantext(text):
-    if type(text) is str:
-        text = re.sub(' +',' ', text)
-        text = re.sub('\\r|\\n','', text)
-        text = text.strip()
-        return text
+
+def assign_formatting(self, data_dict, page_data, year):
+    args = self.parser.parse_args()
+    if args['fields'] == None:
+        fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
     else:
-        return text
+        fields =  args['fields'].split(',')
+
+    if self.table_name_stem == 'cand':
+        return format_candids(data_dict, page_data, fields, year)
+    elif self.table_name_stem == 'cmte':
+        return format_committees(data_dict, page_data, fields, year)
+    else:
+        return data_dict
 
 
 def as_dicts(data):
@@ -194,7 +197,7 @@ def format_candids(self, data, page_data, fields, default_year):
                         committee[api_name] = cmte[fec_name]
 
                 if cmte['cmte_dsgn']:
-                    committee['designation'] = designation_decoder[cmte['cmte_dsgn']]
+                    committee['designation_full'] = designation_decoder[cmte['cmte_dsgn']]
                 if cmte['cmte_tp']:
                     committee['type_full'] = cmte_decoder[cmte['cmte_tp']]
 
@@ -233,11 +236,11 @@ def format_candids(self, data, page_data, fields, default_year):
             status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
 
             if status.has_key('cand_status') and status['cand_status'] is not None:
-                elections[year]['candidate_status'] = status_decoder[status['cand_status']]
+                elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
 
             ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
             if status.has_key('ici_code') and status['ici_code'] is not None:
-                elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
+                elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
 
         # Using most recent name as full name
         if cand['dimcandproperties'][0].has_key('cand_nm'):
@@ -257,46 +260,43 @@ def format_candids(self, data, page_data, fields, default_year):
                 elections[year] = {}
 
             # Addresses
-            address = {}
+            one_address = {}
             for api_name, fec_name in self.properties_mapping:
                 if prop.has_key(fec_name) and fec_name != "cand_nm" and fec_name != "expire_date":
-                    address[api_name] = cleantext(prop[fec_name])
+                    one_address[api_name] = cleantext(prop[fec_name])
                 if prop.has_key('expire_date') and prop['expire_date'] is not None:
-                    address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
-            if address not in addresses:
-                addresses.append(address)
+                    one_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
+            if one_address not in addresses and one_address != {}:
+                addresses.append(one_address)
 
             # Names (picking up name variations)
-            if prop.has_key('cand_nm') and (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
+            if prop.has_key('cand_nm') and other_names in fields and (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
                 name = cleantext(prop['cand_nm'])
                 other_names.append(name)
 
         if len(addresses) > 0:
-            cand['mailing_addresses'] = addresses
+            cand_data['mailing_addresses'] = addresses
         if len(other_names) > 0:
             cand_data['name']['other_names'] = other_names
 
         # Order eleciton data so the most recent is first and just show years requested
         years = []
         for year in elections:
-            if default_year is not None:
-                if str(default_year) == year:
+            if default_year is not None and str(default_year) == year:
                     years.append(year)
-            else:
-                years.append(year)
+
         years.sort(reverse=True)
         for year in years:
             if len(elections[year]) > 0:
                 if not cand_data.has_key('elections'):
                     cand_data['elections'] = []
-                elections[year]['election_year'] = year
+
                 cand_data['elections'].append(elections[year])
 
         results.append(cand_data)
 
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
-# committee formatting
 # still need to implement year
 def format_committees(data, page, fields, year):
     results = []
@@ -481,7 +481,6 @@ class Searchable(restful.Resource):
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
     def get(self):
-        print "STARTING"
         overall_start_time = time.time()
         speedlogger.info('--------------------------------------------------')
         args = self.parser.parse_args()
@@ -525,12 +524,10 @@ class Searchable(restful.Resource):
                             for m in maps:
                                 if m[0] == field:
                                     show_fields[field_name] = show_fields[field_name] + m[1] + ','
-
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
 
-        print "THESE_______", show_fields
         qry = self.query_text(show_fields)
 
         if elements:
@@ -542,8 +539,8 @@ class Searchable(restful.Resource):
             count_qry = "/count(%s)" % self.viewable_table_name
 
         offset = per_page * (page_num-1)
-
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
+
         print("\n%s\n" % (qry))
 
         speedlogger.info('\n\nHTSQL query: \n%s' % qry)
@@ -576,7 +573,7 @@ class Searchable(restful.Resource):
 class Candidate(object):
     # default fields for search
     default_fields = {
-        'dimcand_fields': '',
+        'dimcand_fields': 'cand_id',
         'cand_committee_link_fields': 'cmte_id,cmte_dsgn,cmte_tp,cand_election_yr',
         'office_fields': 'office_district,office_state,office_tp',
         'party_fields': 'party_affiliation_desc,party_affiliation',
@@ -616,7 +613,6 @@ class Candidate(object):
     # basic candidate information
     dimcand_mapping = (
         ('candidate_id', 'cand_id'),
-        #('fec_id','cand_id'),
         ('form_type', 'form_tp'),
         ## we don't have this data yet
         ('expire_date','expire_date'),
@@ -625,8 +621,19 @@ class Candidate(object):
     )
     #affiliated committees
     cand_committee_link_mapping = (
+        # fields if primary committee is requested
+        ('primary_committee', 'cmte_id'),
+        ('primary_committee', 'cmte_dsgn'),
+        ('primary_committee', 'cmte_tp'),
+        ('primary_committee', 'cand_election_yr'),
+        # fields if associated committee is requested
+        ('associated_committee', 'cmte_id'),
+        ('associated_committee', 'cmte_dsgn'),
+        ('associated_committee', 'cmte_tp'),
+        ('associated_committee', 'cand_election_yr'),
+        # regular mapping
         ('committee_id', 'cmte_id'),
-        ('designation_code', 'cmte_dsgn'),
+        ('designation', 'cmte_dsgn'),
         ('type', 'cmte_tp'),
         ('year', 'cand_election_yr'),
         ('*', '*'),
@@ -648,7 +655,7 @@ class Candidate(object):
     )
     # dimcandstatus
     status_mapping = (
-        ('year', 'election_yr'),
+        ('election_year', 'election_yr'),
         ('candidate_inactive', 'cand_inactive_flg'),
         ('candidate_status', 'cand_status'),
         ('incumbent_challenge', 'ici_code'),
@@ -656,6 +663,14 @@ class Candidate(object):
     )
     # dimcandproperties
     properties_mapping = (
+        # this is for translating mailing_address into the corresponding fields
+        ('mailing_addresses', 'cand_st1'),
+        ('mailing_addresses','cand_st2'),
+        ('mailing_addresses', 'cand_city'),
+        ('mailing_addresses', 'cand_st'),
+        ('mailing_addresses', 'cand_zip'),
+        ('mailing_addresses', 'expire_date'),
+        #
         ('name', 'cand_nm'),
         ('street_1', 'cand_st1'),
         ('street_2','cand_st2'),
@@ -705,21 +720,20 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
     parser.add_argument('year', type=int, default=2012, help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
-    parser.add_argument('district', type=str, help='Two digit district number')
+    parser.add_argument('district', type=int, help='Two digit district number')
 
 
-    field_name_map = {
-        "candidate_id": string.Template("cand_id=$arg"),
-        "fec_id": string.Template("cand_id=$arg"),
-        "office":
-        string.Template("exists(dimcandoffice?dimoffice.office_tp~$arg)"),
-        "district":
-        string.Template("exists(dimcandoffice?dimoffice.office_district~$arg)"),
-        "state": string.Template("exists(dimcandoffice?dimoffice.office_state~$arg)"),
-        "name": string.Template("exists(dimcandproperties?cand_nm~$arg)"),
-        "year": string.Template("exists(dimcandoffice?cand_election_yr=$arg)"),
-        "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~$arg)")
-    }
+    field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
+                      "fec_id": string.Template("cand_id='$arg'"),
+                      "office":
+                      string.Template("exists(dimcandoffice?dimoffice.office_tp~'$arg')"),
+                      "district":
+                      string.Template("exists(dimcandoffice?dimoffice.office_district~'$arg')"),
+                      "state": string.Template("exists(dimcandoffice?dimoffice.office_state~'$arg')"),
+                      "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
+                      "year": string.Template("exists(dimcandoffice?cand_election_yr='$arg')"),
+                      "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
+                      }
 
 
 class Committee(object):
@@ -737,17 +751,16 @@ class CommitteeResource(SingleResource, Committee):
 
 class CommitteeSearch(Searchable, Committee):
 
-    field_name_map = {
-        "committee_id": string.Template("cmte_id=$arg"),
-      "fec_id": string.Template("cmte_id=$arg"),
-      # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
-      "candidate_id":string.Template("exists(dimlinkages?cand_id~$arg)"),
-      "state": string.Template("exists(dimcmteproperties?cmte_st~$arg)"),
-      "name": string.Template("exists(dimcmteproperties?cmte_nm~$arg)"),
-      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~$arg)"),
-      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~$arg)"),
-      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~$arg)"),
-      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~$arg)&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
+    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
+                      "fec_id": string.Template("cmte_id='$arg'"),
+                      # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
+                      "candidate_id":string.Template("exists(dimlinkages?cand_id~'$arg')"),
+                      "state": string.Template("exists(dimcmteproperties?cmte_st~'$arg')"),
+                      "name": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')"),
+                      "type_code": string.Template("exists(dimcmtetpdsgn?cmte_tp~'$arg')"),
+                      "designation_code": string.Template("exists(dimcmtetpdsgn?cmte_dsgn~'$arg')"),
+                      "organization_type_code": string.Template("exists(dimcmteproperties?org_tp~'$arg')"),
+                      "fake_party": string.Template("exists(dimcmteproperties?cmte_nm~'$arg')&exists(dimcmtetpdsgn?cmte_tp={'X','Y'})")
     }
 
     parser = reqparse.RequestParser()
