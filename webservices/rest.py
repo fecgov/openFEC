@@ -194,7 +194,7 @@ def format_candids(self, data, page_data, fields, default_year):
 
                 committee = {}
                 # not looking at the fields used for name matching
-                for api_name, fec_name in self.cand_committee_link_mapping:
+                for api_name, fec_name in self.cand_committee_format_mapping:
                     if cmte.has_key(fec_name):
                         committee[api_name] = cmte[fec_name]
 
@@ -265,7 +265,7 @@ def format_candids(self, data, page_data, fields, default_year):
 
             # Addresses
             one_address = {}
-            for api_name, fec_name in self.properties_mapping:
+            for api_name, fec_name in self.property_fields_mapping:
                 if prop.has_key(fec_name) and fec_name != "cand_nm" and fec_name != "expire_date":
                     one_address[api_name] = cleantext(prop[fec_name])
                 if prop.has_key('expire_date') and prop['expire_date'] is not None:
@@ -624,7 +624,15 @@ class Candidate(object):
         ('load_date','load_date'),
         ('*', '*'),
     )
+
     #affiliated committees
+    cand_committee_format_mapping = (
+        ('committee_id', 'cmte_id'),
+        ('designation', 'cmte_dsgn'),
+        ('type', 'cmte_tp'),
+        ('election_year', 'cand_election_yr'),
+    )
+    # I want to take additional formatting from the user but don't want to use it for matching during formatting
     cand_committee_link_mapping = (
         # fields if primary committee is requested
         ('primary_committee', 'cmte_id'),
@@ -636,13 +644,10 @@ class Candidate(object):
         ('associated_committee', 'cmte_dsgn'),
         ('associated_committee', 'cmte_tp'),
         ('associated_committee', 'cand_election_yr'),
-        # regular mapping
-        ('committee_id', 'cmte_id'),
-        ('designation', 'cmte_dsgn'),
-        ('type', 'cmte_tp'),
         ('year', 'cand_election_yr'),
         ('*', '*'),
-    )
+        # regular mapping
+    ) + cand_committee_format_mapping
     # dimoffice
     office_mapping = (
         ('office', 'office_tp'),
@@ -667,15 +672,7 @@ class Candidate(object):
         ('*', '*'),
     )
     # dimcandproperties
-    properties_mapping = (
-        # this is for translating mailing_address into the corresponding fields
-        ('mailing_addresses', 'cand_st1'),
-        ('mailing_addresses','cand_st2'),
-        ('mailing_addresses', 'cand_city'),
-        ('mailing_addresses', 'cand_st'),
-        ('mailing_addresses', 'cand_zip'),
-        ('mailing_addresses', 'expire_date'),
-        #
+    property_fields_mapping = (
         ('name', 'cand_nm'),
         ('street_1', 'cand_st1'),
         ('street_2','cand_st2'),
@@ -683,8 +680,18 @@ class Candidate(object):
         ('state', 'cand_st'),
         ('zip', 'cand_zip'),
         ('expire_date', 'expire_date'),
-        ('*', '*'),
     )
+    # I want to take additional formatting from the user but don't want to use it for matching during formatting
+    properties_mapping = (
+        ('mailing_addresses', 'cand_st1'),
+        ('mailing_addresses','cand_st2'),
+        ('mailing_addresses', 'cand_city'),
+        ('mailing_addresses', 'cand_st'),
+        ('mailing_addresses', 'cand_zip'),
+        ('mailing_addresses', 'expire_date'),
+        ('*', '*'),
+
+    ) + property_fields_mapping
     # to filter primary from affiliated committees
     cmte_mapping = (
         ('primary_committee', "'P'"),

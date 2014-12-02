@@ -88,13 +88,6 @@ class OverallTest(unittest.TestCase):
             print election[field]
             self.assertEquals(election.has_key(field), True)
 
-        primary_com_fields = ('designation_full', 'designation',)
-        p_com = election['primary_committee']
-        for field in p_com:
-            print field
-            print p_com[field]
-            self.assertEquals(p_com.has_key(field), True)
-
         # not in default fields
         self.assertEquals(response['elections'][0].has_key('affiliated_committees'), False)
         self.assertEquals(response.has_key('mailing_addresses'), False)
@@ -115,7 +108,7 @@ class OverallTest(unittest.TestCase):
     def test_candidate_committes(self):
         response = self._results('/candidate?candidate_id=P80003338&fields=*')
 
-        fields = ('committee_id', 'designation', 'designation_full', 'type', 'type_full')
+        fields = ('committee_id', 'designation', 'designation_full', 'type', 'type_full', 'election_year')
 
         election = response[0]['elections'][0]
         print election
