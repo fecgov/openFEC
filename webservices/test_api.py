@@ -74,93 +74,95 @@ class OverallTest(unittest.TestCase):
         # testing key defaults
         response = self._results('/candidate?candidate_id=P80003338&year=2008')
 
-        print "\n%s\n" % response
-
-
         response= response[0]
+        print "\n%s\n" % response
 
         #self.assertEquals(response['candidate_id'], 'P80003338')
         self.assertEquals(response['name']['full_name'], 'OBAMA, BARACK')
-        self.assertEquals(response['elections'][0]['party_affiliation'], "Democratic Party")
-        self.assertEquals(response['elections'][0]['primary_committee']['committee_id'], 'C00431445')
-        self.assertEquals(response['elections'][0]['primary_committee']['designation'], "P")
-        self.assertEquals(response['elections'][0]['state'], "US")
-        self.assertEquals(response['elections'][0]['district'], None)
-        self.assertEquals(response['elections'][0].has_key('incumbent_challenge_full'), True)
-        self.assertEquals(response['elections'][0].has_key('incumbent_challenge'), True)
-        self.assertEquals(response['elections'][0]['primary_committee']['designation'], 'P')
-        self.assertEquals(response['elections'][0]['primary_committee'].has_key('designation_full'), True)
+
+        fields = ('party_affiliation', 'primary_committee', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'office_sought', 'election_year', 'primary_committee')
+
+        election = response['elections'][0]
+        for field in fields:
+            print field
+            print election[field]
+            self.assertEquals(election.has_key(field), True)
+
+        primary_com_fields = ('designation_full', 'designation',)
+        p_com = election['primary_committee']
+        for field in p_com:
+            print field
+            print p_com[field]
+            self.assertEquals(p_com.has_key(field), True)
+
+        # not in default fields
         self.assertEquals(response['elections'][0].has_key('affiliated_committees'), False)
-        self.assertEquals(response['elections'][0].has_key('mailing_addresses'), False)
-        self.assertEquals(response['elections'][0].has_key('candidate_status'), True)
-        self.assertEquals(response['elections'][0].has_key('office_sought'), True)
-        self.assertEquals(response['elections'][0].has_key('election_year'), True)
+        self.assertEquals(response.has_key('mailing_addresses'), False)
+        # making sure primary committee is in the right bucket
+        self.assertEquals(response['elections'][0]['primary_committee']['designation'], 'P')
 
-    # def test_extra_fields(self):
-    #     response = self._results('/candidate?candidate_id=P80003338&fields=mailing_addresses,affiliated_committees')
-    #     self.assertIn('C00434357', [c['committee_id'] for c in response[0]['elections'][0]['affiliated_committees']])
-    #     self.assertIn('233 NORTH MICHIGAN AVE STE 1720', [a['street_1'] for a in response[0]['mailing_addresses']])
-    #     self.assertEquals(response[0].has_key('candidate_id'), False)
-    #     self.assertEquals(response[0].has_key('name'), False)
+    def test_extra_fields(self):
+        response = self._results('/candidate?candidate_id=P80003338&fields=mailing_addresses,affiliated_committees')
+        self.assertIn('C00434357', [c['committee_id'] for c in response[0]['elections'][0]['affiliated_committees']])
+        self.assertIn('233 NORTH MICHIGAN AVE STE 1720', [a['street_1'] for a in response[0]['mailing_addresses']])
+        self.assertEquals(response[0].has_key('candidate_id'), False)
+        self.assertEquals(response[0].has_key('name'), False)
 
-    # def test_no_fields(self):
-    #     response = self._results('/candidate?candidate_id=P80003338&fields=wrong')
-    #     self.assertEquals(response[0], {})
+    def test_no_fields(self):
+        response = self._results('/candidate?candidate_id=P80003338&fields=wrong')
+        self.assertEquals(response[0], {})
 
-    # def test_candidate_committes(self):
-    #     response = self._results('/candidate?candidate_id=P80003338&fields=*')
+    def test_candidate_committes(self):
+        response = self._results('/candidate?candidate_id=P80003338&fields=*')
 
-    #     self.assertEquals(response[0]['elections'][0]['affiliated_committees'][0].has_key('committee_id'), True)
-    #     self.assertEquals(response[0]['elections'][0]['affiliated_committees'][0].has_key('designation'), True)
-    #     self.assertEquals(response[0]['elections'][0]['affiliated_committees'][0].has_key('designation_full'), True)
-    #     self.assertEquals(response[0]['elections'][0]['affiliated_committees'][0].has_key('type'), True)
-    #     self.assertEquals(response[0]['elections'][0]['affiliated_committees'][0].has_key('type_full'), True)
+        fields = ('committee_id', 'designation', 'designation_full', 'type', 'type_full')
 
-    #     self.assertEquals(response[0]['elections'][0]['primary_committee'].has_key('committee_id'), True)
-    #     self.assertEquals(response[0]['elections'][0]['primary_committee'].has_key('designation'), True)
-    #     self.assertEquals(response[0]['elections'][0]['primary_committee'].has_key('designation_full'), True)
-    #     self.assertEquals(response[0]['elections'][0]['primary_committee'].has_key('type'), True)
-    #     self.assertEquals(response[0]['elections'][0]['primary_committee'].has_key('type_full'), True)
+        election = response[0]['elections'][0]
+        print election
+        for field in fields:
+            print field
+            self.assertEquals(election['primary_committee'].has_key(field), True)
+            self.assertEquals(election['affiliated_committees'][0].has_key(field), True)
 
-    # def test_committee_basics(self):
-    #     response = self._response('/committee')
-    #     results = response['results']
-    #     # not all records in the test db have statuses; find one that does
-    #     result = [r[0] for r in results if r[0]['status']][0]
-    #     self.assertEquals(result.has_key('committee_id'), True)
-    #     self.assertEquals(result.has_key('form_type'), True)
-    #     self.assertEquals(result.has_key('expire_date'), True)
-    #     self.assertEquals(result.has_key('name'), True)
-    #     self.assertEquals(result['status'][0].has_key('designation'), True)
-    #     self.assertEquals(result['status'][0].has_key('designation_code'), True)
-    #     self.assertEquals(result['status'][0].has_key('type_code'), True)
-    #     self.assertEquals(result['status'][0].has_key('type'), True)
-    #     self.assertEquals(result.has_key('address'), True)
+    def test_committee_basics(self):
+        response = self._response('/committee')
+        results = response['results']
+        # not all records in the test db have statuses; find one that does
+        result = [r[0] for r in results if r[0]['status']][0]
+        self.assertEquals(result.has_key('committee_id'), True)
+        self.assertEquals(result.has_key('form_type'), True)
+        self.assertEquals(result.has_key('expire_date'), True)
+        self.assertEquals(result.has_key('name'), True)
+        self.assertEquals(result['status'][0].has_key('designation'), True)
+        self.assertEquals(result['status'][0].has_key('designation_code'), True)
+        self.assertEquals(result['status'][0].has_key('type_code'), True)
+        self.assertEquals(result['status'][0].has_key('type'), True)
+        self.assertEquals(result.has_key('address'), True)
 
-    # def test_committee_candidate(self):
-    #     response = self._response('/committee/C00431445')
-    #     print response['results']
-    #     cand = response['results'][0][0]['candidates'][0]
+    def test_committee_candidate(self):
+        response = self._response('/committee/C00431445')
+        print response['results']
+        cand = response['results'][0][0]['candidates'][0]
 
-    #     fields = ('candidate_id', 'designation','designation_code',
-    #                 'election_year', 'expire_date', 'link_date', 'type', 'type_code'
-    #     )
+        fields = ('candidate_id', 'designation','designation_code',
+                    'election_year', 'expire_date', 'link_date', 'type', 'type_code'
+        )
 
-    #     for field in fields:
-    #         self.assertEquals(cand.has_key(field), True)
+        for field in fields:
+            self.assertEquals(cand.has_key(field), True)
 
-    # def test_committee_filter(self):
-    #     response = self._response('/committee')
-    #     type_response = self._response('/committee?type_code=P')
-    #     desig_response = self._response('/committee?designation_code=P')
-    #     org_response = self._response('/committee?organization_type_code=C')
+    def test_committee_filter(self):
+        response = self._response('/committee')
+        type_response = self._response('/committee?type_code=P')
+        desig_response = self._response('/committee?designation_code=P')
+        org_response = self._response('/committee?organization_type_code=C')
 
 
-    #     original_count = response['pagination']['count']
-    #     type_count = type_response['pagination']['count']
-    #     desig_count = desig_response['pagination']['count']
-    #     org_count = org_response['pagination']['count']
+        original_count = response['pagination']['count']
+        type_count = type_response['pagination']['count']
+        desig_count = desig_response['pagination']['count']
+        org_count = org_response['pagination']['count']
 
-    #     self.assertEquals((original_count > type_count), True)
-    #     self.assertEquals((original_count > desig_count), True)
-    #     self.assertEquals((original_count > org_count), True)
+        self.assertEquals((original_count > type_count), True)
+        self.assertEquals((original_count > desig_count), True)
+        self.assertEquals((original_count > org_count), True)

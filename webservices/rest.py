@@ -52,6 +52,7 @@ from json_encoding import TolerantJSONEncoder
 import logging
 import pprint
 import time
+import copy
 from datetime import datetime
 from psycopg2._range import DateTimeRange
 
@@ -192,9 +193,11 @@ def format_candids(self, data, page_data, fields, default_year):
                     elections[year] = {}
 
                 committee = {}
+                # not looking at the fields used for name matching
                 for api_name, fec_name in self.cand_committee_link_mapping:
                     if cmte.has_key(fec_name):
                         committee[api_name] = cmte[fec_name]
+
 
                 if cmte['cmte_dsgn']:
                     committee['designation_full'] = designation_decoder[cmte['cmte_dsgn']]
@@ -207,6 +210,7 @@ def format_candids(self, data, page_data, fields, default_year):
                     elections[year]['affiliated_committees']  = [committee]
                 else:
                     elections[year]['affiliated_committees'].append(committee)
+
 
 
         for office in cand['dimcandoffice']:
@@ -486,7 +490,8 @@ class Searchable(restful.Resource):
         args = self.parser.parse_args()
         elements = []
         page_num = 1
-        show_fields = self.default_fields
+        show_fields = copy.copy(self.default_fields)
+        print show_fields
 
         for arg in args:
             if args[arg]:
