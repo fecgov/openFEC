@@ -404,17 +404,19 @@ def format_committees(self, data, page, fields, year):
             candidate_arcive_list = []
             for cand in cmte['dimlinkages']:
                 candidate ={}
-                for api_name, fec_name in self.linkages_mapping:
-                    if cand.has_key(fec_name):
+                for api_name, fec_name in self.linkages_field_mapping:
+                    if cand.has_key(fec_name)and fec_name != 'expire_date':
                         candidate[api_name] = cand[fec_name]
 
+                if cand.has_key('expire_date') and 'expire_date' in fields:
+                    candidate['expire_date'] = cand['expire_date']
                 if candidate.has_key('type'):
                     candidate['type_full'] = cmte_decoder[candidate['type']]
                 if candidate.has_key('designation'):
                     candidate['designation_full'] = designation_decoder[candidate['designation']]
 
                 # add to properties or archive based on expire date
-                if cand['expire_date'] == None:
+                if cand.has_key('expire_date') and cand['expire_date'] == None:
                     candidate_list.append(candidate)
                 else:
                     candidate_arcive_list.append(candidate)
@@ -424,7 +426,8 @@ def format_committees(self, data, page, fields, year):
             if len(candidate_arcive_list) > 0:
                 record['candidates'] = candidate_arcive_list
 
-
+#### do this next
+# make mapping in class, loop through the mapping in the format step and make sure the filters are working and write tests.
             statuses = []
             for info in cmte['dimcmtetpdsgn']:
                 status_mappings = [
@@ -516,7 +519,6 @@ class Searchable(restful.Resource):
         elements = []
         page_num = 1
         show_fields = copy.copy(self.default_fields)
-        print show_fields
 
         for arg in args:
             if args[arg]:
@@ -554,7 +556,6 @@ class Searchable(restful.Resource):
                             for m in maps:
                                 if m[0] == field:
                                     show_fields[field_name] = show_fields[field_name] + m[1] + ','
-                                    print "!!!!!", show_fields[field_name]
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
@@ -778,16 +779,18 @@ class Committee(object):
     default_fields = {
         'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
         'properties_fields': '*',
-        'linkages_fields': '*',
+        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date',
         'designation_fields': '*',
     }
 
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
     def query_text(self, show_fields):
-        return '(%s{{%s},/dimcmteproperties, /dimlinkages, /dimcmtetpdsgn})' % (
+        # We always need expire date to sort the information
+        return '(%s{{%s},/dimcmteproperties, /dimlinkages{expire_date,%s}, /dimcmtetpdsgn})' % (
             self.viewable_table_name,
             show_fields['dimcmte_fields'],
+            show_fields['linkages_fields']
         )
 
 
@@ -799,16 +802,25 @@ class Committee(object):
         ('*', '*'),
     )
 
-    linkages_mapping = (
+    linkages_field_mapping = (
         ('candidate_id', 'cand_id'),
         ('type', 'cmte_tp'),
         ('designation', 'cmte_dsgn'),
-        ('designation_full', 'cmte_dsgn'),
         ('election_year', 'cand_election_yr'),
         ('expire_date', 'expire_date'),
         ('link_date', 'link_date'),
-        ('*', '*'),
     )
+
+    linkages_mapping = (
+        ('committees', 'cand_id'),
+        ('committees', 'cmte_tp'),
+        ('committees', 'cmte_dsgn'),
+        ('committees', 'cand_election_yr'),
+        ('committees', 'expire_date'),
+        ('committees', 'link_date'),
+        ('*', '*'),
+
+    ) + linkages_field_mapping
 
     # placeholders
     properties_mapping = (('x', 'y'))
