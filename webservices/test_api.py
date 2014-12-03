@@ -71,14 +71,12 @@ class OverallTest(unittest.TestCase):
     #     results = self._results('candidate?cand_id=P80003338&year=2012')
     #     self.assertNotEqual(results, [])
 
+    # Candidates
     def test_fields(self):
         # testing key defaults
         response = self._results('/candidate?candidate_id=P80003338&year=2008')
-
         response= response[0]
-        print "\n%s\n" % response
 
-        #self.assertEquals(response['candidate_id'], 'P80003338')
         self.assertEquals(response['name']['full_name'], 'OBAMA, BARACK')
 
         fields = ('party_affiliation', 'primary_committee', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'office_sought', 'election_year', 'primary_committee')
@@ -129,6 +127,16 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(item['properties'].has_key(field), True)
 
+    def test_committee_cand_fields(self):
+        response = self._response('/committee/C00000752')
+        results = response['results']
+        # not all records in the test db have candidates; find one that does
+        result = results[0]['properties']['candidates'][0]
+
+        fields = ('candidate_id', 'designation', 'designation_full', 'election_year', 'expire_date', 'link_date', 'type', 'type_full')
+        for field in fields:
+            print field
+            self.assertEquals(result.has_key(field), True)
 
 
     def test_committee_filter(self):
@@ -136,7 +144,6 @@ class OverallTest(unittest.TestCase):
         type_response = self._response('/committee?type_code=P')
         desig_response = self._response('/committee?designation_code=P')
         org_response = self._response('/committee?organization_type_code=C')
-
 
         original_count = response['pagination']['count']
         type_count = type_response['pagination']['count']

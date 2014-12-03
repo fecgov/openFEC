@@ -304,8 +304,8 @@ def format_committees(self, data, page, fields, year):
     #return data
     results = []
     for cmte in data:
-        pp = pprint.PrettyPrinter(indent=2)
-        pp.pprint(cmte)
+        # pp = pprint.PrettyPrinter(indent=2)
+        # pp.pprint(cmte)
         committee = {}
         committee['archive'] = []
 
@@ -400,20 +400,30 @@ def format_committees(self, data, page, fields, year):
                     if item[f] is not None:
                         record[v] = item[f]
 
-            candidates = []
+            candidate_list = []
+            candidate_arcive_list = []
             for cand in cmte['dimlinkages']:
                 candidate ={}
-                candidate['candidate_id'] = cand['cand_id']
-                candidate['type_code'] = cand['cmte_tp']
-                candidate['type'] = cmte_decoder[cand['cmte_tp']]
-                candidate['designation'] = cand['cmte_dsgn']
-                candidate['designation_full'] = designation_decoder[cand['cmte_dsgn']]
-                candidate['election_year'] = cand['cand_election_yr']
-                candidate['expire_date'] = cand['expire_date']
-                candidate['link_date'] = cand['link_date']
-                candidates.append(candidate)
-            if len(candidates) > 0:
-                record['candidates'] = candidates
+                for api_name, fec_name in self.linkages_mapping:
+                    if cand.has_key(fec_name):
+                        candidate[api_name] = cand[fec_name]
+
+                if candidate.has_key('type'):
+                    candidate['type_full'] = cmte_decoder[candidate['type']]
+                if candidate.has_key('designation'):
+                    candidate['designation_full'] = designation_decoder[candidate['designation']]
+
+                # add to properties or archive based on expire date
+                if cand['expire_date'] == None:
+                    candidate_list.append(candidate)
+                else:
+                    candidate_arcive_list.append(candidate)
+
+            if len(candidate_list) > 0:
+                properties['candidates'] = candidate_list
+            if len(candidate_arcive_list) > 0:
+                record['candidates'] = candidate_arcive_list
+
 
             statuses = []
             for info in cmte['dimcmtetpdsgn']:
@@ -789,9 +799,19 @@ class Committee(object):
         ('*', '*'),
     )
 
+    linkages_mapping = (
+        ('candidate_id', 'cand_id'),
+        ('type', 'cmte_tp'),
+        ('designation', 'cmte_dsgn'),
+        ('designation_full', 'cmte_dsgn'),
+        ('election_year', 'cand_election_yr'),
+        ('expire_date', 'expire_date'),
+        ('link_date', 'link_date'),
+        ('*', '*'),
+    )
+
     # placeholders
     properties_mapping = (('x', 'y'))
-    linkages_mapping = (('x', 'y'))
     designation_mapping= (('x', 'y'))
 
 # I know I will need these for the above mappings--
