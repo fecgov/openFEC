@@ -166,7 +166,7 @@ def assign_formatting(self, data_dict, page_data, year):
     if self.table_name_stem == 'cand':
         return format_candids(self, data_dict, page_data, fields, year)
     elif self.table_name_stem == 'cmte':
-        return format_committees(data_dict, page_data, fields, year)
+        return format_committees(self, data_dict, page_data, fields, year)
     else:
         return data_dict
 
@@ -198,7 +198,6 @@ def format_candids(self, data, page_data, fields, default_year):
                     if cmte.has_key(fec_name):
                         committee[api_name] = cmte[fec_name]
 
-
                 if cmte['cmte_dsgn']:
                     committee['designation_full'] = designation_decoder[cmte['cmte_dsgn']]
                 if cmte['cmte_tp']:
@@ -210,7 +209,6 @@ def format_candids(self, data, page_data, fields, default_year):
                     elections[year]['affiliated_committees']  = [committee]
                 else:
                     elections[year]['affiliated_committees'].append(committee)
-
 
 
         for office in cand['dimcandoffice']:
@@ -302,7 +300,7 @@ def format_candids(self, data, page_data, fields, default_year):
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 # still need to implement year
-def format_committees(data, page, fields, year):
+def format_committees(self, data, page, fields, year):
     results = []
     for cmte in data:
         committee = []
@@ -343,6 +341,7 @@ def format_committees(data, page, fields, year):
             ]
 
             custodian = {}
+            # self.custodian_field_mapping
             for f,v in custodian_mappings:
                     if item[f] is not None:
                             custodian[v] = item[f]
@@ -413,16 +412,17 @@ def format_committees(data, page, fields, year):
                 status = {}
                 for f,v in status_mappings:
                     if info[f] is not None:
+                        print info[f]
                         status[v] = info[f]
                         if f == 'cmte_dsgn' and designation_decoder.has_key(info[f]):
                             status['designation'] = designation_decoder[info[f]]
                         if f == 'cmte_tp' and cmte_decoder.has_key(info[f]):
-                            status['type'] = cmte_decoder[info[f]]
+                            status['type_full'] = cmte_decoder[info[f]]
                 statuses.append(status)
             record['status'] = sorted(statuses, key=lambda k: k['receipt_date'], reverse=True)
 
             # We don't have party info so I am going to mock up what it would be like
-            if record['status'] and record['status'][0]["type_code"] in ['X', 'Y']:
+            if record['status'] and record['status'][0].has_key("type_code") and record['status'][0]["type_code"] in ['X', 'Y']:
                 name = str(item['cmte_nm']).upper()
                 if 'DEMOCRAT' in name:
                     record['fake_party'] = 'Democratic Party'
@@ -443,7 +443,8 @@ class SingleResource(restful.Resource):
     # add fields and year to this
     def get(self, id):
         overall_start_time = time.time()
-        qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
+        # parse arguements looking for custom fields
+        qry = "/%s?%s_id='%s'" % (self.query_text(self.default_fields), self.table_name_stem, id)
         print(qry)
         speedlogger.info('--------------------------------------------------')
         speedlogger.info('\nHTSQL query: \n%s' % qry)
@@ -700,7 +701,6 @@ class Candidate(object):
     )
 
     # connects mappings to field names
-    fields = ''
     maps_fields = (
         (dimcand_mapping, 'dimcand_fields'),
         (cand_committee_link_mapping, 'cand_committee_link_fields'),
@@ -750,9 +750,94 @@ class CandidateSearch(Searchable, Candidate):
 
 class Committee(object):
 
+    default_fields = {
+        'properties_fields': '*',
+        'linkages_fields': '*',
+        'designation_fields': '*',
+    }
+
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
-    htsql_qry = '(%s{*,/dimcmteproperties, /dimlinkages, /dimcmtetpdsgn})' % viewable_table_name
+    def query_text(self, show_fields):
+        return '(%s{*,/dimcmteproperties, /dimlinkages, /dimcmtetpdsgn})' % self.viewable_table_name
+
+    ### Placeholder
+    properties_mapping = (1, 2)
+    linkages_mapping = (1, 2)
+    designation_mapping= (1, 2)
+
+# I know I will need these for the above mappings--
+    treasurer_field_mapping = (
+        ('city', 'cmte_treasurer_city'),
+        ('name_1', 'cmte_treasurer_f_nm'),
+        ('name_2', 'cmte_treasurer_l_nm'),
+        ('name_middle', 'cmte_treasurer_m_nm'),
+        ('name_full', 'cmte_treasurer_nm'),
+        ('phone', 'cmte_treasurer_ph_num'),
+        ('name_prefix', 'cmte_treasurer_prefix'),
+        ('state', 'cmte_treasurer_st'),
+        ('street_1', 'cmte_treasurer_st1'),
+        ('street_2', 'cmte_treasurer_st2'),
+        ('name_suffix', 'cmte_treasurer_suffix'),
+        ('name_title', 'cmte_treasurer_title'),
+        ('zip', 'cmte_treasurer_zip'),
+    )
+# this should be renamed
+    treasurer = (
+        ('treasurer', 'cmte_treasurer_city'),
+        ('treasurer', 'cmte_treasurer_f_nm'),
+        ('treasurer', 'cmte_treasurer_l_nm'),
+        ('treasurer', 'cmte_treasurer_m_nm'),
+        ('treasurer', 'cmte_treasurer_nm'),
+        ('treasurer', 'cmte_treasurer_ph_num'),
+        ('treasurer', 'cmte_treasurer_prefix'),
+        ('treasurer', 'cmte_treasurer_st'),
+        ('treasurer', 'cmte_treasurer_st1'),
+        ('treasurer', 'cmte_treasurer_st2'),
+        ('treasurer', 'cmte_treasurer_suffix'),
+        ('treasurer', 'cmte_treasurer_title'),
+        ('treasurer', 'cmte_treasurer_zip'),
+    )
+
+    custodian = (
+        ('custodian', 'cmte_custodian_city'),
+        ('custodian', 'cmte_custodian_f_nm'),
+        ('custodian', 'cmte_custodian_l_nm'),
+        ('custodian', 'cmte_custodian_m_nm'),
+        ('custodian', 'cmte_custodian_nm'),
+        ('custodian', 'cmte_custodian_ph_num'),
+        ('custodian', 'cmte_custodian_prefix'),
+        ('custodian', 'cmte_custodian_st'),
+        ('custodian', 'cmte_custodian_st1'),
+        ('custodian', 'cmte_custodian_st2'),
+        ('custodian', 'cmte_custodian_suffix'),
+        ('custodian', 'cmte_custodian_title'),
+        ('custodian', 'cmte_custodian_zip'),
+    )
+
+    custodian_field_mapping = (
+        ('city', 'cmte_custodian_city'),
+        ('name_1', 'cmte_custodian_f_nm'),
+        ('name_2', 'cmte_custodian_l_nm'),
+        ('name_middle', 'cmte_custodian_m_nm'),
+        ('name_full', 'cmte_custodian_nm'),
+        ('phone', 'cmte_custodian_ph_num'),
+        ('name_prefix', 'cmte_custodian_prefix'),
+        ('state', 'cmte_custodian_st'),
+        ('street_1', 'cmte_custodian_st1'),
+        ('street_2', 'cmte_custodian_st2'),
+        ('name_suffix', 'cmte_custodian_suffix'),
+        ('name_title', 'cmte_custodian_title'),
+        ('zip', 'cmte_custodian_zip'),
+    )
+
+
+    # connects mappings to field names
+    maps_fields = (
+        (properties_mapping, 'properties_fields'),
+        (linkages_mapping, 'linkages_fields'),
+        (designation_mapping, 'designation_fields'),
+    )
 
 
 class CommitteeResource(SingleResource, Committee):

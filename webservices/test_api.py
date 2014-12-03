@@ -128,7 +128,7 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(result.has_key('name'), True)
         self.assertEquals(result['status'][0].has_key('designation'), True)
         self.assertEquals(result['status'][0].has_key('designation_code'), True)
-        self.assertEquals(result['status'][0].has_key('type_code'), True)
+        self.assertEquals(result['status'][0].has_key('type_full'), True)
         self.assertEquals(result['status'][0].has_key('type'), True)
         self.assertEquals(result.has_key('address'), True)
 
