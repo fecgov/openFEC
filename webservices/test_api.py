@@ -3,6 +3,7 @@ import unittest
 import rest
 
 class OverallTest(unittest.TestCase):
+    # Candidate
 
     def setUp(self):
         rest.app.config['TESTING'] = True
@@ -117,42 +118,18 @@ class OverallTest(unittest.TestCase):
             self.assertEquals(election['primary_committee'].has_key(field), True)
             self.assertEquals(election['affiliated_committees'][0].has_key(field), True)
 
-    def test_committee_basics(self):
+    #Committee
+
+    def test_committee_fields(self):
         response = self._response('/committee')
-        results = response['results']
-        # not all records in the test db have statuses; find one that does
-        result = [r[0] for r in results if r[0]['status']][0]
+        item = response['results'][0]
 
-        fields = ('committee_id', 'form_type', 'form_type', 'expire_date', 'name', 'address')
-        for field in fields:
-            self.assertEquals(result.has_key(field), True)
-
-
-    def test_committee_status(self):
-        response = self._response('/committee')
-        results = response['results']
-        # not all records in the test db have statuses; find one that does
-        result = [r[0] for r in results if r[0]['status']][0]
-        status = result['status'][0]
-        print status, "\n"
-
-        fields = ('designation', 'designation_full', 'type_full', 'type')
-        for field in fields:
+        property_fields = ('committee_id', 'expire_date', 'form_type', 'load_date')
+        for field in property_fields:
             print field
-            self.assertEquals(status.has_key(field), True)
+            self.assertEquals(item['properties'].has_key(field), True)
 
 
-    def test_committee_candidate(self):
-        response = self._response('/committee/C00431445')
-        print response['results']
-        cand = response['results'][0][0]['candidates'][0]
-
-        fields = ('candidate_id', 'designation','designation_full',
-                    'election_year', 'expire_date', 'link_date', 'type', 'type_code'
-        )
-
-        for field in fields:
-            self.assertEquals(cand.has_key(field), True)
 
     def test_committee_filter(self):
         response = self._response('/committee')
@@ -169,3 +146,51 @@ class OverallTest(unittest.TestCase):
         self.assertEquals((original_count > type_count), True)
         self.assertEquals((original_count > desig_count), True)
         self.assertEquals((original_count > org_count), True)
+
+
+    # def test_committee_basics(self):
+    #     response = self._response('/committee')
+    #     results = response['results']
+    #     # not all records in the test db have statuses; find one that does
+    #     result = [r[0] for r in results if r[0]['status']][0]
+
+    #     fields = ('committee_id', 'form_type', 'form_type', 'expire_date', 'name', 'address')
+    #     for field in fields:
+    #         self.assertEquals(result.has_key(field), True)
+
+
+    # def test_committee_status(self):
+    #     response = self._response('/committee')
+    #     results = response['results']
+    #     # not all records in the test db have statuses; find one that does
+    #     result = [r[0] for r in results if r[0]['status']][0]
+    #     status = result['status'][0]
+    #     print status, "\n"
+
+    #     fields = ('designation', 'designation_full', 'type_full', 'type')
+    #     for field in fields:
+    #         print field
+    #         self.assertEquals(status.has_key(field), True)
+
+
+    # def test_committee_candidate(self):
+    #     response = self._response('/committee/C00431445')
+    #     print response['results']
+    #     cand = response['results'][0][0]['candidates'][0]
+
+    #     fields = ('candidate_id', 'designation','designation_full',
+    #                 'election_year', 'expire_date', 'link_date', 'type', 'type_code'
+    #     )
+
+    #     for field in fields:
+    #         self.assertEquals(cand.has_key(field), True)
+
+
+
+    # def test_treasurer(self):
+    #     # These fields really vary
+    #     response = self._response('/committee/C00031054')
+    #     results = response['results'][0]['treasurer']
+    #     self.assertEquals(status.has_key(name_full), True)
+
+

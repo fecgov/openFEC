@@ -301,16 +301,30 @@ def format_candids(self, data, page_data, fields, default_year):
 
 # still need to implement year
 def format_committees(self, data, page, fields, year):
+    #return data
     results = []
     for cmte in data:
-        committee = []
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(cmte)
+        committee = {}
+        committee['archive'] = []
+
+        # Most recent information
+        properties = {}
+        # Keeps track of previous info
+
+
+        for api_name, fec_name in self.dimcmte_mapping:
+            if cmte['dimcmte'].has_key(fec_name):
+                properties[api_name] = cmte['dimcmte'][fec_name]
+
 
         for item in cmte['dimcmteproperties']:
             record = {}
             record['name'] = item['cmte_nm']
-            record['committee_id'] = cmte['cmte_id']
-            record['expire_date'] = cmte['expire_date']
-            record['form_type'] = item['form_tp']
+            # record['committee_id'] = cmte['dimcmte']['cmte_id']
+            # record['expire_date'] = cmte['dimcmte']['expire_date']
+            # record['form_type'] = item['dimcmte']['form_tp']
 
             address = {}
             address['street_1'] = item['cmte_st1']
@@ -342,9 +356,9 @@ def format_committees(self, data, page, fields, year):
 
             custodian = {}
             # self.custodian_field_mapping
-            for f,v in custodian_mappings:
-                    if item[f] is not None:
-                            custodian[v] = item[f]
+            for api_name, fec_name in self.custodian_field_mapping:
+                if item[fec_name] is not None:
+                        custodian[api_name] = item[fec_name]
             if len(custodian) > 0:
                 record['custodian'] = custodian
 
@@ -412,7 +426,6 @@ def format_committees(self, data, page, fields, year):
                 status = {}
                 for f,v in status_mappings:
                     if info[f] is not None:
-                        print info[f]
                         status[v] = info[f]
                         if f == 'cmte_dsgn' and designation_decoder.has_key(info[f]):
                             status['designation_full'] = designation_decoder[info[f]]
@@ -431,7 +444,8 @@ def format_committees(self, data, page, fields, year):
                     record['fake_party'] = 'Republican Party'
                     record['fake_party_code'] = 'REP'
 
-            committee.append(record)
+            committee['archive'].append(record)
+        committee['properties'] = properties
 
         results.append(committee)
 
@@ -530,6 +544,7 @@ class Searchable(restful.Resource):
                             for m in maps:
                                 if m[0] == field:
                                     show_fields[field_name] = show_fields[field_name] + m[1] + ','
+                                    print "!!!!!", show_fields[field_name]
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
@@ -745,12 +760,13 @@ class CandidateSearch(Searchable, Candidate):
                       "name": string.Template("exists(dimcandproperties?cand_nm~'$arg')"),
                       "year": string.Template("exists(dimcandoffice?cand_election_yr='$arg')"),
                       "party": string.Template("exists(dimcandoffice?dimparty.party_affiliation~'$arg')")
-                      }
+    }
 
 
 class Committee(object):
 
     default_fields = {
+        'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
         'properties_fields': '*',
         'linkages_fields': '*',
         'designation_fields': '*',
@@ -759,12 +775,24 @@ class Committee(object):
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
     def query_text(self, show_fields):
-        return '(%s{*,/dimcmteproperties, /dimlinkages, /dimcmtetpdsgn})' % self.viewable_table_name
+        return '(%s{{%s},/dimcmteproperties, /dimlinkages, /dimcmtetpdsgn})' % (
+            self.viewable_table_name,
+            show_fields['dimcmte_fields'],
+        )
 
-    ### Placeholder
-    properties_mapping = (1, 2)
-    linkages_mapping = (1, 2)
-    designation_mapping= (1, 2)
+
+    dimcmte_mapping = (
+        ('committee_id', 'cmte_id'),
+        ('form_type', 'form_tp'),
+        ('load_date', 'load_date'),
+        ('expire_date', 'expire_date'),
+        ('*', '*'),
+    )
+
+    # placeholders
+    properties_mapping = (('x', 'y'))
+    linkages_mapping = (('x', 'y'))
+    designation_mapping= (('x', 'y'))
 
 # I know I will need these for the above mappings--
     treasurer_field_mapping = (
@@ -834,6 +862,7 @@ class Committee(object):
 
     # connects mappings to field names
     maps_fields = (
+        (dimcmte_mapping, 'dimcmte_fields'),
         (properties_mapping, 'properties_fields'),
         (linkages_mapping, 'linkages_fields'),
         (designation_mapping, 'designation_fields'),
