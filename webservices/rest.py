@@ -392,8 +392,8 @@ def format_committees(self, data, page, fields, year):
                 candidate['candidate_id'] = cand['cand_id']
                 candidate['type_code'] = cand['cmte_tp']
                 candidate['type'] = cmte_decoder[cand['cmte_tp']]
-                candidate['designation_code'] = cand['cmte_dsgn']
-                candidate['designation'] = designation_decoder[cand['cmte_dsgn']]
+                candidate['designation'] = cand['cmte_dsgn']
+                candidate['designation_full'] = designation_decoder[cand['cmte_dsgn']]
                 candidate['election_year'] = cand['cand_election_yr']
                 candidate['expire_date'] = cand['expire_date']
                 candidate['link_date'] = cand['link_date']
@@ -404,7 +404,7 @@ def format_committees(self, data, page, fields, year):
             statuses = []
             for info in cmte['dimcmtetpdsgn']:
                 status_mappings = [
-                    ('cmte_dsgn', 'designation_code'),
+                    ('cmte_dsgn', 'designation'),
                     ('cmte_tp', 'type'),
                     #('expire_date', 'expire_date'),
                     ('receipt_date', 'receipt_date'),
@@ -415,7 +415,7 @@ def format_committees(self, data, page, fields, year):
                         print info[f]
                         status[v] = info[f]
                         if f == 'cmte_dsgn' and designation_decoder.has_key(info[f]):
-                            status['designation'] = designation_decoder[info[f]]
+                            status['designation_full'] = designation_decoder[info[f]]
                         if f == 'cmte_tp' and cmte_decoder.has_key(info[f]):
                             status['type_full'] = cmte_decoder[info[f]]
                 statuses.append(status)
