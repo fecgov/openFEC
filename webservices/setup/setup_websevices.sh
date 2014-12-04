@@ -46,3 +46,7 @@ sudo cp /usr/local/home/$CURRENT_USER/setup/star.18f.us.key /etc/nginx/ssl/keys/
 
 cd /usr/local/home/$CURRENT_USER/openFEC
 sudo service nginx restart 
+
+# Will use Ubuntu Upstart for process control
+# REST server logs available in /var/log/upstart/rest_server.log 
+sudo cp /usr/local/home/$CURRENT_USER/openFEC/webservices/setup/rest_server.conf /etc/init
