@@ -155,17 +155,6 @@ class OverallTest(unittest.TestCase):
         self.assertEquals((original_count > org_count), True)
 
 
-    # def test_committee_basics(self):
-    #     response = self._response('/committee')
-    #     results = response['results']
-    #     # not all records in the test db have statuses; find one that does
-    #     result = [r[0] for r in results if r[0]['status']][0]
-
-    #     fields = ('committee_id', 'form_type', 'form_type', 'expire_date', 'name', 'address')
-    #     for field in fields:
-    #         self.assertEquals(result.has_key(field), True)
-
-
     # def test_committee_status(self):
     #     response = self._response('/committee')
     #     results = response['results']
@@ -178,20 +167,6 @@ class OverallTest(unittest.TestCase):
     #     for field in fields:
     #         print field
     #         self.assertEquals(status.has_key(field), True)
-
-
-    # def test_committee_candidate(self):
-    #     response = self._response('/committee/C00431445')
-    #     print response['results']
-    #     cand = response['results'][0][0]['candidates'][0]
-
-    #     fields = ('candidate_id', 'designation','designation_full',
-    #                 'election_year', 'expire_date', 'link_date', 'type', 'type_code'
-    #     )
-
-    #     for field in fields:
-    #         self.assertEquals(cand.has_key(field), True)
-
 
 
     # def test_treasurer(self):
