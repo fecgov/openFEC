@@ -5,7 +5,7 @@ Endpoint:
 `/committee`
 
 ## Supported parameters for committee
-| Parameter |Discription |
+| Parameter |description |
 |-----|-----|
 | q=          | full-text search |
 | /<cmte_id>  | Single candidate's record |
@@ -24,11 +24,11 @@ Endpoint:
 
 Unique id of the committee.
 
-#### designation
+#### designation_full
 
 Designation of the committee. See full list of designations and designation codes [here](designations). The committee's designation can affect what rules the committee must follow.
 
-#### designation_code
+#### designation
 
 Designation code of the committee. See full list of designations and designation codes [here](designations).
 
@@ -47,11 +47,11 @@ T = Trade Association,
 V = Cooperative,
 W = Corporation Without Capital Stock,
 
-#### type
+#### type_full
 
 The type of the committee. See full list of types and type codes [here](committee_type).The committee's type can affect what rules the committee must follow.
 
-#### type_code
+#### type
 
 The type of the committee code. See full list of types and type codes [here](committee_type).
 
@@ -76,13 +76,30 @@ Year of the election. Elections are in two-year election cycles.
 
 The type of the committee. See full list of types and type codes [here](committee_type).The committee's type can affect what rules the committee must follow.
 
-#### org_type
+#### organization_type
 
 The kind of organization,
 
-#### type_code
+{add codes here }
+
+#### type_codes
 
 The type of the committee code. See full list of types and type codes [here](committee_type).
 
+#### website
 
+The url to the committee's webpage, if provided.
 
+#### filing_frequency
+
+How often a committee is scheduled to file.
+M = monthly
+Q = quarterly
+
+#### lobbyist_registrant_pac
+
+#### leadership_pac
+
+#### original_registration_date
+
+#### qualifying_date

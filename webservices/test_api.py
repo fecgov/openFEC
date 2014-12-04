@@ -71,7 +71,7 @@ class OverallTest(unittest.TestCase):
     #     results = self._results('candidate?cand_id=P80003338&year=2012')
     #     self.assertNotEqual(results, [])
 
-    # Candidates
+# Candidates
     def test_fields(self):
         # testing key defaults
         response = self._results('/candidate?candidate_id=P80003338&year=2008')
@@ -100,7 +100,7 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response[0].has_key('candidate_id'), False)
         self.assertEquals(response[0].has_key('name'), False)
 
-    def test_no_fields(self):
+    def test_no_candidate_fields(self):
         response = self._results('/candidate?candidate_id=P80003338&fields=wrong')
         self.assertEquals(response[0], {})
 
@@ -116,19 +116,10 @@ class OverallTest(unittest.TestCase):
             self.assertEquals(election['primary_committee'].has_key(field), True)
             self.assertEquals(election['affiliated_committees'][0].has_key(field), True)
 
-    #Committee
-
-    def test_committee_fields(self):
-        response = self._response('/committee')
-        item = response['results'][0]
-
-        property_fields = ('committee_id', 'expire_date', 'form_type', 'load_date')
-        for field in property_fields:
-            print field
-            self.assertEquals(item['properties'].has_key(field), True)
+#Committee
 
     def test_committee_cand_fields(self):
-        response = self._response('/committee/C00000752')
+        response = self._response('/committee/C00000851')
         results = response['results']
         # not all records in the test db have candidates; find one that does
         result = results[0]['properties']['candidates'][0]
@@ -138,41 +129,56 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(result.has_key(field), True)
 
+    def test_committee_stats(self):
+        response = self._response('/committee/C00000851')
+        results = response['results']
+
+        result = results[0]['properties']['status']
+        fields = ('designation','designation_full', 'expire_date','load_date', 'receipt_date', 'type', 'type_full')
+        for field in fields:
+            print field
+            self.assertEquals(result.has_key(field), True)
+
 
     def test_committee_filter(self):
+        # one filter from each table
         response = self._response('/committee')
-        type_response = self._response('/committee?type_code=P')
-        desig_response = self._response('/committee?designation_code=P')
-        org_response = self._response('/committee?organization_type_code=C')
+        type_response = self._response('/committee?type=P')
+        org_response = self._response('/committee?organization_type=C')
 
         original_count = response['pagination']['count']
         type_count = type_response['pagination']['count']
-        desig_count = desig_response['pagination']['count']
         org_count = org_response['pagination']['count']
 
         self.assertEquals((original_count > type_count), True)
-        self.assertEquals((original_count > desig_count), True)
         self.assertEquals((original_count > org_count), True)
 
+    def test_committee_properties_basic(self):
+        response = self._response('/committee/C00000851')
+        result = response['results'][0]
 
-    # def test_committee_status(self):
-    #     response = self._response('/committee')
-    #     results = response['results']
-    #     # not all records in the test db have statuses; find one that does
-    #     result = [r[0] for r in results if r[0]['status']][0]
-    #     status = result['status'][0]
-    #     print status, "\n"
+        basic_fields = ('committee_id','expire_date','form_type','load_date','properties')
+        for field in fields:
+            print field
+            self.assertEquals(result.has_key(field), True)
 
-    #     fields = ('designation', 'designation_full', 'type_full', 'type')
-    #     for field in fields:
-    #         print field
-    #         self.assertEquals(status.has_key(field), True)
+        # Not a default field
+        self.assertEquals(result.has_key('archive'), False)
+
+     # def test_committee_properties_all(self):
+     #     response = self._response('/committee/C00000851?fields=*')
+
+     #     description_fields = ('expire_date','filing_frequency','form_type',)
+     #     treasurer
+     # address
 
 
-    # def test_treasurer(self):
-    #     # These fields really vary
-    #     response = self._response('/committee/C00031054')
-    #     results = response['results'][0]['treasurer']
-    #     self.assertEquals(status.has_key(name_full), True)
+    def test_no_committee_fields(self):
+        response = self._results('/committee/C00000851&fields=wrong')
+        self.assertEquals(response[0], {})
+
+
+    def test_committee_archive(self):
+        pass
 
 
