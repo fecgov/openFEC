@@ -116,21 +116,6 @@ def natural_number(n):
     return result
 
 
-def assign_formatting(self, data_dict, page_data, year):
-    args = self.parser.parse_args()
-    if args['fields'] == None:
-        fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
-    else:
-        fields =  args['fields'].split(',')
-
-    if self.table_name_stem == 'cand':
-        return format_candids(data_dict, page_data, fields, year)
-    elif self.table_name_stem == 'cmte':
-        return format_committees(data_dict, page_data, fields, year)
-    else:
-        return data_dict
-
-
 def as_dicts(data):
     """
     Because HTSQL results render as though they were lists (field info lost)
@@ -155,13 +140,22 @@ def cleantext(text):
     else:
         return text
 
+# this is shared by search and single resource
+def find_fields(self, args):
+    if args['fields'] == None and self.table_name_stem == 'cand':
+        return []
+    elif args['fields'] == None and self.table_name_stem == 'cmte':
+        # I always need expire date to sort the information, don't want to show it when it is not asked for in a custom query.
+        return ['expire_date']
+    elif ',' in args['fields']:
+        return args['fields'].split(',')
+    else:
+        return [args['fields']]
+
 
 def assign_formatting(self, data_dict, page_data, year):
     args = self.parser.parse_args()
-    if args['fields'] == None:
-        fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
-    else:
-        fields =  args['fields'].split(',')
+    fields = find_fields(self, args)
 
     if self.table_name_stem == 'cand':
         return format_candids(self, data_dict, page_data, fields, year)
@@ -304,8 +298,6 @@ def format_candids(self, data, page_data, fields, default_year):
 # still need to implement year
 def format_committees(self, data, page, fields, year):
     results = []
-    if fields == None:
-        fields = ['expire_date']
     for cmte in data:
         committee = {}
         # Most recent information
@@ -314,15 +306,15 @@ def format_committees(self, data, page, fields, year):
         record = {}
 
         for api_name, fec_name in self.dimcmte_mapping:
-            if cmte['dimcmte'].has_key(fec_name):
-                committee[api_name] = cmte['dimcmte'][fec_name]
+                if cmte['dimcmte'].has_key(fec_name):
+                    committee[api_name] = cmte['dimcmte'][fec_name]
 
         for item in cmte['dimcmteproperties']:
             # shortcut for formatting
             if item['expire_date'] == None:
                 expired = False
-                if 'expire_date' in fields or '*' in fields:
-                        properties['expire_date'] = item['expire_date']
+                if 'expire_date' in fields or '*' in fields or fields == []:
+                    properties['expire_date'] = item['expire_date']
             else:
                 expired = True
                 if 'expire_date' in fields or '*' in fields:
@@ -402,7 +394,11 @@ def format_committees(self, data, page, fields, year):
                     if cand.has_key(fec_name) and fec_name != 'expire_date':
                         candidate[api_name] = cand[fec_name]
 
-                if 'expire_date' in fields or '*' in fields:
+                print '\n', fields, '\n'
+                print '\n', cand, '\n'
+                print
+
+                if 'expire_date' in fields or '*' in fields or fields == []:
                     candidate['expire_date'] = cand['expire_date']
                 if candidate.has_key('type'):
                     candidate['type_full'] = cmte_decoder[candidate['type']]
@@ -412,7 +408,6 @@ def format_committees(self, data, page, fields, year):
                 # add to properties or archive based on expire date
                 if len(candidate) > 0:
                     if cand.has_key('expire_date') and cand['expire_date'] == None:
-
                         candidate_list.append(candidate)
                     else:
                         candidate_arcive_list.append(candidate)
@@ -471,19 +466,65 @@ class SingleResource(restful.Resource):
     # add fields and year to this
     def get(self, id):
         overall_start_time = time.time()
-        # parse arguements looking for custom fields
-        qry = "/%s?%s_id='%s'" % (self.query_text(self.default_fields), self.table_name_stem, id)
+
+        if "&" in id:
+            info = id.split('&')
+            args = {}
+            for i in info[1:]:
+                i_list = i.split("=")
+                args[i_list[0]] = i_list[1]
+            id = info[0]
+        else:
+            args = {}
+            id = id
+
+        show_fields = copy.copy(self.default_fields)
+
+        if args.has_key('fields') and args['fields'] is not None:
+            print args['fields']
+            if ',' in str(args['fields']):
+                fields = args['fields'].split(',')
+            else:
+                fields = [str(args['fields'])]
+
+            for maps, field_name in self.maps_fields:
+                show_fields[field_name] = ''
+                #looking at each field the user requested
+                for field in fields:
+                    # for each mapping, see if there is a field match. If so, add it to the field list
+                    for m in maps:
+                        if m[0] == field:
+                            show_fields[field_name] = show_fields[field_name] + m[1] + ','
+        else: fields = []
+
+        # not working
+        if args.has_key('year'):
+            year = int(args['year'])
+        else:
+            year = default_year()
+
+        qry = "/%s?%s_id='%s'" % (self.query_text(show_fields), self.table_name_stem, id)
         print(qry)
+
         speedlogger.info('--------------------------------------------------')
         speedlogger.info('\nHTSQL query: \n%s' % qry)
         start_time = time.time()
-        data = htsql_conn.produce(qry) or [None, ]
+
+        data = htsql_conn.produce(qry)
+
         speedlogger.info('HTSQL query time: %f' % (time.time() - start_time))
+
         data_dict = as_dicts(data)
         page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
-        args = self.parser.parse_args()
+
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return assign_formatting(self, data_dict, page_data, None)
+
+        if self.table_name_stem == 'cand':
+            return format_candids(self, data_dict, page_data, fields, year)
+        elif self.table_name_stem == 'cmte':
+            return format_committees(self, data_dict, page_data, fields, year)
+        else:
+            return data_dict
 
 _child_table_pattern = re.compile("^exists\((\w+)\?(.*?)\)\s*$")
 def combine_filters(elements):

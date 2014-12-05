@@ -157,7 +157,7 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee/C00000851')
         result = response['results'][0]
 
-        basic_fields = ('committee_id','expire_date','form_type','load_date','properties')
+        fields = ('committee_id','expire_date','form_type','load_date','properties')
         for field in fields:
             print field
             self.assertEquals(result.has_key(field), True)
@@ -175,6 +175,7 @@ class OverallTest(unittest.TestCase):
 
     def test_no_committee_fields(self):
         response = self._results('/committee/C00000851&fields=wrong')
+        print '\n%s\n' % response
         self.assertEquals(response[0], {})
 
 
