@@ -314,8 +314,7 @@ def format_committees(self, data, page, fields, year):
         record = {}
 
         for api_name, fec_name in self.dimcmte_mapping:
-            print cmte
-            if cmte.has_key(fec_name):
+            if cmte['dimcmte'].has_key(fec_name):
                 committee[api_name] = cmte['dimcmte'][fec_name]
 
         for item in cmte['dimcmteproperties']:
@@ -641,7 +640,6 @@ class Candidate(object):
                 #show_fields['cand_committee_link_fields'],
                 show_fields['status_fields'],
         )
-
 
     # Field mappings (API_output, FEC_input)
     # basic candidate information
