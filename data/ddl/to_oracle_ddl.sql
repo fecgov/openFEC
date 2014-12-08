@@ -1,5 +1,5 @@
 
--- TODO: file Blaze bug - Columns that are NUMBER(14,2) in Oracle come across as INTEGER!
+-- TODO: file Blaze bug - Columns that are numeric, in Oracle come across as INTEGER!
 -- ex: DESC SCHED_D - SEE OUTSTG_BAL_BOP
 -- had to change _id and _sk integers to bigint, all others to numeric
 
@@ -11,14 +11,14 @@ GRANT USAGE ON FOREIGN SERVER oradb TO "ec2-user";
 
 DROP USER MAPPING FOR "ec2-user" SERVER oradb;
 CREATE USER MAPPING FOR "ec2-user" SERVER oradb
-          OPTIONS (user 'READONLY', 
+          OPTIONS (user 'READONLY',
                    password :oracle_password);
 
 DROP USER MAPPING FOR openfec SERVER oradb;
 CREATE USER MAPPING FOR openfec SERVER oradb
-          OPTIONS (user 'READONLY', 
+          OPTIONS (user 'READONLY',
                    password :oracle_password);
-                   
+
 DROP SCHEMA frn;
 CREATE SCHEMA frn;
 
@@ -49,7 +49,7 @@ CREATE FOREIGN TABLE frn.dimcandoffice (
 ALTER TABLE public.dimcandoffice OWNER TO "ec2-user";
 
 --
--- Name: dimcandproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcandproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcandproperties (
@@ -82,7 +82,7 @@ CREATE FOREIGN TABLE frn.dimcandproperties (
 ALTER TABLE public.dimcandproperties OWNER TO "ec2-user";
 
 --
--- Name: dimcandstatusici; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcandstatusici; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcandstatusici (
@@ -100,7 +100,7 @@ CREATE FOREIGN TABLE frn.dimcandstatusici (
 ALTER TABLE public.dimcandstatusici OWNER TO "ec2-user";
 
 --
--- Name: dimcmte; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcmte; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcmte (
@@ -116,7 +116,7 @@ CREATE FOREIGN TABLE frn.dimcmte (
 ALTER TABLE public.dimcmte OWNER TO "ec2-user";
 
 --
--- Name: dimcmteproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcmteproperties; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcmteproperties (
@@ -137,6 +137,7 @@ CREATE FOREIGN TABLE frn.dimcmteproperties (
     cmte_web_url text,
     party_cmte_type text,
     party_cmte_type_desc text,
+    cand_pty_affiliation text,
     filing_freq text,
     qual_dt timestamp without time zone,
     cand_id text,
@@ -213,7 +214,7 @@ CREATE FOREIGN TABLE frn.dimcmteproperties (
 ALTER TABLE public.dimcmteproperties OWNER TO "ec2-user";
 
 --
--- Name: dimcmtetpdsgn; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimcmtetpdsgn; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimcmtetpdsgn (
@@ -230,7 +231,7 @@ CREATE FOREIGN TABLE frn.dimcmtetpdsgn (
 ALTER TABLE public.dimcmtetpdsgn OWNER TO "ec2-user";
 
 --
--- Name: dimdates; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimdates; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimdates (
@@ -243,7 +244,7 @@ CREATE FOREIGN TABLE frn.dimdates (
 ALTER TABLE public.dimdates OWNER TO "ec2-user";
 
 --
--- Name: dimelectiontp; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimelectiontp; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimelectiontp (
@@ -258,7 +259,7 @@ CREATE FOREIGN TABLE frn.dimelectiontp (
 ALTER TABLE public.dimelectiontp OWNER TO "ec2-user";
 
 --
--- Name: dimlinkages; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimlinkages; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimlinkages (
@@ -279,7 +280,7 @@ CREATE FOREIGN TABLE frn.dimlinkages (
 ALTER TABLE public.dimlinkages OWNER TO "ec2-user";
 
 --
--- Name: dimoffice; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimoffice; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimoffice (
@@ -296,7 +297,7 @@ CREATE FOREIGN TABLE frn.dimoffice (
 ALTER TABLE public.dimoffice OWNER TO "ec2-user";
 
 --
--- Name: dimparty; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimparty; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimparty (
@@ -311,7 +312,7 @@ CREATE FOREIGN TABLE frn.dimparty (
 ALTER TABLE public.dimparty OWNER TO "ec2-user";
 
 --
--- Name: dimreporttype; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimreporttype; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimreporttype (
@@ -326,7 +327,7 @@ CREATE FOREIGN TABLE frn.dimreporttype (
 ALTER TABLE public.dimreporttype OWNER TO "ec2-user";
 
 --
--- Name: dimyears; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: dimyears; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.dimyears (
@@ -339,7 +340,7 @@ CREATE FOREIGN TABLE frn.dimyears (
 ALTER TABLE public.dimyears OWNER TO "ec2-user";
 
 --
--- Name: facthousesenate_f3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: facthousesenate_f3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.facthousesenate_f3 (
@@ -439,7 +440,7 @@ CREATE FOREIGN TABLE frn.facthousesenate_f3 (
 ALTER TABLE public.facthousesenate_f3 OWNER TO "ec2-user";
 
 --
--- Name: factpacsandparties_f3x; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: factpacsandparties_f3x; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.factpacsandparties_f3x (
@@ -564,7 +565,7 @@ CREATE FOREIGN TABLE frn.factpacsandparties_f3x (
 ALTER TABLE public.factpacsandparties_f3x OWNER TO "ec2-user";
 
 --
--- Name: factpresidential_f3p; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: factpresidential_f3p; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.factpresidential_f3p (
@@ -767,7 +768,7 @@ CREATE FOREIGN TABLE frn.factpresidential_f3p (
 ALTER TABLE public.factpresidential_f3p OWNER TO "ec2-user";
 
 --
--- Name: form_105; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_105; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_105 (
@@ -797,7 +798,7 @@ CREATE FOREIGN TABLE frn.form_105 (
 ALTER TABLE public.form_105 OWNER TO "ec2-user";
 
 --
--- Name: form_56; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_56; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_56 (
@@ -844,7 +845,7 @@ CREATE FOREIGN TABLE frn.form_56 (
 ALTER TABLE public.form_56 OWNER TO "ec2-user";
 
 --
--- Name: form_57; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_57; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_57 (
@@ -898,7 +899,7 @@ CREATE FOREIGN TABLE frn.form_57 (
 ALTER TABLE public.form_57 OWNER TO "ec2-user";
 
 --
--- Name: form_65; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_65; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_65 (
@@ -945,7 +946,7 @@ CREATE FOREIGN TABLE frn.form_65 (
 ALTER TABLE public.form_65 OWNER TO "ec2-user";
 
 --
--- Name: form_76; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_76; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_76 (
@@ -983,7 +984,7 @@ CREATE FOREIGN TABLE frn.form_76 (
 ALTER TABLE public.form_76 OWNER TO "ec2-user";
 
 --
--- Name: form_82; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_82; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_82 (
@@ -1033,7 +1034,7 @@ CREATE FOREIGN TABLE frn.form_82 (
 ALTER TABLE public.form_82 OWNER TO "ec2-user";
 
 --
--- Name: form_83; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_83; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_83 (
@@ -1075,7 +1076,7 @@ CREATE FOREIGN TABLE frn.form_83 (
 ALTER TABLE public.form_83 OWNER TO "ec2-user";
 
 --
--- Name: form_91; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_91; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_91 (
@@ -1108,7 +1109,7 @@ CREATE FOREIGN TABLE frn.form_91 (
 ALTER TABLE public.form_91 OWNER TO "ec2-user";
 
 --
--- Name: form_94; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: form_94; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.form_94 (
@@ -1143,7 +1144,7 @@ CREATE FOREIGN TABLE frn.form_94 (
 ALTER TABLE public.form_94 OWNER TO "ec2-user";
 
 --
--- Name: log_audit_dml; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: log_audit_dml; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.log_audit_dml (
@@ -1165,7 +1166,7 @@ CREATE FOREIGN TABLE frn.log_audit_dml (
 ALTER TABLE public.log_audit_dml OWNER TO "ec2-user";
 
 --
--- Name: log_audit_module; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: log_audit_module; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.log_audit_module (
@@ -1185,7 +1186,7 @@ CREATE FOREIGN TABLE frn.log_audit_module (
 ALTER TABLE public.log_audit_module OWNER TO "ec2-user";
 
 --
--- Name: log_audit_process; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: log_audit_process; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.log_audit_process (
@@ -1207,7 +1208,7 @@ CREATE FOREIGN TABLE frn.log_audit_process (
 ALTER TABLE public.log_audit_process OWNER TO "ec2-user";
 
 --
--- Name: sched_a; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_a; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_a (
@@ -1277,7 +1278,7 @@ CREATE FOREIGN TABLE frn.sched_a (
 ALTER TABLE public.sched_a OWNER TO "ec2-user";
 
 --
--- Name: sched_b; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_b; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_b (
@@ -1349,7 +1350,7 @@ CREATE FOREIGN TABLE frn.sched_b (
 ALTER TABLE public.sched_b OWNER TO "ec2-user";
 
 --
--- Name: sched_c; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_c; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_c (
@@ -1408,7 +1409,7 @@ CREATE FOREIGN TABLE frn.sched_c (
 ALTER TABLE public.sched_c OWNER TO "ec2-user";
 
 --
--- Name: sched_c1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_c1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_c1 (
@@ -1478,7 +1479,7 @@ CREATE FOREIGN TABLE frn.sched_c1 (
 ALTER TABLE public.sched_c1 OWNER TO "ec2-user";
 
 --
--- Name: sched_c2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_c2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_c2 (
@@ -1519,7 +1520,7 @@ CREATE FOREIGN TABLE frn.sched_c2 (
 ALTER TABLE public.sched_c2 OWNER TO "ec2-user";
 
 --
--- Name: sched_d; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_d; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_d (
@@ -1577,7 +1578,7 @@ CREATE FOREIGN TABLE frn.sched_d (
 ALTER TABLE public.sched_d OWNER TO "ec2-user";
 
 --
--- Name: sched_e; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_e; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_e (
@@ -1648,7 +1649,7 @@ CREATE FOREIGN TABLE frn.sched_e (
 ALTER TABLE public.sched_e OWNER TO "ec2-user";
 
 --
--- Name: sched_f; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_f; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_f (
@@ -1723,7 +1724,7 @@ CREATE FOREIGN TABLE frn.sched_f (
 ALTER TABLE public.sched_f OWNER TO "ec2-user";
 
 --
--- Name: sched_h1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h1; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h1 (
@@ -1790,7 +1791,7 @@ CREATE FOREIGN TABLE frn.sched_h1 (
 ALTER TABLE public.sched_h1 OWNER TO "ec2-user";
 
 --
--- Name: sched_h2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h2; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h2 (
@@ -1829,7 +1830,7 @@ CREATE FOREIGN TABLE frn.sched_h2 (
 ALTER TABLE public.sched_h2 OWNER TO "ec2-user";
 
 --
--- Name: sched_h3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h3; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h3 (
@@ -1868,7 +1869,7 @@ CREATE FOREIGN TABLE frn.sched_h3 (
 ALTER TABLE public.sched_h3 OWNER TO "ec2-user";
 
 --
--- Name: sched_h4; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h4; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h4 (
@@ -1943,7 +1944,7 @@ CREATE FOREIGN TABLE frn.sched_h4 (
 ALTER TABLE public.sched_h4 OWNER TO "ec2-user";
 
 --
--- Name: sched_h5; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h5; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h5 (
@@ -1953,7 +1954,7 @@ CREATE FOREIGN TABLE frn.sched_h5 (
     acct_nm text,
     tranf_dt timestamp without time zone,
     ttl_tranf_amt_voter_reg numeric,
-    ttl_tranf_voter_id bigint,
+    ttl_tranf_voter_id numeric,
     ttl_tranf_gotv numeric,
     ttl_tranf_gen_campgn_actvy numeric,
     ttl_tranf_amt numeric,
@@ -1981,7 +1982,7 @@ CREATE FOREIGN TABLE frn.sched_h5 (
 ALTER TABLE public.sched_h5 OWNER TO "ec2-user";
 
 --
--- Name: sched_h6; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_h6; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_h6 (
@@ -2050,7 +2051,7 @@ CREATE FOREIGN TABLE frn.sched_h6 (
 ALTER TABLE public.sched_h6 OWNER TO "ec2-user";
 
 --
--- Name: sched_i; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_i; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_i (
@@ -2110,7 +2111,7 @@ CREATE FOREIGN TABLE frn.sched_i (
 ALTER TABLE public.sched_i OWNER TO "ec2-user";
 
 --
--- Name: sched_l; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace: 
+-- Name: sched_l; Type: TABLE; Schema: public; Owner: ec2-user; Tablespace:
 --
 
 CREATE FOREIGN TABLE frn.sched_l (
@@ -2176,8 +2177,659 @@ CREATE FOREIGN TABLE frn.sched_l (
     update_date timestamp without time zone
 ) SERVER oradb OPTIONS (schema 'CFDM', table 'SCHED_L');
 
+CREATE FOREIGN TABLE frn.form_1 (
+   form_1_sk				   bigint,
+   form_tp					    text,
+   cmte_id					    text,
+   cmte_nm					    text,
+   cmte_st1					    text,
+   cmte_st2					    text,
+   cmte_city					    text,
+   cmte_st					    text,
+   cmte_zip					    text,
+   submit_dt					    timestamp without time zone,
+   cmte_nm_chg_flg				    text,
+   cmte_addr_chg_flg				    text,
+   cmte_tp					    text,
+   cand_id					    text,
+   cand_nm					    text,
+   cand_office					    text,
+   cand_office_st 				    text,
+   cand_office_district				    text,
+   cand_pty_affiliation				    text,
+   cand_pty_tp					    text,
+   affiliated_cmte_id				    text,
+   affiliated_cmte_nm				    text,
+   affiliated_cmte_st1				    text,
+   affiliated_cmte_st2				    text,
+   affiliated_cmte_city				    text,
+   affiliated_cmte_st				    text,
+   affiliated_cmte_zip				    text,
+   cmte_rltshp					    text,
+   org_tp 					    text,
+   cust_rec_nm					    text,
+   cust_rec_st1					    text,
+   cust_rec_st2					    text,
+   cust_rec_city					    text,
+   cust_rec_st					    text,
+   cust_rec_zip					    text,
+   cust_rec_title 				    text,
+   cust_rec_ph_num				    text,
+   tres_nm					    text,
+   tres_st1					    text,
+   tres_st2					    text,
+   tres_city					    text,
+   tres_st					    text,
+   tres_zip					    text,
+   tres_title					    text,
+   tres_ph_num					    text,
+   designated_agent_nm				    text,
+   designated_agent_st1				    text,
+   designated_agent_st2				    text,
+   designated_agent_city				    text,
+   designated_agent_st				    text,
+   designated_agent_zip				    text,
+   designated_agent_title 			    text,
+   designated_agent_ph_num			    text,
+   bank_depository_nm				    text,
+   bank_depository_st1				    text,
+   bank_depository_st2				    text,
+   bank_depository_city				    text,
+   bank_depository_st				    text,
+   bank_depository_zip				    text,
+   sec_bank_depository_nm 			    text,
+   sec_bank_depository_st1			    text,
+   sec_bank_depository_st2			    text,
+   sec_bank_depository_city			    text,
+   sec_bank_depository_st 			    text,
+   sec_bank_depository_zip			    text,
+   tres_sign_nm					    text,
+   tres_sign_dt					    timestamp without time zone,
+   cmte_email					    text,
+   cmte_web_url					    text,
+   receipt_dt					    timestamp without time zone,
+   filing_freq					    text,
+   cmte_dsgn					    text,
+   qual_dt					    timestamp without time zone,
+   cmte_fax					    text,
+   efiling_cmte_tp				    text,
+   rpt_yr 					    integer,
+   leadership_pac 				    text,
+   affiliated_relationship_cd			    text,
+   cmte_email_chg_flg				    text,
+   cmte_url_chg_flg				    text,
+   lobbyist_registrant_pac			    text,
+   affiliated_cand_id				    text,
+   affiliated_cand_l_nm				    text,
+   affiliated_cand_f_nm				    text,
+   affiliated_cand_m_nm				    text,
+   affiliated_cand_prefix 			    text,
+   affiliated_cand_suffix 			    text,
+   cand_l_nm					    text,
+   cand_f_nm					    text,
+   cand_m_nm					    text,
+   cand_prefix					    text,
+   cand_suffix					    text,
+   cust_rec_l_nm					    text,
+   cust_rec_f_nm					    text,
+   cust_rec_m_nm					    text,
+   cust_rec_prefix				    text,
+   cust_rec_suffix				    text,
+   tres_l_nm					    text,
+   tres_f_nm					    text,
+   tres_m_nm					    text,
+   tres_prefix					    text,
+   tres_suffix					    text,
+   designated_agent_l_nm				    text,
+   designated_agent_f_nm				    text,
+   designated_agent_m_nm				    text,
+   designated_agent_prefix			    text,
+   designated_agent_suffix			    text,
+   f3l_filing_freq				    text,
+   begin_image_num				    text,
+   end_image_num					    text,
+   sub_id 					          bigint,
+   etl_invalid_flg				    text,
+   etl_complete_date				    timestamp without time zone,
+   filing_type					    text,
+   record_ind					    text,
+   load_date				   timestamp without time zone not null,
+   update_date					    timestamp without time zone
+) SERVER oradb OPTIONS (schema 'PROCESSED', table 'FORM_1');
 
 ALTER TABLE public.sched_l OWNER TO "ec2-user";
+
+
+CREATE FOREIGN TABLE frn.form_2 (
+ form_2_sk				   bigint not null,
+ form_tp					    text,
+ cand_id					    text,
+ cand_nm					    text,
+ cand_st1					    text,
+ cand_st2					    text,
+ cand_city					    text,
+ cand_st					    text,
+ cand_zip					    text,
+ addr_chg_flg					    text,
+ cand_pty_affiliation				    text,
+ cand_pty_affiliation_2 			    text,
+ cand_pty_affiliation_3 			    text,
+ cand_office					    text,
+ cand_office_st 				    text,
+ cand_office_district				    text,
+ election_yr					    integer,
+ pcc_cmte_id					    text,
+ pcc_cmte_nm					    text,
+ pcc_cmte_st1					    text,
+ pcc_cmte_st2					    text,
+ pcc_cmte_city					    text,
+ pcc_cmte_st					    text,
+ pcc_cmte_zip					    text,
+ addl_auth_cmte_id				    text,
+ addl_auth_cmte_nm				    text,
+ addl_auth_cmte_st1				    text,
+ addl_auth_cmte_st2				    text,
+ addl_auth_cmte_city				    text,
+ addl_auth_cmte_st				    text,
+ addl_auth_cmte_zip				    text,
+ cand_sign_nm					    text,
+ cand_sign_dt					    date,
+ receipt_dt					    date,
+ party_cd					    text,
+ cand_ici					    text,
+ cand_status					    text,
+ prim_pers_funds_decl				    numeric,
+ gen_pers_funds_decl				    numeric,
+ rpt_yr 					   integer,
+ begin_image_num				    text,
+ end_image_num					    text,
+ sub_id 					    bigint,
+ etl_invalid_flg				    text,
+ etl_complete_date				    date,
+ filing_type					    text,
+ record_ind					   text,
+ load_date				   date not null,
+ update_date					    date
+) SERVER oradb OPTIONS (schema 'PROCESSED', table 'FORM_2');
+
+CREATE FOREIGN TABLE frn.form_3 (
+ FORM_3_SK				bigint not null,
+ FORM_TP					    text,
+ CMTE_ID					    text,
+ CMTE_NM					    text,
+ CMTE_ST1					    text,
+ CMTE_ST2					    text,
+ CMTE_CITY					    text,
+ CMTE_ST					    text,
+ CMTE_ZIP					    text,
+ CMTE_ADDR_CHG_FLG				    text,
+ CMTE_ELECTION_ST				    text,
+ CMTE_ELECTION_DISTRICT 			    text,
+ RPT_TP 					    text,
+ RPT_PGI					    text,
+ ELECTION_DT					    timestamp without time zone,
+ ELECTION_ST					    text,
+ PRIMARY_ELECTION				    text,
+ GENERAL_ELECTION				    text,
+ SPECIAL_ELECTION				    text,
+ RUNOFF_ELECTION				    text,
+ CVG_START_DT					    timestamp without time zone,
+ CVG_END_DT					    timestamp without time zone,
+ TTL_CONTB_PER					    numeric,
+ TTL_CONTB_REF_PER				    numeric,
+ NET_CONTB_PER					    numeric,
+ TTL_OP_EXP_PER 				    numeric,
+ TTL_OFFSETS_TO_OP_EXP_PER			    numeric,
+ NET_OP_EXP_PER 				    numeric,
+ COH_COP_I					    numeric,
+ DEBTS_OWED_TO_CMTE				    numeric,
+ DEBTS_OWED_BY_CMTE				    numeric,
+ INDV_ITEM_CONTB_PER				    numeric,
+ INDV_UNITEM_CONTB_PER				    numeric,
+ TTL_INDV_CONTB_PER				    numeric,
+ POL_PTY_CMTE_CONTB_PER 			    numeric,
+ OTHER_POL_CMTE_CONTB_PER			    numeric,
+ CAND_CONTB_PER 				    numeric,
+ TTL_CONTB_COLUMN_TTL_PER			    numeric,
+ TRANF_FROM_OTHER_AUTH_CMTE_PER 		    numeric,
+ LOANS_MADE_BY_CAND_PER 			    numeric,
+ ALL_OTHER_LOANS_PER				    numeric,
+ TTL_LOANS_PER					    numeric,
+ OFFSETS_TO_OP_EXP_PER				    numeric,
+ OTHER_RECEIPTS_PER				    numeric,
+ TTL_RECEIPTS_PER_I				    numeric,
+ OP_EXP_PER					    numeric,
+ TRANF_TO_OTHER_AUTH_CMTE_PER			    numeric,
+ LOAN_REPYMTS_CAND_LOANS_PER			    numeric,
+ LOAN_REPYMTS_OTHER_LOANS_PER			    numeric,
+ TTL_LOAN_REPYMTS_PER				    numeric,
+ REF_INDV_CONTB_PER				    numeric,
+ REF_POL_PTY_CMTE_CONTB_PER			    numeric,
+ REF_OTHER_POL_CMTE_CONTB_PER			    numeric,
+ TTL_CONTB_REF_COL_TTL_PER			    numeric,
+ OTHER_DISB_PER 				    numeric,
+ TTL_DISB_PER_I 				    numeric,
+ COH_BOP					    numeric,
+ TTL_RECEIPTS_II				    numeric,
+ SUBTTL_PER					    numeric,
+ TTL_DISB_PER_II				    numeric,
+ COH_COP_II					    numeric,
+ TTL_CONTB_YTD					    numeric,
+ TTL_CONTB_REF_YTD				    numeric,
+ NET_CONTB_YTD					    numeric,
+ TTL_OP_EXP_YTD 				    numeric,
+ TTL_OFFSETS_TO_OP_EXP_YTD			    numeric,
+ NET_OP_EXP_YTD 				    numeric,
+ TTL_INDV_ITEM_CONTB_YTD			    numeric,
+ TTL_INDV_UNITEM_CONTB_YTD			    numeric,
+ TTL_INDV_CONTB_YTD				    numeric,
+ POL_PTY_CMTE_CONTB_YTD 			    numeric,
+ OTHER_POL_CMTE_CONTB_YTD			    numeric,
+ CAND_CONTB_YTD 				    numeric,
+ TTL_CONTB_COL_TTL_YTD				    numeric,
+ TRANF_FROM_OTHER_AUTH_CMTE_YTD 		    numeric,
+ LOANS_MADE_BY_CAND_YTD 			    numeric,
+ ALL_OTHER_LOANS_YTD				    numeric,
+ TTL_LOANS_YTD					    numeric,
+ OFFSETS_TO_OP_EXP_YTD				    numeric,
+ OTHER_RECEIPTS_YTD				    numeric,
+ TTL_RECEIPTS_YTD				    numeric,
+ OP_EXP_YTD					    numeric,
+ TRANF_TO_OTHER_AUTH_CMTE_YTD			    numeric,
+ LOAN_REPYMTS_CAND_LOANS_YTD			    numeric,
+ LOAN_REPYMTS_OTHER_LOANS_YTD			    numeric,
+ TTL_LOAN_REPYMTS_YTD				    numeric,
+ REF_INDV_CONTB_YTD				    numeric,
+ REF_POL_PTY_CMTE_CONTB_YTD			    numeric,
+ REF_OTHER_POL_CMTE_CONTB_YTD			    numeric,
+ REF_TTL_CONTB_COL_TTL_YTD			    numeric,
+ OTHER_DISB_YTD 				    numeric,
+ TTL_DISB_YTD					    numeric,
+ TRES_SIGN_NM					    text,
+ TRES_SIGN_DT					    timestamp without time zone,
+ RECEIPT_DT					    timestamp without time zone,
+ RPT_YR 					    integer,
+ GRS_RCPT_AUTH_CMTE_PRIM			    numeric,
+ AGR_AMT_CONTRIB_PERS_FUND_PRIM 		    numeric,
+ GRS_RCPT_MIN_PERS_CONTRIB_PRIM 		    numeric,
+ GRS_RCPT_AUTH_CMTE_GEN 			    numeric,
+ AGR_AMT_PERS_CONTRIB_GEN			    numeric,
+ GRS_RCPT_MIN_PERS_CONTRIB_GEN			    numeric,
+ CAND_ID					    text,
+ CAND_NM					    text,
+ F3Z1_RPT_TP					    text,
+ F3Z1_RPT_TP_DESC				    text,
+ BEGIN_IMAGE_NUM				    text,
+ END_IMAGE_NUM					    text,
+ SUB_ID 					    bigint,
+ TWO_YR_PERIOD					   integer, 
+ TRANSACTION_ID 				    integer,
+ ETL_INVALID_FLG				    text,
+ ETL_COMPLETE_DATE				    timestamp without time zone,
+ FILING_TYPE					    text,
+ RECORD_IND					    text,
+ MRF_REC					    text,
+ LOAD_DATE				   timestamp without time zone,
+ UPDATE_DATE					    timestamp without time zone
+) SERVER oradb OPTIONS (schema 'PROCESSED', table 'FORM_3');
+
+
+CREATE FOREIGN TABLE frn.form_3x (
+ FORM_3X_SK				   bigint NOT NULL,
+ FORM_TP					    text,
+ CMTE_ID					    text,
+ CMTE_NM					    text,
+ CMTE_ST1					    text,
+ CMTE_ST2					    text,
+ CMTE_CITY					    text,
+ CMTE_ST					    text,
+ CMTE_ZIP					    text,
+ CMTE_ADDR_CHG_FLG				    text,
+ QUAL_CMTE_FLG					    text,
+ RPT_TP 					    text,
+ RPT_PGI					    text,
+ ELECTION_DT					    timestamp without time zone,
+ ELECTION_ST					    text,
+ CVG_START_DT					    timestamp without time zone,
+ CVG_END_DT					    timestamp without time zone,
+ COH_BOP					    numeric,
+ TTL_RECEIPTS_SUM_PAGE_PER			    numeric,
+ SUBTTL_SUM_PAGE_PER				    numeric,
+ TTL_DISB_SUM_PAGE_PER				    numeric,
+ COH_COP					    numeric,
+ DEBTS_OWED_TO_CMTE				    numeric,
+ DEBTS_OWED_BY_CMTE				    numeric,
+ INDV_ITEM_CONTB_PER				    numeric,
+ INDV_UNITEM_CONTB_PER				    numeric,
+ TTL_INDV_CONTB 				    numeric,
+ POL_PTY_CMTE_CONTB_PER_I			    numeric,
+ OTHER_POL_CMTE_CONTB_PER_I			    numeric,
+ TTL_CONTB_COL_TTL_PER				    numeric,
+ TRANF_FROM_AFFILIATED_PTY_PER			    numeric,
+ ALL_LOANS_RECEIVED_PER 			    numeric,
+ LOAN_REPYMTS_RECEIVED_PER			    numeric,
+ OFFSETS_TO_OP_EXP_PER_I			    numeric,
+ FED_CAND_CONTB_REF_PER 			    numeric,
+ OTHER_FED_RECEIPTS_PER 			    numeric,
+ TRANF_FROM_NONFED_ACCT_PER			    numeric,
+ TTL_RECEIPTS_PER				    numeric,
+ TTL_FED_RECEIPTS_PER				    numeric,
+ SHARED_FED_OP_EXP_PER				    numeric,
+ SHARED_NONFED_OP_EXP_PER			    numeric,
+ OTHER_FED_OP_EXP_PER				    numeric,
+ TTL_OP_EXP_PER 				    numeric,
+ TRANF_TO_AFFLILIATED_CMTE_PER			    numeric,
+ FED_CAND_CMTE_CONTB_PER			    numeric,
+ INDT_EXP_PER					    numeric,
+ COORD_EXP_BY_PTY_CMTE_PER			    numeric,
+ LOAN_REPYMTS_MADE_PER				    numeric,
+ LOANS_MADE_PER 				    numeric,
+ INDV_CONTB_REF_PER				    numeric,
+ POL_PTY_CMTE_CONTB_PER_II			    numeric,
+ OTHER_POL_CMTE_CONTB_PER_II			    numeric,
+ TTL_CONTB_REF_PER_I				    numeric,
+ OTHER_DISB_PER 				    numeric,
+ TTL_DISB_PER					    numeric,
+ TTL_FED_DISB_PER				    numeric,
+ TTL_CONTB_PER					    numeric,
+ TTL_CONTB_REF_PER_II				    numeric,
+ NET_CONTB_PER					    numeric,
+ TTL_FED_OP_EXP_PER				    numeric,
+ OFFSETS_TO_OP_EXP_PER_II			    numeric,
+ NET_OP_EXP_PER 				    numeric,
+ COH_BEGIN_CALENDAR_YR				    numeric,
+ CALENDAR_YR					    bigint,
+ TTL_RECEIPTS_SUM_PAGE_YTD			    numeric,
+ SUBTTL_SUM_YTD 				    numeric,
+ TTL_DISB_SUM_PAGE_YTD				    numeric,
+ COH_COY					    numeric,
+ INDV_ITEM_CONTB_YTD				    numeric,
+ INDV_UNITEM_CONTB_YTD				    numeric,
+ TTL_INDV_CONTB_YTD				    numeric,
+ POL_PTY_CMTE_CONTB_YTD_I			    numeric,
+ OTHER_POL_CMTE_CONTB_YTD_I			    numeric,
+ TTL_CONTB_COL_TTL_YTD				    numeric,
+ TRANF_FROM_AFFILIATED_PTY_YTD			    numeric,
+ ALL_LOANS_RECEIVED_YTD 			    numeric,
+ LOAN_REPYMTS_RECEIVED_YTD			    numeric,
+ OFFSETS_TO_OP_EXP_YTD_I			    numeric,
+ FED_CAND_CMTE_CONTB_YTD			    numeric,
+ OTHER_FED_RECEIPTS_YTD 			    numeric,
+ TRANF_FROM_NONFED_ACCT_YTD			    numeric,
+ TTL_RECEIPTS_YTD				    numeric,
+ TTL_FED_RECEIPTS_YTD				    numeric,
+ SHARED_FED_OP_EXP_YTD				    numeric,
+ SHARED_NONFED_OP_EXP_YTD			    numeric,
+ OTHER_FED_OP_EXP_YTD				    numeric,
+ TTL_OP_EXP_YTD 				    numeric,
+ TRANF_TO_AFFILITATED_CMTE_YTD			    numeric,
+ FED_CAND_CMTE_CONTB_REF_YTD			    numeric,
+ INDT_EXP_YTD					    numeric,
+ COORD_EXP_BY_PTY_CMTE_YTD			    numeric,
+ LOAN_REPYMTS_MADE_YTD				    numeric,
+ LOANS_MADE_YTD 				    numeric,
+ INDV_CONTB_REF_YTD				    numeric,
+ POL_PTY_CMTE_CONTB_YTD_II			    numeric,
+ OTHER_POL_CMTE_CONTB_YTD_II			    numeric,
+ TTL_CONTB_REF_YTD_I				    numeric,
+ OTHER_DISB_YTD 				    numeric,
+ TTL_DISB_YTD					    numeric,
+ TTL_FED_DISB_YTD				    numeric,
+ TTL_CONTB_YTD					    numeric,
+ TTL_CONTB_REF_YTD_II				    numeric,
+ NET_CONTB_YTD					    numeric,
+ TTL_FED_OP_EXP_YTD				    numeric,
+ OFFSETS_TO_OP_EXP_YTD_II			    numeric,
+ NET_OP_EXP_YTD 				    numeric,
+ TRES_SIGN_NM					    text,
+ TRES_SIGN_DT					    timestamp without time zone,
+ MULTICAND_FLG					    text,
+ RECEIPT_DT					    timestamp without time zone,
+ RPT_YR 					    bigint,
+ TRANF_FROM_NONFED_LEVIN_PER			    numeric,
+ TTL_NONFED_TRANF_PER				    numeric,
+ SHARED_FED_ACTVY_FED_SHR_PER			    numeric,
+ SHARED_FED_ACTVY_NONFED_PER			    numeric,
+ NON_ALLOC_FED_ELECT_ACTVY_PER			    numeric,
+ TTL_FED_ELECT_ACTVY_PER			    numeric,
+ TRANF_FROM_NONFED_LEVIN_YTD			    numeric,
+ TTL_NONFED_TRANF_YTD				    numeric,
+ SHARED_FED_ACTVY_FED_SHR_YTD			    numeric,
+ SHARED_FED_ACTVY_NONFED_YTD			    numeric,
+ NON_ALLOC_FED_ELECT_ACTVY_YTD			    numeric,
+ TTL_FED_ELECT_ACTVY_YTD			    numeric,
+ BEGIN_IMAGE_NUM				    text,
+ END_IMAGE_NUM					    text,
+ SUB_ID 					    bigint,
+ TWO_YR_PERIOD					    bigint,
+ TRANSACTION_ID 				    bigint,
+ ETL_INVALID_FLG				    text,
+ ETL_COMPLETE_DATE				    timestamp without time zone,
+ FILING_TYPE					    text,
+ RECORD_IND					    text,
+ MRF_REC					    text,
+ LOAD_DATE				   timestamp without time zone,
+ UPDATE_DATE					    timestamp without time zone
+) SERVER oradb OPTIONS (schema 'PROCESSED', table 'FORM_3X');
+
+CREATE FOREIGN TABLE frn.form_3p (
+ FORM_3P_SK				   bigint NOT NULL ,
+ FORM_TP					    text,
+ CMTE_ID					    text,
+ CMTE_NM					    text,
+ CMTE_ST1					    text,
+ CMTE_ST2					    text,
+ CMTE_CITY					    text,
+ CMTE_ST					    text,
+ CMTE_ZIP					    text,
+ ADDR_CHG_FLG					    text,
+ ACTIVITY_PRIMARY				    text,
+ ACTIVITY_GENERAL				    text,
+ TERM_RPT_FLAG					    text,
+ RPT_TP 					    text,
+ RPT_PGI					    text,
+ ELECTION_DT					    timestamp without time zone,
+ ELECTION_ST					    text,
+ CVG_START_DT					    timestamp without time zone,
+ CVG_END_DT					    timestamp without time zone,
+ COH_BOP					    numeric,
+ TTL_RECEIPTS_SUM_PAGE_PER			    numeric,
+ SUBTTL_SUM_PAGE_PER				    numeric,
+ TTL_DISB_SUM_PAGE_PER				    numeric,
+ COH_COP					    numeric,
+ DEBTS_OWED_TO_CMTE				    numeric,
+ DEBTS_OWED_BY_CMTE				    numeric,
+ EXP_SUBJECT_LIMITS				    numeric,
+ NET_CONTB_SUM_PAGE_PER 			    numeric,
+ NET_OP_EXP_SUM_PAGE_PER			    numeric,
+ FED_FUNDS_PER					    numeric,
+ INDV_CONTB_PER 				    numeric,
+ POL_PTY_CMTE_CONTB_PER 			    numeric,
+ OTHER_POL_CMTE_CONTB_PER			    numeric,
+ CAND_CONTB_PER 				    numeric,
+ TTL_CONTB_PER					    numeric,
+ TRANF_FROM_AFFILATED_CMTE_PER			    numeric,
+ LOANS_RECEIVED_FROM_CAND_PER			    numeric,
+ OTHER_LOANS_RECEIVED_PER			    numeric,
+ TTL_LOANS_RECEIVED_PER 			    numeric,
+ OFFSETS_TO_OP_EXP_PER				    numeric,
+ OFFSETS_TO_FNDRSG_EXP_PER			    numeric,
+ OFFSETS_TO_LEGAL_ACCTG_PER			    numeric,
+ TTL_OFFSETS_TO_OP_EXP_PER			    numeric,
+ OTHER_RECEIPTS_PER				    numeric,
+ TTL_RECEIPTS_PER				    numeric,
+ OP_EXP_PER					    numeric,
+ TRANF_TO_OTHER_AUTH_CMTE_PER			    numeric,
+ FNDRSG_DISB_PER				    numeric,
+ EXEMPT_LEGAL_ACCTG_DISB_PER			    numeric,
+ REPYMTS_LOANS_MADE_BY_CAND_PER 		    numeric,
+ REPYMTS_OTHER_LOANS_PER			    numeric,
+ TTL_LOAN_REPYMTS_MADE_PER			    numeric,
+ REF_INDV_CONTB_PER				    numeric,
+ REF_POL_PTY_CMTE_CONTB_PER			    numeric,
+ REF_OTHER_POL_CMTE_CONTB_PER			    numeric,
+ TTL_CONTB_REF_PER				    numeric,
+ OTHER_DISB_PER 				    numeric,
+ TTL_DISB_PER					    numeric,
+ ITEMS_ON_HAND_LIQUIDATED			    numeric,
+ ALABAMA_PER					    numeric,
+ ALASKA_PER					    numeric,
+ ARIZONA_PER					    numeric,
+ ARKANSAS_PER					    numeric,
+ CALIFORNIA_PER 				    numeric,
+ COLORADO_PER					    numeric,
+ CONNECTICUT_PER				    numeric,
+ DELAWARE_PER					    numeric,
+ DISTRICT_COLUMBIA_PER				    numeric,
+ FLORIDA_PER					    numeric,
+ GEORGIA_PER					    numeric,
+ HAWAII_PER					    numeric,
+ IDAHO_PER					    numeric,
+ ILLINOIS_PER					    numeric,
+ INDIANA_PER					    numeric,
+ IOWA_PER					    numeric,
+ KANSAS_PER					    numeric,
+ KENTUCKY_PER					    numeric,
+ LOUISIANA_PER					    numeric,
+ MAINE_PER					    numeric,
+ MARYLAND_PER					    numeric,
+ MASSACHUSETTS_PER				    numeric,
+ MICHIGAN_PER					    numeric,
+ MINNESOTA_PER					    numeric,
+ MISSISSIPPI_PER				    numeric,
+ MISSOURI_PER					    numeric,
+ MONTANA_PER					    numeric,
+ NEBRASKA_PER					    numeric,
+ NEVADA_PER					    numeric,
+ NEW_HAMPSHIRE_PER				    numeric,
+ NEW_JERSEY_PER 				    numeric,
+ NEW_MEXICO_PER 				    numeric,
+ NEW_YORK_PER					    numeric,
+ NORTH_CAROLINA_PER				    numeric,
+ NORTH_DAKOTA_PER				    numeric,
+ OHIO_PER					    numeric,
+ OKLAHOMA_PER					    numeric,
+ OREGON_PER					    numeric,
+ PENNSYLVANIA_PER				    numeric,
+ RHODE_ISLAND_PER				    numeric,
+ SOUTH_CAROLINA_PER				    numeric,
+ SOUTH_DAKOTA_PER				    numeric,
+ TENNESSEE_PER					    numeric,
+ TEXAS_PER					    numeric,
+ UTAH_PER					    numeric,
+ VERMONT_PER					    numeric,
+ VIRGINIA_PER					    numeric,
+ WASHINGTON_PER 				    numeric,
+ WEST_VIRGINIA_PER				    numeric,
+ WISCONSIN_PER					    numeric,
+ WYOMING_PER					    numeric,
+ PUERTO_RICO_PER				    numeric,
+ GUAM_PER					    numeric,
+ VIRGIN_ISLANDS_PER				    numeric,
+ TTL_PER					    numeric,
+ FED_FUNDS_YTD					    numeric,
+ INDV_CONTB_YTD 				    numeric,
+ POL_PTY_CMTE_CONTB_YTD 			    numeric,
+ OTHER_POL_CMTE_CONTB_YTD			    numeric,
+ CAND_CONTB_YTD 				    numeric,
+ TTL_CONTB_YTD					    numeric,
+ TRANF_FROM_AFFILIATED_CMTE_YTD 		    numeric,
+ LOANS_RECEIVED_FROM_CAND_YTD			    numeric,
+ OTHER_LOANS_RECEIVED_YTD			    numeric,
+ TTL_LOANS_RECEIVED_YTD 			    numeric,
+ OFFSETS_TO_OP_EXP_YTD				    numeric,
+ OFFSETS_TO_FNDRSG_EXP_YTD			    numeric,
+ OFFSETS_TO_LEGAL_ACCTG_YTD			    numeric,
+ TTL_OFFSETS_TO_OP_EXP_YTD			    numeric,
+ OTHER_RECEIPTS_YTD				    numeric,
+ TTL_RECEIPTS_YTD				    numeric,
+ OP_EXP_YTD					    numeric,
+ TRANF_TO_OTHER_AUTH_CMTE_YTD			    numeric,
+ FNDRSG_DISB_YTD				    numeric,
+ EXEMPT_LEGAL_ACCTG_DISB_YTD			    numeric,
+ REPYMTS_LOANS_MADE_CAND_YTD			    numeric,
+ REPYMTS_OTHER_LOANS_YTD			    numeric,
+ TTL_LOAN_REPYMTS_MADE_YTD			    numeric,
+ REF_INDV_CONTB_YTD				    numeric,
+ REF_POL_PTY_CMTE_CONTB_YTD			    numeric,
+ REF_OTHER_POL_CMTE_CONTB_YTD			    numeric,
+ TTL_CONTB_REF_YTD				    numeric,
+ OTHER_DISB_YTD 				    numeric,
+ TTL_DISB_YTD					    numeric,
+ ALABAMA_YTD					    numeric,
+ ALASKA_YTD					    numeric,
+ ARIZONA_YTD					    numeric,
+ ARKANSAS_YTD					    numeric,
+ CALIFORNIA_YTD 				    numeric,
+ COLORADO_YTD					    numeric,
+ CONNECTICUT_YTD				    numeric,
+ DELAWARE_YTD					    numeric,
+ DISTRICT_COLUMBIA_YTD				    numeric,
+ FLORIDA_YTD					    numeric,
+ GEORGIA_YTD					    numeric,
+ HAWAII_YTD					    numeric,
+ IDAHO_YTD					    numeric,
+ ILLINOIS_YTD					    numeric,
+ INDIANA_YTD					    numeric,
+ IOWA_YTD					    numeric,
+ KANSAS_YTD					    numeric,
+ KENTUCKY_YTD					    numeric,
+ LOUISIANA_YTD					    numeric,
+ MAINE_YTD					    numeric,
+ MARYLAND_YTD					    numeric,
+ MASSACHUSETTS_YTD				    numeric,
+ MICHIGAN_YTD					    numeric,
+ MINNESOTA_YTD					    numeric,
+ MISSISSIPPI_YTD				    numeric,
+ MISSOURI_YTD					    numeric,
+ MONTANA_YTD					    numeric,
+ NEBRASKA_YTD					    numeric,
+ NEVADA_YTD					    numeric,
+ NEW_HAMPSHIRE_YTD				    numeric,
+ NEW_JERSEY_YTD 				    numeric,
+ NEW_MEXICO_YTD 				    numeric,
+ NEW_YORK_YTD					    numeric,
+ NORTH_CAROLINA_YTD				    numeric,
+ NORTH_DAKOTA_YTD				    numeric,
+ OHIO_YTD					    numeric,
+ OKLAHOMA_YTD					    numeric,
+ OREGON_YTD					    numeric,
+ PENNSYLVANIA_YTD				    numeric,
+ RHODE_ISLAND_YTD				    numeric,
+ SOUTH_CAROLINA_YTD				    numeric,
+ SOUTH_DAKOTA_YTD				    numeric,
+ TENNESSEE_YTD					    numeric,
+ TEXAS_YTD					    numeric,
+ UTAH_YTD					    numeric,
+ VERMONT_YTD					    numeric,
+ VIRGINIA_YTD					    numeric,
+ WASHINGTON_YTD 				    numeric,
+ WEST_VIRGINIA_YTD				    numeric,
+ WISCONSIN_YTD					    numeric,
+ WYOMING_YTD					    numeric,
+ PUERTO_RICO_YTD				    numeric,
+ GUAM_YTD					    numeric,
+ VIRGIN_ISLANDS_YTD				    numeric,
+ TTL_YTD					    numeric,
+ TRES_SIGN_NM					    text,
+ TRES_SIGN_DT					    timestamp without time zone,
+ RECEIPT_DT					    timestamp without time zone,
+ RPT_YR 					    bigint,
+ BEGIN_IMAGE_NUM				    text,
+ END_IMAGE_NUM					    text,
+ SUB_ID 					    bigint,
+ TWO_YR_PERIOD					    bigint,
+ TRANSACTION_ID 				    bigint,
+ ETL_INVALID_FLG				    text,
+ ETL_COMPLETE_DATE				    timestamp without time zone,
+ FILING_TYPE					    text,
+ RECORD_IND					    text,
+ MRF_REC					    text,
+ LOAD_DATE				   timestamp without time zone,
+ UPDATE_DATE					    timestamp without time zone
+) SERVER oradb OPTIONS (schema 'PROCESSED', table 'FORM_3P');
+
+
 
 GRANT ALL PRIVILEGES ON SCHEMA frn TO openfec;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA frn TO openfec;

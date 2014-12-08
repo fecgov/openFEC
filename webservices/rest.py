@@ -37,6 +37,7 @@ Supported for /committee ::
 
 """
 from collections import defaultdict
+import doctest
 import os
 import re
 import string
@@ -57,7 +58,7 @@ from datetime import datetime
 from psycopg2._range import DateTimeRange
 
 speedlogger = logging.getLogger('speed')
-speedlogger.setLevel(logging.INFO)
+speedlogger.setLevel(logging.CRITICAL)
 speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
@@ -555,6 +556,7 @@ class Searchable(restful.Resource):
         elements = []
         page_num = 1
         show_fields = copy.copy(self.default_fields)
+        year = None
 
         for arg in args:
             if args[arg]:
@@ -592,14 +594,21 @@ class Searchable(restful.Resource):
                             for m in maps:
                                 if m[0] == field:
                                     show_fields[field_name] = show_fields[field_name] + m[1] + ','
+                    fields = args[arg]
+                elif arg == 'year':
+                    year = args[arg]
                 else:
                     element = self.field_name_map[arg].substitute(arg=args[arg])
                     elements.append(element)
 
         qry = self.query_text(show_fields)
 
+        # this is being used for candidates and committees, does this make sense for committees?
+        for element in elements:
+            if year:
+                element = element.replace('dimcandoffice',
+                                          '(dimcandoffice?cand_election_yr=%s)' % year)
         if elements:
-            elements = combine_filters(elements)
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
@@ -630,12 +639,8 @@ class Searchable(restful.Resource):
 
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
-        # make this better later
-        if not args.has_key("year"):
-            args['year'] = None
-
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return assign_formatting(self, data_dict, page_data, args['year'])
+        return assign_formatting(self, data_dict, page_data, year)
 
 
 class Candidate(object):
@@ -1036,6 +1041,9 @@ class CommitteeSearch(Searchable, Committee):
                         "organization_type": string.Template(
                             "exists(dimcmteproperties?org_tp~'$arg')"
                         ),
+                        "party": string.Template(
+                            "exists(dimcmteproperties?party_cmte_type~'$arg')"
+                        ),
     }
 
     parser = reqparse.RequestParser()
@@ -1122,5 +1130,8 @@ api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 
 if __name__ == '__main__':
-    debug = not os.getenv('PRODUCTION')
-    app.run(debug=debug)
+    if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
+        doctest.testmod()
+    else:
+        debug = not os.getenv('PRODUCTION')
+        app.run(debug=debug)

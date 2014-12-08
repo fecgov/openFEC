@@ -51,3 +51,5 @@ SET    fulltxt = (SELECT weights FROM cmte
              
 CREATE INDEX cmte_fts_idx ON dimcmte_fulltext USING gin(fulltxt);    
 
+GRANT SELECT ON dimcmte_fulltext TO webro;
+GRANT SELECT ON dimcand_fulltext TO webro;
