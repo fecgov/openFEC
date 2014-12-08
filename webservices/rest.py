@@ -297,6 +297,7 @@ def format_candids(self, data, page_data, fields, default_year):
 
 # still need to implement year
 def format_committees(self, data, page, fields, year):
+    print data
     results = []
     for cmte in data:
         committee = {}
@@ -311,10 +312,13 @@ def format_committees(self, data, page, fields, year):
 
         for item in cmte['dimcmteproperties']:
             # shortcut for formatting
-            if item['expire_date'] == None:
-                expired = False
-                if 'expire_date' in fields or '*' in fields or fields == []:
-                    properties['expire_date'] = item['expire_date']
+            if item['expire_date'] is not None:
+                if item['expire_date'] > datetime.now():
+                    expired = False
+                    if 'expire_date' in fields or '*' in fields or fields == []:
+                        properties['expire_date'] = item['expire_date']
+                else:
+                    expired = True
             else:
                 expired = True
                 if 'expire_date' in fields or '*' in fields:
@@ -394,10 +398,6 @@ def format_committees(self, data, page, fields, year):
                     if cand.has_key(fec_name) and fec_name != 'expire_date':
                         candidate[api_name] = cand[fec_name]
 
-                print '\n', fields, '\n'
-                print '\n', cand, '\n'
-                print
-
                 if 'expire_date' in fields or '*' in fields or fields == []:
                     candidate['expire_date'] = cand['expire_date']
                 if candidate.has_key('type'):
@@ -465,23 +465,12 @@ def format_committees(self, data, page, fields, year):
 class SingleResource(restful.Resource):
     # add fields and year to this
     def get(self, id):
-        overall_start_time = time.time()
-
-        if "&" in id:
-            info = id.split('&')
-            args = {}
-            for i in info[1:]:
-                i_list = i.split("=")
-                args[i_list[0]] = i_list[1]
-            id = info[0]
-        else:
-            args = {}
-            id = id
-
         show_fields = copy.copy(self.default_fields)
+        overall_start_time = time.time()
+        args = self.parser.parse_args()
+        fields = find_fields(self, args)
 
         if args.has_key('fields') and args['fields'] is not None:
-            print args['fields']
             if ',' in str(args['fields']):
                 fields = args['fields'].split(',')
             else:

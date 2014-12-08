@@ -165,21 +165,29 @@ class OverallTest(unittest.TestCase):
         # Not a default field
         self.assertEquals(result.has_key('archive'), False)
 
-     # def test_committee_properties_all(self):
-     #     response = self._response('/committee/C00000851?fields=*')
+    def test_committee_properties_all(self):
+        response = self._response('/committee/C00000851?fields=*')
+        result = response['results'][0]['archive'][0]
 
-     #     description_fields = ('expire_date','filing_frequency','form_type',)
-     #     treasurer
-     # address
+        print result
+
+        description_fields = ('form_type','expire_date','filing_frequency','load_date')
+        for field in description_fields:
+            print field
+            self.assertEquals(result['description'][0].has_key(field), True)
+
+        address_fields = ('city', 'state', 'state_full', 'street_1', 'zip')
+        for field in address_fields:
+            print field
+            self.assertEquals(result['address'][0].has_key(field), True)
+
+        self.assertEquals(result['treasurer'][0].has_key('name_full'), True)
 
 
-    def test_no_committee_fields(self):
-        response = self._results('/committee/C00000851&fields=wrong')
+    def test_committee_field_filtering(self):
+        response = self._results('/committee/C00000851?fields=committee_id')
         print '\n%s\n' % response
-        self.assertEquals(response[0], {})
+        self.assertEquals(len(response[0]), 1)
 
-
-    def test_committee_archive(self):
-        pass
 
 
