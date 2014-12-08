@@ -1,4 +1,4 @@
 psycopg2 
 htsql-pgsql 
 sqlalchemy 
-flask-restful
+git+git://github.com/18F/flask-restful.git

@@ -157,3 +157,7 @@ class OverallTest(unittest.TestCase):
         self.assertEquals((original_count > type_count), True)
         self.assertEquals((original_count > desig_count), True)
         self.assertEquals((original_count > org_count), True)
+
+    def test_err_on_unsupported_arg(self):
+        response = self.app.get('/committee?bogusArg=1')
+        self.assertEquals(response.status_code, 400)
