@@ -297,7 +297,6 @@ def format_candids(self, data, page_data, fields, default_year):
 
 # still need to implement year
 def format_committees(self, data, page, fields, year):
-    print data
     results = []
     for cmte in data:
         committee = {}
@@ -315,14 +314,12 @@ def format_committees(self, data, page, fields, year):
             if item['expire_date'] is not None:
                 if item['expire_date'] > datetime.now():
                     expired = False
-                    if 'expire_date' in fields or '*' in fields or fields == []:
-                        properties['expire_date'] = item['expire_date']
                 else:
                     expired = True
+            ### need to double check this
             else:
                 expired = True
-                if 'expire_date' in fields or '*' in fields:
-                    record['expire_date'] = item['expire_date']
+
 
             if properties.has_key('load_date') and properties['load_date'] is not None:
                 if expired == False:
@@ -340,6 +337,8 @@ def format_committees(self, data, page, fields, year):
                 address['state_full'] = item['cmte_st_desc'].strip()
 
             if len(address) > 0:
+                if 'expire_date' in fields or '*' in fields:
+                    address['expire_date'] = item['expire_date']
                 if expired == False:
                     properties['address'] = address
                 else:
@@ -354,6 +353,8 @@ def format_committees(self, data, page, fields, year):
                     description[api_name] = item[fec_name]
 
             if len(description) > 0:
+                if 'expire_date' in fields or '*' in fields:
+                    description['expire_date'] = item['expire_date']
                 if expired == False and len(description) > 0:
                     properties['description'] = description
                 else:
@@ -368,6 +369,8 @@ def format_committees(self, data, page, fields, year):
                     treasurer[api_name] = item[fec_name]
 
             if len(treasurer) > 0:
+                if 'expire_date' in fields or '*' in fields:
+                    treasurer['expire_date'] = item['expire_date']
                 if expired == False:
                     properties['treasurer'] = treasurer
                 else:
@@ -382,6 +385,8 @@ def format_committees(self, data, page, fields, year):
                     custodian[api_name] = item[fec_name]
 
             if len(custodian) > 0:
+                if 'expire_date' in fields or '*' in fields:
+                    custodian['expire_date'] = item['expire_date']
                 if expired == False:
                     properties['custodian'] = custodian
                 else:
@@ -446,7 +451,7 @@ def format_committees(self, data, page, fields, year):
                 properties['status'] = designations[0]
 
             if len(archive_designations) > 0:
-                record['status'] = designations#sorted(archive_designations, key=lambda k: k['_date'], reverse=True)
+                record['status'] = designations
 
         if ('archive' in fields or '*' in fields) and len(record) > 0:
             if not committee.has_key('archive'):

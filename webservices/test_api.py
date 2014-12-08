@@ -176,13 +176,13 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(result['description'][0].has_key(field), True)
 
-        address_fields = ('city', 'state', 'state_full', 'street_1', 'zip')
+        address_fields = ('city', 'state', 'state_full', 'street_1', 'zip', 'expire_date')
         for field in address_fields:
             print field
             self.assertEquals(result['address'][0].has_key(field), True)
 
         self.assertEquals(result['treasurer'][0].has_key('name_full'), True)
-
+        self.assertEquals(result['treasurer'][0].has_key('expire_date'), True)
 
     def test_committee_field_filtering(self):
         response = self._results('/committee/C00000851?fields=committee_id')
