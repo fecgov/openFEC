@@ -117,7 +117,7 @@ def natural_number(n):
 
 
 def assign_formatting(self, data_dict, page_data, year):
-    args = self.parser.parse_args()
+    args = self.parser.parse_args(strict=True)
     if args['fields'] == None:
         fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
     else:
@@ -466,11 +466,11 @@ class SingleResource(restful.Resource):
         speedlogger.info('HTSQL query time: %f' % (time.time() - start_time))
         data_dict = as_dicts(data)
         page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
-        args = self.parser.parse_args()
+        args = self.parser.parse_args(strict=True)
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
         return assign_formatting(self, data_dict, page_data, None)
- 
-    
+
+
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
                       FROM   dim%s_fulltext
@@ -480,11 +480,11 @@ class Searchable(restful.Resource):
     def get(self):
         overall_start_time = time.time()
         speedlogger.info('--------------------------------------------------')
-        args = self.parser.parse_args()
+        args = self.parser.parse_args(strict=True)
         elements = []
         page_num = 1
         year = None
-        
+
         for arg in args:
             if args[arg]:
                 if arg == 'q':
@@ -518,7 +518,7 @@ class Searchable(restful.Resource):
 
         for element in elements:
             if year:
-                element = element.replace('dimcandoffice', 
+                element = element.replace('dimcandoffice',
                                           '(dimcandoffice?cand_election_yr=%s)' % year)
         if elements:
             qry += "?" + "&".join(elements)
