@@ -985,7 +985,7 @@ class Committee(object):
     properties_field_mapping = (
         ('email', 'cmte_email'),
         ('fax', 'cmte_fax'),
-        ('name', 'cmte_name'),
+        ('name', 'cmte_nm'),
         ('website', 'cmte_web_url'),
         ('expire_date', 'expire_date'),
         ('filing_frequency', 'filing_freq'),
