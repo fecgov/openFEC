@@ -127,7 +127,7 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee/C00000851')
         results = response['results']
         # not all records in the test db have candidates; find one that does
-        result = results[0]['properties']['candidates'][0]
+        result = results[0]['candidates'][0]
 
         fields = ('candidate_id', 'designation', 'designation_full', 'election_year', 'expire_date', 'link_date', 'type', 'type_full')
         for field in fields:
@@ -138,7 +138,7 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee/C00000851')
         results = response['results']
 
-        result = results[0]['properties']['status']
+        result = results[0]['status']
         fields = ('designation','designation_full', 'expire_date','load_date', 'receipt_date', 'type', 'type_full')
         for field in fields:
             print field
@@ -162,7 +162,7 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee/C00000851')
         result = response['results'][0]
 
-        fields = ('committee_id','expire_date','form_type','load_date','properties')
+        fields = ('committee_id','expire_date','form_type','load_date')
         for field in fields:
             print field
             self.assertEquals(result.has_key(field), True)

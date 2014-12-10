@@ -300,8 +300,6 @@ def format_committees(self, data, page, fields, year):
     results = []
     for cmte in data:
         committee = {}
-        # Most recent information
-        properties = {}
         # Keeps track of previous info
         record = {}
 
@@ -316,14 +314,13 @@ def format_committees(self, data, page, fields, year):
                     expired = False
                 else:
                     expired = True
-            ### need to double check this
             else:
-                expired = True
+                expired = False
 
 
-            if properties.has_key('load_date') and properties['load_date'] is not None:
+            if item.has_key('load_date') and item['load_date'] is not None:
                 if expired == False:
-                    properties['load_date'] = item['load_date']
+                    committee['load_date'] = item['load_date']
                 else:
                     record['load_date'] = item['load_date']
 
@@ -340,7 +337,7 @@ def format_committees(self, data, page, fields, year):
                 if 'expire_date' in fields or '*' in fields:
                     address['expire_date'] = item['expire_date']
                 if expired == False:
-                    properties['address'] = address
+                    committee['address'] = address
                 else:
                     if not record.has_key('address'):
                         record['address'] = []
@@ -356,7 +353,7 @@ def format_committees(self, data, page, fields, year):
                 if 'expire_date' in fields or '*' in fields:
                     description['expire_date'] = item['expire_date']
                 if expired == False and len(description) > 0:
-                    properties['description'] = description
+                    committee['description'] = description
                 else:
                     if not record.has_key('description'):
                         record['description'] = []
@@ -372,7 +369,7 @@ def format_committees(self, data, page, fields, year):
                 if 'expire_date' in fields or '*' in fields:
                     treasurer['expire_date'] = item['expire_date']
                 if expired == False:
-                    properties['treasurer'] = treasurer
+                    committee['treasurer'] = treasurer
                 else:
                     if not record.has_key('treasurer'):
                         record['treasurer'] = []
@@ -388,7 +385,7 @@ def format_committees(self, data, page, fields, year):
                 if 'expire_date' in fields or '*' in fields:
                     custodian['expire_date'] = item['expire_date']
                 if expired == False:
-                    properties['custodian'] = custodian
+                    committee['custodian'] = custodian
                 else:
                     if not record.has_key('custodian'):
                         record['custodian'] = []
@@ -418,7 +415,7 @@ def format_committees(self, data, page, fields, year):
                         candidate_arcive_list.append(candidate)
 
             if len(candidate_list) > 0:
-                properties['candidates'] = candidate_list
+                committee['candidates'] = candidate_list
 
             if len(candidate_arcive_list) > 0:
                 record['candidates'] = candidate_arcive_list
@@ -444,11 +441,11 @@ def format_committees(self, data, page, fields, year):
 
             # Setting up some messaging to see if there is a problem I will get rid of this if it looks OK
             if len(designations) > 1:
-                properties['status'] = designations[0]
+                committee['status'] = designations[0]
                 print "THIS SHOULD'NT HAPPEN- THERE SHOULD BE ONE UNEXPIRED DOC"
 
             if len(designations) > 0:
-                properties['status'] = designations[0]
+                committee['status'] = designations[0]
 
             if len(archive_designations) > 0:
                 record['status'] = designations
@@ -457,9 +454,6 @@ def format_committees(self, data, page, fields, year):
             if not committee.has_key('archive'):
                 committee['archive'] = []
             committee['archive'].append(record)
-
-        if len(properties) > 0:
-            committee['properties'] = properties
 
         results.append(committee)
 
