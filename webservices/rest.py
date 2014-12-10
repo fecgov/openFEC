@@ -31,8 +31,8 @@ Supported for /committee ::
     name=        (committee's name)
     state=       (two-letter code)
     candidate=   (associated candidate's name)
-    type_code=   one-letter code see cmte_decoder
-    designation_code=  one-letter code see designation_decoder
+    type=   one-letter code see cmte_decoder
+    designation=  one-letter code see designation_decoder
     year=        The four-digit election year
 
 """
@@ -53,6 +53,7 @@ from json_encoding import TolerantJSONEncoder
 import logging
 import pprint
 import time
+import copy
 from datetime import datetime
 from psycopg2._range import DateTimeRange
 
@@ -115,22 +116,6 @@ def natural_number(n):
         raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
     return result
 
-
-def assign_formatting(self, data_dict, page_data, year):
-    args = self.parser.parse_args(strict=True)
-    if args['fields'] == None:
-        fields = ['candidate_id', 'district', 'office_sought', 'party_affiliation', 'primary_committee', 'state', 'name', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'election_year']
-    else:
-        fields =  args['fields'].split(',')
-
-    if self.table_name_stem == 'cand':
-        return format_candids(data_dict, page_data, fields, year)
-    elif self.table_name_stem == 'cmte':
-        return format_committees(data_dict, page_data, fields, year)
-    else:
-        return data_dict
-
-
 def as_dicts(data):
     """
     Because HTSQL results render as though they were lists (field info lost)
@@ -155,297 +140,320 @@ def cleantext(text):
     else:
         return text
 
+# this is shared by search and single resource
+def find_fields(self, args):
+    if args['fields'] == None and self.table_name_stem == 'cand':
+        return []
+    elif args['fields'] == None and self.table_name_stem == 'cmte':
+        # I always need expire date to sort the information, don't want to show it when it is not asked for in a custom query.
+        return ['expire_date']
+    elif ',' in args['fields']:
+        return args['fields'].split(',')
+    else:
+        return [args['fields']]
 
-def format_candids(data, page_data, fields, default_year):
+
+def assign_formatting(self, data_dict, page_data, year):
+    args = self.parser.parse_args()
+    fields = find_fields(self, args)
+
+    if self.table_name_stem == 'cand':
+        return format_candids(self, data_dict, page_data, fields, year)
+    elif self.table_name_stem == 'cmte':
+        return format_committees(self, data_dict, page_data, fields, year)
+    else:
+        return data_dict
+
+
+# Candidate formatting
+def format_candids(self, data, page_data, fields, default_year):
+    #return data
     results = []
-
-    if 'elections' in fields:
-        fields = fields + ['district', 'party_affiliation', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought', 'election_year']
-    elif fields == ['*']:
-        fields = ['name', 'candidate_id', 'mailing_addresses', 'district', 'party_affiliation', 'primary_committee', 'affiliated_committees', 'state', 'incumbent_challenge', 'candidate_status', 'candidate_inactive', 'office_sought', 'other_names', 'election_year']
 
     for cand in data:
         #aggregating data for each election across the tables
         elections = {}
         cand_data = {}
 
-        if ('name' in fields) or ('full_name' in fields) or ('other_names' in fields):
-            cand_data = {'name':{}}
-
-        if 'candidate_id' in fields:
-            cand_data['candidate_id'] = cand['cand_id']
-
-        # nicknames are useful
-        # Using most recent name as full name
-        if 'name' in fields or 'full_name' in fields:
-          cand_data['name'] = {}
-          name = cand['dimcandproperties'][-1]['cand_nm']
-          cand_data['name']['full_name'] = name
-          # let's do this for now, we could look for improvements in the future
-          if len(name.split(',')) == 2 and len(name.split(',')[0].strip()) > 0 and len(name.split(',')[1].strip()) > 0:
-              cand_data['name']['name_1'] = name.split(',')[1].strip()
-              cand_data['name']['name_2'] = name.split(',')[0].strip()
-
+        for api_name, fec_name in self.dimcand_mapping:
+            if cand['dimcand'].has_key(fec_name):
+                cand_data[api_name] = cand['dimcand'][fec_name]
 
         # Committee information
-        if 'primary_committee' or 'affiliated_committees' in fields:
+        if cand.has_key('affiliated_committees'):
             for cmte in cand['affiliated_committees']:
                 year = str(cmte['cand_election_yr'])
-                if not elections.has_key(year):
+                if len(cmte) > 0 and not elections.has_key(year):
                     elections[year] = {}
-                prmary_cmte = {}
-                prmary_cmte['committee_id'] = cmte['cmte_id']
 
-                if cmte['cmte_dsgn'] == 'P' and "primary_committee" in fields:
+                committee = {}
+                # not looking at the fields used for name matching
+                for api_name, fec_name in self.cand_committee_format_mapping:
+                    if cmte.has_key(fec_name):
+                        committee[api_name] = cmte[fec_name]
 
-                    prmary_cmte['designation_code'] = cmte['cmte_dsgn']
-                    prmary_cmte['designation'] = designation_decoder[cmte['cmte_dsgn']]
-                    prmary_cmte['type_code'] = cmte['cmte_tp']
-                    prmary_cmte['type'] = cmte_decoder[cmte['cmte_tp']]
-                    # if they are running as house and president they will have a different candidate id records
-                    elections[year]['primary_committee'] = prmary_cmte
+                if cmte['cmte_dsgn']:
+                    committee['designation_full'] = designation_decoder[cmte['cmte_dsgn']]
+                if cmte['cmte_tp']:
+                    committee['type_full'] = cmte_decoder[cmte['cmte_tp']]
 
-                elif 'affiliated_committees' in fields:
-                    # add a decoder here too
-                    if not elections[year].has_key('affiliated_committees'):
-                        elections[year]['affiliated_committees'] =[{
-                            'committee_id': cmte['cmte_id'],
-                            'type_code': cmte['cmte_tp'],
-                            'type': cmte_decoder[cmte['cmte_tp']],
-                            'designation_code': cmte['cmte_dsgn'],
-                            'designation': designation_decoder[cmte['cmte_dsgn']],
-                        }]
-                    else:
-                        elections[year]['affiliated_committees'].append({
-                            'committee_id': cmte['cmte_id'],
-                            'type_code': cmte['cmte_tp'],
-                            'type': cmte_decoder[cmte['cmte_tp']],
-                            'designation_code': cmte['cmte_dsgn'],
-                            'designation': designation_decoder[cmte['cmte_dsgn']],
-                        })
+                if cmte['cmte_dsgn'] == 'P':
+                    elections[year]['primary_committee'] = committee
+                elif not elections[year].has_key('affiliated_committees'):
+                    elections[year]['affiliated_committees']  = [committee]
+                else:
+                    elections[year]['affiliated_committees'].append(committee)
 
-        # Office information
+
         for office in cand['dimcandoffice']:
             year = str(office['cand_election_yr'])
-
-            if not elections.has_key(year):
+            if len(office) > 0 and not elections.has_key(year):
                 elections[year] = {}
-            if 'office_sought' in fields:
-                elections[year]['office_sought'] = office['dimoffice']['office_tp_desc']
-            if 'district'in fields:
-                elections[year]['district'] = office['dimoffice']['office_district']
-            if 'state' in fields:
-                elections[year]['state'] = office['dimoffice']['office_state']
-            if 'party_affiliation'in fields:
-                elections[year]['party_affiliation'] = office['dimparty']['party_affiliation_desc']
-                elections[year]['party_code'] = office['dimparty']['party_affiliation']
+
+            # Office information
+            for api_name, fec_name in self.office_mapping:
+                if office['dimoffice'].has_key(fec_name):
+                    elections[year][api_name] = office['dimoffice'][fec_name]
+            # Party information
+            for api_name, fec_name in self.party_mapping:
+                if office['dimparty'].has_key(fec_name):
+                    elections[year][api_name] = office['dimparty'][fec_name]
 
         # status information
-
         for status in cand['dimcandstatusici']:
-            year = str(status['election_yr'])
+            if status.has_key('election_yr') and not elections.has_key(year):
+                year = str(status['election_yr'])
+                elections[year] = {}
 
-            if 'candidate_inactive' in fields:
-                if elections.has_key(year):
-                    elections[year]['candidate_inactive'] = status['cand_inactive_flg']
-                else:
-                    elections[year] = {}
-                    elections[year]['candidate_inactive'] = status['cand_inactive_flg']
+            for api_name, fec_name in self.status_mapping:
+                if status.has_key(fec_name):
+                    elections[year][api_name] = status[fec_name]
 
-            if 'candidate_status' in fields:
-                status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
-                if status['cand_status'] is not None:
-                    elections[year]['candidate_status'] = status_decoder[status['cand_status']]
-                else:
-                    elections[year]['candidate_status'] = None
+            status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
 
-            if 'incumbent_challenge' in fields:
-                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-                if status['ici_code'] != None:
-                    elections[year]['incumbent_challenge'] = ici_decoder[status['ici_code']]
-                else:
-                    elections[year]['incumbent_challenger'] = None
+            if status.has_key('cand_status') and status['cand_status'] is not None:
+                elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
 
+            ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+            if status.has_key('ici_code') and status['ici_code'] is not None:
+                elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
+
+        # Using most recent name as full name
+        if cand['dimcandproperties'][0].has_key('cand_nm'):
+            name = cand['dimcandproperties'][0]['cand_nm']
+            cand_data['name'] = {}
+            cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
+
+            # let's do this for now, we could look for improvements in the future
+            if len(name.split(',')) == 2 and len(name.split(',')[0].strip()) > 0 and len(name.split(',')[1].strip()) > 0:
+                cand_data['name']['name_1'] = name.split(',')[1].strip()
+                cand_data['name']['name_2'] = name.split(',')[0].strip()
+
+        # properties has names and addresses
         addresses = []
         other_names = []
+        for prop in cand['dimcandproperties']:
+            if prop.has_key('election_yr') and not elections.has_key(year):
+                elections[year] = {}
 
-        if 'name' or 'mailing_address' in fields:
-            for prop in cand['dimcandproperties']:
+            # Addresses
+            one_address = {}
+            for api_name, fec_name in self.property_fields_mapping:
+                if prop.has_key(fec_name) and fec_name != "cand_nm" and fec_name != "expire_date":
+                    one_address[api_name] = cleantext(prop[fec_name])
+                if prop.has_key('expire_date') and prop['expire_date'] is not None:
+                    one_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
+            if one_address not in addresses and one_address != {}:
+                addresses.append(one_address)
 
-                mailing_address = {}
-                mailing_address['street_1'] = cleantext(prop['cand_st1'])
-                mailing_address['street_2'] = cleantext(prop['cand_st2'])
-                mailing_address['city'] = cleantext(prop['cand_city'])
-                mailing_address['state'] = cleantext(prop['cand_st'])
-                mailing_address['zip'] = cleantext(prop['cand_zip'])
-                if prop['expire_date'] != None:
-                    mailing_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
-                if mailing_address not in addresses:
-                    addresses.append(mailing_address)
+            # Names (picking up name variations)
+            if prop.has_key('cand_nm') and other_names in fields and (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
+                name = cleantext(prop['cand_nm'])
+                other_names.append(name)
 
-                if 'name' in fields or 'other_names' in fields:
-                    # other_names will help improve search based on nick names
-                    name = cleantext(prop['cand_nm'])
-                if ('other_names' in fields) and (cand_data['name']['full_name'] != name) and (name not in other_names):
-                    other_names.append(name)
-
-        if "mailing_addresses" in fields:
+        if len(addresses) > 0:
             cand_data['mailing_addresses'] = addresses
-
-        if len(other_names) > 0 and ('name' in fields):
+        if len(other_names) > 0:
             cand_data['name']['other_names'] = other_names
 
-
-        if 'district'in fields or 'party_affiliation'in fields or 'primary_committee'in fields or 'affiliated_committees'in fields or 'state'in fields or 'incumbent_challenge'in fields or 'candidate_status'in fields or 'candidate_inactive'in fields or 'office_sought' in fields:
-
-            cand_data['elections'] = []
-            years = []
-            for year in elections:
-                if default_year is not None:
-                    if str(default_year) == year:
-                        years.append(year)
-                else:
+        # Order eleciton data so the most recent is first and just show years requested
+        years = []
+        for year in elections:
+            if default_year is not None and str(default_year) == year:
                     years.append(year)
-            years.sort(reverse=True)
-            for year in years:
-                elections[year]['election_year'] = year
+
+        years.sort(reverse=True)
+        for year in years:
+            if len(elections[year]) > 0:
+                if not cand_data.has_key('elections'):
+                    cand_data['elections'] = []
+
                 cand_data['elections'].append(elections[year])
 
         results.append(cand_data)
 
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
+
 # still need to implement year
-def format_committees(data, page, fields, year):
+def format_committees(self, data, page, fields, year):
     results = []
     for cmte in data:
-        committee = []
+        committee = {}
+        # Keeps track of previous info
+        record = {}
+
+        for api_name, fec_name in self.dimcmte_mapping:
+                if cmte['dimcmte'].has_key(fec_name):
+                    committee[api_name] = cmte['dimcmte'][fec_name]
 
         for item in cmte['dimcmteproperties']:
-            record = {}
-            record['name'] = item['cmte_nm']
-            record['committee_id'] = cmte['cmte_id']
-            record['expire_date'] = cmte['expire_date']
-            record['form_type'] = item['form_tp']
+            # shortcut for formatting
+            if item['expire_date'] is not None:
+                if item['expire_date'] > datetime.now():
+                    expired = False
+                else:
+                    expired = True
+            else:
+                expired = False
 
+
+            if item.has_key('load_date') and item['load_date'] is not None:
+                if expired == False:
+                    committee['load_date'] = item['load_date']
+                else:
+                    record['load_date'] = item['load_date']
+
+            # address
             address = {}
-            address['street_1'] = item['cmte_st1']
-            address['street_2'] = item['cmte_st2']
-            address['city'] = item['cmte_city']
-            address['state'] = item['cmte_st']
-            address['zip'] = item['cmte_zip']
-            if item['cmte_st_desc'] is not None:
-                address['state_long'] = item['cmte_st_desc'].strip()
-            record['address'] = address
-            record['email'] = item['cmte_email']
-            record['web_address'] = item['cmte_web_url']
+            for api_name, fec_name in self.committee_address_field_mappings:
+                if item.has_key(fec_name) and item[fec_name] is not None:
+                    address[api_name] = item[fec_name]
 
-            custodian_mappings = [
-                ('cmte_custodian_city', 'city'),
-                ('cmte_custodian_f_nm', 'name_1'),
-                ('cmte_custodian_l_nm', 'name_2'),
-                ('cmte_custodian_m_nm', 'name_middle'),
-                ('cmte_custodian_nm', 'name_full'),
-                ('cmte_custodian_ph_num', 'phone'),
-                ('cmte_custodian_prefix', 'name_prefix'),
-                ('cmte_custodian_st', 'state'),
-                ('cmte_custodian_st1', 'street_1'),
-                ('cmte_custodian_st2', 'street_2'),
-                ('cmte_custodian_suffix', 'name_suffix'),
-                ('cmte_custodian_title', 'name_title'),
-                ('cmte_custodian_zip', 'zip'),
-            ]
+            if address.has_key('state_full'):
+                address['state_full'] = item['cmte_st_desc'].strip()
 
-            custodian = {}
-            for f,v in custodian_mappings:
-                    if item[f] is not None:
-                            custodian[v] = item[f]
-            if len(custodian) > 0:
-                record['custodian'] = custodian
+            if len(address) > 0:
+                if 'expire_date' in fields or '*' in fields:
+                    address['expire_date'] = item['expire_date']
+                if expired == False:
+                    committee['address'] = address
+                else:
+                    if not record.has_key('address'):
+                        record['address'] = []
+                    record['address'].append(address)
 
-            treasurer_mappings=[
-                ('cmte_treasurer_city', 'city'),
-                ('cmte_treasurer_f_nm', 'name_1'),
-                ('cmte_treasurer_l_nm', 'name_2'),
-                ('cmte_treasurer_m_nm', 'name_middle'),
-                ('cmte_treasurer_nm', 'name_full'),
-                ('cmte_treasurer_ph_num', 'phone'),
-                ('cmte_treasurer_prefix', 'name_prefix'),
-                ('cmte_treasurer_st', 'state'),
-                ('cmte_treasurer_st1', 'street_1'),
-                ('cmte_treasurer_st2', 'street_2'),
-                ('cmte_treasurer_suffix', 'name_suffix'),
-                ('cmte_treasurer_title', 'name_title'),
-                ('cmte_treasurer_zip', 'zip'),
-            ]
+            # properties table called description in api
+            description = {}
+            for api_name, fec_name in self.properties_field_mapping:
+                if item.has_key(fec_name) and item[fec_name] is not None:
+                    description[api_name] = item[fec_name]
 
+            if len(description) > 0:
+                if 'expire_date' in fields or '*' in fields:
+                    description['expire_date'] = item['expire_date']
+                if expired == False and len(description) > 0:
+                    committee['description'] = description
+                else:
+                    if not record.has_key('description'):
+                        record['description'] = []
+                    record['description'].append(description)
+
+            # treasurer
             treasurer = {}
-            for f,v in treasurer_mappings:
-                    if item[f] is not None:
-                            treasurer[v] = item[f]
+            for api_name, fec_name in self.treasurer_field_mapping:
+                if item.has_key(fec_name) and item[fec_name] is not None:
+                    treasurer[api_name] = item[fec_name]
+
             if len(treasurer) > 0:
-                record['treasurer'] = treasurer
+                if 'expire_date' in fields or '*' in fields:
+                    treasurer['expire_date'] = item['expire_date']
+                if expired == False:
+                    committee['treasurer'] = treasurer
+                else:
+                    if not record.has_key('treasurer'):
+                        record['treasurer'] = []
+                    record['treasurer'].append(treasurer)
 
+            # custodian
+            custodian = {}
+            for api_name, fec_name in self.custodian_field_mapping:
+                if item.has_key(fec_name) and item[fec_name] is not None:
+                    custodian[api_name] = item[fec_name]
 
-            info_mappings=[
-                ('lobbyist_registrant_pac_flg', 'lobbyist_registrant_pac_flg'),
-                ('org_tp', 'organization_type_code'),
-                ('org_tp_desc', 'organization_type'),
-                ('orig_registration_dt', 'original_registration_date'),
-                ('party_cmte_type', 'party_cmte_type'),
-                # Want to research this
-                ('qual_dt', 'qual_dt'),
-            ]
+            if len(custodian) > 0:
+                if 'expire_date' in fields or '*' in fields:
+                    custodian['expire_date'] = item['expire_date']
+                if expired == False:
+                    committee['custodian'] = custodian
+                else:
+                    if not record.has_key('custodian'):
+                        record['custodian'] = []
+                    record['custodian'].append(custodian)
 
-            for f,v in info_mappings:
-                    if item[f] is not None:
-                        record[v] = item[f]
-
-            candidates = []
+            # candidates associated with committees
+            candidate_list = []
+            candidate_arcive_list = []
             for cand in cmte['dimlinkages']:
                 candidate ={}
-                candidate['candidate_id'] = cand['cand_id']
-                candidate['type_code'] = cand['cmte_tp']
-                candidate['type'] = cmte_decoder[cand['cmte_tp']]
-                candidate['designation_code'] = cand['cmte_dsgn']
-                candidate['designation'] = designation_decoder[cand['cmte_dsgn']]
-                candidate['election_year'] = cand['cand_election_yr']
-                candidate['expire_date'] = cand['expire_date']
-                candidate['link_date'] = cand['link_date']
-                candidates.append(candidate)
-            if len(candidates) > 0:
-                record['candidates'] = candidates
+                for api_name, fec_name in self.linkages_field_mapping:
+                    if cand.has_key(fec_name) and fec_name != 'expire_date':
+                        candidate[api_name] = cand[fec_name]
 
-            statuses = []
-            for info in cmte['dimcmtetpdsgn']:
-                status_mappings = [
-                    ('cmte_dsgn', 'designation_code'),
-                    ('cmte_tp', 'type_code'),
-                    #('expire_date', 'expire_date'),
-                    ('receipt_date', 'receipt_date'),
-                ]
+                if 'expire_date' in fields or '*' in fields or fields == []:
+                    candidate['expire_date'] = cand['expire_date']
+                if candidate.has_key('type'):
+                    candidate['type_full'] = cmte_decoder[candidate['type']]
+                if candidate.has_key('designation'):
+                    candidate['designation_full'] = designation_decoder[candidate['designation']]
+
+                # add to properties or archive based on expire date
+                if len(candidate) > 0:
+                    if cand.has_key('expire_date') and cand['expire_date'] == None:
+                        candidate_list.append(candidate)
+                    else:
+                        candidate_arcive_list.append(candidate)
+
+            if len(candidate_list) > 0:
+                committee['candidates'] = candidate_list
+
+            if len(candidate_arcive_list) > 0:
+                record['candidates'] = candidate_arcive_list
+
+            # designation/discription
+            designations = []
+            archive_designations = []
+            for designation in cmte['dimcmtetpdsgn']:
                 status = {}
-                for f,v in status_mappings:
-                    if info[f] is not None:
-                        status[v] = info[f]
-                        if f == 'cmte_dsgn' and designation_decoder.has_key(info[f]):
-                            status['designation'] = designation_decoder[info[f]]
-                        if f == 'cmte_tp' and cmte_decoder.has_key(info[f]):
-                            status['type'] = cmte_decoder[info[f]]
-                statuses.append(status)
-            record['status'] = sorted(statuses, key=lambda k: k['receipt_date'], reverse=True)
+                for api_name, fec_name in self.designation_mapping:
+                    if designation.has_key(fec_name):
+                        status[api_name] = designation[fec_name]
 
-            # We don't have party info so I am going to mock up what it would be like
-            if record['status'] and record['status'][0]["type_code"] in ['X', 'Y']:
-                name = str(item['cmte_nm']).upper()
-                if 'DEMOCRAT' in name:
-                    record['fake_party'] = 'Democratic Party'
-                    record['fake_party_code'] = 'DEM'
-                if 'REPUBLICAN' in name:
-                    record['fake_party'] = 'Republican Party'
-                    record['fake_party_code'] = 'REP'
+                    if designation.has_key('cmte_dsgn') and  designation_decoder.has_key(designation['cmte_dsgn']):
+                        status['designation_full'] = designation_decoder[designation['cmte_dsgn']]
+                    if designation.has_key('cmte_tp') and cmte_decoder.has_key(designation['cmte_tp']):
+                        status['type_full'] = cmte_decoder[designation['cmte_tp']]
 
-            committee.append(record)
+                if designation.has_key('expire_date') and designation['expire_date'] == None:
+                    designations.append(status)
+                else:
+                    archive_designations.append(status)
+
+            # Setting up some messaging to see if there is a problem I will get rid of this if it looks OK
+            if len(designations) > 1:
+                committee['status'] = designations[0]
+                print "THIS SHOULD'NT HAPPEN- THERE SHOULD BE ONE UNEXPIRED DOC"
+
+            if len(designations) > 0:
+                committee['status'] = designations[0]
+
+            if len(archive_designations) > 0:
+                record['status'] = designations
+
+        if ('archive' in fields or '*' in fields) and len(record) > 0:
+            if not committee.has_key('archive'):
+                committee['archive'] = []
+            committee['archive'].append(record)
 
         results.append(committee)
 
@@ -456,20 +464,55 @@ def format_committees(data, page, fields, year):
 class SingleResource(restful.Resource):
     # add fields and year to this
     def get(self, id):
+        show_fields = copy.copy(self.default_fields)
         overall_start_time = time.time()
-        qry = "/%s?%s_id='%s'" % (self.htsql_qry, self.table_name_stem, id)
+        args = self.parser.parse_args()
+        fields = find_fields(self, args)
+
+        if args.has_key('fields') and args['fields'] is not None:
+            if ',' in str(args['fields']):
+                fields = args['fields'].split(',')
+            else:
+                fields = [str(args['fields'])]
+
+            for maps, field_name in self.maps_fields:
+                show_fields[field_name] = ''
+                #looking at each field the user requested
+                for field in fields:
+                    # for each mapping, see if there is a field match. If so, add it to the field list
+                    for m in maps:
+                        if m[0] == field:
+                            show_fields[field_name] = show_fields[field_name] + m[1] + ','
+        else: fields = []
+
+        # not working
+        if args.has_key('year'):
+            year = int(args['year'])
+        else:
+            year = default_year()
+
+        qry = "/%s?%s_id='%s'" % (self.query_text(show_fields), self.table_name_stem, id)
         print(qry)
+
         speedlogger.info('--------------------------------------------------')
         speedlogger.info('\nHTSQL query: \n%s' % qry)
         start_time = time.time()
-        data = htsql_conn.produce(qry) or [None, ]
+
+        data = htsql_conn.produce(qry)
+
         speedlogger.info('HTSQL query time: %f' % (time.time() - start_time))
+
         data_dict = as_dicts(data)
         page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
-        args = self.parser.parse_args(strict=True)
-        speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return assign_formatting(self, data_dict, page_data, None)
 
+        speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
+
+        if self.table_name_stem == 'cand':
+            return format_candids(self, data_dict, page_data, fields, year)
+        elif self.table_name_stem == 'cmte':
+            return format_committees(self, data_dict, page_data, fields, year)
+        else:
+            return data_dict
 
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
@@ -483,12 +526,13 @@ class Searchable(restful.Resource):
         args = self.parser.parse_args(strict=True)
         elements = []
         page_num = 1
-        year = None
-
+        show_fields = copy.copy(self.default_fields)
+        if 'year' not in args:
+            args['year'] = default_year()
+        year = args['year']
         for arg in args:
             if args[arg]:
                 if arg == 'q':
-                    print "found query"
                     qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
                     qry = sa.sql.text(qry)
                     speedlogger.info('\nfulltext query: \n%s' % qry)
@@ -507,23 +551,36 @@ class Searchable(restful.Resource):
                 elif arg == 'per_page':
                     per_page = args[arg]
                 elif arg == 'fields':
+                    # queries need year to link the data
+                    if ',' in str(args[arg]):
+                        field_list = args[arg].split(',')
+                    else:
+                        field_list = [str(args[arg])]
+
+                    #going through the different kinds of mappings and fields
+                    for maps, field_name in self.maps_fields:
+                        show_fields[field_name] = ''
+                        #looking at each field the user requested
+                        for field in field_list:
+                            # for each mapping, see if there is a field match. If so, add it to the field list
+                            for m in maps:
+                                if m[0] == field:
+                                    show_fields[field_name] = show_fields[field_name] + m[1] + ','
                     fields = args[arg]
-                elif arg == 'year':
-                    year = args[arg]
                 else:
-                    element = self.field_name_map[arg].substitute(arg=args[arg])
-                    elements.append(element)
+                    if arg in self.field_name_map:
+                        element = self.field_name_map[arg].substitute(arg=args[arg])
+                        elements.append(element)
 
-        qry = self.htsql_qry
+        qry = self.query_text(show_fields)
 
-        for element in elements:
-            if year:
-                element = element.replace('dimcandoffice',
-                                          '(dimcandoffice?cand_election_yr=%s)' % year)
         if elements:
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
+            # these replacements will have no effect on committees, etc. - that's ok
+            qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
+            count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
 
@@ -531,6 +588,7 @@ class Searchable(restful.Resource):
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
 
         print("\n%s\n" % (qry))
+
         speedlogger.info('\n\nHTSQL query: \n%s' % qry)
         start_time = time.time()
         data = htsql_conn.produce(qry)
@@ -539,6 +597,8 @@ class Searchable(restful.Resource):
         count = htsql_conn.produce(count_qry)
 
         data_dict = as_dicts(data)
+
+        # page info
         data_count = int(count[0])
         pages = data_count/per_page
         if data_count % per_page != 0:
@@ -548,61 +608,377 @@ class Searchable(restful.Resource):
 
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
-        # make this better later
-        if not args.has_key("year"):
-            args['year'] = None
-
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-        return assign_formatting(self, data_dict, page_data, args['year'])
+        return assign_formatting(self, data_dict, page_data, year)
 
 
 class Candidate(object):
+    # default fields for search
+    default_fields = {
+        'dimcand_fields': 'cand_id',
+        'cand_committee_link_fields': 'cmte_id,cmte_dsgn,cmte_tp,cand_election_yr',
+        'office_fields': 'office_district,office_state,office_tp',
+        'party_fields': 'party_affiliation_desc,party_affiliation',
+        'status_fields': 'election_yr,cand_status,ici_code',
+        'properties_fields': 'cand_nm',
+        'cmte_fields': "'P'",
+    }
 
+    # Query
     table_name_stem = 'cand'
     viewable_table_name = "(dimcand?exists(dimcandproperties)&exists(dimcandoffice))"
-    htsql_qry = """%s{*,/dimcandproperties,/dimcandoffice{cand_election_yr-,dimoffice,dimparty},
-                      /dimlinkages{cmte_id, cand_election_yr, cmte_tp, cmte_dsgn} :as affiliated_committees,
-                      /dimcandstatusici} """ % viewable_table_name
+
+    def query_text(self, show_fields):
+        if show_fields['cmte_fields'] != '':
+            com_query = "/dimlinkages?cmte_dsgn={%s}  :as affiliated_committees," % (show_fields['cmte_fields'])
+            show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
+        else:
+            com_query = ''
+
+        return """
+            %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
+                              %s
+                              /dimcandstatusici{%s}}
+        """ % (
+                self.viewable_table_name,
+                show_fields['dimcand_fields'],
+                show_fields['properties_fields'],
+                show_fields['office_fields'],
+                show_fields['party_fields'],
+                com_query,
+                #show_fields['cand_committee_link_fields'],
+                show_fields['status_fields'],
+        )
+
+    # Field mappings (API_output, FEC_input)
+    # basic candidate information
+    dimcand_mapping = (
+        ('candidate_id', 'cand_id'),
+        ('form_type', 'form_tp'),
+        ## we don't have this data yet
+        ('expire_date','expire_date'),
+        ('load_date','load_date'),
+        ('*', '*'),
+    )
+
+    #affiliated committees
+    cand_committee_format_mapping = (
+        ('committee_id', 'cmte_id'),
+        ('designation', 'cmte_dsgn'),
+        ('type', 'cmte_tp'),
+        ('election_year', 'cand_election_yr'),
+    )
+    # I want to take additional formatting from the user but don't want to use it for matching during formatting
+    cand_committee_link_mapping = (
+        # fields if primary committee is requested
+        ('primary_committee', 'cmte_id'),
+        ('primary_committee', 'cmte_dsgn'),
+        ('primary_committee', 'cmte_tp'),
+        ('primary_committee', 'cand_election_yr'),
+        # fields if associated committee is requested
+        ('associated_committee', 'cmte_id'),
+        ('associated_committee', 'cmte_dsgn'),
+        ('associated_committee', 'cmte_tp'),
+        ('associated_committee', 'cand_election_yr'),
+        ('year', 'cand_election_yr'),
+        ('*', '*'),
+        # regular mapping
+    ) + cand_committee_format_mapping
+    # dimoffice
+    office_mapping = (
+        ('office', 'office_tp'),
+        ('district', 'office_district'),
+        ('state', 'office_state'),
+        ('office_sought_full', 'office_tp_desc'),
+        ('office_sought', 'office_tp'),
+        ('*', '*'),
+    )
+    #dimparty
+    party_mapping = (
+        ('party', 'party_affiliation'),
+        ('party_affiliation', 'party_affiliation_desc'),
+        ('*', '*'),
+    )
+    # dimcandstatus
+    status_mapping = (
+        ('election_year', 'election_yr'),
+        ('candidate_inactive', 'cand_inactive_flg'),
+        ('candidate_status', 'cand_status'),
+        ('incumbent_challenge', 'ici_code'),
+        ('*', '*'),
+    )
+    # dimcandproperties
+    property_fields_mapping = (
+        ('name', 'cand_nm'),
+        ('street_1', 'cand_st1'),
+        ('street_2','cand_st2'),
+        ('city', 'cand_city'),
+        ('state', 'cand_st'),
+        ('zip', 'cand_zip'),
+        ('expire_date', 'expire_date'),
+    )
+    # I want to take additional formatting from the user but don't want to use it for matching during formatting
+    properties_mapping = (
+        ('mailing_addresses', 'cand_st1,cand_st2,cand_city,cand_st,\
+            cand_zip,expire_date'),
+        ('*', '*'),
+
+    ) + property_fields_mapping
+    # to filter primary from affiliated committees
+    cmte_mapping = (
+        ('primary_committee', "'P'"),
+        ('affiliated_committees', "'U'"),
+        ('*', "'P', 'U'")
+    )
+
+    # connects mappings to field names
+    maps_fields = (
+        (dimcand_mapping, 'dimcand_fields'),
+        (cand_committee_link_mapping, 'cand_committee_link_fields'),
+        (office_mapping, 'office_fields'),
+        (party_mapping, 'party_fields'),
+        (status_mapping,'status_fields'),
+        (properties_mapping, 'properties_fields'),
+        (cmte_mapping, 'cmte_fields'),
+    )
+
 
 class CandidateResource(SingleResource, Candidate):
 
     parser = reqparse.RequestParser()
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
+
 class CandidateSearch(Searchable, Candidate):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('q', type=str, help='Text to search all fields for')
-    parser.add_argument('candidate_id', type=str, help="Candidate's FEC ID")
-    parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
-    parser.add_argument('page', type=natural_number, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=natural_number, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
-    parser.add_argument('office', type=str, help='Governmental office candidate runs for')
-    parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
-    parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
-    parser.add_argument('year', type=int, default=2012, help="Year in which a candidate runs for office")
-    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
-    parser.add_argument('district', type=int, help='Two digit district number')
+    parser.add_argument(
+        'q',
+        type=str,
+        help='Text to search all fields for'
+    )
+    parser.add_argument(
+        'candidate_id',
+        type=str,
+        help="Candidate's FEC ID"
+    )
+    parser.add_argument(
+        'fec_id',
+        type=str,
+        help="Candidate's FEC ID"
+    )
+    parser.add_argument(
+        'page',
+        type=natural_number,
+        default=1,
+        help='For paginating through results, starting at page 1'
+    )
+    parser.add_argument(
+        'per_page',
+        type=natural_number,
+        default=20,
+        help='The number of results returned per page. Defaults to 20.'
+    )
+    parser.add_argument(
+        'name',
+        type=str,
+        help="Candidate's name (full or partial)"
+    )
+    parser.add_argument(
+        'office',
+        type=str,
+        help='Governmental office candidate runs for'
+    )
+    parser.add_argument(
+        'state',
+        type=str,
+        help='U. S. State candidate is registered in'
+    )
+    parser.add_argument(
+        'party',
+        type=str,
+        help="Party under which a candidate ran for office"
+    )
+    parser.add_argument(
+        'year',
+        type=int,
+        default=2012,
+        help="Year in which a candidate runs for office"
+    )
+    parser.add_argument(
+        'fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
+    parser.add_argument(
+        'district',
+        type=int,
+        help='Two digit district number'
+    )
 
 
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
-                      "fec_id": string.Template("cand_id='$arg'"),
-                      "office":
-                      string.Template("top(dimcandoffice.sort(expire_date-)).office_tp~'$arg'"),
-                      "district":
-                      string.Template("top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"),
-                      "state": string.Template("top(dimcandoffice.sort(expire_date-)).dimoffice.office_state~'$arg'"),
-                      "name": string.Template("top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"),
-                      "party": string.Template("top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation~'$arg'")
-                      }
+                    "fec_id": string.Template("cand_id='$arg'"),
+                    "office": string.Template(
+                        "top(dimcandoffice.sort(expire_date-)).office_tp~'$arg'"
+                    ),
+                    "district":string.Template(
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"
+                    ),
+                    "state": string.Template(
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_state~'$arg'"
+                    ),
+                    "name": string.Template(
+                        "top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"
+                    ),
+                    "party": string.Template(
+                        "top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation~'$arg'"
+                    ),
+                    "year": string.Template(
+                        "exists(dimcandoffice)"
+                    ),
+    }
 
 
 class Committee(object):
 
+    default_fields = {
+        'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
+        'properties_fields': '*',
+        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date',
+        'designation_fields': '*',
+    }
+
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
-    htsql_qry = '(%s{*,/dimcmteproperties, /dimlinkages, /dimcmtetpdsgn})' % viewable_table_name
+    def query_text(self, show_fields):
+        # We always need expire date to sort the information
+        return '(%s{{%s},/dimcmteproperties{expire_date,%s}, /dimlinkages{expire_date,%s}, /dimcmtetpdsgn{%s}})' % (
+            self.viewable_table_name,
+            show_fields['dimcmte_fields'],
+            show_fields['properties_fields'],
+            show_fields['linkages_fields'],
+            show_fields['designation_fields']
+        )
+
+
+    dimcmte_mapping = (
+        ('committee_id', 'cmte_id'),
+        ('form_type', 'form_tp'),
+        ('load_date', 'load_date'),
+        ('expire_date', 'expire_date'),
+        ('*', '*'),
+    )
+
+    linkages_field_mapping = (
+        ('candidate_id', 'cand_id'),
+        ('type', 'cmte_tp'),
+        ('designation', 'cmte_dsgn'),
+        ('election_year', 'cand_election_yr'),
+        ('expire_date', 'expire_date'),
+        ('link_date', 'link_date'),
+    )
+
+    linkages_mapping = (
+        ('committees', 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,\
+            expire_date,link_date'),
+        ('*', '*'),
+
+    ) + linkages_field_mapping
+
+    designation_mapping = (
+        ('designation', 'cmte_dsgn'),
+        ('type', 'cmte_tp'),
+        ('expire_date', 'expire_date'),
+        ('load_date', 'load_date'),
+        ('receipt_date', 'receipt_date'),
+        ('*', '*'),
+    )
+
+    # Beginning of the dimcmteproperties mapping, making subdivisions for easier formatting
+    committee_address_field_mappings = (
+        ('street_1', 'cmte_st1'),
+        ('street_2', 'cmte_st2'),
+        ('city', 'cmte_city'),
+        ('state', 'cmte_st'),
+        ('state_full', 'cmte_st_desc'),
+        ('zip', 'cmte_zip'),
+    )
+    committee_address = ('address', 'street_1,cmte_st1,street_2,cmte_st2,cmte_city,cmte_st,cmte_zip')
+
+    treasurer_field_mapping = (
+        ('city', 'cmte_treasurer_city'),
+        ('name_1', 'cmte_treasurer_f_nm'),
+        ('name_2', 'cmte_treasurer_l_nm'),
+        ('name_middle', 'cmte_treasurer_m_nm'),
+        ('name_full', 'cmte_treasurer_nm'),
+        ('phone', 'cmte_treasurer_ph_num'),
+        ('name_prefix', 'cmte_treasurer_prefix'),
+        ('state', 'cmte_treasurer_st'),
+        ('street_1', 'cmte_treasurer_st1'),
+        ('street_2', 'cmte_treasurer_st2'),
+        ('name_suffix', 'cmte_treasurer_suffix'),
+        ('name_title', 'cmte_treasurer_title'),
+        ('zip', 'cmte_treasurer_zip'),
+    )
+    treasurer = (
+        ('treasurer', 'cmte_treasurer_city,cmte_treasurer_f_nm,\
+            cmte_treasurer_l_nm,cmte_treasurer_m_nm,cmte_treasurer_nm,\
+            cmte_treasurer_ph_num,cmte_treasurer_prefix,cmte_treasurer_st,\
+            cmte_treasurer_st1,cmte_treasurer_st2,cmte_treasurer_suffix,\
+            cmte_treasurer_title,cmte_treasurer_zip'),
+    )
+
+    custodian_field_mapping = (
+        ('city', 'cmte_custodian_city'),
+        ('name_1', 'cmte_custodian_f_nm'),
+        ('name_2', 'cmte_custodian_l_nm'),
+        ('name_middle', 'cmte_custodian_m_nm'),
+        ('name_full', 'cmte_custodian_nm'),
+        ('phone', 'cmte_custodian_ph_num'),
+        ('name_prefix', 'cmte_custodian_prefix'),
+        ('state', 'cmte_custodian_st'),
+        ('street_1', 'cmte_custodian_st1'),
+        ('street_2', 'cmte_custodian_st2'),
+        ('name_suffix', 'cmte_custodian_suffix'),
+        ('name_title', 'cmte_custodian_title'),
+        ('zip', 'cmte_custodian_zip'),
+    )
+    custodian = (
+        ('custodian', 'cmte_custodian_city,cmte_custodian_f_nm\
+            ,cmte_custodian_l_nm,cmte_custodian_m_nm,cmte_custodian_nm,\
+            cmte_custodian_ph_num,cmte_custodian_prefix,cmte_custodian_st,\
+            cmte_custodian_st1,cmte_custodian_st2,cmte_custodian_suffix,\
+            cmte_custodian_title,cmte_custodian_zip'),
+    )
+    properties_field_mapping = (
+        ('email', 'cmte_email'),
+        ('fax', 'cmte_fax'),
+        ('name', 'cmte_nm'),
+        ('website', 'cmte_web_url'),
+        ('expire_date', 'expire_date'),
+        ('filing_frequency', 'filing_freq'),
+        ('form_type', 'form_tp'),
+        ('leadership_pac', 'leadership_pac'),
+        ('load_date', 'load_date'),
+        ('lobbyist_registrant_pac', 'lobbyist_registrant_pac_flg'),
+        ('organization_type', 'org_tp'),
+        ('organization_type_full', 'org_tp_desc'),
+        ('original_registration_date', 'orig_registration_dt'),
+        ('party', 'party_cmte_type'),
+        ('party_full', 'party_cmte_type_desc'),
+        ('qualifying_date', 'qual_dt'),
+    )
+
+    properties_mapping = (('*', '*'),) + properties_field_mapping + committee_address_field_mappings + committee_address + treasurer_field_mapping + custodian_field_mapping + custodian
+
+    # connects mappings to field names
+    maps_fields = (
+        (dimcmte_mapping, 'dimcmte_fields'),
+        (properties_mapping, 'properties_fields'),
+        (linkages_mapping, 'linkages_fields'),
+        (designation_mapping, 'designation_fields'),
+    )
 
 
 class CommitteeResource(SingleResource, Committee):
@@ -614,31 +990,95 @@ class CommitteeResource(SingleResource, Committee):
 class CommitteeSearch(Searchable, Committee):
 
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
-                      "fec_id": string.Template("cmte_id='$arg'"),
-                      # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
-                      "candidate_id":string.Template("top(dimlinkages.sort(expire_date-)).cand_id~'$arg'"),
-                      "state": string.Template("top(dimcmteproperties.sort(expire_date-)).cmte_st~'$arg'"),
-                      "name": string.Template("top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'"),
-                      "type_code": string.Template("top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp~'$arg'"),
-                      "designation_code": string.Template("top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn~'$arg'"),
-                      "organization_type_code": string.Template("top(dimcmteproperties.sort(expire_date-)).org_tp~'$arg'"),
-                      "fake_party": string.Template("top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'&top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp={'X','Y'}")
+                        "fec_id": string.Template("cmte_id='$arg'"),
+                        # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
+                        "candidate_id":string.Template(
+                            "exists(dimlinkages?cand_id~'$arg')"
+                        ),
+                        "state": string.Template(
+                            "top(dimcmteproperties.sort(expire_date-)).cmte_st~'$arg'"
+                        ),
+                        "name": string.Template(
+                            "top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'"
+                        ),
+                        "type": string.Template(
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp~'$arg'"
+                        ),
+                        "designation": string.Template(
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn~'$arg'"
+                        ),
+                        "organization_type": string.Template(
+                            "top(dimcmteproperties.sort(expire_date-)).org_tp~'$arg'"
+                        ),
+                        "party": string.Template(
+                            "top(dimcmteproperties.sort(expire_date-)).party_cmte_type~'$arg'"
+                        ),
     }
 
     parser = reqparse.RequestParser()
-    parser.add_argument('q', type=str, help='Text to search all fields for')
-    parser.add_argument('committee_id', type=str, help="Committee's FEC ID")
-    parser.add_argument('fec_id', type=str, help="Committee's FEC ID")
-    parser.add_argument('state', type=str, help='U. S. State committee is registered in')
-    parser.add_argument('name', type=str, help="Committee's name (full or partial)")
-    parser.add_argument('candidate_id', type=str, help="Associated candidate's name (full or partial)")
-    parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
-    parser.add_argument('type_code', type=str, help='The one-letter type code of the organization')
-    parser.add_argument('designation_code', type=str, help='The one-letter designation code of the organization')
-    parser.add_argument('organization_type_code', type=str, help='The one-letter code for the kind for orgnization')
-    parser.add_argument('fake_party', type=str, help='This is just a name search that is standing in until we can get the real data. Use "democrat" or "republican" and it will assign a fake party off of names.')
+    parser.add_argument(
+        'q',
+        type=str,
+        help='Text to search all fields for'
+    )
+    parser.add_argument(
+        'committee_id',
+        type=str,
+        help="Committee's FEC ID"
+    )
+    parser.add_argument(
+        'fec_id',
+        type=str,
+        help="Committee's FEC ID"
+    )
+    parser.add_argument(
+        'state',
+        type=str,
+        help='U. S. State committee is registered in'
+    )
+    parser.add_argument(
+        'name',
+        type=str,
+        help="Committee's name (full or partial)"
+    )
+    parser.add_argument(
+        'candidate_id',
+        type=str,
+        help="Associated candidate's name (full or partial)"
+    )
+    parser.add_argument(
+        'page',
+        type=int,
+        default=1,
+        help='For paginating through results, starting at page 1'
+    )
+    parser.add_argument(
+        'per_page',
+        type=int,
+        default=20,
+        help='The number of results returned per page. Defaults to 20.'
+    )
+    parser.add_argument(
+        'fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
+    parser.add_argument(
+        'type',
+        type=str,
+        help='The one-letter type code of the organization'
+    )
+    parser.add_argument(
+        'designation',
+        type=str,
+        help='The one-letter designation code of the organization'
+    )
+    parser.add_argument(
+        'organization_type',
+        type=str,
+        help='The one-letter code for the kind for organization'
+    )
+
 
 
 class Help(restful.Resource):
