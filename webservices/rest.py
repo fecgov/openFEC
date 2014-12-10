@@ -521,27 +521,6 @@ class SingleResource(restful.Resource):
         else:
             return data_dict
 
-_child_table_pattern = re.compile("^exists\((\w+)\?(.*?)\)\s*$")
-def combine_filters(elements):
-    """
-    For HTSQL filter elements like "exists(tablename?...)",
-    collapse multiple filters on a single table into
-    one filter with all conditions combined into an AND.
-    """
-    conditions = defaultdict(list)
-    results = []
-    for element in elements:
-        match = _child_table_pattern.search(element)
-        if match:
-            (tablename, condition) = match.groups()
-            conditions[tablename].append(condition)
-        else:
-            results.append(element)
-    for (tablename, table_conditions) in conditions.items():
-        condition = "&".join("(%s)" % c for c in table_conditions)
-        results.append("exists(%s?%s)" % (tablename, condition))
-    return results
-
 
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
@@ -556,7 +535,9 @@ class Searchable(restful.Resource):
         elements = []
         page_num = 1
         show_fields = copy.copy(self.default_fields)
-        year = None
+        if 'year' not in args:
+            args['year'] = default_year()
+        year = args['year']
 
         for arg in args:
             if args[arg]:
@@ -595,23 +576,20 @@ class Searchable(restful.Resource):
                                 if m[0] == field:
                                     show_fields[field_name] = show_fields[field_name] + m[1] + ','
                     fields = args[arg]
-                elif arg == 'year':
-                    year = args[arg]
                 else:
-                    element = self.field_name_map[arg].substitute(arg=args[arg])
-                    elements.append(element)
+                    if arg in self.field_name_map:
+                        element = self.field_name_map[arg].substitute(arg=args[arg])
+                        elements.append(element)
 
         qry = self.query_text(show_fields)
 
-        # this is being used for candidates and committees, does this make sense for committees?
-        for element in elements:
-            if year:
-                element = element.replace('dimcandoffice',
-                                          '(dimcandoffice?cand_election_yr=%s)' % year)
         if elements:
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
+            # these replacements will have no effect on committees, etc. - that's ok
+            qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
+            count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
 
@@ -851,23 +829,23 @@ class CandidateSearch(Searchable, Candidate):
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
                     "fec_id": string.Template("cand_id='$arg'"),
                     "office": string.Template(
-                        "exists(dimcandoffice?dimoffice.office_tp~'$arg')"
+                        "top(dimcandoffice.sort(expire_date-)).office_tp~'$arg'"
                     ),
                     "district":string.Template(
-                        "exists(dimcandoffice?dimoffice.office_district~'$arg')"
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"
                     ),
                     "state": string.Template(
-                        "exists(dimcandoffice?dimoffice.office_state~'$arg')"
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_state~'$arg'"
                     ),
                     "name": string.Template(
-                        "exists(dimcandproperties?cand_nm~'$arg')"
-                    ),
-                    "year": string.Template(
-                        "exists(dimcandoffice?cand_election_yr='$arg')"
+                        "top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"
                     ),
                     "party": string.Template(
-                        "exists(dimcandoffice?dimparty.party_affiliation~'$arg')"
-                    )
+                        "top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation~'$arg'"
+                    ),
+                    "year": string.Template(
+                        "exists(dimcandoffice)"
+                    ),
     }
 
 
@@ -1027,22 +1005,22 @@ class CommitteeSearch(Searchable, Committee):
                             "exists(dimlinkages?cand_id~'$arg')"
                         ),
                         "state": string.Template(
-                            "exists(dimcmteproperties?cmte_st~'$arg')"
+                            "top(dimcmteproperties.sort(expire_date-)).cmte_st~'$arg'"
                         ),
                         "name": string.Template(
-                            "exists(dimcmteproperties?cmte_nm~'$arg')"
+                            "top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'"
                         ),
                         "type": string.Template(
-                            "exists(dimcmtetpdsgn?cmte_tp~'$arg')"
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp~'$arg'"
                         ),
                         "designation": string.Template(
-                            "exists(dimcmtetpdsgn?cmte_dsgn~'$arg')"
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn~'$arg'"
                         ),
                         "organization_type": string.Template(
-                            "exists(dimcmteproperties?org_tp~'$arg')"
+                            "top(dimcmteproperties.sort(expire_date-)).org_tp~'$arg'"
                         ),
                         "party": string.Template(
-                            "exists(dimcmteproperties?party_cmte_type~'$arg')"
+                            "top(dimcmteproperties.sort(expire_date-)).party_cmte_type~'$arg'"
                         ),
     }
 

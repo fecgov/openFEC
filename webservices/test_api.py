@@ -31,15 +31,20 @@ class OverallTest(unittest.TestCase):
         results = self._results('/candidate?q=james&fields=*')
         for r in results:
             txt = json.dumps(r).lower()
-            print "\n\n", txt, "\n\n"
             self.assertIn('james', txt)
 
     def test_full_text_search_with_whitespace(self):
         results = self._results('/candidate?q=barack obama&fields=*')
         for r in results:
             txt = json.dumps(r).lower()
-            print "\n\n", txt, "\n\n"
             self.assertIn('obama', txt)
+
+    def test_year_filter(self):
+        results = self._results('/candidate?year=1988&fields=*')
+        for r in results:
+            for e in r['elections']:
+                if 'primary_committee' in e:
+                    self.assertEqual(e['primary_committee']['election_year'], 1988)
 
     def test_per_page_defaults_to_20(self):
         results = self._results('/candidate')
