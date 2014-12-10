@@ -194,5 +194,6 @@ class OverallTest(unittest.TestCase):
         print '\n%s\n' % response
         self.assertEquals(len(response[0]), 1)
 
-
-
+    def test_err_on_unsupported_arg(self):
+        response = self.app.get('/committee?bogusArg=1')
+        self.assertEquals(response.status_code, 400)

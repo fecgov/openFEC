@@ -116,7 +116,6 @@ def natural_number(n):
         raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
     return result
 
-
 def as_dicts(data):
     """
     Because HTSQL results render as though they were lists (field info lost)
@@ -521,7 +520,6 @@ class SingleResource(restful.Resource):
         else:
             return data_dict
 
-
 class Searchable(restful.Resource):
     fulltext_qry = """SELECT %s_sk
                       FROM   dim%s_fulltext
@@ -531,14 +529,13 @@ class Searchable(restful.Resource):
     def get(self):
         overall_start_time = time.time()
         speedlogger.info('--------------------------------------------------')
-        args = self.parser.parse_args()
+        args = self.parser.parse_args(strict=True)
         elements = []
         page_num = 1
         show_fields = copy.copy(self.default_fields)
         if 'year' not in args:
             args['year'] = default_year()
         year = args['year']
-
         for arg in args:
             if args[arg]:
                 if arg == 'q':
