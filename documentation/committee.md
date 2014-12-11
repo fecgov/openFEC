@@ -232,60 +232,137 @@ Sample response
     },
     "results": [
         {
+            "address": {
+                "city": "VANCOUVER",
+                "expire_date": null,
+                "state": "WA",
+                "state_full": "Washington",
+                "street_1": "P.O. BOX 665",
+                "zip": "98666"
+            },
             "archive": [
                 {
                     "address": [
                         {
                             "city": "VANCOUVER",
-                            "expire_date": "2014-09-18 00:00:00",
+                            "expire_date": "1978-12-31 00:00:00",
                             "state": "WA",
                             "state_full": "Washington",
                             "street_1": "P.O. BOX 2216",
                             "zip": "98661"
+                        },
+                        {
+                            "city": "VANCOUVER",
+                            "expire_date": "1980-12-31 00:00:00",
+                            "state": "WA",
+                            "state_full": "Washington",
+                            "street_1": "P O BOX 665",
+                            "zip": "98666"
+                        },
+                        {
+                            "city": "VANCOUVER",
+                            "expire_date": "1982-12-31 00:00:00",
+                            "state": "WA",
+                            "state_full": "Washington",
+                            "street_1": "P.O. BOX 725",
+                            "zip": "98666"
                         }
                     ],
                     "description": [
                         {
-                            "expire_date": "2014-09-18 00:00:00",
+                            "expire_date": "1978-12-31 00:00:00",
                             "filing_frequency": "Q",
                             "form_type": "F1",
-                            "load_date": "2014-09-18 13:28:50"
+                            "load_date": "1976-03-15 00:00:00",
+                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
+                        },
+                        {
+                            "expire_date": "1980-12-31 00:00:00",
+                            "filing_frequency": "Q",
+                            "form_type": "F1Z",
+                            "load_date": "1978-12-31 00:00:00",
+                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
+                        },
+                        {
+                            "expire_date": "1982-12-31 00:00:00",
+                            "filing_frequency": "T",
+                            "form_type": "F1Z",
+                            "load_date": "1980-12-31 00:00:00",
+                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
                         }
                     ],
+                    "load_date": "1980-12-31 00:00:00",
                     "treasurer": [
                         {
-                            "expire_date": "2014-09-18 00:00:00",
+                            "expire_date": "1978-12-31 00:00:00",
                             "name_full": "MR. JAMES W. CALLEY, TREAS."
+                        },
+                        {
+                            "expire_date": "1980-12-31 00:00:00",
+                            "name_full": "MR. JAMES W. CALLEY, TREAS."
+                        },
+                        {
+                            "expire_date": "1982-12-31 00:00:00",
+                            "name_full": "JAMES W. CALEY"
                         }
                     ]
                 }
             ],
-            "committee_id": "C00000851",
-            "expire_date": null,
-            "form_type": "F1",
-            "load_date": "2014-09-18 13:28:42",
-            "properties": {
-                "candidates": [
-                    {
-                        "candidate_id": "H6WA04034",
-                        "designation": "P",
-                        "designation_full": "Principal campaign committee",
-                        "election_year": 1976.0,
-                        "expire_date": null,
-                        "link_date": "2007-10-12 13:38:33",
-                        "type": "H",
-                        "type_full": "House"
-                    }
-                ],
-                "status": {
+            "candidates": [
+                {
+                    "candidate_id": "H6WA04034",
                     "designation": "P",
                     "designation_full": "Principal campaign committee",
+                    "election_year": 1976.0,
                     "expire_date": null,
-                    "load_date": "2014-09-18 13:28:46",
-                    "receipt_date": "1976-03-15 00:00:00",
+                    "link_date": "2007-10-12 13:38:33",
+                    "type": "H",
+                    "type_full": "House"
+                },
+                {
+                    "candidate_id": "H6WA04034",
+                    "designation": "P",
+                    "designation_full": "Principal campaign committee",
+                    "election_year": 1978.0,
+                    "expire_date": null,
+                    "link_date": "2007-10-12 13:38:33",
+                    "type": "H",
+                    "type_full": "House"
+                },
+                {
+                    "candidate_id": "H6WA04034",
+                    "designation": "P",
+                    "designation_full": "Principal campaign committee",
+                    "election_year": 1980.0,
+                    "expire_date": null,
+                    "link_date": "2007-10-12 13:38:33",
                     "type": "H",
                     "type_full": "House"
                 }
+            ],
+            "committee_id": "C00000851",
+            "description": {
+                "expire_date": null,
+                "filing_frequency": "T",
+                "form_type": "F1Z",
+                "load_date": "1982-12-31 00:00:00",
+                "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
+            },
+            "expire_date": null,
+            "form_type": "F1",
+            "load_date": "1982-12-31 00:00:00",
+            "status": {
+                "designation": "P",
+                "designation_full": "Principal campaign committee",
+                "expire_date": null,
+                "load_date": "2014-11-24 16:52:15",
+                "receipt_date": "1976-03-15 00:00:00",
+                "type": "H",
+                "type_full": "House"
+            },
+            "treasurer": {
+                "expire_date": null,
+                "name_full": "JAMES W. CALEY"
             }
         }
     ]
