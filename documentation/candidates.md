@@ -94,12 +94,13 @@ The office the candidate is seeking, either `President`, `Senate` or `House`.
 
 The candidate's political party. See full list of political party and party codes [here](party_codes).
 
-#### party_code
+#### party_full
+
+The written-out political party of the candidate. See full list of political party and party codes [here](party_codes).
+
+#### party
 
 The three-letter code for the political party of the candidate. See full list of political party and party codes [here](party_codes).
-
-#### party_code
-
 
 #### primary_committee
 
@@ -111,19 +112,19 @@ The primary committee for the candidate. See full list of political party and pa
 
 Unique id of the committee.
 
-##### designation
+##### designation_full
 
 Designation of the committee. See full list of designations and designation codes [here](designations). The committee's designation can affect what rules the committee must follow.
 
-##### designation_code
+##### designation
 
 Designation code of the committee. See full list of designations and designation codes [here](designations).
 
-##### type
+##### type_full
 
 The type of the committee. See full list of types and type codes [here](committee_type).The committee's type can affect what rules the committee must follow.
 
-##### type_code
+##### type
 
 The type of the committee code. See full list of types and type codes [here](committee_type).
 
@@ -137,25 +138,53 @@ Each of the affiliated committee has the following children:
 
 Unique id of the committee.
 
-##### designation
+##### designation_full
 
 Designation of the committee. See full list of designations and designation codes [here](designations). The committee's designation can affect what rules the committee must follow.
 
-##### designation_code
+##### designation
 
 Designation code of the committee. See full list of designations and designation codes [here](designations).
 
-##### type
+##### type_full
 
 The type of the committee. See full list of types and type codes [here](committee_type).The committee's type can affect what rules the committee must follow.
 
-##### type_code
+##### type
 
 The type of the committee code. See full list of types and type codes [here](committee_type).
 
 ### state
 
-The two-letter postal abbreviation for the state
+The two-letter postal abbreviation for the state the candidate is running for office.
+
+
+### mailing address
+Mailing address of the candidate's mailing.
+
+#### city
+
+City of candidate's mailing address.
+
+#### expire_date
+
+Expiration date of the address
+
+#### state
+
+Sate of the candidate's mailing address
+
+#### street_1
+
+First line of the street of the candidate's mailing address.
+
+#### street_2
+
+Second line of the street of the candidate's mailing address, if provided.
+
+#### zip
+
+Zipcode of the candidate's mailing address.
 
 ---
 
@@ -163,7 +192,7 @@ The two-letter postal abbreviation for the state
 
 Sample call
 ```
-http://localhost:5000/candidate?office=H&state=CA&name=JENSEN&fields=*
+/candidate?office=H&state=CA&name=JENSEN&fields=*
 ```
 
 Sample response
