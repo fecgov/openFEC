@@ -140,7 +140,7 @@ Candidates associated with a committee. Look at the designation for the kind of 
 
 #### election_years
 
-A list of election years that a
+A list of election years that a committee was associated with that candidate.
 
 #### candidate_id
 
