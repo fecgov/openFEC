@@ -19,7 +19,7 @@ Endpoint:
 | party = | Party of the committee if applicable |
 
 
-Information for committee is divided by `properties` and `archive` information that is current for the committee is listed in properties. Expired information is listed in archive and can be requested by addding `fields=*`.
+The endpoint automatically displays the most recent information for the committee. Additional expired information may be listed in `archive` and can be requested by adding `fields=*` to the request.
 ## Fields
 
 
@@ -215,12 +215,12 @@ Information about the custodian, which may include: name address and phone
 
 ## Sample output
 
-Sample call
+### Sample call
 ```
-/committee/C00000851?fields=*
+/committee/C00000422?fields=*
 ```
 
-Sample response
+### Sample response
 ```
 {
     "api_version": "0.2",
@@ -233,136 +233,98 @@ Sample response
     "results": [
         {
             "address": {
-                "city": "VANCOUVER",
-                "expire_date": null,
-                "state": "WA",
-                "state_full": "Washington",
-                "street_1": "P.O. BOX 665",
-                "zip": "98666"
+                "city": "WASHINGTON",
+                "expire_date": "2001-06-05 00:00:00",
+                "state": "DC",
+                "state_full": "District of Columbia",
+                "street_1": "1101 VERMONT AVENUE N W",
+                "zip": "20005"
             },
-            "archive": [
-                {
-                    "address": [
-                        {
-                            "city": "VANCOUVER",
-                            "expire_date": "1978-12-31 00:00:00",
-                            "state": "WA",
-                            "state_full": "Washington",
-                            "street_1": "P.O. BOX 2216",
-                            "zip": "98661"
-                        },
-                        {
-                            "city": "VANCOUVER",
-                            "expire_date": "1980-12-31 00:00:00",
-                            "state": "WA",
-                            "state_full": "Washington",
-                            "street_1": "P O BOX 665",
-                            "zip": "98666"
-                        },
-                        {
-                            "city": "VANCOUVER",
-                            "expire_date": "1982-12-31 00:00:00",
-                            "state": "WA",
-                            "state_full": "Washington",
-                            "street_1": "P.O. BOX 725",
-                            "zip": "98666"
-                        }
-                    ],
-                    "description": [
-                        {
-                            "expire_date": "1978-12-31 00:00:00",
-                            "filing_frequency": "Q",
-                            "form_type": "F1",
-                            "load_date": "1976-03-15 00:00:00",
-                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
-                        },
-                        {
-                            "expire_date": "1980-12-31 00:00:00",
-                            "filing_frequency": "Q",
-                            "form_type": "F1Z",
-                            "load_date": "1978-12-31 00:00:00",
-                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
-                        },
-                        {
-                            "expire_date": "1982-12-31 00:00:00",
-                            "filing_frequency": "T",
-                            "form_type": "F1Z",
-                            "load_date": "1980-12-31 00:00:00",
-                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
-                        }
-                    ],
-                    "load_date": "1980-12-31 00:00:00",
-                    "treasurer": [
-                        {
-                            "expire_date": "1978-12-31 00:00:00",
-                            "name_full": "MR. JAMES W. CALLEY, TREAS."
-                        },
-                        {
-                            "expire_date": "1980-12-31 00:00:00",
-                            "name_full": "MR. JAMES W. CALLEY, TREAS."
-                        },
-                        {
-                            "expire_date": "1982-12-31 00:00:00",
-                            "name_full": "JAMES W. CALEY"
-                        }
-                    ]
-                }
-            ],
-            "candidates": [
-                {
-                    "candidate_id": "H6WA04034",
-                    "designation": "P",
-                    "designation_full": "Principal campaign committee",
-                    "election_year": 1976.0,
-                    "expire_date": null,
-                    "link_date": "2007-10-12 13:38:33",
-                    "type": "H",
-                    "type_full": "House"
-                },
-                {
-                    "candidate_id": "H6WA04034",
-                    "designation": "P",
-                    "designation_full": "Principal campaign committee",
-                    "election_year": 1978.0,
-                    "expire_date": null,
-                    "link_date": "2007-10-12 13:38:33",
-                    "type": "H",
-                    "type_full": "House"
-                },
-                {
-                    "candidate_id": "H6WA04034",
-                    "designation": "P",
-                    "designation_full": "Principal campaign committee",
-                    "election_year": 1980.0,
-                    "expire_date": null,
-                    "link_date": "2007-10-12 13:38:33",
-                    "type": "H",
-                    "type_full": "House"
-                }
-            ],
-            "committee_id": "C00000851",
+            "archive": {
+                "address": [
+                    {
+                        "city": "WASHINGTON",
+                        "expire_date": "1999-01-19 00:00:00",
+                        "state": "DC",
+                        "state_full": "District of Columbia",
+                        "street_1": "1101 VERMONT AVENUE N W",
+                        "zip": "20005"
+                    },
+                    {
+                        "city": "WASHINGTON",
+                        "expire_date": "1987-12-18 00:00:00",
+                        "state": "DC",
+                        "state_full": "District of Columbia",
+                        "street_1": "1101 VERMONT AVENUE N W",
+                        "zip": "20005"
+                    }
+                ],
+                "description": [
+                    {
+                        "expire_date": "1999-01-19 00:00:00",
+                        "filing_frequency": "M",
+                        "form_type": "F1",
+                        "load_date": "1987-12-18 00:00:00",
+                        "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
+                        "organization_type": "V",
+                        "organization_type_full": "Cooperative",
+                        "party": "NAT",
+                        "party_full": "NATIONAL",
+                        "qualifying_date": "1975-01-01 00:00:00"
+                    },
+                    {
+                        "expire_date": "1987-12-18 00:00:00",
+                        "filing_frequency": "M",
+                        "form_type": "F1Z",
+                        "load_date": "1986-12-31 00:00:00",
+                        "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
+                        "organization_type": "T",
+                        "organization_type_full": "Trade Association",
+                        "party": "NAT",
+                        "party_full": "NATIONAL",
+                        "qualifying_date": "1975-01-01 00:00:00"
+                    }
+                ],
+                "treasurer": [
+                    {
+                        "expire_date": "1999-01-19 00:00:00",
+                        "name_full": "PETER B. LAUER"
+                    },
+                    {
+                        "expire_date": "1987-12-18 00:00:00",
+                        "name_full": "PETER B. LAUER"
+                    }
+                ]
+            },
+            "committee_id": "C00000422",
             "description": {
-                "expire_date": null,
-                "filing_frequency": "T",
-                "form_type": "F1Z",
-                "load_date": "1982-12-31 00:00:00",
-                "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
+                "expire_date": "2001-06-05 00:00:00",
+                "filing_frequency": "M",
+                "form_type": "F1",
+                "load_date": "1999-01-19 00:00:00",
+                "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
+                "organization_type": "T",
+                "organization_type_full": "Trade Association",
+                "party": "NAT",
+                "party_full": "NATIONAL",
+                "qualifying_date": "1975-01-01 00:00:00"
             },
             "expire_date": null,
             "form_type": "F1",
-            "load_date": "1982-12-31 00:00:00",
+            "load_date": "1975-07-03 00:00:00",
+            "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
             "status": {
-                "designation": "P",
-                "designation_full": "Principal campaign committee",
-                "expire_date": null,
+                "designation": "U",
+                "designation_full": "Unauthorized",
+                "expire_date": "2014-11-24 00:00:00",
                 "load_date": "2014-11-24 16:52:15",
-                "receipt_date": "1976-03-15 00:00:00",
-                "type": "H",
-                "type_full": "House"
+                "receipt_date": "1975-07-03 00:00:00",
+                "type": "Q",
+                "type_full": "PAC - Qualified"
             },
             "treasurer": {
-                "expire_date": null,
-                "name_full": "JAMES W. CALEY"
+                "expire_date": "2001-06-05 00:00:00",
+                "name_full": "KEVIN WALKER"
             }
         }
     ]

@@ -394,36 +394,6 @@ def format_committees(self, data, page, fields, year):
                         record['custodian'] = {}
                     record['custodian'][item['expire_date']] = custodian
 
-            # candidates associated with committees
-            candidate_dict = {}
-            for cand in cmte['dimlinkages']:
-                candidate ={}
-                for api_name, fec_name in self.linkages_field_mapping:
-                    if cand.has_key(fec_name) and fec_name != 'expire_date' and fec_name != 'cand_id':
-                        candidate[api_name] = cand[fec_name]
-                if candidate.has_key('election_years'):
-                    candidate['election_years']= [int(candidate['election_years'])]
-                if 'expire_date' in fields or '*' in fields or fields == []:
-                    candidate['expire_date'] = cand['expire_date']
-                if 'candidate_id' in fields or 'fec_id' in fields or '*' in fields or fields == []:
-                    candidate['candidate_id'] = cand['cand_id']
-                if candidate.has_key('type'):
-                    candidate['type_full'] = cmte_decoder[candidate['type']]
-                if candidate.has_key('designation'):
-                    candidate['designation_full'] = designation_decoder[candidate['designation']]
-                # add all expire dates and save to committee
-                if len(candidate) > 0:
-                    if not candidate_dict.has_key(cand['cand_id']):
-                        candidate_dict[cand['cand_id']] = candidate
-                    elif candidate.has_key('election_years'):
-                        candidate_dict[cand['cand_id']]['election_years'].append(candidate['election_years'][0])
-
-            # one entry per candidate
-            for cand_id in sorted(candidate_dict):
-                if not committee.has_key('candidates'):
-                    committee['candidates'] = []
-                committee['candidates'].append(candidate_dict[cand_id])
-
             #designation
             for designation in cmte['dimcmtetpdsgn']:
                 status = {}
@@ -448,6 +418,37 @@ def format_committees(self, data, page, fields, year):
                             record['status'] = {}
                         record['status'][designation['expire_date']] = status
 
+            # candidates associated with committees
+            candidate_dict = {}
+            for cand in cmte['dimlinkages']:
+                candidate ={}
+                for api_name, fec_name in self.linkages_field_mapping:
+                    if cand.has_key(fec_name) and fec_name != 'expire_date' and fec_name != 'cand_id':
+                        candidate[api_name] = cand[fec_name]
+                if candidate.has_key('election_years'):
+                    candidate['election_years']= [int(candidate['election_years'])]
+                if 'expire_date' in fields or '*' in fields or fields == []:
+                    candidate['expire_date'] = cand['expire_date']
+                if 'candidate_id' in fields or 'fec_id' in fields or '*' in fields or fields == []:
+                    candidate['candidate_id'] = cand['cand_id']
+                if candidate.has_key('type'):
+                    candidate['type_full'] = cmte_decoder[candidate['type']]
+                if candidate.has_key('designation'):
+                    candidate['designation_full'] = designation_decoder[candidate['designation']]
+                # add all expire dates and save to committee
+                if len(candidate) > 0:
+                    if not candidate_dict.has_key(cand['cand_id']):
+                        candidate_dict[cand['cand_id']] = candidate
+                    elif candidate.has_key('election_years'):
+                        candidate_dict[cand['cand_id']]['election_years'].append(candidate['election_years'][0])
+
+        # one entry per candidate
+        for cand_id in sorted(candidate_dict):
+            print cand_id
+            if not committee.has_key('candidates'):
+                committee['candidates'] = []
+            committee['candidates'].append(candidate_dict[cand_id])
+            print candidate_dict[cand_id]
 
         # if there are no current records, add the most recent record to the top level committee information
         for record_type in record:
