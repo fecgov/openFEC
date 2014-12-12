@@ -440,8 +440,6 @@ def format_committees(self, data, page, fields, year):
                     status['type_full'] = cmte_decoder[designation['cmte_tp']]
 
                 if len(status) > 0:
-                    print designation, "HELLO"
-                    print designation['expire_date']
                     if designation['expire_date'] == None:
                         committee['status'] = status
                     else:

@@ -162,7 +162,7 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee/C00000851')
         result = response['results'][0]
 
-        fields = ('committee_id','expire_date','form_type','load_date')
+        fields = ('committee_id','expire_date','form_type','load_date','name','description','status', 'address')
         for field in fields:
             print field
             self.assertEquals(result.has_key(field), True)
@@ -189,8 +189,9 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response['results'][0]['treasurer'].has_key('name_full'), True)
         self.assertEquals(response['results'][0]['treasurer'].has_key('expire_date'), True)
 
-    # def test2committees(self):
-    #     http://localhost:5000/committee/C00480665?fields=*
+    def test2committees(self):
+        response = self._results('/committee/C00480665?fields=*')
+        self.assertEquals(len(response[0]['candidates']), 2)
 
     def test_committee_field_filtering(self):
         response = self._results('/committee/C00000851?fields=committee_id')
