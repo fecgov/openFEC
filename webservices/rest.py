@@ -424,6 +424,7 @@ def format_committees(self, data, page, fields, year):
                     committee['candidates'] = []
                 committee['candidates'].append(candidate_dict[cand_id])
 
+            #designation
             for designation in cmte['dimcmtetpdsgn']:
                 status = {}
                 for api_name, fec_name in self.designation_mapping:
