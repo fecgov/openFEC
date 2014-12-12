@@ -332,11 +332,19 @@ def format_committees(self, data, page, fields, year):
                 if item.has_key(fec_name) and item[fec_name] is not None:
                     address[api_name] = item[fec_name]
 
+            if 'expire_date' in fields or '*' in fields or fields == []:
+                address['expire_date'] = item['expire_date']
+                ##### add here
+
             if address.has_key('state_full'):
                 address['state_full'] = item['cmte_st_desc'].strip()
 
-            if len(address) > 0:
-                addresses[item['expire_date']] = address
+            if item['expire_date'] == None:
+                committee['address'] = address
+            elif len(address) > 0:
+                if not record.has_key('address'):
+                    record['address'] = {}
+                record['address'][item['expire_date']] = address
 
             # properties table called description in api
             description = {}
@@ -351,8 +359,8 @@ def format_committees(self, data, page, fields, year):
                     committee['description'] = description
                 else:
                     if not record.has_key('description'):
-                        record['description'] = []
-                    record['description'].append(description)
+                         record['description'] = {}
+                    record['description'][item['expire_date']] = description
 
             # treasurer
             treasurer = {}
@@ -367,8 +375,8 @@ def format_committees(self, data, page, fields, year):
                     committee['treasurer'] = treasurer
                 else:
                     if not record.has_key('treasurer'):
-                        record['treasurer'] = []
-                    record['treasurer'].append(treasurer)
+                        record['treasurer'] = {}
+                    record['treasurer'][item['expire_date']] = treasurer
 
             # custodian
             custodian = {}
@@ -383,8 +391,8 @@ def format_committees(self, data, page, fields, year):
                     committee['custodian'] = custodian
                 else:
                     if not record.has_key('custodian'):
-                        record['custodian'] = []
-                    record['custodian'].append(custodian)
+                        record['custodian'] = {}
+                    record['custodian'][item['expire_date']] = custodian
 
             # candidates associated with committees
             candidate_dict = {}
@@ -414,8 +422,6 @@ def format_committees(self, data, page, fields, year):
                     committee['candidates'] = []
                 committee['candidates'].append(candidate_dict[cand_id])
 
-            designations = []
-            archive_designations = []
             for designation in cmte['dimcmtetpdsgn']:
                 status = {}
                 for api_name, fec_name in self.designation_mapping:
@@ -428,49 +434,29 @@ def format_committees(self, data, page, fields, year):
                         status['type_full'] = cmte_decoder[designation['cmte_tp']]
 
                 if designation.has_key('expire_date') and designation['expire_date'] == None:
-                    designations.append(status)
+                    committee['status'] = status
                 else:
-                    archive_designations.append(status)
-
-            # Setting up some messaging to see if there is a problem I will get rid of this if it looks OK
-            if len(designations) > 1:
-                committee['status'] = designations[0]
-                print "THIS SHOULD'NT HAPPEN- THERE SHOULD BE ONE UNEXPIRED DOC"
-
-            if len(designations) > 0:
-                committee['status'] = designations[0]
-
-            if len(archive_designations) > 0:
-                record['status'] = designations
-
-        if len(addresses) > 0:
-            if addresses.has_key(None):
-                if 'expire_date' in fields or '*' in fields:
-                        address['expire_date'] = None
-                committee['address'] = addresses[None]
-                del addresses[None]
-            else:
-                if 'expire_date' in fields or '*' in fields:
-                        address['expire_date'] = None
-                most_recent =  sorted(addresses, key=addresses.get)[0]
-                committee['address'] = addresses[most_recent]
-                del addresses[sorted(addresses, key=addresses.get)[0]]
-#### need to check uniqueness
-            # if len(addresses) > 0:
-            #     for a in addresses:
-            #         # evaluate uniqueness
-            #         if not committee.has_key('archive'):
-            #             committee['archive'] = []
-            #             if not committee['archive'].has_key('address'):
-            #                 committee['archive']['address'] = []
-            #         else:
-                        # committee['archive']['address'].append(addresses[a])
+                    if not record.has_key('status'):
+                        record['status'] = {}
+                    record['status'][designation['expire_date']] = status
 
 
-        if ('archive' in fields or '*' in fields) and len(record) > 0:
-            if not committee.has_key('archive'):
-                committee['archive'] = []
-            committee['archive'].append(record)
+        # if there are no current records, add the most recent record to the top level committee information
+        for record_type in record:
+            if not committee.has_key(record_type):
+                key = sorted(record[record_type], key=record[record_type].get, reverse=True)[0]
+                committee[record_type] = record[record_type][key]
+                # removing from archive so it is not double posted
+                del record[record_type][key]
+                # adding additional records to archive newest to oldest
+
+                if len(record[record_type]) > 0:
+                    if not committee.has_key('archive'):
+                        committee['archive'] = {}
+                    for key in sorted(record[record_type], key=record[record_type].get, reverse=True):
+                        if not committee['archive'].has_key(record_type):
+                            committee['archive'][record_type] = []
+                        committee['archive'][record_type].append(record[record_type][key])
 
         results.append(committee)
 
