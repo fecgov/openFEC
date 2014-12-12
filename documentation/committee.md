@@ -138,9 +138,9 @@ Date a committee became qualified by meeting the requirements and filling our th
 ### Candidates
 Candidates associated with a committee. Look at the designation for the kind of relationship.
 
-#### election_year
+#### election_years
 
-Year of the election. Elections are in two-year election cycles.
+A list of election years that a
 
 #### candidate_id
 
@@ -217,7 +217,7 @@ Information about the custodian, which may include: name address and phone
 
 ### Sample call
 ```
-/committee/C00000422?fields=*
+/committee?fields=*&q=obama&designation=P&type=P
 ```
 
 ### Sample response
@@ -233,98 +233,75 @@ Information about the custodian, which may include: name address and phone
     "results": [
         {
             "address": {
-                "city": "WASHINGTON",
-                "expire_date": "2001-06-05 00:00:00",
-                "state": "DC",
-                "state_full": "District of Columbia",
-                "street_1": "1101 VERMONT AVENUE N W",
-                "zip": "20005"
+                "city": "CHICAGO",
+                "expire_date": null,
+                "state": "IL",
+                "state_full": "Illinois",
+                "street_1": "PO BOX 8102",
+                "zip": "60680"
             },
-            "archive": {
-                "address": [
-                    {
-                        "city": "WASHINGTON",
-                        "expire_date": "1999-01-19 00:00:00",
-                        "state": "DC",
-                        "state_full": "District of Columbia",
-                        "street_1": "1101 VERMONT AVENUE N W",
-                        "zip": "20005"
-                    },
-                    {
-                        "city": "WASHINGTON",
-                        "expire_date": "1987-12-18 00:00:00",
-                        "state": "DC",
-                        "state_full": "District of Columbia",
-                        "street_1": "1101 VERMONT AVENUE N W",
-                        "zip": "20005"
-                    }
-                ],
-                "description": [
-                    {
-                        "expire_date": "1999-01-19 00:00:00",
-                        "filing_frequency": "M",
-                        "form_type": "F1",
-                        "load_date": "1987-12-18 00:00:00",
-                        "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
-                        "organization_type": "V",
-                        "organization_type_full": "Cooperative",
-                        "party": "NAT",
-                        "party_full": "NATIONAL",
-                        "qualifying_date": "1975-01-01 00:00:00"
-                    },
-                    {
-                        "expire_date": "1987-12-18 00:00:00",
-                        "filing_frequency": "M",
-                        "form_type": "F1Z",
-                        "load_date": "1986-12-31 00:00:00",
-                        "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
-                        "organization_type": "T",
-                        "organization_type_full": "Trade Association",
-                        "party": "NAT",
-                        "party_full": "NATIONAL",
-                        "qualifying_date": "1975-01-01 00:00:00"
-                    }
-                ],
-                "treasurer": [
-                    {
-                        "expire_date": "1999-01-19 00:00:00",
-                        "name_full": "PETER B. LAUER"
-                    },
-                    {
-                        "expire_date": "1987-12-18 00:00:00",
-                        "name_full": "PETER B. LAUER"
-                    }
-                ]
+            "candidates": [
+                {
+                    "candidate_id": "P80003338",
+                    "designation": "P",
+                    "designation_full": "Principal campaign committee",
+                    "election_years": [
+                        2008,
+                        2012
+                    ],
+                    "expire_date": null,
+                    "link_date": "2009-01-01 21:49:00",
+                    "type": "P",
+                    "type_full": "Presidential"
+                }
+            ],
+            "committee_id": "C00431445",
+            "custodian": {
+                "city": "CHICAGO",
+                "expire_date": null,
+                "name_1": "TARYN",
+                "name_2": "VOGEL",
+                "name_full": "VOGEL, TARYN",
+                "name_title": "CUSTODIAN OF RECORDS",
+                "phone": "3129851700",
+                "state": "IL",
+                "street_1": "PO BOX 8102",
+                "zip": "60680"
             },
-            "committee_id": "C00000422",
             "description": {
-                "expire_date": "2001-06-05 00:00:00",
-                "filing_frequency": "M",
+                "email": "OFAFEC@OBAMABIDEN.COM",
+                "expire_date": null,
+                "filing_frequency": "Q",
                 "form_type": "F1",
-                "load_date": "1999-01-19 00:00:00",
-                "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
-                "organization_type": "T",
-                "organization_type_full": "Trade Association",
-                "party": "NAT",
-                "party_full": "NATIONAL",
-                "qualifying_date": "1975-01-01 00:00:00"
+                "load_date": "2013-08-27 00:00:00",
+                "name": "OBAMA FOR AMERICA",
+                "website": "HTTP://WWW.OBAMABIDEN.COM"
             },
             "expire_date": null,
             "form_type": "F1",
-            "load_date": "1975-07-03 00:00:00",
-            "name": "AMERICAN MEDICAL ASSOCIATION POLITICAL ACTION COMMITTEE",
+            "load_date": "2013-08-27 00:00:00",
+            "name": "OBAMA FOR AMERICA",
             "status": {
-                "designation": "U",
-                "designation_full": "Unauthorized",
-                "expire_date": "2014-11-24 00:00:00",
+                "designation": "P",
+                "designation_full": "Principal campaign committee",
+                "expire_date": null,
                 "load_date": "2014-11-24 16:52:15",
-                "receipt_date": "1975-07-03 00:00:00",
-                "type": "Q",
-                "type_full": "PAC - Qualified"
+                "receipt_date": "2007-01-16 00:00:00",
+                "type": "P",
+                "type_full": "Presidential"
             },
             "treasurer": {
-                "expire_date": "2001-06-05 00:00:00",
-                "name_full": "KEVIN WALKER"
+                "city": "CHICAGO",
+                "expire_date": null,
+                "name_1": "MARTIN",
+                "name_2": "NESBITT",
+                "name_full": "NESBITT, MARTIN H",
+                "name_middle": "H",
+                "name_title": "TREASURER",
+                "phone": "3129851700",
+                "state": "IL",
+                "street_1": "PO BOX 8102",
+                "zip": "60680"
             }
         }
     ]

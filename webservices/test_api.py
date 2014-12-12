@@ -190,7 +190,7 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response['results'][0]['treasurer'].has_key('expire_date'), True)
 
     def test2committees(self):
-        response = self._results('/committee/C00480665?fields=*')
+        response = self._results('/committee/C00484188')
         self.assertEquals(len(response[0]['candidates']), 2)
 
     def test_committee_field_filtering(self):
