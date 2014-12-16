@@ -102,13 +102,16 @@ designation_decoder = {'A': 'Authorized by a candidate',
                 'D': 'Leadership PAC',
 }
 
-
-
-# DEFAULTING TO 2012 FOR THE DEMO
+# defaulting to the last 4 years so there is always the last presidential, we could make this 6 to ensure coverage of sitting senators.
 def default_year():
-    # year = str(datetime.now().strftime("%Y"))
-    year = '2012'
-    return year
+    year = int(datetime.now().strftime("%Y"))
+    default = ''
+    for years in range(4):
+        default = default + str(year) + ","
+        year -= 1
+    return default
+
+
 
 def natural_number(n):
     result = int(n)
@@ -221,7 +224,7 @@ def format_candids(self, data, page_data, fields, default_year):
 
         # status information
         for status in cand['dimcandstatusici']:
-            if status.has_key('election_yr') and not elections.has_key(year):
+            if not elections.has_key(year):
                 year = str(status['election_yr'])
                 elections[year] = {}
 
@@ -277,7 +280,9 @@ def format_candids(self, data, page_data, fields, default_year):
             cand_data['name']['other_names'] = other_names
 
         # Order eleciton data so the most recent is first and just show years requested
+
         years = []
+        print default_year
         default_years = default_year.split(',')
         for year in elections:
             if year in default_years or default_year == '*':
@@ -468,6 +473,7 @@ class SingleResource(restful.Resource):
         show_fields = copy.copy(self.default_fields)
         overall_start_time = time.time()
         args = self.parser.parse_args()
+        print "argueing", args
         fields = find_fields(self, args)
 
         if args.has_key('fields') and args['fields'] is not None:
@@ -488,7 +494,7 @@ class SingleResource(restful.Resource):
 
         # not working
         if args.has_key('year'):
-            year = int(args['year'])
+            year = args['year']
         else:
             year = default_year()
 
@@ -529,7 +535,7 @@ class Searchable(restful.Resource):
         page_num = 1
         show_fields = copy.copy(self.default_fields)
         if 'year' not in args:
-            args['year'] = default_year()
+            args['year'] = '*'
         year = args['year']
         for arg in args:
             if args[arg]:
@@ -747,7 +753,16 @@ class Candidate(object):
 class CandidateResource(SingleResource, Candidate):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument('fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
+    parser.add_argument(
+        'year',
+        type=str,
+        default= default_year(),
+        help="Year in which a candidate runs for office"
+    )
 
 
 class CandidateSearch(Searchable, Candidate):
@@ -803,7 +818,7 @@ class CandidateSearch(Searchable, Candidate):
     parser.add_argument(
         'year',
         type=str,
-        default=2012,
+        default= default_year(),
         help="Year in which a candidate runs for office"
     )
     parser.add_argument(
