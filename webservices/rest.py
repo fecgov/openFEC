@@ -212,7 +212,7 @@ def format_candids(self, data, page_data, fields, default_year):
             year = str(office['cand_election_yr'])
             if len(office) > 0 and not elections.has_key(year):
                 elections[year] = {}
-            print "===============", fields
+
             if fields == [] or 'election_year' in fields or '*' in fields:
                 elections[year]['election_year'] = int(year)
 
@@ -226,24 +226,26 @@ def format_candids(self, data, page_data, fields, default_year):
                     elections[year][api_name] = office['dimparty'][fec_name]
 
         # status information
+        print "====>", cand['dimcandstatusici']
         for status in cand['dimcandstatusici']:
-            year = str(status['election_yr'])
-            if not elections.has_key(year):
+            if status != {}:
                 year = str(status['election_yr'])
-                elections[year] = {}
+                if not elections.has_key(year):
+                    year = str(status['election_yr'])
+                    elections[year] = {}
 
-            for api_name, fec_name in self.status_mapping:
-                if status.has_key(fec_name):
-                    elections[year][api_name] = status[fec_name]
+                for api_name, fec_name in self.status_mapping:
+                    if status.has_key(fec_name):
+                        elections[year][api_name] = status[fec_name]
 
-            status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
+                status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
 
-            if status.has_key('cand_status') and status['cand_status'] is not None:
-                elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
+                if status.has_key('cand_status') and status['cand_status'] is not None:
+                    elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
 
-            ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-            if status.has_key('ici_code') and status['ici_code'] is not None:
-                elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
+                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+                if status.has_key('ici_code') and status['ici_code'] is not None:
+                    elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
 
         # Using most recent name as full name
         if cand['dimcandproperties'][0].has_key('cand_nm'):

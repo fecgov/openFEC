@@ -121,6 +121,21 @@ class OverallTest(unittest.TestCase):
             self.assertEquals(election['primary_committee'].has_key(field), True)
             self.assertEquals(election['affiliated_committees'][0].has_key(field), True)
 
+    def test_years_all(self):
+        # testing search
+        response = self._results('/candidate?candidate_id=P80003338&year=*')
+        elections = response[0]['elections']
+        self.assertEquals(len(elections), 2)
+        # testing single resource
+        response = self._results('/candidate/P80003338?year=*')
+        elections = response[0]['elections']
+        self.assertEquals(len(elections), 2)
+
+
+    def test_multi_year(self):
+        # need to write this one
+        pass
+
 #Committee
 
     def test_committee_cand_fields(self):
@@ -197,6 +212,3 @@ class OverallTest(unittest.TestCase):
     def test_err_on_unsupported_arg(self):
         response = self.app.get('/committee?bogusArg=1')
         self.assertEquals(response.status_code, 400)
-
-
-# add year star test
