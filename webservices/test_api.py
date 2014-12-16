@@ -197,3 +197,6 @@ class OverallTest(unittest.TestCase):
     def test_err_on_unsupported_arg(self):
         response = self.app.get('/committee?bogusArg=1')
         self.assertEquals(response.status_code, 400)
+
+
+# add year star test

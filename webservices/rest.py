@@ -278,8 +278,9 @@ def format_candids(self, data, page_data, fields, default_year):
 
         # Order eleciton data so the most recent is first and just show years requested
         years = []
+        default_years = default_year.split(',')
         for year in elections:
-            if default_year is not None and str(default_year) == year:
+            if year in default_years or default_year == '*':
                     years.append(year)
 
         years.sort(reverse=True)
@@ -578,9 +579,9 @@ class Searchable(restful.Resource):
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
-            # these replacements will have no effect on committees, etc. - that's ok
-            qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
-            count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
+            if year != '*':
+                qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
+                count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
 
