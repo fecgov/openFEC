@@ -190,12 +190,12 @@ Zipcode of the candidate's mailing address.
 
 ## Sample output
 
-Sample call
+### Sample call
 ```
 /candidate?office=H&state=CA&name=JENSEN&fields=*
 ```
 
-Sample response
+### Sample response
 ```
 {
     "api_version": "0.2",
