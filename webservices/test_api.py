@@ -133,8 +133,14 @@ class OverallTest(unittest.TestCase):
 
 
     def test_multi_year(self):
-        # need to write this one
-        pass
+        # testing search
+        response = self._results('/candidate?candidate_id=P80003338&year=2012,2008')
+        elections = response[0]['elections']
+        self.assertEquals(len(elections), 2)
+        # testing single resource
+        response = self._results('/candidate/P80003338?year=2012,2008')
+        elections = response[0]['elections']
+        self.assertEquals(len(elections), 2)
 
 #Committee
 
