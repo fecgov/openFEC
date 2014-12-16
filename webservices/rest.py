@@ -579,8 +579,8 @@ class Searchable(restful.Resource):
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
             # these replacements will have no effect on committees, etc. - that's ok
-            qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
-            count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
+            qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
+            count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
 
@@ -801,7 +801,7 @@ class CandidateSearch(Searchable, Candidate):
     )
     parser.add_argument(
         'year',
-        type=int,
+        type=str,
         default=2012,
         help="Year in which a candidate runs for office"
     )
