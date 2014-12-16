@@ -212,6 +212,9 @@ def format_candids(self, data, page_data, fields, default_year):
             year = str(office['cand_election_yr'])
             if len(office) > 0 and not elections.has_key(year):
                 elections[year] = {}
+            print "===============", fields
+            if fields == [] or 'election_year' in fields or '*' in fields:
+                elections[year]['election_year'] = int(year)
 
             # Office information
             for api_name, fec_name in self.office_mapping:
@@ -224,6 +227,7 @@ def format_candids(self, data, page_data, fields, default_year):
 
         # status information
         for status in cand['dimcandstatusici']:
+            year = str(status['election_yr'])
             if not elections.has_key(year):
                 year = str(status['election_yr'])
                 elections[year] = {}
