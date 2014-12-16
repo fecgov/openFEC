@@ -450,6 +450,7 @@ def format_committees(self, data, page, fields, year):
             committee['candidates'].append(candidate_dict[cand_id])
             print candidate_dict[cand_id]
 
+
         # if there are no current records, add the most recent record to the top level committee information
         for record_type in record:
             if not committee.has_key(record_type):
