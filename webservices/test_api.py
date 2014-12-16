@@ -69,13 +69,6 @@ class OverallTest(unittest.TestCase):
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
 
-    # def test_year_default(self):
-    #     # finds obama only if 2012 is specified
-    #     results = self._results('candidate?cand_id=P80003338')
-    #     self.assertEquals(results, [])
-    #     results = self._results('candidate?cand_id=P80003338&year=2012')
-    #     self.assertNotEqual(results, [])
-
 # Candidates
     def test_fields(self):
         # testing key defaults
@@ -140,6 +133,16 @@ class OverallTest(unittest.TestCase):
         # testing single resource
         response = self._results('/candidate/P80003338?year=2012,2008')
         elections = response[0]['elections']
+        self.assertEquals(len(elections), 2)
+
+    def test_year_default(self):
+        # we are currently defaulting to last 4 years
+        # also the test data is weird but it should still work for this purpose
+        results = self._results('/candidate/H0VA08040')
+        self.assertNotIn('elections', results)
+
+        results = self._results('/candidate?candidate_id=H0VA08040&year=1996,1998')
+        elections = results[0]['elections']
         self.assertEquals(len(elections), 2)
 
 #Committee

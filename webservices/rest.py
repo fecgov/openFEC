@@ -226,7 +226,6 @@ def format_candids(self, data, page_data, fields, default_year):
                     elections[year][api_name] = office['dimparty'][fec_name]
 
         # status information
-        print "====>", cand['dimcandstatusici']
         for status in cand['dimcandstatusici']:
             if status != {}:
                 year = str(status['election_yr'])
@@ -288,7 +287,6 @@ def format_candids(self, data, page_data, fields, default_year):
         # Order eleciton data so the most recent is first and just show years requested
 
         years = []
-        print default_year
         default_years = default_year.split(',')
         for year in elections:
             if year in default_years or default_year == '*':
@@ -479,7 +477,6 @@ class SingleResource(restful.Resource):
         show_fields = copy.copy(self.default_fields)
         overall_start_time = time.time()
         args = self.parser.parse_args()
-        print "argueing", args
         fields = find_fields(self, args)
 
         if args.has_key('fields') and args['fields'] is not None:
@@ -498,7 +495,6 @@ class SingleResource(restful.Resource):
                             show_fields[field_name] = show_fields[field_name] + m[1] + ','
         else: fields = []
 
-        # not working
         if args.has_key('year'):
             year = args['year']
         else:
@@ -540,9 +536,11 @@ class Searchable(restful.Resource):
         elements = []
         page_num = 1
         show_fields = copy.copy(self.default_fields)
+
         if 'year' not in args:
-            args['year'] = '*'
+            args['year'] = default_year()
         year = args['year']
+
         for arg in args:
             if args[arg]:
                 if arg == 'q':
