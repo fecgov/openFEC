@@ -1,0 +1,7 @@
+ipython
+tornado
+pyzmq
+jinja2
+ipython_sql
+psycopg2
+requests
