@@ -102,13 +102,11 @@ designation_decoder = {'A': 'Authorized by a candidate',
                 'D': 'Leadership PAC',
 }
 
-
-
-# DEFAULTING TO 2012 FOR THE DEMO
+# defaulting to the last 4 years so there is always the last presidential, we could make this 6 to ensure coverage of sitting senators.
 def default_year():
-    # year = str(datetime.now().strftime("%Y"))
-    year = '2012'
-    return year
+    year = datetime.now().year
+    years = [str(y) for y in range(year, year-4, -1)]
+    return ','.join(years)
 
 def natural_number(n):
     result = int(n)
@@ -210,6 +208,9 @@ def format_candids(self, data, page_data, fields, default_year):
             if len(office) > 0 and not elections.has_key(year):
                 elections[year] = {}
 
+            if fields == [] or 'election_year' in fields or '*' in fields:
+                elections[year]['election_year'] = int(year)
+
             # Office information
             for api_name, fec_name in self.office_mapping:
                 if office['dimoffice'].has_key(fec_name):
@@ -221,22 +222,24 @@ def format_candids(self, data, page_data, fields, default_year):
 
         # status information
         for status in cand['dimcandstatusici']:
-            if status.has_key('election_yr') and not elections.has_key(year):
+            if status != {}:
                 year = str(status['election_yr'])
-                elections[year] = {}
+                if not elections.has_key(year):
+                    year = str(status['election_yr'])
+                    elections[year] = {}
 
-            for api_name, fec_name in self.status_mapping:
-                if status.has_key(fec_name):
-                    elections[year][api_name] = status[fec_name]
+                for api_name, fec_name in self.status_mapping:
+                    if status.has_key(fec_name):
+                        elections[year][api_name] = status[fec_name]
 
-            status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
+                status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
 
-            if status.has_key('cand_status') and status['cand_status'] is not None:
-                elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
+                if status.has_key('cand_status') and status['cand_status'] is not None:
+                    elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
 
-            ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-            if status.has_key('ici_code') and status['ici_code'] is not None:
-                elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
+                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
+                if status.has_key('ici_code') and status['ici_code'] is not None:
+                    elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
 
         # Using most recent name as full name
         if cand['dimcandproperties'][0].has_key('cand_nm'):
@@ -277,9 +280,11 @@ def format_candids(self, data, page_data, fields, default_year):
             cand_data['name']['other_names'] = other_names
 
         # Order eleciton data so the most recent is first and just show years requested
+
         years = []
+        default_years = default_year.split(',')
         for year in elections:
-            if default_year is not None and str(default_year) == year:
+            if year in default_years or default_year == '*':
                     years.append(year)
 
         years.sort(reverse=True)
@@ -500,9 +505,8 @@ class SingleResource(restful.Resource):
                             show_fields[field_name] = show_fields[field_name] + m[1] + ','
         else: fields = []
 
-        # not working
         if args.has_key('year'):
-            year = int(args['year'])
+            year = args['year']
         else:
             year = default_year()
 
@@ -542,9 +546,11 @@ class Searchable(restful.Resource):
         elements = []
         page_num = 1
         show_fields = copy.copy(self.default_fields)
+
         if 'year' not in args:
             args['year'] = default_year()
         year = args['year']
+
         for arg in args:
             if args[arg]:
                 if arg == 'q':
@@ -593,9 +599,9 @@ class Searchable(restful.Resource):
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
-            # these replacements will have no effect on committees, etc. - that's ok
-            qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
-            count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr=%s)' % year)
+            if year != '*':
+                qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
+                count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
 
@@ -761,7 +767,16 @@ class Candidate(object):
 class CandidateResource(SingleResource, Candidate):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument('fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
+    parser.add_argument(
+        'year',
+        type=str,
+        default= default_year(),
+        help="Year in which a candidate runs for office"
+    )
 
 
 class CandidateSearch(Searchable, Candidate):
@@ -816,8 +831,8 @@ class CandidateSearch(Searchable, Candidate):
     )
     parser.add_argument(
         'year',
-        type=int,
-        default=2012,
+        type=str,
+        default= default_year(),
         help="Year in which a candidate runs for office"
     )
     parser.add_argument(
