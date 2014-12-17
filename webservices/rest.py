@@ -104,6 +104,7 @@ designation_decoder = {'A': 'Authorized by a candidate',
 
 # defaulting to the last 4 years so there is always the last presidential, we could make this 6 to ensure coverage of sitting senators.
 def default_year():
+    year = datetime.now().year
     years = [str(y) for y in range(year, year-4, -1)]
     return ','.join(years)
 
