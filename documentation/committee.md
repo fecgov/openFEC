@@ -19,7 +19,7 @@ Endpoint:
 | party = | Party of the committee if applicable |
 
 
-Information for committee is divided by `properties` and `archive` information that is current for the committee is listed in properties. Expired information is listed in archive and can be requested by addding `fields=*`.
+The endpoint automatically displays the most recent information for the committee. Additional expired information may be listed in `archive` and can be requested by adding `fields=*` to the request.
 ## Fields
 
 
@@ -138,9 +138,9 @@ Date a committee became qualified by meeting the requirements and filling our th
 ### Candidates
 Candidates associated with a committee. Look at the designation for the kind of relationship.
 
-#### election_year
+#### election_years
 
-Year of the election. Elections are in two-year election cycles.
+A list of election years that a committee was associated with that candidate.
 
 #### candidate_id
 
@@ -215,12 +215,12 @@ Information about the custodian, which may include: name address and phone
 
 ## Sample output
 
-Sample call
+### Sample call
 ```
-/committee/C00000851?fields=*
+/committee?fields=*&q=obama&designation=P&type=P
 ```
 
-Sample response
+### Sample response
 ```
 {
     "api_version": "0.2",
@@ -233,136 +233,75 @@ Sample response
     "results": [
         {
             "address": {
-                "city": "VANCOUVER",
+                "city": "CHICAGO",
                 "expire_date": null,
-                "state": "WA",
-                "state_full": "Washington",
-                "street_1": "P.O. BOX 665",
-                "zip": "98666"
+                "state": "IL",
+                "state_full": "Illinois",
+                "street_1": "PO BOX 8102",
+                "zip": "60680"
             },
-            "archive": [
-                {
-                    "address": [
-                        {
-                            "city": "VANCOUVER",
-                            "expire_date": "1978-12-31 00:00:00",
-                            "state": "WA",
-                            "state_full": "Washington",
-                            "street_1": "P.O. BOX 2216",
-                            "zip": "98661"
-                        },
-                        {
-                            "city": "VANCOUVER",
-                            "expire_date": "1980-12-31 00:00:00",
-                            "state": "WA",
-                            "state_full": "Washington",
-                            "street_1": "P O BOX 665",
-                            "zip": "98666"
-                        },
-                        {
-                            "city": "VANCOUVER",
-                            "expire_date": "1982-12-31 00:00:00",
-                            "state": "WA",
-                            "state_full": "Washington",
-                            "street_1": "P.O. BOX 725",
-                            "zip": "98666"
-                        }
-                    ],
-                    "description": [
-                        {
-                            "expire_date": "1978-12-31 00:00:00",
-                            "filing_frequency": "Q",
-                            "form_type": "F1",
-                            "load_date": "1976-03-15 00:00:00",
-                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
-                        },
-                        {
-                            "expire_date": "1980-12-31 00:00:00",
-                            "filing_frequency": "Q",
-                            "form_type": "F1Z",
-                            "load_date": "1978-12-31 00:00:00",
-                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
-                        },
-                        {
-                            "expire_date": "1982-12-31 00:00:00",
-                            "filing_frequency": "T",
-                            "form_type": "F1Z",
-                            "load_date": "1980-12-31 00:00:00",
-                            "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
-                        }
-                    ],
-                    "load_date": "1980-12-31 00:00:00",
-                    "treasurer": [
-                        {
-                            "expire_date": "1978-12-31 00:00:00",
-                            "name_full": "MR. JAMES W. CALLEY, TREAS."
-                        },
-                        {
-                            "expire_date": "1980-12-31 00:00:00",
-                            "name_full": "MR. JAMES W. CALLEY, TREAS."
-                        },
-                        {
-                            "expire_date": "1982-12-31 00:00:00",
-                            "name_full": "JAMES W. CALEY"
-                        }
-                    ]
-                }
-            ],
             "candidates": [
                 {
-                    "candidate_id": "H6WA04034",
+                    "candidate_id": "P80003338",
                     "designation": "P",
                     "designation_full": "Principal campaign committee",
-                    "election_year": 1976.0,
+                    "election_years": [
+                        2008,
+                        2012
+                    ],
                     "expire_date": null,
-                    "link_date": "2007-10-12 13:38:33",
-                    "type": "H",
-                    "type_full": "House"
-                },
-                {
-                    "candidate_id": "H6WA04034",
-                    "designation": "P",
-                    "designation_full": "Principal campaign committee",
-                    "election_year": 1978.0,
-                    "expire_date": null,
-                    "link_date": "2007-10-12 13:38:33",
-                    "type": "H",
-                    "type_full": "House"
-                },
-                {
-                    "candidate_id": "H6WA04034",
-                    "designation": "P",
-                    "designation_full": "Principal campaign committee",
-                    "election_year": 1980.0,
-                    "expire_date": null,
-                    "link_date": "2007-10-12 13:38:33",
-                    "type": "H",
-                    "type_full": "House"
+                    "link_date": "2009-01-01 21:49:00",
+                    "type": "P",
+                    "type_full": "Presidential"
                 }
             ],
-            "committee_id": "C00000851",
-            "description": {
+            "committee_id": "C00431445",
+            "custodian": {
+                "city": "CHICAGO",
                 "expire_date": null,
-                "filing_frequency": "T",
-                "form_type": "F1Z",
-                "load_date": "1982-12-31 00:00:00",
-                "name": "MCCORMACK CONGRESSIONAL COMMITTEE"
+                "name_1": "TARYN",
+                "name_2": "VOGEL",
+                "name_full": "VOGEL, TARYN",
+                "name_title": "CUSTODIAN OF RECORDS",
+                "phone": "3129851700",
+                "state": "IL",
+                "street_1": "PO BOX 8102",
+                "zip": "60680"
+            },
+            "description": {
+                "email": "OFAFEC@OBAMABIDEN.COM",
+                "expire_date": null,
+                "filing_frequency": "Q",
+                "form_type": "F1",
+                "load_date": "2013-08-27 00:00:00",
+                "name": "OBAMA FOR AMERICA",
+                "website": "HTTP://WWW.OBAMABIDEN.COM"
             },
             "expire_date": null,
             "form_type": "F1",
-            "load_date": "1982-12-31 00:00:00",
+            "load_date": "2013-08-27 00:00:00",
+            "name": "OBAMA FOR AMERICA",
             "status": {
                 "designation": "P",
                 "designation_full": "Principal campaign committee",
                 "expire_date": null,
                 "load_date": "2014-11-24 16:52:15",
-                "receipt_date": "1976-03-15 00:00:00",
-                "type": "H",
-                "type_full": "House"
+                "receipt_date": "2007-01-16 00:00:00",
+                "type": "P",
+                "type_full": "Presidential"
             },
             "treasurer": {
+                "city": "CHICAGO",
                 "expire_date": null,
-                "name_full": "JAMES W. CALEY"
+                "name_1": "MARTIN",
+                "name_2": "NESBITT",
+                "name_full": "NESBITT, MARTIN H",
+                "name_middle": "H",
+                "name_title": "TREASURER",
+                "phone": "3129851700",
+                "state": "IL",
+                "street_1": "PO BOX 8102",
+                "zip": "60680"
             }
         }
     ]

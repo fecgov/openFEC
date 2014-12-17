@@ -312,6 +312,8 @@ def format_committees(self, data, page, fields, year):
                 if cmte['dimcmte'].has_key(fec_name):
                     committee[api_name] = cmte['dimcmte'][fec_name]
 
+        # addresses, description,
+        addresses = {}
         for item in cmte['dimcmteproperties']:
             # shortcut for formatting
             if item['expire_date'] is not None:
@@ -332,26 +334,27 @@ def format_committees(self, data, page, fields, year):
             # address
             address = {}
             for api_name, fec_name in self.committee_address_field_mappings:
-                if item.has_key(fec_name) and item[fec_name] is not None:
+                if item.has_key(fec_name) and item[fec_name] is not None and fec_name != 'expire_date':
                     address[api_name] = item[fec_name]
+
+            if 'expire_date' in fields or '*' in fields or fields == []:
+                address['expire_date'] = item['expire_date']
 
             if address.has_key('state_full'):
                 address['state_full'] = item['cmte_st_desc'].strip()
 
             if len(address) > 0:
-                if 'expire_date' in fields or '*' in fields:
-                    address['expire_date'] = item['expire_date']
-                if expired == False:
+                if item['expire_date'] == None:
                     committee['address'] = address
                 else:
                     if not record.has_key('address'):
-                        record['address'] = []
-                    record['address'].append(address)
+                        record['address'] = {}
+                    record['address'][item['expire_date']] = address
 
             # properties table called description in api
             description = {}
             for api_name, fec_name in self.properties_field_mapping:
-                if item.has_key(fec_name) and item[fec_name] is not None:
+                if item.has_key(fec_name) and item[fec_name] is not None and fec_name != 'expire_date':
                     description[api_name] = item[fec_name]
 
             if len(description) > 0:
@@ -361,8 +364,8 @@ def format_committees(self, data, page, fields, year):
                     committee['description'] = description
                 else:
                     if not record.has_key('description'):
-                        record['description'] = []
-                    record['description'].append(description)
+                         record['description'] = {}
+                    record['description'][item['expire_date']] = description
 
             # treasurer
             treasurer = {}
@@ -377,8 +380,8 @@ def format_committees(self, data, page, fields, year):
                     committee['treasurer'] = treasurer
                 else:
                     if not record.has_key('treasurer'):
-                        record['treasurer'] = []
-                    record['treasurer'].append(treasurer)
+                        record['treasurer'] = {}
+                    record['treasurer'][item['expire_date']] = treasurer
 
             # custodian
             custodian = {}
@@ -393,73 +396,85 @@ def format_committees(self, data, page, fields, year):
                     committee['custodian'] = custodian
                 else:
                     if not record.has_key('custodian'):
-                        record['custodian'] = []
-                    record['custodian'].append(custodian)
+                        record['custodian'] = {}
+                    record['custodian'][item['expire_date']] = custodian
+
+            #designation
+            for designation in cmte['dimcmtetpdsgn']:
+                status = {}
+                for api_name, fec_name in self.designation_mapping:
+                    if designation.has_key(fec_name) and fec_name != 'expire_date':
+                        status[api_name] = designation[fec_name]
+
+                if 'expire_date' in fields or '*' in fields or fields == []:
+                    status['expire_date'] = designation['expire_date']
+
+                if designation.has_key('cmte_dsgn') and  designation_decoder.has_key(designation['cmte_dsgn']):
+                    status['designation_full'] = designation_decoder[designation['cmte_dsgn']]
+
+                if designation.has_key('cmte_tp') and cmte_decoder.has_key(designation['cmte_tp']):
+                    status['type_full'] = cmte_decoder[designation['cmte_tp']]
+
+                if len(status) > 0:
+                    if designation['expire_date'] == None:
+                        committee['status'] = status
+                    else:
+                        if not record.has_key('status'):
+                            record['status'] = {}
+                        record['status'][designation['expire_date']] = status
 
             # candidates associated with committees
-            candidate_list = []
-            candidate_arcive_list = []
+            candidate_dict = {}
             for cand in cmte['dimlinkages']:
                 candidate ={}
                 for api_name, fec_name in self.linkages_field_mapping:
-                    if cand.has_key(fec_name) and fec_name != 'expire_date':
+                    if cand.has_key(fec_name) and fec_name != 'expire_date' and fec_name != 'cand_id':
                         candidate[api_name] = cand[fec_name]
-
+                if candidate.has_key('election_years'):
+                    candidate['election_years']= [int(candidate['election_years'])]
                 if 'expire_date' in fields or '*' in fields or fields == []:
                     candidate['expire_date'] = cand['expire_date']
+                if 'candidate_id' in fields or 'fec_id' in fields or '*' in fields or fields == []:
+                    candidate['candidate_id'] = cand['cand_id']
                 if candidate.has_key('type'):
                     candidate['type_full'] = cmte_decoder[candidate['type']]
                 if candidate.has_key('designation'):
                     candidate['designation_full'] = designation_decoder[candidate['designation']]
-
-                # add to properties or archive based on expire date
+                # add all expire dates and save to committee
                 if len(candidate) > 0:
-                    if cand.has_key('expire_date') and cand['expire_date'] == None:
-                        candidate_list.append(candidate)
-                    else:
-                        candidate_arcive_list.append(candidate)
+                    if not candidate_dict.has_key(cand['cand_id']):
+                        candidate_dict[cand['cand_id']] = candidate
+                    elif candidate.has_key('election_years'):
+                        candidate_dict[cand['cand_id']]['election_years'].append(candidate['election_years'][0])
 
-            if len(candidate_list) > 0:
-                committee['candidates'] = candidate_list
+        # one entry per candidate
+        for cand_id in sorted(candidate_dict):
+            print cand_id
+            if not committee.has_key('candidates'):
+                committee['candidates'] = []
+            committee['candidates'].append(candidate_dict[cand_id])
+            print candidate_dict[cand_id]
 
-            if len(candidate_arcive_list) > 0:
-                record['candidates'] = candidate_arcive_list
 
-            # designation/discription
-            designations = []
-            archive_designations = []
-            for designation in cmte['dimcmtetpdsgn']:
-                status = {}
-                for api_name, fec_name in self.designation_mapping:
-                    if designation.has_key(fec_name):
-                        status[api_name] = designation[fec_name]
+        # if there are no current records, add the most recent record to the top level committee information
+        for record_type in record:
+            if not committee.has_key(record_type):
+                key = sorted(record[record_type], key=record[record_type].get, reverse=True)[0]
+                committee[record_type] = record[record_type][key]
+                # removing from archive so it is not double posted
+                del record[record_type][key]
+                # adding additional records to archive newest to oldest
 
-                    if designation.has_key('cmte_dsgn') and  designation_decoder.has_key(designation['cmte_dsgn']):
-                        status['designation_full'] = designation_decoder[designation['cmte_dsgn']]
-                    if designation.has_key('cmte_tp') and cmte_decoder.has_key(designation['cmte_tp']):
-                        status['type_full'] = cmte_decoder[designation['cmte_tp']]
-
-                if designation.has_key('expire_date') and designation['expire_date'] == None:
-                    designations.append(status)
-                else:
-                    archive_designations.append(status)
-
-            # Setting up some messaging to see if there is a problem I will get rid of this if it looks OK
-            if len(designations) > 1:
-                committee['status'] = designations[0]
-                print "THIS SHOULD'NT HAPPEN- THERE SHOULD BE ONE UNEXPIRED DOC"
-
-            if len(designations) > 0:
-                committee['status'] = designations[0]
-
-            if len(archive_designations) > 0:
-                record['status'] = designations
-
-        if ('archive' in fields or '*' in fields) and len(record) > 0:
-            if not committee.has_key('archive'):
-                committee['archive'] = []
-            committee['archive'].append(record)
-
+                if len(record[record_type]) > 0 and ('archive' in fields or '*' in fields):
+                    if not committee.has_key('archive'):
+                        committee['archive'] = {}
+                    for key in sorted(record[record_type], key=record[record_type].get, reverse=True):
+                        if not committee['archive'].has_key(record_type):
+                            committee['archive'][record_type] = []
+                        committee['archive'][record_type].append(record[record_type][key])
+        #name short cut
+        if committee.has_key('description') and committee['description'].has_key('name'):
+            committee['name'] = committee['description']['name']
         results.append(committee)
 
     return {'api_version':"0.2", 'pagination':page, 'results': results}
@@ -867,8 +882,8 @@ class Committee(object):
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
     def query_text(self, show_fields):
-        # We always need expire date to sort the information
-        return '(%s{{%s},/dimcmteproperties{expire_date,%s}, /dimlinkages{expire_date,%s}, /dimcmtetpdsgn{%s}})' % (
+        # We always need expire date and cand_id to sort the information
+        return '(%s{{%s},/dimcmteproperties{expire_date,%s}, /dimlinkages{cand_id,expire_date,%s}, /dimcmtetpdsgn{expire_date,%s}})' % (
             self.viewable_table_name,
             show_fields['dimcmte_fields'],
             show_fields['properties_fields'],
@@ -889,7 +904,7 @@ class Committee(object):
         ('candidate_id', 'cand_id'),
         ('type', 'cmte_tp'),
         ('designation', 'cmte_dsgn'),
-        ('election_year', 'cand_election_yr'),
+        ('election_years', 'cand_election_yr'),
         ('expire_date', 'expire_date'),
         ('link_date', 'link_date'),
     )
@@ -985,7 +1000,7 @@ class Committee(object):
         ('qualifying_date', 'qual_dt'),
     )
 
-    properties_mapping = (('*', '*'),) + properties_field_mapping + committee_address_field_mappings + committee_address + treasurer_field_mapping + custodian_field_mapping + custodian
+    properties_mapping = (('*', '*'),) + properties_field_mapping + committee_address_field_mappings + committee_address + treasurer + treasurer_field_mapping + custodian_field_mapping + custodian
 
     # connects mappings to field names
     maps_fields = (

@@ -153,7 +153,7 @@ class OverallTest(unittest.TestCase):
         # not all records in the test db have candidates; find one that does
         result = results[0]['candidates'][0]
 
-        fields = ('candidate_id', 'designation', 'designation_full', 'election_year', 'expire_date', 'link_date', 'type', 'type_full')
+        fields = ('candidate_id', 'designation', 'designation_full', 'election_years', 'expire_date', 'link_date', 'type', 'type_full')
         for field in fields:
             print field
             self.assertEquals(result.has_key(field), True)
@@ -186,7 +186,7 @@ class OverallTest(unittest.TestCase):
         response = self._response('/committee/C00000851')
         result = response['results'][0]
 
-        fields = ('committee_id','expire_date','form_type','load_date')
+        fields = ('committee_id','expire_date','form_type','load_date','name','description','status', 'address')
         for field in fields:
             print field
             self.assertEquals(result.has_key(field), True)
@@ -195,8 +195,8 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(result.has_key('archive'), False)
 
     def test_committee_properties_all(self):
-        response = self._response('/committee/C00000851?fields=*')
-        result = response['results'][0]['archive'][0]
+        response = self._response('/committee/C00000422?fields=*')
+        result = response['results'][0]['archive']
 
         print result
 
@@ -208,10 +208,14 @@ class OverallTest(unittest.TestCase):
         address_fields = ('city', 'state', 'state_full', 'street_1', 'zip', 'expire_date')
         for field in address_fields:
             print field
-            self.assertEquals(result['address'][0].has_key(field), True)
+            self.assertEquals(response['results'][0]['address'].has_key(field), True)
 
-        self.assertEquals(result['treasurer'][0].has_key('name_full'), True)
-        self.assertEquals(result['treasurer'][0].has_key('expire_date'), True)
+        self.assertEquals(response['results'][0]['treasurer'].has_key('name_full'), True)
+        self.assertEquals(response['results'][0]['treasurer'].has_key('expire_date'), True)
+
+    def test2committees(self):
+        response = self._results('/committee/C00484188')
+        self.assertEquals(len(response[0]['candidates']), 2)
 
     def test_committee_field_filtering(self):
         response = self._results('/committee/C00000851?fields=committee_id')
