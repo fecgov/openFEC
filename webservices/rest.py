@@ -995,8 +995,9 @@ class Committee(object):
         ('organization_type', 'org_tp'),
         ('organization_type_full', 'org_tp_desc'),
         ('original_registration_date', 'orig_registration_dt'),
-        ('party', 'party_cmte_type'),
-        ('party_full', 'party_cmte_type_desc'),
+        ('party', 'cand_pty_affiliation'),
+        ('party_type', 'party_cmte_type'),
+        ('party_type_full', 'party_cmte_type_desc'),
         ('qualifying_date', 'qual_dt'),
     )
 
@@ -1041,7 +1042,7 @@ class CommitteeSearch(Searchable, Committee):
                             "top(dimcmteproperties.sort(expire_date-)).org_tp~'$arg'"
                         ),
                         "party": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).party_cmte_type~'$arg'"
+                            "top(dimcmteproperties.sort(expire_date-)).cand_pty_affiliation~'$arg'"
                         ),
     }
 
@@ -1107,6 +1108,11 @@ class CommitteeSearch(Searchable, Committee):
         'organization_type',
         type=str,
         help='The one-letter code for the kind for organization'
+    )
+    parser.add_argument(
+        'party',
+        type=str,
+        help='Three letter code for party'
     )
 
 
