@@ -225,3 +225,9 @@ class OverallTest(unittest.TestCase):
     def test_err_on_unsupported_arg(self):
         response = self.app.get('/committee?bogusArg=1')
         self.assertEquals(response.status_code, 400)
+
+    def test_committee_party(self):
+        response = self._results('/committee?party=REP')
+        self.assertEquals(response[0]['description']['party'], 'REP')
+        self.assertEquals(response[0]['description']['party_full'], 'Republican Party')
+
