@@ -158,9 +158,9 @@ def assign_formatting(self, data_dict, page_data, year):
     args = self.parser.parse_args()
     fields = find_fields(self, args)
 
-    if self.table_name_stem == 'cand':
+    if str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch':
         return format_candids(self, data_dict, page_data, fields, year)
-    elif self.table_name_stem == 'cmte':
+    elif str(self.endpoint) == 'committeeresource' or str(self.endpoint) == 'committeesearch':
         return format_committees(self, data_dict, page_data, fields, year)
     else:
         return data_dict
@@ -485,7 +485,7 @@ def format_committees(self, data, page, fields, year):
 
 
 class SingleResource(restful.Resource):
-    # add fields and year to this
+
     def get(self, id):
         show_fields = copy.copy(self.default_fields)
         overall_start_time = time.time()
@@ -529,14 +529,15 @@ class SingleResource(restful.Resource):
 
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
 
-        if self.table_name_stem == 'cand':
+        if str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch':
             return format_candids(self, data_dict, page_data, fields, year)
-        elif self.table_name_stem == 'cmte':
+        elif str(self.endpoint) == 'committeeresource' or str(self.endpoint) == 'committeesearch':
             return format_committees(self, data_dict, page_data, fields, year)
         else:
             return data_dict
 
 class Searchable(restful.Resource):
+
     fulltext_qry = """SELECT %s_sk
                       FROM   dim%s_fulltext
                       WHERE  fulltxt @@ to_tsquery(:findme)
@@ -637,6 +638,7 @@ class Searchable(restful.Resource):
 
 
 class Candidate(object):
+
     # default fields for search
     default_fields = {
         'dimcand_fields': 'cand_id',
@@ -1124,22 +1126,22 @@ class CommitteeSearch(Searchable, Committee):
 
 
 class Total(object):
+
     #need to do this for 3 tables:
         #facthousesenate_f3
         #factpacsandparties_f3x
         #factpresidential_f3p
-    table_name_stem = 'dimcmte.cmte'
-    viewable_table_name = "facthousesenate_f3"
+    table_name_stem = 'cmte'
+    viewable_table_name = "(dimcmte)?exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x)"
 
-    default_fields = {'fields': '*'}
+    default_fields = {'dimcmte_fields': '*', 'committee_fields': '*'}
 
     def query_text(self, show_fields):
-        return '(%s){%s}' % (self.viewable_table_name, show_fields['fields'])
-
-# ((dimcmte)
-#         ?(exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x))
-#         {*, /facthousesenate_f3{*}, /factpresidential_f3p{*}, /factpacsandparties_f3x{*}}
-#         )?cmte_id='C00431445'
+        return '(%s){%s, /facthousesenate_f3{%s}, /factpresidential_f3p{%s}, /factpacsandparties_f3x{%s}}' % (self.viewable_table_name, show_fields['dimcmte_fields'],
+            show_fields['committee_fields'],
+            show_fields['committee_fields'],
+            show_fields['committee_fields'],
+            )
 
 class TotalResource(SingleResource, Total):
     parser = reqparse.RequestParser()
