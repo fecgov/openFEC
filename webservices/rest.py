@@ -142,11 +142,12 @@ def cleantext(text):
 
 # this is shared by search and single resource
 def find_fields(self, args):
-    if args['fields'] == None and self.table_name_stem == 'cand':
-        return []
-    elif args['fields'] == None and self.table_name_stem == 'cmte':
-        # I always need expire date to sort the information, don't want to show it when it is not asked for in a custom query.
-        return ['expire_date']
+    if args['fields'] == None:
+        if args['fields'] == None and self.table_name_stem == 'cmte':
+            # I always need expire date to sort the information, don't want to show it when it is not asked for in a custom query.
+            return ['expire_date']
+        else:
+            return []
     elif ',' in args['fields']:
         return args['fields'].split(',')
     else:
@@ -454,12 +455,9 @@ def format_committees(self, data, page, fields, year):
 
         # one entry per candidate
         for cand_id in sorted(candidate_dict):
-            print cand_id
             if not committee.has_key('candidates'):
                 committee['candidates'] = []
             committee['candidates'].append(candidate_dict[cand_id])
-            print candidate_dict[cand_id]
-
 
         # if there are no current records, add the most recent record to the top level committee information
         for record_type in record:
@@ -1020,7 +1018,11 @@ class Committee(object):
 class CommitteeResource(SingleResource, Committee):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument(
+        'fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
 
 
 class CommitteeSearch(Searchable, Committee):
@@ -1121,6 +1123,32 @@ class CommitteeSearch(Searchable, Committee):
     )
 
 
+class Total(object):
+    #need to do this for 3 tables:
+        #facthousesenate_f3
+        #factpacsandparties_f3x
+        #factpresidential_f3p
+    table_name_stem = 'dimcmte.cmte'
+    viewable_table_name = "facthousesenate_f3"
+
+    default_fields = {'fields': '*'}
+
+    def query_text(self, show_fields):
+        return '(%s){%s}' % (self.viewable_table_name, show_fields['fields'])
+
+
+
+# /((dimcmte?exists(dimcmteproperties)){{cmte_id,form_tp,load_date,expire_date},/dimcmteproperties{expire_date,*}, /dimlinkages{cand_id,expire_date,cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date}, /dimcmtetpdsgn{expire_date,*}})?cmte_id='C00000851'
+
+class TotalResource(SingleResource, Total):
+    parser = reqparse.RequestParser()
+
+    parser.add_argument(
+        'fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
+
 
 class Help(restful.Resource):
     def get(self):
@@ -1138,6 +1166,9 @@ api.add_resource(CandidateResource, '/candidate/<string:id>')
 api.add_resource(CandidateSearch, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
+api.add_resource(TotalResource, '/total/<string:id>')
+# uses fact, not dim tables not sure we need full text search, We will want filtering though
+#api.add_resource(TotalSearch, '/total')
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
