@@ -1125,34 +1125,6 @@ class CommitteeSearch(Searchable, Committee):
     )
 
 
-class Total(object):
-    #need to do this for 3 tables:
-        #facthousesenate_f3
-        #factpacsandparties_f3x
-        #factpresidential_f3p
-    table_name_stem = 'dimcmte.cmte'
-    viewable_table_name = "facthousesenate_f3"
-
-    default_fields = {'fields': '*'}
-
-    def query_text(self, show_fields):
-        return '(%s){%s}' % (self.viewable_table_name, show_fields['fields'])
-
-# ((dimcmte)
-#         ?(exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x))
-#         {*, /facthousesenate_f3{*}, /factpresidential_f3p{*}, /factpacsandparties_f3x{*}}
-#         )?cmte_id='C00431445'
-
-class TotalResource(SingleResource, Total):
-    parser = reqparse.RequestParser()
-
-    parser.add_argument(
-        'fields',
-        type=str,
-        help='Choose the fields that are displayed'
-    )
-
-
 class Help(restful.Resource):
     def get(self):
         result = {'doc': sys.modules[__name__].__doc__,
