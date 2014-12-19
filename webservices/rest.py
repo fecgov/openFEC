@@ -1136,9 +1136,10 @@ class Total(object):
     def query_text(self, show_fields):
         return '(%s){%s}' % (self.viewable_table_name, show_fields['fields'])
 
-
-
-# /((dimcmte?exists(dimcmteproperties)){{cmte_id,form_tp,load_date,expire_date},/dimcmteproperties{expire_date,*}, /dimlinkages{cand_id,expire_date,cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date}, /dimcmtetpdsgn{expire_date,*}})?cmte_id='C00000851'
+# ((dimcmte)
+#         ?(exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x))
+#         {*, /facthousesenate_f3{*}, /factpresidential_f3p{*}, /factpacsandparties_f3x{*}}
+#         )?cmte_id='C00431445'
 
 class TotalResource(SingleResource, Total):
     parser = reqparse.RequestParser()
