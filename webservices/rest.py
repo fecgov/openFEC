@@ -1142,9 +1142,6 @@ api.add_resource(CandidateSearch, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 
-# uses fact, not dim tables not sure we need full text search, We will want filtering though
-#api.add_resource(TotalSearch, '/total')
-
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
         doctest.testmod()
