@@ -1141,7 +1141,7 @@ api.add_resource(CandidateResource, '/candidate/<string:id>')
 api.add_resource(CandidateSearch, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
-api.add_resource(TotalResource, '/total/<string:id>')
+
 # uses fact, not dim tables not sure we need full text search, We will want filtering though
 #api.add_resource(TotalSearch, '/total')
 
