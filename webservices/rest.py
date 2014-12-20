@@ -141,12 +141,8 @@ def cleantext(text):
         return text
 
 # this is shared by search and single resource
-def find_fields(self, args):
+def find_fields(args):
     if args['fields'] == None:
-        if args['fields'] == None and self.table_name_stem == 'cmte':
-            # I always need expire date to sort the information, don't want to show it when it is not asked for in a custom query.
-            return ['expire_date']
-        else:
             return []
     elif ',' in args['fields']:
         return args['fields'].split(',')
@@ -156,7 +152,7 @@ def find_fields(self, args):
 
 def assign_formatting(self, data_dict, page_data, year):
     args = self.parser.parse_args()
-    fields = find_fields(self, args)
+    fields = find_fields(args)
 
     if str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch':
         return format_candids(self, data_dict, page_data, fields, year)
@@ -515,13 +511,9 @@ class SingleResource(restful.Resource):
         show_fields = copy.copy(self.default_fields)
         overall_start_time = time.time()
         args = self.parser.parse_args()
-        fields = find_fields(self, args)
+        fields = find_fields(args)
 
         if args.has_key('fields') and args['fields'] is not None:
-            if ',' in str(args['fields']):
-                fields = args['fields'].split(',')
-            else:
-                fields = [str(args['fields'])]
 
             for maps, field_name in self.maps_fields:
                 show_fields[field_name] = ''
