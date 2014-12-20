@@ -145,6 +145,24 @@ class OverallTest(unittest.TestCase):
         elections = results[0]['elections']
         self.assertEquals(len(elections), 2)
 
+    def test_cand_filters(self):
+        # checking one example from each field
+        filter_fields = (
+            ('office','H'),
+            ('district', '0'),
+            ('state', 'CA'),
+            ('name', 'Obama'),
+            ('party', 'DEM'),
+            ('year', '2012'),
+        )
+
+        for field, example in filter_fields:
+            page = "/candidate?%s=%s" % (field, example)
+            print page
+            response = self.app.get(page)
+
+            self.assertEquals(response.status_code, 200)
+
 #Committee
 
     def test_committee_cand_fields(self):
@@ -230,4 +248,23 @@ class OverallTest(unittest.TestCase):
         response = self._results('/committee?party=REP')
         self.assertEquals(response[0]['description']['party'], 'REP')
         self.assertEquals(response[0]['description']['party_full'], 'Republican Party')
+
+    def test_committee_filters(self):
+        # checking one example from each field
+        filter_fields = (
+            ('candidate_id','H0VA08040'),
+            ('state', 'CA'),
+            ('name', 'Obama'),
+            ('type', 'S'),
+            ('designation', 'P'),
+            ('party', 'REP'),
+            ('organization_type','C'),
+        )
+
+        for field, example in filter_fields:
+            page = "/committee?%s=%s" % (field, example)
+            print page
+            response = self.app.get(page)
+
+            self.assertEquals(response.status_code, 200)
 

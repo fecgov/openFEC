@@ -142,11 +142,12 @@ def cleantext(text):
 
 # this is shared by search and single resource
 def find_fields(self, args):
-    if args['fields'] == None and self.table_name_stem == 'cand':
-        return []
-    elif args['fields'] == None and self.table_name_stem == 'cmte':
-        # I always need expire date to sort the information, don't want to show it when it is not asked for in a custom query.
-        return ['expire_date']
+    if args['fields'] == None:
+        if args['fields'] == None and self.table_name_stem == 'cmte':
+            # I always need expire date to sort the information, don't want to show it when it is not asked for in a custom query.
+            return ['expire_date']
+        else:
+            return []
     elif ',' in args['fields']:
         return args['fields'].split(',')
     else:
@@ -454,12 +455,9 @@ def format_committees(self, data, page, fields, year):
 
         # one entry per candidate
         for cand_id in sorted(candidate_dict):
-            print cand_id
             if not committee.has_key('candidates'):
                 committee['candidates'] = []
             committee['candidates'].append(candidate_dict[cand_id])
-            print candidate_dict[cand_id]
-
 
         # if there are no current records, add the most recent record to the top level committee information
         for record_type in record:
@@ -676,6 +674,8 @@ class Candidate(object):
                 show_fields['status_fields'],
         )
 
+
+
     # Field mappings (API_output, FEC_input)
     # basic candidate information
     dimcand_mapping = (
@@ -855,7 +855,7 @@ class CandidateSearch(Searchable, Candidate):
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
                     "fec_id": string.Template("cand_id='$arg'"),
                     "office": string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).office_tp~'$arg'"
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp~'$arg'"
                     ),
                     "district":string.Template(
                         "top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"
@@ -1020,7 +1020,11 @@ class Committee(object):
 class CommitteeResource(SingleResource, Committee):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
+    parser.add_argument(
+        'fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
 
 
 class CommitteeSearch(Searchable, Committee):
@@ -1119,7 +1123,6 @@ class CommitteeSearch(Searchable, Committee):
         type=str,
         help='Three letter code for party'
     )
-
 
 
 class Help(restful.Resource):
