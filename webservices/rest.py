@@ -162,6 +162,8 @@ def assign_formatting(self, data_dict, page_data, year):
         return format_candids(self, data_dict, page_data, fields, year)
     elif str(self.endpoint) == 'committeeresource' or str(self.endpoint) == 'committeesearch':
         return format_committees(self, data_dict, page_data, fields, year)
+    elif str(self.endpoint) == 'totalresource' or str(self.endpoint) == 'totalsearch':
+        return format_totals(self, data_dict, page_data, fields, year)
     else:
         return data_dict
 
@@ -484,6 +486,29 @@ def format_committees(self, data, page, fields, year):
     #return data
 
 
+def format_totals(self, data, page_data, fields, default_year):
+    results = []
+
+    for committee in data:
+        com = {}
+        for api_name, fec_name in self.dim_mapping:
+              com[api_name]  = committee[fec_name]
+        reports = []
+        for record in committee['factpresidential_f3p']:
+            if record != []:
+                details = {}
+                details['type'] = 'presidential'
+                for api_name, fec_name in self.mapping:
+                    if record.has_key(fec_name):
+                        details[api_name] = record[fec_name]
+                reports.append(details)
+        if reports != []:
+            com['reports'] = reports
+        results.append(com)
+
+    return {'api_version':"0.2", 'pagination':page_data, 'results': results}
+
+
 class SingleResource(restful.Resource):
 
     def get(self, id):
@@ -529,12 +554,7 @@ class SingleResource(restful.Resource):
 
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
 
-        if str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch':
-            return format_candids(self, data_dict, page_data, fields, year)
-        elif str(self.endpoint) == 'committeeresource' or str(self.endpoint) == 'committeesearch':
-            return format_committees(self, data_dict, page_data, fields, year)
-        else:
-            return data_dict
+        return assign_formatting(self, data_dict, page_data, year)
 
 class Searchable(restful.Resource):
 
@@ -634,6 +654,7 @@ class Searchable(restful.Resource):
         page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
 
         speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
+
         return assign_formatting(self, data_dict, page_data, year)
 
 
@@ -896,7 +917,6 @@ class Committee(object):
             show_fields['designation_fields']
         )
 
-
     dimcmte_mapping = (
         ('committee_id', 'cmte_id'),
         ('form_type', 'form_tp'),
@@ -904,7 +924,6 @@ class Committee(object):
         ('expire_date', 'expire_date'),
         ('*', '*'),
     )
-
     linkages_field_mapping = (
         ('candidate_id', 'cand_id'),
         ('type', 'cmte_tp'),
@@ -913,12 +932,10 @@ class Committee(object):
         ('expire_date', 'expire_date'),
         ('link_date', 'link_date'),
     )
-
     linkages_mapping = (
         ('committees', 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,\
             expire_date,link_date'),
         ('*', '*'),
-
     ) + linkages_field_mapping
 
     designation_mapping = (
@@ -963,7 +980,6 @@ class Committee(object):
             cmte_treasurer_st1,cmte_treasurer_st2,cmte_treasurer_suffix,\
             cmte_treasurer_title,cmte_treasurer_zip'),
     )
-
     custodian_field_mapping = (
         ('city', 'cmte_custodian_city'),
         ('name_1', 'cmte_custodian_f_nm'),
@@ -1143,6 +1159,109 @@ class Total(object):
             show_fields['committee_fields'],
             )
 
+    # need to add
+        # "cvg_end_dt_sk"
+        # "cvg_start_dt_sk"
+        # exp_subject_limits
+
+        # 'two_yr_period_sk'
+        # 'electiontp_sk'
+        # 'reporttype_sk'
+        # 'transaction_sk'
+
+    mapping = (
+        ('beggining_image_number','begin_image_num'),
+        ('candidate_contribution_period','cand_contb_per'),
+        ('candidate_contribution_year','cand_contb_ytd'),
+        ('cash_on_hand_beginning_period','coh_bop'),
+        ('cash_on_hand_end_period','coh_cop'),
+        ('debts_owed_by_committe','debts_owed_by_cmte'),
+        ('debts_owed_to_committe','debts_owed_to_cmte'),
+        ('end_image_number','end_image_num'),
+        ('exempt_legal_accounting_disbursement_period','exempt_legal_acctg_disb_per'),
+        ('exempt_legal_accounting_disbursement_year','exempt_legal_acctg_disb_ytd'),
+        ('expire_date','expire_date'),
+        ('federal_funds_period','fed_funds_per'),
+        ('federal_funds_year','fed_funds_ytd'),
+        ('fundraising_disbursements_period','fndrsg_disb_per'),
+        ('fundraising_disbursements_year','fndrsg_disb_ytd'),
+        ('indvidual_contbutions_period','indv_contb_per'),
+        ('indvidual_contbutions_year','indv_contb_ytd'),
+        ('items_on_hand_liquidated','items_on_hand_liquidated'),
+        ('load_date','load_date'),
+        ('loans_received_from_candidate_period','loans_received_from_cand_per'),
+        ('loans_received_from_cand_year','loans_received_from_cand_ytd'),
+        ('net_contbution_summary_period','net_contb_sum_page_per'),
+        ('net_operating_expenses_summary_period','net_op_exp_sum_page_per'),
+        ('offsets_to_fundraising_expenses_period','offsets_to_fndrsg_exp_per'),
+        ('offsets_to_fundraising_exp_year','offsets_to_fndrsg_exp_ytd'),
+        ('offsets_to_legal_accounting_period','offsets_to_legal_acctg_per'),
+        ('offsets_to_legal_accounting_year','offsets_to_legal_acctg_ytd'),
+        ('offsets_to_operating_expenditures_period','offsets_to_op_exp_per'),
+        ('offsets_to_operating_expenditures_year','offsets_to_op_exp_ytd'),
+        ('operating_expenditures_period','op_exp_per'),
+        ('operating_expenditures_year','op_exp_ytd'),
+        ('other_disbursements_period','other_disb_per'),
+        ('other_disbursements_year','other_disb_ytd'),
+        ('other_loans_received_period','other_loans_received_per'),
+        ('other_loans_received_year', 'other_loans_received_ytd'),
+
+        ('other_political_committee_contbutions_period', 'other_pol_cmte_contb_per'),
+        ('other_political_committee_contbutions_year', 'other_pol_cmte_contb_ytd'),
+        ('other_receipts_period', 'other_receipts_per'),
+        ('other_receipts_year', 'other_receipts_ytd'),
+        ('political_party_committee_contbutions_period', 'pol_pty_cmte_contb_per'),
+        ('political_party_committee_contbutions_year', 'pol_pty_cmte_contb_ytd'),
+        ('refunded_indvidual_contbutions_period', 'ref_indv_contb_per'),
+        ('refunded_indvidual_contbutions_year', 'ref_indv_contb_ytd'),
+        ('refunded_other_political_committee_contbutions_period', 'ref_other_pol_cmte_contb_per'),
+        ('refunded_other_political_committee_contbutions_year', 'ref_other_pol_cmte_contb_ytd'),
+        ('refunded_political_party_committee_contbutions_period', 'ref_pol_pty_cmte_contb_per'),
+        ('refunded_political_party_committee_contbutions_year', 'ref_pol_pty_cmte_contb_ytd'),
+        ('repayments_loans_made_by_candidate_period', 'repymts_loans_made_by_cand_per'),
+        ('repayments_loans_made_candidate_year', 'repymts_loans_made_cand_ytd'),
+        ('repayments_other_loans_period', 'repymts_other_loans_per'),
+        ('repayments_other_loans_year', 'repymts_other_loans_ytd'),
+        ('report_year', 'rpt_yr'),
+
+        ('subtotal_summary_period', 'subttl_sum_page_per'),
+
+        ('tranfer_from_affilated_committee_period', 'tranf_from_affilated_cmte_per'),
+        ('tranfer_from_affilated_committee_year', 'tranf_from_affiliated_cmte_ytd'),
+        ('tranfer_to_other_authorized_committe_period', 'tranf_to_other_auth_cmte_per'),
+        ('tranfer_to_other_authorized_committe_year', 'tranf_to_other_auth_cmte_ytd'),
+        ('total_contbutions_period', 'ttl_contb_per'),
+        ('total_contbution_refunds_period', 'ttl_contb_ref_per'),
+        ('total_contbution_refunds_year', 'ttl_contb_ref_ytd'),
+        ('total_contbutions_year', 'ttl_contb_ytd'),
+        ('total_disbursements_period', 'ttl_disb_per'),
+        ('total_disbursements_summary_period', 'ttl_disb_sum_page_per'),
+        ('total_disbursements_year', 'ttl_disb_ytd'),
+        ('total_loan_repayments_made_period', 'ttl_loan_repymts_made_per'),
+        ('total_loan_repayments_made_year', 'ttl_loan_repymts_made_ytd'),
+        ('total_loans_received_period', 'ttl_loans_received_per'),
+        ('total_loans_received_year', 'ttl_loans_received_ytd'),
+        ('total_offsets_to_operating_expenditures_period', 'ttl_offsets_to_op_exp_per'),
+        ('total_offsets_to_opperating_expenditures_year', 'ttl_offsets_to_op_exp_ytd'),
+        ('total_period', 'ttl_per'),
+        ('total_receipts_period', 'ttl_receipts_per'),
+        ('total_receipts_summary_period', 'ttl_receipts_sum_page_per'),
+        ('total_receipts_year', 'ttl_receipts_ytd'),
+        ('total_year', 'ttl_ytd'),
+    )
+
+    dim_mapping = (
+        ('load_date', 'load_date'),
+        ('committee_id', 'cmte_id'),
+        ('expire_date', 'expire_date'),
+    )
+
+    maps_fields = (
+        (mapping, 'fields'),
+        (dim_mapping, 'dimcmte_fields')
+    )
+
+
 class TotalResource(SingleResource, Total):
     parser = reqparse.RequestParser()
 
@@ -1150,6 +1269,29 @@ class TotalResource(SingleResource, Total):
         'fields',
         type=str,
         help='Choose the fields that are displayed'
+    )
+
+class TotalSearch(Searchable, Total):
+    parser = reqparse.RequestParser()
+
+    field_name_map = {"committee_id": string.Template("cmte_id='$arg'")}
+
+    parser.add_argument(
+        'fields',
+        type=str,
+        help='Choose the fields that are displayed'
+    )
+    parser.add_argument(
+        'page',
+        type=natural_number,
+        default=1,
+        help='For paginating through results, starting at page 1'
+    )
+    parser.add_argument(
+        'per_page',
+        type=natural_number,
+        default=20,
+        help='The number of results returned per page. Defaults to 20.'
     )
 
 
@@ -1170,8 +1312,7 @@ api.add_resource(CandidateSearch, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')
-# uses fact, not dim tables not sure we need full text search, We will want filtering though
-#api.add_resource(TotalSearch, '/total')
+api.add_resource(TotalSearch, '/total')
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
