@@ -490,17 +490,26 @@ def format_totals(self, data, page_data, fields, default_year):
         for api_name, fec_name in self.dim_mapping:
               com[api_name]  = committee[fec_name]
         reports = []
-        for record in committee['factpresidential_f3p']:
-            if record != []:
-                details = {}
-                details['type'] = 'presidential'
-                for api_name, fec_name in self.mapping:
-                    if record.has_key(fec_name):
-                        details[api_name] = record[fec_name]
-                reports.append(details)
-        if reports != []:
-            com['reports'] = reports
-        results.append(com)
+
+        bucket_map = (
+            ('factpresidential_f3p', self.presidential_mapping, 'presidential'),
+            ('factpacsandparties_f3x', self.pac_party_mapping, 'pac_party'),
+            ('facthousesenate_f3', self.house_senate_mapping, 'house_senate'),
+        )
+
+        for bucket, mapping, kind in bucket_map:
+            for record in committee[bucket]:
+                if record != []:
+                    details = {}
+                    details['type'] = kind
+                    for api_name, fec_name in mapping:
+                        if record.has_key(fec_name):
+                            details[api_name] = record[fec_name]
+                    reports.append(details)
+
+            if reports != []:
+                com['reports'] = reports
+            results.append(com)
 
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
@@ -514,6 +523,10 @@ class SingleResource(restful.Resource):
         fields = find_fields(args)
 
         if args.has_key('fields') and args['fields'] is not None:
+            if ',' in str(args['fields']):
+                fields = args['fields'].split(',')
+            else:
+                fields = [str(args['fields'])]
 
             for maps, field_name in self.maps_fields:
                 show_fields[field_name] = ''
@@ -685,7 +698,6 @@ class Candidate(object):
                 show_fields['office_fields'],
                 show_fields['party_fields'],
                 com_query,
-                #show_fields['cand_committee_link_fields'],
                 show_fields['status_fields'],
         )
 
@@ -1140,28 +1152,39 @@ class Total(object):
         #factpacsandparties_f3x
         #factpresidential_f3p
     table_name_stem = 'cmte'
-    viewable_table_name = "(dimcmte)?exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x)"
-
-    default_fields = {'dimcmte_fields': '*', 'committee_fields': '*'}
+    viewable_table_name = "dimcmte?exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x)"
+    ### update this
+    default_fields = {
+        'dimcmte_fields': '*',
+        'house_senate_fields': '*',
+        'presidential_fields': '*',
+        'pac_party_fields': '*',
+    }
 
     def query_text(self, show_fields):
-        return '(%s){%s, /facthousesenate_f3{%s}, /factpresidential_f3p{%s}, /factpacsandparties_f3x{%s}}' % (self.viewable_table_name, show_fields['dimcmte_fields'],
-            show_fields['committee_fields'],
-            show_fields['committee_fields'],
-            show_fields['committee_fields'],
+        print "Aloha!"
+        print show_fields
+        return '(%s){%s, /facthousesenate_f3{%s}, /factpresidential_f3p{%s}, /factpacsandparties_f3x{%s}}' % (
+                self.viewable_table_name,
+                show_fields['dimcmte_fields'],
+                show_fields['house_senate_fields'],
+                show_fields['presidential_fields'],
+                show_fields['pac_party_fields'],
             )
 
     # need to add
         # "cvg_end_dt_sk"
         # "cvg_start_dt_sk"
         # exp_subject_limits
+        # 'ttl_contb_col_ttl_per'
 
         # 'two_yr_period_sk'
         # 'electiontp_sk'
         # 'reporttype_sk'
         # 'transaction_sk'
 
-    mapping = (
+    # presidential
+    presidential_mapping = (
         ('beggining_image_number','begin_image_num'),
         ('candidate_contribution_period','cand_contb_per'),
         ('candidate_contribution_year','cand_contb_ytd'),
@@ -1182,7 +1205,7 @@ class Total(object):
         ('items_on_hand_liquidated','items_on_hand_liquidated'),
         ('load_date','load_date'),
         ('loans_received_from_candidate_period','loans_received_from_cand_per'),
-        ('loans_received_from_cand_year','loans_received_from_cand_ytd'),
+        ('loans_received_from_candidate_year','loans_received_from_cand_ytd'),
         ('net_contbution_summary_period','net_contb_sum_page_per'),
         ('net_operating_expenses_summary_period','net_op_exp_sum_page_per'),
         ('offsets_to_fundraising_expenses_period','offsets_to_fndrsg_exp_per'),
@@ -1242,6 +1265,214 @@ class Total(object):
         ('total_year', 'ttl_ytd'),
     )
 
+    pac_party_mapping =(
+        #('total_contributions_col_total_year', 'ttl_contb_col_ttl_ytd'),
+        #('cvg_end_dt_sk', 'cvg_end_dt_sk'),
+        #('cvg_start_dt_sk', 'cvg_start_dt_sk'),
+        #('cvg_start_dt_sk', 'cvg_start_dt_sk'),
+        #('reporttype_sk', 'reporttype_sk'),
+        #('transaction_sk', 'transaction_sk'),
+        ('election_type_sk', 'electiontp_sk'),
+        ('end_image_number', 'end_image_num'),
+        ('individual_contributions_refunds_year', 'indv_contb_ref_ytd'),
+        ('total_contributions_refunds_period_i', 'ttl_contb_ref_per_i'),
+        ('shared_nonfed_operating_expenditures_period', 'shared_nonfed_op_exp_per'),
+        ('shared_fed_activity_nonfed_year', 'shared_fed_actvy_nonfed_ytd'),
+        ('other_political_committee_contributions_year', 'other_pol_cmte_contb_ytd_i'),
+        ('subtotal_summary_page_period', 'subttl_sum_page_per'),
+        ('total_fed_receipts_period', 'ttl_fed_receipts_per'),
+        ('net_operating_expenditures_period', 'net_op_exp_per'),
+        ('shared_fed_activity_year', 'shared_fed_actvy_fed_shr_ytd'),
+        ('loan_repymts_received_period', 'loan_repymts_received_per'),
+        ('cash_on_hand_close_year', 'coh_coy'),
+        ('offsets_to_operating_expendituresenditures_period', 'offsets_to_op_exp_per_i'),
+        ('cash_on_hand_close_period', 'coh_cop'),
+        ('independent_expenditures_period', 'indt_exp_per'),
+        ('other_fed_operating_expenditures_period', 'other_fed_op_exp_per'),
+        #('two_year_period_sk', 'two_yr_period_sk'),
+        ('loan_repayments_made_period', 'loan_repymts_made_per'),
+        ('total_fed_elect_activity_period', 'ttl_fed_elect_actvy_per'),
+        ('total_receipts_period', 'ttl_receipts_per'),
+        ('total_nonfed_transfers_period', 'ttl_nonfed_tranf_per'),
+        ('political_party_committee_contributions_period', 'pol_pty_cmte_contb_per_ii'),
+        ('total_nonfed_transfers_year', 'ttl_nonfed_tranf_ytd'),
+        ('total_fed_disbursements_period', 'ttl_fed_disb_per'),
+        ('offsets_to_operating_expendituresenditures_year', 'offsets_to_op_exp_ytd_i'),
+        ('total_disbursements_period', 'ttl_disb_per'),
+        ('non_allocated_fed_election_activity_year', 'non_alloc_fed_elect_actvy_ytd'),
+        ('subtotal_summary_year', 'subttl_sum_ytd'),
+        ('political_party_committee_contributions_period', 'pol_pty_cmte_contb_per_i'),
+        ('all_loans_received_year', 'all_loans_received_ytd'),
+        ('load_date', 'load_date'),
+        ('total_fed_election_activity_year', 'ttl_fed_elect_actvy_ytd'),
+        ('total_operating_expenditures_year', 'ttl_op_exp_ytd'),
+        ('non_allocated_fed_election_activity_period', 'non_alloc_fed_elect_actvy_per'),
+        ('fed_candidate_committee_contributions_refunds_year', 'fed_cand_cmte_contb_ref_ytd'),
+        ('debts_owed_by_committee', 'debts_owed_by_cmte'),
+        ('loan_repayments_received_year', 'loan_repymts_received_ytd'),
+        ('cash_on_hand_beginning_period', 'coh_bop'),
+        ('total_receipts_summary_page_year', 'ttl_receipts_sum_page_ytd'),
+        ('coordinated_expenditures_by_party_committee_year', 'coord_exp_by_pty_cmte_ytd'),
+        ('loan_repayments_made_year', 'loan_repymts_made_ytd'),
+        ('coordinated_expenditures_by_party_committee_period', 'coord_exp_by_pty_cmte_per'),
+        ('shared_fed_activity_nonfed_period', 'shared_fed_actvy_nonfed_per'),
+        ('transfers_to_affilitated_committees_year', 'tranf_to_affilitated_cmte_ytd'),
+        ('individual_item_contributions_year', 'indv_item_contb_ytd'),
+        ('other_disbursements_period', 'other_disb_per'),
+        ('fed_candidate_committee_contributions_year', 'fed_cand_cmte_contb_ytd'),
+        ('other_disbursements_year', 'other_disb_ytd'),
+        ('loans_made_year', 'loans_made_ytd'),
+        ('total_disbursements_summary_page_year', 'ttl_disb_sum_page_ytd'),
+        ('fed_candidate_committee_contributions_period', 'fed_cand_cmte_contb_per'),
+        ('offsets_to_operating_expendituresenditures_period', 'offsets_to_op_exp_per_ii'),
+        ('net_contributions_period', 'net_contb_per'),
+        ('net_contributions_year', 'net_contb_ytd'),
+        ('individual_unitemized_contributions_period', 'indv_unitem_contb_per'),
+        ('total_receipts_summary_page_period', 'ttl_receipts_sum_page_per'),
+        ('political_party_committee_contributions_year', 'pol_pty_cmte_contb_ytd_i'),
+        ('all_loans_received_period', 'all_loans_received_per'),
+        ('cash_on_hand_begining_calendar_year', 'coh_begin_calendar_yr'),
+        ('total_individual_contributions', 'ttl_indv_contb'),
+        ('total_contributions_period', 'ttl_contb_per'),
+        ('offsets_to_operating_expenditures_year', 'offsets_to_op_exp_ytd_ii'),
+        ('transfers_from_nonfed_levin_period', 'tranf_from_nonfed_levin_per'),
+        ('total_disbursements_year', 'ttl_disb_ytd'),
+        ('political_party_committee_contributions_year', 'pol_pty_cmte_contb_ytd_ii'),
+        ('debts_owed_to_committee', 'debts_owed_to_cmte'),
+        ('shared_fed_operating_expenditures_period', 'shared_fed_op_exp_per'),
+        ('transfers_from_nonfed_levin_year', 'tranf_from_nonfed_levin_ytd'),
+        ('loans_made_period', 'loans_made_per'),
+        ('transfers_from_affiliated_party_year', 'tranf_from_affiliated_pty_ytd'),
+        ('transfers_to_affliliated_committee_period', 'tranf_to_affliliated_cmte_per'),
+        ('independent_expenditures_year', 'indt_exp_ytd'),
+        ('other_fed_receipts_year', 'other_fed_receipts_ytd'),
+        ('total_contributions_refunded_year', 'ttl_contb_ref_ytd_i'),
+        ('report_year', 'rpt_yr'),
+        ('other_political_committee_contributions_period', 'other_pol_cmte_contb_per_ii'),
+        ('total_contributions_year', 'ttl_contb_ytd'),
+        ('other_fed_receipts_period', 'other_fed_receipts_per'),
+        ('transfers_from_affiliated_party_period', 'tranf_from_affiliated_pty_per'),
+        ('individual_unitemized_contributions_year', 'indv_unitem_contb_ytd'),
+        ('total_fed_disbursements_year', 'ttl_fed_disb_ytd'),
+        ('total_fed_operating_expenditures_year', 'ttl_fed_op_exp_ytd'),
+        ('total_individual_contributions_year', 'ttl_indv_contb_ytd'),
+        ('other_fed_operating_expenditures_year', 'other_fed_op_exp_ytd'),
+        ('total_contribution_refunds_period', 'ttl_contb_ref_per_ii'),
+        ('begin_image_num', 'begin_image_num'),
+        ('expire_date', 'expire_date'),
+        ('individual_contribution_refunds_period', 'indv_contb_ref_per'),
+        ('total_contribution_refunds_year', 'ttl_contb_ref_ytd_ii'),
+        ('transfers_from_nonfed_account_period', 'tranf_from_nonfed_acct_per'),
+        ('total_fed_operating_expenditures_period', 'ttl_fed_op_exp_per'),
+        ('shared_fed_operating_expenditures_year', 'shared_fed_op_exp_ytd'),
+        ('total_fed_receipts_year', 'ttl_fed_receipts_ytd'),
+        ('shared_fed_activity_period', 'shared_fed_actvy_fed_shr_per'),
+        ('shared_nonfed_operating_expenditures_year', 'shared_nonfed_op_exp_ytd'),
+        ('fed_candidate_contributions_refunds_period', 'fed_cand_contb_ref_per'),
+        ('net_operating_expendituresenditures_year', 'net_op_exp_ytd'),
+        ('total_operating_expenditures_period', 'ttl_op_exp_per'),
+        ('transfers_from_nonfed_account_year', 'tranf_from_nonfed_acct_ytd'),
+        ('other_political_committee_contributions_period', 'other_pol_cmte_contb_per_i'),
+        ('total_disbursements_summary_page_period', 'ttl_disb_sum_page_per'),
+        ('other_political_committee_contributions_year', 'other_pol_cmte_contb_ytd_ii'),
+        ('total_receipts_year', 'ttl_receipts_ytd'),
+        ('individual_item_contributions_period', 'indv_item_contb_per'),
+        ('calendar_year', 'calendar_yr'),
+    )
+
+    house_senate_mapping = (
+        #('total_contributions_col_total_year', 'ttl_contb_col_ttl_ytd'),
+        #('cvg_end_dt_sk', 'cvg_end_dt_sk'),
+        #('aggregate_amount_pers_contributions_general', 'agr_amt_pers_contrib_gen'),
+        ('refunds_individual_contributions_period', 'ref_indv_contb_per'),
+        ('refunds_other_political_committee_contributions_year', 'ref_other_pol_cmte_contb_ytd'),
+        ('electiontp_sk', 'electiontp_sk'),
+        ('end_image_num', 'end_image_num'),
+        ('total_offsets_to_operating_expenditures_period', 'ttl_offsets_to_op_exp_per'),
+        ('total_loan_repayments_year', 'ttl_loan_repymts_ytd'),
+        ('transfers_from_other_authorized_committee_period', 'tranf_from_other_auth_cmte_per'),
+        ('refunds_political_party_committee_contributions_period', 'ref_pol_pty_cmte_contb_per'),
+        ('candidate_contributions_period', 'cand_contb_per'),
+        ('total_contributions_column_total_period', 'ttl_contb_column_ttl_per'),
+        ('transfers_to_other_authorized_committee_period', 'tranf_to_other_auth_cmte_per'),
+        ('net_operating_expenditures_period', 'net_op_exp_per'),
+        ('gross_recipt_min_pers_contribution_general', 'grs_rcpt_min_pers_contrib_gen'),
+        ('gross_recipt_authorized_committee_general', 'grs_rcpt_auth_cmte_gen'),
+        ('transfers_to_other_authorized_committee_year', 'tranf_to_other_auth_cmte_ytd'),
+        ('operating_expenditures_period', 'op_exp_per'),
+        #('two_year_periodiod_sk', 'two_yr_period_sk'),
+        ('gross_recipt_min_periods_contrib_primary', 'grs_rcpt_min_pers_contrib_prim'),
+        ('refunds_other_political_committee_contributions_period', 'ref_other_pol_cmte_contb_per'),
+        ('offsets_to_operating_expenditures_year', 'offsets_to_op_exp_ytd'),
+        ('total_individual_item_contributions_year', 'ttl_indv_item_contb_ytd'),
+        ('total_loan_repayments_period', 'ttl_loan_repymts_per'),
+        ('load_date', 'load_date'),
+        ('loan_repayments_candidate_loans_period', 'loan_repymts_cand_loans_per'),
+        ('debts_owed_by_committee', 'debts_owed_by_cmte'),
+        ('total_disbursements_period', 'ttl_disb_per_ii'),
+        ('candidate_contributions_year', 'cand_contb_ytd'),
+        ('transfers_from_other_authorized_committee_year', 'tranf_from_other_auth_cmte_ytd'),
+        ('cash_on_hand_beginning_period', 'coh_bop'),
+        ('offsets_to_operating_expenditures_period', 'offsets_to_op_exp_per'),
+        ('all_other_loans_year', 'all_other_loans_ytd'),
+        ('cvg_start_dt_sk', 'cvg_start_dt_sk'),
+        ('all_other_loans_period', 'all_other_loans_per'),
+        ('other_disbursements_period', 'other_disb_per'),
+        ('refunds_total_contributions_col_total_year', 'ref_ttl_contb_col_ttl_ytd'),
+        ('other_disbursements_year', 'other_disb_ytd'),
+        ('transaction_sk', 'transaction_sk'),
+        ('refunds_individual_contributions_year', 'ref_indv_contb_ytd'),
+        ('individual_item_contributions_period', 'indv_item_contb_per'),
+        ('total_loans_year', 'ttl_loans_ytd'),
+        ('cash_on_hand_close_period', 'coh_cop_i'),
+        ('net_contributions_period', 'net_contb_per'),
+        #('reporttype_sk', 'reporttype_sk'),
+        ('net_contributions_year', 'net_contb_ytd'),
+        ('individual_unitemized_contributions_period', 'indv_unitem_contb_per'),
+        ('other_political_committee_contributions_year', 'other_pol_cmte_contb_ytd'),
+        ('total_receipts_period', 'ttl_receipts_per_i'),
+        ('cash_on_hand_end_period', 'coh_cop_ii'),
+        ('total_contributions_refunds_year', 'ttl_contb_ref_ytd'),
+        ('other_political_committee_contributions_period', 'other_pol_cmte_contb_per'),
+        ('total_contributions_period', 'ttl_contb_per'),
+        ('loan_repayments_candidate_loans_year', 'loan_repymts_cand_loans_ytd'),
+        #('cmte_sk', 'cmte_sk'),
+        #('form_3_sk', 'form_3_sk'),
+        ('total_disbursements_year', 'ttl_disb_ytd'),
+        ('total_offsets_to_operating_expenditures_year', 'ttl_offsets_to_op_exp_ytd'),
+        ('debts_owed_to_committee', 'debts_owed_to_cmte'),
+        ('total_operating_expenditures_year', 'ttl_op_exp_ytd'),
+        ('report_year', 'rpt_yr'),
+        ('gross_recipt_authorized_committee_primary', 'grs_rcpt_auth_cmte_prim'),
+        ('political_party_committee_contributions_period', 'pol_pty_cmte_contb_per'),
+        ('total_contributions_year', 'ttl_contb_ytd'),
+        ('loan_repayments_other_loans_period', 'loan_repymts_other_loans_per'),
+        ('operating_expenditures_year', 'op_exp_ytd'),
+        ('total_loans_period', 'ttl_loans_per'),
+        ('total_individual_contributions_year', 'ttl_indv_contb_ytd'),
+        ('total_receipts', 'ttl_receipts_ii'),
+        ('facthousesenate_f3_sk', 'facthousesenate_f3_sk'),
+        ('loan_repayments_other_loans_year', 'loan_repymts_other_loans_ytd'),
+        ('refunds_political_party_committee_contributions_year', 'ref_pol_pty_cmte_contb_ytd'),
+        ('beginning_image_number', 'begin_image_num'),
+        ('expire_date', 'expire_date'),
+        ('political_party_committee_contributions_year', 'pol_pty_cmte_contb_ytd'),
+        ('loans_made_by_candidate_year', 'loans_made_by_cand_ytd'),
+        ('total_receipts_year', 'ttl_receipts_ytd'),
+        ('total_disbursements_period', 'ttl_disb_per_i'),
+        ('other_receipts_period', 'other_receipts_per'),
+        ('total_contribution_refunds_col_total_period', 'ttl_contb_ref_col_ttl_per'),
+        ('total_individual_contributions_period', 'ttl_indv_contb_per'),
+        ('net_operating_expenditures_year', 'net_op_exp_ytd'),
+        ('total_operating_expenditures_period', 'ttl_op_exp_per'),
+        ('loans_made_by_candidate_period', 'loans_made_by_cand_per'),
+        ('aggregate_amount_contributions_pers_fund_primary', 'agr_amt_contrib_pers_fund_prim'),
+        ('total_contributions_refunds_period', 'ttl_contb_ref_per'),
+        ('subtotal_period', 'subttl_per'),
+        ('total_individual_unitemized_contributions_year', 'ttl_indv_unitem_contb_ytd'),
+        ('other_receipts_year', 'other_receipts_ytd'),
+    )
+
     dim_mapping = (
         ('load_date', 'load_date'),
         ('committee_id', 'cmte_id'),
@@ -1249,8 +1480,10 @@ class Total(object):
     )
 
     maps_fields = (
-        (mapping, 'fields'),
-        (dim_mapping, 'dimcmte_fields')
+        (presidential_mapping, 'presidential_fields'),
+        (pac_party_mapping, 'pac_party_fields'),
+        (house_senate_mapping, 'house_senate_fields'),
+        (dim_mapping, 'dimcmte_fields'),
     )
 
 
