@@ -484,6 +484,7 @@ def format_committees(self, data, page, fields, year):
 
 def format_totals(self, data, page_data, fields, default_year):
     results = []
+    #return data
 
     for committee in data:
         com = {}
@@ -502,10 +503,18 @@ def format_totals(self, data, page_data, fields, default_year):
                 if record != []:
                     details = {}
                     details['type'] = kind
+
                     for api_name, fec_name in mapping:
                         if record.has_key(fec_name):
                             details[api_name] = record[fec_name]
+
+                    if record.has_key('dimreporttype'):
+                        for api_name, fec_name in self.report_mapping:
+                            if record['dimreporttype'][0].has_key(fec_name):
+                                details[api_name] = record['dimreporttype'][0][fec_name]
+
                     reports.append(details)
+
 
             if reports != []:
                 com['reports'] = reports
@@ -1162,9 +1171,8 @@ class Total(object):
     }
 
     def query_text(self, show_fields):
-        print "Aloha!"
-        print show_fields
-        return '(%s){%s, /facthousesenate_f3{%s}, /factpresidential_f3p{%s}, /factpacsandparties_f3x{%s}}' % (
+
+        return '(%s){%s, /facthousesenate_f3{%s, /dimreporttype}, /factpresidential_f3p{%s, /dimreporttype}, /factpacsandparties_f3x{%s, /dimreporttype}}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
                 show_fields['house_senate_fields'],
@@ -1473,6 +1481,13 @@ class Total(object):
         ('other_receipts_year', 'other_receipts_ytd'),
     )
 
+    report_mapping = (
+        ('expire_date', 'expire_date'),
+        ('load_date', 'load_date'),
+        ('report_type', 'rpt_tp'),
+        ('report_type_full', 'rpt_tp_desc'),
+    )
+
     dim_mapping = (
         ('load_date', 'load_date'),
         ('committee_id', 'cmte_id'),
@@ -1483,6 +1498,7 @@ class Total(object):
         (presidential_mapping, 'presidential_fields'),
         (pac_party_mapping, 'pac_party_fields'),
         (house_senate_mapping, 'house_senate_fields'),
+        (report_mapping, 'report_fields'),
         (dim_mapping, 'dimcmte_fields'),
     )
 
