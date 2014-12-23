@@ -499,14 +499,30 @@ def format_totals(self, data, page_data, fields, default_year):
         )
 
         for bucket, mapping, kind in bucket_map:
+            totals = {}
             for record in committee[bucket]:
                 if record != []:
                     details = {}
                     details['type'] = kind
 
+                    cycle = int(record['two_yr_period_sk'])
+                    if not totals.has_key(cycle):
+                        totals[cycle] = {'election_cycle': cycle}
+
                     for api_name, fec_name in mapping:
                         if record.has_key(fec_name):
                             details[api_name] = record[fec_name]
+
+                        # this is the naming convention for the totals in each period that can be summed by election cycle. I am still going to double check on this to make sure reports don't overlap.
+                        if api_name.startswith('total_') and api_name.endswith('_period') and record[fec_name] is not None:
+                            new_name = api_name[6:-7]
+
+                            if not totals[cycle].has_key(new_name):
+                                totals[cycle][new_name] = float(record[fec_name])
+                            else:
+                                totals[cycle][new_name] += float(record[fec_name])
+
+
 
                     if record.has_key('dimreporttype'):
                         for api_name, fec_name in self.report_mapping:
@@ -515,6 +531,8 @@ def format_totals(self, data, page_data, fields, default_year):
 
                     reports.append(details)
 
+            if totals != {}:
+                com['totals'] = totals
 
             if reports != []:
                 com['reports'] = reports
