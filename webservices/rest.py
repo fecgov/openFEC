@@ -522,8 +522,6 @@ def format_totals(self, data, page_data, fields, default_year):
                             else:
                                 totals[cycle][new_name] += float(record[fec_name])
 
-
-
                     if record.has_key('dimreporttype'):
                         for api_name, fec_name in self.report_mapping:
                             if record['dimreporttype'][0].has_key(fec_name):
@@ -1211,13 +1209,13 @@ class Total(object):
 
     # presidential
     presidential_mapping = (
-        ('beggining_image_number','begin_image_num'),
+        ('beginning_image_number','begin_image_num'),
         ('candidate_contribution_period','cand_contb_per'),
         ('candidate_contribution_year','cand_contb_ytd'),
         ('cash_on_hand_beginning_period','coh_bop'),
         ('cash_on_hand_end_period','coh_cop'),
-        ('debts_owed_by_committe','debts_owed_by_cmte'),
-        ('debts_owed_to_committe','debts_owed_to_cmte'),
+        ('debts_owed_by_committee','debts_owed_by_cmte'),
+        ('debts_owed_to_committee','debts_owed_to_cmte'),
         ('end_image_number','end_image_num'),
         ('exempt_legal_accounting_disbursement_period','exempt_legal_acctg_disb_per'),
         ('exempt_legal_accounting_disbursement_year','exempt_legal_acctg_disb_ytd'),
@@ -1226,13 +1224,13 @@ class Total(object):
         ('federal_funds_year','fed_funds_ytd'),
         ('fundraising_disbursements_period','fndrsg_disb_per'),
         ('fundraising_disbursements_year','fndrsg_disb_ytd'),
-        ('indvidual_contbutions_period','indv_contb_per'),
-        ('indvidual_contbutions_year','indv_contb_ytd'),
+        ('indvidual_contributions_period','indv_contb_per'),
+        ('indvidual_contributions_year','indv_contb_ytd'),
         ('items_on_hand_liquidated','items_on_hand_liquidated'),
         ('load_date','load_date'),
         ('loans_received_from_candidate_period','loans_received_from_cand_per'),
         ('loans_received_from_candidate_year','loans_received_from_cand_ytd'),
-        ('net_contbution_summary_period','net_contb_sum_page_per'),
+        ('net_contribution_summary_period','net_contb_sum_page_per'),
         ('net_operating_expenses_summary_period','net_op_exp_sum_page_per'),
         ('offsets_to_fundraising_expenses_period','offsets_to_fndrsg_exp_per'),
         ('offsets_to_fundraising_exp_year','offsets_to_fndrsg_exp_ytd'),
@@ -1247,18 +1245,18 @@ class Total(object):
         ('other_loans_received_period','other_loans_received_per'),
         ('other_loans_received_year', 'other_loans_received_ytd'),
 
-        ('other_political_committee_contbutions_period', 'other_pol_cmte_contb_per'),
-        ('other_political_committee_contbutions_year', 'other_pol_cmte_contb_ytd'),
+        ('other_political_committee_contributions_period', 'other_pol_cmte_contb_per'),
+        ('other_political_committee_contributions_year', 'other_pol_cmte_contb_ytd'),
         ('other_receipts_period', 'other_receipts_per'),
         ('other_receipts_year', 'other_receipts_ytd'),
-        ('political_party_committee_contbutions_period', 'pol_pty_cmte_contb_per'),
-        ('political_party_committee_contbutions_year', 'pol_pty_cmte_contb_ytd'),
-        ('refunded_indvidual_contbutions_period', 'ref_indv_contb_per'),
-        ('refunded_indvidual_contbutions_year', 'ref_indv_contb_ytd'),
-        ('refunded_other_political_committee_contbutions_period', 'ref_other_pol_cmte_contb_per'),
-        ('refunded_other_political_committee_contbutions_year', 'ref_other_pol_cmte_contb_ytd'),
-        ('refunded_political_party_committee_contbutions_period', 'ref_pol_pty_cmte_contb_per'),
-        ('refunded_political_party_committee_contbutions_year', 'ref_pol_pty_cmte_contb_ytd'),
+        ('political_party_committee_contributions_period', 'pol_pty_cmte_contb_per'),
+        ('political_party_committee_contributions_year', 'pol_pty_cmte_contb_ytd'),
+        ('refunds_indvidual_contributions_period', 'ref_indv_contb_per'),
+        ('refunded_indvidual_contributions_year', 'ref_indv_contb_ytd'),
+        ('refunded_other_political_committee_contributions_period', 'ref_other_pol_cmte_contb_per'),
+        ('refunded_other_political_committee_contributions_year', 'ref_other_pol_cmte_contb_ytd'),
+        ('refunded_political_party_committee_contributions_period', 'ref_pol_pty_cmte_contb_per'),
+        ('refunded_political_party_committee_contributions_year', 'ref_pol_pty_cmte_contb_ytd'),
         ('repayments_loans_made_by_candidate_period', 'repymts_loans_made_by_cand_per'),
         ('repayments_loans_made_candidate_year', 'repymts_loans_made_cand_ytd'),
         ('repayments_other_loans_period', 'repymts_other_loans_per'),
@@ -1271,10 +1269,10 @@ class Total(object):
         ('tranfer_from_affilated_committee_year', 'tranf_from_affiliated_cmte_ytd'),
         ('tranfer_to_other_authorized_committe_period', 'tranf_to_other_auth_cmte_per'),
         ('tranfer_to_other_authorized_committe_year', 'tranf_to_other_auth_cmte_ytd'),
-        ('total_contbutions_period', 'ttl_contb_per'),
-        ('total_contbution_refunds_period', 'ttl_contb_ref_per'),
-        ('total_contbution_refunds_year', 'ttl_contb_ref_ytd'),
-        ('total_contbutions_year', 'ttl_contb_ytd'),
+        ('total_contributions_period', 'ttl_contb_per'),
+        ('total_contribution_refunds_period', 'ttl_contb_ref_per'),
+        ('total_contribution_refunds_year', 'ttl_contb_ref_ytd'),
+        ('total_contributions_year', 'ttl_contb_ytd'),
         ('total_disbursements_period', 'ttl_disb_per'),
         ('total_disbursements_summary_period', 'ttl_disb_sum_page_per'),
         ('total_disbursements_year', 'ttl_disb_ytd'),
@@ -1312,7 +1310,7 @@ class Total(object):
         ('loan_repymts_received_period', 'loan_repymts_received_per'),
         ('cash_on_hand_close_year', 'coh_coy'),
         ('offsets_to_operating_expendituresenditures_period', 'offsets_to_op_exp_per_i'),
-        ('cash_on_hand_close_period', 'coh_cop'),
+        ('cash_on_hand_end_period', 'coh_cop'),
         ('independent_expenditures_period', 'indt_exp_per'),
         ('other_fed_operating_expenditures_period', 'other_fed_op_exp_per'),
         #('two_year_period_sk', 'two_yr_period_sk'),
@@ -1384,7 +1382,7 @@ class Total(object):
         ('total_individual_contributions_year', 'ttl_indv_contb_ytd'),
         ('other_fed_operating_expenditures_year', 'other_fed_op_exp_ytd'),
         ('total_contribution_refunds_period', 'ttl_contb_ref_per_ii'),
-        ('begin_image_num', 'begin_image_num'),
+        ('beginning_image_number', 'begin_image_num'),
         ('expire_date', 'expire_date'),
         ('individual_contribution_refunds_period', 'indv_contb_ref_per'),
         ('total_contribution_refunds_year', 'ttl_contb_ref_ytd_ii'),
@@ -1395,7 +1393,7 @@ class Total(object):
         ('shared_fed_activity_period', 'shared_fed_actvy_fed_shr_per'),
         ('shared_nonfed_operating_expenditures_year', 'shared_nonfed_op_exp_ytd'),
         ('fed_candidate_contributions_refunds_period', 'fed_cand_contb_ref_per'),
-        ('net_operating_expendituresenditures_year', 'net_op_exp_ytd'),
+        ('net_operating_expenditures_year', 'net_op_exp_ytd'),
         ('total_operating_expenditures_period', 'ttl_op_exp_per'),
         ('transfers_from_nonfed_account_year', 'tranf_from_nonfed_acct_ytd'),
         ('other_political_committee_contributions_period', 'other_pol_cmte_contb_per_i'),
@@ -1418,7 +1416,7 @@ class Total(object):
         ('total_loan_repayments_year', 'ttl_loan_repymts_ytd'),
         ('transfers_from_other_authorized_committee_period', 'tranf_from_other_auth_cmte_per'),
         ('refunds_political_party_committee_contributions_period', 'ref_pol_pty_cmte_contb_per'),
-        ('candidate_contributions_period', 'cand_contb_per'),
+        ('candidate_contribution_period', 'cand_contb_per'),
         ('total_contributions_column_total_period', 'ttl_contb_column_ttl_per'),
         ('transfers_to_other_authorized_committee_period', 'tranf_to_other_auth_cmte_per'),
         ('net_operating_expenditures_period', 'net_op_exp_per'),
@@ -1436,7 +1434,7 @@ class Total(object):
         ('loan_repayments_candidate_loans_period', 'loan_repymts_cand_loans_per'),
         ('debts_owed_by_committee', 'debts_owed_by_cmte'),
         ('total_disbursements_period', 'ttl_disb_per_ii'),
-        ('candidate_contributions_year', 'cand_contb_ytd'),
+        ('candidate_contribution_year', 'cand_contb_ytd'),
         ('transfers_from_other_authorized_committee_year', 'tranf_from_other_auth_cmte_ytd'),
         ('cash_on_hand_beginning_period', 'coh_bop'),
         ('offsets_to_operating_expenditures_period', 'offsets_to_op_exp_per'),
@@ -1450,7 +1448,7 @@ class Total(object):
         ('refunds_individual_contributions_year', 'ref_indv_contb_ytd'),
         ('individual_item_contributions_period', 'indv_item_contb_per'),
         ('total_loans_year', 'ttl_loans_ytd'),
-        ('cash_on_hand_close_period', 'coh_cop_i'),
+        ('cash_on_hand_end_period', 'coh_cop_i'),
         ('net_contributions_period', 'net_contb_per'),
         #('reporttype_sk', 'reporttype_sk'),
         ('net_contributions_year', 'net_contb_ytd'),
@@ -1493,7 +1491,7 @@ class Total(object):
         ('total_operating_expenditures_period', 'ttl_op_exp_per'),
         ('loans_made_by_candidate_period', 'loans_made_by_cand_per'),
         ('aggregate_amount_contributions_pers_fund_primary', 'agr_amt_contrib_pers_fund_prim'),
-        ('total_contributions_refunds_period', 'ttl_contb_ref_per'),
+        ('total_contribution_refunds_period', 'ttl_contb_ref_per'),
         ('subtotal_period', 'subttl_per'),
         ('total_individual_unitemized_contributions_year', 'ttl_indv_unitem_contb_ytd'),
         ('other_receipts_year', 'other_receipts_ytd'),
@@ -1533,7 +1531,8 @@ class TotalResource(SingleResource, Total):
 class TotalSearch(Searchable, Total):
     parser = reqparse.RequestParser()
 
-    field_name_map = {"committee_id": string.Template("cmte_id='$arg'")}
+    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
+    }
 
     parser.add_argument(
         'fields',
@@ -1552,6 +1551,17 @@ class TotalSearch(Searchable, Total):
         default=20,
         help='The number of results returned per page. Defaults to 20.'
     )
+    parser.add_argument(
+        'committee_id',
+        type=str,
+        help='Committee ID that starts with a "C"'
+    )
+    ### not ready for this one yet
+    # parser.add_argument(
+    #     'election_cycle',
+    #     type=str,
+    #     help='Limit results to a two-year election cycle'
+    # )
 
 
 class Help(restful.Resource):
