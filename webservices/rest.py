@@ -1199,11 +1199,6 @@ class Total(object):
         # exp_subject_limits
         # 'ttl_contb_col_ttl_per'
 
-        # 'two_yr_period_sk'
-        # 'electiontp_sk'
-        # 'reporttype_sk'
-        # 'transaction_sk'
-
     # presidential
     presidential_mapping = (
         ('beginning_image_number','begin_image_num'),
@@ -1523,19 +1518,19 @@ class Total(object):
 
     #These are used for making the election cycle totals.
     house_senate_totals = (
-        ('offsets_to_operating_expenditures_period', 'ttl_offsets_to_op_exp_per')
-        ('contributions_column', 'ttl_contb_column_ttl_per')
-        ('loan_repayments', 'ttl_loan_repymts_per')
-        ('disbursements', 'ttl_disb_per_ii')
-        ('receipts', 'ttl_receipts_per_i')
-        ('contributions', 'ttl_contb_per')
-        ('loans_period', 'ttl_loans_per')
-        ('receipts', 'ttl_receipts_ii')
-        ('disbursements', 'ttl_disb_per_i')
-        ('contribution_refunds_col_', 'ttl_contb_ref_col_ttl_per')
-        ('individual_contributions', 'ttl_indv_contb_per')
-        ('operating_expenditures', 'ttl_op_exp_per')
-        ('contribution_refunds', 'ttl_contb_ref_per')
+        ('offsets_to_operating_expenditures_period', 'ttl_offsets_to_op_exp_per'),
+        ('contributions_column', 'ttl_contb_column_ttl_per'),
+        ('loan_repayments', 'ttl_loan_repymts_per'),
+        ('disbursements', 'ttl_disb_per_ii'),
+        ('receipts', 'ttl_receipts_per_i'),
+        ('contributions', 'ttl_contb_per'),
+        ('loans_period', 'ttl_loans_per'),
+        ('receipts', 'ttl_receipts_ii'),
+        ('disbursements', 'ttl_disb_per_i'),
+        ('contribution_refunds_col_', 'ttl_contb_ref_col_ttl_per'),
+        ('individual_contributions', 'ttl_indv_contb_per'),
+        ('operating_expenditures', 'ttl_op_exp_per'),
+        ('contribution_refunds', 'ttl_contb_ref_per'),
     )
 
     report_mapping = (
