@@ -50,3 +50,9 @@ sudo service nginx restart
 # Will use Ubuntu Upstart for process control
 # REST server logs available in /var/log/upstart/rest_server.log 
 sudo cp /usr/local/home/$CURRENT_USER/openFEC/webservices/setup/rest_server.conf /etc/init
+
+sudo mkdir /var/log/openfec
+sudo chown ubuntu:ubuntu var/log/openfec
+
+echo "
+alias nodeapp=\"cd /usr/local/home/ubuntu/openFEC-web-app; git pull origin master; npm run build; node app.js > /var/log/openfec/app_log.log 2> /var/log/openfec/app_err.log\"" >> $HOME/.bash_profile
