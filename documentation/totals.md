@@ -596,7 +596,7 @@ Total receipts during the period.
 
 Cash on hand end during the period.
 
-### total_contributions_refunds_year
+### total_contribution_refunds_year
 
 Total contributions refunds for the year to date.
 
@@ -752,11 +752,11 @@ Election type sk.
 
 End image number.
 
-### individual_contributions_refunds_year
+### individual_contribution_refunds_year
 
 Individual contributions refunds for the year to date.
 
-### total_contributions_refunds_period_i
+### total_contribution_refunds_period_i
 
 Total contributions refunds during the period i.
 
@@ -880,7 +880,7 @@ Total operating expenditures for the year to date.
 
 Non allocated fed election activity during the period.
 
-### fed_candidate_committee_contributions_refunds_year
+### fed_candidate_committee_contribution_refunds_year
 
 Fed candidate committee contributions refunds for the year to date.
 
@@ -1036,7 +1036,7 @@ Independent expenditures for the year to date.
 
 Other fed receipts for the year to date.
 
-### total_contributions_refunded_year
+### total_contribution_refunds_year
 
 Total contributions refunded for the year to date.
 
@@ -1124,7 +1124,7 @@ Shared fed activity during the period.
 
 Shared non-federal operating expenditures for the year to date.
 
-### fed_candidate_contributions_refunds_period
+### fed_candidate_contribution_refunds_period
 
 Fed candidate contributions refunds during the period.
 
