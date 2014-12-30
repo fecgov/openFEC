@@ -1521,6 +1521,23 @@ class Total(object):
         ('other_receipts_year', 'other_receipts_ytd'),
     )
 
+    #These are used for making the election cycle totals.
+    house_senate_totals = (
+        ('offsets_to_operating_expenditures_period', 'ttl_offsets_to_op_exp_per')
+        ('contributions_column', 'ttl_contb_column_ttl_per')
+        ('loan_repayments', 'ttl_loan_repymts_per')
+        ('disbursements', 'ttl_disb_per_ii')
+        ('receipts', 'ttl_receipts_per_i')
+        ('contributions', 'ttl_contb_per')
+        ('loans_period', 'ttl_loans_per')
+        ('receipts', 'ttl_receipts_ii')
+        ('disbursements', 'ttl_disb_per_i')
+        ('contribution_refunds_col_', 'ttl_contb_ref_col_ttl_per')
+        ('individual_contributions', 'ttl_indv_contb_per')
+        ('operating_expenditures', 'ttl_op_exp_per')
+        ('contribution_refunds', 'ttl_contb_ref_per')
+    )
+
     report_mapping = (
         ('expire_date', 'expire_date'),
         ('load_date', 'load_date'),
