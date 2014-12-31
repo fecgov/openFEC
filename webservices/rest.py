@@ -161,7 +161,7 @@ def assign_formatting(self, data_dict, page_data, year):
     elif str(self.endpoint) == 'totalresource' or str(self.endpoint) == 'totalsearch':
         return format_totals(self, data_dict, page_data, fields, year)
     else:
-        return data_dict
+        return data_dic
 
 
 # Candidate formatting
@@ -325,12 +325,8 @@ def format_committees(self, data, page, fields, year):
             else:
                 expired = False
 
-
             if item.has_key('load_date') and item['load_date'] is not None:
-                if expired == False:
-                    committee['load_date'] = item['load_date']
-                else:
-                    record['load_date'] = item['load_date']
+                committee['load_date'] = item['load_date']
 
             # address
             address = {}
@@ -466,13 +462,13 @@ def format_committees(self, data, page, fields, year):
                 del record[record_type][key]
                 # adding additional records to archive newest to oldest
 
-                if len(record[record_type]) > 0 and ('archive' in fields or '*' in fields):
-                    if not committee.has_key('archive'):
-                        committee['archive'] = {}
-                    for key in sorted(record[record_type], key=record[record_type].get, reverse=True):
-                        if not committee['archive'].has_key(record_type):
-                            committee['archive'][record_type] = []
-                        committee['archive'][record_type].append(record[record_type][key])
+            if len(record[record_type]) > 0 and ('archive' in fields or '*' in fields):
+                if not committee.has_key('archive'):
+                    committee['archive'] = {}
+                for key in sorted(record[record_type], key=record[record_type].get, reverse=True):
+                    if not committee['archive'].has_key(record_type):
+                        committee['archive'][record_type] = []
+                    committee['archive'][record_type].append(record[record_type][key])
         #name short cut
         if committee.has_key('description') and committee['description'].has_key('name'):
             committee['name'] = committee['description']['name']
@@ -726,6 +722,8 @@ class Candidate(object):
                 show_fields['status_fields'],
         )
 
+
+
     # Field mappings (API_output, FEC_input)
     # basic candidate information
     dimcand_mapping = (
@@ -905,7 +903,7 @@ class CandidateSearch(Searchable, Candidate):
     field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
                     "fec_id": string.Template("cand_id='$arg'"),
                     "office": string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).office_tp~'$arg'"
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp~'$arg'"
                     ),
                     "district":string.Template(
                         "top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"
@@ -1234,7 +1232,6 @@ class Total(object):
         ('other_disbursements_year','other_disb_ytd'),
         ('other_loans_received_period','other_loans_received_per'),
         ('other_loans_received_year', 'other_loans_received_ytd'),
-
         ('other_political_committee_contributions_period', 'other_pol_cmte_contb_per'),
         ('other_political_committee_contributions_year', 'other_pol_cmte_contb_ytd'),
         ('other_receipts_period', 'other_receipts_per'),
