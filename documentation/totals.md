@@ -467,13 +467,13 @@ Transfers to other authorized committee during the period.
 
 Net operating expenditures during the period.
 
-### gross_recipt_min_pers_contribution_general
+### gross_receipt_minus_personal_contributions_primary
 
-?
+Gross receipts minus personal contributions primary (Form 3 -- BCRA Millionaire's Amendment ruled unconstitutional Davis v FEC)
 
-### gross_recipt_authorized_committee_general
+### gross_receipts_authorized_committee_general
 
-?
+Gross receipts authorized committee in the general election.
 
 ### transfers_to_other_authorized_committee_year
 
@@ -483,9 +483,9 @@ Transfers to other authorized committee for the year to date.
 
 Operating expenditures during the period.
 
-### gross_receipt_min_pers_contrib_primary
+### gross_receipt_minus_personal_contributions_primary
 
-?
+Gross receipts minus personal contributions in the primary.
 
 ### refunds_other_political_committee_contributions_period
 
@@ -720,9 +720,9 @@ Total operating expenditures during the period.
 
 Loans made by candidate during the period.
 
-### aggregate_amount_contributions_pers_fund_primary
+### aggregate_contributions_personal_funds_primary
 
-Aggregate amount contributions personal fund primary.
+Aggregate amount contributed from personal funds - primary (Form 3 -- BCRA Millionaire's Amendment ruled unconstitutional Davis v FEC)
 
 ### total_contribution_refunds_period
 

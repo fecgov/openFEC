@@ -1206,7 +1206,7 @@ class Total(object):
         ('debts_owed_by_committee','debts_owed_by_cmte'),
         ('debts_owed_to_committee','debts_owed_to_cmte'),
         ('end_image_number','end_image_num'),
-        ('expentiture_subject_to_limits', 'exp_subject_limits')
+        ('expentiture_subject_to_limits', 'exp_subject_limits'),
         ('exempt_legal_accounting_disbursement_period','exempt_legal_acctg_disb_per'),
         ('exempt_legal_accounting_disbursement_year','exempt_legal_acctg_disb_ytd'),
         ('expire_date','expire_date'),
