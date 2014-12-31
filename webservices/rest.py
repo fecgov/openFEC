@@ -506,7 +506,7 @@ def format_totals(self, data, page_data, fields, default_year):
                         totals[cycle] = {'election_cycle': cycle}
 
                     for api_name, fec_name in mapping:
-                        if record.has_key(fec_name):
+                        if record.has_key(fec_name) and record[fec_name] is not None:
                             details[api_name] = record[fec_name]
 
                         # this is the naming convention for the totals in each period that can be summed by election cycle. I am still going to double check on this to make sure reports don't overlap.
