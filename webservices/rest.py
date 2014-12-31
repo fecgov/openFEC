@@ -1196,9 +1196,6 @@ class Total(object):
     # need to add
         # "cvg_end_dt_sk"
         # "cvg_start_dt_sk"
-        # exp_subject_limits
-        # 'ttl_contb_col_ttl_per'
-
     # presidential
     presidential_mapping = (
         ('beginning_image_number','begin_image_num'),
@@ -1209,6 +1206,7 @@ class Total(object):
         ('debts_owed_by_committee','debts_owed_by_cmte'),
         ('debts_owed_to_committee','debts_owed_to_cmte'),
         ('end_image_number','end_image_num'),
+        ('expentiture_subject_to_limits', 'exp_subject_limits')
         ('exempt_legal_accounting_disbursement_period','exempt_legal_acctg_disb_per'),
         ('exempt_legal_accounting_disbursement_year','exempt_legal_acctg_disb_ytd'),
         ('expire_date','expire_date'),
@@ -1424,9 +1422,8 @@ class Total(object):
     )
 
     house_senate_mapping = (
-        #('total_contributions_col_total_year', 'ttl_contb_col_ttl_ytd'),
         #('cvg_end_dt_sk', 'cvg_end_dt_sk'),
-        #('aggregate_amount_pers_contributions_general', 'agr_amt_pers_contrib_gen'),
+        ('aggregate_amount_personal_contributions_general', 'agr_amt_pers_contrib_gen'),
         ('refunds_individual_contributions_period', 'ref_indv_contb_per'),
         ('refunds_other_political_committee_contributions_year', 'ref_other_pol_cmte_contb_ytd'),
         ('electiontp_sk', 'electiontp_sk'),
@@ -1439,12 +1436,11 @@ class Total(object):
         ('total_contributions_column_total_period', 'ttl_contb_column_ttl_per'),
         ('transfers_to_other_authorized_committee_period', 'tranf_to_other_auth_cmte_per'),
         ('net_operating_expenditures_period', 'net_op_exp_per'),
-        ('gross_receipt_min_pers_contribution_general', 'grs_rcpt_min_pers_contrib_gen'),
+        ('gross_receipt_minus_personal_contribution_general', 'grs_rcpt_min_pers_contrib_gen'),
         ('gross_receipt_authorized_committee_general', 'grs_rcpt_auth_cmte_gen'),
         ('transfers_to_other_authorized_committee_year', 'tranf_to_other_auth_cmte_ytd'),
         ('operating_expenditures_period', 'op_exp_per'),
-        #('two_year_periodiod_sk', 'two_yr_period_sk'),
-        ('gross_receipt_min_periods_contrib_primary', 'grs_rcpt_min_pers_contrib_prim'),
+        ('gross_receipt_minus_personal_contributions_primary', 'grs_rcpt_min_pers_contrib_prim'),
         ('refunds_other_political_committee_contributions_period', 'ref_other_pol_cmte_contb_per'),
         ('offsets_to_operating_expenditures_year', 'offsets_to_op_exp_ytd'),
         ('total_individual_item_contributions_year', 'ttl_indv_item_contb_ytd'),
@@ -1469,7 +1465,6 @@ class Total(object):
         ('total_loans_year', 'ttl_loans_ytd'),
         ('cash_on_hand_end_period', 'coh_cop_i'),
         ('net_contributions_period', 'net_contb_per'),
-        #('reporttype_sk', 'reporttype_sk'),
         ('net_contributions_year', 'net_contb_ytd'),
         ('individual_unitemized_contributions_period', 'indv_unitem_contb_per'),
         ('other_political_committee_contributions_year', 'other_pol_cmte_contb_ytd'),
@@ -1479,8 +1474,6 @@ class Total(object):
         ('other_political_committee_contributions_period', 'other_pol_cmte_contb_per'),
         ('total_contributions_period', 'ttl_contb_per'),
         ('loan_repayments_candidate_loans_year', 'loan_repymts_cand_loans_ytd'),
-        #('cmte_sk', 'cmte_sk'),
-        #('form_3_sk', 'form_3_sk'),
         ('total_disbursements_year', 'ttl_disb_ytd'),
         ('total_offsets_to_operating_expenditures_year', 'ttl_offsets_to_op_exp_ytd'),
         ('debts_owed_to_committee', 'debts_owed_to_cmte'),
@@ -1509,7 +1502,7 @@ class Total(object):
         ('net_operating_expenditures_year', 'net_op_exp_ytd'),
         ('total_operating_expenditures_period', 'ttl_op_exp_per'),
         ('loans_made_by_candidate_period', 'loans_made_by_cand_per'),
-        ('aggregate_amount_contributions_pers_fund_primary', 'agr_amt_contrib_pers_fund_prim'),
+        ('aggregate_contributions_personal_funds_primary', 'agr_amt_contrib_pers_fund_prim'),
         ('total_contribution_refunds_period', 'ttl_contb_ref_per'),
         ('subtotal_period', 'subttl_per'),
         ('total_individual_unitemized_contributions_year', 'ttl_indv_unitem_contb_ytd'),
