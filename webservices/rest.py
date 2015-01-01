@@ -1420,7 +1420,7 @@ class Total(object):
         ('aggregate_amount_personal_contributions_general', 'agr_amt_pers_contrib_gen'),
         ('refunds_individual_contributions_period', 'ref_indv_contb_per'),
         ('refunds_other_political_committee_contributions_year', 'ref_other_pol_cmte_contb_ytd'),
-        ('end_image_num', 'end_image_num'),
+        ('end_image_number', 'end_image_num'),
         ('total_offsets_to_operating_expenditures_period', 'ttl_offsets_to_op_exp_per'),
         ('total_loan_repayments_year', 'ttl_loan_repymts_ytd'),
         ('transfers_from_other_authorized_committee_period', 'tranf_from_other_auth_cmte_per'),

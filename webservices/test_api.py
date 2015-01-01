@@ -271,13 +271,15 @@ class OverallTest(unittest.TestCase):
 # Totals
 
     def test_reports(self):
-        results = self._results('/total/C00000620')
+        results = self._results('/total/C00002600')
         print results
 
-        fields = ('beginning_image_number','end_image_number','expire_date','load_date','report_type','report_type_full','report_year','type')
+        fields = ('beginning_image_number', 'end_image_number', 'expire_date', 'load_date','report_type', 'report_type_full','report_year', 'type', 'cash_on_hand_beginning_period', 'cash_on_hand_end_period', 'debts_owed_by_committee', 'debts_owed_to_committee', 'operating_expenditures_period', 'other_political_committee_contributions_period', 'refunds_other_political_committee_contributions_period', 'total_disbursements_period', 'total_individual_contributions_period', 'total_receipts_period',)
 
         for field in fields:
-            self.assertEquals(response['results'][0]['reports'][0].has_key(field), True)
+            print field
+            self.assertEquals(results[0]['reports'][0].has_key(field), True)
+
 
     # def test_totals(self):
     #     response = self._results('/total/C00000620')
