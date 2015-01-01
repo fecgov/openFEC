@@ -128,6 +128,15 @@ The written-out political party of the committee, if applicable. See full list o
 
 The three-letter code for the political party of the committee, if applicable. See full list of political party and party codes [here](party_codes).
 
+#### party_type
+
+Describes the nature of the party such as NAT for national or STA for state.
+
+#### party_type_full
+
+The written-out description of the party such as NATIONAL or STATE.
+
+
 #### qualifying_date
 
 Date a committee became qualified by meeting the requirements and filling our their paperwork.
