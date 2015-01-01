@@ -268,3 +268,18 @@ class OverallTest(unittest.TestCase):
 
             self.assertEquals(response.status_code, 200)
 
+# Totals
+
+    def test_reports(self):
+        results = self._results('/total/C00000620')
+        print results
+
+        fields = ('beginning_image_number','end_image_number','expire_date','load_date','report_type','report_type_full','report_year','type')
+
+        for field in fields:
+            self.assertEquals(response['results'][0]['reports'][0].has_key(field), True)
+
+    # def test_totals(self):
+    #     response = self._results('/total/C00000620')
+    #     self.assertEquals(response[0].has_key(field), True)
+
