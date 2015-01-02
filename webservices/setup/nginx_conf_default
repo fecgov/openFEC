@@ -1,18 +1,49 @@
+##
+# Test vhost
+##
+
+# HTTP server
 server {
   listen 80;
   server_name  fec.18f.us;
 
+  rewrite /eregs/static/(.*)? /regulations/static/$1 ;
+
+  location /regulations/static/ {
+    root /usr/local/home/ubuntu/regulations-site/;
+  }
+
         location /rest/ {
                         proxy_pass http://localhost:5000/;
+			auth_basic "Restricted";
+			auth_basic_user_file /etc/nginx/.htpasswd;
           }
 
         location /htsql/ {
-                        proxy_pass http://localhost:8080/;
+                        proxy_pass http://localhost:8081/;
+			auth_basic "Restricted";
+			auth_basic_user_file /etc/nginx/.htpasswd;
+          }
+
+        location /eregs/ {
+                        proxy_pass http://localhost:8000/;
+			auth_basic "Restricted";
+			auth_basic_user_file /etc/nginx/.htpasswd;
+          }
+
+
+        location /eregs-api/ {
+                        proxy_pass http://localhost:8001/;
+			auth_basic "Restricted";
+			auth_basic_user_file /etc/nginx/.htpasswd;
           }
 
         location / {
                         proxy_pass http://localhost:3000/;
+			auth_basic "Restricted";
+			auth_basic_user_file /etc/nginx/.htpasswd;
           }
+
 }
 
 
@@ -26,16 +57,41 @@ server {
 
   include ssl/ssl.rules;
 
+  rewrite /eregs/static/(.*)? /regulations/static/$1 ;
+
+  location /regulations/static/ {
+    root /usr/local/home/ubuntu/regulations-site/;
+  }
+
   location /rest/ {
 		proxy_pass http://localhost:5000/;
+		auth_basic "Restricted";
+		auth_basic_user_file /etc/nginx/.htpasswd;
   }
 
   location /htsql/ {
-		proxy_pass http://localhost:8080/;
+		proxy_pass http://localhost:8081/;
+		auth_basic "Restricted";
+		auth_basic_user_file /etc/nginx/.htpasswd;
+  }
+
+  location /eregs/ {
+		proxy_pass http://localhost:8000/;
+		auth_basic "Restricted";
+		auth_basic_user_file /etc/nginx/.htpasswd;
+  }
+
+  location /eregs-api/ {
+		proxy_pass http://localhost:8001/;
+		auth_basic "Restricted";
+		auth_basic_user_file /etc/nginx/.htpasswd;
   }
 
   location / {
 		proxy_pass http://localhost:3000/;
+		auth_basic "Restricted";
+		auth_basic_user_file /etc/nginx/.htpasswd;
   }
+
 }
 
