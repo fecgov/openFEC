@@ -1177,17 +1177,32 @@ class Total(object):
     default_fields = {
         'dimcmte_fields': '*',
         'house_senate_fields': '*',
+        'house_senate_totals':['ttl_contb_per', 'net_contb_per'],
         'presidential_fields': '*',
+        'presidential_totals': ['ttl_contb_per'],
         'pac_party_fields': '*',
     }
 
     def query_text(self, show_fields):
+        if len(show_fields['house_senate_totals']) > 0:
+            hs_totals = '/facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, '
+            for t in show_fields['house_senate_totals']:
+                hs_totals = hs_totals + 'sum(^.%s), ' % (t)
+            hs_totals += '},'
 
-        return '(%s){%s, /facthousesenate_f3{%s, /dimreporttype}, /factpresidential_f3p{%s, /dimreporttype}, /factpacsandparties_f3x{%s, /dimreporttype}}' % (
+        if len(show_fields['presidential_totals']) > 0:
+            pres_totals = '/factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, '
+            for t in show_fields['presidential_totals']:
+                pres_totals = pres_totals + 'sum(^.%s), ' % (t)
+            pres_totals += '},'
+
+        return '(%s){%s, /facthousesenate_f3{%s, /dimreporttype}, %s /factpresidential_f3p{%s, /dimreporttype},%s /factpacsandparties_f3x{%s, /dimreporttype}}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
                 show_fields['house_senate_fields'],
+                hs_totals,
                 show_fields['presidential_fields'],
+                pres_totals,
                 show_fields['pac_party_fields'],
             )
 
