@@ -161,7 +161,7 @@ def assign_formatting(self, data_dict, page_data, year):
     elif str(self.endpoint) == 'totalresource' or str(self.endpoint) == 'totalsearch':
         return format_totals(self, data_dict, page_data, fields, year)
     else:
-        return data_dic
+        return data_dict
 
 
 # Candidate formatting
