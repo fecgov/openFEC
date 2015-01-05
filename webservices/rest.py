@@ -480,12 +480,16 @@ def format_committees(self, data, page, fields, year):
 
 def format_totals(self, data, page_data, fields, default_year):
     results = []
+    com = {}
     #return data
 
     for committee in data:
-        com = {}
+        #### make sure committee_id is always in query
+        committee_id = committee['cmte_id']
+        com[committee_id] = {}
+
         for api_name, fec_name in self.dim_mapping:
-              com[api_name]  = committee[fec_name]
+            com[committee_id][api_name]  = committee[fec_name]
         reports = []
 
         bucket_map = (
@@ -494,29 +498,17 @@ def format_totals(self, data, page_data, fields, default_year):
             ('facthousesenate_f3', self.house_senate_mapping, 'house_senate'),
         )
 
+        # loop through the specifics in the forms
         for bucket, mapping, kind in bucket_map:
-            totals = {}
             for record in committee[bucket]:
                 if record != []:
                     details = {}
                     details['type'] = kind
-
                     cycle = int(record['two_yr_period_sk'])
-                    if not totals.has_key(cycle):
-                        totals[cycle] = {'election_cycle': cycle}
 
                     for api_name, fec_name in mapping:
                         if record.has_key(fec_name) and record[fec_name] is not None:
                             details[api_name] = record[fec_name]
-
-                        # this is the naming convention for the totals in each period that can be summed by election cycle. I am still going to double check on this to make sure reports don't overlap.
-                        if api_name.startswith('total_') and api_name.endswith('_period') and record[fec_name] is not None:
-                            new_name = api_name[6:-7]
-
-                            if not totals[cycle].has_key(new_name):
-                                totals[cycle][new_name] = float(record[fec_name])
-                            else:
-                                totals[cycle][new_name] += float(record[fec_name])
 
                     if record.has_key('dimreporttype'):
                         for api_name, fec_name in self.report_mapping:
@@ -525,13 +517,35 @@ def format_totals(self, data, page_data, fields, default_year):
 
                     reports.append(details)
 
-            if totals != {}:
-                com['totals'] = totals
+        if reports != []:
+            com[committee_id]['reports'] = reports
 
-            if reports != []:
-                com['reports'] = reports
-            results.append(com)
+        # add sums
+        totals = {}
+        totals_mappings = (
+            ('hs_sums', self.house_senate_totals),
+            ('p_sums', self.presidential_totals),
+            ('pp_sums', self.pac_party_totals),
+        )
 
+        for name, mapping in totals_mappings:
+            if committee[name] != []:
+                for api_name, fec_name in mapping:
+                    for t in committee[name]:
+                        if t.has_key(fec_name):
+                            if not totals.has_key(t['two_yr_period_sk']):
+                                totals[t['two_yr_period_sk']] = {}
+
+                            totals[t['two_yr_period_sk']][api_name] = t[fec_name]
+        pp = pprint.PrettyPrinter(indent=2)
+        pp.pprint(totals)
+        if totals != {}:
+            com[committee_id]['totals'] = []
+            for key in sorted(totals, key=totals.get, reverse=True):
+                com[committee_id]['totals'].append(totals[key])
+
+
+        results.append(com)
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
@@ -721,7 +735,6 @@ class Candidate(object):
                 com_query,
                 show_fields['status_fields'],
         )
-
 
 
     # Field mappings (API_output, FEC_input)
@@ -1177,26 +1190,33 @@ class Total(object):
     default_fields = {
         'dimcmte_fields': '*',
         'house_senate_fields': '*',
-        'house_senate_totals':['ttl_contb_per', 'net_contb_per'],
+        'house_senate_totals':'ttl_disb_per_ii,ttl_contb_per',
         'presidential_fields': '*',
-        'presidential_totals': ['ttl_contb_per'],
+        'presidential_totals': 'ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per',
         'pac_party_fields': '*',
+        'pac_party_totals': 'ttl_disb_per,ttl_contb_per',
     }
 
     def query_text(self, show_fields):
-        if len(show_fields['house_senate_totals']) > 0:
-            hs_totals = '/facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, '
-            for t in show_fields['house_senate_totals']:
-                hs_totals = hs_totals + 'sum(^.%s), ' % (t)
-            hs_totals += '},'
+        # Creating the summing part of the query
+        house_senate_totals = show_fields['house_senate_totals'].split(',')
+        presidential_totals = show_fields['presidential_totals'].split(',')
+        pac_party_totals = show_fields['pac_party_totals'].split(',')
 
-        if len(show_fields['presidential_totals']) > 0:
-            pres_totals = '/factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, '
-            for t in show_fields['presidential_totals']:
-                pres_totals = pres_totals + 'sum(^.%s), ' % (t)
-            pres_totals += '},'
+        if len(house_senate_totals) > 0:
+            hs_sums = ['sum(^.%s) :as %s, '%(t, t) for t in house_senate_totals]
+            hs_totals = '/facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as hs_sums,'%(string.join(hs_sums))
 
-        return '(%s){%s, /facthousesenate_f3{%s, /dimreporttype}, %s /factpresidential_f3p{%s, /dimreporttype},%s /factpacsandparties_f3x{%s, /dimreporttype}}' % (
+        if len(presidential_totals) > 0:
+            p_sums = ['sum(^.%s) :as %s, '%(t, t) for t in presidential_totals]
+            pres_totals = '/factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as p_sums,'%(string.join(p_sums))
+
+        if len(pac_party_totals)> 0:
+            pp_sums = ['sum(^.%s) :as %s, '%(t, t) for t in pac_party_totals]
+            pp_totals = ', /factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
+
+        # adds the sums formatted above and inserts the default or user defined fields.
+        return '(%s){%s, /facthousesenate_f3{%s, /dimreporttype}, %s /factpresidential_f3p{%s, /dimreporttype},%s /factpacsandparties_f3x{%s, /dimreporttype}%s}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
                 show_fields['house_senate_fields'],
@@ -1204,6 +1224,7 @@ class Total(object):
                 show_fields['presidential_fields'],
                 pres_totals,
                 show_fields['pac_party_fields'],
+                pp_totals,
             )
 
     # need to add
@@ -1293,15 +1314,17 @@ class Total(object):
 
     #These are used for making the election cycle totals.
     presidential_totals = (
+        ('cycle', 'two_yr_period_sk'),
         ('contributions', 'ttl_contb_per'),
         ('contribution_refunds', 'ttl_contb_ref_per'),
         ('disbursements', 'ttl_disb_per'),
         ('loan_repayments_made', 'ttl_loan_repymts_made_per'),
         ('loans_received', 'ttl_loans_received_per'),
         ('offsets_to_operating_expenditures', 'ttl_offsets_to_op_exp_per'),
-        ('total_periods', 'ttl_per'),
+        #('total_period', 'ttl_per'),
         ('receipts', 'ttl_receipts_per'),
-        ('receipts_summary', 'ttl_receipts_sum_page_per'),
+        #('receipts_summary', 'ttl_receipts_sum_page_per'),
+        ('*', 'ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per')
     )
 
     pac_party_mapping = (
@@ -1413,6 +1436,7 @@ class Total(object):
 
     #These are used for making the election cycle totals.
     pac_party_totals = (
+        ('cycle', 'two_yr_period_sk'),
         ('contribution_refunds', 'ttl_contb_ref_per_i'),
         ('fed_receipts', 'ttl_fed_receipts_per'),
         ('fed_election_activity', 'ttl_fed_elect_actvy_per'),
@@ -1420,14 +1444,14 @@ class Total(object):
         ('nonfed_transfers', 'ttl_nonfed_tranf_per'),
         ('fed_disbursements', 'ttl_fed_disb_per'),
         ('disbursements', 'ttl_disb_per'),
-        ('receipts_summary_page', 'ttl_receipts_sum_page_per'),
-        # I think this one is by period
+        #('receipts_summary_page', 'ttl_receipts_sum_page_per'),
         ('individual_contributions', 'ttl_indv_contb'),
         ('contributions', 'ttl_contb_per'),
-        ('contribution_refunds_period', 'ttl_contb_ref_per_ii'),
+        ('contribution_refunds', 'ttl_contb_ref_per_ii'),
         ('fed_operating_expenditures', 'ttl_fed_op_exp_per'),
         ('operating_expenditures', 'ttl_op_exp_per'),
-        ('disbursements_summary_page_period', 'ttl_disb_sum_page_per'),
+        #('disbursements_summary_page_period', 'ttl_disb_sum_page_per'),
+        ('*', 'ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per')
     )
 
     house_senate_mapping = (
@@ -1517,19 +1541,22 @@ class Total(object):
 
     #These are used for making the election cycle totals.
     house_senate_totals = (
-        ('offsets_to_operating_expenditures_period', 'ttl_offsets_to_op_exp_per'),
-        ('contributions_column', 'ttl_contb_column_ttl_per'),
+        #### trying to take out duplicates, need to do this elsewhere
+        ('cycle', 'two_yr_period_sk'),
+        ('offsets_to_operating_expenditures', 'ttl_offsets_to_op_exp_per'),
+        #('contributions_column', 'ttl_contb_column_ttl_per'),
         ('loan_repayments', 'ttl_loan_repymts_per'),
         ('disbursements', 'ttl_disb_per_ii'),
-        ('receipts', 'ttl_receipts_per_i'),
+        #('receipts', 'ttl_receipts_per_i'),
         ('contributions', 'ttl_contb_per'),
-        ('loans_period', 'ttl_loans_per'),
+        ('loans', 'ttl_loans_per'),
         ('receipts', 'ttl_receipts_ii'),
         ('disbursements', 'ttl_disb_per_i'),
-        ('contribution_refunds_col_', 'ttl_contb_ref_col_ttl_per'),
+        #('contribution_refunds_col_', 'ttl_contb_ref_col_ttl_per'),
         ('individual_contributions', 'ttl_indv_contb_per'),
         ('operating_expenditures', 'ttl_op_exp_per'),
         ('contribution_refunds', 'ttl_contb_ref_per'),
+        ('*', 'ttl_offsets_to_op_exp_per,ttl_loan_repymts_per,ttl_receipts_per_i,ttl_contb_per,ttl_loans_per,ttl_receipts_ii,ttl_indv_contb_per,ttl_op_exp_per,ttl_contb_ref_per,')
     )
 
     report_mapping = (
@@ -1551,6 +1578,9 @@ class Total(object):
         (house_senate_mapping, 'house_senate_fields'),
         (report_mapping, 'report_fields'),
         (dim_mapping, 'dimcmte_fields'),
+        (house_senate_totals,'house_senate_totals'),
+        (presidential_totals,'presidential_totals'),
+        (pac_party_totals,'pac_party_totals'),
     )
 
 
