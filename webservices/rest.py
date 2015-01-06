@@ -489,7 +489,8 @@ def format_totals(self, data, page_data, fields, default_year):
         com[committee_id] = {}
 
         for api_name, fec_name in self.dim_mapping:
-            com[committee_id][api_name]  = committee[fec_name]
+            if committee.has_key(fec_name):
+                com[committee_id][api_name]  = committee[fec_name]
         reports = []
 
         bucket_map = (
@@ -532,13 +533,12 @@ def format_totals(self, data, page_data, fields, default_year):
             if committee[name] != []:
                 for api_name, fec_name in mapping:
                     for t in committee[name]:
-                        if t.has_key(fec_name):
+                        if t.has_key(fec_name) and api_name != '*':
                             if not totals.has_key(t['two_yr_period_sk']):
                                 totals[t['two_yr_period_sk']] = {}
-
                             totals[t['two_yr_period_sk']][api_name] = t[fec_name]
-        pp = pprint.PrettyPrinter(indent=2)
-        pp.pprint(totals)
+        # pp = pprint.PrettyPrinter(indent=2)
+        # pp.pprint(totals)
         if totals != {}:
             com[committee_id]['totals'] = []
             for key in sorted(totals, key=totals.get, reverse=True):
@@ -1188,25 +1188,21 @@ class Total(object):
 
     ### update this
     default_fields = {
-        'dimcmte_fields': '*',
-        'house_senate_fields': '*',
-        'house_senate_totals':'ttl_disb_per_ii,ttl_contb_per',
-        'presidential_fields': '*',
-        'presidential_totals': 'ttl_contb_per,ttl_contb_ref_per,',#ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,op_exp_per,cand_contb_per,indv_contb_per',
-        'pac_party_fields': '*',
-        'pac_party_totals': 'ttl_disb_per,ttl_contb_per',
+        'dimcmte_fields': '*,',
+        'house_senate_fields': '*,',
+        'house_senate_totals':'ttl_disb_per_ii,ttl_contb_per,',
+        'presidential_fields': '*,',
+        'presidential_totals': 'ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,op_exp_per,cand_contb_per,indv_contb_per,',
+        'pac_party_fields': '*,',
+        'pac_party_totals': 'ttl_disb_per,ttl_contb_per,',
     }
 
     def query_text(self, show_fields):
+        print show_fields
         # Creating the summing part of the query
         house_senate_totals = show_fields['house_senate_totals'].split(',')
         presidential_totals = show_fields['presidential_totals'].split(',')
         pac_party_totals = show_fields['pac_party_totals'].split(',')
-        print "=================="
-        print house_senate_totals
-        print presidential_totals
-        print pac_party_totals
-        print "=================="
 
         if len(house_senate_totals) > 0:
             hs_sums = ['sum(^.%s) :as %s, '%(t, t) for t in house_senate_totals if t != '']
@@ -1218,7 +1214,7 @@ class Total(object):
 
         if len(pac_party_totals)> 0:
             pp_sums = ['sum(^.%s) :as %s, '%(t, t) for t in pac_party_totals if t != '']
-            pp_totals = ',  /factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
+            pp_totals = '/factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
 
         print "---------"
         print hs_totals
@@ -1227,7 +1223,7 @@ class Total(object):
         print "---------"
 
         # adds the sums formatted above and inserts the default or user defined fields.
-        return '(%s){%s, /facthousesenate_f3{%s, /dimreporttype}, %s /factpresidential_f3p{%s, /dimreporttype},%s /factpacsandparties_f3x{%s, /dimreporttype}%s}' % (
+        return '(%s){cmte_id,%s /facthousesenate_f3{%s /dimreporttype}, %s /factpresidential_f3p{%s /dimreporttype},%s /factpacsandparties_f3x{%s /dimreporttype},%s}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
                 show_fields['house_senate_fields'],
@@ -1355,7 +1351,7 @@ class Total(object):
         ('operating_expenditure', 'op_exp_per'),
         ('candidate_contribution', 'cand_contb_per'),
         # all
-        ('*', 'ttl_contb_per'),#,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,op_exp_per,cand_contb_per,indv_contb_per'),
+        ('*', 'two_yr_period_sk,ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,tranf_to_other_auth_cmte_per,tranf_from_affilated_cmte_per,repymts_loans_made_by_cand_per,ref_indv_contb_per,ref_pol_pty_cmte_contb_per,ref_other_pol_cmte_contb_per,pol_pty_cmte_contb_per,other_receipts_per,other_pol_cmte_contb_per,other_loans_received_per,other_disb_per,loans_received_from_cand_per,indv_contb_per,fndrsg_disb_per,fed_funds_per,exempt_legal_acctg_disb_per,op_exp_per,cand_contb_per,'),
 
         #('total_period', 'ttl_per'),
         #('receipts_summary', 'ttl_receipts_sum_page_per'),
@@ -1602,12 +1598,14 @@ class Total(object):
         ('load_date', 'load_date'),
         ('report_type', 'rpt_tp'),
         ('report_type_full', 'rpt_tp_desc'),
+        ('*', '*'),
     )
 
     dim_mapping = (
         ('load_date', 'load_date'),
         ('committee_id', 'cmte_id'),
         ('expire_date', 'expire_date'),
+        ('*', '*'),
     )
 
     maps_fields = (
