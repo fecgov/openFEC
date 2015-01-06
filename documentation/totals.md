@@ -495,9 +495,9 @@ Refunds other political committee contributions during the period.
 
 Offsets to operating expenditures for the year to date.
 
-### total_individual_item_contributions_year
+### total_individual_itemized_contributions_year
 
-Total individual item contributions for the year to date.
+Total individual itemized contributions for the year to date. Contributions under $200 are not itemized.
 
 ### total_loan_repayments_period
 
@@ -560,9 +560,9 @@ Other disbursements for the year to date.
 
 Refunds individual contributions for the year to date.
 
-### individual_item_contributions_period
+### individual_itemized_contributions_period
 
-Individual item contributions during the period.
+Individual itemized contributions during the period.
 
 ### total_loans_year
 
@@ -920,9 +920,9 @@ Shared fed activity nonfed during the period.
 
 Transfers to affilitated committees for the year to date.
 
-### individual_item_contributions_year
+### individual_itemized_contributions_year
 
-Individual item contributions for the year to date.
+Individual itemized contributions for the year to date.
 
 ### other_disbursements_period
 
@@ -1156,9 +1156,9 @@ Other political committee contributions for the year to date.
 
 Total receipts for the year to date.
 
-### individual_item_contributions_period
+### individual_itemized_contributions_period
 
-Individual item contributions during the period.
+Individual itemized contributions during the period.
 
 ### calendar_year
 

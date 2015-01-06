@@ -545,7 +545,7 @@ def format_totals(self, data, page_data, fields, default_year):
                 com[committee_id]['totals'].append(totals[key])
 
 
-        results.append(com)
+        results.append(com[committee_id])
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
@@ -1190,9 +1190,11 @@ class Total(object):
     default_fields = {
         'dimcmte_fields': '*,',
         'house_senate_fields': '*,',
-        'house_senate_totals':'ttl_disb_per_ii,ttl_contb_per,',
+        'house_senate_totals':
+            'ref_indv_contb_per,tranf_from_other_auth_cmte_per,ref_pol_pty_cmte_contb_per,tranf_to_other_auth_cmte_per,cand_contb_per,op_exp_per,ttl_loan_repymts_per,ttl_disb_per_ii,indv_item_contb_per,indv_unitem_contb_per,ttl_receipts_per_i,other_pol_cmte_contb_per,ttl_contb_per,pol_pty_cmte_contb_per,other_receipts_per,ttl_loans_per,ttl_disb_per_i,ttl_indv_contb_per,ttl_op_exp_per,loans_made_by_cand_per,',
         'presidential_fields': '*,',
-        'presidential_totals': 'ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,op_exp_per,cand_contb_per,indv_contb_per,',
+        'presidential_totals':
+            'ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,op_exp_per,cand_contb_per,indv_contb_per,',
         'pac_party_fields': '*,',
         'pac_party_totals': 'ttl_disb_per,ttl_contb_per,',
     }
@@ -1215,12 +1217,6 @@ class Total(object):
         if len(pac_party_totals)> 0:
             pp_sums = ['sum(^.%s) :as %s, '%(t, t) for t in pac_party_totals if t != '']
             pp_totals = '/factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
-
-        print "---------"
-        print hs_totals
-        print pres_totals
-        print pp_totals
-        print "---------"
 
         # adds the sums formatted above and inserts the default or user defined fields.
         return '(%s){cmte_id,%s /facthousesenate_f3{%s /dimreporttype}, %s /factpresidential_f3p{%s /dimreporttype},%s /factpacsandparties_f3x{%s /dimreporttype},%s}' % (
@@ -1401,7 +1397,7 @@ class Total(object):
         ('coordinated_expenditures_by_party_committee_period', 'coord_exp_by_pty_cmte_per'),
         ('shared_fed_activity_nonfed_period', 'shared_fed_actvy_nonfed_per'),
         ('transfers_to_affilitated_committees_year', 'tranf_to_affilitated_cmte_ytd'),
-        ('individual_item_contributions_year', 'indv_item_contb_ytd'),
+        ('individual_itemized_contributions_year', 'indv_item_contb_ytd'),
         ('other_disbursements_period', 'other_disb_per'),
         ('fed_candidate_committee_contributions_year', 'fed_cand_cmte_contb_ytd'),
         ('other_disbursements_year', 'other_disb_ytd'),
@@ -1460,7 +1456,7 @@ class Total(object):
         ('total_disbursements_summary_page_period', 'ttl_disb_sum_page_per'),
         ('other_political_committee_contributions_year', 'other_pol_cmte_contb_ytd_ii'),
         ('total_receipts_year', 'ttl_receipts_ytd'),
-        ('individual_item_contributions_period', 'indv_item_contb_per'),
+        ('individual_itemized_contributions_period', 'indv_item_contb_per'),
         ('calendar_year', 'calendar_yr'),
         ('*','*'),
     )
@@ -1482,8 +1478,7 @@ class Total(object):
         ('fed_operating_expenditures', 'ttl_fed_op_exp_per'),
         ('operating_expenditures', 'ttl_op_exp_per'),
         #('disbursements_summary_page_period', 'ttl_disb_sum_page_per'),
-        ('*', 'ttl_receipts_per'),
-            #ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per')
+        ('*', 'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,')
     )
 
     house_senate_mapping = (
@@ -1507,7 +1502,7 @@ class Total(object):
         ('gross_receipt_minus_personal_contributions_primary', 'grs_rcpt_min_pers_contrib_prim'),
         ('refunds_other_political_committee_contributions_period', 'ref_other_pol_cmte_contb_per'),
         ('offsets_to_operating_expenditures_year', 'offsets_to_op_exp_ytd'),
-        ('total_individual_item_contributions_year', 'ttl_indv_item_contb_ytd'),
+        ('total_individual_itemized_contributions_year', 'ttl_indv_item_contb_ytd'),
         ('total_loan_repayments_period', 'ttl_loan_repymts_per'),
         ('load_date', 'load_date'),
         ('loan_repayments_candidate_loans_period', 'loan_repymts_cand_loans_per'),
@@ -1524,7 +1519,7 @@ class Total(object):
         ('refunds_total_contributions_col_total_year', 'ref_ttl_contb_col_ttl_ytd'),
         ('other_disbursements_year', 'other_disb_ytd'),
         ('refunds_individual_contributions_year', 'ref_indv_contb_ytd'),
-        ('individual_item_contributions_period', 'indv_item_contb_per'),
+        ('individual_itemized_contributions_period', 'indv_item_contb_per'),
         ('total_loans_year', 'ttl_loans_ytd'),
         ('cash_on_hand_end_period', 'coh_cop_i'),
         ('net_contributions_period', 'net_contb_per'),
@@ -1574,23 +1569,37 @@ class Total(object):
 
     #These are used for making the election cycle totals.
     house_senate_totals = (
-        #### trying to take out duplicates, need to do this elsewhere
         ('cycle', 'two_yr_period_sk'),
+        ('refunds_individual_contributions', 'ref_indv_contb_per'),
         ('offsets_to_operating_expenditures', 'ttl_offsets_to_op_exp_per'),
-        #('contributions_column', 'ttl_contb_column_ttl_per'),
+        ('transfers_from_other_authorized_committee', 'tranf_from_other_auth_cmte_per'),
+        ('refunds_political_party_committee_contributions', 'ref_pol_pty_cmte_contb_per'),
+        ('transfers_to_other_authorized_committee', 'tranf_to_other_auth_cmte_per'),
+        ('candidate_contribution', 'cand_contb_per'),
+        ('operating_expenditures', 'op_exp_per'),
+        ('refunds_other_political_committee_contributions', 'ref_other_pol_cmte_contb_per'),
         ('loan_repayments', 'ttl_loan_repymts_per'),
+        ('loan_repayments_candidate_loans', 'loan_repymts_cand_loans_per'),
         ('disbursements', 'ttl_disb_per_ii'),
-        #('receipts', 'ttl_receipts_per_i'),
+        ('offsets_to_operating_expenditures', 'offsets_to_op_exp_per'),
+        ('all_other_loans', 'all_other_loans_per'),
+        ('other_disbursements', 'other_disb_per'),
+        ('individual_itemized_contributions', 'indv_item_contb_per'),
+        ('individual_unitemized_contributions', 'indv_unitem_contb_per'),
+        ('receipts', 'ttl_receipts_per_i'),
+        ('other_political_committee_contributions', 'other_pol_cmte_contb_per'),
         ('contributions', 'ttl_contb_per'),
+        ('political_party_committee_contributions', 'pol_pty_cmte_contb_per'),
+        ('loan_repayments_other_loans', 'loan_repymts_other_loans_per'),
+        ('other_receipts', 'other_receipts_per'),
         ('loans', 'ttl_loans_per'),
-        ('receipts', 'ttl_receipts_ii'),
         ('disbursements', 'ttl_disb_per_i'),
-        #('contribution_refunds_col_', 'ttl_contb_ref_col_ttl_per'),
+        ('other_receipts', 'other_receipts_per'),
         ('individual_contributions', 'ttl_indv_contb_per'),
         ('operating_expenditures', 'ttl_op_exp_per'),
+        ('loans_made_by_candidate', 'loans_made_by_cand_per'),
         ('contribution_refunds', 'ttl_contb_ref_per'),
-        ('*', 'ttl_disb_per_i')
-            #'ttl_offsets_to_op_exp_per,ttl_loan_repymts_per,ttl_receipts_per_i,ttl_contb_per,ttl_loans_per,ttl_receipts_ii,ttl_indv_contb_per,ttl_op_exp_per,ttl_disb_per_ii')
+        ('*', 'ref_indv_contb_per,ttl_offsets_to_op_exp_per,tranf_from_other_auth_cmte_per,ref_pol_pty_cmte_contb_per,tranf_to_other_auth_cmte_per,cand_contb_per,op_exp_per,ref_other_pol_cmte_contb_per,ttl_loan_repymts_per,loan_repymts_cand_loans_per,ttl_disb_per_ii,offsets_to_op_exp_per,all_other_loans_per,other_disb_per,indv_item_contb_per,indv_unitem_contb_per,ttl_receipts_per_i,other_pol_cmte_contb_per,ttl_contb_per,pol_pty_cmte_contb_per,loan_repymts_other_loans_per,other_receipts_per,ttl_loans_per,ttl_disb_per_i,other_receipts_per,ttl_indv_contb_per,ttl_op_exp_per,loans_made_by_cand_per,ttl_contb_ref_per,'),
     )
 
     report_mapping = (
