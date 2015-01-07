@@ -153,7 +153,11 @@ A list of election years that a committee was associated with that candidate.
 
 #### candidate_id
 
-Unique id of the candidate
+Unique id of the candidate.
+
+#### candidate_name
+
+The name of the candidate in his or her most recent records.
 
 #### designation_full
 
