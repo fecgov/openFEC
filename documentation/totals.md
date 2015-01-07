@@ -418,6 +418,132 @@ Total receipts for the year to date.
 
 Total for the year to date.
 
+
+## Presidential committee total fields
+
+All total fields sum the period reports for the two-year election cycles to create totals. for example, 'receipts' in totals is the sum of total_receipts_period during the election cycle. All totals are grouped by election cycle
+
+### cycle
+
+A four-digit number for the two-year election cycle.
+
+### candidate_contribution
+
+Total candidate contribution for the two-year election cycle.
+
+### exempt_legal_accounting_disbursement
+
+Total exempt legal accounting disbursement for the two-year election cycle.
+
+### federal_funds
+
+Total federal funds for the two-year election cycle.
+
+### fundraising_disbursements
+
+Total fundraising disbursements for the two-year election cycle.
+
+### individual_contributions
+
+Total individual contributions for the two-year election cycle.
+
+### loans_received_from_candidate
+
+Total loans received from candidate for the two-year election cycle.
+
+### offsets_to_fundraising_expenses
+
+Total offsets to fundraising expenses for the two-year election cycle.
+
+### offsets_to_legal_accounting
+
+Total offsets to legal accounting for the two-year election cycle.
+
+### offsets_to_operating_expenditures
+
+Total offsets to operating expenditures for the two-year election cycle.
+
+### operating_expenditures
+
+Total operating expenditures for the two-year election cycle.
+
+### other_disbursements
+
+Total other disbursements for the two-year election cycle.
+
+### other_loans_received
+
+Total other loans received for the two-year election cycle.
+
+### other_political_committee_contributions
+
+Total other political committee contributions for the two-year election cycle.
+
+### other_receipts
+
+Total other receipts for the two-year election cycle.
+
+### political_party_committee_contributions
+
+Total political party committee contributions for the two-year election cycle.
+
+### refunds_individual_contributions
+
+Total refunds individual contributions for the two-year election cycle.
+
+### refunded_other_political_committee_contributions
+
+Total refunded other political committee contributions for the two-year election cycle.
+
+### refunded_political_party_committee_contributions
+
+Total refunded political party committee contributions for the two-year election cycle.
+
+### repayments_loans_made_by_candidate
+
+Total repayments loans made by candidate for the two-year election cycle.
+
+### repayments_other_loans
+
+Total repayments other loans for the two-year election cycle.
+
+### transfer_from_affiliated_committee
+
+Total transfer from affiliated committee for the two-year election cycle.
+
+### transfer_to_other_authorized_committee
+
+Total transfer to other authorized committee for the two-year election cycle.
+
+### contributions
+
+Total contributions for the two-year election cycle.
+
+### contribution_refunds
+
+Total contribution refunds for the two-year election cycle.
+
+### disbursements
+
+Total disbursements for the two-year election cycle.
+
+### loan_repayments_made
+
+Total loan repayments made for the two-year election cycle.
+
+### loans_received
+
+Total loans received for the two-year election cycle.
+
+### offsets_to_operating_expenditures
+
+Total offsets to operating expenditures for the two-year election cycle.
+
+### receipts
+
+Total receipts for the two-year election cycle.
+
+
 ---------------------------------------------------
 
 
@@ -739,6 +865,132 @@ Total individual unitemized contributions for the year to date.
 ### other_receipts_year
 
 Other receipts for the year to date.
+
+
+## House and Senate total fields
+
+All total fields sum the period reports for the two-year election cycles to create totals. for example, 'receipts' in totals is the sum of total_receipts_period during the election cycle. All totals are grouped by election cycle
+
+### cycle
+
+The four-digit number for the two-year election cycle.
+
+### refunds_individual_contributions
+
+Total refunds individual contributions for the two-year election cycle.
+
+### offsets_to_operating_expenditures
+
+Total offsets to operating expenditures for the two-year election cycle.
+
+### transfers_from_other_authorized_committee
+
+Total transfers from other authorized committee for the two-year election cycle.
+
+### refunds_political_party_committee_contributions
+
+Total refunds political party committee contributions for the two-year election cycle.
+
+### transfers_to_other_authorized_committee
+
+Total transfers to other authorized committee for the two-year election cycle.
+
+### candidate_contribution
+
+Total candidate contribution for the two-year election cycle.
+
+### operating_expenditures
+
+Total operating expenditures for the two-year election cycle.
+
+### refunds_other_political_committee_contributions
+
+Total refunds other political committee contributions for the two-year election cycle.
+
+### loan_repayments
+
+Total loan repayments for the two-year election cycle.
+
+### loan_repayments_candidate_loans
+
+Total loan repayments candidate loans for the two-year election cycle.
+
+### disbursements
+
+Total disbursements for the two-year election cycle.
+
+### offsets_to_operating_expenditures
+
+Total offsets to operating expenditures for the two-year election cycle.
+
+### all_other_loans
+
+Total all other loans for the two-year election cycle.
+
+### other_disbursements
+
+Total other disbursements for the two-year election cycle.
+
+### individual_itemized_contributions
+
+Total individual itemized contributions for the two-year election cycle.
+
+### individual_unitemized_contributions
+
+Total individual unitemized contributions for the two-year election cycle.
+
+### receipts
+
+Total receipts for the two-year election cycle.
+
+### other_political_committee_contributions
+
+Total other political committee contributions for the two-year election cycle.
+
+### contributions
+
+Total contributions for the two-year election cycle.
+
+### political_party_committee_contributions
+
+Total political party committee contributions for the two-year election cycle.
+
+### loan_repayments_other_loans
+
+Total loan repayments other loans for the two-year election cycle.
+
+### other_receipts
+
+Total other receipts for the two-year election cycle.
+
+### loans
+
+Total loans for the two-year election cycle.
+
+### disbursements
+
+Total disbursements for the two-year election cycle.
+
+### other_receipts
+
+Total other receipts for the two-year election cycle.
+
+### individual_contributions
+
+Total individual contributions for the two-year election cycle.
+
+### operating_expenditures
+
+Total operating expenditures for the two-year election cycle.
+
+### loans_made_by_candidate
+
+Total loans made by candidate for the two-year election cycle.
+
+### contribution_refunds
+
+Total contribution refunds for the two-year election cycle.
+
 
 -----------------------------------------------
 
@@ -1164,4 +1416,177 @@ Individual itemized contributions during the period.
 
 Calendar year of the report.
 
+
+## PAC and Party total fields
+
+All total fields sum the period reports for the two-year election cycles to create totals. for example, 'receipts' in totals is the sum of total_receipts_period during the election cycle. All totals are grouped by election cycle.
+
+
+### cycle
+
+A four-digit number for the two-year election cycle.
+
+### contribution_refunds
+
+Total contribution refunds for the two-year election cycle.
+
+### shared_nonfed_operating_expenditures
+
+Total shared non-federal operating expenditures for the two-year election cycle.
+
+### fed_receipts
+
+Total fed receipts for the two-year election cycle.
+
+### loan_repayments_received
+
+Total loan repayments received for the two-year election cycle.
+
+### offsets_to_operating_expenditures
+
+Total offsets to operating expenditures for the two-year election cycle.
+
+### independent_expenditures
+
+Total independent expenditures for the two-year election cycle.
+
+### other_fed_operating_expenditures
+
+Total other fed operating expenditures for the two-year election cycle.
+
+### loan_repayments_made
+
+Total loan repayments made for the two-year election cycle.
+
+### fed_elect_activity
+
+Total fed elect activity for the two-year election cycle.
+
+### receipts
+
+Total receipts for the two-year election cycle.
+
+### nonfed_transfers
+
+Total non-federal transfers for the two-year election cycle.
+
+### political_party_committee_contributions
+
+Total political party committee contributions for the two-year election cycle.
+
+### total_fed_disbursements
+
+Total total fed disbursements for the two-year election cycle.
+
+### total_disbursements
+
+Total total disbursements for the two-year election cycle.
+
+### political_party_committee_contributions
+
+Total political party committee contributions for the two-year election cycle.
+
+### non_allocated_fed_election_activity
+
+Total non allocated fed election activity for the two-year election cycle.
+
+### coordinated_expenditures_by_party_committee
+
+Total coordinated expenditures by party committee for the two-year election cycle.
+
+### shared_fed_activity_nonfed
+
+Total shared fed activity non-federal for the two-year election cycle.
+
+### other_disbursements
+
+Total other disbursements for the two-year election cycle.
+
+### fed_candidate_committee_contributions
+
+Total fed candidate committee contributions for the two-year election cycle.
+
+### offsets_to_operating_expendituresenditures
+
+Total offsets to operating expenditures for the two-year election cycle.
+
+### net_contributions
+
+Total net contributions for the two-year election cycle.
+
+### individual_unitemized_contributions
+
+Total individual unitemized contributions for the two-year election cycle.
+
+### all_loans_received
+
+Total of all loans received for the two-year election cycle.
+
+### total_contributions
+
+Total contributions for the two-year election cycle.
+
+### transfers_from_nonfed_levin
+
+Total transfers from non-federal levin funds for the two-year election cycle.
+
+### shared_fed_operating_expenditures
+
+Total shared fed operating expenditures for the two-year election cycle.
+
+### loans_made
+
+Total loans made for the two-year election cycle.
+
+### transfers_to_affiliated_committee
+
+Total transfers to affiliated committee for the two-year election cycle.
+
+### other_political_committee_contributions
+
+Total of other political committee contributions for the two-year election cycle.
+
+### other_fed_receipts
+
+Total of other federal receipts for the two-year election cycle.
+
+### transfers_from_affiliated_party
+
+Total transfers from affiliated party for the two-year election cycle.
+
+### total_contribution_refunds
+
+Total total contribution refunds for the two-year election cycle.
+
+### individual_contribution_refunds
+
+Total individual contribution refunds for the two-year election cycle.
+
+### transfers_from_nonfed_account
+
+Total transfers from non-federal accounts for the two-year election cycle.
+
+### total_fed_operating_expenditures
+
+Total total fed operating expenditures for the two-year election cycle.
+
+### shared_fed_activity
+
+Total shared fed activity for the two-year election cycle.
+
+### fed_candidate_contribution_refunds
+
+Total fed candidate contribution refunds for the two-year election cycle.
+
+### total_operating_expenditures
+
+Total total operating expenditures for the two-year election cycle.
+
+### other_political_committee_contributions
+
+Total other political committee contributions for the two-year election cycle.
+
+### individual_itemized_contributions
+
+Total individual itemized contributions for the two-year election cycle.
 
