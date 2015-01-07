@@ -191,6 +191,10 @@ def format_candids(self, data, page_data, fields, default_year):
                     if cmte.has_key(fec_name):
                         committee[api_name] = cmte[fec_name]
 
+                if cmte['dimcmte'][0]['dimcmteproperties'][0]:
+                    # this should be most recent name
+                    committee['committee_name'] = cmte['dimcmte'][0]['dimcmteproperties'][-1]['cmte_nm']
+
                 if cmte['cmte_dsgn']:
                     committee['designation_full'] = designation_decoder[cmte['cmte_dsgn']]
                 if cmte['cmte_tp']:
@@ -303,6 +307,8 @@ def format_candids(self, data, page_data, fields, default_year):
 
 # still need to implement year
 def format_committees(self, data, page, fields, year):
+    #return data
+
     results = []
     for cmte in data:
         committee = {}
@@ -427,6 +433,15 @@ def format_committees(self, data, page, fields, year):
             candidate_dict = {}
             for cand in cmte['dimlinkages']:
                 candidate ={}
+                if cmte['dimlinkages'] != []:
+                    if cmte['dimlinkages'][0].has_key('dimcand'):
+                        if cmte['dimlinkages'][0]['dimcand'][0]['dimcandproperties'] != []:
+                            # this assumes the most recent is last, which seems to be the case
+                            candidate['candidate_name'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandproperties'][-1]['cand_nm']
+                        if cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'] != []:
+                            # not worried about this changing because they would get a new id if it did
+                            candidate['office_sought'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'][0]['dimoffice'][0]['office_tp']
+
                 for api_name, fec_name in self.linkages_field_mapping:
                     if cand.has_key(fec_name) and fec_name != 'expire_date' and fec_name != 'cand_id':
                         candidate[api_name] = cand[fec_name]
@@ -717,10 +732,11 @@ class Candidate(object):
 
     def query_text(self, show_fields):
         if show_fields['cmte_fields'] != '':
-            com_query = "/dimlinkages?cmte_dsgn={%s}  :as affiliated_committees," % (show_fields['cmte_fields'])
+            com_query = "/dimlinkages?cmte_dsgn={%s}{*, /dimcmte{/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (show_fields['cmte_fields'])
             show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
         else:
             com_query = ''
+
 
         return """
             %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
@@ -941,7 +957,7 @@ class Committee(object):
     default_fields = {
         'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
         'properties_fields': '*',
-        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date',
+        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp}}}',
         'designation_fields': '*',
     }
 
@@ -975,6 +991,7 @@ class Committee(object):
     linkages_mapping = (
         ('committees', 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,\
             expire_date,link_date'),
+        ('candidate_name', '/dimcand{/dimcandproperties{cand_nm}}'),
         ('*', '*'),
     ) + linkages_field_mapping
 
@@ -1062,7 +1079,7 @@ class Committee(object):
         ('qualifying_date', 'qual_dt'),
     )
 
-    properties_mapping = (('*', '*'),) + properties_field_mapping + committee_address_field_mappings + committee_address + treasurer + treasurer_field_mapping + custodian_field_mapping + custodian
+    properties_mapping = properties_field_mapping + committee_address_field_mappings + committee_address + treasurer + treasurer_field_mapping + custodian_field_mapping + custodian + (('*', '*'),)
 
     # connects mappings to field names
     maps_fields = (

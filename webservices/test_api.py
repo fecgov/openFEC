@@ -105,7 +105,7 @@ class OverallTest(unittest.TestCase):
     def test_candidate_committes(self):
         response = self._results('/candidate?candidate_id=P80003338&fields=*')
 
-        fields = ('committee_id', 'designation', 'designation_full', 'type', 'type_full', 'election_year')
+        fields = ('committee_id', 'designation', 'designation_full', 'type', 'type_full', 'election_year', 'committee_name')
 
         election = response[0]['elections'][0]
         print election
@@ -171,7 +171,7 @@ class OverallTest(unittest.TestCase):
         # not all records in the test db have candidates; find one that does
         result = results[0]['candidates'][0]
 
-        fields = ('candidate_id', 'designation', 'designation_full', 'election_years', 'expire_date', 'link_date', 'type', 'type_full')
+        fields = ('candidate_id', 'candidate_name', 'office_sought', 'designation', 'designation_full', 'election_years', 'expire_date', 'link_date', 'type', 'type_full')
         for field in fields:
             print field
             self.assertEquals(result.has_key(field), True)
