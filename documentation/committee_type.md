@@ -1,6 +1,8 @@
+
 # Committee Type Codes
 
 |   Committee Type Code |   Committee Type  |   Explanation |
+|-----|-----|-----|
 |   C   |   Communication Cost  |   Organizations like corporations or unions may prepare communications for their employees or members that advocate the election of specific candidates and they must disclose them under certain circumstances. These are usually paid with direct corporate or union funds rather than from PACs.   |
 |   D   |   Delegate Committee  |   Delegate committees are organized for the purpose of influencing the selection of delegates to Presidential nominating conventions. The term includes a group of delegates, a group of individuals seeking to become delegates, and a group of individuals supporting delegates.    |
 |   E   |   Electioneering Communication    |   Groups (other than PACs) making Electioneering Communications   |
