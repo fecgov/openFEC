@@ -519,7 +519,6 @@ def format_totals(self, data, page_data, fields, default_year):
         for bucket, mapping, kind in bucket_map:
             for record in committee[bucket]:
                 if record != []:
-                    print record
                     details = {}
                     if fields == '' or '*' in fields or 'type' in fields:
                         details['type'] = kind
@@ -539,7 +538,7 @@ def format_totals(self, data, page_data, fields, default_year):
                         reports.append(details)
 
         if reports != []:
-            com[committee_id]['reports'] = reports
+            com[committee_id]['reports'] = sorted(reports, key=lambda k: k['report_year'], reverse=True)
 
         # add sums
         totals = {}
@@ -554,13 +553,13 @@ def format_totals(self, data, page_data, fields, default_year):
                 for api_name, fec_name in mapping:
                     for t in committee[name]:
                         if t.has_key(fec_name) and api_name != '*':
-                            if not totals.has_key(t['two_yr_period_sk']):
-                                totals[t['two_yr_period_sk']] = {}
-                            totals[t['two_yr_period_sk']][api_name] = t[fec_name]
+                            if not totals.has_key(int(t['two_yr_period_sk'])):
+                                totals[int(t['two_yr_period_sk'])] = {}
+                            totals[int(t['two_yr_period_sk'])][api_name] = t[fec_name]
 
         if totals != {}:
             com[committee_id]['totals'] = []
-            for key in sorted(totals, key=totals.get, reverse=True):
+            for key in sorted(totals, reverse=True):
                 com[committee_id]['totals'].append(totals[key])
 
 
@@ -1222,7 +1221,6 @@ class Total(object):
     }
 
     def query_text(self, show_fields):
-        print show_fields
         # Creating the summing part of the query
         house_senate_totals = show_fields['house_senate_totals'].split(',')
         presidential_totals = show_fields['presidential_totals'].split(',')
