@@ -298,3 +298,6 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(results[0]['reports'][0].has_key(field), True)
 
+# write these tests
+#/total?fields=disbursements
+#/total?fields=total_receipts_period
