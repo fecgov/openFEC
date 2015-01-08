@@ -499,7 +499,6 @@ def format_totals(self, data, page_data, fields, default_year):
     #return data
 
     for committee in data:
-        #### make sure committee_id is always in query
         committee_id = committee['cmte_id']
 
         com[committee_id] = {}
@@ -520,7 +519,8 @@ def format_totals(self, data, page_data, fields, default_year):
             for record in committee[bucket]:
                 if record != []:
                     details = {}
-                    if fields == '' or '*' in fields or 'type' in fields:
+                    print fields
+                    if fields == [] or '*' in fields or 'type' in fields:
                         details['type'] = kind
                     if record.has_key('two_yr_period_sk'):
                         cycle = int(record['two_yr_period_sk'])
@@ -1107,7 +1107,6 @@ class CommitteeSearch(Searchable, Committee):
 
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                         "fec_id": string.Template("cmte_id='$arg'"),
-                        # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
                         "candidate_id":string.Template(
                             "exists(dimlinkages?cand_id~'$arg')"
                         ),
@@ -1206,7 +1205,6 @@ class Total(object):
     table_name_stem = 'cmte'
     viewable_table_name = "dimcmte?exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x)"
 
-    ### update this
     default_fields = {
         'dimcmte_fields': '*,',
         'house_senate_fields': '*,',
@@ -1706,7 +1704,9 @@ class TotalResource(SingleResource, Total):
 class TotalSearch(Searchable, Total):
     parser = reqparse.RequestParser()
 
-    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
+    field_name_map = {
+        "committee_id": string.Template("cmte_id='$arg'"),
+        "cycle": string.Template("(facthousesenate_f3){two_yr_period_sk='$arg'}|(factpresidential_f3p){two_yr_period_sk='$arg'}|(factpacsandparties_f3x){two_yr_period_sk='$arg'}")
     }
 
     parser.add_argument(
@@ -1731,12 +1731,12 @@ class TotalSearch(Searchable, Total):
         type=str,
         help='Committee ID that starts with a "C"'
     )
-    ### not ready for this one yet
-    # parser.add_argument(
-    #     'election_cycle',
-    #     type=str,
-    #     help='Limit results to a two-year election cycle'
-    # )
+
+    parser.add_argument(
+        'cycle',
+        type=str,
+        help='Limit results to a two-year election cycle'
+    )
 
 
 class Help(restful.Resource):

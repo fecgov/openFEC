@@ -27,6 +27,8 @@ The endpoint automatically displays the most recent information for the committe
 
 Unique id of the committee.
 
+The Federal Election Commission assigns a 9-character alpha-numeric code a committee. The committee ID for a specific committee always remains the same.
+
 #### expire_date
 
 Expire dates apply to the information that the date is directly grouped with.
@@ -97,8 +99,12 @@ Fax number of the committee, if provided.
 #### filing_frequency
 
 How often a committee is scheduled to file.
-M = monthly
-Q = quarterly
+A = Administratively terminated,
+D = Debt,
+M = Monthly filer,
+Q = Quarterly filer,
+T = Terminated,
+W = Waived,
 
 #### form_type
 
