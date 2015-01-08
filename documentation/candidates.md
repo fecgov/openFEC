@@ -112,6 +112,10 @@ The primary committee for the candidate. See full list of political party and pa
 
 Unique id of the committee.
 
+##### committee_name
+
+The name of the committee in its most recent records.
+
 ##### designation_full
 
 Designation of the committee. See full list of designations and designation codes [here](designations). The committee's designation can affect what rules the committee must follow.
