@@ -584,8 +584,8 @@ class SingleResource(restful.Resource):
 
 class Searchable(restful.Resource):
 
-    fulltext_qry = """SELECT %s_sk
-                      FROM   dim%s_fulltext
+    fulltext_qry = """SELECT {name_stem}_sk
+                      FROM   dim{name_stem}_fulltext
                       WHERE  fulltxt @@ to_tsquery(:findme)
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
@@ -604,7 +604,7 @@ class Searchable(restful.Resource):
         for arg in args:
             if args[arg]:
                 if arg == 'q':
-                    qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
+                    qry = self.fulltext_qry.format(name_stem=self.table_name_stem)
                     qry = sa.sql.text(qry)
                     speedlogger.info('\nfulltext query: \n%s' % qry)
                     start_time = time.time()
@@ -921,6 +921,39 @@ class CandidateSearch(Searchable, Candidate):
                         "exists(dimcandoffice)"
                     ),
     }
+
+
+class NameSearch(Searchable):
+    """
+    A quick name search (candidate or committee) optimized for response time for typeahead
+    """
+
+    fulltext_qry = """SELECT cand_id AS candidate_id,
+                             cmte_id AS committee_id,
+                             name,
+                             office_sought
+                      FROM   name_search_fulltext
+                      WHERE  name_vec @@ to_tsquery(:findme || ':*')
+                      ORDER BY ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
+                      LIMIT  20"""
+
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        'q',
+        type=str,
+        help='Name (candidate or committee) to search for',
+    )
+
+    def get(self):
+        args = self.parser.parse_args(strict=True)
+
+        qry = sa.sql.text(self.fulltext_qry)
+        findme = ' & '.join(args['q'].split())
+        data = conn.execute(qry, findme = findme).fetchall()
+
+        return {"api_version": "0.2",
+                "pagination": {'per_page': 20, 'page': 1, 'pages': 1, 'count': len(data)},
+                "results": [dict(d) for d in data]}
 
 
 class Committee(object):
@@ -1602,6 +1635,7 @@ api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
+api.add_resource(NameSearch, '/name')
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
