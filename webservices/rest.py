@@ -709,7 +709,7 @@ class Candidate(object):
         'party_fields': 'party_affiliation_desc,party_affiliation',
         'status_fields': 'election_yr,cand_status,ici_code',
         'properties_fields': 'cand_nm',
-        'cmte_fields': "'P'",
+        'cmte_fields': 'P',
     }
 
     # Query
@@ -718,7 +718,16 @@ class Candidate(object):
 
     def query_text(self, show_fields):
         if show_fields['cmte_fields'] != '':
-            com_query = "/dimlinkages?cmte_dsgn={%s}{*, /dimcmte{/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (show_fields['cmte_fields'])
+            cmte = show_fields['cmte_fields']
+            if cmte == 'P':
+                cmte_des_qry = "?cmte_dsgn={'P'}"
+                print "HOLA"
+            elif cmte == '!P':
+                cmte_des_qry = "?cmte_dsgn!={'P'}"
+            else:
+                cmte_des_qry = ''
+
+            com_query = "/dimlinkages%s{*, /dimcmte{*,/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (cmte_des_qry)
             show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
         else:
             com_query = ''
@@ -816,9 +825,9 @@ class Candidate(object):
     ) + property_fields_mapping
     # to filter primary from affiliated committees
     cmte_mapping = (
-        ('primary_committee', "'P'"),
-        ('affiliated_committees', "'U'"),
-        ('*', "'P', 'U'")
+        ('primary_committee', 'P'),
+        ('affiliated_committees', '!P'),
+        ('*', '*')
     )
 
     # connects mappings to field names
