@@ -740,8 +740,10 @@ class Candidate(object):
             else:
                 cmte_des_qry = ''
 
-            com_query = "/dimlinkages%s{*, /dimcmte{/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (cmte_des_qry)
+            com_query = "/dimlinkages%s{*, /dimcmte{*,/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (cmte_des_qry)
+
             show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
+
         else:
             com_query = ''
 
