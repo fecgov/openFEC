@@ -48,11 +48,18 @@ This is a grouping of information about the committee's description, designation
 
 #### designation_full
 
-Designation of the committee. See full list of designations and designation codes [here](designations). The committee's designation can affect what rules the committee must follow.
+Written-out Designation of the committee. It can be Authorized by a candidate, Lobbyist/Registrant PAC, Leadership PAC, Joint fundraiser, Principal campaign committee of a candidate, Unauthorized.
 
 #### designation
 
-Designation code of the committee. See full list of designations and designation codes [here](designations).
+Designation code of the committee.
+
+A = Authorized by a candidate,
+B = Lobbyist/Registrant PAC,
+D = Leadership PAC,
+J = Joint fundraiser,
+P = Principal campaign committee of a candidate,
+U = Unauthorized,
 
 #### organization_type_full
 
@@ -153,7 +160,11 @@ A list of election years that a committee was associated with that candidate.
 
 #### candidate_id
 
-Unique id of the candidate
+Unique id of the candidate.
+
+#### candidate_name
+
+The name of the candidate in his or her most recent records.
 
 #### designation_full
 
