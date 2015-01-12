@@ -161,7 +161,7 @@ def assign_formatting(self, data_dict, page_data, year):
     elif str(self.endpoint) == 'totalresource' or str(self.endpoint) == 'totalsearch':
         return format_totals(self, data_dict, page_data, fields, year)
     else:
-        return data_dict
+        return {'api_version':"0.2", 'pagination':page_data, 'results': data_dict}
 
 
 # Candidate formatting
@@ -441,6 +441,8 @@ def format_committees(self, data, page, fields, year):
                         if cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'] != []:
                             # not worried about this changing because they would get a new id if it did
                             candidate['office_sought'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'][0]['dimoffice'][0]['office_tp']
+                            candidate['office_sought_full'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'][0]['dimoffice'][0]['office_tp_desc']
+
 
                 for api_name, fec_name in self.linkages_field_mapping:
                     if cand.has_key(fec_name) and fec_name != 'expire_date' and fec_name != 'cand_id':
@@ -552,8 +554,7 @@ def format_totals(self, data, page_data, fields, default_year):
                             if not totals.has_key(t['two_yr_period_sk']):
                                 totals[t['two_yr_period_sk']] = {}
                             totals[t['two_yr_period_sk']][api_name] = t[fec_name]
-        # pp = pprint.PrettyPrinter(indent=2)
-        # pp.pprint(totals)
+
         if totals != {}:
             com[committee_id]['totals'] = []
             for key in sorted(totals, key=totals.get, reverse=True):
@@ -678,7 +679,8 @@ class Searchable(restful.Resource):
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
-            if year != '*':
+            # Committee endpoint is not year sensitive yet, so we don't want to limit it yet. Otherwise, the candidate's won't show if they are not in the default year.
+            if year != '*' and (str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch'):
                 qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
                 count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
@@ -967,7 +969,7 @@ class Committee(object):
     default_fields = {
         'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
         'properties_fields': '*',
-        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp}}}',
+        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp,office_tp_desc}}}',
         'designation_fields': '*',
     }
 
@@ -1002,7 +1004,10 @@ class Committee(object):
         ('committees', 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,\
             expire_date,link_date'),
         ('candidate_name', '/dimcand{/dimcandproperties{cand_nm}}'),
-        ('*', '*'),
+        ('office_sought', '/dimcandoffice{/dimoffice{office_tp}}}'),
+        ('office_sought_full', '/dimcandoffice{/dimoffice{office_tp_desc}}}'),
+        ('candidate_name', '/dimcand{/dimcandproperties{cand_nm,}'),
+        ('*', '*, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp,office_tp_desc}}}'),
     ) + linkages_field_mapping
 
     designation_mapping = (
@@ -1227,7 +1232,6 @@ class Total(object):
     }
 
     def query_text(self, show_fields):
-        print show_fields
         # Creating the summing part of the query
         house_senate_totals = show_fields['house_senate_totals'].split(',')
         presidential_totals = show_fields['presidential_totals'].split(',')

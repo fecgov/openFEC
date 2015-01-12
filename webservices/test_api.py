@@ -176,6 +176,15 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(result.has_key(field), True)
 
+        response = self._response('/committee?committee_id=C00000851&fields=*')
+        results = response['results']
+        result = results[0]['candidates'][0]
+        for field in fields:
+            print field
+            self.assertEquals(result.has_key(field), True)
+
+
+
     def test_committee_stats(self):
         response = self._response('/committee/C00000851')
         results = response['results']
@@ -298,3 +307,6 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(results[0]['reports'][0].has_key(field), True)
 
+# write these tests
+#/total?fields=disbursements
+#/total?fields=total_receipts_period
