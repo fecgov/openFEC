@@ -298,6 +298,15 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(results[0]['reports'][0].has_key(field), True)
 
-# write these tests
-#/total?fields=disbursements
-#/total?fields=total_receipts_period
+    # def test_total_field_filter(self):
+    #     results_disbursements = self._results('total?committee_id=C00347583&fields=disbursements')
+    #     results_recipts = self._results('/total/C00347583?fields=total_receipts_period')
+
+    #     self.assertIn('disbursements', results_disbursements)
+    #     self.assertIn('total_receipts_period',results_recipts)
+
+
+
+
+
+
