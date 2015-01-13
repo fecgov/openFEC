@@ -71,7 +71,11 @@ engine = sa.create_engine(sqla_conn_string)
 conn = engine.connect()
 
 htsql_conn_string = sqla_conn_string.replace('postgresql', 'pgsql')
-htsql_conn = HTSQL(htsql_conn_string)
+htsql_conn = HTSQL(htsql_conn_string,
+                   #{'tweak.override': {'foreign_keys':
+                                                          #['facthousesenate_f3_sums(cmte_id) -> dimcmte(cmte_id']}})
+                                                          #[{'facthousesenate_f3_sums(cmte_id)': 'dimcmte(cmte_id)'}]}})
+                                                          )
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -161,7 +165,7 @@ def assign_formatting(self, data_dict, page_data, year):
     elif str(self.endpoint) == 'totalresource' or str(self.endpoint) == 'totalsearch':
         return format_totals(self, data_dict, page_data, fields, year)
     else:
-        return data_dict
+        return {'api_version':"0.2", 'pagination':page_data, 'results': data_dict}
 
 
 # Candidate formatting
@@ -441,6 +445,8 @@ def format_committees(self, data, page, fields, year):
                         if cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'] != []:
                             # not worried about this changing because they would get a new id if it did
                             candidate['office_sought'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'][0]['dimoffice'][0]['office_tp']
+                            candidate['office_sought_full'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'][0]['dimoffice'][0]['office_tp_desc']
+
 
                 for api_name, fec_name in self.linkages_field_mapping:
                     if cand.has_key(fec_name) and fec_name != 'expire_date' and fec_name != 'cand_id':
@@ -519,7 +525,6 @@ def format_totals(self, data, page_data, fields, default_year):
             for record in committee[bucket]:
                 if record != []:
                     details = {}
-                    print fields
                     if fields == [] or '*' in fields or 'type' in fields:
                         details['type'] = kind
                     if record.has_key('two_yr_period_sk'):
@@ -553,13 +558,13 @@ def format_totals(self, data, page_data, fields, default_year):
                 for api_name, fec_name in mapping:
                     for t in committee[name]:
                         if t.has_key(fec_name) and api_name != '*':
-                            if not totals.has_key(int(t['two_yr_period_sk'])):
-                                totals[int(t['two_yr_period_sk'])] = {}
-                            totals[int(t['two_yr_period_sk'])][api_name] = t[fec_name]
+                            if not totals.has_key(t['two_yr_period_sk']):
+                                totals[t['two_yr_period_sk']] = {}
+                            totals[t['two_yr_period_sk']][api_name] = t[fec_name]
 
         if totals != {}:
             com[committee_id]['totals'] = []
-            for key in sorted(totals, reverse=True):
+            for key in sorted(totals, key=totals.get, reverse=True):
                 com[committee_id]['totals'].append(totals[key])
 
 
@@ -616,8 +621,8 @@ class SingleResource(restful.Resource):
 
 class Searchable(restful.Resource):
 
-    fulltext_qry = """SELECT %s_sk
-                      FROM   dim%s_fulltext
+    fulltext_qry = """SELECT {name_stem}_sk
+                      FROM   dim{name_stem}_fulltext
                       WHERE  fulltxt @@ to_tsquery(:findme)
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
@@ -636,7 +641,7 @@ class Searchable(restful.Resource):
         for arg in args:
             if args[arg]:
                 if arg == 'q':
-                    qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
+                    qry = self.fulltext_qry.format(name_stem=self.table_name_stem)
                     qry = sa.sql.text(qry)
                     speedlogger.info('\nfulltext query: \n%s' % qry)
                     start_time = time.time()
@@ -681,7 +686,8 @@ class Searchable(restful.Resource):
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
-            if year != '*':
+            # Committee endpoint is not year sensitive yet, so we don't want to limit it yet. Otherwise, the candidate's won't show if they are not in the default year.
+            if year != '*' and (str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch'):
                 qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
                 count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
@@ -726,7 +732,7 @@ class Candidate(object):
         'party_fields': 'party_affiliation_desc,party_affiliation',
         'status_fields': 'election_yr,cand_status,ici_code',
         'properties_fields': 'cand_nm',
-        'cmte_fields': "'P'",
+        'cmte_fields': 'P',
     }
 
     # Query
@@ -735,8 +741,18 @@ class Candidate(object):
 
     def query_text(self, show_fields):
         if show_fields['cmte_fields'] != '':
-            com_query = "/dimlinkages?cmte_dsgn={%s}{*, /dimcmte{/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (show_fields['cmte_fields'])
+            cmte = show_fields['cmte_fields']
+            if cmte == 'P':
+                cmte_des_qry = "?cmte_dsgn={'P'}"
+            elif cmte == '!P':
+                cmte_des_qry = "?cmte_dsgn!={'P'}"
+            else:
+                cmte_des_qry = ''
+
+            com_query = "/dimlinkages%s{*, /dimcmte{*,/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (cmte_des_qry)
+
             show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
+
         else:
             com_query = ''
 
@@ -832,9 +848,9 @@ class Candidate(object):
     ) + property_fields_mapping
     # to filter primary from affiliated committees
     cmte_mapping = (
-        ('primary_committee', "'P'"),
-        ('affiliated_committees', "'U'"),
-        ('*', "'P', 'U'")
+        ('primary_committee', 'P'),
+        ('affiliated_committees', '!P'),
+        ('*', '*'),
     )
 
     # connects mappings to field names
@@ -955,12 +971,45 @@ class CandidateSearch(Searchable, Candidate):
     }
 
 
+class NameSearch(Searchable):
+    """
+    A quick name search (candidate or committee) optimized for response time for typeahead
+    """
+
+    fulltext_qry = """SELECT cand_id AS candidate_id,
+                             cmte_id AS committee_id,
+                             name,
+                             office_sought
+                      FROM   name_search_fulltext
+                      WHERE  name_vec @@ to_tsquery(:findme || ':*')
+                      ORDER BY ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
+                      LIMIT  20"""
+
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        'q',
+        type=str,
+        help='Name (candidate or committee) to search for',
+    )
+
+    def get(self):
+        args = self.parser.parse_args(strict=True)
+
+        qry = sa.sql.text(self.fulltext_qry)
+        findme = ' & '.join(args['q'].split())
+        data = conn.execute(qry, findme = findme).fetchall()
+
+        return {"api_version": "0.2",
+                "pagination": {'per_page': 20, 'page': 1, 'pages': 1, 'count': len(data)},
+                "results": [dict(d) for d in data]}
+
+
 class Committee(object):
 
     default_fields = {
         'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
         'properties_fields': '*',
-        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp}}}',
+        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp,office_tp_desc}}}',
         'designation_fields': '*',
     }
 
@@ -995,7 +1044,10 @@ class Committee(object):
         ('committees', 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,\
             expire_date,link_date'),
         ('candidate_name', '/dimcand{/dimcandproperties{cand_nm}}'),
-        ('*', '*'),
+        ('office_sought', '/dimcandoffice{/dimoffice{office_tp}}}'),
+        ('office_sought_full', '/dimcandoffice{/dimoffice{office_tp_desc}}}'),
+        ('candidate_name', '/dimcand{/dimcandproperties{cand_nm,}'),
+        ('*', '*, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp,office_tp_desc}}}'),
     ) + linkages_field_mapping
 
     designation_mapping = (
@@ -1226,19 +1278,19 @@ class Total(object):
 
         if house_senate_totals != ['']:
             hs_sums = ['sum(^.%s) :as %s, '%(t, t) for t in house_senate_totals if t != '']
-            hs_totals = '/facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as hs_sums,'%(string.join(hs_sums))
+            hs_totals = ' /facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as hs_sums,'%(string.join(hs_sums))
         else:
             hs_totals = ''
 
         if presidential_totals != ['']:
             p_sums = ['sum(^.%s) :as %s, '%(t, t) for t in presidential_totals if t != '']
-            pres_totals = '/factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as p_sums,'%(string.join(p_sums))
+            pres_totals = ' /factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as p_sums,'%(string.join(p_sums))
         else:
             pres_totals = ''
 
         if pac_party_totals != ['']:
             pp_sums = ['sum(^.%s) :as %s, '%(t, t) for t in pac_party_totals if t != '']
-            pp_totals = '/factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
+            pp_totals = ' /factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
         else:
             pp_totals = ''
 
@@ -1248,17 +1300,21 @@ class Total(object):
         else:
             reports = ''
 
+        year = ''
+        if show_fields['house_senate_fields'] != '' and show_fields['presidential_fields'] != '' and show_fields['pac_party_fields']:
+            year = 'rpt_yr,'
+
         # adds the sums formatted above and inserts the default or user defined fields.
         return '(%s){cmte_id,%s /facthousesenate_f3{%s %s}, %s /factpresidential_f3p{%s %s},%s /factpacsandparties_f3x{%s %s},%s}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
-                show_fields['house_senate_fields'],
+                year + show_fields['house_senate_fields'],
                 reports,
                 hs_totals,
-                show_fields['presidential_fields'],
+                year + show_fields['presidential_fields'],
                 reports,
                 pres_totals,
-                show_fields['pac_party_fields'],
+                year + show_fields['pac_party_fields'],
                 reports,
                 pp_totals,
             )
@@ -1757,6 +1813,7 @@ api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
+api.add_resource(NameSearch, '/name')
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):

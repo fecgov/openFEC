@@ -179,3 +179,21 @@ AND    cand_id NOT IN
 
 CREATE INDEX ON public.form_1(submit_dt);
 CREATE INDEX ON public.form_1(receipt_dt);
+CREATE INDEX ON dimcmteproperties(expire_date);
+create index dimcmteproperties_cmte_sk_expire_date_cmteproperties_sk_idx on dimcmteproperties (cmte_sk, expire_date DESC NULLS LAST, cmteproperties_sk);
+cluster dimcmteproperties using dimcmteproperties_cmte_sk_expire_date_cmteproperties_sk_idx;
+
+CREATE INDEX ON dimcmtetpdsgn(cmte_sk);
+
+CREATE INDEX ON dimcmteproperties(cand_id);
+CREATE INDEX ON dimlinkages(cand_sk);
+CREATE INDEX ON dimlinkages(cmte_sk);
+CREATE INDEX ON factpresidential_f3p (cmte_sk);
+CREATE INDEX ON factpresidential_f3p (electiontp_sk);
+CREATE INDEX ON factpresidential_f3p (reporttype_sk);
+CREATE INDEX ON dimcandoffice (cand_sk);
+
+
+ALTER TABLE public.dimcmteproperties ADD FOREIGN KEY (cand_pty_affiliation) REFERENCES processed.ref_party (party_cd);
+
+CREATE INDEX ON facthousesenate_f3 (two_yr_period_sk);
