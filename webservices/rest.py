@@ -165,7 +165,7 @@ def assign_formatting(self, data_dict, page_data, year):
     elif str(self.endpoint) == 'totalresource' or str(self.endpoint) == 'totalsearch':
         return format_totals(self, data_dict, page_data, fields, year)
     else:
-        return data_dict
+        return {'api_version':"0.2", 'pagination':page_data, 'results': data_dict}
 
 
 # Candidate formatting
@@ -445,6 +445,8 @@ def format_committees(self, data, page, fields, year):
                         if cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'] != []:
                             # not worried about this changing because they would get a new id if it did
                             candidate['office_sought'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'][0]['dimoffice'][0]['office_tp']
+                            candidate['office_sought_full'] = cmte['dimlinkages'][0]['dimcand'][0]['dimcandoffice'][0]['dimoffice'][0]['office_tp_desc']
+
 
                 for api_name, fec_name in self.linkages_field_mapping:
                     if cand.has_key(fec_name) and fec_name != 'expire_date' and fec_name != 'cand_id':
@@ -556,11 +558,10 @@ def format_totals(self, data, page_data, fields, default_year):
                             if not totals.has_key(t['two_yr_period_sk']):
                                 totals[t['two_yr_period_sk']] = {}
                             totals[t['two_yr_period_sk']][api_name] = t[fec_name]
-        # pp = pprint.PrettyPrinter(indent=2)
-        # pp.pprint(totals)
+
         if totals != {}:
             com[committee_id]['totals'] = []
-            for key in sorted(totals, key=totals.get, reverse=True):
+            for key in sorted(totals, key=totals.get):
                 com[committee_id]['totals'].append(totals[key])
 
 
@@ -682,7 +683,8 @@ class Searchable(restful.Resource):
             qry += "?" + "&".join(elements)
             count_qry = "/count(%s?%s)" % (self.viewable_table_name,
                                            "&".join(elements))
-            if year != '*':
+            # Committee endpoint is not year sensitive yet, so we don't want to limit it yet. Otherwise, the candidate's won't show if they are not in the default year.
+            if year != '*' and (str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch'):
                 qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
                 count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
@@ -1004,7 +1006,7 @@ class Committee(object):
     default_fields = {
         'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
         'properties_fields': '*',
-        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp}}}',
+        'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp,office_tp_desc}}}',
         'designation_fields': '*',
     }
 
@@ -1039,7 +1041,10 @@ class Committee(object):
         ('committees', 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,\
             expire_date,link_date'),
         ('candidate_name', '/dimcand{/dimcandproperties{cand_nm}}'),
-        ('*', '*'),
+        ('office_sought', '/dimcandoffice{/dimoffice{office_tp}}}'),
+        ('office_sought_full', '/dimcandoffice{/dimoffice{office_tp_desc}}}'),
+        ('candidate_name', '/dimcand{/dimcandproperties{cand_nm,}'),
+        ('*', '*, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp,office_tp_desc}}}'),
     ) + linkages_field_mapping
 
     designation_mapping = (
@@ -1151,7 +1156,6 @@ class CommitteeSearch(Searchable, Committee):
 
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                         "fec_id": string.Template("cmte_id='$arg'"),
-                        # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
                         "candidate_id":string.Template(
                             "exists(dimlinkages?cand_id~'$arg')"
                         ),
@@ -1260,11 +1264,10 @@ class Total(object):
         'presidential_totals':
             'cand_contb_per,fed_funds_per,fndrsg_disb_per,indv_contb_per,loans_received_from_cand_per,op_exp_per,pol_pty_cmte_contb_per,repymts_loans_made_by_cand_per,tranf_from_affilated_cmte_per,tranf_to_other_auth_cmte_per,ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,',
         'pac_party_fields': '*,',
-        'pac_party_totals': 'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,',
+        'pac_party_totals': 'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,'
     }
 
     def query_text(self, show_fields):
-        print show_fields
         # Creating the summing part of the query
         house_senate_totals = show_fields['house_senate_totals'].split(',')
         presidential_totals = show_fields['presidential_totals'].split(',')
@@ -1283,7 +1286,7 @@ class Total(object):
             pp_totals = '/factpacsandparties_f3x_sums :as pp_sums,'
 
         # adds the sums formatted above and inserts the default or user defined fields.
-        return '(%s){cmte_id,%s /facthousesenate_f3{%s /dimreporttype}, %s /factpresidential_f3p{%s /dimreporttype},%s /factpacsandparties_f3x{%s /dimreporttype},%s}' % (
+        return '(%s){cmte_id,%s /facthousesenate_f3{two_yr_period_sk,%s /dimreporttype}, %s /factpresidential_f3p{two_yr_period_sk,%s /dimreporttype},%s /factpacsandparties_f3x{two_yr_period_sk,%s /dimreporttype},%s}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
                 show_fields['house_senate_fields'],

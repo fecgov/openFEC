@@ -166,15 +166,17 @@ class OverallTest(unittest.TestCase):
 #Committee
 
     def test_committee_cand_fields(self):
-        response = self._response('/committee/C00000851')
-        results = response['results']
-        # not all records in the test db have candidates; find one that does
-        result = results[0]['candidates'][0]
+        # they were giving different responses
+        response_1 = self._response('/committee/C00000851')
+        response_2 = response = self._response('/committee?committee_id=C00000851&fields=*')
+        result_1 = response_1['results'][0]['candidates'][0]
+        result_2 = response_2['results'][0]['candidates'][0]
 
         fields = ('candidate_id', 'candidate_name', 'office_sought', 'designation', 'designation_full', 'election_years', 'expire_date', 'link_date', 'type', 'type_full')
         for field in fields:
             print field
-            self.assertEquals(result.has_key(field), True)
+            self.assertEquals(result_1.has_key(field), True)
+            self.assertEquals(result_2.has_key(field), True)
 
     def test_committee_stats(self):
         response = self._response('/committee/C00000851')
@@ -304,3 +306,4 @@ class OverallTest(unittest.TestCase):
         self.assertGreaterEqual(len(results), 10)
         for r in results:
             self.assertIn('OBA', r['name'])
+
