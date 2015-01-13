@@ -195,3 +195,5 @@ CREATE INDEX ON dimcandoffice (cand_sk);
 
 
 ALTER TABLE public.dimcmteproperties ADD FOREIGN KEY (cand_pty_affiliation) REFERENCES processed.ref_party (party_cd);
+
+CREATE INDEX ON facthousesenate_f3 (two_yr_period_sk);
