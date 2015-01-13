@@ -24,3 +24,8 @@ CREATE TABLE tuning_action (
   previous       TEXT,
   new            TEXT NOT NULL
   );
+
+GRANT SELECT, INSERT, UPDATE ON tuning_action, tuning_test, tuning_requirement TO webro;
+GRANT ALL PRIVILEGES ON SEQUENCE tuning_requirement_id_seq TO webro;
+GRANT ALL PRIVILEGES ON SEQUENCE tuning_test_id_seq TO webro;
+GRANT ALL PRIVILEGES ON SEQUENCE tuning_action_id_seq TO webro;

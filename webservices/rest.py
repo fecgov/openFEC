@@ -71,7 +71,11 @@ engine = sa.create_engine(sqla_conn_string)
 conn = engine.connect()
 
 htsql_conn_string = sqla_conn_string.replace('postgresql', 'pgsql')
-htsql_conn = HTSQL(htsql_conn_string)
+htsql_conn = HTSQL(htsql_conn_string,
+                   #{'tweak.override': {'foreign_keys':
+                                                          #['facthousesenate_f3_sums(cmte_id) -> dimcmte(cmte_id']}})
+                                                          #[{'facthousesenate_f3_sums(cmte_id)': 'dimcmte(cmte_id)'}]}})
+                                                          )
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -1267,16 +1271,16 @@ class Total(object):
         pac_party_totals = show_fields['pac_party_totals'].split(',')
 
         if len(house_senate_totals) > 0:
-            hs_sums = ['sum(^.%s) :as %s, '%(t, t) for t in house_senate_totals if t != '']
-            hs_totals = '/facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as hs_sums,'%(string.join(hs_sums))
+            hs_sums = ', '.join(t for t in house_senate_totals if t != '')
+            hs_totals = '/facthousesenate_f3_sums :as hs_sums,'
 
         if len(presidential_totals) > 0:
-            p_sums = ['sum(^.%s) :as %s, '%(t, t) for t in presidential_totals if t != '']
-            pres_totals = '/factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as p_sums,'%(string.join(p_sums))
+            p_sums = ', '.join(t for t in presidential_totals if t != '')
+            pres_totals = '/factpresidential_f3p_sums :as p_sums,'
 
         if len(pac_party_totals)> 0:
-            pp_sums = ['sum(^.%s) :as %s, '%(t, t) for t in pac_party_totals if t != '']
-            pp_totals = '/factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
+            pp_sums = ', '.join(t for t in pac_party_totals if t != '')
+            pp_totals = '/factpacsandparties_f3x_sums :as pp_sums,'
 
         # adds the sums formatted above and inserts the default or user defined fields.
         return '(%s){cmte_id,%s /facthousesenate_f3{%s /dimreporttype}, %s /factpresidential_f3p{%s /dimreporttype},%s /factpacsandparties_f3x{%s /dimreporttype},%s}' % (
