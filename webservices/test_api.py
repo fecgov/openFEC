@@ -300,6 +300,10 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(results[0]['reports'][0].has_key(field), True)
 
-# write these tests
-#/total?fields=disbursements
-#/total?fields=total_receipts_period
+    # Typeahead name search
+    def test_typeahead_name_search(self):
+        results = self._results('/name?q=oba')
+        self.assertGreaterEqual(len(results), 10)
+        for r in results:
+            self.assertIn('OBA', r['name'])
+

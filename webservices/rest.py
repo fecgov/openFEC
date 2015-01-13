@@ -557,7 +557,7 @@ def format_totals(self, data, page_data, fields, default_year):
 
         if totals != {}:
             com[committee_id]['totals'] = []
-            for key in sorted(totals, key=totals.get, reverse=True):
+            for key in sorted(totals, key=totals.get):
                 com[committee_id]['totals'].append(totals[key])
 
 
@@ -614,8 +614,8 @@ class SingleResource(restful.Resource):
 
 class Searchable(restful.Resource):
 
-    fulltext_qry = """SELECT %s_sk
-                      FROM   dim%s_fulltext
+    fulltext_qry = """SELECT {name_stem}_sk
+                      FROM   dim{name_stem}_fulltext
                       WHERE  fulltxt @@ to_tsquery(:findme)
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
@@ -634,7 +634,7 @@ class Searchable(restful.Resource):
         for arg in args:
             if args[arg]:
                 if arg == 'q':
-                    qry = self.fulltext_qry % (self.table_name_stem, self.table_name_stem)
+                    qry = self.fulltext_qry.format(name_stem=self.table_name_stem)
                     qry = sa.sql.text(qry)
                     speedlogger.info('\nfulltext query: \n%s' % qry)
                     start_time = time.time()
@@ -964,6 +964,39 @@ class CandidateSearch(Searchable, Candidate):
     }
 
 
+class NameSearch(Searchable):
+    """
+    A quick name search (candidate or committee) optimized for response time for typeahead
+    """
+
+    fulltext_qry = """SELECT cand_id AS candidate_id,
+                             cmte_id AS committee_id,
+                             name,
+                             office_sought
+                      FROM   name_search_fulltext
+                      WHERE  name_vec @@ to_tsquery(:findme || ':*')
+                      ORDER BY ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
+                      LIMIT  20"""
+
+    parser = reqparse.RequestParser()
+    parser.add_argument(
+        'q',
+        type=str,
+        help='Name (candidate or committee) to search for',
+    )
+
+    def get(self):
+        args = self.parser.parse_args(strict=True)
+
+        qry = sa.sql.text(self.fulltext_qry)
+        findme = ' & '.join(args['q'].split())
+        data = conn.execute(qry, findme = findme).fetchall()
+
+        return {"api_version": "0.2",
+                "pagination": {'per_page': 20, 'page': 1, 'pages': 1, 'count': len(data)},
+                "results": [dict(d) for d in data]}
+
+
 class Committee(object):
 
     default_fields = {
@@ -1119,7 +1152,6 @@ class CommitteeSearch(Searchable, Committee):
 
     field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
                         "fec_id": string.Template("cmte_id='$arg'"),
-                        # I don't think this is going to work because the data is not reliable in the fields and we should query to find the candidate names.
                         "candidate_id":string.Template(
                             "exists(dimlinkages?cand_id~'$arg')"
                         ),
@@ -1228,7 +1260,7 @@ class Total(object):
         'presidential_totals':
             'cand_contb_per,fed_funds_per,fndrsg_disb_per,indv_contb_per,loans_received_from_cand_per,op_exp_per,pol_pty_cmte_contb_per,repymts_loans_made_by_cand_per,tranf_from_affilated_cmte_per,tranf_to_other_auth_cmte_per,ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,',
         'pac_party_fields': '*,',
-        'pac_party_totals': 'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,',
+        'pac_party_totals': 'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,'
     }
 
     def query_text(self, show_fields):
@@ -1250,7 +1282,7 @@ class Total(object):
             pp_totals = '/factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
 
         # adds the sums formatted above and inserts the default or user defined fields.
-        return '(%s){cmte_id,%s /facthousesenate_f3{%s /dimreporttype}, %s /factpresidential_f3p{%s /dimreporttype},%s /factpacsandparties_f3x{%s /dimreporttype},%s}' % (
+        return '(%s){cmte_id,%s /facthousesenate_f3{two_yr_period_sk,%s /dimreporttype}, %s /factpresidential_f3p{two_yr_period_sk,%s /dimreporttype},%s /factpacsandparties_f3x{two_yr_period_sk,%s /dimreporttype},%s}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
                 show_fields['house_senate_fields'],
@@ -1753,6 +1785,7 @@ api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
+api.add_resource(NameSearch, '/name')
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
