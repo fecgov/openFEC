@@ -1,3 +1,4 @@
+<!-- add election_cycle to the report types -->
 # FEC API Documentation
 ## Total
 
