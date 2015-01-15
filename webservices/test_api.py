@@ -301,7 +301,7 @@ class OverallTest(unittest.TestCase):
             self.assertEquals(results[0]['reports'][0].has_key(field), True)
 
     def test_total_field_filter(self):
-        results_disbursements = self._results('total?committee_id=C00347583&fields=disbursements')
+        results_disbursements = self._results('/total?committee_id=C00347583&fields=disbursements')
         results_recipts = self._results('/total/C00347583?fields=total_receipts_period')
 
         self.assertIn('disbursements', results_disbursements[0]['totals'][0])
@@ -309,6 +309,19 @@ class OverallTest(unittest.TestCase):
         self.assertNotIn('reports', results_disbursements[0])
         self.assertNotIn('totals', results_recipts[0])
 
+    def test_total_cycle(self):
+        results = self._results('/total/C00000422?fields=cash_on_hand_end_period,disbursements')[0]
+        print results
+        reports_all = len(results['reports'])
+        totals_all = len(results['totals'])
+
+        results_after = self._results('/total/C00000422?fields=cash_on_hand_end_period,disbursements&election_cycle=2008')[0]
+        print results_after
+        reports_04 = len(results_after['reports'])
+        totals_04 = len(results_after['totals'])
+
+        self.assertGreater(reports_all, reports_04)
+        self.assertGreater(totals_all, totals_04)
 
     # Typeahead name search
     def test_typeahead_name_search(self):
