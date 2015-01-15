@@ -505,8 +505,8 @@ def format_totals(self, data, page_data, fields, default_year):
     #return data
 
     for committee in data:
-        #### make sure committee_id is always in query
         committee_id = committee['cmte_id']
+
         com[committee_id] = {}
 
         for api_name, fec_name in self.dim_mapping:
@@ -525,8 +525,10 @@ def format_totals(self, data, page_data, fields, default_year):
             for record in committee[bucket]:
                 if record != []:
                     details = {}
-                    details['type'] = kind
-                    cycle = int(record['two_yr_period_sk'])
+                    if fields == [] or '*' in fields or 'type' in fields:
+                        details['type'] = kind
+                    if record.has_key('two_yr_period_sk'):
+                        cycle = int(record['two_yr_period_sk'])
 
                     for api_name, fec_name in mapping:
                         if record.has_key(fec_name) and record[fec_name] is not None:
@@ -537,10 +539,11 @@ def format_totals(self, data, page_data, fields, default_year):
                             if record['dimreporttype'][0].has_key(fec_name):
                                 details[api_name] = record['dimreporttype'][0][fec_name]
 
-                    reports.append(details)
+                    if details != {}:
+                        reports.append(details)
 
         if reports != []:
-            com[committee_id]['reports'] = reports
+            com[committee_id]['reports'] = sorted(reports, key=lambda k: k['report_year'], reverse=True)
 
         # add sums
         totals = {}
@@ -551,7 +554,7 @@ def format_totals(self, data, page_data, fields, default_year):
         )
 
         for name, mapping in totals_mappings:
-            if committee[name] != []:
+            if committee.has_key(name) and committee[name] != []:
                 for api_name, fec_name in mapping:
                     for t in committee[name]:
                         if t.has_key(fec_name) and api_name != '*':
@@ -561,7 +564,7 @@ def format_totals(self, data, page_data, fields, default_year):
 
         if totals != {}:
             com[committee_id]['totals'] = []
-            for key in sorted(totals, key=totals.get):
+            for key in sorted(totals, key=totals.get, reverse=True):
                 com[committee_id]['totals'].append(totals[key])
 
 
@@ -1254,7 +1257,6 @@ class Total(object):
     table_name_stem = 'cmte'
     viewable_table_name = "dimcmte?exists(facthousesenate_f3)|exists(factpresidential_f3p)|exists(factpacsandparties_f3x)"
 
-    ### update this
     default_fields = {
         'dimcmte_fields': '*,',
         'house_senate_fields': '*,',
@@ -1264,7 +1266,8 @@ class Total(object):
         'presidential_totals':
             'cand_contb_per,fed_funds_per,fndrsg_disb_per,indv_contb_per,loans_received_from_cand_per,op_exp_per,pol_pty_cmte_contb_per,repymts_loans_made_by_cand_per,tranf_from_affilated_cmte_per,tranf_to_other_auth_cmte_per,ttl_contb_per,ttl_contb_ref_per,ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,ttl_offsets_to_op_exp_per,ttl_receipts_per,',
         'pac_party_fields': '*,',
-        'pac_party_totals': 'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,'
+        'pac_party_totals': 'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,',
+        'report_fields': '*',
     }
 
     def query_text(self, show_fields):
@@ -1273,27 +1276,46 @@ class Total(object):
         presidential_totals = show_fields['presidential_totals'].split(',')
         pac_party_totals = show_fields['pac_party_totals'].split(',')
 
-        if len(house_senate_totals) > 0:
-            hs_sums = ', '.join(t for t in house_senate_totals if t != '')
-            hs_totals = '/facthousesenate_f3_sums :as hs_sums,'
+        if house_senate_totals != ['']:
+            hs_sums = ['sum(^.%s) :as %s, '%(t, t) for t in house_senate_totals if t != '']
+            hs_totals = ' /facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as hs_sums,'%(string.join(hs_sums))
+        else:
+            hs_totals = ''
 
-        if len(presidential_totals) > 0:
-            p_sums = ', '.join(t for t in presidential_totals if t != '')
-            pres_totals = '/factpresidential_f3p_sums :as p_sums,'
+        if presidential_totals != ['']:
+            p_sums = ['sum(^.%s) :as %s, '%(t, t) for t in presidential_totals if t != '']
+            pres_totals = ' /factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as p_sums,'%(string.join(p_sums))
+        else:
+            pres_totals = ''
 
-        if len(pac_party_totals)> 0:
-            pp_sums = ', '.join(t for t in pac_party_totals if t != '')
-            pp_totals = '/factpacsandparties_f3x_sums :as pp_sums,'
+        if pac_party_totals != ['']:
+            pp_sums = ['sum(^.%s) :as %s, '%(t, t) for t in pac_party_totals if t != '']
+            pp_totals = ' /factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
+        else:
+            pp_totals = ''
+
+        # don't want to add reports if not needed
+        if show_fields['report_fields'] != '':
+            reports = '/dimreporttype{%s}' % show_fields['report_fields']
+        else:
+            reports = ''
+
+        year = ''
+        if show_fields['house_senate_fields'] != '' and show_fields['presidential_fields'] != '' and show_fields['pac_party_fields']:
+            year = 'rpt_yr,'
 
         # adds the sums formatted above and inserts the default or user defined fields.
-        return '(%s){cmte_id,%s /facthousesenate_f3{two_yr_period_sk,%s /dimreporttype}, %s /factpresidential_f3p{two_yr_period_sk,%s /dimreporttype},%s /factpacsandparties_f3x{two_yr_period_sk,%s /dimreporttype},%s}' % (
+        return '(%s){cmte_id,%s /facthousesenate_f3{%s %s}, %s /factpresidential_f3p{%s %s},%s /factpacsandparties_f3x{%s %s},%s}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
-                show_fields['house_senate_fields'],
+                year + show_fields['house_senate_fields'],
+                reports,
                 hs_totals,
-                show_fields['presidential_fields'],
+                year + show_fields['presidential_fields'],
+                reports,
                 pres_totals,
-                show_fields['pac_party_fields'],
+                year + show_fields['pac_party_fields'],
+                reports,
                 pp_totals,
             )
 
@@ -1741,7 +1763,9 @@ class TotalResource(SingleResource, Total):
 class TotalSearch(Searchable, Total):
     parser = reqparse.RequestParser()
 
-    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
+    field_name_map = {
+        "committee_id": string.Template("cmte_id='$arg'"),
+        "cycle": string.Template("(facthousesenate_f3){two_yr_period_sk='$arg'}|(factpresidential_f3p){two_yr_period_sk='$arg'}|(factpacsandparties_f3x){two_yr_period_sk='$arg'}")
     }
 
     parser.add_argument(
@@ -1766,12 +1790,12 @@ class TotalSearch(Searchable, Total):
         type=str,
         help='Committee ID that starts with a "C"'
     )
-    ### not ready for this one yet
-    # parser.add_argument(
-    #     'election_cycle',
-    #     type=str,
-    #     help='Limit results to a two-year election cycle'
-    # )
+
+    parser.add_argument(
+        'cycle',
+        type=str,
+        help='Limit results to a two-year election cycle'
+    )
 
 
 class Help(restful.Resource):

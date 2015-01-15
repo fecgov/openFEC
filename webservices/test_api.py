@@ -300,10 +300,21 @@ class OverallTest(unittest.TestCase):
             print field
             self.assertEquals(results[0]['reports'][0].has_key(field), True)
 
+    def test_total_field_filter(self):
+        results_disbursements = self._results('total?committee_id=C00347583&fields=disbursements')
+        results_recipts = self._results('/total/C00347583?fields=total_receipts_period')
+
+        self.assertIn('disbursements', results_disbursements[0]['totals'][0])
+        self.assertIn('total_receipts_period',results_recipts[0]['reports'][0])
+        self.assertNotIn('reports', results_disbursements[0])
+        self.assertNotIn('totals', results_recipts[0])
+
+
     # Typeahead name search
     def test_typeahead_name_search(self):
         results = self._results('/name?q=oba')
         self.assertGreaterEqual(len(results), 10)
         for r in results:
             self.assertIn('OBA', r['name'])
+
 
