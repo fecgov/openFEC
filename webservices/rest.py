@@ -1270,27 +1270,37 @@ class Total(object):
         'report_fields': '*',
     }
 
+    #This is jsut string formattting the query we need to run additional layers are added in the search class
     def query_text(self, show_fields):
         # Creating the summing part of the query
         house_senate_totals = show_fields['house_senate_totals'].split(',')
         presidential_totals = show_fields['presidential_totals'].split(',')
         pac_party_totals = show_fields['pac_party_totals'].split(',')
 
+        # limiting to an election cycle
+        args = self.parser.parse_args(strict=True)
+        if 'election_cycle' in args and args['election_cycle'] != None:
+            cycle = '?two_yr_period_sk=%s'%(args['election_cycle'])
+            print "found---------------"
+        else:
+            cycle = ''
+
+        # this part creates the election cycle totals
         if house_senate_totals != ['']:
             hs_sums = ['sum(^.%s) :as %s, '%(t, t) for t in house_senate_totals if t != '']
-            hs_totals = ' /facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as hs_sums,'%(string.join(hs_sums))
+            hs_totals = ' /facthousesenate_f3^{two_yr_period_sk, dimcmte.cmte_id}%s{*, %s} :as hs_sums,'%(cycle, string.join(hs_sums))
         else:
             hs_totals = ''
 
         if presidential_totals != ['']:
             p_sums = ['sum(^.%s) :as %s, '%(t, t) for t in presidential_totals if t != '']
-            pres_totals = ' /factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as p_sums,'%(string.join(p_sums))
+            pres_totals = ' /factpresidential_f3p^{two_yr_period_sk, dimcmte.cmte_id}%s{*, %s} :as p_sums,'%(cycle, string.join(p_sums))
         else:
             pres_totals = ''
 
         if pac_party_totals != ['']:
             pp_sums = ['sum(^.%s) :as %s, '%(t, t) for t in pac_party_totals if t != '']
-            pp_totals = ' /factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}{*, %s} :as pp_sums,'%(string.join(pp_sums))
+            pp_totals = ' /factpacsandparties_f3x^{two_yr_period_sk, dimcmte.cmte_id}%s{*, %s} :as pp_sums,'%(cycle, string.join(pp_sums))
         else:
             pp_totals = ''
 
@@ -1305,17 +1315,20 @@ class Total(object):
             year = 'rpt_yr,'
 
         # adds the sums formatted above and inserts the default or user defined fields.
-        return '(%s){cmte_id,%s /facthousesenate_f3{%s %s}, %s /factpresidential_f3p{%s %s},%s /factpacsandparties_f3x{%s %s},%s}' % (
+        return '(%s){cmte_id,%s /facthousesenate_f3{%s %s}%s, %s /factpresidential_f3p{%s %s}%s,%s /factpacsandparties_f3x{%s %s}%s,%s}' % (
                 self.viewable_table_name,
                 show_fields['dimcmte_fields'],
                 year + show_fields['house_senate_fields'],
                 reports,
+                cycle,
                 hs_totals,
                 year + show_fields['presidential_fields'],
                 reports,
+                cycle,
                 pres_totals,
                 year + show_fields['pac_party_fields'],
                 reports,
+                cycle,
                 pp_totals,
             )
 
@@ -1566,12 +1579,11 @@ class Total(object):
         ('receipts', 'ttl_receipts_per'),
         ('nonfed_transfers', 'ttl_nonfed_tranf_per'),
         ('political_party_committee_contributions', 'pol_pty_cmte_contb_per_ii'),
-        ('total_fed_disbursements', 'ttl_fed_disb_per'),
-        ('total_disbursements', 'ttl_disb_per'),
+        ('fed_disbursements', 'ttl_fed_disb_per'),
+        ('disbursements', 'ttl_disb_per'),
         ('political_party_committee_contributions', 'pol_pty_cmte_contb_per_i'),
         ('non_allocated_fed_election_activity', 'non_alloc_fed_elect_actvy_per'),
-        # is this period?
-        #('debts_owed_by_committee', 'debts_owed_by_cmte'),
+        ('debts_owed_by_committee', 'debts_owed_by_cmte'),
         ('coordinated_expenditures_by_party_committee', 'coord_exp_by_pty_cmte_per'),
         ('shared_fed_activity_nonfed', 'shared_fed_actvy_nonfed_per'),
         ('other_disbursements', 'other_disb_per'),
@@ -1580,23 +1592,22 @@ class Total(object):
         ('net_contributions', 'net_contb_per'),
         ('individual_unitemized_contributions', 'indv_unitem_contb_per'),
         ('all_loans_received', 'all_loans_received_per'),
-        ('total_contributions', 'ttl_contb_per'),
+        ('contributions', 'ttl_contb_per'),
         ('transfers_from_nonfed_levin', 'tranf_from_nonfed_levin_per'),
-        # is this period?
-        #('debts_owed_to_committee', 'debts_owed_to_cmte'),
+        ('debts_owed_to_committee', 'debts_owed_to_cmte'),
         ('shared_fed_operating_expenditures', 'shared_fed_op_exp_per'),
         ('loans_made', 'loans_made_per'),
         ('transfers_to_affiliated_committee', 'tranf_to_affliliated_cmte_per'),
         ('other_political_committee_contributions', 'other_pol_cmte_contb_per_ii'),
         ('other_fed_receipts', 'other_fed_receipts_per'),
         ('transfers_from_affiliated_party', 'tranf_from_affiliated_pty_per'),
-        ('total_contribution_refunds', 'ttl_contb_ref_per_ii'),
+        ('contribution_refunds', 'ttl_contb_ref_per_ii'),
         ('individual_contribution_refunds', 'indv_contb_ref_per'),
         ('transfers_from_nonfed_account', 'tranf_from_nonfed_acct_per'),
-        ('total_fed_operating_expenditures', 'ttl_fed_op_exp_per'),
+        ('fed_operating_expenditures', 'ttl_fed_op_exp_per'),
         ('shared_fed_activity', 'shared_fed_actvy_fed_shr_per'),
         ('fed_candidate_contribution_refunds', 'fed_cand_contb_ref_per'),
-        ('total_operating_expenditures', 'ttl_op_exp_per'),
+        ('operating_expenditures', 'ttl_op_exp_per'),
         ('other_political_committee_contributions', 'other_pol_cmte_contb_per_i'),
         ('individual_itemized_contributions', 'indv_item_contb_per'),
         ('*', 'ttl_contb_ref_per_i,shared_nonfed_op_exp_per,ttl_fed_receipts_per,loan_repymts_received_per,offsets_to_op_exp_per_i,indt_exp_per,other_fed_op_exp_per,loan_repymts_made_per,ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,pol_pty_cmte_contb_per_ii,ttl_fed_disb_per,ttl_disb_per,pol_pty_cmte_contb_per_i,non_alloc_fed_elect_actvy_per,coord_exp_by_pty_cmte_per,shared_fed_actvy_nonfed_per,other_disb_per,fed_cand_cmte_contb_per,offsets_to_op_exp_per_ii,net_contb_per,indv_unitem_contb_per,all_loans_received_per,ttl_contb_per,tranf_from_nonfed_levin_per,shared_fed_op_exp_per,loans_made_per,tranf_to_affliliated_cmte_per,other_pol_cmte_contb_per_ii,other_fed_receipts_per,tranf_from_affiliated_pty_per,ttl_contb_ref_per_ii,indv_contb_ref_per,tranf_from_nonfed_acct_per,ttl_fed_op_exp_per,shared_fed_actvy_fed_shr_per,fed_cand_contb_ref_per,ttl_op_exp_per,other_pol_cmte_contb_per_i,indv_item_contb_per,'),
@@ -1759,13 +1770,19 @@ class TotalResource(SingleResource, Total):
         type=str,
         help='Choose the fields that are displayed'
     )
+    parser.add_argument(
+        'election_cycle',
+        type=str,
+        default=None,
+        help='Limit results to a two-year election cycle'
+    )
+
 
 class TotalSearch(Searchable, Total):
     parser = reqparse.RequestParser()
 
     field_name_map = {
         "committee_id": string.Template("cmte_id='$arg'"),
-        "cycle": string.Template("(facthousesenate_f3){two_yr_period_sk='$arg'}|(factpresidential_f3p){two_yr_period_sk='$arg'}|(factpacsandparties_f3x){two_yr_period_sk='$arg'}")
     }
 
     parser.add_argument(
@@ -1790,12 +1807,13 @@ class TotalSearch(Searchable, Total):
         type=str,
         help='Committee ID that starts with a "C"'
     )
-
     parser.add_argument(
-        'cycle',
+        'election_cycle',
         type=str,
+        default=None,
         help='Limit results to a two-year election cycle'
     )
+
 
 
 class Help(restful.Resource):

@@ -97,21 +97,22 @@ What kind of report was filed. It can be quarterly, monthly, pre-general, etc.
 
 The written-out description of the report type
 
+
 Totals:
 
 ### election_cycle
 
 The four-digit year for the two-year election cycle.
 
-### total_contributions
+### contributions
 
 The sum of all total_contributions_period reported for the election cycle.
 
-### total_disbursements
+### disbursements
 
 The sum of all total_disbursements_period reported for the election cycle.
 
-### total_receipts
+### receipts
 
 The sum of all total_receipts_period reported for the election cycle.
 
@@ -1475,11 +1476,11 @@ Total non-federal transfers for the two-year election cycle.
 
 Total political party committee contributions for the two-year election cycle.
 
-### total_fed_disbursements
+### fed_disbursements
 
 Total total fed disbursements for the two-year election cycle.
 
-### total_disbursements
+### disbursements
 
 Total total disbursements for the two-year election cycle.
 
@@ -1523,7 +1524,7 @@ Total individual unitemized contributions for the two-year election cycle.
 
 Total of all loans received for the two-year election cycle.
 
-### total_contributions
+### contributions
 
 Total contributions for the two-year election cycle.
 
@@ -1555,7 +1556,7 @@ Total of other federal receipts for the two-year election cycle.
 
 Total transfers from affiliated party for the two-year election cycle.
 
-### total_contribution_refunds
+### contribution_refunds
 
 Total total contribution refunds for the two-year election cycle.
 
@@ -1567,7 +1568,7 @@ Total individual contribution refunds for the two-year election cycle.
 
 Total transfers from non-federal accounts for the two-year election cycle.
 
-### total_fed_operating_expenditures
+### fed_operating_expenditures
 
 Total total fed operating expenditures for the two-year election cycle.
 
@@ -1579,7 +1580,7 @@ Total shared fed activity for the two-year election cycle.
 
 Total fed candidate contribution refunds for the two-year election cycle.
 
-### total_operating_expenditures
+### operating_expenditures
 
 Total total operating expenditures for the two-year election cycle.
 
