@@ -1402,6 +1402,7 @@ class Total(object):
         ('total_receipts_summary_period', 'ttl_receipts_sum_page_per'),
         ('total_receipts_year', 'ttl_receipts_ytd'),
         ('total_year', 'ttl_ytd'),
+        ('election_cycle', 'two_yr_period_sk'),
         ('*','*'),
     )
 
@@ -1546,6 +1547,7 @@ class Total(object):
         ('total_receipts_year', 'ttl_receipts_ytd'),
         ('individual_itemized_contributions_period', 'indv_item_contb_per'),
         ('calendar_year', 'calendar_yr'),
+        ('election_cycle', 'two_yr_period_sk'),
         ('*','*'),
     )
 
@@ -1683,6 +1685,7 @@ class Total(object):
         ('subtotal_period', 'subttl_per'),
         ('total_individual_unitemized_contributions_year', 'ttl_indv_unitem_contb_ytd'),
         ('other_receipts_year', 'other_receipts_ytd'),
+        ('election_cycle', 'two_yr_period_sk'),
         ('*','*'),
     )
 
