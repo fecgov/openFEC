@@ -2,24 +2,30 @@
 # FEC API Documentation
 ## Candidate
 
-Provides descriptive information about campaign finance report filers.
+Candidates are search-able by name, id and the parameters listed below. Years may be provided to see the activity of a candidate over time, hiding the information that is not relevant to that year. Information is grouped in the elections section, by two-year election cycles.
+
+Results default to the last 4 years, but particular years and '*' for all years may be passed into the request, as described below. Additionally, all fields are not shown my default but can be adjusted by the fields parameter.
+
+The endpoint also returns basic information about committees that file regarding the candidate. Each result reflects a unique FEC candidate id. That id is unique to the candidate for a particular office sought. So, if a candidate runs for the same office over time, that id will stay the same. If the same person runs for another office, for example, a House candidate runs for a Senate office, that candidate will get an additional id that will be unique to him or her for that office.
+
+The Candidate endpoint uses data from FEC forms 1 and 2 with additional forms to provide context.
 
 ## Supported parameters for candidate
 
 | Parameter | Description |
 |-----|-----|
 | q=          | Full-text search |
-| /<candidate_id>  | Single candidate's record |
-| candidate_id=    | Synonym for /<candidate_id> |
-| office=     | Governmental office sought |
-| state=      | Two-letter state abbreviation |
-| district=   | Two-digit number(00 - if no district or at large) |
-| name=       | Candidate's name |
-| page=       | Page number |
-| party=      | 3-letter party abbreviation |
-| per_page=   | Number of records per page |
-| year=       | Any year in which candidate ran |
-| fields =    | Comma separated list of fields to display or `*` for all |
+| /<candidate_id>  | Single candidate's record this will be slightly faster that using candidate_id as a filter but, only one candidate id is accepted per call and only the year and field filtering will be applicable. |
+| candidate_id=    | Accepts one or more candidate ids. |
+| office=     | Governmental office sought. |
+| state=      | Two-letter state abbreviation where the candidate is running for office. |
+| district=   | Two-digit number of the candidate's district(00 - if no district or at large.) |
+| name=       | Candidate's name. |
+| page=       | Page number. |
+| party=      | 3-letter party abbreviation. |
+| per_page=   | Number of records per page. |
+| year=       | A year in which candidate ran. |
+| fields =    | Comma separated list of fields to display or `*` to display all fields. |
 
 
 ---

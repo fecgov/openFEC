@@ -1,14 +1,17 @@
-<!-- add election_cycle to the report types -->
 # FEC API Documentation
 ## Total
 
 Provides key information about committee's finance reports and provides 2-year election totals for key numbers.
 
+As part of each financial report, committees must provide a summary of their financial activity in each filing, and these summaries for each reporting period are included in these files. Generally, committees file reports on a quarterly or monthly basis, but some must also submit a report 12 days before primary elections. During the primary election season, therefore, the period covered by this file may be different for different committees. These totals also incorporate any changes made by committees if any report covering the period is amended.
+
+There are several different reporting structures, depending on what type of organization is submitting financial information. To see an example of these reporting requirements you can look at the summary and detailed summary pages of the FEC form 3, form 3X and form 3P.
+
 ## Supported parameters for candidate
 
 | Parameter | Description |
 |-----|-----|
-| /<committee_id>  | Single committee's record |
+| /<committee_id>  | A single committee's reports and cycle totals. This will be slightly faster that using committee_id as a filter but, only one committee_id is accepted per call. |
 | committeee_id=    | Synonym for /<committee_id> |
 | fields =    | Comma separated list of fields to display or `*` for all |
 
@@ -37,9 +40,12 @@ Total of all the debts owed by a committee.
 
 Total of all the debts owed to a committee.
 
+### election_cycle
+The two-year election cycle of the report.
+
 ### end_image_number
 
-image number of the last page of the filing.
+The image number of the last page of the filing.
 
 ### expire_date
 

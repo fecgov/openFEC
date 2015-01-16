@@ -1,6 +1,19 @@
 # FEC API Documentation
 ## Committee
 
+Committees include the committees and organizations that file with the FEC. There are a number of different types of organizations who file financial reports with the FEC;
+- Campaign committees authorized by particular candidates to raise and spend funds in their campaigns
+- Non-party committees (i.e. PACs), some of which may be sponsored by corporations, unions, trade or membership groups, etc.
+- Political Party committees at the national, state and local levels
+- Groups and individuals making only Independent Expenditures
+- Corporations, Unions and other organizations making Internal Communications
+
+The committee endpoint is search-able by name, id and the parameters outlined below.
+
+There is a description about the type and designation of committee the address of the committee, treasurer and custodian information and information about candidates mentioned by committees in their filings. Read the fields below for a complete listing of information that can be returned.
+
+The committee endpoint returns  FEC forms 1 and 2 with additional forms to provide context.
+
 Endpoint:
 `/committee`
 
@@ -8,8 +21,8 @@ Endpoint:
 | Parameter |description |
 |-----|-----|
 | q=          | full-text search |
-| /<cmte_id>  | Single candidate's record |
-| cmte_id=    | Synonym for /<cmte_id> |
+| /<cmte_id>  | A single committee's record this will be slightly faster that using committee_id as a filter but, only one committee_id is accepted per call and only field filtering will be applicable.|
+| cmte_id=    | Accepts one or more committee ids.|
 | name=       | Committee's name |
 | state=      | Two-letter state abbreviation |
 | type=   |one-letter code of committee type  |
@@ -40,7 +53,6 @@ The type of filing the information came from
 #### load_date
 
 The date the information was loaded into the system
-
 
 
 ### Status
