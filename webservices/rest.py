@@ -301,7 +301,6 @@ def format_candids(self, data, page_data, fields, default_year):
             if len(elections[year]) > 0:
                 if not cand_data.has_key('elections'):
                     cand_data['elections'] = []
-
                 cand_data['elections'].append(elections[year])
 
         results.append(cand_data)
