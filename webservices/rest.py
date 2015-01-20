@@ -57,6 +57,8 @@ import copy
 from datetime import datetime
 from psycopg2._range import DateTimeRange
 
+from .candidate.models import Candidate
+
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
 speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
