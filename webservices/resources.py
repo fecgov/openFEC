@@ -14,13 +14,14 @@ from webservices.db import db_conn, htsql_conn
 
 
 # this is shared by search and single resource
-def find_fields(args):
-    if args['fields'] is None:
-            return []
-    elif ',' in args['fields']:
-        return args['fields'].split(',')
-    else:
-        return [args['fields']]
+class FindFieldsMixin(object):
+    def find_fields(self, args):
+        if args['fields'] is None:
+                return []
+        elif ',' in args['fields']:
+            return args['fields'].split(',')
+        else:
+            return [args['fields']]
 
 
 def as_dicts(data):
@@ -47,31 +48,13 @@ def default_year():
     return ','.join(years)
 
 
-def natural_number(n):
-    result = int(n)
-    if result < 1:
-        raise reqparse.ArgumentTypeError(
-            'Must be a number greater than or equal to 1')
-    return result
-
-
-def cleantext(text):
-    if type(text) is str:
-        text = re.sub(' +', ' ', text)
-        text = re.sub('\\r|\\n', '', text)
-        text = text.strip()
-        return text
-    else:
-        return text
-
-
-class SingleResource(restful.Resource):
+class SingleResource(restful.Resource, FindFieldsMixin):
 
     def get(self, id):
         show_fields = copy.copy(self.default_fields)
         overall_start_time = time.time()
         args = self.parser.parse_args()
-        fields = find_fields(args)
+        fields = self.find_fields(args)
 
         if args.get('fields') is not None:
             if ',' in str(args['fields']):
@@ -119,7 +102,7 @@ class SingleResource(restful.Resource):
                 'results': data_dict}
 
 
-class Searchable(restful.Resource):
+class Searchable(restful.Resource, FindFieldsMixin):
 
     fulltext_qry = """SELECT {name_stem}_sk
                       FROM   dim{name_stem}_fulltext

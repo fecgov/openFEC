@@ -59,7 +59,7 @@ from psycopg2._range import DateTimeRange
 
 from .candidate.models import Candidate
 from .db import db_conn
-from .resources import Searchable, SingleResource
+from .resources import default_year, Searchable, SingleResource
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -98,32 +98,11 @@ designation_decoder = {'A': 'Authorized by a candidate',
 
 party_decoder = {'ACE': 'Ace Party', 'AKI': 'Alaskan Independence Party', 'AIC': 'American Independent Conservative', 'AIP': 'American Independent Party', 'AMP': 'American Party', 'APF': "American People's Freedom Party", 'AE': 'Americans Elect', 'CIT': "Citizens' Party", 'CMD': 'Commandments Party', 'CMP': 'Commonwealth Party of the U.S.', 'COM': 'Communist Party', 'CNC': 'Concerned Citizens Party Of Connecticut', 'CRV': 'Conservative Party', 'CON': 'Constitution Party', 'CST': 'Constitutional', 'COU': 'Country', 'DCG': 'D.C. Statehood Green Party', 'DNL': 'Democratic -Nonpartisan League', 'DEM': 'Democratic Party', 'D/C': 'Democratic/Conservative', 'DFL': 'Democratic-Farmer-Labor', 'DGR': 'Desert Green Party', 'FED': 'Federalist', 'FLP': 'Freedom Labor Party', 'FRE': 'Freedom Party', 'GWP': 'George Wallace Party', 'GRT': 'Grassroots', 'GRE': 'Green Party', 'GR': 'Green-Rainbow', 'HRP': 'Human Rights Party', 'IDP': 'Independence Party', 'IND': 'Independent', 'IAP': 'Independent American Party', 'ICD': 'Independent Conservative Democratic', 'IGR': 'Independent Green', 'IP': 'Independent Party', 'IDE': 'Independent Party of Delaware', 'IGD': 'Industrial Government Party', 'JCN': 'Jewish/Christian National', 'JUS': 'Justice Party', 'LRU': 'La Raza Unida', 'LBR': 'Labor Party', 'LFT': 'Less Federal Taxes', 'LBL': 'Liberal Party', 'LIB': 'Libertarian Party', 'LBU': 'Liberty Union Party', 'MTP': 'Mountain Party', 'NDP': 'National Democratic Party', 'NLP': 'Natural Law Party', 'NA': 'New Alliance', 'NJC': 'New Jersey Conservative Party', 'NPP': 'New Progressive Party', 'NPA': 'No Party Affiliation', 'NOP': 'No Party Preference', 'NNE': 'None', 'N': 'Nonpartisan', 'NON': 'Non-Party', 'OE': 'One Earth Party', 'OTH': 'Other', 'PG': 'Pacific Green', 'PSL': 'Party for Socialism and Liberation', 'PAF': 'Peace And Freedom', 'PFP': 'Peace And Freedom Party', 'PFD': 'Peace Freedom Party', 'POP': 'People Over Politics', 'PPY': "People's Party", 'PCH': 'Personal Choice Party', 'PPD': 'Popular Democratic Party', 'PRO': 'Progressive Party', 'NAP': 'Prohibition Party', 'PRI': 'Puerto Rican Independence Party', 'RUP': 'Raza Unida Party', 'REF': 'Reform Party', 'REP': 'Republican Party', 'RES': 'Resource Party', 'RTL': 'Right To Life', 'SEP': 'Socialist Equality Party', 'SLP': 'Socialist Labor Party', 'SUS': 'Socialist Party', 'SOC': 'Socialist Party U.S.A.', 'SWP': 'Socialist Workers Party', 'TX': 'Taxpayers', 'TWR': 'Taxpayers Without Representation', 'TEA': 'Tea Party', 'THD': 'Theo-Democratic', 'LAB': 'U.S. Labor Party', 'USP': "U.S. People's Party", 'UST': 'U.S. Taxpayers Party', 'UN': 'Unaffiliated', 'UC': 'United Citizen', 'UNI': 'United Party', 'UNK': 'Unknown', 'VET': 'Veterans Party', 'WTP': 'We the People', 'W': 'Write-In'}
 
-# defaulting to the last 4 years so there is always the last presidential, we could make this 6 to ensure coverage of sitting senators.
-def default_year():
-    year = datetime.now().year
-    years = [str(y) for y in range(year, year-4, -1)]
-    return ','.join(years)
-
 def natural_number(n):
     result = int(n)
     if result < 1:
         raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
     return result
-
-def as_dicts(data):
-    """
-    Because HTSQL results render as though they were lists (field info lost)
-    without intervention.
-    """
-    if isinstance(data, htsql.core.domain.Record):
-        return dict(zip(data.__fields__, [as_dicts(d) for d in data]))
-    elif isinstance(data, DateTimeRange):
-        return {'begin': data.upper, 'end': data.lower}
-    elif isinstance(data, htsql.core.domain.Product) or \
-         isinstance(data, list):
-        return [as_dicts(d) for d in data]
-    else:
-        return data
 
 def cleantext(text):
     if type(text) is str:
@@ -133,16 +112,6 @@ def cleantext(text):
         return text
     else:
         return text
-
-# this is shared by search and single resource
-def find_fields(args):
-    if args['fields'] == None:
-            return []
-    elif ',' in args['fields']:
-        return args['fields'].split(',')
-    else:
-        return [args['fields']]
-
 
 # Candidate formatting
 def format_candids(self, data, page_data, fields, default_year):
@@ -563,7 +532,7 @@ class CandidateResource(SingleResource, Candidate):
 
     def format(self, data_dict, page_data, year):
         args = self.parser.parse_args()
-        fields = find_fields(args)
+        fields = self.find_fields(args)
         return format_candids(self, data_dict, page_data, fields, year)
 
 
@@ -659,7 +628,7 @@ class CandidateSearch(Searchable, Candidate):
 
     def format(self, data_dict, page_data, year):
         args = self.parser.parse_args()
-        fields = find_fields(args)
+        fields = self.find_fields(args)
         return format_candids(self, data_dict, page_data, fields, year)
 
 
@@ -848,7 +817,7 @@ class CommitteeResource(SingleResource, Committee):
 
     def format(self, data_dict, page_data, year):
         args = self.parser.parse_args()
-        fields = find_fields(args)
+        fields = self.find_fields(args)
         return format_committees(self, data_dict, page_data, fields, year)
 
 
@@ -950,7 +919,7 @@ class CommitteeSearch(Searchable, Committee):
 
     def format(self, data_dict, page_data, year):
         args = self.parser.parse_args()
-        fields = find_fields(args)
+        fields = self.find_fields(args)
         return format_committees(self, data_dict, page_data, fields, year)
 
 
@@ -1481,7 +1450,7 @@ class TotalResource(SingleResource, Total):
 
     def format(self, data_dict, page_data, year):
         args = self.parser.parse_args()
-        fields = find_fields(args)
+        fields = self.find_fields(args)
         return format_totals(self, data_dict, page_data, fields, year)
 
 
@@ -1523,7 +1492,7 @@ class TotalSearch(Searchable, Total):
 
     def format(self, data_dict, page_data, year):
         args = self.parser.parse_args()
-        fields = find_fields(args)
+        fields = self.find_fields(args)
         return format_totals(self, data_dict, page_data, fields, year)
 
 
