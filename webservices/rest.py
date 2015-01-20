@@ -58,26 +58,14 @@ from datetime import datetime
 from psycopg2._range import DateTimeRange
 
 from .candidate.models import Candidate
+from .db import db_conn
+from .resources import Searchable, SingleResource
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
 speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
-
-sqla_conn_string = os.getenv('SQLA_CONN')
-if not sqla_conn_string:
-    print("Environment variable SQLA_CONN is empty; running against local `cfdm_test`")
-    sqla_conn_string = 'postgresql://:@/cfdm_test'
-engine = sa.create_engine(sqla_conn_string)
-conn = engine.connect()
-
-htsql_conn_string = sqla_conn_string.replace('postgresql', 'pgsql')
-htsql_conn = HTSQL(htsql_conn_string,
-                   #{'tweak.override': {'foreign_keys':
-                                                          #['facthousesenate_f3_sums(cmte_id) -> dimcmte(cmte_id']}})
-                                                          #[{'facthousesenate_f3_sums(cmte_id)': 'dimcmte(cmte_id)'}]}})
-                                                          )
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -154,20 +142,6 @@ def find_fields(args):
         return args['fields'].split(',')
     else:
         return [args['fields']]
-
-
-def assign_formatting(self, data_dict, page_data, year):
-    args = self.parser.parse_args()
-    fields = find_fields(args)
-
-    if str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch':
-        return format_candids(self, data_dict, page_data, fields, year)
-    elif str(self.endpoint) == 'committeeresource' or str(self.endpoint) == 'committeesearch':
-        return format_committees(self, data_dict, page_data, fields, year)
-    elif str(self.endpoint) == 'totalresource' or str(self.endpoint) == 'totalsearch':
-        return format_totals(self, data_dict, page_data, fields, year)
-    else:
-        return {'api_version':"0.2", 'pagination':page_data, 'results': data_dict}
 
 
 # Candidate formatting
@@ -573,156 +547,6 @@ def format_totals(self, data, page_data, fields, default_year):
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
-class SingleResource(restful.Resource):
-
-    def get(self, id):
-        show_fields = copy.copy(self.default_fields)
-        overall_start_time = time.time()
-        args = self.parser.parse_args()
-        fields = find_fields(args)
-
-        if args.has_key('fields') and args['fields'] is not None:
-            if ',' in str(args['fields']):
-                fields = args['fields'].split(',')
-            else:
-                fields = [str(args['fields'])]
-
-            for maps, field_name in self.maps_fields:
-                show_fields[field_name] = ''
-                #looking at each field the user requested
-                for field in fields:
-                    # for each mapping, see if there is a field match. If so, add it to the field list
-                    for m in maps:
-                        if m[0] == field:
-                            show_fields[field_name] = show_fields[field_name] + m[1] + ','
-        else: fields = []
-
-        if args.has_key('year'):
-            year = args['year']
-        else:
-            year = default_year()
-
-        qry = "/%s?%s_id='%s'" % (self.query_text(show_fields), self.table_name_stem, id)
-        print(qry)
-
-        speedlogger.info('--------------------------------------------------')
-        speedlogger.info('\nHTSQL query: \n%s' % qry)
-        start_time = time.time()
-
-        data = htsql_conn.produce(qry)
-
-        speedlogger.info('HTSQL query time: %f' % (time.time() - start_time))
-
-        data_dict = as_dicts(data)
-        page_data = {'per_page': 1, 'page':1, 'pages':1, 'count': 1}
-
-        speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-
-        return assign_formatting(self, data_dict, page_data, year)
-
-class Searchable(restful.Resource):
-
-    fulltext_qry = """SELECT {name_stem}_sk
-                      FROM   dim{name_stem}_fulltext
-                      WHERE  fulltxt @@ to_tsquery(:findme)
-                      ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
-
-    def get(self):
-        overall_start_time = time.time()
-        speedlogger.info('--------------------------------------------------')
-        args = self.parser.parse_args(strict=True)
-        elements = []
-        page_num = 1
-        show_fields = copy.copy(self.default_fields)
-
-        if 'year' not in args:
-            args['year'] = default_year()
-        year = args['year']
-
-        for arg in args:
-            if args[arg]:
-                if arg == 'q':
-                    qry = self.fulltext_qry.format(name_stem=self.table_name_stem)
-                    qry = sa.sql.text(qry)
-                    speedlogger.info('\nfulltext query: \n%s' % qry)
-                    start_time = time.time()
-                    findme = ' & '.join(args['q'].split())
-                    fts_result = conn.execute(qry, findme = findme).fetchall()
-                    speedlogger.info('fulltext query time: %f' % (time.time() - start_time))
-                    if not fts_result:
-                        return []
-                    elements.append("%s_sk={%s}" %
-                                    (self.table_name_stem,
-                                     ",".join(str(id[0])
-                                    for id in fts_result)))
-                elif arg == 'page':
-                    page_num = args[arg]
-                elif arg == 'per_page':
-                    per_page = args[arg]
-                elif arg == 'fields':
-                    # queries need year to link the data
-                    if ',' in str(args[arg]):
-                        field_list = args[arg].split(',')
-                    else:
-                        field_list = [str(args[arg])]
-
-                    #going through the different kinds of mappings and fields
-                    for maps, field_name in self.maps_fields:
-                        show_fields[field_name] = ''
-                        #looking at each field the user requested
-                        for field in field_list:
-                            # for each mapping, see if there is a field match. If so, add it to the field list
-                            for m in maps:
-                                if m[0] == field:
-                                    show_fields[field_name] = show_fields[field_name] + m[1] + ','
-                    fields = args[arg]
-                else:
-                    if arg in self.field_name_map:
-                        element = self.field_name_map[arg].substitute(arg=args[arg])
-                        elements.append(element)
-
-        qry = self.query_text(show_fields)
-
-        if elements:
-            qry += "?" + "&".join(elements)
-            count_qry = "/count(%s?%s)" % (self.viewable_table_name,
-                                           "&".join(elements))
-            # Committee endpoint is not year sensitive yet, so we don't want to limit it yet. Otherwise, the candidate's won't show if they are not in the default year.
-            if year != '*' and (str(self.endpoint) == 'candidateresource' or str(self.endpoint) == 'candidatesearch'):
-                qry = qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
-                count_qry = count_qry.replace('dimcandoffice', '(dimcandoffice?cand_election_yr={%s})' % year)
-        else:
-            count_qry = "/count(%s)" % self.viewable_table_name
-
-        offset = per_page * (page_num-1)
-        qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
-
-        print("\n%s\n" % (qry))
-
-        speedlogger.info('\n\nHTSQL query: \n%s' % qry)
-        start_time = time.time()
-        data = htsql_conn.produce(qry)
-        speedlogger.info('HTSQL query time: %f' % (time.time() - start_time))
-
-        count = htsql_conn.produce(count_qry)
-
-        data_dict = as_dicts(data)
-
-        # page info
-        data_count = int(count[0])
-        pages = data_count/per_page
-        if data_count % per_page != 0:
-          pages += 1
-        if data_count < per_page:
-          per_page = data_count
-
-        page_data = {'per_page': per_page, 'page':page_num, 'pages':pages, 'count': data_count}
-
-        speedlogger.info('\noverall time: %f' % (time.time() - overall_start_time))
-
-        return assign_formatting(self, data_dict, page_data, year)
-
-
 class CandidateResource(SingleResource, Candidate):
 
     parser = reqparse.RequestParser()
@@ -736,6 +560,11 @@ class CandidateResource(SingleResource, Candidate):
         default= default_year(),
         help="Year in which a candidate runs for office"
     )
+
+    def format(self, data_dict, page_data, year):
+        args = self.parser.parse_args()
+        fields = find_fields(args)
+        return format_candids(self, data_dict, page_data, fields, year)
 
 
 class CandidateSearch(Searchable, Candidate):
@@ -828,6 +657,11 @@ class CandidateSearch(Searchable, Candidate):
                     ),
     }
 
+    def format(self, data_dict, page_data, year):
+        args = self.parser.parse_args()
+        fields = find_fields(args)
+        return format_candids(self, data_dict, page_data, fields, year)
+
 
 class NameSearch(Searchable):
     """
@@ -855,7 +689,7 @@ class NameSearch(Searchable):
 
         qry = sa.sql.text(self.fulltext_qry)
         findme = ' & '.join(args['q'].split())
-        data = conn.execute(qry, findme = findme).fetchall()
+        data = db_conn().execute(qry, findme = findme).fetchall()
 
         return {"api_version": "0.2",
                 "pagination": {'per_page': 20, 'page': 1, 'pages': 1, 'count': len(data)},
@@ -1012,6 +846,11 @@ class CommitteeResource(SingleResource, Committee):
         help='Choose the fields that are displayed'
     )
 
+    def format(self, data_dict, page_data, year):
+        args = self.parser.parse_args()
+        fields = find_fields(args)
+        return format_committees(self, data_dict, page_data, fields, year)
+
 
 class CommitteeSearch(Searchable, Committee):
 
@@ -1108,6 +947,11 @@ class CommitteeSearch(Searchable, Committee):
         type=str,
         help='Three letter code for party'
     )
+
+    def format(self, data_dict, page_data, year):
+        args = self.parser.parse_args()
+        fields = find_fields(args)
+        return format_committees(self, data_dict, page_data, fields, year)
 
 
 class Total(object):
@@ -1635,6 +1479,11 @@ class TotalResource(SingleResource, Total):
         help='Limit results to a two-year election cycle'
     )
 
+    def format(self, data_dict, page_data, year):
+        args = self.parser.parse_args()
+        fields = find_fields(args)
+        return format_totals(self, data_dict, page_data, fields, year)
+
 
 class TotalSearch(Searchable, Total):
     parser = reqparse.RequestParser()
@@ -1672,6 +1521,10 @@ class TotalSearch(Searchable, Total):
         help='Limit results to a two-year election cycle'
     )
 
+    def format(self, data_dict, page_data, year):
+        args = self.parser.parse_args()
+        fields = find_fields(args)
+        return format_totals(self, data_dict, page_data, fields, year)
 
 
 class Help(restful.Resource):
