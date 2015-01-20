@@ -3,7 +3,8 @@ class Candidate(object):
     # default fields for search
     default_fields = {
         'dimcand_fields': 'cand_id',
-        'cand_committee_link_fields': 'cmte_id,cmte_dsgn,cmte_tp,cand_election_yr',
+        'cand_committee_link_fields':
+            'cmte_id,cmte_dsgn,cmte_tp,cand_election_yr',
         'office_fields': 'office_district,office_state,office_tp',
         'party_fields': 'party_affiliation_desc,party_affiliation',
         'status_fields': 'election_yr,cand_status,ici_code',
@@ -13,7 +14,8 @@ class Candidate(object):
 
     # Query
     table_name_stem = 'cand'
-    viewable_table_name = "(dimcand?exists(dimcandproperties)&exists(dimcandoffice))"
+    viewable_table_name = "(dimcand?exists(dimcandproperties)"
+    viewable_table_name += "&exists(dimcandoffice))"
 
     def query_text(self, show_fields):
         if show_fields['cmte_fields'] != '':
@@ -25,48 +27,50 @@ class Candidate(object):
             else:
                 cmte_des_qry = ''
 
-            com_query = "/dimlinkages%s{*, /dimcmte{*,/dimcmteproperties{cmte_nm}}}  :as affiliated_committees," % (cmte_des_qry)
+            com_query = "/dimlinkages%s" % (cmte_des_qry)
+            com_query += "{*, /dimcmte{*,/dimcmteproperties{cmte_nm}}}"
+            com_query += "  :as affiliated_committees,"
 
-            show_fields['status_fields'] = 'election_yr,' + show_fields['status_fields']
+            show_fields['status_fields'] = ('election_yr,'
+                                            + show_fields['status_fields'])
 
         else:
             com_query = ''
-
 
         return """
             %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
                               %s
                               /dimcandstatusici{%s}}
         """ % (
-                self.viewable_table_name,
-                show_fields['dimcand_fields'],
-                show_fields['properties_fields'],
-                show_fields['office_fields'],
-                show_fields['party_fields'],
-                com_query,
-                show_fields['status_fields'],
+            self.viewable_table_name,
+            show_fields['dimcand_fields'],
+            show_fields['properties_fields'],
+            show_fields['office_fields'],
+            show_fields['party_fields'],
+            com_query,
+            show_fields['status_fields'],
         )
-
 
     # Field mappings (API_output, FEC_input)
     # basic candidate information
     dimcand_mapping = (
         ('candidate_id', 'cand_id'),
         ('form_type', 'form_tp'),
-        ## we don't have this data yet
-        ('expire_date','expire_date'),
-        ('load_date','load_date'),
+        # we don't have this data yet
+        ('expire_date', 'expire_date'),
+        ('load_date', 'load_date'),
         ('*', '*'),
     )
 
-    #affiliated committees
+    # affiliated committees
     cand_committee_format_mapping = (
         ('committee_id', 'cmte_id'),
         ('designation', 'cmte_dsgn'),
         ('type', 'cmte_tp'),
         ('election_year', 'cand_election_yr'),
     )
-    # I want to take additional formatting from the user but don't want to use it for matching during formatting
+    # I want to take additional formatting from the user but don't want to use
+    # it for matching during formatting
     cand_committee_link_mapping = (
         # fields if primary committee is requested
         ('primary_committee', 'cmte_id'),
@@ -91,7 +95,7 @@ class Candidate(object):
         ('office_sought', 'office_tp'),
         ('*', '*'),
     )
-    #dimparty
+    # dimparty
     party_mapping = (
         ('party', 'party_affiliation'),
         ('party_affiliation', 'party_affiliation_desc'),
@@ -109,13 +113,14 @@ class Candidate(object):
     property_fields_mapping = (
         ('name', 'cand_nm'),
         ('street_1', 'cand_st1'),
-        ('street_2','cand_st2'),
+        ('street_2', 'cand_st2'),
         ('city', 'cand_city'),
         ('state', 'cand_st'),
         ('zip', 'cand_zip'),
         ('expire_date', 'expire_date'),
     )
-    # I want to take additional formatting from the user but don't want to use it for matching during formatting
+    # I want to take additional formatting from the user but don't want to use
+    # it for matching during formatting
     properties_mapping = (
         ('mailing_addresses', 'cand_st1,cand_st2,cand_city,cand_st,\
             cand_zip,expire_date'),
@@ -135,7 +140,7 @@ class Candidate(object):
         (cand_committee_link_mapping, 'cand_committee_link_fields'),
         (office_mapping, 'office_fields'),
         (party_mapping, 'party_fields'),
-        (status_mapping,'status_fields'),
+        (status_mapping, 'status_fields'),
         (properties_mapping, 'properties_fields'),
         (cmte_mapping, 'cmte_fields'),
     )
