@@ -57,9 +57,9 @@ import copy
 from datetime import datetime
 from psycopg2._range import DateTimeRange
 
-from .candidate.models import Candidate
-from .db import db_conn
-from .resources import default_year, Searchable, SingleResource
+from webservices.candidate.models import Candidate
+from webservices.db import db_conn
+from webservices.resources import default_year, Searchable, SingleResource
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
