@@ -652,7 +652,7 @@ class Searchable(restful.Resource):
         for arg in args:
             if args[arg]:
                 if arg == 'q':
-                    if arg.is_digit() == True and len(arg) == 9:
+                    if arg.is_digit() == True and len(arg) == 5:
                         query_by_zip(arg)
                     qry = self.fulltext_qry.format(name_stem=self.table_name_stem)
                     qry = sa.sql.text(qry)
