@@ -865,17 +865,17 @@ class NameSearch(Searchable):
 class Committee(object):
 
     default_fields = {
-        'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date',
-        'properties_fields': '*',
+        'dimcmte_fields': 'cmte_id,form_tp,load_date,expire_date,',
+        'properties_fields': '*,',
         'linkages_fields': 'cand_id,cmte_tp,cmte_dsgn,cand_election_yr,expire_date,link_date, /dimcand{/dimcandproperties{cand_nm,}, /dimcandoffice{/dimoffice{office_tp,office_tp_desc}}}',
-        'designation_fields': '*',
+        'designation_fields': '*,',
     }
 
     table_name_stem = 'cmte'
     viewable_table_name = "(dimcmte?exists(dimcmteproperties))"
     def query_text(self, show_fields):
         # We always need expire date and cand_id to sort the information
-        return '(%s{{%s},/dimcmteproperties{expire_date,%s}, /dimlinkages{cand_id,expire_date,%s}, /dimcmtetpdsgn{expire_date,%s}})' % (
+        return '(%s{{%s max(dimcmteproperties.cmte_nm)},/dimcmteproperties{expire_date,%s}, /dimlinkages{cand_id,expire_date,%s}, /dimcmtetpdsgn{expire_date,%s}}).sort(max(dimcmteproperties.cmte_nm)+)' % (
             self.viewable_table_name,
             show_fields['dimcmte_fields'],
             show_fields['properties_fields'],
