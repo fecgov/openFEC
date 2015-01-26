@@ -37,8 +37,6 @@ Supported for /committee ::
 
 """
 from collections import defaultdict
-import doctest
-import os
 import re
 import string
 import sys
@@ -1521,10 +1519,3 @@ api.add_resource(CommitteeSearch, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
 api.add_resource(NameSearch, '/name')
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
-        doctest.testmod()
-    else:
-        debug = not os.getenv('PRODUCTION')
-        app.run(debug=debug)
