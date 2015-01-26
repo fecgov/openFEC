@@ -111,8 +111,9 @@ party_decoder = {'ACE': 'Ace Party', 'AKI': 'Alaskan Independence Party', 'AIC':
 
 
 # loading in zipcode for now
-zip_data = open('/data/zips.json').read()
-zips = json.loads(zip_data)
+# do this later
+zip_data = {}#open('/data/zips.json').read()
+zips = {}#json.loads(zip_data)
 
 # defaulting to the last 4 years so there is always the last presidential, we could make this 6 to ensure coverage of sitting senators.
 def default_year():
