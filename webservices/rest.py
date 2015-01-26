@@ -83,7 +83,7 @@ htsql_conn = HTSQL(htsql_conn_string,
 app = Flask(__name__)
 api = restful.Api(app)
 
-
+### section for lookup shortcuts that I want to shift to the database
 cmte_decoder = {'P': 'Presidential',
                 'H': 'House',
                 'S': 'Senate',
@@ -109,13 +109,14 @@ designation_decoder = {'A': 'Authorized by a candidate',
                 'D': 'Leadership PAC',
 }
 
+# want to get this from the reference table
 party_decoder = {'ACE': 'Ace Party', 'AKI': 'Alaskan Independence Party', 'AIC': 'American Independent Conservative', 'AIP': 'American Independent Party', 'AMP': 'American Party', 'APF': "American People's Freedom Party", 'AE': 'Americans Elect', 'CIT': "Citizens' Party", 'CMD': 'Commandments Party', 'CMP': 'Commonwealth Party of the U.S.', 'COM': 'Communist Party', 'CNC': 'Concerned Citizens Party Of Connecticut', 'CRV': 'Conservative Party', 'CON': 'Constitution Party', 'CST': 'Constitutional', 'COU': 'Country', 'DCG': 'D.C. Statehood Green Party', 'DNL': 'Democratic -Nonpartisan League', 'DEM': 'Democratic Party', 'D/C': 'Democratic/Conservative', 'DFL': 'Democratic-Farmer-Labor', 'DGR': 'Desert Green Party', 'FED': 'Federalist', 'FLP': 'Freedom Labor Party', 'FRE': 'Freedom Party', 'GWP': 'George Wallace Party', 'GRT': 'Grassroots', 'GRE': 'Green Party', 'GR': 'Green-Rainbow', 'HRP': 'Human Rights Party', 'IDP': 'Independence Party', 'IND': 'Independent', 'IAP': 'Independent American Party', 'ICD': 'Independent Conservative Democratic', 'IGR': 'Independent Green', 'IP': 'Independent Party', 'IDE': 'Independent Party of Delaware', 'IGD': 'Industrial Government Party', 'JCN': 'Jewish/Christian National', 'JUS': 'Justice Party', 'LRU': 'La Raza Unida', 'LBR': 'Labor Party', 'LFT': 'Less Federal Taxes', 'LBL': 'Liberal Party', 'LIB': 'Libertarian Party', 'LBU': 'Liberty Union Party', 'MTP': 'Mountain Party', 'NDP': 'National Democratic Party', 'NLP': 'Natural Law Party', 'NA': 'New Alliance', 'NJC': 'New Jersey Conservative Party', 'NPP': 'New Progressive Party', 'NPA': 'No Party Affiliation', 'NOP': 'No Party Preference', 'NNE': 'None', 'N': 'Nonpartisan', 'NON': 'Non-Party', 'OE': 'One Earth Party', 'OTH': 'Other', 'PG': 'Pacific Green', 'PSL': 'Party for Socialism and Liberation', 'PAF': 'Peace And Freedom', 'PFP': 'Peace And Freedom Party', 'PFD': 'Peace Freedom Party', 'POP': 'People Over Politics', 'PPY': "People's Party", 'PCH': 'Personal Choice Party', 'PPD': 'Popular Democratic Party', 'PRO': 'Progressive Party', 'NAP': 'Prohibition Party', 'PRI': 'Puerto Rican Independence Party', 'RUP': 'Raza Unida Party', 'REF': 'Reform Party', 'REP': 'Republican Party', 'RES': 'Resource Party', 'RTL': 'Right To Life', 'SEP': 'Socialist Equality Party', 'SLP': 'Socialist Labor Party', 'SUS': 'Socialist Party', 'SOC': 'Socialist Party U.S.A.', 'SWP': 'Socialist Workers Party', 'TX': 'Taxpayers', 'TWR': 'Taxpayers Without Representation', 'TEA': 'Tea Party', 'THD': 'Theo-Democratic', 'LAB': 'U.S. Labor Party', 'USP': "U.S. People's Party", 'UST': 'U.S. Taxpayers Party', 'UN': 'Unaffiliated', 'UC': 'United Citizen', 'UNI': 'United Party', 'UNK': 'Unknown', 'VET': 'Veterans Party', 'WTP': 'We the People', 'W': 'Write-In'}
 
+# want a better way of dealing with this
+zip_data=json.loads(open('webservices/zips.json').read())
 
-# loading in zipcode for now
-# do this later
-zip_data = {}#open('/data/zips.json').read()
-zips = {}#json.loads(zip_data)
+
+### section for helper functions
 
 # defaulting to the last 4 years so there is always the last presidential, we could make this 6 to ensure coverage of sitting senators.
 def default_year():
@@ -176,6 +177,7 @@ def assign_formatting(self, data_dict, page_data, year):
     else:
         return {'api_version':"0.2", 'pagination':page_data, 'results': data_dict}
 
+### formatting section
 
 # Candidate formatting
 def format_candids(self, data, page_data, fields, default_year):
@@ -579,9 +581,6 @@ def format_totals(self, data, page_data, fields, default_year):
         results.append(com[committee_id])
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
-def query_by_zip(zip_code):
-    if zip_code in zips:
-        print 'hit'
 
 class SingleResource(restful.Resource):
 
@@ -630,12 +629,30 @@ class SingleResource(restful.Resource):
 
         return assign_formatting(self, data_dict, page_data, year)
 
+
+
 class Searchable(restful.Resource):
 
     fulltext_qry = """SELECT {name_stem}_sk
                       FROM   dim{name_stem}_fulltext
                       WHERE  fulltxt @@ to_tsquery(:findme)
                       ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
+
+    # this will show too many candidates when the zipcode crosses state lines need to address that later.
+    def query_by_zip(self, args):
+        if  args['q'] in zip_data:
+            state_dist = zip_data[args['q']]
+            s = ''
+            d = ''
+            for state_dist in zip_data[args['q']]:
+                print state_dist
+                print state_dist['state']
+                print state_dist['district']
+                s =  s + state_dist['state']
+                d = d = state_dist['district']
+            print (s, d)
+            return (s, d)
+
 
     def get(self):
         overall_start_time = time.time()
@@ -649,11 +666,25 @@ class Searchable(restful.Resource):
             args['year'] = default_year()
         year = args['year']
 
+        # Checking for special cases
+        if 'q' in args and args['q'] is not None:
+            if str(self.endpoint) == 'candidatesearch':
+                if args['q'].isdigit() == True and len(args['q']) == 5:
+                    state_dist = self.query_by_zip(args)
+                    args['q'] = ''
+                    args['state'] = state_dist[0]
+                    args['district'] = state_dist[1]
+
+
+        #         if len(arg) == 9 and arg[1:].isdigit == True:
+        #             query_by_cand_id(arg)
+        # if str(self.endpoint) == 'committeesearch' and arg[1:].isdigit == True and len(arg) == 9:
+        #         query_by_com_id(arg)
+
+
         for arg in args:
             if args[arg]:
                 if arg == 'q':
-                    if arg.is_digit() == True and len(arg) == 5:
-                        query_by_zip(arg)
                     qry = self.fulltext_qry.format(name_stem=self.table_name_stem)
                     qry = sa.sql.text(qry)
                     speedlogger.info('\nfulltext query: \n%s' % qry)
@@ -692,6 +723,7 @@ class Searchable(restful.Resource):
                     if arg in self.field_name_map:
                         element = self.field_name_map[arg].substitute(arg=args[arg])
                         elements.append(element)
+                        print element
 
         qry = self.query_text(show_fields)
 
