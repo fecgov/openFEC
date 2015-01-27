@@ -642,17 +642,14 @@ class Searchable(restful.Resource):
     def query_by_zip(self, args):
         if  args['q'] is not None and args['q'] in zip_data:
             state_dist = zip_data[args['q']]
-            s = ''
+            s = []
             # this is to find senators
-            d = '00,'
+            d = ['00']
             for state_dist in zip_data[args['q']]:
-                print state_dist
-                print state_dist['state']
-                print state_dist['district']
-                s =  s + state_dist['state'] + ','
-                d = d + state_dist['district'] + ','
-            print (s, d)
-            return (s, d)
+                s.append(state_dist['state'])
+                d.append(state_dist['district'])
+            return (','.join(s), ','.join(d))
+        else: return None
 
 
     def get(self):
@@ -672,15 +669,18 @@ class Searchable(restful.Resource):
             if str(self.endpoint) == 'candidatesearch':
                 if args['q'].isdigit() == True and len(args['q']) == 5:
                     state_dist = self.query_by_zip(args)
+                    if state_dist is not None:
+                        args['q'] = ''
+                        args['state'] = state_dist[0]
+                        args['district'] = state_dist[1]
+            # use committee id
+            if len(args['q']) == 9 and args['q'][-5:].isdigit() == True:
+                if args['q'][:1] == 'C' and args['q'][-1:].isdigit() == True:
+                    args['committee_id'] = copy.copy(args['q'])
                     args['q'] = ''
-                    args['state'] = state_dist[0]
-                    args['district'] = state_dist[1]
-
-
-        #         if len(arg) == 9 and arg[1:].isdigit == True:
-        #             query_by_cand_id(arg)
-        # if str(self.endpoint) == 'committeesearch' and arg[1:].isdigit == True and len(arg) == 9:
-        #         query_by_com_id(arg)
+                if args['q'][:1] in ['P', 'H', 'S']:
+                    args['candidate_id'] = copy.copy(args['q'])
+                    args['q'] = ''
 
 
         for arg in args:

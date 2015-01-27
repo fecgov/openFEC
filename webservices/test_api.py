@@ -149,11 +149,11 @@ class OverallTest(unittest.TestCase):
         # checking one example from each field
         filter_fields = (
             ('office','H'),
-            ('district', '0'),
+            ('district', '00,02'),
             ('state', 'CA'),
             ('name', 'Obama'),
             ('party', 'DEM'),
-            ('year', '2012'),
+            ('year', '2012,2014'),
         )
 
         for field, example in filter_fields:
@@ -163,12 +163,22 @@ class OverallTest(unittest.TestCase):
 
             self.assertEquals(response.status_code, 200)
 
+    def test_zip_lookup(self):
+        response = self._response('/candidate?q=20009')
+        self.assertEquals(len(response['results']), 1)
+
+    def test_q_ids(self):
+        response = self._response('/committee?q=C00000851')
+        self.assertEquals(len(response['results']), 1)
+        response = self._response('/candidate?q=H4DC00092')
+        self.assertEquals(len(response['results']), 1)
+
 #Committee
 
     def test_committee_cand_fields(self):
         # they were giving different responses
         response_1 = self._response('/committee/C00000851')
-        response_2 = response = self._response('/committee?committee_id=C00000851&fields=*')
+        response_2 = self._response('/committee?committee_id=C00000851&fields=*')
         result_1 = response_1['results'][0]['candidates'][0]
         result_2 = response_2['results'][0]['candidates'][0]
 
@@ -255,11 +265,11 @@ class OverallTest(unittest.TestCase):
         # checking one example from each field
         filter_fields = (
             ('candidate_id','H0VA08040'),
-            ('state', 'CA'),
+            ('state', 'CA,DC'),
             ('name', 'Obama'),
             ('type', 'S'),
             ('designation', 'P'),
-            ('party', 'REP'),
+            ('party', 'REP,DEM'),
             ('organization_type','C'),
         )
 
