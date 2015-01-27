@@ -640,16 +640,17 @@ class Searchable(restful.Resource):
 
     # this will show too many candidates when the zipcode crosses state lines need to address that later.
     def query_by_zip(self, args):
-        if  args['q'] in zip_data:
+        if  args['q'] is not None and args['q'] in zip_data:
             state_dist = zip_data[args['q']]
             s = ''
-            d = ''
+            # this is to find senators
+            d = '00,'
             for state_dist in zip_data[args['q']]:
                 print state_dist
                 print state_dist['state']
                 print state_dist['district']
-                s =  s + state_dist['state']
-                d = d = state_dist['district']
+                s =  s + state_dist['state'] + ','
+                d = d + state_dist['district'] + ','
             print (s, d)
             return (s, d)
 
@@ -721,7 +722,7 @@ class Searchable(restful.Resource):
                     fields = args[arg]
                 else:
                     if arg in self.field_name_map:
-                        element = self.field_name_map[arg].substitute(arg=args[arg])
+                        element = self.field_name_map[arg].substitute(arg=args[arg].upper().replace(',', "','"))
                         elements.append(element)
                         print element
 
@@ -845,27 +846,28 @@ class CandidateSearch(Searchable, Candidate):
     )
     parser.add_argument(
         'district',
-        type=int,
+        type=str,
         help='Two digit district number'
     )
 
 
-    field_name_map = {"candidate_id": string.Template("cand_id='$arg'"),
+    field_name_map = {"candidate_id": string.Template("cand_id={'$arg'}"),
                     "fec_id": string.Template("cand_id='$arg'"),
                     "office": string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp~'$arg'"
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp={'$arg'}"
                     ),
                     "district":string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg', '0$arg'}"
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg'}"
                     ),
                     "state": string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_state~'$arg'"
+                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_state={'$arg'}"
                     ),
                     "name": string.Template(
                         "top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"
                     ),
-                    "party": string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation~'$arg'"
+                    "party":
+                        string.Template(
+                        "top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation={'$arg'}"
                     ),
                     "year": string.Template(
                         "exists(dimcandoffice)"
@@ -1059,28 +1061,28 @@ class CommitteeResource(SingleResource, Committee):
 
 class CommitteeSearch(Searchable, Committee):
 
-    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
+    field_name_map = {"committee_id": string.Template("cmte_id={'$arg'}"),
                         "fec_id": string.Template("cmte_id='$arg'"),
                         "candidate_id":string.Template(
-                            "exists(dimlinkages?cand_id~'$arg')"
+                            "exists(dimlinkages?cand_id={'$arg'})"
                         ),
                         "state": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).cmte_st~'$arg'"
+                            "top(dimcmteproperties.sort(expire_date-)).cmte_st={'$arg'}"
                         ),
                         "name": string.Template(
                             "top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'"
                         ),
                         "type": string.Template(
-                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp~'$arg'"
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp={'$arg'}"
                         ),
                         "designation": string.Template(
-                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn~'$arg'"
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn={'$arg'}"
                         ),
                         "organization_type": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).org_tp~'$arg'"
+                            "top(dimcmteproperties.sort(expire_date-)).org_tp={'$arg'}"
                         ),
                         "party": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).cand_pty_affiliation~'$arg'"
+                            "top(dimcmteproperties.sort(expire_date-)).cand_pty_affiliation={'$arg'}"
                         ),
     }
 
@@ -1684,7 +1686,7 @@ class TotalSearch(Searchable, Total):
     parser = reqparse.RequestParser()
 
     field_name_map = {
-        "committee_id": string.Template("cmte_id='$arg'"),
+        "committee_id": string.Template("cmte_id={'$arg'}"),
     }
 
     parser.add_argument(
