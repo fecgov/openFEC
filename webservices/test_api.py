@@ -163,10 +163,6 @@ class OverallTest(unittest.TestCase):
 
             self.assertEquals(response.status_code, 200)
 
-    def test_zip_lookup(self):
-        response = self._response('/candidate?q=20009')
-        self.assertEquals(len(response['results']), 1)
-
     def test_q_ids(self):
         response = self._response('/committee?q=C00000851')
         self.assertEquals(len(response['results']), 1)
