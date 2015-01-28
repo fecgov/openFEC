@@ -2,9 +2,20 @@
 
 We are taking data from the Federal Election Commission and creating an API around it. We will be harmonizing/cleaning it up to make it easier for external developers to use and analyze as well as creating a web application to make some analyzation and comparison of the data easier.
 
-**Note**: This project is still in alpha and may never be deployed. We're still investigating the best ways to present this data to the public.
+**Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
 
-There is a corresponding web application at [18F/openFEC-web-app](http://github.com/18F/openFEC-web-app).
+## Outside Contributors
+
+Hello! If you're interested in learning more about this project, check out some related repos and don't be afraid to ask us questions (general questions usually go here: [fec](https://github.com/18F/fec)). 
+
+If you'd like to contribute to our project, please check out our [openfec] (https://github.com/18F/openfec) repo. We try to tag things that are easy to pick up without being entrenched in our project with a "help wanted" tag. Things in our [backlog] (https://github.com/18F/openfec/milestones/Backlog) are usually also up for grabs, so let us know if you'd like to pick something up from there. 
+
+For those interested in contributing, please check out our [contributing guidelies] (https://github.com/18F/openfec/blob/master/CONTRIBUTING.md) we use to guide our development processes internally. You don't have to adhere to them to participate, but following them may help keep things from getting messy. 
+
+## Our Repos
+
+* [fec](https://github.com/18F/fec) - A discussion forum where we can discuss the project. 
+* [openfec] (https://github.com/18F/openfec) - Where our work happens. We create issues related to each sprint and our backlog here. If you're interested in contribution, please look for "help wanted" tags or ask!
 
 ## Installation
 This will work best when installed in to its own [Virtual Environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
