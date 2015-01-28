@@ -57,31 +57,48 @@ GRANT SELECT ON dimcand_fulltext TO webro;
 
 DROP TABLE IF EXISTS name_search_fulltext;
 CREATE TABLE name_search_fulltext AS
-SELECT DISTINCT
-       p.cand_sk,
-       NULL::bigint AS cmte_sk,
+WITH ranked AS (
+SELECT
        p.cand_nm AS name,
        to_tsvector(p.cand_nm) as name_vec,
        c.cand_id,
+       row_number() OVER (partition by c.cand_id
+                          order by p.load_date desc) AS load_order,
        NULL::text AS cmte_id,
        o.office_tp AS office_sought
 FROM   dimcand c
 JOIN   dimcandproperties p ON (p.cand_sk = c.cand_sk)
 JOIN   dimcandoffice co ON (co.cand_sk = c.cand_sk)
-JOIN   dimoffice o ON (co.office_sk = o.office_sk);
-
+JOIN   dimoffice o ON (co.office_sk = o.office_sk)
+)
+SELECT DISTINCT
+       name,
+       name_vec,
+       cand_id,
+       cmte_id,
+       office_sought
+FROM   ranked
+WHERE  load_order = 1;
 
 INSERT INTO name_search_fulltext
-SELECT DISTINCT
-       NULL::bigint AS cand_sk,
-       p.cmte_sk,
+WITH ranked AS (
+SELECT
        p.cmte_nm AS name,
        to_tsvector(p.cmte_nm) AS name_vec,
-       NULL AS cand_id,
        c.cmte_id,
-       NULL AS office_sought
+       row_number() OVER (partition by c.cmte_id
+                          order by p.load_date desc) AS load_order
 FROM   dimcmte c
-JOIN   dimcmteproperties p ON (c.cmte_sk = p.cmte_sk);
+JOIN   dimcmteproperties p ON (p.cmte_sk = c.cmte_sk)
+)
+SELECT DISTINCT
+       name,
+       name_vec,
+       NULL AS cand_id,
+       cmte_id,
+       NULL AS office_sought
+FROM   ranked
+WHERE  load_order = 1;
 
 CREATE INDEX name_search_fts_idx ON name_search_fulltext USING gin(name_vec);
 GRANT SELECT ON name_search_fulltext TO webro;
