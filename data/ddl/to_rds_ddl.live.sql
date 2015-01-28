@@ -1,32 +1,41 @@
-SET search_path=newdownload;
 
-create table pinglog (at timestamp primary key, up boolean);
+-- TODO: file Blaze bug - Columns that are NUMBER(14,2) in Oracle come across as INTEGER!
+-- ex: DESC SCHED_D - SEE OUTSTG_BAL_BOP
+-- had to change _id and _sk integers to bigint, all others to numeric
 
-CREATE TABLE dimcand (
+-- run it via ``psql_w_vars.sh`` to set variables like :rds_host_loc
+
+DROP SCHEMA live CASCADE;
+CREATE SCHEMA live;
+
+DROP FOREIGN TABLE live.pinglog;
+CREATE FOREIGN TABLE live.pinglog
+( at timestamp, up boolean
+) SERVER rds OPTIONS (schema_name 'public', table_name 'pinglog');
+
+CREATE FOREIGN TABLE live.dimcand (
     cand_sk bigint NOT NULL,
     cand_id text,
     form_sk bigint,
     form_tp text,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcand');
 
-CREATE TABLE dimcandoffice (
+CREATE FOREIGN TABLE live.dimcandoffice (
     candoffice_sk bigint NOT NULL,
     cand_sk bigint,
     office_sk bigint,
     party_sk bigint,
     form_sk bigint,
     form_tp text,
-    cand_election_yr int,
-    load_date timestamp without time zone,
+    cand_election_yr integer,
+    load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
-
-ALTER TABLE dimcandoffice ALTER COLUMN cand_election_yr TYPE integer;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandoffice');
 
 
-CREATE TABLE dimcandproperties (
+CREATE FOREIGN TABLE live.dimcandproperties (
     candproperties_sk bigint NOT NULL,
     cand_sk bigint NOT NULL,
     form_sk bigint,
@@ -50,29 +59,29 @@ CREATE TABLE dimcandproperties (
     gen_pers_funds_decl numeric,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandproperties');
 
-CREATE TABLE dimcandstatusici (
+CREATE FOREIGN TABLE live.dimcandstatusici (
     candstatusici_sk bigint NOT NULL,
     cand_sk bigint,
     election_yr numeric NOT NULL,
     ici_code text,
     cand_status text,
     cand_inactive_flg text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandstatusici');
 
-CREATE TABLE dimcmte (
+CREATE FOREIGN TABLE live.dimcmte (
     cmte_sk bigint NOT NULL,
     cmte_id text,
     form_sk bigint,
     form_tp text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmte');
 
-CREATE TABLE dimcmteproperties (
+CREATE FOREIGN TABLE live.dimcmteproperties (
     cmteproperties_sk bigint NOT NULL,
     cmte_sk bigint,
     form_sk bigint,
@@ -161,34 +170,34 @@ CREATE TABLE dimcmteproperties (
     fith_cand_contb_dt timestamp without time zone,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmteproperties');
 
 
-CREATE TABLE dimcmtetpdsgn (
+CREATE FOREIGN TABLE live.dimcmtetpdsgn (
     cmte_tpdgn_sk bigint NOT NULL,
     cmte_sk bigint NOT NULL,
     cmte_tp text,
     cmte_dsgn text,
     receipt_date timestamp without time zone,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmtetpdsgn');
 
-CREATE TABLE dimdates (
+CREATE FOREIGN TABLE live.dimdates (
     date_sk bigint NOT NULL,
     dw_date timestamp without time zone,
     load_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimdates');
 
-CREATE TABLE dimelectiontp (
+CREATE FOREIGN TABLE live.dimelectiontp (
     electiontp_sk bigint NOT NULL,
     election_type_id text NOT NULL,
     election_type_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimelectiontp');
 
-CREATE TABLE dimlinkages (
+CREATE FOREIGN TABLE live.dimlinkages (
     linkages_sk bigint NOT NULL,
     cand_sk bigint NOT NULL,
     cmte_sk bigint NOT NULL,
@@ -200,9 +209,9 @@ CREATE TABLE dimlinkages (
     link_date timestamp without time zone,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimlinkages');
 
-CREATE TABLE dimoffice (
+CREATE FOREIGN TABLE live.dimoffice (
     office_sk bigint NOT NULL,
     office_tp text,
     office_tp_desc text,
@@ -210,31 +219,31 @@ CREATE TABLE dimoffice (
     office_district text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimoffice');
 
-CREATE TABLE dimparty (
+CREATE FOREIGN TABLE live.dimparty (
     party_sk bigint NOT NULL,
     party_affiliation text,
     party_affiliation_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimparty');
 
-CREATE TABLE dimreporttype (
+CREATE FOREIGN TABLE live.dimreporttype (
     reporttype_sk bigint NOT NULL,
     rpt_tp text,
     rpt_tp_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimreporttype');
 
-CREATE TABLE dimyears (
+CREATE FOREIGN TABLE live.dimyears (
     year_sk bigint NOT NULL,
     year numeric,
     load_date timestamp without time zone NOT NULL
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'dimyears');
 
-CREATE TABLE facthousesenate_f3 (
+CREATE FOREIGN TABLE live.facthousesenate_f3 (
     facthousesenate_f3_sk bigint NOT NULL,
     form_3_sk bigint,
     cmte_sk bigint,
@@ -323,11 +332,11 @@ CREATE TABLE facthousesenate_f3 (
     grs_rcpt_min_pers_contrib_gen numeric,
     begin_image_num numeric,
     end_image_num numeric,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'facthousesenate_f3');
 
-CREATE TABLE factpacsandparties_f3x (
+CREATE FOREIGN TABLE live.factpacsandparties_f3x (
     factpacsandparties_f3x_sk bigint NOT NULL,
     form_3x_sk bigint,
     cmte_sk bigint,
@@ -441,12 +450,12 @@ CREATE TABLE factpacsandparties_f3x (
     ttl_fed_elect_actvy_ytd numeric,
     begin_image_num numeric,
     end_image_num numeric,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'factpacsandparties_f3x');
 
 
-CREATE TABLE factpresidential_f3p (
+CREATE FOREIGN TABLE live.factpresidential_f3p (
     factpresidential_f3p_sk bigint NOT NULL,
     form_3p_sk bigint,
     cmte_sk bigint,
@@ -638,12 +647,12 @@ CREATE TABLE factpresidential_f3p (
     ttl_ytd numeric,
     begin_image_num numeric,
     end_image_num numeric,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'factpresidential_f3p');
 
 
-CREATE TABLE form_105 (
+CREATE FOREIGN TABLE live.form_105 (
     form_105_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -662,12 +671,12 @@ CREATE TABLE form_105 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_105');
 
 
-CREATE TABLE form_56 (
+CREATE FOREIGN TABLE live.form_56 (
     form_56_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -703,12 +712,12 @@ CREATE TABLE form_56 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_56');
 
 
-CREATE TABLE form_57 (
+CREATE FOREIGN TABLE live.form_57 (
     form_57_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -751,12 +760,12 @@ CREATE TABLE form_57 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_57');
 
 
-CREATE TABLE form_65 (
+CREATE FOREIGN TABLE live.form_65 (
     form_65_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -792,12 +801,12 @@ CREATE TABLE form_65 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_65');
 
 
-CREATE TABLE form_76 (
+CREATE FOREIGN TABLE live.form_76 (
     form_76_sk bigint NOT NULL,
     form_tp text,
     org_id text,
@@ -824,12 +833,12 @@ CREATE TABLE form_76 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_76');
 
 
-CREATE TABLE form_82 (
+CREATE FOREIGN TABLE live.form_82 (
     form_82_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -868,12 +877,12 @@ CREATE TABLE form_82 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_82');
 
 
-CREATE TABLE form_83 (
+CREATE FOREIGN TABLE live.form_83 (
     form_83_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -904,12 +913,12 @@ CREATE TABLE form_83 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_83');
 
 
-CREATE TABLE form_91 (
+CREATE FOREIGN TABLE live.form_91 (
     form_91_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -931,12 +940,11 @@ CREATE TABLE form_91 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_91');
 
-
-CREATE TABLE form_94 (
+CREATE FOREIGN TABLE live.form_94 (
     form_94_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -960,12 +968,12 @@ CREATE TABLE form_94 (
     link_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_94');
 
 
-CREATE TABLE log_audit_dml (
+CREATE FOREIGN TABLE live.log_audit_dml (
     dml_id bigint NOT NULL,
     run_id bigint,
     audit_id bigint,
@@ -978,10 +986,10 @@ CREATE TABLE log_audit_dml (
     elapsed_minutes numeric,
     start_cpu_time numeric NOT NULL,
     start_clock_time numeric NOT NULL
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_dml');
 
 
-CREATE TABLE log_audit_module (
+CREATE FOREIGN TABLE live.log_audit_module (
     audit_id bigint NOT NULL,
     run_id bigint,
     module_name text NOT NULL,
@@ -992,10 +1000,10 @@ CREATE TABLE log_audit_module (
     elapsed_minutes numeric,
     start_cpu_time numeric NOT NULL,
     start_clock_time numeric NOT NULL
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_module');
 
 
-CREATE TABLE log_audit_process (
+CREATE FOREIGN TABLE live.log_audit_process (
     run_id bigint NOT NULL,
     session_id bigint NOT NULL,
     process_name text,
@@ -1008,10 +1016,10 @@ CREATE TABLE log_audit_process (
     elapsed_minutes numeric,
     start_cpu_time numeric NOT NULL,
     start_clock_time numeric NOT NULL
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_process');
 
 
-CREATE TABLE sched_a (
+CREATE FOREIGN TABLE live.sched_a (
     sched_a_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1070,12 +1078,12 @@ CREATE TABLE sched_a (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_a');
 
 
-CREATE TABLE sched_b (
+CREATE FOREIGN TABLE live.sched_b (
     sched_b_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1136,12 +1144,12 @@ CREATE TABLE sched_b (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_b');
 
 
-CREATE TABLE sched_c (
+CREATE FOREIGN TABLE live.sched_c (
     sched_c_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1189,12 +1197,12 @@ CREATE TABLE sched_c (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c');
 
 
-CREATE TABLE sched_c1 (
+CREATE FOREIGN TABLE live.sched_c1 (
     sched_c1_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1253,12 +1261,11 @@ CREATE TABLE sched_c1 (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c1');
 
-
-CREATE TABLE sched_c2 (
+CREATE FOREIGN TABLE live.sched_c2 (
     sched_c2_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1288,12 +1295,12 @@ CREATE TABLE sched_c2 (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c2');
 
 
-CREATE TABLE sched_d (
+CREATE FOREIGN TABLE live.sched_d (
     sched_d_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1340,12 +1347,12 @@ CREATE TABLE sched_d (
     transaction_id bigint,
     filing_type text,
     filing_form text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_d');
 
 
-CREATE TABLE sched_e (
+CREATE FOREIGN TABLE live.sched_e (
     sched_e_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1405,12 +1412,12 @@ CREATE TABLE sched_e (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_e');
 
 
-CREATE TABLE sched_f (
+CREATE FOREIGN TABLE live.sched_f (
     sched_f_sk bigint NOT NULL,
     form_tp text,
     cmte_id text,
@@ -1474,12 +1481,12 @@ CREATE TABLE sched_f (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_f');
 
 
-CREATE TABLE sched_h1 (
+CREATE FOREIGN TABLE live.sched_h1 (
     sched_h1_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1535,12 +1542,12 @@ CREATE TABLE sched_h1 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h1');
 
 
-CREATE TABLE sched_h2 (
+CREATE FOREIGN TABLE live.sched_h2 (
     sched_h2_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1568,12 +1575,12 @@ CREATE TABLE sched_h2 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h2');
 
 
-CREATE TABLE sched_h3 (
+CREATE FOREIGN TABLE live.sched_h3 (
     sched_h3_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1601,12 +1608,12 @@ CREATE TABLE sched_h3 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h3');
 
 
-CREATE TABLE sched_h4 (
+CREATE FOREIGN TABLE live.sched_h4 (
     sched_h4_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1670,19 +1677,18 @@ CREATE TABLE sched_h4 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h4');
 
-
-CREATE TABLE sched_h5 (
+CREATE FOREIGN TABLE live.sched_h5 (
     sched_h5_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
     acct_nm text,
     tranf_dt timestamp without time zone,
     ttl_tranf_amt_voter_reg numeric,
-    ttl_tranf_voter_id bigint,
+    ttl_tranf_voter_id numeric,
     ttl_tranf_gotv numeric,
     ttl_tranf_gen_campgn_actvy numeric,
     ttl_tranf_amt numeric,
@@ -1702,12 +1708,12 @@ CREATE TABLE sched_h5 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h5');
 
 
-CREATE TABLE sched_h6 (
+CREATE FOREIGN TABLE live.sched_h6 (
     sched_h6_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1765,12 +1771,12 @@ CREATE TABLE sched_h6 (
     rpt_yr numeric,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h6');
 
 
-CREATE TABLE sched_i (
+CREATE FOREIGN TABLE live.sched_i (
     sched_i_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1819,12 +1825,12 @@ CREATE TABLE sched_i (
     end_image_num text,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_i');
 
 
-CREATE TABLE sched_l (
+CREATE FOREIGN TABLE live.sched_l (
     sched_l_sk bigint NOT NULL,
     form_tp text,
     filer_cmte_id text,
@@ -1883,12 +1889,129 @@ CREATE TABLE sched_l (
     orig_sub_id bigint,
     transaction_id bigint,
     filing_type text,
-    load_date timestamp without time zone,
+    load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) ;
+) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_l');
 
-GRANT USAGE ON SCHEMA newdownload TO webro;
-GRANT USAGE ON SCHEMA newdownload TO openfec;
-GRANT ALL PRIVILEGES ON SCHEMA newdownload TO openfec;
-GRANT SELECT ON ALL TABLES IN SCHEMA newdownload TO webro;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA newdownload TO openfec;
+CREATE FOREIGN TABLE live.form_1 (
+   form_1_sk				   bigint,
+   form_tp					    text,
+   cmte_id					    text,
+   cmte_nm					    text,
+   cmte_st1					    text,
+   cmte_st2					    text,
+   cmte_city					    text,
+   cmte_st					    text,
+   cmte_zip					    text,
+   submit_dt					    timestamp without time zone,
+   cmte_nm_chg_flg				    text,
+   cmte_addr_chg_flg				    text,
+   cmte_tp					    text,
+   cand_id					    text,
+   cand_nm					    text,
+   cand_office					    text,
+   cand_office_st 				    text,
+   cand_office_district				    text,
+   cand_pty_affiliation				    text,
+   cand_pty_tp					    text,
+   affiliated_cmte_id				    text,
+   affiliated_cmte_nm				    text,
+   affiliated_cmte_st1				    text,
+   affiliated_cmte_st2				    text,
+   affiliated_cmte_city				    text,
+   affiliated_cmte_st				    text,
+   affiliated_cmte_zip				    text,
+   cmte_rltshp					    text,
+   org_tp 					    text,
+   cust_rec_nm					    text,
+   cust_rec_st1					    text,
+   cust_rec_st2					    text,
+   cust_rec_city					    text,
+   cust_rec_st					    text,
+   cust_rec_zip					    text,
+   cust_rec_title 				    text,
+   cust_rec_ph_num				    text,
+   tres_nm					    text,
+   tres_st1					    text,
+   tres_st2					    text,
+   tres_city					    text,
+   tres_st					    text,
+   tres_zip					    text,
+   tres_title					    text,
+   tres_ph_num					    text,
+   designated_agent_nm				    text,
+   designated_agent_st1				    text,
+   designated_agent_st2				    text,
+   designated_agent_city				    text,
+   designated_agent_st				    text,
+   designated_agent_zip				    text,
+   designated_agent_title 			    text,
+   designated_agent_ph_num			    text,
+   bank_depository_nm				    text,
+   bank_depository_st1				    text,
+   bank_depository_st2				    text,
+   bank_depository_city				    text,
+   bank_depository_st				    text,
+   bank_depository_zip				    text,
+   sec_bank_depository_nm 			    text,
+   sec_bank_depository_st1			    text,
+   sec_bank_depository_st2			    text,
+   sec_bank_depository_city			    text,
+   sec_bank_depository_st 			    text,
+   sec_bank_depository_zip			    text,
+   tres_sign_nm					    text,
+   tres_sign_dt					    timestamp without time zone,
+   cmte_email					    text,
+   cmte_web_url					    text,
+   receipt_dt					    timestamp without time zone,
+   filing_freq					    text,
+   cmte_dsgn					    text,
+   qual_dt					    timestamp without time zone,
+   cmte_fax					    text,
+   efiling_cmte_tp				    text,
+   rpt_yr 					    integer,
+   leadership_pac 				    text,
+   affiliated_relationship_cd			    text,
+   cmte_email_chg_flg				    text,
+   cmte_url_chg_flg				    text,
+   lobbyist_registrant_pac			    text,
+   affiliated_cand_id				    text,
+   affiliated_cand_l_nm				    text,
+   affiliated_cand_f_nm				    text,
+   affiliated_cand_m_nm				    text,
+   affiliated_cand_prefix 			    text,
+   affiliated_cand_suffix 			    text,
+   cand_l_nm					    text,
+   cand_f_nm					    text,
+   cand_m_nm					    text,
+   cand_prefix					    text,
+   cand_suffix					    text,
+   cust_rec_l_nm					    text,
+   cust_rec_f_nm					    text,
+   cust_rec_m_nm					    text,
+   cust_rec_prefix				    text,
+   cust_rec_suffix				    text,
+   tres_l_nm					    text,
+   tres_f_nm					    text,
+   tres_m_nm					    text,
+   tres_prefix					    text,
+   tres_suffix					    text,
+   designated_agent_l_nm				    text,
+   designated_agent_f_nm				    text,
+   designated_agent_m_nm				    text,
+   designated_agent_prefix			    text,
+   designated_agent_suffix			    text,
+   f3l_filing_freq				    text,
+   begin_image_num				    text,
+   end_image_num					    text,
+   sub_id 					          bigint,
+   etl_invalid_flg				    text,
+   etl_complete_date				    timestamp without time zone,
+   filing_type					    text,
+   record_ind					    text,
+   load_date				   timestamp without time zone not null,
+   update_date					    timestamp without time zone
+) SERVER rds OPTIONS (schema_name 'public', table_name 'form_1');
+
+GRANT ALL PRIVILEGES ON SCHEMA live TO openfec;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA live TO openfec;
