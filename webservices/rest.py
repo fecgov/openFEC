@@ -31,8 +31,8 @@ Supported for /committee ::
     name=        (committee's name)
     state=       (two-letter code)
     candidate=   (associated candidate's name)
-    type=   one-letter code see cmte_decoder
-    designation=  one-letter code see designation_decoder
+    type=   one-letter code see decoders.cmte
+    designation=  one-letter code see decoders.designation
     year=        The four-digit election year
 
 """
@@ -57,6 +57,7 @@ from psycopg2._range import DateTimeRange
 
 from candidates.models import Candidate
 from db import db_conn
+import decoders
 from resources import default_year, Searchable, SingleResource
 
 speedlogger = logging.getLogger('speed')
@@ -68,33 +69,6 @@ flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 app = Flask(__name__)
 api = restful.Api(app)
 
-
-cmte_decoder = {'P': 'Presidential',
-                'H': 'House',
-                'S': 'Senate',
-                'C': 'Communication Cost',
-                'D': 'Delegate Committee',
-                'E': 'Electioneering Communication',
-                'I': 'Independent Expenditor (Person or Group)',
-                'N': 'PAC - Nonqualified',
-                'O': 'Independent Expenditure-Only (Super PACs)',
-                'Q': 'PAC - Qualified',
-                'U': 'Single Candidate Independent Expenditure',
-                'V': 'PAC with Non-Contribution Account - Nonqualified',
-                'W': 'PAC with Non-Contribution Account - Qualified',
-                'X': 'Party - Nonqualified',
-                'Y': 'Party - Qualified',
-                'Z': 'National Party Nonfederal Account'
-}
-designation_decoder = {'A': 'Authorized by a candidate',
-                'J': 'Joint fundraising committee',
-                'P': 'Principal campaign committee',
-                'U': 'Unauthorized',
-                'B': 'Lobbyist/Registrant PAC',
-                'D': 'Leadership PAC',
-}
-
-party_decoder = {'ACE': 'Ace Party', 'AKI': 'Alaskan Independence Party', 'AIC': 'American Independent Conservative', 'AIP': 'American Independent Party', 'AMP': 'American Party', 'APF': "American People's Freedom Party", 'AE': 'Americans Elect', 'CIT': "Citizens' Party", 'CMD': 'Commandments Party', 'CMP': 'Commonwealth Party of the U.S.', 'COM': 'Communist Party', 'CNC': 'Concerned Citizens Party Of Connecticut', 'CRV': 'Conservative Party', 'CON': 'Constitution Party', 'CST': 'Constitutional', 'COU': 'Country', 'DCG': 'D.C. Statehood Green Party', 'DNL': 'Democratic -Nonpartisan League', 'DEM': 'Democratic Party', 'D/C': 'Democratic/Conservative', 'DFL': 'Democratic-Farmer-Labor', 'DGR': 'Desert Green Party', 'FED': 'Federalist', 'FLP': 'Freedom Labor Party', 'FRE': 'Freedom Party', 'GWP': 'George Wallace Party', 'GRT': 'Grassroots', 'GRE': 'Green Party', 'GR': 'Green-Rainbow', 'HRP': 'Human Rights Party', 'IDP': 'Independence Party', 'IND': 'Independent', 'IAP': 'Independent American Party', 'ICD': 'Independent Conservative Democratic', 'IGR': 'Independent Green', 'IP': 'Independent Party', 'IDE': 'Independent Party of Delaware', 'IGD': 'Industrial Government Party', 'JCN': 'Jewish/Christian National', 'JUS': 'Justice Party', 'LRU': 'La Raza Unida', 'LBR': 'Labor Party', 'LFT': 'Less Federal Taxes', 'LBL': 'Liberal Party', 'LIB': 'Libertarian Party', 'LBU': 'Liberty Union Party', 'MTP': 'Mountain Party', 'NDP': 'National Democratic Party', 'NLP': 'Natural Law Party', 'NA': 'New Alliance', 'NJC': 'New Jersey Conservative Party', 'NPP': 'New Progressive Party', 'NPA': 'No Party Affiliation', 'NOP': 'No Party Preference', 'NNE': 'None', 'N': 'Nonpartisan', 'NON': 'Non-Party', 'OE': 'One Earth Party', 'OTH': 'Other', 'PG': 'Pacific Green', 'PSL': 'Party for Socialism and Liberation', 'PAF': 'Peace And Freedom', 'PFP': 'Peace And Freedom Party', 'PFD': 'Peace Freedom Party', 'POP': 'People Over Politics', 'PPY': "People's Party", 'PCH': 'Personal Choice Party', 'PPD': 'Popular Democratic Party', 'PRO': 'Progressive Party', 'NAP': 'Prohibition Party', 'PRI': 'Puerto Rican Independence Party', 'RUP': 'Raza Unida Party', 'REF': 'Reform Party', 'REP': 'Republican Party', 'RES': 'Resource Party', 'RTL': 'Right To Life', 'SEP': 'Socialist Equality Party', 'SLP': 'Socialist Labor Party', 'SUS': 'Socialist Party', 'SOC': 'Socialist Party U.S.A.', 'SWP': 'Socialist Workers Party', 'TX': 'Taxpayers', 'TWR': 'Taxpayers Without Representation', 'TEA': 'Tea Party', 'THD': 'Theo-Democratic', 'LAB': 'U.S. Labor Party', 'USP': "U.S. People's Party", 'UST': 'U.S. Taxpayers Party', 'UN': 'Unaffiliated', 'UC': 'United Citizen', 'UNI': 'United Party', 'UNK': 'Unknown', 'VET': 'Veterans Party', 'WTP': 'We the People', 'W': 'Write-In'}
 
 def natural_number(n):
     result = int(n)
@@ -144,9 +118,9 @@ def format_candids(self, data, page_data, fields, default_year):
                     committee['committee_name'] = cmte['dimcmte'][0]['dimcmteproperties'][-1]['cmte_nm']
 
                 if cmte['cmte_dsgn']:
-                    committee['designation_full'] = designation_decoder[cmte['cmte_dsgn']]
+                    committee['designation_full'] = decoders.designation[cmte['cmte_dsgn']]
                 if cmte['cmte_tp']:
-                    committee['type_full'] = cmte_decoder[cmte['cmte_tp']]
+                    committee['type_full'] = decoders.cmte[cmte['cmte_tp']]
 
                 if cmte['cmte_dsgn'] == 'P':
                     elections[year]['primary_committee'] = committee
@@ -185,14 +159,11 @@ def format_candids(self, data, page_data, fields, default_year):
                     if status.has_key(fec_name):
                         elections[year][api_name] = status[fec_name]
 
-                status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
-
                 if status.has_key('cand_status') and status['cand_status'] is not None:
-                    elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
+                    elections[year]['candidate_status_full'] = decoders.status[status['cand_status']]
 
-                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
                 if status.has_key('ici_code') and status['ici_code'] is not None:
-                    elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
+                    elections[year]['incumbent_challenge_full'] = decoders.ici[status['ici_code']]
 
         # Using most recent name as full name
         if cand['dimcandproperties'][0].has_key('cand_nm'):
@@ -307,8 +278,8 @@ def format_committees(self, data, page, fields, year):
                 if item.has_key(fec_name) and item[fec_name] is not None and fec_name != 'expire_date':
                     description[api_name] = item[fec_name]
 
-            if item.has_key('cand_pty_affiliation') and item['cand_pty_affiliation'] in party_decoder:
-                description['party_full'] = party_decoder[item['cand_pty_affiliation']]
+            if item.has_key('cand_pty_affiliation') and item['cand_pty_affiliation'] in decoders.party:
+                description['party_full'] = decoders.party[item['cand_pty_affiliation']]
 
             if len(description) > 0:
                 if 'expire_date' in fields or '*' in fields:
@@ -362,11 +333,11 @@ def format_committees(self, data, page, fields, year):
                 if 'expire_date' in fields or '*' in fields or fields == []:
                     status['expire_date'] = designation['expire_date']
 
-                if designation.has_key('cmte_dsgn') and  designation_decoder.has_key(designation['cmte_dsgn']):
-                    status['designation_full'] = designation_decoder[designation['cmte_dsgn']]
+                if designation.has_key('cmte_dsgn') and  decoders.designation.has_key(designation['cmte_dsgn']):
+                    status['designation_full'] = decoders.designation[designation['cmte_dsgn']]
 
-                if designation.has_key('cmte_tp') and cmte_decoder.has_key(designation['cmte_tp']):
-                    status['type_full'] = cmte_decoder[designation['cmte_tp']]
+                if designation.has_key('cmte_tp') and decoders.cmte.has_key(designation['cmte_tp']):
+                    status['type_full'] = decoders.cmte[designation['cmte_tp']]
 
                 if len(status) > 0:
                     if designation['expire_date'] == None:
@@ -401,9 +372,9 @@ def format_committees(self, data, page, fields, year):
                 if 'candidate_id' in fields or 'fec_id' in fields or '*' in fields or fields == []:
                     candidate['candidate_id'] = cand['cand_id']
                 if candidate.has_key('type'):
-                    candidate['type_full'] = cmte_decoder[candidate['type']]
+                    candidate['type_full'] = decoders.cmte[candidate['type']]
                 if candidate.has_key('designation'):
-                    candidate['designation_full'] = designation_decoder[candidate['designation']]
+                    candidate['designation_full'] = decoders.designation[candidate['designation']]
                 # add all expire dates and save to committee
                 if len(candidate) > 0:
                     if not candidate_dict.has_key(cand['cand_id']):
