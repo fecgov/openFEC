@@ -154,6 +154,7 @@ class OverallTest(unittest.TestCase):
             ('name', 'Obama'),
             ('party', 'DEM'),
             ('year', '2012,2014'),
+            ('district', '00,01')
         )
 
         for field, example in filter_fields:

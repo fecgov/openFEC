@@ -2,13 +2,13 @@ class Candidate(object):
 
     # default fields for search
     default_fields = {
-        'dimcand_fields': 'cand_id',
+        'dimcand_fields': 'cand_id,',
         'cand_committee_link_fields':
-            'cmte_id,cmte_dsgn,cmte_tp,cand_election_yr',
-        'office_fields': 'office_district,office_state,office_tp',
-        'party_fields': 'party_affiliation_desc,party_affiliation',
-        'status_fields': 'election_yr,cand_status,ici_code',
-        'properties_fields': 'cand_nm',
+            'cmte_id,cmte_dsgn,cmte_tp,cand_election_yr,',
+        'office_fields': 'office_district,office_state,office_tp,',
+        'party_fields': 'party_affiliation_desc,party_affiliation,',
+        'status_fields': 'election_yr,cand_status,ici_code,',
+        'properties_fields': 'cand_nm,',
         'cmte_fields': 'P',
     }
 
@@ -38,9 +38,9 @@ class Candidate(object):
             com_query = ''
 
         return """
-            %s{{%s},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
+            (%s{{%s max(dimcandproperties.cand_nm)},/dimcandproperties{%s},/dimcandoffice{cand_election_yr-,dimoffice{%s},dimparty{%s}},
                               %s
-                              /dimcandstatusici{%s}}
+                              /dimcandstatusici{%s}}).sort(max(dimcandproperties.cand_nm)+)
         """ % (
             self.viewable_table_name,
             show_fields['dimcand_fields'],

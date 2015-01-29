@@ -3,6 +3,11 @@
 -- ex: DESC SCHED_D - SEE OUTSTG_BAL_BOP
 -- had to change _id and _sk integers to bigint, all others to numeric
 
+-- run it via ``psql_w_vars.sh`` to set variables like :rds_host_loc
+
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
 CREATE EXTENSION postgres_fdw;
 DROP SERVER rds CASCADE;
 CREATE SERVER rds FOREIGN DATA WRAPPER postgres_fdw
@@ -19,14 +24,10 @@ CREATE USER MAPPING FOR "ec2-user" SERVER rds
           OPTIONS (user 'openfec',
                    password :rds_password);
 
-
-DROP SCHEMA public;
-CREATE SCHEMA public;
-
 DROP FOREIGN TABLE public.pinglog;
 CREATE FOREIGN TABLE public.pinglog
 ( at timestamp, up boolean
-) SERVER rds OPTIONS (schema_name 'public', table_name 'pinglog');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'pinglog');
 
 CREATE FOREIGN TABLE public.dimcand (
     cand_sk bigint NOT NULL,
@@ -35,7 +36,7 @@ CREATE FOREIGN TABLE public.dimcand (
     form_tp text,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcand');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimcand');
 
 CREATE FOREIGN TABLE public.dimcandoffice (
     candoffice_sk bigint NOT NULL,
@@ -47,7 +48,7 @@ CREATE FOREIGN TABLE public.dimcandoffice (
     cand_election_yr integer,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandoffice');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimcandoffice');
 
 
 CREATE FOREIGN TABLE public.dimcandproperties (
@@ -74,7 +75,7 @@ CREATE FOREIGN TABLE public.dimcandproperties (
     gen_pers_funds_decl numeric,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandproperties');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimcandproperties');
 
 CREATE FOREIGN TABLE public.dimcandstatusici (
     candstatusici_sk bigint NOT NULL,
@@ -85,7 +86,7 @@ CREATE FOREIGN TABLE public.dimcandstatusici (
     cand_inactive_flg text,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcandstatusici');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimcandstatusici');
 
 CREATE FOREIGN TABLE public.dimcmte (
     cmte_sk bigint NOT NULL,
@@ -94,7 +95,7 @@ CREATE FOREIGN TABLE public.dimcmte (
     form_tp text,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmte');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimcmte');
 
 CREATE FOREIGN TABLE public.dimcmteproperties (
     cmteproperties_sk bigint NOT NULL,
@@ -185,7 +186,7 @@ CREATE FOREIGN TABLE public.dimcmteproperties (
     fith_cand_contb_dt timestamp without time zone,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmteproperties');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimcmteproperties');
 
 
 CREATE FOREIGN TABLE public.dimcmtetpdsgn (
@@ -196,13 +197,13 @@ CREATE FOREIGN TABLE public.dimcmtetpdsgn (
     receipt_date timestamp without time zone,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimcmtetpdsgn');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimcmtetpdsgn');
 
 CREATE FOREIGN TABLE public.dimdates (
     date_sk bigint NOT NULL,
     dw_date timestamp without time zone,
     load_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimdates');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimdates');
 
 CREATE FOREIGN TABLE public.dimelectiontp (
     electiontp_sk bigint NOT NULL,
@@ -210,7 +211,7 @@ CREATE FOREIGN TABLE public.dimelectiontp (
     election_type_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimelectiontp');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimelectiontp');
 
 CREATE FOREIGN TABLE public.dimlinkages (
     linkages_sk bigint NOT NULL,
@@ -224,7 +225,7 @@ CREATE FOREIGN TABLE public.dimlinkages (
     link_date timestamp without time zone,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimlinkages');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimlinkages');
 
 CREATE FOREIGN TABLE public.dimoffice (
     office_sk bigint NOT NULL,
@@ -234,7 +235,7 @@ CREATE FOREIGN TABLE public.dimoffice (
     office_district text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimoffice');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimoffice');
 
 CREATE FOREIGN TABLE public.dimparty (
     party_sk bigint NOT NULL,
@@ -242,7 +243,7 @@ CREATE FOREIGN TABLE public.dimparty (
     party_affiliation_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimparty');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimparty');
 
 CREATE FOREIGN TABLE public.dimreporttype (
     reporttype_sk bigint NOT NULL,
@@ -250,13 +251,13 @@ CREATE FOREIGN TABLE public.dimreporttype (
     rpt_tp_desc text,
     load_date timestamp without time zone,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimreporttype');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimreporttype');
 
 CREATE FOREIGN TABLE public.dimyears (
     year_sk bigint NOT NULL,
     year numeric,
     load_date timestamp without time zone NOT NULL
-) SERVER rds OPTIONS (schema_name 'public', table_name 'dimyears');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'dimyears');
 
 CREATE FOREIGN TABLE public.facthousesenate_f3 (
     facthousesenate_f3_sk bigint NOT NULL,
@@ -349,7 +350,7 @@ CREATE FOREIGN TABLE public.facthousesenate_f3 (
     end_image_num numeric,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'facthousesenate_f3');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'facthousesenate_f3');
 
 CREATE FOREIGN TABLE public.factpacsandparties_f3x (
     factpacsandparties_f3x_sk bigint NOT NULL,
@@ -467,7 +468,7 @@ CREATE FOREIGN TABLE public.factpacsandparties_f3x (
     end_image_num numeric,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'factpacsandparties_f3x');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'factpacsandparties_f3x');
 
 
 CREATE FOREIGN TABLE public.factpresidential_f3p (
@@ -664,7 +665,7 @@ CREATE FOREIGN TABLE public.factpresidential_f3p (
     end_image_num numeric,
     load_date timestamp without time zone NOT NULL,
     expire_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'factpresidential_f3p');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'factpresidential_f3p');
 
 
 CREATE FOREIGN TABLE public.form_105 (
@@ -688,7 +689,7 @@ CREATE FOREIGN TABLE public.form_105 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_105');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_105');
 
 
 CREATE FOREIGN TABLE public.form_56 (
@@ -729,7 +730,7 @@ CREATE FOREIGN TABLE public.form_56 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_56');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_56');
 
 
 CREATE FOREIGN TABLE public.form_57 (
@@ -777,7 +778,7 @@ CREATE FOREIGN TABLE public.form_57 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_57');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_57');
 
 
 CREATE FOREIGN TABLE public.form_65 (
@@ -818,7 +819,7 @@ CREATE FOREIGN TABLE public.form_65 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_65');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_65');
 
 
 CREATE FOREIGN TABLE public.form_76 (
@@ -850,7 +851,7 @@ CREATE FOREIGN TABLE public.form_76 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_76');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_76');
 
 
 CREATE FOREIGN TABLE public.form_82 (
@@ -894,7 +895,7 @@ CREATE FOREIGN TABLE public.form_82 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_82');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_82');
 
 
 CREATE FOREIGN TABLE public.form_83 (
@@ -930,7 +931,7 @@ CREATE FOREIGN TABLE public.form_83 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_83');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_83');
 
 
 CREATE FOREIGN TABLE public.form_91 (
@@ -957,7 +958,7 @@ CREATE FOREIGN TABLE public.form_91 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_91');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_91');
 
 CREATE FOREIGN TABLE public.form_94 (
     form_94_sk bigint NOT NULL,
@@ -985,7 +986,7 @@ CREATE FOREIGN TABLE public.form_94 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_94');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_94');
 
 
 CREATE FOREIGN TABLE public.log_audit_dml (
@@ -1001,7 +1002,7 @@ CREATE FOREIGN TABLE public.log_audit_dml (
     elapsed_minutes numeric,
     start_cpu_time numeric NOT NULL,
     start_clock_time numeric NOT NULL
-) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_dml');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'log_audit_dml');
 
 
 CREATE FOREIGN TABLE public.log_audit_module (
@@ -1015,7 +1016,7 @@ CREATE FOREIGN TABLE public.log_audit_module (
     elapsed_minutes numeric,
     start_cpu_time numeric NOT NULL,
     start_clock_time numeric NOT NULL
-) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_module');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'log_audit_module');
 
 
 CREATE FOREIGN TABLE public.log_audit_process (
@@ -1031,7 +1032,7 @@ CREATE FOREIGN TABLE public.log_audit_process (
     elapsed_minutes numeric,
     start_cpu_time numeric NOT NULL,
     start_clock_time numeric NOT NULL
-) SERVER rds OPTIONS (schema_name 'public', table_name 'log_audit_process');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'log_audit_process');
 
 
 CREATE FOREIGN TABLE public.sched_a (
@@ -1095,7 +1096,7 @@ CREATE FOREIGN TABLE public.sched_a (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_a');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_a');
 
 
 CREATE FOREIGN TABLE public.sched_b (
@@ -1161,7 +1162,7 @@ CREATE FOREIGN TABLE public.sched_b (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_b');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_b');
 
 
 CREATE FOREIGN TABLE public.sched_c (
@@ -1214,7 +1215,7 @@ CREATE FOREIGN TABLE public.sched_c (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_c');
 
 
 CREATE FOREIGN TABLE public.sched_c1 (
@@ -1278,7 +1279,7 @@ CREATE FOREIGN TABLE public.sched_c1 (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c1');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_c1');
 
 CREATE FOREIGN TABLE public.sched_c2 (
     sched_c2_sk bigint NOT NULL,
@@ -1312,7 +1313,7 @@ CREATE FOREIGN TABLE public.sched_c2 (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_c2');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_c2');
 
 
 CREATE FOREIGN TABLE public.sched_d (
@@ -1364,7 +1365,7 @@ CREATE FOREIGN TABLE public.sched_d (
     filing_form text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_d');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_d');
 
 
 CREATE FOREIGN TABLE public.sched_e (
@@ -1429,7 +1430,7 @@ CREATE FOREIGN TABLE public.sched_e (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_e');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_e');
 
 
 CREATE FOREIGN TABLE public.sched_f (
@@ -1498,7 +1499,7 @@ CREATE FOREIGN TABLE public.sched_f (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_f');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_f');
 
 
 CREATE FOREIGN TABLE public.sched_h1 (
@@ -1559,7 +1560,7 @@ CREATE FOREIGN TABLE public.sched_h1 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h1');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_h1');
 
 
 CREATE FOREIGN TABLE public.sched_h2 (
@@ -1592,7 +1593,7 @@ CREATE FOREIGN TABLE public.sched_h2 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h2');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_h2');
 
 
 CREATE FOREIGN TABLE public.sched_h3 (
@@ -1625,7 +1626,7 @@ CREATE FOREIGN TABLE public.sched_h3 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h3');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_h3');
 
 
 CREATE FOREIGN TABLE public.sched_h4 (
@@ -1694,7 +1695,7 @@ CREATE FOREIGN TABLE public.sched_h4 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h4');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_h4');
 
 CREATE FOREIGN TABLE public.sched_h5 (
     sched_h5_sk bigint NOT NULL,
@@ -1725,7 +1726,7 @@ CREATE FOREIGN TABLE public.sched_h5 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h5');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_h5');
 
 
 CREATE FOREIGN TABLE public.sched_h6 (
@@ -1788,7 +1789,7 @@ CREATE FOREIGN TABLE public.sched_h6 (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_h6');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_h6');
 
 
 CREATE FOREIGN TABLE public.sched_i (
@@ -1842,7 +1843,7 @@ CREATE FOREIGN TABLE public.sched_i (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_i');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_i');
 
 
 CREATE FOREIGN TABLE public.sched_l (
@@ -1906,7 +1907,7 @@ CREATE FOREIGN TABLE public.sched_l (
     filing_type text,
     load_date timestamp without time zone NOT NULL,
     update_date timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'sched_l');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'sched_l');
 
 CREATE FOREIGN TABLE public.form_1 (
    form_1_sk				   bigint,
@@ -2026,7 +2027,7 @@ CREATE FOREIGN TABLE public.form_1 (
    record_ind					    text,
    load_date				   timestamp without time zone not null,
    update_date					    timestamp without time zone
-) SERVER rds OPTIONS (schema_name 'public', table_name 'form_1');
+) SERVER rds OPTIONS (schema_name 'newdownload', table_name 'form_1');
 
 GRANT ALL PRIVILEGES ON SCHEMA public TO openfec;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO openfec;
