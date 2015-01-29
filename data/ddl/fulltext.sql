@@ -55,8 +55,6 @@ GRANT SELECT ON dimcand_fulltext TO webro;
 DROP TABLE IF EXISTS name_search_fulltext;
 CREATE TABLE name_search_fulltext AS
 SELECT DISTINCT
-       p.cand_sk,
-       NULL::bigint AS cmte_sk,
        p.cand_nm AS name,
        to_tsvector(p.cand_nm) as name_vec,
        c.cand_id,
@@ -70,8 +68,6 @@ JOIN   dimoffice o ON (co.office_sk = o.office_sk);
 
 INSERT INTO name_search_fulltext
 SELECT DISTINCT
-       NULL::bigint AS cand_sk,
-       p.cmte_sk,
        p.cmte_nm AS name,
        to_tsvector(p.cmte_nm) AS name_vec,
        NULL AS cand_id,
