@@ -263,30 +263,30 @@ class CandidateSearch(BaseCandidateResource, Searchable):
     )
     parser.add_argument(
         'district',
-        type=int,
+        type=str,
         help='Two digit district number'
     )
 
     field_name_map = {
         "candidate_id": string.Template("cand_id='$arg'"),
-        "fec_id": string.Template("cand_id='$arg'"),
+        "fec_id": string.Template("cand_id={'$arg'}"),
         "office": string.Template(
             "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp~'$arg'"
         ),
         "district": string.Template(
             "top(dimcandoffice.sort(expire_date-)).dimoffice."
-            + "office_district={'$arg', '0$arg'}"
+            + "office_district={'$arg'}"
         ),
         "state": string.Template(
             "top(dimcandoffice.sort(expire_date-)).dimoffice."
-            + "office_state~'$arg'"
+            + "office_state={'$arg'}"
         ),
         "name": string.Template(
             "top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"
         ),
         "party": string.Template(
             "top(dimcandoffice.sort(expire_date-)).dimparty."
-            + "party_affiliation~'$arg'"
+            + "party_affiliation={'$arg'}"
         ),
         "year": string.Template("exists(dimcandoffice)"),
     }

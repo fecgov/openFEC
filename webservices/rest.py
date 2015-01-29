@@ -47,6 +47,7 @@ from flask.ext import restful
 import flask.ext.restful.representations.json
 from htsql import HTSQL
 import htsql.core.domain
+import json
 from json_encoding import TolerantJSONEncoder
 import logging
 import pprint
@@ -68,6 +69,13 @@ flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
 app = Flask(__name__)
 api = restful.Api(app)
+
+
+def natural_number(n):
+    result = int(n)
+    if result < 1:
+        raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
+    return result
 
 
 # still need to implement year
@@ -529,28 +537,28 @@ class CommitteeResource(SingleResource, Committee):
 
 class CommitteeSearch(Searchable, Committee):
 
-    field_name_map = {"committee_id": string.Template("cmte_id='$arg'"),
+    field_name_map = {"committee_id": string.Template("cmte_id={'$arg'}"),
                         "fec_id": string.Template("cmte_id='$arg'"),
                         "candidate_id":string.Template(
-                            "exists(dimlinkages?cand_id~'$arg')"
+                            "exists(dimlinkages?cand_id={'$arg'})"
                         ),
                         "state": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).cmte_st~'$arg'"
+                            "top(dimcmteproperties.sort(expire_date-)).cmte_st={'$arg'}"
                         ),
                         "name": string.Template(
                             "top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'"
                         ),
                         "type": string.Template(
-                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp~'$arg'"
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp={'$arg'}"
                         ),
                         "designation": string.Template(
-                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn~'$arg'"
+                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn={'$arg'}"
                         ),
                         "organization_type": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).org_tp~'$arg'"
+                            "top(dimcmteproperties.sort(expire_date-)).org_tp={'$arg'}"
                         ),
                         "party": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).cand_pty_affiliation~'$arg'"
+                            "top(dimcmteproperties.sort(expire_date-)).cand_pty_affiliation={'$arg'}"
                         ),
     }
 
@@ -1164,7 +1172,7 @@ class TotalSearch(Searchable, Total):
     parser = reqparse.RequestParser()
 
     field_name_map = {
-        "committee_id": string.Template("cmte_id='$arg'"),
+        "committee_id": string.Template("cmte_id={'$arg'}"),
     }
 
     parser.add_argument(
