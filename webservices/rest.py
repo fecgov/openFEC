@@ -31,8 +31,8 @@ Supported for /committee ::
     name=        (committee's name)
     state=       (two-letter code)
     candidate=   (associated candidate's name)
-    type=   one-letter code see cmte_decoder
-    designation=  one-letter code see designation_decoder
+    type=   one-letter code see decoders.cmte
+    designation=  one-letter code see decoders.designation
     year=        The four-digit election year
 
 """
@@ -56,9 +56,10 @@ import copy
 from datetime import datetime
 from psycopg2._range import DateTimeRange
 
-from candidates.models import Candidate
+from candidates.resources import CandidateResource, CandidateSearch
 from db import db_conn
-from resources import default_year, Searchable, SingleResource
+import decoders
+from resources import default_year, natural_number, Searchable, SingleResource
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -69,191 +70,12 @@ flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 app = Flask(__name__)
 api = restful.Api(app)
 
-### section for lookup shortcuts that I want to shift to the database
-cmte_decoder = {'P': 'Presidential',
-                'H': 'House',
-                'S': 'Senate',
-                'C': 'Communication Cost',
-                'D': 'Delegate Committee',
-                'E': 'Electioneering Communication',
-                'I': 'Independent Expenditor (Person or Group)',
-                'N': 'PAC - Nonqualified',
-                'O': 'Independent Expenditure-Only (Super PACs)',
-                'Q': 'PAC - Qualified',
-                'U': 'Single Candidate Independent Expenditure',
-                'V': 'PAC with Non-Contribution Account - Nonqualified',
-                'W': 'PAC with Non-Contribution Account - Qualified',
-                'X': 'Party - Nonqualified',
-                'Y': 'Party - Qualified',
-                'Z': 'National Party Nonfederal Account'
-}
-designation_decoder = {'A': 'Authorized by a candidate',
-                'J': 'Joint fundraising committee',
-                'P': 'Principal campaign committee',
-                'U': 'Unauthorized',
-                'B': 'Lobbyist/Registrant PAC',
-                'D': 'Leadership PAC',
-}
-
-# want to get this from the reference table
-party_decoder = {'ACE': 'Ace Party', 'AKI': 'Alaskan Independence Party', 'AIC': 'American Independent Conservative', 'AIP': 'American Independent Party', 'AMP': 'American Party', 'APF': "American People's Freedom Party", 'AE': 'Americans Elect', 'CIT': "Citizens' Party", 'CMD': 'Commandments Party', 'CMP': 'Commonwealth Party of the U.S.', 'COM': 'Communist Party', 'CNC': 'Concerned Citizens Party Of Connecticut', 'CRV': 'Conservative Party', 'CON': 'Constitution Party', 'CST': 'Constitutional', 'COU': 'Country', 'DCG': 'D.C. Statehood Green Party', 'DNL': 'Democratic -Nonpartisan League', 'DEM': 'Democratic Party', 'D/C': 'Democratic/Conservative', 'DFL': 'Democratic-Farmer-Labor', 'DGR': 'Desert Green Party', 'FED': 'Federalist', 'FLP': 'Freedom Labor Party', 'FRE': 'Freedom Party', 'GWP': 'George Wallace Party', 'GRT': 'Grassroots', 'GRE': 'Green Party', 'GR': 'Green-Rainbow', 'HRP': 'Human Rights Party', 'IDP': 'Independence Party', 'IND': 'Independent', 'IAP': 'Independent American Party', 'ICD': 'Independent Conservative Democratic', 'IGR': 'Independent Green', 'IP': 'Independent Party', 'IDE': 'Independent Party of Delaware', 'IGD': 'Industrial Government Party', 'JCN': 'Jewish/Christian National', 'JUS': 'Justice Party', 'LRU': 'La Raza Unida', 'LBR': 'Labor Party', 'LFT': 'Less Federal Taxes', 'LBL': 'Liberal Party', 'LIB': 'Libertarian Party', 'LBU': 'Liberty Union Party', 'MTP': 'Mountain Party', 'NDP': 'National Democratic Party', 'NLP': 'Natural Law Party', 'NA': 'New Alliance', 'NJC': 'New Jersey Conservative Party', 'NPP': 'New Progressive Party', 'NPA': 'No Party Affiliation', 'NOP': 'No Party Preference', 'NNE': 'None', 'N': 'Nonpartisan', 'NON': 'Non-Party', 'OE': 'One Earth Party', 'OTH': 'Other', 'PG': 'Pacific Green', 'PSL': 'Party for Socialism and Liberation', 'PAF': 'Peace And Freedom', 'PFP': 'Peace And Freedom Party', 'PFD': 'Peace Freedom Party', 'POP': 'People Over Politics', 'PPY': "People's Party", 'PCH': 'Personal Choice Party', 'PPD': 'Popular Democratic Party', 'PRO': 'Progressive Party', 'NAP': 'Prohibition Party', 'PRI': 'Puerto Rican Independence Party', 'RUP': 'Raza Unida Party', 'REF': 'Reform Party', 'REP': 'Republican Party', 'RES': 'Resource Party', 'RTL': 'Right To Life', 'SEP': 'Socialist Equality Party', 'SLP': 'Socialist Labor Party', 'SUS': 'Socialist Party', 'SOC': 'Socialist Party U.S.A.', 'SWP': 'Socialist Workers Party', 'TX': 'Taxpayers', 'TWR': 'Taxpayers Without Representation', 'TEA': 'Tea Party', 'THD': 'Theo-Democratic', 'LAB': 'U.S. Labor Party', 'USP': "U.S. People's Party", 'UST': 'U.S. Taxpayers Party', 'UN': 'Unaffiliated', 'UC': 'United Citizen', 'UNI': 'United Party', 'UNK': 'Unknown', 'VET': 'Veterans Party', 'WTP': 'We the People', 'W': 'Write-In'}
-
 
 def natural_number(n):
     result = int(n)
     if result < 1:
         raise reqparse.ArgumentTypeError('Must be a number greater than or equal to 1')
     return result
-
-def cleantext(text):
-    if type(text) is str:
-        text = re.sub(' +',' ', text)
-        text = re.sub('\\r|\\n','', text)
-        text = text.strip()
-        return text
-    else:
-        return text
-
-
-
-# Candidate formatting
-def format_candids(self, data, page_data, fields, default_year):
-    #return data
-    results = []
-
-    for cand in data:
-        #aggregating data for each election across the tables
-        elections = {}
-        cand_data = {}
-
-        for api_name, fec_name in self.dimcand_mapping:
-            if cand['dimcand'].has_key(fec_name):
-                cand_data[api_name] = cand['dimcand'][fec_name]
-
-        # Committee information
-        if cand.has_key('affiliated_committees'):
-            for cmte in cand['affiliated_committees']:
-                year = str(cmte['cand_election_yr'])
-                if len(cmte) > 0 and not elections.has_key(year):
-                    elections[year] = {}
-
-                committee = {}
-                # not looking at the fields used for name matching
-                for api_name, fec_name in self.cand_committee_format_mapping:
-                    if cmte.has_key(fec_name):
-                        committee[api_name] = cmte[fec_name]
-
-                if cmte['dimcmte'][0]['dimcmteproperties'][0]:
-                    # this should be most recent name
-                    committee['committee_name'] = cmte['dimcmte'][0]['dimcmteproperties'][-1]['cmte_nm']
-
-                if cmte['cmte_dsgn']:
-                    committee['designation_full'] = designation_decoder[cmte['cmte_dsgn']]
-                if cmte['cmte_tp']:
-                    committee['type_full'] = cmte_decoder[cmte['cmte_tp']]
-
-                if cmte['cmte_dsgn'] == 'P':
-                    elections[year]['primary_committee'] = committee
-                elif not elections[year].has_key('affiliated_committees'):
-                    elections[year]['affiliated_committees']  = [committee]
-                else:
-                    elections[year]['affiliated_committees'].append(committee)
-
-
-        for office in cand['dimcandoffice']:
-            year = str(office['cand_election_yr'])
-            if len(office) > 0 and not elections.has_key(year):
-                elections[year] = {}
-
-            if fields == [] or 'election_year' in fields or '*' in fields:
-                elections[year]['election_year'] = int(year)
-
-            # Office information
-            for api_name, fec_name in self.office_mapping:
-                if office['dimoffice'].has_key(fec_name):
-                    elections[year][api_name] = office['dimoffice'][fec_name]
-            # Party information
-            for api_name, fec_name in self.party_mapping:
-                if office['dimparty'].has_key(fec_name):
-                    elections[year][api_name] = office['dimparty'][fec_name]
-
-        # status information
-        for status in cand['dimcandstatusici']:
-            if status != {}:
-                year = str(status['election_yr'])
-                if not elections.has_key(year):
-                    year = str(status['election_yr'])
-                    elections[year] = {}
-
-                for api_name, fec_name in self.status_mapping:
-                    if status.has_key(fec_name):
-                        elections[year][api_name] = status[fec_name]
-
-                status_decoder = {'C': 'candidate', 'F': 'future_candidate', 'N': 'not_yet_candidate', 'P': 'prior_candidate'}
-
-                if status.has_key('cand_status') and status['cand_status'] is not None:
-                    elections[year]['candidate_status_full'] = status_decoder[status['cand_status']]
-
-                ici_decoder = {'C': 'challenger', 'I': 'incumbent', 'O': 'open_seat'}
-                if status.has_key('ici_code') and status['ici_code'] is not None:
-                    elections[year]['incumbent_challenge_full'] = ici_decoder[status['ici_code']]
-
-        # Using most recent name as full name
-        if cand['dimcandproperties'][0].has_key('cand_nm'):
-            name = cand['dimcandproperties'][0]['cand_nm']
-            cand_data['name'] = {}
-            cand_data['name']['full_name'] = cand['dimcandproperties'][-1]['cand_nm']
-
-            # let's do this for now, we could look for improvements in the future
-            if len(name.split(',')) == 2 and len(name.split(',')[0].strip()) > 0 and len(name.split(',')[1].strip()) > 0:
-                cand_data['name']['name_1'] = name.split(',')[1].strip()
-                cand_data['name']['name_2'] = name.split(',')[0].strip()
-
-        # properties has names and addresses
-        addresses = []
-        other_names = []
-        for prop in cand['dimcandproperties']:
-            if prop.has_key('election_yr') and not elections.has_key(year):
-                elections[year] = {}
-
-            # Addresses
-            one_address = {}
-            for api_name, fec_name in self.property_fields_mapping:
-                if prop.has_key(fec_name) and fec_name != "cand_nm" and fec_name != "expire_date":
-                    one_address[api_name] = cleantext(prop[fec_name])
-                if prop.has_key('expire_date') and prop['expire_date'] is not None:
-                    one_address['expire_date'] = datetime.strftime(prop['expire_date'], '%Y-%m-%d')
-            if one_address not in addresses and one_address != {}:
-                addresses.append(one_address)
-
-            # Names (picking up name variations)
-            if prop.has_key('cand_nm') and other_names in fields and (cand_data['name']['full_name'] != prop['cand_nm']) and (prop['cand_nm'] not in other_names):
-                name = cleantext(prop['cand_nm'])
-                other_names.append(name)
-
-        if len(addresses) > 0:
-            cand_data['mailing_addresses'] = addresses
-        if len(other_names) > 0:
-            cand_data['name']['other_names'] = other_names
-
-        # Order eleciton data so the most recent is first and just show years requested
-
-        years = []
-        default_years = default_year.split(',')
-        for year in elections:
-            if year in default_years or default_year == '*':
-                    years.append(year)
-
-        years.sort(reverse=True)
-        for year in years:
-            if len(elections[year]) > 0:
-                if not cand_data.has_key('elections'):
-                    cand_data['elections'] = []
-                cand_data['elections'].append(elections[year])
-
-        results.append(cand_data)
-
-    return {'api_version':"0.2", 'pagination':page_data, 'results': results}
 
 
 # still need to implement year
@@ -311,8 +133,8 @@ def format_committees(self, data, page, fields, year):
                 if item.has_key(fec_name) and item[fec_name] is not None and fec_name != 'expire_date':
                     description[api_name] = item[fec_name]
 
-            if item.has_key('cand_pty_affiliation') and item['cand_pty_affiliation'] in party_decoder:
-                description['party_full'] = party_decoder[item['cand_pty_affiliation']]
+            if item.has_key('cand_pty_affiliation') and item['cand_pty_affiliation'] in decoders.party:
+                description['party_full'] = decoders.party[item['cand_pty_affiliation']]
 
             if len(description) > 0:
                 if 'expire_date' in fields or '*' in fields:
@@ -366,11 +188,11 @@ def format_committees(self, data, page, fields, year):
                 if 'expire_date' in fields or '*' in fields or fields == []:
                     status['expire_date'] = designation['expire_date']
 
-                if designation.has_key('cmte_dsgn') and  designation_decoder.has_key(designation['cmte_dsgn']):
-                    status['designation_full'] = designation_decoder[designation['cmte_dsgn']]
+                if designation.has_key('cmte_dsgn') and  decoders.designation.has_key(designation['cmte_dsgn']):
+                    status['designation_full'] = decoders.designation[designation['cmte_dsgn']]
 
-                if designation.has_key('cmte_tp') and cmte_decoder.has_key(designation['cmte_tp']):
-                    status['type_full'] = cmte_decoder[designation['cmte_tp']]
+                if designation.has_key('cmte_tp') and decoders.cmte.has_key(designation['cmte_tp']):
+                    status['type_full'] = decoders.cmte[designation['cmte_tp']]
 
                 if len(status) > 0:
                     if designation['expire_date'] == None:
@@ -405,9 +227,9 @@ def format_committees(self, data, page, fields, year):
                 if 'candidate_id' in fields or 'fec_id' in fields or '*' in fields or fields == []:
                     candidate['candidate_id'] = cand['cand_id']
                 if candidate.has_key('type'):
-                    candidate['type_full'] = cmte_decoder[candidate['type']]
+                    candidate['type_full'] = decoders.cmte[candidate['type']]
                 if candidate.has_key('designation'):
-                    candidate['designation_full'] = designation_decoder[candidate['designation']]
+                    candidate['designation_full'] = decoders.designation[candidate['designation']]
                 # add all expire dates and save to committee
                 if len(candidate) > 0:
                     if not candidate_dict.has_key(cand['cand_id']):
@@ -517,123 +339,6 @@ def format_totals(self, data, page_data, fields, default_year):
 
         results.append(com[committee_id])
     return {'api_version':"0.2", 'pagination':page_data, 'results': results}
-
-
-class CandidateResource(SingleResource, Candidate):
-
-    parser = reqparse.RequestParser()
-    parser.add_argument('fields',
-        type=str,
-        help='Choose the fields that are displayed'
-    )
-    parser.add_argument(
-        'year',
-        type=str,
-        default= default_year(),
-        help="Year in which a candidate runs for office"
-    )
-
-    def format(self, data_dict, page_data, year):
-        args = self.parser.parse_args()
-        fields = self.find_fields(args)
-        return format_candids(self, data_dict, page_data, fields, year)
-
-
-class CandidateSearch(Searchable, Candidate):
-
-    parser = reqparse.RequestParser()
-    parser.add_argument(
-        'q',
-        type=str,
-        help='Text to search all fields for'
-    )
-    parser.add_argument(
-        'candidate_id',
-        type=str,
-        help="Candidate's FEC ID"
-    )
-    parser.add_argument(
-        'fec_id',
-        type=str,
-        help="Candidate's FEC ID"
-    )
-    parser.add_argument(
-        'page',
-        type=natural_number,
-        default=1,
-        help='For paginating through results, starting at page 1'
-    )
-    parser.add_argument(
-        'per_page',
-        type=natural_number,
-        default=20,
-        help='The number of results returned per page. Defaults to 20.'
-    )
-    parser.add_argument(
-        'name',
-        type=str,
-        help="Candidate's name (full or partial)"
-    )
-    parser.add_argument(
-        'office',
-        type=str,
-        help='Governmental office candidate runs for'
-    )
-    parser.add_argument(
-        'state',
-        type=str,
-        help='U. S. State candidate is registered in'
-    )
-    parser.add_argument(
-        'party',
-        type=str,
-        help="Party under which a candidate ran for office"
-    )
-    parser.add_argument(
-        'year',
-        type=str,
-        default= default_year(),
-        help="Year in which a candidate runs for office"
-    )
-    parser.add_argument(
-        'fields',
-        type=str,
-        help='Choose the fields that are displayed'
-    )
-    parser.add_argument(
-        'district',
-        type=str,
-        help='Two digit district number'
-    )
-
-
-    field_name_map = {"candidate_id": string.Template("cand_id={'$arg'}"),
-                    "fec_id": string.Template("cand_id='$arg'"),
-                    "office": string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp={'$arg'}"
-                    ),
-                    "district":string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_district={'$arg'}"
-                    ),
-                    "state": string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimoffice.office_state={'$arg'}"
-                    ),
-                    "name": string.Template(
-                        "top(dimcandproperties.sort(expire_date-)).cand_nm~'$arg'"
-                    ),
-                    "party":
-                        string.Template(
-                        "top(dimcandoffice.sort(expire_date-)).dimparty.party_affiliation={'$arg'}"
-                    ),
-                    "year": string.Template(
-                        "exists(dimcandoffice)"
-                    ),
-    }
-
-    def format(self, data_dict, page_data, year):
-        args = self.parser.parse_args()
-        fields = self.find_fields(args)
-        return format_candids(self, data_dict, page_data, fields, year)
 
 
 class NameSearch(Searchable):
