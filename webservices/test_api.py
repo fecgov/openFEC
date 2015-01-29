@@ -330,6 +330,13 @@ class OverallTest(unittest.TestCase):
         self.assertGreater(reports_all, reports_04)
         self.assertGreater(totals_all, totals_04)
 
+    def test_multiple_committee(self):
+        results = self._results('/total?committee_id=C00002600,C00000422&fields=committtee_id')
+        print len(results)
+        self.assertEquals(len(results), 2)
+
+
+
     # Typeahead name search
     def test_typeahead_name_search(self):
         results = self._results('/name?q=oba')
