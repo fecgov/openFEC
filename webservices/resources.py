@@ -163,7 +163,7 @@ class Searchable(restful.Resource, FindFieldsMixin):
                 else:
                     if arg in self.field_name_map:
                         element = self.field_name_map[arg].substitute(
-                            arg=args[arg])
+                            arg=args[arg].upper().replace(',', "','"))
                         elements.append(element)
 
         qry = self.query_text(show_fields)

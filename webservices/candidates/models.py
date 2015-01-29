@@ -51,6 +51,7 @@ class Candidate(object):
             show_fields['status_fields'],
         )
 
+
     # Field mappings (API_output, FEC_input)
     # basic candidate information
     dimcand_mapping = (
