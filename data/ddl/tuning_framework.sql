@@ -26,6 +26,7 @@ CREATE TABLE tuning_action (
   );
 
 CREATE OR REPLACE VIEW tuning_history AS
+SELECT * FROM (
 SELECT r.ticket,
        t.dt,
        r.txt,
@@ -41,7 +42,8 @@ SELECT NULL::text AS ticket,
        NULL::numeric AS target_seconds,
        NULL::numeric AS seconds,
        NULL::text AS error_msg
-FROM   tuning_action a;
+FROM   tuning_action a) q
+ORDER BY dt;
 
 -- sample queries:
 -- https://fec.18f.us/htsql/tuning_history.sort(dt)?txt='https://fec.18f.us/rest/total'|is_null(ticket)
