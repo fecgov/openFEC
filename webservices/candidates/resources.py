@@ -268,7 +268,7 @@ class CandidateSearch(BaseCandidateResource, Searchable):
     )
 
     field_name_map = {
-        "candidate_id": string.Template("cand_id='$arg'"),
+        "candidate_id": string.Template("cand_id={'$arg'}"),
         "fec_id": string.Template("cand_id={'$arg'}"),
         "office": string.Template(
             "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp={'$arg'}"

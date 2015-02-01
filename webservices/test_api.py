@@ -147,6 +147,9 @@ class OverallTest(unittest.TestCase):
 
     def test_cand_filters(self):
         # checking one example from each field
+        org_response = self._response('/candidate')
+        original_count = org_response['pagination']['count']
+
         filter_fields = (
             ('office','H'),
             ('district', '00,02'),
@@ -154,14 +157,19 @@ class OverallTest(unittest.TestCase):
             ('name', 'Obama'),
             ('party', 'DEM'),
             ('year', '2012,2014'),
+            ('candidate_id', 'H0VA08040,P80003338'),
         )
 
         for field, example in filter_fields:
             page = "/candidate?%s=%s" % (field, example)
             print page
-            response = self.app.get(page)
+            # returns at least one result
+            results = self._results(page)
+            self.assertGreater(len(results), 0)
+            # doesn't return all results
+            response = self._response(page)
+            self.assertGreater(original_count, response['pagination']['count'])
 
-            self.assertEquals(response.status_code, 200)
 
 ### not ready for this yet
     # def test_q_ids(self):
@@ -259,9 +267,14 @@ class OverallTest(unittest.TestCase):
         self.assertEquals(response[0]['description']['party_full'], 'Republican Party')
 
     def test_committee_filters(self):
+        org_response = self._response('/committee')
+        original_count = org_response['pagination']['count']
+
         # checking one example from each field
         filter_fields = (
-            ('candidate_id','H0VA08040'),
+            ('candidate_id', 'H0VA08040'),
+            ('candidate_id', 'H0VA08040,P80003338'),
+            ('committee_id', 'C00484188,C00000422'),
             ('state', 'CA,DC'),
             ('name', 'Obama'),
             ('type', 'S'),
@@ -273,9 +286,13 @@ class OverallTest(unittest.TestCase):
         for field, example in filter_fields:
             page = "/committee?%s=%s" % (field, example)
             print page
-            response = self.app.get(page)
+            # returns at least one result
+            results = self._results(page)
+            self.assertGreater(len(results), 0)
+            # doesn't return all results
+            response = self._response(page)
+            self.assertGreater(original_count, response['pagination']['count'])
 
-            self.assertEquals(response.status_code, 200)
 
 # Totals
 
@@ -329,6 +346,13 @@ class OverallTest(unittest.TestCase):
 
         self.assertGreater(reports_all, reports_04)
         self.assertGreater(totals_all, totals_04)
+
+    def test_multiple_committee(self):
+        results = self._results('/total?committee_id=C00002600,C00000422&fields=committtee_id')
+        print len(results)
+        self.assertEquals(len(results), 2)
+
+
 
     # Typeahead name search
     def test_typeahead_name_search(self):
