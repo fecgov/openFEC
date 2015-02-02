@@ -15,12 +15,10 @@ from db import db_conn, htsql_conn
 # this is shared by search and single resource
 class FindFieldsMixin(object):
     def find_fields(self, args):
-        if args['fields'] is None:
+        if not args.get('fields'):
                 return []
-        elif ',' in args['fields']:
-            return args['fields'].split(',')
         else:
-            return [args['fields']]
+            return args['fields'].split(',')
 
 
 def as_dicts(data):
@@ -63,12 +61,7 @@ class SingleResource(restful.Resource, FindFieldsMixin):
         args = self.parser.parse_args()
         fields = self.find_fields(args)
 
-        if args.get('fields') is not None:
-            if ',' in str(args['fields']):
-                fields = args['fields'].split(',')
-            else:
-                fields = [str(args['fields'])]
-
+        if fields:
             for maps, field_name in self.maps_fields:
                 show_fields[field_name] = ''
                 # looking at each field the user requested
@@ -78,8 +71,6 @@ class SingleResource(restful.Resource, FindFieldsMixin):
                     for m in maps:
                         if m[0] == field:
                             show_fields[field_name] += m[1] + ','
-        else:
-            fields = []
 
         year = args.get('year', default_year())
 
@@ -124,10 +115,10 @@ class Searchable(restful.Resource, FindFieldsMixin):
         elements = []
         page_num = 1
         show_fields = copy.copy(self.default_fields)
+        field_list = self.find_fields(args)
 
-        if 'year' not in args:
-            args['year'] = default_year()
-        year = args['year']
+        # queries need year to link the data
+        year = args.get('year', default_year())
 
         for arg in args:
             if args[arg]:
@@ -153,12 +144,6 @@ class Searchable(restful.Resource, FindFieldsMixin):
                 elif arg == 'per_page':
                     per_page = args[arg]
                 elif arg == 'fields':
-                    # queries need year to link the data
-                    if ',' in str(args[arg]):
-                        field_list = args[arg].split(',')
-                    else:
-                        field_list = [str(args[arg])]
-
                     # going through the different kinds of mappings and fields
                     for maps, field_name in self.maps_fields:
                         show_fields[field_name] = ''
