@@ -1,8 +1,4 @@
 
--- TODO: file Blaze bug - Columns that are numeric, in Oracle come across as INTEGER!
--- ex: DESC SCHED_D - SEE OUTSTG_BAL_BOP
--- had to change _id and _sk integers to bigint, all others to numeric
-
 CREATE EXTENSION oracle_fdw;
 DROP SERVER oradb CASCADE;
 CREATE SERVER oradb FOREIGN DATA WRAPPER oracle_fdw

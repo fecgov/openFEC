@@ -1,8 +1,4 @@
 
--- TODO: file Blaze bug - Columns that are NUMBER(14,2) in Oracle come across as INTEGER!
--- ex: DESC SCHED_D - SEE OUTSTG_BAL_BOP
--- had to change _id and _sk integers to bigint, all others to numeric
-
 -- run it via ``psql_w_vars.sh`` to set variables like :rds_host_loc
 
 DROP SCHEMA public CASCADE;
