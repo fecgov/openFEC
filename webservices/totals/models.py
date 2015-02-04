@@ -54,11 +54,8 @@ class Total(object):
             data = htsql_conn().produce(pre_qry)
             types = []
             # looking for the codes in the htsql string
-            for d in str(data):
-                if d.isalpha() == True:
-                    if d not in types:
-                        types.append(d)
-            print types
+            types = set(d for d in str(data) if d.isalpha())
+
             table_list = []
 
             # create the base table name
