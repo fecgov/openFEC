@@ -77,11 +77,11 @@ class Total(object):
 
         else:
             tables = self.viewable_table_name
-            use_table = ['P', 'H', 'O']
+            types = ['P', 'H', 'O']
 
 
         # this part creates the election cycle totals
-        if house_senate_totals != [''] and 'H' in use_table:
+        if house_senate_totals != [''] and 'H' in types:
             hs_sums = ['sum(^.%s) :as %s, ' % (t, t)
                        for t in house_senate_totals if t != '']
             hs_totals = (
@@ -91,7 +91,7 @@ class Total(object):
         else:
             hs_totals = ''
 
-        if presidential_totals != [''] and 'P' in use_table:
+        if presidential_totals != [''] and 'P' in types:
             p_sums = ['sum(^.%s) :as %s, ' % (t, t)
                       for t in presidential_totals if t != '']
             pres_totals = (
@@ -100,7 +100,7 @@ class Total(object):
         else:
             pres_totals = ''
 
-        if pac_party_totals != [''] and 'O' in use_table:
+        if pac_party_totals != [''] and 'O' in types:
             pp_sums = ['sum(^.%s) :as %s, ' % (t, t)
                        for t in pac_party_totals if t != '']
             pp_totals = (
