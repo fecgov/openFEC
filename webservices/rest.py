@@ -38,21 +38,20 @@ Supported for /committee ::
     year=        The four-digit election year
 
 """
-import string
+import logging
 import sys
-import sqlalchemy as sa
+
 from flask import Flask
-from flask.ext.restful import reqparse
 from flask.ext import restful
+from flask.ext.restful import reqparse
 import flask.ext.restful.representations.json
 from json_encoding import TolerantJSONEncoder
-import logging
+import sqlalchemy as sa
 
-from candidates.resources import CandidateResource, CandidateSearch
-from committees.format import format_committees
-from committees.models import Committee
 from db import db_conn
-from resources import Searchable, SingleResource
+from candidates.resources import CandidateResource, CandidateSearch
+from committees.resources import CommitteeResource, CommitteeSearch
+from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
 
 speedlogger = logging.getLogger('speed')
@@ -67,17 +66,19 @@ api = restful.Api(app)
 
 class NameSearch(Searchable):
     """
-    A quick name search (candidate or committee) optimized for response time for typeahead
+    A quick name search (candidate or committee) optimized for response time
+    for typeahead
     """
 
-    fulltext_qry = """SELECT cand_id AS candidate_id,
-                             cmte_id AS committee_id,
-                             name,
-                             office_sought
-                      FROM   name_search_fulltext
-                      WHERE  name_vec @@ to_tsquery(:findme || ':*')
-                      ORDER BY ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
-                      LIMIT  20"""
+    fulltext_qry = """
+        SELECT cand_id AS candidate_id,
+               cmte_id AS committee_id,
+               name,
+               office_sought
+      FROM   name_search_fulltext
+      WHERE  name_vec @@ to_tsquery(:findme || ':*')
+      ORDER BY ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
+      LIMIT  20"""
 
     parser = reqparse.RequestParser()
     parser.add_argument(
@@ -91,133 +92,12 @@ class NameSearch(Searchable):
 
         qry = sa.sql.text(self.fulltext_qry)
         findme = ' & '.join(args['q'].split())
-        data = db_conn().execute(qry, findme = findme).fetchall()
+        data = db_conn().execute(qry, findme=findme).fetchall()
 
         return {"api_version": "0.2",
-                "pagination": {'per_page': 20, 'page': 1, 'pages': 1, 'count': len(data)},
+                "pagination": {'per_page': 20, 'page': 1, 'pages': 1,
+                               'count': len(data)},
                 "results": [dict(d) for d in data]}
-
-    def format(self, data_dict, page_data, year):
-        args = self.parser.parse_args()
-        fields = self.find_fields(args)
-        return format_committees(self, data_dict, page_data, fields, year)
-
-
-class CommitteeResource(SingleResource, Committee):
-
-    parser = reqparse.RequestParser()
-    parser.add_argument(
-        'fields',
-        type=str,
-        help='Choose the fields that are displayed'
-    )
-
-    def format(self, data_dict, page_data, year):
-        args = self.parser.parse_args()
-        fields = self.find_fields(args)
-        return format_committees(self, data_dict, page_data, fields, year)
-
-
-class CommitteeSearch(Searchable, Committee):
-
-    field_name_map = {"committee_id": string.Template("cmte_id={'$arg'}"),
-                        "fec_id": string.Template("cmte_id='$arg'"),
-                        "candidate_id":string.Template(
-                            "exists(dimlinkages?cand_id={'$arg'})"
-                        ),
-                        "state": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).cmte_st={'$arg'}"
-                        ),
-                        "name": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).cmte_nm~'$arg'"
-                        ),
-                        "type": string.Template(
-                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_tp={'$arg'}"
-                        ),
-                        "designation": string.Template(
-                            "top(dimcmtetpdsgn.sort(expire_date-)).cmte_dsgn={'$arg'}"
-                        ),
-                        "organization_type": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).org_tp={'$arg'}"
-                        ),
-                        "party": string.Template(
-                            "top(dimcmteproperties.sort(expire_date-)).cand_pty_affiliation={'$arg'}"
-                        ),
-    }
-
-    parser = reqparse.RequestParser()
-    parser.add_argument(
-        'q',
-        type=str,
-        help='Text to search all fields for'
-    )
-    parser.add_argument(
-        'committee_id',
-        type=str,
-        help="Committee's FEC ID"
-    )
-    parser.add_argument(
-        'fec_id',
-        type=str,
-        help="Committee's FEC ID"
-    )
-    parser.add_argument(
-        'state',
-        type=str,
-        help='U. S. State committee is registered in'
-    )
-    parser.add_argument(
-        'name',
-        type=str,
-        help="Committee's name (full or partial)"
-    )
-    parser.add_argument(
-        'candidate_id',
-        type=str,
-        help="Associated candidate's name (full or partial)"
-    )
-    parser.add_argument(
-        'page',
-        type=int,
-        default=1,
-        help='For paginating through results, starting at page 1'
-    )
-    parser.add_argument(
-        'per_page',
-        type=int,
-        default=20,
-        help='The number of results returned per page. Defaults to 20.'
-    )
-    parser.add_argument(
-        'fields',
-        type=str,
-        help='Choose the fields that are displayed'
-    )
-    parser.add_argument(
-        'type',
-        type=str,
-        help='The one-letter type code of the organization'
-    )
-    parser.add_argument(
-        'designation',
-        type=str,
-        help='The one-letter designation code of the organization'
-    )
-    parser.add_argument(
-        'organization_type',
-        type=str,
-        help='The one-letter code for the kind for organization'
-    )
-    parser.add_argument(
-        'party',
-        type=str,
-        help='Three letter code for party'
-    )
-
-    def format(self, data_dict, page_data, year):
-        args = self.parser.parse_args()
-        fields = self.find_fields(args)
-        return format_committees(self, data_dict, page_data, fields, year)
 
 
 class Help(restful.Resource):
@@ -226,8 +106,10 @@ class Help(restful.Resource):
                   'endpoints': {}}
         for cls in (CandidateSearch, CommitteeSearch):
             name = cls.__name__[:-6].lower()
-            result['endpoints'][name] = {'arguments supported':
-                                         {a.name: a.help for a in sorted(cls.parser.args)}}
+            result['endpoints'][name] = {
+                'arguments supported': {a.name: a.help
+                                        for a in sorted(cls.parser.args)}
+            }
         return result
 
 
