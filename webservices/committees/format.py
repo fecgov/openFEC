@@ -3,6 +3,7 @@ from datetime import datetime
 from webservices import decoders
 
 
+# @todo split into smaller functions; make less pointy
 # still need to implement year
 def format_committees(self, data, page, fields, year):
     results = []
