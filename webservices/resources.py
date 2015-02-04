@@ -179,6 +179,7 @@ class Searchable(restful.Resource, FindFieldsMixin):
                     '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
+            print count_qry
 
         offset = per_page * (page_num-1)
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)

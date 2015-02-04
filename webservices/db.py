@@ -26,3 +26,18 @@ def htsql_conn():
         htsql_conn_string = sqla_conn_string().replace('postgresql', 'pgsql')
         g._htsql_conn = HTSQL(htsql_conn_string)
     return g._htsql_conn
+
+def as_dicts(data):
+    """
+    Because HTSQL results render as though they were lists (field info lost)
+    without intervention.
+    """
+    if isinstance(data, htsql.core.domain.Record):
+        return dict(zip(data.__fields__, [as_dicts(d) for d in data]))
+    elif isinstance(data, DateTimeRange):
+        return {'begin': data.upper, 'end': data.lower}
+    elif (isinstance(data, htsql.core.domain.Product)
+            or isinstance(data, list)):
+        return [as_dicts(d) for d in data]
+    else:
+        return data
