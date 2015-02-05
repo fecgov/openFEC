@@ -48,7 +48,7 @@ import flask.ext.restful.representations.json
 from json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
-from db import db_conn
+from db import db_conn, as_dicts
 from candidates.resources import CandidateResource, CandidateSearch
 from committees.resources import CommitteeResource, CommitteeSearch
 from resources import Searchable
