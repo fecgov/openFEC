@@ -6,10 +6,9 @@ import time
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import htsql
-from psycopg2._range import DateTimeRange
 import sqlalchemy as sa
 
-from db import db_conn, htsql_conn
+from db import db_conn, htsql_conn, as_dicts
 
 
 # this is shared by search and single resource
@@ -19,22 +18,6 @@ class FindFieldsMixin(object):
                 return []
         else:
             return args['fields'].split(',')
-
-
-def as_dicts(data):
-    """
-    Because HTSQL results render as though they were lists (field info lost)
-    without intervention.
-    """
-    if isinstance(data, htsql.core.domain.Record):
-        return dict(zip(data.__fields__, [as_dicts(d) for d in data]))
-    elif isinstance(data, DateTimeRange):
-        return {'begin': data.upper, 'end': data.lower}
-    elif (isinstance(data, htsql.core.domain.Product)
-            or isinstance(data, list)):
-        return [as_dicts(d) for d in data]
-    else:
-        return data
 
 
 # defaulting to the last 4 years so there is always the last presidential, we
@@ -119,7 +102,6 @@ class Searchable(restful.Resource, FindFieldsMixin):
 
         # queries need year to link the data
         year = args.get('year', default_year())
-
         for arg in args:
             if args[arg]:
                 if arg == 'q':
@@ -134,7 +116,17 @@ class Searchable(restful.Resource, FindFieldsMixin):
                     speedlogger.info('fulltext query time: %f' %
                                      (time.time() - start_time))
                     if not fts_result:
-                        return []
+                        #empty result
+                        return {
+                            'api_version': "0.2",
+                            'pagination': {
+                                'per_page': 0,
+                                'page': 0,
+                                'pages': 0,
+                                'count': 0
+                            },
+                            'results':[]
+                        }
                     elements.append(
                         "%s_sk={%s}" %
                         (self.table_name_stem,
@@ -179,6 +171,7 @@ class Searchable(restful.Resource, FindFieldsMixin):
                     '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
+            print(count_qry)
 
         offset = per_page * (page_num-1)
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
