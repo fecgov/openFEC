@@ -41,7 +41,7 @@ class OverallTest(unittest.TestCase):
 
     def test_full_text_no_results(self):
         results = self._results('/candidate?q=asdlkflasjdflkjasdl;kfj')
-        assertEquals(results, [])
+        self.assertEquals(results, [])
 
     def test_year_filter(self):
         results = self._results('/candidate?year=1988&fields=*')
