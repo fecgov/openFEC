@@ -21,22 +21,6 @@ class FindFieldsMixin(object):
             return args['fields'].split(',')
 
 
-def as_dicts(data):
-    """
-    Because HTSQL results render as though they were lists (field info lost)
-    without intervention.
-    """
-    if isinstance(data, htsql.core.domain.Record):
-        return dict(zip(data.__fields__, [as_dicts(d) for d in data]))
-    elif isinstance(data, DateTimeRange):
-        return {'begin': data.upper, 'end': data.lower}
-    elif (isinstance(data, htsql.core.domain.Product)
-            or isinstance(data, list)):
-        return [as_dicts(d) for d in data]
-    else:
-        return data
-
-
 # defaulting to the last 4 years so there is always the last presidential, we
 # could make this 6 to ensure coverage of sitting senators.
 def default_year():
