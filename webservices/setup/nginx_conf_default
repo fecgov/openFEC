@@ -18,6 +18,8 @@ server {
 			auth_basic "Restricted";
 			auth_basic_user_file /etc/nginx/.htpasswd;
       add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Headers' "X-Requested-With";
+      add_header 'Access-Control-Allow-Methods' "GET, HEAD, OPTIONS";
       add_header 'Content-Type' 'application/json; charset=utf-8';
           }
 
@@ -70,6 +72,8 @@ server {
 		auth_basic "Restricted";
 		auth_basic_user_file /etc/nginx/.htpasswd;
     add_header 'Access-Control-Allow-Origin' '*';
+    add_header 'Access-Control-Allow-Headers' "X-Requested-With";
+    add_header 'Access-Control-Allow-Methods' "GET, HEAD, OPTIONS";
     add_header 'Content-Type' 'application/json; charset=utf-8';
   }
 
