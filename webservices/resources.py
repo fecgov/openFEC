@@ -6,10 +6,9 @@ import time
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import htsql
-from psycopg2._range import DateTimeRange
 import sqlalchemy as sa
 
-from db import db_conn, htsql_conn
+from db import db_conn, htsql_conn, as_dicts
 
 
 # this is shared by search and single resource
