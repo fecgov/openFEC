@@ -1,4 +1,8 @@
 import string
+import htsql
+from datetime import datetime
+
+from webservices.db import htsql_conn, as_dicts
 
 
 class Total(object):
@@ -12,28 +16,16 @@ class Total(object):
         'dimcmte_fields': '*,',
         'house_senate_fields': '*,',
         'house_senate_totals': (
-            'ref_indv_contb_per,tranf_from_other_auth_cmte_per,'
-            'ref_pol_pty_cmte_contb_per,tranf_to_other_auth_cmte_per,'
-            'cand_contb_per,op_exp_per,ttl_loan_repymts_per,ttl_disb_per_ii,'
-            'indv_item_contb_per,indv_unitem_contb_per,ttl_receipts_per_i,'
-            'other_pol_cmte_contb_per,ttl_contb_per,pol_pty_cmte_contb_per,'
-            'other_receipts_per,ttl_loans_per,ttl_disb_per_i,'
-            'ttl_indv_contb_per,ttl_op_exp_per,loans_made_by_cand_per,'),
+            'ttl_disb_per_ii,ttl_receipts_per_i,'
+        ),
         'presidential_fields': '*,',
         'presidential_totals': (
-            'cand_contb_per,fed_funds_per,fndrsg_disb_per,indv_contb_per,'
-            'loans_received_from_cand_per,op_exp_per,pol_pty_cmte_contb_per,'
-            'repymts_loans_made_by_cand_per,tranf_from_affilated_cmte_per,'
-            'tranf_to_other_auth_cmte_per,ttl_contb_per,ttl_contb_ref_per,'
-            'ttl_disb_per,ttl_loan_repymts_made_per,ttl_loans_received_per,'
-            'ttl_offsets_to_op_exp_per,ttl_receipts_per,'),
+            'ttl_disb_per,ttl_receipts_per,'
+        ),
         'pac_party_fields': '*,',
         'pac_party_totals': (
-            'ttl_receipts_per,ttl_contb_ref_per_i,ttl_fed_receipts_per,'
-            'ttl_fed_elect_actvy_per,ttl_receipts_per,ttl_nonfed_tranf_per,'
-            'ttl_fed_disb_per,ttl_disb_per,ttl_receipts_sum_page_per,'
-            'ttl_indv_contb,ttl_contb_per,ttl_contb_ref_per_ii,'
-            'ttl_fed_op_exp_per,ttl_op_exp_per,ttl_disb_sum_page_per,'),
+            'ttl_receipts_per,ttl_disb_sum_page_per,'
+        ),
         'report_fields': '*',
     }
 
@@ -48,13 +40,45 @@ class Total(object):
         # limiting to an election cycle
         args = self.parser.parse_args(strict=True)
         if args.get('election_cycle') is not None:
-            cycle = '?two_yr_period_sk=%s' % (args['election_cycle'])
-            print "found---------------"
+            cycle = '?two_yr_period_sk={%s}' % (args['election_cycle'])
         else:
             cycle = ''
 
+        #checking what table to look at
+        if args.get('committee_id') is not None:
+            ids = args['committee_id'].split(',')
+            pre_qry = "/dimcmte{/dimcmtetpdsgn{cmte_tp}}\
+                    ?cmte_id={'%s'}"%(
+                        "','".join(ids)
+                )
+            data = htsql_conn().produce(pre_qry)
+            types = []
+            # looking for the codes in the htsql string
+            types = set(d for d in str(data) if d.isalpha())
+
+            table_list = []
+
+            # create the base table name
+            for t in types:
+                if t =='P':
+                    if 'exists(factpresidential_f3p)' not in table_list:
+                        table_list.append('exists(factpresidential_f3p)')
+                elif t =='H'  or  t == 'S':
+                    if 'exists(facthousesenate_f3)' not in table_list:
+                        table_list.append('exists(facthousesenate_f3)')
+                else:
+                    if 'exists(factpacsandparties_f3x)' not in table_list:
+                        table_list.append('exists(factpacsandparties_f3x)')
+
+            tables = 'dimcmte?' + '|'.join(table_list)
+
+        else:
+            tables = self.viewable_table_name
+            types = ['P', 'H', 'O']
+
+
         # this part creates the election cycle totals
-        if house_senate_totals != ['']:
+        if house_senate_totals != [''] and 'H' in types:
             hs_sums = ['sum(^.%s) :as %s, ' % (t, t)
                        for t in house_senate_totals if t != '']
             hs_totals = (
@@ -64,7 +88,7 @@ class Total(object):
         else:
             hs_totals = ''
 
-        if presidential_totals != ['']:
+        if presidential_totals != [''] and 'P' in types:
             p_sums = ['sum(^.%s) :as %s, ' % (t, t)
                       for t in presidential_totals if t != '']
             pres_totals = (
@@ -73,7 +97,7 @@ class Total(object):
         else:
             pres_totals = ''
 
-        if pac_party_totals != ['']:
+        if pac_party_totals != [''] and 'O' in types:
             pp_sums = ['sum(^.%s) :as %s, ' % (t, t)
                        for t in pac_party_totals if t != '']
             pp_totals = (
@@ -97,25 +121,45 @@ class Total(object):
 
         # adds the sums formatted above and inserts the default or user
         # defined fields.
-        return (
-            '(%s){cmte_id,%s /facthousesenate_f3{%s %s}%s, '
-            '%s /factpresidential_f3p{%s %s}%s,'
-            '%s /factpacsandparties_f3x{%s %s}%s,%s}') % (
-                self.viewable_table_name,
-                show_fields['dimcmte_fields'],
+
+        if 'H' in types:
+            house_qry = '/facthousesenate_f3{%s %s}%s,%s ' % (
                 year + show_fields['house_senate_fields'],
                 reports,
                 cycle,
-                hs_totals,
-                year + show_fields['presidential_fields'],
-                reports,
-                cycle,
-                pres_totals,
+                hs_totals
+            )
+        else:
+            house_qry = ''
+
+        if 'O' in types:
+            party_qry = '/factpacsandparties_f3x{%s %s}%s,%s ' % (
                 year + show_fields['pac_party_fields'],
                 reports,
                 cycle,
-                pp_totals,
+                pp_totals
             )
+        else:
+            party_qry = ''
+
+        if 'P' in types:
+            prez_qry = '/factpresidential_f3p{%s %s}%s,%s '  % (
+                year + show_fields['presidential_fields'],
+                reports,
+                cycle,
+                pres_totals
+            )
+        else:
+            prez_qry = ''
+
+        qry =  '((%s){cmte_id, %s%s%s%s})' % (
+            tables,
+            show_fields['dimcmte_fields'],
+            house_qry,
+            prez_qry,
+            party_qry
+        )
+        return qry
 
     # need to add
         # "cvg_end_dt_sk"
