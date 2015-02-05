@@ -102,7 +102,6 @@ class Searchable(restful.Resource, FindFieldsMixin):
 
         # queries need year to link the data
         year = args.get('year', default_year())
-
         for arg in args:
             if args[arg]:
                 if arg == 'q':
@@ -117,7 +116,17 @@ class Searchable(restful.Resource, FindFieldsMixin):
                     speedlogger.info('fulltext query time: %f' %
                                      (time.time() - start_time))
                     if not fts_result:
-                        return []
+                        #empty result
+                        return {
+                            'api_version': "0.2",
+                            'pagination': {
+                                'per_page': 0,
+                                'page': 0,
+                                'pages': 0,
+                                'count': 0
+                            },
+                            'results':[]
+                        }
                     elements.append(
                         "%s_sk={%s}" %
                         (self.table_name_stem,
@@ -162,7 +171,7 @@ class Searchable(restful.Resource, FindFieldsMixin):
                     '(dimcandoffice?cand_election_yr={%s})' % year)
         else:
             count_qry = "/count(%s)" % self.viewable_table_name
-            print count_qry
+            print(count_qry)
 
         offset = per_page * (page_num-1)
         qry = "/(%s).limit(%d,%d)" % (qry, per_page, offset)
