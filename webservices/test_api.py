@@ -40,6 +40,10 @@ class OverallTest(unittest.TestCase):
             txt = json.dumps(r).lower()
             self.assertIn('obama', txt)
 
+    def test_full_text_no_results(self):
+        results = self._results('/candidate?q=asdlkflasjdflkjasdl;kfj')
+        self.assertEquals(results, [])
+
     def test_year_filter(self):
         results = self._results('/candidate?year=1988&fields=*')
         for r in results:

@@ -41,24 +41,25 @@ class BaseTotalsResource(Total):
 
             # loop through the specifics in the forms
             for bucket, mapping, kind in bucket_map:
-                for record in committee[bucket]:
-                    if record != []:
-                        details = {}
-                        if fields == [] or '*' in fields or 'type' in fields:
-                            details['type'] = kind
+                if bucket in committee:
+                    for record in committee[bucket]:
+                        if record != []:
+                            details = {}
+                            if fields == [] or '*' in fields or 'type' in fields:
+                                details['type'] = kind
 
-                        for api_name, fec_name in mapping:
-                            if record.get(fec_name) is not None:
-                                details[api_name] = record[fec_name]
+                            for api_name, fec_name in mapping:
+                                if record.get(fec_name) is not None:
+                                    details[api_name] = record[fec_name]
 
-                        if 'dimreporttype' in record:
-                            for api_name, fec_name in self.report_mapping:
-                                if fec_name in record['dimreporttype'][0]:
-                                    details[api_name] = \
-                                        record['dimreporttype'][0][fec_name]
+                            if 'dimreporttype' in record:
+                                for api_name, fec_name in self.report_mapping:
+                                    if fec_name in record['dimreporttype'][0]:
+                                        details[api_name] = \
+                                            record['dimreporttype'][0][fec_name]
 
-                        if details != {}:
-                            reports.append(details)
+                            if details != {}:
+                                reports.append(details)
 
             if reports != []:
                 com[committee_id]['reports'] = sorted(
