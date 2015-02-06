@@ -50,7 +50,7 @@ from json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
 from db import db_conn, as_dicts
-from candidates.resources import CandidateResource, CandidateSearch
+from candidates.resources import CandidateResource
 from committees.resources import CommitteeResource, CommitteeSearch
 from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
@@ -118,7 +118,7 @@ class Help(restful.Resource):
     def get(self):
         result = {'doc': sys.modules[__name__].__doc__,
                   'endpoints': {}}
-        for cls in (CandidateSearch, CommitteeSearch):
+        for cls in (CandidateList, CommitteeSearch):
             name = cls.__name__[:-6].lower()
             result['endpoints'][name] = {
                 'arguments supported': {a.name: a.help
