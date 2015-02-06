@@ -26,9 +26,9 @@ class ApiBaseTest(unittest.TestCase):
         cryptic "this 500 attribute dict is different than that one"). prefix
         is an identifier to see where we are in the tree
         Inspiration from 18f/hourglass's assertResultsEqual()"""
-        if isinstance(expected, dict):
+        if isinstance(expected, dict) and isinstance(actual, dict):
             self.assertDictsEqual(actual, expected, prefix)
-        elif isinstance(expected, list):
+        elif isinstance(expected, list) and isinstance(actual, list):
             self.assertListsEqual(actual, expected, prefix)
         else:
             self.assertEqual(actual, expected)
@@ -39,8 +39,8 @@ class ApiBaseTest(unittest.TestCase):
         self.assertEqual(
             actual_keys, expected_keys,
             prefix + ": Different keys:\n"
-            ("Unique to actual: %s\n" % actual_keys - expected_keys)
-            ("Unique to expected: %s" % expected_keys - actual_keys))
+            + ("Unique to actual: %s\n" % (actual_keys - expected_keys))
+            + ("Unique to expected: %s" % (expected_keys - actual_keys)))
         for key in expected_keys:
             self.assertResultsEqual(actual[key], expected[key],
                                     prefix + '.' + key)
@@ -51,7 +51,9 @@ class ApiBaseTest(unittest.TestCase):
             len(actual), len(expected),
             prefix + ": Different number of elements "
             "(actual: %d, expected: %d)" % (len(actual), len(expected)))
-        if set(actual) == set(expected):
+        # Check for out of order. Note we can't use set as we might have an
+        # unhashable type
+        if len(actual) == len(expected) and all(a in expected for a in actual):
             self.assertEqual(actual, expected,
                              prefix + ": Sort order is wrong")
         for i in range(len(expected)):

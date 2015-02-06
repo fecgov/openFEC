@@ -9,7 +9,7 @@ class CandidateFormatTest(ApiBaseTest):
         response = self._response('/candidate/H0VA08040?fields=*')
         self.assertResultsEqual(
             response['pagination'],
-            {'count': 1, 'page': 1, 'pages': 1, 'per_page': 20})
+            {'count': 1, 'page': 1, 'pages': 1, 'per_page': 1})
         self.assertEqual(len(response['results']), 1)
 
         result = response['results'][0]
@@ -26,7 +26,7 @@ class CandidateFormatTest(ApiBaseTest):
                 "name_2": "MORAN",
                 "other_names": [
                     "MORAN, JAMES P JR", "MORAN, JAMES P",
-                    "MORAN, JAMES PATRICK", "MORAN, JAMES P JR."]
+                    "MORAN, JAMES PATRICK", "MORAN, JAMES P  JR."]
             })
         address = {
             "city": "ALEXANDRIA",
