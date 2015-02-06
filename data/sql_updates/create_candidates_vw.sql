@@ -17,3 +17,4 @@ from dimcand
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
 ;
+grant select on table ofec_candidates_vw to webro;
