@@ -28,10 +28,11 @@ class OverallTest(unittest.TestCase):
         return response['results']
 
     def test_full_text_search(self):
-        results = self._results('/candidate?q=james&fields=*')
+        # changed from 'james' to 'arnold' because 'james' falls victim to stemming, and some results return 'jame' causing the assert to fail
+        results = self._results('/candidate?q=arnold&fields=*')
         for r in results:
-            txt = json.dumps(r).lower()
-            self.assertIn('james', txt)
+            #txt = json.dumps(r).lower()
+            self.assertIn('arnold', r['name'].lower())
 
     def test_full_text_search_with_whitespace(self):
         results = self._results('/candidate?q=barack obama&fields=*')
@@ -147,8 +148,8 @@ class OverallTest(unittest.TestCase):
 
     def test_cand_filters(self):
         # checking one example from each field
-        org_response = self._response('/candidate')
-        original_count = org_response['pagination']['count']
+        orig_response = self._response('/candidate')
+        original_count = orig_response['pagination']['count']
 
         filter_fields = (
             ('office','H'),

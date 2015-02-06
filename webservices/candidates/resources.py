@@ -4,8 +4,8 @@ import string
 
 from flask.ext.restful import reqparse
 
-from webservices.resources import (
-    default_year, natural_number, Searchable, SingleResource)
+from webservices.common.util import default_year, natural_number
+from webservices.resources import Searchable, SingleResource
 from webservices import decoders
 from .models import Candidate
 

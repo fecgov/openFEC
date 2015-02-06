@@ -45,14 +45,6 @@ def default_year():
     return ','.join(years)
 
 
-def natural_number(n):
-    result = int(n)
-    if result < 1:
-        raise reqparse.ArgumentTypeError(
-            'Must be a number greater than or equal to 1')
-    return result
-
-
 class SingleResource(restful.Resource, FindFieldsMixin):
 
     def get(self, id):

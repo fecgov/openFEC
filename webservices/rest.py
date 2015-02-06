@@ -40,7 +40,7 @@ Supported for /committee ::
 """
 import string
 import sys
-import sqlalchemy as sa
+import os
 from flask import Flask
 from flask.ext.restful import reqparse
 from flask.ext import restful
@@ -50,10 +50,11 @@ import logging
 from datetime import datetime
 
 from candidates.resources import CandidateResource, CandidateSearch
-from db import db_conn
 import decoders
 from resources import Searchable, SingleResource
 from totals.resources import TotalResource, TotalSearch
+from webservices.common.models import db
+from webservices.resources.candidates import CandidateList
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -61,8 +62,19 @@ speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
+
+def sqla_conn_string():
+    sqla_conn_string = os.getenv('SQLA_CONN')
+    if not sqla_conn_string:
+        print("Environment variable SQLA_CONN is empty; running against "
+              + "local `cfdm_test`")
+        sqla_conn_string = 'postgresql://:@/cfdm_test'
+    return sqla_conn_string
+
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 api = restful.Api(app)
+db.init_app(app)
 
 
 # still need to implement year
@@ -561,10 +573,9 @@ class Help(restful.Resource):
                                          {a.name: a.help for a in sorted(cls.parser.args)}}
         return result
 
-
 api.add_resource(Help, '/')
 api.add_resource(CandidateResource, '/candidate/<string:id>')
-api.add_resource(CandidateSearch, '/candidate')
+api.add_resource(CandidateList, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')
