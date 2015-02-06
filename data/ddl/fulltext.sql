@@ -8,6 +8,7 @@ CREATE TABLE dimcand_fulltext AS
 WITH cnd AS (
   SELECT c.cand_sk,
          setweight(to_tsvector(string_agg(coalesce(p.cand_nm, ''), ' ')), 'A') ||
+         setweight(to_tsvector(string_agg(coalesce(p.cand_id, ''), ' ')), 'A') ||
          setweight(to_tsvector(string_agg(coalesce(p.cand_city, ''), ' ')), 'B  ') ||
          setweight(to_tsvector(string_agg(coalesce(p.cand_st, ''), ' ')), 'A') ||
          setweight(to_tsvector(string_agg(coalesce(o.office_tp_desc, ''), ' ')), 'A')
@@ -32,15 +33,11 @@ CREATE TABLE dimcmte_fulltext AS
 WITH cmte AS (
   SELECT c.cmte_sk,
          setweight(to_tsvector(string_agg(coalesce(p.cmte_nm, ''), ' ')), 'A') ||
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_id, ''), ' ')), 'A') ||
          setweight(to_tsvector(string_agg(coalesce(p.cmte_city, ''), ' ')), 'B') ||
          setweight(to_tsvector(string_agg(coalesce(p.cmte_st, ''), ' ')), 'B') ||
          setweight(to_tsvector(string_agg(coalesce(p.cmte_st_desc, ''), ' ')), 'B') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_web_url, ''), ' ')), 'B') ||
-         setweight(to_tsvector(string_agg(coalesce(p.fst_cand_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.sec_cand_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.trd_cand_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.frth_cand_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.fith_cand_nm, ''), ' ')), 'A')
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_web_url, ''), ' ')), 'B')
          AS weights
   FROM   dimcmte c
   JOIN   dimcmteproperties p ON (c.cmte_sk = p.cmte_sk)
