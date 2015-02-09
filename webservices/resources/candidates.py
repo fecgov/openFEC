@@ -10,9 +10,10 @@ candidate_fields = {
     'district': fields.String,
     'election_year': fields.Integer,
     'incumbent_challenge': fields.String,
+    'office_short': fields.String,
     'office': fields.String,
+    'party_short': fields.String,
     'party': fields.String,
-    'party_affiliation': fields.String,
     'state': fields.String,
     'name': fields.String,
 }
@@ -73,7 +74,11 @@ class CandidateList(Resource):
 
         for argname in ['office', 'district', 'state', 'party', 'candidate_id']:
             if args.get(argname):
-                candidates = candidates.filter_by(**{argname: args[argname]})
+                if argname == 'office' or argname == 'party':
+                    candidates = candidate.filter_by(**{argname + '_short': args[argname]})
+                else:
+                    candidates = candidates.filter_by(**{argname: args[argname]})
+
 
         if args.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
@@ -91,9 +96,10 @@ class Candidate(db.Model):
     district = db.Column(db.String(2))
     election_year = db.Column(db.Integer)
     incumbent_challenge = db.Column(db.String(1))
-    office = db.Column(db.String(1))
-    party = db.Column(db.String(3))
-    party_affiliation = db.Column(db.String(64))
+    office_short = db.Column(db.String(1))
+    office = db.Column(db.String(9))
+    party_short = db.Column(db.String(3))
+    party = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
 

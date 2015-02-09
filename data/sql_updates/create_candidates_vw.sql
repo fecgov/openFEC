@@ -1,4 +1,5 @@
-create view ofec_candidates_vw as 
+drop view ofec_candidates_vw;
+create view ofec_candidates_vw as
 select distinct
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
@@ -6,9 +7,10 @@ select distinct
     dimoffice.office_district as district,
     co.cand_election_yr as election_year,
     csi.ici_code as incumbent_challenge,
-    dimoffice.office_tp as office,
-    dimparty.party_affiliation as party,
-    dimparty.party_affiliation_desc as party_affiliation,
+    dimoffice.office_tp as office_short,
+    dimoffice.office_tp_desc as office,
+    dimparty.party_affiliation as party_short,
+    dimparty.party_affiliation_desc as party,
     dimoffice.office_state as state,
     (select cand_nm from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as name
 from dimcand
