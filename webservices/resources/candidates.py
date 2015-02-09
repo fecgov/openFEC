@@ -18,8 +18,9 @@ candidate_fields = {
 }
 pagination_fields = {
     'per_page': fields.Integer,
-    'page_num': fields.Integer,
+    'page': fields.Integer,
     'count': fields.Integer,
+    'pages': fields.Integer,
 }
 candidate_list_fields = {
     'pagination': fields.Nested(pagination_fields),
@@ -55,9 +56,10 @@ class CandidateList(Resource):
 
         data = {
             'pagination': {
-                'page_num': page_num,
+                'page': page_num,
                 'per_page': per_page,
-                'count': count
+                'count': count,
+                'pages': int(count / per_page),
             },
             'results': candidates
         }
