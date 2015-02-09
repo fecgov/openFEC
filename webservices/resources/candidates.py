@@ -83,7 +83,9 @@ class CandidateList(Resource):
 
         for argname in ['office', 'district', 'state', 'party', 'candidate_id']:
             if args.get(argname):
-                if argname == 'office' or argname == 'party':
+                if ',' in args[argname]:
+                    candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname].split(',')))
+                elif argname == 'office' or argname == 'party':
                     candidates = candidate.filter_by(**{argname + '_short': args[argname]})
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
