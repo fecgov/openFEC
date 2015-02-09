@@ -1,22 +1,10 @@
 import json
-import unittest
-import rest
 
-class OverallTest(unittest.TestCase):
+from .tests.common import ApiBaseTest
+
+
+class OverallTest(ApiBaseTest):
     # Candidate
-
-    def setUp(self):
-        rest.app.config['TESTING'] = True
-        self.app = rest.app.test_client()
-
-    def tearDown(self):
-        pass
-
-    def _response(self, qry):
-        response = self.app.get(qry)
-        self.assertEquals(response.status_code, 200)
-        return json.loads(response.data)
-
     def test_header_info(self):
         response = self._response('/candidate')
         self.assertIn('api_version', response)
