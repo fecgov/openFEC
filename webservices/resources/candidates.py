@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with
 from webservices.common.models import db
 from webservices.common.util import default_year, natural_number
+from sqlalchemy.sql import text
 
 
 # output format for flask-restful marshaling
@@ -65,12 +66,20 @@ class CandidateList(Resource):
             'results': candidates
         }
 
-        # TODO: add fulltext search back in ('q')
-
         return data
 
     def get_candidates(self, args, page_num, per_page):
         candidates = Candidate.query
+
+        fulltext_qry = """SELECT cand_sk
+                          FROM   dimcand_fulltext
+                          WHERE  fulltxt @@ to_tsquery(:findme)
+                          ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
+
+        if args.get('q'):
+            findme = ' & '.join(args['q'].split())
+            candidates = candidates.filter(Candidate.candidate_key.in_(
+                db.session.query("cand_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
         for argname in ['office', 'district', 'state', 'party', 'candidate_id']:
             if args.get(argname):
@@ -105,6 +114,8 @@ class Candidate(db.Model):
 
     __tablename__ = 'ofec_candidates_vw'
 
-# class DimcandFulltext(db.Model):
-#     cand_sk = db.Column(db.Integer)
-#     fulltxt = db.Column(db.Text)
+class CandidateFulltext(db.Model):
+    cand_sk = db.Column(db.Integer, primary_key=True)
+    fulltxt = db.Column(db.Text)
+
+    __tablename__ = 'dimcand_fulltext'
