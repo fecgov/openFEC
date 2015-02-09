@@ -7,9 +7,11 @@ from sqlalchemy.sql import text
 # output format for flask-restful marshaling
 candidate_fields = {
     'candidate_id': fields.String,
+    'candidate_status_short': fields.String,
     'candidate_status': fields.String,
     'district': fields.String,
     'election_year': fields.Integer,
+    'incumbent_challenge_short': fields.String,
     'incumbent_challenge': fields.String,
     'office_short': fields.String,
     'office': fields.String,
@@ -41,9 +43,14 @@ class CandidateList(Resource):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
+    parser.add_argument('party_short', type=str, help="Three letter code of the party under which a candidate ran for office")
     parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
     parser.add_argument('district', type=str, help='Two digit district number')
+    parser.add_argument('candidate_status', type=str, help='Test explaining if the candidate is a present, future or past candidate')
+    parser.add_argument('candidate_status_short', type=str, help='Code explaining if the candidate is a present, future or past candidate')
+    parser.add_argument('incumbent_challenge', type=str, help='Text explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
+    parser.add_argument('incumbent_challenge_short', type=str, help='Code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
 
     @marshal_with(candidate_list_fields)
     def get(self, **kwargs):
@@ -85,8 +92,8 @@ class CandidateList(Resource):
             if args.get(argname):
                 if ',' in args[argname]:
                     candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname].split(',')))
-                elif argname == 'office' or argname == 'party':
-                    candidates = candidate.filter_by(**{argname + '_short': args[argname]})
+                elif argname in ['office', 'party', 'incumbent_challenge', 'candidate_status']:
+                    candidates = candidates.filter_by(**{argname + '_short': args[argname]})
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
@@ -103,10 +110,12 @@ class CandidateList(Resource):
 class Candidate(db.Model):
     candidate_key = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.String(10))
-    candidate_status = db.Column(db.String(1))
+    candidate_status_short = db.Column(db.String(1))
+    candidate_status = db.Column(db.String(11))
     district = db.Column(db.String(2))
     election_year = db.Column(db.Integer)
-    incumbent_challenge = db.Column(db.String(1))
+    incumbent_challenge_short = db.Column(db.String(1))
+    incumbent_challenge = db.Column(db.String(10))
     office_short = db.Column(db.String(1))
     office = db.Column(db.String(9))
     party_short = db.Column(db.String(3))
