@@ -97,7 +97,7 @@ class CandidateList(Resource):
         candidates = candidates.filter(Candidate.election_year.in_(args.get('election_year').split(',')))
         count = candidates.count()
 
-        return count, candidates.paginate(page_num, per_page, False).items
+        return count, candidates.order_by(Candidate.name).paginate(page_num, per_page, False).items
 
 
 class Candidate(db.Model):
