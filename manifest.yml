@@ -1,0 +1,5 @@
+---
+applications:
+- name: fec-api
+  memory: 512M
+  host: fec-api
