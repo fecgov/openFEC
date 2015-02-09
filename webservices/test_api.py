@@ -175,6 +175,14 @@ class OverallTest(unittest.TestCase):
             self.assertGreater(original_count, response['pagination']['count'])
 
 
+    def test_name_endpoint_returns_unique_candidates_and_committees(self):
+        results = self._results('/name?q=obama')
+        cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
+        self.assertEqual(len(cand_ids), len(set(cand_ids)))
+        cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
+        self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
+
+
 ### not ready for this yet
     # def test_q_ids(self):
     #     response = self._response('/committee?q=C00000851')
