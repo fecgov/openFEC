@@ -33,7 +33,7 @@ virtualenv-2.7 /opt/ve/fec2
 pip install -r /usr/local/home/$CURRENT_USER/openFEC/webservices/requirements.txt
 
 sudo mkdir /etc/nginx/vhosts
-sudo cp /usr/local/home/$CURRENT_USER/openFEC/webservices/setup/nginx_conf_default_no_ssl /etc/nginx/vhosts/default.conf
+sudo cp /usr/local/home/$CURRENT_USER/openFEC/webservices/setup/nginx_conf_default /etc/nginx/vhosts/default.conf
 sudo rm /etc/nginx/sites-available/default
 sudo ln -s /etc/nginx/vhosts/default.conf /etc/nginx/sites-available/default
 sudo rm /etc/nginx/nginx.conf

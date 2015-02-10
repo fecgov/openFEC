@@ -151,7 +151,7 @@ class BaseCandidateResource(Candidate):
 
                 # Names (picking up name variations)
                 if ('cand_nm' in prop
-                        and other_names in fields
+                        and ('other_names' in fields or '*' in fields)
                         and cand_data['name']['full_name'] != prop['cand_nm']
                         and prop['cand_nm'] not in other_names):
                     name = cleantext(prop['cand_nm'])
@@ -268,10 +268,11 @@ class CandidateSearch(BaseCandidateResource, Searchable):
     )
 
     field_name_map = {
-        "candidate_id": string.Template("cand_id='$arg'"),
+        "candidate_id": string.Template("cand_id={'$arg'}"),
         "fec_id": string.Template("cand_id={'$arg'}"),
         "office": string.Template(
-            "top(dimcandoffice.sort(expire_date-)).dimoffice.office_tp={'$arg'}"
+            "top(dimcandoffice.sort(expire_date-)).dimoffice."
+            "office_tp={'$arg'}"
         ),
         "district": string.Template(
             "top(dimcandoffice.sort(expire_date-)).dimoffice."

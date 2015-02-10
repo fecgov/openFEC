@@ -7,6 +7,7 @@ server {
   listen 80;
   server_name  fec.18f.us;
 
+  rewrite /eregs/eregs/(.*)? /eregs/$1 ;
   rewrite /eregs/static/(.*)? /regulations/static/$1 ;
 
   location /regulations/static/ {
@@ -17,6 +18,10 @@ server {
                         proxy_pass http://localhost:5000/;
 			auth_basic "Restricted";
 			auth_basic_user_file /etc/nginx/.htpasswd;
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Headers' "X-Requested-With";
+      add_header 'Access-Control-Allow-Methods' "GET, HEAD, OPTIONS";
+      add_header 'Content-Type' 'application/json; charset=utf-8';
           }
 
         location /htsql/ {
@@ -57,6 +62,7 @@ server {
 
   include ssl/ssl.rules;
 
+  rewrite /eregs/eregs/(.*)? /eregs/$1 ;
   rewrite /eregs/static/(.*)? /regulations/static/$1 ;
 
   location /regulations/static/ {
@@ -67,6 +73,10 @@ server {
 		proxy_pass http://localhost:5000/;
 		auth_basic "Restricted";
 		auth_basic_user_file /etc/nginx/.htpasswd;
+    add_header 'Access-Control-Allow-Origin' '*';
+    add_header 'Access-Control-Allow-Headers' "X-Requested-With";
+    add_header 'Access-Control-Allow-Methods' "GET, HEAD, OPTIONS";
+    add_header 'Content-Type' 'application/json; charset=utf-8';
   }
 
   location /htsql/ {
