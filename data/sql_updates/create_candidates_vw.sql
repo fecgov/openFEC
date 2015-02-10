@@ -1,10 +1,11 @@
-drop view ofec_candidates_vw;
+drop view if exists ofec_candidates_vw;
 create view ofec_candidates_vw as
 select distinct
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
     csi.cand_status as candidate_status_short,
-    case when csi.cand_status = 'C' then 'candidate'
+    case csi.cand_status
+        when 'C' then 'candidate'
         when 'F' then 'future candidate'
         when 'N' then 'not yet a candidate'
         when 'P' then 'prior candidate'
@@ -12,7 +13,8 @@ select distinct
     dimoffice.office_district as district,
     co.cand_election_yr as election_year,
     csi.ici_code as incumbent_challenge_short,
-    case when csi.ici_code = 'I' then 'incumbent'
+    case csi.ici_code 
+        when 'I' then 'incumbent'
         when 'C' then 'challenger'
         when 'O' then 'open seat'
         else 'unknown' end as incumbent_challenge,
