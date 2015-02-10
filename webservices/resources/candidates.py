@@ -1,6 +1,6 @@
-from flask.ext.restful import Resource, reqparse, fields, marshal_with
+from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
 from webservices.common.models import db
-from webservices.common.util import default_year, natural_number
+from webservices.common.util import default_year
 from sqlalchemy.sql import text
 
 
@@ -27,6 +27,7 @@ pagination_fields = {
     'pages': fields.Integer,
 }
 candidate_list_fields = {
+    'api_version': fields.Fixed(1),
     'pagination': fields.Nested(pagination_fields),
     'results': fields.Nested(candidate_fields),
 }
@@ -37,8 +38,8 @@ class CandidateList(Resource):
     parser.add_argument('q', type=str, help='Text to search all fields for')
     parser.add_argument('candidate_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
-    parser.add_argument('page', type=natural_number, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=natural_number, default=20, help='The number of results returned per page. Defaults to 20.')
+    parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
+    parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
@@ -64,6 +65,7 @@ class CandidateList(Resource):
         count, candidates = self.get_candidates(args, page_num, per_page)
 
         data = {
+            'api_version': '0.2',
             'pagination': {
                 'page': page_num,
                 'per_page': per_page,
@@ -101,7 +103,9 @@ class CandidateList(Resource):
         if args.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
 
-        candidates = candidates.filter(Candidate.election_year.in_(args.get('election_year').split(',')))
+        if args.get('election_year') and args['election_year'] != '*':
+            candidates = candidates.filter(Candidate.election_year.in_(args['election_year'].split(',')))
+
         count = candidates.count()
 
         return count, candidates.order_by(Candidate.name).paginate(page_num, per_page, False).items
