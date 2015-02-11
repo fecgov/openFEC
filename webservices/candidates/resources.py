@@ -151,7 +151,7 @@ class BaseCandidateResource(Candidate):
 
                 # Names (picking up name variations)
                 if ('cand_nm' in prop
-                        and other_names in fields
+                        and ('other_names' in fields or '*' in fields)
                         and cand_data['name']['full_name'] != prop['cand_nm']
                         and prop['cand_nm'] not in other_names):
                     name = cleantext(prop['cand_nm'])
@@ -198,3 +198,4 @@ class CandidateResource(BaseCandidateResource, SingleResource):
         default=default_year(),
         help="Year in which a candidate runs for office"
     )
+

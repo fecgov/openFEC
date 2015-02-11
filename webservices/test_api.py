@@ -1,22 +1,10 @@
 import json
-import unittest
-import rest
 
-class OverallTest(unittest.TestCase):
+from .tests.common import ApiBaseTest
+
+
+class OverallTest(ApiBaseTest):
     # Candidate
-
-    def setUp(self):
-        rest.app.config['TESTING'] = True
-        self.app = rest.app.test_client()
-
-    def tearDown(self):
-        pass
-
-    def _response(self, qry):
-        response = self.app.get(qry)
-        self.assertEquals(response.status_code, 200)
-        return json.loads(response.data)
-
     def test_header_info(self):
         response = self._response('/candidate')
         self.assertIn('api_version', response)
@@ -170,6 +158,14 @@ class OverallTest(unittest.TestCase):
             # doesn't return all results
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
+
+
+    def test_name_endpoint_returns_unique_candidates_and_committees(self):
+        results = self._results('/name?q=obama')
+        cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
+        self.assertEqual(len(cand_ids), len(set(cand_ids)))
+        cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
+        self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
 
 
 ### not ready for this yet
