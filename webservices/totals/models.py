@@ -132,15 +132,15 @@ class Total(object):
         else:
             house_qry = ''
 
-        if 'O' in types:
-            party_qry = '/factpacsandparties_f3x{%s %s}%s,%s ' % (
-                year + show_fields['pac_party_fields'],
-                reports,
-                cycle,
-                pp_totals
-            )
-        else:
-            party_qry = ''
+        party_qry = ''
+        for code in types:
+            if code in['C','D','E','I','N','O','Q','U','V','W','X','Y','Z']:
+                party_qry = '/factpacsandparties_f3x{%s %s}%s,%s ' % (
+                    year + show_fields['pac_party_fields'],
+                    reports,
+                    cycle,
+                    pp_totals
+                )
 
         if 'P' in types:
             prez_qry = '/factpresidential_f3p{%s %s}%s,%s '  % (
