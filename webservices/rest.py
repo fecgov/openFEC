@@ -40,6 +40,7 @@ Supported for /committee ::
 """
 import logging
 import sys
+import os
 
 from flask import Flask
 from flask.ext import restful
@@ -49,10 +50,12 @@ from json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
 from db import db_conn, as_dicts
-from candidates.resources import CandidateResource, CandidateSearch
+from candidates.resources import CandidateResource
 from committees.resources import CommitteeResource, CommitteeSearch
 from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
+from webservices.common.models import db
+from webservices.resources.candidates import CandidateList
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -60,8 +63,20 @@ speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
 
 flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
+
+def sqla_conn_string():
+    sqla_conn_string = os.getenv('SQLA_CONN')
+    if not sqla_conn_string:
+        print("Environment variable SQLA_CONN is empty; running against "
+              + "local `cfdm_test`")
+        sqla_conn_string = 'postgresql://:@/cfdm_test'
+    print sqla_conn_string
+    return sqla_conn_string
+
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 api = restful.Api(app)
+db.init_app(app)
 
 
 class NameSearch(Searchable):
@@ -104,7 +119,7 @@ class Help(restful.Resource):
     def get(self):
         result = {'doc': sys.modules[__name__].__doc__,
                   'endpoints': {}}
-        for cls in (CandidateSearch, CommitteeSearch):
+        for cls in (CandidateList, CommitteeSearch):
             name = cls.__name__[:-6].lower()
             result['endpoints'][name] = {
                 'arguments supported': {a.name: a.help
@@ -112,10 +127,9 @@ class Help(restful.Resource):
             }
         return result
 
-
 api.add_resource(Help, '/')
 api.add_resource(CandidateResource, '/candidate/<string:id>')
-api.add_resource(CandidateSearch, '/candidate')
+api.add_resource(CandidateList, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeSearch, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')

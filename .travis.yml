@@ -9,5 +9,6 @@ before_script:
   - md5sum data/cfdm_test.pgdump.sql
   - psql -f data/cfdm_test.pgdump.sql -U postgres cfdm_test
   - psql -c "SELECT count(*) FROM dimcand" -U postgres cfdm_test
-  - pip install -r webservices/requirements.txt
+  - psql -f data/sql_updates/create_candidates_vw.sql -U postgres cfdm_test
+  - pip install -r requirements.txt
 script: nosetests

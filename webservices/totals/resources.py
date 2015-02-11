@@ -2,7 +2,8 @@ import string
 
 from flask.ext.restful import reqparse
 
-from webservices.resources import natural_number, Searchable, SingleResource
+from webservices.common.util import natural_number
+from webservices.resources import Searchable, SingleResource
 from .models import Total
 
 
