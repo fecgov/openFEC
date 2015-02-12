@@ -1,5 +1,12 @@
+-- Creates and populates the _fulltext tables.  Run after
+-- any operation that changes the data in the tables indexed
+-- for full-text search.
 
-DROP TABLE IF EXISTS dimcand_fulltext;
+-- table CREATES
+-- will throw an error if the table already exists; that's fine.
+-- Plow cheerfully on, ignoring flaming wreckage in the rearview
+-- mirror.  Only strictly necessary when setting up database for
+-- the first time. 
 CREATE TABLE dimcand_fulltext AS
   SELECT cand_sk,
          NULL::tsvector AS fulltxt
@@ -24,7 +31,7 @@ SET    fulltxt = (SELECT weights FROM cnd
 
 CREATE INDEX cand_fts_idx ON dimcand_fulltext USING gin(fulltxt);
 
-DROP TABLE IF EXISTS dimcmte_fulltext;
+-- Will also throw an acceptable error when the table already exists.
 CREATE TABLE dimcmte_fulltext AS
   SELECT cmte_sk,
          NULL::tsvector AS fulltxt
@@ -52,7 +59,6 @@ GRANT SELECT ON dimcmte_fulltext TO webro;
 GRANT SELECT ON dimcand_fulltext TO webro;
 
 
-DROP TABLE IF EXISTS name_search_fulltext;
 CREATE TABLE name_search_fulltext AS
 WITH ranked AS (
 SELECT

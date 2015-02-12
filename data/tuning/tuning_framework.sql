@@ -1,3 +1,7 @@
+-- Run at any time to create tables for tracking tuning activities.
+-- Not directly related to app's data.  Optionally put these in a
+-- separate schema for clarity.
+
 CREATE TABLE tuning_requirement (
   id             SERIAL PRIMARY KEY,
   txt            TEXT NOT NULL,

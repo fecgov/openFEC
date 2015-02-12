@@ -1,4 +1,4 @@
-
+-- Run on data bridge machine to set up foreign tables to RDS
 -- run it via ``psql_w_vars.sh`` to set variables like :rds_host_loc
 
 DROP SCHEMA public CASCADE;

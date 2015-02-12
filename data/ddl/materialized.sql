@@ -1,3 +1,6 @@
+-- Set up summary tables for fact_* tables.
+-- Re-run whenever data in fact_* tables is changed.
+
 -- DROP MATERIALIZED VIEW IF EXISTS facthousesenate_f3_sums;
 -- CREATE MATERIALIZED VIEW facthousesenate_f3_sums AS
 DROP TABLE facthousesenate_f3_sums CASCADE;
