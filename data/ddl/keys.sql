@@ -1,3 +1,5 @@
+-- Run on RDS after complete data refresh to create indexes.
+
 -- SELECT 'ALTER TABLE ' || table_name ||
 --       ' ADD PRIMARY KEY (' || column_name ||
 --       ');'

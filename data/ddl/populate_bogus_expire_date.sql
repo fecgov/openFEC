@@ -1,3 +1,7 @@
+-- Fills tables with fictional expire_dates.  Discard as soon
+-- as actual dates are available from FEC.
+-- Run after populating RDS.
+
 -- for development only - because expire_date unset 
 UPDATE dimcandoffice
 SET    expire_date = (cand_election_yr || '-11-04' )::timestamp

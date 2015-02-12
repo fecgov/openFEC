@@ -1,3 +1,11 @@
+-- Create and populate calculated tables, those that don't
+-- exist in FEC's CFDM.
+--
+-- Run after a complete import from FEC is complete.
+-- Also can run after incremental update from FEC; however,
+-- the DROP .. CREATE sequences will take tables offline for a
+-- while.  May need to improve that solution.
+
 DROP TABLE IF EXISTS candproperties_to_candoffice CASCADE;
 CREATE TABLE candproperties_to_candoffice
   ( candproperties_sk INTEGER NOT NULL 
