@@ -90,7 +90,7 @@ class CandidateList(Resource):
             candidates = candidates.filter(Candidate.candidate_key.in_(
                 db.session.query("cand_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
-        for argname in ['office', 'district', 'state', 'party', 'candidate_id']:
+        for argname in ['office', 'district', 'state', 'party', 'candidate_id', 'candidate_status', 'incumbent_challenge']:
             if args.get(argname):
                 if ',' in args[argname]:
                     candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname].split(',')))

@@ -5,18 +5,18 @@ select distinct
     dimcand.cand_id as candidate_id,
     csi.cand_status as candidate_status_short,
     case csi.cand_status
-        when 'C' then 'candidate'
-        when 'F' then 'future candidate'
-        when 'N' then 'not yet a candidate'
-        when 'P' then 'prior candidate'
+        when 'C' then 'Candidate'
+        when 'F' then 'Future candidate'
+        when 'N' then 'Not yet a candidate'
+        when 'P' then 'Prior candidate'
         else 'unknown' end as candidate_status,
     dimoffice.office_district as district,
     co.cand_election_yr as election_year,
     csi.ici_code as incumbent_challenge_short,
-    case csi.ici_code 
-        when 'I' then 'incumbent'
-        when 'C' then 'challenger'
-        when 'O' then 'open seat'
+    case csi.ici_code
+        when 'I' then 'Incumbent'
+        when 'C' then 'Challenger'
+        when 'O' then 'Open seat'
         else 'unknown' end as incumbent_challenge,
     dimoffice.office_tp as office_short,
     dimoffice.office_tp_desc as office,
