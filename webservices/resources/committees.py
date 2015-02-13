@@ -16,8 +16,8 @@ committee_fields = {
     'state': fields.String,
     'party_short': fields.String,
     'party': fields.String,
-    'type_short': fields.String,
-    'type': fields.String,
+    'committee_type_short': fields.String,
+    'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
 }
@@ -69,7 +69,7 @@ class CommitteeList(Resource):
         help='The number of results returned per page. Defaults to 20.'
     )
     parser.add_argument(
-        'type',
+        'committee_type',
         type=str,
         help='The one-letter type code of the organization'
     )
@@ -89,7 +89,7 @@ class CommitteeList(Resource):
         help='The one-letter code for the kind for organization'
     )
     parser.add_argument(
-        'organization_type_short',
+        'organization_committee_type_short',
         type=str,
         help='The one-letter code for the kind for organization'
     )
@@ -146,11 +146,11 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.committee_key.in_(
                 db.session.query("cmte_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
-        for argname in ['committee_id', 'name', 'designation', 'orgnization_type', 'state', 'party', 'type', 'expire_date', 'original_registration_date']:
+        for argname in ['committee_id', 'name', 'designation', 'orgnization_type', 'state', 'party', 'committee_type', 'expire_date', 'original_registration_date']:
             if args.get(argname):
                 if ',' in args[argname]:
                     committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
-                elif argname in ['designation', 'orgnization_type', 'type', 'party']:
+                elif argname in ['designation', 'orgnization_type', 'committee_type', 'party']:
                     committees = committees.filter_by(**{argname + '_short': args[argname]})
                 else:
                     committees = committees.filter_by(**{argname: args[argname]})
@@ -161,6 +161,7 @@ class CommitteeList(Resource):
         # I want to add a proper year filter here
 
         count = committees.count()
+        print str(committees)
 
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
@@ -173,8 +174,8 @@ class Committee(db.Model):
     orgnization_type_short = db.Column(db.String(1))
     orgnization_type = db.Column(db.String(100))
     state = db.Column(db.String(2))
-    type_short = db.Column(db.String(1))
-    type = db.Column(db.String(100))
+    committee_type_short = db.Column(db.String(1))
+    committee_type = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
     party_short = db.Column(db.String(3))
     party = db.Column(db.String(50))

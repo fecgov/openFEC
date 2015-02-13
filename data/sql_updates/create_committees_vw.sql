@@ -16,8 +16,8 @@ select distinct
     cp.org_tp as orgnization_type_short,
     cp.org_tp_desc as orgnization_type,
     cp.cmte_st as state,
-    cp.org_tp as type_short,
-    case cp.org_tp
+    dd.cmte_tp as committee_type_short,
+    case dd.cmte_tp
         when 'P' then 'Presidential'
         when 'H' then 'House'
         when 'S' then 'Senate'
@@ -34,7 +34,7 @@ select distinct
         when 'X' then 'Party - Nonqualified'
         when 'Y' then 'Party - Qualified'
         when 'Z' then 'National Party Nonfederal Account'
-        else 'unknown' end as type,
+        else 'unknown' end as committee_type,
     cp.expire_date as expire_date,
     cp.cand_pty_affiliation as party_short,
     p.party_affiliation_desc as party,
