@@ -11,8 +11,8 @@ committee_fields = {
     'designation_short': fields.String,
     'designation': fields.String,
     'treasurer_name': fields.String,
-    'orgnization_type_short': fields.String,
-    'orgnization_type': fields.String,
+    'organization_type_short': fields.String,
+    'organization_type': fields.String,
     'state': fields.String,
     'party_short': fields.String,
     'party': fields.String,
@@ -20,6 +20,7 @@ committee_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
+    # 'candidate_ids': fields.String,
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -89,7 +90,7 @@ class CommitteeList(Resource):
         help='The one-letter code for the kind for organization'
     )
     parser.add_argument(
-        'organization_committee_type_short',
+        'organization_type_short',
         type=str,
         help='The one-letter code for the kind for organization'
     )
@@ -108,6 +109,10 @@ class CommitteeList(Resource):
         type=str,
         help='Date of the committees first registered'
     )
+    # parser.add_argument(
+    #     'candidate_ids',
+    #     type=str,
+    #     help='FEC IDs of candidates that committees have filed about. (See designation for the nature of the relationship.)')
 
     @marshal_with(committee_list_fields)
     def get(self, **kwargs):
@@ -146,11 +151,11 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.committee_key.in_(
                 db.session.query("cmte_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
-        for argname in ['committee_id', 'name', 'designation', 'orgnization_type', 'state', 'party', 'committee_type', 'expire_date', 'original_registration_date']:
+        for argname in ['committee_id', 'name', 'designation', 'organization_type', 'state', 'party', 'committee_type', 'expire_date', 'original_registration_date']:
             if args.get(argname):
                 if ',' in args[argname]:
                     committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
-                elif argname in ['designation', 'orgnization_type', 'committee_type', 'party']:
+                elif argname in ['designation', 'organization_type', 'committee_type', 'party']:
                     committees = committees.filter_by(**{argname + '_short': args[argname]})
                 else:
                     committees = committees.filter_by(**{argname: args[argname]})
@@ -171,8 +176,8 @@ class Committee(db.Model):
     designation_short = db.Column(db.String(1))
     designation = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
-    orgnization_type_short = db.Column(db.String(1))
-    orgnization_type = db.Column(db.String(100))
+    organization_type_short = db.Column(db.String(1))
+    organization_type = db.Column(db.String(100))
     state = db.Column(db.String(2))
     committee_type_short = db.Column(db.String(1))
     committee_type = db.Column(db.String(50))
@@ -181,6 +186,7 @@ class Committee(db.Model):
     party = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
+    # candidate_ids = db.Column(db.String(100))
 
     __tablename__ = 'ofec_committees_vw'
 
