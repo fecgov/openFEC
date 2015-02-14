@@ -20,7 +20,7 @@ committee_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    # 'candidate_ids': fields.String,
+    'candidate_ids': fields.String,
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -109,10 +109,10 @@ class CommitteeList(Resource):
         type=str,
         help='Date of the committees first registered'
     )
-    # parser.add_argument(
-    #     'candidate_ids',
-    #     type=str,
-    #     help='FEC IDs of candidates that committees have filed about. (See designation for the nature of the relationship.)')
+    parser.add_argument(
+        'candidate_ids',
+        type=str,
+        help='FEC IDs of candidates that committees have filed about. (See designation for the nature of the relationship.)')
 
     @marshal_with(committee_list_fields)
     def get(self, **kwargs):
@@ -186,7 +186,7 @@ class Committee(db.Model):
     party = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
-    # candidate_ids = db.Column(db.String(100))
+    candidate_ids = db.Column(db.String(100))
 
     __tablename__ = 'ofec_committees_vw'
 
@@ -197,4 +197,19 @@ class CommitteeFulltext(db.Model):
 
     __tablename__ = 'dimcmte_fulltext'
 
+# trying to link candidate ids so that committees will be search-able by candidate ids
+class Association(Committee):
+    __tablename__ = 'association'
+    left_id = db.Column(db.Integer, db.ForeignKey('dimcmte.committee_key'), primary_key=True)
+    right_id = db.Column(db.Integer, db.ForeignKey('linkages.cmte_sk'), primary_key=True)
+    child = db.relationship("Child", backref="parent_assocs")
+
+class Parent(Committee):
+    __tablename__ = 'dimcmte'
+    committee_key = db.Column(db.Integer, primary_key=True)
+    children = relationship("Association", backref="parent")
+
+class Child(Committee):
+    __tablename__ = 'linkages'
+    cmte_sk = db.Column(db.Integer, primary_key=True)
 
