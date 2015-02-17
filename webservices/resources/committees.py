@@ -135,7 +135,7 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
 
         # I want to add a proper year filter here
-        print self.candidates
+        # print committees.candidate_ids
 
         count = committees.count()
 
