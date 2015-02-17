@@ -21,7 +21,7 @@ committee_fields = {
     'expire_date': fields.String,
     'original_registration_date': fields.String,
     # want to add ids
-    'candidate_ids': fields.String,
+    'candidates': db.relationship('Linkages', backref='committees'),
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -138,8 +138,7 @@ class CommitteeList(Resource):
         count = committees.count()
 
         # trying to access the candidate_ids
-        for candidate in Association.child:
-            print linkages.cand_id
+        #cand_id
 
         print str(committees)
 
