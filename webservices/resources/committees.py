@@ -20,7 +20,6 @@ committee_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    # want to add ids
     'candidate_ids': fields.List(fields.String),
 }
 
@@ -109,8 +108,6 @@ class CommitteeList(Resource):
 
         return data
 
-    def candidate_ids(self):
-        return [ x.id for x in self.candidates]
 
     def get_committees(self, args, page_num, per_page):
         committees = Committee.query
@@ -138,8 +135,7 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
 
         # I want to add a proper year filter here
-
-        #candidates_id = candidate_ids(self)
+        print self.candidates
 
         count = committees.count()
 
@@ -164,7 +160,7 @@ class Committee(db.Model):
     party = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
-
+    candidates = db.relationship('Association', backref='dimlinkages')
 
     __tablename__ = 'ofec_committees_vw'
 
