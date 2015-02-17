@@ -21,8 +21,9 @@ committee_fields = {
     'expire_date': fields.String,
     'original_registration_date': fields.String,
     # want to add ids
-    'candidates': db.relationship('Linkages', backref='committees'),
+    'candidate_ids': fields.List(fields.String),
 }
+
 pagination_fields = {
     'per_page': fields.Integer,
     'page': fields.Integer,
@@ -108,6 +109,9 @@ class CommitteeList(Resource):
 
         return data
 
+    def candidate_ids(self):
+        return [ x.id for x in self.candidates]
+
     def get_committees(self, args, page_num, per_page):
         committees = Committee.query
 
@@ -135,10 +139,9 @@ class CommitteeList(Resource):
 
         # I want to add a proper year filter here
 
-        count = committees.count()
+        #candidates_id = candidate_ids(self)
 
-        # trying to access the candidate_ids
-        #cand_id
+        count = committees.count()
 
         print str(committees)
 
@@ -162,6 +165,7 @@ class Committee(db.Model):
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
 
+
     __tablename__ = 'ofec_committees_vw'
 
 
@@ -173,16 +177,16 @@ class CommitteeFulltext(db.Model):
 
 
 class Linkages(db.Model):
+   # linkages_sk = db.Column(db.Integer, primary_key=True)
     cmte_sk = db.Column(db.Integer, primary_key=True)
     cand_id = db.Column(db.String(9))
 
-    __tablename__ = 'linkages'
+    __tablename__ = 'dimlinkages'
 
 
 # trying to link candidate ids so that committees will be search-able by candidate ids
 class Association(Committee):
     __tablename__ = 'association'
     dimcmte_id = db.Column(db.Integer, db.ForeignKey('ofec_committees_vw.committee_key'), primary_key=True, )
-    linkages_id = db.Column(db.Integer, db.ForeignKey('linkages.cmte_sk'), primary_key=True)
-    child = db.relationship("Linkages", backref="parent_assocs")
-
+    linkages_id = db.Column(db.Integer, db.ForeignKey('dimlinkages.cmte_sk'), primary_key=True)
+    candidate_ids = db.relationship('Linkages', backref='committees')
