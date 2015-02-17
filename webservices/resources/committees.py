@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
 from webservices.common.models import db
 from webservices.common.util import default_year
+from webservices.resources.candidates import Candidate
 from sqlalchemy.sql import text
 
 
@@ -160,7 +161,7 @@ class Committee(db.Model):
     party = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
-    candidates = db.relationship('Association', backref='dimlinkages')
+    candidates = db.relationship('CandidateCommitteeLink', backref='committees')
 
     __tablename__ = 'ofec_committees_vw'
 
@@ -172,17 +173,18 @@ class CommitteeFulltext(db.Model):
     __tablename__ = 'dimcmte_fulltext'
 
 
-class Linkages(db.Model):
-   # linkages_sk = db.Column(db.Integer, primary_key=True)
-    cmte_sk = db.Column(db.Integer, primary_key=True)
-    cand_id = db.Column(db.String(9))
+class CandidateCommitteeLink(db.Model):
+    linkages_sk = db.Column(db.Integer, primary_key=True)
+    committee_key = db.Column('cmte_sk', db.Integer, db.ForeignKey(Committee.committee_key))
+    candidate_key = db.Column('cand_sk', db.Integer, db.ForeignKey(Candidate.candidate_key))
+    committee_id = db.Column('cmte_id', db.String(10))
+    candidate_id = db.Column('cand_id', db.String(10))
+    election_year = db.Column('cand_election_year', db.Integer)
+    committee_type = db.Column('cmte_tp', db.String(1))
+    committee_designation = db.Column('cmte_dsgn', db.String(1))
+    # more columns:
+    # link_date
+    # load_date
+    # expire_date
 
     __tablename__ = 'dimlinkages'
-
-
-# trying to link candidate ids so that committees will be search-able by candidate ids
-class Association(Committee):
-    __tablename__ = 'association'
-    dimcmte_id = db.Column(db.Integer, db.ForeignKey('ofec_committees_vw.committee_key'), primary_key=True, )
-    linkages_id = db.Column(db.Integer, db.ForeignKey('dimlinkages.cmte_sk'), primary_key=True)
-    candidate_ids = db.relationship('Linkages', backref='committees')
