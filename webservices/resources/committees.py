@@ -6,6 +6,12 @@ from sqlalchemy.sql import text
 
 
 # output format for flask-restful marshaling
+candidate_commitee_fields = {
+    'candidate_id': fields.String,
+    'election_year': fields.Integer,
+    'link_date': fields.String,
+    'expire_date': fields.String,
+}
 committee_fields = {
     'committee_id': fields.String,
     'name': fields.String,
@@ -21,9 +27,8 @@ committee_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    'candidate_ids': fields.List(fields.String),
+    'candidates': fields.Nested(candidate_commitee_fields),
 }
-
 pagination_fields = {
     'per_page': fields.Integer,
     'page': fields.Integer,
@@ -136,7 +141,7 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
 
         # I want to add a proper year filter here
-        # print committees.candidate_ids
+        #print self.candidates
 
         count = committees.count()
 
@@ -179,12 +184,8 @@ class CandidateCommitteeLink(db.Model):
     candidate_key = db.Column('cand_sk', db.Integer, db.ForeignKey(Candidate.candidate_key))
     committee_id = db.Column('cmte_id', db.String(10))
     candidate_id = db.Column('cand_id', db.String(10))
-    election_year = db.Column('cand_election_year', db.Integer)
-    committee_type = db.Column('cmte_tp', db.String(1))
-    committee_designation = db.Column('cmte_dsgn', db.String(1))
-    # more columns:
-    # link_date
-    # load_date
-    # expire_date
+    election_year = db.Column('cand_election_yr', db.Integer)
+    link_date = db.Column('link_date', db.DateTime())
+    expire_date = db.Column('expire_date', db.DateTime())
 
     __tablename__ = 'dimlinkages'
