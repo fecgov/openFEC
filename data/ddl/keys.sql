@@ -209,3 +209,4 @@ create index on facthousesenate_f3(cvg_start_dt_sk);
 create index on facthousesenate_f3(cvg_start_dt_sk);
 create index on facthousesenate_f3(cvg_end_dt_sk);
 
+create index factpacsandparties_f3x_two_year_period_sk_idx on factpacsandparties_f3x (two_yr_period_sk);
