@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
 from webservices.common.models import db
 from webservices.common.util import default_year
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.sql import text
 
 
@@ -10,7 +11,8 @@ candidate_fields = {
     'candidate_status_short': fields.String,
     'candidate_status': fields.String,
     'district': fields.String,
-    'election_year': fields.Integer,
+    'active_through': fields.Integer,
+    'election_years': fields.List(fields.Integer),
     'incumbent_challenge_short': fields.String,
     'incumbent_challenge': fields.String,
     'office_short': fields.String,
@@ -104,7 +106,7 @@ class CandidateList(Resource):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
 
         if args.get('election_year') and args['election_year'] != '*':
-            candidates = candidates.filter(Candidate.election_year.in_(args['election_year'].split(',')))
+            candidates = candidates.filter(Candidate.election_years.overlap([int(x) for x in args['election_year'].split(',')]))
 
         count = candidates.count()
 
@@ -117,7 +119,8 @@ class Candidate(db.Model):
     candidate_status_short = db.Column(db.String(1))
     candidate_status = db.Column(db.String(11))
     district = db.Column(db.String(2))
-    election_year = db.Column(db.Integer)
+    active_through = db.Column(db.Integer)
+    election_years = db.Column(ARRAY(db.Integer))
     incumbent_challenge_short = db.Column(db.String(1))
     incumbent_challenge = db.Column(db.String(10))
     office_short = db.Column(db.String(1))
