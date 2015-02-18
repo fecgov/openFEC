@@ -2,7 +2,7 @@ from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
 from webservices.common.models import db
 from webservices.common.util import default_year
 from webservices.resources.candidates import Candidate
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text, or_
 from datetime import date
 
 
@@ -147,7 +147,7 @@ class CommitteeList(Resource):
         # still need to make it handle a list of years to make it consistent with /candidate
         if args.get('year'):
             # before expiration
-            committees = committees.filter(Committee.expire_date <= date(int(args['year']), 12, 31))
+            committees = committees.filter(or_(Committee.expire_date <= date(int(args['year']), 12, 31), Committee.expire_date == None))
             # after origination
             committees = committees.filter(Committee.original_registration_date >= date(int(args['year']), 01, 01))
 
