@@ -92,6 +92,7 @@ class CandidateList(Resource):
 
         for argname in ['office', 'district', 'state', 'party', 'candidate_id', 'candidate_status', 'incumbent_challenge']:
             if args.get(argname):
+                # this is not working and doesn't look like it would work for _short
                 if ',' in args[argname]:
                     candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname].split(',')))
                 elif argname in ['office', 'party', 'incumbent_challenge', 'candidate_status']:

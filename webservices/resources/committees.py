@@ -82,16 +82,19 @@ class CommitteeList(Resource):
         'party', type=str, help='Three letter code for party'
     )
     parser.add_argument(
+        'party_short', type=str, help='Three letter code for party'
+    )
+    parser.add_argument(
         'expire_date', type=str, help='Date the committee registration expires'
     )
     parser.add_argument(
         'original_registration_date', type=str, help='Date of the committees first registered'
     )
     parser.add_argument(
-        'candidate_id', type=str,help='FEC IDs of candidates that committees have mentioned in filings. (See designation for the nature of the relationship.)'
+        'candidate_id', type=str, help='FEC IDs of candidates that committees have mentioned in filings. (See designation for the nature of the relationship.)'
     )
     parser.add_argument(
-        'year', type=str,help='A year that the committee was active- (After original registration but before expiration.)'
+        'year', type=str, help='A year that the committee was active- (After original registration but before expiration.)'
     )
 
     @marshal_with(committee_list_fields)
@@ -132,10 +135,11 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.committee_key.in_(
                 db.session.query("cmte_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
-        for argname in ['committee_id', 'name', 'designation', 'organization_type', 'state', 'party', 'committee_type', 'expire_date', 'original_registration_date']:
+        for argname in ['committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type']:
             if args.get(argname):
+                # this is not working and doesn't look like it would work for _short
                 if ',' in args[argname]:
-                    committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
+                    committees = committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
                 elif argname in ['designation', 'organization_type', 'committee_type', 'party']:
                     committees = committees.filter_by(**{argname + '_short': args[argname]})
                 else:
@@ -144,13 +148,18 @@ class CommitteeList(Resource):
         if args.get('name'):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
 
-        # still need to make it handle a list of years to make it consistent with /candidate
-        if args.get('year'):
+        # default year filtering
+        if args.get('year') is None:
+            earliest_year = int(sorted(default_year().split(','))[0])
+            # still going or expired after the earliest year we are looking for
+            committees = committees.filter(or_(Committee.expire_date <= date(earliest_year, 12, 31), Committee.expire_date == None))
+
+        # Should this handle a list of years to make it consistent with /candidate ?
+        elif args.get('year') and args['year'] != '*':
             # before expiration
             committees = committees.filter(or_(Committee.expire_date <= date(int(args['year']), 12, 31), Committee.expire_date == None))
             # after origination
             committees = committees.filter(Committee.original_registration_date >= date(int(args['year']), 01, 01))
-
 
         count = committees.count()
 

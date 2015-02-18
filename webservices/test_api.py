@@ -177,6 +177,74 @@ class OverallTest(ApiBaseTest):
     #     self.assertEquals(len(response['results']), 1)
 
 #Committee
+    # new
+    def test_committee_search_fields(self):
+        # example with committee
+        response = self._response('/committee?committee_id=C00048587&year=*')
+        result = response['results'][0]
+        # main fields
+        # original registration date doesn't make sense in this example, need to look into this more
+        self.assertEqual(result['original_registration_date'], '1982-12-31 00:00:00')
+        self.assertEqual(result['committee_type_short'], 'P')
+        self.assertEqual(result['treasurer_name'], 'ROBERT J. LIPSHUTZ')
+        self.assertEqual(result['party_short'], 'DEM')
+        self.assertEqual(result['committee_type'], 'Presidential')
+        self.assertEqual(result['name'], '1976 DEMOCRATIC PRESIDENTIAL CAMPAIGN COMMITTEE, INC. (PCC-1976 GENERAL ELECTION)')
+        self.assertEqual(result['committee_id'], 'C00048587')
+        self.assertEqual(result['designation'], 'Principal campaign committee')
+        self.assertEqual(result['state'], 'GA')
+        self.assertEqual(result['party'], 'Democratic Party')
+        self.assertEqual(result['designation_short'], 'P')
+        # no expired committees in test data to test just checking it exists
+        self.assertEqual(result['expire_date'], None)
+        # candidate fields
+        candidate_result = response['results'][0]['candidates'][0]
+        self.assertEqual(candidate_result['candidate_id'], 'P60000247')
+        self.assertEqual(candidate_result['election_year'], 1976)
+        self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
+        # Example with org type
+        response = self._response('/committee?organization_type=C')
+        results = response['results'][0]
+        self.assertEqual(results['organization_type'], 'Corporation')
+        self.assertEqual(results['organization_type_short'], 'C')
+
+    # new
+    @unittest.skip('multiple parameters are not working')
+    def test_committee_search_double_committee_id(self):
+        response = self._response('committee?committee_id=C00048587,C00116574&year=*')
+        results = response['results']
+        self.assertEqual(len(results), 2)
+
+    #new
+    def test_committee_search_filters(self):
+        original_response = self._response('/committee')
+        original_count = original_response['pagination']['count']
+
+        party_short_response = self._response('/committee?party=REP')
+        party_short_count = party_short_response['pagination']['count']
+        self.assertEquals((original_count > party_short_count), True)
+
+        committee_type_short_response = self._response('/committee?committee_type=P')
+        committee_type_short_count = committee_type_short_response['pagination']['count']
+        self.assertEquals((original_count > committee_type_short_count), True)
+
+        name_response = self._response('/committee?name=Obama')
+        name_count = name_response['pagination']['count']
+        self.assertEquals((original_count > name_count), True)
+
+        committee_id_response = self._response('/committee?committee_id=C00116574')
+        committee_id_count = committee_id_response['pagination']['count']
+        self.assertEquals((original_count > committee_id_count), True)
+
+        designation_short_response = self._response('/committee?designation=P')
+        designation_short_count = designation_short_response['pagination']['count']
+        self.assertEquals((original_count > designation_short_count), True)
+
+        state_response = self._response('/committee?state=CA')
+        state_count = state_response['pagination']['count']
+        self.assertEquals((original_count > state_count), True)
+
+
 
     def test_committee_cand_fields(self):
         # they were giving different responses
@@ -197,20 +265,6 @@ class OverallTest(ApiBaseTest):
         for field in fields:
             print field
             self.assertEquals(result.has_key(field), True)
-
-
-    def test_committee_filter(self):
-        # one filter from each table
-        response = self._response('/committee')
-        type_response = self._response('/committee?committee_type=P')
-        org_response = self._response('/committee?organization_type=C')
-
-        original_count = response['pagination']['count']
-        type_count = type_response['pagination']['count']
-        org_count = org_response['pagination']['count']
-
-        self.assertEquals((original_count > type_count), True)
-        self.assertEquals((original_count > org_count), True)
 
     def test_committee_properties_basic(self):
         response = self._response('/committee/C00000851')
@@ -252,6 +306,7 @@ class OverallTest(ApiBaseTest):
         print '\n%s\n' % response
         self.assertEquals(len(response[0]), 1)
 
+    # /committee?
     def test_err_on_unsupported_arg(self):
         response = self.app.get('/committee?bogusArg=1')
         self.assertEquals(response.status_code, 400)
