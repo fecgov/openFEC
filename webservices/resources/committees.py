@@ -87,7 +87,7 @@ class CommitteeList(Resource):
         'original_registration_date', type=str, help='Date of the committees first registered'
     )
     parser.add_argument(
-        'candidate_ids', type=str,help='FEC IDs of candidates that committees have mentioned in filings. (See designation for the nature of the relationship.)'
+        'candidate_id', type=str,help='FEC IDs of candidates that committees have mentioned in filings. (See designation for the nature of the relationship.)'
     )
 
     @marshal_with(committee_list_fields)
@@ -116,6 +116,15 @@ class CommitteeList(Resource):
 
 
     def get_committees(self, args, page_num, per_page):
+        # check for candidaitate_id
+        if args.get('candidate_id'):
+            # look up candidate and find committees
+            cand_committees = db.session.query(CandidateCommitteeLink).from_statement(
+                    text("SELECT cmte_sk FROM dimlinkages WHERE cand_id=:candidate_id")).\
+                    params(candidate_id=args['candidate_id']).all()
+            print cand_committees
+            # then pass the comittee_id into the query
+
         committees = Committee.query
 
         fulltext_qry = """SELECT cmte_sk
@@ -141,7 +150,6 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
 
         # I want to add a proper year filter here
-        #print self.candidates
 
         count = committees.count()
 
