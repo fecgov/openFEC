@@ -3,6 +3,7 @@ from webservices.common.models import db
 from webservices.common.util import default_year
 from webservices.resources.candidates import Candidate
 from sqlalchemy.sql import text
+from datetime import date
 
 
 # output format for flask-restful marshaling
@@ -89,6 +90,9 @@ class CommitteeList(Resource):
     parser.add_argument(
         'candidate_id', type=str,help='FEC IDs of candidates that committees have mentioned in filings. (See designation for the nature of the relationship.)'
     )
+    parser.add_argument(
+        'year', type=str,help='A year that the committee was active- (After original registration but before expiration.)'
+    )
 
     @marshal_with(committee_list_fields)
     def get(self, **kwargs):
@@ -114,17 +118,8 @@ class CommitteeList(Resource):
 
         return data
 
-
+# maybe filtering out U designation committees would be faster, less records?
     def get_committees(self, args, page_num, per_page):
-        # check for candidaitate_id
-        if args.get('candidate_id'):
-            # look up candidate and find committees
-            cand_committees = db.session.query(CandidateCommitteeLink).from_statement(
-                    text("SELECT cmte_sk FROM dimlinkages WHERE cand_id=:candidate_id")).\
-                    params(candidate_id=args['candidate_id']).all()
-            print cand_committees
-            # then pass the comittee_id into the query
-
         committees = Committee.query
 
         fulltext_qry = """SELECT cmte_sk
@@ -149,7 +144,13 @@ class CommitteeList(Resource):
         if args.get('name'):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
 
-        # I want to add a proper year filter here
+        # still need to make it handle a list of years to make it consistent with /candidate
+        if args.get('year'):
+            # before expiration
+            committees = committees.filter(Committee.expire_date <= date(int(args['year']), 12, 31))
+            # after origination
+            committees = committees.filter(Committee.original_registration_date >= date(int(args['year']), 01, 01))
+
 
         count = committees.count()
 
