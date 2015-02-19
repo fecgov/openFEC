@@ -56,10 +56,10 @@ class CommitteeList(Resource):
     parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
     parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
     parser.add_argument('party', type=str, help='Three letter code for party')
-    parser.add_argument('expire_date', type=str, help='Date the committee registration expires')
-    # not working yet
+    parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (after original registration date but before expiration date.)')
+    # not implemented yet
+    # parser.add_argument('expire_date', type=str, help='Date the committee registration expires')
     # parser.add_argument('original_registration_date', type=str, help='Date of the committees first registered')
-    # parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (fter original registration but before expiration.)')
 
     @marshal_with(committee_list_fields)
     def get(self, **kwargs):
@@ -129,6 +129,14 @@ class CommitteeList(Resource):
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
 
+
+
+
+
+
+
+
+
 class CommitteeByCandidate(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('state', type=str, help='Two digit U.S. State committee is registered in')
@@ -175,9 +183,10 @@ class CommitteeByCandidate(Resource):
         committee_keys = []
         for c in cand_committees:
             committee_keys.append(int(c.committee_key))
-
+        print committee_keys
         # look up committees
         committees = Committee.query
+        # this is only working if there is one committee returned
         committees = committees.filter(getattr(Committee, 'committee_key').in_(committee_keys))
 
         for argname in ['designation', 'organization_type', 'state', 'party', 'committee_type']:
