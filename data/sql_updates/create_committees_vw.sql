@@ -31,21 +31,24 @@ select distinct
         when 'Y' then 'Party - Qualified'
         when 'Z' then 'National Party Nonfederal Account'
         else 'unknown' end as committee_type,
-    cp.cmte_treasurer_nm as treasurer_name,
-    cp.org_tp as organization_type_short,
-    cp.org_tp_desc as organization_type,
-    cp.cmte_st as state,
-    cp.expire_date as expire_date,
-    cp.cand_pty_affiliation as party_short,
+    cp_most_recent.cmte_treasurer_nm as treasurer_name,
+    cp_most_recent.org_tp as organization_type_short,
+    cp_most_recent.org_tp_desc as organization_type,
+    cp_most_recent.cmte_st as state,
+    cp_most_recent.expire_date as expire_date,
+    cp_most_recent.cand_pty_affiliation as party_short,
     p.party_affiliation_desc as party,
-    -- they should give this to us but I am querying around it for now
-    (select load_date from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by load_date desc limit 1) as original_registration_date,
-    (select cmte_nm from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by cmteproperties_sk desc limit 1) as name
+    -- contrary to most recent, we'll need to pull just the oldest load_date here, since they don't give us registration dates yet
+    (select distinct on (cmte_sk) load_date from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by cmte_sk, cmteproperties_sk) as original_registration_date,
+    cp_most_recent.cmte_nm as name
     -- (select all cand_id from dimlinkages dl where dl.cmte_sk = dimcmte.cmte_sk) as candidate_ids
 from dimcmte
     inner join dimcmtetpdsgn dd using (cmte_sk)
-    inner join dimcmteproperties cp using (cmte_sk)
-    inner join dimparty p on cp.cand_pty_affiliation = p.party_affiliation
+    -- do a DISTINCT ON subselect to get the most recent properties for a committee
+    inner join (
+        select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
+    ) cp_most_recent using (cmte_sk)
+    inner join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     -- inner join dimlinkages dl using (cmte_sk)
 ;
 grant select on table ofec_committees_vw to webro;

@@ -189,6 +189,8 @@ cluster dimcmteproperties using dimcmteproperties_cmte_sk_expire_date_cmteproper
 
 CREATE INDEX ON dimcmtetpdsgn(cmte_sk);
 
+create index dimparty_party_affiliation_idx on dimparty(party_affiliation);
+
 CREATE INDEX ON dimcmteproperties(cand_id);
 CREATE INDEX ON dimlinkages(cand_sk);
 CREATE INDEX ON dimlinkages(cmte_sk);
