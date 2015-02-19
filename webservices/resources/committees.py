@@ -3,6 +3,7 @@ from webservices.common.models import db
 from webservices.common.util import default_year
 from webservices.resources.candidates import Candidate
 from sqlalchemy.sql import text, or_
+from sqlalchemy import extract
 from datetime import date
 
 
@@ -45,57 +46,20 @@ committee_list_fields = {
 
 class CommitteeList(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument(
-        'q', type=str, help='Text to search all fields for'
-    )
-    parser.add_argument(
-        'committee_id', type=str, help="Committee's FEC ID"
-    )
-    parser.add_argument(
-        'state', type=str, help='Two digit U.S. State committee is registered in'
-    )
-    parser.add_argument(
-        'name', type=str, help="Committee's name (full or partial)"
-    )
-    parser.add_argument(
-        'page', type=int, default=1, help='For paginating through results, starting at page 1'
-    )
-    parser.add_argument(
-        'per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.'
-    )
-    parser.add_argument(
-        'committee_type', type=str, help='The one-letter type code of the organization'
-    )
-    parser.add_argument(
-        'designation', type=str, help='The one-letter designation code of the organization'
-    )
-    parser.add_argument(
-        'designation_short', type=str, help='The one-letter designation code of the organization'
-    )
-    parser.add_argument(
-        'organization_type', type=str, help='The one-letter code for the kind for organization'
-    )
-    parser.add_argument(
-        'organization_type_short', type=str, help='The one-letter code for the kind for organization'
-    )
-    parser.add_argument(
-        'party', type=str, help='Three letter code for party'
-    )
-    parser.add_argument(
-        'party_short', type=str, help='Three letter code for party'
-    )
-    parser.add_argument(
-        'expire_date', type=str, help='Date the committee registration expires'
-    )
-    parser.add_argument(
-        'original_registration_date', type=str, help='Date of the committees first registered'
-    )
-    parser.add_argument(
-        'candidate_id', type=str, help='FEC IDs of candidates that committees have mentioned in filings. (See designation for the nature of the relationship.)'
-    )
-    parser.add_argument(
-        'year', type=str, help='A year that the committee was active- (After original registration but before expiration.)'
-    )
+    parser.add_argument('q', type=str, help='Text to search all fields for')
+    parser.add_argument('committee_id', type=str, help="Committee's FEC ID")
+    parser.add_argument('state', type=str, help='Two digit U.S. State committee is registered in')
+    parser.add_argument('name', type=str, help="Committee's name (full or partial)")
+    parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
+    parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
+    parser.add_argument('committee_type', type=str, help='The one-letter type code of the organization')
+    parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
+    parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
+    parser.add_argument('party', type=str, help='Three letter code for party')
+    parser.add_argument('expire_date', type=str, help='Date the committee registration expires')
+    parser.add_argument('original_registration_date', type=str, help='Date of the committees first registered')
+    parser.add_argument('candidate_id', type=str, help='FEC IDs of candidates that committees have mentioned in filings. (ee designation for the nature of the relationship.)')
+    parser.add_argument('year', type=str, help='A year that the committee was active- (fter original registration but before expiration.)')
 
     @marshal_with(committee_list_fields)
     def get(self, **kwargs):
@@ -157,9 +121,9 @@ class CommitteeList(Resource):
         # Should this handle a list of years to make it consistent with /candidate ?
         elif args.get('year') and args['year'] != '*':
             # before expiration
-            committees = committees.filter(or_(Committee.expire_date <= date(int(args['year']), 12, 31), Committee.expire_date == None))
+            committees = committees.filter(or_(extract('year', Committee.expire_date) >= int(args['year']), Committee.expire_date == None))
             # after origination
-            committees = committees.filter(Committee.original_registration_date >= date(int(args['year']), 01, 01))
+            committees = committees.filter(extract('year', Committee.original_registration_date) <= int(args['year']))
 
         count = committees.count()
 
