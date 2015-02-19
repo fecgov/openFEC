@@ -55,8 +55,8 @@ from committees.resources import CommitteeResource
 from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
-from webservices.resources.candidates import CandidateList, CommitteeByCandidate
-from webservices.resources.committees import CommitteeList
+from webservices.resources.candidates import CandidateList
+from webservices.resources.committees import CommitteeList, CommitteeByCandidate
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
