@@ -1,38 +1,54 @@
-drop view if exists ofec_candidates_vw;
-create view ofec_candidates_vw as
-select
-    dimcand.cand_sk as candidate_key,
-    dimcand.cand_id as candidate_id,
-    max(csi_recent.cand_status) as candidate_status_short,
-    case max(csi_recent.cand_status)
-        when 'C' then 'candidate'
-        when 'F' then 'future candidate'
-        when 'N' then 'not yet a candidate'
-        when 'P' then 'prior candidate'
-        else 'unknown' end as candidate_status,
-    max(dimoffice.office_district) as district,
-    csi_recent.election_yr as active_through,
-    (select array_agg(distinct election_yr)::int[] from dimcandstatusici csi where csi.cand_sk = dimcand.cand_sk) as election_years,
-    max(csi_recent.ici_code) as incumbent_challenge_short,
-    case max(csi_recent.ici_code)
-        when 'I' then 'incumbent'
-        when 'C' then 'challenger'
-        when 'O' then 'open seat'
-        else 'unknown' end as incumbent_challenge,
-    max(dimoffice.office_tp) as office_short,
-    max(dimoffice.office_tp_desc) as office,
-    max(dimparty.party_affiliation) as party_short,
-    max(dimparty.party_affiliation_desc) as party,
-    max(dimoffice.office_state) as state,
-    (select cand_nm from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as name
-from dimcand
-    inner join (select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code from dimcandstatusici order by cand_sk, election_yr desc) csi_recent using (cand_sk)
-    inner join dimcandoffice co on co.cand_sk = dimcand.cand_sk and co.cand_election_yr = csi_recent.election_yr  -- only joined to get to dimoffice
-    inner join dimoffice using (office_sk)
-    inner join dimparty using (party_sk)
-group by
-    dimcand.cand_sk,
-    dimcand.cand_id,
-    csi_recent.election_yr
+drop view if exists ofec_committees_vw;
+create view ofec_committees_vw as
+select distinct
+    dimcmte.cmte_sk as committee_key,
+    dimcmte.cmte_id as committee_id,
+    dd.cmte_dsgn as designation,
+    case dd.cmte_dsgn
+        when 'A' then 'Authorized by a candidate'
+        when 'J' then 'Joint fundraising committee'
+        when 'P' then 'Principal campaign committee'
+        when 'U' then 'Unauthorized'
+        when 'B' then 'Lobbyist/Registrant PAC'
+        when 'D' then 'Leadership PAC'
+        else 'unknown' end as designation_full,
+    dd.cmte_tp as committee_type,
+    case dd.cmte_tp
+        when 'P' then 'Presidential'
+        when 'H' then 'House'
+        when 'S' then 'Senate'
+        when 'C' then 'Communication Cost'
+        when 'D' then 'Delegate Committee'
+        when 'E' then 'Electioneering Communication'
+        when 'I' then 'Independent Expenditor (Person or Group)'
+        when 'N' then 'PAC - Nonqualified'
+        when 'O' then 'Independent Expenditure-Only (Super PACs)'
+        when 'Q' then 'PAC - Qualified'
+        when 'U' then 'Single Candidate Independent Expenditure'
+        when 'V' then 'PAC with Non-Contribution Account - Nonqualified'
+        when 'W' then 'PAC with Non-Contribution Account - Qualified'
+        when 'X' then 'Party - Nonqualified'
+        when 'Y' then 'Party - Qualified'
+        when 'Z' then 'National Party Nonfederal Account'
+        else 'unknown' end as committee_type_full,
+    cp_most_recent.cmte_treasurer_nm as treasurer_name,
+    cp_most_recent.org_tp as organization_type,
+    cp_most_recent.org_tp_desc as organization_type_full,
+    cp_most_recent.cmte_st as state,
+    cp_most_recent.expire_date as expire_date,
+    cp_most_recent.cand_pty_affiliation as party,
+    p.party_affiliation_desc as party_full,
+    -- contrary to most recent, we'll need to pull just the oldest load_date here, since they don't give us registration dates yet
+    (select distinct on (cmte_sk) load_date from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by cmte_sk, cmteproperties_sk) as original_registration_date,
+    cp_most_recent.cmte_nm as name
+    -- (select all cand_id from dimlinkages dl where dl.cmte_sk = dimcmte.cmte_sk) as candidate_ids
+from dimcmte
+    inner join dimcmtetpdsgn dd using (cmte_sk)
+    -- do a DISTINCT ON subselect to get the most recent properties for a committee
+    inner join (
+        select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
+    ) cp_most_recent using (cmte_sk)
+    inner join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
+    -- inner join dimlinkages dl using (cmte_sk)
 ;
-grant select on table ofec_candidates_vw to webro;
+grant select on table ofec_committees_vw to webro
