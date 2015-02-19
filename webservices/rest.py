@@ -51,7 +51,7 @@ import sqlalchemy as sa
 
 from db import db_conn, as_dicts
 from candidates.resources import CandidateResource
-from committees.resources import CommitteeResource, CommitteeSearch
+from committees.resources import CommitteeResource
 from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db

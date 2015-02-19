@@ -185,16 +185,16 @@ class OverallTest(ApiBaseTest):
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
         self.assertEqual(result['original_registration_date'], '1982-12-31 00:00:00')
-        self.assertEqual(result['committee_type_short'], 'P')
+        self.assertEqual(result['committee_type'], 'P')
         self.assertEqual(result['treasurer_name'], 'ROBERT J. LIPSHUTZ')
-        self.assertEqual(result['party_short'], 'DEM')
-        self.assertEqual(result['committee_type'], 'Presidential')
+        self.assertEqual(result['party'], 'DEM')
+        self.assertEqual(result['committee_type_full'], 'Presidential')
         self.assertEqual(result['name'], '1976 DEMOCRATIC PRESIDENTIAL CAMPAIGN COMMITTEE, INC. (PCC-1976 GENERAL ELECTION)')
         self.assertEqual(result['committee_id'], 'C00048587')
-        self.assertEqual(result['designation'], 'Principal campaign committee')
+        self.assertEqual(result['designation_full'], 'Principal campaign committee')
         self.assertEqual(result['state'], 'GA')
-        self.assertEqual(result['party'], 'Democratic Party')
-        self.assertEqual(result['designation_short'], 'P')
+        self.assertEqual(result['party_full'], 'Democratic Party')
+        self.assertEqual(result['designation'], 'P')
         # no expired committees in test data to test just checking it exists
         self.assertEqual(result['expire_date'], None)
         # candidate fields
@@ -205,8 +205,8 @@ class OverallTest(ApiBaseTest):
         # Example with org type
         response = self._response('/committee?organization_type=C')
         results = response['results'][0]
-        self.assertEqual(results['organization_type'], 'Corporation')
-        self.assertEqual(results['organization_type_short'], 'C')
+        self.assertEqual(results['organization_type_full'], 'Corporation')
+        self.assertEqual(results['organization_type'], 'C')
 
     # new
     @unittest.skip('multiple parameters are not working')
@@ -220,13 +220,13 @@ class OverallTest(ApiBaseTest):
         original_response = self._response('/committee')
         original_count = original_response['pagination']['count']
 
-        party_short_response = self._response('/committee?party=REP')
-        party_short_count = party_short_response['pagination']['count']
-        self.assertEquals((original_count > party_short_count), True)
+        party_response = self._response('/committee?party=REP')
+        party_count = party_response['pagination']['count']
+        self.assertEquals((original_count > party_count), True)
 
-        committee_type_short_response = self._response('/committee?committee_type=P')
-        committee_type_short_count = committee_type_short_response['pagination']['count']
-        self.assertEquals((original_count > committee_type_short_count), True)
+        committee_type_response = self._response('/committee?committee_type=P')
+        committee_type_count = committee_type_response['pagination']['count']
+        self.assertEquals((original_count > committee_type_count), True)
 
         name_response = self._response('/committee?name=Obama')
         name_count = name_response['pagination']['count']
@@ -236,9 +236,9 @@ class OverallTest(ApiBaseTest):
         committee_id_count = committee_id_response['pagination']['count']
         self.assertEquals((original_count > committee_id_count), True)
 
-        designation_short_response = self._response('/committee?designation=P')
-        designation_short_count = designation_short_response['pagination']['count']
-        self.assertEquals((original_count > designation_short_count), True)
+        designation_response = self._response('/committee?designation=P')
+        designation_count = designation_response['pagination']['count']
+        self.assertEquals((original_count > designation_count), True)
 
         state_response = self._response('/committee?state=CA')
         state_count = state_response['pagination']['count']
@@ -313,9 +313,8 @@ class OverallTest(ApiBaseTest):
 
     def test_committee_party(self):
         response = self._results('/committee?party=REP')
-        self.assertEquals(response[0]['party_short'], 'REP')
-        self.assertEquals(response[0]['party'], 'Republican Party')
-
+        self.assertEquals(response[0]['party'], 'REP')
+        self.assertEquals(response[0]['party_full'], 'Republican Party')
 
     @unittest.skip('need to re-implement candidate filtering')
     def test_committee_filters(self):

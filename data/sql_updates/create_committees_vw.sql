@@ -3,7 +3,7 @@ create view ofec_committees_vw as
 select distinct
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
-    dd.cmte_dsgn as designation_short,
+    dd.cmte_dsgn as designation,
     case dd.cmte_dsgn
         when 'A' then 'Authorized by a candidate'
         when 'J' then 'Joint fundraising committee'
@@ -11,8 +11,8 @@ select distinct
         when 'U' then 'Unauthorized'
         when 'B' then 'Lobbyist/Registrant PAC'
         when 'D' then 'Leadership PAC'
-        else 'unknown' end as designation,
-    dd.cmte_tp as committee_type_short,
+        else 'unknown' end as designation_full,
+    dd.cmte_tp as committee_type,
     case dd.cmte_tp
         when 'P' then 'Presidential'
         when 'H' then 'House'
@@ -30,14 +30,14 @@ select distinct
         when 'X' then 'Party - Nonqualified'
         when 'Y' then 'Party - Qualified'
         when 'Z' then 'National Party Nonfederal Account'
-        else 'unknown' end as committee_type,
+        else 'unknown' end as committee_type_full,
     cp_most_recent.cmte_treasurer_nm as treasurer_name,
-    cp_most_recent.org_tp as organization_type_short,
-    cp_most_recent.org_tp_desc as organization_type,
+    cp_most_recent.org_tp as organization_type,
+    cp_most_recent.org_tp_desc as organization_type_full,
     cp_most_recent.cmte_st as state,
     cp_most_recent.expire_date as expire_date,
-    cp_most_recent.cand_pty_affiliation as party_short,
-    p.party_affiliation_desc as party,
+    cp_most_recent.cand_pty_affiliation as party,
+    p.party_affiliation_desc as party_full,
     -- contrary to most recent, we'll need to pull just the oldest load_date here, since they don't give us registration dates yet
     (select distinct on (cmte_sk) load_date from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by cmte_sk, cmteproperties_sk) as original_registration_date,
     cp_most_recent.cmte_nm as name

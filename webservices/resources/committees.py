@@ -17,15 +17,15 @@ candidate_commitee_fields = {
 committee_fields = {
     'committee_id': fields.String,
     'name': fields.String,
-    'designation_short': fields.String,
+    'designation_full': fields.String,
     'designation': fields.String,
     'treasurer_name': fields.String,
-    'organization_type_short': fields.String,
+    'organization_type_full': fields.String,
     'organization_type': fields.String,
     'state': fields.String,
-    'party_short': fields.String,
+    'party_full': fields.String,
     'party': fields.String,
-    'committee_type_short': fields.String,
+    'committee_type_full': fields.String,
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
@@ -59,7 +59,7 @@ class CommitteeList(Resource):
     parser.add_argument('expire_date', type=str, help='Date the committee registration expires')
     parser.add_argument('original_registration_date', type=str, help='Date of the committees first registered')
     parser.add_argument('candidate_id', type=str, help='FEC IDs of candidates that committees have mentioned in filings. (ee designation for the nature of the relationship.)')
-    parser.add_argument('year', type=str, help='A year that the committee was active- (fter original registration but before expiration.)')
+    parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (fter original registration but before expiration.)')
 
     @marshal_with(committee_list_fields)
     def get(self, **kwargs):
@@ -101,11 +101,8 @@ class CommitteeList(Resource):
 
         for argname in ['committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type']:
             if args.get(argname):
-                # this is not working and doesn't look like it would work for _short
                 if ',' in args[argname]:
                     committees = committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
-                elif argname in ['designation', 'organization_type', 'committee_type', 'party']:
-                    committees = committees.filter_by(**{argname + '_short': args[argname]})
                 else:
                     committees = committees.filter_by(**{argname: args[argname]})
 
@@ -116,7 +113,7 @@ class CommitteeList(Resource):
         if args.get('year') is None:
             earliest_year = int(sorted(default_year().split(','))[0])
             # still going or expired after the earliest year we are looking for
-            committees = committees.filter(or_(Committee.expire_date <= date(earliest_year, 12, 31), Committee.expire_date == None))
+            committees = committees.filter(or_(extract('year', Committee.expire_date) >= earliest_year, Committee.expire_date == None))
 
         # Should this handle a list of years to make it consistent with /candidate ?
         elif args.get('year') and args['year'] != '*':
@@ -135,17 +132,17 @@ class CommitteeList(Resource):
 class Committee(db.Model):
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
-    designation_short = db.Column(db.String(1))
-    designation = db.Column(db.String(25))
+    designation = db.Column(db.String(1))
+    designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
-    organization_type_short = db.Column(db.String(1))
-    organization_type = db.Column(db.String(100))
+    organization_type = db.Column(db.String(1))
+    organization_type_full = db.Column(db.String(100))
     state = db.Column(db.String(2))
-    committee_type_short = db.Column(db.String(1))
-    committee_type = db.Column(db.String(50))
+    committee_type = db.Column(db.String(1))
+    committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
-    party_short = db.Column(db.String(3))
-    party = db.Column(db.String(50))
+    party = db.Column(db.String(3))
+    party_full = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
     candidates = db.relationship('CandidateCommitteeLink', backref='committees')
