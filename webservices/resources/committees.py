@@ -129,6 +129,10 @@ class CommitteeList(Resource):
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
 
+class CommitteeByCandidate(Resource):
+    pass
+
+
 class Committee(db.Model):
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
