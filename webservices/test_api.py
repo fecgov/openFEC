@@ -114,7 +114,7 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(len(elections), 2)
 
 
-    @unittest.skip("Year aggregation needs to be implemented.")
+    @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
     def test_multi_year(self):
         # testing search
         response = self._results('/candidate?candidate_id=P80003338&year=2012,2008')
