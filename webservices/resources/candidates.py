@@ -8,16 +8,16 @@ from sqlalchemy.sql import text
 # output format for flask-restful marshaling
 candidate_fields = {
     'candidate_id': fields.String,
-    'candidate_status_short': fields.String,
+    'candidate_status_full': fields.String,
     'candidate_status': fields.String,
     'district': fields.String,
     'active_through': fields.Integer,
     'election_years': fields.List(fields.Integer),
-    'incumbent_challenge_short': fields.String,
+    'incumbent_challenge_full': fields.String,
     'incumbent_challenge': fields.String,
-    'office_short': fields.String,
+    'office_full': fields.String,
     'office': fields.String,
-    'party_short': fields.String,
+    'party_full': fields.String,
     'party': fields.String,
     'state': fields.String,
     'name': fields.String,
@@ -45,15 +45,13 @@ class CandidateList(Resource):
     parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
-    parser.add_argument('party', type=str, help="Party under which a candidate ran for office")
-    parser.add_argument('party_short', type=str, help="Three letter code of the party under which a candidate ran for office")
+    parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
     parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
     parser.add_argument('district', type=str, help='Two digit district number')
-    parser.add_argument('candidate_status', type=str, help='Test explaining if the candidate is a present, future or past candidate')
-    parser.add_argument('candidate_status_short', type=str, help='Code explaining if the candidate is a present, future or past candidate')
-    parser.add_argument('incumbent_challenge', type=str, help='Text explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
-    parser.add_argument('incumbent_challenge_short', type=str, help='Code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
+    parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
+    parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
+
 
     @marshal_with(candidate_list_fields)
     def get(self, **kwargs):
@@ -92,13 +90,11 @@ class CandidateList(Resource):
             candidates = candidates.filter(Candidate.candidate_key.in_(
                 db.session.query("cand_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
-        for argname in ['office', 'district', 'state', 'party', 'candidate_id', 'candidate_status', 'incumbent_challenge']:
+        for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
             if args.get(argname):
                 # this is not working and doesn't look like it would work for _short
                 if ',' in args[argname]:
                     candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname].split(',')))
-                elif argname in ['office', 'party', 'incumbent_challenge', 'candidate_status']:
-                    candidates = candidates.filter_by(**{argname + '_short': args[argname]})
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
@@ -117,17 +113,17 @@ class CandidateList(Resource):
 class Candidate(db.Model):
     candidate_key = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.String(10))
-    candidate_status_short = db.Column(db.String(1))
-    candidate_status = db.Column(db.String(11))
+    candidate_status = db.Column(db.String(1))
+    candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2))
     active_through = db.Column(db.Integer)
     election_years = db.Column(ARRAY(db.Integer))
-    incumbent_challenge_short = db.Column(db.String(1))
-    incumbent_challenge = db.Column(db.String(10))
-    office_short = db.Column(db.String(1))
-    office = db.Column(db.String(9))
-    party_short = db.Column(db.String(3))
-    party = db.Column(db.String(255))
+    incumbent_challenge = db.Column(db.String(1))
+    incumbent_challenge_full = db.Column(db.String(10))
+    office = db.Column(db.String(1))
+    office_full = db.Column(db.String(9))
+    party = db.Column(db.String(3))
+    party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
 

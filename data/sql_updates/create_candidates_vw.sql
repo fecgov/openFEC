@@ -3,26 +3,26 @@ create view ofec_candidates_vw as
 select
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
-    max(csi_recent.cand_status) as candidate_status_short,
+    max(csi_recent.cand_status) as candidate_status,
     case max(csi_recent.cand_status)
-        when 'C' then 'candidate'
-        when 'F' then 'future candidate'
-        when 'N' then 'not yet a candidate'
-        when 'P' then 'prior candidate'
-        else 'unknown' end as candidate_status,
+        when 'C' then 'Candidate'
+        when 'F' then 'Future candidate'
+        when 'N' then 'Not yet a candidate'
+        when 'P' then 'Prior candidate'
+        else 'Unknown' end as candidate_status_full,
     max(dimoffice.office_district) as district,
     csi_recent.election_yr as active_through,
     (select array_agg(distinct election_yr)::int[] from dimcandstatusici csi where csi.cand_sk = dimcand.cand_sk) as election_years,
-    max(csi_recent.ici_code) as incumbent_challenge_short,
+    max(csi_recent.ici_code) as incumbent_challenge,
     case max(csi_recent.ici_code)
-        when 'I' then 'incumbent'
-        when 'C' then 'challenger'
-        when 'O' then 'open seat'
-        else 'unknown' end as incumbent_challenge,
-    max(dimoffice.office_tp) as office_short,
-    max(dimoffice.office_tp_desc) as office,
-    max(dimparty.party_affiliation) as party_short,
-    max(dimparty.party_affiliation_desc) as party,
+        when 'I' then 'Incumbent'
+        when 'C' then 'Challenger'
+        when 'O' then 'Open seat'
+        else 'Unknown' end as incumbent_challenge_full,
+    max(dimoffice.office_tp) as office,
+    max(dimoffice.office_tp_desc) as office_full,
+    max(dimparty.party_affiliation) as party,
+    max(dimparty.party_affiliation_desc) as party_full,
     max(dimoffice.office_state) as state,
     (select cand_nm from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as name
 from dimcand

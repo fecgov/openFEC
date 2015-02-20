@@ -114,7 +114,7 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(len(elections), 2)
 
 
-    @unittest.skip("Year aggregation needs to be implemented.")
+    @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
     def test_multi_year(self):
         # testing search
         response = self._results('/candidate?candidate_id=P80003338&year=2012,2008')
@@ -177,7 +177,6 @@ class OverallTest(ApiBaseTest):
     #     self.assertEquals(len(response['results']), 1)
 
 #Committee
-    # new
     def test_committee_search_fields(self):
         # example with committee
         response = self._response('/committee?committee_id=C00048587&year=*')
@@ -208,14 +207,11 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(results['organization_type_full'], 'Corporation')
         self.assertEqual(results['organization_type'], 'C')
 
-    # new
-    @unittest.skip('multiple parameters are not working')
     def test_committee_search_double_committee_id(self):
         response = self._response('committee?committee_id=C00048587,C00116574&year=*')
         results = response['results']
         self.assertEqual(len(results), 2)
 
-    #new
     def test_committee_search_filters(self):
         original_response = self._response('/committee')
         original_count = original_response['pagination']['count']
@@ -316,7 +312,7 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(response[0]['party'], 'REP')
         self.assertEquals(response[0]['party_full'], 'Republican Party')
 
-    @unittest.skip('need to re-implement candidate filtering')
+    @unittest.skip('need to re-implement candidate filtering on another endpoint')
     def test_committee_filters(self):
         org_response = self._response('/committee')
         original_count = org_response['pagination']['count']
@@ -346,7 +342,6 @@ class OverallTest(ApiBaseTest):
 
 
 # Totals
-
     def test_reports_house_senate(self):
         results = self._results('/total/C00002600')
 
