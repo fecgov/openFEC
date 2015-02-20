@@ -48,7 +48,7 @@ from dimcmte
     inner join (
         select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
     ) cp_most_recent using (cmte_sk)
-    inner join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
+    left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     -- inner join dimlinkages dl using (cmte_sk)
 ;
 grant select on table ofec_committees_vw to webro
