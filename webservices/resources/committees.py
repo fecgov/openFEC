@@ -178,7 +178,7 @@ class CommitteeByCandidate(Resource):
         # look up candidate in dimlinkages to find committees
         candidate_id = kwargs['id']
         cand_committees = db.session.query(CandidateCommitteeLink).from_statement(
-                text("SELECT cmte_sk, linkages_sk FROM dimlinkages WHERE cand_id=:candidate_id")).\
+                text("SELECT cmte_id, linkages_sk FROM dimlinkages WHERE cand_id=:candidate_id")).\
                 params(candidate_id=candidate_id).all()
         committee_keys = []
         for c in cand_committees:
@@ -188,6 +188,9 @@ class CommitteeByCandidate(Resource):
         committees = Committee.query
         # this is only working if there is one committee returned
         committees = committees.filter(getattr(Committee, 'committee_key').in_(committee_keys))
+        print"------------"
+        print committees
+        print"------------"
 
         for argname in ['designation', 'organization_type', 'state', 'party', 'committee_type']:
             if args.get(argname):
