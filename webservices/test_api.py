@@ -342,6 +342,10 @@ class OverallTest(ApiBaseTest):
         self.assertIn('C00111245', ids)
         self.assertIn('C00108407', ids)
 
+    def test_committee_by_cand_filter(self):
+        results =  self._results('/candidate/P60000247/committees?designation=P')
+        self.assertEquals(1, len(results))
+
 # Totals
     def test_reports_house_senate(self):
         results = self._results('/total/C00002600')
