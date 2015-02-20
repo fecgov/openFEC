@@ -51,11 +51,12 @@ import sqlalchemy as sa
 
 from db import db_conn, as_dicts
 from candidates.resources import CandidateResource
-from committees.resources import CommitteeResource, CommitteeSearch
+from committees.resources import CommitteeResource
 from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList
+from webservices.resources.committees import CommitteeList
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -131,7 +132,7 @@ api.add_resource(Help, '/')
 api.add_resource(CandidateResource, '/candidate/<string:id>')
 api.add_resource(CandidateList, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
-api.add_resource(CommitteeSearch, '/committee')
+api.add_resource(CommitteeList, '/committee')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
 api.add_resource(NameSearch, '/name')
