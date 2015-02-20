@@ -2,7 +2,7 @@ import string
 
 from flask.ext.restful import reqparse
 
-from webservices.resources import Searchable, SingleResource
+from webservices.resources import SingleResource
 from .formatter import BaseCommitteeResource
 
 

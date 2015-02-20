@@ -85,7 +85,7 @@ class CommitteeList(Resource):
 
         return data
 
-# maybe filtering out U designation committees would be faster, less records?
+
     def get_committees(self, args, page_num, per_page):
         committees = Committee.query
 
@@ -123,8 +123,6 @@ class CommitteeList(Resource):
             committees = committees.filter(extract('year', Committee.original_registration_date) <= int(args['year']))
 
         count = committees.count()
-
-        print str(committees)
 
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
