@@ -1,3 +1,5 @@
+-- Run on RDS after complete data refresh to create indexes.
+
 -- SELECT 'ALTER TABLE ' || table_name ||
 --       ' ADD PRIMARY KEY (' || column_name ||
 --       ');'
@@ -186,6 +188,8 @@ create index dimcmteproperties_cmte_sk_expire_date_cmteproperties_sk_idx on dimc
 cluster dimcmteproperties using dimcmteproperties_cmte_sk_expire_date_cmteproperties_sk_idx;
 
 CREATE INDEX ON dimcmtetpdsgn(cmte_sk);
+
+create index dimparty_party_affiliation_idx on dimparty(party_affiliation);
 
 CREATE INDEX ON dimcmteproperties(cand_id);
 CREATE INDEX ON dimlinkages(cand_sk);

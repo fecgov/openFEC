@@ -1,4 +1,5 @@
--- run on data access machine to create foreign tables in RDS
+-- run on data access machine (not RDS) to create foreign tables to RDS
+-- that enable data transfer.  Needed only at initial database setup.
 
 CREATE FOREIGN TABLE processed.cand_status_ici (
     cand_status_ici_sk numeric(10,0) NOT NULL,

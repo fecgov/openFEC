@@ -1,4 +1,8 @@
--- run on data access machine to create foreign tables in RDS
+-- run on data access machine to create foreign tables to RDS
+-- the `processed_live` schema should let a full data population
+-- run without disturbing data currently stored in `processed`.
+-- When it is done and satisfactory the `processed` schema can
+-- be dropped and `processed_live` renamed to `processed`.
 
 DROP SCHEMA processed_live;
 CREATE SCHEMA processed_live;

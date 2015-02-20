@@ -1,3 +1,5 @@
+-- Run on data bridge machine to set up foreign data wrapper tables
+-- accessing FEC/Oracle.
 
 CREATE EXTENSION oracle_fdw;
 DROP SERVER oradb CASCADE;

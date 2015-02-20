@@ -1,4 +1,5 @@
 -- Run in RDS to create the actual tables to store copies of FEC rows
+-- from the PROCESSED schema.
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;

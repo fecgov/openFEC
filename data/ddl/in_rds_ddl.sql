@@ -1,3 +1,6 @@
+-- Set up tables in RDS.  Only needed when initially setting
+-- up database.
+
 SET search_path=newdownload;
 
 create table pinglog (at timestamp primary key, up boolean);

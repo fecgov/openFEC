@@ -1,3 +1,8 @@
+-- run on data access machine to create foreign tables to RDS
+-- the `live` schema should let a full data population
+-- run without disturbing data currently stored in `public`.
+-- When it is done and satisfactory the `public` schema can
+-- be dropped and `live` renamed to `public`.
 
 -- run it via ``psql_w_vars.sh`` to set variables like :rds_host_loc
 
