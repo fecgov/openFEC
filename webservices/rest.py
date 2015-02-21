@@ -56,7 +56,7 @@ from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList
-from webservices.resources.committees import CommitteeList, CommitteeByCandidate
+from webservices.resources.committees import CommitteeList
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -129,7 +129,6 @@ class Help(restful.Resource):
         return result
 
 api.add_resource(Help, '/')
-api.add_resource(CommitteeByCandidate, '/candidate/<string:id>/committees')
 api.add_resource(CandidateResource, '/candidate/<string:id>')
 api.add_resource(CandidateList, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')

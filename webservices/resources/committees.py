@@ -48,6 +48,7 @@ class CommitteeList(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
     parser.add_argument('committee_id', type=str, help="Committee's FEC ID")
+    parser.add_argument('candidate_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('state', type=str, help='Two digit U.S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
@@ -99,6 +100,23 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.committee_key.in_(
                 db.session.query("cmte_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
+        cand_qry = """SELECT cmte_id, linkages_sk
+                      FROM dimlinkages
+                      WHERE cand_id=:candidate_id"""
+
+        if args.get('candidate_id'):
+            cand_committees = db.session.query(CandidateCommitteeLink).\
+                from_statement(text(cand_qry)).\
+                params(candidate_id=args['candidate_id']).all()
+
+            committee_keys = []
+            for c in cand_committees:
+                committee_keys.append(int(c.committee_key))
+
+            print committee_keys
+            committees = committees.filter(getattr(Committee, 'committee_key').in_(committee_keys))
+
+
         for argname in ['committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type']:
             if args.get(argname):
                 if ',' in args[argname]:
@@ -126,95 +144,6 @@ class CommitteeList(Resource):
 
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
-
-
-
-
-
-
-
-
-
-class CommitteeByCandidate(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('state', type=str, help='Two digit U.S. State committee is registered in')
-    parser.add_argument('name', type=str, help="Committee's name (full or partial)")
-    parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('committee_type', type=str, help='The one-letter type code of the organization')
-    parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
-    parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
-    parser.add_argument('party', type=str, help='Three letter code for party')
-    parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (fter original registration but before expiration.)')
-
-    @marshal_with(committee_list_fields)
-    def get(self, **kwargs):
-
-        args = self.parser.parse_args(strict=True)
-
-        # pagination
-        page_num = args.get('page', 1)
-        per_page = args.get('per_page', 20)
-
-        count, committees = self.get_committees(args, page_num, per_page, **kwargs)
-
-        data = {
-            'api_version': '0.2',
-            'pagination': {
-                'page': page_num,
-                'per_page': per_page,
-                'count': count,
-                'pages': int(count / per_page),
-            },
-            'results': committees
-        }
-
-
-        return data
-
-    def get_committees(self, args, page_num, per_page, **kwargs):
-        # look up candidate in dimlinkages to find committees
-        candidate_id = kwargs['id']
-        cand_committees = db.session.query(CandidateCommitteeLink).from_statement(
-                text("SELECT cmte_id, linkages_sk FROM dimlinkages WHERE cand_id=:candidate_id")).\
-                params(candidate_id=candidate_id).all()
-        committee_keys = []
-        for c in cand_committees:
-            committee_keys.append(int(c.committee_key))
-        print committee_keys
-        # look up committees
-        committees = Committee.query
-        # this is only working if there is one committee returned
-        committees = committees.filter(getattr(Committee, 'committee_key').in_(committee_keys))
-        print"------------"
-        print committees
-        print"------------"
-
-        for argname in ['designation', 'organization_type', 'state', 'party', 'committee_type']:
-            if args.get(argname):
-                if ',' in args[argname]:
-                    committees = committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
-                else:
-                    committees = committees.filter_by(**{argname: args[argname]})
-
-        # default year filtering
-        if args.get('year') is None:
-            earliest_year = int(sorted(default_year().split(','))[0])
-            # still going or expired after the earliest year we are looking for
-            committees = committees.filter(or_(extract('year', Committee.expire_date) >= earliest_year, Committee.expire_date == None))
-
-        # Should this handle a list of years to make it consistent with /candidate ?
-        elif args.get('year') and args['year'] != '*':
-            # before expiration
-            committees = committees.filter(or_(extract('year', Committee.expire_date) >= int(args['year']), Committee.expire_date == None))
-            # after origination
-            committees = committees.filter(extract('year', Committee.original_registration_date) <= int(args['year']))
-
-        count = committees.count()
-
-        print str(committees)
-
-        return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
 
 class Committee(db.Model):

@@ -332,7 +332,7 @@ class OverallTest(ApiBaseTest):
             self.assertGreater(original_count, response['pagination']['count'])
 
     def test_committe_by_cand_id(self):
-        results =  self._results('/candidate/P60000247/committees')
+        results =  self._results('/committee?candidate_id=P60000247')
 
         ids = []
         for com in results:
@@ -343,7 +343,7 @@ class OverallTest(ApiBaseTest):
         self.assertIn('C00108407', ids)
 
     def test_committee_by_cand_filter(self):
-        results =  self._results('/candidate/P60000247/committees?designation=P')
+        results =  self._results('/committee?candidate_id=P60000247&designation=P')
         self.assertEquals(1, len(results))
 
 # Totals
