@@ -1,17 +1,14 @@
-from flask.ext.restful import Resource, reqparse, fields, marshal_with, marshal, inputs
+from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 from webservices.common.models import db
 from webservices.common.util import default_year
 from webservices.resources.committees import Committee
+from sqlalchemy.orm.exc import NoResultFound
 
 
-class TotalsItem(fields.Raw):
-    def format(self, value):
-        if value['committee_type'] == 'P':
-            return marshal(value, common_fields.merge(presidential_fields))
-        elif value['committee_type'] in ('H', 'S'):
-            return marshal(value, common_fields.merge(house_senate_fields))
-        else:
-            return marshal(value, common_fields.merge(pac_party_fields))
+def merge_dicts(x, y):
+    z = x.copy()
+    z.update(y)
+    return z
 
 # output format for flask-restful marshaling
 common_fields = {
@@ -99,11 +96,6 @@ pagination_fields = {
     'count': fields.Integer,
     'pages': fields.Integer,
 }
-totals_view_fields = {
-    'api_version': fields.Fixed(1),
-    'pagination': fields.Nested(pagination_fields),
-    'results': fields.Nested(TotalsItem),
-}
 
 
 class TotalsView(Resource):
@@ -113,8 +105,8 @@ class TotalsView(Resource):
     parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
-    @marshal_with(totals_view_fields)
     def get(self, **kwargs):
+        committee_id = kwargs.get('id')
         args = self.parser.parse_args(strict=True)
 
         # pagination
@@ -122,7 +114,22 @@ class TotalsView(Resource):
         per_page = args.get('per_page', 20)
         count = 1
 
-        committee_type, totals = self.get_totals(args, page_num, per_page)
+        try:
+            committee = Committee.query.filter_by(committee_id=committee_id).one()
+        except NoResultFound:
+            return []
+
+        if committee.committee_type == 'P':
+            totals_class = CommitteeTotalsPresidential
+            results_fields = merge_dicts(common_fields, presidential_fields)
+        elif committee.committee_type in ['H', 'S']:
+            totals_class = CommitteeTotalsHouseOrSenate
+            results_fields = merge_dicts(common_fields, house_senate_fields)
+        else:
+            totals_class = CommitteeTotalsPacOrParty
+            results_fields = merge_dicts(common_fields, pac_party_fields)
+
+        totals = self.get_totals(committee_id, totals_class, args, page_num, per_page)
 
         data = {
             'api_version': '0.2',
@@ -135,24 +142,20 @@ class TotalsView(Resource):
             'results': totals
         }
 
-        return data
+        totals_view_fields = {
+            'api_version': fields.Fixed(1),
+            'pagination': fields.Nested(pagination_fields),
+            'results': fields.Nested(results_fields),
+        }
 
-    def get_totals(self, args, page_num, per_page):
-        committee = Committee.query.filter_by(committee_id=args.get('id'))
+        return marshal(data, totals_view_fields)
 
-        if committee.committee_type == 'P':
-            totals_class = CommitteeTotalsPresidential
-        elif committee.committee_type in ['H', 'S']:
-            totals_class = CommitteeTotalsHouseOrSenate
-        else:
-            totals_class = CommitteeTotalsPacOrParty
+    def get_totals(self, committee_id, totals_class, args, page_num, per_page):
 
-        totals = totals_class.query.filter_by(committee_id=args.get('id'))
+        totals = totals_class.query.filter_by(committee_id=committee_id)
 
         if args.get('election_year') and args['election_year'] != '*':
             totals = totals.filter(totals_class.cycle.in_(args['election_year'].split(',')))
-
-        # count = totals.count()
 
         return totals.order_by(totals_class.cycle).paginate(page_num, per_page, False).items
 
@@ -205,6 +208,7 @@ class CommitteeTotalsPacOrParty(db.Model):
 class CommitteeTotalsPresidential(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
     cycle = db.Column(db.Integer)
+    committee_type = db.Column(db.String(1))
     candidate_contribution = db.Column(db.Integer)
     contribution_refunds = db.Column(db.Integer)
     contributions = db.Column(db.Integer)
@@ -240,6 +244,7 @@ class CommitteeTotalsPresidential(db.Model):
 class CommitteeTotalsHouseOrSenate(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
     cycle = db.Column(db.Integer)
+    committee_type = db.Column(db.String(1))
     all_other_loans = db.Column(db.Integer)
     candidate_contribution = db.Column(db.Integer)
     contribution_refunds = db.Column(db.Integer)

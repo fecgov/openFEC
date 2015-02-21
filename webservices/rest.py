@@ -53,7 +53,6 @@ from db import db_conn, as_dicts
 from candidates.resources import CandidateResource
 from committees.resources import CommitteeResource
 from resources import Searchable
-from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList
 from webservices.resources.totals import TotalsView
@@ -81,7 +80,7 @@ api = restful.Api(app)
 db.init_app(app)
 
 
-class NameSearch(Searchable):
+class NameSearch(restful.Resource):
     """
     A quick name search (candidate or committee) optimized for response time
     for typeahead

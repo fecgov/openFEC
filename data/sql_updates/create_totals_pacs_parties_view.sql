@@ -3,6 +3,7 @@ create materialized view ofec_totals_pacs_parties_mv as
 select
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
+    cmte_tp as committee_type,
     sum(all_loans_received_per) as all_loans_received,
     sum(ttl_contb_ref_per_i) as contribution_refunds,
     sum(ttl_contb_per) as contributions,
@@ -42,6 +43,8 @@ select
     sum(tranf_to_affliliated_cmte_per) as transfers_to_affiliated_committee
 from
     dimcmte c
+    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join factpacsandparties_f3x pnp using (cmte_sk)
-group by committee_id, cycle
+group by committee_id, cycle, committee_type
 ;
+grant select on table ofec_totals_pacs_parties_mv to webro;

@@ -3,6 +3,7 @@ create materialized view ofec_totals_house_senate_mv as
 select
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
+    cmte_tp as committee_type,
     sum(all_other_loans_per) as all_other_loans,
     sum(cand_contb_per) as candidate_contribution,
     sum(ttl_contb_ref_per) as contribution_refunds,
@@ -30,6 +31,8 @@ select
     sum(tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee
 from
     dimcmte c
+    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join facthousesenate_f3 hs using (cmte_sk)
-group by committee_id, cycle
+group by committee_id, cycle, committee_type
 ;
+grant select on table ofec_totals_house_senate_mv to webro;
