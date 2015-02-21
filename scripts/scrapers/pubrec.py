@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+import os
 import sys
 
+import json
+import uuid
 import xlrd
 import lxml.html
 import requests
@@ -16,29 +19,51 @@ def lxmlize(url):
     return page
 
 
-def scrape_xls(xls):
-    book = xlrd.open_workbook(xls)
-    print(book)
+def rows(sheet):
+    header = [x.value for x in sheet.row(0)]
+    for i in range(1, sheet.nrows):
+        yield dict(zip(header, (x.value for x in sheet.row(i))))
+
+
+def scrape_house_senate_results(sheet):
+    for row in rows(sheet):
+        yield row
+
+
+def scrape_xls(req):
+    book = xlrd.open_workbook(file_contents=req.content)
+    dispatch = {
+        "house & senate res": scrape_house_senate_results,
+        "house and senate res": scrape_house_senate_results,
+    }
+    for sheet in book.sheets():
+        name = sheet.name.lower()
+        for k, v in dispatch.items():
+            if k in name:
+                return v(sheet)
+    raise ValueError("Unhandled workbook")
 
 
 def scrape_html(page):
     for spreadsheet in page.xpath(
-        "//a[contains(@href, 'federalelections') "
+        "//a[contains(@href, 'congresults') "
             "and contains(@href, '.xls')]/@href"
     ):
-        print(spreadsheet)
-
-    if False:
-        yield
+        data = requests.get(spreadsheet)
+        for x in scrape_xls(data):
+            yield x
 
 
 def save(data):
     for el in data:
-        print(el)
+        with open("data/{}.json".format(uuid.uuid4()), 'w') as fd:
+            json.dump(el, fd)
 
 
 def scrape():
-    return scrape_xls("federalelections2012.xls")
+    if os.path.exists("data"):
+        raise ValueError("Data directory exists; please clear it :)")
+    os.mkdir("data")
 
     lib = lxmlize(LIBRARY)
     for page in set(lib.xpath("//a[contains(@href, 'federalelections')]/@href")):
