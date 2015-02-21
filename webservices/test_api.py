@@ -11,7 +11,6 @@ class OverallTest(ApiBaseTest):
         self.assertIn('api_version', response)
         self.assertIn('pagination', response)
 
-
     def _results(self, qry):
         response = self._response(qry)
         return response['results']
