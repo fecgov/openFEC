@@ -51,4 +51,3 @@ from dimcmte
     inner join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     -- inner join dimlinkages dl using (cmte_sk)
 ;
-grant select on table ofec_committees_vw to webro

@@ -35,4 +35,3 @@ group by
     dimcand.cand_id,
     csi_recent.election_yr
 ;
-grant select on table ofec_candidates_vw to webro;

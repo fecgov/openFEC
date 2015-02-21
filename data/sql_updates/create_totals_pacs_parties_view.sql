@@ -47,4 +47,3 @@ from
     inner join factpacsandparties_f3x pnp using (cmte_sk)
 group by committee_id, cycle, committee_type
 ;
-grant select on table ofec_totals_pacs_parties_mv to webro;

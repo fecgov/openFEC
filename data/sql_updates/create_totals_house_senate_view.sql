@@ -35,4 +35,3 @@ from
     inner join facthousesenate_f3 hs using (cmte_sk)
 group by committee_id, cycle, committee_type
 ;
-grant select on table ofec_totals_house_senate_mv to webro;

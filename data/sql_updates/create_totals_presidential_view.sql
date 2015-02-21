@@ -38,4 +38,3 @@ from
     inner join factpresidential_f3p p using (cmte_sk)
 group by committee_id, cycle, committee_type
 ;
-grant select on table ofec_totals_presidential_mv to webro;
