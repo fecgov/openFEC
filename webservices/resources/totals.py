@@ -1,4 +1,5 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
+from math import ceil
 from webservices.common.models import db
 from webservices.common.util import default_year
 from webservices.resources.committees import Committee
@@ -102,11 +103,11 @@ class TotalsView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=str, default=default_year(), dest='cycle', help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
     def get(self, **kwargs):
-        committee_id = kwargs.get('id')
+        committee_id = kwargs['id']
         args = self.parser.parse_args(strict=True)
 
         # pagination
@@ -114,10 +115,7 @@ class TotalsView(Resource):
         per_page = args.get('per_page', 20)
         count = 1
 
-        try:
-            committee = Committee.query.filter_by(committee_id=committee_id).one()
-        except NoResultFound:
-            return []
+        committee = Committee.query.filter_by(committee_id=committee_id).one()
 
         if committee.committee_type == 'P':
             totals_class = CommitteeTotalsPresidential
@@ -137,7 +135,7 @@ class TotalsView(Resource):
                 'page': page_num,
                 'per_page': per_page,
                 'count': count,
-                'pages': int(count / per_page),
+                'pages': ceil(count / per_page),
             },
             'results': totals
         }
@@ -154,15 +152,16 @@ class TotalsView(Resource):
 
         totals = totals_class.query.filter_by(committee_id=committee_id)
 
-        if args.get('election_year') and args['election_year'] != '*':
-            totals = totals.filter(totals_class.cycle.in_(args['election_year'].split(',')))
+        if args['cycle'] != '*':
+            totals = totals.filter(totals_class.cycle.in_(args['cycle'].split(',')))
 
-        return totals.order_by(totals_class.cycle).paginate(page_num, per_page, False).items
+        totals = totals.order_by(totals_class.cycle)
+        return totals.paginate(page_num, per_page, True).items
 
 
 class CommitteeTotalsPacOrParty(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
-    cycle = db.Column(db.Integer)
+    cycle = db.Column(db.Integer, primary_key=True)
     committee_type = db.Column(db.String(1))
     all_loans_received = db.Column(db.Integer)
     contribution_refunds = db.Column(db.Integer)
@@ -207,7 +206,7 @@ class CommitteeTotalsPacOrParty(db.Model):
 
 class CommitteeTotalsPresidential(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
-    cycle = db.Column(db.Integer)
+    cycle = db.Column(db.Integer, primary_key=True)
     committee_type = db.Column(db.String(1))
     candidate_contribution = db.Column(db.Integer)
     contribution_refunds = db.Column(db.Integer)
@@ -243,7 +242,7 @@ class CommitteeTotalsPresidential(db.Model):
 
 class CommitteeTotalsHouseOrSenate(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
-    cycle = db.Column(db.Integer)
+    cycle = db.Column(db.Integer, primary_key=True)
     committee_type = db.Column(db.String(1))
     all_other_loans = db.Column(db.Integer)
     candidate_contribution = db.Column(db.Integer)

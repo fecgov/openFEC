@@ -6,6 +6,7 @@ import time
 from flask.ext import restful
 
 from db import htsql_conn, as_dicts
+from webservices.common.util import default_year
 
 
 # this is shared by search and single resource
