@@ -32,6 +32,7 @@ select
     sum(other_fed_receipts_per) as other_fed_receipts,
     sum(other_pol_cmte_contb_per_i) as other_political_committee_contributions,
     sum(pol_pty_cmte_contb_per_i) as political_party_committee_contributions,
+    sum(pol_pty_cmte_contb_per_ii) as political_party_committee_contribution_refunds,
     sum(ttl_receipts_per) as receipts,
     sum(shared_fed_actvy_fed_shr_per) as shared_fed_activity,
     sum(shared_fed_actvy_nonfed_per) as shared_fed_activity_nonfed,
