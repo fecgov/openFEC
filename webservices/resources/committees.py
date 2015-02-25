@@ -1,7 +1,6 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
-from webservices.common.models import db
+from webservices.common.models import db, Candidate, Committee, CandidateCommittee
 from webservices.common.util import default_year
-from webservices.resources.candidates import Candidate
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
 from datetime import date
@@ -66,12 +65,13 @@ class CommitteeList(Resource):
     def get(self, **kwargs):
 
         args = self.parser.parse_args(strict=True)
+        candidate_id = kwargs.get('id', args.get('candidate_id', None))
 
         # pagination
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-        count, committees = self.get_committees(args, page_num, per_page)
+        count, committees = self.get_committees(args, page_num, per_page, candidate_id=candidate_id)
 
         data = {
             'api_version': '0.2',
@@ -87,34 +87,22 @@ class CommitteeList(Resource):
         return data
 
 
-    def get_committees(self, args, page_num, per_page):
+    def get_committees(self, args, page_num, per_page, candidate_id=None):
+
         committees = Committee.query
 
-        fulltext_qry = """SELECT cmte_sk
-                          FROM   dimcmte_fulltext
-                          WHERE  fulltxt @@ to_tsquery(:findme)
-                          ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
+        if candidate_id:
+            committees = Committee.query.join(CandidateCommittee).filter(CandidateCommittee.candidate_id==candidate_id)
 
-        if args.get('q'):
+        elif args.get('q'):
+            fulltext_qry = """SELECT cmte_sk
+                              FROM   dimcmte_fulltext
+                              WHERE  fulltxt @@ to_tsquery(:findme)
+                              ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
+
             findme = ' & '.join(args['q'].split())
             committees = committees.filter(Committee.committee_key.in_(
                 db.session.query("cmte_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
-
-        cand_qry = """SELECT cmte_id, linkages_sk
-                      FROM dimlinkages
-                      WHERE cand_id=:candidate_id"""
-
-        if args.get('candidate_id'):
-            cand_committees = db.session.query(CandidateCommitteeLink).\
-                from_statement(text(cand_qry)).\
-                params(candidate_id=args['candidate_id']).all()
-
-            committee_keys = []
-            for c in cand_committees:
-                committee_keys.append(int(c.committee_key))
-
-            print committee_keys
-            committees = committees.filter(getattr(Committee, 'committee_key').in_(committee_keys))
 
 
         for argname in ['committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type']:
@@ -122,7 +110,7 @@ class CommitteeList(Resource):
                 if ',' in args[argname]:
                     committees = committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
                 else:
-                    committees = committees.filter_by(**{argname: args[argname]})
+                    committees = committees.filter(getattr(Committee, argname)==args[argname])
 
         if args.get('name'):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
@@ -144,44 +132,3 @@ class CommitteeList(Resource):
 
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
-
-
-class Committee(db.Model):
-    committee_key = db.Column(db.Integer, primary_key=True)
-    committee_id = db.Column(db.String(9))
-    designation = db.Column(db.String(1))
-    designation_full = db.Column(db.String(25))
-    treasurer_name = db.Column(db.String(100))
-    organization_type = db.Column(db.String(1))
-    organization_type_full = db.Column(db.String(100))
-    state = db.Column(db.String(2))
-    committee_type = db.Column(db.String(1))
-    committee_type_full = db.Column(db.String(50))
-    expire_date = db.Column(db.DateTime())
-    party = db.Column(db.String(3))
-    party_full = db.Column(db.String(50))
-    original_registration_date = db.Column(db.DateTime())
-    name = db.Column(db.String(100))
-    candidates = db.relationship('CandidateCommitteeLink', backref='committees')
-
-    __tablename__ = 'ofec_committees_vw'
-
-
-class CommitteeFulltext(db.Model):
-    cmte_sk = db.Column(db.Integer, primary_key=True)
-    fulltxt = db.Column(db.Text)
-
-    __tablename__ = 'dimcmte_fulltext'
-
-
-class CandidateCommitteeLink(db.Model):
-    linkages_sk = db.Column(db.Integer, primary_key=True)
-    committee_key = db.Column('cmte_sk', db.Integer, db.ForeignKey(Committee.committee_key))
-    candidate_key = db.Column('cand_sk', db.Integer, db.ForeignKey(Candidate.candidate_key))
-    committee_id = db.Column('cmte_id', db.String(10))
-    candidate_id = db.Column('cand_id', db.String(10))
-    election_year = db.Column('cand_election_yr', db.Integer)
-    link_date = db.Column('link_date', db.DateTime())
-    expire_date = db.Column('expire_date', db.DateTime())
-
-    __tablename__ = 'dimlinkages'

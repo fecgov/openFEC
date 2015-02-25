@@ -191,10 +191,10 @@ class OverallTest(ApiBaseTest):
         # no expired committees in test data to test just checking it exists
         self.assertEqual(result['expire_date'], None)
         # candidate fields
-        candidate_result = response['results'][0]['candidates'][0]
-        self.assertEqual(candidate_result['candidate_id'], 'P60000247')
-        self.assertEqual(candidate_result['election_year'], 1976)
-        self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
+        #candidate_result = response['results'][0]['candidates'][0]
+        #self.assertEqual(candidate_result['candidate_id'], 'P60000247')
+        #self.assertEqual(candidate_result['election_year'], 1976)
+        #self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Example with org type
         response = self._response('/committee?organization_type=C')
         results = response['results'][0]
@@ -331,19 +331,17 @@ class OverallTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-    def test_committe_by_cand_id(self):
-        results =  self._results('/committee?candidate_id=P60000247')
+    def test_committees_by_cand_id(self):
+        results =  self._results('/candidate/P60000247/committees')
 
-        ids = []
-        for com in results:
-            ids.append(com['committee_id'])
+        ids = [x['committee_id'] for x in results]
 
         self.assertIn('C00048587', ids)
         self.assertIn('C00111245', ids)
         self.assertIn('C00108407', ids)
 
     def test_committee_by_cand_filter(self):
-        results =  self._results('/committee?candidate_id=P60000247&designation=P')
+        results =  self._results('/candidate/P60000247/committees?designation=P')
         self.assertEquals(1, len(results))
 
 # Totals
