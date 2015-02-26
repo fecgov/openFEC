@@ -43,6 +43,7 @@ class Committee(db.Model):
     party_full = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
+    candidate_ids = db.Column(ARRAY(db.String))
 
     __tablename__ = 'ofec_committees_vw'
 

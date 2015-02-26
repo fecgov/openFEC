@@ -7,12 +7,6 @@ from datetime import date
 
 
 # output format for flask-restful marshaling
-candidate_commitee_fields = {
-    'candidate_id': fields.String,
-    'election_year': fields.Integer,
-    'link_date': fields.String,
-    'expire_date': fields.String,
-}
 committee_fields = {
     'committee_id': fields.String,
     'name': fields.String,
@@ -28,7 +22,7 @@ committee_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    'candidates': fields.Nested(candidate_commitee_fields),
+    'candidate_ids': fields.List(fields.String),
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -92,7 +86,7 @@ class CommitteeList(Resource):
         committees = Committee.query
 
         if candidate_id:
-            committees = Committee.query.join(CandidateCommittee).filter(CandidateCommittee.candidate_id==candidate_id)
+            committees = committees.filter(Committee.candidate_ids.overlap(candidate_id.split(',')))
 
         elif args.get('q'):
             fulltext_qry = """SELECT cmte_sk
