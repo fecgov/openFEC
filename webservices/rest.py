@@ -56,6 +56,7 @@ from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList
+from webservices.resources.totals import TotalsView
 from webservices.resources.committees import CommitteeList
 
 speedlogger = logging.getLogger('speed')
@@ -80,7 +81,7 @@ api = restful.Api(app)
 db.init_app(app)
 
 
-class NameSearch(Searchable):
+class NameSearch(restful.Resource):
     """
     A quick name search (candidate or committee) optimized for response time
     for typeahead
@@ -133,6 +134,7 @@ api.add_resource(CandidateResource, '/candidate/<string:id>')
 api.add_resource(CandidateList, '/candidate')
 api.add_resource(CommitteeResource, '/committee/<string:id>')
 api.add_resource(CommitteeList, '/committee')
+api.add_resource(TotalsView, '/committee/<string:id>/totals')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
 api.add_resource(NameSearch, '/name')
