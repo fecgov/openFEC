@@ -24,6 +24,8 @@ common_fields = {
     'contributions': fields.Integer,
     'contribution_refunds': fields.Integer,
     'receipts': fields.Integer,
+    'coverage_start_date': fields.DateTime,
+    'coverage_end_date': fields.DateTime,
 }
 pac_party_fields = {
     'committee_id': fields.String,
@@ -163,6 +165,8 @@ class CommitteeTotalsPacOrParty(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
     cycle = db.Column(db.Integer, primary_key=True)
     committee_type = db.Column(db.String(1))
+    coverage_start_date = db.Column(db.DateTime())
+    coverage_end_date = db.Column(db.DateTime())
     all_loans_received = db.Column(db.Integer)
     contribution_refunds = db.Column(db.Integer)
     contributions = db.Column(db.Integer)
@@ -208,6 +212,8 @@ class CommitteeTotalsPresidential(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
     cycle = db.Column(db.Integer, primary_key=True)
     committee_type = db.Column(db.String(1))
+    coverage_start_date = db.Column(db.DateTime())
+    coverage_end_date = db.Column(db.DateTime())
     candidate_contribution = db.Column(db.Integer)
     contribution_refunds = db.Column(db.Integer)
     contributions = db.Column(db.Integer)
@@ -244,6 +250,8 @@ class CommitteeTotalsHouseOrSenate(db.Model):
     committee_id = db.Column(db.String(10), primary_key=True)
     cycle = db.Column(db.Integer, primary_key=True)
     committee_type = db.Column(db.String(1))
+    coverage_start_date = db.Column(db.DateTime())
+    coverage_end_date = db.Column(db.DateTime())
     all_other_loans = db.Column(db.Integer)
     candidate_contribution = db.Column(db.Integer)
     contribution_refunds = db.Column(db.Integer)
