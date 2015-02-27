@@ -190,12 +190,17 @@ class CommitteeList(Resource):
 
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
+
+
 class CommitteeView(Resource):
     parser = reqparse.RequestParser()
+    parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
+    parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (after original registration date but before expiration date.)')
 
-    @marshal_with(committee_detail_fields)
+    @marshal_with(committee_list_fields)
     def get(self, **kwargs):
+
         if 'committee_id' in kwargs:
             committee_id = kwargs['committee_id']
             candidate_id = None
@@ -209,7 +214,7 @@ class CommitteeView(Resource):
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-        count, committees = self.get_committee(args, page_num, per_page, candidate_id, committee_id)
+        count, committees = self.get_committees(args, page_num, per_page, committee_id, candidate_id)
 
         data = {
             'api_version': '0.2',
@@ -225,24 +230,13 @@ class CommitteeView(Resource):
         return data
 
 
-    def get_committee(self, args, page_num, per_page, committee_id, candidate_id):
+    def get_committees(self, args, page_num, per_page, committee_id, candidate_id):
 
-        committees = CommitteeDetail.query
-
-        if committee_id:
+        if committee_id is not None:
+            committees = CommitteeDetail.query
             committees = committees.filter_by(**{'committee_id': committee_id})
-
-        if candidate_id:
-            cand_committees = db.session.query(CandidateCommitteeLink).from_statement(
-                text("SELECT cmte_sk, linkages_sk FROM dimlinkages WHERE cand_id=:candidate_id")).\
-                params(candidate_id=candidate_id).all()
-
-            committee_keys = []
-            for c in cand_committees:
-                committee_keys.append(int(c.committee_key))
-
-            committees = committees.filter(getattr(CommitteeDetail, 'committee_key').in_(committee_keys))
-
+        if candidate_id is not None:
+            committees = CommitteeDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.candidate_id==candidate_id)
 
         # default year filtering
         if args.get('year') is None:
@@ -250,9 +244,10 @@ class CommitteeView(Resource):
             # still going or expired after the earliest year we are looking for
             committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= earliest_year, CommitteeDetail.expire_date == None))
 
+        # Should this handle a list of years to make it consistent with /candidate ?
         elif args.get('year') and args['year'] != '*':
             # before expiration
-            committees = committees.filter(or_(extract('year', Committee.expire_date) >= int(args['year']), CommitteeDetail.expire_date == None))
+            committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= int(args['year']), CommitteeDetail.expire_date == None))
             # after origination
             committees = committees.filter(extract('year', CommitteeDetail.original_registration_date) <= int(args['year']))
 
