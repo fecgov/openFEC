@@ -169,12 +169,6 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
 
 
-### not ready for this yet
-    # def test_q_ids(self):
-    #     response = self._response('/committee?q=C00000851')
-    #     self.assertEquals(len(response['results']), 1)
-    #     response = self._response('/candidate?q=H4DC00092')
-    #     self.assertEquals(len(response['results']), 1)
 
 #Committee
     def test_committee_search_fields(self):
@@ -197,10 +191,10 @@ class OverallTest(ApiBaseTest):
         # no expired committees in test data to test just checking it exists
         self.assertEqual(result['expire_date'], None)
         # candidate fields
-        candidate_result = response['results'][0]['candidates'][0]
-        self.assertEqual(candidate_result['candidate_id'], 'P60000247')
-        self.assertEqual(candidate_result['election_year'], 1976)
-        self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
+        #candidate_result = response['results'][0]['candidates'][0]
+        #self.assertEqual(candidate_result['candidate_id'], 'P60000247')
+        #self.assertEqual(candidate_result['election_year'], 1976)
+        #self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Example with org type
         response = self._response('/committee?organization_type=C')
         results = response['results'][0]
@@ -312,15 +306,12 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(response[0]['party'], 'REP')
         self.assertEquals(response[0]['party_full'], 'Republican Party')
 
-    @unittest.skip('need to re-implement candidate filtering on another endpoint')
     def test_committee_filters(self):
         org_response = self._response('/committee')
         original_count = org_response['pagination']['count']
 
         # checking one example from each field
         filter_fields = (
-            ('candidate_id', 'H0VA08040'),
-            ('candidate_id', 'H0VA08040,P80003338'),
             ('committee_id', 'C00484188,C00000422'),
             ('state', 'CA,DC'),
             ('name', 'Obama'),
@@ -340,6 +331,18 @@ class OverallTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
+    def test_committees_by_cand_id(self):
+        results =  self._results('/candidate/P60000247/committees')
+
+        ids = [x['committee_id'] for x in results]
+
+        self.assertIn('C00048587', ids)
+        self.assertIn('C00111245', ids)
+        self.assertIn('C00108407', ids)
+
+    def test_committee_by_cand_filter(self):
+        results =  self._results('/candidate/P60000247/committees?designation=P')
+        self.assertEquals(1, len(results))
 
 # Totals
     @unittest.skip("not implemented yet")
