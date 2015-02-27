@@ -18,6 +18,7 @@ class ApiBaseTest(unittest.TestCase):
         response = self.app.get(qry)
         self.assertEquals(response.status_code, 200)
         result = json.loads(response.data)
+        self.assertNotEqual(result, [], "Empty response!")
         self.assertEqual(result['api_version'], '0.2')
         return result
 

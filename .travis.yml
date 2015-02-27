@@ -11,5 +11,8 @@ before_script:
   - psql -c "SELECT count(*) FROM dimcand" -U postgres cfdm_test
   - psql -f data/sql_updates/create_candidates_vw.sql -U postgres cfdm_test
   - psql -f data/sql_updates/create_committees_vw.sql -U postgres cfdm_test
+  - psql -f data/sql_updates/create_totals_pacs_parties_view.sql -U postgres cfdm_test
+  - psql -f data/sql_updates/create_totals_presidential_view.sql -U postgres cfdm_test
+  - psql -f data/sql_updates/create_totals_house_senate_view.sql -U postgres cfdm_test
   - pip install -r requirements.txt
 script: nosetests
