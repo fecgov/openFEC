@@ -21,8 +21,7 @@ class Candidate(db.Model):
     party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
-    candidate_committees = db.relationship('CandidateCommittee', backref='candidate')
-    committees = association_proxy('committee_links', 'committee')
+    committees = db.relationship('CandidateCommitteeLink', backref='candidates')
 
     __tablename__ = 'ofec_candidates_vw'
 
@@ -43,22 +42,86 @@ class Committee(db.Model):
     party_full = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
+    candidates = db.relationship('CandidateCommitteeLink', backref='committees')
 
     __tablename__ = 'ofec_committees_vw'
 
+# Is there a better way of doing this with sub-classing Committee or something?
+class CommitteeDetail(db.Model):
+    committee_key = db.Column(db.Integer, primary_key=True)
+    committee_id = db.Column(db.String(9))
+    designation = db.Column(db.String(1))
+    designation_full = db.Column(db.String(25))
+    treasurer_name = db.Column(db.String(100))
+    organization_type = db.Column(db.String(1))
+    organization_type_full = db.Column(db.String(100))
+    state = db.Column(db.String(2))
+    committee_type = db.Column(db.String(1))
+    committee_type_full = db.Column(db.String(50))
+    expire_date = db.Column(db.DateTime())
+    party = db.Column(db.String(3))
+    party_full = db.Column(db.String(50))
+    original_registration_date = db.Column(db.DateTime())
+    name = db.Column(db.String(100))
+    candidates = db.relationship('CandidateCommitteeLink', backref='committeedetails')
+    # detail view additions
+    filing_frequency = db.Column(db.String(1))
+    email = db.Column(db.String(50))
+    fax = db.Column(db.String(10))
+    website = db.Column(db.String(50))
+    form_type = db.Column(db.String(3))
+    leadership_pac = db.Column(db.String(50))
+    load_date = db.Column(db.DateTime())
+    lobbyist_registrant_pac = db.Column(db.String(1))
+    party_type = db.Column(db.String(3))
+    party_type_full = db.Column(db.String(15))
+    qualifying_date = db.Column(db.DateTime())
+    street_1 = db.Column(db.String(50))
+    street_2 = db.Column(db.String(50))
+    city = db.Column(db.String(50))
+    state_full = db.Column(db.String(50))
+    zip = db.Column(db.String(9))
+    treasurer_city = db.Column(db.String(50))
+    treasurer_name_1 = db.Column(db.String(50))
+    treasurer_name_2 = db.Column(db.String(50))
+    treasurer_name_middle = db.Column(db.String(50))
+    treasurer_name_prefix = db.Column(db.String(50))
+    treasurer_phone = db.Column(db.String(15))
+    treasurer_state = db.Column(db.String(50))
+    treasurer_street_1 = db.Column(db.String(50))
+    treasurer_street_2 = db.Column(db.String(50))
+    treasurer_name_suffix = db.Column(db.String(50))
+    treasurer_name_title = db.Column(db.String(50))
+    treasurer_zip = db.Column(db.String(9))
+    custodian_city = db.Column(db.String(50))
+    custodian_name_1 = db.Column(db.String(50))
+    custodian_name_2 = db.Column(db.String(50))
+    custodian_name_middle = db.Column(db.String(50))
+    custodian_name_full = db.Column(db.String(100))
+    custodian_phone = db.Column(db.String(15))
+    custodian_name_prefix = db.Column(db.String(50))
+    custodian_state = db.Column(db.String(2))
+    custodian_street_1 = db.Column(db.String(50))
+    custodian_street_2 = db.Column(db.String(50))
+    custodian_name_suffix = db.Column(db.String(50))
+    custodian_name_title = db.Column(db.String(50))
+    custodian_zip = db.Column(db.String(9))
 
-class CandidateCommittee(db.Model):
+    __tablename__ = 'ofec_committee_detail_vw'
+
+
+
+class CandidateCommitteeLink(db.Model):
     linkages_sk = db.Column(db.Integer, primary_key=True)
-    committee_key = db.Column('cmte_sk', db.Integer, db.ForeignKey('ofec_committees_vw.committee_key'))
-    candidate_key = db.Column('cand_sk', db.Integer, db.ForeignKey('ofec_candidates_vw.candidate_key'))
+    committee_key = db.Column('cmte_sk', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
+    candidate_key = db.Column('cand_sk', db.Integer, db.ForeignKey(Candidate.candidate_key))
     committee_id = db.Column('cmte_id', db.String(10))
     candidate_id = db.Column('cand_id', db.String(10))
     election_year = db.Column('cand_election_yr', db.Integer)
     link_date = db.Column('link_date', db.DateTime())
     expire_date = db.Column('expire_date', db.DateTime())
-    committee = db.relationship(Committee, lazy='joined', backref='committee_candidates')
 
     __tablename__ = 'dimlinkages'
-    __table_args__ = (db.ForeignKeyConstraint(['cmte_sk'], ['ofec_committees_vw.committee_key']), db.ForeignKeyConstraint(['cand_sk'], ['ofec_candidates_vw.candidate_key']))
+
 
 

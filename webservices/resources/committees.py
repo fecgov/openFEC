@@ -1,5 +1,5 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
-from webservices.common.models import db, Candidate, Committee, CandidateCommittee
+from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, CommitteeDetail
 from webservices.common.util import default_year
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
@@ -29,6 +29,64 @@ committee_fields = {
     'expire_date': fields.String,
     'original_registration_date': fields.String,
     'candidates': fields.Nested(candidate_commitee_fields),
+}
+committee_detail_fields = {
+    'committee_id': fields.String,
+    'name': fields.String,
+    'designation_full': fields.String,
+    'designation': fields.String,
+    'treasurer_name': fields.String,
+    'organization_type_full': fields.String,
+    'organization_type': fields.String,
+    'state': fields.String,
+    'party_full': fields.String,
+    'party': fields.String,
+    'committee_type_full': fields.String,
+    'committee_type': fields.String,
+    'expire_date': fields.String,
+    'original_registration_date': fields.String,
+    'candidates': fields.Nested(candidate_commitee_fields),
+    'filing_frequency' : fields.String,
+    'email' : fields.String,
+    'fax' : fields.String,
+    'website' : fields.String,
+    'form_type' : fields.String,
+    'leadership_pac' : fields.String,
+    'load_date' : fields.String,
+    'lobbyist_registrant_pac' : fields.String,
+    'party_type' : fields.String,
+    'party_type_full' : fields.String,
+    'qualifying_date' : fields.String,
+    'street_1' : fields.String,
+    'street_2' : fields.String,
+    'city' : fields.String,
+    'state_full' : fields.String,
+    'zip' : fields.String,
+    'treasurer_city' : fields.String,
+    'treasurer_name_1' : fields.String,
+    'treasurer_name_2' : fields.String,
+    'treasurer_name_middle' : fields.String,
+    'treasurer_name_prefix' : fields.String,
+    'treasurer_phone' : fields.String,
+    'treasurer_state' : fields.String,
+    'treasurer_street_1' : fields.String,
+    'treasurer_street_2' : fields.String,
+    'treasurer_name_suffix' : fields.String,
+    'treasurer_name_title' : fields.String,
+    'treasurer_zip' : fields.String,
+    'custodian_city' : fields.String,
+    'custodian_name_1' : fields.String,
+    'custodian_name_2' : fields.String,
+    'custodian_name_middle' : fields.String,
+    'custodian_name_full' : fields.String,
+    'custodian_phone' : fields.String,
+    'custodian_name_prefix' : fields.String,
+    'custodian_state' : fields.String,
+    'custodian_street_1' : fields.String,
+    'custodian_street_2' : fields.String,
+    'custodian_name_suffix' : fields.String,
+    'custodian_name_title' : fields.String,
+    'custodian_zip' : fields.String,
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -92,7 +150,7 @@ class CommitteeList(Resource):
         committees = Committee.query
 
         if candidate_id:
-            committees = Committee.query.join(CandidateCommittee).filter(CandidateCommittee.candidate_id==candidate_id)
+            committees = Committee.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.candidate_id==candidate_id)
 
         elif args.get('q'):
             fulltext_qry = """SELECT cmte_sk
@@ -132,3 +190,72 @@ class CommitteeList(Resource):
 
         return count, committees.order_by(Committee.name).paginate(page_num, per_page, False).items
 
+class CommitteeView(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (after original registration date but before expiration date.)')
+
+    @marshal_with(committee_detail_fields)
+    def get(self, **kwargs):
+        if 'committee_id' in kwargs:
+            committee_id = kwargs['committee_id']
+            candidate_id = None
+        else:
+            committee_id = None
+            candidate_id = kwargs['candidate_id']
+
+        args = self.parser.parse_args(strict=True)
+
+        # pagination
+        page_num = args.get('page', 1)
+        per_page = args.get('per_page', 20)
+
+        count, committees = self.get_committee(args, page_num, per_page, candidate_id, committee_id)
+
+        data = {
+            'api_version': '0.2',
+            'pagination': {
+                'page': page_num,
+                'per_page': per_page,
+                'count': count,
+                'pages': int(count / per_page),
+            },
+            'results': committees
+        }
+
+        return data
+
+
+    def get_committee(self, args, page_num, per_page, committee_id, candidate_id):
+
+        committees = CommitteeDetail.query
+
+        if committee_id:
+            committees = committees.filter_by(**{'committee_id': committee_id})
+
+        if candidate_id:
+            cand_committees = db.session.query(CandidateCommitteeLink).from_statement(
+                text("SELECT cmte_sk, linkages_sk FROM dimlinkages WHERE cand_id=:candidate_id")).\
+                params(candidate_id=candidate_id).all()
+
+            committee_keys = []
+            for c in cand_committees:
+                committee_keys.append(int(c.committee_key))
+
+            committees = committees.filter(getattr(CommitteeDetail, 'committee_key').in_(committee_keys))
+
+
+        # default year filtering
+        if args.get('year') is None:
+            earliest_year = int(sorted(default_year().split(','))[0])
+            # still going or expired after the earliest year we are looking for
+            committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= earliest_year, CommitteeDetail.expire_date == None))
+
+        elif args.get('year') and args['year'] != '*':
+            # before expiration
+            committees = committees.filter(or_(extract('year', Committee.expire_date) >= int(args['year']), CommitteeDetail.expire_date == None))
+            # after origination
+            committees = committees.filter(extract('year', CommitteeDetail.original_registration_date) <= int(args['year']))
+
+        count = committees.count()
+
+        return count, committees.order_by(CommitteeDetail.name).paginate(page_num, per_page, False).items
