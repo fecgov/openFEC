@@ -1,15 +1,10 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 from math import ceil
 from webservices.common.models import db
-from webservices.common.util import default_year
+from webservices.common.util import default_year, merge_dicts
 from webservices.resources.committees import Committee
 from sqlalchemy.orm.exc import NoResultFound
 
-
-def merge_dicts(x, y):
-    z = x.copy()
-    z.update(y)
-    return z
 
 # output format for flask-restful marshaling
 common_fields = {
