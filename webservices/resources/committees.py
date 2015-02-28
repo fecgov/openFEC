@@ -1,5 +1,5 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
-from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, DetailCommittee#CommitteeDetail
+from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, CommitteeDetail
 from webservices.common.util import default_year
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
@@ -47,7 +47,7 @@ committee_detail_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    #'candidates': fields.Nested(candidate_commitee_fields),
+    'candidates': fields.Nested(candidate_commitee_fields),
     'filing_frequency' : fields.String,
     'email' : fields.String,
     'fax' : fields.String,
