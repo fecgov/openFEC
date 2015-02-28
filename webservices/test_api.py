@@ -82,19 +82,20 @@ class OverallTest(ApiBaseTest):
         # making sure primary committee is in the right bucket
         self.assertEquals(response['elections'][0]['primary_committee']['designation'], 'P')
 
+    @unittest.skip("No Mailing address for candidate yet.")
     def test_extra_fields(self):
-        response = self._results('/candidate/P80003338?fields=mailing_addresses,affiliated_committees')
+        response = self._results('/candidate/P80003338')
         self.assertIn('C00434357', [c['committee_id'] for c in response[0]['elections'][0]['affiliated_committees']])
         self.assertIn('233 NORTH MICHIGAN AVE STE 1720', [a['street_1'] for a in response[0]['mailing_addresses']])
         self.assertEquals(response[0].has_key('candidate_id'), False)
         self.assertEquals(response[0].has_key('name'), False)
 
     def test_candidate_committes(self):
-        response = self._results('/candidate/P80003338?fields=affiliated_committees')
+        response = self._results('/candidate/P80003338?year=*')
 
         fields = ('committee_id', 'designation', 'designation_full', 'type', 'type_full', 'election_year', 'committee_name')
 
-        election = response[0]['elections'][0]
+        election = response[0]['committees'][0]
         print election
         for field in fields:
             print field
