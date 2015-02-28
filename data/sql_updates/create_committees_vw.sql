@@ -40,14 +40,15 @@ select distinct
     p.party_affiliation_desc as party_full,
     -- contrary to most recent, we'll need to pull just the oldest load_date here, since they don't give us registration dates yet
     (select distinct on (cmte_sk) load_date from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by cmte_sk, cmteproperties_sk) as original_registration_date,
-    cp_most_recent.cmte_nm as name
-    -- (select all cand_id from dimlinkages dl where dl.cmte_sk = dimcmte.cmte_sk) as candidate_ids
+    cp_most_recent.cmte_nm as name,
+    candidates.candidate_ids
 from dimcmte
-    inner join dimcmtetpdsgn dd using (cmte_sk)
+    left join dimcmtetpdsgn dd using (cmte_sk)
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
-    inner join (
+    left join (
         select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
     ) cp_most_recent using (cmte_sk)
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
+    left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
     -- inner join dimlinkages dl using (cmte_sk)
 ;

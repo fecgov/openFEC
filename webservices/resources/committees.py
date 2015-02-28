@@ -13,7 +13,6 @@ candidate_commitee_fields = {
     'link_date': fields.String,
     'expire_date': fields.String,
 }
-
 committee_fields = {
     'committee_id': fields.String,
     'name': fields.String,
@@ -29,7 +28,7 @@ committee_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    'candidates': fields.Nested(candidate_commitee_fields),
+    'candidate_ids': fields.List(fields.String),
 }
 committee_detail_fields = {
     'committee_id': fields.String,
@@ -151,7 +150,7 @@ class CommitteeList(Resource):
         committees = Committee.query
 
         if candidate_id:
-            committees = Committee.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.candidate_id==candidate_id)
+            committees = committees.filter(Committee.candidate_ids.overlap(candidate_id.split(',')))
 
         elif args.get('q'):
             fulltext_qry = """SELECT cmte_sk

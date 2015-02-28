@@ -44,6 +44,7 @@ class Committee(db.Model):
     name = db.Column(db.String(100))
     candidates = db.relationship('CandidateCommitteeLink', backref='committees')
 
+
     __tablename__ = 'ofec_committees_vw'
 
 
