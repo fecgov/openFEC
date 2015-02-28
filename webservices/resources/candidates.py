@@ -23,7 +23,6 @@ candidate_fields = {
 candidate_commitee_fields = {
     'committee_id': fields.String,
     'committee_name': fields.String,
-    'active_through': fields.Integer,
     'link_date': fields.String,
     'expire_date': fields.String,
     'committee_type': fields.String,
@@ -181,8 +180,14 @@ class CandidateView(Resource):
         return data
 
     def get_candidate(self, args, page_num, per_page, candidate_id, committee_id):
+        print "--------------Starting-------------------"
+        if candidate_id is not None:
+            print candidate_id
+            candidates = Candidate.query
+            candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 
-        candidates = Candidate.query
+        if committee_id is not None:
+            candidates = Candidate.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
 
         for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
             if args.get(argname):
