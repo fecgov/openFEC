@@ -1,5 +1,5 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
-from webservices.common.models import db, Candidate, Committee
+from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink
 from webservices.common.util import default_year
 from sqlalchemy.sql import text
 

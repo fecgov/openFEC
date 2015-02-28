@@ -212,7 +212,11 @@ class OverallTest(ApiBaseTest):
         results = response['results'][0]
         self.assertEqual(results['organization_type_full'], 'Corporation')
         self.assertEqual(results['organization_type'], 'C')
-
+        self.assertEqual(results['filing_frequency'], 'T')
+        self.assertEqual(results['form_type'], 'F1Z')
+        self.assertEqual(results['load_date'], '1982-12-31 00:00:00')
+        self.assertEqual(results['street_1'], '1795 PEACHTREE ROAD , NE')
+        self.assertEqual(results['zip'], '30309')
 
     def test_committee_search_double_committee_id(self):
         response = self._response('committee?committee_id=C00048587,C00116574&year=*')
@@ -300,6 +304,13 @@ class OverallTest(ApiBaseTest):
         results =  self._results('/candidate/P60000247/committees?designation=P')
         self.assertEquals(1, len(results))
 
+    def test_committee_by_cand(self):
+        results =  self._results('http://localhost:5000/candidate/P60000247/committees?year=*')
+        self.assertEquals(3, len(results))
+
+    def test_canditites_by_com(self):
+        results =  self._results('/committee/C00111245/candidates?year=*')
+        self.assertEquals(1, len(results))
 # Totals
     @unittest.skip("not implemented yet")
     def test_reports_house_senate(self):
