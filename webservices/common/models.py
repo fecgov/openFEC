@@ -46,8 +46,8 @@ class Committee(db.Model):
 
     __tablename__ = 'ofec_committees_vw'
 
-# Is there a better way of doing this with sub-classing Committee or something?
-class CommitteeDetail(db.Model):
+
+class DetailCommittee(db.Model):
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
     designation = db.Column(db.String(1))
@@ -63,7 +63,7 @@ class CommitteeDetail(db.Model):
     party_full = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
-    candidates = db.relationship('CandidateCommitteeLink', backref='committeedetails')
+    #candidates = db.relationship('CandidateCommitteeLink', backref='committeedetail')
     # detail view additions
     filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50))
@@ -113,7 +113,7 @@ class CommitteeDetail(db.Model):
 
 class CandidateCommitteeLink(db.Model):
     linkages_sk = db.Column(db.Integer, primary_key=True)
-    committee_key = db.Column('cmte_sk', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
+    committee_key = db.Column('cmte_sk', db.Integer, db.ForeignKey(Committee.committee_key))#, db.ForeignKey(CommitteeDetail.committee_key))
     candidate_key = db.Column('cand_sk', db.Integer, db.ForeignKey(Candidate.candidate_key))
     committee_id = db.Column('cmte_id', db.String(10))
     candidate_id = db.Column('cand_id', db.String(10))

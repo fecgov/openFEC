@@ -1,10 +1,9 @@
-from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs
-from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, CommitteeDetail
+from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
+from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, DetailCommittee#CommitteeDetail
 from webservices.common.util import default_year
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
 from datetime import date
-
 
 # output format for flask-restful marshaling
 candidate_commitee_fields = {
@@ -30,6 +29,9 @@ committee_fields = {
     'original_registration_date': fields.String,
     'candidates': fields.Nested(candidate_commitee_fields),
 }
+# for debugging
+c = {'filing_frequency': fields.String}
+
 committee_detail_fields = {
     'committee_id': fields.String,
     'name': fields.String,
@@ -45,7 +47,7 @@ committee_detail_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    'candidates': fields.Nested(candidate_commitee_fields),
+    #'candidates': fields.Nested(candidate_commitee_fields),
     'filing_frequency' : fields.String,
     'email' : fields.String,
     'fax' : fields.String,
@@ -198,7 +200,6 @@ class CommitteeView(Resource):
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (after original registration date but before expiration date.)')
 
-    @marshal_with(committee_list_fields)
     def get(self, **kwargs):
 
         if 'committee_id' in kwargs:
@@ -214,7 +215,10 @@ class CommitteeView(Resource):
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-        count, committees = self.get_committees(args, page_num, per_page, committee_id, candidate_id)
+        count, committees = self.get_committee(args, page_num, per_page, committee_id, candidate_id)
+
+        # decorator won't work for me
+        committees = {'committee': marshal(committees, committee_detail_fields)}
 
         data = {
             'api_version': '0.2',
@@ -230,11 +234,14 @@ class CommitteeView(Resource):
         return data
 
 
-    def get_committees(self, args, page_num, per_page, committee_id, candidate_id):
+    def get_committee(self, args, page_num, per_page, committee_id, candidate_id):
 
         if committee_id is not None:
-            committees = CommitteeDetail.query
-            committees = committees.filter_by(**{'committee_id': committee_id})
+            committeedetail = Committee.query
+            committeedetail = committeedetail.filter_by(**{'committee_id': committee_id})
+            return 1, committeedetail.paginate(page_num, per_page, False).items
+
+
         if candidate_id is not None:
             committees = CommitteeDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.candidate_id==candidate_id)
 
