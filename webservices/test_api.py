@@ -64,23 +64,16 @@ class OverallTest(ApiBaseTest):
     def test_fields(self):
         # testing key defaults
         response = self._results('/candidate/P80003338?year=2008')
-        response= response[0]
+        response = response[0]
 
-        self.assertEquals(response['name']['full_name'], 'OBAMA, BARACK')
+        self.assertEquals(response['name'], 'OBAMA, BARACK')
 
-        fields = ('party_affiliation', 'primary_committee', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'office_sought', 'election_year', 'primary_committee')
+        fields = ('party', 'party_full', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'candidate_status_full', 'office', 'active_through')
 
-        election = response['elections'][0]
         for field in fields:
             print field
-            print election[field]
-            self.assertEquals(election.has_key(field), True)
-
-        # not in default fields
-        self.assertEquals(response['elections'][0].has_key('affiliated_committees'), False)
-        self.assertEquals(response.has_key('mailing_addresses'), False)
-        # making sure primary committee is in the right bucket
-        self.assertEquals(response['elections'][0]['primary_committee']['designation'], 'P')
+            print response[field]
+            self.assertEquals(response.has_key(field), True)
 
     @unittest.skip("No Mailing address for candidate yet.")
     def test_extra_fields(self):
@@ -93,14 +86,13 @@ class OverallTest(ApiBaseTest):
     def test_candidate_committes(self):
         response = self._results('/candidate/P80003338?year=*')
 
-        fields = ('committee_id', 'designation', 'designation_full', 'type', 'type_full', 'election_year', 'committee_name')
+        fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
 
         election = response[0]['committees'][0]
         print election
         for field in fields:
             print field
-            self.assertEquals(election['primary_committee'].has_key(field), True)
-            self.assertEquals(election['affiliated_committees'][0].has_key(field), True)
+            self.assertEquals(election.has_key(field), True)
 
     @unittest.skip("Year aggregation needs to be implemented.")
     def test_years_all(self):
@@ -123,16 +115,6 @@ class OverallTest(ApiBaseTest):
         # testing single resource
         response = self._results('/candidate/P80003338?year=2012,2008')
         elections = response[0]['elections']
-        self.assertEquals(len(elections), 2)
-
-    def test_year_default(self):
-        # we are currently defaulting to last 4 years
-        # also the test data is weird but it should still work for this purpose
-        results = self._results('/candidate/H0VA08040')
-        self.assertNotIn('elections', results)
-
-        results = self._results('/candidate/H0VA08040?year=1996,1998')
-        elections = results[0]['elections']
         self.assertEquals(len(elections), 2)
 
     def test_cand_filters(self):

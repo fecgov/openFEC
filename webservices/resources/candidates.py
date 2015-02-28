@@ -26,7 +26,9 @@ candidate_commitee_fields = {
     'link_date': fields.String,
     'expire_date': fields.String,
     'committee_type': fields.String,
+    'committee_type_full': fields.String,
     'committee_designation': fields.String,
+    'committee_designation_full': fields.String,
 }
 candidate_detail_fields = {
     'candidate_id': fields.String,
@@ -180,9 +182,8 @@ class CandidateView(Resource):
         return data
 
     def get_candidate(self, args, page_num, per_page, candidate_id, committee_id):
-        print "--------------Starting-------------------"
+
         if candidate_id is not None:
-            print candidate_id
             candidates = Candidate.query
             candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 

@@ -123,7 +123,10 @@ class CandidateCommitteeLink(db.Model):
     committee_name = db.Column('committee_name', db.DateTime())
     candidate_name = db.Column('candidate_name', db.DateTime())
     committee_designation = db.Column('committee_designation', db.String(1))
+    committee_designation_full = db.Column(db.String(25))
     committee_type = db.Column('committee_type', db.String(1))
+    committee_type_full = db.Column('committee_type_full', db.String(50))
+
 
     __tablename__ = 'name_linkage_vw'
 
