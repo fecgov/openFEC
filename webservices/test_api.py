@@ -17,13 +17,13 @@ class OverallTest(ApiBaseTest):
 
     def test_full_text_search(self):
         # changed from 'james' to 'arnold' because 'james' falls victim to stemming, and some results return 'jame' causing the assert to fail
-        results = self._results('/candidate?q=arnold&fields=*')
+        results = self._results('/candidate?q=arnold')
         for r in results:
             #txt = json.dumps(r).lower()
             self.assertIn('arnold', r['name'].lower())
 
     def test_full_text_search_with_whitespace(self):
-        results = self._results('/candidate?q=barack obama&fields=*')
+        results = self._results('/candidate?q=barack obama')
         for r in results:
             txt = json.dumps(r).lower()
             self.assertIn('obama', txt)
@@ -33,7 +33,7 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(results, [])
 
     def test_year_filter(self):
-        results = self._results('/candidate?year=1988&fields=*')
+        results = self._results('/candidate?year=1988')
         for r in results:
             self.assertEqual(r.get('active_through'), 1988)
 
@@ -169,10 +169,10 @@ class OverallTest(ApiBaseTest):
 
 
 
-#Committee
-    def test_committee_search_fields(self):
+    ## Committee ##
+    def test_committee_list_fields(self):
         # example with committee
-        response = self._response('/committee?committee_id=C00048587&year=*')
+        response = self._response('/committee?committee_id=C00048587')
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
@@ -190,15 +190,46 @@ class OverallTest(ApiBaseTest):
         # no expired committees in test data to test just checking it exists
         self.assertEqual(result['expire_date'], None)
         # candidate fields
-        #candidate_result = response['results'][0]['candidates'][0]
-        #self.assertEqual(candidate_result['candidate_id'], 'P60000247')
-        #self.assertEqual(candidate_result['election_year'], 1976)
-        #self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
+        candidate_result = response['results'][0]['candidates'][0]
+        self.assertEqual(candidate_result['candidate_id'], 'P60000247')
+        self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
+        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Example with org type
         response = self._response('/committee?organization_type=C')
         results = response['results'][0]
         self.assertEqual(results['organization_type_full'], 'Corporation')
         self.assertEqual(results['organization_type'], 'C')
+
+    def test_committee_detail_fields(self):
+        response = self._response('/committee/C00048587')
+        result = response['results'][0]
+        # main fields
+        self.assertEqual(result['original_registration_date'], '1982-12-31 00:00:00')
+        self.assertEqual(result['committee_type'], 'P')
+        self.assertEqual(result['treasurer_name'], 'ROBERT J. LIPSHUTZ')
+        self.assertEqual(result['party'], 'DEM')
+        self.assertEqual(result['committee_type_full'], 'Presidential')
+        self.assertEqual(result['name'], '1976 DEMOCRATIC PRESIDENTIAL CAMPAIGN COMMITTEE, INC. (PCC-1976 GENERAL ELECTION)')
+        self.assertEqual(result['committee_id'], 'C00048587')
+        self.assertEqual(result['designation_full'], 'Principal campaign committee')
+        self.assertEqual(result['state'], 'GA')
+        self.assertEqual(result['party_full'], 'Democratic Party')
+        self.assertEqual(result['designation'], 'P')
+        # no expired committees in test data to test just checking it exists
+        self.assertEqual(result['expire_date'], None)
+        # candidate fields
+        candidate_result = response['results'][0]['candidates'][0]
+        self.assertEqual(candidate_result['candidate_id'], 'P60000247')
+        self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
+        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
+        # Example with org type
+        response = self._response('/committee?organization_type=C')
+        results = response['results'][0]
+        self.assertEqual(results['organization_type_full'], 'Corporation')
+        self.assertEqual(results['organization_type'], 'C')
+
 
     def test_committee_search_double_committee_id(self):
         response = self._response('committee?committee_id=C00048587,C00116574&year=*')
@@ -234,66 +265,9 @@ class OverallTest(ApiBaseTest):
         self.assertEquals((original_count > state_count), True)
 
 
-
-    def test_committee_cand_fields(self):
-        # they were giving different responses
-        response_1 = self._response('/committee/C00000851')
-        result_1 = response_1['results'][0]['candidates'][0]
-
-        fields = ('candidate_id', 'candidate_name', 'office_sought', 'designation', 'designation_full', 'election_years', 'expire_date', 'link_date', 'type', 'type_full')
-        for field in fields:
-            print field
-            self.assertEquals(result_1.has_key(field), True)
-
-    def test_committee_stats(self):
-        response = self._response('/committee/C00000851')
-        results = response['results']
-
-        result = results[0]['status']
-        fields = ('designation','designation_full', 'expire_date','load_date', 'receipt_date', 'type', 'type_full')
-        for field in fields:
-            print field
-            self.assertEquals(result.has_key(field), True)
-
-    def test_committee_properties_basic(self):
-        response = self._response('/committee/C00000851')
-        result = response['results'][0]
-
-        fields = ('committee_id','expire_date','form_type','load_date','name','description','status', 'address')
-        for field in fields:
-            print field
-            self.assertEquals(result.has_key(field), True)
-
-        # Not a default field
-        self.assertEquals(result.has_key('archive'), False)
-
-    def test_committee_properties_all(self):
-        response = self._response('/committee/C00000422?fields=*')
-        result = response['results'][0]['archive']
-
-        print result
-
-        description_fields = ('form_type','expire_date','filing_frequency','load_date')
-        for field in description_fields:
-            print field
-            self.assertEquals(result['description'][0].has_key(field), True)
-
-        address_fields = ('city', 'state', 'state_full', 'street_1', 'zip', 'expire_date')
-        for field in address_fields:
-            print field
-            self.assertEquals(response['results'][0]['address'].has_key(field), True)
-
-        self.assertEquals(response['results'][0]['treasurer'].has_key('name_full'), True)
-        self.assertEquals(response['results'][0]['treasurer'].has_key('expire_date'), True)
-
     def test2committees(self):
         response = self._results('/committee/C00484188?year=2012')
         self.assertEquals(len(response[0]['candidates']), 2)
-
-    def test_committee_field_filtering(self):
-        response = self._results('/committee/C00000851?fields=committee_id')
-        print '\n%s\n' % response
-        self.assertEquals(len(response[0]), 1)
 
     # /committee?
     def test_err_on_unsupported_arg(self):
@@ -385,6 +359,7 @@ class OverallTest(ApiBaseTest):
         self.assertNotIn('reports', results_disbursements[0])
         self.assertNotIn('totals', results_recipts[0])
 
+    @unittest.skip("Not implementing for now.")
     def test_total_cycle(self):
         results1 = self._results('/committee/C00000422/totals?year=2004')
         total_receipts1 = results1[0]['receipts']

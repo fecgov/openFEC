@@ -110,18 +110,19 @@ class CommitteeDetail(db.Model):
     __tablename__ = 'ofec_committee_detail_vw'
 
 
-
 class CandidateCommitteeLink(db.Model):
-    linkages_sk = db.Column(db.Integer, primary_key=True)
-    committee_key = db.Column('cmte_sk', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
-    candidate_key = db.Column('cand_sk', db.Integer, db.ForeignKey(Candidate.candidate_key))
-    committee_id = db.Column('cmte_id', db.String(10))
-    candidate_id = db.Column('cand_id', db.String(10))
-    election_year = db.Column('cand_election_yr', db.Integer)
+    linkage_key = db.Column(db.Integer, primary_key=True)
+    committee_key = db.Column('committee_key', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
+    candidate_key = db.Column('candidate_key', db.Integer, db.ForeignKey(Candidate.candidate_key))
+    committee_id = db.Column('committee_id', db.String(10))
+
+    candidate_id = db.Column('candidate_id', db.String(10))
+    active_through = db.Column('active_through', db.Integer)
     link_date = db.Column('link_date', db.DateTime())
     expire_date = db.Column('expire_date', db.DateTime())
+    committee_name = db.Column('committee_name', db.DateTime())
+    candidate_name = db.Column('candidate_name', db.DateTime())
 
-    __tablename__ = 'dimlinkages'
-
+    __tablename__ = 'name_linkage_vw'
 
 

@@ -46,7 +46,6 @@ class CandidateList(Resource):
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
     parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Year in which a candidate runs for office")
-    parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
     parser.add_argument('district', type=str, help='Two digit district number')
     parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
     parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')

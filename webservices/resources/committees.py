@@ -8,10 +8,12 @@ from datetime import date
 # output format for flask-restful marshaling
 candidate_commitee_fields = {
     'candidate_id': fields.String,
-    'election_year': fields.Integer,
+    'candidate_name': fields.String,
+    'active_through': fields.Integer,
     'link_date': fields.String,
     'expire_date': fields.String,
 }
+
 committee_fields = {
     'committee_id': fields.String,
     'name': fields.String,
@@ -29,9 +31,6 @@ committee_fields = {
     'original_registration_date': fields.String,
     'candidates': fields.Nested(candidate_commitee_fields),
 }
-# for debugging
-c = {'filing_frequency': fields.String}
-
 committee_detail_fields = {
     'committee_id': fields.String,
     'name': fields.String,
@@ -199,6 +198,10 @@ class CommitteeView(Resource):
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (after original registration date but before expiration date.)')
+    # useful for lookup by candidate id
+    parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
+    parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
+    parser.add_argument('committee_type', type=str, help='The one-letter type code of the organization')
 
     def get(self, **kwargs):
 
@@ -218,7 +221,7 @@ class CommitteeView(Resource):
         count, committees = self.get_committee(args, page_num, per_page, committee_id, candidate_id)
 
         # decorator won't work for me
-        committees = {'committee': marshal(committees, committee_detail_fields)}
+        committees = marshal(committees, committee_detail_fields)
 
         data = {
             'api_version': '0.2',
@@ -244,6 +247,14 @@ class CommitteeView(Resource):
 
         if candidate_id is not None:
             committees = CommitteeDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.candidate_id==candidate_id)
+
+
+        for argname in ['designation', 'organization_type', 'committee_type']:
+            if args.get(argname):
+                if ',' in args[argname]:
+                    committees = committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
+                else:
+                    committees = committees.filter(getattr(Committee, argname)==args[argname])
 
         # default year filtering
         if args.get('year') is None:
