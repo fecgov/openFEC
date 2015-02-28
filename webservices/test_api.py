@@ -376,7 +376,6 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(len(results), 2)
 
 
-
     # Typeahead name search
     def test_typeahead_name_search(self):
         results = self._results('/name?q=oba')

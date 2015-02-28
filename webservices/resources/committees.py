@@ -240,14 +240,11 @@ class CommitteeView(Resource):
     def get_committee(self, args, page_num, per_page, committee_id, candidate_id):
 
         if committee_id is not None:
-            committeedetail = Committee.query
-            committeedetail = committeedetail.filter_by(**{'committee_id': committee_id})
-            return 1, committeedetail.paginate(page_num, per_page, False).items
-
+            committees = CommitteeDetail.query
+            committees = committees.filter_by(**{'committee_id': committee_id})
 
         if candidate_id is not None:
             committees = CommitteeDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.candidate_id==candidate_id)
-
 
         for argname in ['designation', 'organization_type', 'committee_type']:
             if args.get(argname):

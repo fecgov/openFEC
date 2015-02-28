@@ -26,7 +26,7 @@ select
     max(dimoffice.office_state) as state,
     (select cand_nm from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as name
 from dimcand
-    left join (select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code from dimcandstatusici order by cand_sk, election_yr desc) csi_recent using (cand_sk)
+    left join (select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code from dimcandstatusici order by election_yr desc) csi_recent using (cand_sk)
     left join dimcandstatusici csi_all using (cand_sk)
     inner join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)  -- only joined to get to dimoffice
     inner join dimoffice using (office_sk)

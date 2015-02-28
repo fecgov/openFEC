@@ -122,6 +122,8 @@ class CandidateCommitteeLink(db.Model):
     expire_date = db.Column('expire_date', db.DateTime())
     committee_name = db.Column('committee_name', db.DateTime())
     candidate_name = db.Column('candidate_name', db.DateTime())
+    committee_designation = db.Column('committee_designation', db.String(1))
+    committee_type = db.Column('committee_type', db.String(1))
 
     __tablename__ = 'name_linkage_vw'
 
