@@ -15,6 +15,6 @@ before_script:
   - psql -f data/sql_updates/create_totals_presidential_view.sql -U postgres cfdm_test
   - psql -f data/sql_updates/create_totals_house_senate_view.sql -U postgres cfdm_test
   - psql -f data/sql_updates/create_committee_detail_vw.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_create_linkage_names_vw.sql -U postgres cfdm_test
+  - psql -f data/sql_updates/create_linkage_names_vw.sql -U postgres cfdm_test
   - pip install -r requirements.txt
 script: nosetests
