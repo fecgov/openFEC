@@ -12,8 +12,8 @@ select
         else 'Unknown' end as candidate_status_full,
     max(csi_recent.election_yr) as active_through,
     array_agg(distinct csi_all.election_yr)::int[] as election_years,
-    max(csi_recent.ici_code) as incumbent_challenge,
-    case max(csi_recent.ici_code)
+    max(cand_p_most_recent.cand_ici_cd) as incumbent_challenge,
+    case max(cand_p_most_recent.cand_ici_cd)
         when 'I' then 'Incumbent'
         when 'C' then 'Challenger'
         when 'O' then 'Open seat'
@@ -25,28 +25,34 @@ select
     max(dimparty.party_affiliation_desc) as party_full,
     max(dimoffice.office_state) as state,
     max(dimoffice.office_district) as district,
-    max(cp_most_recent.cand_nm) as name,
-    max(cp_most_recent.expire_date) as expire_date,
-    max(cp_most_recent.load_date) as load_date,
-    max(cp_most_recent.form_tp) as form_type,
-    max(cp_most_recent.cand_city) as address_city,
-    max(cp_most_recent.cand_st)  as address_state,
-    max(cp_most_recent.cand_st1) as address_street_1,
-    max(cp_most_recent.cand_st2) as address_street_2,
-    max(cp_most_recent.cand_zip) as address_zip
-
+    (select cand_nm from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as name,
+    max(cand_p_most_recent.expire_date) as expire_date,
+    max(cand_p_most_recent.load_date) as load_date,
+    max(cand_p_most_recent.cand_city) as address_city,
+    max(cand_p_most_recent.cand_st)  as address_state,
+    max(cand_p_most_recent.cand_st1) as address_street_1,
+    max(cand_p_most_recent.cand_st2) as address_street_2,
+    max(cand_p_most_recent.cand_zip) as address_zip,
+    -- I needed help keeping track of where the information is coming from when we have the information to get the forms linked we can link to the forms for each section.
+    -- I would like to replace this information with just links to the form and expire dates
+    max(dimcand.form_tp) as form_type,
+    max(dimcand.expire_date) as candidate_expire_date,
+    max(cand_p_most_recent.expire_date) as properties_expire_date,
+    max(cand_p_most_recent.form_tp) as properties_form_type,
+    max(csi_recent.expire_date) as status_expire_date,
+    max(dimoffice.expire_date) as office_expire_date,
+    max(dimparty.expire_date) as party_expire_date
 from dimcand
     left join (
-        select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code, cand_inactive_flg from dimcandstatusici order by cand_sk, election_yr desc
+        select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code, cand_inactive_flg, expire_date from dimcandstatusici order by cand_sk, election_yr desc
     ) csi_recent using (cand_sk)
     left join dimcandstatusici csi_all using (cand_sk)
     left join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)  -- only joined to get to dimoffice
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
     left join (
-        select distinct on (cand_sk) cand_sk, cand_nm, expire_date, load_date, form_tp, cand_city, cand_st1, cand_st2, cand_st, cand_zip, cand_status_cd, cand_status_desc from dimcandproperties order by cand_sk desc
-    ) cp_most_recent on cp_most_recent.cand_sk = cp_most_recent.cand_sk
+        select distinct on (cand_sk) * from dimcandproperties order by cand_sk desc limit 1
+    ) cand_p_most_recent on cand_p_most_recent.cand_sk = cand_p_most_recent.cand_sk
 group by
-    dimcand.cand_sk,
-    dimcand.cand_id
+    dimcand.cand_sk
 ;
