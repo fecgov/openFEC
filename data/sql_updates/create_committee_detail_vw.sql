@@ -88,6 +88,7 @@ select distinct
     cp_most_recent.party_cmte_type as party_type,
     cp_most_recent.party_cmte_type_desc as party_type_full,
     cp_most_recent.qual_dt as qualifying_date
+
 from dimcmte
     inner join dimcmtetpdsgn dd using (cmte_sk)
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
