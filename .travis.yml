@@ -10,6 +10,7 @@ before_script:
   - psql -f data/cfdm_test.pgdump.sql -U postgres cfdm_test
   - psql -c "SELECT count(*) FROM dimcand" -U postgres cfdm_test
   - psql -f data/sql_updates/create_candidates_vw.sql -U postgres cfdm_test
+  - psql -f data/sql_updates/create_candidate_detail_vw.sql -U postgres cfdm_test
   - psql -f data/sql_updates/create_committees_vw.sql -U postgres cfdm_test
   - psql -f data/sql_updates/create_totals_pacs_parties_view.sql -U postgres cfdm_test
   - psql -f data/sql_updates/create_totals_presidential_view.sql -U postgres cfdm_test

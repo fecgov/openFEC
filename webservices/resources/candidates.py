@@ -1,9 +1,19 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
-from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink
+from webservices.common.models import db, Candidate, CandidateDetail, Committee, CandidateCommitteeLink
 from webservices.common.util import default_year
 from sqlalchemy.sql import text
 
 # output format for flask-restful marshaling
+candidate_commitee_fields = {
+    'committee_id': fields.String,
+    'committee_name': fields.String,
+    'link_date': fields.String,
+    'expire_date': fields.String,
+    'committee_type': fields.String,
+    'committee_type_full': fields.String,
+    'committee_designation': fields.String,
+    'committee_designation_full': fields.String,
+}
 candidate_fields = {
     'candidate_id': fields.String,
     'candidate_status_full': fields.String,
@@ -20,16 +30,6 @@ candidate_fields = {
     'state': fields.String,
     'name': fields.String,
 }
-candidate_commitee_fields = {
-    'committee_id': fields.String,
-    'committee_name': fields.String,
-    'link_date': fields.String,
-    'expire_date': fields.String,
-    'committee_type': fields.String,
-    'committee_type_full': fields.String,
-    'committee_designation': fields.String,
-    'committee_designation_full': fields.String,
-}
 candidate_detail_fields = {
     'candidate_id': fields.String,
     'candidate_status_full': fields.String,
@@ -45,6 +45,15 @@ candidate_detail_fields = {
     'party': fields.String,
     'state': fields.String,
     'name': fields.String,
+    'expire_date': fields.String,
+    'load_date': fields.String,
+    'form_type': fields.String,
+    'address_city': fields.String,
+    'address_state': fields.String,
+    'address_street_1': fields.String,
+    'address_street_2': fields.String,
+    'address_zip': fields.String,
+    'candidate_inactive': fields.String,
     'committees': fields.Nested(candidate_commitee_fields),
 }
 pagination_fields = {
@@ -183,26 +192,26 @@ class CandidateView(Resource):
     def get_candidate(self, args, page_num, per_page, candidate_id, committee_id):
 
         if candidate_id is not None:
-            candidates = Candidate.query
+            candidates = CandidateDetail.query
             candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 
         if committee_id is not None:
-            candidates = Candidate.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
+            candidates = CandidateDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
 
         for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
             if args.get(argname):
                 # this is not working and doesn't look like it would work for _short
                 if ',' in args[argname]:
-                    candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname].split(',')))
+                    candidates = candidates.filter(getattr(CandidateDetail, argname).in_(args[argname].split(',')))
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
         if args.get('election_year') and args['election_year'] != '*':
-            candidates = candidates.filter(Candidate.election_years.overlap([int(x) for x in args['election_year'].split(',')]))
+            candidates = candidates.filter(CandidateDetail.election_years.overlap([int(x) for x in args['election_year'].split(',')]))
 
         count = candidates.count()
 
-        return count, candidates.order_by(Candidate.name).paginate(page_num, per_page, False).items
+        return count, candidates.order_by(CandidateDetail.name).paginate(page_num, per_page, False).items
 
 
 
