@@ -94,7 +94,7 @@ class CandidateList(Resource):
                 'page': page_num,
                 'per_page': per_page,
                 'count': count,
-                'pages': int(count / per_page),
+                'pages': int(count / per_page) + (count % per_page > 0),
             },
             'results': candidates
         }
@@ -159,7 +159,6 @@ class CandidateView(Resource):
 
         args = self.parser.parse_args(strict=True)
 
-        # pagination
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
@@ -174,7 +173,7 @@ class CandidateView(Resource):
                 'page': page_num,
                 'per_page': per_page,
                 'count': count,
-                'pages': int(count / per_page),
+                'pages': int(count / per_page) + (count % per_page > 0),
             },
             'results': candidates
         }

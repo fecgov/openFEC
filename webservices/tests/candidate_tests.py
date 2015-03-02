@@ -6,7 +6,7 @@ class CandidateFormatTest(ApiBaseTest):
     def test_for_regressions(self):
         """Compare results to expected fields."""
         # @todo - use a factory rather than the test data
-        response = self._response('/candidate/H0VA08040?fields=*')
+        response = self._response('/candidate/H0VA08040')
         self.assertResultsEqual(
             response['pagination'],
             {'count': 1, 'page': 1, 'pages': 1, 'per_page': 1})
@@ -38,10 +38,10 @@ class CandidateFormatTest(ApiBaseTest):
         }
         self.assertTrue(address in result['mailing_addresses'])
 
-        self.assertEqual(2, len(result['elections']))
-        election = result['elections'][0]
-        primary_committee = election['primary_committee']  # tested separately
-        del election['primary_committee']
+
+        election = result[0]
+        # tested separately
+        del election['committee']
         self.assertResultsEqual(
             election,
             {
@@ -49,13 +49,13 @@ class CandidateFormatTest(ApiBaseTest):
                 "office": "H",
                 "district": "08",
                 "state": "VA",
-                "office_sought": "H",
-                "office_sought_full": "House",
+                "office": "H",
+                "office_full": "House",
                 # From party_mapping
                 "party": "DEM",
-                "party_affiliation": "Democratic Party",
+                "party_full": "Democratic Party",
                 # From status_mapping
-                "election_year": 2014,
+                "active_through": 2014,
                 "candidate_inactive": "Y",
                 "candidate_status": "C",
                 "incumbent_challenge": None,
@@ -78,12 +78,12 @@ class CandidateFormatTest(ApiBaseTest):
             })
 
         # The above candidate is missing a few fields
-        response = self._response('/candidate/P20003984?fields=*')
+        response = self._response('/candidate/P20003984')
         election = response['results'][0]['elections'][0]
         self.assertEqual(election["incumbent_challenge"], "C")
         self.assertEqual(election["incumbent_challenge_full"], "challenger")
         self.assertResultsEqual(
-            election['affiliated_committees'],
+            election['committees'],
             [{
                 "committee_id": "C00527648",
                 "committee_name": "CONNECTICUT GREEN PRESIDENTIAL COMMITTEE",

@@ -137,7 +137,7 @@ class CommitteeList(Resource):
                 'page': page_num,
                 'per_page': per_page,
                 'count': count,
-                'pages': int(count / per_page),
+                'pages': int(count / per_page) + (count % per_page > 0),
             },
             'results': committees
         }
@@ -228,7 +228,7 @@ class CommitteeView(Resource):
                 'page': page_num,
                 'per_page': per_page,
                 'count': count,
-                'pages': int(count / per_page),
+                'pages': int(count / per_page) + (count % per_page > 0),
             },
             'results': committees
         }
