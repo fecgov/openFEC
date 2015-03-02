@@ -45,7 +45,7 @@ from dimcand
     inner join dimparty using (party_sk)
     left join (
         select distinct on (cand_sk) * from dimcandproperties order by cand_sk desc limit 1
-    ) cp_most_recent on cp_most_recent.cand_sk = cp_most_recent.cand_sk
+    ) cp_most_recent on dimcand.cand_sk = cp_most_recent.cand_sk
 group by
     dimcand.cand_sk,
     dimcand.cand_id
