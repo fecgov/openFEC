@@ -207,16 +207,18 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
         self.assertEqual(candidate_result['active_through'], 1976)
         self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
+        # Things on the detailed view
+        self.assertEqual(result['filing_frequency'], 'T')
+        self.assertEqual(result['form_type'], 'F1Z')
+        self.assertEqual(result['load_date'], '1982-12-31 00:00:00')
+        self.assertEqual(result['street_1'], '1795 PEACHTREE ROAD , NE')
+        self.assertEqual(result['zip'], '30309')
         # Example with org type
         response = self._response('/committee?organization_type=C')
         results = response['results'][0]
         self.assertEqual(results['organization_type_full'], 'Corporation')
         self.assertEqual(results['organization_type'], 'C')
-        self.assertEqual(results['filing_frequency'], 'T')
-        self.assertEqual(results['form_type'], 'F1Z')
-        self.assertEqual(results['load_date'], '1982-12-31 00:00:00')
-        self.assertEqual(results['street_1'], '1795 PEACHTREE ROAD , NE')
-        self.assertEqual(results['zip'], '30309')
+
 
     def test_committee_search_double_committee_id(self):
         response = self._response('committee?committee_id=C00048587,C00116574&year=*')
