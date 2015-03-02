@@ -1,8 +1,8 @@
 drop view if exists ofec_candidate_detail_vw;
 create view ofec_candidate_detail_vw as
 select
-    max(dimcand.cand_sk) as candidate_key,
-    max(dimcand.cand_id) as candidate_id,
+    dimcand.cand_sk as candidate_key,
+    dimcand.cand_id as candidate_id,
     max(csi_recent.cand_status) as candidate_status,
     case max(csi_recent.cand_status)
         when 'C' then 'Candidate'
@@ -37,14 +37,14 @@ select
 
 from dimcand
     left join (
-        select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code, cand_inactive_flg from dimcandstatusici order by cand_sk, election_yr desc
+        select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code, cand_inactive_flg from dimcandstatusici order by cand_sk, election_yr desc limit 1
     ) csi_recent using (cand_sk)
     left join dimcandstatusici csi_all using (cand_sk)
-    left join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)  -- only joined to get to dimoffice
+    left join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr::integer = csi_recent.election_yr::integer)  -- only joined to get to dimoffice
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
     left join (
-        select distinct on (cand_sk) cand_sk, cand_nm, expire_date, load_date, form_tp, cand_city, cand_st1, cand_st2, cand_st, cand_zip, cand_status_cd, cand_status_desc from dimcandproperties order by cand_sk desc
+        select distinct on (cand_sk) * from dimcandproperties order by cand_sk desc limit 1
     ) cp_most_recent on cp_most_recent.cand_sk = cp_most_recent.cand_sk
 group by
     dimcand.cand_sk,
