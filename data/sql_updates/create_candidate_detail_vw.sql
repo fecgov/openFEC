@@ -1,8 +1,8 @@
 drop view if exists ofec_candidate_detail_vw;
 create view ofec_candidate_detail_vw as
 select
-    max(dimcand.cand_sk) as candidate_key,
-    max(dimcand.cand_id) as candidate_id,
+    dimcand.cand_sk as candidate_key,
+    dimcand.cand_id as candidate_id,
     max(csi_recent.cand_status) as candidate_status,
     case max(csi_recent.cand_status)
         when 'C' then 'Candidate'
@@ -52,5 +52,6 @@ from dimcand
         select distinct on (cand_sk) * from dimcandproperties order by cand_sk desc limit 1
     ) cand_p_most_recent on cand_p_most_recent.cand_sk = cand_p_most_recent.cand_sk
 group by
-    dimcand.cand_sk
+    dimcand.cand_sk,
+    dimcand.cand_id
 ;
