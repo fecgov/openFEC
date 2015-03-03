@@ -12,12 +12,6 @@ select
         else 'Unknown' end as candidate_status_full,
     max(csi_recent.election_yr) as active_through,
     array_agg(distinct csi_all.election_yr)::int[] as election_years,
-    max(cand_p_most_recent.cand_ici_cd) as incumbent_challenge,
-    case max(cand_p_most_recent.cand_ici_cd)
-        when 'I' then 'Incumbent'
-        when 'C' then 'Challenger'
-        when 'O' then 'Open seat'
-        else 'Unknown' end as incumbent_challenge_full,
     max(csi_recent.cand_inactive_flg) as candidate_inactive,
     max(dimoffice.office_tp) as office,
     max(dimoffice.office_tp_desc) as office_full,
@@ -25,14 +19,18 @@ select
     max(dimparty.party_affiliation_desc) as party_full,
     max(dimoffice.office_state) as state,
     max(dimoffice.office_district) as district,
+    -- This seems like an awful way to do this but the left join was not giving the right data
     (select cand_nm from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as name,
-    max(cand_p_most_recent.expire_date) as expire_date,
-    max(cand_p_most_recent.load_date) as load_date,
-    max(cand_p_most_recent.cand_city) as address_city,
-    max(cand_p_most_recent.cand_st)  as address_state,
-    max(cand_p_most_recent.cand_st1) as address_street_1,
-    max(cand_p_most_recent.cand_st2) as address_street_2,
-    max(cand_p_most_recent.cand_zip) as address_zip,
+    (select cand_st from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as address_state,
+    (select expire_date from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as expire_date,
+    (select load_date from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as load_date,
+    (select cand_city from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as address_city,
+    (select cand_st1 from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as address_street_1,
+    (select cand_st2 from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as address_street_2,
+    (select cand_zip from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as address_zip,
+    (select cand_ici_desc from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as incumbent_challenge_full,
+    (select cand_ici_cd from dimcandproperties cp where cp.cand_sk = dimcand.cand_sk order by candproperties_sk desc limit 1) as incumbent_challenge,
+
     -- I needed help keeping track of where the information is coming from when we have the information to get the forms linked we can link to the forms for each section.
     -- I would like to replace this information with just links to the form and expire dates
     max(dimcand.form_tp) as form_type,

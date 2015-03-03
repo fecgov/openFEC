@@ -50,7 +50,7 @@ from json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
 from db import db_conn, as_dicts
-# from candidates.resources import CandidateResource
+from candidates.resources import CandidateResource
 # from committees.resources import CommitteeResource
 from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
@@ -138,3 +138,5 @@ api.add_resource(TotalsView, '/committee/<string:id>/totals')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
 api.add_resource(NameSearch, '/name')
+# for debugging
+api.add_resource(CandidateResource, '/oldcandidate/<string:id>')
