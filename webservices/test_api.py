@@ -36,7 +36,7 @@ class OverallTest(ApiBaseTest):
     def test_year_filter(self):
         results = self._results('/candidate?year=1988&fields=*')
         for r in results:
-            self.assertEqual(r.get('active_through'), 1988)
+            self.assertIn(1988, r['election_years'])
 
     def test_per_page_defaults_to_20(self):
         results = self._results('/candidate')
@@ -170,14 +170,14 @@ class OverallTest(ApiBaseTest):
 
 
 
-#Committee
+    # Committee
     def test_committee_search_fields(self):
         # example with committee
         response = self._response('/committee?committee_id=C00048587&year=*')
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
-        self.assertEqual(result['original_registration_date'], '1982-12-31 00:00:00')
+        self.assertEqual(result['original_registration_date'], '1976-07-20 00:00:00')
         self.assertEqual(result['committee_type'], 'P')
         self.assertEqual(result['treasurer_name'], 'ROBERT J. LIPSHUTZ')
         self.assertEqual(result['party'], 'DEM')
