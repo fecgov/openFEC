@@ -312,6 +312,12 @@ class OverallTest(ApiBaseTest):
     def test_canditites_by_com(self):
         results =  self._results('/committee/C00111245/candidates?year=*')
         self.assertEquals(1, len(results))
+
+    def test_multiple_cmtes_in_detail(self):
+        response = self._results('http://localhost:5000/candidate/P80003338/committees')
+        self.assertEquals(len(response[0], 11))
+        self.assertEquals(response['pagination']['count'], 11)
+
 # Totals
     @unittest.skip("not implemented yet")
     def test_reports_house_senate(self):
