@@ -14,6 +14,7 @@ candidate_commitee_fields = {
     'committee_type_full': fields.String,
     'committee_designation': fields.String,
     'committee_designation_full': fields.String,
+    'election_year': fields.Integer,
 }
 candidate_fields = {
     'candidate_id': fields.String,
