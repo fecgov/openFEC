@@ -51,14 +51,14 @@ import sqlalchemy as sa
 
 from db import db_conn, as_dicts
 from candidates.resources import CandidateResource
-from committees.resources import CommitteeResource
+# from committees.resources import CommitteeResource
 from resources import Searchable
 from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
-from webservices.resources.candidates import CandidateList
+from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
-from webservices.resources.committees import CommitteeList
+from webservices.resources.committees import CommitteeList, CommitteeView
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -131,12 +131,14 @@ class Help(restful.Resource):
         return result
 
 api.add_resource(Help, '/')
-api.add_resource(CandidateResource, '/candidate/<string:id>')
+api.add_resource(CandidateView, '/candidate/<string:candidate_id>', '/committee/<string:committee_id>/candidates')
 api.add_resource(CandidateList, '/candidate')
-api.add_resource(CommitteeResource, '/committee/<string:id>')
-api.add_resource(CommitteeList, '/committee', '/candidate/<string:id>/committees')
+api.add_resource(CommitteeView, '/committee/<string:committee_id>', '/candidate/<string:candidate_id>/committees')
+api.add_resource(CommitteeList, '/committee')
 api.add_resource(TotalsView, '/committee/<string:id>/totals')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
 api.add_resource(ReportsView, '/committee/<string:id>/reports')
 api.add_resource(NameSearch, '/name')
+# for debugging
+api.add_resource(CandidateResource, '/oldcandidate/<string:id>')
