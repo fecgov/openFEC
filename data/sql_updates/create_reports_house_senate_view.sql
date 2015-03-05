@@ -5,7 +5,7 @@ select
     two_yr_period_sk as cycle,
     cmte_tp as committee_type,
     start_date.dw_date as coverage_start_date,
-    start_date.dw_date as coverage_end_date,
+    end_date.dw_date as coverage_end_date,
     agr_amt_pers_contrib_gen as aggregate_amount_personal_contributions_general,
     agr_amt_contrib_pers_fund_prim as aggregate_contributions_personal_funds_primary,
     all_other_loans_per as all_other_loans_period,
@@ -86,6 +86,7 @@ select
     tranf_to_other_auth_cmte_ytd as transfers_to_other_authorized_committee_ytd,
     rpt_tp as report_type,
     rpt_tp_desc as report_type_full,
+    rpt_yr as report_year,
     f3.expire_date as expire_date,
     f3.load_date as load_date
 from
