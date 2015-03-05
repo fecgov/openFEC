@@ -199,6 +199,7 @@ CREATE INDEX ON factpresidential_f3p (cmte_id);
 CREATE INDEX ON factpresidential_f3p (electiontp_sk);
 CREATE INDEX ON factpresidential_f3p (reporttype_sk);
 CREATE INDEX ON dimcandoffice (cand_sk);
+create index dimcandstatusici_election_yr_idx on dimcandstatusici (election_yr);
 
 
 ALTER TABLE public.dimcmteproperties ADD FOREIGN KEY (cand_pty_affiliation) REFERENCES processed.ref_party (party_cd);
