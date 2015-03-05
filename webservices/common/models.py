@@ -26,7 +26,8 @@ class Candidate(db.Model):
     __tablename__ = 'ofec_candidates_vw'
 
 class CandidateDetail(db.Model):
-    candidate_key = db.Column(db.Integer, primary_key=True)
+    properties_key = db.Column(db.Integer, primary_key=True)
+    candidate_key = db.Column(db.Integer)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))

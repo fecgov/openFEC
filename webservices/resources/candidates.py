@@ -1,7 +1,8 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
 from webservices.common.models import db, Candidate, CandidateDetail, Committee, CandidateCommitteeLink
 from webservices.common.util import default_year
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text, or_
+from sqlalchemy import extract
 
 # output format for flask-restful marshaling
 candidate_commitee_fields = {
@@ -80,7 +81,7 @@ class CandidateList(Resource):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
-    parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Fileter records to only those that were applicable to a given year")
     parser.add_argument('district', type=str, help='Two digit district number')
     parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
     parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
@@ -152,7 +153,7 @@ class CandidateView(Resource):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
-    parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=str, dest='year', help="See records pertaining to a particular year.")
     parser.add_argument('district', type=str, help='Two digit district number')
     parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
     parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
@@ -167,9 +168,12 @@ class CandidateView(Resource):
             candidate_id = None
 
         args = self.parser.parse_args(strict=True)
+        print args
 
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
+
+
 
         count, candidates = self.get_candidate(args, page_num, per_page, candidate_id, committee_id)
 
@@ -190,7 +194,6 @@ class CandidateView(Resource):
         return data
 
     def get_candidate(self, args, page_num, per_page, candidate_id, committee_id):
-
         if candidate_id is not None:
             candidates = CandidateDetail.query
             candidates = candidates.filter_by(**{'candidate_id': candidate_id})
@@ -206,12 +209,16 @@ class CandidateView(Resource):
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
-        if args.get('election_year') and args['election_year'] != '*':
-            candidates = candidates.filter(CandidateDetail.election_years.overlap([int(x) for x in args['election_year'].split(',')]))
+        if args.get('year') and args['year'] != '*':
+            print ('hello')
+            # before expiration
+            candidates = candidates.filter(or_(extract('year', CandidateDetail.expire_date) >= int(args['year']), CandidateDetail.expire_date == None))
+            # after origination
+            candidates = candidates.filter(extract('year', CandidateDetail.load_date) <= int(args['year']))
 
         count = candidates.count()
 
-        return count, candidates.order_by(CandidateDetail.name).paginate(page_num, per_page, False).items
+        return count, candidates.order_by(CandidateDetail.expire_date.desc()).paginate(page_num, per_page, False).items
 
 
 

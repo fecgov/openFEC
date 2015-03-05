@@ -80,7 +80,8 @@ class OverallTest(ApiBaseTest):
         self.assertIn('committees', response[0])
         self.assertIn('PO BOX 8102', response[0]['address_street_1'])
         self.assertIn('60680',response[0]['address_zip'])
-        self.assertIn('I', response[0]['incumbent_challenge'])
+        # testing for year sensitivity
+        self.assertIn('O', response[0]['incumbent_challenge'])
 
     def test_candidate_committes(self):
         response = self._results('/candidate/P80003338?year=*')
@@ -315,7 +316,7 @@ class OverallTest(ApiBaseTest):
 
     def test_multiple_cmtes_in_detail(self):
         response = self._results('http://localhost:5000/candidate/P80003338/committees')
-        self.assertEquals(len(response[0], 11))
+        self.assertEquals(len(response[0]), 11)
         self.assertEquals(response['pagination']['count'], 11)
 
 # Totals
