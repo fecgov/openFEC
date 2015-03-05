@@ -291,9 +291,8 @@ class ReportsView(Resource):
         if args['cycle'] != '*':
             reports = reports.filter(reports_class.cycle.in_(args['cycle'].split(',')))
 
-        reports = reports.order_by(reports_class.cycle)
         count = reports.count()
-        return count, reports.order_by(desc(reports_class.report_year), desc(reports_class.report_type)).paginate(page_num, per_page, True).items
+        return count, reports.order_by(desc(reports_class.coverage_end_date)).paginate(page_num, per_page, True).items
 
 
 class CommitteeReportsHouseOrSenate(db.Model):
