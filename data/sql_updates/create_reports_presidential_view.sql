@@ -1,6 +1,7 @@
 drop materialized view if exists ofec_reports_presidential_mv;
 create materialized view ofec_reports_presidential_mv as
 select
+    factpresidential_f3p_sk as report_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
     cmte_tp as committee_type,

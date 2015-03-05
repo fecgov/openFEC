@@ -293,14 +293,15 @@ class ReportsView(Resource):
 
         reports = reports.order_by(reports_class.cycle)
         count = reports.count()
-        return count, reports.order_by(desc(reports_class.report_year), desc(reports_class.report_type)).paginate(page_num, per_page, True)
+        return count, reports.order_by(desc(reports_class.report_year), desc(reports_class.report_type)).paginate(page_num, per_page, True).items
 
 
 class CommitteeReportsHouseOrSenate(db.Model):
     __tablename__ = 'ofec_reports_house_senate_mv'
 
-    committee_id = db.Column(db.String(10), primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True)
+    report_key = db.Column(db.BigInteger, primary_key=True)
+    committee_id = db.Column(db.String(10))
+    cycle = db.Column(db.Integer)
 
     # common fields
     beginning_image_number = db.Column(db.Integer)
@@ -390,8 +391,9 @@ class CommitteeReportsHouseOrSenate(db.Model):
 class CommitteeReportsPacOrParty(db.Model):
     __tablename__ = 'ofec_reports_pacs_parties_mv'
 
-    committee_id = db.Column(db.String(10), primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True)
+    report_key = db.Column(db.BigInteger, primary_key=True)
+    committee_id = db.Column(db.String(10))
+    cycle = db.Column(db.Integer)
 
     # common fields
     beginning_image_number = db.Column(db.Integer)
@@ -502,8 +504,9 @@ class CommitteeReportsPacOrParty(db.Model):
 class CommitteeReportsPresidential(db.Model):
     __tablename__ = 'ofec_reports_presidential_mv'
 
-    committee_id = db.Column(db.String(10), primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True)
+    report_key = db.Column(db.BigInteger, primary_key=True)
+    committee_id = db.Column(db.String(10))
+    cycle = db.Column(db.Integer)
 
     # common fields
     beginning_image_number = db.Column(db.Integer)
