@@ -159,7 +159,7 @@ class OverallTest(ApiBaseTest):
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
-        self.assertEqual(result['original_registration_date'], '1976-07-20 00:00:00')
+        self.assertEqual(result['original_registration_date'], '1982-12-31 00:00:00')
         self.assertEqual(result['committee_type'], 'P')
         self.assertEqual(result['treasurer_name'], 'ROBERT J. LIPSHUTZ')
         self.assertEqual(result['party'], 'DEM')
