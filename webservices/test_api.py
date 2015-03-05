@@ -35,7 +35,7 @@ class OverallTest(ApiBaseTest):
     def test_year_filter(self):
         results = self._results('/candidate?year=1988')
         for r in results:
-            self.assertEqual(r.get('active_through'), 1988)
+            self.assertIn(1988, r['election_years'])
 
     def test_per_page_defaults_to_20(self):
         results = self._results('/candidate')

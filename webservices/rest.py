@@ -55,6 +55,7 @@ from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
+from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
 
 speedlogger = logging.getLogger('speed')
@@ -135,4 +136,5 @@ api.add_resource(CommitteeList, '/committee')
 api.add_resource(TotalsView, '/committee/<string:id>/totals')
 api.add_resource(TotalResource, '/total/<string:id>')
 api.add_resource(TotalSearch, '/total')
+api.add_resource(ReportsView, '/committee/<string:id>/reports')
 api.add_resource(NameSearch, '/name')
