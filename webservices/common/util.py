@@ -2,6 +2,11 @@ from datetime import datetime
 from flask.ext.restful import reqparse
 
 
+def merge_dicts(x, y):
+    z = x.copy()
+    z.update(y)
+    return z
+
 def default_year():
     year = datetime.now().year
     years = [str(y) for y in range(year, year-4, -1)]
