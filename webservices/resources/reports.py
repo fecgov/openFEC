@@ -516,7 +516,7 @@ class CommitteeReportsPresidential(db.Model):
     debts_owed_by_committee = db.Column(db.Integer)
     debts_owed_to_committee = db.Column(db.Integer)
     end_image_number = db.Column(db.Integer)
-    operating_expenditures = db.Column(db.Integer)
+    operating_expenditures_period = db.Column(db.Integer)
     other_disbursements_period = db.Column(db.Integer)
     other_disbursements_ytd = db.Column(db.Integer)
     other_political_committee_contributions_period = db.Column(db.Integer)
