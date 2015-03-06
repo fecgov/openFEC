@@ -18,6 +18,7 @@ common_fields = {
     'debts_owed_by_committee': fields.Integer,
     'debts_owed_to_committee': fields.Integer,
     'end_image_number': fields.Integer,
+    'expire_date': fields.DateTime,
     'other_disbursements_period': fields.Integer,
     'other_disbursements_ytd': fields.Integer,
     'other_political_committee_contributions_period': fields.Integer,
@@ -311,6 +312,7 @@ class CommitteeReportsHouseOrSenate(db.Model):
     debts_owed_by_committee = db.Column(db.Integer)
     debts_owed_to_committee = db.Column(db.Integer)
     end_image_number = db.Column(db.Integer)
+    expire_date = db.Column(db.DateTime)
     other_disbursements_period = db.Column(db.Integer)
     other_disbursements_ytd = db.Column(db.Integer)
     other_political_committee_contributions_period = db.Column(db.Integer)
@@ -403,6 +405,7 @@ class CommitteeReportsPacOrParty(db.Model):
     debts_owed_by_committee = db.Column(db.Integer)
     debts_owed_to_committee = db.Column(db.Integer)
     end_image_number = db.Column(db.Integer)
+    expire_date = db.Column(db.DateTime)
     other_disbursements_period = db.Column(db.Integer)
     other_disbursements_ytd = db.Column(db.Integer)
     other_political_committee_contributions_period = db.Column(db.Integer)
@@ -516,6 +519,7 @@ class CommitteeReportsPresidential(db.Model):
     debts_owed_by_committee = db.Column(db.Integer)
     debts_owed_to_committee = db.Column(db.Integer)
     end_image_number = db.Column(db.Integer)
+    expire_date = db.Column(db.DateTime)
     operating_expenditures_period = db.Column(db.Integer)
     other_disbursements_period = db.Column(db.Integer)
     other_disbursements_ytd = db.Column(db.Integer)
