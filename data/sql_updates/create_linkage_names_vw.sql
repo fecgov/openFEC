@@ -1,5 +1,6 @@
-drop view if exists name_linkage_vw;
-create view name_linkage_vw as
+drop view if exists name_linkage_vw; -- the old name-- this line can be removed in the future
+drop view if exists ofec_name_linkage_vw;
+create view ofec_name_linkage_vw as
 select
     dimlinkages.linkages_sk as linkage_key,
     dimlinkages.cand_sk as candidate_key,

@@ -159,6 +159,6 @@ class CandidateCommitteeLink(db.Model):
     committee_type_full = db.Column('committee_type_full', db.String(50))
 
 
-    __tablename__ = 'name_linkage_vw'
+    __tablename__ = 'ofec_name_linkage_vw'
 
 
