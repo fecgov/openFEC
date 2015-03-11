@@ -2,14 +2,15 @@ drop view if exists name_linkage_vw; -- the old name-- this line can be removed 
 drop view if exists ofec_name_linkage_vw;
 create view ofec_name_linkage_vw as
 select
-    dimlinkages.linkages_sk as linkage_key,
-    dimlinkages.cand_sk as candidate_key,
-    dimlinkages.cmte_sk as committee_key,
-    dimlinkages.cand_id as candidate_id,
-    dimlinkages.cand_election_yr as active_through,
-    dimlinkages.cmte_id as committee_id,
-    dimlinkages.cmte_tp as committee_type,
-    case dimlinkages.cmte_tp
+    l.linkages_sk as linkage_key,
+    l.cand_sk as candidate_key,
+    l.cmte_sk as committee_key,
+    l.cand_id as candidate_id,
+    (select max(cand_election_yr) from dimlinkages dl where dl.cand_id = l.cand_id) as active_through,
+    l.cand_election_yr as election_year,
+    l.cmte_id as committee_id,
+    l.cmte_tp as committee_type,
+    case l.cmte_tp
         when 'P' then 'Presidential'
         when 'H' then 'House'
         when 'S' then 'Senate'
@@ -27,8 +28,8 @@ select
         when 'Y' then 'Party - Qualified'
         when 'Z' then 'National Party Nonfederal Account'
         else 'unknown' end as committee_type_full,
-    dimlinkages.cmte_dsgn as committee_designation,
-    case dimlinkages.cmte_dsgn
+    l.cmte_dsgn as committee_designation,
+    case l.cmte_dsgn
         when 'A' then 'Authorized by a candidate'
         when 'J' then 'Joint fundraising committee'
         when 'P' then 'Principal campaign committee'
@@ -36,9 +37,9 @@ select
         when 'B' then 'Lobbyist/Registrant PAC'
         when 'D' then 'Leadership PAC'
         else 'unknown' end as committee_designation_full,
-    dimlinkages.link_date as link_date,
-    dimlinkages.load_date as load_date,
-    dimlinkages.expire_date as expire_date,
-    (select cand_nm from dimcandproperties where dimcandproperties.cand_sk = dimlinkages.cand_sk order by candproperties_sk desc limit 1) as candidate_name,
-    (select cmte_nm from dimcmteproperties where dimcmteproperties.cmte_sk = dimlinkages.cmte_sk order by cmteproperties_sk desc limit 1) as committee_name
-from dimlinkages;
+    l.link_date as link_date,
+    l.load_date as load_date,
+    l.expire_date as expire_date,
+    (select cand_nm from dimcandproperties where dimcandproperties.cand_sk = l.cand_sk order by candproperties_sk desc limit 1) as candidate_name,
+    (select cmte_nm from dimcmteproperties where dimcmteproperties.cmte_sk = l.cmte_sk order by cmteproperties_sk desc limit 1) as committee_name
+from dimlinkages l;

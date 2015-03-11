@@ -13,6 +13,8 @@ class ApiBaseTest(unittest.TestCase):
     def setUp(self):
         rest.app.config['TESTING'] = True
         self.app = rest.app.test_client()
+        self.longMessage = True
+        self.maxDiff = None
 
     def _response(self, qry):
         response = self.app.get(qry)
@@ -60,3 +62,11 @@ class ApiBaseTest(unittest.TestCase):
         for i in range(len(expected)):
             self.assertResultsEqual(actual[i], expected[i],
                                     prefix + '[%d]' % i)
+
+    def prettyPrint(self, thing):
+        """
+        Pretty-printing for debugging purposes.
+        """
+        import pprint; pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(thing)
+

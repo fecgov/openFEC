@@ -60,51 +60,17 @@ class OverallTest(ApiBaseTest):
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
 
-    ### Candidates ###
-    def test_fields(self):
-        # testing key defaults
-        response = self._results('/candidate/P80003338?year=2008')
-        response = response[0]
 
-        self.assertEquals(response['name'], 'OBAMA, BARACK')
-
-        fields = ('party', 'party_full', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'candidate_status_full', 'office', 'active_through')
-
-        for field in fields:
-            print field
-            print response[field]
-            self.assertEquals(response.has_key(field), True)
-
-    def test_extra_fields(self):
-        response = self._results('/candidate/P80003338?year=2008')
-        self.assertIn('committees', response[0])
-        self.assertIn('PO BOX 8102', response[0]['address_street_1'])
-        self.assertIn('60680',response[0]['address_zip'])
-        # testing for year sensitivity
-        self.assertIn('O', response[0]['incumbent_challenge'])
-
-    def test_candidate_committes(self):
-        response = self._results('/candidate/P80003338?year=*')
-
-        fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
-
-        election = response[0]['committees'][0]
-        print election
-        for field in fields:
-            print field
-            self.assertEquals(election.has_key(field), True)
-
-    @unittest.skip("Year aggregation needs to be implemented.")
-    def test_years_all(self):
+    @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
+    def test_multi_year(self):
         # testing search
-        response = self._results('/candidates?candidate_id=P80003338&year=*')
-        elections = response[0]['elections']
-        self.assertEquals(len(elections), 2)
+        response = self._results('/candidate?candidate_id=P80003338&year=2012,2008')
+        # search listing should aggregate years
+        self.assertIn('2008, 2012', response)
         # testing single resource
-        response = self._results('/candidate/P80003338?year=*')
+        response = self._results('/candidate/P80003338?year=2012,2008')
         elections = response[0]['elections']
         self.assertEquals(len(elections), 2)
-
 
     @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
     def test_multi_year(self):
@@ -176,7 +142,7 @@ class OverallTest(ApiBaseTest):
         candidate_result = response['results'][0]['candidates'][0]
         self.assertEqual(candidate_result['candidate_id'], 'P60000247')
         self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
-        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['active_through'], 1980)
         self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Example with org type
         response = self._response('/committees?organization_type=C')
@@ -205,7 +171,7 @@ class OverallTest(ApiBaseTest):
         candidate_result = response['results'][0]['candidates'][0]
         self.assertEqual(candidate_result['candidate_id'], 'P60000247')
         self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
-        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['active_through'], 1980)
         self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Things on the detailed view
         self.assertEqual(result['filing_frequency'], 'T')
@@ -306,11 +272,11 @@ class OverallTest(ApiBaseTest):
         results =  self._results('/candidate/P60000247/committees?designation=P')
         self.assertEquals(1, len(results))
 
-    def test_committee_by_cand(self):
+    def test_committee_by_candidate(self):
         results =  self._results('http://localhost:5000/candidate/P60000247/committees?year=*')
         self.assertEquals(3, len(results))
 
-    def test_canditites_by_com(self):
+    def test_candidates_by_committee(self):
         results =  self._results('/committee/C00111245/candidates?year=*')
         self.assertEquals(1, len(results))
 
