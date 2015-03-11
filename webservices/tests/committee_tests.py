@@ -11,7 +11,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_list_fields(self):
         # example with committee
-        response = self._response('/committee?committee_id=C00048587')
+        response = self._response('/committees?committee_id=C00048587')
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
@@ -32,10 +32,10 @@ class CommitteeFormatTest(ApiBaseTest):
         candidate_result = response['results'][0]['candidates'][0]
         self.assertEqual(candidate_result['candidate_id'], 'P60000247')
         self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
-        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['active_through'], 1980)
         self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Example with org type
-        response = self._response('/committee?organization_type=C')
+        response = self._response('/committees?organization_type=C')
         results = response['results'][0]
         self.assertEqual(results['organization_type_full'], 'Corporation')
         self.assertEqual(results['organization_type'], 'C')
@@ -61,7 +61,7 @@ class CommitteeFormatTest(ApiBaseTest):
         candidate_result = response['results'][0]['candidates'][0]
         self.assertEqual(candidate_result['candidate_id'], 'P60000247')
         self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
-        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['active_through'], 1980)
         self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Things on the detailed view
         self.assertEqual(result['filing_frequency'], 'T')
@@ -70,42 +70,42 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertEqual(result['street_1'], '1795 PEACHTREE ROAD , NE')
         self.assertEqual(result['zip'], '30309')
         # Example with org type
-        response = self._response('/committee?organization_type=C')
+        response = self._response('/committees?organization_type=C')
         results = response['results'][0]
         self.assertEqual(results['organization_type_full'], 'Corporation')
         self.assertEqual(results['organization_type'], 'C')
 
 
     def test_committee_search_double_committee_id(self):
-        response = self._response('committee?committee_id=C00048587,C00116574&year=*')
+        response = self._response('/committees?committee_id=C00048587,C00116574&year=*')
         results = response['results']
         self.assertEqual(len(results), 2)
 
     def test_committee_search_filters(self):
-        original_response = self._response('/committee')
+        original_response = self._response('/committees')
         original_count = original_response['pagination']['count']
 
-        party_response = self._response('/committee?party=REP')
+        party_response = self._response('/committees?party=REP')
         party_count = party_response['pagination']['count']
         self.assertEquals((original_count > party_count), True)
 
-        committee_type_response = self._response('/committee?committee_type=P')
+        committee_type_response = self._response('/committees?committee_type=P')
         committee_type_count = committee_type_response['pagination']['count']
         self.assertEquals((original_count > committee_type_count), True)
 
-        name_response = self._response('/committee?name=Obama')
+        name_response = self._response('/committees?name=Obama')
         name_count = name_response['pagination']['count']
         self.assertEquals((original_count > name_count), True)
 
-        committee_id_response = self._response('/committee?committee_id=C00116574')
+        committee_id_response = self._response('/committees?committee_id=C00116574')
         committee_id_count = committee_id_response['pagination']['count']
         self.assertEquals((original_count > committee_id_count), True)
 
-        designation_response = self._response('/committee?designation=P')
+        designation_response = self._response('/committees?designation=P')
         designation_count = designation_response['pagination']['count']
         self.assertEquals((original_count > designation_count), True)
 
-        state_response = self._response('/committee?state=CA')
+        state_response = self._response('/committees?state=CA')
         state_count = state_response['pagination']['count']
         self.assertEquals((original_count > state_count), True)
 
@@ -114,18 +114,18 @@ class CommitteeFormatTest(ApiBaseTest):
         response = self._results('/committee/C00484188?year=2012')
         self.assertEquals(len(response[0]['candidates']), 2)
 
-    # /committee?
+    # /committees?
     def test_err_on_unsupported_arg(self):
-        response = self.app.get('/committee?bogusArg=1')
+        response = self.app.get('/committees?bogusArg=1')
         self.assertEquals(response.status_code, 400)
 
     def test_committee_party(self):
-        response = self._results('/committee?party=REP')
+        response = self._results('/committees?party=REP')
         self.assertEquals(response[0]['party'], 'REP')
         self.assertEquals(response[0]['party_full'], 'Republican Party')
 
     def test_committee_filters(self):
-        org_response = self._response('/committee')
+        org_response = self._response('/committees')
         original_count = org_response['pagination']['count']
 
         # checking one example from each field
@@ -140,7 +140,7 @@ class CommitteeFormatTest(ApiBaseTest):
         )
 
         for field, example in filter_fields:
-            page = "/committee?%s=%s" % (field, example)
+            page = "/committees?%s=%s" % (field, example)
             print page
             # returns at least one result
             results = self._results(page)

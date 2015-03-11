@@ -142,7 +142,7 @@ class OverallTest(ApiBaseTest):
         candidate_result = response['results'][0]['candidates'][0]
         self.assertEqual(candidate_result['candidate_id'], 'P60000247')
         self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
-        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['active_through'], 1980)
         self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Example with org type
         response = self._response('/committees?organization_type=C')
@@ -171,7 +171,7 @@ class OverallTest(ApiBaseTest):
         candidate_result = response['results'][0]['candidates'][0]
         self.assertEqual(candidate_result['candidate_id'], 'P60000247')
         self.assertEqual(candidate_result['candidate_name'], 'CARTER, JIMMY')
-        self.assertEqual(candidate_result['active_through'], 1976)
+        self.assertEqual(candidate_result['active_through'], 1980)
         self.assertEqual(candidate_result['link_date'], '2007-10-12 13:38:33')
         # Things on the detailed view
         self.assertEqual(result['filing_frequency'], 'T')
@@ -272,11 +272,11 @@ class OverallTest(ApiBaseTest):
         results =  self._results('/candidate/P60000247/committees?designation=P')
         self.assertEquals(1, len(results))
 
-    def test_committee_by_cand(self):
+    def test_committee_by_candidate(self):
         results =  self._results('http://localhost:5000/candidate/P60000247/committees?year=*')
         self.assertEquals(3, len(results))
 
-    def test_canditites_by_com(self):
+    def test_candidates_by_committee(self):
         results =  self._results('/committee/C00111245/candidates?year=*')
         self.assertEquals(1, len(results))
 
