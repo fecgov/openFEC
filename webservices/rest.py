@@ -120,12 +120,6 @@ class Help(restful.Resource):
     def get(self):
         result = {'doc': sys.modules[__name__].__doc__,
                   'endpoints': {}}
-        for cls in (CandidateList, CommitteeSearch):
-            name = cls.__name__[:-6].lower()
-            result['endpoints'][name] = {
-                'arguments supported': {a.name: a.help
-                                        for a in sorted(cls.parser.args)}
-            }
         return result
 
 api.add_resource(Help, '/')
