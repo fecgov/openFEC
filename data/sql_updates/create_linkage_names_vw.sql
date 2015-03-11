@@ -1,4 +1,4 @@
-drop view if exists name_linkage_vw;
+drop view if exists name_linkage_vw; -- the old name-- this line can be removed in the future
 drop view if exists ofec_name_linkage_vw;
 create view ofec_name_linkage_vw as
 select

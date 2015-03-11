@@ -130,11 +130,13 @@ class Help(restful.Resource):
 
 api.add_resource(Help, '/')
 api.add_resource(CandidateView, '/candidate/<string:candidate_id>', '/committee/<string:committee_id>/candidates')
-api.add_resource(CandidateList, '/candidate')
+api.add_resource(CandidateList, '/candidates')
 api.add_resource(CommitteeView, '/committee/<string:committee_id>', '/candidate/<string:candidate_id>/committees')
-api.add_resource(CommitteeList, '/committee')
+api.add_resource(CommitteeList, '/committees')
 api.add_resource(TotalsView, '/committee/<string:id>/totals')
-api.add_resource(TotalResource, '/total/<string:id>')
-api.add_resource(TotalSearch, '/total')
 api.add_resource(ReportsView, '/committee/<string:id>/reports')
-api.add_resource(NameSearch, '/name')
+api.add_resource(NameSearch, '/names')
+# TODO later: remove routes below this line, which are deprecated or for debugging
+api.add_resource(CandidateResource, '/oldcandidate/<string:id>')
+api.add_resource(TotalSearch, '/total')
+api.add_resource(TotalResource, '/total/<string:id>')
