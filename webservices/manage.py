@@ -2,7 +2,7 @@ from common.util import get_full_path
 from flask.ext.script import Manager
 from flask import url_for
 
-from rest import app
+from rest import app, db
 import glob
 
 manager = Manager(app)
@@ -28,13 +28,17 @@ def list_routes():
 
 @manager.command
 def refresh_db():
+    print "Starting DB refresh..."
     sql_dir = get_full_path('data/sql_updates/')
     files = glob.glob(sql_dir + '*.sql')
 
     for sql_file in files:
+        print "Running {}".format(sql_file)
         with open(sql_file, 'r') as sql_fh:
             sql = '\n'.join(sql_fh.readlines())
             db.engine.execute(sql)
+
+    print "Finished DB refresh."
 
 
 if __name__ == "__main__":
