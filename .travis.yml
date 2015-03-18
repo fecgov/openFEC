@@ -9,13 +9,6 @@ before_script:
   - md5sum data/cfdm_test.pgdump.sql
   - psql -f data/cfdm_test.pgdump.sql -U postgres cfdm_test
   - psql -c "SELECT count(*) FROM dimcand" -U postgres cfdm_test
-  - psql -f data/sql_updates/create_candidates_vw.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_candidate_detail_vw.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_committees_vw.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_totals_pacs_parties_view.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_totals_presidential_view.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_totals_house_senate_view.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_committee_detail_vw.sql -U postgres cfdm_test
-  - psql -f data/sql_updates/create_linkage_names_vw.sql -U postgres cfdm_test
   - pip install -r requirements.txt
+  - python manage.py refresh_db
 script: nosetests

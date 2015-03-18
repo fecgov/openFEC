@@ -4,7 +4,7 @@ from flask.ext.restful import reqparse
 
 from webservices.common.util import natural_number
 from webservices.resources import Searchable, SingleResource
-from .models import Total
+from webservices.totals.models import Total
 
 
 class BaseTotalsResource(Total):

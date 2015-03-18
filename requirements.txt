@@ -4,3 +4,4 @@ sqlalchemy
 git+git://github.com/flask-restful/flask-restful.git
 nose
 flask-sqlalchemy
+Flask-Script

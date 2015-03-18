@@ -49,8 +49,7 @@ import flask.ext.restful.representations.json
 from json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
-from db import db_conn, as_dicts
-from resources import Searchable
+from db import db_conn
 from totals.resources import TotalResource, TotalSearch
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView
@@ -68,8 +67,7 @@ flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 def sqla_conn_string():
     sqla_conn_string = os.getenv('SQLA_CONN')
     if not sqla_conn_string:
-        print("Environment variable SQLA_CONN is empty; running against "
-              + "local `cfdm_test`")
+        print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     print sqla_conn_string
     return sqla_conn_string
