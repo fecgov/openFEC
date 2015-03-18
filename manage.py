@@ -1,8 +1,8 @@
-from common.util import get_full_path
+from webservices.common.util import get_full_path
 from flask.ext.script import Manager
 from flask import url_for
 
-from rest import app, db
+from webservices.rest import app, db
 import glob
 
 manager = Manager(app)
