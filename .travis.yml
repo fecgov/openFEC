@@ -9,6 +9,6 @@ before_script:
   - md5sum data/cfdm_test.pgdump.sql
   - psql -f data/cfdm_test.pgdump.sql -U postgres cfdm_test
   - psql -c "SELECT count(*) FROM dimcand" -U postgres cfdm_test
-  - python webservices/manage.py refresh_db
   - pip install -r requirements.txt
+  - python webservices/manage.py refresh_db
 script: nosetests
