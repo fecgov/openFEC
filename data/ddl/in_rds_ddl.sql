@@ -1955,6 +1955,39 @@ CREATE TABLE form_7 (
 ) ;
 
 
+CREATE TABLE vw_filing_history(
+     sub_id numeric,
+     cvg_start_dt timestamp without time zone,
+     cvg_end_dt timestamp without time zone,
+     receipt_dt timestamp without time zone,
+     election_yr numeric,
+     cmte_id text,
+     form_tp text,
+     rpt_yr numeric,
+     rpt_tp text,
+     to_from_ind text,
+     begin_image_num text,
+     end_image_num text,
+     pages numeric,
+     ttl_receipts numeric,
+     ttl_indt_contb numeric,
+     net_dons numeric,
+     ttl_disb numeric,
+     ttl_indt_exp numeric,
+     ttl_communication_cost numeric,
+     coh_bop numeric,
+     coh_cop_i numeric,
+     debts_owed_by_cmte numeric,
+     debts_owed_to_cmte numeric,
+     hse_pers_funds_amt numeric,
+     sen_pers_funds_amt numeric,
+     tres_nm text,
+     file_num text,
+     prev_file_num text,
+     rpt_pgi text,
+     record_ind text,
+     update_date timestamp without time zone,
+ ) ;
 
 GRANT USAGE ON SCHEMA newdownload TO webro;
 GRANT USAGE ON SCHEMA newdownload TO openfec;
