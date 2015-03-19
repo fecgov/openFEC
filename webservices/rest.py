@@ -77,6 +77,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 api = restful.Api(app)
 db.init_app(app)
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'GET')
+    response.headers.add('Access-Control-Max-Age', '3000')
+    return response
+
 
 class NameSearch(restful.Resource):
     """
