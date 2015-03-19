@@ -1907,7 +1907,7 @@ CREATE TABLE f_rpt_or_form_sub_vw (
     file_num numeric,
     prev_file_num text,
     report_pgi text,
-    amend_ind text,
+    amend_ind text
 ) ;
 
 CREATE TABLE form_7 (
@@ -1951,7 +1951,7 @@ CREATE TABLE form_7 (
     record_ind text,
     mrf_rec text,
     load_date timestamp without time zone NOT NULL,
-    update_date timestamp without time zone,
+    update_date timestamp without time zone
 ) ;
 
 
@@ -1986,7 +1986,7 @@ CREATE TABLE vw_filing_history(
      prev_file_num text,
      rpt_pgi text,
      record_ind text,
-     update_date timestamp without time zone,
+     update_date timestamp without time zone
  ) ;
 
 GRANT USAGE ON SCHEMA newdownload TO webro;
