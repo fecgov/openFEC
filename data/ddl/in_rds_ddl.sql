@@ -1013,7 +1013,7 @@ CREATE TABLE log_audit_process (
     start_clock_time numeric NOT NULL
 ) ;
 
-
+-- individual contributions
 CREATE TABLE sched_a (
     sched_a_sk bigint NOT NULL,
     form_tp text,
@@ -1347,7 +1347,7 @@ CREATE TABLE sched_b (
 --     update_date timestamp without time zone
 -- ) ;
 
-
+-- independent expenditures
 CREATE TABLE sched_e (
     sched_e_sk bigint NOT NULL,
     form_tp text,
@@ -1889,6 +1889,70 @@ CREATE TABLE sched_e (
 --     load_date timestamp without time zone,
 --     update_date timestamp without time zone
 -- ) ;
+
+CREATE TABLE f_rpt_or_form_sub_vw (
+    sub_id numeric,
+    election_yr int,
+    cvg_start_dt timestamp without time zone,
+    cvg_end_dt timestamp without time zone,
+    receipt_dt timestamp without time zone,
+    cand_cmte_id text,
+    form_tp text,
+    rpt_yr int,
+    rpt_tp text,
+    rpt_tp_desc text,
+    begin_image_num text,
+    end_image_num text,
+    pages int,
+    file_num numeric,
+    prev_file_num text,
+    report_pgi text,
+    amend_ind text,
+) ;
+
+CREATE TABLE form_7 (
+    form_7_sk bigint NOT NULL,
+    form_tp text,
+    org_id text,
+    org_num text,
+    org_st text,
+    org_st2 text,
+    org_city text,
+    org_st text,
+    org_zip text,
+    org_tp text,
+    rpt_tp text,
+    election_dt timestamp without time zone,
+    election_st text,
+    cvg_start_dt timestamp without time zone,
+    cvg_end_dt timestamp without time zone,
+    ttl_communication_cost
+    filer_sign_nm numeric,
+    filer_sign_dt timestamp without time zone,
+    filer_title text,
+    filer_prefix text,
+    filer_m_nm text,
+    filer_f_nm text,
+    filer_l_nm text,
+    filer_suffix text,
+    receipt_dt timestamp without time zone,
+    rpt_pgi text,
+    amndt_ind text,
+    rpt_yr int,
+    begin_image_num text,
+    end_image_num text,
+    file_num numeric,
+    sub_id numeric,
+    two_yr_period int,
+    transaction_id numeric,
+    etl_invalid_flg text,
+    etl_complete_date timestamp without time zone,
+    filing_type text,
+    record_ind text,
+    mrf_rec text,
+    load_date timestamp without time zone NOT NULL,
+    update_date timestamp without time zone,
+) ;
 
 
 
