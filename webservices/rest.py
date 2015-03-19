@@ -81,6 +81,7 @@ db.init_app(app)
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Methods', 'GET')
+    response.headers.add('Access-Control-Max-Age', '3000')
     return response
 
 
