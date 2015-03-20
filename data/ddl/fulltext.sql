@@ -6,7 +6,7 @@
 -- will throw an error if the table already exists; that's fine.
 -- Plow cheerfully on, ignoring flaming wreckage in the rearview
 -- mirror.  Only strictly necessary when setting up database for
--- the first time. 
+-- the first time.
 CREATE TABLE dimcand_fulltext AS
   SELECT cand_sk,
          NULL::tsvector AS fulltxt
@@ -15,15 +15,10 @@ CREATE TABLE dimcand_fulltext AS
 WITH cnd AS (
   SELECT c.cand_sk,
          setweight(to_tsvector(string_agg(coalesce(p.cand_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cand_id, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cand_city, ''), ' ')), 'B  ') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cand_st, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(o.office_tp_desc, ''), ' ')), 'A')
+         setweight(to_tsvector(string_agg(coalesce(p.cand_id, ''), ' ')), 'B')
          AS weights
   FROM   dimcand c
   JOIN   dimcandproperties p ON (c.cand_sk = p.cand_sk)
-  JOIN   dimcandoffice co ON (co.cand_sk = c.cand_sk)
-  JOIN   dimoffice o ON (co.office_sk = o.office_sk)
   GROUP BY c.cand_sk)
 UPDATE dimcand_fulltext
 SET    fulltxt = (SELECT weights FROM cnd
@@ -40,11 +35,7 @@ CREATE TABLE dimcmte_fulltext AS
 WITH cmte AS (
   SELECT c.cmte_sk,
          setweight(to_tsvector(string_agg(coalesce(p.cmte_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_id, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_city, ''), ' ')), 'B') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_st, ''), ' ')), 'B') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_st_desc, ''), ' ')), 'B') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_web_url, ''), ' ')), 'B')
+         setweight(to_tsvector(string_agg(coalesce(p.cmte_id, ''), ' ')), 'B')
          AS weights
   FROM   dimcmte c
   JOIN   dimcmteproperties p ON (c.cmte_sk = p.cmte_sk)
