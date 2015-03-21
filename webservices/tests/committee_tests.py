@@ -141,7 +141,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
         for field, example in filter_fields:
             page = "/committees?%s=%s" % (field, example)
-            print page
+            print(page)
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
