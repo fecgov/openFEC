@@ -18,7 +18,7 @@ def merge_dicts(x, y):
 
 def default_year():
     year = datetime.now().year
-    years = [str(y) for y in range(year, year-4, -1)]
+    years = [str(y) for y in range(year+1, year-4, -1)]
     return ','.join(years)
 
 
