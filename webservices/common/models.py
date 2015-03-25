@@ -1,7 +1,6 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy import ForeignKeyConstraint
 
 db = SQLAlchemy()
 
