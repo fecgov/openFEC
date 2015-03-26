@@ -21,7 +21,6 @@ class Candidate(db.Model):
     party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
-    committees = db.relationship('CandidateCommitteeLink', backref='candidates')
 
     __tablename__ = 'ofec_candidates_vw'
 
@@ -51,7 +50,6 @@ class CandidateDetail(db.Model):
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
-    committees = db.relationship('CandidateCommitteeLink', backref='candidatedetail')
 
     __tablename__ = 'ofec_candidate_detail_vw'
 
@@ -144,7 +142,7 @@ class CommitteeDetail(db.Model):
 class CandidateCommitteeLink(db.Model):
     linkage_key = db.Column(db.Integer, primary_key=True)
     committee_key = db.Column('committee_key', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
-    candidate_key = db.Column('candidate_key', db.Integer, db.ForeignKey(Candidate.candidate_key), db.ForeignKey(CandidateDetail.candidate_key))
+    candidate_key = db.Column('candidate_key', db.Integer) #, db.ForeignKey(Candidate.candidate_key), db.ForeignKey(CandidateDetail.candidate_key))
     committee_id = db.Column('committee_id', db.String(10))
 
     candidate_id = db.Column('candidate_id', db.String(10))
