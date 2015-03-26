@@ -166,7 +166,6 @@ class CommitteeFormatTest(ApiBaseTest):
         results =  self._results('http://localhost:5000/candidate/P60000247/committees?year=*')
         self.assertEquals(3, len(results))
 
-    @unittest.skip('removing this functionality form this endpoint now')
     def test_canditites_by_com(self):
         results =  self._results('/committee/C00111245/candidates?year=*')
         self.assertEquals(1, len(results))

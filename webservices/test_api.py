@@ -273,12 +273,12 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(1, len(results))
 
     def test_committee_by_candidate(self):
-        results =  self._results('http://localhost:5000/candidate/P60000247/committees?year=*')
+        results =  self._results('/candidate/P60000247/committees?year=*')
         self.assertEquals(3, len(results))
 
     @unittest.skip('This is not a great view anymore')
     def test_multiple_cmtes_in_detail(self):
-        response = self._results('http://localhost:5000/candidate/P80003338/committees')
+        response = self._results('/candidate/P80003338/committees')
         self.assertEquals(len(response[0]), 11)
         self.assertEquals(response['pagination']['count'], 11)
 
