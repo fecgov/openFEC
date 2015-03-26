@@ -1,9 +1,10 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
-from webservices.common.models import db, Candidate, CandidateDetail
+from webservices.common.models import db, Candidate, CandidateDetail, Committee, CandidateCommitteeLink
 from webservices.common.util import default_year
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
 
+# output format for flask-restful marshaling
 
 candidate_fields = {
     'candidate_id': fields.String,
@@ -122,6 +123,7 @@ class CandidateList(Resource):
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
+
         if args.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
 
@@ -149,8 +151,10 @@ class CandidateView(Resource):
 
     def get(self, **kwargs):
         if 'candidate_id' in kwargs:
+            committee_id = None
             candidate_id = kwargs['candidate_id']
         else:
+            committee_id = kwargs['committee_id']
             candidate_id = None
 
         args = self.parser.parse_args(strict=True)
@@ -158,7 +162,9 @@ class CandidateView(Resource):
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-        count, candidates = self.get_candidate(args, page_num, per_page, candidate_id)
+
+
+        count, candidates = self.get_candidate(args, page_num, per_page, candidate_id, committee_id)
 
         # decorator won't work for me
         candidates = marshal(candidates, candidate_detail_fields)
@@ -176,11 +182,13 @@ class CandidateView(Resource):
 
         return data
 
-    def get_candidate(self, args, page_num, per_page, candidate_id):
-        candidates = CandidateDetail.query
-
+    def get_candidate(self, args, page_num, per_page, candidate_id, committee_id):
         if candidate_id is not None:
+            candidates = CandidateDetail.query
             candidates = candidates.filter_by(**{'candidate_id': candidate_id})
+
+        if committee_id is not None:
+            candidates = CandidateDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
 
         for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
             if args.get(argname):
