@@ -28,7 +28,6 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertEqual(result['address_street_1'], '311 NORTH WASHINGTON STREET')
         self.assertEqual(result['address_street_2'], 'SUITE 200L')
         self.assertEqual(result['address_zip'], '22314')
-        self.assertEqual(16, len(result['committees']))
         # office
         self.assertResultsEqual(result['office'], 'H')
         self.assertResultsEqual(result['district'],'08')
@@ -96,22 +95,11 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_extra_fields(self):
         response = self._results('/candidate/P80003338?year=2008')
-        self.assertIn('committees', response[0])
         self.assertIn('PO BOX 8102', response[0]['address_street_1'])
         self.assertIn('60680',response[0]['address_zip'])
         # testing for year sensitivity
         self.assertIn('O', response[0]['incumbent_challenge'])
 
-    def test_candidate_committes(self):
-        response = self._results('/candidate/P80003338?year=*')
-
-        fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
-
-        election = response[0]['committees'][0]
-        print election
-        for field in fields:
-            print field
-            self.assertEquals(election.has_key(field), True)
 
     def test_cand_filters(self):
         # checking one example from each field
@@ -143,8 +131,7 @@ class CandidateFormatTest(ApiBaseTest):
         results = self._results('/names?q=obama')
         cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
         self.assertEqual(len(cand_ids), len(set(cand_ids)))
-        cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
-        self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
+
 
 
 
