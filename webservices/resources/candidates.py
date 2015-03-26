@@ -122,7 +122,6 @@ class CandidateList(Resource):
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
-
         if args.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
 
@@ -155,12 +154,9 @@ class CandidateView(Resource):
             candidate_id = None
 
         args = self.parser.parse_args(strict=True)
-        print args
 
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
-
-
 
         count, candidates = self.get_candidate(args, page_num, per_page, candidate_id)
 
@@ -195,7 +191,6 @@ class CandidateView(Resource):
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
         if args.get('year') and args['year'] != '*':
-            print ('hello')
             # before expiration
             candidates = candidates.filter(or_(extract('year', CandidateDetail.expire_date) >= int(args['year']), CandidateDetail.expire_date == None))
             # after origination
