@@ -44,37 +44,6 @@ class CandidateFormatTest(ApiBaseTest):
                 # Expanded from candidate_status
         self.assertResultsEqual(result['candidate_status_full'], 'Statutory candidate')
 
-
-    @unittest.skip("Fix later once we've figured out how to fix committee cardinality")
-    def test_candidate_committees(self):
-        """Compare results to expected fields."""
-        # @todo - use a factory rather than the test data
-        response = self._response('/candidate/H0VA08040')
-        committees = response['results'][0]['committees']
-        self.prettyPrint(committees)
-        self.assertResultsEqual(committees,
-            [{
-                # From cand_committee_format_mapping
-                'committee_designation': 'P',
-                'committee_designation_full': 'Principal campaign committee',
-                'committee_id': 'C00241349',
-                'committee_name': 'MORAN FOR CONGRESS',
-                'committee_type': 'H',
-                'committee_type_full': 'House',
-                'election_year': 2014,
-                'expire_date': None,
-                'link_date': '2007-10-12 13:38:33',
-
-            }])
-
-        # The above candidate is missing a few fields
-        response = self._response('/candidate/P20003984')
-        committee = response['results'][0]['committees'][1]
-
-        self.assertResultsEqual(committee['committee_type'], 'I')
-        self.assertResultsEqual(committee['committee_type_full'], 'Independent Expenditor (Person or Group)')
-
-
     def _results(self, qry):
         response = self._response(qry)
         return response['results']
