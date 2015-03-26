@@ -37,7 +37,6 @@ committee_detail_fields = {
     'committee_type': fields.String,
     'expire_date': fields.String,
     'original_registration_date': fields.String,
-    'candidates': fields.Nested(candidate_commitee_fields),
     'filing_frequency' : fields.String,
     'email' : fields.String,
     'fax' : fields.String,
