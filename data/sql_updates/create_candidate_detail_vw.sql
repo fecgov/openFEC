@@ -1,6 +1,7 @@
 drop materialized view if exists ofec_candidate_detail_vw;
 create materialized view ofec_candidate_detail_vw as
 select
+    dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
     max(csi_recent.cand_status) as candidate_status,
     case max(csi_recent.cand_status)
@@ -56,5 +57,6 @@ from dimcand
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
 group by
+    dimcand.cand_sk,
     dimcand.cand_id
 ;
