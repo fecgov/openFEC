@@ -1,6 +1,5 @@
-drop view if exists name_linkage_vw; -- the old name-- this line can be removed in the future
-drop view if exists ofec_name_linkage_vw;
-create view ofec_name_linkage_vw as
+drop materialized view if exists ofec_name_linkage_vw;
+create materialized view ofec_name_linkage_vw as
 select
     l.linkages_sk as linkage_key,
     l.cand_sk as candidate_key,
