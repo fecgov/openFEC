@@ -49,7 +49,7 @@ import flask.ext.restful.representations.json
 from .json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
-from .db import db_conn
+from db import db_conn
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
@@ -66,8 +66,7 @@ flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 def sqla_conn_string():
     sqla_conn_string = os.getenv('SQLA_CONN')
     if not sqla_conn_string:
-        print(("Environment variable SQLA_CONN is empty; running against "
-              + "local `cfdm_test`"))
+        print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     print(sqla_conn_string)
     return sqla_conn_string
@@ -76,6 +75,13 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 api = restful.Api(app)
 db.init_app(app)
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'GET')
+    response.headers.add('Access-Control-Max-Age', '3000')
+    return response
 
 
 class NameSearch(restful.Resource):
@@ -118,12 +124,6 @@ class Help(restful.Resource):
     def get(self):
         result = {'doc': sys.modules[__name__].__doc__,
                   'endpoints': {}}
-        for cls in (CandidateList, CommitteeSearch):
-            name = cls.__name__[:-6].lower()
-            result['endpoints'][name] = {
-                'arguments supported': {a.name: a.help
-                                        for a in sorted(cls.parser.args)}
-            }
         return result
 
 api.add_resource(Help, '/')
