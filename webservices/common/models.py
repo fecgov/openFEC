@@ -25,8 +25,7 @@ class Candidate(db.Model):
     __tablename__ = 'ofec_candidates_vw'
 
 class CandidateDetail(db.Model):
-    properties_key = db.Column(db.Integer, primary_key=True)
-    candidate_key = db.Column(db.Integer)
+    candidate_key = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
@@ -41,7 +40,7 @@ class CandidateDetail(db.Model):
     party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
-    expire_date = db.Column(db.DateTime())
+    expire_date = db.Column('candidate_expire_date', db.DateTime())
     load_date = db.Column(db.DateTime())
     form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
@@ -141,7 +140,6 @@ class CandidateCommitteeLink(db.Model):
     committee_key = db.Column('committee_key', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
     candidate_key = db.Column('candidate_key', db.Integer, db.ForeignKey(Candidate.candidate_key), db.ForeignKey(CandidateDetail.candidate_key))
     committee_id = db.Column('committee_id', db.String(10))
-
     candidate_id = db.Column('candidate_id', db.String(10))
     election_year = db.Column('election_year', db.Integer)
     active_through = db.Column('active_through', db.Integer)
@@ -154,7 +152,7 @@ class CandidateCommitteeLink(db.Model):
     committee_type = db.Column('committee_type', db.String(1))
     committee_type_full = db.Column('committee_type_full', db.String(50))
 
-
     __tablename__ = 'ofec_name_linkage_vw'
+
 
 

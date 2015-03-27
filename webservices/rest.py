@@ -46,11 +46,10 @@ from flask import Flask
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import flask.ext.restful.representations.json
-from json_encoding import TolerantJSONEncoder
+from .json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
-from db import db_conn
-from totals.resources import TotalResource, TotalSearch
+from .db import db_conn
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
@@ -69,7 +68,7 @@ def sqla_conn_string():
     if not sqla_conn_string:
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
-    print sqla_conn_string
+    print(sqla_conn_string)
     return sqla_conn_string
 
 app = Flask(__name__)
@@ -135,6 +134,3 @@ api.add_resource(CommitteeList, '/committees')
 api.add_resource(TotalsView, '/committee/<string:id>/totals')
 api.add_resource(ReportsView, '/committee/<string:id>/reports')
 api.add_resource(NameSearch, '/names')
-# TODO later: remove routes below this line, which are deprecated or for debugging
-api.add_resource(TotalSearch, '/total')
-api.add_resource(TotalResource, '/total/<string:id>')
