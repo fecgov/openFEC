@@ -23,22 +23,22 @@ def list_routes():
         output.append(line)
 
     for line in sorted(output):
-        print line
+        print(line)
 
 
 @manager.command
 def refresh_db():
-    print "Starting DB refresh..."
+    print("Starting DB refresh...")
     sql_dir = get_full_path('data/sql_updates/')
     files = glob.glob(sql_dir + '*.sql')
 
     for sql_file in files:
-        print "Running {}".format(sql_file)
+        print("Running {}".format(sql_file))
         with open(sql_file, 'r') as sql_fh:
             sql = '\n'.join(sql_fh.readlines())
             db.engine.execute(sql)
 
-    print "Finished DB refresh."
+    print("Finished DB refresh.")
 
 
 if __name__ == "__main__":
