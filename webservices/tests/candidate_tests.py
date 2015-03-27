@@ -90,9 +90,9 @@ class CandidateFormatTest(ApiBaseTest):
         fields = ('party', 'party_full', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'candidate_status_full', 'office', 'active_through')
 
         for field in fields:
-            print field
-            print response[field]
-            self.assertEquals(response.has_key(field), True)
+            print(field)
+            print(response[field])
+            self.assertEquals(field in response, True)
 
     def test_extra_fields(self):
         response = self._results('/candidate/P80003338')
@@ -106,10 +106,10 @@ class CandidateFormatTest(ApiBaseTest):
         fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
 
         election = response[0]['committees'][0]
-        print election
+        print(election)
         for field in fields:
-            print field
-            self.assertEquals(election.has_key(field), True)
+            print(field)
+            self.assertEquals(field in election, True)
 
     def test_cand_filters(self):
         # checking one example from each field
@@ -128,7 +128,7 @@ class CandidateFormatTest(ApiBaseTest):
 
         for field, example in filter_fields:
             page = "/candidates?%s=%s" % (field, example)
-            print page
+            print(page)
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
