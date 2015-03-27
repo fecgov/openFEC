@@ -49,7 +49,7 @@ import flask.ext.restful.representations.json
 from .json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
-from db import db_conn
+from .db import db_conn
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
