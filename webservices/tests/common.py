@@ -1,3 +1,4 @@
+import codecs
 import json
 import unittest
 
@@ -19,7 +20,7 @@ class ApiBaseTest(unittest.TestCase):
     def _response(self, qry):
         response = self.app.get(qry)
         self.assertEquals(response.status_code, 200)
-        result = json.loads(response.data)
+        result = json.loads(codecs.decode(response.data))
         self.assertNotEqual(result, [], "Empty response!")
         self.assertEqual(result['api_version'], '0.2')
         return result

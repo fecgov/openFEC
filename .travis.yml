@@ -1,6 +1,6 @@
 language: python
 python:
-  - "2.7"
+  - "3.4"
 addons:
   postgresql: "9.3"
 env: SQLA_CONN="postgresql://:@/cfdm_test"

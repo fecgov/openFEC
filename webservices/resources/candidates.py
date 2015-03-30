@@ -162,8 +162,6 @@ class CandidateView(Resource):
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-
-
         count, candidates = self.get_candidate(args, page_num, per_page, candidate_id, committee_id)
 
         # decorator won't work for me

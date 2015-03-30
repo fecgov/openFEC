@@ -100,7 +100,7 @@ class OverallTest(ApiBaseTest):
 
         for field, example in filter_fields:
             page = "/candidates?%s=%s" % (field, example)
-            print page
+            print(page)
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
@@ -235,7 +235,7 @@ class OverallTest(ApiBaseTest):
 
         for field, example in filter_fields:
             page = "/committees?%s=%s" % (field, example)
-            print page
+            print(page)
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
@@ -274,8 +274,8 @@ class OverallTest(ApiBaseTest):
         fields = ('beginning_image_number', 'end_image_number', 'expire_date', 'load_date','report_type', 'report_type_full','report_year', 'type', 'cash_on_hand_beginning_period', 'cash_on_hand_end_period', 'debts_owed_by_committee', 'debts_owed_to_committee', 'operating_expenditures_period', 'other_political_committee_contributions_period', 'refunds_other_political_committee_contributions_period', 'total_disbursements_period', 'total_individual_contributions_period', 'total_receipts_period',)
 
         for field in fields:
-            print field
-            self.assertEquals(results[0]['reports'][0].has_key(field), True)
+            print(field)
+            self.assertEquals(field in results[0]['reports'][0], True)
 
     @unittest.skip("not implemented yet")
     def test_reports_pac_party(self):
@@ -284,8 +284,8 @@ class OverallTest(ApiBaseTest):
         fields = ('beginning_image_number', 'end_image_number', 'expire_date', 'load_date', 'report_type', 'report_type_full', 'report_year', 'total_disbursements_period', 'total_disbursements_summary_page_period', 'total_receipts_period', 'total_receipts_summary_page_period', 'type')
 
         for field in fields:
-            print field
-            self.assertEquals(results[0]['reports'][0].has_key(field), True)
+            print(field)
+            self.assertEquals(field in results[0]['reports'][0], True)
 
     @unittest.skip("not implemented yet")
     def test_reports_presidental(self):
@@ -295,8 +295,8 @@ class OverallTest(ApiBaseTest):
             )
 
         for field in fields:
-            print field
-            self.assertEquals(results[0]['reports'][0].has_key(field), True)
+            print(field)
+            self.assertEquals(field in results[0]['reports'][0], True)
 
     @unittest.skip("Not implementing for now.")
     def test_total_field_filter(self):
@@ -321,7 +321,7 @@ class OverallTest(ApiBaseTest):
     @unittest.skip("Not implementing for now.")
     def test_multiple_committee(self):
         results = self._results('/total?committee_id=C00002600,C00000422&fields=committtee_id')
-        print len(results)
+        print(len(results))
         self.assertEquals(len(results), 2)
 
 
