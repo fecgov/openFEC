@@ -169,7 +169,7 @@ class CandidateView(Resource):
             candidate_id = None
 
         args = self.parser.parse_args(strict=True)
-        print args
+        print(args)
 
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)

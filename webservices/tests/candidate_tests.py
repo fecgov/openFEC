@@ -10,13 +10,13 @@ class CandidateFormatTest(ApiBaseTest):
         response = self._response('/candidate/H0VA08040')
         self.assertResultsEqual(
             response['pagination'],
-            {'count': 20, 'page': 1, 'pages': 1, 'per_page': 20})
+            {'count': 1, 'page': 1, 'pages': 1, 'per_page': 20})
         # we are showing the full history rather than one result
-        self.assertEqual(len(response['results']), 20)
+        self.assertEqual(len(response['results']), 1)
 
         result = response['results'][0]
         self.assertEqual(result['candidate_id'], 'H0VA08040')
-        self.assertEqual(result['form_type'], 'F2Z')
+        self.assertEqual(result['form_type'], 'F2')
         # @todo - check for a value for expire_data
         self.assertEqual(result['expire_date'], None)
         # most recent record should be first
@@ -43,7 +43,7 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertResultsEqual(result['candidate_status'], 'C')
         self.assertResultsEqual(result['incumbent_challenge'], 'I')
                 # Expanded from candidate_status
-        self.assertResultsEqual(result['candidate_status_full'], 'Statutory candidate')
+        self.assertResultsEqual(result['candidate_status_full'], 'Candidate')
 
 
     @unittest.skip("Fix later once we've figured out how to fix committee cardinality")
@@ -82,7 +82,7 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_fields(self):
         # testing key defaults
-        response = self._results('/candidate/P80003338?year=2008')
+        response = self._results('/candidate/P80003338')
         response = response[0]
 
         self.assertEquals(response['name'], 'OBAMA, BARACK')
@@ -90,17 +90,15 @@ class CandidateFormatTest(ApiBaseTest):
         fields = ('party', 'party_full', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'candidate_status_full', 'office', 'active_through')
 
         for field in fields:
-            print field
-            print response[field]
-            self.assertEquals(response.has_key(field), True)
+            print(field)
+            print(response[field])
+            self.assertEquals(field in response, True)
 
     def test_extra_fields(self):
-        response = self._results('/candidate/P80003338?year=2008')
+        response = self._results('/candidate/P80003338')
         self.assertIn('committees', response[0])
         self.assertIn('PO BOX 8102', response[0]['address_street_1'])
         self.assertIn('60680',response[0]['address_zip'])
-        # testing for year sensitivity
-        self.assertIn('O', response[0]['incumbent_challenge'])
 
     def test_candidate_committes(self):
         response = self._results('/candidate/P80003338?year=*')
@@ -108,10 +106,10 @@ class CandidateFormatTest(ApiBaseTest):
         fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
 
         election = response[0]['committees'][0]
-        print election
+        print(election)
         for field in fields:
-            print field
-            self.assertEquals(election.has_key(field), True)
+            print(field)
+            self.assertEquals(field in election, True)
 
     def test_cand_filters(self):
         # checking one example from each field
@@ -130,7 +128,7 @@ class CandidateFormatTest(ApiBaseTest):
 
         for field, example in filter_fields:
             page = "/candidates?%s=%s" % (field, example)
-            print page
+            print(page)
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
