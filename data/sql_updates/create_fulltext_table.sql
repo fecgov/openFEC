@@ -1,12 +1,4 @@
--- Creates and populates the _fulltext tables.  Run after
--- any operation that changes the data in the tables indexed
--- for full-text search.
-
--- table CREATES
--- will throw an error if the table already exists; that's fine.
--- Plow cheerfully on, ignoring flaming wreckage in the rearview
--- mirror.  Only strictly necessary when setting up database for
--- the first time.
+-- Creates and populates the _fulltext tables.
 
 DROP TABLE if exists dimcand_fulltext;
 CREATE TABLE dimcand_fulltext AS
