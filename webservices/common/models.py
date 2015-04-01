@@ -175,7 +175,7 @@ class CandidateHistory(db.Model):
     party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
-    expire_date = db.Column('candidate_expire_date', db.DateTime())
+    expire_date = db.Column(db.DateTime())
     load_date = db.Column(db.DateTime())
     form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))

@@ -56,7 +56,7 @@ candidate_detail_fields = {
     'address_street_2': fields.String,
     'address_zip': fields.String,
     'candidate_inactive': fields.String,
-    'committees': fields.Nested(candidate_commitee_fields),
+    # 'committees': fields.Nested(candidate_commitee_fields),
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -147,6 +147,7 @@ class CandidateList(Resource):
 
 
 class CandidateView(Resource):
+
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
@@ -168,7 +169,6 @@ class CandidateView(Resource):
             candidate_id = None
 
         args = self.parser.parse_args(strict=True)
-        print(args)
 
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
@@ -209,7 +209,6 @@ class CandidateView(Resource):
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
         if args.get('year') and args['year'] != '*':
-            print ('hello')
             # before expiration
             candidates = candidates.filter(or_(extract('year', CandidateDetail.expire_date) >= int(args['year']), CandidateDetail.expire_date == None))
             # after origination
@@ -220,3 +219,59 @@ class CandidateView(Resource):
         return count, candidates.order_by(CandidateDetail.expire_date.desc()).paginate(page_num, per_page, False).items
 
 
+class CandidateHistoryView(Resource):
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
+    parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
+    parser.add_argument('year', type=str, dest='year', help="See records pertaining to a particular year.")
+    parser.add_argument('year', type=str, help="show records for a given year")
+
+
+    def get(self, **kwargs):
+        candidate_id = kwargs['candidate_id']
+        args = self.parser.parse_args(strict=True)
+
+        page_num = args.get('page', 1)
+        per_page = args.get('per_page', 20)
+
+
+        count, candidates = self.get_candidate(args, page_num, per_page, candidate_id)
+
+        # decorator won't work for me
+        candidates = marshal(candidates, candidate_detail_fields)
+
+        data = {
+            'api_version': '0.2',
+            'pagination': {
+                'page': page_num,
+                'per_page': per_page,
+                'count': count,
+                'pages': int(count / per_page) + (count % per_page > 0),
+            },
+            'results': candidates
+        }
+
+        return data
+
+    def get_candidate(self, args, page_num, per_page, candidate_id):
+        candidates = CandidateHistory.query
+        candidates = candidates.filter_by(**{'candidate_id': candidate_id})
+
+        for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
+            if args.get(argname):
+                # this is not working and doesn't look like it would work for _short
+                if ',' in args[argname]:
+                    candidates = candidates.filter(getattr(CandidateHistory, argname).in_(args[argname].split(',')))
+                else:
+                    candidates = candidates.filter_by(**{argname: args[argname]})
+
+        if args.get('year') and args['year'] != '*':
+            # before expiration
+            candidates = candidates.filter(or_(extract('year', CandidateHistory.expire_date) >= int(args['year']), CandidateHistory.expire_date == None))
+            # after origination
+            candidates = candidates.filter(extract('year', CandidateHistory.load_date) <= int(args['year']))
+
+        count = candidates.count()
+
+        return count, candidates.order_by(CandidateHistory.expire_date.desc()).paginate(page_num, per_page, False).items
