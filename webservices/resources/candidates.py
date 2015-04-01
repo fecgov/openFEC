@@ -1,5 +1,5 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
-from webservices.common.models import db, Candidate, CandidateDetail, Committee, CandidateCommitteeLink
+from webservices.common.models import db, Candidate, CandidateDetail, Committee, CandidateCommitteeLink, CandidateHistory
 from webservices.common.util import default_year
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
@@ -113,7 +113,6 @@ class CandidateList(Resource):
         return data
 
     def get_candidates(self, args, page_num, per_page):
-
         candidates = Candidate.query
 
         fulltext_qry = """SELECT cand_sk
@@ -175,7 +174,6 @@ class CandidateView(Resource):
         per_page = args.get('per_page', 20)
 
 
-
         count, candidates = self.get_candidate(args, page_num, per_page, candidate_id, committee_id)
 
         # decorator won't work for me
@@ -220,6 +218,5 @@ class CandidateView(Resource):
         count = candidates.count()
 
         return count, candidates.order_by(CandidateDetail.expire_date.desc()).paginate(page_num, per_page, False).items
-
 
 

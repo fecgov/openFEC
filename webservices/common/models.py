@@ -159,5 +159,31 @@ class CandidateCommitteeLink(db.Model):
 
     __tablename__ = 'ofec_name_linkage_vw'
 
+class CandidateHistory(db.Model):
+    candidate_key = db.Column(db.Integer, primary_key=True)
+    candidate_id = db.Column(db.String(10))
+    candidate_status = db.Column(db.String(1))
+    candidate_status_full = db.Column(db.String(11))
+    district = db.Column(db.String(2))
+    active_through = db.Column(db.Integer)
+    election_years = db.Column(ARRAY(db.Integer))
+    incumbent_challenge = db.Column(db.String(1))
+    incumbent_challenge_full = db.Column(db.String(10))
+    office = db.Column(db.String(1))
+    office_full = db.Column(db.String(9))
+    party = db.Column(db.String(3))
+    party_full = db.Column(db.String(255))
+    state = db.Column(db.String(2))
+    name = db.Column(db.String(100))
+    expire_date = db.Column('candidate_expire_date', db.DateTime())
+    load_date = db.Column(db.DateTime())
+    form_type = db.Column(db.String(3))
+    address_city = db.Column(db.String(100))
+    address_state = db.Column(db.String(2))
+    address_street_1 = db.Column(db.String(200))
+    address_street_2 = db.Column(db.String(200))
+    address_zip = db.Column(db.String(10))
+    candidate_inactive = db.Column(db.String(1))
 
+    __tablename__ = 'ofec_candidate_history_vw'
 
