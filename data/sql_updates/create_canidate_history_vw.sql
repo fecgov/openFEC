@@ -4,8 +4,7 @@ select
     dimcandproperties.candproperties_sk as properties_key,
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
-    max(dimcandstatusici.election_yr) as active_through,
-    array_agg(distinct dimcandstatusici.election_yr)::int[] as election_years,
+    dimcandstatusici.election_yr as election_year,
     max(dimcandstatusici.cand_inactive_flg) as candidate_inactive,
     max(dimoffice.office_tp) as office,
     max(dimoffice.office_tp_desc) as office_full,
@@ -33,7 +32,6 @@ from dimcandproperties
     left join dimcandoffice co using (cand_sk)
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
-    left join dimcandstatusici csi_recent using (cand_sk)
 group by
     dimcandproperties.candproperties_sk,
     dimcandproperties.cand_nm,
@@ -48,6 +46,7 @@ group by
     dimcandproperties.cand_ici_cd,
     dimcandproperties.cand_status_cd,
     dimcandproperties.cand_status_desc,
+    dimcandstatusici.election_yr,
     dimcand.cand_sk,
     dimcand.cand_id,
     dimcandproperties.form_tp
