@@ -99,9 +99,11 @@ class CandidateList(Resource):
 
         count, candidates = self.get_candidates(args, page_num, per_page)
 
+        page_data = Pagination(page_num, per_page, count)
+
         data = {
             'api_version': '0.2',
-            'pagination': Pagination.as_json(page_num, per_page, count),
+            'pagination': page_data.as_json(),
             'results': candidates
         }
 
@@ -172,9 +174,6 @@ class CandidateView(Resource):
         count, candidates = self.get_candidate(args, page_num, per_page, candidate_id, committee_id)
 
         page_data = Pagination(page_num, per_page, count)
-        print(page_data)
-        p = page_data.as_json
-        print(p)
 
         # decorator won't work for me
         candidates = marshal(candidates, candidate_detail_fields)
