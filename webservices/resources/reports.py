@@ -266,14 +266,11 @@ class ReportsView(Resource):
 
         count, reports = self.get_reports(committee_id, reports_class, args, page_num, per_page)
 
+        page_data = Pagination(page_num, per_page, count)
+
         data = {
             'api_version': '0.2',
-            'pagination': {
-                'page': page_num,
-                'per_page': per_page,
-                'count': count,
-                'pages': int(ceil(count / per_page)),
-            },
+            'pagination': page_data.as_json(),
             'results': reports
         }
 
