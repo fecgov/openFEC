@@ -115,6 +115,7 @@ class NameSearch(restful.Resource):
         findme = ' & '.join(args['q'].split())
         data = db_conn().execute(qry, findme=findme).fetchall()
 
+        ### The count is wrong if more than 20 results are returned.
         return {"api_version": "0.2",
                 "pagination": {'per_page': 20, 'page': 1, 'pages': 1,
                                'count': len(data)},
