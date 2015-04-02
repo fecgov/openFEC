@@ -56,7 +56,32 @@ candidate_detail_fields = {
     'address_street_2': fields.String,
     'address_zip': fields.String,
     'candidate_inactive': fields.String,
-    # 'committees': fields.Nested(candidate_commitee_fields),
+    'committees': fields.Nested(candidate_commitee_fields),
+}
+candidate_history_fields = {
+    'candidate_id': fields.String,
+    'candidate_status_full': fields.String,
+    'candidate_status': fields.String,
+    'district': fields.String,
+    'election_years': fields.List(fields.Integer),
+    'election_year': fields.Integer,
+    'incumbent_challenge_full': fields.String,
+    'incumbent_challenge': fields.String,
+    'office_full': fields.String,
+    'office': fields.String,
+    'party_full': fields.String,
+    'party': fields.String,
+    'state': fields.String,
+    'name': fields.String,
+    'expire_date': fields.String,
+    'load_date': fields.String,
+    'form_type': fields.String,
+    'address_city': fields.String,
+    'address_state': fields.String,
+    'address_street_1': fields.String,
+    'address_street_2': fields.String,
+    'address_zip': fields.String,
+    'candidate_inactive': fields.String,
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -225,7 +250,6 @@ class CandidateHistoryView(Resource):
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('year', type=str, dest='year', help="See records pertaining to a particular year.")
-    parser.add_argument('year', type=str, help="show records for a given year")
 
 
     def get(self, **kwargs):
@@ -239,7 +263,7 @@ class CandidateHistoryView(Resource):
         count, candidates = self.get_candidate(args, page_num, per_page, candidate_id)
 
         # decorator won't work for me
-        candidates = marshal(candidates, candidate_detail_fields)
+        candidates = marshal(candidates, candidate_history_fields)
 
         data = {
             'api_version': '0.2',
