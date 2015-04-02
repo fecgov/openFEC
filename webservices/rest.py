@@ -55,6 +55,7 @@ from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
+from webservices.common.util import Pagination
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)

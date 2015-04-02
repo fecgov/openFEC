@@ -1,6 +1,6 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
 from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, CommitteeDetail
-from webservices.common.util import default_year
+from webservices.common.util import default_year, Pagination
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
 from datetime import date
