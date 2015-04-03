@@ -129,7 +129,7 @@ class Help(restful.Resource):
 
 api.add_resource(Help, '/')
 api.add_resource(CandidateView, '/candidate/<string:candidate_id>', '/committee/<string:committee_id>/candidates')
-api.add_resource(CandidateHistoryView, '/candidate/<string:candidate_id>/history')
+api.add_resource(CandidateHistoryView, '/candidate/<string:candidate_id>/history/<int:year>')
 api.add_resource(CandidateList, '/candidates')
 api.add_resource(CommitteeView, '/committee/<string:committee_id>', '/candidate/<string:candidate_id>/committees')
 api.add_resource(CommitteeList, '/committees')

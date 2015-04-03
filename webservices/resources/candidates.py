@@ -63,7 +63,6 @@ candidate_history_fields = {
     'candidate_status_full': fields.String,
     'candidate_status': fields.String,
     'district': fields.String,
-    'election_years': fields.List(fields.Integer),
     'election_year': fields.Integer,
     'incumbent_challenge_full': fields.String,
     'incumbent_challenge': fields.String,
@@ -253,7 +252,7 @@ class CandidateHistoryView(Resource):
         per_page = args.get('per_page', 20)
 
 
-        count, candidates = self.get_candidate(args, page_num, per_page, candidate_id)
+        count, candidates = self.get_candidate(args, page_num, per_page, **kwargs)
 
         # decorator won't work for me
         candidates = marshal(candidates, candidate_history_fields)
@@ -271,16 +270,18 @@ class CandidateHistoryView(Resource):
 
         return data
 
-    def get_candidate(self, args, page_num, per_page, candidate_id):
+    def get_candidate(self, args, page_num, per_page, **kwargs):
+        candidate_id = kwargs['candidate_id']
+        year = kwargs['year']
         candidates = CandidateHistory.query
         candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 
-        if args.get('year') and args['year'] != '*':
-            # before expiration
-            candidates = candidates.filter(or_(extract('year', CandidateHistory.expire_date) >= int(args['year']), CandidateHistory.expire_date == None))
-            # after origination
-            candidates = candidates.filter(extract('year', CandidateHistory.load_date) <= int(args['year']))
+        # I expect this to change
+        # before expiration
+        candidates = candidates.filter(or_(extract('year', CandidateHistory.expire_date) >= year, CandidateHistory.expire_date == None))
+        # after origination
+        candidates = candidates.filter(extract('year', CandidateHistory.load_date) <= year)
 
         count = candidates.count()
 
-        return count, candidates.order_by(CandidateHistory.election_year.desc()).paginate(page_num, per_page, False).items
+        return count, candidates.order_by(CandidateHistory.expire_date.desc()).paginate(page_num, per_page, False).items
