@@ -275,14 +275,6 @@ class CandidateHistoryView(Resource):
         candidates = CandidateHistory.query
         candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 
-        for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
-            if args.get(argname):
-                # this is not working and doesn't look like it would work for _short
-                if ',' in args[argname]:
-                    candidates = candidates.filter(getattr(CandidateHistory, argname).in_(args[argname].split(',')))
-                else:
-                    candidates = candidates.filter_by(**{argname: args[argname]})
-
         if args.get('year') and args['year'] != '*':
             # before expiration
             candidates = candidates.filter(or_(extract('year', CandidateHistory.expire_date) >= int(args['year']), CandidateHistory.expire_date == None))
@@ -291,4 +283,4 @@ class CandidateHistoryView(Resource):
 
         count = candidates.count()
 
-        return count, candidates.order_by(CandidateHistory.expire_date.desc()).paginate(page_num, per_page, False).items
+        return count, candidates.order_by(CandidateHistory.election_year.desc()).paginate(page_num, per_page, False).items
