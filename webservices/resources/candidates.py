@@ -270,17 +270,19 @@ class CandidateHistoryView(Resource):
 
         return data
 
-    def get_candidate(self, args, page_num, per_page, **kwargs):
+    def get_candidate(self, args, page_num, per_page, year=None, **kwargs):
         candidate_id = kwargs['candidate_id']
-        year = kwargs['year']
+        year = kwargs.get('year', None)
+
         candidates = CandidateHistory.query
         candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 
         # I expect this to change
-        # before expiration
-        candidates = candidates.filter(or_(extract('year', CandidateHistory.expire_date) >= year, CandidateHistory.expire_date == None))
-        # after origination
-        candidates = candidates.filter(extract('year', CandidateHistory.load_date) <= year)
+        if year:
+            # before expiration
+            candidates = candidates.filter(or_(extract('year', CandidateHistory.expire_date) >= year, CandidateHistory.expire_date == None))
+            # after origination
+            candidates = candidates.filter(extract('year', CandidateHistory.load_date) <= year)
 
         count = candidates.count()
 
