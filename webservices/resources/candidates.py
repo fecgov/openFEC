@@ -257,14 +257,11 @@ class CandidateHistoryView(Resource):
         # decorator won't work for me
         candidates = marshal(candidates, candidate_history_fields)
 
+        page_data = Pagination(page_num, per_page, count)
+
         data = {
             'api_version': '0.2',
-            'pagination': {
-                'page': page_num,
-                'per_page': per_page,
-                'count': count,
-                'pages': int(count / per_page) + (count % per_page > 0),
-            },
+            'pagination': page_data.as_json(),
             'results': candidates
         }
 
