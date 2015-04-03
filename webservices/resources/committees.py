@@ -1,6 +1,6 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
 from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, CommitteeDetail
-from webservices.common.util import default_year
+from webservices.common.util import default_year, Pagination
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
 from datetime import date
@@ -122,14 +122,11 @@ class CommitteeList(Resource):
 
         count, committees = self.get_committees(args, page_num, per_page, candidate_id=candidate_id)
 
+        page_data = Pagination(page_num, per_page, count)
+
         data = {
             'api_version': '0.2',
-            'pagination': {
-                'page': page_num,
-                'per_page': per_page,
-                'count': count,
-                'pages': int(count / per_page) + (count % per_page > 0),
-            },
+            'pagination': page_data.as_json(),
             'results': committees
         }
 
@@ -210,17 +207,14 @@ class CommitteeView(Resource):
 
         count, committees = self.get_committee(args, page_num, per_page, committee_id, candidate_id)
 
+        page_data = Pagination(page_num, per_page, count)
+
         # decorator won't work for me
         committees = marshal(committees, committee_detail_fields)
 
         data = {
             'api_version': '0.2',
-            'pagination': {
-                'page': page_num,
-                'per_page': per_page,
-                'count': count,
-                'pages': int(count / per_page) + (count % per_page > 0),
-            },
+            'pagination': page_data.as_json(),
             'results': committees
         }
 

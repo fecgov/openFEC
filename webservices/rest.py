@@ -55,6 +55,7 @@ from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
+from webservices.common.util import Pagination
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -113,10 +114,10 @@ class NameSearch(restful.Resource):
         qry = sa.sql.text(self.fulltext_qry)
         findme = ' & '.join(args['q'].split())
         data = db_conn().execute(qry, findme=findme).fetchall()
+        page_data = Pagination(1, 1, len(data))
 
         return {"api_version": "0.2",
-                "pagination": {'per_page': 20, 'page': 1, 'pages': 1,
-                               'count': len(data)},
+                "pagination": page_data.as_json(),
                 "results": [dict(d) for d in data]}
 
 

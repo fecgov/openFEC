@@ -1,7 +1,7 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 from math import ceil
 from webservices.common.models import db
-from webservices.common.util import default_year, merge_dicts
+from webservices.common.util import default_year, merge_dicts, Pagination
 from webservices.resources.committees import Committee
 from sqlalchemy import desc
 
@@ -266,14 +266,11 @@ class ReportsView(Resource):
 
         count, reports = self.get_reports(committee_id, reports_class, args, page_num, per_page)
 
+        page_data = Pagination(page_num, per_page, count)
+
         data = {
             'api_version': '0.2',
-            'pagination': {
-                'page': page_num,
-                'per_page': per_page,
-                'count': count,
-                'pages': int(ceil(count / per_page)),
-            },
+            'pagination': page_data.as_json(),
             'results': reports
         }
 
