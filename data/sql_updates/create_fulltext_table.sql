@@ -1,12 +1,6 @@
--- Creates and populates the _fulltext tables.  Run after
--- any operation that changes the data in the tables indexed
--- for full-text search.
+-- Creates and populates the _fulltext tables.
 
--- table CREATES
--- will throw an error if the table already exists; that's fine.
--- Plow cheerfully on, ignoring flaming wreckage in the rearview
--- mirror.  Only strictly necessary when setting up database for
--- the first time.
+DROP TABLE if exists dimcand_fulltext;
 CREATE TABLE dimcand_fulltext AS
   SELECT cand_sk,
          NULL::tsvector AS fulltxt
@@ -15,7 +9,7 @@ CREATE TABLE dimcand_fulltext AS
 WITH cnd AS (
   SELECT c.cand_sk,
          setweight(to_tsvector(string_agg(coalesce(p.cand_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cand_id, ''), ' ')), 'B')
+         setweight(to_tsvector(string_agg(coalesce(c.cand_id, ''), ' ')), 'B')
          AS weights
   FROM   dimcand c
   JOIN   dimcandproperties p ON (c.cand_sk = p.cand_sk)
@@ -26,7 +20,8 @@ SET    fulltxt = (SELECT weights FROM cnd
 
 CREATE INDEX cand_fts_idx ON dimcand_fulltext USING gin(fulltxt);
 
--- Will also throw an acceptable error when the table already exists.
+
+DROP TABLE if exists dimcmte_fulltext;
 CREATE TABLE dimcmte_fulltext AS
   SELECT cmte_sk,
          NULL::tsvector AS fulltxt
@@ -46,10 +41,8 @@ SET    fulltxt = (SELECT weights FROM cmte
 
 CREATE INDEX cmte_fts_idx ON dimcmte_fulltext USING gin(fulltxt);
 
-GRANT SELECT ON dimcmte_fulltext TO webro;
-GRANT SELECT ON dimcand_fulltext TO webro;
 
-
+DROP TABLE if exists name_search_fulltext;
 CREATE TABLE name_search_fulltext AS
 WITH ranked AS (
 SELECT
@@ -95,5 +88,5 @@ FROM   ranked
 WHERE  load_order = 1;
 
 CREATE INDEX name_search_fts_idx ON name_search_fulltext USING gin(name_vec);
-GRANT SELECT ON name_search_fulltext TO webro;
+
 
