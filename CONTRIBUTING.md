@@ -20,6 +20,9 @@ Development issues should include:
 * Unknowns tasks or dependencies that need investigation; and
 * [The boilerplate tasks for each development issue](https://gist.github.com/theresaanna/86be7e29214a7f31ab73).
 
+The use of checklists (via `- [ ]`) to keep track of sub-items is encouraged wherever possible.
+
+
 #### Commit messages
 
 - Usually start with a verb. Like “added” or “changed” or “removed”.
