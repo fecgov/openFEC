@@ -36,11 +36,10 @@ The use of checklists (via `- [ ]`) to keep track of sub-items is encouraged whe
 When creating a new pull request:
 
 * Be sure that the message contains a summary of the work that is included in the pull request.
-* If the pull request is still a work-in-progress and should not be merged, include that in the description and then **assign the PR to yourself**. When the PR is ready to be merged, **unassign yourself and add a comment**.
-* If a new pull request is ready for review, **leave it unassigned**. This is the assumed state of new PRs, but work-in-progress PRs are quite welcome.
+* If the pull request is still a work-in-progress and should not be merged, **include `[WIP]` at the beginning of the title**. When the PR is ready to be merged, **edit the title to remove `[WIP]`**.
+* If a pull request is ready for review, **leave or make it unassigned**. This is the assumed state of new PRs, but work-in-progress PRs are quite welcome.
 * If you decide to review a pull request with the intent of merging it (or deciding what still needs to be done before merge), then **assign the PR to yourself** so that it's clear that someone's grabbed it.
 * Anyone is welcome to informally review a PR and comment on it at any time, no matter who is assigned.
-
 
 
 ## Public domain
