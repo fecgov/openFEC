@@ -50,7 +50,7 @@ class CandidateFormatTest(ApiBaseTest):
     def test_candidate_committees(self):
         """Compare results to expected fields."""
         # @todo - use a factory rather than the test data
-        response = self._response('/candidate/H0VA08040')
+        response = self._response('/candidate/H0VA08040/committees')
         committees = response['results'][0]['committees']
         self.prettyPrint(committees)
         self.assertResultsEqual(committees,
@@ -144,7 +144,7 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
 
     def test_candidate_history_by_year(self):
-        results = self._results('/candidate/H0VA08040/history/2006')
+        results = self._results('/candidate/P80003338/history/2008')
 
         expected_result = {
             "address_city": "CHICAGO",
@@ -170,6 +170,7 @@ class CandidateFormatTest(ApiBaseTest):
             "party_full": "Democratic Party",
             "state": "US"
         }
+
 
         self.assertEqual(results[0], expected_result)
 
