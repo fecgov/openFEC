@@ -136,7 +136,6 @@ class CandidateFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-
     def test_name_endpoint_returns_unique_candidates_and_committees(self):
         results = self._results('/names?q=obama')
         cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
@@ -144,8 +143,63 @@ class CandidateFormatTest(ApiBaseTest):
         cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
         self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
 
+    def test_candidate_history_by_year(self):
+        results = self._results('/candidate/H0VA08040/history/2006')
 
+        expected_result = {
+            "address_city": "CHICAGO",
+            "address_state": "IL",
+            "address_street_1": "PO BOX 8102",
+            "address_street_2": None,
+            "address_zip": "60680",
+            "candidate_id": "P80003338",
+            "candidate_inactive": None,
+            "candidate_status": "C",
+            "candidate_status_full": "Statutory candidate",
+            "district": None,
+            "election_year": 2008,
+            "expire_date": "2011-04-04 00:00:00",
+            "form_type": "F2",
+            "incumbent_challenge": "O",
+            "incumbent_challenge_full": "Open (Open seat)",
+            "load_date": "2008-09-17 00:00:00",
+            "name": "OBAMA, BARACK",
+            "office": "P",
+            "office_full": "President",
+            "party": "DEM",
+            "party_full": "Democratic Party",
+            "state": "US"
+        }
 
+        self.assertEqual(results[0], expected_result)
 
+    def test_candidate_history(self):
+        results = self._results('/candidate/P80003338/history')
 
+        expected_result = {
+            "address_city": "CHICAGO",
+            "address_state": "IL",
+            "address_street_1": "PO BOX 8102",
+            "address_street_2": None,
+            "address_zip": "60680",
+            "candidate_id": "P80003338",
+            "candidate_inactive": None,
+            "candidate_status": "C",
+            "candidate_status_full": "Statutory candidate",
+            "district": None,
+            "election_year": 2012,
+            "expire_date": None,
+            "form_type": "F2Z",
+            "incumbent_challenge": "I",
+            "incumbent_challenge_full": "Incumbent (Current seat holder running for election)",
+            "load_date": "2011-07-19 00:00:00",
+            "name": "OBAMA, BARACK",
+            "office": "P",
+            "office_full": "President",
+            "party": "DEM",
+            "party_full": "Democratic Party",
+            "state": "US"
+        }
+
+        self.assertEqual(results[0], expected_result)
 

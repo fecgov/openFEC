@@ -270,7 +270,7 @@ class CandidateHistoryView(Resource):
 
         return data
 
-    def get_candidate(self, args, page_num, per_page, year=None, **kwargs):
+    def get_candidate(self, args, page_num, per_page, **kwargs):
         candidate_id = kwargs['candidate_id']
         year = kwargs.get('year', None)
 
@@ -284,6 +284,4 @@ class CandidateHistoryView(Resource):
             # after origination
             candidates = candidates.filter(extract('year', CandidateHistory.load_date) <= year)
 
-        count = candidates.count()
-
-        return count, candidates.order_by(CandidateHistory.expire_date.desc()).paginate(page_num, per_page, False).items
+        return 1, candidates.order_by(CandidateHistory.expire_date.desc()).paginate(page_num, per_page, False).items
