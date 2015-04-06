@@ -1,5 +1,9 @@
+-- leaving older version drop code here for backward compatibility with older DB snapshots
+drop view if exists ofec_name_linkage_vw;
 drop materialized view if exists ofec_name_linkage_vw;
-create materialized view ofec_name_linkage_vw as
+
+drop materialized view if exists ofec_name_linkage_mv;
+create materialized view ofec_name_linkage_mv as
 select
     l.linkages_sk as linkage_key,
     l.cand_sk as candidate_key,
