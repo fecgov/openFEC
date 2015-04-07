@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_candidate_detail_vw;
-create materialized view ofec_candidate_detail_vw as
+drop materialized view if exists ofec_candidate_detail_mv;
+create materialized view ofec_candidate_detail_mv as
 select
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
