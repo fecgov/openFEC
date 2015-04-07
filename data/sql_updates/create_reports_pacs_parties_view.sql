@@ -1,3 +1,4 @@
+drop view if exists ofec_reports_pacs_parties_vw;
 drop materialized view if exists ofec_reports_pacs_parties_mv;
 create materialized view ofec_reports_pacs_parties_mv as
 select

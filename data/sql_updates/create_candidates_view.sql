@@ -1,3 +1,4 @@
+drop view if exists ofec_candidates_vw;
 drop materialized view if exists ofec_candidates_mv;
 create materialized view ofec_candidates_mv as
 select

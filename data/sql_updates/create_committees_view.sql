@@ -1,3 +1,4 @@
+drop view if exists ofec_committees_vw;
 drop materialized view if exists ofec_committees_mv;
 create materialized view ofec_committees_mv as
 select distinct

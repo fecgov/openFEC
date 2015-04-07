@@ -1,3 +1,4 @@
+drop view if exists ofec_name_linkage_vw;
 drop materialized view if exists ofec_name_linkage_mv;
 create materialized view ofec_name_linkage_mv as
 select
