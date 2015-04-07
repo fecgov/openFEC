@@ -1,6 +1,8 @@
--- leaving older version drop code here for backward compatibility with older DB snapshots
-drop view if exists ofec_name_linkage_vw;
-drop materialized view if exists ofec_name_linkage_vw;
+-- leaving older version drop code commented out here for backward compatibility with older DB snapshots
+-- note that you need to know whether the DB in question needs a VIEW or MATERIALIZED VIEW dropped here
+-- if you run the wrong version, it will cause an error.
+-- drop view if exists ofec_name_linkage_vw;
+-- drop materialized view if exists ofec_name_linkage_vw;
 
 drop materialized view if exists ofec_name_linkage_mv;
 create materialized view ofec_name_linkage_mv as
