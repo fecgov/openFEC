@@ -1,3 +1,12 @@
+-- Creates a table of 2-year periods
+drop table if exists two_year_period_tb;
+create table two_year_period_tb as
+select year from dimyears
+    where (year <= EXTRACT(YEAR FROM now()) +1)
+    and year % 2 = 0;
+
+
+--  full history of a candidate
 drop materialized view if exists ofec_candidate_history_vw;
 create materialized view ofec_candidate_history_vw as
 select
