@@ -18,7 +18,7 @@ For those interested in contributing, please check out our [contributing guideli
 * [openfec] (https://github.com/18F/openfec) - Where our work happens. We create issues related to each sprint and our backlog here. If you're interested in contribution, please look for "help wanted" tags or ask!
 
 ## Installation
-This will work best when installed in to its own [Virtual Environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
+This will work best when installed in to its own [Virtual Environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/). Ensure you set up the virtual environment to use python3.
 
 - `$ python setup.py develop`
 - `$ python openfec/entities/pipeline.py CleanData --local-scheduler`
