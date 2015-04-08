@@ -58,6 +58,7 @@ class CandidateDetail(db.Model):
 class Committee(db.Model):
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
+    candidate_ids = db.Column(ARRAY(db.String))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
