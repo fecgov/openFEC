@@ -37,3 +37,13 @@ group by
     dimcand.cand_id,
     csi_recent.election_yr
 ;
+
+create index on ofec_candidates_mv(name);
+create index on ofec_candidates_mv(party);
+create index on ofec_candidates_mv(state);
+create index on ofec_candidates_mv(office);
+create index on ofec_candidates_mv(district);
+create index on ofec_candidates_mv(candidate_id);
+create index on ofec_candidates_mv(election_years);
+create index on ofec_candidates_mv(candidate_status);
+create index on ofec_candidates_mv(incumbent_challenge);

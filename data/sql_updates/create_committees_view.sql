@@ -53,3 +53,13 @@ from dimcmte
     left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
     -- inner join dimlinkages dl using (cmte_sk)
 ;
+
+create index on ofec_committees_mv(party);
+create index on ofec_committees_mv(state);
+create index on ofec_committees_mv(designation);
+create index on ofec_committees_mv(expire_date);
+create index on ofec_committees_mv(committee_id);
+create index on ofec_committees_mv(committee_key);
+create index on ofec_committees_mv(candidate_ids);
+create index on ofec_committees_mv(committee_type);
+create index on ofec_committees_mv(organization_type);

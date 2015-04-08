@@ -45,3 +45,6 @@ where
     p.expire_date is null or p.expire_date > date_trunc('day', now())
 group by committee_id, cycle, committee_type
 ;
+
+create index on ofec_totals_presidential_mv(cycle);
+create index on ofec_totals_presidential_mv(committee_id);

@@ -43,3 +43,6 @@ select
     (select cand_nm from dimcandproperties where dimcandproperties.cand_sk = l.cand_sk order by candproperties_sk desc limit 1) as candidate_name,
     (select cmte_nm from dimcmteproperties where dimcmteproperties.cmte_sk = l.cmte_sk order by cmteproperties_sk desc limit 1) as committee_name
 from dimlinkages l;
+
+create index on ofec_name_linkage_mv(candidate_key);
+create index on ofec_name_linkage_mv(committee_key);
