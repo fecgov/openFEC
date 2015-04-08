@@ -33,6 +33,7 @@ Prior to running, ensure you have the following requirements installed:
 * npm
 * PostgreSQL
 * tmuxinator
+
 <!--endrequirements-->
 
 Then, simply run:
