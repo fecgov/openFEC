@@ -14,8 +14,13 @@ class ApiBaseTest(unittest.TestCase):
     def setUp(self):
         rest.app.config['TESTING'] = True
         self.app = rest.app.test_client()
+        self.ctx = rest.app.app_context()
+        self.ctx.push()
         self.longMessage = True
         self.maxDiff = None
+
+    def tearDown(self):
+        self.ctx.pop()
 
     def _response(self, qry):
         response = self.app.get(qry)
