@@ -1,63 +1,74 @@
 -- Creates a table of 2-year periods
-drop table if exists two_year_period_tb;
-create table two_year_period_tb as
+drop table if exists two_year_period;
+create table two_year_period as
 select year from dimyears
     where (year <= EXTRACT(YEAR FROM now()) +1)
     and year % 2 = 0;
 
-
---  full history of a candidate
+--  Full history of a candidate selecting the most recent record for each 2-year period
 drop materialized view if exists ofec_candidate_history_vw;
 create materialized view ofec_candidate_history_vw as
 select
-    dimcandproperties.candproperties_sk as properties_key,
+    dcp.candproperties_sk as properties_key,
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
-    dimcandstatusici.election_yr as election_year,
-    max(dimcandstatusici.cand_inactive_flg) as candidate_inactive,
-    max(dimoffice.office_tp) as office,
-    max(dimoffice.office_tp_desc) as office_full,
-    max(dimparty.party_affiliation) as party,
-    max(dimparty.party_affiliation_desc) as party_full,
-    max(dimoffice.office_state) as state,
-    max(dimoffice.office_district) as district,
-    dimcandproperties.cand_nm as name,
-    dimcandproperties.cand_st as address_state,
-    dimcandproperties.expire_date as expire_date,
-    dimcandproperties.load_date as load_date,
-    dimcandproperties.cand_city as address_city,
-    dimcandproperties.cand_st1 as address_street_1,
-    dimcandproperties.cand_st2 as address_street_2,
-    dimcandproperties.cand_st2 as address_street,
-    dimcandproperties.cand_zip as address_zip,
-    dimcandproperties.cand_ici_desc as incumbent_challenge_full,
-    dimcandproperties.cand_ici_cd as incumbent_challenge,
-    dimcandproperties.cand_status_cd as candidate_status,
-    dimcandproperties.cand_status_desc as candidate_status_full,
-    dimcandproperties.form_tp as form_type
-from dimcandproperties
-    left join dimcand using (cand_sk)
-    left join dimcandstatusici using (cand_sk)
-    left join dimcandoffice co using (cand_sk)
-    inner join dimoffice using (office_sk)
-    inner join dimparty using (party_sk)
+    dcs.election_yr as election_year,
+    max(dcs.cand_inactive_flg) as candidate_inactive,
+    max(do.office_tp) as office,
+    max(do.office_tp_desc) as office_full,
+    max(dp.party_affiliation) as party,
+    max(dp.party_affiliation_desc) as party_full,
+    max(do.office_state) as state,
+    max(do.office_district) as district,
+    dcp.cand_nm as name,
+    dcp.cand_st as address_state,
+    dcp.expire_date as expire_date,
+    dcp.load_date as load_date,
+    dcp.cand_city as address_city,
+    dcp.cand_st1 as address_street_1,
+    dcp.cand_st2 as address_street_2,
+    dcp.cand_st2 as address_street,
+    dcp.cand_zip as address_zip,
+    dcp.cand_ici_desc as incumbent_challenge_full,
+    dcp.cand_ici_cd as incumbent_challenge,
+    dcp.cand_status_cd as candidate_status,
+    dcp.cand_status_desc as candidate_status_full,
+    dcp.form_tp as form_type
+-- using the two year period table to translate the data into two year periods
+    from two_year_period
+
+        select distinct on (election_yr, cand_id)
+            dcp.candproperties_sk, dcp.cand_nm, dcp.cand_st, dcp.expire_date, dcp.load_date, dcp.cand_city, dcp.cand_st1, dcp.cand_st2, dcp.cand_zip, dcp.cand_ici_desc, dcp.cand_ici_cd, dcp.cand_status_cd, dcp.cand_status_desc
+        from dimcandproperties dcp
+        -- Looking for all records that were turned in before the end of the cycle and
+        -- don't expire before the cycle begins to link records to a 2-year period.
+        -- The beginning of the period starts one year before the cycle
+        where (two_year_period.year >= EXTRACT(YEAR FROM load_date) - 1) and (expire_date is null or two_year_period.year <= EXTRACT(YEAR FROM expire_date))
+        -- ordering so that the we just return the most recent record
+        order by dcp.expire_date desc
+
+        from dcp
+            left join dimcand using (cand_sk)
+            left join dimcandstatusici dcs using (cand_sk)
+            left join dimcandoffice dco using (cand_sk)
+            inner join dimoffice do using (office_sk)
+            inner join dimparty dp using (party_sk)
 group by
-    dimcandproperties.candproperties_sk,
-    dimcandproperties.cand_nm,
-    dimcandproperties.cand_st,
-    dimcandproperties.expire_date,
-    dimcandproperties.load_date,
-    dimcandproperties.cand_city,
-    dimcandproperties.cand_st1,
-    dimcandproperties.cand_st2,
-    dimcandproperties.cand_zip,
-    dimcandproperties.cand_ici_desc,
-    dimcandproperties.cand_ici_cd,
-    dimcandproperties.cand_status_cd,
-    dimcandproperties.cand_status_desc,
-    dimcandstatusici.election_yr,
+    dcp.candproperties_sk,
+    dcp.cand_nm,
+    dcp.cand_st,
+    dcp.expire_date,
+    dcp.load_date,
+    dcp.cand_city,
+    dcp.cand_st1,
+    dcp.cand_st2,
+    dcp.cand_zip,
+    dcp.cand_ici_desc,
+    dcp.cand_ici_cd,
+    dcp.cand_status_cd,
+    dcp.cand_status_desc,
+    dcs.election_yr,
     dimcand.cand_sk,
     dimcand.cand_id,
-    dimcandproperties.form_tp
+    dcp.form_tp
 ;
-
