@@ -44,7 +44,7 @@ api = restful.Api(app)
 db.init_app(app)
 
 # api.data.gov
-trusted_proxies = ('192.168.114.100')
+trusted_proxies = ('192.168.114.100',)
 PRODUCTION = os.getenv('PRODUCTION', False)
 print(PRODUCTION)
 
