@@ -8,7 +8,7 @@ import logging
 import sys
 import os
 
-from flask import Flask
+from flask import Flask, abort, request
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import flask.ext.restful.representations.json
@@ -42,6 +42,24 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 api = restful.Api(app)
 db.init_app(app)
+
+# api.data.gov
+trusted_proxies = ('192.168.114.100')
+PRODUCTION = os.getenv('PRODUCTION', False)
+print(PRODUCTION)
+
+@app.before_request
+def limit_remote_addr():
+    if PRODUCTION == 'true':
+        print('running')
+        remote = request.remote_addr
+        route = list(request.access_route)
+        while remote in trusted_proxies:
+            remote = route.pop()
+        print(route.pop())
+
+        if remote not in trusted_proxies:
+            abort(403)
 
 @app.after_request
 def after_request(response):
