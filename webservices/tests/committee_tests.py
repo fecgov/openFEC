@@ -1,6 +1,7 @@
 import json
 import unittest
 
+from webservices.common import models
 from .common import ApiBaseTest
 
 ## old, re-factored Committee tests ##
@@ -33,6 +34,24 @@ class CommitteeFormatTest(ApiBaseTest):
         results = response['results'][0]
         self.assertEqual(results['organization_type_full'], 'Corporation')
         self.assertEqual(results['organization_type'], 'C')
+
+    def test_filter_by_candidate_id(self):
+        response = self._response('/committees?candidate_id=H2CA37213')
+        self.assertEqual(
+            len(response['results']),
+            models.Committee.query.filter(
+                models.Committee.candidate_ids.overlap(['H2CA37213'])
+            ).count(),
+        )
+
+    def test_filter_by_candidate_ids(self):
+        response = self._response('/committees?candidate_id=H2CA37213,H2CA38088')
+        self.assertEqual(
+            len(response['results']),
+            models.Committee.query.filter(
+                models.Committee.candidate_ids.overlap(['H2CA37213', 'H2CA38088'])
+            ).count(),
+        )
 
     def test_committee_detail_fields(self):
         response = self._response('/committee/C00048587')
