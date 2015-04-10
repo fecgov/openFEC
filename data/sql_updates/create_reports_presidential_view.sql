@@ -1,3 +1,4 @@
+drop view if exists ofec_reports_presidential_vw;
 drop materialized view if exists ofec_reports_presidential_mv;
 create materialized view ofec_reports_presidential_mv as
 select

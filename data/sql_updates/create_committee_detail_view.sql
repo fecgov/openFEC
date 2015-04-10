@@ -1,5 +1,6 @@
 drop view if exists ofec_committee_detail_vw;
-create view ofec_committee_detail_vw as
+drop materialized view if exists ofec_committee_detail_mv;
+create materialized view ofec_committee_detail_mv as
 select distinct
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
