@@ -1,5 +1,6 @@
 drop view if exists ofec_committee_detail_vw;
-create view ofec_committee_detail_vw as
+drop materialized view if exists ofec_committee_detail_mv;
+create materialized view ofec_committee_detail_mv as
 select distinct
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
@@ -98,3 +99,9 @@ from dimcmte
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     -- inner join dimlinkages dl using (cmte_sk)
 ;
+
+create index on ofec_committee_detail_mv(designation);
+create index on ofec_committee_detail_mv(expire_date);
+create index on ofec_committee_detail_mv(committee_id);
+create index on ofec_committee_detail_mv(committee_type);
+create index on ofec_committee_detail_mv(organization_type);
