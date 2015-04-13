@@ -12,7 +12,7 @@ candidate_detail = {
     'office': Arg(str, description='Governmental office candidate runs for'),
     'state': Arg(str, description='U.S. State candidate is registered in'),
     'party': Arg(str, description='Three letter code for the party under which a candidate ran for office'),
-    'year': Arg(str, description='See records pertaining to a particular year.'),
+    'year': Arg(str, dest='election_year', description='See records pertaining to a particular year.'),
     'district': Arg(str, description='Two digit district number'),
     'candidate_status': Arg(str, description='One letter code explaining if the candidate is a present, future or past candidate'),
     'incumbent_challenge': Arg(str, description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),

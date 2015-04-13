@@ -31,7 +31,11 @@ def filter_query(model, query, fields, **kwargs):
         if field not in fields or not value:
             continue
         column = getattr(model, field)
-        predicate = column.in_(value.split(',')) if ',' in value else column == value
+        predicate = (
+            column.in_(value.split(','))
+            if ',' in value
+            else column == value
+        )
         query = query.filter(predicate)
     return query
 
@@ -45,7 +49,6 @@ class CandidateList(Resource):
         candidates = self.get_candidates(kwargs)
         paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
         page = paginator.get_page(kwargs['page'])
-        import ipdb; ipdb.set_trace()
         return schemas.CandidatePageSchema().dump(page).data
 
     def get_candidates(self, kwargs):
@@ -68,7 +71,7 @@ class CandidateList(Resource):
         if kwargs.get('election_year') and kwargs['election_year'] != '*':
             candidates = candidates.filter(
                 Candidate.election_years.overlap(
-                    [int(x) for x in args['election_year'].split(',')]
+                    [int(x) for x in kwargs['election_year'].split(',')]
                 )
             )
 
@@ -93,7 +96,7 @@ class CandidateView(Resource):
         if committee_id is not None:
             candidates = CandidateDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
 
-        candidates = filter_query(Candidate, candidates, filter_fields, **kwargs)
+        candidates = filter_query(CandidateDetail, candidates, filter_fields, **kwargs)
 
         if kwargs.get('year') and kwargs['year'] != '*':
             # before expiration
