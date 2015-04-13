@@ -247,7 +247,7 @@ class CommitteeView(Resource):
                     committees = committees.filter(getattr(Committee, argname)==args[argname])
 
         # Should this handle a list of years to make it consistent with /candidate ?
-        if args.get('year') and args['year'] != '*':
+        if args.get('year'):
             # before expiration
             committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= int(args['year']), CommitteeDetail.expire_date == None))
             # after origination
