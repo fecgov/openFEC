@@ -4,3 +4,7 @@ git+git://github.com/flask-restful/flask-restful.git
 nose
 flask-sqlalchemy
 Flask-Script
+
+marshmallow>=1.2.4
+webargs>=0.13.0
+git+https://github.com/marshmallow-code/smore

@@ -1,5 +1,4 @@
 from .common import ApiBaseTest
-import unittest
 
 
 class CandidateFormatTest(ApiBaseTest):
@@ -20,7 +19,7 @@ class CandidateFormatTest(ApiBaseTest):
         # @todo - check for a value for expire_data
         self.assertEqual(result['expire_date'], None)
         # most recent record should be first
-        self.assertEqual(result['load_date'], '2013-04-24 00:00:00')
+        self.assertEqual(result['load_date'], '2013-04-24T00:00:00+00:00')
         self.assertResultsEqual(result['name'], 'MORAN, JAMES P. JR.')
         #address
         self.assertEqual(result['address_city'], 'ALEXANDRIA')
@@ -41,7 +40,7 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertResultsEqual(result['candidate_inactive'], 'Y')
         self.assertResultsEqual(result['candidate_status'], 'C')
         self.assertResultsEqual(result['incumbent_challenge'], 'I')
-                # Expanded from candidate_status
+        # Expanded from candidate_status
         self.assertResultsEqual(result['candidate_status_full'], 'Candidate')
 
     def _results(self, qry):
@@ -65,7 +64,7 @@ class CandidateFormatTest(ApiBaseTest):
     def test_extra_fields(self):
         response = self._results('/candidate/P80003338')
         self.assertIn('PO BOX 8102', response[0]['address_street_1'])
-        self.assertIn('60680',response[0]['address_zip'])
+        self.assertIn('60680', response[0]['address_zip'])
 
     def test_cand_filters(self):
         # checking one example from each field
@@ -73,7 +72,7 @@ class CandidateFormatTest(ApiBaseTest):
         original_count = orig_response['pagination']['count']
 
         filter_fields = (
-            ('office','H'),
+            ('office', 'H'),
             ('district', '00,02'),
             ('state', 'CA'),
             ('name', 'Obama'),
@@ -92,15 +91,7 @@ class CandidateFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-
     def test_name_endpoint_returns_unique_candidates_and_committees(self):
         results = self._results('/names?q=obama')
         cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
         self.assertEqual(len(cand_ids), len(set(cand_ids)))
-
-
-
-
-
-
-
