@@ -1,3 +1,5 @@
+-- Run on RDS after complete data refresh to create indexes.
+
 -- SELECT 'ALTER TABLE ' || table_name ||
 --       ' ADD PRIMARY KEY (' || column_name ||
 --       ');'
@@ -187,6 +189,8 @@ cluster dimcmteproperties using dimcmteproperties_cmte_sk_expire_date_cmteproper
 
 CREATE INDEX ON dimcmtetpdsgn(cmte_sk);
 
+create index dimparty_party_affiliation_idx on dimparty(party_affiliation);
+
 CREATE INDEX ON dimcmteproperties(cand_id);
 CREATE INDEX ON dimlinkages(cand_sk);
 CREATE INDEX ON dimlinkages(cmte_sk);
@@ -195,8 +199,19 @@ CREATE INDEX ON factpresidential_f3p (cmte_id);
 CREATE INDEX ON factpresidential_f3p (electiontp_sk);
 CREATE INDEX ON factpresidential_f3p (reporttype_sk);
 CREATE INDEX ON dimcandoffice (cand_sk);
+create index dimcandstatusici_election_yr_idx on dimcandstatusici (election_yr);
 
 
 ALTER TABLE public.dimcmteproperties ADD FOREIGN KEY (cand_pty_affiliation) REFERENCES processed.ref_party (party_cd);
 
 CREATE INDEX ON facthousesenate_f3 (two_yr_period_sk);
+
+create index on factpacsandparties_f3x(cvg_start_dt_sk);
+create index on factpacsandparties_f3x(cvg_end_dt_sk);
+create index on factpresidential_f3p(cvg_end_dt_sk);
+create index on factpresidential_f3p(cvg_start_dt_sk);
+create index on facthousesenate_f3(cvg_start_dt_sk);
+create index on facthousesenate_f3(cvg_start_dt_sk);
+create index on facthousesenate_f3(cvg_end_dt_sk);
+
+create index factpacsandparties_f3x_two_year_period_sk_idx on factpacsandparties_f3x (two_yr_period_sk);

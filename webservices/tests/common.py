@@ -1,3 +1,4 @@
+import codecs
 import json
 import unittest
 
@@ -13,11 +14,19 @@ class ApiBaseTest(unittest.TestCase):
     def setUp(self):
         rest.app.config['TESTING'] = True
         self.app = rest.app.test_client()
+        self.ctx = rest.app.app_context()
+        self.ctx.push()
+        self.longMessage = True
+        self.maxDiff = None
+
+    def tearDown(self):
+        self.ctx.pop()
 
     def _response(self, qry):
         response = self.app.get(qry)
         self.assertEquals(response.status_code, 200)
-        result = json.loads(response.data)
+        result = json.loads(codecs.decode(response.data))
+        self.assertNotEqual(result, [], "Empty response!")
         self.assertEqual(result['api_version'], '0.2')
         return result
 
@@ -59,3 +68,11 @@ class ApiBaseTest(unittest.TestCase):
         for i in range(len(expected)):
             self.assertResultsEqual(actual[i], expected[i],
                                     prefix + '[%d]' % i)
+
+    def prettyPrint(self, thing):
+        """
+        Pretty-printing for debugging purposes.
+        """
+        import pprint; pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(thing)
+

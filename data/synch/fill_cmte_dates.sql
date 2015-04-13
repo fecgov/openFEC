@@ -1,4 +1,7 @@
 -- run on cfdm on the bridge machine
+-- Sets load dates in ``dim_*`` tables from ``form_*`` tables
+-- Should be unnecessary once dates are populated in FEC's CFDM
+
 UPDATE public.dimcand p
 SET    load_date = o.receipt_dt
 FROM   frn.form_2 o
