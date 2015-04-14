@@ -27,14 +27,18 @@ def _schema_or_ref(schema):
         ),
         None,
     )
-    ret = _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
-    return {'schema': ret}
+    return _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
 
 
-def marshal_with(schema, code=http.client.OK):
+def marshal_with(schema, code=http.client.OK, description=None):
     def wrapper(func):
         func.__apidoc__ = getattr(func, '__apidoc__', {})
-        func.__apidoc__.setdefault('responses', {}).update({code: _schema_or_ref(schema)})
+        func.__apidoc__.setdefault('responses', {}).update({
+            code: {
+                'schema': _schema_or_ref(schema),
+                'description': description or '',
+            }
+        })
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
