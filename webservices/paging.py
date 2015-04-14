@@ -7,6 +7,8 @@ import collections
 import six
 import marshmallow as ma
 
+from webservices.spec import spec
+
 
 @six.add_metaclass(abc.ABCMeta)
 class Paginator(object):
@@ -110,7 +112,7 @@ class PageSchema(ma.Schema):
 
     OPTIONS_CLASS = PageSchemaOpts
 
-    pagination = ma.fields.Nested(PaginationSchema)
+    pagination = ma.fields.Nested(PaginationSchema, ref='#/definitions/Pagination')
 
     def __init__(self, nested_options=None, *args, **kwargs):
         super(PageSchema, self).__init__(*args, **kwargs)
@@ -134,3 +136,6 @@ class SqlalchemyPaginator(Paginator):
 
     def _slice(self, offset, limit):
         return self.cursor.offset(offset).limit(limit).all()
+
+
+spec.definition('Pagination', schema=PaginationSchema)

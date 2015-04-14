@@ -8,7 +8,7 @@ from flask.ext.restful import inputs
 
 def register_kwargs(arg_dict):
     def wrapper(func):
-        params = swagger.args2parameters(arg_dict)
+        params = swagger.args2parameters(arg_dict, default_in='query')
         func.__apidoc__ = getattr(func, '__apidoc__', {})
         func.__apidoc__.setdefault('parameters', []).extend(params)
         return use_kwargs(arg_dict)(func)
@@ -31,7 +31,7 @@ candidate_detail = {
 }
 
 candidate_list = {
-    'q': Arg(str, help='Text to search all fields for'),
+    'q': Arg(str, description='Text to search all fields for'),
     'candidate_id': Arg(str, description="Candidate's FEC ID"),
     'fec_id': Arg(str, description="Candidate's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),

@@ -132,23 +132,27 @@ def register_resource(resource):
     rules = app.url_map._rules_by_endpoint[resource.__name__.lower()]
     resource_doc = getattr(resource, '__apidoc__', {})
     operations = {}
-    for method in [method.lower() for method in resource.methods or []]:
-        view = getattr(resource, method)
-        method_doc = getattr(view, '__apidoc__', {})
-        operations[method] = {}
-        operations[method]['responses'] = (
-            resource_doc.get('responses', {})
-            or method_doc.get('responses', {})
-            or {}
-        )
-        operations[method]['parameters'] = (
-            resource_doc.get('parameters')
-            or method_doc.get('parameters')
-            or {}
-        )
-        for rule in rules:
-            path = extract_path(rule.rule)
-            spec.add_path(path=path, operations=operations, view=view)
+    for rule in rules:
+        path = extract_path(rule.rule)
+        path_params = [
+            each for each in resource_doc.get('path_params', [])
+            if each['name'] in rule.arguments
+        ]
+        for method in [method.lower() for method in resource.methods or []]:
+            view = getattr(resource, method)
+            method_doc = getattr(view, '__apidoc__', {})
+            operations[method] = {}
+            operations[method]['responses'] = (
+                resource_doc.get('responses', {})
+                or method_doc.get('responses', {})
+                or {}
+            )
+            operations[method]['parameters'] = (
+                resource_doc.get('parameters')
+                or method_doc.get('parameters')
+                or []
+            ) + path_params
+        spec.add_path(path=path, operations=operations, view=view)
 
 
 register_resource(CandidateView)

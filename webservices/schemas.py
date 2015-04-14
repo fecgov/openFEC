@@ -86,12 +86,17 @@ class CandidateDetailSchema(CandidateSchema):
 class CandidatePageSchema(paging.PageSchema, ApiSchema):
     class Meta:
         results_schema_class = CandidateSchema
+        results_schema_options = {'ref': '#/definitions/Candidate'}
 
 
 class CandidateDetailPageSchema(paging.PageSchema, ApiSchema):
     class Meta:
         results_schema_class = CandidateDetailSchema
+        results_schema_options = {'ref': '#/definitions/CandidateDetail'}
 
 
-spec.definition('Candidate', schema=CandidatePageSchema())
-spec.definition('CandidateDetail', schema=CandidateDetailPageSchema())
+spec.definition('Candidate', schema=CandidateSchema())
+spec.definition('CandidateDetail', schema=CandidateDetailSchema())
+
+spec.definition('CandidatePage', schema=CandidatePageSchema())
+spec.definition('CandidateDetailPage', schema=CandidateDetailPageSchema())

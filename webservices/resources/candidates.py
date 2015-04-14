@@ -1,9 +1,9 @@
 from sqlalchemy import extract
 from sqlalchemy.sql import text, or_
-from webargs.flaskparser import use_kwargs
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import spec
 from webservices import paging
 from webservices import schemas
 from webservices.common.models import db, Candidate, CandidateDetail, CandidateCommitteeLink
@@ -78,6 +78,10 @@ class CandidateList(Resource):
         return candidates.order_by(Candidate.name)
 
 
+@spec.doc(path_params=[
+    {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+    {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+])
 class CandidateView(Resource):
 
     @args.register_kwargs(args.paging)
@@ -88,7 +92,7 @@ class CandidateView(Resource):
         paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
         return paginator.get_page(kwargs['page'])
 
-    def get_candidate(self, kwargs, candidate_id, committee_id):
+    def get_candidate(self, kwargs, candidate_id=None, committee_id=None):
         if candidate_id is not None:
             candidates = CandidateDetail.query
             candidates = candidates.filter_by(**{'candidate_id': candidate_id})
