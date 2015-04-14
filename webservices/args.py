@@ -36,3 +36,18 @@ candidate_list = {
     'fec_id': Arg(str, description="Candidate's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
 }
+
+committee = {
+    'year': Arg(str, default=None, description='A year that the committee was active- (after original registration date but before expiration date.)'),
+    'designation': Arg(str, description='The one-letter designation code of the organization'),
+    'organization_type': Arg(str, description='The one-letter code for the kind for organization'),
+    'committee_type': Arg(str, description='The one-letter type code of the organization'),
+}
+committee_list = {
+    'q': Arg(str, description='Text to search all fields for'),
+    'committee_id': Arg(str, description="Committee's FEC ID"),
+    'candidate_id': Arg(str, description="Candidate's FEC ID"),
+    'state': Arg(str, description='Two digit U.S. State committee is registered in'),
+    'name': Arg(str, description="Committee's name (full or partial)"),
+    'party': Arg(str, description='Three letter code for party'),
+}

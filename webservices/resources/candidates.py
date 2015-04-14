@@ -6,6 +6,7 @@ from webservices import args
 from webservices import spec
 from webservices import paging
 from webservices import schemas
+from webservices.common.util import filter_query
 from webservices.common.models import db, Candidate, CandidateDetail, CandidateCommitteeLink
 
 
@@ -25,19 +26,6 @@ filter_fields = {
     'party',
     'state',
 }
-
-def filter_query(model, query, fields, **kwargs):
-    for field, value in kwargs.items():
-        if field not in fields or not value:
-            continue
-        column = getattr(model, field)
-        predicate = (
-            column.in_(value.split(','))
-            if ',' in value
-            else column == value
-        )
-        query = query.filter(predicate)
-    return query
 
 
 class CandidateList(Resource):
@@ -63,7 +51,7 @@ class CandidateList(Resource):
                 )
             )
 
-        candidates = filter_query(Candidate, candidates, filter_fields, **kwargs)
+        candidates = filter_query(Candidate, candidates, filter_fields, kwargs)
 
         if kwargs.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(kwargs['name'])))
@@ -100,7 +88,7 @@ class CandidateView(Resource):
         if committee_id is not None:
             candidates = CandidateDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
 
-        candidates = filter_query(CandidateDetail, candidates, filter_fields, **kwargs)
+        candidates = filter_query(CandidateDetail, candidates, filter_fields, kwargs)
 
         if kwargs.get('year') and kwargs['year'] != '*':
             # before expiration

@@ -116,11 +116,6 @@ class CommitteeFormatTest(ApiBaseTest):
         state_count = state_response['pagination']['count']
         self.assertEquals((original_count > state_count), True)
 
-    # /committees?
-    def test_err_on_unsupported_arg(self):
-        response = self.app.get('/committees?bogusArg=1')
-        self.assertEquals(response.status_code, 400)
-
     def test_committee_party(self):
         response = self._results('/committees?party=REP')
         self.assertEquals(response[0]['party'], 'REP')
@@ -152,7 +147,7 @@ class CommitteeFormatTest(ApiBaseTest):
             self.assertGreater(original_count, response['pagination']['count'])
 
     def test_committees_by_cand_id(self):
-        results =  self._results('/candidate/P60000247/committees')
+        results = self._results('/candidate/P60000247/committees')
 
         ids = [x['committee_id'] for x in results]
 
@@ -161,13 +156,13 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertIn('C00108407', ids)
 
     def test_committee_by_cand_filter(self):
-        results =  self._results('/candidate/P60000247/committees?designation=P')
+        results = self._results('/candidate/P60000247/committees?designation=P')
         self.assertEquals(1, len(results))
 
     def test_committee_by_cand(self):
-        results =  self._results('http://localhost:5000/candidate/P60000247/committees?year=*')
+        results = self._results('http://localhost:5000/candidate/P60000247/committees?year=*')
         self.assertEquals(3, len(results))
 
     def test_canditites_by_com(self):
-        results =  self._results('/committee/C00111245/candidates?year=*')
+        results = self._results('/committee/C00111245/candidates?year=*')
         self.assertEquals(1, len(results))

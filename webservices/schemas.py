@@ -1,3 +1,4 @@
+import re
 import http
 import functools
 
@@ -47,6 +48,26 @@ def marshal_with(schema, code=http.client.OK, description=None):
     return wrapper
 
 
+def register_schema(schema, definition_name=None):
+    definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
+    spec.definition(definition_name, schema=schema())
+
+
+def make_page_schema(schema, class_name=None, definition_name=None):
+    class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
+    definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
+
+    class Meta:
+        results_schema_class = schema
+        results_schema_options = {'ref': '#/definitions/{0}'.format(definition_name)}
+
+    return type(
+        class_name,
+        (paging.PageSchema, ApiSchema),
+        {'Meta': Meta},
+    )
+
+
 class ApiSchema(ma.Schema):
     def _postprocess(self, data, many, obj):
         ret = {'api_version': __API_VERSION__}
@@ -83,20 +104,80 @@ class CandidateDetailSchema(CandidateSchema):
     candidate_inactive = ma.fields.String()
 
 
-class CandidatePageSchema(paging.PageSchema, ApiSchema):
-    class Meta:
-        results_schema_class = CandidateSchema
-        results_schema_options = {'ref': '#/definitions/Candidate'}
+CandidatePageSchema = make_page_schema(CandidateSchema)
+CandidateDetailPageSchema = make_page_schema(CandidateDetailSchema)
+
+register_schema(CandidateSchema)
+register_schema(CandidateDetailSchema)
+register_schema(CandidatePageSchema)
+register_schema(CandidateDetailPageSchema)
 
 
-class CandidateDetailPageSchema(paging.PageSchema, ApiSchema):
-    class Meta:
-        results_schema_class = CandidateDetailSchema
-        results_schema_options = {'ref': '#/definitions/CandidateDetail'}
+class CommitteeSchema(ma.Schema):
+    committee_id = ma.fields.String()
+    name = ma.fields.String()
+    designation_full = ma.fields.String()
+    designation = ma.fields.String()
+    treasurer_name = ma.fields.String()
+    organization_type_full = ma.fields.String()
+    organization_type = ma.fields.String()
+    state = ma.fields.String()
+    party_full = ma.fields.String()
+    party = ma.fields.String()
+    committee_type_full = ma.fields.String()
+    committee_type = ma.fields.String()
+    expire_date = ma.fields.DateTime()
+    original_registration_date = ma.fields.String()
 
 
-spec.definition('Candidate', schema=CandidateSchema())
-spec.definition('CandidateDetail', schema=CandidateDetailSchema())
+class CommitteeDetailSchema(CommitteeSchema):
+    filing_frequency = ma.fields.String()
+    email = ma.fields.String()
+    fax = ma.fields.String()
+    website = ma.fields.String()
+    form_type = ma.fields.String()
+    leadership_pac = ma.fields.String()
+    load_date = ma.fields.String()
+    lobbyist_registrant_pac = ma.fields.String()
+    party_type = ma.fields.String()
+    party_type_full = ma.fields.String()
+    qualifying_date = ma.fields.String()
+    street_1 = ma.fields.String()
+    street_2 = ma.fields.String()
+    city = ma.fields.String()
+    state_full = ma.fields.String()
+    zip = ma.fields.String()
+    treasurer_city = ma.fields.String()
+    treasurer_name_1 = ma.fields.String()
+    treasurer_name_2 = ma.fields.String()
+    treasurer_name_middle = ma.fields.String()
+    treasurer_name_prefix = ma.fields.String()
+    treasurer_phone = ma.fields.String()
+    treasurer_state = ma.fields.String()
+    treasurer_street_1 = ma.fields.String()
+    treasurer_street_2 = ma.fields.String()
+    treasurer_name_suffix = ma.fields.String()
+    treasurer_name_title = ma.fields.String()
+    treasurer_zip = ma.fields.String()
+    custodian_city = ma.fields.String()
+    custodian_name_1 = ma.fields.String()
+    custodian_name_2 = ma.fields.String()
+    custodian_name_middle = ma.fields.String()
+    custodian_name_full = ma.fields.String()
+    custodian_phone = ma.fields.String()
+    custodian_name_prefix = ma.fields.String()
+    custodian_state = ma.fields.String()
+    custodian_street_1 = ma.fields.String()
+    custodian_street_2 = ma.fields.String()
+    custodian_name_suffix = ma.fields.String()
+    custodian_name_title = ma.fields.String()
+    custodian_zip = ma.fields.String()
 
-spec.definition('CandidatePage', schema=CandidatePageSchema())
-spec.definition('CandidateDetailPage', schema=CandidateDetailPageSchema())
+
+CommitteePageSchema = make_page_schema(CommitteeSchema)
+CommitteeDetailPageSchema = make_page_schema(CommitteeDetailSchema)
+
+register_schema(CommitteeSchema)
+register_schema(CommitteeDetailSchema)
+register_schema(CommitteePageSchema)
+register_schema(CommitteeDetailPageSchema)

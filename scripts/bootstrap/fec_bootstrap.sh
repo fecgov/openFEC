@@ -12,6 +12,7 @@ mkvirtualenv openFEC -p `which python3.4`
 workon openFEC
 echo "Installing requirements"
 pip install -r requirements.txt
+npm install
 echo "Creating sample DB"
 dropdb cfdm_test 2>/dev/null
 createdb cfdm_test

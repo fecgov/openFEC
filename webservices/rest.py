@@ -160,6 +160,8 @@ def register_resource(resource):
 
 register_resource(CandidateView)
 register_resource(CandidateList)
+register_resource(CommitteeView)
+register_resource(CommitteeList)
 
 renderers = {
     'application/json': lambda data: jsonify(data),

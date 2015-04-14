@@ -37,9 +37,22 @@ class Pagination:
 
     def as_json(self):
         return {
-                'page': self.page_num,
-                'per_page': self.per_page,
-                'count': self.count,
-                'pages': int(self.count / self.per_page) + (self.count % self.per_page > 0),
+            'page': self.page_num,
+            'per_page': self.per_page,
+            'count': self.count,
+            'pages': int(self.count / self.per_page) + (self.count % self.per_page > 0),
         }
 
+
+def filter_query(model, query, fields, kwargs):
+    for field, value in kwargs.items():
+        if field not in fields or not value:
+            continue
+        column = getattr(model, field)
+        predicate = (
+            column.in_(value.split(','))
+            if ',' in value
+            else column == value
+        )
+        query = query.filter(predicate)
+    return query
