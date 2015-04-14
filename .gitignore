@@ -1,4 +1,5 @@
 cache
+node_modules
 
 data/bin/set_env_vars.real.sh
 .DS_Store

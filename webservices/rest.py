@@ -15,7 +15,10 @@ import smore.apispec
 from flask import abort
 from flask import request
 from flask import jsonify
+from flask import url_for
+from flask import render_template
 from flask import Flask
+from flask import Blueprint
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import flask.ext.restful.representations.json
@@ -160,6 +163,7 @@ register_resource(CandidateList)
 
 renderers = {
     'application/json': lambda data: jsonify(data),
+    'application/json;charset=utf-8': lambda data: jsonify(data),
     'application/yaml': lambda data: yaml.dump(data, default_flow_style=False),
 }
 
@@ -168,7 +172,16 @@ yaml.add_representer(
     lambda dumper, data: dumper.represent_dict(data),
 )
 
-@app.route('/swagger/')
+# Adapted from https://github.com/noirbizarre/flask-restplus
+docs = Blueprint(
+    'docs',
+    __name__,
+    static_folder='/Users/jmcarp/code/openFEC/',
+    static_url_path='/docs/static',
+)
+
+
+@docs.route('/swagger/')
 def api_spec():
     render_type = request.accept_mimetypes.best_match(renderers.keys())
     if not render_type:
@@ -183,3 +196,16 @@ def api_spec():
     })
     rendered = renderers[render_type](data)
     return rendered, http.client.OK, {'Content-Type': render_type}
+
+
+@docs.add_app_template_global
+def swagger_static(filename):
+    return url_for('docs.static', filename='node_modules/swagger-ui/dist/{0}'.format(filename))
+
+
+@docs.route('/swagger/ui/')
+def api_ui():
+    return render_template('swagger-ui.html', specs_url=url_for('docs.api_spec'))
+
+
+app.register_blueprint(docs)
