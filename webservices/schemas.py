@@ -13,7 +13,7 @@ def _get_class(value):
 
 
 def _format_ref(ref):
-    return '#/definitions/{0}'.format(ref)
+    return {'$ref': '#/definitions/{0}'.format(ref)}
 
 
 def _schema_or_ref(schema):
@@ -26,7 +26,8 @@ def _schema_or_ref(schema):
         ),
         None,
     )
-    return _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
+    ret = _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
+    return {'schema': ret}
 
 
 def marshal_with(schema, code=http.client.OK):
