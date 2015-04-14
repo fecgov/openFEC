@@ -7,14 +7,19 @@ SEE DOCUMENTATION FOLDER
 import os
 import re
 import sys
+import http
 import logging
 
+import yaml
+import smore.apispec
+from flask import abort
+from flask import request
+from flask import jsonify
 from flask import Flask
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import flask.ext.restful.representations.json
 import sqlalchemy as sa
-from smore import swagger
 
 from .db import db_conn
 from .json_encoding import TolerantJSONEncoder
@@ -25,7 +30,6 @@ from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
 from webservices.common.util import Pagination
 from webservices.spec import spec
-from webservices import args
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -148,3 +152,21 @@ def register_resource(resource):
 
 register_resource(CandidateView)
 register_resource(CandidateList)
+
+renderers = {
+    'application/json': lambda data: jsonify(data),
+    'application/yaml': lambda data: yaml.dump(data, default_flow_style=False),
+}
+
+yaml.add_representer(
+    smore.apispec.Path,
+    lambda dumper, data: dumper.represent_dict(data),
+)
+
+@app.route('/swagger/')
+def api_spec():
+    render_type = request.accept_mimetypes.best_match(renderers.keys())
+    if not render_type:
+        abort(http.client.NOT_ACCEPTABLE)
+    rendered = renderers[render_type](spec.to_dict())
+    return rendered, http.client.OK, {'Content-Type': render_type}
