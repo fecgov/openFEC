@@ -1,6 +1,6 @@
 --  Full history of a candidate selecting the most recent record for each 2-year period
-drop materialized view if exists ofec_candidate_history_vw;
-create materialized view ofec_candidate_history_vw as
+drop materialized view if exists ofec_candidate_history_mv;
+create materialized view ofec_candidate_history_mv as
 select
     dimcandproperties.candproperties_sk as properties_key,
     dimcand.cand_sk as candidate_key,

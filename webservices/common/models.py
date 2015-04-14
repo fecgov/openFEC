@@ -185,4 +185,4 @@ class CandidateHistory(db.Model):
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
 
-    __tablename__ = 'ofec_candidate_history_vw'
+    __tablename__ = 'ofec_candidate_history_mv'
