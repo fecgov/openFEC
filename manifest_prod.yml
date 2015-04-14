@@ -1,0 +1,18 @@
+---
+memory: 512M
+applications:
+- name: api
+  path: .
+  host: fec-prod-api
+  env:
+    PRODUCTION: True
+- name: web
+  path: ../openFEC-web-app
+  buildpack: python_buildpack
+  host: fec-prod-web
+  env:
+    FEC_WEB_API_URL: http://api.data.gov/fec/
+    FEC_WEB_DEBUG: False
+    # These must be set manually via `cf set-env`
+    # FEC_WEB_PASSWORD
+    # FEC_WEB_USERNAME
