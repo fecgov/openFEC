@@ -225,6 +225,7 @@ class CandidateView(Resource):
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
+        # To support '*' across all endpoints
         if args.get('year') and args['year'] != '*':
             # before expiration
             candidates = candidates.filter(or_(extract('year', CandidateDetail.expire_date) >= int(args['year']), CandidateDetail.expire_date == None))
