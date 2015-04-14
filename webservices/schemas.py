@@ -8,10 +8,31 @@ from webservices import paging
 from webservices.spec import spec
 
 
+def _get_class(value):
+    return value if isinstance(value, type) else type(value)
+
+
+def _format_ref(ref):
+    return '#/definitions/{0}'.format(ref)
+
+
+def _schema_or_ref(schema):
+    schema_class = _get_class(schema)
+    ref = next(
+        (
+            ref_name
+            for ref_schema, ref_name in spec.plugins['smore.ext.marshmallow']['refs'].items()
+            if schema_class is _get_class(ref_schema)
+        ),
+        None,
+    )
+    return _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
+
+
 def marshal_with(schema, code=http.client.OK):
     def wrapper(func):
         func.__apidoc__ = getattr(func, '__apidoc__', {})
-        func.__apidoc__.setdefault('responses', {}).update({code: swagger.schema2jsonschema(schema)})
+        func.__apidoc__.setdefault('responses', {}).update({code: _schema_or_ref(schema)})
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
