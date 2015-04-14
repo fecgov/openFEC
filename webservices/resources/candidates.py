@@ -42,14 +42,14 @@ def filter_query(model, query, fields, **kwargs):
 
 class CandidateList(Resource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.candidate_list)
-    @use_kwargs(args.candidate_detail)
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.candidate_list)
+    @args.register_kwargs(args.candidate_detail)
+    @schemas.marshal_with(schemas.CandidatePageSchema())
     def get(self, **kwargs):
         candidates = self.get_candidates(kwargs)
         paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
-        page = paginator.get_page(kwargs['page'])
-        return schemas.CandidatePageSchema().dump(page).data
+        return paginator.get_page(kwargs['page'])
 
     def get_candidates(self, kwargs):
 
@@ -80,13 +80,13 @@ class CandidateList(Resource):
 
 class CandidateView(Resource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.candidate_detail)
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.candidate_detail)
+    @schemas.marshal_with(schemas.CandidateDetailPageSchema())
     def get(self, candidate_id=None, committee_id=None, **kwargs):
         candidates = self.get_candidate(kwargs, candidate_id, committee_id)
         paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
-        page = paginator.get_page(kwargs['page'])
-        return schemas.CandidateDetailPageSchema().dump(page).data
+        return paginator.get_page(kwargs['page'])
 
     def get_candidate(self, kwargs, candidate_id, committee_id):
         if candidate_id is not None:

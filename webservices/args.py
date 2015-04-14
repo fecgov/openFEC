@@ -1,6 +1,18 @@
+from smore import swagger
+
 from webargs import Arg
+from webargs.flaskparser import use_kwargs
 
 from flask.ext.restful import inputs
+
+
+def register_kwargs(arg_dict):
+    def wrapper(func):
+        params = swagger.args2parameters(arg_dict)
+        func.__apidoc__ = getattr(func, '__apidoc__', {})
+        func.__apidoc__.setdefault('parameters', []).extend(params)
+        return use_kwargs(arg_dict)(func)
+    return wrapper
 
 
 paging = {

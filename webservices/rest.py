@@ -5,6 +5,7 @@ candidate data.
 SEE DOCUMENTATION FOLDER
 """
 import os
+import re
 import sys
 import logging
 
@@ -106,32 +107,44 @@ api.add_resource(TotalsView, '/committee/<string:id>/totals')
 api.add_resource(ReportsView, '/committee/<string:id>/reports')
 api.add_resource(NameSearch, '/names')
 
+
 def extend(*dicts):
     ret = {}
     for each in dicts:
         ret.update(each)
     return ret
 
-with app.app_context():
-    spec.add_path(
-        view=app.view_functions['candidateview'],
-        operations={
-            'get': {
-                'responses': {
-                    200: {'schema': {'$ref': '#/definitions/CandidateDetail'}},
-                },
-                'parameters': swagger.args2parameters(extend(args.paging, args.candidate_list, args.candidate_detail)),
-            },
-        },
-    )
-    spec.add_path(
-        view=app.view_functions['candidatelist'],
-        operations={
-            'get': {
-                'responses': {
-                    200: {'schema': {'$ref': '#/definitions/Candidate'}},
-                },
-                'parameters': swagger.args2parameters(extend(args.paging, args.candidate_list)),
-            },
-        },
-    )
+
+RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
+def extract_path(path):
+    '''
+    Transform a Flask/Werkzeug URL pattern in a Swagger one.
+    '''
+    return RE_URL.sub(r'{\1}', path)
+
+
+def register_resource(resource):
+    rules = app.url_map._rules_by_endpoint[resource.__name__.lower()]
+    resource_doc = getattr(resource, '__apidoc__', {})
+    operations = {}
+    for method in [method.lower() for method in resource.methods or []]:
+        view = getattr(resource, method)
+        method_doc = getattr(view, '__apidoc__', {})
+        operations[method] = {}
+        operations[method]['responses'] = (
+            resource_doc.get('responses', {})
+            or method_doc.get('responses', {})
+            or {}
+        )
+        operations[method]['parameters'] = (
+            resource_doc.get('parameters')
+            or method_doc.get('parameters')
+            or {}
+        )
+        for rule in rules:
+            path = extract_path(rule.rule)
+            spec.add_path(path=path, operations=operations, view=view)
+
+
+register_resource(CandidateView)
+register_resource(CandidateList)

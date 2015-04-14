@@ -1,7 +1,23 @@
+import http
+import functools
+
 import marshmallow as ma
+from smore import swagger
 
 from webservices import paging
 from webservices.spec import spec
+
+
+def marshal_with(schema, code=http.client.OK):
+    def wrapper(func):
+        func.__apidoc__ = getattr(func, '__apidoc__', {})
+        func.__apidoc__.setdefault('responses', {}).update({code: swagger.schema2jsonschema(schema)})
+
+        @functools.wraps(func)
+        def wrapped(*args, **kwargs):
+            return schema.dump(func(*args, **kwargs)).data
+        return wrapped
+    return wrapper
 
 
 class ApiSchema(ma.Schema):

@@ -1,11 +1,8 @@
 from smore.apispec import APISpec
 
 spec = APISpec(
-    title='openfec',
-    version='0.1.0',
-    description='openfec api',
-    plugins=[
-        'smore.ext.flask',
-        'smore.ext.marshmallow',
-    ]
+    title='OpenFEC',
+    version='0.2',
+    description='OpenFEC API',
+    plugins=['smore.ext.marshmallow'],
 )
