@@ -23,6 +23,7 @@ import sqlalchemy as sa
 
 from .db import db_conn
 from .json_encoding import TolerantJSONEncoder
+from webservices import __API_VERSION__
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView
 from webservices.resources.totals import TotalsView
@@ -168,5 +169,13 @@ def api_spec():
     render_type = request.accept_mimetypes.best_match(renderers.keys())
     if not render_type:
         abort(http.client.NOT_ACCEPTABLE)
-    rendered = renderers[render_type](spec.to_dict())
+    data = spec.to_dict()
+    data.update({
+        'swagger': '2.0',
+        'info': {
+            'title': 'OpenFEC API',
+            'version': __API_VERSION__,
+        },
+    })
+    rendered = renderers[render_type](data)
     return rendered, http.client.OK, {'Content-Type': render_type}

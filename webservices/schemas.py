@@ -6,6 +6,7 @@ from smore import swagger
 
 from webservices import paging
 from webservices.spec import spec
+from webservices import __API_VERSION__
 
 
 def _get_class(value):
@@ -44,7 +45,7 @@ def marshal_with(schema, code=http.client.OK):
 
 class ApiSchema(ma.Schema):
     def _postprocess(self, data, many, obj):
-        ret = {'api_version': '0.2'}
+        ret = {'api_version': __API_VERSION__}
         ret.update(data)
         return ret
 
