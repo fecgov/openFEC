@@ -64,7 +64,6 @@ candidate_history_fields = {
     'candidate_status_full': fields.String,
     'candidate_status': fields.String,
     'district': fields.String,
-    'election_year': fields.Integer,
     'incumbent_challenge_full': fields.String,
     'incumbent_challenge': fields.String,
     'office_full': fields.String,
@@ -281,4 +280,6 @@ class CandidateHistoryView(Resource):
             year = int(year) + int(year) % 2
             candidates = candidates.filter_by(**{'two_year_period': year})
 
-        return 1, candidates.order_by(CandidateHistory.two_year_period.desc()).paginate(page_num, per_page, False).items
+        count = candidates.count()
+
+        return count, candidates.order_by(CandidateHistory.two_year_period.desc()).paginate(page_num, per_page, False).items

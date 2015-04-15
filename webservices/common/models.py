@@ -168,7 +168,6 @@ class CandidateHistory(db.Model):
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2))
-    election_year = db.Column(db.Integer)
     incumbent_challenge = db.Column(db.String(1))
     incumbent_challenge_full = db.Column(db.String(10))
     office = db.Column(db.String(1))

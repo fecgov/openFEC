@@ -13,7 +13,6 @@ select
     dcp_recent.candproperties_sk as properties_key,
     dcp_recent.cand_sk as candidate_key,
     dcp_recent.cand_id as candidate_id,
-    dcp_recent.election_yr as election_year,
     dcp_recent.cand_nm as name,
     dcp_recent.record_expire_date as expire_date,
     dcp_recent.record_load_date as load_date,
@@ -51,4 +50,4 @@ from two_year_periods
 
 create index on ofec_candidate_history_mv(candidate_key);
 create index on ofec_candidate_history_mv(candidate_id);
-create index on ofec_candidate_history_mv(election_year);
+create index on ofec_candidate_history_mv(two_year_period);
