@@ -10,6 +10,25 @@ from sqlalchemy import text as sqla_text
 manager = Manager(app)
 
 
+def excute_sql_folder(files):
+    sql_dir = get_full_path(files)
+    files = glob.glob(sql_dir + '*.sql')
+    for sql_file in files:
+        print(("Running {}".format(sql_file)))
+        with open(sql_file, 'r') as sql_fh:
+            sql = '\n'.join(sql_fh.readlines())
+            db.engine.execute(sqla_text(sql))
+
+
+@manager.command
+def refresh_db():
+    print("Starting DB refresh...")
+    excute_sql_folder('data/sql_prep/')
+    excute_sql_folder('data/sql_updates/')
+
+    print("Finished DB refresh.")
+
+
 @manager.command
 def list_routes():
     output = []
@@ -26,21 +45,6 @@ def list_routes():
 
     for line in sorted(output):
         print(line)
-
-
-@manager.command
-def refresh_db():
-    print("Starting DB refresh...")
-    sql_dir = get_full_path('data/sql_updates/')
-    files = glob.glob(sql_dir + '*.sql')
-
-    for sql_file in files:
-        print(("Running {}".format(sql_file)))
-        with open(sql_file, 'r') as sql_fh:
-            sql = '\n'.join(sql_fh.readlines())
-            db.engine.execute(sqla_text(sql))
-
-    print("Finished DB refresh.")
 
 
 if __name__ == "__main__":
