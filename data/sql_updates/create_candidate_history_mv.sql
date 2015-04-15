@@ -11,12 +11,14 @@ create materialized view ofec_candidate_history_mv as
 select
     dcp_recent.candproperties_sk as properties_key,
     dcp_recent.cand_sk as candidate_key,
+    dcp_recent.cand_id as candidate_id,
+    dcp_recent.election_yr as election_year,
     dcp_recent.cand_nm as name,
-    dcp_recent.cand_st as address_state,
     dcp_recent.record_expire_date as expire_date,
     dcp_recent.record_load_date as load_date,
     dcp_recent.record_form_tp as form_type,
     dcp_recent.two_year_period as two_year_period,
+    dcp_recent.cand_st as address_state,
     dcp_recent.cand_city as address_city,
     dcp_recent.cand_st1 as address_street_1,
     dcp_recent.cand_st2 as address_street_2,
@@ -26,8 +28,6 @@ select
     dcp_recent.cand_ici_cd as incumbent_challenge,
     dcp_recent.cand_status_cd as candidate_status,
     dcp_recent.cand_status_desc as candidate_status_full,
-    dcp_recent.cand_id as candidate_id,
-    dcp_recent.election_yr as election_year,
     dcp_recent.cand_inactive_flg as candidate_inactive,
     dcp_recent.office_tp as office,
     dcp_recent.office_tp_desc as office_full,
@@ -45,23 +45,9 @@ from two_year_periods
             inner join dimoffice using (office_sk)
             inner join dimparty using (party_sk)
         order by cand_sk, two_year_period, dcp.load_date desc
-    ) as dcp_recent on two_year_periods.year = two_year_period;
--- group by
---     dcp.candproperties_sk,
---     dcp.cand_nm,
---     dcp.cand_st,
---     dcp.expire_date,
---     dcp.load_date,
---     dcp.cand_city,
---     dcp.cand_st1,
---     dcp.cand_st2,
---     dcp.cand_zip,
---     dcp.cand_ici_desc,
---     dcp.cand_ici_cd,
---     dcp.cand_status_cd,
---     dcp.cand_status_desc,
---     dimcandstatusici.election_yr,
---     dimcand.cand_sk,
---     dimcand.cand_id,
---     dcp.form_tp
---     ;
+    ) as dcp_recent on two_year_periods.year = two_year_period
+;
+
+create index on ofec_candidate_history_mv(candidate_key);
+create index on ofec_candidate_history_mv(candidate_id);
+create index on ofec_candidate_history_mv(election_year);
