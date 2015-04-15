@@ -50,7 +50,8 @@ PRODUCTION = os.getenv('PRODUCTION', False)
 
 @app.before_request
 def limit_remote_addr():
-    if PRODUCTION != False:
+    falses = (False, 'False', 'false', 'f')
+    if PRODUCTION not in falses :
         remote = request.remote_addr
         route = list(request.access_route)
         while remote in trusted_proxies:
