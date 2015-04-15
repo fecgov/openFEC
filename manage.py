@@ -5,7 +5,7 @@ from flask import url_for
 from webservices.rest import app, db
 import glob
 import urllib.parse
-import sqlalchemy
+from sqlalchemy import text as sqla_text
 
 
 manager = Manager(app)
@@ -39,7 +39,7 @@ def refresh_db():
         print(("Running {}".format(sql_file)))
         with open(sql_file, 'r') as sql_fh:
             sql = '\n'.join(sql_fh.readlines())
-            db.engine.execute(sqlalchemy.text(sql))
+            db.engine.execute(sqla_text(sql))
 
     print("Finished DB refresh.")
 
