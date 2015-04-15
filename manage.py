@@ -7,7 +7,6 @@ import glob
 import urllib.parse
 from sqlalchemy import text as sqla_text
 
-
 manager = Manager(app)
 
 
