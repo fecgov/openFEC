@@ -1,3 +1,4 @@
+drop materialized view if exists ofec_candidate_history_mv;
 drop table if exists ofec_two_year_periods;
 create table ofec_two_year_periods as
 select year from dimyears
