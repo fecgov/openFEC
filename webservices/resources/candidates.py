@@ -276,9 +276,15 @@ class CandidateHistoryView(Resource):
         candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 
         if year:
-            # look for 2 year period
-            year = int(year) + int(year) % 2
-            candidates = candidates.filter_by(**{'two_year_period': year})
+            if year == 'recent':
+                candidates = candidates.order_by(CandidateHistory.two_year_period.desc()).first()
+
+                return 1, [candidates]
+
+            else:
+                # look for 2 year period
+                year = int(year) + int(year) % 2
+                candidates = candidates.filter_by(**{'two_year_period': year})
 
         count = candidates.count()
 

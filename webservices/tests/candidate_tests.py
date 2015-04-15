@@ -176,6 +176,7 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_candidate_history(self):
         results = self._results('/candidate/P80003338/history')
+        recent_results = self._results('/candidate/P80003338/history/recent')
 
         expected_result_0 = {
             'address_street_1': 'PO BOX 8102',
@@ -225,6 +226,9 @@ class CandidateFormatTest(ApiBaseTest):
             "two_year_period": 2008
         }
         print (expected_result_0)
-
+        # history/recent
+        self.assertEqual(recent_results[0], expected_result_0)
+        self.assertEqual(len(recent_results), 1)
+        # /history
         self.assertEqual(results[0], expected_result_0)
         self.assertEqual(results[1], expected_result_1)
