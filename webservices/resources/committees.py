@@ -246,14 +246,8 @@ class CommitteeView(Resource):
                 else:
                     committees = committees.filter(getattr(Committee, argname)==args[argname])
 
-        # default year filtering
-        if args.get('year') is None:
-            earliest_year = int(sorted(default_year().split(','))[0])
-            # still going or expired after the earliest year we are looking for
-            committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= earliest_year, CommitteeDetail.expire_date == None))
-
-        # Should this handle a list of years to make it consistent with /candidate ?
-        elif args.get('year') and args['year'] != '*':
+        # To support '*' across all endpoints
+        if args.get('year') and args['year'] != '*':
             # before expiration
             committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= int(args['year']), CommitteeDetail.expire_date == None))
             # after origination
