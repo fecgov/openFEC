@@ -1,12 +1,12 @@
 -- Creates a table of 2-year periods
-drop materialized view if exists ofec_candidate_history_mv;
-drop table if exists two_year_periods;
-create table two_year_periods as
+-- drop materialized view if exists ofec_candidate_history_mv;
+drop table if exists ofec_two_year_periods;
+create table ofec_two_year_periods as
 select year from dimyears
+    -- only up to the current campaign cycle
     where (year <= EXTRACT(YEAR FROM now()) +1)
     and year % 2 = 0
 ;
-
 
 --  Full history view of a candidate selecting the most recent record for each 2-year period
 drop materialized view if exists ofec_candidate_history_mv;
@@ -37,7 +37,7 @@ select
     dcp_recent.office_district as district,
     dcp_recent.party_affiliation as party,
     dcp_recent.party_affiliation_desc as party_full
-from two_year_periods
+from ofec_two_year_periods
     left join (
         select distinct on (two_year_period, cand_sk) ((CAST(EXTRACT(YEAR FROM dcp.load_date) AS INT) + CAST(EXTRACT(YEAR FROM dcp.load_date) AS INT) % 2)) as two_year_period, dcp.expire_date as record_expire_date, dcp.load_date as record_load_date, dcp.form_tp as record_form_tp, *
         from dimcandproperties dcp
@@ -47,7 +47,7 @@ from two_year_periods
             inner join dimoffice using (office_sk)
             inner join dimparty using (party_sk)
         order by cand_sk, two_year_period, dcp.load_date desc
-    ) as dcp_recent on two_year_periods.year = two_year_period
+    ) as dcp_recent on ofec_two_year_periods.year = two_year_period
 ;
 
 create index on ofec_candidate_history_mv(candidate_key);
