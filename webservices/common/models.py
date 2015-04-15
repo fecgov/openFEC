@@ -161,8 +161,10 @@ class CandidateCommitteeLink(db.Model):
     __tablename__ = 'ofec_name_linkage_mv'
 
 class CandidateHistory(db.Model):
-    candidate_key = db.Column(db.Integer, primary_key=True)
+    properties_key = db.Column(db.Integer, primary_key=True)
+    candidate_key = db.Column(db.Integer)
     candidate_id = db.Column(db.String(10))
+    two_year_period = db.Column(db.Integer)
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2))

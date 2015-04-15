@@ -60,6 +60,7 @@ candidate_detail_fields = {
 }
 candidate_history_fields = {
     'candidate_id': fields.String,
+    'two_year_period': fields.Integer,
     'candidate_status_full': fields.String,
     'candidate_status': fields.String,
     'district': fields.String,
@@ -275,11 +276,9 @@ class CandidateHistoryView(Resource):
         candidates = CandidateHistory.query
         candidates = candidates.filter_by(**{'candidate_id': candidate_id})
 
-        # I expect this to change
         if year:
-            # before expiration
-            candidates = candidates.filter(or_(extract('year', CandidateHistory.expire_date) >= year, CandidateHistory.expire_date == None))
-            # after origination
-            candidates = candidates.filter(extract('year', CandidateHistory.load_date) <= year)
+            # look for 2 year period
+            year = int(year) + int(year) % 2
+            candidates = candidates.filter_by(**{'two_year_period': year})
 
-        return 1, candidates.order_by(CandidateHistory.expire_date.desc()).paginate(page_num, per_page, False).items
+        return 1, candidates.order_by(CandidateHistory.two_year_period.desc()).paginate(page_num, per_page, False).items
