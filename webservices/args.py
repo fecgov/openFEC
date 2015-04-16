@@ -1,9 +1,10 @@
+import functools
+
+import webargs
 from smore import swagger
 
 from webargs import Arg
 from webargs.flaskparser import use_kwargs
-
-from flask.ext.restful import inputs
 
 from webservices.common.util import default_year
 
@@ -17,9 +18,14 @@ def register_kwargs(arg_dict):
     return wrapper
 
 
+def _validate_natural(value):
+    if value < 0:
+        raise webargs.ValidationError('Must be a natural number')
+Natural = functools.partial(Arg, int, validate=_validate_natural)
+
 paging = {
-    'page': Arg(inputs.natural, default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Arg(inputs.natural, default=20, description='The number of results returned per page. Defaults to 20.'),
+    'page': Natural(default=1, description='For paginating through results, starting at page 1'),
+    'per_page': Natural(default=20, description='The number of results returned per page. Defaults to 20.'),
 }
 
 
