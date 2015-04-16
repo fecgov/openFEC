@@ -1,10 +1,11 @@
-from webservices.common.util import get_full_path
-from flask.ext.script import Manager
 from flask import url_for
+from flask.ext.script import Manager
 
-from webservices.rest import app, db
 import glob
+import subprocess
 import urllib.parse
+from webservices.rest import app, db
+from webservices.common.util import get_full_path
 
 
 manager = Manager(app)
@@ -51,6 +52,20 @@ def refresh_materialized():
     with open('data/refresh/refresh.sql') as fp:
         db.engine.execute(fp.read().replace('%', '%%'))
     print('Finished refreshing materialized views.')
+
+
+@manager.command
+def start_beat():
+    subprocess.Popen(['python', 'cron.py'])
+
+
+@manager.command
+def stop_beat():
+    """See http://celery.readthedocs.org/en/latest/userguide/workers.html#stopping-the-worker"""
+    subprocess.Popen(
+        "ps aux | grep 'cron.py' | awk '{print $2}' | xargs kill -9",
+        shell=True,
+    )
 
 
 if __name__ == "__main__":
