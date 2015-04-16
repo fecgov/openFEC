@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from .tests.common import ApiBaseTest
+from .common import ApiBaseTest
 
 
 class OverallTest(ApiBaseTest):
@@ -16,7 +16,8 @@ class OverallTest(ApiBaseTest):
         return response['results']
 
     def test_full_text_search(self):
-        # changed from 'james' to 'arnold' because 'james' falls victim to stemming, and some results return 'jame' causing the assert to fail
+        # changed from 'james' to 'arnold' because 'james' falls victim to stemming,
+        # and some results return 'jame' causing the assert to fail
         results = self._results('/candidates?q=arnold')
         for r in results:
             #txt = json.dumps(r).lower()
@@ -60,22 +61,11 @@ class OverallTest(ApiBaseTest):
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
 
-
-    @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
+    @unittest.skip('We are just showing one year at a time, this would be a good feature '
+                   'for /candidate/<id> but it is not a priority right now')
     def test_multi_year(self):
         # testing search
         response = self._results('/candidate?candidate_id=P80003338&year=2012,2008')
-        # search listing should aggregate years
-        self.assertIn('2008, 2012', response)
-        # testing single resource
-        response = self._results('/candidate/P80003338?year=2012,2008')
-        elections = response[0]['elections']
-        self.assertEquals(len(elections), 2)
-
-    @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
-    def test_multi_year(self):
-        # testing search
-        response = self._results('/candidates?candidate_id=P80003338&year=2012,2008')
         # search listing should aggregate years
         self.assertIn('2008, 2012', response)
         # testing single resource
@@ -89,7 +79,7 @@ class OverallTest(ApiBaseTest):
         original_count = orig_response['pagination']['count']
 
         filter_fields = (
-            ('office','H'),
+            ('office', 'H'),
             ('district', '00,02'),
             ('state', 'CA'),
             ('name', 'Obama'),
@@ -108,14 +98,12 @@ class OverallTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-
     def test_name_endpoint_returns_unique_candidates_and_committees(self):
         results = self._results('/names?q=obama')
         cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
         self.assertEqual(len(cand_ids), len(set(cand_ids)))
         cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
         self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
-
 
     @unittest.skip('This is not a great view anymore')
     def test_multiple_cmtes_in_detail(self):
@@ -128,7 +116,7 @@ class OverallTest(ApiBaseTest):
     def test_reports_house_senate(self):
         results = self._results('/committee/C00002600/reports')
 
-        fields = ('beginning_image_number', 'end_image_number', 'expire_date', 'load_date','report_type', 'report_type_full','report_year', 'type', 'cash_on_hand_beginning_period', 'cash_on_hand_end_period', 'debts_owed_by_committee', 'debts_owed_to_committee', 'operating_expenditures_period', 'other_political_committee_contributions_period', 'refunds_other_political_committee_contributions_period', 'total_disbursements_period', 'total_individual_contributions_period', 'total_receipts_period',)
+        fields = ('beginning_image_number', 'end_image_number', 'expire_date', 'load_date', 'report_type', 'report_type_full','report_year', 'type', 'cash_on_hand_beginning_period', 'cash_on_hand_end_period', 'debts_owed_by_committee', 'debts_owed_to_committee', 'operating_expenditures_period', 'other_political_committee_contributions_period', 'refunds_other_political_committee_contributions_period', 'total_disbursements_period', 'total_individual_contributions_period', 'total_receipts_period',)
 
         for field in fields:
             print(field)
@@ -161,7 +149,7 @@ class OverallTest(ApiBaseTest):
         results_recipts = self._results('/committee/C00347583/totals?fields=total_receipts_period')
 
         self.assertIn('disbursements', results_disbursements[0]['totals'][0])
-        self.assertIn('total_receipts_period',results_recipts[0]['reports'][0])
+        self.assertIn('total_receipts_period', results_recipts[0]['reports'][0])
         self.assertNotIn('reports', results_disbursements[0])
         self.assertNotIn('totals', results_recipts[0])
 
@@ -181,12 +169,9 @@ class OverallTest(ApiBaseTest):
         print(len(results))
         self.assertEquals(len(results), 2)
 
-
     # Typeahead name search
     def test_typeahead_name_search(self):
         results = self._results('/names?q=oba')
         self.assertGreaterEqual(len(results), 10)
         for r in results:
             self.assertIn('OBA', r['name'])
-
-
