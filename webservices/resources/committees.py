@@ -14,13 +14,6 @@ from webservices.common.models import db, Committee, CandidateCommitteeLink, Com
 list_filter_fields = {'committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type'}
 detail_filter_fields = {'designation', 'organization_type', 'committee_type'}
 
-fulltext_query = """
-    SELECT cmte_sk
-    FROM   dimcmte_fulltext
-    WHERE  fulltxt @@ to_tsquery(:findme)
-    ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
-"""
-
 
 def filter_year(model, query, kwargs):
     # default year filtering
@@ -53,6 +46,13 @@ def filter_year(model, query, kwargs):
 
 class CommitteeList(Resource):
 
+    fulltext_query = """
+        SELECT cmte_sk
+        FROM   dimcmte_fulltext
+        WHERE  fulltxt @@ to_tsquery(:findme)
+        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
+    """
+
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.committee)
     @args.register_kwargs(args.committee_list)
@@ -75,7 +75,7 @@ class CommitteeList(Resource):
             findme = ' & '.join(kwargs['q'].split())
             committees = committees.filter(
                 Committee.committee_key.in_(
-                    db.session.query('cmte_sk').from_statement(text(fulltext_query)).params(findme=findme)
+                    db.session.query('cmte_sk').from_statement(text(self.fulltext_query)).params(findme=findme)
                 )
             )
 

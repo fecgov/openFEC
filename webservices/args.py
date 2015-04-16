@@ -23,6 +23,11 @@ paging = {
 }
 
 
+names = {
+    'q': Arg(str, required=True, description='Name (candidate or committee) to search for'),
+}
+
+
 candidate_detail = {
     'office': Arg(str, description='Governmental office candidate runs for'),
     'state': Arg(str, description='U.S. State candidate is registered in'),

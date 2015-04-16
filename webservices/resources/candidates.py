@@ -10,13 +10,6 @@ from webservices.common.util import filter_query
 from webservices.common.models import db, Candidate, CandidateDetail, CandidateCommitteeLink
 
 
-fulltext_query = """
-    SELECT cand_sk
-    FROM   dimcand_fulltext
-    WHERE  fulltxt @@ to_tsquery(:findme)
-    ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
-"""
-
 filter_fields = {
     'candidate_id',
     'candidate_status',
@@ -29,6 +22,13 @@ filter_fields = {
 
 
 class CandidateList(Resource):
+
+    fulltext_query = """
+        SELECT cand_sk
+        FROM   dimcand_fulltext
+        WHERE  fulltxt @@ to_tsquery(:findme)
+        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
+    """
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
@@ -47,7 +47,7 @@ class CandidateList(Resource):
             findme = ' & '.join(kwargs['q'].split())
             candidates = candidates.filter(
                 Candidate.candidate_key.in_(
-                    db.session.query('cand_sk').from_statement(text(fulltext_query)).params(findme=findme)
+                    db.session.query('cand_sk').from_statement(text(self.fulltext_query)).params(findme=findme)
                 )
             )
 

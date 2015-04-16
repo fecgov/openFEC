@@ -75,6 +75,25 @@ class ApiSchema(ma.Schema):
         return ret
 
 
+class NameSearchSchema(ma.Schema):
+    candidate_id = ma.fields.String()
+    committee_id = ma.fields.String()
+    name = ma.fields.String()
+    office_sought = ma.fields.String()
+
+
+class NameSearchListSchema(ApiSchema):
+    results = ma.fields.Nested(
+        NameSearchSchema,
+        ref='#/definitions/NameSearch',
+        many=True,
+    )
+
+
+register_schema(NameSearchSchema)
+register_schema(NameSearchListSchema)
+
+
 class CandidateSchema(ma.Schema):
     candidate_id = ma.fields.String()
     candidate_status_full = ma.fields.String()
