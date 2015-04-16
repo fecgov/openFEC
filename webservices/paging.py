@@ -4,14 +4,12 @@ import abc
 import math
 import collections
 
-import six
 import marshmallow as ma
 
 from webservices.spec import spec
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Paginator(object):
+class Paginator(metaclass=abc.ABCMeta):
 
     def __init__(self, cursor, per_page):
         self.cursor = cursor
