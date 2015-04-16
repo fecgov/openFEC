@@ -7,4 +7,4 @@ Flask-Script
 
 marshmallow>=1.2.4
 webargs>=0.13.0
-git+https://github.com/jmcarp/smore@current
+git+https://github.com/marshmallow-code/smore@dev

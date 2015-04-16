@@ -1,11 +1,15 @@
 from smore.apispec import APISpec
 
+from webservices import __API_VERSION__
+
+
 spec = APISpec(
     title='OpenFEC',
-    version='0.2',
+    version=__API_VERSION__,
     description='OpenFEC API',
     plugins=['smore.ext.marshmallow'],
 )
+
 
 def doc(**kwargs):
     def wrapper(func):
