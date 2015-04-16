@@ -4,6 +4,7 @@ import abc
 import math
 import collections
 
+
 import marshmallow as ma
 
 from webservices.spec import spec
@@ -88,13 +89,7 @@ class Page(collections.Sequence):
 class PageSchemaOpts(ma.schema.SchemaOpts):
     def __init__(self, meta):
         super(PageSchemaOpts, self).__init__(meta)
-        try:
-            self.results_schema_class = getattr(meta, 'results_schema_class')
-        except AttributeError:
-            raise ma.exceptions.MarshmallowError(
-                'Must specify `results_schema_class` option '
-                'in class `Meta` of `PaginationSchema`.'
-            )
+        self.results_schema_class = getattr(meta, 'results_schema_class', None)
         self.results_field_name = getattr(meta, 'results_field_name', 'results')
         self.results_schema_options = getattr(meta, 'results_schema_options', {})
 
@@ -106,25 +101,25 @@ class PaginationSchema(ma.Schema):
     per_page = ma.fields.Integer()
 
 
-class PageSchema(ma.Schema):
-
-    OPTIONS_CLASS = PageSchemaOpts
-
-    pagination = ma.fields.Nested(PaginationSchema, ref='#/definitions/Pagination')
-
-    def __init__(self, nested_options=None, *args, **kwargs):
-        super(PageSchema, self).__init__(*args, **kwargs)
-        options = {}
-        options.update(self.opts.results_schema_options)
-        options.update(nested_options or {})
-        field = ma.fields.Nested(
-            self.opts.results_schema_class,
+class PageMeta(ma.schema.SchemaMeta):
+    """Metaclass for `PageSchema` that creates a `Nested` field based on the
+    options configured in `OPTIONS_CLASS`.
+    """
+    def __new__(mcs, name, bases, attrs):
+        klass = super().__new__(mcs, name, bases, attrs)
+        opts = klass.OPTIONS_CLASS(klass.Meta)
+        klass._declared_fields[opts.results_field_name] = ma.fields.Nested(
+            opts.results_schema_class,
             attribute='results',
             many=True,
-            **options
+            **opts.results_schema_options
         )
-        # TODO: Move to ``SchemaMeta`` @jmcarp
-        self.__class__._declared_fields[self.opts.results_field_name] = field
+        return klass
+
+
+class PageSchema(ma.Schema, metaclass=PageMeta):
+    OPTIONS_CLASS = PageSchemaOpts
+    pagination = ma.fields.Nested(PaginationSchema, ref='#/definitions/Pagination')
 
 
 class SqlalchemyPaginator(Paginator):
