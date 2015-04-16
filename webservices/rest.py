@@ -162,6 +162,7 @@ register_resource(CandidateView)
 register_resource(CandidateList)
 register_resource(CommitteeView)
 register_resource(CommitteeList)
+register_resource(ReportsView)
 register_resource(TotalsView)
 
 renderers = {

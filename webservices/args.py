@@ -58,7 +58,8 @@ committee_list = {
 
 
 reports = {
-
+    'year': Arg(str, default=default_year(), dest='cycle', description='Year in which a candidate runs for office'),
+    'fields': Arg(str, description='Choose the fields that are displayed'),
 }
 
 

@@ -15,6 +15,7 @@ totals_schema_map = {
     None: (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageSchema),
 }
 
+
 @spec.doc(path_params=[
     {'name': 'id', 'in': 'path', 'type': 'string'},
 ])
