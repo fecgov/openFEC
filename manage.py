@@ -21,7 +21,9 @@ def list_routes():
 
         methods = ','.join(rule.methods)
         url = url_for(rule.endpoint, **options)
-        line = urllib.parse.unquote("{:50s} {:20s} {}".format(rule.endpoint, methods, url))
+        line = urllib.parse.unquote(
+            '{:50s} {:20s} {}'.format(rule.endpoint, methods, url)
+        )
         output.append(line)
 
     for line in sorted(output):
@@ -30,7 +32,7 @@ def list_routes():
 
 @manager.command
 def refresh_db():
-    print("Starting DB refresh...")
+    print('Starting DB refresh...')
     sql_dir = get_full_path('data/sql_updates/')
     files = glob.glob(sql_dir + '*.sql')
 
@@ -40,7 +42,15 @@ def refresh_db():
             sql = '\n'.join(sql_fh.readlines())
             db.engine.execute(sql)
 
-    print("Finished DB refresh.")
+    print('Finished DB refresh.')
+
+
+@manager.command
+def refresh_materialized():
+    print('Refreshing materialized views...')
+    with open('data/refresh/refresh.sql') as fp:
+        db.engine.execute(fp.read().replace('%', '%%'))
+    print('Finished refreshing materialized views.')
 
 
 if __name__ == "__main__":
