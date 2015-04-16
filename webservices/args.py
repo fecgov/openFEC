@@ -6,8 +6,6 @@ from smore import swagger
 from webargs import Arg
 from webargs.flaskparser import use_kwargs
 
-from webservices.common.util import default_year
-
 
 def register_kwargs(arg_dict):
     def wrapper(func):
@@ -69,12 +67,12 @@ committee_list = {
 
 
 reports = {
-    'year': Arg(str, default=default_year(), dest='cycle', description='Year in which a candidate runs for office'),
+    'year': Arg(str, default='*', dest='cycle', description='Year in which a candidate runs for office'),
     'fields': Arg(str, description='Choose the fields that are displayed'),
 }
 
 
 totals = {
-    'year': Arg(str, default=default_year(), dest='cycle', description='Year in which a candidate runs for office'),
+    'year': Arg(str, default='*', dest='cycle', description='Year in which a candidate runs for office'),
     'fields': Arg(str, description='Choose the fields that are displayed'),
 }

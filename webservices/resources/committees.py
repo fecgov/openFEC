@@ -28,7 +28,7 @@ def filter_year(model, query, kwargs):
         )
 
     # Should this handle a list of years to make it consistent with /candidate ?
-    elif kwargs.get('year') and kwargs['year'] != '*':
+    if kwargs.get('year') and kwargs['year'] != '*':
         # before expiration
         query = query.filter(
             or_(

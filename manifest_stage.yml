@@ -1,0 +1,16 @@
+---
+memory: 512M
+applications:
+- name: api
+  path: .
+  host: fec-stage-api
+- name: web
+  path: ../openFEC-web-app
+  buildpack: python_buildpack
+  host: fec-stage-web
+  env:
+    FEC_WEB_API_URL: http://fec-stage-api.cf.18f.us
+    FEC_WEB_DEBUG: True
+    # These must be set manually via `cf set-env`
+    # FEC_WEB_PASSWORD
+    # FEC_WEB_USERNAME
