@@ -5,6 +5,8 @@ from webargs.flaskparser import use_kwargs
 
 from flask.ext.restful import inputs
 
+from webservices.common.util import default_year
+
 
 def register_kwargs(arg_dict):
     def wrapper(func):
@@ -19,6 +21,7 @@ paging = {
     'page': Arg(inputs.natural, default=1, description='For paginating through results, starting at page 1'),
     'per_page': Arg(inputs.natural, default=20, description='The number of results returned per page. Defaults to 20.'),
 }
+
 
 candidate_detail = {
     'office': Arg(str, description='Governmental office candidate runs for'),
@@ -43,6 +46,7 @@ committee = {
     'organization_type': Arg(str, description='The one-letter code for the kind for organization'),
     'committee_type': Arg(str, description='The one-letter type code of the organization'),
 }
+
 committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'committee_id': Arg(str, description="Committee's FEC ID"),
@@ -50,4 +54,15 @@ committee_list = {
     'state': Arg(str, description='Two digit U.S. State committee is registered in'),
     'name': Arg(str, description="Committee's name (full or partial)"),
     'party': Arg(str, description='Three letter code for party'),
+}
+
+
+reports = {
+
+}
+
+
+totals = {
+    'year': Arg(str, default=default_year(), dest='cycle', description='Year in which a candidate runs for office'),
+    'fields': Arg(str, description='Choose the fields that are displayed'),
 }

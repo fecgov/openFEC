@@ -1,11 +1,12 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.ext.associationproxy import association_proxy
 
 db = SQLAlchemy()
 
 
 class Candidate(db.Model):
+    __tablename__ = 'ofec_candidates_mv'
+
     candidate_key = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
@@ -22,9 +23,10 @@ class Candidate(db.Model):
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
 
-    __tablename__ = 'ofec_candidates_mv'
 
 class CandidateDetail(db.Model):
+    __tablename__ = 'ofec_candidate_detail_mv'
+
     candidate_key = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
@@ -50,10 +52,10 @@ class CandidateDetail(db.Model):
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
 
-    __tablename__ = 'ofec_candidate_detail_mv'
-
 
 class Committee(db.Model):
+    __tablename__ = 'ofec_committees_mv'
+
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
     candidate_ids = db.Column(ARRAY(db.String))
@@ -71,10 +73,10 @@ class Committee(db.Model):
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
 
-    __tablename__ = 'ofec_committees_mv'
-
 
 class CommitteeDetail(db.Model):
+    __tablename__ = 'ofec_committee_detail_mv'
+
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
     designation = db.Column(db.String(1))
@@ -133,10 +135,10 @@ class CommitteeDetail(db.Model):
     custodian_name_title = db.Column(db.String(50))
     custodian_zip = db.Column(db.String(9))
 
-    __tablename__ = 'ofec_committee_detail_mv'
-
 
 class CandidateCommitteeLink(db.Model):
+    __tablename__ = 'ofec_name_linkage_mv'
+
     linkage_key = db.Column(db.Integer, primary_key=True)
     committee_key = db.Column('committee_key', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
     candidate_key = db.Column('candidate_key', db.Integer, db.ForeignKey(Candidate.candidate_key), db.ForeignKey(CandidateDetail.candidate_key))
@@ -153,4 +155,122 @@ class CandidateCommitteeLink(db.Model):
     committee_type = db.Column('committee_type', db.String(1))
     committee_type_full = db.Column('committee_type_full', db.String(50))
 
-    __tablename__ = 'ofec_name_linkage_mv'
+
+class CommitteeTotalsPacOrParty(db.Model):
+    committee_id = db.Column(db.String(10), primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True)
+    committee_type = db.Column(db.String(1))
+    coverage_start_date = db.Column(db.DateTime())
+    coverage_end_date = db.Column(db.DateTime())
+    all_loans_received = db.Column(db.Integer)
+    contribution_refunds = db.Column(db.Integer)
+    contributions = db.Column(db.Integer)
+    coordinated_expenditures_by_party_committee = db.Column(db.Integer)
+    disbursements = db.Column(db.Integer)
+    fed_candidate_committee_contributions = db.Column(db.Integer)
+    fed_candidate_contribution_refunds = db.Column(db.Integer)
+    fed_disbursements = db.Column(db.Integer)
+    fed_elect_activity = db.Column(db.Integer)
+    fed_operating_expenditures = db.Column(db.Integer)
+    fed_receipts = db.Column(db.Integer)
+    independent_expenditures = db.Column(db.Integer)
+    individual_contribution_refunds = db.Column(db.Integer)
+    individual_itemized_contributions = db.Column(db.Integer)
+    individual_unitemized_contributions = db.Column(db.Integer)
+    loan_repayments_made = db.Column(db.Integer)
+    loan_repayments_received = db.Column(db.Integer)
+    loans_made = db.Column(db.Integer)
+    net_contributions = db.Column(db.Integer)
+    non_allocated_fed_election_activity = db.Column(db.Integer)
+    nonfed_transfers = db.Column(db.Integer)
+    offsets_to_operating_expenditures = db.Column(db.Integer)
+    operating_expenditures = db.Column(db.Integer)
+    other_disbursements = db.Column(db.Integer)
+    other_fed_operating_expenditures = db.Column(db.Integer)
+    other_fed_receipts = db.Column(db.Integer)
+    other_political_committee_contributions = db.Column(db.Integer)
+    political_party_committee_contributions = db.Column(db.Integer)
+    receipts = db.Column(db.Integer)
+    shared_fed_activity = db.Column(db.Integer)
+    shared_fed_activity_nonfed = db.Column(db.Integer)
+    shared_fed_operating_expenditures = db.Column(db.Integer)
+    shared_nonfed_operating_expenditures = db.Column(db.Integer)
+    transfers_from_affiliated_party = db.Column(db.Integer)
+    transfers_from_nonfed_account = db.Column(db.Integer)
+    transfers_from_nonfed_levin = db.Column(db.Integer)
+    transfers_to_affiliated_committee = db.Column(db.Integer)
+
+    __tablename__ = 'ofec_totals_pacs_parties_mv'
+
+
+class CommitteeTotalsPresidential(db.Model):
+    committee_id = db.Column(db.String(10), primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True)
+    committee_type = db.Column(db.String(1))
+    coverage_start_date = db.Column(db.DateTime())
+    coverage_end_date = db.Column(db.DateTime())
+    candidate_contribution = db.Column(db.Integer)
+    contribution_refunds = db.Column(db.Integer)
+    contributions = db.Column(db.Integer)
+    disbursements = db.Column(db.Integer)
+    exempt_legal_accounting_disbursement = db.Column(db.Integer)
+    federal_funds = db.Column(db.Integer)
+    fundraising_disbursements = db.Column(db.Integer)
+    individual_contributions = db.Column(db.Integer)
+    loan_repayments_made = db.Column(db.Integer)
+    loans_received = db.Column(db.Integer)
+    loans_received_from_candidate = db.Column(db.Integer)
+    offsets_to_fundraising_expenses = db.Column(db.Integer)
+    offsets_to_legal_accounting = db.Column(db.Integer)
+    offsets_to_operating_expenditures = db.Column(db.Integer)
+    operating_expenditures = db.Column(db.Integer)
+    other_disbursements = db.Column(db.Integer)
+    other_loans_received = db.Column(db.Integer)
+    other_political_committee_contributions = db.Column(db.Integer)
+    other_receipts = db.Column(db.Integer)
+    political_party_committee_contributions = db.Column(db.Integer)
+    receipts = db.Column(db.Integer)
+    refunded_other_political_committee_contributions = db.Column(db.Integer)
+    refunded_political_party_committee_contributions = db.Column(db.Integer)
+    refunded_individual_contributions = db.Column(db.Integer)
+    repayments_loans_made_by_candidate = db.Column(db.Integer)
+    repayments_other_loans = db.Column(db.Integer)
+    transfer_from_affiliated_committee = db.Column(db.Integer)
+    transfer_to_other_authorized_committee = db.Column(db.Integer)
+
+    __tablename__ = 'ofec_totals_presidential_mv'
+
+
+class CommitteeTotalsHouseOrSenate(db.Model):
+    committee_id = db.Column(db.String(10), primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True)
+    committee_type = db.Column(db.String(1))
+    coverage_start_date = db.Column(db.DateTime())
+    coverage_end_date = db.Column(db.DateTime())
+    all_other_loans = db.Column(db.Integer)
+    candidate_contribution = db.Column(db.Integer)
+    contribution_refunds = db.Column(db.Integer)
+    contributions = db.Column(db.Integer)
+    disbursements = db.Column(db.Integer)
+    individual_contributions = db.Column(db.Integer)
+    individual_itemized_contributions = db.Column(db.Integer)
+    individual_unitemized_contributions = db.Column(db.Integer)
+    loan_repayments = db.Column(db.Integer)
+    loan_repayments_candidate_loans = db.Column(db.Integer)
+    loan_repayments_other_loans = db.Column(db.Integer)
+    loans = db.Column(db.Integer)
+    loans_made_by_candidate = db.Column(db.Integer)
+    offsets_to_operating_expenditures = db.Column(db.Integer)
+    operating_expenditures = db.Column(db.Integer)
+    other_disbursements = db.Column(db.Integer)
+    other_political_committee_contributions = db.Column(db.Integer)
+    other_receipts = db.Column(db.Integer)
+    political_party_committee_contributions = db.Column(db.Integer)
+    receipts = db.Column(db.Integer)
+    refunds_individual_contributions = db.Column(db.Integer)
+    refunds_other_political_committee_contributions = db.Column(db.Integer)
+    refunds_political_party_committee_contributions = db.Column(db.Integer)
+    transfers_from_other_authorized_committee = db.Column(db.Integer)
+    transfers_to_other_authorized_committee = db.Column(db.Integer)
+
+    __tablename__ = 'ofec_totals_house_senate_mv'
