@@ -1,4 +1,17 @@
 #!/usr/bin/env python
+"""Run background tasks in a crontab-like system using celery beat. Celery does
+not daemonize itself, so this script should be run in a subprocess or managed
+using supervisor or a similar tool.
+
+Simple invocation: ::
+
+    $ ./cron.py
+
+Customizable invocation: ::
+
+    celery worker -app cron --beat
+
+"""
 
 import celery
 from celery.schedules import crontab

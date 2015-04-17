@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from flask import url_for
 from flask.ext.script import Manager
 
@@ -32,7 +34,8 @@ def list_routes():
 
 
 @manager.command
-def refresh_db():
+def update_schemas():
+    """Delete and recreate all tables and views."""
     print('Starting DB refresh...')
     sql_dir = get_full_path('data/sql_updates/')
     files = glob.glob(sql_dir + '*.sql')
@@ -48,6 +51,7 @@ def refresh_db():
 
 @manager.command
 def refresh_materialized():
+    """Refresh materialized views."""
     print('Refreshing materialized views...')
     with open('data/refresh/refresh.sql') as fp:
         db.engine.execute(fp.read().replace('%', '%%'))
@@ -55,17 +59,24 @@ def refresh_materialized():
 
 
 @manager.command
-def start_beat():
-    subprocess.Popen(['python', 'cron.py'])
-
-
-@manager.command
 def stop_beat():
-    """See http://celery.readthedocs.org/en/latest/userguide/workers.html#stopping-the-worker"""
-    subprocess.Popen(
+    """Kill all celery beat workers.
+    Note: In the future, it would be more elegant to use a process manager like
+    supervisor or forever.
+    """
+    return subprocess.Popen(
         "ps aux | grep 'cron.py' | awk '{print $2}' | xargs kill -9",
         shell=True,
     )
+
+
+@manager.command
+def start_beat():
+    """Start celery beat workers in the background using subprocess.
+    """
+    # Stop beat workers synchronously
+    stop_beat().wait()
+    return subprocess.Popen(['python', 'cron.py'])
 
 
 if __name__ == "__main__":

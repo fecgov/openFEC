@@ -1,4 +1,4 @@
--- Refresh all materialized views; borrwed from
+-- Refresh all materialized views; borrowed from
 -- https://github.com/sorokine/RefreshAllMaterializedViews
 
 CREATE OR REPLACE FUNCTION refresh_materialized(schema_arg TEXT DEFAULT 'public')
