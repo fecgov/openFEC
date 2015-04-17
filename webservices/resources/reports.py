@@ -12,8 +12,8 @@ reports_schema_map = {
     'P': (models.CommitteeReportsPresidential, schemas.ReportsPresidentialPageSchema),
     'H': (models.CommitteeReportsHouseOrSenate, schemas.ReportsHouseSenatePageSchema),
     'S': (models.CommitteeReportsHouseOrSenate, schemas.ReportsHouseSenatePageSchema),
-    None: (models.CommitteeReportsPacOrParty, schemas.ReportsPacPartyPageSchema),
 }
+default_schemas = (models.CommitteeReportsPacOrParty, schemas.ReportsPacPartyPageSchema)
 
 
 @spec.doc(path_params=[
@@ -25,7 +25,7 @@ class ReportsView(Resource):
     @args.register_kwargs(args.reports)
     def get(self, committee_id, **kwargs):
         committee = models.Committee.query.filter_by(committee_id=committee_id).one()
-        reports_class, reports_schema = reports_schema_map[committee.committee_type]
+        reports_class, reports_schema = reports_schema_map.get(committee.committee_type, default_schemas)
         reports = self.get_reports(committee_id, reports_class, kwargs)
         paginator = paging.SqlalchemyPaginator(reports, kwargs['per_page'])
         return reports_schema().dump(paginator.get_page(kwargs['page'])).data

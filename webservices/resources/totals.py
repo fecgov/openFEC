@@ -12,8 +12,8 @@ totals_schema_map = {
     'P': (models.CommitteeTotalsPresidential, schemas.TotalsPresidentialPageSchema),
     'H': (models.CommitteeTotalsHouseOrSenate, schemas.TotalsHouseSenatePageSchema),
     'S': (models.CommitteeTotalsHouseOrSenate, schemas.TotalsHouseSenatePageSchema),
-    None: (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageSchema),
 }
+default_schemas = (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageSchema)
 
 
 @spec.doc(path_params=[
@@ -25,8 +25,8 @@ class TotalsView(Resource):
     @args.register_kwargs(args.totals)
     def get(self, committee_id, **kwargs):
         committee = models.Committee.query.filter_by(committee_id=committee_id).one()
-        totals_class, totals_schema = totals_schema_map[committee.committee_type]
-        totals = self.get_totals(committee_id, totals_class)
+        totals_class, totals_schema = totals_schema_map.get(committee.committee_type, default_schemas)
+        totals = self.get_totals(committee_id, totals_class, kwargs)
         paginator = paging.SqlalchemyPaginator(totals, kwargs['per_page'])
         return totals_schema().dump(paginator.get_page(kwargs['page'])).data
 

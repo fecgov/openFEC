@@ -21,6 +21,7 @@ def _validate_natural(value):
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
 
+
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
     'per_page': Natural(default=20, description='The number of results returned per page. Defaults to 20.'),
