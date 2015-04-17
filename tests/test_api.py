@@ -174,3 +174,10 @@ class OverallTest(ApiBaseTest):
         self.assertGreaterEqual(len(results), 10)
         for r in results:
             self.assertIn('OBA', r['name'])
+
+    def test_typeahead_name_search_missing_param(self):
+        resp = self.app.get('/names')
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertEqual(data['message'], 'Required parameter "q" not found.')

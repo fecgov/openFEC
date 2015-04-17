@@ -1,10 +1,28 @@
+import logging
 import functools
 
-import webargs
 from smore import swagger
+from flask.ext.restful import abort
 
+import webargs
 from webargs import Arg
-from webargs.flaskparser import use_kwargs
+from webargs.core import text_type
+from webargs.flaskparser import FlaskParser
+
+
+logger = logging.getLogger(__name__)
+
+
+class FlaskRestParser(FlaskParser):
+
+    def handle_error(self, error):
+        logger.error(error)
+        status_code = getattr(error, 'status_code', 400)
+        data = getattr(error, 'data', {})
+        abort(status_code, message=text_type(error), **data)
+
+
+parser = FlaskRestParser()
 
 
 def register_kwargs(arg_dict):
@@ -12,7 +30,7 @@ def register_kwargs(arg_dict):
         params = swagger.args2parameters(arg_dict, default_in='query')
         func.__apidoc__ = getattr(func, '__apidoc__', {})
         func.__apidoc__.setdefault('parameters', []).extend(params)
-        return use_kwargs(arg_dict)(func)
+        return parser.use_kwargs(arg_dict)(func)
     return wrapper
 
 
