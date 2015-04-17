@@ -131,6 +131,13 @@ class OverallTest(ApiBaseTest):
         results = self._results(rest.api.url_for(rest.ReportsView, committee_id=committee.committee_id))
         assert results[0].keys() == schemas.ReportsPacPartySchema._declared_fields.keys()
 
+    def test_reports_committee_not_found(self):
+        resp = self.app.get(rest.api.url_for(rest.ReportsView, committee_id='fake'))
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertIn('not found', data['message'].lower())
+
     @unittest.skip('Failing on Travis CI')
     def test_reports_presidential(self):
         committee = models.Committee.query.filter(models.Committee.committee_type == 'P').first()
@@ -146,6 +153,13 @@ class OverallTest(ApiBaseTest):
         self.assertIn('total_receipts_period', results_recipts[0]['reports'][0])
         self.assertNotIn('reports', results_disbursements[0])
         self.assertNotIn('totals', results_recipts[0])
+
+    def test_totals_committee_not_found(self):
+        resp = self.app.get(rest.api.url_for(rest.TotalsView, committee_id='fake'))
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertIn('not found', data['message'].lower())
 
     def test_total_cycle(self):
         committee, totals = models.db.session.query(

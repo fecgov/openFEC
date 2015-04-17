@@ -24,7 +24,7 @@ class ReportsView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reports)
     def get(self, committee_id, **kwargs):
-        committee = models.Committee.query.filter_by(committee_id=committee_id).one()
+        committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()
         reports_class, reports_schema = reports_schema_map.get(committee.committee_type, default_schemas)
         reports = self.get_reports(committee_id, reports_class, kwargs)
         paginator = paging.SqlalchemyPaginator(reports, kwargs['per_page'])

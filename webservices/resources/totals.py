@@ -1,5 +1,4 @@
 from flask.ext.restful import Resource
-from sqlalchemy.orm.exc import NoResultFound
 
 from webservices import args
 from webservices import spec
@@ -24,7 +23,7 @@ class TotalsView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.totals)
     def get(self, committee_id, **kwargs):
-        committee = models.Committee.query.filter_by(committee_id=committee_id).one()
+        committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()
         totals_class, totals_schema = totals_schema_map.get(committee.committee_type, default_schemas)
         totals = self.get_totals(committee_id, totals_class, kwargs)
         paginator = paging.SqlalchemyPaginator(totals, kwargs['per_page'])
