@@ -4,6 +4,7 @@ applications:
 - name: api
   path: .
   host: fec-test-api
+  stack: lucid64
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack
