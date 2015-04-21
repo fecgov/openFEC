@@ -151,7 +151,7 @@ class CommitteeList(Resource):
 
         elif args.get('q'):
             fulltext_qry = """SELECT cmte_sk
-                              FROM   dimcmte_fulltext
+                              FROM   dimcmte_fulltext_mv
                               WHERE  fulltxt @@ to_tsquery(:findme)
                               ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
