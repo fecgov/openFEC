@@ -1,6 +1,6 @@
 drop view if exists ofec_committees_vw;
-drop materialized view if exists ofec_committees_mv;
-create materialized view ofec_committees_mv as
+drop materialized view if exists ofec_committees_mv_tmp;
+create materialized view ofec_committees_mv_tmp as
 select distinct
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
@@ -54,12 +54,18 @@ from dimcmte
     -- inner join dimlinkages dl using (cmte_sk)
 ;
 
-create index on ofec_committees_mv(party);
-create index on ofec_committees_mv(state);
-create index on ofec_committees_mv(designation);
-create index on ofec_committees_mv(expire_date);
-create index on ofec_committees_mv(committee_id);
-create index on ofec_committees_mv(committee_key);
-create index on ofec_committees_mv(candidate_ids);
-create index on ofec_committees_mv(committee_type);
-create index on ofec_committees_mv(organization_type);
+create index on ofec_committees_mv_tmp(party);
+create index on ofec_committees_mv_tmp(state);
+create index on ofec_committees_mv_tmp(designation);
+create index on ofec_committees_mv_tmp(expire_date);
+create index on ofec_committees_mv_tmp(committee_id);
+create index on ofec_committees_mv_tmp(committee_key);
+create index on ofec_committees_mv_tmp(candidate_ids);
+create index on ofec_committees_mv_tmp(committee_type);
+create index on ofec_committees_mv_tmp(organization_type);
+
+begin;
+    drop materialized view if exists ofec_committees_mv;
+    alter materialized view ofec_committees_mv_tmp
+        rename to ofec_committees_mv;
+commit;

@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_totals_presidential_mv;
-create materialized view ofec_totals_presidential_mv as
+drop materialized view if exists ofec_totals_presidential_mv_tmp;
+create materialized view ofec_totals_presidential_mv_tmp as
 select
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
@@ -45,5 +45,11 @@ where
 group by committee_id, cycle, committee_type
 ;
 
-create index on ofec_totals_presidential_mv(cycle);
-create index on ofec_totals_presidential_mv(committee_id);
+create index on ofec_totals_presidential_mv_tmp(cycle);
+create index on ofec_totals_presidential_mv_tmp(committee_id);
+
+begin;
+    drop materialized view if exists ofec_totals_presidential_mv;
+    alter materialized view ofec_totals_presidential_mv_tmp
+        rename to ofec_totals_presidential_mv;
+commit;

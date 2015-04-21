@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_name_linkage_mv;
-create materialized view ofec_name_linkage_mv as
+drop materialized view if exists ofec_name_linkage_mv_tmp;
+create materialized view ofec_name_linkage_mv_tmp as
 select
     l.linkages_sk as linkage_key,
     l.cand_sk as candidate_key,
@@ -43,5 +43,11 @@ select
     (select cmte_nm from dimcmteproperties where dimcmteproperties.cmte_sk = l.cmte_sk order by cmteproperties_sk desc limit 1) as committee_name
 from dimlinkages l;
 
-create index on ofec_name_linkage_mv(candidate_key);
-create index on ofec_name_linkage_mv(committee_key);
+create index on ofec_name_linkage_mv_tmp(candidate_key);
+create index on ofec_name_linkage_mv_tmp(committee_key);
+
+begin;
+    drop materialized view if exists ofec_name_linkage_mv;
+    alter materialized view ofec_name_linkage_mv_tmp
+        rename to ofec_name_linkage_mv;
+commit;
