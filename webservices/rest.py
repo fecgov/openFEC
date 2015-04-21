@@ -80,7 +80,7 @@ class NameSearch(restful.Resource):
                cmte_id AS committee_id,
                name,
                office_sought
-      FROM   name_search_fulltext
+      FROM   name_search_fulltext_mv
       WHERE  name_vec @@ to_tsquery(:findme || ':*')
       ORDER BY ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
       LIMIT  20"""

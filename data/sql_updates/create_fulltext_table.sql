@@ -1,92 +1,87 @@
--- Creates and populates the _fulltext tables.
+drop table if exists dimcand_fulltext;
+drop materialized view if exists dimcand_fulltext_mv;
+create materialized view dimcand_fulltext_mv as
+    select
+        c.cand_sk,
+        case
+            when max(p.cand_nm) is not null then
+                setweight(to_tsvector(string_agg(coalesce(p.cand_nm, ''), ' ')), 'A') ||
+                setweight(to_tsvector(string_agg(coalesce(c.cand_id, ''), ' ')), 'B')
+            else null::tsvector
+            end
+        as fulltxt
+    from dimcand c
+    left outer join dimcandproperties p on c.cand_sk = p.cand_sk
+    group by c.cand_sk
+;
 
-DROP TABLE if exists dimcand_fulltext;
-CREATE TABLE dimcand_fulltext AS
-  SELECT cand_sk,
-         NULL::tsvector AS fulltxt
-  FROM   dimcand;
+create index on dimcand_fulltext_mv using gin(fulltxt);
 
-WITH cnd AS (
-  SELECT c.cand_sk,
-         setweight(to_tsvector(string_agg(coalesce(p.cand_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(c.cand_id, ''), ' ')), 'B')
-         AS weights
-  FROM   dimcand c
-  JOIN   dimcandproperties p ON (c.cand_sk = p.cand_sk)
-  GROUP BY c.cand_sk)
-UPDATE dimcand_fulltext
-SET    fulltxt = (SELECT weights FROM cnd
-                  WHERE  dimcand_fulltext.cand_sk = cnd.cand_sk);
+drop table if exists dimcmte_fulltext;
+drop materialized view if exists dimcmte_fulltext_mv;
+create materialized view dimcmte_fulltext_mv as
+    select
+        c.cmte_sk,
+        case
+            when max(p.cmte_nm) is not null then
+                setweight(to_tsvector(string_agg(coalesce(p.cmte_nm, ''), ' ')), 'A') ||
+                setweight(to_tsvector(string_agg(coalesce(c.cmte_id, ''), ' ')), 'B')
+            else null::tsvector
+            end
+        as fulltxt
+    from dimcmte c
+    left outer join dimcmteproperties p on c.cmte_sk = p.cmte_sk
+    group by c.cmte_sk
+;
 
-CREATE INDEX cand_fts_idx ON dimcand_fulltext USING gin(fulltxt);
+create index on dimcmte_fulltext_mv using gin(fulltxt);
 
+drop table if exists name_search_fulltext;
+drop materialized view if exists name_search_fulltext_mv;
+create materialized view name_search_fulltext_mv as
+with
+    ranked_cand as (
+        select
+            p.cand_nm as name,
+            to_tsvector(p.cand_nm) as name_vec,
+            c.cand_id,
+            row_number() over
+                (partition by c.cand_id order by p.load_date desc)
+                as load_order,
+            null::text as cmte_id,
+            o.office_tp as office_sought
+        from dimcand c
+        join dimcandproperties p on (p.cand_sk = c.cand_sk)
+        join dimcandoffice co on (co.cand_sk = c.cand_sk)
+        join dimoffice o on (co.office_sk = o.office_sk)
+    ), ranked_cmte as (
+        select
+            p.cmte_nm as name,
+            to_tsvector(p.cmte_nm) as name_vec,
+            c.cmte_id,
+            row_number()
+                over (partition by c.cmte_id order by p.load_date desc)
+                as load_order
+        from dimcmte c
+        join dimcmteproperties p on (p.cmte_sk = c.cmte_sk)
+    )
+    select distinct
+        name,
+        name_vec,
+        cand_id,
+        cmte_id,
+        office_sought
+    from ranked_cand
+    where load_order = 1
+    union
+    select distinct
+        name,
+        name_vec,
+        null as cand_id,
+        cmte_id,
+        null as office_sought
+    from ranked_cmte
+    where load_order = 1
+;
 
-DROP TABLE if exists dimcmte_fulltext;
-CREATE TABLE dimcmte_fulltext AS
-  SELECT cmte_sk,
-         NULL::tsvector AS fulltxt
-  FROM   dimcmte;
-
-WITH cmte AS (
-  SELECT c.cmte_sk,
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_nm, ''), ' ')), 'A') ||
-         setweight(to_tsvector(string_agg(coalesce(p.cmte_id, ''), ' ')), 'B')
-         AS weights
-  FROM   dimcmte c
-  JOIN   dimcmteproperties p ON (c.cmte_sk = p.cmte_sk)
-  GROUP BY c.cmte_sk)
-UPDATE dimcmte_fulltext
-SET    fulltxt = (SELECT weights FROM cmte
-                  WHERE  dimcmte_fulltext.cmte_sk = cmte.cmte_sk);
-
-CREATE INDEX cmte_fts_idx ON dimcmte_fulltext USING gin(fulltxt);
-
-
-DROP TABLE if exists name_search_fulltext;
-CREATE TABLE name_search_fulltext AS
-WITH ranked AS (
-SELECT
-       p.cand_nm AS name,
-       to_tsvector(p.cand_nm) as name_vec,
-       c.cand_id,
-       row_number() OVER (partition by c.cand_id
-                          order by p.load_date desc) AS load_order,
-       NULL::text AS cmte_id,
-       o.office_tp AS office_sought
-FROM   dimcand c
-JOIN   dimcandproperties p ON (p.cand_sk = c.cand_sk)
-JOIN   dimcandoffice co ON (co.cand_sk = c.cand_sk)
-JOIN   dimoffice o ON (co.office_sk = o.office_sk)
-)
-SELECT DISTINCT
-       name,
-       name_vec,
-       cand_id,
-       cmte_id,
-       office_sought
-FROM   ranked
-WHERE  load_order = 1;
-
-INSERT INTO name_search_fulltext
-WITH ranked AS (
-SELECT
-       p.cmte_nm AS name,
-       to_tsvector(p.cmte_nm) AS name_vec,
-       c.cmte_id,
-       row_number() OVER (partition by c.cmte_id
-                          order by p.load_date desc) AS load_order
-FROM   dimcmte c
-JOIN   dimcmteproperties p ON (p.cmte_sk = c.cmte_sk)
-)
-SELECT DISTINCT
-       name,
-       name_vec,
-       NULL AS cand_id,
-       cmte_id,
-       NULL AS office_sought
-FROM   ranked
-WHERE  load_order = 1;
-
-CREATE INDEX name_search_fts_idx ON name_search_fulltext USING gin(name_vec);
-
-
+create index on name_search_fulltext_mv using gin(name_vec);
