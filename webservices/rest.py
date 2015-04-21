@@ -45,13 +45,13 @@ db.init_app(app)
 
 # api.data.gov
 trusted_proxies = ('192.168.114.100',)
-WHITE_LIST = os.getenv('WHITE_LIST', False)
+FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
 
 
 @app.before_request
 def limit_remote_addr():
     falses = (False, 'False', 'false', 'f')
-    if WHITE_LIST not in falses :
+    if FEC_API_WHITELIST_IPS not in falses :
         remote = request.remote_addr
         route = list(request.access_route)
         while remote in trusted_proxies:
