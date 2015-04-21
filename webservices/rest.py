@@ -45,13 +45,13 @@ db.init_app(app)
 
 # api.data.gov
 trusted_proxies = ('192.168.114.100',)
-PRODUCTION = os.getenv('PRODUCTION', False)
+WHITE_LIST = os.getenv('WHITE_LIST', False)
 
 
 @app.before_request
 def limit_remote_addr():
     falses = (False, 'False', 'false', 'f')
-    if PRODUCTION not in falses :
+    if WHITE_LIST not in falses :
         remote = request.remote_addr
         route = list(request.access_route)
         while remote in trusted_proxies:
