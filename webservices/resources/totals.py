@@ -1,7 +1,7 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 from math import ceil
 from webservices.common.models import db
-from webservices.common.util import default_year, merge_dicts, Pagination
+from webservices.common.util import merge_dicts, Pagination
 from webservices.resources.committees import Committee
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -100,7 +100,7 @@ class TotalsView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('year', type=str, default=default_year(), dest='cycle', help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=str, default='*', dest='cycle', help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
     def get(self, **kwargs):
