@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_candidate_detail_vw;
-create materialized view ofec_candidate_detail_vw as
+drop materialized view if exists ofec_candidate_detail_mv;
+create materialized view ofec_candidate_detail_mv as
 select
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
@@ -60,3 +60,15 @@ group by
     dimcand.cand_sk,
     dimcand.cand_id
 ;
+
+create index on ofec_candidate_detail_mv(name);
+create index on ofec_candidate_detail_mv(party);
+create index on ofec_candidate_detail_mv(state);
+create index on ofec_candidate_detail_mv(office);
+create index on ofec_candidate_detail_mv(load_date);
+create index on ofec_candidate_detail_mv(district);
+create index on ofec_candidate_detail_mv(election_years);
+create index on ofec_candidate_detail_mv(candidate_status);
+create index on ofec_candidate_detail_mv(candidate_id);
+create index on ofec_candidate_detail_mv(incumbent_challenge);
+create index on ofec_candidate_detail_mv(candidate_expire_date);

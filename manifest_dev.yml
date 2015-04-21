@@ -1,0 +1,17 @@
+---
+memory: 512M
+stack: lucid64
+applications:
+- name: api
+  path: .
+  host: fec-dev-api
+- name: web
+  path: ../openFEC-web-app
+  buildpack: python_buildpack
+  host: fec-dev-web
+  env:
+    FEC_WEB_API_URL: http://fec-dev-api.cf.18f.us
+    FEC_WEB_DEBUG: True
+    # These must be set manually via `cf set-env`
+    # FEC_WEB_PASSWORD
+    # FEC_WEB_USERNAME

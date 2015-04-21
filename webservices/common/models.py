@@ -23,7 +23,7 @@ class Candidate(db.Model):
     name = db.Column(db.String(100))
     committees = db.relationship('CandidateCommitteeLink', backref='candidates')
 
-    __tablename__ = 'ofec_candidates_vw'
+    __tablename__ = 'ofec_candidates_mv'
 
 class CandidateDetail(db.Model):
     candidate_key = db.Column(db.Integer, primary_key=True)
@@ -52,12 +52,13 @@ class CandidateDetail(db.Model):
     candidate_inactive = db.Column(db.String(1))
     committees = db.relationship('CandidateCommitteeLink', backref='candidatedetail')
 
-    __tablename__ = 'ofec_candidate_detail_vw'
+    __tablename__ = 'ofec_candidate_detail_mv'
 
 
 class Committee(db.Model):
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
+    candidate_ids = db.Column(ARRAY(db.String))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
@@ -74,7 +75,7 @@ class Committee(db.Model):
     candidates = db.relationship('CandidateCommitteeLink', backref='committees')
 
 
-    __tablename__ = 'ofec_committees_vw'
+    __tablename__ = 'ofec_committees_mv'
 
 
 class CommitteeDetail(db.Model):
@@ -137,7 +138,7 @@ class CommitteeDetail(db.Model):
     custodian_name_title = db.Column(db.String(50))
     custodian_zip = db.Column(db.String(9))
 
-    __tablename__ = 'ofec_committee_detail_vw'
+    __tablename__ = 'ofec_committee_detail_mv'
 
 
 class CandidateCommitteeLink(db.Model):
@@ -157,7 +158,4 @@ class CandidateCommitteeLink(db.Model):
     committee_type = db.Column('committee_type', db.String(1))
     committee_type_full = db.Column('committee_type_full', db.String(50))
 
-    __tablename__ = 'ofec_name_linkage_vw'
-
-
-
+    __tablename__ = 'ofec_name_linkage_mv'

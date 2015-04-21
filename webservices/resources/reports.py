@@ -4,7 +4,7 @@ from sqlalchemy import desc
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 
 from webservices.common.models import db
-from webservices.common.util import default_year, merge_dicts, Pagination
+from webservices.common.util import merge_dicts, Pagination
 from webservices.resources.committees import Committee
 
 
@@ -486,7 +486,7 @@ class ReportsView(Resource):
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
     # TODO: change to filter on report_year and add a separate filter for cycle
-    parser.add_argument('year', type=str, default=default_year(), dest='cycle', help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=str, default='*', dest='cycle', help="Year in which a candidate runs for office")
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
     def get(self, **kwargs):
@@ -499,11 +499,11 @@ class ReportsView(Resource):
 
         committee = Committee.query.filter_by(committee_id=committee_id).one()
 
-        reports_class, fields = reports_model_map.get(
+        reports_class, specific_fields = reports_model_map.get(
             committee.committee_type,
             reports_model_map['default'],
         )
-        results_fields = merge_dicts(common_fields, fields)
+        results_fields = merge_dicts(common_fields, specific_fields)
 
         count, reports = self.get_reports(committee_id, reports_class, args, page_num, per_page)
 

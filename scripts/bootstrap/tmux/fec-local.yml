@@ -1,0 +1,34 @@
+# ~/.tmuxinator/fec.yml
+
+name: fec-local
+root: <CHANGE>
+
+# Optional tmux socket
+# socket_name: foo
+
+# Runs before everything. Use it to start daemons etc.
+# pre: sudo /etc/rc.d/mysqld start
+
+# Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
+pre_window: source ~/.fec_vars
+
+# Pass command line options to tmux. Useful for specifying a different tmux.conf.
+# tmux_options: -f ~/.tmux.mac.conf
+
+# Change the command to call tmux.  This can be used by derivatives/wrappers like byobu.
+# tmux_command: byobu
+
+windows:
+  - servers:
+      layout: tiled
+      panes:
+        - api:
+            - workon openFEC
+            - cd <CHANGE>/openFEC
+            - python run_api.py
+        - site:
+            - workon openFEC-web-app
+            - cd <CHANGE>/openFEC-web-app
+            - python __init__.py
+        - d:
+            - tmux detach
