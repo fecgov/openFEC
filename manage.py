@@ -26,7 +26,7 @@ def excute_sql_folder(files):
 
 
 @manager.command
-def refresh_db():
+def update_schemas():
     print("Starting DB refresh...")
     excute_sql_folder('data/sql_prep/')
     excute_sql_folder('data/sql_updates/')
@@ -52,22 +52,6 @@ def list_routes():
 
     for line in sorted(output):
         print(line)
-
-
-@manager.command
-def update_schemas():
-    """Delete and recreate all tables and views."""
-    print('Starting DB refresh...')
-    sql_dir = get_full_path('data/sql_updates/')
-    files = glob.glob(sql_dir + '*.sql')
-
-    for sql_file in files:
-        print(("Running {}".format(sql_file)))
-        with open(sql_file, 'r') as sql_fh:
-            sql = '\n'.join(sql_fh.readlines())
-            db.engine.execute(sql)
-
-    print('Finished DB refresh.')
 
 
 @manager.command
