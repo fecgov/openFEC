@@ -242,10 +242,6 @@ class CandidateHistoryView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    # We are standardizing on year
-    parser.add_argument('year', type=str, dest='year', help="See most recent record for a two-year cycle.")
-    # Would like symmetry between results and query terms
-    parser.add_argument('two_year_period', type=str, dest='year', help="Synonym for year.")
 
 
     def get(self, **kwargs):
