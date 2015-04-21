@@ -175,7 +175,7 @@ class CandidateView(Resource):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
-    parser.add_argument('year', type=str, dest='year', help="See records pertaining to a particular year.")
+    parser.add_argument('year', type=str, help="See records pertaining to a particular year.")
     parser.add_argument('district', type=str, help='Two digit district number')
     parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
     parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
