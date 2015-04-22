@@ -2,6 +2,7 @@ drop table if exists dimcand_fulltext;
 drop materialized view if exists dimcand_fulltext_mv;
 create materialized view dimcand_fulltext_mv as
     select
+        row_number() over () as idx,
         c.cand_sk,
         case
             when max(p.cand_nm) is not null then
@@ -15,12 +16,14 @@ create materialized view dimcand_fulltext_mv as
     group by c.cand_sk
 ;
 
+create unique index on dimcand_fulltext_mv(idx);
 create index on dimcand_fulltext_mv using gin(fulltxt);
 
 drop table if exists dimcmte_fulltext;
 drop materialized view if exists dimcmte_fulltext_mv;
 create materialized view dimcmte_fulltext_mv as
     select
+        row_number() over () as idx,
         c.cmte_sk,
         case
             when max(p.cmte_nm) is not null then
@@ -34,6 +37,7 @@ create materialized view dimcmte_fulltext_mv as
     group by c.cmte_sk
 ;
 
+create unique index on dimcmte_fulltext_mv(idx);
 create index on dimcmte_fulltext_mv using gin(fulltxt);
 
 drop table if exists name_search_fulltext;
@@ -66,6 +70,7 @@ with
         join dimcmteproperties p on (p.cmte_sk = c.cmte_sk)
     )
     select distinct
+        row_number() over () as idx,
         name,
         name_vec,
         cand_id,
@@ -75,6 +80,7 @@ with
     where load_order = 1
     union
     select distinct
+        row_number() over () + (select count(*) from ranked_cand) as idx,
         name,
         name_vec,
         null as cand_id,
@@ -84,4 +90,5 @@ with
     where load_order = 1
 ;
 
+create unique index on name_search_fulltext_mv(idx);
 create index on name_search_fulltext_mv using gin(name_vec);

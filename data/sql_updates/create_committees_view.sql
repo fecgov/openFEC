@@ -2,6 +2,7 @@ drop view if exists ofec_committees_vw;
 drop materialized view if exists ofec_committees_mv;
 create materialized view ofec_committees_mv as
 select distinct
+    row_number() over () as idx,
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
     dd.cmte_dsgn as designation,
@@ -53,6 +54,8 @@ from dimcmte
     left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
     -- inner join dimlinkages dl using (cmte_sk)
 ;
+
+create unique index on ofec_committees_mv(idx);
 
 create index on ofec_committees_mv(party);
 create index on ofec_committees_mv(state);

@@ -1,6 +1,7 @@
 drop materialized view if exists ofec_totals_house_senate_mv;
 create materialized view ofec_totals_house_senate_mv as
 select
+    row_number() over () as idx,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
     cmte_tp as committee_type,
@@ -41,6 +42,8 @@ where
     hs.expire_date is null or hs.expire_date > date_trunc('day', now())
 group by committee_id, cycle, committee_type
 ;
+
+create unique index on ofec_totals_house_senate_mv(idx);
 
 create index on ofec_totals_house_senate_mv(cycle);
 create index on ofec_totals_house_senate_mv(committee_id);

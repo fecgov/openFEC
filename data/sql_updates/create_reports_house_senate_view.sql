@@ -2,6 +2,7 @@ drop view if exists ofec_reports_house_senate_vw;
 drop materialized view if exists ofec_reports_house_senate_mv;
 create materialized view ofec_reports_house_senate_mv as
 select
+    row_number() over () as idx,
     facthousesenate_f3_sk as report_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
@@ -99,6 +100,8 @@ from
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 ;
+
+create unique index on ofec_reports_house_senate_mv(idx);
 
 create index on ofec_reports_house_senate_mv(cycle);
 create index on ofec_reports_house_senate_mv(committee_id);
