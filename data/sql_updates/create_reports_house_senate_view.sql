@@ -1,6 +1,6 @@
 drop view if exists ofec_reports_house_senate_vw;
-drop materialized view if exists ofec_reports_house_senate_mv;
-create materialized view ofec_reports_house_senate_mv as
+drop materialized view if exists ofec_reports_house_senate_mv_tmp;
+create materialized view ofec_reports_house_senate_mv_tmp as
 select
     facthousesenate_f3_sk as report_key,
     cmte_id as committee_id,
@@ -100,5 +100,5 @@ from
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 ;
 
-create index on ofec_reports_house_senate_mv(cycle);
-create index on ofec_reports_house_senate_mv(committee_id);
+create index on ofec_reports_house_senate_mv_tmp(cycle);
+create index on ofec_reports_house_senate_mv_tmp(committee_id);

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from flask import url_for
-from flask.ext.script import Manager
-
 import glob
 import subprocess
 import urllib.parse
+import multiprocessing
 
+from flask import url_for
+from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
 from webservices.rest import app, db
 from webservices.common.util import get_full_path
@@ -54,12 +54,36 @@ def list_routes():
         print(line)
 
 
+def execute_sql_file(path):
+    print(('Running {}'.format(path)))
+    with open(path) as fp:
+        cmd = '\n'.join([
+            line.replace('%', '%%') for line in fp.readlines()
+            if not line.startswith('--')
+        ])
+        db.engine.execute(cmd)
+
+
+@manager.command
+def update_schemas(processes=2):
+    """Delete and recreate all tables and views."""
+    print('Starting DB refresh...')
+    sql_dir = get_full_path('data/sql_updates/')
+    files = glob.glob(sql_dir + '*.sql')
+
+    pool = multiprocessing.Pool(processes=int(processes))
+    pool.map(execute_sql_file, files)
+
+    execute_sql_file('data/rename_temporary_views.sql')
+
+    print('Finished DB refresh.')
+
+
 @manager.command
 def refresh_materialized():
     """Refresh materialized views."""
     print('Refreshing materialized views...')
-    with open('data/refresh/refresh.sql') as fp:
-        db.engine.execute(fp.read().replace('%', '%%'))
+    execute_sql_file('data/refresh_materialized_views.sql')
     print('Finished refreshing materialized views.')
 
 
