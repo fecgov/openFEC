@@ -105,9 +105,3 @@ create index on ofec_committee_detail_mv_tmp(expire_date);
 create index on ofec_committee_detail_mv_tmp(committee_id);
 create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(organization_type);
-
-begin;
-    drop materialized view if exists ofec_committee_detail_mv;
-    alter materialized view ofec_committee_detail_mv_tmp
-        rename to ofec_committee_detail_mv;
-commit;

@@ -33,6 +33,11 @@ def list_routes():
         print(line)
 
 
+def execute_sql_file(path):
+    with open(path) as fp:
+        db.engine.execute(fp.read().replace('%', '%%'))
+
+
 @manager.command
 def update_schemas():
     """Delete and recreate all tables and views."""
@@ -45,6 +50,8 @@ def update_schemas():
         with open(sql_file, 'r') as sql_fh:
             sql = '\n'.join(sql_fh.readlines())
             db.engine.execute(sql)
+
+    execute_sql_file('data/rename_temporary_views.sql')
 
     print('Finished DB refresh.')
 

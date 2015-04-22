@@ -63,9 +63,3 @@ create index on ofec_committees_mv_tmp(committee_key);
 create index on ofec_committees_mv_tmp(candidate_ids);
 create index on ofec_committees_mv_tmp(committee_type);
 create index on ofec_committees_mv_tmp(organization_type);
-
-begin;
-    drop materialized view if exists ofec_committees_mv;
-    alter materialized view ofec_committees_mv_tmp
-        rename to ofec_committees_mv;
-commit;

@@ -6,7 +6,7 @@ RETURNS INT AS $$
   DECLARE
     view RECORD;
   BEGIN
-    RAISE NOTICE 'Refreshing materialized view in schema %', schema_arg;
+    RAISE NOTICE 'Refreshing materialized views in schema %', schema_arg;
     FOR view IN SELECT matviewname FROM pg_matviews WHERE schemaname = schema_arg
     LOOP
       RAISE NOTICE 'Refreshing %.%', schema_arg, view.matviewname;

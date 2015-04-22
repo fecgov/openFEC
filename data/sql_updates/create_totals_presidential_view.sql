@@ -47,9 +47,3 @@ group by committee_id, cycle, committee_type
 
 create index on ofec_totals_presidential_mv_tmp(cycle);
 create index on ofec_totals_presidential_mv_tmp(committee_id);
-
-begin;
-    drop materialized view if exists ofec_totals_presidential_mv;
-    alter materialized view ofec_totals_presidential_mv_tmp
-        rename to ofec_totals_presidential_mv;
-commit;

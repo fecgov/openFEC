@@ -17,12 +17,6 @@ create materialized view dimcand_fulltext_mv_tmp as
 
 create index on dimcand_fulltext_mv_tmp using gin(fulltxt);
 
-begin;
-    drop materialized view if exists dimcand_fulltext_mv;
-    alter materialized view dimcand_fulltext_mv_tmp
-        rename to dimcand_fulltext_mv;
-commit;
-
 drop table if exists dimcmte_fulltext;
 drop materialized view if exists dimcmte_fulltext_mv_tmp;
 create materialized view dimcmte_fulltext_mv_tmp as
@@ -41,12 +35,6 @@ create materialized view dimcmte_fulltext_mv_tmp as
 ;
 
 create index on dimcmte_fulltext_mv_tmp using gin(fulltxt);
-
-begin;
-    drop materialized view if exists dimcmte_fulltext_mv;
-    alter materialized view dimcmte_fulltext_mv_tmp
-        rename to dimcmte_fulltext_mv;
-commit;
 
 drop table if exists name_search_fulltext;
 drop materialized view if exists name_search_fulltext_mv_tmp;
@@ -97,9 +85,3 @@ with
 ;
 
 create index on name_search_fulltext_mv_tmp using gin(name_vec);
-
-begin;
-    drop materialized view if exists name_search_fulltext_mv;
-    alter materialized view name_search_fulltext_mv_tmp
-        rename to name_search_fulltext_mv;
-commit;

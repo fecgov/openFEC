@@ -72,9 +72,3 @@ create index on ofec_candidate_detail_mv_tmp(candidate_status);
 create index on ofec_candidate_detail_mv_tmp(candidate_id);
 create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
 create index on ofec_candidate_detail_mv_tmp(candidate_expire_date);
-
-begin;
-    drop materialized view if exists ofec_candidate_detail_mv;
-    alter materialized view ofec_candidate_detail_mv_tmp
-        rename to ofec_candidate_detail_mv;
-commit;

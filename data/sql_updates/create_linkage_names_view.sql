@@ -45,9 +45,3 @@ from dimlinkages l;
 
 create index on ofec_name_linkage_mv_tmp(candidate_key);
 create index on ofec_name_linkage_mv_tmp(committee_key);
-
-begin;
-    drop materialized view if exists ofec_name_linkage_mv;
-    alter materialized view ofec_name_linkage_mv_tmp
-        rename to ofec_name_linkage_mv;
-commit;
