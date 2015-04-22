@@ -1,6 +1,6 @@
 drop view if exists ofec_committee_detail_vw;
-drop materialized view if exists ofec_committee_detail_mv;
-create materialized view ofec_committee_detail_mv as
+drop materialized view if exists ofec_committee_detail_mv_tmp;
+create materialized view ofec_committee_detail_mv_tmp as
 select distinct
     row_number() over () as idx,
     dimcmte.cmte_sk as committee_key,
@@ -101,11 +101,11 @@ from dimcmte
     -- inner join dimlinkages dl using (cmte_sk)
 ;
 
-create unique index on ofec_committee_detail_mv(idx);
+create unique index on ofec_committee_detail_mv_tmp(idx);
 
-create index on ofec_committee_detail_mv(designation);
-create index on ofec_committee_detail_mv(expire_date);
-create index on ofec_committee_detail_mv(committee_id);
-create index on ofec_committee_detail_mv(committee_key);
-create index on ofec_committee_detail_mv(committee_type);
-create index on ofec_committee_detail_mv(organization_type);
+create index on ofec_committee_detail_mv_tmp(designation);
+create index on ofec_committee_detail_mv_tmp(expire_date);
+create index on ofec_committee_detail_mv_tmp(committee_id);
+create index on ofec_committee_detail_mv_tmp(committee_key);
+create index on ofec_committee_detail_mv_tmp(committee_type);
+create index on ofec_committee_detail_mv_tmp(organization_type);

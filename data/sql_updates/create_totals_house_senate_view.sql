@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_totals_house_senate_mv;
-create materialized view ofec_totals_house_senate_mv as
+drop materialized view if exists ofec_totals_house_senate_mv_tmp;
+create materialized view ofec_totals_house_senate_mv_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
@@ -43,7 +43,7 @@ where
 group by committee_id, cycle, committee_type
 ;
 
-create unique index on ofec_totals_house_senate_mv(idx);
+create unique index on ofec_totals_house_senate_mv_tmp(idx);
 
-create index on ofec_totals_house_senate_mv(cycle);
-create index on ofec_totals_house_senate_mv(committee_id);
+create index on ofec_totals_house_senate_mv_tmp(cycle);
+create index on ofec_totals_house_senate_mv_tmp(committee_id);

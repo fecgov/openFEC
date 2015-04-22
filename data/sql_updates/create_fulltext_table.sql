@@ -1,6 +1,6 @@
 drop table if exists dimcand_fulltext;
-drop materialized view if exists dimcand_fulltext_mv;
-create materialized view dimcand_fulltext_mv as
+drop materialized view if exists dimcand_fulltext_mv_tmp;
+create materialized view dimcand_fulltext_mv_tmp as
     select
         row_number() over () as idx,
         c.cand_sk,
@@ -16,12 +16,12 @@ create materialized view dimcand_fulltext_mv as
     group by c.cand_sk
 ;
 
-create unique index on dimcand_fulltext_mv(idx);
-create index on dimcand_fulltext_mv using gin(fulltxt);
+create unique index on dimcand_fulltext_mv_tmp(idx);
+create index on dimcand_fulltext_mv_tmp using gin(fulltxt);
 
 drop table if exists dimcmte_fulltext;
-drop materialized view if exists dimcmte_fulltext_mv;
-create materialized view dimcmte_fulltext_mv as
+drop materialized view if exists dimcmte_fulltext_mv_tmp;
+create materialized view dimcmte_fulltext_mv_tmp as
     select
         row_number() over () as idx,
         c.cmte_sk,
@@ -37,12 +37,12 @@ create materialized view dimcmte_fulltext_mv as
     group by c.cmte_sk
 ;
 
-create unique index on dimcmte_fulltext_mv(idx);
-create index on dimcmte_fulltext_mv using gin(fulltxt);
+create unique index on dimcmte_fulltext_mv_tmp(idx);
+create index on dimcmte_fulltext_mv_tmp using gin(fulltxt);
 
 drop table if exists name_search_fulltext;
-drop materialized view if exists name_search_fulltext_mv;
-create materialized view name_search_fulltext_mv as
+drop materialized view if exists name_search_fulltext_mv_tmp;
+create materialized view name_search_fulltext_mv_tmp as
 with
     ranked_cand as (
         select
@@ -90,5 +90,5 @@ with
     where load_order = 1
 ;
 
-create unique index on name_search_fulltext_mv(idx);
-create index on name_search_fulltext_mv using gin(name_vec);
+create unique index on name_search_fulltext_mv_tmp(idx);
+create index on name_search_fulltext_mv_tmp using gin(name_vec);

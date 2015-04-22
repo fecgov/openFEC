@@ -1,6 +1,6 @@
 drop view if exists ofec_candidates_vw;
-drop materialized view if exists ofec_candidates_mv;
-create materialized view ofec_candidates_mv as
+drop materialized view if exists ofec_candidates_mv_tmp;
+create materialized view ofec_candidates_mv_tmp as
 select
     row_number() over () as idx,
     dimcand.cand_sk as candidate_key,
@@ -39,15 +39,15 @@ group by
     csi_recent.election_yr
 ;
 
-create unique index on ofec_candidates_mv(idx);
+create unique index on ofec_candidates_mv_tmp(idx);
 
-create index on ofec_candidates_mv(name);
-create index on ofec_candidates_mv(party);
-create index on ofec_candidates_mv(state);
-create index on ofec_candidates_mv(office);
-create index on ofec_candidates_mv(district);
-create index on ofec_candidates_mv(candidate_id);
-create index on ofec_candidates_mv(candidate_key);
-create index on ofec_candidates_mv(election_years);
-create index on ofec_candidates_mv(candidate_status);
-create index on ofec_candidates_mv(incumbent_challenge);
+create index on ofec_candidates_mv_tmp(name);
+create index on ofec_candidates_mv_tmp(party);
+create index on ofec_candidates_mv_tmp(state);
+create index on ofec_candidates_mv_tmp(office);
+create index on ofec_candidates_mv_tmp(district);
+create index on ofec_candidates_mv_tmp(candidate_id);
+create index on ofec_candidates_mv_tmp(candidate_key);
+create index on ofec_candidates_mv_tmp(election_years);
+create index on ofec_candidates_mv_tmp(candidate_status);
+create index on ofec_candidates_mv_tmp(incumbent_challenge);

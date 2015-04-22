@@ -1,6 +1,6 @@
 drop view if exists ofec_reports_pacs_parties_vw;
-drop materialized view if exists ofec_reports_pacs_parties_mv;
-create materialized view ofec_reports_pacs_parties_mv as
+drop materialized view if exists ofec_reports_pacs_parties_mv_tmp;
+create materialized view ofec_reports_pacs_parties_mv_tmp as
 select
     row_number() over () as idx,
     factpacsandparties_f3x_sk as report_key,
@@ -124,7 +124,7 @@ from
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 ;
 
-create unique index on ofec_reports_pacs_parties_mv(idx);
+create unique index on ofec_reports_pacs_parties_mv_tmp(idx);
 
-create index on ofec_reports_pacs_parties_mv(cycle);
-create index on ofec_reports_pacs_parties_mv(committee_id);
+create index on ofec_reports_pacs_parties_mv_tmp(cycle);
+create index on ofec_reports_pacs_parties_mv_tmp(committee_id);
