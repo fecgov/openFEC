@@ -8,6 +8,7 @@ import multiprocessing
 from flask import url_for
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
+
 from webservices.rest import app, db
 from webservices.common.util import get_full_path
 
@@ -15,22 +16,30 @@ from webservices.common.util import get_full_path
 manager = Manager(app)
 
 
-def execute_sql_folder(files):
-    sql_dir = get_full_path(files)
-    files = glob.glob(sql_dir + '*.sql')
-    for sql_file in files:
-        print(("Running {}".format(sql_file)))
-        with open(sql_file, 'r') as sql_fh:
-            sql = '\n'.join(sql_fh.readlines())
-            db.engine.execute(sqla_text(sql))
+def execute_sql_file(path):
+    print(('Running {}'.format(path)))
+    with open(path) as fp:
+        cmd = '\n'.join([
+            line for line in fp.readlines()
+            if not line.startswith('--')
+        ])
+        db.engine.execute(sqla_text(cmd))
+
+
+def execute_sql_folder(path, processes):
+    sql_dir = get_full_path(path)
+    paths = glob.glob(sql_dir + '*.sql')
+    pool = multiprocessing.Pool(processes=processes)
+    pool.map(execute_sql_file, paths)
 
 
 @manager.command
-def update_schemas():
+def update_schemas(processes=2):
     print("Starting DB refresh...")
-    execute_sql_folder('data/sql_prep/')
-    execute_sql_folder('data/sql_updates/')
-
+    processes = int(processes)
+    execute_sql_folder('data/sql_prep/', processes=processes)
+    execute_sql_folder('data/sql_updates/', processes=processes)
+    execute_sql_file('data/rename_temporary_views.sql')
     print("Finished DB refresh.")
 
 
@@ -52,31 +61,6 @@ def list_routes():
 
     for line in sorted(output):
         print(line)
-
-
-def execute_sql_file(path):
-    print(('Running {}'.format(path)))
-    with open(path) as fp:
-        cmd = '\n'.join([
-            line.replace('%', '%%') for line in fp.readlines()
-            if not line.startswith('--')
-        ])
-        db.engine.execute(cmd)
-
-
-@manager.command
-def update_schemas(processes=2):
-    """Delete and recreate all tables and views."""
-    print('Starting DB refresh...')
-    sql_dir = get_full_path('data/sql_updates/')
-    files = glob.glob(sql_dir + '*.sql')
-
-    pool = multiprocessing.Pool(processes=int(processes))
-    pool.map(execute_sql_file, files)
-
-    execute_sql_file('data/rename_temporary_views.sql')
-
-    print('Finished DB refresh.')
 
 
 @manager.command

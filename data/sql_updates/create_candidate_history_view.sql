@@ -1,6 +1,7 @@
 drop materialized view if exists ofec_candidate_history_mv;
 create materialized view ofec_candidate_history_mv as
 select
+    row_number() over () as idx,
     dcp_by_period.candproperties_sk as properties_key,
     dcp_by_period.cand_sk as candidate_key,
     dcp_by_period.cand_id as candidate_id,
@@ -38,6 +39,8 @@ from ofec_two_year_periods
         order by cand_sk, two_year_period, dcp.load_date desc
     ) as dcp_by_period on ofec_two_year_periods.year = two_year_period
 ;
+
+create unique index on ofec_candidate_history_mv(idx);
 
 create index on ofec_candidate_history_mv(candidate_key);
 create index on ofec_candidate_history_mv(candidate_id);
