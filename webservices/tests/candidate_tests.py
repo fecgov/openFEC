@@ -50,7 +50,7 @@ class CandidateFormatTest(ApiBaseTest):
     def test_candidate_committees(self):
         """Compare results to expected fields."""
         # @todo - use a factory rather than the test data
-        response = self._response('/candidate/H0VA08040')
+        response = self._response('/candidate/H0VA08040/committees')
         committees = response['results'][0]['committees']
         self.prettyPrint(committees)
         self.assertResultsEqual(committees,
@@ -136,7 +136,6 @@ class CandidateFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-
     def test_name_endpoint_returns_unique_candidates_and_committees(self):
         results = self._results('/names?q=obama')
         cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
@@ -144,8 +143,92 @@ class CandidateFormatTest(ApiBaseTest):
         cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
         self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
 
+    def test_candidate_history_by_year(self):
+        results = self._results('/candidate/P80003338/history/2008')
+
+        expected_result = {
+            "address_city": "CHICAGO",
+            "address_state": "IL",
+            "address_street_1": "PO BOX 8102",
+            "address_street_2": None,
+            "address_zip": "60680",
+            "candidate_id": "P80003338",
+            "candidate_inactive": None,
+            "candidate_status": "C",
+            "candidate_status_full": "Statutory candidate",
+            "district": None,
+            "expire_date": "2011-04-04 00:00:00",
+            "form_type": "F2",
+            "incumbent_challenge": "O",
+            "incumbent_challenge_full": "Open (Open seat)",
+            "load_date": "2008-09-17 00:00:00",
+            "name": "OBAMA, BARACK",
+            "office": "P",
+            "office_full": "President",
+            "party": "DEM",
+            "party_full": "Democratic Party",
+            "state": "US",
+            "two_year_period": 2008
+        }
 
 
+        self.assertEqual(results[0], expected_result)
 
+    def test_candidate_history(self):
+        results = self._results('/candidate/P80003338/history')
+        recent_results = self._results('/candidate/P80003338/history/recent')
 
-
+        expected_result_0 = {
+            'address_street_1': 'PO BOX 8102',
+            'office_full': 'President',
+            'district': None,
+            'address_city': 'CHICAGO',
+            'address_state': 'IL',
+            'expire_date': None,
+            'candidate_status_full': 'Statutory candidate',
+            'candidate_inactive': None,
+            'load_date': '2011-07-19 00:00:00',
+            'office': 'P',
+            'party': 'DEM',
+            'incumbent_challenge': 'I',
+            'incumbent_challenge_full': 'Incumbent (Current seat holder running for election)',
+            'form_type': 'F2Z',
+            'party_full': 'Democratic Party',
+            'name': 'OBAMA, BARACK',
+            'address_street_2': None,
+            'candidate_id': 'P80003338',
+            'address_zip': '60680',
+            'two_year_period': 2012,
+            'candidate_status': 'C', 'state': 'US',
+        }
+        expected_result_1 = {
+            "address_city": "CHICAGO",
+            "address_state": "IL",
+            "address_street_1": "PO BOX 8102",
+            "address_street_2": None,
+            "address_zip": "60680",
+            "candidate_id": "P80003338",
+            "candidate_inactive": None,
+            "candidate_status": "C",
+            "candidate_status_full": "Statutory candidate",
+            "district": None,
+            "expire_date": "2011-04-04 00:00:00",
+            "form_type": "F2",
+            "incumbent_challenge": "O",
+            "incumbent_challenge_full": "Open (Open seat)",
+            "load_date": "2008-09-17 00:00:00",
+            "name": "OBAMA, BARACK",
+            "office": "P",
+            "office_full": "President",
+            "party": "DEM",
+            "party_full": "Democratic Party",
+            "state": "US",
+            "two_year_period": 2008
+        }
+        print (expected_result_0)
+        # history/recent
+        self.assertEqual(recent_results[0], expected_result_0)
+        self.assertEqual(len(recent_results), 1)
+        # /history
+        self.assertEqual(results[0], expected_result_0)
+        self.assertEqual(results[1], expected_result_1)

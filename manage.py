@@ -7,12 +7,31 @@ import multiprocessing
 
 from flask import url_for
 from flask.ext.script import Manager
-
+from sqlalchemy import text as sqla_text
 from webservices.rest import app, db
 from webservices.common.util import get_full_path
 
 
 manager = Manager(app)
+
+
+def execute_sql_folder(files):
+    sql_dir = get_full_path(files)
+    files = glob.glob(sql_dir + '*.sql')
+    for sql_file in files:
+        print(("Running {}".format(sql_file)))
+        with open(sql_file, 'r') as sql_fh:
+            sql = '\n'.join(sql_fh.readlines())
+            db.engine.execute(sqla_text(sql))
+
+
+@manager.command
+def update_schemas():
+    print("Starting DB refresh...")
+    execute_sql_folder('data/sql_prep/')
+    execute_sql_folder('data/sql_updates/')
+
+    print("Finished DB refresh.")
 
 
 @manager.command
