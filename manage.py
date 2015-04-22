@@ -15,7 +15,7 @@ from webservices.common.util import get_full_path
 manager = Manager(app)
 
 
-def excute_sql_folder(files):
+def execute_sql_folder(files):
     sql_dir = get_full_path(files)
     files = glob.glob(sql_dir + '*.sql')
     for sql_file in files:
@@ -28,8 +28,8 @@ def excute_sql_folder(files):
 @manager.command
 def update_schemas():
     print("Starting DB refresh...")
-    excute_sql_folder('data/sql_prep/')
-    excute_sql_folder('data/sql_updates/')
+    execute_sql_folder('data/sql_prep/')
+    execute_sql_folder('data/sql_updates/')
 
     print("Finished DB refresh.")
 
