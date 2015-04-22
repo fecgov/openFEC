@@ -44,7 +44,7 @@ api = restful.Api(app)
 db.init_app(app)
 
 # api.data.gov
-trusted_proxies = ('192.168.114.100',)
+trusted_proxies = ('192.168.114.100', '54.208.160.112', '54.208.160.151')
 FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
 
 
