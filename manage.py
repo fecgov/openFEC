@@ -38,7 +38,11 @@ def list_routes():
 def execute_sql_file(path):
     print(('Running {}'.format(path)))
     with open(path) as fp:
-        db.engine.execute(fp.read().replace('%', '%%'))
+        cmd = '\n'.join([
+            line.replace('%', '%%') for line in fp.readlines()
+            if not line.startswith('--')
+        ])
+        db.engine.execute(cmd)
 
 
 @manager.command
