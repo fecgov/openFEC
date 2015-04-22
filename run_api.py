@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-import ast
 import newrelic.agent
 import doctest
 import os
@@ -25,5 +23,5 @@ if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
         doctest.testmod()
     else:
-        debug = not ast.literal_eval(os.getenv('PRODUCTION', False))
+        debug = bool(os.getenv('FEC_API_DEBUG', ''))
         app.run(debug=debug, port=int(port), host='0.0.0.0')
