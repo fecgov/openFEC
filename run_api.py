@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import ast
 import os
 import sys
 import doctest
@@ -23,5 +24,5 @@ if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
         doctest.testmod()
     else:
-        debug = not os.getenv('PRODUCTION')
+        debug = not ast.literal_eval(os.getenv('PRODUCTION', False))
         app.run(debug=debug, port=int(port), host='0.0.0.0')
