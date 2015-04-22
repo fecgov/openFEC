@@ -137,7 +137,7 @@ class CandidateList(Resource):
         candidates = Candidate.query
 
         fulltext_qry = """SELECT cand_sk
-                          FROM   dimcand_fulltext
+                          FROM   dimcand_fulltext_mv
                           WHERE  fulltxt @@ to_tsquery(:findme)
                           ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
 
