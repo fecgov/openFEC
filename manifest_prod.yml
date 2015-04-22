@@ -1,6 +1,7 @@
 ---
 memory: 512M
 stack: lucid64
+instances: 2
 applications:
 - name: api
   path: .
