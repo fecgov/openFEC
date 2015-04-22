@@ -50,7 +50,7 @@ def update_schemas(processes=2):
     """Delete and recreate all tables and views."""
     print('Starting DB refresh...')
     sql_dir = get_full_path('data/sql_updates/')
-    files = glob.glob(sql_dir + 'create*.sql')
+    files = glob.glob(sql_dir + '*.sql')
 
     pool = multiprocessing.Pool(processes=int(processes))
     pool.map(execute_sql_file, files)
