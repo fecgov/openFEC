@@ -51,10 +51,15 @@ FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
 @app.before_request
 def limit_remote_addr():
     falses = (False, 'False', 'false', 'f')
-    if FEC_API_WHITELIST_IPS not in falses :
-        route = request.access_route
-        if route[-2] not in trusted_proxies:
+    if FEC_API_WHITELIST_IPS not in falses:
+        try:
+            *_, api_data_route, cf_route = request.access_route
+        except ValueError:  # Not enough routes
             abort(403)
+        else:
+            if api_data_route not in trusted_proxies:
+                abort(403)
+
 
 @app.after_request
 def after_request(response):
