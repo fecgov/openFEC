@@ -10,7 +10,7 @@ applications:
   path: .
   host: fec-prod-api
   env:
-    PRODUCTION: True
+    FEC_API_DEBUG: False
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack

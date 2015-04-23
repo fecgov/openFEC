@@ -8,6 +8,8 @@ applications:
 - name: api
   path: .
   host: fec-dev-api
+  env:
+    FEC_API_DEBUG: True
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack
