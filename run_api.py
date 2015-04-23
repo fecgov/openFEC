@@ -23,5 +23,5 @@ if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower().startswith('test'):
         doctest.testmod()
     else:
-        debug = not os.getenv('PRODUCTION')
+        debug = bool(os.getenv('FEC_API_DEBUG', ''))
         app.run(debug=debug, port=int(port), host='0.0.0.0')
