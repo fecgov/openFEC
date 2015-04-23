@@ -2,6 +2,9 @@
 memory: 512M
 stack: lucid64
 instances: 2
+env:
+  NEW_RELIC_CONFIG_FILE: newrelic.ini
+  NEW_RELIC_ENV: staging
 applications:
 - name: api
   path: .
