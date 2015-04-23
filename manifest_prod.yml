@@ -1,4 +1,4 @@
----
+
 memory: 512M
 stack: lucid64
 instances: 2
@@ -16,7 +16,7 @@ applications:
   buildpack: python_buildpack
   host: fec-prod-web
   env:
-    FEC_WEB_API_URL: http://api.data.gov/fec/
+    FEC_WEB_API_URL: https://api.open.fec.gov/
     FEC_WEB_DEBUG: False
     # These must be set manually via `cf set-env`
     # FEC_WEB_PASSWORD
