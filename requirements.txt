@@ -6,4 +6,4 @@ Flask-Script
 newrelic
 celery>=3.1.17
 SQLAlchemy>=0.9.9
-
+gunicorn
