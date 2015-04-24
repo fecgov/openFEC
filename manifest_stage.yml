@@ -6,7 +6,7 @@ applications:
   path: .
   host: fec-stage-api
   env:
-    NEW_RELIC_APP_NAME: OpenFEC (staging)
+    NEW_RELIC_APP_NAME: OpenFEC API (staging)
     NEW_RELIC_LOG: stdout
     WEB_CONCURRENCY: 4
 - name: web

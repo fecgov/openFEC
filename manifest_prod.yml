@@ -7,7 +7,7 @@ applications:
   host: fec-prod-api
   env:
     PRODUCTION: True
-    NEW_RELIC_APP_NAME: OpenFEC (production)
+    NEW_RELIC_APP_NAME: OpenFEC API (production)
     NEW_RELIC_LOG: stdout
     WEB_CONCURRENCY: 4
 - name: web
