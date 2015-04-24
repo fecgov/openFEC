@@ -17,6 +17,7 @@ applications:
   buildpack: python_buildpack
   host: fec-stage-web
   env:
+    NEW_RELIC_APP_NAME: OpenFEC Web (staging)
     FEC_WEB_API_URL: http://fec-stage-api.cf.18f.us
     FEC_WEB_DEBUG: True
     # These must be set manually via `cf set-env`
