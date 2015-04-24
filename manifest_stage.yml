@@ -8,6 +8,7 @@ applications:
   env:
     NEW_RELIC_APP_NAME: OpenFEC (staging)
     NEW_RELIC_LOG: stdout
+    WEB_CONCURRENCY: 4
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack
