@@ -9,15 +9,12 @@ applications:
 - name: api
   path: .
   host: fec-prod-api
-  env:
-    FEC_API_DEBUG: False
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack
   host: fec-prod-web
   env:
     FEC_WEB_API_URL: https://api.open.fec.gov/
-    FEC_WEB_DEBUG: False
     # These must be set manually via `cf set-env`
     # FEC_WEB_PASSWORD
     # FEC_WEB_USERNAME
