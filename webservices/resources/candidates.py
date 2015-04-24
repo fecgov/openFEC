@@ -7,7 +7,7 @@ from webservices import spec
 from webservices import paging
 from webservices import schemas
 from webservices.common.util import filter_query
-from webservices.common.models import db, Candidate, CandidateDetail, CandidateCommitteeLink
+from webservices.common.models import db, Candidate, CandidateDetail, CandidateHistory, CandidateCommitteeLink
 
 
 filter_fields = {
@@ -25,7 +25,7 @@ class CandidateList(Resource):
 
     fulltext_query = """
         SELECT cand_sk
-        FROM   dimcand_fulltext
+        FROM   dimcand_fulltext_mv
         WHERE  fulltxt @@ to_tsquery(:findme)
         ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
     """
@@ -33,7 +33,7 @@ class CandidateList(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
-    @schemas.marshal_with(schemas.CandidatePageSchema())
+    @schemas.marshal_with(schemas.CandidateListPageSchema())
     def get(self, **kwargs):
         candidates = self.get_candidates(kwargs)
         paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
@@ -83,7 +83,7 @@ class CandidateView(Resource):
     def get_candidate(self, kwargs, candidate_id=None, committee_id=None):
         if candidate_id is not None:
             candidates = CandidateDetail.query
-            candidates = candidates.filter_by(**{'candidate_id': candidate_id})
+            candidates = candidates.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
             candidates = CandidateDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
@@ -102,3 +102,26 @@ class CandidateView(Resource):
             candidates = candidates.filter(extract('year', CandidateDetail.load_date) <= int(args['year']))
 
         return candidates.order_by(CandidateDetail.expire_date.desc())
+
+
+class CandidateHistoryView(Resource):
+
+    @args.register_kwargs(args.paging)
+    @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
+    def get(self, candidate_id, year=None, **kwargs):
+        candidates = self.get_candidate(candidate_id, year, kwargs)
+        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
+        return paginator.get_page(kwargs['page'])
+
+    def get_candidate(self, candidate_id, year, kwargs):
+
+        candidates = CandidateHistory.query
+        candidates = candidates.filter_by(candidate_id=candidate_id)
+
+        if year:
+            if year == 'recent':
+                return candidates.order_by(CandidateHistory.two_year_period.desc()).limit(1)
+            year = int(year) + int(year) % 2
+            candidates = candidates.filter_by(two_year_period=year)
+
+        return candidates.order_by(CandidateHistory.two_year_period.desc())

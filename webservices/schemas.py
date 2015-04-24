@@ -99,8 +99,6 @@ class CandidateSchema(ma.Schema):
     candidate_status_full = ma.fields.String()
     candidate_status = ma.fields.String()
     district = ma.fields.String()
-    active_through = ma.fields.Integer()
-    election_years = ma.fields.List(ma.fields.Integer())
     incumbent_challenge_full = ma.fields.String()
     incumbent_challenge = ma.fields.String()
     office_full = ma.fields.String()
@@ -111,7 +109,12 @@ class CandidateSchema(ma.Schema):
     name = ma.fields.String()
 
 
-class CandidateDetailSchema(CandidateSchema):
+class CandidateListSchema(CandidateSchema):
+    active_through = ma.fields.Integer()
+    election_years = ma.fields.List(ma.fields.Integer())
+
+
+class CandidateDetailSchema(CandidateListSchema):
     expire_date = ma.fields.DateTime()
     load_date = ma.fields.DateTime()
     form_type = ma.fields.String()
@@ -123,13 +126,29 @@ class CandidateDetailSchema(CandidateSchema):
     candidate_inactive = ma.fields.String()
 
 
-CandidatePageSchema = make_page_schema(CandidateSchema)
-CandidateDetailPageSchema = make_page_schema(CandidateDetailSchema)
+class CandidateHistorySchema(CandidateSchema):
+    two_year_period = ma.fields.Integer()
+    expire_date = ma.fields.String()
+    load_date = ma.fields.String()
+    form_type = ma.fields.String()
+    address_city = ma.fields.String()
+    address_state = ma.fields.String()
+    address_street_1 = ma.fields.String()
+    address_street_2 = ma.fields.String()
+    address_zip = ma.fields.String()
+    candidate_inactive = ma.fields.String()
 
-register_schema(CandidateSchema)
+
+CandidateListPageSchema = make_page_schema(CandidateListSchema)
+CandidateDetailPageSchema = make_page_schema(CandidateDetailSchema)
+CandidateHistoryPageSchema = make_page_schema(CandidateHistorySchema)
+
+register_schema(CandidateListSchema)
 register_schema(CandidateDetailSchema)
-register_schema(CandidatePageSchema)
+register_schema(CandidateHistorySchema)
+register_schema(CandidateListPageSchema)
 register_schema(CandidateDetailPageSchema)
+register_schema(CandidateHistoryPageSchema)
 
 
 class CommitteeSchema(ma.Schema):
@@ -206,7 +225,7 @@ class ReportsSchema(ma.Schema):
     beginning_image_number = ma.fields.Integer()
     cash_on_hand_beginning_period = ma.fields.Integer()
     cash_on_hand_end_period = ma.fields.Integer()
-    committee_id = ma.fields.String,
+    committee_id = ma.fields.String()
     coverage_end_date = ma.fields.DateTime,
     coverage_start_date = ma.fields.DateTime,
     cycle = ma.fields.Integer()
@@ -222,8 +241,8 @@ class ReportsSchema(ma.Schema):
     political_party_committee_contributions_ytd = ma.fields.Integer()
     offsets_to_operating_expenditures_period = ma.fields.Integer()
     offsets_to_operating_expenditures_ytd = ma.fields.Integer()
-    report_type = ma.fields.String,
-    report_type_full = ma.fields.String,
+    report_type = ma.fields.String()
+    report_type_full = ma.fields.String()
     report_year = ma.fields.Integer()
     total_contribution_refunds_period = ma.fields.Integer()
     total_contribution_refunds_ytd = ma.fields.Integer()

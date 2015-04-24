@@ -3,8 +3,8 @@ $body$
 BEGIN
    IF NOT EXISTS (
       SELECT *
-      FROM   pg_catalog.pg_user
-      WHERE  usename = 'webro') THEN
+      FROM   pg_roles
+      WHERE  rolname = 'webro') THEN
 
       CREATE ROLE webro;
    END IF;

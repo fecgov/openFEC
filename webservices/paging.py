@@ -17,8 +17,8 @@ class Paginator(metaclass=abc.ABCMeta):
         self.per_page = per_page
         self.count = self._count()
 
-    def slice(self, page, per_page):
-        return self._slice(per_page * (page - 1), per_page)
+    def slice(self, page):
+        return self._slice(self.per_page * (page - 1), self.per_page)
 
     @abc.abstractmethod
     def _count(self):
@@ -36,7 +36,7 @@ class Paginator(metaclass=abc.ABCMeta):
         return index > 0 and index <= self.pages
 
     def get_page(self, page):
-        return Page(page, self.slice(page, self.per_page), self)
+        return Page(page, self.slice(page), self)
 
 
 class PaginationInfo(object):
@@ -128,6 +128,9 @@ class SqlalchemyPaginator(Paginator):
         return self.cursor.count()
 
     def _slice(self, offset, limit):
+        offset += (self.cursor._offset or 0)
+        if self.cursor._limit:
+            limit = min(limit, self.cursor._limit - offset)
         return self.cursor.offset(offset).limit(limit).all()
 
 

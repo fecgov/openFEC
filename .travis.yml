@@ -10,5 +10,5 @@ before_script:
   - psql -f data/cfdm_test.pgdump.sql -U postgres cfdm_test
   - psql -c "SELECT count(*) FROM dimcand" -U postgres cfdm_test
   - pip install -r requirements.txt
-  - python manage.py refresh_db
+  - python manage.py update_schemas
 script: nosetests

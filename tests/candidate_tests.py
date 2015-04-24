@@ -95,3 +95,93 @@ class CandidateFormatTest(ApiBaseTest):
         results = self._results('/names?q=obama')
         cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
         self.assertEqual(len(cand_ids), len(set(cand_ids)))
+        cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
+        self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
+
+    def test_candidate_history_by_year(self):
+        results = self._results('/candidate/P80003338/history/2008')
+
+        expected_result = {
+            "address_city": "CHICAGO",
+            "address_state": "IL",
+            "address_street_1": "PO BOX 8102",
+            "address_street_2": '',
+            "address_zip": "60680",
+            "candidate_id": "P80003338",
+            "candidate_inactive": '',
+            "candidate_status": "C",
+            "candidate_status_full": "Statutory candidate",
+            "district": '',
+            "expire_date": "2011-04-04 00:00:00",
+            "form_type": "F2",
+            "incumbent_challenge": "O",
+            "incumbent_challenge_full": "Open (Open seat)",
+            "load_date": "2008-09-17 00:00:00",
+            "name": "OBAMA, BARACK",
+            "office": "P",
+            "office_full": "President",
+            "party": "DEM",
+            "party_full": "Democratic Party",
+            "state": "US",
+            "two_year_period": 2008
+        }
+
+        self.assertEqual(results[0], expected_result)
+
+    def test_candidate_history(self):
+        results = self._results('/candidate/P80003338/history')
+        recent_results = self._results('/candidate/P80003338/history/recent')
+
+        expected_result_0 = {
+            'address_street_1': 'PO BOX 8102',
+            'office_full': 'President',
+            'district': '',
+            'address_city': 'CHICAGO',
+            'address_state': 'IL',
+            'expire_date': '',
+            'candidate_status_full': 'Statutory candidate',
+            'candidate_inactive': '',
+            'load_date': '2011-07-19 00:00:00',
+            'office': 'P',
+            'party': 'DEM',
+            'incumbent_challenge': 'I',
+            'incumbent_challenge_full': 'Incumbent (Current seat holder running for election)',
+            'form_type': 'F2Z',
+            'party_full': 'Democratic Party',
+            'name': 'OBAMA, BARACK',
+            'address_street_2': '',
+            'candidate_id': 'P80003338',
+            'address_zip': '60680',
+            'two_year_period': 2012,
+            'candidate_status': 'C', 'state': 'US',
+        }
+        expected_result_1 = {
+            "address_city": "CHICAGO",
+            "address_state": "IL",
+            "address_street_1": "PO BOX 8102",
+            "address_street_2": '',
+            "address_zip": "60680",
+            "candidate_id": "P80003338",
+            "candidate_inactive": '',
+            "candidate_status": "C",
+            "candidate_status_full": "Statutory candidate",
+            "district": '',
+            "expire_date": "2011-04-04 00:00:00",
+            "form_type": "F2",
+            "incumbent_challenge": "O",
+            "incumbent_challenge_full": "Open (Open seat)",
+            "load_date": "2008-09-17 00:00:00",
+            "name": "OBAMA, BARACK",
+            "office": "P",
+            "office_full": "President",
+            "party": "DEM",
+            "party_full": "Democratic Party",
+            "state": "US",
+            "two_year_period": 2008
+        }
+        # history/recent
+        self.assertEqual(recent_results[0], expected_result_0)
+        self.assertEqual(len(recent_results), 1)
+        # /history
+        self.assertEqual(results[0], expected_result_0)
+        self.assertEqual(results[1], expected_result_1)

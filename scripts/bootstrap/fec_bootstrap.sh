@@ -18,7 +18,7 @@ dropdb cfdm_test 2>/dev/null
 createdb cfdm_test
 psql -f data/cfdm_test.pgdump.sql cfdm_test >/dev/null
 echo "Refreshing DB"
-python manage.py refresh_db
+python manage.py update_schemas
 deactivate
 cd ..
 

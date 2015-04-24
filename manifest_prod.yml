@@ -1,18 +1,25 @@
 ---
 memory: 512M
+stack: lucid64
+instances: 2
+env:
+  NEW_RELIC_CONFIG_FILE: newrelic.ini
+  NEW_RELIC_ENV: staging
 applications:
 - name: api
   path: .
   host: fec-prod-api
   env:
     PRODUCTION: True
+    NEW_RELIC_APP_NAME: OpenFEC API (production)
+    NEW_RELIC_LOG: stdout
+    WEB_CONCURRENCY: 4
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack
   host: fec-prod-web
   env:
-    FEC_WEB_API_URL: http://api.data.gov/fec/
-    FEC_WEB_DEBUG: False
+    FEC_WEB_API_URL: https://api.open.fec.gov/
     # These must be set manually via `cf set-env`
     # FEC_WEB_PASSWORD
     # FEC_WEB_USERNAME
