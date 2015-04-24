@@ -1,10 +1,15 @@
 ---
 memory: 512M
 stack: lucid64
+env:
+  NEW_RELIC_CONFIG_FILE: newrelic.ini
+  NEW_RELIC_ENV: staging
 applications:
 - name: api
   path: .
   host: fec-stage-api
+  env:
+    FEC_API_DEBUG: True
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack

@@ -44,22 +44,22 @@ api = restful.Api(app)
 db.init_app(app)
 
 # api.data.gov
-trusted_proxies = ('192.168.114.100', '54.208.160.112', '54.208.160.151')
+trusted_proxies = ('54.208.160.112', '54.208.160.151')
 FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
 
 
 @app.before_request
 def limit_remote_addr():
     falses = (False, 'False', 'false', 'f')
-    if FEC_API_WHITELIST_IPS not in falses :
-        remote = request.remote_addr
-        route = list(request.access_route)
-        while remote in trusted_proxies:
-            remote = route.pop()
-        print(route.pop())
-
-        if remote not in trusted_proxies:
+    if FEC_API_WHITELIST_IPS not in falses:
+        try:
+            *_, api_data_route, cf_route = request.access_route
+        except ValueError:  # Not enough routes
             abort(403)
+        else:
+            if api_data_route not in trusted_proxies:
+                abort(403)
+
 
 @app.after_request
 def after_request(response):
