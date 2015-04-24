@@ -198,7 +198,7 @@ totals_model_map = {
     'P': (CommitteeTotalsPresidential, presidential_fields),
     'H': (CommitteeTotalsHouseOrSenate, house_senate_fields),
     'S': (CommitteeTotalsHouseOrSenate, house_senate_fields),
-    'default': (CommitteeTotals, pac_party_fields),
+    'default': (CommitteeTotalsPacOrParty, pac_party_fields),
 }
 
 
