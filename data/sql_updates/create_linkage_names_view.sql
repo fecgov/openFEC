@@ -44,11 +44,11 @@ select
 from dimlinkages l
     left join (
         select distinct on (cand_sk) cand_sk, cand_nm from dimcandproperties
-            order by cand_sk desc
+            order by cand_sk, candproperties_sk desc
     ) candprops on l.cand_sk = candprops.cand_sk
     left join (
         select distinct on (cmte_sk) cmte_sk, cmte_nm from dimcmteproperties
-            order by cmte_sk desc
+            order by cmte_sk, cmteproperties_sk desc
     ) cmteprops on l.cmte_sk = cmteprops.cmte_sk
     left join (
         select cand_id, max(dl.cand_election_yr) as active_through from dimlinkages

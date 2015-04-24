@@ -34,7 +34,7 @@ from dimcand
     inner join dimparty using (party_sk)
     left join (
         select distinct on (cand_sk) cand_sk, cand_nm from dimcandproperties
-            order by cand_sk desc
+            order by cand_sk, candproperties_sk desc
     ) candprops on dimcand.cand_sk = candprops.cand_sk
 group by
     dimcand.cand_sk,
