@@ -4,7 +4,7 @@ stack: lucid64
 instances: 2
 env:
   NEW_RELIC_CONFIG_FILE: newrelic.ini
-  NEW_RELIC_ENV: staging
+  NEW_RELIC_ENV: production
 applications:
 - name: api
   path: .
