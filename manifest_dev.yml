@@ -5,6 +5,9 @@ applications:
 - name: api
   path: .
   host: fec-dev-api
+  env:
+    NEW_RELIC_APP_NAME: OpenFEC (development)
+    NEW_RELIC_LOG: stdout
 - name: web
   path: ../openFEC-web-app
   buildpack: python_buildpack
