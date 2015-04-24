@@ -1,5 +1,4 @@
 from .common import ApiBaseTest
-import unittest
 
 
 class CandidateFormatTest(ApiBaseTest):
@@ -20,7 +19,7 @@ class CandidateFormatTest(ApiBaseTest):
         # @todo - check for a value for expire_data
         self.assertEqual(result['expire_date'], None)
         # most recent record should be first
-        self.assertEqual(result['load_date'], '2013-04-24 00:00:00')
+        self.assertEqual(result['load_date'], '2013-04-24T00:00:00+00:00')
         self.assertResultsEqual(result['name'], 'MORAN, JAMES P. JR.')
         #address
         self.assertEqual(result['address_city'], 'ALEXANDRIA')
@@ -28,7 +27,6 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertEqual(result['address_street_1'], '311 NORTH WASHINGTON STREET')
         self.assertEqual(result['address_street_2'], 'SUITE 200L')
         self.assertEqual(result['address_zip'], '22314')
-        self.assertEqual(16, len(result['committees']))
         # office
         self.assertResultsEqual(result['office'], 'H')
         self.assertResultsEqual(result['district'],'08')
@@ -42,39 +40,8 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertResultsEqual(result['candidate_inactive'], 'Y')
         self.assertResultsEqual(result['candidate_status'], 'C')
         self.assertResultsEqual(result['incumbent_challenge'], 'I')
-                # Expanded from candidate_status
+        # Expanded from candidate_status
         self.assertResultsEqual(result['candidate_status_full'], 'Candidate')
-
-
-    @unittest.skip("Fix later once we've figured out how to fix committee cardinality")
-    def test_candidate_committees(self):
-        """Compare results to expected fields."""
-        # @todo - use a factory rather than the test data
-        response = self._response('/candidate/H0VA08040/committees')
-        committees = response['results'][0]['committees']
-        self.prettyPrint(committees)
-        self.assertResultsEqual(committees,
-            [{
-                # From cand_committee_format_mapping
-                'committee_designation': 'P',
-                'committee_designation_full': 'Principal campaign committee',
-                'committee_id': 'C00241349',
-                'committee_name': 'MORAN FOR CONGRESS',
-                'committee_type': 'H',
-                'committee_type_full': 'House',
-                'election_year': 2014,
-                'expire_date': None,
-                'link_date': '2007-10-12 13:38:33',
-
-            }])
-
-        # The above candidate is missing a few fields
-        response = self._response('/candidate/P20003984')
-        committee = response['results'][0]['committees'][1]
-
-        self.assertResultsEqual(committee['committee_type'], 'I')
-        self.assertResultsEqual(committee['committee_type_full'], 'Independent Expenditor (Person or Group)')
-
 
     def _results(self, qry):
         response = self._response(qry)
@@ -96,20 +63,8 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_extra_fields(self):
         response = self._results('/candidate/P80003338')
-        self.assertIn('committees', response[0])
         self.assertIn('PO BOX 8102', response[0]['address_street_1'])
-        self.assertIn('60680',response[0]['address_zip'])
-
-    def test_candidate_committes(self):
-        response = self._results('/candidate/P80003338?year=*')
-
-        fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
-
-        election = response[0]['committees'][0]
-        print(election)
-        for field in fields:
-            print(field)
-            self.assertEquals(field in election, True)
+        self.assertIn('60680', response[0]['address_zip'])
 
     def test_cand_filters(self):
         # checking one example from each field
@@ -117,7 +72,7 @@ class CandidateFormatTest(ApiBaseTest):
         original_count = orig_response['pagination']['count']
 
         filter_fields = (
-            ('office','H'),
+            ('office', 'H'),
             ('district', '00,02'),
             ('state', 'CA'),
             ('name', 'Obama'),
@@ -150,13 +105,13 @@ class CandidateFormatTest(ApiBaseTest):
             "address_city": "CHICAGO",
             "address_state": "IL",
             "address_street_1": "PO BOX 8102",
-            "address_street_2": None,
+            "address_street_2": '',
             "address_zip": "60680",
             "candidate_id": "P80003338",
-            "candidate_inactive": None,
+            "candidate_inactive": '',
             "candidate_status": "C",
             "candidate_status_full": "Statutory candidate",
-            "district": None,
+            "district": '',
             "expire_date": "2011-04-04 00:00:00",
             "form_type": "F2",
             "incumbent_challenge": "O",
@@ -170,7 +125,6 @@ class CandidateFormatTest(ApiBaseTest):
             "state": "US",
             "two_year_period": 2008
         }
-
 
         self.assertEqual(results[0], expected_result)
 
@@ -181,12 +135,12 @@ class CandidateFormatTest(ApiBaseTest):
         expected_result_0 = {
             'address_street_1': 'PO BOX 8102',
             'office_full': 'President',
-            'district': None,
+            'district': '',
             'address_city': 'CHICAGO',
             'address_state': 'IL',
-            'expire_date': None,
+            'expire_date': '',
             'candidate_status_full': 'Statutory candidate',
-            'candidate_inactive': None,
+            'candidate_inactive': '',
             'load_date': '2011-07-19 00:00:00',
             'office': 'P',
             'party': 'DEM',
@@ -195,7 +149,7 @@ class CandidateFormatTest(ApiBaseTest):
             'form_type': 'F2Z',
             'party_full': 'Democratic Party',
             'name': 'OBAMA, BARACK',
-            'address_street_2': None,
+            'address_street_2': '',
             'candidate_id': 'P80003338',
             'address_zip': '60680',
             'two_year_period': 2012,
@@ -205,13 +159,13 @@ class CandidateFormatTest(ApiBaseTest):
             "address_city": "CHICAGO",
             "address_state": "IL",
             "address_street_1": "PO BOX 8102",
-            "address_street_2": None,
+            "address_street_2": '',
             "address_zip": "60680",
             "candidate_id": "P80003338",
-            "candidate_inactive": None,
+            "candidate_inactive": '',
             "candidate_status": "C",
             "candidate_status_full": "Statutory candidate",
-            "district": None,
+            "district": '',
             "expire_date": "2011-04-04 00:00:00",
             "form_type": "F2",
             "incumbent_challenge": "O",
@@ -225,7 +179,6 @@ class CandidateFormatTest(ApiBaseTest):
             "state": "US",
             "two_year_period": 2008
         }
-        print (expected_result_0)
         # history/recent
         self.assertEqual(recent_results[0], expected_result_0)
         self.assertEqual(len(recent_results), 1)

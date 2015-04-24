@@ -7,3 +7,7 @@ newrelic
 celery>=3.1.17
 SQLAlchemy>=0.9.9
 gunicorn
+
+marshmallow>=1.2.4
+webargs>=0.13.0
+git+https://github.com/marshmallow-code/smore@dev
