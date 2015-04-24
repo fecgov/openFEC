@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 
+import os
 import glob
 import subprocess
 import urllib.parse
 import multiprocessing
 
 from flask import url_for
+from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
+
 from webservices.rest import app, db
 from webservices.common.util import get_full_path
 
 
 manager = Manager(app)
+
+# The Flask app server should only be used for local testing, so we default to
+# using debug mode and auto-reload. To disable debug mode locally, pass the
+# --no-debug flag to `runserver`.
+manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
 def execute_sql_file(path):
@@ -89,6 +97,17 @@ def start_beat():
     # Stop beat workers synchronously
     stop_beat().wait()
     return subprocess.Popen(['python', 'cron.py'])
+
+
+@manager.command
+def cf_startup():
+    """Start celery beat and schema migration on `cf-push`. Services are only
+    started if running on 0th instance.
+    """
+    instance_id = os.getenv('CF_INSTANCE_INDEX')
+    if instance_id == '0':
+        start_beat()
+        subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 
 
 if __name__ == "__main__":
