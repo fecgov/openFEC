@@ -149,7 +149,6 @@ class CandidateCommitteeLink(db.Model):
     candidate_id = db.Column('candidate_id', db.String(10))
     election_year = db.Column('election_year', db.Integer)
     active_through = db.Column('active_through', db.Integer)
-    link_date = db.Column('link_date', db.DateTime())
     expire_date = db.Column('expire_date', db.DateTime())
     committee_name = db.Column('committee_name', db.DateTime())
     candidate_name = db.Column('candidate_name', db.DateTime())
