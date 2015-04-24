@@ -43,20 +43,12 @@ select
     cmteprops.cmte_nm as committee_name
 from dimlinkages l
     left join (
-        select props.cand_sk, cand_nm from (
-            select cand_sk, max(candproperties_sk) as candproperties_sk from dimlinkages
-                join dimcandproperties using (cand_sk)
-                group by cand_sk
-        ) props
-            join dimcandproperties using (candproperties_sk)
+        select distinct on (cand_sk) cand_sk, cand_nm from dimcandproperties
+            order by cand_sk desc
     ) candprops on l.cand_sk = candprops.cand_sk
     left join (
-        select props.cmte_sk, cmte_nm from (
-            select cmte_sk, max(cmteproperties_sk) as cmteproperties_sk from dimlinkages
-                join dimcmteproperties using (cmte_sk)
-                group by cmte_sk
-        ) props
-            join dimcmteproperties using (cmteproperties_sk)
+        select distinct on (cmte_sk) cmte_sk, cmte_nm from dimcmteproperties
+            order by cmte_sk desc
     ) cmteprops on l.cmte_sk = cmteprops.cmte_sk
     left join (
         select cand_id, max(dl.cand_election_yr) as active_through from dimlinkages

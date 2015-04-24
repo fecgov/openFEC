@@ -33,12 +33,8 @@ from dimcand
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
     left join (
-        select props.cand_sk, cand_nm from (
-            select cand_sk, max(candproperties_sk) as candproperties_sk from dimcand
-                join dimcandproperties using (cand_sk)
-                group by cand_sk
-        ) props
-            join dimcandproperties using (candproperties_sk)
+        select distinct on (cand_sk) cand_sk, cand_nm from dimcandproperties
+            order by cand_sk desc
     ) candprops on dimcand.cand_sk = candprops.cand_sk
 group by
     dimcand.cand_sk,
