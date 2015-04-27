@@ -36,7 +36,6 @@ select
         when 'B' then 'Lobbyist/Registrant PAC'
         when 'D' then 'Leadership PAC'
         else 'unknown' end as committee_designation_full,
-    l.link_date as link_date,
     l.load_date as load_date,
     l.expire_date as expire_date,
     (select cand_nm from dimcandproperties where dimcandproperties.cand_sk = l.cand_sk order by candproperties_sk desc limit 1) as candidate_name,
