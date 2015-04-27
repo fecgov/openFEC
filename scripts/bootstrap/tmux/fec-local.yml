@@ -25,7 +25,7 @@ windows:
         - api:
             - workon openFEC
             - cd <CHANGE>/openFEC
-            - python run_api.py
+            - python manage.py runserver
         - site:
             - workon openFEC-web-app
             - cd <CHANGE>/openFEC-web-app

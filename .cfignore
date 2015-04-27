@@ -56,3 +56,10 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# PG dumps, DDL, etc.
+data/*dump*
+data/ddl/
+data/tuning
+
+documentation/notebooks/

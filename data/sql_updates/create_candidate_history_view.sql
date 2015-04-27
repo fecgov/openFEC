@@ -4,7 +4,7 @@ select
     row_number() over () as idx,
     dcp_by_period.candproperties_sk as properties_key,
     dcp_by_period.cand_sk as candidate_key,
-    dcp_by_period.cand_id as candidate_id,
+    dcp_by_period.candidate_id,
     dcp_by_period.cand_nm as name,
     dcp_by_period.record_expire_date as expire_date,
     dcp_by_period.record_load_date as load_date,
@@ -29,7 +29,7 @@ select
     dcp_by_period.party_affiliation_desc as party_full
 from ofec_two_year_periods
     left join (
-        select distinct on (two_year_period, cand_sk) ((CAST(EXTRACT(YEAR FROM dcp.load_date) AS INT) + CAST(EXTRACT(YEAR FROM dcp.load_date) AS INT) % 2)) as two_year_period, dcp.expire_date as record_expire_date, dcp.load_date as record_load_date, dcp.form_tp as record_form_tp, *
+        select distinct on (two_year_period, cand_sk) ((CAST(EXTRACT(YEAR FROM dcp.load_date) AS INT) + CAST(EXTRACT(YEAR FROM dcp.load_date) AS INT) % 2)) as two_year_period, dcp.expire_date as record_expire_date, dcp.load_date as record_load_date, dcp.form_tp as record_form_tp, dcp.cand_id as candidate_id, *
         from dimcandproperties dcp
             left join dimcand dc using (cand_sk)
             left join dimcandstatusici dsi using (cand_sk)
