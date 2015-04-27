@@ -8,7 +8,7 @@ import logging
 import sys
 import os
 
-from flask import Flask
+from flask import Flask, abort, request
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import flask.ext.restful.representations.json
@@ -17,7 +17,7 @@ import sqlalchemy as sa
 
 from .db import db_conn
 from webservices.common.models import db
-from webservices.resources.candidates import CandidateList, CandidateView
+from webservices.resources.candidates import CandidateList, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
@@ -43,6 +43,24 @@ app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 api = restful.Api(app)
 db.init_app(app)
 
+# api.data.gov
+trusted_proxies = ('54.208.160.112', '54.208.160.151')
+FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
+
+
+@app.before_request
+def limit_remote_addr():
+    falses = (False, 'False', 'false', 'f')
+    if FEC_API_WHITELIST_IPS not in falses:
+        try:
+            *_, api_data_route, cf_route = request.access_route
+        except ValueError:  # Not enough routes
+            abort(403)
+        else:
+            if api_data_route not in trusted_proxies:
+                abort(403)
+
+
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -62,7 +80,7 @@ class NameSearch(restful.Resource):
                cmte_id AS committee_id,
                name,
                office_sought
-      FROM   name_search_fulltext
+      FROM   name_search_fulltext_mv
       WHERE  name_vec @@ to_tsquery(:findme || ':*')
       ORDER BY ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
       LIMIT  20"""
@@ -95,6 +113,7 @@ class Help(restful.Resource):
 
 api.add_resource(Help, '/')
 api.add_resource(CandidateView, '/candidate/<string:candidate_id>', '/committee/<string:committee_id>/candidates')
+api.add_resource(CandidateHistoryView, '/candidate/<string:candidate_id>/history/<string:year>', '/candidate/<string:candidate_id>/history')
 api.add_resource(CandidateList, '/candidates')
 api.add_resource(CommitteeView, '/committee/<string:committee_id>', '/candidate/<string:candidate_id>/committees')
 api.add_resource(CommitteeList, '/committees')
