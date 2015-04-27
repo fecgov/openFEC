@@ -11,16 +11,32 @@ class ApiBaseTest(unittest.TestCase):
         """Don't test the base class"""
         return self.__class__ != ApiBaseTest
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        super(ApiBaseTest, cls).setUpClass()
         rest.app.config['TESTING'] = True
-        self.app = rest.app.test_client()
-        self.ctx = rest.app.app_context()
-        self.ctx.push()
+        cls.app = rest.app.test_client()
+        cls.ctx = rest.app.app_context()
+        cls.ctx.push()
+        rest.db.create_all()
+
+    def setUp(self):
         self.longMessage = True
         self.maxDiff = None
+        self.connection = rest.db.engine.connect()
+        self.transaction = self.connection.begin()
 
     def tearDown(self):
-        self.ctx.pop()
+        self.transaction.rollback()
+        self.connection.close()
+        rest.db.session.remove()
+
+    @classmethod
+    def tearDownClass(cls):
+        super(ApiBaseTest, cls).tearDownClass()
+        rest.db.engine.execute('drop schema public cascade;')
+        rest.db.engine.execute('create schema public;')
+        cls.ctx.pop()
 
     def _response(self, qry):
         response = self.app.get(qry)

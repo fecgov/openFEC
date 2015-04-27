@@ -97,7 +97,8 @@ class NameSearch(restful.Resource):
 
         qry = sa.sql.text(self.fulltext_qry)
         findme = ' & '.join(args['q'].split())
-        data = db_conn().execute(qry, findme=findme).fetchall()
+        with db.session.connection() as conn:
+            data = conn.execute(qry, findme=findme).fetchall()
         page_data = Pagination(1, 1, len(data))
 
         return {"api_version": "0.2",

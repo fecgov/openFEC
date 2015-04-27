@@ -1,8 +1,18 @@
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+
 
 db = SQLAlchemy()
+
+
+class NameSearch(db.Model):
+    __tablename__ = 'name_search_fulltext_mv'
+
+    cand_id = db.Column(db.Integer, primary_key=True, nullable=True)
+    cmte_id = db.Column(db.Integer, primary_key=True, nullable=True)
+    name = db.Column(db.String)
+    office_sought = db.Column(db.String)
+    name_vec = db.Column(TSVECTOR)
 
 
 class Candidate(db.Model):
