@@ -5,7 +5,7 @@ select
     l.cand_sk as candidate_key,
     l.cmte_sk as committee_key,
     l.cand_id as candidate_id,
-    (select max(cand_election_yr) from dimlinkages dl where dl.cand_id = l.cand_id) as active_through,
+    active.active_through,
     l.cand_election_yr as election_year,
     l.cmte_id as committee_id,
     l.cmte_tp as committee_type,
@@ -38,9 +38,23 @@ select
         else 'unknown' end as committee_designation_full,
     l.load_date as load_date,
     l.expire_date as expire_date,
-    (select cand_nm from dimcandproperties where dimcandproperties.cand_sk = l.cand_sk order by candproperties_sk desc limit 1) as candidate_name,
-    (select cmte_nm from dimcmteproperties where dimcmteproperties.cmte_sk = l.cmte_sk order by cmteproperties_sk desc limit 1) as committee_name
-from dimlinkages l;
+    candprops.cand_nm as candidate_name,
+    cmteprops.cmte_nm as committee_name
+from dimlinkages l
+    left join (
+        select distinct on (cand_sk) cand_sk, cand_nm from dimcandproperties
+            order by cand_sk, candproperties_sk desc
+    ) candprops on l.cand_sk = candprops.cand_sk
+    left join (
+        select distinct on (cmte_sk) cmte_sk, cmte_nm from dimcmteproperties
+            order by cmte_sk, cmteproperties_sk desc
+    ) cmteprops on l.cmte_sk = cmteprops.cmte_sk
+    left join (
+        select cand_id, max(dl.cand_election_yr) as active_through from dimlinkages
+            join dimlinkages dl using (cand_id)
+            group by cand_id
+    ) active on l.cand_id = active.cand_id
+;
 
 create index on ofec_name_linkage_mv_tmp(candidate_key);
 create index on ofec_name_linkage_mv_tmp(committee_key);
