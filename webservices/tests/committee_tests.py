@@ -4,6 +4,14 @@ from .common import ApiBaseTest
 from tests import factories
 from webservices import rest
 
+
+def extend(*dicts):
+    ret = {}
+    for each in dicts:
+        ret.update(each)
+    return ret
+
+
 ## old, re-factored Committee tests ##
 class CommitteeFormatTest(ApiBaseTest):
     def _results(self, qry):
@@ -91,6 +99,46 @@ class CommitteeFormatTest(ApiBaseTest):
         response = self._results('/committees?party=REP')
         self.assertEquals(response[0]['party'], 'REP')
         self.assertEquals(response[0]['party_full'], 'Republican Party')
+
+    # TODO(jmcarp) Refactor as parameterized tests
+    # TODO(jmcarp) Generalize to /committees endpoint
+    # TODO(jmcarp) Generalize to candidate models
+    def test_filters_generic(self):
+        committee = factories.CommitteeFactory()
+        committee_id = committee.committee_id
+        base_url = '/committee/{0}'.format(committee_id)
+        self._check_filter('designation', ['B', 'P'], base_url, committee_id=committee_id)
+        self._check_filter('organization_type', ['M', 'T'], base_url, committee_id=committee_id)
+        self._check_filter('committee_type', ['H', 'X'], base_url, committee_id=committee_id)
+
+    def _check_filter(self, field, values, base_url, alt=None, **attrs):
+
+        # Build fixtures
+        factories.CommitteeFactory(**extend(attrs, {field: alt}))
+        [
+            factories.CommitteeFactory(**extend(attrs, {field: value}))
+            for value in values
+        ]
+
+        # Assert that exactly one record is found for each single-valued search
+        # (e.g. field=value1)
+        for value in values:
+            url = '{0}?{1}={2}'.format(base_url, field, value)
+            results = self._results(url)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0][field], value)
+
+        # Assert that `len(values)` records are found for multi-valued search
+        # (e.g. field=value1,value2...valueN)
+        url = '{0}?{1}={2}'.format(
+            base_url,
+            field,
+            ','.join(str(each) for each in values),
+        )
+        results = self._results(url)
+        self.assertEqual(len(results), len(values))
+        for result in results:
+            self.assertIn(result[field], values)
 
     def test_committee_filters(self):
         [
