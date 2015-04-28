@@ -1,11 +1,18 @@
-import codecs
+import os
 import json
+import codecs
 import unittest
 
 from webservices import rest
 
 
+def _reset_schema():
+    rest.db.engine.execute('drop schema if exists public cascade;')
+    rest.db.engine.execute('create schema public;')
+
+
 class ApiBaseTest(unittest.TestCase):
+
     @property
     def __test__(self):
         """Don't test the base class"""
@@ -15,9 +22,12 @@ class ApiBaseTest(unittest.TestCase):
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
         rest.app.config['TESTING'] = True
+        conn_string = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm-unit-test')
+        rest.app.config['SQLALCHEMY_DATABASE_URI'] = conn_string
         cls.app = rest.app.test_client()
         cls.ctx = rest.app.app_context()
         cls.ctx.push()
+        _reset_schema()
         rest.db.create_all()
 
     def setUp(self):
@@ -34,8 +44,7 @@ class ApiBaseTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         super(ApiBaseTest, cls).tearDownClass()
-        rest.db.engine.execute('drop schema public cascade;')
-        rest.db.engine.execute('create schema public;')
+        _reset_schema()
         cls.ctx.pop()
 
     def _response(self, qry):
@@ -91,4 +100,3 @@ class ApiBaseTest(unittest.TestCase):
         """
         import pprint; pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(thing)
-
