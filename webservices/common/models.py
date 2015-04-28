@@ -5,8 +5,13 @@ from sqlalchemy.ext.associationproxy import association_proxy
 db = SQLAlchemy()
 
 
-class Candidate(db.Model):
-    candidate_key = db.Column(db.Integer, primary_key=True)
+class BaseModel(db.Model):
+    __abstract__ = True
+    idx = db.Column(db.Integer, primary_key=True)
+
+
+class Candidate(BaseModel):
+    candidate_key = db.Column(db.Integer)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
@@ -25,8 +30,8 @@ class Candidate(db.Model):
 
     __tablename__ = 'ofec_candidates_mv'
 
-class CandidateDetail(db.Model):
-    candidate_key = db.Column(db.Integer, primary_key=True)
+class CandidateDetail(BaseModel):
+    candidate_key = db.Column(db.Integer)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
@@ -55,8 +60,8 @@ class CandidateDetail(db.Model):
     __tablename__ = 'ofec_candidate_detail_mv'
 
 
-class Committee(db.Model):
-    committee_key = db.Column(db.Integer, primary_key=True)
+class Committee(BaseModel):
+    committee_key = db.Column(db.Integer)
     committee_id = db.Column(db.String(9))
     candidate_ids = db.Column(ARRAY(db.String))
     designation = db.Column(db.String(1))
@@ -78,8 +83,8 @@ class Committee(db.Model):
     __tablename__ = 'ofec_committees_mv'
 
 
-class CommitteeDetail(db.Model):
-    committee_key = db.Column(db.Integer, primary_key=True)
+class CommitteeDetail(BaseModel):
+    committee_key = db.Column(db.Integer)
     committee_id = db.Column(db.String(9))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
@@ -141,8 +146,8 @@ class CommitteeDetail(db.Model):
     __tablename__ = 'ofec_committee_detail_mv'
 
 
-class CandidateCommitteeLink(db.Model):
-    linkage_key = db.Column(db.Integer, primary_key=True)
+class CandidateCommitteeLink(BaseModel):
+    linkage_key = db.Column(db.Integer)
     committee_key = db.Column('committee_key', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
     candidate_key = db.Column('candidate_key', db.Integer, db.ForeignKey(Candidate.candidate_key), db.ForeignKey(CandidateDetail.candidate_key))
     committee_id = db.Column('committee_id', db.String(10))
@@ -159,8 +164,8 @@ class CandidateCommitteeLink(db.Model):
 
     __tablename__ = 'ofec_name_linkage_mv'
 
-class CandidateHistory(db.Model):
-    properties_key = db.Column(db.Integer, primary_key=True)
+class CandidateHistory(BaseModel):
+    properties_key = db.Column(db.Integer)
     candidate_key = db.Column(db.Integer)
     candidate_id = db.Column(db.String(10))
     two_year_period = db.Column(db.Integer)
