@@ -1,4 +1,3 @@
-import json
 import unittest
 
 import sqlalchemy as sa
@@ -46,7 +45,10 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(results, [])
 
     def test_year_filter(self):
+        factories.CandidateFactory(election_years=[1986, 1988])
+        factories.CandidateFactory(election_years=[2000, 2002])
         results = self._results('/candidates?year=1988')
+        self.assertEqual(len(results), 1)
         for r in results:
             self.assertIn(1988, r['election_years'])
 
