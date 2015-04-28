@@ -28,7 +28,7 @@ class CandidateSearch(BaseModel):
 
 
 class Candidate(BaseModel):
-    candidate_key = db.Column(db.Integer)
+    candidate_key = db.Column(db.Integer, unique=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
@@ -47,7 +47,7 @@ class Candidate(BaseModel):
     __tablename__ = 'ofec_candidates_mv'
 
 class CandidateDetail(BaseModel):
-    candidate_key = db.Column(db.Integer)
+    candidate_key = db.Column(db.Integer, unique=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
@@ -76,7 +76,7 @@ class CandidateDetail(BaseModel):
 
 
 class Committee(BaseModel):
-    committee_key = db.Column(db.Integer)
+    committee_key = db.Column(db.Integer, unique=True)
     committee_id = db.Column(db.String(9))
     candidate_ids = db.Column(ARRAY(db.Text))
     designation = db.Column(db.String(1))
@@ -97,7 +97,7 @@ class Committee(BaseModel):
 
 
 class CommitteeDetail(BaseModel):
-    committee_key = db.Column(db.Integer)
+    committee_key = db.Column(db.Integer, unique=True)
     committee_id = db.Column(db.String(9))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
