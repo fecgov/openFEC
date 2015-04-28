@@ -106,6 +106,18 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(len(response[0]), 11)
         self.assertEquals(response['pagination']['count'], 11)
 
+    def test_totals_house_senate(self):
+        committee = factories.CommitteeFactory(committee_type='H')
+        committee_id = committee.committee_id
+        [
+            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
+            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
+        ]
+        response = self._results('/committee/{0}/totals'.format(committee_id))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['cycle'], 2012)
+        self.assertEqual(response[1]['cycle'], 2008)
+
     # Totals
     @unittest.skip("not implemented yet")
     def test_reports_house_senate(self):
