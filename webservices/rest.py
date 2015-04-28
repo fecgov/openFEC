@@ -15,7 +15,6 @@ import flask.ext.restful.representations.json
 from .json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
-from .db import db_conn
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
@@ -37,6 +36,7 @@ def sqla_conn_string():
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     print(sqla_conn_string)
     return sqla_conn_string
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
@@ -97,7 +97,7 @@ class NameSearch(restful.Resource):
 
         qry = sa.sql.text(self.fulltext_qry)
         findme = ' & '.join(args['q'].split())
-        data = db_conn().execute(qry, findme=findme).fetchall()
+        data = db.engine.execute(qry, findme=findme).fetchall()
         page_data = Pagination(1, 1, len(data))
 
         return {"api_version": "0.2",
