@@ -5,17 +5,7 @@ from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
 
 # output format for flask-restful marshaling
-candidate_commitee_fields = {
-    'committee_id': fields.String,
-    'committee_name': fields.String,
-    'link_date': fields.String,
-    'expire_date': fields.String,
-    'committee_type': fields.String,
-    'committee_type_full': fields.String,
-    'committee_designation': fields.String,
-    'committee_designation_full': fields.String,
-    'election_year': fields.Integer,
-}
+
 candidate_fields = {
     'candidate_id': fields.String,
     'candidate_status_full': fields.String,
@@ -56,7 +46,6 @@ candidate_detail_fields = {
     'address_street_2': fields.String,
     'address_zip': fields.String,
     'candidate_inactive': fields.String,
-    'committees': fields.Nested(candidate_commitee_fields),
 }
 candidate_history_fields = {
     'candidate_id': fields.String,
