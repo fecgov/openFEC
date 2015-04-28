@@ -15,6 +15,13 @@ class NameSearch(db.Model):
     name_vec = db.Column(TSVECTOR)
 
 
+class CandidateSearch(db.Model):
+    __tablename__ = 'dimcand_fulltext_mv'
+
+    cand_sk = db.Column(db.Integer, primary_key=True)
+    fulltxt = db.Column(TSVECTOR)
+
+
 class Candidate(db.Model):
     candidate_key = db.Column(db.Integer, primary_key=True)
     candidate_id = db.Column(db.String(10))

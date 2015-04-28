@@ -180,19 +180,6 @@ class CandidateFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-    def test_name_endpoint_returns_unique_candidates_and_committees(self):
-        name = factories.NameSearchFactory(
-            name='Bartlet',
-            name_vec=sa.func.to_tsvector('Bartlet for America'),
-        )
-        rest.db.session.flush()
-        results = self._results('/names?q=bartlet')
-        self.assertEqual(results[0]['name'], name.name)
-        cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
-        self.assertEqual(len(cand_ids), len(set(cand_ids)))
-        cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
-        self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
-
     def test_candidate_history_by_year(self):
         key = 0
         id = 'id0'
