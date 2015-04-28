@@ -145,7 +145,7 @@ class CandidateFormatTest(ApiBaseTest):
             self.assertEquals(field in election, True)
 
     def test_cand_filters(self):
-        candidates = [
+        [
             factories.CandidateFactory(office='H'),
             factories.CandidateFactory(district='00'),
             factories.CandidateFactory(district='02'),

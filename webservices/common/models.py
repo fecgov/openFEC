@@ -31,7 +31,6 @@ class Candidate(db.Model):
     party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
-    committees = db.relationship('CandidateCommitteeLink', backref='candidates')
 
     __tablename__ = 'ofec_candidates_mv'
 
@@ -60,7 +59,6 @@ class CandidateDetail(db.Model):
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
-    committees = db.relationship('CandidateCommitteeLink', backref='candidatedetail')
 
     __tablename__ = 'ofec_candidate_detail_mv'
 
@@ -68,7 +66,7 @@ class CandidateDetail(db.Model):
 class Committee(db.Model):
     committee_key = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String(9))
-    candidate_ids = db.Column(ARRAY(db.String))
+    candidate_ids = db.Column(ARRAY(db.Text))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
@@ -82,8 +80,6 @@ class Committee(db.Model):
     party_full = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
-    candidates = db.relationship('CandidateCommitteeLink', backref='committees')
-
 
     __tablename__ = 'ofec_committees_mv'
 
@@ -104,7 +100,6 @@ class CommitteeDetail(db.Model):
     party_full = db.Column(db.String(50))
     original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
-    candidates = db.relationship('CandidateCommitteeLink', backref='committeedetail')
     # detail view additions
     filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50))
