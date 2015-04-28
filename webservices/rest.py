@@ -48,6 +48,10 @@ trusted_proxies = ('54.208.160.112', '54.208.160.151')
 FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
 
 
+class BaseModel(db.Model):
+    idx = db.Column(db.Integer, primary_key=True)
+
+
 @app.before_request
 def limit_remote_addr():
     falses = (False, 'False', 'false', 'f')

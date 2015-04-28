@@ -4,16 +4,16 @@ from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 
-from webservices.common.models import db
+from webservices.common.models import db, BaseModel
 from webservices.common.util import merge_dicts, Pagination
 from webservices.resources.committees import Committee
 
 
-class CommitteeTotals(db.Model):
+class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String(10), primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True)
+    committee_id = db.Column(db.String(10))
+    cycle = db.Column(db.Integer)
     committee_type = db.Column(db.String(1))
 
     offsets_to_operating_expenditures = db.Column(db.Integer)
@@ -219,7 +219,8 @@ class TotalsView(Resource):
         per_page = args.get('per_page', 20)
         page_data = Pagination(page_num, per_page, 1)
 
-        committee = Committee.query.filter_by(committee_id=committee_id).one()
+        # TODO(jmcarp) Handle multiple results better
+        committee = Committee.query.filter_by(committee_id=committee_id).first()
 
         totals_class, specific_fields = totals_model_map.get(
             committee.committee_type,

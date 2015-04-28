@@ -3,15 +3,15 @@ from math import ceil
 from sqlalchemy import desc
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 
-from webservices.common.models import db
+from webservices.common.models import db, BaseModel
 from webservices.common.util import merge_dicts, Pagination
 from webservices.resources.committees import Committee
 
 
-class CommitteeReports(db.Model):
+class CommitteeReports(BaseModel):
     __abstract__ = True
 
-    report_key = db.Column(db.BigInteger, primary_key=True)
+    report_key = db.Column(db.BigInteger)
     committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer)
 
@@ -497,7 +497,8 @@ class ReportsView(Resource):
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-        committee = Committee.query.filter_by(committee_id=committee_id).one()
+        # TODO(jmcarp) Handle multiple results better
+        committee = Committee.query.filter_by(committee_id=committee_id).first()
 
         reports_class, specific_fields = reports_model_map.get(
             committee.committee_type,
@@ -531,5 +532,6 @@ class ReportsView(Resource):
             reports = reports.filter(reports_class.cycle.in_(args['cycle'].split(',')))
 
         count = reports.count()
+        import ipdb; ipdb.set_trace()
         return count, reports.order_by(desc(reports_class.coverage_end_date)).paginate(page_num, per_page, True).items
 
