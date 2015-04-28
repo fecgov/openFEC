@@ -242,9 +242,9 @@ class CommitteeView(Resource):
         for argname in ['designation', 'organization_type', 'committee_type']:
             if args.get(argname):
                 if ',' in args[argname]:
-                    committees = committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
+                    committees = committees.filter(getattr(CommitteeDetail, argname).in_(args[argname].split(',')))
                 else:
-                    committees = committees.filter(getattr(Committee, argname)==args[argname])
+                    committees = committees.filter(getattr(CommitteeDetail, argname)==args[argname])
 
         # To support '*' across all endpoints
         if args.get('year') and args['year'] != '*':
