@@ -2,6 +2,7 @@ drop view if exists ofec_committees_vw;
 drop materialized view if exists ofec_committees_mv_tmp;
 create materialized view ofec_committees_mv_tmp as
 select distinct
+    row_number() over () as idx,
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
     dd.cmte_dsgn as designation,
@@ -56,6 +57,8 @@ from dimcmte
     ) dates on dimcmte.cmte_sk = dates.cmte_sk
     -- inner join dimlinkages dl using (cmte_sk)
 ;
+
+create unique index on ofec_committees_mv_tmp(idx);
 
 create index on ofec_committees_mv_tmp(party);
 create index on ofec_committees_mv_tmp(state);

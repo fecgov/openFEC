@@ -2,7 +2,7 @@ language: python
 python:
   - "3.4"
 addons:
-  postgresql: "9.3"
+  postgresql: "9.4"
 env: SQLA_CONN="postgresql://:@/cfdm_test"
 before_script:
   - psql -c 'create database cfdm_test;' -U postgres

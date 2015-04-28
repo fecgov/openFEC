@@ -1,6 +1,7 @@
 drop materialized view if exists ofec_name_linkage_mv_tmp;
 create materialized view ofec_name_linkage_mv_tmp as
 select
+    row_number() over () as idx,
     l.linkages_sk as linkage_key,
     l.cand_sk as candidate_key,
     l.cmte_sk as committee_key,
@@ -55,6 +56,8 @@ from dimlinkages l
             group by cand_id
     ) active on l.cand_id = active.cand_id
 ;
+
+create unique index on ofec_name_linkage_mv_tmp(idx);
 
 create index on ofec_name_linkage_mv_tmp(candidate_key);
 create index on ofec_name_linkage_mv_tmp(committee_key);
