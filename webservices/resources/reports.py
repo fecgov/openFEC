@@ -532,6 +532,5 @@ class ReportsView(Resource):
             reports = reports.filter(reports_class.cycle.in_(args['cycle'].split(',')))
 
         count = reports.count()
-        import ipdb; ipdb.set_trace()
         return count, reports.order_by(desc(reports_class.coverage_end_date)).paginate(page_num, per_page, True).items
 
