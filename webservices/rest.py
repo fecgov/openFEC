@@ -15,7 +15,6 @@ import flask.ext.restful.representations.json
 from .json_encoding import TolerantJSONEncoder
 import sqlalchemy as sa
 
-from .db import db_conn
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
@@ -37,6 +36,7 @@ def sqla_conn_string():
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     print(sqla_conn_string)
     return sqla_conn_string
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()

@@ -1,5 +1,6 @@
 from math import ceil
 
+from sqlalchemy import desc
 from sqlalchemy.orm.exc import NoResultFound
 from flask.ext.restful import Resource, reqparse, fields, marshal, inputs
 
@@ -249,5 +250,5 @@ class TotalsView(Resource):
         if args['cycle'] != '*':
             totals = totals.filter(totals_class.cycle.in_(args['cycle'].split(',')))
 
-        totals = totals.order_by(totals_class.cycle)
+        totals = totals.order_by(desc(totals_class.cycle))
         return totals.paginate(page_num, per_page, True).items

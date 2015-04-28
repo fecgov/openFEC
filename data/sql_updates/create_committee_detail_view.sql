@@ -2,6 +2,7 @@ drop view if exists ofec_committee_detail_vw;
 drop materialized view if exists ofec_committee_detail_mv_tmp;
 create materialized view ofec_committee_detail_mv_tmp as
 select distinct
+    row_number() over () as idx,
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
     dd.cmte_dsgn as designation,
@@ -39,8 +40,7 @@ select distinct
     cp_most_recent.expire_date as expire_date,
     cp_most_recent.cand_pty_affiliation as party,
     p.party_affiliation_desc as party_full,
-    -- contrary to most recent, we'll need to pull just the oldest load_date here, since they don't give us registration dates yet
-    (select distinct on (cmte_sk) load_date from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by cmte_sk, cmteproperties_sk) as original_registration_date,
+    dates.load_date as original_registration_date,
     cp_most_recent.cmte_nm as name,
     -- (select all cand_id from dimlinkages dl where dl.cmte_sk = dimcmte.cmte_sk) as candidate_ids
     -- Below here are committee variables for the detail view
@@ -97,11 +97,18 @@ from dimcmte
         select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_zip, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation, cmte_st1, cmte_st2, cmte_city, cmte_st_desc, cmte_zip cmte_treasurer_city, cmte_treasurer_f_nm, cmte_treasurer_l_nm, cmte_treasurer_m_nm, cmte_treasurer_ph_num, cmte_treasurer_prefix, cmte_treasurer_st, cmte_treasurer_st1, cmte_treasurer_st2, cmte_treasurer_suffix, cmte_treasurer_title, cmte_treasurer_zip, cmte_custodian_city, cmte_custodian_f_nm, cmte_custodian_l_nm, cmte_custodian_m_nm, cmte_custodian_nm, cmte_custodian_ph_num, cmte_custodian_prefix, cmte_custodian_st, cmte_custodian_st1, cmte_custodian_st2, cmte_custodian_suffix, cmte_custodian_title, cmte_custodian_zip, cmte_email, cmte_fax, cmte_web_url, form_tp, leadership_pac, load_date, lobbyist_registrant_pac_flg, party_cmte_type, party_cmte_type_desc, qual_dt from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
     ) cp_most_recent using (cmte_sk)
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
+    left join (
+        select distinct on (cmte_sk) cmte_sk, load_date from dimcmteproperties
+            order by cmte_sk, cmteproperties_sk
+    ) dates on dimcmte.cmte_sk = dates.cmte_sk
     -- inner join dimlinkages dl using (cmte_sk)
 ;
+
+create unique index on ofec_committee_detail_mv_tmp(idx);
 
 create index on ofec_committee_detail_mv_tmp(designation);
 create index on ofec_committee_detail_mv_tmp(expire_date);
 create index on ofec_committee_detail_mv_tmp(committee_id);
+create index on ofec_committee_detail_mv_tmp(committee_key);
 create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(organization_type);
