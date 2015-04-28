@@ -3,12 +3,8 @@ python:
   - "3.4"
 addons:
   postgresql: "9.3"
-env: SQLA_CONN="postgresql://:@/cfdm_test"
 before_script:
-  - psql -c 'create database cfdm_test;' -U postgres
-  - md5sum data/cfdm_test.pgdump.sql
-  - psql -f data/cfdm_test.pgdump.sql -U postgres cfdm_test
-  - psql -c "SELECT count(*) FROM dimcand" -U postgres cfdm_test
+  - psql -c 'create database cfdm-unit-test;' -U postgres
   - pip install -r requirements.txt
   - python manage.py update_schemas
 script: nosetests
