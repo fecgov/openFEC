@@ -20,7 +20,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_list_fields(self):
         committee = factories.CommitteeFactory(
-            original_registration_date=datetime.datetime(1982, 12, 31),
+            first_file_date=datetime.datetime(1982, 12, 31),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
@@ -29,7 +29,7 @@ class CommitteeFormatTest(ApiBaseTest):
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
-        self.assertEqual(result['original_registration_date'], str(committee.original_registration_date))
+        self.assertEqual(result['first_file_date'], str(committee.first_file_date))
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
@@ -57,7 +57,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_detail_fields(self):
         committee = factories.CommitteeDetailFactory(
-            original_registration_date=datetime.datetime(1982, 12, 31),
+            first_file_date=datetime.datetime(1982, 12, 31),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
@@ -69,7 +69,7 @@ class CommitteeFormatTest(ApiBaseTest):
         response = self._response('/committee/{0}'.format(committee.committee_id))
         result = response['results'][0]
         # main fields
-        self.assertEqual(result['original_registration_date'], str(committee.original_registration_date))
+        self.assertEqual(result['first_file_date'], str(committee.first_file_date))
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)

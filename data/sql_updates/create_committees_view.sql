@@ -39,16 +39,23 @@ select distinct
     cp_most_recent.cmte_st as state,
     cp_most_recent.expire_date as expire_date,
     cp_most_recent.cand_pty_affiliation as party,
+    cp_most_recent.receipt_dt as last_file_date,
+    cp_original.receipt_dt as first_file_date,
     p.party_affiliation_desc as party_full,
-    dates.load_date as original_registration_date,
     cp_most_recent.cmte_nm as name,
     candidates.candidate_ids
 from dimcmte
     left join dimcmtetpdsgn dd using (cmte_sk)
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
-    left join (
-        select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
+    inner join (
+        select distinct on (cmte_sk) * from dimcmteproperties
+            where form_tp = 'F1'
+            order by cmte_sk, receipt_dt desc
     ) cp_most_recent using (cmte_sk)
+    left join(
+        select cmte_sk, min(receipt_dt) receipt_dt from dimcmteproperties
+            group by cmte_sk
+    ) cp_original using (cmte_sk)
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
     left join (

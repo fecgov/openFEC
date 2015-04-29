@@ -27,7 +27,8 @@ committee_fields = {
     'committee_type_full': fields.String,
     'committee_type': fields.String,
     'expire_date': fields.String,
-    'original_registration_date': fields.String,
+    'first_file_date': fields.String,
+    'last_file_date': fields.String,
     'candidates': fields.Nested(candidate_commitee_fields),
 }
 committee_detail_fields = {
@@ -44,7 +45,8 @@ committee_detail_fields = {
     'committee_type_full': fields.String,
     'committee_type': fields.String,
     'expire_date': fields.String,
-    'original_registration_date': fields.String,
+    'first_file_date': fields.String,
+    'last_file_date': fields.String,
     'candidates': fields.Nested(candidate_commitee_fields),
     'filing_frequency' : fields.String,
     'email' : fields.String,
@@ -179,9 +181,9 @@ class CommitteeList(Resource):
         # Should this handle a list of years to make it consistent with /candidate ?
         elif args.get('year') and args['year'] != '*':
             # before expiration
-            committees = committees.filter(or_(extract('year', Committee.expire_date) >= int(args['year']), Committee.expire_date == None))
+            committees = committees.filter(or_(extract('year', Committee.last_file_date) >= int(args['year']), Committee.last_file_date == None))
             # after origination
-            committees = committees.filter(extract('year', Committee.original_registration_date) <= int(args['year']))
+            committees = committees.filter(extract('year', Committee.first_file_date) <= int(args['year']))
 
         count = committees.count()
 
@@ -249,9 +251,9 @@ class CommitteeView(Resource):
         # To support '*' across all endpoints
         if args.get('year') and args['year'] != '*':
             # before expiration
-            committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= int(args['year']), CommitteeDetail.expire_date == None))
+            committees = committees.filter(or_(extract('year', CommitteeDetail.last_file_date) >= int(args['year']), CommitteeDetail.last_file_date == None))
             # after origination
-            committees = committees.filter(extract('year', CommitteeDetail.original_registration_date) <= int(args['year']))
+            committees = committees.filter(extract('year', CommitteeDetail.first_file_date) <= int(args['year']))
 
         count = committees.count()
 
