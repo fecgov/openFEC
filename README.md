@@ -1,5 +1,8 @@
 # openFEC
 
+[![Build Status](https://travis-ci.org/18F/openFEC.svg?branch=master)](https://travis-ci.org/18F/openFEC)
+[![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
+
 We are taking data from the Federal Election Commission and creating an API around it. We will be harmonizing/cleaning it up to make it easier for external developers to use and analyze as well as creating a web application to make some analyzation and comparison of the data easier.
 
 **Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
