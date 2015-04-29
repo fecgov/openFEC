@@ -4,7 +4,7 @@ stack: lucid64
 instances: 2
 env:
   NEW_RELIC_CONFIG_FILE: newrelic.ini
-  NEW_RELIC_ENV: staging
+  NEW_RELIC_ENV: production
 applications:
 - name: api
   path: .
@@ -19,6 +19,7 @@ applications:
   buildpack: python_buildpack
   host: fec-prod-web
   env:
+    NEW_RELIC_APP_NAME: OpenFEC Web (production)
     FEC_WEB_API_URL: https://api.open.fec.gov/
     # These must be set manually via `cf set-env`
     # FEC_WEB_PASSWORD

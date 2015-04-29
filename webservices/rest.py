@@ -33,7 +33,6 @@ from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
 from webservices.spec import spec
 
-from .db import db_conn
 from .json_encoding import TolerantJSONEncoder
 
 speedlogger = logging.getLogger('speed')
@@ -50,6 +49,7 @@ def sqla_conn_string():
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     print(sqla_conn_string)
     return sqla_conn_string
+
 
 app = Flask(__name__)
 app.debug = True
@@ -106,7 +106,8 @@ class NameSearch(restful.Resource):
     def get(self, **kwargs):
         query = sa.sql.text(self.fulltext_query)
         findme = ' & '.join(kwargs['q'].split())
-        rows = db_conn().execute(query, findme=findme).fetchall()
+        with db.session.connection() as conn:
+            rows = conn.execute(query, findme=findme).fetchall()
         return {'results': rows}
 
 

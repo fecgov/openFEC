@@ -1,13 +1,36 @@
 from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+
 
 db = SQLAlchemy()
 
 
-class Candidate(db.Model):
+class BaseModel(db.Model):
+    __abstract__ = True
+    idx = db.Column(db.Integer, primary_key=True)
+
+
+class NameSearch(BaseModel):
+    __tablename__ = 'name_search_fulltext_mv'
+
+    cand_id = db.Column(db.Integer, nullable=True)
+    cmte_id = db.Column(db.Integer, nullable=True)
+    name = db.Column(db.String)
+    office_sought = db.Column(db.String)
+    name_vec = db.Column(TSVECTOR)
+
+
+class CandidateSearch(BaseModel):
+    __tablename__ = 'dimcand_fulltext_mv'
+
+    cand_sk = db.Column(db.Integer)
+    fulltxt = db.Column(TSVECTOR)
+
+
+class Candidate(BaseModel):
     __tablename__ = 'ofec_candidates_mv'
 
-    candidate_key = db.Column(db.Integer, primary_key=True)
+    candidate_key = db.Column(db.Integer, unique=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
@@ -24,10 +47,10 @@ class Candidate(db.Model):
     name = db.Column(db.String(100))
 
 
-class CandidateDetail(db.Model):
+class CandidateDetail(BaseModel):
     __tablename__ = 'ofec_candidate_detail_mv'
 
-    candidate_key = db.Column(db.Integer, primary_key=True)
+    candidate_key = db.Column(db.Integer, unique=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
@@ -53,12 +76,12 @@ class CandidateDetail(db.Model):
     candidate_inactive = db.Column(db.String(1))
 
 
-class Committee(db.Model):
+class Committee(BaseModel):
     __tablename__ = 'ofec_committees_mv'
 
-    committee_key = db.Column(db.Integer, primary_key=True)
+    committee_key = db.Column(db.Integer, unique=True)
     committee_id = db.Column(db.String(9))
-    candidate_ids = db.Column(ARRAY(db.String))
+    candidate_ids = db.Column(ARRAY(db.Text))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
@@ -74,10 +97,10 @@ class Committee(db.Model):
     name = db.Column(db.String(100))
 
 
-class CommitteeDetail(db.Model):
+class CommitteeDetail(BaseModel):
     __tablename__ = 'ofec_committee_detail_mv'
 
-    committee_key = db.Column(db.Integer, primary_key=True)
+    committee_key = db.Column(db.Integer, unique=True)
     committee_id = db.Column(db.String(9))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
@@ -136,17 +159,16 @@ class CommitteeDetail(db.Model):
     custodian_zip = db.Column(db.String(9))
 
 
-class CandidateCommitteeLink(db.Model):
+class CandidateCommitteeLink(BaseModel):
     __tablename__ = 'ofec_name_linkage_mv'
 
-    linkage_key = db.Column(db.Integer, primary_key=True)
+    linkage_key = db.Column(db.Integer)
     committee_key = db.Column('committee_key', db.Integer, db.ForeignKey(Committee.committee_key), db.ForeignKey(CommitteeDetail.committee_key))
     candidate_key = db.Column('candidate_key', db.Integer, db.ForeignKey(Candidate.candidate_key), db.ForeignKey(CandidateDetail.candidate_key))
     committee_id = db.Column('committee_id', db.String(10))
     candidate_id = db.Column('candidate_id', db.String(10))
     election_year = db.Column('election_year', db.Integer)
     active_through = db.Column('active_through', db.Integer)
-    link_date = db.Column('link_date', db.DateTime())
     expire_date = db.Column('expire_date', db.DateTime())
     committee_name = db.Column('committee_name', db.DateTime())
     candidate_name = db.Column('candidate_name', db.DateTime())
@@ -156,10 +178,10 @@ class CandidateCommitteeLink(db.Model):
     committee_type_full = db.Column('committee_type_full', db.String(50))
 
 
-class CommitteeReports(db.Model):
+class CommitteeReports(BaseModel):
     __abstract__ = True
 
-    report_key = db.Column(db.BigInteger, primary_key=True)
+    report_key = db.Column(db.BigInteger)
     committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer)
 
@@ -391,10 +413,10 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfer_to_other_authorized_committee_ytd = db.Column(db.Integer)
 
 
-class CommitteeTotals(db.Model):
+class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String(10), primary_key=True)
+    committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer, primary_key=True)
     committee_type = db.Column(db.String(1))
 
@@ -489,10 +511,10 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     transfers_to_other_authorized_committee = db.Column(db.Integer)
 
 
-class CandidateHistory(db.Model):
+class CandidateHistory(BaseModel):
     __tablename__ = 'ofec_candidate_history_mv'
 
-    properties_key = db.Column(db.Integer, primary_key=True)
+    properties_key = db.Column(db.Integer)
     candidate_key = db.Column(db.Integer)
     candidate_id = db.Column(db.String(10))
     two_year_period = db.Column(db.Integer)

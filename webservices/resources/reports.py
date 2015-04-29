@@ -1,4 +1,4 @@
-from sqlalchemy import desc
+import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -24,6 +24,7 @@ class ReportsView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reports)
     def get(self, committee_id, **kwargs):
+        # TODO(jmcarp) Handle multiple results better
         committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()
         reports_class, reports_schema = reports_schema_map.get(committee.committee_type, default_schemas)
         reports = self.get_reports(committee_id, reports_class, kwargs)
@@ -34,4 +35,4 @@ class ReportsView(Resource):
         reports = reports_class.query.filter_by(committee_id=committee_id)
         if kwargs['cycle'] != '*':
             reports = reports.filter(reports_class.cycle.in_(kwargs['cycle'].split(',')))
-        return reports.order_by(desc(reports_class.coverage_end_date))
+        return reports.order_by(sa.desc(reports_class.coverage_end_date))

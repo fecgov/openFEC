@@ -2,6 +2,7 @@ drop view if exists ofec_committees_vw;
 drop materialized view if exists ofec_committees_mv_tmp;
 create materialized view ofec_committees_mv_tmp as
 select distinct
+    row_number() over () as idx,
     dimcmte.cmte_sk as committee_key,
     dimcmte.cmte_id as committee_id,
     dd.cmte_dsgn as designation,
@@ -39,8 +40,7 @@ select distinct
     cp_most_recent.expire_date as expire_date,
     cp_most_recent.cand_pty_affiliation as party,
     p.party_affiliation_desc as party_full,
-    -- contrary to most recent, we'll need to pull just the oldest load_date here, since they don't give us registration dates yet
-    (select distinct on (cmte_sk) load_date from dimcmteproperties cp where cp.cmte_sk = dimcmte.cmte_sk order by cmte_sk, cmteproperties_sk) as original_registration_date,
+    dates.load_date as original_registration_date,
     cp_most_recent.cmte_nm as name,
     candidates.candidate_ids
 from dimcmte
@@ -51,8 +51,14 @@ from dimcmte
     ) cp_most_recent using (cmte_sk)
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
+    left join (
+        select distinct on (cmte_sk) cmte_sk, load_date from dimcmteproperties
+            order by cmte_sk, cmteproperties_sk
+    ) dates on dimcmte.cmte_sk = dates.cmte_sk
     -- inner join dimlinkages dl using (cmte_sk)
 ;
+
+create unique index on ofec_committees_mv_tmp(idx);
 
 create index on ofec_committees_mv_tmp(party);
 create index on ofec_committees_mv_tmp(state);

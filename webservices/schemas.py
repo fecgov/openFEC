@@ -226,7 +226,7 @@ class ReportsSchema(ma.Schema):
     cash_on_hand_beginning_period = ma.fields.Integer()
     cash_on_hand_end_period = ma.fields.Integer()
     committee_id = ma.fields.String()
-    coverage_end_date = ma.fields.DateTime,
+    coverage_end_date = ma.fields.DateTime()
     coverage_start_date = ma.fields.DateTime,
     cycle = ma.fields.Integer()
     debts_owed_by_committee = ma.fields.Integer()

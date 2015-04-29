@@ -1,12 +1,17 @@
 import json
+import datetime
 import unittest
 
 import sqlalchemy as sa
 
+from marshmallow.utils import isoformat
+
 from webservices import rest
 from webservices import schemas
 from webservices.common import models
-from .common import ApiBaseTest
+
+from tests import factories
+from tests.common import ApiBaseTest
 
 
 class OverallTest(ApiBaseTest):
@@ -21,33 +26,46 @@ class OverallTest(ApiBaseTest):
         return response['results']
 
     def test_full_text_search(self):
-        # changed from 'james' to 'arnold' because 'james' falls victim to stemming,
-        # and some results return 'jame' causing the assert to fail
-        results = self._results('/candidates?q=arnold')
-        for r in results:
-            #txt = json.dumps(r).lower()
-            self.assertIn('arnold', r['name'].lower())
+        candidate = factories.CandidateFactory(name='Josiah Bartlet')
+        factories.CandidateSearchFactory(
+            cand_sk=candidate.candidate_key,
+            fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
+        )
+        rest.db.session.flush()
+        results = self._results('/candidates?q=bartlet')
+        self.assertEqual(len(results), 1)
+        self.assertIn('josiah', results[0]['name'].lower())
 
     def test_full_text_search_with_whitespace(self):
-        results = self._results('/candidates?q=barack obama')
-        for r in results:
-            txt = json.dumps(r).lower()
-            self.assertIn('obama', txt)
+        candidate = factories.CandidateFactory(name='Josiah Bartlet')
+        factories.CandidateSearchFactory(
+            cand_sk=candidate.candidate_key,
+            fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
+        )
+        rest.db.session.flush()
+        results = self._results('/candidates?q=bartlet josiah')
+        self.assertEqual(len(results), 1)
+        self.assertIn('josiah', results[0]['name'].lower())
 
     def test_full_text_no_results(self):
         results = self._results('/candidates?q=asdlkflasjdflkjasdl;kfj')
         self.assertEquals(results, [])
 
     def test_year_filter(self):
+        factories.CandidateFactory(election_years=[1986, 1988])
+        factories.CandidateFactory(election_years=[2000, 2002])
         results = self._results('/candidates?year=1988')
-        for r in results:
-            self.assertIn(1988, r['election_years'])
+        self.assertEqual(len(results), 1)
+        for each in results:
+            self.assertIn(1988, each['election_years'])
 
     def test_per_page_defaults_to_20(self):
+        [factories.CandidateFactory() for _ in range(40)]
         results = self._results('/candidates')
         self.assertEquals(len(results), 20)
 
     def test_per_page_param(self):
+        [factories.CandidateFactory() for _ in range(20)]
         results = self._results('/candidates?per_page=5')
         self.assertEquals(len(results), 5)
 
@@ -60,6 +78,7 @@ class OverallTest(ApiBaseTest):
         self.assertEquals(response.status_code, 400)
 
     def test_page_param(self):
+        [factories.CandidateFactory() for _ in range(20)]
         page_one_and_two = self._results('/candidates?per_page=10&page=1')
         page_two = self._results('/candidates?per_page=5&page=2')
         self.assertEqual(page_two[0], page_one_and_two[5])
@@ -78,58 +97,46 @@ class OverallTest(ApiBaseTest):
         elections = response[0]['elections']
         self.assertEquals(len(elections), 2)
 
-    def test_cand_filters(self):
-        # checking one example from each field
-        orig_response = self._response('/candidates')
-        original_count = orig_response['pagination']['count']
-
-        filter_fields = (
-            ('office', 'H'),
-            ('district', '00,02'),
-            ('state', 'CA'),
-            ('name', 'Obama'),
-            ('party', 'DEM'),
-            ('year', '2012,2014'),
-            ('candidate_id', 'H0VA08040,P80003338'),
-        )
-
-        for field, example in filter_fields:
-            page = "/candidates?%s=%s" % (field, example)
-            print(page)
-            # returns at least one result
-            results = self._results(page)
-            self.assertGreater(len(results), 0)
-            # doesn't return all results
-            response = self._response(page)
-            self.assertGreater(original_count, response['pagination']['count'])
-
-    def test_name_endpoint_returns_unique_candidates_and_committees(self):
-        results = self._results('/names?q=obama')
-        cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
-        self.assertEqual(len(cand_ids), len(set(cand_ids)))
-        cmte_ids = [r['committee_id'] for r in results if r['committee_id']]
-        self.assertEqual(len(cmte_ids), len(set(cmte_ids)))
-
     @unittest.skip('This is not a great view anymore')
     def test_multiple_cmtes_in_detail(self):
         response = self._results('/candidate/P80003338/committees')
         self.assertEquals(len(response[0]), 11)
         self.assertEquals(response['pagination']['count'], 11)
 
-    def test_reports_house(self):
-        committee = models.Committee.query.filter(models.Committee.committee_type == 'H').first()
-        results = self._results(rest.api.url_for(rest.ReportsView, committee_id=committee.committee_id))
-        assert results[0].keys() == schemas.ReportsHouseSenateSchema._declared_fields.keys()
+    def test_totals_house_senate(self):
+        committee = factories.CommitteeFactory(committee_type='H')
+        committee_id = committee.committee_id
+        [
+            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
+            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
+        ]
+        response = self._results('/committee/{0}/totals'.format(committee_id))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['cycle'], 2012)
+        self.assertEqual(response[1]['cycle'], 2008)
 
-    def test_reports_senate(self):
-        committee = models.Committee.query.filter(models.Committee.committee_type == 'S').first()
-        results = self._results(rest.api.url_for(rest.ReportsView, committee_id=committee.committee_id))
-        assert results[0].keys() == schemas.ReportsHouseSenateSchema._declared_fields.keys()
+    def _check_reports(self, committee_type, factory, schema):
+        committee = factories.CommitteeFactory(committee_type=committee_type)
+        end_dates = [datetime.datetime(2012, 1, 1), datetime.datetime(2008, 1, 1)]
+        committee_id = committee.committee_id
+        [
+            factory(
+                committee_id=committee_id,
+                coverage_end_date=end_date
+            )
+            for end_date in end_dates
+        ]
+        response = self._results('/committee/{0}/reports'.format(committee_id))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['coverage_end_date'], isoformat(end_dates[0]))
+        self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
+        assert response[0].keys() == schema._declared_fields.keys()
 
-    def test_reports_pac_party(self):
-        committee = models.Committee.query.filter(sa.not_(models.Committee.committee_type.in_(['P', 'H', 'S']))).first()
-        results = self._results(rest.api.url_for(rest.ReportsView, committee_id=committee.committee_id))
-        assert results[0].keys() == schemas.ReportsPacPartySchema._declared_fields.keys()
+    def test_reports(self):
+        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
+        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
+        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.ReportsPresidentialSchema)
+        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.ReportsPacPartySchema)
 
     def test_reports_committee_not_found(self):
         resp = self.app.get(rest.api.url_for(rest.ReportsView, committee_id='fake'))
@@ -162,17 +169,10 @@ class OverallTest(ApiBaseTest):
         self.assertIn('not found', data['message'].lower())
 
     def test_total_cycle(self):
-        committee, totals = models.db.session.query(
-            models.Committee,
-            models.CommitteeTotalsPresidential,
-        ).join(
-            models.CommitteeTotalsPresidential,
-            models.Committee.committee_id == models.CommitteeTotalsPresidential.committee_id,
-        ).filter(
-            models.CommitteeTotalsPresidential.receipts != None,  # noqa
-        ).order_by(
-            models.CommitteeTotalsPresidential.cycle
-        ).first()
+        committee = factories.CommitteeFactory(committee_type='P')
+        committee_id = committee.committee_id
+        receipts = 5
+        totals = factories.TotalsPresidentialFactory(cycle=2012, committee_id=committee_id, receipts=receipts)
 
         results = self._results(rest.api.url_for(rest.TotalsView, committee_id=committee.committee_id))
         self.assertEqual(results[0]['receipts'], totals.receipts)
@@ -185,14 +185,17 @@ class OverallTest(ApiBaseTest):
 
     # Typeahead name search
     def test_typeahead_name_search(self):
-        results = self._results('/names?q=oba')
-        self.assertGreaterEqual(len(results), 10)
-        for r in results:
-            self.assertIn('OBA', r['name'])
-
-    def test_typeahead_name_search_missing_param(self):
-        resp = self.app.get('/names')
-        self.assertEqual(resp.status_code, 400)
-        self.assertEqual(resp.content_type, 'application/json')
-        data = json.loads(resp.data.decode('utf-8'))
-        self.assertEqual(data['message'], 'Required parameter "q" not found.')
+        [
+            factories.NameSearchFactory(
+                name='Bartlet {0}'.format(idx),
+                name_vec=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
+            )
+            for idx in range(30)
+        ]
+        rest.db.session.flush()
+        results = self._results('/names?q=bartlet')
+        self.assertEqual(len(results), 20)
+        cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
+        self.assertEqual(len(cand_ids), len(set(cand_ids)))
+        for each in results:
+            self.assertIn('bartlet', each['name'].lower())
