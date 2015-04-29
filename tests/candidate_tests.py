@@ -4,9 +4,10 @@ import functools
 
 from marshmallow.utils import isoformat
 
-from .common import ApiBaseTest
-from webservices import rest
+from webservices import schemas
+
 from tests import factories
+from tests.common import ApiBaseTest
 
 
 fields = dict(
@@ -114,12 +115,7 @@ class CandidateFormatTest(ApiBaseTest):
     def test_fields(self):
         candidate = factories.CandidateDetailFactory()
         response = self._results('/candidate/{0}'.format(candidate.candidate_id))
-        response = response[0]
-
-        fields = ('party', 'party_full', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'candidate_status_full', 'office', 'active_through')
-
-        for field in fields:
-            self.assertIn(field, response)
+        assert response[0].keys() == schemas.CandidateDetailSchema._declared_fields.keys()
 
     def test_extra_fields(self):
         candidate = factories.CandidateDetailFactory(
@@ -130,18 +126,6 @@ class CandidateFormatTest(ApiBaseTest):
         response = response[0]
         self.assertIn(candidate.address_street_1, response['address_street_1'])
         self.assertIn(candidate.address_zip, response['address_zip'])
-
-    @unittest.skip("This functionality to be removed soon.")
-    def test_candidate_committes(self):
-        response = self._results('/candidate/P80003338?year=*')
-
-        fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
-
-        election = response[0]['committees'][0]
-        print(election)
-        for field in fields:
-            print(field)
-            self.assertEquals(field in election, True)
 
     def test_cand_filters(self):
         [

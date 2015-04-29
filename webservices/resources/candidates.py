@@ -86,7 +86,11 @@ class CandidateView(Resource):
             candidates = candidates.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
-            candidates = CandidateDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
+            candidates = CandidateDetail.query.join(
+                CandidateCommitteeLink
+            ).filter(
+                CandidateCommitteeLink.committee_id == committee_id
+            )
 
         candidates = filter_query(CandidateDetail, candidates, filter_fields, kwargs)
 

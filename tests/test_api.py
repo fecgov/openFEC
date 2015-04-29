@@ -8,7 +8,6 @@ from marshmallow.utils import isoformat
 
 from webservices import rest
 from webservices import schemas
-from webservices.common import models
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -132,6 +131,7 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
         assert response[0].keys() == schema._declared_fields.keys()
 
+    # TODO(jmcarp) Refactor as parameterize tests
     def test_reports(self):
         self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
         self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
@@ -144,12 +144,6 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data.decode('utf-8'))
         self.assertIn('not found', data['message'].lower())
-
-    @unittest.skip('Failing on Travis CI')
-    def test_reports_presidential(self):
-        committee = models.Committee.query.filter(models.Committee.committee_type == 'P').first()
-        results = self._results(rest.api.url_for(rest.ReportsView, committee_id=committee.committee_id))
-        assert results[0].keys() == schemas.ReportsPresidentialSchema._declared_fields.keys()
 
     @unittest.skip("Not implementing for now.")
     def test_total_field_filter(self):

@@ -4,7 +4,6 @@ from factory.alchemy import SQLAlchemyModelFactory
 
 from webservices.rest import db
 from webservices.common import models
-from webservices.resources import totals
 
 
 class BaseFactory(SQLAlchemyModelFactory):
