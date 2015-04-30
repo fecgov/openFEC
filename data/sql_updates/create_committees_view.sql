@@ -47,7 +47,7 @@ select distinct
 from dimcmte
     left join dimcmtetpdsgn dd using (cmte_sk)
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
-    inner join (
+    left join (
         select distinct on (cmte_sk) * from dimcmteproperties
             where form_tp = 'F1'
             order by cmte_sk, receipt_dt desc

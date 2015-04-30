@@ -25,14 +25,16 @@ class ApiBaseTest(unittest.TestCase):
         conn_string = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm-unit-test')
         rest.app.config['SQLALCHEMY_DATABASE_URI'] = conn_string
         cls.app = rest.app.test_client()
-        cls.ctx = rest.app.app_context()
-        cls.ctx.push()
+        cls.app_context = rest.app.app_context()
+        cls.app_context.push()
         _reset_schema()
         rest.db.create_all()
 
     def setUp(self):
         self.longMessage = True
         self.maxDiff = None
+        self.request_context = rest.app.test_request_context()
+        self.request_context.push()
         self.connection = rest.db.engine.connect()
         self.transaction = self.connection.begin()
 
@@ -40,12 +42,13 @@ class ApiBaseTest(unittest.TestCase):
         self.transaction.rollback()
         self.connection.close()
         rest.db.session.remove()
+        self.request_context.pop()
 
     @classmethod
     def tearDownClass(cls):
         super(ApiBaseTest, cls).tearDownClass()
         _reset_schema()
-        cls.ctx.pop()
+        cls.app_context.pop()
 
     def _response(self, qry):
         response = self.app.get(qry)

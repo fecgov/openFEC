@@ -180,10 +180,14 @@ class CommitteeList(Resource):
 
         # Should this handle a list of years to make it consistent with /candidate ?
         elif args.get('year') and args['year'] != '*':
-            # before expiration
-            committees = committees.filter(or_(extract('year', Committee.last_file_date) >= int(args['year']), Committee.last_file_date == None))
-            # after origination
-            committees = committees.filter(extract('year', Committee.first_file_date) <= int(args['year']))
+            year = int(args['year'])
+            committees = committees.filter(
+                or_(
+                    extract('year', Committee.last_file_date) >= year,
+                    Committee.last_file_date == None,
+                ),
+                extract('year', Committee.first_file_date) <= year,
+            )  # noqa
 
         count = committees.count()
 
@@ -250,10 +254,14 @@ class CommitteeView(Resource):
 
         # To support '*' across all endpoints
         if args.get('year') and args['year'] != '*':
-            # before expiration
-            committees = committees.filter(or_(extract('year', CommitteeDetail.last_file_date) >= int(args['year']), CommitteeDetail.last_file_date == None))
-            # after origination
-            committees = committees.filter(extract('year', CommitteeDetail.first_file_date) <= int(args['year']))
+            year = int(args['year'])
+            committees = committees.filter(
+                or_(
+                    extract('year', CommitteeDetail.last_file_date) >= year,
+                    CommitteeDetail.last_file_date == None,
+                ),
+                extract('year', CommitteeDetail.first_file_date) <= year,
+            )  # noqa
 
         count = committees.count()
 
