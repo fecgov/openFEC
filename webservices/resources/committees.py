@@ -176,7 +176,12 @@ class CommitteeList(Resource):
         if args.get('year') is None:
             earliest_year = int(sorted(default_year().split(','))[0])
             # still going or expired after the earliest year we are looking for
-            committees = committees.filter(or_(extract('year', Committee.expire_date) >= earliest_year, Committee.expire_date == None))
+            committees = committees.filter(
+                or_(
+                    extract('year', Committee.last_file_date) >= earliest_year,
+                    Committee.last_file_date == None,
+                )
+            )  # noqa
 
         # Should this handle a list of years to make it consistent with /candidate ?
         elif args.get('year') and args['year'] != '*':
