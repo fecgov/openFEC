@@ -91,7 +91,10 @@ select distinct
     cp_most_recent.qual_dt as qualifying_date
 
 from dimcmte
-    inner join dimcmtetpdsgn dd using (cmte_sk)
+    left join (
+        select distinct on (cmte_sk) * from dimcmtetpdsgn
+            order by cmte_sk, receipt_date desc
+    ) dd using (cmte_sk)
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
     inner join (
         select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_zip, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation, cmte_st1, cmte_st2, cmte_city, cmte_st_desc, cmte_zip cmte_treasurer_city, cmte_treasurer_f_nm, cmte_treasurer_l_nm, cmte_treasurer_m_nm, cmte_treasurer_ph_num, cmte_treasurer_prefix, cmte_treasurer_st, cmte_treasurer_st1, cmte_treasurer_st2, cmte_treasurer_suffix, cmte_treasurer_title, cmte_treasurer_zip, cmte_custodian_city, cmte_custodian_f_nm, cmte_custodian_l_nm, cmte_custodian_m_nm, cmte_custodian_nm, cmte_custodian_ph_num, cmte_custodian_prefix, cmte_custodian_st, cmte_custodian_st1, cmte_custodian_st2, cmte_custodian_suffix, cmte_custodian_title, cmte_custodian_zip, cmte_email, cmte_fax, cmte_web_url, form_tp, leadership_pac, load_date, lobbyist_registrant_pac_flg, party_cmte_type, party_cmte_type_desc, qual_dt from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
