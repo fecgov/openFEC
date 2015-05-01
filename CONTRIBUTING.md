@@ -5,7 +5,7 @@
 * Don't merge your own pull request. Find a friend to review your code and merge your pull request.
 * Pull requests contain some tests. Ideally they would contain decent test coverage.
 
-#### Issues
+### Issues
 
 When creating a task through the issue tracker, please include the following where applicable: 
 
@@ -23,7 +23,7 @@ Development issues should include:
 The use of checklists (via `- [ ]`) to keep track of sub-items is encouraged wherever possible.
 
 
-#### Commit messages
+### Commit messages
 
 - Usually start with a verb. Like “added” or “changed” or “removed”.
 - Generally follow [50/72 format](http://stackoverflow.com/questions/2290016/git-commit-messages-50-72-formatting).
@@ -31,7 +31,7 @@ The use of checklists (via `- [ ]`) to keep track of sub-items is encouraged whe
 - Be sure to talk about the nature of the change you're making instead of describing the bug or task. Explain why the change was needed if it is relevant.
 
 
-#### Pull Requests
+### Pull Requests
 
 When creating a new pull request:
 
@@ -40,6 +40,11 @@ When creating a new pull request:
 * If a pull request is ready for review, **leave or make it unassigned**. This is the assumed state of new PRs, but work-in-progress PRs are quite welcome.
 * If you decide to review a pull request with the intent of merging it (or deciding what still needs to be done before merge), then **assign the PR to yourself** so that it's clear that someone's grabbed it.
 * Anyone is welcome to informally review a PR and comment on it at any time, no matter who is assigned.
+
+## Workflow
+
+1. Pull an issue from the current sprint only plz (unless there is an *URGENT* issue). Take an unassigned issue or re-assign an issue with the label "[stealable](https://github.com/18F/openFEC/labels/stealable)." If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PM or tech lead on slack.
+2. Before starting, 
 
 
 ## Public domain
