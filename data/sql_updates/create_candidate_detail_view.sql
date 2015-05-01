@@ -47,11 +47,8 @@ from dimcand
         order by cand_sk, cand_id, election_yr desc
     ) csi_recent using (cand_sk, cand_id)
     left join (
-        select distinct on (cand_sk, cand_id)
-            p.cand_sk, p.cand_nm, c.cand_id, p.cand_st, p.expire_date, p.load_date, p.cand_city, p.cand_st1, p.cand_st2, p.cand_zip, p.cand_ici_desc, p.cand_ici_cd, p.form_tp
-        from dimcandproperties p
-            inner join dimcand c using (cand_sk)
-        order by cand_sk, cand_id, load_date desc
+        select distinct on (cand_sk) * from dimcandproperties
+            order by cand_sk, candproperties_sk desc
     ) cand_p_most_recent using(cand_sk, cand_id)
     left join dimcandstatusici csi_all using (cand_sk)
     left join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)  -- only joined to get to dimoffice
