@@ -90,9 +90,10 @@ class Committee(BaseModel):
     committee_type = db.Column(db.String(1))
     committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
     party = db.Column(db.String(3))
     party_full = db.Column(db.String(50))
-    original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
     candidates = db.relationship('CandidateCommitteeLink', backref='committees')
 
@@ -111,9 +112,10 @@ class CommitteeDetail(BaseModel):
     committee_type = db.Column(db.String(1))
     committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
     party = db.Column(db.String(3))
     party_full = db.Column(db.String(50))
-    original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
     # detail view additions
     filing_frequency = db.Column(db.String(1))
