@@ -44,7 +44,10 @@ select distinct
     cp_most_recent.cmte_nm as name,
     candidates.candidate_ids
 from dimcmte
-    left join dimcmtetpdsgn dd using (cmte_sk)
+    left join (
+        select distinct on (cmte_sk) * from dimcmtetpdsgn
+            order by cmte_sk, receipt_date desc
+    ) dd using (cmte_sk)
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
     left join (
         select distinct on (cmte_sk) cmte_sk, cmte_nm, cmte_treasurer_nm, org_tp, org_tp_desc, cmte_st, expire_date, cand_pty_affiliation from dimcmteproperties order by cmte_sk, cmteproperties_sk desc
