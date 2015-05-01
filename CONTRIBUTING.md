@@ -44,11 +44,11 @@ When creating a new pull request:
 ## Team Workflow
 
 1. Pull an issue from the current sprint only plz (unless there is an *URGENT* issue). Take an unassigned issue or re-assign an issue with the label "[stealable](https://github.com/18F/openFEC/labels/stealable)." If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PM or tech lead on slack.
-2. Before starting, [write the dev issue checklist](https://github.com/leahbannon/openFEC/blob/leah-contributing/CONTRIBUTING.md#development-issues-should-include).
-3. While working, submit `[WIP]` [pull requests](https://github.com/leahbannon/openFEC/blob/leah-contributing/CONTRIBUTING.md#pull-requests) liberally.
-4. Time boxing! If you have spent half the time of the estimated size of the issue and you're not sure that you're half-way finished, notify the tech lead or PM in slack. (Is there a better way to approach this?? This is a stab in the dark...)
+2. Before starting, [write the dev issue checklist](https://github.com/leahbannon/openFEC/blob/develop/CONTRIBUTING.md#development-issues-should-include).
+3. While working, submit `[WIP]` [pull requests](https://github.com/leahbannon/openFEC/blob/develop/CONTRIBUTING.md#pull-requests) liberally.
+4. Time boxing! If you have spent half the time of the estimated size of the issue and you're not sure that you're half-way finished, notify the tech lead or PM in slack. This isn't bad, we just like knowing what's up. :)
 5. Make sure your PR includes significant test coverage.
-6. Once you're done with your PR, notify the team in slack that your PR is ready for review. Review someone else's PR. Follow the above guidelines.
+6. Once you're done with your PR, notify the team in slack that your PR is ready for review. Do a review of someone else's PR. (Follow the above PR guidelines.)
 
 
 ## Public domain
