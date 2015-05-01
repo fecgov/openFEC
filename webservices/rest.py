@@ -8,7 +8,7 @@ import logging
 import sys
 import os
 
-from flask import Flask, abort, request
+from flask import Flask, Blueprint, abort, request
 from flask.ext import restful
 from flask.ext.restful import reqparse
 import flask.ext.restful.representations.json
@@ -40,8 +40,12 @@ def sqla_conn_string():
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
-api = restful.Api(app)
 db.init_app(app)
+
+v1 = Blueprint('v1', __name__, url_prefix='/v1')
+api = restful.Api(v1)
+
+app.register_blueprint(v1)
 
 # api.data.gov
 trusted_proxies = ('54.208.160.112', '54.208.160.151')
@@ -93,7 +97,7 @@ class NameSearch(restful.Resource):
     )
 
     def get(self):
-        args = self.parser.parse_args(strict=True)
+        args = self.parser.parse_args()
 
         qry = sa.sql.text(self.fulltext_qry)
         findme = ' & '.join(args['q'].split())
