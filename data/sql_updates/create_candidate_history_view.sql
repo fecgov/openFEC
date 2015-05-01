@@ -42,7 +42,7 @@ from ofec_two_year_periods
             left join dimcandoffice co using (cand_sk)
             inner join dimoffice using (office_sk)
             inner join dimparty using (party_sk)
-        order by cand_sk, two_year_period, dcp.load_date desc
+        order by cand_sk, two_year_period, dcp.candproperties_sk desc
     ) as dcp_by_period on ofec_two_year_periods.year = two_year_period
 ;
 
