@@ -16,7 +16,7 @@ Design and feature request issues should include:
 * What the goal of the task being accomplished is; and
 * The user need being addressed.
 
-Development issues should include:
+#### Development issues should include:
 * Unknowns tasks or dependencies that need investigation; and
 * [The boilerplate tasks for each development issue](https://gist.github.com/theresaanna/86be7e29214a7f31ab73).
 
