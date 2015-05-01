@@ -20,7 +20,7 @@ Design and feature request issues should include:
 * Unknowns tasks or dependencies that need investigation; and
 * [The boilerplate tasks for each development issue](https://gist.github.com/theresaanna/86be7e29214a7f31ab73).
 
-The use of checklists (via `- [ ]`) to keep track of sub-items is encouraged wherever possible.
+Use checklists (via `- [ ]`) to keep track of sub-items wherever possible.
 
 
 ### Commit messages
@@ -44,7 +44,8 @@ When creating a new pull request:
 ## Workflow
 
 1. Pull an issue from the current sprint only plz (unless there is an *URGENT* issue). Take an unassigned issue or re-assign an issue with the label "[stealable](https://github.com/18F/openFEC/labels/stealable)." If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PM or tech lead on slack.
-2. Before starting, 
+2. Before starting, [write the dev issue checklist](https://github.com/leahbannon/openFEC/blob/leah-contributing/CONTRIBUTING.md#development-issues-should-include).
+3. While working, submit `[WIP]` [pull requests]() liberally.
 
 
 ## Public domain
