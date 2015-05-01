@@ -45,31 +45,28 @@ drop materialized view if exists name_search_fulltext_mv_tmp;
 create materialized view name_search_fulltext_mv_tmp as
 with
     ranked_cand as (
-        select
+        select distinct on (c.cand_sk)
             p.cand_nm as name,
             to_tsvector(p.cand_nm) as name_vec,
             c.cand_id,
-            row_number() over
-                (partition by c.cand_id order by p.load_date desc)
-                as load_order,
             null::text as cmte_id,
             o.office_tp as office_sought
         from dimcand c
-        join dimcandproperties p on (p.cand_sk = c.cand_sk)
-        join dimcandoffice co on (co.cand_sk = c.cand_sk)
-        join dimoffice o on (co.office_sk = o.office_sk)
+            join dimcandproperties p on (p.cand_sk = c.cand_sk)
+            join dimcandoffice co on (co.cand_sk = c.cand_sk)
+            join dimoffice o on (co.office_sk = o.office_sk)
+            order by c.cand_sk, p.candproperties_sk
     ), ranked_cmte as (
-        select
+        select distinct on (c.cmte_sk)
             p.cmte_nm as name,
             to_tsvector(p.cmte_nm) as name_vec,
-            c.cmte_id,
-            row_number()
-                over (partition by c.cmte_id order by p.load_date desc)
-                as load_order
+            c.cmte_id
         from dimcmte c
-        join dimcmteproperties p on (p.cmte_sk = c.cmte_sk)
+            join dimcmteproperties p using (cmte_sk)
+            where p.form_tp = 'F1'
+            order by c.cmte_sk, p.receipt_dt desc
     )
-    select distinct
+    select
         row_number() over () as idx,
         name,
         name_vec,
@@ -77,9 +74,8 @@ with
         cmte_id,
         office_sought
     from ranked_cand
-    where load_order = 1
     union
-    select distinct
+    select
         row_number() over () + (select count(*) from ranked_cand) as idx,
         name,
         name_vec,
@@ -87,7 +83,6 @@ with
         cmte_id,
         null as office_sought
     from ranked_cmte
-    where load_order = 1
 ;
 
 create unique index on name_search_fulltext_mv_tmp(idx);
