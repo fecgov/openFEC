@@ -490,22 +490,21 @@ class ReportsView(Resource):
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
     def get(self, **kwargs):
-        committee_id = kwargs['id']
+        committee_id = kwargs.get('id', None)
+        cycle = kwargs.get('cycle', None)
         args = self.parser.parse_args(strict=True)
 
         # pagination
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-        committee = Committee.query.filter_by(committee_id=committee_id).one()
+        if committee_id:
+            count, reports, results_fields = self.get_reports_by_committee(committee_id, args, page_num, per_page)
 
-        reports_class, specific_fields = reports_model_map.get(
-            committee.committee_type,
-            reports_model_map['default'],
-        )
-        results_fields = merge_dicts(common_fields, specific_fields)
+        if cycle:
+            committee_type = kwargs['committee_type']
 
-        count, reports = self.get_reports(committee_id, reports_class, args, page_num, per_page)
+            count, reports, results_fields = self.get_reports_by_cycle(cycle, committee_type, args, page_num, per_page)
 
         page_data = Pagination(page_num, per_page, count)
 
@@ -523,13 +522,44 @@ class ReportsView(Resource):
 
         return marshal(data, reports_view_fields)
 
-    def get_reports(self, committee_id, reports_class, args, page_num, per_page):
+    def get_reports_by_committee(self, committee_id, args, page_num, per_page):
+        committee = Committee.query.filter_by(committee_id=committee_id).one()
 
+        reports_class, specific_fields = reports_model_map.get(
+            committee.committee_type,
+            reports_model_map['default'],
+        )
+
+        results_fields = merge_dicts(common_fields, specific_fields)
         reports = reports_class.query.filter_by(committee_id=committee_id)
 
         if args['cycle'] != '*':
             reports = reports.filter(reports_class.cycle.in_(args['cycle'].split(',')))
 
         count = reports.count()
-        return count, reports.order_by(desc(reports_class.coverage_end_date)).paginate(page_num, per_page, True).items
+
+        return count, reports.order_by(desc(reports_class.coverage_end_date)).paginate(page_num, per_page, True).items, results_fields
+
+    def get_reports_by_cycle(self, cycle, committee_type, args, page_num, per_page):
+
+        url_types = {
+            'house-senate': 'H',
+            'pac-party': 'default',
+            'presidential': 'P'
+        }
+
+        committee_type = url_types[committee_type]
+
+        reports_class, specific_fields = reports_model_map.get(
+            committee_type,
+            reports_model_map['default'],
+        )
+
+        results_fields = merge_dicts(common_fields, specific_fields)
+        reports = reports_class.query.filter_by(cycle=cycle)
+        count = reports.count()
+
+        return count, reports.order_by(desc(reports_class.coverage_end_date)).paginate(page_num, per_page, True).items, results_fields
+
+
 
