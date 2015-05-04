@@ -14,16 +14,6 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-echo "Building JS in openFEC-web-app..."
-cd ../openFEC-web-app
-npm run build
-
-if [ $? -ne 0 ]; then
-  echo "JS build failed."
-  exit $?
-fi
-
-cd -
 echo "Targeting Cloud Foundry space..."
 cf target -o fec -s "$1"
 echo
