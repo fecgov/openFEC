@@ -51,7 +51,7 @@ from dimcand
             order by cand_sk, candproperties_sk desc
     ) cand_p_most_recent using(cand_sk, cand_id)
     left join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)
-    inner join dimoffice using (office_sk)
+    left join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
 group by
     dimcand.cand_sk,

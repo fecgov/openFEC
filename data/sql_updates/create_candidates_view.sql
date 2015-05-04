@@ -29,7 +29,7 @@ select
     max(candprops.cand_nm) as name
 from dimcand
     left join (select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code from dimcandstatusici order by cand_sk, election_yr desc) csi_recent using (cand_sk)
-    inner join dimcandoffice co on co.cand_sk = dimcand.cand_sk --and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)
+    left join dimcandoffice co on co.cand_sk = dimcand.cand_sk
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
     left join (
@@ -39,7 +39,6 @@ from dimcand
 group by
     dimcand.cand_sk,
     dimcand.cand_id
-    -- csi_recent.election_yr
 ;
 
 create unique index on ofec_candidates_mv_tmp(idx);
