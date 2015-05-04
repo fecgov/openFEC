@@ -21,6 +21,7 @@ applications:
   env:
     NEW_RELIC_APP_NAME: OpenFEC Web (production)
     FEC_WEB_API_URL: https://api.open.fec.gov/
+    FEC_FORCE_HTTPS: true
     # These must be set manually via `cf set-env`
     # FEC_WEB_PASSWORD
     # FEC_WEB_USERNAME
