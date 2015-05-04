@@ -11,8 +11,8 @@ select
         when 'N' then 'Not yet a candidate'
         when 'P' then 'Prior candidate'
         else 'Unknown' end as candidate_status_full,
-    max(csi_recent.election_yr) as active_through,
-    array_agg(distinct csi_all.election_yr)::int[] as election_years,
+    max(co.cand_election_yr) as active_through,
+    array_agg(distinct co.cand_election_yr)::int[] as election_years,
     max(csi_recent.cand_inactive_flg) as candidate_inactive,
     max(dimoffice.office_tp) as office,
     max(dimoffice.office_tp_desc) as office_full,
@@ -50,8 +50,7 @@ from dimcand
         select distinct on (cand_sk) * from dimcandproperties
             order by cand_sk, candproperties_sk desc
     ) cand_p_most_recent using(cand_sk, cand_id)
-    left join dimcandstatusici csi_all using (cand_sk)
-    left join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)  -- only joined to get to dimoffice
+    left join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
 group by
