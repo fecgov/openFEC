@@ -13,8 +13,8 @@ select
         when 'P' then 'Prior candidate'
         else 'Unknown' end as candidate_status_full,
     max(dimoffice.office_district) as district,
-    csi_recent.election_yr as active_through,
-    array_agg(distinct co_all.cand_election_yr)::int[] as election_years,
+    max(co.cand_election_yr) as active_through,
+    array_agg(distinct co.cand_election_yr)::int[] as election_years,
     max(csi_recent.ici_code) as incumbent_challenge,
     case max(csi_recent.ici_code)
         when 'I' then 'Incumbent'
@@ -29,8 +29,7 @@ select
     max(candprops.cand_nm) as name
 from dimcand
     left join (select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code from dimcandstatusici order by cand_sk, election_yr desc) csi_recent using (cand_sk)
-    left join dimcandoffice co_all using (cand_sk)
-    inner join dimcandoffice co on co.cand_sk = dimcand.cand_sk and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)  -- only joined to get to dimoffice
+    inner join dimcandoffice co on co.cand_sk = dimcand.cand_sk --and (csi_recent.election_yr is null or co.cand_election_yr = csi_recent.election_yr)
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
     left join (
@@ -39,8 +38,8 @@ from dimcand
     ) candprops on dimcand.cand_sk = candprops.cand_sk
 group by
     dimcand.cand_sk,
-    dimcand.cand_id,
-    csi_recent.election_yr
+    dimcand.cand_id
+    -- csi_recent.election_yr
 ;
 
 create unique index on ofec_candidates_mv_tmp(idx);
