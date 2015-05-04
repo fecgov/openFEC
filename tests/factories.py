@@ -5,6 +5,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from webservices.rest import db
 from webservices.common import models
 from webservices.resources import totals
+from webservices.resources import reports
 
 
 class BaseFactory(SQLAlchemyModelFactory):
@@ -118,3 +119,22 @@ class TotalsPresidentialFactory(BaseTotalsFactory):
 class TotalsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = totals.CommitteeTotalsPacOrParty
+
+
+class BaseReportsFactory(BaseFactory):
+    committee_id = factory.LazyAttribute(lambda o: CommitteeFactory().committee_id)
+
+
+class ReportsHouseSenateFactory(BaseTotalsFactory):
+    class Meta:
+        model = reports.CommitteeReportsHouseOrSenate
+
+
+class ReportsPresidentialFactory(BaseTotalsFactory):
+    class Meta:
+        model = reports.CommitteeReportsPresidential
+
+
+class ReportsPacPartyFactory(BaseTotalsFactory):
+    class Meta:
+        model = reports.CommitteeReportsPacOrParty
