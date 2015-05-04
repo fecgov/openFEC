@@ -55,6 +55,7 @@ from dimlinkages l
             join dimlinkages dl using (cand_id)
             group by cand_id
     ) active on l.cand_id = active.cand_id
+    and l.cmte_dsgn != 'U'
 ;
 
 create unique index on ofec_name_linkage_mv_tmp(idx);
