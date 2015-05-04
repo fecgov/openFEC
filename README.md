@@ -62,3 +62,19 @@ Assuming you ran the bootstrap script, you can launch the API and the Web App wi
     $ tmuxinator fec-local
 
 The site can be found at [http://localhost:3000](http://localhost:3000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant). Remember the username and password you created when running the script.
+
+### Deployment
+##### Likely only useful for 18Fers
+If you want to deploy to one of our Cloud Foundry instances, use `deploy.sh`. It takes one argument, the Cloud Foundry space. Be sure to be in the root directory of the codebase, and you must already be logged in to CF with your user account.
+
+The script will automatically target the correct manifest file for the environment/space you specify, and it will also deploy the web app at the same time as the API.
+
+`./deploy.sh [dev|stage|prod]`
+
+Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
+
+`cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]`
+
+
+
+
