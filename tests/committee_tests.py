@@ -1,8 +1,16 @@
 import datetime
+import functools
+
+from marshmallow.utils import isoformat
 
 from .common import ApiBaseTest
 from tests import factories
 from webservices import rest
+
+from webservices.rest import api
+from webservices.rest import CommitteeList
+from webservices.rest import CommitteeView
+from webservices.rest import CandidateView
 
 
 def extend(*dicts):
@@ -20,16 +28,16 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_list_fields(self):
         committee = factories.CommitteeFactory(
-            original_registration_date=datetime.datetime(1982, 12, 31),
+            first_file_date=datetime.datetime(1982, 12, 31),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
         )
-        response = self._response('/committees?committee_id={0}'.format(committee.committee_id))
+        response = self._response(api.url_for(CommitteeView, committee_id=committee.committee_id))
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
-        self.assertEqual(result['original_registration_date'], str(committee.original_registration_date))
+        self.assertEqual(result['first_file_date'], isoformat(committee.first_file_date))
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
@@ -38,7 +46,7 @@ class CommitteeFormatTest(ApiBaseTest):
         candidate_id = 'id0'
         candidate_committees = [factories.CommitteeFactory(candidate_ids=[candidate_id]) for _ in range(2)]
         other_committees = [factories.CommitteeFactory() for _ in range(3)]  # noqa
-        response = self._response('/committees?candidate_id={0}'.format(candidate_id))
+        response = self._response(api.url_for(CommitteeList, candidate_id=candidate_id))
         self.assertEqual(
             len(response['results']),
             len(candidate_committees)
@@ -49,7 +57,7 @@ class CommitteeFormatTest(ApiBaseTest):
         candidate1_committees = [factories.CommitteeFactory(candidate_ids=[candidate_ids[0]]) for _ in range(2)]
         candidate2_committees = [factories.CommitteeFactory(candidate_ids=[candidate_ids[1]]) for _ in range(2)]
         other_committees = [factories.CommitteeFactory() for _ in range(3)]  # noqa
-        response = self._response('/committees?candidate_id={0}'.format(','.join(candidate_ids)))
+        response = self._response(api.url_for(CommitteeList, candidate_id=','.join(candidate_ids)))
         self.assertEqual(
             len(response['results']),
             len(candidate1_committees) + len(candidate2_committees)
@@ -57,7 +65,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_detail_fields(self):
         committee = factories.CommitteeDetailFactory(
-            original_registration_date=datetime.datetime(1982, 12, 31),
+            first_file_date=datetime.datetime(1982, 12, 31),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
@@ -66,10 +74,10 @@ class CommitteeFormatTest(ApiBaseTest):
             street_1='1795 Peachtree Road',
             zip='30309',
         )
-        response = self._response('/committee/{0}'.format(committee.committee_id))
+        response = self._response(api.url_for(CommitteeView, committee_id=committee.committee_id))
         result = response['results'][0]
         # main fields
-        self.assertEqual(result['original_registration_date'], str(committee.original_registration_date))
+        self.assertEqual(result['first_file_date'], isoformat(committee.first_file_date))
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
@@ -82,7 +90,7 @@ class CommitteeFormatTest(ApiBaseTest):
     def test_committee_search_double_committee_id(self):
         committees = [factories.CommitteeFactory() for _ in range(2)]
         ids = ','.join(each.committee_id for each in committees)
-        response = self._response('/committees?committee_id={0}&year=*'.format(ids))
+        response = self._response(api.url_for(CommitteeList, committee_id=ids, year='*'))
         results = response['results']
         self.assertEqual(len(results), 2)
 
@@ -91,7 +99,7 @@ class CommitteeFormatTest(ApiBaseTest):
             party='REP',
             party_full='Republican Party',
         )
-        response = self._results('/committees?party=REP')
+        response = self._results(api.url_for(CommitteeList, party='REP'))
         self.assertEquals(response[0]['party'], 'REP')
         self.assertEquals(response[0]['party_full'], 'Republican Party')
 
@@ -101,7 +109,7 @@ class CommitteeFormatTest(ApiBaseTest):
     def test_filters_generic(self):
         committee = factories.CommitteeFactory()
         committee_id = committee.committee_id
-        base_url = '/committee/{0}'.format(committee_id)
+        base_url = api.url_for(CommitteeView, committee_id=committee_id)
         self._check_filter('designation', ['B', 'P'], base_url, committee_id=committee_id)
         self._check_filter('organization_type', ['M', 'T'], base_url, committee_id=committee_id)
         self._check_filter('committee_type', ['H', 'X'], base_url, committee_id=committee_id)
@@ -157,17 +165,46 @@ class CommitteeFormatTest(ApiBaseTest):
             ('organization_type', 'C'),
         )
 
-        org_response = self._response('/committees')
+        org_response = self._response(api.url_for(CommitteeList))
         original_count = org_response['pagination']['count']
 
         for field, example in filter_fields:
-            page = "/committees?%s=%s" % (field, example)
+            page = api.url_for(CommitteeList, **{field: example})
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
             # doesn't return all results
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
+
+    def test_committee_year_filter_skips_null_first_file_date(self):
+        # Build fixtures
+        committee_id = 'concannon'
+        dates = [
+            datetime.datetime(2012, 1, 1),
+            datetime.datetime(2015, 1, 1),
+        ]
+        partial = functools.partial(factories.CommitteeFactory, committee_id=committee_id)
+        [
+            partial(first_file_date=None, last_file_date=None),
+            partial(first_file_date=dates[0], last_file_date=None),
+            partial(first_file_date=None, last_file_date=dates[1]),
+            partial(first_file_date=dates[0], last_file_date=dates[1]),
+        ]
+
+        # Check committee list results
+        results = self._results(api.url_for(CommitteeList, year=2013))
+        self.assertEqual(len(results), 2)
+        for each in results:
+            self.assertIsNotNone(each['first_file_date'])
+
+        # Check committee detail results
+        results = self._results(
+            api.url_for(CommitteeView, committee_id=committee_id, year=2013)
+        )
+        self.assertEqual(len(results), 2)
+        for each in results:
+            self.assertIsNotNone(each['first_file_date'])
 
     def test_committees_by_cand_id(self):
         candidate_id = 'id0'
@@ -181,7 +218,7 @@ class CommitteeFormatTest(ApiBaseTest):
             )
             for committee in committees
         ]
-        results = self._results('/candidate/{0}/committees'.format(candidate_id))
+        results = self._results(api.url_for(CommitteeView, candidate_id=candidate_id))
 
         self.assertEqual(
             set((each['committee_id'] for each in results)),
@@ -198,9 +235,7 @@ class CommitteeFormatTest(ApiBaseTest):
             committee_id=committee.committee_id,
         )
         results = self._results(
-            '/candidate/{0}/committees?designation=P'.format(
-                candidate_id,
-            )
+            api.url_for(CommitteeView, candidate_id=candidate_id, designation='P')
         )
         self.assertEqual(1, len(results))
 
@@ -213,5 +248,5 @@ class CommitteeFormatTest(ApiBaseTest):
             candidate_key=candidate.candidate_key,
             committee_id=committee_id,
         )
-        results = self._results('/committee/{0}/candidates?year=*'.format(committee_id))
+        results = self._results(api.url_for(CandidateView, committee_id=committee_id, year='*'))
         self.assertEquals(1, len(results))

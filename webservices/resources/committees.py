@@ -16,42 +16,40 @@ detail_filter_fields = {'designation', 'organization_type', 'committee_type'}
 
 
 def filter_year(model, query, kwargs):
+
     # default year filtering
     if kwargs.get('year') is None:
         earliest_year = int(sorted(default_year().split(','))[0])
         # still going or expired after the earliest year we are looking for
         query = query.filter(
             or_(
-                extract('year', model.expire_date) >= earliest_year,
+                extract('year', model.last_file_date) >= earliest_year,
                 model.expire_date == None  # noqa
             )
         )
 
     # Should this handle a list of years to make it consistent with /candidate ?
-    if kwargs.get('year') and kwargs['year'] != '*':
-        # before expiration
+    elif kwargs.get('year') and kwargs['year'] != '*':
+        year = int(kwargs['year'])
         query = query.filter(
             or_(
-                extract('year', model.expire_date) >= int(kwargs['year']),
-                model.expire_date == None  # noqa
-            )
-        )
-        # after origination
-        query = query.filter(
-            extract('year', model.original_registration_date) <= int(kwargs['year'])
-        )
+                extract('year', model.last_file_date) >= year,
+                model.last_file_date == None,
+            ),
+            extract('year', model.first_file_date) <= year,
+        )  # noqa
 
     return query
 
 
 class CommitteeList(Resource):
 
-    fulltext_query = """
+    fulltext_query = '''
         SELECT cmte_sk
         FROM   dimcmte_fulltext
         WHERE  fulltxt @@ to_tsquery(:findme)
         ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
-    """
+    '''
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.committee)
@@ -110,7 +108,7 @@ class CommitteeView(Resource):
             committees = committees.filter_by(**{'committee_id': committee_id})
 
         if candidate_id is not None:
-            committees = committees.join(
+            committees = CommitteeDetail.query.join(
                 CandidateCommitteeLink
             ).filter(
                 CandidateCommitteeLink.candidate_id == candidate_id

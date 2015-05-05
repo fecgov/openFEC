@@ -4,10 +4,14 @@ import functools
 
 from marshmallow.utils import isoformat
 
-from webservices import schemas
-
 from tests import factories
 from tests.common import ApiBaseTest
+
+from webservices import schemas
+from webservices.rest import api
+from webservices.rest import CandidateList
+from webservices.rest import CandidateView
+from webservices.rest import CandidateHistoryView
 
 
 fields = dict(
@@ -43,7 +47,9 @@ class CandidateFormatTest(ApiBaseTest):
             load_date=datetime.datetime(2014, 1, 3),
             **fields
         )
-        response = self._response('/candidate/{0}'.format(candidate.candidate_id))
+        response = self._response(
+            api.url_for(CandidateView, candidate_id=candidate.candidate_id)
+        )
         self.assertResultsEqual(
             response['pagination'],
             {'count': 1, 'page': 1, 'pages': 1, 'per_page': 20})
@@ -114,15 +120,20 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_fields(self):
         candidate = factories.CandidateDetailFactory()
-        response = self._results('/candidate/{0}'.format(candidate.candidate_id))
+        response = self._results(
+            api.url_for(CandidateView, candidate_id=candidate.candidate_id)
+        )
         assert response[0].keys() == schemas.CandidateDetailSchema._declared_fields.keys()
+        response = response[0]
 
     def test_extra_fields(self):
         candidate = factories.CandidateDetailFactory(
             address_street_1='PO Box 8102',
             address_zip='60680',
         )
-        response = self._results('/candidate/{0}'.format(candidate.candidate_id))
+        response = self._results(
+            api.url_for(CandidateView, candidate_id=candidate.candidate_id)
+        )
         response = response[0]
         self.assertIn(candidate.address_street_1, response['address_street_1'])
         self.assertIn(candidate.address_zip, response['address_zip'])
@@ -151,11 +162,11 @@ class CandidateFormatTest(ApiBaseTest):
         )
 
         # checking one example from each field
-        orig_response = self._response('/candidates')
+        orig_response = self._response(api.url_for(CandidateList))
         original_count = orig_response['pagination']['count']
 
         for field, example in filter_fields:
-            page = "/candidates?%s=%s" % (field, example)
+            page = api.url_for(CandidateList, **{field: example})
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
@@ -174,7 +185,13 @@ class CandidateFormatTest(ApiBaseTest):
             partial(two_year_period=2012),
             partial(two_year_period=2008),
         ]
-        results = self._results('/candidate/{0}/history/{1}'.format(id, histories[1].two_year_period))
+        results = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                candidate_id=id,
+                year=histories[1].two_year_period,
+            )
+        )
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['candidate_id'], id)
         self.assertEqual(results[0]['two_year_period'], histories[1].two_year_period)
@@ -190,8 +207,12 @@ class CandidateFormatTest(ApiBaseTest):
             partial(two_year_period=2012),
             partial(two_year_period=2008),
         ]
-        results = self._results('/candidate/{0}/history'.format(id))
-        recent_results = self._results('/candidate/{0}/history/recent'.format(id))
+        results = self._results(
+            api.url_for(CandidateHistoryView, candidate_id=id)
+        )
+        recent_results = self._results(
+            api.url_for(CandidateHistoryView, candidate_id=id, year='recent')
+        )
 
         # history/recent
         self.assertEqual(recent_results[0]['candidate_id'], histories[0].candidate_id)

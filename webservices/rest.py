@@ -20,6 +20,7 @@ from flask import render_template
 from flask import Flask
 from flask import Blueprint
 
+from flask import Flask, Blueprint, abort, request
 from flask.ext import restful
 import flask.ext.restful.representations.json
 import sqlalchemy as sa
@@ -54,8 +55,12 @@ def sqla_conn_string():
 app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
-api = restful.Api(app)
 db.init_app(app)
+
+v1 = Blueprint('v1', __name__, url_prefix='/v1')
+api = restful.Api(v1)
+
+app.register_blueprint(v1)
 
 # api.data.gov
 trusted_proxies = ('54.208.160.112', '54.208.160.151')
@@ -89,7 +94,7 @@ class NameSearch(restful.Resource):
     for typeahead
     """
 
-    fulltext_query = """
+    fulltext_query = '''
     select
         cand_id as candidate_id,
         cmte_id as committee_id,
@@ -99,7 +104,7 @@ class NameSearch(restful.Resource):
     where name_vec @@ to_tsquery(:findme || ':*')
     order by ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
     limit 20
-    """
+    '''
 
     @args.register_kwargs(args.names)
     @schemas.marshal_with(schemas.NameSearchListSchema())
@@ -137,7 +142,7 @@ api.add_resource(
     '/candidate/<string:candidate_id>/committees',
 )
 api.add_resource(TotalsView, '/committee/<string:committee_id>/totals')
-api.add_resource(ReportsView, '/committee/<string:committee_id>/reports')
+api.add_resource(ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
 api.add_resource(NameSearch, '/names')
 
 
@@ -156,8 +161,11 @@ def extract_path(path):
     return RE_URL.sub(r'{\1}', path)
 
 
-def register_resource(resource):
-    rules = app.url_map._rules_by_endpoint[resource.__name__.lower()]
+def register_resource(resource, blueprint=None):
+    key = resource.__name__.lower()
+    if blueprint:
+        key = '{0}.{1}'.format(blueprint, key)
+    rules = app.url_map._rules_by_endpoint[key]
     resource_doc = getattr(resource, '__apidoc__', {})
     operations = {}
     for rule in rules:
@@ -183,13 +191,13 @@ def register_resource(resource):
         spec.add_path(path=path, operations=operations, view=view)
 
 
-register_resource(NameSearch)
-register_resource(CandidateView)
-register_resource(CandidateList)
-register_resource(CommitteeView)
-register_resource(CommitteeList)
-register_resource(ReportsView)
-register_resource(TotalsView)
+register_resource(NameSearch, blueprint='v1')
+register_resource(CandidateView, blueprint='v1')
+register_resource(CandidateList, blueprint='v1')
+register_resource(CommitteeView, blueprint='v1')
+register_resource(CommitteeList, blueprint='v1')
+register_resource(ReportsView, blueprint='v1')
+register_resource(TotalsView, blueprint='v1')
 
 renderers = {
     'application/json': lambda data: jsonify(data),

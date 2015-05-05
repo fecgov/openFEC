@@ -165,6 +165,8 @@ class CommitteeSchema(ma.Schema):
     committee_type_full = ma.fields.String()
     committee_type = ma.fields.String()
     expire_date = ma.fields.DateTime()
+    first_file_date = ma.fields.DateTime()
+    last_file_date = ma.fields.DateTime()
     original_registration_date = ma.fields.String()
 
 
