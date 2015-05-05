@@ -1,0 +1,28 @@
+{
+  "constraints": {
+    "dimcandproperties": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcand",
+        "referred_columns": ["cand_sk"],
+        "constrained_columns": ["cand_sk"]
+      }
+    ],
+    "dimcandstatus_ici": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcand",
+        "referred_columns": ["cand_sk"],
+        "constrained_columns": ["cand_sk"]
+      }
+    ],
+    "dimcandoffice": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcand",
+        "referred_columns": ["cand_sk"],
+        "constrained_columns": ["cand_sk"]
+      }
+    ]
+  }
+}
