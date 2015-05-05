@@ -6,11 +6,16 @@ from .tests.common import ApiBaseTest
 from webservices import rest
 from tests import factories
 
+from webservices.rest import api
+from webservices.rest import NameSearch
+from webservices.rest import TotalsView
+from webservices.rest import CandidateList
+
 
 class OverallTest(ApiBaseTest):
     # Candidate
     def test_header_info(self):
-        response = self._response('/candidates')
+        response = self._response(api.url_for(CandidateList))
         self.assertIn('api_version', response)
         self.assertIn('pagination', response)
 
@@ -25,7 +30,7 @@ class OverallTest(ApiBaseTest):
             fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
         rest.db.session.flush()
-        results = self._results('/candidates?q=bartlet')
+        results = self._results(api.url_for(CandidateList, q='bartlet'))
         self.assertEqual(len(results), 1)
         self.assertIn('josiah', results[0]['name'].lower())
 
@@ -36,44 +41,44 @@ class OverallTest(ApiBaseTest):
             fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
         rest.db.session.flush()
-        results = self._results('/candidates?q=bartlet josiah')
+        results = self._results(api.url_for(CandidateList, q='bartlet josiah'))
         self.assertEqual(len(results), 1)
         self.assertIn('josiah', results[0]['name'].lower())
 
     def test_full_text_no_results(self):
-        results = self._results('/candidates?q=asdlkflasjdflkjasdl;kfj')
+        results = self._results(api.url_for(CandidateList, q='asdfasdf'))
         self.assertEquals(results, [])
 
     def test_year_filter(self):
         factories.CandidateFactory(election_years=[1986, 1988])
         factories.CandidateFactory(election_years=[2000, 2002])
-        results = self._results('/candidates?year=1988')
+        results = self._results(api.url_for(CandidateList, year=1988))
         self.assertEqual(len(results), 1)
         for r in results:
             self.assertIn(1988, r['election_years'])
 
     def test_per_page_defaults_to_20(self):
         [factories.CandidateFactory() for _ in range(40)]
-        results = self._results('/candidates')
+        results = self._results(api.url_for(CandidateList))
         self.assertEquals(len(results), 20)
 
     def test_per_page_param(self):
         [factories.CandidateFactory() for _ in range(20)]
-        results = self._results('/candidates?per_page=5')
+        results = self._results(api.url_for(CandidateList, per_page=5))
         self.assertEquals(len(results), 5)
 
     def test_invalid_per_page_param(self):
-        response = self.app.get('/candidates?per_page=-10')
-        self.assertEquals(response.status_code, 400)
-        response = self.app.get('/candidates?per_page=34.2')
-        self.assertEquals(response.status_code, 400)
-        response = self.app.get('/candidates?per_page=dynamic-wombats')
-        self.assertEquals(response.status_code, 400)
+        results = self.app.get(api.url_for(CandidateList, per_page=-10))
+        self.assertEquals(results.status_code, 400)
+        results = self.app.get(api.url_for(CandidateList, per_page=34.2))
+        self.assertEquals(results.status_code, 400)
+        results = self.app.get(api.url_for(CandidateList, per_page='dynamic-wombats'))
+        self.assertEquals(results.status_code, 400)
 
     def test_page_param(self):
         [factories.CandidateFactory() for _ in range(20)]
-        page_one_and_two = self._results('/candidates?per_page=10&page=1')
-        page_two = self._results('/candidates?per_page=5&page=2')
+        page_one_and_two = self._results(api.url_for(CandidateList, per_page=10, page=1))
+        page_two = self._results(api.url_for(CandidateList, per_page=5, page=2))
         self.assertEqual(page_two[0], page_one_and_two[5])
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
@@ -113,7 +118,7 @@ class OverallTest(ApiBaseTest):
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
         ]
-        response = self._results('/committee/{0}/totals'.format(committee_id))
+        response = self._results(api.url_for(TotalsView, id=committee_id))
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['cycle'], 2012)
         self.assertEqual(response[1]['cycle'], 2008)
@@ -186,7 +191,7 @@ class OverallTest(ApiBaseTest):
             for idx in range(30)
         ]
         rest.db.session.flush()
-        results = self._results('/names?q=bartlet')
+        results = self._results(api.url_for(NameSearch, q='bartlet'))
         self.assertEqual(len(results), 20)
         cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
         self.assertEqual(len(cand_ids), len(set(cand_ids)))

@@ -43,6 +43,7 @@ class Candidate(BaseModel):
     party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
+    committees = db.relationship('CandidateCommitteeLink', backref='candidates')
 
     __tablename__ = 'ofec_candidates_mv'
 
@@ -71,6 +72,7 @@ class CandidateDetail(BaseModel):
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
+    committees = db.relationship('CandidateCommitteeLink', backref='candidatedetail')
 
     __tablename__ = 'ofec_candidate_detail_mv'
 
@@ -88,10 +90,12 @@ class Committee(BaseModel):
     committee_type = db.Column(db.String(1))
     committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
     party = db.Column(db.String(3))
     party_full = db.Column(db.String(50))
-    original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
+    candidates = db.relationship('CandidateCommitteeLink', backref='committees')
 
     __tablename__ = 'ofec_committees_mv'
 
@@ -108,9 +112,10 @@ class CommitteeDetail(BaseModel):
     committee_type = db.Column(db.String(1))
     committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
     party = db.Column(db.String(3))
     party_full = db.Column(db.String(50))
-    original_registration_date = db.Column(db.DateTime())
     name = db.Column(db.String(100))
     # detail view additions
     filing_frequency = db.Column(db.String(1))
@@ -154,6 +159,7 @@ class CommitteeDetail(BaseModel):
     custodian_name_suffix = db.Column(db.String(50))
     custodian_name_title = db.Column(db.String(50))
     custodian_zip = db.Column(db.String(9))
+    candidates = db.relationship('CandidateCommitteeLink', backref='committeedetail')
 
     __tablename__ = 'ofec_committee_detail_mv'
 

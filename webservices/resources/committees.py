@@ -20,7 +20,8 @@ committee_fields = {
     'committee_type_full': fields.String,
     'committee_type': fields.String,
     'expire_date': fields.String,
-    'original_registration_date': fields.String,
+    'first_file_date': fields.String,
+    'last_file_date': fields.String,
 }
 committee_detail_fields = {
     'committee_id': fields.String,
@@ -36,7 +37,8 @@ committee_detail_fields = {
     'committee_type_full': fields.String,
     'committee_type': fields.String,
     'expire_date': fields.String,
-    'original_registration_date': fields.String,
+    'first_file_date': fields.String,
+    'last_file_date': fields.String,
     'filing_frequency' : fields.String,
     'email' : fields.String,
     'fax' : fields.String,
@@ -165,14 +167,23 @@ class CommitteeList(Resource):
         if args.get('year') is None:
             earliest_year = int(sorted(default_year().split(','))[0])
             # still going or expired after the earliest year we are looking for
-            committees = committees.filter(or_(extract('year', Committee.expire_date) >= earliest_year, Committee.expire_date == None))
+            committees = committees.filter(
+                or_(
+                    extract('year', Committee.last_file_date) >= earliest_year,
+                    Committee.last_file_date == None,
+                )
+            )  # noqa
 
         # Should this handle a list of years to make it consistent with /candidate ?
         elif args.get('year') and args['year'] != '*':
-            # before expiration
-            committees = committees.filter(or_(extract('year', Committee.expire_date) >= int(args['year']), Committee.expire_date == None))
-            # after origination
-            committees = committees.filter(extract('year', Committee.original_registration_date) <= int(args['year']))
+            year = int(args['year'])
+            committees = committees.filter(
+                or_(
+                    extract('year', Committee.last_file_date) >= year,
+                    Committee.last_file_date == None,
+                ),
+                extract('year', Committee.first_file_date) <= year,
+            )  # noqa
 
         count = committees.count()
 
@@ -239,10 +250,14 @@ class CommitteeView(Resource):
 
         # To support '*' across all endpoints
         if args.get('year') and args['year'] != '*':
-            # before expiration
-            committees = committees.filter(or_(extract('year', CommitteeDetail.expire_date) >= int(args['year']), CommitteeDetail.expire_date == None))
-            # after origination
-            committees = committees.filter(extract('year', CommitteeDetail.original_registration_date) <= int(args['year']))
+            year = int(args['year'])
+            committees = committees.filter(
+                or_(
+                    extract('year', CommitteeDetail.last_file_date) >= year,
+                    CommitteeDetail.last_file_date == None,
+                ),
+                extract('year', CommitteeDetail.first_file_date) <= year,
+            )  # noqa
 
         count = committees.count()
 
