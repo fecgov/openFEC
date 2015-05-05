@@ -3,10 +3,10 @@ import functools
 
 from marshmallow.utils import isoformat
 
-from .common import ApiBaseTest
 from tests import factories
-from webservices import rest
+from tests.common import ApiBaseTest
 
+from webservices.rest import db
 from webservices.rest import api
 from webservices.rest import CommitteeList
 from webservices.rest import CommitteeView
@@ -209,7 +209,7 @@ class CommitteeFormatTest(ApiBaseTest):
     def test_committees_by_cand_id(self):
         candidate_id = 'id0'
         committees = [factories.CommitteeFactory() for _ in range(3)]
-        rest.db.session.flush()
+        db.session.flush()
         [
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=candidate_id,
@@ -228,7 +228,7 @@ class CommitteeFormatTest(ApiBaseTest):
     def test_committee_by_cand_filter(self):
         candidate_id = 'id0'
         committee = factories.CommitteeFactory(designation='P')
-        rest.db.session.flush()
+        db.session.flush()
         factories.CandidateCommitteeLinkFactory(
             candidate_id=candidate_id,
             committee_key=committee.committee_key,
@@ -242,7 +242,7 @@ class CommitteeFormatTest(ApiBaseTest):
     def test_candidates_by_com(self):
         committee_id = 'id0'
         candidate = factories.CandidateFactory()
-        rest.db.session.flush()
+        db.session.flush()
         factories.CandidateCommitteeLinkFactory(
             candidate_id=candidate.candidate_id,
             candidate_key=candidate.candidate_key,
