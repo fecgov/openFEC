@@ -23,6 +23,60 @@
         "referred_columns": ["cand_sk"],
         "constrained_columns": ["cand_sk"]
       }
+    ],
+    "dimcmteproperties": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcmte",
+        "referred_columns": ["cmte_sk"],
+        "constrained_columns": ["cmte_sk"]
+      }
+    ],
+    "dimcmtetpdsgn": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcmte",
+        "referred_columns": ["cmte_sk"],
+        "constrained_columns": ["cmte_sk"]
+      }
+    ],
+    "facthousesenate_f3": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcmte",
+        "referred_columns": ["cmte_sk"],
+        "constrained_columns": ["cmte_sk"]
+      }
+    ],
+    "factpacsandparties_f3x": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcmte",
+        "referred_columns": ["cmte_sk"],
+        "constrained_columns": ["cmte_sk"]
+      }
+    ],
+    "factpresidential_f3p": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcmte",
+        "referred_columns": ["cmte_sk"],
+        "constrained_columns": ["cmte_sk"]
+      }
+    ],
+    "dimlinkages": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcand",
+        "referred_columns": ["cand_sk"],
+        "constrained_columns": ["cand_sk"]
+      },
+      {
+        "referred_schema": null,
+        "referred_table": "dimcmte",
+        "referred_columns": ["cmte_sk"],
+        "constrained_columns": ["cmte_sk"]
+      }
     ]
   }
 }
