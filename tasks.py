@@ -11,8 +11,11 @@ FULL_TABLES = [
     'dimreporttype',
 ]
 EXCLUDE_TABLES = [
+    '*_mv',
+    '*_tmp',
     'sched_a',
     'sched_b',
+    'ofec_two_year_periods',
 ]
 # Include Nancy Pelosi and John Boehner for debugging purposes
 FORCE_INCLUDE = [
@@ -23,16 +26,16 @@ FORCE_INCLUDE = [
 
 @task
 def fetch_schemas(source, dest):
-    cmd = 'pg_dump {0} --schema-only --no-owner'.format(source)
-    for table in EXCLUDE_TABLES:
+    cmd = 'pg_dump {0} --schema-only --no-acl --no-owner'.format(source)
+    for table in (FULL_TABLES + EXCLUDE_TABLES):
         cmd += ' --exclude-table {0}'.format(table)
     cmd += ' | psql {0}'.format(dest)
-    run(cmd)
+    run(cmd, echo=True)
 
 
 @task
 def fetch_full(source, dest):
-    cmd = 'pg_dump {0} --no-owner'.format(source)
+    cmd = 'pg_dump {0} --no-acl --no-owner'.format(source)
     for table in FULL_TABLES:
         cmd += ' --table {0}'.format(table)
     cmd += ' | psql {0}'.format(dest)
@@ -60,5 +63,7 @@ def build_test(source, dest, fraction=DEFAULT_FRACTION):
 
 @task
 def dump(source, dest):
-    cmd = 'pg_dump {source} --no-owner -f {dest}'.format(**locals())
+    cmd = 'pg_dump {source} --no-acl --no-owner -f {dest}'.format(**locals())
+    for table in EXCLUDE_TABLES:
+        cmd += ' --exclude-table {0}'.format(table)
     run(cmd, echo=True)
