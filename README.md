@@ -69,12 +69,16 @@ If you want to deploy to one of our Cloud Foundry instances, use `deploy.sh`. It
 
 The script will automatically target the correct manifest file for the environment/space you specify, and it will also deploy the web app at the same time as the API.
 
-`./deploy.sh [dev|stage|prod]`
+    $ ./deploy.sh [dev|stage|prod]
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
-`cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]`
+    $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 
+### Working with test data
 
+This repo includes a small subset of the production database (built 2015/05/05) at `data/subset.sql`. To build a new test subset, use the `build_test` invoke task:
 
+    $ invoke build_test <source> <dest>
 
+where both `source` and `dest` are valid PostgreSQL connection strings.
