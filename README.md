@@ -1,5 +1,8 @@
 # openFEC
 
+[![Build Status](https://travis-ci.org/18F/openFEC.svg?branch=master)](https://travis-ci.org/18F/openFEC)
+[![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
+
 We are taking data from the Federal Election Commission and creating an API around it. We will be harmonizing/cleaning it up to make it easier for external developers to use and analyze as well as creating a web application to make some analyzation and comparison of the data easier.
 
 **Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
@@ -59,3 +62,23 @@ Assuming you ran the bootstrap script, you can launch the API and the Web App wi
     $ tmuxinator fec-local
 
 The site can be found at [http://localhost:3000](http://localhost:3000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant). Remember the username and password you created when running the script.
+
+### Deployment
+##### Likely only useful for 18Fers
+If you want to deploy to one of our Cloud Foundry instances, use `deploy.sh`. It takes one argument, the Cloud Foundry space. Be sure to be in the root directory of the codebase, and you must already be logged in to CF with your user account.
+
+The script will automatically target the correct manifest file for the environment/space you specify, and it will also deploy the web app at the same time as the API.
+
+    $ ./deploy.sh [dev|stage|prod]
+
+Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
+
+    $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+
+### Working with test data
+
+This repo includes a small subset of the production database (built 2015/05/05) at `data/subset.sql`. To build a new test subset, use the `build_test` invoke task:
+
+    $ invoke build_test <source> <dest>
+
+where both `source` and `dest` are valid PostgreSQL connection strings.

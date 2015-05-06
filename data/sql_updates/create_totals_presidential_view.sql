@@ -33,8 +33,8 @@ select
     sum(ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
     sum(repymts_loans_made_by_cand_per) as repayments_loans_made_by_candidate,
     sum(repymts_other_loans_per) as repayments_other_loans,
-    sum(tranf_from_affilated_cmte_per) as transfer_from_affiliated_committee,
-    sum(tranf_to_other_auth_cmte_per) as transfer_to_other_authorized_committee
+    sum(tranf_from_affilated_cmte_per) as transfers_from_affiliated_committee,
+    sum(tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee
 from
     dimcmte c
     inner join dimcmtetpdsgn ctd using (cmte_sk)
