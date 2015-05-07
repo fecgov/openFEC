@@ -15,6 +15,10 @@ from webservices.rest import app, db
 from webservices.common.util import get_full_path
 
 
+SQL_CONFIG = {
+    'START_YEAR': 1980,
+}
+
 manager = Manager(app)
 
 # The Flask app server should only be used for local testing, so we default to
@@ -30,7 +34,7 @@ def execute_sql_file(path):
             line for line in fp.readlines()
             if not line.startswith('--')
         ])
-        db.engine.execute(sqla_text(cmd))
+        db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
 
 
 def execute_sql_folder(path, processes):
