@@ -52,7 +52,8 @@ from
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
-    pnp.expire_date is null or pnp.expire_date > date_trunc('day', now())
+    (pnp.expire_date is null or pnp.expire_date > date_trunc('day', now()))
+    and two_yr_period_sk >= :START_YEAR
 group by committee_id, cycle, committee_type
 ;
 
