@@ -1,5 +1,5 @@
 drop materialized view if exists ofec_candidate_history_mv;
-drop table if exists ofec_two_year_periods;
+drop table if exists ofec_two_year_periods cascade;
 create table ofec_two_year_periods as
 select year from dimyears
     -- only up to the current campaign cycle
