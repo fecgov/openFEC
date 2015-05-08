@@ -64,14 +64,14 @@ from dimcmte
     left join (
         select
             cmte_sk,
-            array_agg(rpt_yr + rpt_yr % 2) as cycles
+            array_agg(distinct(rpt_yr + rpt_yr % 2)) as cycles
         from dimcmteproperties
         where rpt_yr >= :START_YEAR
         group by cmte_sk
     ) cp_agg using (cmte_sk)
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
-    -- Committee must have > 0 cycles after START_DATE
+    -- Committee must have > 0 cycles after START_YEAR
     where array_length(cp_agg.cycles, 1) > 0
 ;
 
@@ -86,3 +86,5 @@ create index on ofec_committees_mv_tmp(committee_key);
 create index on ofec_committees_mv_tmp(candidate_ids);
 create index on ofec_committees_mv_tmp(committee_type);
 create index on ofec_committees_mv_tmp(organization_type);
+
+create index on ofec_committees_mv_tmp using gin (cycles);

@@ -111,7 +111,7 @@ from dimcmte
     left join (
         select
             cmte_sk,
-            array_agg(rpt_yr + rpt_yr % 2) as cycles
+            array_agg(distinct(rpt_yr + rpt_yr % 2)) as cycles
         from dimcmteproperties
         where rpt_yr >= :START_YEAR
         group by cmte_sk
@@ -129,3 +129,5 @@ create index on ofec_committee_detail_mv_tmp(committee_id);
 create index on ofec_committee_detail_mv_tmp(committee_key);
 create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(organization_type);
+
+create index on ofec_committee_detail_mv_tmp using gin (cycles);
