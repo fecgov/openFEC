@@ -1,6 +1,23 @@
+import sqlalchemy as sa
+
 import manage
 from webservices.rest import db
 from webservices.tests import common
+from webservices.common import models
+from webservices.resources import totals
+from webservices.resources import reports
+
+
+REPORTS_MODELS = [
+    reports.CommitteeReportsPacOrParty,
+    reports.CommitteeReportsPresidential,
+    reports.CommitteeReportsHouseOrSenate,
+]
+TOTALS_MODELS = [
+    totals.CommitteeTotalsPacOrParty,
+    totals.CommitteeTotalsPresidential,
+    totals.CommitteeTotalsHouseOrSenate,
+]
 
 
 class TestViews(common.IntegrationTestCase):
@@ -15,3 +32,39 @@ class TestViews(common.IntegrationTestCase):
             if not hasattr(model, '__table__'):
                 continue
             self.assertGreater(model.query.count(), 0)
+
+    def test_committee_year_filter(self):
+        self._check_entity_model(models.Committee, 'committee_key')
+        self._check_entity_model(models.CommitteeDetail, 'committee_key')
+
+    def test_candidate_year_filter(self):
+        self._check_entity_model(models.Candidate, 'candidate_key')
+        self._check_entity_model(models.CandidateDetail, 'candidate_key')
+
+    def test_reports_year_filter(self):
+        for model in REPORTS_MODELS:
+            self._check_financial_model(model)
+
+    def test_totals_year_filter(self):
+        for model in TOTALS_MODELS:
+            self._check_financial_model(model)
+
+    def _check_financial_model(self, model):
+        count = model.query.filter(
+            model.cycle < manage.SQL_CONFIG['START_YEAR']
+        ).count()
+        self.assertEqual(count, 0)
+
+    def _check_entity_model(self, model, key):
+        subquery = model.query.with_entities(
+            getattr(model, key),
+            sa.func.unnest(model.cycles).label('cycle'),
+        ).subquery()
+        count = db.session.query(
+            getattr(subquery.columns, key)
+        ).group_by(
+            getattr(subquery.columns, key)
+        ).having(
+            sa.func.min(subquery.columns.cycle) < manage.SQL_CONFIG['START_YEAR']
+        ).count()
+        self.assertEqual(count, 0)

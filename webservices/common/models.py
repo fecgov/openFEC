@@ -56,6 +56,7 @@ class CandidateDetail(BaseModel):
     district = db.Column(db.String(2))
     active_through = db.Column(db.Integer)
     election_years = db.Column(ARRAY(db.Integer))
+    cycles = db.Column(ARRAY(db.Integer))
     incumbent_challenge = db.Column(db.String(1))
     incumbent_challenge_full = db.Column(db.String(10))
     office = db.Column(db.String(1))
@@ -105,6 +106,7 @@ class Committee(BaseModel):
 class CommitteeDetail(BaseModel):
     committee_key = db.Column(db.Integer, unique=True)
     committee_id = db.Column(db.String(9))
+    cycles = db.Column(ARRAY(db.Integer))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
