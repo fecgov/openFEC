@@ -121,4 +121,8 @@ class IntegrationTestCase(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(IntegrationTestCase, cls).setUpClass()
-        subprocess.check_call(['psql', '-f', './data/subset.sql', TEST_CONN])
+        with open(os.devnull, 'w') as null:
+            subprocess.check_call(
+                ['psql', '-f', './data/subset.sql', TEST_CONN],
+                stdout=null,
+            )
