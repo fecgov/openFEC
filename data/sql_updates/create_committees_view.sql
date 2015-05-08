@@ -43,7 +43,8 @@ select distinct
     cp_original.receipt_dt as first_file_date,
     p.party_affiliation_desc as party_full,
     cp_most_recent.cmte_nm as name,
-    candidates.candidate_ids
+    candidates.candidate_ids,
+    cp_agg.cycles
 from dimcmte
     left join (
         select distinct on (cmte_sk) * from dimcmtetpdsgn
@@ -59,13 +60,19 @@ from dimcmte
         select cmte_sk, min(receipt_dt) receipt_dt from dimcmteproperties
             group by cmte_sk
     ) cp_original using (cmte_sk)
+    -- Aggregate election cycles from dimcmteproperties.rpt_yr
+    left join (
+        select
+            cmte_sk,
+            array_agg(rpt_yr + rpt_yr % 2) as cycles
+        from dimcmteproperties
+        where rpt_yr >= :START_YEAR
+        group by cmte_sk
+    ) cp_agg using (cmte_sk)
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
     left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
-    left join (
-        select distinct on (cmte_sk) cmte_sk, load_date from dimcmteproperties
-            order by cmte_sk, cmteproperties_sk
-    ) dates on dimcmte.cmte_sk = dates.cmte_sk
-    -- inner join dimlinkages dl using (cmte_sk)
+    -- Committee must have > 0 cycles after START_DATE
+    where array_length(cp_agg.cycles, 1) > 0
 ;
 
 create unique index on ofec_committees_mv_tmp(idx);
