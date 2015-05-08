@@ -13,6 +13,7 @@ create materialized view dimcand_fulltext_mv_tmp as
         as fulltxt
     from dimcand c
     left outer join dimcandproperties p on c.cand_sk = p.cand_sk
+    where p.election_yr >= :START_YEAR
     group by c.cand_sk
 ;
 
@@ -33,7 +34,8 @@ create materialized view dimcmte_fulltext_mv_tmp as
             end
         as fulltxt
     from dimcmte c
-    left outer join dimcmteproperties p on c.cmte_sk = p.cmte_sk
+    left outer join dimcmteproperties p using (cmte_sk)
+    where p.rpt_yr >= :START_YEAR
     group by c.cmte_sk
 ;
 
@@ -55,7 +57,8 @@ with
             join dimcandproperties p on (p.cand_sk = c.cand_sk)
             join dimcandoffice co on (co.cand_sk = c.cand_sk)
             join dimoffice o on (co.office_sk = o.office_sk)
-            order by c.cand_sk, p.candproperties_sk
+        where p.election_yr >= :START_YEAR
+        order by c.cand_sk, p.candproperties_sk
     ), ranked_cmte as (
         select distinct on (c.cmte_sk)
             p.cmte_nm as name,
@@ -63,8 +66,8 @@ with
             c.cmte_id
         from dimcmte c
             join dimcmteproperties p using (cmte_sk)
-            where p.form_tp = 'F1'
-            order by c.cmte_sk, p.receipt_dt desc
+        where p.rpt_yr >= :START_YEAR
+        order by c.cmte_sk, p.receipt_dt desc
     )
     select
         row_number() over () as idx,

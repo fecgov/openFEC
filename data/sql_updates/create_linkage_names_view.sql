@@ -56,6 +56,7 @@ from dimlinkages l
             group by cand_id
     ) active on l.cand_id = active.cand_id
     and l.cmte_dsgn != 'U'
+    and l.fec_election_yr >= :START_YEAR
 ;
 
 create unique index on ofec_name_linkage_mv_tmp(idx);
