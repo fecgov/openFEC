@@ -154,12 +154,12 @@ class CandidateFormatTest(ApiBaseTest):
 
         filter_fields = (
             ('office', 'H'),
-            ('district', '00,02'),
+            ('district', ['00', '02']),
             ('state', 'CA'),
             ('name', 'Obama'),
             ('party', 'DEM'),
             ('cycle', '2006'),
-            ('candidate_id', 'bartlet,ritchie')
+            ('candidate_id', ['bartlet', 'ritchie'])
         )
 
         # checking one example from each field

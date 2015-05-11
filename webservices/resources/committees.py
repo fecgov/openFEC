@@ -121,16 +121,16 @@ def filter_year(model, query, years):
 class CommitteeList(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
-    parser.add_argument('committee_id', type=str, help="Committee's FEC ID")
-    parser.add_argument('candidate_id', type=str, help="Candidate's FEC ID")
-    parser.add_argument('state', type=str, help='Two digit U.S. State committee is registered in')
+    parser.add_argument('committee_id', type=str, action='append', help="Committee's FEC ID")
+    parser.add_argument('candidate_id', type=str, action='append', help="Candidate's FEC ID")
+    parser.add_argument('state', type=str, action='append', help='Two digit U.S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('committee_type', type=str, help='The one-letter type code of the organization')
-    parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
-    parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
-    parser.add_argument('party', type=str, help='Three letter code for party')
+    parser.add_argument('committee_type', type=str, action='append', help='The one-letter type code of the organization')
+    parser.add_argument('designation', type=str, action='append', help='The one-letter designation code of the organization')
+    parser.add_argument('organization_type', type=str, action='append', help='The one-letter code for the kind for organization')
+    parser.add_argument('party', type=str, action='append', help='Three letter code for party')
     parser.add_argument('year', type=int, action='append', help='A year that the committee was active- (after original registration date but before expiration date.)')
     parser.add_argument('cycle', type=int, action='append', help='An election cycle that the committee was active- (after original registration date but before expiration date.)')
     # not implemented yet
@@ -138,16 +138,15 @@ class CommitteeList(Resource):
     # parser.add_argument('original_registration_date', type=str, help='Date of the committees first registered')
 
     @marshal_with(committee_list_fields)
-    def get(self, **kwargs):
+    def get(self):
 
         args = self.parser.parse_args(strict=True)
-        candidate_id = kwargs.get('id', args.get('candidate_id', None))
 
         # pagination
         page_num = args.get('page', 1)
         per_page = args.get('per_page', 20)
 
-        count, committees = self.get_committees(args, page_num, per_page, candidate_id=candidate_id)
+        count, committees = self.get_committees(args, page_num, per_page)
 
         page_data = Pagination(page_num, per_page, count)
 
@@ -160,12 +159,12 @@ class CommitteeList(Resource):
         return data
 
 
-    def get_committees(self, args, page_num, per_page, candidate_id=None):
+    def get_committees(self, args, page_num, per_page):
 
         committees = Committee.query
 
-        if candidate_id:
-            committees = committees.filter(Committee.candidate_ids.overlap(candidate_id.split(',')))
+        if args['candidate_id']:
+            committees = committees.filter(Committee.candidate_ids.overlap(args['candidate_id']))
 
         elif args.get('q'):
             fulltext_qry = """SELECT cmte_sk
@@ -179,10 +178,7 @@ class CommitteeList(Resource):
 
         for argname in ['committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type']:
             if args.get(argname):
-                if ',' in args[argname]:
-                    committees = committees.filter(getattr(Committee, argname).in_(args[argname].split(',')))
-                else:
-                    committees = committees.filter(getattr(Committee, argname)==args[argname])
+                committees = committees.filter(getattr(Committee, argname).in_(args[argname]))
 
         if args.get('name'):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
@@ -206,9 +202,9 @@ class CommitteeView(Resource):
     parser.add_argument('year', type=int, action='append', help='A year that the committee was active- (after original registration date but before expiration date.)')
     parser.add_argument('cycle', type=int, action='append', help='An election cycle that the committee was active- (after original registration date but before expiration date.)')
     # useful for lookup by candidate id
-    parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
-    parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
-    parser.add_argument('committee_type', type=str, help='The one-letter type code of the organization')
+    parser.add_argument('designation', type=str, action='append', help='The one-letter designation code of the organization')
+    parser.add_argument('organization_type', type=str, action='append', help='The one-letter code for the kind for organization')
+    parser.add_argument('committee_type', type=str, action='append', help='The one-letter type code of the organization')
 
     def get(self, **kwargs):
 
@@ -252,16 +248,13 @@ class CommitteeView(Resource):
 
         for argname in ['designation', 'organization_type', 'committee_type']:
             if args.get(argname):
-                if ',' in args[argname]:
-                    committees = committees.filter(getattr(CommitteeDetail, argname).in_(args[argname].split(',')))
-                else:
-                    committees = committees.filter(getattr(CommitteeDetail, argname)==args[argname])
+                committees = committees.filter(getattr(CommitteeDetail, argname).in_(args[argname]))
 
         if args['year']:
             committees = filter_year(CommitteeDetail, committees, args['year'])
 
         if args['cycle']:
-            committees = committees.filter(Committee.cycles.overlap(args['cycle']))
+            committees = committees.filter(CommitteeDetail.cycles.overlap(args['cycle']))
 
         count = committees.count()
 

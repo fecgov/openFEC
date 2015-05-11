@@ -99,18 +99,18 @@ candidate_list_fields = {
 class CandidateList(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
-    parser.add_argument('candidate_id', type=str, help="Candidate's FEC ID")
+    parser.add_argument('candidate_id', type=str, action='append', help="Candidate's FEC ID")
     parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
     parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
-    parser.add_argument('office', type=str, help='Governmental office candidate runs for')
-    parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
-    parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
+    parser.add_argument('office', type=str, action='append', help='Governmental office candidate runs for')
+    parser.add_argument('state', type=str, action='append', help='U. S. State candidate is registered in')
+    parser.add_argument('party', type=str, action='append', help="Three letter code for the party under which a candidate ran for office")
     parser.add_argument('cycle', type=int, action='append', help='Filter records to only those that were applicable to a given election cycle')
-    parser.add_argument('district', type=str, help='Two digit district number')
-    parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
-    parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
+    parser.add_argument('district', type=str, action='append', help='Two digit district number')
+    parser.add_argument('candidate_status', type=str, action='append', help='One letter code explaining if the candidate is a present, future or past candidate')
+    parser.add_argument('incumbent_challenge', type=str, action='append', help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
 
     @marshal_with(candidate_list_fields)
     def get(self, **kwargs):
@@ -149,10 +149,7 @@ class CandidateList(Resource):
         for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
             if args.get(argname):
                 # this is not working and doesn't look like it would work for _short
-                if ',' in args[argname]:
-                    candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname].split(',')))
-                else:
-                    candidates = candidates.filter_by(**{argname: args[argname]})
+                candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname]))
 
         if args.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
@@ -172,13 +169,13 @@ class CandidateView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('office', type=str, help='Governmental office candidate runs for')
-    parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
-    parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
+    parser.add_argument('office', type=str, action='append', help='Governmental office candidate runs for')
+    parser.add_argument('state', type=str, action='append', help='U. S. State candidate is registered in')
+    parser.add_argument('party', type=str, action='append', help="Three letter code for the party under which a candidate ran for office")
     parser.add_argument('cycle', type=int, action='append', help='Filter records to only those that were applicable to a given election cycle')
-    parser.add_argument('district', type=str, help='Two digit district number')
-    parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
-    parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
+    parser.add_argument('district', type=str, action='append', help='Two digit district number')
+    parser.add_argument('candidate_status', type=str, action='append', help='One letter code explaining if the candidate is a present, future or past candidate')
+    parser.add_argument('incumbent_challenge', type=str, action='append', help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
 
 
     def get(self, **kwargs):
@@ -220,10 +217,7 @@ class CandidateView(Resource):
         for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
             if args.get(argname):
                 # this is not working and doesn't look like it would work for _short
-                if ',' in args[argname]:
-                    candidates = candidates.filter(getattr(CandidateDetail, argname).in_(args[argname].split(',')))
-                else:
-                    candidates = candidates.filter_by(**{argname: args[argname]})
+                candidates = candidates.filter(getattr(CandidateDetail, argname).in_(args[argname]))
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if args['cycle']:
