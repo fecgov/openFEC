@@ -68,3 +68,15 @@ def dump(source, dest):
     for table in EXCLUDE_TABLES:
         cmd += ' --exclude-table {0}'.format(table)
     run(cmd, echo=True)
+
+
+@task
+def add_hooks():
+    run('ln -s ../../bin/post-merge .git/hooks/post-merge')
+    run('ln -s ../../bin/post-checkout .git/hooks/post-checkout')
+
+
+@task
+def remove_hooks():
+    run('rm .git/hooks/post-merge')
+    run('rm .git/hooks/post-checkout')
