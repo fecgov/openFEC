@@ -76,7 +76,7 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     loan_repayments_made = db.Column(db.Integer)
     loans_received = db.Column(db.Integer)
     loans_received_from_candidate = db.Column(db.Integer)
-    offsets_to_fundraising_expenses = db.Column(db.Integer)
+    offsets_to_fundraising_expenditures = db.Column(db.Integer)
     offsets_to_legal_accounting = db.Column(db.Integer)
     other_loans_received = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
@@ -183,7 +183,7 @@ presidential_fields = {
     'individual_contributions': fields.Integer,
     'loan_repayments_made': fields.Integer,
     'loans_received_from_candidate': fields.Integer,
-    'offsets_to_fundraising_expenses': fields.Integer,
+    'offsets_to_fundraising_expenditures': fields.Integer,
     'offsets_to_legal_accounting': fields.Integer,
     'other_loans_received': fields.Integer,
     'other_receipts': fields.Integer,

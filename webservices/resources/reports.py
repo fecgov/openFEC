@@ -203,9 +203,9 @@ class CommitteeReportsPresidential(CommitteeReports):
     loans_received_from_candidate_period = db.Column(db.Integer)
     loans_received_from_candidate_ytd = db.Column(db.Integer)
     net_contribution_summary_period = db.Column(db.Integer)
-    net_operating_expenses_summary_period = db.Column(db.Integer)
+    net_operating_expenditures_summary_period = db.Column(db.Integer)
     offsets_to_fundraising_exp_ytd = db.Column(db.Integer)
-    offsets_to_fundraising_expenses_period = db.Column(db.Integer)
+    offsets_to_fundraising_expenditures_period = db.Column(db.Integer)
     offsets_to_legal_accounting_period = db.Column(db.Integer)
     offsets_to_legal_accounting_ytd = db.Column(db.Integer)
     offsets_to_operating_expenditures_period = db.Column(db.Integer)
@@ -426,9 +426,9 @@ presidential_fields = {
     'loans_received_from_candidate_period': fields.Integer,
     'loans_received_from_candidate_ytd': fields.Integer,
     'net_contribution_summary_period': fields.Integer,
-    'net_operating_expenses_summary_period': fields.Integer,
+    'net_operating_expenditures_summary_period': fields.Integer,
     'offsets_to_fundraising_exp_ytd': fields.Integer,
-    'offsets_to_fundraising_expenses_period': fields.Integer,
+    'offsets_to_fundraising_expenditures_period': fields.Integer,
     'offsets_to_legal_accounting_period': fields.Integer,
     'offsets_to_legal_accounting_ytd': fields.Integer,
     'offsets_to_operating_expenditures_period': fields.Integer,
