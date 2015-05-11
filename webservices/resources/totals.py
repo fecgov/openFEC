@@ -102,6 +102,8 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     loan_repayments_other_loans = db.Column(db.Integer)
     loans = db.Column(db.Integer)
     loans_made_by_candidate = db.Column(db.Integer)
+    net_contribution_summary_period = db.Column(db.Integer)
+    net_operating_expenditures_summary_period = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
     refunds_individual_contributions = db.Column(db.Integer)
     refunds_other_political_committee_contributions = db.Column(db.Integer)
@@ -170,6 +172,8 @@ house_senate_fields = {
     'loan_repayments_other_loans': fields.Integer,
     'loans': fields.Integer,
     'loans_made_by_candidate': fields.Integer,
+    'net_contribution_summary_period': fields.Integer,
+    'net_operating_expenditures_summary_period': fields.Integer,
     'other_receipts': fields.Integer,
     'refunds_individual_contributions': fields.Integer,
     'refunds_other_political_committee_contributions': fields.Integer,
