@@ -21,7 +21,7 @@ select
     sum(ttl_loans_per) as loans,
     sum(loans_made_by_cand_per) as loans_made_by_candidate,
     sum(net_contb_per) as net_contributions,
-    sum(net_op_exp_per) as net_operating_expendidutes,
+    sum(net_op_exp_per) as net_operating_expenditures,
     sum(offsets_to_op_exp_per) as offsets_to_operating_expenditures,
     sum(ttl_op_exp_per) as operating_expenditures,
     sum(other_disb_per) as other_disbursements,
