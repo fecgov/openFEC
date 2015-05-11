@@ -139,17 +139,6 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertIn(candidate.address_street_1, response['address_street_1'])
         self.assertIn(candidate.address_zip, response['address_zip'])
 
-    @unittest.skip("This functionality to be removed soon.")
-    def test_candidate_committes(self):
-        response = self._results('/candidate/P80003338?year=*')
-
-        fields = ('committee_id', 'committee_designation', 'committee_designation_full', 'committee_type', 'committee_type_full', 'committee_name')
-
-        election = response[0]['committees'][0]
-        print(election)
-        for field in fields:
-            self.assertEquals(field in election, True)
-
     def test_cand_filters(self):
         [
             factories.CandidateFactory(office='H'),
@@ -158,7 +147,7 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateFactory(state='CA'),
             factories.CandidateFactory(name='Obama'),
             factories.CandidateFactory(party='DEM'),
-            factories.CandidateFactory(election_years=[2006]),
+            factories.CandidateFactory(cycles=[2006]),
             factories.CandidateFactory(candidate_id='barlet'),
             factories.CandidateFactory(candidate_id='ritchie'),
         ]
@@ -169,7 +158,7 @@ class CandidateFormatTest(ApiBaseTest):
             ('state', 'CA'),
             ('name', 'Obama'),
             ('party', 'DEM'),
-            ('year', '2006'),
+            ('cycle', '2006'),
             ('candidate_id', 'bartlet,ritchie')
         )
 

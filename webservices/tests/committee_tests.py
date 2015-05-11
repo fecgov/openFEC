@@ -88,7 +88,7 @@ class CommitteeFormatTest(ApiBaseTest):
     def test_committee_search_double_committee_id(self):
         committees = [factories.CommitteeFactory() for _ in range(2)]
         ids = ','.join(each.committee_id for each in committees)
-        response = self._response(api.url_for(CommitteeList, committee_id=ids, year='*'))
+        response = self._response(api.url_for(CommitteeList, committee_id=ids))
         results = response['results']
         self.assertEqual(len(results), 2)
 
@@ -251,5 +251,5 @@ class CommitteeFormatTest(ApiBaseTest):
             candidate_key=candidate.candidate_key,
             committee_id=committee_id,
         )
-        results = self._results(api.url_for(CandidateView, committee_id=committee_id, year='*'))
+        results = self._results(api.url_for(CandidateView, committee_id=committee_id))
         self.assertEquals(1, len(results))

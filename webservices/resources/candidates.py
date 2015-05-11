@@ -1,6 +1,6 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
 from webservices.common.models import db, Candidate, CandidateDetail, Committee, CandidateCommitteeLink, CandidateHistory
-from webservices.common.util import default_year, Pagination
+from webservices.common.util import Pagination
 from sqlalchemy.sql import text, or_
 from sqlalchemy import extract
 
@@ -23,6 +23,7 @@ candidate_fields = {
     'district': fields.String,
     'active_through': fields.Integer,
     'election_years': fields.List(fields.Integer),
+    'cycles': fields.List(fields.Integer),
     'incumbent_challenge_full': fields.String,
     'incumbent_challenge': fields.String,
     'office_full': fields.String,
@@ -106,11 +107,10 @@ class CandidateList(Resource):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
-    parser.add_argument('year', type=str, default=default_year(), dest='election_year', help="Fileter records to only those that were applicable to a given year")
+    parser.add_argument('cycle', type=int, action='append', help='Filter records to only those that were applicable to a given election cycle')
     parser.add_argument('district', type=str, help='Two digit district number')
     parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
     parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
-
 
     @marshal_with(candidate_list_fields)
     def get(self, **kwargs):
@@ -154,12 +154,12 @@ class CandidateList(Resource):
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
-
         if args.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
 
-        if args.get('election_year') and args['election_year'] != '*':
-            candidates = candidates.filter(Candidate.election_years.overlap([int(x) for x in args['election_year'].split(',')]))
+        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
+        if args['cycle']:
+            candidates = candidates.filter(Candidate.cycles.overlap(args['cycle']))
 
         count = candidates.count()
 
@@ -175,7 +175,7 @@ class CandidateView(Resource):
     parser.add_argument('office', type=str, help='Governmental office candidate runs for')
     parser.add_argument('state', type=str, help='U. S. State candidate is registered in')
     parser.add_argument('party', type=str, help="Three letter code for the party under which a candidate ran for office")
-    parser.add_argument('year', type=str, help="See records pertaining to a particular year.")
+    parser.add_argument('cycle', type=int, action='append', help='Filter records to only those that were applicable to a given election cycle')
     parser.add_argument('district', type=str, help='Two digit district number')
     parser.add_argument('candidate_status', type=str, help='One letter code explaining if the candidate is a present, future or past candidate')
     parser.add_argument('incumbent_challenge', type=str, help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
@@ -225,12 +225,9 @@ class CandidateView(Resource):
                 else:
                     candidates = candidates.filter_by(**{argname: args[argname]})
 
-        # To support '*' across all endpoints
-        if args.get('year') and args['year'] != '*':
-            # before expiration
-            candidates = candidates.filter(or_(extract('year', CandidateDetail.expire_date) >= int(args['year']), CandidateDetail.expire_date == None))
-            # after origination
-            candidates = candidates.filter(extract('year', CandidateDetail.load_date) <= int(args['year']))
+        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
+        if args['cycle']:
+            candidates = candidates.filter(CandidateDetail.cycles.overlap(args['cycle']))
 
         count = candidates.count()
 

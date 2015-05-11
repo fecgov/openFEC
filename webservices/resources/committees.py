@@ -1,7 +1,7 @@
 from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
 from webservices.common.models import db, Candidate, Committee, CandidateCommitteeLink, CommitteeDetail
-from webservices.common.util import default_year, Pagination
-from sqlalchemy.sql import text, or_
+from webservices.common.util import Pagination
+from sqlalchemy.sql import text, or_, and_
 from sqlalchemy import extract
 from datetime import date
 
@@ -103,6 +103,21 @@ committee_list_fields = {
 }
 
 
+def filter_year(model, query, years):
+    return query.filter(
+        or_(*[
+            and_(
+                or_(
+                    extract('year', model.last_file_date) >= year,
+                    model.last_file_date == None,
+                ),
+                extract('year', model.first_file_date) <= year,
+            )
+            for year in years
+        ])
+    )  # noqa
+
+
 class CommitteeList(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('q', type=str, help='Text to search all fields for')
@@ -116,7 +131,8 @@ class CommitteeList(Resource):
     parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
     parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
     parser.add_argument('party', type=str, help='Three letter code for party')
-    parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (after original registration date but before expiration date.)')
+    parser.add_argument('year', type=int, action='append', help='A year that the committee was active- (after original registration date but before expiration date.)')
+    parser.add_argument('cycle', type=int, action='append', help='An election cycle that the committee was active- (after original registration date but before expiration date.)')
     # not implemented yet
     # parser.add_argument('expire_date', type=str, help='Date the committee registration expires')
     # parser.add_argument('original_registration_date', type=str, help='Date of the committees first registered')
@@ -161,7 +177,6 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.committee_key.in_(
                 db.session.query("cmte_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
 
-
         for argname in ['committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type']:
             if args.get(argname):
                 if ',' in args[argname]:
@@ -172,27 +187,11 @@ class CommitteeList(Resource):
         if args.get('name'):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(args['name'])))
 
-        # default year filtering
-        if args.get('year') is None:
-            earliest_year = int(sorted(default_year().split(','))[0])
-            # still going or expired after the earliest year we are looking for
-            committees = committees.filter(
-                or_(
-                    extract('year', Committee.last_file_date) >= earliest_year,
-                    Committee.last_file_date == None,
-                )
-            )  # noqa
+        if args['year']:
+            committees = filter_year(Committee, committees, args['year'])
 
-        # Should this handle a list of years to make it consistent with /candidate ?
-        elif args.get('year') and args['year'] != '*':
-            year = int(args['year'])
-            committees = committees.filter(
-                or_(
-                    extract('year', Committee.last_file_date) >= year,
-                    Committee.last_file_date == None,
-                ),
-                extract('year', Committee.first_file_date) <= year,
-            )  # noqa
+        if args['cycle']:
+            committees = committees.filter(Committee.cycles.overlap(args['cycle']))
 
         count = committees.count()
 
@@ -204,7 +203,8 @@ class CommitteeView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('year', type=str, default=None, help='A year that the committee was active- (after original registration date but before expiration date.)')
+    parser.add_argument('year', type=int, action='append', help='A year that the committee was active- (after original registration date but before expiration date.)')
+    parser.add_argument('cycle', type=int, action='append', help='An election cycle that the committee was active- (after original registration date but before expiration date.)')
     # useful for lookup by candidate id
     parser.add_argument('designation', type=str, help='The one-letter designation code of the organization')
     parser.add_argument('organization_type', type=str, help='The one-letter code for the kind for organization')
@@ -257,16 +257,11 @@ class CommitteeView(Resource):
                 else:
                     committees = committees.filter(getattr(CommitteeDetail, argname)==args[argname])
 
-        # To support '*' across all endpoints
-        if args.get('year') and args['year'] != '*':
-            year = int(args['year'])
-            committees = committees.filter(
-                or_(
-                    extract('year', CommitteeDetail.last_file_date) >= year,
-                    CommitteeDetail.last_file_date == None,
-                ),
-                extract('year', CommitteeDetail.first_file_date) <= year,
-            )  # noqa
+        if args['year']:
+            committees = filter_year(CommitteeDetail, committees, args['year'])
+
+        if args['cycle']:
+            committees = committees.filter(Committee.cycles.overlap(args['cycle']))
 
         count = committees.count()
 
