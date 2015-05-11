@@ -114,7 +114,7 @@ class CommitteeList(Resource):
     parser.add_argument('q', type=str, help='Text to search all fields for')
     parser.add_argument('committee_id', type=str, action='append', help="Committee's FEC ID")
     parser.add_argument('candidate_id', type=str, action='append', help="Candidate's FEC ID")
-    parser.add_argument('state', type=str, action='append', help='Two digit U.S. State committee is registered in')
+    parser.add_argument('state', type=str, action='append', help='Two character U.S. State committee is registered in')
     parser.add_argument('name', type=str, help="Committee's name (full or partial)")
     parser.add_argument('page', type=int, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=int, default=20, help='The number of results returned per page. Defaults to 20.')
