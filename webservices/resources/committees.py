@@ -6,13 +6,6 @@ from sqlalchemy import extract
 from datetime import date
 
 # output format for flask-restful marshaling
-candidate_commitee_fields = {
-    'candidate_id': fields.String,
-    'candidate_name': fields.String,
-    'active_through': fields.Integer,
-    'link_date': fields.String,
-    'expire_date': fields.String,
-}
 committee_fields = {
     'committee_id': fields.String,
     'name': fields.String,
@@ -29,7 +22,6 @@ committee_fields = {
     'expire_date': fields.String,
     'first_file_date': fields.String,
     'last_file_date': fields.String,
-    'candidates': fields.Nested(candidate_commitee_fields),
 }
 committee_detail_fields = {
     'committee_id': fields.String,
@@ -47,7 +39,6 @@ committee_detail_fields = {
     'expire_date': fields.String,
     'first_file_date': fields.String,
     'last_file_date': fields.String,
-    'candidates': fields.Nested(candidate_commitee_fields),
     'filing_frequency' : fields.String,
     'email' : fields.String,
     'fax' : fields.String,
