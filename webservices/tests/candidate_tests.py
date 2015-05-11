@@ -117,19 +117,19 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateFactory(state='CA'),
             factories.CandidateFactory(name='Obama'),
             factories.CandidateFactory(party='DEM'),
-            factories.CandidateFactory(election_years=[2006]),
+            factories.CandidateFactory(cycles=[2006]),
             factories.CandidateFactory(candidate_id='barlet'),
             factories.CandidateFactory(candidate_id='ritchie'),
         ]
 
         filter_fields = (
             ('office', 'H'),
-            ('district', '00,02'),
+            ('district', ['00', '02']),
             ('state', 'CA'),
             ('name', 'Obama'),
             ('party', 'DEM'),
-            ('year', '2006'),
-            ('candidate_id', 'bartlet,ritchie')
+            ('cycle', '2006'),
+            ('candidate_id', ['bartlet', 'ritchie'])
         )
 
         # checking one example from each field

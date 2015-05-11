@@ -111,7 +111,7 @@ from dimcmte
     left join (
         select
             cmte_sk,
-            array_agg(distinct(rpt_yr + rpt_yr % 2)) as cycles
+            array_agg(distinct(rpt_yr + rpt_yr % 2))::int[] as cycles
         from dimcmteproperties
         where rpt_yr >= :START_YEAR
         group by cmte_sk

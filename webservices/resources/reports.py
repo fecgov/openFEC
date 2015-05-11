@@ -14,6 +14,7 @@ class CommitteeReports(BaseModel):
     report_key = db.Column(db.BigInteger)
     committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer)
+    report_year = db.Column(db.Integer)
 
     beginning_image_number = db.Column(db.Integer)
     cash_on_hand_beginning_period = db.Column(db.Integer)
@@ -490,8 +491,8 @@ class ReportsView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    # TODO: change to filter on report_year and add a separate filter for cycle
-    parser.add_argument('year', type=str, default='*', dest='cycle', help="Year in which a candidate runs for office")
+    parser.add_argument('year', type=int, action='append', help='Year in which a candidate runs for office')
+    parser.add_argument('cycle', type=int, action='append', help='Two-year election cycle in which a candidate runs for office')
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
     def get(self, committee_id=None, committee_type=None):
@@ -539,8 +540,10 @@ class ReportsView(Resource):
         if committee_id is not None:
             reports = reports.filter_by(committee_id=committee_id)
 
-        if args['cycle'] != '*':
-            reports = reports.filter(reports_class.cycle.in_(args['cycle'].split(',')))
+        if args['year']:
+            reports = reports.filter(reports_class.report_year.in_(args['year']))
+        if args['cycle']:
+            reports = reports.filter(reports_class.cycle.in_(args['cycle']))
 
         count = reports.count()
 

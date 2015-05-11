@@ -207,7 +207,7 @@ class TotalsView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('year', type=str, default='*', dest='cycle', help="Year in which a candidate runs for office")
+    parser.add_argument('cycle', type=int, action='append', help='Two-year election cycle in which a candidate runs for office')
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
     def get(self, **kwargs):
@@ -248,8 +248,8 @@ class TotalsView(Resource):
 
         totals = totals_class.query.filter_by(committee_id=committee_id)
 
-        if args['cycle'] != '*':
-            totals = totals.filter(totals_class.cycle.in_(args['cycle'].split(',')))
+        if args['cycle']:
+            totals = totals.filter(totals_class.cycle.in_(args['cycle']))
 
         totals = totals.order_by(desc(totals_class.cycle))
         return totals.paginate(page_num, per_page, True).items
