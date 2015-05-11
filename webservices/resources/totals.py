@@ -82,8 +82,8 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     refunded_individual_contributions = db.Column(db.Integer)
     repayments_loans_made_by_candidate = db.Column(db.Integer)
     repayments_other_loans = db.Column(db.Integer)
-    transfer_from_affiliated_committee = db.Column(db.Integer)
-    transfer_to_other_authorized_committee = db.Column(db.Integer)
+    transfers_from_affiliated_committee = db.Column(db.Integer)
+    transfers_to_other_authorized_committee = db.Column(db.Integer)
 
 
 class CommitteeTotalsHouseOrSenate(CommitteeTotals):
@@ -100,9 +100,9 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     loans = db.Column(db.Integer)
     loans_made_by_candidate = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
-    refunds_individual_contributions = db.Column(db.Integer)
-    refunds_other_political_committee_contributions = db.Column(db.Integer)
-    refunds_political_party_committee_contributions = db.Column(db.Integer)
+    refunded_individual_contributions = db.Column(db.Integer)
+    refunded_other_political_committee_contributions = db.Column(db.Integer)
+    refunded_political_party_committee_contributions = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
 
@@ -165,9 +165,9 @@ house_senate_fields = {
     'loans': fields.Integer,
     'loans_made_by_candidate': fields.Integer,
     'other_receipts': fields.Integer,
-    'refunds_individual_contributions': fields.Integer,
-    'refunds_other_political_committee_contributions': fields.Integer,
-    'refunds_political_party_committee_contributions': fields.Integer,
+    'refunded_individual_contributions': fields.Integer,
+    'refunded_other_political_committee_contributions': fields.Integer,
+    'refunded_political_party_committee_contributions': fields.Integer,
     'transfers_from_other_authorized_committee': fields.Integer,
     'transfers_to_other_authorized_committee': fields.Integer,
 }
@@ -184,8 +184,8 @@ presidential_fields = {
     'refunded_individual_contributions': fields.Integer,
     'refunded_other_political_committee_contributions': fields.Integer,
     'refunded_political_party_committee_contributions': fields.Integer,
-    'transfer_from_affiliated_committee': fields.Integer,
-    'transfer_to_other_authorized_committee': fields.Integer,
+    'transfers_from_affiliated_committee': fields.Integer,
+    'transfers_to_other_authorized_committee': fields.Integer,
 }
 pagination_fields = {
     'per_page': fields.Integer,

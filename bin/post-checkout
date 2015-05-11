@@ -1,0 +1,15 @@
+#/usr/bin/env bash
+
+# git hook to run a command after `git checkout` if a specified file was changed
+# Run `chmod +x post-checkout` to make it executable then put it into `.git/hooks/`.
+
+PREV_HEAD=$1
+
+changed_files="$(git diff-tree -r --name-only --no-commit-id $PREV_HEAD HEAD)"
+
+check_run() {
+    echo "$changed_files" | grep --quiet "$1" && eval "$2"
+}
+
+# Update dependencies
+check_run requirements.txt "pip install -r requirements.txt --upgrade"
