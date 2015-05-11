@@ -15,7 +15,7 @@ select
     sum(fed_cand_cmte_contb_per) as fed_candidate_committee_contributions,
     sum(fed_cand_contb_ref_per) as fed_candidate_contribution_refunds,
     sum(ttl_fed_disb_per) as fed_disbursements,
-    sum(ttl_fed_elect_actvy_per) as fed_elect_activity,
+    sum(ttl_fed_elect_actvy_per) as fed_election_activity,
     sum(ttl_fed_op_exp_per) as fed_operating_expenditures,
     sum(ttl_fed_receipts_per) as fed_receipts,
     sum(indt_exp_per) as independent_expenditures,
