@@ -37,7 +37,7 @@ class CommitteeTotalsPacOrParty(CommitteeTotals):
     fed_candidate_committee_contributions = db.Column(db.Integer)
     fed_candidate_contribution_refunds = db.Column(db.Integer)
     fed_disbursements = db.Column(db.Integer)
-    fed_elect_activity = db.Column(db.Integer)
+    fed_election_activity = db.Column(db.Integer)
     fed_operating_expenditures = db.Column(db.Integer)
     fed_receipts = db.Column(db.Integer)
     independent_expenditures = db.Column(db.Integer)
@@ -48,10 +48,13 @@ class CommitteeTotalsPacOrParty(CommitteeTotals):
     loan_repayments_received = db.Column(db.Integer)
     loans_made = db.Column(db.Integer)
     net_contributions = db.Column(db.Integer)
+    net_operating_expenditures = db.Column(db.Integer)
     non_allocated_fed_election_activity = db.Column(db.Integer)
     nonfed_transfers = db.Column(db.Integer)
     other_fed_operating_expenditures = db.Column(db.Integer)
     other_fed_receipts = db.Column(db.Integer)
+    other_political_committee_contribution_refunds = db.Column(db.Integer)
+    political_party_committee_contribution_refunds = db.Column(db.Integer)
     shared_fed_activity = db.Column(db.Integer)
     shared_fed_activity_nonfed = db.Column(db.Integer)
     shared_fed_operating_expenditures = db.Column(db.Integer)
@@ -129,7 +132,7 @@ pac_party_fields = {
     'fed_candidate_committee_contributions': fields.Integer,
     'fed_candidate_contribution_refunds': fields.Integer,
     'fed_disbursements': fields.Integer,
-    'fed_elect_activity': fields.Integer,
+    'fed_election_activity': fields.Integer,
     'fed_operating_expenditures': fields.Integer,
     'fed_receipts': fields.Integer,
     'independent_expenditures': fields.Integer,
@@ -140,10 +143,13 @@ pac_party_fields = {
     'loan_repayments_received': fields.Integer,
     'loans_made': fields.Integer,
     'net_contributions': fields.Integer,
+    'net_operating_expenditures': fields.Integer,
     'non_allocated_fed_election_activity': fields.Integer,
     'nonfed_transfers': fields.Integer,
     'other_fed_operating_expenditures': fields.Integer,
     'other_fed_receipts': fields.Integer,
+    'other_political_committee_contribution_refunds': fields.Integer,
+    'political_party_committee_contribution_refunds': fields.Integer,
     'shared_fed_activity': fields.Integer,
     'shared_fed_activity_nonfed': fields.Integer,
     'shared_fed_operating_expenditures': fields.Integer,

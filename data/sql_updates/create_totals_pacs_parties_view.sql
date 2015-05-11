@@ -26,6 +26,7 @@ select
     sum(loan_repymts_received_per) as loan_repayments_received,
     sum(loans_made_per) as loans_made,
     sum(net_contb_per) as net_contributions,
+    sum(net_op_exp_per) as net_operating_expenditures,
     sum(non_alloc_fed_elect_actvy_per) as non_allocated_fed_election_activity,
     sum(ttl_nonfed_tranf_per) as nonfed_transfers,
     sum(offsets_to_op_exp_per_ii) as offsets_to_operating_expenditures,
