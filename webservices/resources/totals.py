@@ -85,8 +85,8 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     refunded_individual_contributions = db.Column(db.Integer)
     repayments_loans_made_by_candidate = db.Column(db.Integer)
     repayments_other_loans = db.Column(db.Integer)
-    transfer_from_affiliated_committee = db.Column(db.Integer)
-    transfer_to_other_authorized_committee = db.Column(db.Integer)
+    transfers_from_affiliated_committee = db.Column(db.Integer)
+    transfers_to_other_authorized_committee = db.Column(db.Integer)
 
 
 class CommitteeTotalsHouseOrSenate(CommitteeTotals):
@@ -105,9 +105,9 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     net_contribution_summary_period = db.Column(db.Integer)
     net_operating_expenditures_summary_period = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
-    refunds_individual_contributions = db.Column(db.Integer)
-    refunds_other_political_committee_contributions = db.Column(db.Integer)
-    refunds_political_party_committee_contributions = db.Column(db.Integer)
+    refunded_individual_contributions = db.Column(db.Integer)
+    refunded_other_political_committee_contributions = db.Column(db.Integer)
+    refunded_political_party_committee_contributions = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
 
@@ -175,9 +175,9 @@ house_senate_fields = {
     'net_contribution_summary_period': fields.Integer,
     'net_operating_expenditures_summary_period': fields.Integer,
     'other_receipts': fields.Integer,
-    'refunds_individual_contributions': fields.Integer,
-    'refunds_other_political_committee_contributions': fields.Integer,
-    'refunds_political_party_committee_contributions': fields.Integer,
+    'refunded_individual_contributions': fields.Integer,
+    'refunded_other_political_committee_contributions': fields.Integer,
+    'refunded_political_party_committee_contributions': fields.Integer,
     'transfers_from_other_authorized_committee': fields.Integer,
     'transfers_to_other_authorized_committee': fields.Integer,
 }
@@ -195,8 +195,8 @@ presidential_fields = {
     'refunded_individual_contributions': fields.Integer,
     'refunded_other_political_committee_contributions': fields.Integer,
     'refunded_political_party_committee_contributions': fields.Integer,
-    'transfer_from_affiliated_committee': fields.Integer,
-    'transfer_to_other_authorized_committee': fields.Integer,
+    'transfers_from_affiliated_committee': fields.Integer,
+    'transfers_to_other_authorized_committee': fields.Integer,
 }
 pagination_fields = {
     'per_page': fields.Integer,
@@ -218,7 +218,7 @@ class TotalsView(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
     parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('year', type=str, default='*', dest='cycle', help="Year in which a candidate runs for office")
+    parser.add_argument('cycle', type=int, action='append', help='Two-year election cycle in which a candidate runs for office')
     parser.add_argument('fields', type=str, help='Choose the fields that are displayed')
 
     def get(self, **kwargs):
@@ -259,8 +259,8 @@ class TotalsView(Resource):
 
         totals = totals_class.query.filter_by(committee_id=committee_id)
 
-        if args['cycle'] != '*':
-            totals = totals.filter(totals_class.cycle.in_(args['cycle'].split(',')))
+        if args['cycle']:
+            totals = totals.filter(totals_class.cycle.in_(args['cycle']))
 
         totals = totals.order_by(desc(totals_class.cycle))
         return totals.paginate(page_num, per_page, True).items

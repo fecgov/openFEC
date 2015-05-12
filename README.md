@@ -82,3 +82,16 @@ This repo includes a small subset of the production database (built 2015/05/05) 
     $ invoke build_test <source> <dest>
 
 where both `source` and `dest` are valid PostgreSQL connection strings.
+
+### Git Hooks
+
+This repo includes optional post-merge and post-checkout hooks to ensure that
+dependencies are up to date. If enabled, these hooks will update Python
+dependencies on checking out or merging changes to `requirements.txt`. To
+enable the hooks, run
+
+    $ invoke add_hooks
+
+To disable, run
+
+    $ invoke remove_hooks
