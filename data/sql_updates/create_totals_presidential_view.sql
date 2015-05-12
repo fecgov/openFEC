@@ -18,6 +18,8 @@ select
     sum(ttl_loans_received_per) as loans_received,
     sum(loans_received_from_cand_per) as loans_received_from_candidate,
     sum(ttl_loan_repymts_made_per) as loan_repayments_made,
+    sum(net_contb_sum_page_per) as net_contributions,
+    sum(net_op_exp_sum_page_per) as net_operating_expenditures,
     sum(offsets_to_fndrsg_exp_per) as offsets_to_fundraising_expenditures,
     sum(offsets_to_legal_acctg_per) as offsets_to_legal_accounting,
     sum(offsets_to_op_exp_per) as offsets_to_operating_expenditures,

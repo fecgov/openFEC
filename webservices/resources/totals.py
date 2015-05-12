@@ -27,6 +27,8 @@ class CommitteeTotals(BaseModel):
     receipts = db.Column(db.Integer)
     coverage_start_date = db.Column(db.DateTime())
     coverage_end_date = db.Column(db.DateTime())
+    net_contributions = db.Column(db.Integer)
+    net_operating_expenditures = db.Column(db.Integer)
 
 
 class CommitteeTotalsPacOrParty(CommitteeTotals):
@@ -47,8 +49,6 @@ class CommitteeTotalsPacOrParty(CommitteeTotals):
     loan_repayments_made = db.Column(db.Integer)
     loan_repayments_received = db.Column(db.Integer)
     loans_made = db.Column(db.Integer)
-    net_contributions = db.Column(db.Integer)
-    net_operating_expenditures = db.Column(db.Integer)
     non_allocated_fed_election_activity = db.Column(db.Integer)
     nonfed_transfers = db.Column(db.Integer)
     other_fed_operating_expenditures = db.Column(db.Integer)
@@ -102,8 +102,6 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     loan_repayments_other_loans = db.Column(db.Integer)
     loans = db.Column(db.Integer)
     loans_made_by_candidate = db.Column(db.Integer)
-    net_contributions = db.Column(db.Integer)
-    net_operating_expenditures = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
     refunded_individual_contributions = db.Column(db.Integer)
     refunded_other_political_committee_contributions = db.Column(db.Integer)
@@ -127,6 +125,8 @@ common_fields = {
     'receipts': fields.Integer,
     'coverage_start_date': fields.DateTime,
     'coverage_end_date': fields.DateTime,
+    'net_contributions': fields.Integer,
+    'net_operating_expenditures': fields.Integer,
 }
 pac_party_fields = {
     'all_loans_received': fields.Integer,
@@ -144,8 +144,6 @@ pac_party_fields = {
     'loan_repayments_made': fields.Integer,
     'loan_repayments_received': fields.Integer,
     'loans_made': fields.Integer,
-    'net_contributions': fields.Integer,
-    'net_operating_expenditures': fields.Integer,
     'non_allocated_fed_election_activity': fields.Integer,
     'nonfed_transfers': fields.Integer,
     'other_fed_operating_expenditures': fields.Integer,
@@ -172,8 +170,6 @@ house_senate_fields = {
     'loan_repayments_other_loans': fields.Integer,
     'loans': fields.Integer,
     'loans_made_by_candidate': fields.Integer,
-    'net_contributions': fields.Integer,
-    'net_operating_expenditures': fields.Integer,
     'other_receipts': fields.Integer,
     'refunded_individual_contributions': fields.Integer,
     'refunded_other_political_committee_contributions': fields.Integer,
