@@ -230,7 +230,7 @@ class ReportsSchema(ma.Schema):
     cash_on_hand_end_period = ma.fields.Integer()
     committee_id = ma.fields.String()
     coverage_end_date = ma.fields.DateTime()
-    coverage_start_date = ma.fields.DateTime,
+    coverage_start_date = ma.fields.DateTime()
     cycle = ma.fields.Integer()
     debts_owed_by_committee = ma.fields.Integer()
     debts_owed_to_committee = ma.fields.Integer()
@@ -521,6 +521,7 @@ class TotalsHouseSenateSchema(TotalsSchema):
 class TotalsPresidentialSchema(TotalsSchema):
     candidate_contribution = ma.fields.Integer()
     exempt_legal_accounting_disbursement = ma.fields.Integer()
+    federal_funds = ma.fields.Integer()
     individual_contributions = ma.fields.Integer()
     loan_repayments_made = ma.fields.Integer()
     loans_received_from_candidate = ma.fields.Integer()
