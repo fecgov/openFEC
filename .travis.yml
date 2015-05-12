@@ -10,8 +10,8 @@ addons:
   postgresql: "9.4"
 
 env:
-  - secure: "NtT+qMyr3do/rWjyJvEluGCD+IzI4rzrG3AWzm+pIH3jpTM3HWFLPz76VBi4ueYfG58oeqU0UBjEXDDOOL9C1pB2G0t+n+xtYPlMiTxIMw3fnptBg3y/BFDXOmh2QYxy23wSlLAxYTPlnpxWGjd8MseTtn4YSRvegm1Cf3r3HV8="
-  - secure: "Ry9thRDCXGKCCa1XFBp1OCmN+hHsMhUZomBQ5x/PSC+JGItvRXIkZP+Owbg8jGZDr8IIO1gleb+Wt3ZuQLcgLWsJxsEnLUpjUK7nbOLNwOnuVHoMnP2enUAxSb5T2bipmdjmWhcb5hFBmdcT1otgndayAKSgQ5qPnbX6VXzznn8="
+  - secure: "Lj0OkjCNEVTEAb6x6xnFiE93YogXRxAGHytMrnPr/oBkim0RVN35gQdYE+J3HMObLVhu6D5mtMYxJkgi674KfuAWw74ZG0VxXH3fB8I+DtHxt7Ql3HoBryz2VP31lZ14IyV+BGBht7wPOhD7iSmNAnsAyXW2FmgodAhoXyfZMTg="
+  - secure: "hylNba7PhzwQMtfrKiVBRFvLbAvazVpVozkR7LoTdKZKf9jyyW9Z9lxH/tvaXoUCsGPtOQxSdlN9vkkJtxHMZegD+mY8n/m6WuBZzgeZbCD3LMpdzWDcvhQjU8RRZabd8Dn5lLvFmmb3nRSxdi5X1IkLj+ptvC9Caa2NBB78ipk="
 
 before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
