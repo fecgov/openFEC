@@ -1,3 +1,4 @@
+import git
 from invoke import run
 from invoke import task
 
@@ -80,3 +81,54 @@ def add_hooks():
 def remove_hooks():
     run('rm .git/hooks/post-merge')
     run('rm .git/hooks/post-checkout')
+
+
+DEPLOY_RULES = (
+    ('develop', 'dev'),
+    ('master', 'stage'),
+    ('release', 'prod'),
+
+)
+def _resolve_rule(branch):
+    for pattern, space in DEPLOY_RULES:
+        if pattern in branch:
+            return space
+    return None
+
+
+@task
+def deploy(space=None):
+    """Deploy app to Cloud Foundry. Log in using credentials stored in
+    `FEC_CF_USERNAME` and `FEC_CF_PASSWORD`; push to either `space` or the space
+    detected from the name of the current branch.
+    """
+    # Optionally detect space
+    if not space:
+        repo = git.Repo('.')
+        branch = repo.active_branch.name
+        space = _resolve_rule(branch)
+        if space is None:
+            print(
+                'No space detected from branch {branch}; '
+                'skipping deploy'.format(**locals())
+            )
+            return
+        print('Detected space {space} from branch {branch}'.format(**locals()))
+
+    # Select API
+    api = 'cf api https://api.18f.gov'
+    run(api, echo=True)
+
+    # Log in
+    args = (
+        ('--u', '$FEC_CF_USERNAME'),
+        ('--p', '$FEC_CF_PASSWORD'),
+        ('--o', 'fec'),
+        ('--s', space),
+    )
+    login = 'cf login {0}'.format(' '.join(' '.join(arg) for arg in args))
+    run(login, echo=True)
+
+    # Push
+    push = 'cf push -f manifest_{0}.yml'.format(space)
+    run(push, echo=True)
