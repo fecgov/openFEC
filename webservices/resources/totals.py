@@ -27,6 +27,8 @@ class CommitteeTotals(BaseModel):
     receipts = db.Column(db.Integer)
     coverage_start_date = db.Column(db.DateTime())
     coverage_end_date = db.Column(db.DateTime())
+    net_contributions = db.Column(db.Integer)
+    net_operating_expenditures = db.Column(db.Integer)
 
 
 class CommitteeTotalsPacOrParty(CommitteeTotals):
@@ -37,7 +39,7 @@ class CommitteeTotalsPacOrParty(CommitteeTotals):
     fed_candidate_committee_contributions = db.Column(db.Integer)
     fed_candidate_contribution_refunds = db.Column(db.Integer)
     fed_disbursements = db.Column(db.Integer)
-    fed_elect_activity = db.Column(db.Integer)
+    fed_election_activity = db.Column(db.Integer)
     fed_operating_expenditures = db.Column(db.Integer)
     fed_receipts = db.Column(db.Integer)
     independent_expenditures = db.Column(db.Integer)
@@ -47,11 +49,12 @@ class CommitteeTotalsPacOrParty(CommitteeTotals):
     loan_repayments_made = db.Column(db.Integer)
     loan_repayments_received = db.Column(db.Integer)
     loans_made = db.Column(db.Integer)
-    net_contributions = db.Column(db.Integer)
     non_allocated_fed_election_activity = db.Column(db.Integer)
     nonfed_transfers = db.Column(db.Integer)
     other_fed_operating_expenditures = db.Column(db.Integer)
     other_fed_receipts = db.Column(db.Integer)
+    other_political_committee_contribution_refunds = db.Column(db.Integer)
+    political_party_committee_contribution_refunds = db.Column(db.Integer)
     shared_fed_activity = db.Column(db.Integer)
     shared_fed_activity_nonfed = db.Column(db.Integer)
     shared_fed_operating_expenditures = db.Column(db.Integer)
@@ -73,7 +76,7 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     loan_repayments_made = db.Column(db.Integer)
     loans_received = db.Column(db.Integer)
     loans_received_from_candidate = db.Column(db.Integer)
-    offsets_to_fundraising_expenses = db.Column(db.Integer)
+    offsets_to_fundraising_expenditures = db.Column(db.Integer)
     offsets_to_legal_accounting = db.Column(db.Integer)
     other_loans_received = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
@@ -122,6 +125,8 @@ common_fields = {
     'receipts': fields.Integer,
     'coverage_start_date': fields.DateTime,
     'coverage_end_date': fields.DateTime,
+    'net_contributions': fields.Integer,
+    'net_operating_expenditures': fields.Integer,
 }
 pac_party_fields = {
     'all_loans_received': fields.Integer,
@@ -129,7 +134,7 @@ pac_party_fields = {
     'fed_candidate_committee_contributions': fields.Integer,
     'fed_candidate_contribution_refunds': fields.Integer,
     'fed_disbursements': fields.Integer,
-    'fed_elect_activity': fields.Integer,
+    'fed_election_activity': fields.Integer,
     'fed_operating_expenditures': fields.Integer,
     'fed_receipts': fields.Integer,
     'independent_expenditures': fields.Integer,
@@ -139,11 +144,12 @@ pac_party_fields = {
     'loan_repayments_made': fields.Integer,
     'loan_repayments_received': fields.Integer,
     'loans_made': fields.Integer,
-    'net_contributions': fields.Integer,
     'non_allocated_fed_election_activity': fields.Integer,
     'nonfed_transfers': fields.Integer,
     'other_fed_operating_expenditures': fields.Integer,
     'other_fed_receipts': fields.Integer,
+    'other_political_committee_contribution_refunds': fields.Integer,
+    'political_party_committee_contribution_refunds': fields.Integer,
     'shared_fed_activity': fields.Integer,
     'shared_fed_activity_nonfed': fields.Integer,
     'shared_fed_operating_expenditures': fields.Integer,
@@ -177,10 +183,11 @@ presidential_fields = {
     'individual_contributions': fields.Integer,
     'loan_repayments_made': fields.Integer,
     'loans_received_from_candidate': fields.Integer,
-    'offsets_to_fundraising_expenses': fields.Integer,
+    'offsets_to_fundraising_expenditures': fields.Integer,
     'offsets_to_legal_accounting': fields.Integer,
     'other_loans_received': fields.Integer,
     'other_receipts': fields.Integer,
+    'repayments_loans_made_by_candidate': fields.Integer,
     'refunded_individual_contributions': fields.Integer,
     'refunded_other_political_committee_contributions': fields.Integer,
     'refunded_political_party_committee_contributions': fields.Integer,
