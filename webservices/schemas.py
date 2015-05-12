@@ -273,9 +273,9 @@ class ReportsPresidentialSchema(ReportsSchema):
     loans_received_from_candidate_period = ma.fields.Integer()
     loans_received_from_candidate_ytd = ma.fields.Integer()
     net_contribution_summary_period = ma.fields.Integer()
-    net_operating_expenses_summary_period = ma.fields.Integer()
+    net_operating_expenditures_summary_period = ma.fields.Integer()
     offsets_to_fundraising_exp_ytd = ma.fields.Integer()
-    offsets_to_fundraising_expenses_period = ma.fields.Integer()
+    offsets_to_fundraising_expenditures_period = ma.fields.Integer()
     offsets_to_legal_accounting_period = ma.fields.Integer()
     offsets_to_legal_accounting_ytd = ma.fields.Integer()
     operating_expenditures_period = ma.fields.Integer()
@@ -462,15 +462,17 @@ class TotalsSchema(ma.Schema):
     receipts = ma.fields.Integer()
     coverage_start_date = ma.fields.DateTime()
     coverage_end_date = ma.fields.DateTime()
+    net_contributions = ma.fields.Integer()
+    net_operating_expenditures = ma.fields.Integer()
 
 
-class TotalsPresidentialSchema(TotalsSchema):
+class TotalsPacPartySchema(TotalsSchema):
     all_loans_received = ma.fields.Integer()
     coordinated_expenditures_by_party_committee = ma.fields.Integer()
     fed_candidate_committee_contributions = ma.fields.Integer()
     fed_candidate_contribution_refunds = ma.fields.Integer()
     fed_disbursements = ma.fields.Integer()
-    fed_elect_activity = ma.fields.Integer()
+    fed_election_activity = ma.fields.Integer()
     fed_operating_expenditures = ma.fields.Integer()
     fed_receipts = ma.fields.Integer()
     independent_expenditures = ma.fields.Integer()
@@ -485,6 +487,8 @@ class TotalsPresidentialSchema(TotalsSchema):
     nonfed_transfers = ma.fields.Integer()
     other_fed_operating_expenditures = ma.fields.Integer()
     other_fed_receipts = ma.fields.Integer()
+    other_political_committee_contribution_refunds = ma.fields.Integer()
+    political_party_committee_contribution_refunds = ma.fields.Integer()
     shared_fed_activity = ma.fields.Integer()
     shared_fed_activity_nonfed = ma.fields.Integer()
     shared_fed_operating_expenditures = ma.fields.Integer()
@@ -514,16 +518,17 @@ class TotalsHouseSenateSchema(TotalsSchema):
     transfers_to_other_authorized_committee = ma.fields.Integer()
 
 
-class TotalsPacPartySchema(TotalsSchema):
+class TotalsPresidentialSchema(TotalsSchema):
     candidate_contribution = ma.fields.Integer()
     exempt_legal_accounting_disbursement = ma.fields.Integer()
     individual_contributions = ma.fields.Integer()
     loan_repayments_made = ma.fields.Integer()
     loans_received_from_candidate = ma.fields.Integer()
-    offsets_to_fundraising_expenses = ma.fields.Integer()
+    offsets_to_fundraising_expenditures = ma.fields.Integer()
     offsets_to_legal_accounting = ma.fields.Integer()
     other_loans_received = ma.fields.Integer()
     other_receipts = ma.fields.Integer()
+    repayments_loans_made_by_candidate = ma.fields.Integer()
     refunded_individual_contributions = ma.fields.Integer()
     refunded_other_political_committee_contributions = ma.fields.Integer()
     refunded_political_party_committee_contributions = ma.fields.Integer()
