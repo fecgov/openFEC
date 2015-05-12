@@ -1,14 +1,19 @@
+import json
+import datetime
 import unittest
 
 import sqlalchemy as sa
+from marshmallow.utils import isoformat
 
-from .tests.common import ApiBaseTest
-from webservices import rest
 from tests import factories
+from tests.common import ApiBaseTest
 
+from webservices import rest
+from webservices import schemas
 from webservices.rest import api
 from webservices.rest import NameSearch
 from webservices.rest import TotalsView
+from webservices.rest import ReportsView
 from webservices.rest import CandidateList
 
 
@@ -25,7 +30,7 @@ class OverallTest(ApiBaseTest):
 
     def test_full_text_search(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
-        search = factories.CandidateSearchFactory(
+        factories.CandidateSearchFactory(
             cand_sk=candidate.candidate_key,
             fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
@@ -36,7 +41,7 @@ class OverallTest(ApiBaseTest):
 
     def test_full_text_search_with_whitespace(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
-        search = factories.CandidateSearchFactory(
+        factories.CandidateSearchFactory(
             cand_sk=candidate.candidate_key,
             fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
@@ -88,21 +93,11 @@ class OverallTest(ApiBaseTest):
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
 
-    @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
+    @unittest.skip('We are just showing one year at a time, this would be a good feature '
+                   'for /candidate/<id> but it is not a priority right now')
     def test_multi_year(self):
         # testing search
         response = self._results('/candidate?candidate_id=P80003338&year=2012,2008')
-        # search listing should aggregate years
-        self.assertIn('2008, 2012', response)
-        # testing single resource
-        response = self._results('/candidate/P80003338?year=2012,2008')
-        elections = response[0]['elections']
-        self.assertEquals(len(elections), 2)
-
-    @unittest.skip("We are just showing one year at a time, this would be a good feature for /candidate/<id> but it is not a priority right now")
-    def test_multi_year(self):
-        # testing search
-        response = self._results('/candidates?candidate_id=P80003338&year=2012,2008')
         # search listing should aggregate years
         self.assertIn('2008, 2012', response)
         # testing single resource
@@ -123,42 +118,41 @@ class OverallTest(ApiBaseTest):
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
         ]
-        response = self._results(api.url_for(TotalsView, id=committee_id))
+        response = self._results(api.url_for(TotalsView, committee_id=committee_id))
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['cycle'], 2012)
         self.assertEqual(response[1]['cycle'], 2008)
 
-    # Totals
-    @unittest.skip("not implemented yet")
-    def test_reports_house_senate(self):
-        results = self._results('/committee/C00002600/reports')
-
-        fields = ('beginning_image_number', 'end_image_number', 'expire_date', 'load_date','report_type', 'report_type_full','report_year', 'type', 'cash_on_hand_beginning_period', 'cash_on_hand_end_period', 'debts_owed_by_committee', 'debts_owed_to_committee', 'operating_expenditures_period', 'other_political_committee_contributions_period', 'refunds_other_political_committee_contributions_period', 'total_disbursements_period', 'total_individual_contributions_period', 'total_receipts_period',)
-
-        for field in fields:
-            print(field)
-            self.assertEquals(field in results[0]['reports'][0], True)
-
-    @unittest.skip("not implemented yet")
-    def test_reports_pac_party(self):
-        results = self._results('/committee/C00000422/reports')
-
-        fields = ('beginning_image_number', 'end_image_number', 'expire_date', 'load_date', 'report_type', 'report_type_full', 'report_year', 'total_disbursements_period', 'total_disbursements_summary_page_period', 'total_receipts_period', 'total_receipts_summary_page_period', 'type')
-
-        for field in fields:
-            print(field)
-            self.assertEquals(field in results[0]['reports'][0], True)
-
-    @unittest.skip("not implemented yet")
-    def test_reports_presidental(self):
-        results = self._results('/committee/C00347583/reports')
-
-        fields = ('refunds_political_party_committee_contributions_period', 'other_receipts_period', 'total_disbursements_period', 'net_contributions_year', 'beginning_image_number', 'total_receipts_year', 'total_receipts', 'refunds_political_party_committee_contributions_year', 'total_loans_period', 'other_political_committee_contributions_year', 'loan_repayments_other_loans_period', 'net_contributions_period', 'refunds_other_political_committee_contributions_period', 'all_other_loans_year', 'net_operating_expenditures_period', 'loan_repayments_other_loans_year', 'total_individual_itemized_contributions_year', 'subtotal_period', 'other_receipts_year', 'total_contribution_refunds_col_total_period', 'debts_owed_by_committee', 'total_contribution_refunds_year', 'offsets_to_operating_expenditures_period', 'cash_on_hand_beginning_period', 'individual_itemized_contributions_period', 'refunds_individual_contributions_year', 'total_contributions_year', 'operating_expenditures_period', 'political_party_committee_contributions_year', 'total_individual_contributions_year', 'total_individual_unitemized_contributions_year', 'net_operating_expenditures_year', 'expire_date', 'individual_unitemized_contributions_period', 'transfers_to_other_authorized_committee_year', 'report_type', 'total_disbursements_year', 'type', 'operating_expenditures_year', 'transfers_from_other_authorized_committee_period', 'total_offsets_to_operating_expenditures_year', 'total_loan_repayments_year', 'candidate_contribution_year', 'refunds_other_political_committee_contributions_year', 'debts_owed_to_committee', 'other_disbursements_year', 'total_loan_repayments_period', 'candidate_contribution_period', 'transfers_to_other_authorized_committee_period', 'refunds_total_contributions_col_total_year', 'total_contributions_column_total_period', 'political_party_committee_contributions_period', 'cash_on_hand_end_period', 'all_other_loans_period', 'loans_made_by_candidate_year', 'total_individual_contributions_period', 'loans_made_by_candidate_period', 'total_offsets_to_operating_expenditures_period', 'offsets_to_operating_expenditures_year', 'total_contribution_refunds_period', 'report_year', 'total_loans_year', 'transfers_from_other_authorized_committee_year', 'load_date', 'other_disbursements_period', 'loan_repayments_candidate_loans_period', 'other_political_committee_contributions_period', 'total_receipts_period', 'total_contributions_period', 'end_image_number', 'refunds_individual_contributions_period', 'loan_repayments_candidate_loans_year', 'total_operating_expenditures_year', 'total_operating_expenditures_period', 'report_type_full', 'election_cycle',
+    def _check_reports(self, committee_type, factory, schema):
+        committee = factories.CommitteeFactory(committee_type=committee_type)
+        end_dates = [datetime.datetime(2012, 1, 1), datetime.datetime(2008, 1, 1)]
+        committee_id = committee.committee_id
+        [
+            factory(
+                committee_id=committee_id,
+                coverage_end_date=end_date
             )
+            for end_date in end_dates
+        ]
+        response = self._results(api.url_for(ReportsView, committee_id=committee_id))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['coverage_end_date'], isoformat(end_dates[0]))
+        self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
+        assert response[0].keys() == schema._declared_fields.keys()
 
-        for field in fields:
-            print(field)
-            self.assertEquals(field in results[0]['reports'][0], True)
+    # TODO(jmcarp) Refactor as parameterize tests
+    def test_reports(self):
+        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
+        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
+        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.ReportsPresidentialSchema)
+        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.ReportsPacPartySchema)
+
+    def test_reports_committee_not_found(self):
+        resp = self.app.get(api.url_for(ReportsView, committee_id='fake'))
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertIn('not found', data['message'].lower())
 
     @unittest.skip("Not implementing for now.")
     def test_total_field_filter(self):
@@ -166,19 +160,25 @@ class OverallTest(ApiBaseTest):
         results_recipts = self._results('/committee/C00347583/totals?fields=total_receipts_period')
 
         self.assertIn('disbursements', results_disbursements[0]['totals'][0])
-        self.assertIn('total_receipts_period',results_recipts[0]['reports'][0])
+        self.assertIn('total_receipts_period', results_recipts[0]['reports'][0])
         self.assertNotIn('reports', results_disbursements[0])
         self.assertNotIn('totals', results_recipts[0])
 
-    @unittest.skip("Not implementing for now.")
+    def test_totals_committee_not_found(self):
+        resp = self.app.get(api.url_for(TotalsView, committee_id='fake'))
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertIn('not found', data['message'].lower())
+
     def test_total_cycle(self):
-        results1 = self._results('/committee/C00000422/totals?year=2004')
-        total_receipts1 = results1[0]['receipts']
+        committee = factories.CommitteeFactory(committee_type='P')
+        committee_id = committee.committee_id
+        receipts = 5
+        totals = factories.TotalsPresidentialFactory(cycle=2012, committee_id=committee_id, receipts=receipts)
 
-        results2 = self._results('/committee/C00000422/totals?year=2006')
-        total_receipts2 = results2[0]['receipts']
-
-        self.assertGreater(total_receipts2, total_receipts1)
+        results = self._results(api.url_for(TotalsView, committee_id=committee.committee_id))
+        self.assertEqual(results[0]['receipts'], totals.receipts)
 
     @unittest.skip("Not implementing for now.")
     def test_multiple_committee(self):

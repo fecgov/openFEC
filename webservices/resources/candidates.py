@@ -1,270 +1,120 @@
-from flask.ext.restful import Resource, reqparse, fields, marshal_with, inputs, marshal
-from webservices.common.models import db, Candidate, CandidateDetail, Committee, CandidateCommitteeLink, CandidateHistory
-from webservices.common.util import Pagination
-from sqlalchemy.sql import text, or_
-from sqlalchemy import extract
+from sqlalchemy.sql import text
+from flask.ext.restful import Resource
 
-# output format for flask-restful marshaling
+from webservices import args
+from webservices import spec
+from webservices import paging
+from webservices import schemas
+from webservices.common.util import filter_query
+from webservices.common.models import db, Candidate, CandidateDetail, CandidateHistory, CandidateCommitteeLink
 
-candidate_fields = {
-    'candidate_id': fields.String,
-    'candidate_status_full': fields.String,
-    'candidate_status': fields.String,
-    'district': fields.String,
-    'active_through': fields.Integer,
-    'election_years': fields.List(fields.Integer),
-    'cycles': fields.List(fields.Integer),
-    'incumbent_challenge_full': fields.String,
-    'incumbent_challenge': fields.String,
-    'office_full': fields.String,
-    'office': fields.String,
-    'party_full': fields.String,
-    'party': fields.String,
-    'state': fields.String,
-    'name': fields.String,
-}
-candidate_detail_fields = {
-    'candidate_id': fields.String,
-    'candidate_status_full': fields.String,
-    'candidate_status': fields.String,
-    'district': fields.String,
-    'active_through': fields.Integer,
-    'election_years': fields.List(fields.Integer),
-    'incumbent_challenge_full': fields.String,
-    'incumbent_challenge': fields.String,
-    'office_full': fields.String,
-    'office': fields.String,
-    'party_full': fields.String,
-    'party': fields.String,
-    'state': fields.String,
-    'name': fields.String,
-    'expire_date': fields.String,
-    'load_date': fields.String,
-    'form_type': fields.String,
-    'address_city': fields.String,
-    'address_state': fields.String,
-    'address_street_1': fields.String,
-    'address_street_2': fields.String,
-    'address_zip': fields.String,
-    'candidate_inactive': fields.String,
-}
-candidate_history_fields = {
-    'candidate_id': fields.String,
-    'two_year_period': fields.Integer,
-    'candidate_status_full': fields.String,
-    'candidate_status': fields.String,
-    'district': fields.String,
-    'incumbent_challenge_full': fields.String,
-    'incumbent_challenge': fields.String,
-    'office_full': fields.String,
-    'office': fields.String,
-    'party_full': fields.String,
-    'party': fields.String,
-    'state': fields.String,
-    'name': fields.String,
-    'expire_date': fields.String,
-    'load_date': fields.String,
-    'form_type': fields.String,
-    'address_city': fields.String,
-    'address_state': fields.String,
-    'address_street_1': fields.String,
-    'address_street_2': fields.String,
-    'address_zip': fields.String,
-    'candidate_inactive': fields.String,
-}
-pagination_fields = {
-    'per_page': fields.Integer,
-    'page': fields.Integer,
-    'count': fields.Integer,
-    'pages': fields.Integer,
-}
-candidate_list_fields = {
-    'api_version': fields.Fixed(1),
-    'pagination': fields.Nested(pagination_fields),
-    'results': fields.Nested(candidate_fields),
+
+filter_fields = {
+    'candidate_id',
+    'candidate_status',
+    'district',
+    'incumbent_challenge',
+    'office',
+    'party',
+    'state',
 }
 
 
 class CandidateList(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('q', type=str, help='Text to search all fields for')
-    parser.add_argument('candidate_id', type=str, action='append', help="Candidate's FEC ID")
-    parser.add_argument('fec_id', type=str, help="Candidate's FEC ID")
-    parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('name', type=str, help="Candidate's name (full or partial)")
-    parser.add_argument('office', type=str, action='append', help='Governmental office candidate runs for')
-    parser.add_argument('state', type=str, action='append', help='U. S. State candidate is registered in')
-    parser.add_argument('party', type=str, action='append', help="Three letter code for the party under which a candidate ran for office")
-    parser.add_argument('cycle', type=int, action='append', help='Filter records to only those that were applicable to a given election cycle')
-    parser.add_argument('district', type=str, action='append', help='Two digit district number')
-    parser.add_argument('candidate_status', type=str, action='append', help='One letter code explaining if the candidate is a present, future or past candidate')
-    parser.add_argument('incumbent_challenge', type=str, action='append', help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
 
-    @marshal_with(candidate_list_fields)
+    fulltext_query = """
+        SELECT cand_sk
+        FROM   dimcand_fulltext_mv
+        WHERE  fulltxt @@ to_tsquery(:findme)
+        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
+    """
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.candidate_list)
+    @args.register_kwargs(args.candidate_detail)
+    @schemas.marshal_with(schemas.CandidateListPageSchema())
     def get(self, **kwargs):
+        candidates = self.get_candidates(kwargs)
+        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
+        return paginator.get_page(kwargs['page'])
 
-        args = self.parser.parse_args(strict=True)
+    def get_candidates(self, kwargs):
 
-        # pagination
-        page_num = args.get('page', 1)
-        per_page = args.get('per_page', 20)
-
-        count, candidates = self.get_candidates(args, page_num, per_page)
-
-        page_data = Pagination(page_num, per_page, count)
-
-        data = {
-            'api_version': '0.2',
-            'pagination': page_data.as_json(),
-            'results': candidates
-        }
-
-        return data
-
-    def get_candidates(self, args, page_num, per_page):
         candidates = Candidate.query
 
-        fulltext_qry = """SELECT cand_sk
-                          FROM   dimcand_fulltext_mv
-                          WHERE  fulltxt @@ to_tsquery(:findme)
-                          ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc"""
+        if kwargs.get('q'):
+            findme = ' & '.join(kwargs['q'].split())
+            candidates = candidates.filter(
+                Candidate.candidate_key.in_(
+                    db.session.query('cand_sk').from_statement(text(self.fulltext_query)).params(findme=findme)
+                )
+            )
 
-        if args.get('q'):
-            findme = ' & '.join(args['q'].split())
-            candidates = candidates.filter(Candidate.candidate_key.in_(
-                db.session.query("cand_sk").from_statement(text(fulltext_qry)).params(findme=findme)))
+        candidates = filter_query(Candidate, candidates, filter_fields, kwargs)
 
-        for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
-            if args.get(argname):
-                # this is not working and doesn't look like it would work for _short
-                candidates = candidates.filter(getattr(Candidate, argname).in_(args[argname]))
-
-        if args.get('name'):
-            candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(args['name'])))
+        if kwargs.get('name'):
+            candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(kwargs['name'])))
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
-        if args['cycle']:
-            candidates = candidates.filter(Candidate.cycles.overlap(args['cycle']))
+        if kwargs['cycle']:
+            candidates = candidates.filter(Candidate.cycles.overlap(kwargs['cycle']))
 
-        count = candidates.count()
-
-        return count, candidates.order_by(Candidate.name).paginate(page_num, per_page, False).items
+        return candidates.order_by(Candidate.name)
 
 
-
+@spec.doc(path_params=[
+    {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+    {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+])
 class CandidateView(Resource):
 
-    parser = reqparse.RequestParser()
-    parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
-    parser.add_argument('office', type=str, action='append', help='Governmental office candidate runs for')
-    parser.add_argument('state', type=str, action='append', help='U. S. State candidate is registered in')
-    parser.add_argument('party', type=str, action='append', help="Three letter code for the party under which a candidate ran for office")
-    parser.add_argument('cycle', type=int, action='append', help='Filter records to only those that were applicable to a given election cycle')
-    parser.add_argument('district', type=str, action='append', help='Two digit district number')
-    parser.add_argument('candidate_status', type=str, action='append', help='One letter code explaining if the candidate is a present, future or past candidate')
-    parser.add_argument('incumbent_challenge', type=str, action='append', help='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.')
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.candidate_detail)
+    @schemas.marshal_with(schemas.CandidateDetailPageSchema())
+    def get(self, candidate_id=None, committee_id=None, **kwargs):
+        candidates = self.get_candidate(kwargs, candidate_id, committee_id)
+        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
+        return paginator.get_page(kwargs['page'])
 
-
-    def get(self, **kwargs):
-        if 'candidate_id' in kwargs:
-            committee_id = None
-            candidate_id = kwargs['candidate_id']
-        else:
-            committee_id = kwargs['committee_id']
-            candidate_id = None
-
-        args = self.parser.parse_args(strict=True)
-
-        page_num = args.get('page', 1)
-        per_page = args.get('per_page', 20)
-
-        count, candidates = self.get_candidate(args, page_num, per_page, candidate_id, committee_id)
-
-        page_data = Pagination(page_num, per_page, count)
-
-        # decorator won't work for me
-        candidates = marshal(candidates, candidate_detail_fields)
-
-        data = {
-            'api_version': '0.2',
-            'pagination': page_data.as_json(),
-            'results': candidates
-        }
-
-        return data
-
-    def get_candidate(self, args, page_num, per_page, candidate_id, committee_id):
+    def get_candidate(self, kwargs, candidate_id=None, committee_id=None):
         if candidate_id is not None:
             candidates = CandidateDetail.query
-            candidates = candidates.filter_by(**{'candidate_id': candidate_id})
+            candidates = candidates.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
-            candidates = CandidateDetail.query.join(CandidateCommitteeLink).filter(CandidateCommitteeLink.committee_id==committee_id)
+            candidates = CandidateDetail.query.join(
+                CandidateCommitteeLink
+            ).filter(
+                CandidateCommitteeLink.committee_id == committee_id
+            )
 
-        for argname in ['candidate_id', 'candidate_status', 'district', 'incumbent_challenge', 'office', 'party', 'state']:
-            if args.get(argname):
-                # this is not working and doesn't look like it would work for _short
-                candidates = candidates.filter(getattr(CandidateDetail, argname).in_(args[argname]))
+        candidates = filter_query(CandidateDetail, candidates, filter_fields, kwargs)
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
-        if args['cycle']:
-            candidates = candidates.filter(CandidateDetail.cycles.overlap(args['cycle']))
+        if kwargs['cycle']:
+            candidates = candidates.filter(CandidateDetail.cycles.overlap(kwargs['cycle']))
 
-        count = candidates.count()
-
-        return count, candidates.order_by(CandidateDetail.expire_date.desc()).paginate(page_num, per_page, False).items
+        return candidates.order_by(CandidateDetail.expire_date.desc())
 
 
 class CandidateHistoryView(Resource):
 
-    parser = reqparse.RequestParser()
-    parser.add_argument('page', type=inputs.natural, default=1, help='For paginating through results, starting at page 1')
-    parser.add_argument('per_page', type=inputs.natural, default=20, help='The number of results returned per page. Defaults to 20.')
+    @args.register_kwargs(args.paging)
+    @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
+    def get(self, candidate_id, year=None, **kwargs):
+        candidates = self.get_candidate(candidate_id, year, kwargs)
+        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
+        return paginator.get_page(kwargs['page'])
 
-
-    def get(self, **kwargs):
-        candidate_id = kwargs['candidate_id']
-        args = self.parser.parse_args(strict=True)
-
-        page_num = args.get('page', 1)
-        per_page = args.get('per_page', 20)
-
-
-        count, candidates = self.get_candidate(args, page_num, per_page, **kwargs)
-
-        # decorator won't work for me
-        candidates = marshal(candidates, candidate_history_fields)
-
-        page_data = Pagination(page_num, per_page, count)
-
-        data = {
-            'api_version': '0.2',
-            'pagination': page_data.as_json(),
-            'results': candidates
-        }
-
-        return data
-
-    def get_candidate(self, args, page_num, per_page, **kwargs):
-        candidate_id = kwargs['candidate_id']
-        year = kwargs.get('year', None)
+    def get_candidate(self, candidate_id, year, kwargs):
 
         candidates = CandidateHistory.query
-        candidates = candidates.filter_by(**{'candidate_id': candidate_id})
+        candidates = candidates.filter_by(candidate_id=candidate_id)
 
         if year:
             if year == 'recent':
-                candidates = candidates.order_by(CandidateHistory.two_year_period.desc()).first()
+                return candidates.order_by(CandidateHistory.two_year_period.desc()).limit(1)
+            year = int(year) + int(year) % 2
+            candidates = candidates.filter_by(two_year_period=year)
 
-                return 1, [candidates]
-
-            else:
-                # look for 2 year period
-                year = int(year) + int(year) % 2
-                candidates = candidates.filter_by(**{'two_year_period': year})
-
-        count = candidates.count()
-
-        return count, candidates.order_by(CandidateHistory.two_year_period.desc()).paginate(page_num, per_page, False).items
+        return candidates.order_by(CandidateHistory.two_year_period.desc())

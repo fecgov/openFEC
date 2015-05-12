@@ -2,8 +2,12 @@ import datetime
 import unittest
 import functools
 
-from .common import ApiBaseTest
+from marshmallow.utils import isoformat
+
 from tests import factories
+from tests.common import ApiBaseTest
+
+from webservices import schemas
 from webservices.rest import api
 from webservices.rest import CandidateList
 from webservices.rest import CandidateView
@@ -58,8 +62,8 @@ class CandidateFormatTest(ApiBaseTest):
         # @todo - check for a value for expire_data
         self.assertEqual(result['expire_date'], None)
         # # most recent record should be first
-        self.assertEqual(result['load_date'], str(candidate.load_date))
-        self.assertNotEqual(result['load_date'], str(candidate_old.load_date))
+        self.assertEqual(result['load_date'], isoformat(candidate.load_date))
+        self.assertNotEqual(result['load_date'], isoformat(candidate_old.load_date))
         self.assertResultsEqual(result['name'], candidate.name)
         # #address
         self.assertEqual(result['address_city'], candidate.address_city)
@@ -90,12 +94,8 @@ class CandidateFormatTest(ApiBaseTest):
         response = self._results(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
+        assert response[0].keys() == schemas.CandidateDetailSchema._declared_fields.keys()
         response = response[0]
-
-        fields = ('party', 'party_full', 'state', 'district', 'incumbent_challenge_full', 'incumbent_challenge', 'candidate_status', 'candidate_status_full', 'office', 'active_through')
-
-        for field in fields:
-            self.assertIn(field, response)
 
     def test_extra_fields(self):
         candidate = factories.CandidateDetailFactory(
