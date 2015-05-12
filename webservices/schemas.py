@@ -96,6 +96,7 @@ register_schema(NameSearchListSchema)
 
 class CandidateSchema(ma.Schema):
     candidate_id = ma.fields.String()
+    cycles = ma.fields.List(ma.fields.Integer())
     candidate_status_full = ma.fields.String()
     candidate_status = ma.fields.String()
     district = ma.fields.String()

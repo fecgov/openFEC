@@ -13,6 +13,7 @@ select
         else 'Unknown' end as candidate_status_full,
     max(co.cand_election_yr) as active_through,
     array_agg(distinct co.cand_election_yr)::int[] as election_years,
+    array_agg(distinct(dcp.election_yr + dcp.election_yr % 2))::int[] as cycles,
     max(csi_recent.cand_inactive_flg) as candidate_inactive,
     max(dimoffice.office_tp) as office,
     max(dimoffice.office_tp_desc) as office_full,
@@ -50,12 +51,16 @@ from dimcand
         select distinct on (cand_sk) * from dimcandproperties
             order by cand_sk, candproperties_sk desc
     ) cand_p_most_recent using(cand_sk, cand_id)
-    left join dimcandoffice co on co.cand_sk = dimcand.cand_sk
+    left join dimcandoffice co using (cand_sk)
     left join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
+    left join dimcandproperties dcp using (cand_sk)
+    where dcp.election_yr >= :START_YEAR
 group by
     dimcand.cand_sk,
     dimcand.cand_id
+-- Candidate must have > 0 records after START_YEAR
+having count(dcp) > 0
 ;
 
 create unique index on ofec_candidate_detail_mv_tmp(idx);
@@ -68,7 +73,9 @@ create index on ofec_candidate_detail_mv_tmp(district);
 create index on ofec_candidate_detail_mv_tmp(load_date);
 create index on ofec_candidate_detail_mv_tmp(candidate_id);
 create index on ofec_candidate_detail_mv_tmp(candidate_key);
-create index on ofec_candidate_detail_mv_tmp(election_years);
 create index on ofec_candidate_detail_mv_tmp(candidate_status);
 create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
 create index on ofec_candidate_detail_mv_tmp(candidate_expire_date);
+
+create index on ofec_candidate_detail_mv_tmp using gin (cycles);
+create index on ofec_candidate_detail_mv_tmp using gin (election_years);

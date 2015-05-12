@@ -27,9 +27,9 @@ select
     sum(other_receipts_per) as other_receipts,
     sum(pol_pty_cmte_contb_per) as political_party_committee_contributions,
     sum(ttl_receipts_per_i) as receipts,
-    sum(ref_indv_contb_per) as refunds_individual_contributions,
-    sum(ref_other_pol_cmte_contb_per) as refunds_other_political_committee_contributions,
-    sum(ref_pol_pty_cmte_contb_per) as refunds_political_party_committee_contributions,
+    sum(ref_indv_contb_per) as refunded_individual_contributions,
+    sum(ref_other_pol_cmte_contb_per) as refunded_other_political_committee_contributions,
+    sum(ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
     sum(tranf_from_other_auth_cmte_per) as transfers_from_other_authorized_committee,
     sum(tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee
 from
@@ -39,7 +39,8 @@ from
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
-    hs.expire_date is null or hs.expire_date > date_trunc('day', now())
+    hs.expire_date is null
+    and two_yr_period_sk >= :START_YEAR
 group by committee_id, cycle, committee_type
 ;
 

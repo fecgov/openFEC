@@ -27,8 +27,8 @@ class CandidateSearch(BaseModel):
     fulltxt = db.Column(TSVECTOR)
 
 
-class Candidate(BaseModel):
-    __tablename__ = 'ofec_candidates_mv'
+class BaseCandidate(BaseModel):
+    __abstract__ = True
 
     candidate_key = db.Column(db.Integer, unique=True)
     candidate_id = db.Column(db.String(10))
@@ -37,6 +37,7 @@ class Candidate(BaseModel):
     district = db.Column(db.String(2))
     active_through = db.Column(db.Integer)
     election_years = db.Column(ARRAY(db.Integer))
+    cycles = db.Column(ARRAY(db.Integer))
     incumbent_challenge = db.Column(db.String(1))
     incumbent_challenge_full = db.Column(db.String(10))
     office = db.Column(db.String(1))
@@ -45,26 +46,17 @@ class Candidate(BaseModel):
     party_full = db.Column(db.String(255))
     state = db.Column(db.String(2))
     name = db.Column(db.String(100))
+
+
+class Candidate(BaseCandidate):
+    __tablename__ = 'ofec_candidates_mv'
+
     committees = db.relationship('CandidateCommitteeLink', backref='candidates')
 
 
-class CandidateDetail(BaseModel):
+class CandidateDetail(BaseCandidate):
     __tablename__ = 'ofec_candidate_detail_mv'
 
-    candidate_key = db.Column(db.Integer, unique=True)
-    candidate_id = db.Column(db.String(10))
-    candidate_status = db.Column(db.String(1))
-    candidate_status_full = db.Column(db.String(11))
-    district = db.Column(db.String(2))
-    active_through = db.Column(db.Integer)
-    election_years = db.Column(ARRAY(db.Integer))
-    incumbent_challenge = db.Column(db.String(1))
-    incumbent_challenge_full = db.Column(db.String(10))
-    office = db.Column(db.String(1))
-    office_full = db.Column(db.String(9))
-    party = db.Column(db.String(3))
-    party_full = db.Column(db.String(255))
-    state = db.Column(db.String(2))
     name = db.Column(db.String(100))
     expire_date = db.Column('candidate_expire_date', db.DateTime())
     load_date = db.Column(db.DateTime())
@@ -78,12 +70,12 @@ class CandidateDetail(BaseModel):
     committees = db.relationship('CandidateCommitteeLink', backref='candidatedetail')
 
 
-class Committee(BaseModel):
-    __tablename__ = 'ofec_committees_mv'
+class BaseCommittee(BaseModel):
+    __abstract__ = True
 
     committee_key = db.Column(db.Integer, unique=True)
     committee_id = db.Column(db.String(9))
-    candidate_ids = db.Column(ARRAY(db.Text))
+    cycles = db.Column(ARRAY(db.Integer))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
@@ -98,29 +90,18 @@ class Committee(BaseModel):
     party = db.Column(db.String(3))
     party_full = db.Column(db.String(50))
     name = db.Column(db.String(100))
+
+
+class Committee(BaseCommittee):
+    __tablename__ = 'ofec_committees_mv'
+
+    candidate_ids = db.Column(ARRAY(db.Text))
     candidates = db.relationship('CandidateCommitteeLink', backref='committees')
 
 
-class CommitteeDetail(BaseModel):
+class CommitteeDetail(BaseCommittee):
     __tablename__ = 'ofec_committee_detail_mv'
 
-    committee_key = db.Column(db.Integer, unique=True)
-    committee_id = db.Column(db.String(9))
-    designation = db.Column(db.String(1))
-    designation_full = db.Column(db.String(25))
-    treasurer_name = db.Column(db.String(100))
-    organization_type = db.Column(db.String(1))
-    organization_type_full = db.Column(db.String(100))
-    state = db.Column(db.String(2))
-    committee_type = db.Column(db.String(1))
-    committee_type_full = db.Column(db.String(50))
-    expire_date = db.Column(db.DateTime())
-    first_file_date = db.Column(db.DateTime)
-    last_file_date = db.Column(db.DateTime)
-    party = db.Column(db.String(3))
-    party_full = db.Column(db.String(50))
-    name = db.Column(db.String(100))
-    # detail view additions
     filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50))
     fax = db.Column(db.String(10))
@@ -492,8 +473,8 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     refunded_individual_contributions = db.Column(db.Integer)
     repayments_loans_made_by_candidate = db.Column(db.Integer)
     repayments_other_loans = db.Column(db.Integer)
-    transfer_from_affiliated_committee = db.Column(db.Integer)
-    transfer_to_other_authorized_committee = db.Column(db.Integer)
+    transfers_from_affiliated_committee = db.Column(db.Integer)
+    transfers_to_other_authorized_committee = db.Column(db.Integer)
 
 
 class CommitteeTotalsHouseOrSenate(CommitteeTotals):
@@ -510,9 +491,9 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     loans = db.Column(db.Integer)
     loans_made_by_candidate = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
-    refunds_individual_contributions = db.Column(db.Integer)
-    refunds_other_political_committee_contributions = db.Column(db.Integer)
-    refunds_political_party_committee_contributions = db.Column(db.Integer)
+    refunded_individual_contributions = db.Column(db.Integer)
+    refunded_other_political_committee_contributions = db.Column(db.Integer)
+    refunded_political_party_committee_contributions = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
 

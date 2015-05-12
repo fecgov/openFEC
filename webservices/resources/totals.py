@@ -34,8 +34,6 @@ class TotalsView(Resource):
 
     def get_totals(self, committee_id, totals_class, kwargs):
         totals = totals_class.query.filter_by(committee_id=committee_id)
-        if kwargs['cycle'] != '*':
-            totals = totals.filter(
-                totals_class.cycle.in_(kwargs['cycle'].split(','))
-            )
+        if kwargs['cycle']:
+            totals = totals.filter(totals_class.cycle.in_(kwargs['cycle']))
         return totals.order_by(sa.desc(totals_class.cycle))

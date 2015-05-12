@@ -99,6 +99,8 @@ from
     inner join dimreporttype rt using (reporttype_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+where
+    two_yr_period_sk >= :START_YEAR
 ;
 
 create unique index on ofec_reports_house_senate_mv_tmp(idx);

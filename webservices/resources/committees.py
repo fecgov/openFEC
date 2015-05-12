@@ -1,12 +1,11 @@
 from sqlalchemy import extract
-from sqlalchemy.sql import text, or_
+from sqlalchemy.sql import text, or_, and_
 from flask.ext.restful import Resource
 
 from webservices import args
 from webservices import spec
 from webservices import paging
 from webservices import schemas
-from webservices.common.util import default_year
 from webservices.common.util import filter_query
 from webservices.common.models import db, Committee, CandidateCommitteeLink, CommitteeDetail
 
@@ -15,31 +14,19 @@ list_filter_fields = {'committee_id', 'designation', 'organization_type', 'state
 detail_filter_fields = {'designation', 'organization_type', 'committee_type'}
 
 
-def filter_year(model, query, kwargs):
-
-    # default year filtering
-    if kwargs.get('year') is None:
-        earliest_year = int(sorted(default_year().split(','))[0])
-        # still going or expired after the earliest year we are looking for
-        query = query.filter(
-            or_(
-                extract('year', model.last_file_date) >= earliest_year,
-                model.expire_date == None  # noqa
+def filter_year(model, query, years):
+    return query.filter(
+        or_(*[
+            and_(
+                or_(
+                    extract('year', model.last_file_date) >= year,
+                    model.last_file_date == None,
+                ),
+                extract('year', model.first_file_date) <= year,
             )
-        )
-
-    # Should this handle a list of years to make it consistent with /candidate ?
-    elif kwargs.get('year') and kwargs['year'] != '*':
-        year = int(kwargs['year'])
-        query = query.filter(
-            or_(
-                extract('year', model.last_file_date) >= year,
-                model.last_file_date == None,
-            ),
-            extract('year', model.first_file_date) <= year,
-        )  # noqa
-
-    return query
+            for year in years
+        ])
+    )  # noqa
 
 
 class CommitteeList(Resource):
@@ -66,7 +53,7 @@ class CommitteeList(Resource):
 
         if kwargs['candidate_id']:
             committees = committees.filter(
-                Committee.candidate_ids.overlap(kwargs['candidate_id'].split(','))
+                Committee.candidate_ids.overlap(kwargs['candidate_id'])
             )
 
         if kwargs.get('q'):
@@ -81,7 +68,12 @@ class CommitteeList(Resource):
             committees = committees.filter(Committee.name.ilike('%{}%'.format(kwargs['name'])))
 
         committees = filter_query(Committee, committees, list_filter_fields, kwargs)
-        committees = filter_year(Committee, committees, kwargs)
+
+        if kwargs['year']:
+            committees = filter_year(Committee, committees, kwargs['year'])
+
+        if kwargs['cycle']:
+            committees = committees.filter(Committee.cycles.overlap(kwargs['cycle']))
 
         return committees.order_by(Committee.name)
 
@@ -105,7 +97,7 @@ class CommitteeView(Resource):
         committees = CommitteeDetail.query
 
         if committee_id is not None:
-            committees = committees.filter_by(**{'committee_id': committee_id})
+            committees = committees.filter_by(committee_id=committee_id)
 
         if candidate_id is not None:
             committees = CommitteeDetail.query.join(
@@ -115,6 +107,11 @@ class CommitteeView(Resource):
             )
 
         committees = filter_query(CommitteeDetail, committees, detail_filter_fields, kwargs)
-        committees = filter_year(CommitteeDetail, committees, kwargs)
+
+        if kwargs['year']:
+            committees = filter_year(CommitteeDetail, committees, kwargs['year'])
+
+        if kwargs['cycle']:
+            committees = committees.filter(CommitteeDetail.cycles.overlap(kwargs['cycle']))
 
         return committees.order_by(CommitteeDetail.name)

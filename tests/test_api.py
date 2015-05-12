@@ -54,13 +54,18 @@ class OverallTest(ApiBaseTest):
         results = self._results(api.url_for(CandidateList, q='asdfasdf'))
         self.assertEquals(results, [])
 
-    def test_year_filter(self):
-        factories.CandidateFactory(election_years=[1986, 1988])
-        factories.CandidateFactory(election_years=[2000, 2002])
-        results = self._results(api.url_for(CandidateList, year=1988))
+    def test_cycle_filter(self):
+        factories.CandidateFactory(cycles=[1986, 1988])
+        factories.CandidateFactory(cycles=[2000, 2002])
+        results = self._results(api.url_for(CandidateList, cycle=1988))
         self.assertEqual(len(results), 1)
-        for each in results:
-            self.assertIn(1988, each['election_years'])
+        for result in results:
+            self.assertIn(1988, result['cycles'])
+        results = self._results(api.url_for(CandidateList, cycle=[1986, 2002]))
+        self.assertEqual(len(results), 2)
+        cycles = set([1986, 2002])
+        for result in results:
+            self.assertTrue(cycles.intersection(result['cycles']))
 
     def test_per_page_defaults_to_20(self):
         [factories.CandidateFactory() for _ in range(40)]

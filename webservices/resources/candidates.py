@@ -1,5 +1,4 @@
-from sqlalchemy import extract
-from sqlalchemy.sql import text, or_
+from sqlalchemy.sql import text
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -56,12 +55,9 @@ class CandidateList(Resource):
         if kwargs.get('name'):
             candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(kwargs['name'])))
 
-        if kwargs.get('election_year') and kwargs['election_year'] != '*':
-            candidates = candidates.filter(
-                Candidate.election_years.overlap(
-                    [int(x) for x in kwargs['election_year'].split(',')]
-                )
-            )
+        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
+        if kwargs['cycle']:
+            candidates = candidates.filter(Candidate.cycles.overlap(kwargs['cycle']))
 
         return candidates.order_by(Candidate.name)
 
@@ -94,16 +90,9 @@ class CandidateView(Resource):
 
         candidates = filter_query(CandidateDetail, candidates, filter_fields, kwargs)
 
-        if kwargs.get('year') and kwargs['year'] != '*':
-            # before expiration
-            candidates = candidates.filter(
-                or_(
-                    extract('year', CandidateDetail.expire_date) >= int(args['year']),
-                    CandidateDetail.expire_date == None,  # noqa
-                )
-            )
-            # after origination
-            candidates = candidates.filter(extract('year', CandidateDetail.load_date) <= int(args['year']))
+        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
+        if kwargs['cycle']:
+            candidates = candidates.filter(CandidateDetail.cycles.overlap(kwargs['cycle']))
 
         return candidates.order_by(CandidateDetail.expire_date.desc())
 

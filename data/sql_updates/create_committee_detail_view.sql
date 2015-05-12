@@ -89,7 +89,8 @@ select distinct
     cp_most_recent.party_cmte_type_desc as party_type_full,
     cp_most_recent.qual_dt as qualifying_date,
     cp_most_recent.receipt_dt as last_file_date,
-    cp_original.receipt_dt as first_file_date
+    cp_original.receipt_dt as first_file_date,
+    cp_agg.cycles as cycles
 
 from dimcmte
     left join (
@@ -99,19 +100,25 @@ from dimcmte
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
     left join (
         select distinct on (cmte_sk) * from dimcmteproperties
-            where form_tp = 'F1'
             order by cmte_sk, receipt_dt desc
     ) cp_most_recent using (cmte_sk)
     left join(
         select cmte_sk, min(receipt_dt) receipt_dt from dimcmteproperties
+            where form_tp = 'F1'
             group by cmte_sk
     ) cp_original using (cmte_sk)
-    left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
+    -- Aggregate election cycles from dimcmteproperties.rpt_yr
     left join (
-        select distinct on (cmte_sk) cmte_sk, load_date from dimcmteproperties
-            order by cmte_sk, cmteproperties_sk
-    ) dates on dimcmte.cmte_sk = dates.cmte_sk
-    -- inner join dimlinkages dl using (cmte_sk)
+        select
+            cmte_sk,
+            array_agg(distinct(rpt_yr + rpt_yr % 2))::int[] as cycles
+        from dimcmteproperties
+        where rpt_yr >= :START_YEAR
+        group by cmte_sk
+    ) cp_agg using (cmte_sk)
+    left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
+    -- Committee must have > 0 cycles after START_DATE
+    where array_length(cp_agg.cycles, 1) > 0
 ;
 
 create unique index on ofec_committee_detail_mv_tmp(idx);
@@ -122,3 +129,5 @@ create index on ofec_committee_detail_mv_tmp(committee_id);
 create index on ofec_committee_detail_mv_tmp(committee_key);
 create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(organization_type);
+
+create index on ofec_committee_detail_mv_tmp using gin (cycles);

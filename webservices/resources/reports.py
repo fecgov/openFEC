@@ -15,6 +15,7 @@ reports_schema_map = {
 }
 default_schemas = (models.CommitteeReportsPacOrParty, schemas.ReportsPacPartyPageSchema)
 
+
 reports_type_map = {
     'house-senate': 'H',
     'presidential': 'P',
@@ -46,8 +47,10 @@ class ReportsView(Resource):
         if committee_id is not None:
             reports = reports.filter_by(committee_id=committee_id)
 
-        if kwargs['cycle'] != '*':
-            reports = reports.filter(reports_class.cycle.in_(kwargs['cycle'].split(',')))
+        if kwargs['year']:
+            reports = reports.filter(reports_class.report_year.in_(kwargs['year']))
+        if kwargs['cycle']:
+            reports = reports.filter(reports_class.cycle.in_(kwargs['cycle']))
 
         return reports.order_by(sa.desc(reports_class.coverage_end_date)), reports_schema
 
