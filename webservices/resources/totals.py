@@ -191,6 +191,7 @@ presidential_fields = {
     'offsets_to_legal_accounting': fields.Integer,
     'other_loans_received': fields.Integer,
     'other_receipts': fields.Integer,
+    'repayments_loans_made_by_candidate': fields.Integer,
     'refunded_individual_contributions': fields.Integer,
     'refunded_other_political_committee_contributions': fields.Integer,
     'refunded_political_party_committee_contributions': fields.Integer,
