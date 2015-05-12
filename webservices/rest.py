@@ -20,7 +20,6 @@ from flask import render_template
 from flask import Flask
 from flask import Blueprint
 
-from flask import Flask, Blueprint, abort, request
 from flask.ext import restful
 import flask.ext.restful.representations.json
 import sqlalchemy as sa
