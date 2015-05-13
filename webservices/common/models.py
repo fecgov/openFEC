@@ -469,6 +469,7 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     loans_received_from_candidate = db.Column(db.Integer)
     offsets_to_fundraising_expenditures = db.Column(db.Integer)
     offsets_to_legal_accounting = db.Column(db.Integer)
+    total_offsets_to_operating_expenditures = db.Column(db.Integer)
     other_loans_received = db.Column(db.Integer)
     other_receipts = db.Column(db.Integer)
     refunded_other_political_committee_contributions = db.Column(db.Integer)

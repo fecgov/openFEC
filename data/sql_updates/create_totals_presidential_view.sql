@@ -23,6 +23,7 @@ select
     sum(offsets_to_fndrsg_exp_per) as offsets_to_fundraising_expenditures,
     sum(offsets_to_legal_acctg_per) as offsets_to_legal_accounting,
     sum(offsets_to_op_exp_per) as offsets_to_operating_expenditures,
+    sum(ttl_offsets_to_op_exp_per) as total_offsets_to_operating_expenditures,
     sum(op_exp_per) as operating_expenditures,
     sum(other_disb_per) as other_disbursements,
     sum(other_loans_received_per) as other_loans_received,
