@@ -27,7 +27,7 @@ import sqlalchemy as sa
 from webservices import args
 from webservices import schemas
 from webservices.common.models import db
-from webservices.resources.candidates import CandidateList, CandidateView, CandidateHistoryView
+from webservices.resources.candidates import CandidateList, CandidateSearch, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
@@ -124,6 +124,7 @@ class Help(restful.Resource):
 
 api.add_resource(Help, '/')
 api.add_resource(CandidateList, '/candidates')
+api.add_resource(CandidateSearch, '/candidates/search')
 api.add_resource(
     CandidateView,
     '/candidate/<string:candidate_id>',
