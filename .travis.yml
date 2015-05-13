@@ -1,9 +1,25 @@
 language: python
+
 python:
   - "3.4"
+
+# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
+sudo: false
+
 addons:
   postgresql: "9.4"
+
+env:
+  - secure: "Lj0OkjCNEVTEAb6x6xnFiE93YogXRxAGHytMrnPr/oBkim0RVN35gQdYE+J3HMObLVhu6D5mtMYxJkgi674KfuAWw74ZG0VxXH3fB8I+DtHxt7Ql3HoBryz2VP31lZ14IyV+BGBht7wPOhD7iSmNAnsAyXW2FmgodAhoXyfZMTg="
+  - secure: "hylNba7PhzwQMtfrKiVBRFvLbAvazVpVozkR7LoTdKZKf9jyyW9Z9lxH/tvaXoUCsGPtOQxSdlN9vkkJtxHMZegD+mY8n/m6WuBZzgeZbCD3LMpdzWDcvhQjU8RRZabd8Dn5lLvFmmb3nRSxdi5X1IkLj+ptvC9Caa2NBB78ipk="
+
 before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
   - pip install -r requirements.txt
+
 script: nosetests
+
+after_success:
+  # Deploy to appropriate Cloud Foundry space on success
+  # See `tasks.deploy` for details
+  - if [[ $TRAVIS_PULL_REQUEST = 'false' ]]; invoke deploy; fi;

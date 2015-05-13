@@ -13,14 +13,3 @@ applications:
     NEW_RELIC_APP_NAME: OpenFEC API (staging)
     NEW_RELIC_LOG: stdout
     WEB_CONCURRENCY: 4
-- name: web
-  path: ../openFEC-web-app
-  buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
-  host: fec-stage-web
-  env:
-    NEW_RELIC_APP_NAME: OpenFEC Web (staging)
-    FEC_WEB_API_URL: http://fec-stage-api.cf.18f.us
-    FEC_WEB_DEBUG: True
-    # These must be set manually via `cf set-env`
-    # FEC_WEB_PASSWORD
-    # FEC_WEB_USERNAME
