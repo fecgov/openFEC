@@ -96,36 +96,54 @@ def _detect_prod(repo):
 
 
 def _resolve_rule(repo):
+    """Get space associated with first matching rule."""
     for space, rule in DEPLOY_RULES:
         if rule(repo):
             return space
     return None
 
 
+def _detect_space(yes=False):
+    """Detect space from active git branch.
+
+    :param bool yes: Skip confirmation
+    :returns: Space name if space is detected and confirmed, else `None`
+    """
+    repo = git.Repo('.')
+    space = _resolve_rule(repo)
+    if space is None:
+        print(
+            'No space detected from repo {repo}; '
+            'skipping deploy'.format(**locals())
+        )
+        return None
+    print('Detected space {space} from repo {repo}'.format(**locals()))
+    if not yes:
+        run = input(
+            'Deploy to space {space} (enter "yes" to deploy)? >'.format(**locals())
+        )
+        if run.lower() not in ['y', 'yes']:
+            return None
+    return space
+
+
 DEPLOY_RULES = (
-    ('prod', lambda repo: _detect_prod),
+    ('prod', _detect_prod),
     ('stage', lambda repo: repo.active_branch.name == 'master'),
     ('dev', lambda repo: repo.active_branch.name == 'develop'),
 )
 
 
 @task
-def deploy(space=None):
+def deploy(space=None, yes=False):
     """Deploy app to Cloud Foundry. Log in using credentials stored in
     `FEC_CF_USERNAME` and `FEC_CF_PASSWORD`; push to either `space` or the space
     detected from the name and tags of the current branch.
     """
-    # Optionally detect space
-    if not space:
-        repo = git.Repo('.')
-        space = _resolve_rule(repo)
-        if space is None:
-            print(
-                'No space detected from branch {branch}; '
-                'skipping deploy'.format(**locals())
-            )
-            return
-        print('Detected space {space} from branch {branch}'.format(**locals()))
+    # Detect space
+    space = space or _detect_space(yes)
+    if space is None:
+        return
 
     # Select API
     api = 'cf api https://api.18f.gov'
