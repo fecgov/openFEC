@@ -83,30 +83,42 @@ def remove_hooks():
     run('rm .git/hooks/post-checkout')
 
 
-DEPLOY_RULES = (
-    ('develop', 'dev'),
-    ('master', 'stage'),
-    ('release', 'prod'),
+def _detect_prod(repo):
+    """Deploy to production if master is checked out and tagged."""
+    if repo.active_branch != 'master':
+        return False
+    try:
+        # Equivalent to `git describe --tags --exact-match`
+        repo.git().describe('--tags', '--exact-match')
+        return True
+    except git.exc.GitCommandError:
+        return False
 
-)
-def _resolve_rule(branch):
-    for pattern, space in DEPLOY_RULES:
-        if pattern in branch:
+
+def _resolve_rule(repo):
+    for space, rule in DEPLOY_RULES:
+        if rule(repo):
             return space
     return None
+
+
+DEPLOY_RULES = (
+    ('prod', lambda repo: _detect_prod),
+    ('stage', lambda repo: repo.active_branch.name == 'master'),
+    ('dev', lambda repo: repo.active_branch.name == 'develop'),
+)
 
 
 @task
 def deploy(space=None):
     """Deploy app to Cloud Foundry. Log in using credentials stored in
     `FEC_CF_USERNAME` and `FEC_CF_PASSWORD`; push to either `space` or the space
-    detected from the name of the current branch.
+    detected from the name and tags of the current branch.
     """
     # Optionally detect space
     if not space:
         repo = git.Repo('.')
-        branch = repo.active_branch.name
-        space = _resolve_rule(branch)
+        space = _resolve_rule(repo)
         if space is None:
             print(
                 'No space detected from branch {branch}; '
