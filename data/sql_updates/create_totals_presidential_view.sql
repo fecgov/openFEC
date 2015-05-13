@@ -15,6 +15,8 @@ select
     sum(fed_funds_per) as federal_funds,
     sum(fndrsg_disb_per) as fundraising_disbursements,
     sum(indv_contb_per) as individual_contributions,
+    sum(indv_unitem_contb_per) as individual_unitemized_contributions,
+    sum(indv_item_contb_per) as individual_itemized_contributions,
     sum(ttl_loans_received_per) as loans_received,
     sum(loans_received_from_cand_per) as loans_received_from_candidate,
     sum(ttl_loan_repymts_made_per) as loan_repayments_made,
