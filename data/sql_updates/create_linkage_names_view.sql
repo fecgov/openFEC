@@ -1,6 +1,5 @@
 drop materialized view if exists ofec_name_linkage_mv_tmp;
 create materialized view ofec_name_linkage_mv_tmp as
-
 select
     row_number() over () as idx,
     l.linkages_sk as linkage_key,

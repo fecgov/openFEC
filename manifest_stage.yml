@@ -7,6 +7,7 @@ env:
 applications:
 - name: api
   path: .
+  buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-stage-api
   env:
     NEW_RELIC_APP_NAME: OpenFEC API (staging)

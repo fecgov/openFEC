@@ -4,8 +4,6 @@ from factory.alchemy import SQLAlchemyModelFactory
 
 from webservices.rest import db
 from webservices.common import models
-from webservices.resources import totals
-from webservices.resources import reports
 
 
 class BaseFactory(SQLAlchemyModelFactory):
@@ -108,17 +106,17 @@ class BaseTotalsFactory(BaseFactory):
 
 class TotalsHouseSenateFactory(BaseTotalsFactory):
     class Meta:
-        model = totals.CommitteeTotalsHouseOrSenate
+        model = models.CommitteeTotalsHouseOrSenate
 
 
 class TotalsPresidentialFactory(BaseTotalsFactory):
     class Meta:
-        model = totals.CommitteeTotalsPresidential
+        model = models.CommitteeTotalsPresidential
 
 
 class TotalsPacPartyFactory(BaseTotalsFactory):
     class Meta:
-        model = totals.CommitteeTotalsPacOrParty
+        model = models.CommitteeTotalsPacOrParty
 
 
 class BaseReportsFactory(BaseFactory):
@@ -127,14 +125,14 @@ class BaseReportsFactory(BaseFactory):
 
 class ReportsHouseSenateFactory(BaseTotalsFactory):
     class Meta:
-        model = reports.CommitteeReportsHouseOrSenate
+        model = models.CommitteeReportsHouseOrSenate
 
 
 class ReportsPresidentialFactory(BaseTotalsFactory):
     class Meta:
-        model = reports.CommitteeReportsPresidential
+        model = models.CommitteeReportsPresidential
 
 
 class ReportsPacPartyFactory(BaseTotalsFactory):
     class Meta:
-        model = reports.CommitteeReportsPacOrParty
+        model = models.CommitteeReportsPacOrParty

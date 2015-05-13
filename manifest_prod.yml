@@ -8,6 +8,7 @@ env:
 applications:
 - name: api
   path: .
+  buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-prod-api
   env:
     PRODUCTION: True

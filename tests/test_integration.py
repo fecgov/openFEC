@@ -1,22 +1,20 @@
 import sqlalchemy as sa
 
 import manage
+from tests import common
 from webservices.rest import db
-from webservices.tests import common
 from webservices.common import models
-from webservices.resources import totals
-from webservices.resources import reports
 
 
 REPORTS_MODELS = [
-    reports.CommitteeReportsPacOrParty,
-    reports.CommitteeReportsPresidential,
-    reports.CommitteeReportsHouseOrSenate,
+    models.CommitteeReportsPacOrParty,
+    models.CommitteeReportsPresidential,
+    models.CommitteeReportsHouseOrSenate,
 ]
 TOTALS_MODELS = [
-    totals.CommitteeTotalsPacOrParty,
-    totals.CommitteeTotalsPresidential,
-    totals.CommitteeTotalsHouseOrSenate,
+    models.CommitteeTotalsPacOrParty,
+    models.CommitteeTotalsPresidential,
+    models.CommitteeTotalsHouseOrSenate,
 ]
 
 
