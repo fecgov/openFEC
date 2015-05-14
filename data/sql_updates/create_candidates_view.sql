@@ -16,12 +16,13 @@ select
     max(co.cand_election_yr) as active_through,
     array_agg(distinct co.cand_election_yr)::int[] as election_years,
     array_agg(distinct(dcp.election_yr + dcp.election_yr % 2))::int[] as cycles,
-    max(csi_recent.ici_code) as incumbent_challenge,
-    case max(csi_recent.ici_code)
+    max(full_ici.cand_ici_cd) as incumbent_challenge,
+    case max(full_ici.cand_ici_cd)
         when 'I' then 'Incumbent'
         when 'C' then 'Challenger'
         when 'O' then 'Open seat'
-        else 'Unknown' end as incumbent_challenge_full,
+        else 'Unknown'
+    end as incumbent_challenge_full,
     max(dimoffice.office_tp) as office,
     max(dimoffice.office_tp_desc) as office_full,
     max(dimparty.party_affiliation) as party,
@@ -37,6 +38,14 @@ from dimcand
             from dimcandstatusici
             order by cand_sk, election_yr desc
     ) csi_recent using (cand_sk)
+    -- there are some holes in this data so we want the last time it was updated
+    left join(
+        select distinct on (cand_sk)
+            cp.cand_sk, cp.cand_ici_desc, cp.cand_ici_cd
+        from dimcandproperties cp
+        where cand_ici_desc is not null
+        order by cand_sk, cand_id, election_yr desc
+    ) full_ici using (cand_sk)
     left join (
         select distinct on (cand_sk) * from dimcandoffice order by cand_sk, candoffice_sk desc
     ) co using (cand_sk)
