@@ -83,9 +83,9 @@ def remove_hooks():
     run('rm .git/hooks/post-checkout')
 
 
-def _detect_prod(repo):
+def _detect_prod(repo, branch):
     """Deploy to production if master is checked out and tagged."""
-    if repo.active_branch != 'master':
+    if branch != 'master':
         return False
     try:
         # Equivalent to `git describe --tags --exact-match`
@@ -95,22 +95,29 @@ def _detect_prod(repo):
         return False
 
 
-def _resolve_rule(repo):
+def _resolve_rule(repo, branch):
     """Get space associated with first matching rule."""
     for space, rule in DEPLOY_RULES:
-        if rule(repo):
+        if rule(repo, branch):
             return space
     return None
 
 
-def _detect_space(yes=False):
+def _detect_space(branch=None, yes=False):
     """Detect space from active git branch.
 
+    :param str branch: Optional branch name override
     :param bool yes: Skip confirmation
     :returns: Space name if space is detected and confirmed, else `None`
     """
     repo = git.Repo('.')
-    space = _resolve_rule(repo)
+    # Fail gracefully if `branch` is not provided and repo is in detached
+    # `HEAD` mode
+    try:
+        branch = branch or repo.active_branch.name
+    except TypeError:
+        return None
+    space = _resolve_rule(repo, branch)
     if space is None:
         print(
             'No space detected from repo {repo}; '
@@ -120,7 +127,7 @@ def _detect_space(yes=False):
     print('Detected space {space} from repo {repo}'.format(**locals()))
     if not yes:
         run = input(
-            'Deploy to space {space} (enter "yes" to deploy)? >'.format(**locals())
+            'Deploy to space {space} (enter "yes" to deploy)? > '.format(**locals())
         )
         if run.lower() not in ['y', 'yes']:
             return None
@@ -129,19 +136,20 @@ def _detect_space(yes=False):
 
 DEPLOY_RULES = (
     ('prod', _detect_prod),
-    ('stage', lambda repo: repo.active_branch.name == 'master'),
-    ('dev', lambda repo: repo.active_branch.name == 'develop'),
+    ('stage', lambda _, branch: branch == 'master'),
+    ('dev', lambda _, branch: branch == 'develop'),
 )
 
 
 @task
-def deploy(space=None, yes=False):
+def deploy(space=None, branch=None, yes=False):
     """Deploy app to Cloud Foundry. Log in using credentials stored in
     `FEC_CF_USERNAME` and `FEC_CF_PASSWORD`; push to either `space` or the space
-    detected from the name and tags of the current branch.
+    detected from the name and tags of the current branch. Note: Must pass `space`
+    or `branch` if repo is in detached HEAD mode, e.g. when running on Travis.
     """
     # Detect space
-    space = space or _detect_space(yes)
+    space = space or _detect_space(branch, yes)
     if space is None:
         return
 

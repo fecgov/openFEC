@@ -23,4 +23,4 @@ script: nosetests
 after_success:
   # Deploy to appropriate Cloud Foundry space on success
   # See `tasks.deploy` for details
-  - if [[ $TRAVIS_PULL_REQUEST = 'false' ]]; then invoke deploy; fi;
+  - if [[ $TRAVIS_PULL_REQUEST = 'false' ]]; then invoke deploy --branch $TRAVIS_BRANCH --yes; fi;
