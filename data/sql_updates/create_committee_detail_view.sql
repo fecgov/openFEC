@@ -48,7 +48,10 @@ select distinct
     cp_most_recent.cmte_st as state,
     cp_most_recent.expire_date as expire_date,
     cp_most_recent.cand_pty_affiliation as party,
-    p.party_affiliation_desc as party_full,
+    -- Handle typos and notes in party description:
+    -- * "Commandments Party (Removed)" becomes "Commandments Party"
+    -- * "Green Party Added)" becomes "Green Party"
+    regexp_replace(p.party_affiliation_desc, '\s*(Added|Removed|\(.*?)\)$', '') as party_full,
     cp_most_recent.cmte_nm as name,
     -- (select all cand_id from dimlinkages dl where dl.cmte_sk = dimcmte.cmte_sk) as candidate_ids
     -- Below here are committee variables for the detail view
