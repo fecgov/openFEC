@@ -540,6 +540,7 @@ class TotalsPresidentialSchema(TotalsSchema):
     other_loans_received = ma.fields.Integer()
     other_receipts = ma.fields.Integer()
     repayments_loans_made_by_candidate = ma.fields.Integer()
+    repayments_other_loans = ma.fields.Integer()
     refunded_individual_contributions = ma.fields.Integer()
     refunded_other_political_committee_contributions = ma.fields.Integer()
     refunded_political_party_committee_contributions = ma.fields.Integer()
