@@ -27,6 +27,13 @@ class CandidateSearch(BaseModel):
     fulltxt = db.Column(TSVECTOR)
 
 
+class CommitteeSearch(BaseModel):
+    __tablename__ = 'dimcmte_fulltext_mv'
+
+    cmte_sk = db.Column(db.Integer)
+    fulltxt = db.Column(TSVECTOR)
+
+
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
