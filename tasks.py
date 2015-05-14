@@ -145,12 +145,9 @@ def deploy(space=None, yes=False):
     if space is None:
         return
 
-    # Select API
-    api = 'cf api https://api.18f.gov'
-    run(api, echo=True)
-
     # Log in
     args = (
+        ('--a', 'https://api.18f.gov'),
         ('--u', '$FEC_CF_USERNAME'),
         ('--p', '$FEC_CF_PASSWORD'),
         ('--o', 'fec'),
