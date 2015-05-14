@@ -26,7 +26,10 @@ select
     dcp_by_period.office_state as state,
     dcp_by_period.office_district as district,
     dcp_by_period.party_affiliation as party,
-    dcp_by_period.party_affiliation_desc as party_full
+    -- Handle typos and notes in party description:
+    -- * "Commandments Party (Removed)" becomes "Commandments Party"
+    -- * "Green Party Added)" becomes "Green Party"
+    regexp_replace(dcp_by_period.party_affiliation_desc, '\s*(Added|Removed|\(.*?)\)$', '') as party_full
 from ofec_two_year_periods
     left join (
         select distinct on (two_year_period, cand_sk)
