@@ -34,7 +34,9 @@ from dimcand
             from dimcandstatusici
             order by cand_sk, election_yr desc
     ) csi_recent using (cand_sk)
-    left join dimcandoffice co using (cand_sk)
+    left join (
+        select distinct on (cand_sk) * from dimcandoffice order by cand_sk, candoffice_sk desc
+    ) co using (cand_sk)
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
     left join (
