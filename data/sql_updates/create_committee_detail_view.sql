@@ -35,7 +35,16 @@ select distinct
         else 'unknown' end as committee_type_full,
     cp_most_recent.cmte_treasurer_nm as treasurer_name,
     cp_most_recent.org_tp as organization_type,
-    cp_most_recent.org_tp_desc as organization_type_full,
+    -- Columns org_tp and org_tp_desc may be inconsistent; trust org_tp
+    case cp_most_recent.org_tp
+        when 'C' then 'Corporation'
+        when 'L' then 'Labor Organization'
+        when 'M' then 'Membership Organization'
+        when 'T' then 'Trade Association'
+        when 'V' then 'Cooperative'
+        when 'W' then 'Corporation w/o capital stock'
+        else null
+    end as organization_type_full,
     cp_most_recent.cmte_st as state,
     cp_most_recent.expire_date as expire_date,
     cp_most_recent.cand_pty_affiliation as party,
