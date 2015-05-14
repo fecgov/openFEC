@@ -12,7 +12,8 @@ env:
     - secure: "hylNba7PhzwQMtfrKiVBRFvLbAvazVpVozkR7LoTdKZKf9jyyW9Z9lxH/tvaXoUCsGPtOQxSdlN9vkkJtxHMZegD+mY8n/m6WuBZzgeZbCD3LMpdzWDcvhQjU8RRZabd8Dn5lLvFmmb3nRSxdi5X1IkLj+ptvC9Caa2NBB78ipk="
 
 before_install:
-  - curl -L -o cf.deb "https://cli.run.pivotal.io/stable?release=debian64&version=6.11.2&source=github-rel"
+  - travis_retry pip install codecov
+  - travis_retry curl -L -o cf.deb "https://cli.run.pivotal.io/stable?release=debian64&version=6.11.2&source=github-rel"
   - sudo dpkg -i cf.deb
 
 before_script:
@@ -25,3 +26,4 @@ after_success:
   # Deploy to appropriate Cloud Foundry space on success
   # See `tasks.deploy` for details
   - if [[ $TRAVIS_PULL_REQUEST = 'false' ]]; then invoke deploy --branch $TRAVIS_BRANCH --yes; fi;
+  - codecov
