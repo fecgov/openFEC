@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/18F/openFEC.svg?branch=master)](https://travis-ci.org/18F/openFEC)
 [![Code Climate](https://codeclimate.com/github/18F/openFEC/badges/gpa.svg)](https://codeclimate.com/github/18F/openFEC)
-[![codecov.io](http://codecov.io/github/18F/openFEC/coverage.svg?branch=master)](http://codecov.io/github/18F/openFEC?branch=master)
+[![Test Coverage](http://codecov.io/github/18F/openFEC/coverage.svg?branch=develop)](http://codecov.io/github/18F/openFEC?branch=develop)
 [![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
 
 We are taking data from the Federal Election Commission and creating an API around it. We will be harmonizing/cleaning it up to make it easier for external developers to use and analyze as well as creating a web application to make some analyzation and comparison of the data easier.
