@@ -79,7 +79,11 @@ Deploys of a single app can be performed manually by targeting the env/space, an
 
 ### Working with test data
 
-This repo includes a small subset of the production database (built 2015/05/05) at `data/subset.sql`. To build a new test subset, use the `build_test` invoke task:
+This repo includes a small subset of the production database (built 2015/05/05) at `data/subset.sql`. To use the test subset for local development:
+
+    $ psql -f data/subset.sql <dest>
+
+To build a new test subset, use the `build_test` invoke task:
 
     $ invoke build_test <source> <dest>
 
