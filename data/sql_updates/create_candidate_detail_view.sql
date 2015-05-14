@@ -57,8 +57,8 @@ from dimcand
     -- there are some holes in this data so we want the lat time it was updated
     left join(
         select distinct on (cand_sk)
-            s.cand_sk, s.cand_ici_desc, s.cand_ici_cd
-        from dimcandstatusici s
+            cp.cand_sk, cp.cand_ici_desc, cp.cand_ici_cd
+        from dimcandproperties cp
         where cand_ici_desc is not null
         order by  cand_sk, cand_id, election_yr desc
     ) full_ici using (cand_sk)
