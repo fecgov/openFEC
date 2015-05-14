@@ -31,8 +31,8 @@ select
     max(cand_p_most_recent.cand_st1) as address_street_1,
     max(cand_p_most_recent.cand_st2) as address_street_2,
     max(cand_p_most_recent.cand_zip) as address_zip,
-    max(cand_p_most_recent.cand_ici_desc) as incumbent_challenge_full,
-    max(cand_p_most_recent.cand_ici_cd) as incumbent_challenge,
+    max(full_ici.cand_ici_desc) as incumbent_challenge_full,
+    max(full_ici.cand_ici_cd) as incumbent_challenge,
     -- I needed help keeping track of where the information is coming from when we have the information to get the forms linked we can link to the forms for each section.
     -- I would like to replace this information with just links to the form and expire dates
     max(dimcand.form_tp) as form_type,
@@ -45,7 +45,7 @@ select
 from dimcand
     left join (
         select distinct on (cand_sk, cand_id)
-            s.cand_sk, c.cand_id, s.election_yr, s.cand_status, s.ici_code, s.cand_inactive_flg, s.expire_date
+            s.cand_sk, c.cand_id, s.election_yr, s.cand_status, s.cand_inactive_flg, s.expire_date
         from dimcandstatusici s
             inner join dimcand c using (cand_sk)
         order by cand_sk, cand_id, election_yr desc
@@ -54,6 +54,14 @@ from dimcand
         select distinct on (cand_sk) * from dimcandproperties
             order by cand_sk, candproperties_sk desc
     ) cand_p_most_recent using(cand_sk, cand_id)
+    -- there are some holes in this data so we want the lat time it was updated
+    left join(
+        select distinct on (cand_sk)
+            cp.cand_sk, cp.cand_ici_desc, cp.cand_ici_cd
+        from dimcandproperties cp
+        where cand_ici_desc is not null
+        order by  cand_sk, cand_id, election_yr desc
+    ) full_ici using (cand_sk)
     left join dimcandoffice co using (cand_sk)
     left join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
