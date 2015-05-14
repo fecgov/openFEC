@@ -1,4 +1,4 @@
-from sqlalchemy.sql import text
+import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -29,6 +29,10 @@ class CandidateList(Resource):
         ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
    '''
 
+    @property
+    def query(self):
+        return Candidate.query
+
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
@@ -40,13 +44,13 @@ class CandidateList(Resource):
 
     def get_candidates(self, kwargs):
 
-        candidates = Candidate.query
+        candidates = self.query
 
         if kwargs.get('q'):
             findme = ' & '.join(kwargs['q'].split())
             candidates = candidates.filter(
                 Candidate.candidate_key.in_(
-                    db.session.query('cand_sk').from_statement(text(self.fulltext_query)).params(findme=findme)
+                    db.session.query('cand_sk').from_statement(sa.text(self.fulltext_query)).params(findme=findme)
                 )
             )
 
@@ -60,6 +64,25 @@ class CandidateList(Resource):
             candidates = candidates.filter(Candidate.cycles.overlap(kwargs['cycle']))
 
         return candidates.order_by(Candidate.name)
+
+
+class CandidateSearch(CandidateList):
+
+    @property
+    def query(self):
+        # Eagerly load principal committees to avoid extra queries
+        return Candidate.query.options(
+            sa.orm.subqueryload(Candidate.principal_committees)
+        )
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.candidate_list)
+    @args.register_kwargs(args.candidate_detail)
+    @schemas.marshal_with(schemas.CandidateSearchPageSchema())
+    def get(self, **kwargs):
+        candidates = self.get_candidates(kwargs)
+        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
+        return paginator.get_page(kwargs['page'])
 
 
 @spec.doc(path_params=[

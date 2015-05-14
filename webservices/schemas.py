@@ -94,64 +94,6 @@ register_schema(NameSearchSchema)
 register_schema(NameSearchListSchema)
 
 
-class CandidateSchema(ma.Schema):
-    candidate_id = ma.fields.String()
-    cycles = ma.fields.List(ma.fields.Integer())
-    candidate_status_full = ma.fields.String()
-    candidate_status = ma.fields.String()
-    district = ma.fields.String()
-    incumbent_challenge_full = ma.fields.String()
-    incumbent_challenge = ma.fields.String()
-    office_full = ma.fields.String()
-    office = ma.fields.String()
-    party_full = ma.fields.String()
-    party = ma.fields.String()
-    state = ma.fields.String()
-    name = ma.fields.String()
-
-
-class CandidateListSchema(CandidateSchema):
-    active_through = ma.fields.Integer()
-    election_years = ma.fields.List(ma.fields.Integer())
-
-
-class CandidateDetailSchema(CandidateListSchema):
-    expire_date = ma.fields.DateTime()
-    load_date = ma.fields.DateTime()
-    form_type = ma.fields.String()
-    address_city = ma.fields.String()
-    address_state = ma.fields.String()
-    address_street_1 = ma.fields.String()
-    address_street_2 = ma.fields.String()
-    address_zip = ma.fields.String()
-    candidate_inactive = ma.fields.String()
-
-
-class CandidateHistorySchema(CandidateSchema):
-    two_year_period = ma.fields.Integer()
-    expire_date = ma.fields.String()
-    load_date = ma.fields.String()
-    form_type = ma.fields.String()
-    address_city = ma.fields.String()
-    address_state = ma.fields.String()
-    address_street_1 = ma.fields.String()
-    address_street_2 = ma.fields.String()
-    address_zip = ma.fields.String()
-    candidate_inactive = ma.fields.String()
-
-
-CandidateListPageSchema = make_page_schema(CandidateListSchema)
-CandidateDetailPageSchema = make_page_schema(CandidateDetailSchema)
-CandidateHistoryPageSchema = make_page_schema(CandidateHistorySchema)
-
-register_schema(CandidateListSchema)
-register_schema(CandidateDetailSchema)
-register_schema(CandidateHistorySchema)
-register_schema(CandidateListPageSchema)
-register_schema(CandidateDetailPageSchema)
-register_schema(CandidateHistoryPageSchema)
-
-
 class CommitteeSchema(ma.Schema):
     committee_id = ma.fields.String()
     name = ma.fields.String()
@@ -222,6 +164,72 @@ register_schema(CommitteeSchema)
 register_schema(CommitteeDetailSchema)
 register_schema(CommitteePageSchema)
 register_schema(CommitteeDetailPageSchema)
+
+
+class CandidateSchema(ma.Schema):
+    candidate_id = ma.fields.String()
+    cycles = ma.fields.List(ma.fields.Integer())
+    candidate_status_full = ma.fields.String()
+    candidate_status = ma.fields.String()
+    district = ma.fields.String()
+    incumbent_challenge_full = ma.fields.String()
+    incumbent_challenge = ma.fields.String()
+    office_full = ma.fields.String()
+    office = ma.fields.String()
+    party_full = ma.fields.String()
+    party = ma.fields.String()
+    state = ma.fields.String()
+    name = ma.fields.String()
+
+
+class CandidateListSchema(CandidateSchema):
+    active_through = ma.fields.Integer()
+    election_years = ma.fields.List(ma.fields.Integer())
+
+
+class CandidateSearchSchema(CandidateListSchema):
+    principal_committees = ma.fields.Nested(CommitteeSchema, many=True)
+
+
+class CandidateDetailSchema(CandidateListSchema):
+    expire_date = ma.fields.DateTime()
+    load_date = ma.fields.DateTime()
+    form_type = ma.fields.String()
+    address_city = ma.fields.String()
+    address_state = ma.fields.String()
+    address_street_1 = ma.fields.String()
+    address_street_2 = ma.fields.String()
+    address_zip = ma.fields.String()
+    candidate_inactive = ma.fields.String()
+
+
+class CandidateHistorySchema(CandidateSchema):
+    two_year_period = ma.fields.Integer()
+    expire_date = ma.fields.String()
+    load_date = ma.fields.String()
+    form_type = ma.fields.String()
+    address_city = ma.fields.String()
+    address_state = ma.fields.String()
+    address_street_1 = ma.fields.String()
+    address_street_2 = ma.fields.String()
+    address_zip = ma.fields.String()
+    candidate_inactive = ma.fields.String()
+
+
+CandidateListPageSchema = make_page_schema(CandidateListSchema)
+CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
+CandidateDetailPageSchema = make_page_schema(CandidateDetailSchema)
+CandidateHistoryPageSchema = make_page_schema(CandidateHistorySchema)
+
+register_schema(CandidateListSchema)
+register_schema(CandidateSearchSchema)
+register_schema(CandidateDetailSchema)
+register_schema(CandidateHistorySchema)
+
+register_schema(CandidateListPageSchema)
+register_schema(CandidateSearchPageSchema)
+register_schema(CandidateDetailPageSchema)
+register_schema(CandidateHistoryPageSchema)
 
 
 class ReportsSchema(ma.Schema):

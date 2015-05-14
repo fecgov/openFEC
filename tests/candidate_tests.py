@@ -8,9 +8,11 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices import schemas
+from webservices.rest import db
 from webservices.rest import api
 from webservices.rest import CandidateList
 from webservices.rest import CandidateView
+from webservices.rest import CandidateSearch
 from webservices.rest import CandidateHistoryView
 
 
@@ -88,6 +90,29 @@ class CandidateFormatTest(ApiBaseTest):
     def _results(self, qry):
         response = self._response(qry)
         return response['results']
+
+    def test_candidates_search(self):
+        principal_committee = factories.CommitteeFactory(designation='P')
+        joint_committee = factories.CommitteeFactory(designation='J')
+        candidate = factories.CandidateFactory()
+        db.session.flush()
+        [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_key=candidate.candidate_key,
+                committee_key=principal_committee.committee_key,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_key=candidate.candidate_key,
+                committee_key=joint_committee.committee_key,
+            ),
+        ]
+        results = self._results(api.url_for(CandidateSearch))
+        self.assertEqual(len(results), 1)
+        self.assertIn('principal_committees', results[0])
+        self.assertEqual(
+            results[0]['principal_committees'][0]['committee_id'],
+            principal_committee.committee_id,
+        )
 
     def test_fields(self):
         candidate = factories.CandidateDetailFactory()
