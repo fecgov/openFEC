@@ -62,11 +62,11 @@ from dimcmte
     -- do a DISTINCT ON subselect to get the most recent properties for a committee
     left join (
         select distinct on (cmte_sk) * from dimcmteproperties
-            where form_tp = 'F1'
             order by cmte_sk, receipt_dt desc
     ) cp_most_recent using (cmte_sk)
     left join(
         select cmte_sk, min(receipt_dt) receipt_dt from dimcmteproperties
+            where form_tp = 'F1'
             group by cmte_sk
     ) cp_original using (cmte_sk)
     -- Aggregate election cycles from dimcmteproperties.rpt_yr
