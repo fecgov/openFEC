@@ -533,6 +533,7 @@ class TotalsPresidentialSchema(TotalsSchema):
     individual_itemized_contributions = ma.fields.Integer()
     loan_repayments_made = ma.fields.Integer()
     loans_received_from_candidate = ma.fields.Integer()
+    loand_recieved = ma.fields.Integer()
     offsets_to_fundraising_expenditures = ma.fields.Integer()
     offsets_to_legal_accounting = ma.fields.Integer()
     total_offsets_to_operating_expenditures = ma.fields.Integer()
