@@ -1,20 +1,20 @@
 drop table if exists dimcand_fulltext;
 drop materialized view if exists dimcand_fulltext_mv_tmp;
 create materialized view dimcand_fulltext_mv_tmp as
-    select
+    select distinct on (c.cand_sk)
         row_number() over () as idx,
         c.cand_sk,
         case
-            when max(p.cand_nm) is not null then
-                setweight(to_tsvector(string_agg(coalesce(p.cand_nm, ''), ' ')), 'A') ||
-                setweight(to_tsvector(string_agg(coalesce(c.cand_id, ''), ' ')), 'B')
+            when p.cand_nm is not null then
+                setweight(to_tsvector(p.cand_nm), 'A') ||
+                setweight(to_tsvector(c.cand_id), 'B')
             else null::tsvector
             end
         as fulltxt
     from dimcand c
     left outer join dimcandproperties p on c.cand_sk = p.cand_sk
     where p.election_yr >= :START_YEAR
-    group by c.cand_sk
+    order by c.cand_sk, p.election_yr desc
 ;
 
 create unique index on dimcand_fulltext_mv_tmp(idx);
@@ -23,20 +23,20 @@ create index on dimcand_fulltext_mv_tmp using gin(fulltxt);
 drop table if exists dimcmte_fulltext;
 drop materialized view if exists dimcmte_fulltext_mv_tmp;
 create materialized view dimcmte_fulltext_mv_tmp as
-    select
+    select distinct on (c.cmte_sk)
         row_number() over () as idx,
         c.cmte_sk,
         case
-            when max(p.cmte_nm) is not null then
-                setweight(to_tsvector(string_agg(coalesce(p.cmte_nm, ''), ' ')), 'A') ||
-                setweight(to_tsvector(string_agg(coalesce(c.cmte_id, ''), ' ')), 'B')
+            when p.cmte_nm is not null then
+                setweight(to_tsvector(p.cmte_nm), 'A') ||
+                setweight(to_tsvector(c.cmte_id), 'B')
             else null::tsvector
             end
         as fulltxt
     from dimcmte c
     left outer join dimcmteproperties p using (cmte_sk)
     where p.rpt_yr >= :START_YEAR
-    group by c.cmte_sk
+    order by c.cmte_sk, p.receipt_dt desc
 ;
 
 create unique index on dimcmte_fulltext_mv_tmp(idx);
@@ -58,7 +58,7 @@ with
             join dimcandoffice co on (co.cand_sk = c.cand_sk)
             join dimoffice o on (co.office_sk = o.office_sk)
         where p.election_yr >= :START_YEAR
-        order by c.cand_sk, p.candproperties_sk
+        order by c.cand_sk, p.election_yr desc
     ), ranked_cmte as (
         select distinct on (c.cmte_sk)
             p.cmte_nm as name,
