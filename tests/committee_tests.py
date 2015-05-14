@@ -2,6 +2,7 @@ import urllib
 import datetime
 import functools
 
+import sqlalchemy as sa
 from marshmallow.utils import isoformat
 
 from tests import factories
@@ -42,6 +43,18 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
+
+    def test_fulltext_search(self):
+        committee = factories.CommitteeFactory(name='Americans for a Better Tomorrow, Tomorrow')
+        decoy_committee = factories.CommitteeFactory()
+        factories.CommitteeSearchFactory(
+            cmte_sk=committee.committee_key,
+            fulltxt=sa.func.to_tsvector(committee.name),
+        )
+        results = self._results(api.url_for(CommitteeList, q='tomorrow'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['committee_id'], committee.committee_id)
+        self.assertNotEqual(results[0]['committee_id'], decoy_committee.committee_id)
 
     def test_filter_by_candidate_id(self):
         candidate_id = 'id0'
@@ -151,18 +164,18 @@ class CommitteeFormatTest(ApiBaseTest):
             factories.CommitteeFactory(designation='P'),
             factories.CommitteeFactory(party='DEM'),
             factories.CommitteeFactory(organization_type='C'),
-            factories.CommitteeFactory(committee_id='bartlet'),
+            factories.CommitteeFactory(committee_id='C01'),
         ]
 
         # checking one example from each field
         filter_fields = (
-            # ('committee_id', ['bartlet', 'ritchie']),
-            # ('state', ['CA', 'DC']),
+            ('committee_id', ['C01', 'C02']),
+            ('state', ['CA', 'DC']),
             ('name', 'Obama'),
-            # ('committee_type', 'S'),
-            # ('designation', 'P'),
-            # ('party', ['REP', 'DEM']),
-            # ('organization_type', 'C'),
+            ('committee_type', 'S'),
+            ('designation', 'P'),
+            ('party', ['REP', 'DEM']),
+            ('organization_type', 'C'),
         )
 
         org_response = self._response(api.url_for(CommitteeList))

@@ -24,6 +24,12 @@ class CandidateSearchFactory(BaseFactory):
     cand_sk = factory.Sequence(lambda n: n)
 
 
+class CommitteeSearchFactory(BaseFactory):
+    class Meta:
+        model = models.CommitteeSearch
+    cmte_sk = factory.Sequence(lambda n: n)
+
+
 class PairedOptions(SQLAlchemyOptions):
     def _build_default_options(self):
         return super()._build_default_options() + [
