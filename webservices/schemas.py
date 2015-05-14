@@ -413,7 +413,7 @@ class ReportsPacPartySchema(ReportsSchema):
     shared_fed_activity_ytd = ma.fields.Integer()
     shared_fed_operating_expenditures_period = ma.fields.Integer()
     shared_fed_operating_expenditures_ytd = ma.fields.Integer()
-    shared_nonfed_operating_expenditures = ma.fields.Integer()
+    shared_nonfed_operating_expenditures_period = ma.fields.Integer()
     shared_nonfed_operating_expenditures_ytd = ma.fields.Integer()
     subtotal_summary_page_period = ma.fields.Integer()
     subtotal_summary_ytd = ma.fields.Integer()
