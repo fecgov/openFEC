@@ -60,7 +60,7 @@ from dimcand
             cand_sk, cand_ici_desc, cand_ici_desc
         where cand_ici_desc is not null
         order by  cand_sk, cand_id, election_yr desc
-    ) full_ici using (cand_sk, cand_id)
+    ) full_ici using (cand_sk)
     left join dimcandoffice co using (cand_sk)
     left join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
