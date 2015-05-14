@@ -25,7 +25,10 @@ select
     max(dimoffice.office_tp) as office,
     max(dimoffice.office_tp_desc) as office_full,
     max(dimparty.party_affiliation) as party,
-    max(dimparty.party_affiliation_desc) as party_full,
+    -- Handle typos and notes in party description:
+    -- * "Commandments Party (Removed)" becomes "Commandments Party"
+    -- * "Green Party Added)" becomes "Green Party"
+    regexp_replace(max(dimparty.party_affiliation_desc), '\s*(Added|Removed|\(.*?)\)$', '') as party_full,
     max(dimoffice.office_state) as state,
     max(candprops.cand_nm) as name
 from dimcand
