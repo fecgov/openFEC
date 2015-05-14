@@ -58,8 +58,8 @@ from dimcand
     left join(
         select distinct on (cand_sk)
             s.cand_sk, s.cand_ici_desc, s.cand_ici_cd
-        where cand_ici_desc is not null
         from dimcandstatusici s
+        where cand_ici_desc is not null
         order by  cand_sk, cand_id, election_yr desc
     ) full_ici using (cand_sk)
     left join dimcandoffice co using (cand_sk)
