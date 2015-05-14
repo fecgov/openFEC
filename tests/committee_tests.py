@@ -164,12 +164,12 @@ class CommitteeFormatTest(ApiBaseTest):
             factories.CommitteeFactory(designation='P'),
             factories.CommitteeFactory(party='DEM'),
             factories.CommitteeFactory(organization_type='C'),
-            factories.CommitteeFactory(committee_id='bartlet'),
+            factories.CommitteeFactory(committee_id='C01'),
         ]
 
         # checking one example from each field
         filter_fields = (
-            ('committee_id', ['bartlet', 'ritchie']),
+            ('committee_id', ['C01', 'C02']),
             ('state', ['CA', 'DC']),
             ('name', 'Obama'),
             ('committee_type', 'S'),
