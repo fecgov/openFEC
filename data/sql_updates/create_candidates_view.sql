@@ -14,7 +14,7 @@ select
         else 'Unknown' end as candidate_status_full,
     max(dimoffice.office_district) as district,
     max(co.cand_election_yr) as active_through,
-    array_agg(distinct dcp.cand_election_yr)::int[] as election_years,
+    array_agg(distinct dcp.election_yr)::int[] as election_years,
     array_agg(distinct(dcp.election_yr + dcp.election_yr % 2))::int[] as cycles,
     max(full_ici.cand_ici_cd) as incumbent_challenge,
     case max(full_ici.cand_ici_cd)
