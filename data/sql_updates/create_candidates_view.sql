@@ -46,11 +46,12 @@ from dimcand
         where cand_ici_desc is not null
         order by cand_sk, cand_id, election_yr desc
     ) full_ici using (cand_sk)
+    left join dimcandoffice co using (cand_sk)
     left join (
         select distinct on (cand_sk) * from dimcandoffice order by cand_sk, candoffice_sk desc
-    ) co using (cand_sk)
-    inner join dimoffice using (office_sk)
-    inner join dimparty using (party_sk)
+    ) last_co using (cand_sk)
+    inner join dimoffice on last_co.office_sk = dimoffice.office_sk
+    inner join dimparty on last_co.party_sk = dimparty.party_sk
     left join (
         select distinct on (cand_sk) cand_sk, cand_nm from dimcandproperties
             order by cand_sk, candproperties_sk desc
