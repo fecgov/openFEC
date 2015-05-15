@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import paging
 from webservices import schemas
@@ -23,9 +24,12 @@ reports_type_map = {
 }
 
 
-@spec.doc(path_params=[
-    {'name': 'id', 'in': 'path', 'type': 'string'},
-])
+@spec.doc(
+    description=docs.REPORTS,
+    path_params=[
+        {'name': 'id', 'in': 'path', 'type': 'string'},
+    ],
+)
 class ReportsView(Resource):
 
     @args.register_kwargs(args.paging)

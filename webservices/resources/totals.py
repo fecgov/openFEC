@@ -3,6 +3,7 @@ from flask.ext.restful import Resource
 import sqlalchemy as sa
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import paging
 from webservices import schemas
@@ -17,9 +18,12 @@ totals_schema_map = {
 default_schemas = (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageSchema)
 
 
-@spec.doc(path_params=[
-    {'name': 'id', 'in': 'path', 'type': 'string'},
-])
+@spec.doc(
+    description=docs.TOTALS,
+    path_params=[
+        {'name': 'id', 'in': 'path', 'type': 'string'},
+    ],
+)
 class TotalsView(Resource):
 
     @args.register_kwargs(args.paging)
