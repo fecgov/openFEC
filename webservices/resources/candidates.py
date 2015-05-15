@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import paging
 from webservices import schemas
@@ -20,6 +21,7 @@ filter_fields = {
 }
 
 
+@spec.doc(description=docs.CANDIDATE_LIST)
 class CandidateList(Resource):
 
     fulltext_query = '''
@@ -66,6 +68,7 @@ class CandidateList(Resource):
         return candidates.order_by(Candidate.name)
 
 
+@spec.doc(description=docs.CANDIDATE_SEARCH)
 class CandidateSearch(CandidateList):
 
     @property
@@ -85,10 +88,13 @@ class CandidateSearch(CandidateList):
         return paginator.get_page(kwargs['page'])
 
 
-@spec.doc(path_params=[
-    {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
-    {'name': 'committee_id', 'in': 'path', 'type': 'string'},
-])
+@spec.doc(
+    description=docs.CANDIDATE_DETAIL,
+    path_params=[
+        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+    ],
+)
 class CandidateView(Resource):
 
     @args.register_kwargs(args.paging)
