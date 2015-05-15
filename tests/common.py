@@ -123,6 +123,6 @@ class IntegrationTestCase(BaseTestCase):
         super(IntegrationTestCase, cls).setUpClass()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
-                ['psql', '-f', './data/subset.sql', TEST_CONN],
+                ['pg_restore', './data/subset.dump', '--dbname', TEST_CONN, '--no-acl', '--no-owner'],
                 stdout=null,
             )
