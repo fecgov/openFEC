@@ -178,14 +178,18 @@ def register_resource(resource, blueprint=None):
             view = getattr(resource, method)
             method_doc = getattr(view, '__apidoc__', {})
             operations[method] = {}
+            operations[method]['description'] = (
+                method_doc.get('description')
+                or resource_doc.get('description')
+            )
             operations[method]['responses'] = (
-                resource_doc.get('responses', {})
-                or method_doc.get('responses', {})
+                method_doc.get('responses', {})
+                or resource_doc.get('responses', {})
                 or {}
             )
             operations[method]['parameters'] = (
-                resource_doc.get('parameters')
-                or method_doc.get('parameters')
+                method_doc.get('parameters')
+                or resource_doc.get('parameters')
                 or []
             ) + path_params
         spec.add_path(path=path, operations=operations, view=view)
@@ -194,6 +198,7 @@ def register_resource(resource, blueprint=None):
 register_resource(NameSearch, blueprint='v1')
 register_resource(CandidateView, blueprint='v1')
 register_resource(CandidateList, blueprint='v1')
+register_resource(CandidateSearch, blueprint='v1')
 register_resource(CommitteeView, blueprint='v1')
 register_resource(CommitteeList, blueprint='v1')
 register_resource(ReportsView, blueprint='v1')

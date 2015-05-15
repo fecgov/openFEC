@@ -3,6 +3,7 @@ from sqlalchemy.sql import text, or_, and_
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import paging
 from webservices import schemas
@@ -29,6 +30,7 @@ def filter_year(model, query, years):
     )  # noqa
 
 
+@spec.doc(description=docs.COMMITTEE_LIST)
 class CommitteeList(Resource):
 
     fulltext_query = '''
