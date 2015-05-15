@@ -64,9 +64,9 @@ For further description, see `/v1/committees`.
 '''
 
 REPORTS = '''
-Fetch key information about a committee's financial reports.
+Fetch key information about a committee's form 3, 3x or 3p financial reports.
 
-As part of each financial report, committees must provide a summary of their financial
+As part of each financial report, most committees must provide a summary of their financial
 activity in each filing, and these summaries for each reporting period are included in
 these files. Generally, committees file reports on a quarterly or monthly basis, but some
 must also submit a report 12 days before primary elections. During the primary election
@@ -80,7 +80,7 @@ can look at the summary and detailed summary pages of the FEC form 3, form 3X an
 '''
 
 TOTALS = '''
-Fetch key information about a committee's financial reports, aggregated by two-year
+Fetch key information about a committee's form 3, 3x or 3p financial reports, aggregated by two-year
 election cycle period.
 
 For further description, see `/v1/committee/{committee_id}/reports`.
