@@ -220,7 +220,7 @@ docs = Blueprint(
 )
 
 
-@docs.route('/swagger/')
+@docs.route('/swagger')
 def api_spec():
     render_type = request.accept_mimetypes.best_match(renderers.keys())
     if not render_type:
@@ -234,7 +234,7 @@ def swagger_static(filename):
     return url_for('docs.static', filename='dist/{0}'.format(filename))
 
 
-@docs.route('/swagger/ui/')
+@docs.route('/swagger/ui')
 def api_ui():
     return render_template('swagger-ui.html', specs_url=url_for('docs.api_spec'))
 
