@@ -19,6 +19,7 @@ default_schemas = (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageS
 
 
 @spec.doc(
+    tags=['financial'],
     description=docs.TOTALS,
     path_params=[
         {'name': 'id', 'in': 'path', 'type': 'string'},

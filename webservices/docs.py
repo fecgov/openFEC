@@ -11,6 +11,10 @@ collects. Each endpoint focuses on a different aspect of disclosure.
 Information can tied to the underlying forms by file ID and image ID.
 '''
 
+NAME_SEARCH = '''
+Search for candidates or committees by name.
+'''
+
 CANDIDATE_LIST = '''
 Fetch basic information about candidates.
 
