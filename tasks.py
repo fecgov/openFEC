@@ -65,7 +65,7 @@ def build_test(source, dest, fraction=DEFAULT_FRACTION):
 
 @task
 def dump(source, dest):
-    cmd = 'pg_dump {source} --no-acl --no-owner -f {dest}'.format(**locals())
+    cmd = 'pg_dump {source} --format c --no-acl --no-owner -f {dest}'.format(**locals())
     for table in EXCLUDE_TABLES:
         cmd += ' --exclude-table {0}'.format(table)
     run(cmd, echo=True)
