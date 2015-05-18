@@ -4,7 +4,7 @@ from flask.ext.restful import Resource
 from webservices import args
 from webservices import docs
 from webservices import spec
-from webservices import paging
+from webservices import utils
 from webservices import schemas
 from webservices.common.util import filter_query
 from webservices.common.models import db, Candidate, CandidateDetail, CandidateHistory, CandidateCommitteeLink
@@ -39,13 +39,13 @@ class CandidateList(Resource):
         return Candidate.query
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
     @schemas.marshal_with(schemas.CandidateListPageSchema())
     def get(self, **kwargs):
-        candidates = self.get_candidates(kwargs)
-        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_candidates(kwargs)
+        return utils.fetch_page(query, kwargs)
 
     def get_candidates(self, kwargs):
 
@@ -85,13 +85,13 @@ class CandidateSearch(CandidateList):
         )
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
     @schemas.marshal_with(schemas.CandidateSearchPageSchema())
     def get(self, **kwargs):
-        candidates = self.get_candidates(kwargs)
-        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_candidates(kwargs)
+        return utils.fetch_page(query, kwargs)
 
 
 @spec.doc(
@@ -105,12 +105,12 @@ class CandidateSearch(CandidateList):
 class CandidateView(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.candidate_detail)
     @schemas.marshal_with(schemas.CandidateDetailPageSchema())
     def get(self, candidate_id=None, committee_id=None, **kwargs):
-        candidates = self.get_candidate(kwargs, candidate_id, committee_id)
-        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_candidate(kwargs, candidate_id, committee_id)
+        return utils.fetch_page(query, kwargs)
 
     def get_candidate(self, kwargs, candidate_id=None, committee_id=None):
         if candidate_id is not None:
@@ -136,11 +136,11 @@ class CandidateView(Resource):
 class CandidateHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
     def get(self, candidate_id, year=None, **kwargs):
-        candidates = self.get_candidate(candidate_id, year, kwargs)
-        paginator = paging.SqlalchemyPaginator(candidates, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_candidate(candidate_id, year, kwargs)
+        return utils.fetch_page(query, kwargs)
 
     def get_candidate(self, candidate_id, year, kwargs):
 

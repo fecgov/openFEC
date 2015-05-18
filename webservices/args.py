@@ -46,6 +46,11 @@ paging = {
 }
 
 
+sorting = {
+    'sort': Arg(str, multiple=True),
+}
+
+
 names = {
     'q': Arg(str, required=True, description='Name (candidate or committee) to search for'),
 }
