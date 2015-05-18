@@ -143,7 +143,9 @@ DEPLOY_RULES = (
 
 def _detect_apps(blue, green):
     """Detect old and new apps for blue-green deploy."""
-    status = run('cf app {0}'.format(blue))
+    status = run('cf app {0}'.format(blue), echo=True, warn=True)
+    if status.failed:
+        return (None, green)
     if 'started' in status.stdout:
         return (blue, green)
     return (green, blue)
@@ -174,7 +176,7 @@ def deploy(space=None, branch=None, yes=False):
     old, new = _detect_apps('api-a', 'api-b')
 
     # Push
-    push = run('cf push {0} -f manifest_{1}.yml'.format(new, space), echo=True)
+    push = run('cf push {0} -f manifest_{1}.yml'.format(new, space), echo=True, warn=True)
     if push.failed:
         print('Error pushing app {0}'.format(new))
         run('cf stop {0}'.format(new), echo=True)
@@ -183,5 +185,6 @@ def deploy(space=None, branch=None, yes=False):
     # Remap
     route = 'fec-{0}-api.cf.18f.us'.format(space)
     run('cf map-route {0} {1}'.format(new, route), echo=True)
-    run('cf unmap-route {0} {1}'.format(old, route), echo=True)
-    run('cf stop {0}'.format(old), echo=True)
+    if old:
+        run('cf unmap-route {0} {1}'.format(old, route), echo=True)
+        run('cf stop {0}'.format(old), echo=True)
