@@ -62,10 +62,10 @@ class Candidate(BaseCandidate):
     principal_committees = db.relationship(
         'Committee',
         secondary='ofec_name_linkage_mv',
-        secondaryjoin=' and '.join([
-            'Committee.committee_key == ofec_name_linkage_mv.c.committee_key',
-            'Committee.designation == "P"',
-        ]),
+        secondaryjoin='''and_(
+            Committee.committee_key == ofec_name_linkage_mv.c.committee_key,
+            Committee.designation == 'P',
+        )''',
         order_by='desc(Committee.last_file_date)',
     )
 
