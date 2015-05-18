@@ -25,13 +25,14 @@ import flask.ext.restful.representations.json
 import sqlalchemy as sa
 
 from webservices import args
+from webservices import docs
+from webservices import spec
 from webservices import schemas
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateSearch, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
 from webservices.resources.committees import CommitteeList, CommitteeView
-from webservices.spec import spec
 
 from .json_encoding import TolerantJSONEncoder
 
@@ -87,6 +88,10 @@ def after_request(response):
     return response
 
 
+@spec.doc(
+    tags=['search'],
+    description=docs.NAME_SEARCH,
+)
 class NameSearch(restful.Resource):
     """
     A quick name search (candidate or committee) optimized for response time
@@ -161,6 +166,14 @@ def extract_path(path):
     return RE_URL.sub(r'{\1}', path)
 
 
+def resolve(key, docs, default=None):
+    for doc in docs:
+        value = doc.get(key)
+        if value:
+            return value
+    return default
+
+
 def register_resource(resource, blueprint=None):
     key = resource.__name__.lower()
     if blueprint:
@@ -177,22 +190,14 @@ def register_resource(resource, blueprint=None):
         for method in [method.lower() for method in resource.methods or []]:
             view = getattr(resource, method)
             method_doc = getattr(view, '__apidoc__', {})
-            operations[method] = {}
-            operations[method]['description'] = (
-                method_doc.get('description')
-                or resource_doc.get('description')
-            )
-            operations[method]['responses'] = (
-                method_doc.get('responses', {})
-                or resource_doc.get('responses', {})
-                or {}
-            )
-            operations[method]['parameters'] = (
-                method_doc.get('parameters')
-                or resource_doc.get('parameters')
-                or []
-            ) + path_params
-        spec.add_path(path=path, operations=operations, view=view)
+            docs = [method_doc, resource_doc]
+            operations[method] = {
+                'tags': resolve('tags', docs, []),
+                'responses': resolve('responses', docs, {}),
+                'description': resolve('description', docs, None),
+                'parameters': resolve('parameters', docs, []) + path_params,
+            }
+        spec.spec.add_path(path=path, operations=operations, view=view)
 
 
 register_resource(NameSearch, blueprint='v1')
@@ -225,12 +230,12 @@ docs = Blueprint(
 )
 
 
-@docs.route('/swagger/')
+@docs.route('/swagger')
 def api_spec():
     render_type = request.accept_mimetypes.best_match(renderers.keys())
     if not render_type:
         abort(http.client.NOT_ACCEPTABLE)
-    rendered = renderers[render_type](spec.to_dict())
+    rendered = renderers[render_type](spec.spec.to_dict())
     return rendered, http.client.OK, {'Content-Type': render_type}
 
 
@@ -239,7 +244,7 @@ def swagger_static(filename):
     return url_for('docs.static', filename='dist/{0}'.format(filename))
 
 
-@docs.route('/swagger/ui/')
+@docs.route('/swagger/ui')
 def api_ui():
     return render_template('swagger-ui.html', specs_url=url_for('docs.api_spec'))
 
