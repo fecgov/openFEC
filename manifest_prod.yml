@@ -6,7 +6,16 @@ env:
   NEW_RELIC_CONFIG_FILE: newrelic.ini
   NEW_RELIC_ENV: production
 applications:
-- name: api
+- name: api-a
+  path: .
+  buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
+  host: fec-prod-api
+  env:
+    PRODUCTION: True
+    NEW_RELIC_APP_NAME: OpenFEC API (production)
+    NEW_RELIC_LOG: stdout
+    WEB_CONCURRENCY: 4
+- name: api-b
   path: .
   buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-prod-api
