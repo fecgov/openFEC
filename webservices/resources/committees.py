@@ -30,7 +30,10 @@ def filter_year(model, query, years):
     )  # noqa
 
 
-@spec.doc(description=docs.COMMITTEE_LIST)
+@spec.doc(
+    tags=['committee'],
+    description=docs.COMMITTEE_LIST,
+)
 class CommitteeList(Resource):
 
     fulltext_query = '''
@@ -80,10 +83,13 @@ class CommitteeList(Resource):
         return committees.order_by(Committee.name)
 
 
-@spec.doc(path_params=[
-    {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
-    {'name': 'committee_id', 'in': 'path', 'type': 'string'},
-])
+@spec.doc(
+    tags=['committee'],
+    path_params=[
+        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+    ],
+)
 class CommitteeView(Resource):
 
     @args.register_kwargs(args.paging)

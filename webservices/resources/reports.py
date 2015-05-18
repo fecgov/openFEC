@@ -25,6 +25,7 @@ reports_type_map = {
 
 
 @spec.doc(
+    tags=['financial'],
     description=docs.REPORTS,
     path_params=[
         {'name': 'id', 'in': 'path', 'type': 'string'},
