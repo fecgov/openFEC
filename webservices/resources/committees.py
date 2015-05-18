@@ -5,7 +5,7 @@ from flask.ext.restful import Resource
 from webservices import args
 from webservices import docs
 from webservices import spec
-from webservices import paging
+from webservices import utils
 from webservices import schemas
 from webservices.common.util import filter_query
 from webservices.common.models import db, Committee, CandidateCommitteeLink, CommitteeDetail
@@ -44,13 +44,13 @@ class CommitteeList(Resource):
     '''
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.committee)
     @args.register_kwargs(args.committee_list)
     @schemas.marshal_with(schemas.CommitteePageSchema())
     def get(self, **kwargs):
-        committees = self.get_committees(kwargs)
-        paginator = paging.SqlalchemyPaginator(committees, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_committees(kwargs)
+        return utils.fetch_page(query, kwargs)
 
     def get_committees(self, kwargs):
 
@@ -93,12 +93,12 @@ class CommitteeList(Resource):
 class CommitteeView(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.committee)
     @schemas.marshal_with(schemas.CommitteeDetailPageSchema())
     def get(self, committee_id=None, candidate_id=None, **kwargs):
-        committees = self.get_committee(kwargs, committee_id, candidate_id)
-        paginator = paging.SqlalchemyPaginator(committees, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_committee(kwargs, committee_id, candidate_id)
+        return utils.fetch_page(query, kwargs)
 
     def get_committee(self, kwargs, committee_id, candidate_id):
 
