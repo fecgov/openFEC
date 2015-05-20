@@ -6,6 +6,11 @@ from webservices.rest import db
 from webservices.common import models
 
 
+CANDIDATE_MODELS = [
+    models.Candidate,
+    models.CandidateDetail,
+    models.CandidateHistory,
+]
 REPORTS_MODELS = [
     models.CommitteeReportsPacOrParty,
     models.CommitteeReportsPresidential,
@@ -71,3 +76,11 @@ class TestViews(common.IntegrationTestCase):
             sa.func.min(subquery.columns.cycle) < manage.SQL_CONFIG['START_YEAR']
         ).count()
         self.assertEqual(count, 0)
+
+    def test_exclude_z_only_filers(self):
+        dcp = sa.Table('dimcandproperties', db.metadata, autoload=True, autoload_with=db.engine)
+        s = sa.select([dcp.c.cand_sk]).where(dcp.c.form_tp == 'F2').distinct()
+        expected = [int(each.cand_sk) for each in db.engine.execute(s).fetchall()]
+        for model in CANDIDATE_MODELS:
+            observed = [each.candidate_key for each in model.query.all()]
+            self.assertFalse(set(observed).difference(expected))
