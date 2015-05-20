@@ -15,7 +15,7 @@ create materialized view dimcand_fulltext_mv_tmp as
     left outer join dimcandproperties p on c.cand_sk = p.cand_sk
     inner join (
         select distinct cand_sk from dimcandproperties
-        where form_tp = 'F2'
+        where form_tp != 'F2Z'
     ) f2 on c.cand_sk = f2.cand_sk
     where p.election_yr >= :START_YEAR
     order by c.cand_sk, p.election_yr desc
@@ -63,7 +63,7 @@ with
             join dimoffice o on (co.office_sk = o.office_sk)
             inner join (
                 select distinct cand_sk from dimcandproperties
-                where form_tp = 'F2'
+                where form_tp != 'F2Z'
             ) f2 on c.cand_sk = f2.cand_sk
         where p.election_yr >= :START_YEAR
         order by c.cand_sk, p.election_yr desc

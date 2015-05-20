@@ -79,7 +79,7 @@ class TestViews(common.IntegrationTestCase):
 
     def test_exclude_z_only_filers(self):
         dcp = sa.Table('dimcandproperties', db.metadata, autoload=True, autoload_with=db.engine)
-        s = sa.select([dcp.c.cand_sk]).where(dcp.c.form_tp == 'F2').distinct()
+        s = sa.select([dcp.c.cand_sk]).where(dcp.c.form_tp != 'F2Z').distinct()
         expected = [int(each.cand_sk) for each in db.engine.execute(s).fetchall()]
         for model in CANDIDATE_MODELS:
             observed = [each.candidate_key for each in model.query.all()]
