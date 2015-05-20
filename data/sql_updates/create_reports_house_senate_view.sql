@@ -17,7 +17,7 @@ select
     cand_contb_per as candidate_contribution_period,
     cand_contb_ytd as candidate_contribution_ytd,
     coh_bop as cash_on_hand_beginning_period,
-    coh_cop_i as cash_on_hand_end_period,
+    coh_cop as cash_on_hand_end_period,
     -- TODO: find out which is the right one to use: coh_cop_ii as cash_on_hand_end_period,
     debts_owed_by_cmte as debts_owed_by_committee,
     debts_owed_to_cmte as debts_owed_to_committee,
