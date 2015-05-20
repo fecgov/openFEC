@@ -47,6 +47,12 @@ from ofec_two_year_periods
             inner join dimparty using (party_sk)
         order by cand_sk, two_year_period, dcp.candproperties_sk desc
     ) as dcp_by_period on ofec_two_year_periods.year = two_year_period
+    -- Restrict to candidates with at least one non-F2Z filing
+    inner join (
+        select distinct cand_sk
+        from dimcandproperties
+        where form_tp != 'F2Z'
+    ) f2 using (cand_sk)
     where two_year_period >= :START_YEAR
 ;
 

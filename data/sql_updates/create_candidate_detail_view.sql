@@ -49,6 +49,12 @@ select
     max(dimoffice.expire_date) as office_expire_date,
     max(dimparty.expire_date) as party_expire_date
 from dimcand
+    -- Restrict to candidates with at least one non-F2Z filing
+    inner join (
+        select distinct cand_sk
+        from dimcandproperties
+        where form_tp != 'F2Z'
+    ) f2 using (cand_sk)
     left join (
         select distinct on (cand_sk, cand_id)
             s.cand_sk, c.cand_id, s.election_yr, s.cand_status, s.cand_inactive_flg, s.expire_date

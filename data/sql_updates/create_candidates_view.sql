@@ -33,6 +33,12 @@ select
     max(dimoffice.office_state) as state,
     max(candprops.cand_nm) as name
 from dimcand
+    -- Restrict to candidates with at least one non-F2Z filing
+    inner join (
+        select distinct cand_sk
+        from dimcandproperties
+        where form_tp != 'F2Z'
+    ) f2 using (cand_sk)
     left join (
         select distinct on (cand_sk) cand_sk, election_yr, cand_status, ici_code
             from dimcandstatusici
