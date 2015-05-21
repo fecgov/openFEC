@@ -4,7 +4,7 @@ from flask.ext.restful import Resource
 from webservices import args
 from webservices import docs
 from webservices import spec
-from webservices import paging
+from webservices import utils
 from webservices import schemas
 from webservices.common import models
 
@@ -34,12 +34,13 @@ reports_type_map = {
 class ReportsView(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.reports)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         reports = self.get_reports(committee_id, committee_type, kwargs)
         reports, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
-        paginator = paging.SqlalchemyPaginator(reports, kwargs['per_page'])
-        return reports_schema().dump(paginator.get_page(kwargs['page'])).data
+        page = utils.fetch_page(reports, kwargs)
+        return reports_schema().dump(page).data
 
     def get_reports(self, committee_id, committee_type, kwargs):
         reports_class, reports_schema = reports_schema_map.get(

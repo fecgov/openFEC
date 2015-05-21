@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from webservices import args
 from webservices import docs
 from webservices import spec
-from webservices import paging
+from webservices import utils
 from webservices import schemas
 from webservices.common import models
 
@@ -28,14 +28,15 @@ default_schemas = (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageS
 class TotalsView(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.totals)
     def get(self, committee_id, **kwargs):
         # TODO(jmcarp) Handle multiple results better
         committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()
         totals_class, totals_schema = totals_schema_map.get(committee.committee_type, default_schemas)
         totals = self.get_totals(committee_id, totals_class, kwargs)
-        paginator = paging.SqlalchemyPaginator(totals, kwargs['per_page'])
-        return totals_schema().dump(paginator.get_page(kwargs['page'])).data
+        page = utils.fetch_page(totals, kwargs)
+        return totals_schema().dump(page).data
 
     def get_totals(self, committee_id, totals_class, kwargs):
         totals = totals_class.query.filter_by(committee_id=committee_id)
