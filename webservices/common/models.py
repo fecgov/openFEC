@@ -37,12 +37,10 @@ class CommitteeSearch(BaseModel):
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
-    candidate_key = db.Column(db.Integer, unique=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2))
-    active_through = db.Column(db.Integer)
     election_years = db.Column(ARRAY(db.Integer))
     cycles = db.Column(ARRAY(db.Integer))
     incumbent_challenge = db.Column(db.String(1))
@@ -57,6 +55,9 @@ class BaseCandidate(BaseModel):
 
 class Candidate(BaseCandidate):
     __tablename__ = 'ofec_candidates_mv'
+
+    candidate_key = db.Column(db.Integer, unique=True)
+    active_through = db.Column(db.Integer)
 
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
@@ -73,9 +74,7 @@ class Candidate(BaseCandidate):
 class CandidateDetail(BaseCandidate):
     __tablename__ = 'ofec_candidate_detail_mv'
 
-    name = db.Column(db.String(100))
-    expire_date = db.Column('candidate_expire_date', db.DateTime())
-    load_date = db.Column(db.DateTime())
+    candidate_key = db.Column(db.Integer, unique=True)
     form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
@@ -83,6 +82,25 @@ class CandidateDetail(BaseCandidate):
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
+    active_through = db.Column(db.Integer)
+    load_date = db.Column(db.DateTime)
+    expire_date = db.Column('candidate_expire_date', db.DateTime)
+
+
+class CandidateHistory(BaseCandidate):
+    __tablename__ = 'ofec_candidate_history_mv'
+
+    candidate_key = db.Column(db.Integer)
+    two_year_period = db.Column(db.Integer)
+    form_type = db.Column(db.String(3))
+    address_city = db.Column(db.String(100))
+    address_state = db.Column(db.String(2))
+    address_street_1 = db.Column(db.String(200))
+    address_street_2 = db.Column(db.String(200))
+    address_zip = db.Column(db.String(10))
+    candidate_inactive = db.Column(db.String(1))
+    load_date = db.Column(db.DateTime)
+    expire_date = db.Column(db.DateTime)
 
 
 class BaseCommittee(BaseModel):
@@ -525,32 +543,3 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     refunded_political_party_committee_contributions = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
-
-
-class CandidateHistory(BaseModel):
-    __tablename__ = 'ofec_candidate_history_mv'
-
-    properties_key = db.Column(db.Integer)
-    candidate_key = db.Column(db.Integer)
-    candidate_id = db.Column(db.String(10))
-    two_year_period = db.Column(db.Integer)
-    candidate_status = db.Column(db.String(1))
-    candidate_status_full = db.Column(db.String(11))
-    district = db.Column(db.String(2))
-    incumbent_challenge = db.Column(db.String(1))
-    incumbent_challenge_full = db.Column(db.String(10))
-    office = db.Column(db.String(1))
-    office_full = db.Column(db.String(9))
-    party = db.Column(db.String(3))
-    party_full = db.Column(db.String(255))
-    state = db.Column(db.String(2))
-    name = db.Column(db.String(100))
-    expire_date = db.Column(db.DateTime())
-    load_date = db.Column(db.DateTime())
-    form_type = db.Column(db.String(3))
-    address_city = db.Column(db.String(100))
-    address_state = db.Column(db.String(2))
-    address_street_1 = db.Column(db.String(200))
-    address_street_2 = db.Column(db.String(200))
-    address_zip = db.Column(db.String(10))
-    candidate_inactive = db.Column(db.String(1))
