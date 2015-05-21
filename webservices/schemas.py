@@ -97,6 +97,7 @@ register_schema(NameSearchListSchema)
 class CommitteeSchema(ma.Schema):
     committee_id = ma.fields.String()
     name = ma.fields.String()
+    cycles = ma.fields.List(ma.fields.Integer())
     designation_full = ma.fields.String()
     designation = ma.fields.String()
     treasurer_name = ma.fields.String()
@@ -168,7 +169,9 @@ register_schema(CommitteeDetailPageSchema)
 
 class CandidateSchema(ma.Schema):
     candidate_id = ma.fields.String()
+    candidate_key = ma.fields.String()
     cycles = ma.fields.List(ma.fields.Integer())
+    election_years = ma.fields.List(ma.fields.Integer())
     candidate_status_full = ma.fields.String()
     candidate_status = ma.fields.String()
     district = ma.fields.String()
@@ -184,7 +187,6 @@ class CandidateSchema(ma.Schema):
 
 class CandidateListSchema(CandidateSchema):
     active_through = ma.fields.Integer()
-    election_years = ma.fields.List(ma.fields.Integer())
 
 
 class CandidateSearchSchema(CandidateListSchema):
