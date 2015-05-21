@@ -33,7 +33,7 @@ select
     items_on_hand_liquidated as items_on_hand_liquidated,
     loans_received_from_cand_per as loans_received_from_candidate_period,
     loans_received_from_cand_ytd as loans_received_from_candidate_ytd,
-    net_contb_sum_page_per as net_contribution_period,
+    net_contb_sum_page_per as net_contributions_period,
     net_op_exp_sum_page_per as net_operating_expenditures_period,
     offsets_to_fndrsg_exp_ytd as offsets_to_fundraising_exp_ytd,
     offsets_to_fndrsg_exp_per as offsets_to_fundraising_expenditures_period,
