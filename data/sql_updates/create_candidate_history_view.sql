@@ -26,6 +26,8 @@ select
     dcp_by_period.office_state as state,
     dcp_by_period.office_district as district,
     dcp_by_period.party_affiliation as party,
+    year_agg.election_years,
+    cycle_agg.cycles,
     -- Handle typos and notes in party description:
     -- * "Commandments Party (Removed)" becomes "Commandments Party"
     -- * "Green Party Added)" becomes "Green Party"
@@ -47,6 +49,20 @@ from ofec_two_year_periods
             inner join dimparty using (party_sk)
         order by cand_sk, two_year_period, dcp.candproperties_sk desc
     ) as dcp_by_period on ofec_two_year_periods.year = two_year_period
+    left join (
+        select
+            cand_sk,
+            array_agg(distinct(cand_election_yr))::int[] as election_years
+        from dimcandoffice
+        group by cand_sk
+    ) year_agg using (cand_sk)
+    left join (
+        select
+            cand_sk,
+            array_agg(distinct(election_yr + election_yr % 2))::int[] as cycles
+        from dimcandproperties
+        group by cand_sk
+    ) cycle_agg using (cand_sk)
     -- Restrict to candidates with at least one non-F2Z filing
     inner join (
         select distinct cand_sk
