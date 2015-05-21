@@ -109,6 +109,7 @@ class CandidateFormatTest(ApiBaseTest):
         results = self._results(api.url_for(CandidateSearch))
         self.assertEqual(len(results), 1)
         self.assertIn('principal_committees', results[0])
+        self.assertEqual(len(results[0]['principal_committees']), 1)
         self.assertEqual(
             results[0]['principal_committees'][0]['committee_id'],
             principal_committee.committee_id,
