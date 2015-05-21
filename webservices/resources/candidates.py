@@ -39,9 +39,9 @@ class CandidateList(Resource):
         return Candidate.query
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
+    @args.register_kwargs(args.make_sort_args())
     @schemas.marshal_with(schemas.CandidateListPageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
@@ -85,9 +85,9 @@ class CandidateSearch(CandidateList):
         )
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
+    @args.register_kwargs(args.make_sort_args())
     @schemas.marshal_with(schemas.CandidateSearchPageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
@@ -105,8 +105,8 @@ class CandidateSearch(CandidateList):
 class CandidateView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.candidate_detail)
+    @args.register_kwargs(args.make_sort_args())
     @schemas.marshal_with(schemas.CandidateDetailPageSchema())
     def get(self, candidate_id=None, committee_id=None, **kwargs):
         query = self.get_candidate(kwargs, candidate_id, committee_id)
@@ -136,7 +136,7 @@ class CandidateView(Resource):
 class CandidateHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.sorting)
+    @args.register_kwargs(args.make_sort_args())
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
     def get(self, candidate_id, year=None, **kwargs):
         query = self.get_candidate(candidate_id, year, kwargs)
