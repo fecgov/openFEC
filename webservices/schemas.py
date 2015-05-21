@@ -255,6 +255,8 @@ class ReportsSchema(ma.Schema):
     report_type = ma.fields.String()
     report_type_full = ma.fields.String()
     report_year = ma.fields.Integer()
+    net_contributions_period = ma.fields.Integer()
+    net_operating_expenditures_period = ma.fields.Integer()
     total_contribution_refunds_period = ma.fields.Integer()
     total_contribution_refunds_ytd = ma.fields.Integer()
     total_contributions_period = ma.fields.Integer()
@@ -284,8 +286,6 @@ class ReportsPresidentialSchema(ReportsSchema):
     items_on_hand_liquidated = ma.fields.Integer()
     loans_received_from_candidate_period = ma.fields.Integer()
     loans_received_from_candidate_ytd = ma.fields.Integer()
-    net_contribution_summary_period = ma.fields.Integer()
-    net_operating_expenditures_summary_period = ma.fields.Integer()
     offsets_to_fundraising_expenditures_ytd = ma.fields.Integer()
     offsets_to_fundraising_expenditures_period = ma.fields.Integer()
     offsets_to_legal_accounting_period = ma.fields.Integer()
@@ -325,6 +325,8 @@ class ReportsPresidentialSchema(ReportsSchema):
 
 
 class ReportsHouseSenateSchema(ReportsSchema):
+    net_contributions_ytd = ma.fields.Integer()
+    net_operating_expenditures_ytd = ma.fields.Integer()
     aggregate_amount_personal_contributions_general = ma.fields.Integer()
     aggregate_contributions_personal_funds_primary = ma.fields.Integer()
     all_other_loans_period = ma.fields.Integer()
@@ -343,10 +345,6 @@ class ReportsHouseSenateSchema(ReportsSchema):
     loan_repayments_other_loans_ytd = ma.fields.Integer()
     loans_made_by_candidate_period = ma.fields.Integer()
     loans_made_by_candidate_ytd = ma.fields.Integer()
-    net_contributions_period = ma.fields.Integer()
-    net_contributions_ytd = ma.fields.Integer()
-    net_operating_expenditures_period = ma.fields.Integer()
-    net_operating_expenditures_ytd = ma.fields.Integer()
     operating_expenditures_period = ma.fields.Integer()
     operating_expenditures_ytd = ma.fields.Integer()
     other_receipts_period = ma.fields.Integer()
@@ -379,6 +377,8 @@ class ReportsHouseSenateSchema(ReportsSchema):
 
 
 class ReportsPacPartySchema(ReportsSchema):
+    net_contributions_ytd = ma.fields.Integer()
+    net_operating_expenditures_ytd = ma.fields.Integer()
     all_loans_received_period = ma.fields.Integer()
     all_loans_received_ytd = ma.fields.Integer()
     allocated_federal_election_levin_share_period = ma.fields.Integer()
@@ -405,10 +405,6 @@ class ReportsPacPartySchema(ReportsSchema):
     loan_repayments_received_ytd = ma.fields.Integer()
     loans_made_period = ma.fields.Integer()
     loans_made_ytd = ma.fields.Integer()
-    net_contributions_period = ma.fields.Integer()
-    net_contributions_ytd = ma.fields.Integer()
-    net_operating_expenditures_period = ma.fields.Integer()
-    net_operating_expenditures_ytd = ma.fields.Integer()
     non_allocated_fed_election_activity_period = ma.fields.Integer()
     non_allocated_fed_election_activity_ytd = ma.fields.Integer()
     nonfed_share_allocated_disbursements_period = ma.fields.Integer()
@@ -496,7 +492,6 @@ class TotalsPacPartySchema(TotalsSchema):
     loan_repayments_made = ma.fields.Integer()
     loan_repayments_received = ma.fields.Integer()
     loans_made = ma.fields.Integer()
-    net_contributions = ma.fields.Integer()
     non_allocated_fed_election_activity = ma.fields.Integer()
     nonfed_transfers = ma.fields.Integer()
     other_fed_operating_expenditures = ma.fields.Integer()
