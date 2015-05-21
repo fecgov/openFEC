@@ -6,7 +6,6 @@ select
     facthousesenate_f3_sk as report_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
-    cmte_tp as committee_type,
     start_date.dw_date as coverage_start_date,
     end_date.dw_date as coverage_end_date,
     agr_amt_pers_contrib_gen as aggregate_amount_personal_contributions_general,
@@ -17,8 +16,7 @@ select
     cand_contb_per as candidate_contribution_period,
     cand_contb_ytd as candidate_contribution_ytd,
     coh_bop as cash_on_hand_beginning_period,
-    coh_cop_i as cash_on_hand_end_period,
-    -- TODO: find out which is the right one to use: coh_cop_ii as cash_on_hand_end_period,
+    coalesce(coh_cop_i, coh_cop_ii) as cash_on_hand_end_period,
     debts_owed_by_cmte as debts_owed_by_committee,
     debts_owed_to_cmte as debts_owed_to_committee,
     end_image_num as end_image_number,
@@ -94,7 +92,6 @@ select
     f3.load_date as load_date
 from
     dimcmte c
-    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join facthousesenate_f3 f3 using (cmte_sk)
     inner join dimreporttype rt using (reporttype_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
