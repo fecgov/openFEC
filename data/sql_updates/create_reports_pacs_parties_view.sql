@@ -57,8 +57,11 @@ select
     other_fed_op_exp_ytd as other_fed_operating_expenditures_ytd,
     other_fed_receipts_per as other_fed_receipts_period,
     other_fed_receipts_ytd as other_fed_receipts_ytd,
+    -- in this case, i and ii are not the same thing
+    -- refunds
     other_pol_cmte_contb_per_ii as other_political_committee_contribution_refunds_period,
     other_pol_cmte_contb_ytd_ii as other_political_committee_contribution_refunds_ytd,
+    -- contributions
     other_pol_cmte_contb_per_i as other_political_committee_contributions_period,
     other_pol_cmte_contb_ytd_i as other_political_committee_contributions_ytd,
     pol_pty_cmte_contb_per_ii as political_party_committee_contribution_refunds_period,
