@@ -1,4 +1,3 @@
-import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -34,8 +33,8 @@ reports_type_map = {
 class ReportsView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.reports)
+    @args.register_kwargs(args.make_sort_args(default=['-coverage_end_date']))
     def get(self, committee_id=None, committee_type=None, **kwargs):
         reports = self.get_reports(committee_id, committee_type, kwargs)
         reports, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
@@ -58,7 +57,7 @@ class ReportsView(Resource):
         if kwargs['cycle']:
             reports = reports.filter(reports_class.cycle.in_(kwargs['cycle']))
 
-        return reports.order_by(sa.desc(reports_class.coverage_end_date)), reports_schema
+        return reports, reports_schema
 
     def _resolve_committee_type(self, committee_id, committee_type):
         if committee_id is not None:

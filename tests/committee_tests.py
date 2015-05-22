@@ -12,7 +12,6 @@ from webservices.rest import db
 from webservices.rest import api
 from webservices.rest import CommitteeList
 from webservices.rest import CommitteeView
-from webservices.rest import CandidateList
 from webservices.rest import CandidateView
 
 
@@ -265,27 +264,22 @@ class CommitteeFormatTest(ApiBaseTest):
         results = self._results(api.url_for(CandidateView, committee_id=committee_id))
         self.assertEquals(1, len(results))
 
-    def test_candidate_sort(self):
-        candidates = [
-            factories.CandidateFactory(candidate_status='P'),
-            factories.CandidateFactory(candidate_status='C'),
+    def test_committee_sort(self):
+        committees = [
+            factories.CommitteeFactory(designation='B'),
+            factories.CommitteeFactory(designation='U'),
         ]
-        candidate_ids = [each.candidate_id for each in candidates]
-        results = self._results(api.url_for(CandidateList, sort='candidate_status'))
-        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
-        results = self._results(api.url_for(CandidateList, sort='-candidate_status'))
+        committee_ids = [each.committee_id for each in committees]
+        results = self._results(api.url_for(CommitteeList, sort='designation'))
+        self.assertEqual([each['committee_id'] for each in results], committee_ids)
+        results = self._results(api.url_for(CommitteeList, sort='-designation'))
+        self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
 
-    def test_candidate_multi_sort(self):
-        candidates = [
-            factories.CandidateFactory(candidate_status='C', party='DFL'),
-            factories.CandidateFactory(candidate_status='P', party='FLP'),
-            factories.CandidateFactory(candidate_status='P', party='REF'),
+    def test_committee_sort_default(self):
+        committees = [
+            factories.CommitteeFactory(name='Zartlet for America'),
+            factories.CommitteeFactory(name='Bartlet for America'),
         ]
-        candidate_ids = [each.candidate_id for each in candidates]
-        results = self._results(api.url_for(CandidateList, sort=['candidate_status', 'party']))
-        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
-        results = self._results(api.url_for(CandidateList, sort=['candidate_status', '-party']))
-        self.assertEqual(
-            [each['candidate_id'] for each in results],
-            [candidate_ids[0], candidate_ids[2], candidate_ids[1]],
-        )
+        committee_ids = [each.committee_id for each in committees]
+        results = self._results(api.url_for(CommitteeList))
+        self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
