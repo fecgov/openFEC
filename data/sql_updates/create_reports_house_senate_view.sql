@@ -64,7 +64,6 @@ select
     ttl_contb_per as total_contributions_period,
     ttl_contb_ytd as total_contributions_ytd,
     coalesce(ttl_disb_per_i, ttl_disb_per_ii) as total_disbursements_period,
-    --ttl_disb_per_ii as total_disbursements_period,
     ttl_disb_ytd as total_disbursements_ytd,
     ttl_indv_contb_per as total_individual_contributions_period,
     ttl_indv_contb_ytd as total_individual_contributions_ytd,
