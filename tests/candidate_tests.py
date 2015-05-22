@@ -186,7 +186,7 @@ class CandidateFormatTest(ApiBaseTest):
             api.url_for(
                 CandidateHistoryView,
                 candidate_id=id,
-                year=histories[1].two_year_period,
+                cycle=histories[1].two_year_period,
             )
         )
         self.assertEqual(len(results), 1)
@@ -207,14 +207,7 @@ class CandidateFormatTest(ApiBaseTest):
         results = self._results(
             api.url_for(CandidateHistoryView, candidate_id=id)
         )
-        recent_results = self._results(
-            api.url_for(CandidateHistoryView, candidate_id=id, year='recent')
-        )
 
-        # history/recent
-        self.assertEqual(recent_results[0]['candidate_id'], histories[0].candidate_id)
-        self.assertEqual(len(recent_results), 1)
-        # /history
         self.assertEqual(results[0]['candidate_id'], id)
         self.assertEqual(results[1]['candidate_id'], id)
         self.assertEqual(results[0]['two_year_period'], histories[0].two_year_period)
