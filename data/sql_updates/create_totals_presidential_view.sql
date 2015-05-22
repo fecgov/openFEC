@@ -4,7 +4,6 @@ select
     row_number() over () as idx,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
-    cmte_tp as committee_type,
     min(start_date.dw_date) as coverage_start_date,
     max(end_date.dw_date) as coverage_end_date,
     sum(cand_contb_per) as candidate_contribution,
@@ -42,14 +41,13 @@ select
     sum(tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee
 from
     dimcmte c
-    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join factpresidential_f3p p using (cmte_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
     p.expire_date is null
     and two_yr_period_sk >= :START_YEAR
-group by committee_id, cycle, committee_type
+group by committee_id, cycle
 ;
 
 create unique index on ofec_totals_presidential_mv_tmp(idx);
