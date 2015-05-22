@@ -136,7 +136,7 @@ class CandidateView(Resource):
 class CandidateHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.sorting)
+    @args.register_kwargs(args.make_sort_args(default=['-two_year_period']))
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
     def get(self, candidate_id, year=None, **kwargs):
         query = self.get_candidate(candidate_id, year, kwargs)
@@ -153,4 +153,4 @@ class CandidateHistoryView(Resource):
             year = int(year) + int(year) % 2
             candidates = candidates.filter_by(two_year_period=year)
 
-        return candidates.order_by(CandidateHistory.two_year_period.desc())
+        return candidates
