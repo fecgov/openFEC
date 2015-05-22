@@ -17,7 +17,7 @@ select distinct
     cp_most_recent.cand_pty_affiliation as party,
     cp_most_recent.receipt_dt as last_file_date,
     cp_original.receipt_dt as first_file_date,
-    clean_party(p.party_affiliation) as party_full,
+    clean_party(p.party_affiliation_desc) as party_full,
     cp_most_recent.cmte_nm as name,
     candidates.candidate_ids,
     cp_agg.cycles
