@@ -114,7 +114,18 @@ class CommitteeSchema(ma.Schema):
     original_registration_date = ma.fields.String()
 
 
-class CommitteeDetailSchema(CommitteeSchema):
+class CommitteeHistorySchema(CommitteeSchema):
+    cycle = ma.fields.Integer()
+
+
+class CommitteeListSchema(CommitteeSchema):
+    expire_date = ma.fields.DateTime()
+    first_file_date = ma.fields.DateTime()
+    last_file_date = ma.fields.DateTime()
+    original_registration_date = ma.fields.String()
+
+
+class CommitteeDetailSchema(CommitteeListSchema):
     filing_frequency = ma.fields.String()
     email = ma.fields.String()
     fax = ma.fields.String()
@@ -159,11 +170,14 @@ class CommitteeDetailSchema(CommitteeSchema):
 
 
 CommitteePageSchema = make_page_schema(CommitteeSchema)
+CommitteeHistoryPageSchema = make_page_schema(CommitteeHistorySchema)
 CommitteeDetailPageSchema = make_page_schema(CommitteeDetailSchema)
 
 register_schema(CommitteeSchema)
+register_schema(CommitteeHistorySchema)
 register_schema(CommitteeDetailSchema)
 register_schema(CommitteePageSchema)
+register_schema(CommitteeHistoryPageSchema)
 register_schema(CommitteeDetailPageSchema)
 
 

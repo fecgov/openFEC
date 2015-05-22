@@ -6,30 +6,17 @@ select
     dimcand.cand_sk as candidate_key,
     dimcand.cand_id as candidate_id,
     max(csi_recent.cand_status) as candidate_status,
-    case max(csi_recent.cand_status)
-        when 'C' then 'Candidate'
-        when 'F' then 'Future candidate'
-        when 'N' then 'Not yet a candidate'
-        when 'P' then 'Prior candidate'
-        else 'Unknown' end as candidate_status_full,
+    expand_candidate_status(max(csi_recent.cand_status)) as candidate_status_full,
     max(dimoffice.office_district) as district,
     max(co.cand_election_yr) as active_through,
     array_agg(distinct co.cand_election_yr)::int[] as election_years,
     array_agg(distinct(dcp.election_yr + dcp.election_yr % 2))::int[] as cycles,
     max(full_ici.cand_ici_cd) as incumbent_challenge,
-    case max(full_ici.cand_ici_cd)
-        when 'I' then 'Incumbent'
-        when 'C' then 'Challenger'
-        when 'O' then 'Open seat'
-        else 'Unknown'
-    end as incumbent_challenge_full,
+    expand_candidate_incumbent(max(full_ici.cand_ici_cd)) as incumbent_challenge_full,
     max(dimoffice.office_tp) as office,
     max(dimoffice.office_tp_desc) as office_full,
     max(dimparty.party_affiliation) as party,
-    -- Handle typos and notes in party description:
-    -- * "Commandments Party (Removed)" becomes "Commandments Party"
-    -- * "Green Party Added)" becomes "Green Party"
-    regexp_replace(max(dimparty.party_affiliation_desc), '\s*(Added|Removed|\(.*?)\)$', '') as party_full,
+    clean_party(max(dimparty.party_affiliation_desc)) as party_full,
     max(dimoffice.office_state) as state,
     max(candprops.cand_nm) as name
 from dimcand
