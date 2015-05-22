@@ -219,3 +219,28 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertEqual(results[1]['candidate_id'], id)
         self.assertEqual(results[0]['two_year_period'], histories[0].two_year_period)
         self.assertEqual(results[1]['two_year_period'], histories[1].two_year_period)
+
+    def test_candidate_sort(self):
+        candidates = [
+            factories.CandidateFactory(candidate_status='P'),
+            factories.CandidateFactory(candidate_status='C'),
+        ]
+        candidate_ids = [each.candidate_id for each in candidates]
+        results = self._results(api.url_for(CandidateList, sort='candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
+        results = self._results(api.url_for(CandidateList, sort='-candidate_status'))
+
+    def test_candidate_multi_sort(self):
+        candidates = [
+            factories.CandidateFactory(candidate_status='C', party='DFL'),
+            factories.CandidateFactory(candidate_status='P', party='FLP'),
+            factories.CandidateFactory(candidate_status='P', party='REF'),
+        ]
+        candidate_ids = [each.candidate_id for each in candidates]
+        results = self._results(api.url_for(CandidateList, sort=['candidate_status', 'party']))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
+        results = self._results(api.url_for(CandidateList, sort=['candidate_status', '-party']))
+        self.assertEqual(
+            [each['candidate_id'] for each in results],
+            [candidate_ids[0], candidate_ids[2], candidate_ids[1]],
+        )

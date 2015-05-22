@@ -1,7 +1,5 @@
 from flask.ext.restful import Resource
 
-import sqlalchemy as sa
-
 from webservices import args
 from webservices import docs
 from webservices import spec
@@ -28,8 +26,8 @@ default_schemas = (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageS
 class TotalsView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.sorting)
     @args.register_kwargs(args.totals)
+    @args.register_kwargs(args.make_sort_args(default=['-cycle']))
     def get(self, committee_id, **kwargs):
         # TODO(jmcarp) Handle multiple results better
         committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()
@@ -42,4 +40,4 @@ class TotalsView(Resource):
         totals = totals_class.query.filter_by(committee_id=committee_id)
         if kwargs['cycle']:
             totals = totals.filter(totals_class.cycle.in_(kwargs['cycle']))
-        return totals.order_by(sa.desc(totals_class.cycle))
+        return totals
