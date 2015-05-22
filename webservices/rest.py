@@ -137,7 +137,7 @@ api.add_resource(
 )
 api.add_resource(
     CandidateHistoryView,
-    '/candidate/<string:candidate_id>/history/<string:year>',
+    '/candidate/<string:candidate_id>/history/<int:cycle>',
     '/candidate/<string:candidate_id>/history',
 )
 api.add_resource(CommitteeList, '/committees')

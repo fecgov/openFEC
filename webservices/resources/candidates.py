@@ -138,19 +138,12 @@ class CandidateHistoryView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.make_sort_args(default=['-two_year_period']))
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
-    def get(self, candidate_id, year=None, **kwargs):
-        query = self.get_candidate(candidate_id, year, kwargs)
+    def get(self, candidate_id, cycle=None, **kwargs):
+        query = self.get_candidate(candidate_id, cycle, kwargs)
         return utils.fetch_page(query, kwargs)
 
-    def get_candidate(self, candidate_id, year, kwargs):
-
-        candidates = CandidateHistory.query
-        candidates = candidates.filter_by(candidate_id=candidate_id)
-
-        if year:
-            if year == 'recent':
-                return candidates.order_by(CandidateHistory.two_year_period.desc()).limit(1)
-            year = int(year) + int(year) % 2
-            candidates = candidates.filter_by(two_year_period=year)
-
-        return candidates
+    def get_candidate(self, candidate_id, cycle, kwargs):
+        query = CandidateHistory.query.filter(CandidateHistory.candidate_id == candidate_id)
+        if cycle:
+            query = query.filter(CandidateHistory.two_year_period == cycle)
+        return query
