@@ -292,7 +292,6 @@ class CommitteeReportsHouseOrSenate(CommitteeReports):
     total_offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
     total_operating_expenditures_period = db.Column(db.Integer)
     total_operating_expenditures_ytd = db.Column(db.Integer)
-    total_receipts = db.Column(db.Integer)
     transfers_from_other_authorized_committee_period = db.Column(db.Integer)
     transfers_from_other_authorized_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
