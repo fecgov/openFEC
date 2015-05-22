@@ -42,6 +42,7 @@ where
     hs.expire_date is null
     and two_yr_period_sk >= :START_YEAR
 group by committee_id, cycle
+;
 
 create unique index on ofec_totals_house_senate_mv_tmp(idx);
 
