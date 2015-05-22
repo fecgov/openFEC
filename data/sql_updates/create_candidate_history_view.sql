@@ -28,10 +28,7 @@ select
     dcp_by_period.party_affiliation as party,
     year_agg.election_years,
     cycle_agg.cycles,
-    -- Handle typos and notes in party description:
-    -- * "Commandments Party (Removed)" becomes "Commandments Party"
-    -- * "Green Party Added)" becomes "Green Party"
-    regexp_replace(dcp_by_period.party_affiliation_desc, '\s*(Added|Removed|\(.*?)\)$', '') as party_full
+    clean_party(dcp_by_period.party_affiliation) as party_full
 from ofec_two_year_periods
     left join (
         select distinct on (two_year_period, cand_sk)
