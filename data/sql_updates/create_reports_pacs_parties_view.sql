@@ -101,7 +101,7 @@ select
     ttl_op_exp_per as total_operating_expenditures_period,
     ttl_op_exp_ytd as total_operating_expenditures_ytd,
     coalesce(ttl_receipts_sum_page_per, ttl_receipts_per) as total_receipts_period,
-    coalesce(ttl_receipts_sum_page_ytd, total_receipts_ytd) as total_receipts_ytd,
+    coalesce(ttl_receipts_sum_page_ytd, ttl_receipts_ytd) as total_receipts_ytd,
     tranf_from_affiliated_pty_per as transfers_from_affiliated_party_period,
     tranf_from_affiliated_pty_ytd as transfers_from_affiliated_party_ytd,
     tranf_from_nonfed_acct_per as transfers_from_nonfed_account_period,
