@@ -446,8 +446,6 @@ class CommitteeTotals(BaseModel):
 
     committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer, primary_key=True)
-    committee_type = db.Column(db.String(1))
-
     offsets_to_operating_expenditures = db.Column(db.Integer)
     political_party_committee_contributions = db.Column(db.Integer)
     other_disbursements = db.Column(db.Integer)
