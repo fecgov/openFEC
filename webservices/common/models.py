@@ -118,8 +118,6 @@ class BaseCommittee(BaseModel):
     committee_type = db.Column(db.String(1))
     committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
-    first_file_date = db.Column(db.DateTime)
-    last_file_date = db.Column(db.DateTime)
     party = db.Column(db.String(3))
     party_full = db.Column(db.String(50))
     name = db.Column(db.String(100))
@@ -129,11 +127,21 @@ class Committee(BaseCommittee):
     __tablename__ = 'ofec_committees_mv'
 
     candidate_ids = db.Column(ARRAY(db.Text))
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
+
+
+class CommitteeHistory(BaseCommittee):
+    __tablename__ = 'ofec_committee_history_mv'
+
+    cycle = db.Column(db.Integer)
 
 
 class CommitteeDetail(BaseCommittee):
     __tablename__ = 'ofec_committee_detail_mv'
 
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
     filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50))
     fax = db.Column(db.String(10))

@@ -46,9 +46,10 @@ paging = {
 }
 
 
-sorting = {
-    'sort': Arg(str, multiple=True),
-}
+def make_sort_args(default=None):
+    return {
+        'sort': Arg(str, multiple=True, default=default),
+    }
 
 
 names = {
