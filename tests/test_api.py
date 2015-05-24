@@ -130,7 +130,7 @@ class OverallTest(ApiBaseTest):
         [
             factory(
                 committee_id=committee_id,
-                coverage_end_date=end_date
+                coverage_end_date=end_date,
             )
             for end_date in end_dates
         ]
