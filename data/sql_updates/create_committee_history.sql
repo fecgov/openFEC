@@ -33,7 +33,7 @@ and dcp.rpt_yr >= :START_YEAR
 order by cmte_sk, cycle desc, dd.receipt_date desc
 ;
 
-create unique index on ofec_candidate_history_mv_tmp(idx);
+create unique index on ofec_committee_history_mv_tmp(idx);
 
 create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
