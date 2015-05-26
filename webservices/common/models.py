@@ -37,12 +37,10 @@ class CommitteeSearch(BaseModel):
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
-    candidate_key = db.Column(db.Integer, unique=True)
     candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1))
     candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2))
-    active_through = db.Column(db.Integer)
     election_years = db.Column(ARRAY(db.Integer))
     cycles = db.Column(ARRAY(db.Integer))
     incumbent_challenge = db.Column(db.String(1))
@@ -58,14 +56,17 @@ class BaseCandidate(BaseModel):
 class Candidate(BaseCandidate):
     __tablename__ = 'ofec_candidates_mv'
 
+    candidate_key = db.Column(db.Integer, unique=True)
+    active_through = db.Column(db.Integer)
+
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
         'Committee',
         secondary='ofec_name_linkage_mv',
-        secondaryjoin=' and '.join([
-            'Committee.committee_key == ofec_name_linkage_mv.c.committee_key',
-            'Committee.designation == "P"',
-        ]),
+        secondaryjoin='''and_(
+            Committee.committee_key == ofec_name_linkage_mv.c.committee_key,
+            Committee.designation == 'P',
+        )''',
         order_by='desc(Committee.last_file_date)',
     )
 
@@ -73,9 +74,7 @@ class Candidate(BaseCandidate):
 class CandidateDetail(BaseCandidate):
     __tablename__ = 'ofec_candidate_detail_mv'
 
-    name = db.Column(db.String(100))
-    expire_date = db.Column('candidate_expire_date', db.DateTime())
-    load_date = db.Column(db.DateTime())
+    candidate_key = db.Column(db.Integer, unique=True)
     form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
@@ -83,6 +82,25 @@ class CandidateDetail(BaseCandidate):
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
+    active_through = db.Column(db.Integer)
+    load_date = db.Column(db.DateTime)
+    expire_date = db.Column('candidate_expire_date', db.DateTime)
+
+
+class CandidateHistory(BaseCandidate):
+    __tablename__ = 'ofec_candidate_history_mv'
+
+    candidate_key = db.Column(db.Integer)
+    two_year_period = db.Column(db.Integer)
+    form_type = db.Column(db.String(3))
+    address_city = db.Column(db.String(100))
+    address_state = db.Column(db.String(2))
+    address_street_1 = db.Column(db.String(200))
+    address_street_2 = db.Column(db.String(200))
+    address_zip = db.Column(db.String(10))
+    candidate_inactive = db.Column(db.String(1))
+    load_date = db.Column(db.DateTime)
+    expire_date = db.Column(db.DateTime)
 
 
 class BaseCommittee(BaseModel):
@@ -100,8 +118,6 @@ class BaseCommittee(BaseModel):
     committee_type = db.Column(db.String(1))
     committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
-    first_file_date = db.Column(db.DateTime)
-    last_file_date = db.Column(db.DateTime)
     party = db.Column(db.String(3))
     party_full = db.Column(db.String(50))
     name = db.Column(db.String(100))
@@ -111,11 +127,21 @@ class Committee(BaseCommittee):
     __tablename__ = 'ofec_committees_mv'
 
     candidate_ids = db.Column(ARRAY(db.Text))
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
+
+
+class CommitteeHistory(BaseCommittee):
+    __tablename__ = 'ofec_committee_history_mv'
+
+    cycle = db.Column(db.Integer)
 
 
 class CommitteeDetail(BaseCommittee):
     __tablename__ = 'ofec_committee_detail_mv'
 
+    first_file_date = db.Column(db.DateTime)
+    last_file_date = db.Column(db.DateTime)
     filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50))
     fax = db.Column(db.String(10))
@@ -208,6 +234,10 @@ class CommitteeReports(BaseModel):
     other_political_committee_contributions_ytd = db.Column(db.Integer)
     political_party_committee_contributions_period = db.Column(db.Integer)
     political_party_committee_contributions_ytd = db.Column(db.Integer)
+    individual_itemized_contributions_period = db.Column(db.Integer)
+    individual_unitemized_contributions_period = db.Column(db.Integer)
+    net_contributions_period = db.Column(db.Integer)
+    net_operating_expenditures_period = db.Column(db.Integer)
     report_type = db.Column(db.String)
     report_type_full = db.Column(db.String)
     report_year = db.Column(db.Integer)
@@ -219,6 +249,8 @@ class CommitteeReports(BaseModel):
     total_disbursements_ytd = db.Column(db.Integer)
     total_receipts_period = db.Column(db.Integer)
     total_receipts_ytd = db.Column(db.Integer)
+    offsets_to_operating_expenditures_period = db.Column(db.Integer)
+    offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
 
 
 class CommitteeReportsHouseOrSenate(CommitteeReports):
@@ -234,20 +266,14 @@ class CommitteeReportsHouseOrSenate(CommitteeReports):
     gross_receipt_authorized_committee_primary = db.Column(db.Integer)
     gross_receipt_minus_personal_contribution_general = db.Column(db.Integer)
     gross_receipt_minus_personal_contributions_primary = db.Column(db.Integer)
-    individual_itemized_contributions_period = db.Column(db.Integer)
-    individual_unitemized_contributions_period = db.Column(db.Integer)
     loan_repayments_candidate_loans_period = db.Column(db.Integer)
     loan_repayments_candidate_loans_ytd = db.Column(db.Integer)
     loan_repayments_other_loans_period = db.Column(db.Integer)
     loan_repayments_other_loans_ytd = db.Column(db.Integer)
     loans_made_by_candidate_period = db.Column(db.Integer)
     loans_made_by_candidate_ytd = db.Column(db.Integer)
-    net_contributions_period = db.Column(db.Integer)
     net_contributions_ytd = db.Column(db.Integer)
-    net_operating_expenditures_period = db.Column(db.Integer)
     net_operating_expenditures_ytd = db.Column(db.Integer)
-    offsets_to_operating_expenditures_period = db.Column(db.Integer)
-    offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
     operating_expenditures_period = db.Column(db.Integer)
     operating_expenditures_ytd = db.Column(db.Integer)
     other_receipts_period = db.Column(db.Integer)
@@ -274,7 +300,6 @@ class CommitteeReportsHouseOrSenate(CommitteeReports):
     total_offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
     total_operating_expenditures_period = db.Column(db.Integer)
     total_operating_expenditures_ytd = db.Column(db.Integer)
-    total_receipts = db.Column(db.Integer)
     transfers_from_other_authorized_committee_period = db.Column(db.Integer)
     transfers_from_other_authorized_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
@@ -300,9 +325,7 @@ class CommitteeReportsPacOrParty(CommitteeReports):
     independent_expenditures_ytd = db.Column(db.Integer)
     individual_contribution_refunds_period = db.Column(db.Integer)
     individual_contribution_refunds_ytd = db.Column(db.Integer)
-    individual_itemized_contributions_period = db.Column(db.Integer)
     individual_itemized_contributions_ytd = db.Column(db.Integer)
-    individual_unitemized_contributions_period = db.Column(db.Integer)
     individual_unitemized_contributions_ytd = db.Column(db.Integer)
     loan_repayments_made_period = db.Column(db.Integer)
     loan_repayments_made_ytd = db.Column(db.Integer)
@@ -317,8 +340,6 @@ class CommitteeReportsPacOrParty(CommitteeReports):
     non_allocated_fed_election_activity_period = db.Column(db.Integer)
     non_allocated_fed_election_activity_ytd = db.Column(db.Integer)
     nonfed_share_allocated_disbursements_period = db.Column(db.Integer)
-    offsets_to_operating_expenditures_period = db.Column(db.Integer)
-    offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
     other_fed_operating_expenditures_period = db.Column(db.Integer)
     other_fed_operating_expenditures_ytd = db.Column(db.Integer)
     other_fed_receipts_period = db.Column(db.Integer)
@@ -336,8 +357,6 @@ class CommitteeReportsPacOrParty(CommitteeReports):
     shared_nonfed_operating_expenditures_ytd = db.Column(db.Integer)
     subtotal_summary_page_period = db.Column(db.Integer)
     subtotal_summary_ytd = db.Column(db.Integer)
-    total_disbursements_summary_page_period = db.Column(db.Integer)
-    total_disbursements_summary_page_ytd = db.Column(db.Integer)
     total_fed_disbursements_period = db.Column(db.Integer)
     total_fed_disbursements_ytd = db.Column(db.Integer)
     total_fed_election_activity_period = db.Column(db.Integer)
@@ -352,8 +371,6 @@ class CommitteeReportsPacOrParty(CommitteeReports):
     total_nonfed_transfers_ytd = db.Column(db.Integer)
     total_operating_expenditures_period = db.Column(db.Integer)
     total_operating_expenditures_ytd = db.Column(db.Integer)
-    total_receipts_summary_page_period = db.Column(db.Integer)
-    total_receipts_summary_page_ytd = db.Column(db.Integer)
     transfers_from_affiliated_party_period = db.Column(db.Integer)
     transfers_from_affiliated_party_ytd = db.Column(db.Integer)
     transfers_from_nonfed_account_period = db.Column(db.Integer)
@@ -376,23 +393,17 @@ class CommitteeReportsPresidential(CommitteeReports):
     federal_funds_ytd = db.Column(db.Integer)
     fundraising_disbursements_period = db.Column(db.Integer)
     fundraising_disbursements_ytd = db.Column(db.Integer)
-    individual_unitemized_contributions_period = db.Column(db.Integer)
     individual_unitemized_contributions_ytd = db.Column(db.Integer)
-    individual_itemized_contributions_period = db.Column(db.Integer)
     individual_itemized_contributions_ytd = db.Column(db.Integer)
     individual_contributions_period = db.Column(db.Integer)
     individual_contributions_ytd = db.Column(db.Integer)
     items_on_hand_liquidated = db.Column(db.Integer)
     loans_received_from_candidate_period = db.Column(db.Integer)
     loans_received_from_candidate_ytd = db.Column(db.Integer)
-    net_contribution_summary_period = db.Column(db.Integer)
-    net_operating_expenditures_summary_period = db.Column(db.Integer)
     offsets_to_fundraising_expenditures_ytd = db.Column(db.Integer)
     offsets_to_fundraising_expenditures_period = db.Column(db.Integer)
     offsets_to_legal_accounting_period = db.Column(db.Integer)
     offsets_to_legal_accounting_ytd = db.Column(db.Integer)
-    offsets_to_operating_expenditures_period = db.Column(db.Integer)
-    offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
     operating_expenditures_period = db.Column(db.Integer)
     operating_expenditures_ytd = db.Column(db.Integer)
     other_loans_received_period = db.Column(db.Integer)
@@ -411,7 +422,6 @@ class CommitteeReportsPresidential(CommitteeReports):
     repayments_other_loans_period = db.Column(db.Integer)
     repayments_other_loans_ytd = db.Column(db.Integer)
     subtotal_summary_period = db.Column(db.Integer)
-    total_disbursements_summary_period = db.Column(db.Integer)
     total_loan_repayments_made_period = db.Column(db.Integer)
     total_loan_repayments_made_ytd = db.Column(db.Integer)
     total_loans_received_period = db.Column(db.Integer)
@@ -419,7 +429,6 @@ class CommitteeReportsPresidential(CommitteeReports):
     total_offsets_to_operating_expenditures_period = db.Column(db.Integer)
     total_offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
     total_period = db.Column(db.Integer)
-    total_receipts_summary_period = db.Column(db.Integer)
     total_ytd = db.Column(db.Integer)
     transfer_from_affiliated_committee_period = db.Column(db.Integer)
     transfer_from_affiliated_committee_ytd = db.Column(db.Integer)
@@ -432,12 +441,12 @@ class CommitteeTotals(BaseModel):
 
     committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer, primary_key=True)
-    committee_type = db.Column(db.String(1))
-
     offsets_to_operating_expenditures = db.Column(db.Integer)
     political_party_committee_contributions = db.Column(db.Integer)
     other_disbursements = db.Column(db.Integer)
     other_political_committee_contributions = db.Column(db.Integer)
+    individual_itemized_contributions = db.Column(db.Integer)
+    individual_unitemized_contributions = db.Column(db.Integer)
     operating_expenditures = db.Column(db.Integer)
     disbursements = db.Column(db.Integer)
     contributions = db.Column(db.Integer)
@@ -462,8 +471,6 @@ class CommitteeTotalsPacOrParty(CommitteeTotals):
     fed_receipts = db.Column(db.Integer)
     independent_expenditures = db.Column(db.Integer)
     individual_contribution_refunds = db.Column(db.Integer)
-    individual_itemized_contributions = db.Column(db.Integer)
-    individual_unitemized_contributions = db.Column(db.Integer)
     loan_repayments_made = db.Column(db.Integer)
     loan_repayments_received = db.Column(db.Integer)
     loans_made = db.Column(db.Integer)
@@ -491,8 +498,6 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     federal_funds = db.Column(db.Integer)
     fundraising_disbursements = db.Column(db.Integer)
     individual_contributions = db.Column(db.Integer)
-    individual_unitemized_contributions = db.Column(db.Integer)
-    individual_itemized_contributions = db.Column(db.Integer)
     loan_repayments_made = db.Column(db.Integer)
     loans_received = db.Column(db.Integer)
     loans_received_from_candidate = db.Column(db.Integer)
@@ -516,8 +521,6 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     all_other_loans = db.Column(db.Integer)
     candidate_contribution = db.Column(db.Integer)
     individual_contributions = db.Column(db.Integer)
-    individual_itemized_contributions = db.Column(db.Integer)
-    individual_unitemized_contributions = db.Column(db.Integer)
     loan_repayments = db.Column(db.Integer)
     loan_repayments_candidate_loans = db.Column(db.Integer)
     loan_repayments_other_loans = db.Column(db.Integer)
@@ -529,32 +532,3 @@ class CommitteeTotalsHouseOrSenate(CommitteeTotals):
     refunded_political_party_committee_contributions = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
-
-
-class CandidateHistory(BaseModel):
-    __tablename__ = 'ofec_candidate_history_mv'
-
-    properties_key = db.Column(db.Integer)
-    candidate_key = db.Column(db.Integer)
-    candidate_id = db.Column(db.String(10))
-    two_year_period = db.Column(db.Integer)
-    candidate_status = db.Column(db.String(1))
-    candidate_status_full = db.Column(db.String(11))
-    district = db.Column(db.String(2))
-    incumbent_challenge = db.Column(db.String(1))
-    incumbent_challenge_full = db.Column(db.String(10))
-    office = db.Column(db.String(1))
-    office_full = db.Column(db.String(9))
-    party = db.Column(db.String(3))
-    party_full = db.Column(db.String(255))
-    state = db.Column(db.String(2))
-    name = db.Column(db.String(100))
-    expire_date = db.Column(db.DateTime())
-    load_date = db.Column(db.DateTime())
-    form_type = db.Column(db.String(3))
-    address_city = db.Column(db.String(100))
-    address_state = db.Column(db.String(2))
-    address_street_1 = db.Column(db.String(200))
-    address_street_2 = db.Column(db.String(200))
-    address_zip = db.Column(db.String(10))
-    candidate_inactive = db.Column(db.String(1))

@@ -4,14 +4,13 @@ select
     row_number() over () as idx,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
-    cmte_tp as committee_type,
     min(start_date.dw_date) as coverage_start_date,
     max(end_date.dw_date) as coverage_end_date,
     sum(all_other_loans_per) as all_other_loans,
     sum(cand_contb_per) as candidate_contribution,
     sum(ttl_contb_ref_per) as contribution_refunds,
     sum(ttl_contb_per) as contributions,
-    sum(ttl_disb_per_ii) as disbursements,
+    sum(coalesce(ttl_disb_per_i, ttl_disb_per_ii)) as disbursements,
     sum(ttl_indv_contb_per) as individual_contributions,
     sum(indv_item_contb_per) as individual_itemized_contributions,
     sum(indv_unitem_contb_per) as individual_unitemized_contributions,
@@ -28,7 +27,7 @@ select
     sum(other_pol_cmte_contb_per) as other_political_committee_contributions,
     sum(other_receipts_per) as other_receipts,
     sum(pol_pty_cmte_contb_per) as political_party_committee_contributions,
-    sum(ttl_receipts_per_i) as receipts,
+    sum(coalesce(ttl_receipts_per_i, ttl_receipts_ii)) as receipts,
     sum(ref_indv_contb_per) as refunded_individual_contributions,
     sum(ref_other_pol_cmte_contb_per) as refunded_other_political_committee_contributions,
     sum(ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
@@ -36,14 +35,13 @@ select
     sum(tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee
 from
     dimcmte c
-    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join facthousesenate_f3 hs using (cmte_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
     hs.expire_date is null
     and two_yr_period_sk >= :START_YEAR
-group by committee_id, cycle, committee_type
+group by committee_id, cycle
 ;
 
 create unique index on ofec_totals_house_senate_mv_tmp(idx);

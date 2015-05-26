@@ -6,7 +6,6 @@ select
     factpacsandparties_f3x_sk as report_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
-    cmte_tp as committee_type,
     start_date.dw_date as coverage_start_date,
     end_date.dw_date as coverage_end_date,
     all_loans_received_per as all_loans_received_period,
@@ -58,8 +57,11 @@ select
     other_fed_op_exp_ytd as other_fed_operating_expenditures_ytd,
     other_fed_receipts_per as other_fed_receipts_period,
     other_fed_receipts_ytd as other_fed_receipts_ytd,
+    -- in this case, i and ii are not the same thing
+    -- refunds
     other_pol_cmte_contb_per_ii as other_political_committee_contribution_refunds_period,
     other_pol_cmte_contb_ytd_ii as other_political_committee_contribution_refunds_ytd,
+    -- contributions
     other_pol_cmte_contb_per_i as other_political_committee_contributions_period,
     other_pol_cmte_contb_ytd_i as other_political_committee_contributions_ytd,
     pol_pty_cmte_contb_per_ii as political_party_committee_contribution_refunds_period,
@@ -82,10 +84,8 @@ select
     --ttl_contb_ref_ytd_ii as total_contribution_refunds_ytd,
     ttl_contb_per as total_contributions_period,
     ttl_contb_ytd as total_contributions_ytd,
-    ttl_disb_per as total_disbursements_period,
-    ttl_disb_sum_page_per as total_disbursements_summary_page_period,
-    ttl_disb_sum_page_ytd as total_disbursements_summary_page_ytd,
-    ttl_disb_ytd as total_disbursements_ytd,
+    coalesce(ttl_disb_sum_page_per, ttl_disb_per) as total_disbursements_period,
+    coalesce(ttl_disb_sum_page_ytd, ttl_disb_ytd) as total_disbursements_ytd,
     ttl_fed_disb_per as total_fed_disbursements_period,
     ttl_fed_disb_ytd as total_fed_disbursements_ytd,
     ttl_fed_elect_actvy_per as total_fed_election_activity_period,
@@ -100,10 +100,8 @@ select
     ttl_nonfed_tranf_ytd as total_nonfed_transfers_ytd,
     ttl_op_exp_per as total_operating_expenditures_period,
     ttl_op_exp_ytd as total_operating_expenditures_ytd,
-    ttl_receipts_per as total_receipts_period,
-    ttl_receipts_sum_page_per as total_receipts_summary_page_period,
-    ttl_receipts_sum_page_ytd as total_receipts_summary_page_ytd,
-    ttl_receipts_ytd as total_receipts_ytd,
+    coalesce(ttl_receipts_sum_page_per, ttl_receipts_per) as total_receipts_period,
+    coalesce(ttl_receipts_sum_page_ytd, ttl_receipts_ytd) as total_receipts_ytd,
     tranf_from_affiliated_pty_per as transfers_from_affiliated_party_period,
     tranf_from_affiliated_pty_ytd as transfers_from_affiliated_party_ytd,
     tranf_from_nonfed_acct_per as transfers_from_nonfed_account_period,
@@ -118,7 +116,6 @@ select
     f3x.load_date as load_date
 from
     dimcmte c
-    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join factpacsandparties_f3x f3x using (cmte_sk)
     inner join dimreporttype rt using (reporttype_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1

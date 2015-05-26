@@ -6,7 +6,6 @@ select
     factpresidential_f3p_sk as report_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
-    cmte_tp as committee_type,
     start_date.dw_date as coverage_start_date,
     end_date.dw_date as coverage_end_date,
     begin_image_num as beginning_image_number,
@@ -33,8 +32,8 @@ select
     items_on_hand_liquidated as items_on_hand_liquidated,
     loans_received_from_cand_per as loans_received_from_candidate_period,
     loans_received_from_cand_ytd as loans_received_from_candidate_ytd,
-    net_contb_sum_page_per as net_contribution_summary_period,
-    net_op_exp_sum_page_per as net_operating_expenditures_summary_period,
+    net_contb_sum_page_per as net_contributions_period,
+    net_op_exp_sum_page_per as net_operating_expenditures_period,
     offsets_to_fndrsg_exp_ytd as offsets_to_fundraising_exp_ytd,
     offsets_to_fndrsg_exp_per as offsets_to_fundraising_expenditures_period,
     offsets_to_fndrsg_exp_ytd as offsets_to_fundraising_expenditures_ytd,
@@ -71,8 +70,7 @@ select
     ttl_contb_ref_ytd as total_contribution_refunds_ytd,
     ttl_contb_per as total_contributions_period,
     ttl_contb_ytd as total_contributions_ytd,
-    ttl_disb_per as total_disbursements_period,
-    ttl_disb_sum_page_per as total_disbursements_summary_period,
+    coalesce(ttl_disb_per, ttl_disb_sum_page_per) as total_disbursements_period,
     ttl_disb_ytd as total_disbursements_ytd,
     ttl_loan_repymts_made_per as total_loan_repayments_made_period,
     ttl_loan_repymts_made_ytd as total_loan_repayments_made_ytd,
@@ -81,8 +79,7 @@ select
     ttl_offsets_to_op_exp_per as total_offsets_to_operating_expenditures_period,
     ttl_offsets_to_op_exp_ytd as total_offsets_to_operating_expenditures_ytd,
     ttl_per as total_period,
-    ttl_receipts_per as total_receipts_period,
-    ttl_receipts_sum_page_per as total_receipts_summary_period,
+    coalesce(ttl_receipts_per, ttl_receipts_sum_page_per) as total_receipts_period,
     ttl_receipts_ytd as total_receipts_ytd,
     ttl_ytd as total_ytd,
     tranf_from_affilated_cmte_per as transfer_from_affiliated_committee_period,
@@ -95,7 +92,6 @@ select
     f3p.load_date as load_date
 from
     dimcmte c
-    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join factpresidential_f3p f3p using (cmte_sk)
     inner join dimreporttype rt using (reporttype_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1

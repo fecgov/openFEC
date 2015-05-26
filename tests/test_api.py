@@ -130,7 +130,7 @@ class OverallTest(ApiBaseTest):
         [
             factory(
                 committee_id=committee_id,
-                coverage_end_date=end_date
+                coverage_end_date=end_date,
             )
             for end_date in end_dates
         ]
@@ -140,7 +140,7 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
         assert response[0].keys() == schema._declared_fields.keys()
 
-    # TODO(jmcarp) Refactor as parameterize tests
+    # TODO(jmcarp) Refactor as parameterized tests
     def test_reports(self):
         self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
         self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)

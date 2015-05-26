@@ -46,6 +46,12 @@ paging = {
 }
 
 
+def make_sort_args(default=None):
+    return {
+        'sort': Arg(str, multiple=True, default=default),
+    }
+
+
 names = {
     'q': Arg(str, required=True, description='Name (candidate or committee) to search for'),
 }

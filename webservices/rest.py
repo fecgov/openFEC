@@ -32,7 +32,7 @@ from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateSearch, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
-from webservices.resources.committees import CommitteeList, CommitteeView
+from webservices.resources.committees import CommitteeList, CommitteeView, CommitteeHistoryView
 
 from .json_encoding import TolerantJSONEncoder
 
@@ -137,7 +137,7 @@ api.add_resource(
 )
 api.add_resource(
     CandidateHistoryView,
-    '/candidate/<string:candidate_id>/history/<string:year>',
+    '/candidate/<string:candidate_id>/history/<int:cycle>',
     '/candidate/<string:candidate_id>/history',
 )
 api.add_resource(CommitteeList, '/committees')
@@ -145,6 +145,11 @@ api.add_resource(
     CommitteeView,
     '/committee/<string:committee_id>',
     '/candidate/<string:candidate_id>/committees',
+)
+api.add_resource(
+    CommitteeHistoryView,
+    '/committee/<string:committee_id>/history/<int:cycle>',
+    '/committee/<string:committee_id>/history',
 )
 api.add_resource(TotalsView, '/committee/<string:committee_id>/totals')
 api.add_resource(ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')

@@ -263,3 +263,23 @@ class CommitteeFormatTest(ApiBaseTest):
         )
         results = self._results(api.url_for(CandidateView, committee_id=committee_id))
         self.assertEquals(1, len(results))
+
+    def test_committee_sort(self):
+        committees = [
+            factories.CommitteeFactory(designation='B'),
+            factories.CommitteeFactory(designation='U'),
+        ]
+        committee_ids = [each.committee_id for each in committees]
+        results = self._results(api.url_for(CommitteeList, sort='designation'))
+        self.assertEqual([each['committee_id'] for each in results], committee_ids)
+        results = self._results(api.url_for(CommitteeList, sort='-designation'))
+        self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
+
+    def test_committee_sort_default(self):
+        committees = [
+            factories.CommitteeFactory(name='Zartlet for America'),
+            factories.CommitteeFactory(name='Bartlet for America'),
+        ]
+        committee_ids = [each.committee_id for each in committees]
+        results = self._results(api.url_for(CommitteeList))
+        self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
