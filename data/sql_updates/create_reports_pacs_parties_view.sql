@@ -47,10 +47,9 @@ select
     non_alloc_fed_elect_actvy_per as non_allocated_fed_election_activity_period,
     non_alloc_fed_elect_actvy_ytd as non_allocated_fed_election_activity_ytd,
     shared_nonfed_op_exp_per as nonfed_share_allocated_disbursements_period,
-    --offsets_to_op_exp_ytd_ii as offsets_to_operating_expenditures_ytd,
-    offsets_to_op_exp_per_i as offsets_to_operating_expenditures_period,
-    --offsets_to_op_exp_per_ii as offsets_to_operating_expenditures_period,
-    offsets_to_op_exp_ytd_i as offsets_to_operating_expenditures_ytd,
+    coalesce(offsets_to_op_exp_per_i, offsets_to_op_exp_per_ii
+    ) as offsets_to_operating_expenditures_period,
+    coalesce(offsets_to_op_exp_ytd_i, offsets_to_op_exp_ytd_ii) as offsets_to_operating_expenditures_ytd,
     other_disb_per as other_disbursements_period,
     other_disb_ytd as other_disbursements_ytd,
     other_fed_op_exp_per as other_fed_operating_expenditures_period,
@@ -58,10 +57,9 @@ select
     other_fed_receipts_per as other_fed_receipts_period,
     other_fed_receipts_ytd as other_fed_receipts_ytd,
     -- in this case, i and ii are not the same thing
-    -- refunds
+    -- if they have ii they are refunds and i are contributions
     other_pol_cmte_contb_per_ii as other_political_committee_contribution_refunds_period,
     other_pol_cmte_contb_ytd_ii as other_political_committee_contribution_refunds_ytd,
-    -- contributions
     other_pol_cmte_contb_per_i as other_political_committee_contributions_period,
     other_pol_cmte_contb_ytd_i as other_political_committee_contributions_ytd,
     pol_pty_cmte_contb_per_ii as political_party_committee_contribution_refunds_period,
@@ -78,10 +76,8 @@ select
     shared_nonfed_op_exp_ytd as shared_nonfed_operating_expenditures_ytd,
     subttl_sum_page_per as subtotal_summary_page_period,
     subttl_sum_ytd as subtotal_summary_ytd,
-    ttl_contb_ref_per_i as total_contribution_refunds_period,
-    --ttl_contb_ref_per_ii as total_contribution_refunds_period,
-    ttl_contb_ref_ytd_i as total_contribution_refunds_ytd,
-    --ttl_contb_ref_ytd_ii as total_contribution_refunds_ytd,
+    coalesce(ttl_contb_ref_per_i, ttl_contb_ref_per_ii) as total_contribution_refunds_period,
+    coalesce(ttl_contb_ref_ytd_i, ttl_contb_ref_ytd_ii) as total_contribution_refunds_ytd,
     ttl_contb_per as total_contributions_period,
     ttl_contb_ytd as total_contributions_ytd,
     coalesce(ttl_disb_sum_page_per, ttl_disb_per) as total_disbursements_period,
