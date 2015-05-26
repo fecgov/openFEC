@@ -9,6 +9,8 @@ applications:
   path: .
   buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-stage-api
+  services:
+    - fec-creds-stage
   env:
     NEW_RELIC_APP_NAME: OpenFEC API (staging)
     NEW_RELIC_LOG: stdout
@@ -17,6 +19,8 @@ applications:
   path: .
   buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-stage-api
+  services:
+    - fec-creds-stage
   env:
     NEW_RELIC_APP_NAME: OpenFEC API (staging)
     NEW_RELIC_LOG: stdout
