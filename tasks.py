@@ -183,8 +183,9 @@ def deploy(space=None, branch=None, yes=False):
         return
 
     # Remap
-    route = 'fec-{0}-api.cf.18f.us'.format(space)
-    run('cf map-route {0} {1}'.format(new, route), echo=True)
+    route = 'cf.18f.us'
+    host = 'fec-{0}-api'.format(space)
+    run('cf map-route {0} {1} -n {2}'.format(new, route, host), echo=True)
     if old:
-        run('cf unmap-route {0} {1}'.format(old, route), echo=True)
+        run('cf unmap-route {0} {1} -n {2}'.format(old, route, host), echo=True)
         run('cf stop {0}'.format(old), echo=True)
