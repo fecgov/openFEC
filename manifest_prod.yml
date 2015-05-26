@@ -10,6 +10,8 @@ applications:
   path: .
   buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-prod-api
+  services:
+    - fec-creds-prod
   env:
     PRODUCTION: True
     NEW_RELIC_APP_NAME: OpenFEC API (production)
@@ -19,6 +21,8 @@ applications:
   path: .
   buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-prod-api
+  services:
+    - fec-creds-prod
   env:
     PRODUCTION: True
     NEW_RELIC_APP_NAME: OpenFEC API (production)
