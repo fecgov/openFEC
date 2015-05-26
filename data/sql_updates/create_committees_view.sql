@@ -41,7 +41,13 @@ from dimcmte
         select
             cmte_sk,
             array_agg(distinct(rpt_yr + rpt_yr % 2))::int[] as cycles
-        from dimcmteproperties
+        from (
+            select cmte_sk, rpt_yr from factpacsandparties_f3x
+            union
+            select cmte_sk, rpt_yr from factpresidential_f3p
+            union
+            select cmte_sk, rpt_yr from facthousesenate_f3
+        ) years
         where rpt_yr >= :START_YEAR
         group by cmte_sk
     ) cp_agg using (cmte_sk)
