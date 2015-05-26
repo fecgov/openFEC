@@ -5,10 +5,10 @@ from flask.ext.restful import Resource
 from webservices import args
 from webservices import docs
 from webservices import spec
-from webservices import paging
+from webservices import utils
 from webservices import schemas
 from webservices.common.util import filter_query
-from webservices.common.models import db, Committee, CandidateCommitteeLink, CommitteeDetail
+from webservices.common.models import db, Committee, CandidateCommitteeLink, CommitteeDetail, CommitteeHistory
 
 
 list_filter_fields = {'committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type'}
@@ -46,11 +46,11 @@ class CommitteeList(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.committee)
     @args.register_kwargs(args.committee_list)
+    @args.register_kwargs(args.make_sort_args(default=['name']))
     @schemas.marshal_with(schemas.CommitteePageSchema())
     def get(self, **kwargs):
-        committees = self.get_committees(kwargs)
-        paginator = paging.SqlalchemyPaginator(committees, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_committees(kwargs)
+        return utils.fetch_page(query, kwargs)
 
     def get_committees(self, kwargs):
 
@@ -80,7 +80,7 @@ class CommitteeList(Resource):
         if kwargs['cycle']:
             committees = committees.filter(Committee.cycles.overlap(kwargs['cycle']))
 
-        return committees.order_by(Committee.name)
+        return committees
 
 
 @spec.doc(
@@ -94,11 +94,11 @@ class CommitteeView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.committee)
+    @args.register_kwargs(args.make_sort_args(default=['name']))
     @schemas.marshal_with(schemas.CommitteeDetailPageSchema())
     def get(self, committee_id=None, candidate_id=None, **kwargs):
-        committees = self.get_committee(kwargs, committee_id, candidate_id)
-        paginator = paging.SqlalchemyPaginator(committees, kwargs['per_page'])
-        return paginator.get_page(kwargs['page'])
+        query = self.get_committee(kwargs, committee_id, candidate_id)
+        return utils.fetch_page(query, kwargs)
 
     def get_committee(self, kwargs, committee_id, candidate_id):
 
@@ -122,4 +122,22 @@ class CommitteeView(Resource):
         if kwargs['cycle']:
             committees = committees.filter(CommitteeDetail.cycles.overlap(kwargs['cycle']))
 
-        return committees.order_by(CommitteeDetail.name)
+        return committees
+
+
+class CommitteeHistoryView(Resource):
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.make_sort_args(default=['-cycle']))
+    @schemas.marshal_with(schemas.CommitteeHistoryPageSchema())
+    def get(self, committee_id, cycle=None, **kwargs):
+        query = self.get_committee(committee_id, cycle, kwargs)
+        return utils.fetch_page(query, kwargs)
+
+    def get_committee(self, committee_id, cycle, kwargs):
+        query = CommitteeHistory.query.filter(
+            CommitteeHistory.committee_id == committee_id
+        )
+        if cycle:
+            query = query.filter(CommitteeHistory.cycle == cycle)
+        return query

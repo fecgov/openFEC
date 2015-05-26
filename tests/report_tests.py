@@ -1,3 +1,7 @@
+import datetime
+
+from marshmallow.utils import isoformat
+
 from .common import ApiBaseTest
 from tests import factories
 
@@ -91,3 +95,29 @@ class TestReports(ApiBaseTest):
             [presidential_report_2016],
             [presidential_report_2012, house_report_2016],
         )
+
+    def test_reports_sort(self):
+        committee = factories.CommitteeFactory(committee_type='H')
+        committee_id = committee.committee_id
+        contributions = [0, 100]
+        reports = [
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, net_contributions_period=contributions[0]),
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, net_contributions_period=contributions[1]),
+        ]
+        results = self._results(api.url_for(ReportsView, committee_id=committee_id, sort='-net_contributions_period'))
+        self.assertEqual([each['net_contributions_period'] for each in results], contributions[::-1])
+
+    def test_reports_sort_default(self):
+        committee = factories.CommitteeFactory(committee_type='H')
+        committee_id = committee.committee_id
+        dates = [
+            datetime.datetime(2015, 7, 4),
+            datetime.datetime(2015, 7, 5),
+        ]
+        dates_formatted = [isoformat(each) for each in dates]
+        reports = [
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, coverage_end_date=dates[0]),
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, coverage_end_date=dates[1]),
+        ]
+        results = self._results(api.url_for(ReportsView, committee_id=committee_id))
+        self.assertEqual([each['coverage_end_date'] for each in results], dates_formatted[::-1])
