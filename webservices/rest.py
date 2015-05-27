@@ -156,13 +156,6 @@ api.add_resource(ReportsView, '/committee/<string:committee_id>/reports', '/repo
 api.add_resource(NameSearch, '/names')
 
 
-def extend(*dicts):
-    ret = {}
-    for each in dicts:
-        ret.update(each)
-    return ret
-
-
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
 def extract_path(path):
     '''
