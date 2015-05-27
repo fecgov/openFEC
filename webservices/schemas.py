@@ -66,6 +66,7 @@ def make_schema(model, class_name=None, fields=None, options=None):
             {
                 'model': model,
                 'sqla_session': models.db.session,
+                'exclude': ('idx', ),
             },
             options or {},
         )
@@ -119,9 +120,10 @@ register_schema(NameSearchSchema)
 register_schema(NameSearchListSchema)
 
 
-CommitteeSchema = make_schema(models.Committee)
-CommitteeHistorySchema = make_schema(models.CommitteeHistory)
-CommitteeDetailSchema = make_schema(models.CommitteeDetail)
+make_committee_schema = functools.partial(make_schema, options={'exclude': ('idx', 'committee_key')})
+CommitteeSchema = make_committee_schema(models.Committee)
+CommitteeHistorySchema = make_committee_schema(models.CommitteeHistory)
+CommitteeDetailSchema = make_committee_schema(models.CommitteeDetail)
 
 CommitteePageSchema = make_page_schema(CommitteeSchema)
 CommitteeHistoryPageSchema = make_page_schema(CommitteeHistorySchema)
@@ -135,16 +137,17 @@ register_schema(CommitteeHistoryPageSchema)
 register_schema(CommitteeDetailPageSchema)
 
 
+make_candidate_schema = functools.partial(make_schema, options={'exclude': ('idx', 'candidate_key')})
 CandidateSchema = make_schema(
     models.Candidate,
-    options={'exclude': ('principal_committees', )},
+    options={'exclude': ('idx', 'candidate_key', 'principal_committees')},
 )
-CandidateSearchSchema = make_schema(
+CandidateSearchSchema = make_candidate_schema(
     models.Candidate,
     fields={'principal_committees': ma.fields.Nested(CommitteeSchema, many=True)},
 )
-CandidateDetailSchema = make_schema(models.CandidateDetail)
-CandidateHistorySchema = make_schema(models.CandidateHistory)
+CandidateDetailSchema = make_candidate_schema(models.CandidateDetail)
+CandidateHistorySchema = make_candidate_schema(models.CandidateHistory)
 
 CandidatePageSchema = make_page_schema(CandidateSchema)
 CandidateDetailPageSchema = make_page_schema(CandidateDetailSchema)
@@ -162,9 +165,10 @@ register_schema(CandidateDetailPageSchema)
 register_schema(CandidateHistoryPageSchema)
 
 
-CommitteeReportsPresidentialSchema = make_schema(models.CommitteeReportsPresidential)
-CommitteeReportsHouseSenateSchema = make_schema(models.CommitteeReportsHouseSenate)
-CommitteeReportsPacPartySchema = make_schema(models.CommitteeReportsPacParty)
+make_reports_schema = functools.partial(make_schema, options={'exclude': ('idx', 'report_key')})
+CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
+CommitteeReportsHouseSenateSchema = make_reports_schema(models.CommitteeReportsHouseSenate)
+CommitteeReportsPacPartySchema = make_reports_schema(models.CommitteeReportsPacParty)
 
 CommitteeReportsPresidentialPageSchema = make_page_schema(CommitteeReportsPresidentialSchema)
 CommitteeReportsHouseSenatePageSchema = make_page_schema(CommitteeReportsHouseSenateSchema)

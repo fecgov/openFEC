@@ -138,7 +138,7 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['coverage_end_date'], isoformat(end_dates[0]))
         self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
-        assert response[0].keys() == schema._declared_fields.keys()
+        assert response[0].keys() == schema().fields.keys()
 
     # TODO(jmcarp) Refactor as parameterized tests
     def test_reports(self):
