@@ -59,7 +59,6 @@ select
     ref_other_pol_cmte_contb_ytd as refunded_other_political_committee_contributions_ytd,
     ref_pol_pty_cmte_contb_per as refunded_political_party_committee_contributions_period,
     ref_pol_pty_cmte_contb_ytd as refunded_political_party_committee_contributions_ytd,
-    ref_indv_contb_per as refunds_individual_contributions_period,
     repymts_loans_made_by_cand_per as repayments_loans_made_by_candidate_period,
     repymts_loans_made_cand_ytd as repayments_loans_made_candidate_ytd,
     repymts_other_loans_per as repayments_other_loans_period,
