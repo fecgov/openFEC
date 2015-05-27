@@ -142,10 +142,10 @@ class OverallTest(ApiBaseTest):
 
     # TODO(jmcarp) Refactor as parameterized tests
     def test_reports(self):
-        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
-        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
-        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.ReportsPresidentialSchema)
-        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.ReportsPacPartySchema)
+        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
+        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
+        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.CommitteeReportsPresidentialSchema)
+        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.CommitteeReportsPacPartySchema)
 
     def test_reports_committee_not_found(self):
         resp = self.app.get(api.url_for(ReportsView, committee_id='fake'))
