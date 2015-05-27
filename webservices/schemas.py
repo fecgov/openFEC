@@ -115,6 +115,11 @@ class CommitteeSchema(ma.Schema):
 
 
 class CommitteeHistorySchema(CommitteeSchema):
+    street_1 = ma.fields.String()
+    street_2 = ma.fields.String()
+    city = ma.fields.String()
+    state_full = ma.fields.String()
+    zip = ma.fields.String()
     cycle = ma.fields.Integer()
 
 
