@@ -32,6 +32,12 @@ select distinct on (dcp.cmte_sk, cycle)
     dcp.cand_pty_affiliation as party,
     dcp.cmte_st as state,
     dcp.expire_date as expire_date,
+    -- Address
+    dcp.cmte_st1 as street_1,
+    dcp.cmte_st2 as street_2,
+    dcp.cmte_city as city,
+    dcp.cmte_st_desc as state_full,
+    dcp.cmte_zip as zip,
     dd.cmte_dsgn as designation,
     expand_committee_designation(dd.cmte_dsgn) as designation_full,
     dd.cmte_tp as committee_type,
