@@ -134,6 +134,11 @@ class Committee(BaseCommittee):
 class CommitteeHistory(BaseCommittee):
     __tablename__ = 'ofec_committee_history_mv'
 
+    street_1 = db.Column(db.String(50))
+    street_2 = db.Column(db.String(50))
+    city = db.Column(db.String(50))
+    state_full = db.Column(db.String(50))
+    zip = db.Column(db.String(9))
     cycle = db.Column(db.Integer)
 
 
