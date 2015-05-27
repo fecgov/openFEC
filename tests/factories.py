@@ -112,7 +112,7 @@ class BaseTotalsFactory(BaseFactory):
 
 class TotalsHouseSenateFactory(BaseTotalsFactory):
     class Meta:
-        model = models.CommitteeTotalsHouseOrSenate
+        model = models.CommitteeTotalsHouseSenate
 
 
 class TotalsPresidentialFactory(BaseTotalsFactory):
@@ -122,7 +122,7 @@ class TotalsPresidentialFactory(BaseTotalsFactory):
 
 class TotalsPacPartyFactory(BaseTotalsFactory):
     class Meta:
-        model = models.CommitteeTotalsPacOrParty
+        model = models.CommitteeTotalsPacParty
 
 
 class BaseReportsFactory(BaseFactory):
@@ -131,7 +131,7 @@ class BaseReportsFactory(BaseFactory):
 
 class ReportsHouseSenateFactory(BaseTotalsFactory):
     class Meta:
-        model = models.CommitteeReportsHouseOrSenate
+        model = models.CommitteeReportsHouseSenate
 
 
 class ReportsPresidentialFactory(BaseTotalsFactory):
@@ -141,4 +141,4 @@ class ReportsPresidentialFactory(BaseTotalsFactory):
 
 class ReportsPacPartyFactory(BaseTotalsFactory):
     class Meta:
-        model = models.CommitteeReportsPacOrParty
+        model = models.CommitteeReportsPacParty

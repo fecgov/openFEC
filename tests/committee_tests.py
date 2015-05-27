@@ -8,18 +8,12 @@ from marshmallow.utils import isoformat
 from tests import factories
 from tests.common import ApiBaseTest
 
+from webservices import utils
 from webservices.rest import db
 from webservices.rest import api
 from webservices.rest import CommitteeList
 from webservices.rest import CommitteeView
 from webservices.rest import CandidateView
-
-
-def extend(*dicts):
-    ret = {}
-    for each in dicts:
-        ret.update(each)
-    return ret
 
 
 ## old, re-factored Committee tests ##
@@ -97,7 +91,7 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertEqual(result['party'], committee.party)
         # Things on the detailed view
         self.assertEqual(result['form_type'], committee.form_type)
-        self.assertEqual(result['load_date'], str(committee.load_date))
+        self.assertEqual(result['load_date'], isoformat(committee.load_date))
         self.assertEqual(result['street_1'], committee.street_1)
         self.assertEqual(result['zip'], committee.zip)
 
@@ -131,9 +125,9 @@ class CommitteeFormatTest(ApiBaseTest):
     def _check_filter(self, field, values, base_url, alt=None, **attrs):
 
         # Build fixtures
-        factories.CommitteeFactory(**extend(attrs, {field: alt}))
+        factories.CommitteeFactory(**utils.extend(attrs, {field: alt}))
         [
-            factories.CommitteeFactory(**extend(attrs, {field: value}))
+            factories.CommitteeFactory(**utils.extend(attrs, {field: value}))
             for value in values
         ]
 

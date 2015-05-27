@@ -120,7 +120,7 @@ class CandidateFormatTest(ApiBaseTest):
         response = self._results(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
-        assert response[0].keys() == schemas.CandidateDetailSchema._declared_fields.keys()
+        assert response[0].keys() == schemas.CandidateDetailSchema().fields.keys()
         response = response[0]
 
     def test_extra_fields(self):

@@ -4,9 +4,12 @@ import functools
 
 import marshmallow as ma
 from smore import swagger
+from marshmallow_sqlalchemy import ModelSchema
 
+from webservices import utils
 from webservices import paging
 from webservices.spec import spec
+from webservices.common import models
 from webservices import __API_VERSION__
 
 
@@ -53,6 +56,29 @@ def register_schema(schema, definition_name=None):
     spec.definition(definition_name, schema=schema())
 
 
+def make_schema(model, class_name=None, fields=None, options=None):
+    class_name = class_name or '{0}Schema'.format(model.__name__)
+
+    Meta = type(
+        'Meta',
+        (object, ),
+        utils.extend(
+            {
+                'model': model,
+                'sqla_session': models.db.session,
+                'exclude': ('idx', ),
+            },
+            options or {},
+        )
+    )
+
+    return type(
+        class_name,
+        (ModelSchema, ),
+        utils.extend({'Meta': Meta}, fields or {}),
+    )
+
+
 def make_page_schema(schema, class_name=None, definition_name=None):
     class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
@@ -94,85 +120,10 @@ register_schema(NameSearchSchema)
 register_schema(NameSearchListSchema)
 
 
-class CommitteeSchema(ma.Schema):
-    committee_id = ma.fields.String()
-    name = ma.fields.String()
-    cycles = ma.fields.List(ma.fields.Integer())
-    designation_full = ma.fields.String()
-    designation = ma.fields.String()
-    treasurer_name = ma.fields.String()
-    organization_type_full = ma.fields.String()
-    organization_type = ma.fields.String()
-    state = ma.fields.String()
-    party_full = ma.fields.String()
-    party = ma.fields.String()
-    committee_type_full = ma.fields.String()
-    committee_type = ma.fields.String()
-    expire_date = ma.fields.DateTime()
-    first_file_date = ma.fields.DateTime()
-    last_file_date = ma.fields.DateTime()
-    original_registration_date = ma.fields.String()
-
-
-class CommitteeHistorySchema(CommitteeSchema):
-    street_1 = ma.fields.String()
-    street_2 = ma.fields.String()
-    city = ma.fields.String()
-    state_full = ma.fields.String()
-    zip = ma.fields.String()
-    cycle = ma.fields.Integer()
-
-
-class CommitteeListSchema(CommitteeSchema):
-    expire_date = ma.fields.DateTime()
-    first_file_date = ma.fields.DateTime()
-    last_file_date = ma.fields.DateTime()
-    original_registration_date = ma.fields.String()
-
-
-class CommitteeDetailSchema(CommitteeListSchema):
-    filing_frequency = ma.fields.String()
-    email = ma.fields.String()
-    fax = ma.fields.String()
-    website = ma.fields.String()
-    form_type = ma.fields.String()
-    leadership_pac = ma.fields.String()
-    load_date = ma.fields.String()
-    lobbyist_registrant_pac = ma.fields.String()
-    party_type = ma.fields.String()
-    party_type_full = ma.fields.String()
-    qualifying_date = ma.fields.String()
-    street_1 = ma.fields.String()
-    street_2 = ma.fields.String()
-    city = ma.fields.String()
-    state_full = ma.fields.String()
-    zip = ma.fields.String()
-    treasurer_city = ma.fields.String()
-    treasurer_name_1 = ma.fields.String()
-    treasurer_name_2 = ma.fields.String()
-    treasurer_name_middle = ma.fields.String()
-    treasurer_name_prefix = ma.fields.String()
-    treasurer_phone = ma.fields.String()
-    treasurer_state = ma.fields.String()
-    treasurer_street_1 = ma.fields.String()
-    treasurer_street_2 = ma.fields.String()
-    treasurer_name_suffix = ma.fields.String()
-    treasurer_name_title = ma.fields.String()
-    treasurer_zip = ma.fields.String()
-    custodian_city = ma.fields.String()
-    custodian_name_1 = ma.fields.String()
-    custodian_name_2 = ma.fields.String()
-    custodian_name_middle = ma.fields.String()
-    custodian_name_full = ma.fields.String()
-    custodian_phone = ma.fields.String()
-    custodian_name_prefix = ma.fields.String()
-    custodian_state = ma.fields.String()
-    custodian_street_1 = ma.fields.String()
-    custodian_street_2 = ma.fields.String()
-    custodian_name_suffix = ma.fields.String()
-    custodian_name_title = ma.fields.String()
-    custodian_zip = ma.fields.String()
-
+make_committee_schema = functools.partial(make_schema, options={'exclude': ('idx', 'committee_key')})
+CommitteeSchema = make_committee_schema(models.Committee)
+CommitteeHistorySchema = make_committee_schema(models.CommitteeHistory)
+CommitteeDetailSchema = make_committee_schema(models.CommitteeDetail)
 
 CommitteePageSchema = make_page_schema(CommitteeSchema)
 CommitteeHistoryPageSchema = make_page_schema(CommitteeHistorySchema)
@@ -186,359 +137,48 @@ register_schema(CommitteeHistoryPageSchema)
 register_schema(CommitteeDetailPageSchema)
 
 
-class CandidateSchema(ma.Schema):
-    candidate_id = ma.fields.String()
-    candidate_key = ma.fields.String()
-    cycles = ma.fields.List(ma.fields.Integer())
-    election_years = ma.fields.List(ma.fields.Integer())
-    candidate_status_full = ma.fields.String()
-    candidate_status = ma.fields.String()
-    district = ma.fields.String()
-    incumbent_challenge_full = ma.fields.String()
-    incumbent_challenge = ma.fields.String()
-    office_full = ma.fields.String()
-    office = ma.fields.String()
-    party_full = ma.fields.String()
-    party = ma.fields.String()
-    state = ma.fields.String()
-    name = ma.fields.String()
+make_candidate_schema = functools.partial(make_schema, options={'exclude': ('idx', 'candidate_key')})
+CandidateSchema = make_schema(
+    models.Candidate,
+    options={'exclude': ('idx', 'candidate_key', 'principal_committees')},
+)
+CandidateSearchSchema = make_candidate_schema(
+    models.Candidate,
+    fields={'principal_committees': ma.fields.Nested(CommitteeSchema, many=True)},
+)
+CandidateDetailSchema = make_candidate_schema(models.CandidateDetail)
+CandidateHistorySchema = make_candidate_schema(models.CandidateHistory)
 
-
-class CandidateListSchema(CandidateSchema):
-    active_through = ma.fields.Integer()
-
-
-class CandidateSearchSchema(CandidateListSchema):
-    principal_committees = ma.fields.Nested(CommitteeSchema, many=True)
-
-
-class CandidateDetailSchema(CandidateListSchema):
-    expire_date = ma.fields.DateTime()
-    load_date = ma.fields.DateTime()
-    form_type = ma.fields.String()
-    address_city = ma.fields.String()
-    address_state = ma.fields.String()
-    address_street_1 = ma.fields.String()
-    address_street_2 = ma.fields.String()
-    address_zip = ma.fields.String()
-    candidate_inactive = ma.fields.String()
-
-
-class CandidateHistorySchema(CandidateSchema):
-    two_year_period = ma.fields.Integer()
-    expire_date = ma.fields.String()
-    load_date = ma.fields.String()
-    form_type = ma.fields.String()
-    address_city = ma.fields.String()
-    address_state = ma.fields.String()
-    address_street_1 = ma.fields.String()
-    address_street_2 = ma.fields.String()
-    address_zip = ma.fields.String()
-    candidate_inactive = ma.fields.String()
-
-
-CandidateListPageSchema = make_page_schema(CandidateListSchema)
-CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
+CandidatePageSchema = make_page_schema(CandidateSchema)
 CandidateDetailPageSchema = make_page_schema(CandidateDetailSchema)
+CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
 CandidateHistoryPageSchema = make_page_schema(CandidateHistorySchema)
 
-register_schema(CandidateListSchema)
-register_schema(CandidateSearchSchema)
+register_schema(CandidateSchema)
 register_schema(CandidateDetailSchema)
+register_schema(CandidateSearchSchema)
 register_schema(CandidateHistorySchema)
 
-register_schema(CandidateListPageSchema)
+register_schema(CandidatePageSchema)
 register_schema(CandidateSearchPageSchema)
 register_schema(CandidateDetailPageSchema)
 register_schema(CandidateHistoryPageSchema)
 
 
-class ReportsSchema(ma.Schema):
-    beginning_image_number = ma.fields.Integer()
-    cash_on_hand_beginning_period = ma.fields.Integer()
-    cash_on_hand_end_period = ma.fields.Integer()
-    committee_id = ma.fields.String()
-    coverage_end_date = ma.fields.DateTime()
-    coverage_start_date = ma.fields.DateTime()
-    cycle = ma.fields.Integer()
-    debts_owed_by_committee = ma.fields.Integer()
-    debts_owed_to_committee = ma.fields.Integer()
-    end_image_number = ma.fields.Integer()
-    expire_date = ma.fields.DateTime,
-    other_disbursements_period = ma.fields.Integer()
-    other_disbursements_ytd = ma.fields.Integer()
-    other_political_committee_contributions_period = ma.fields.Integer()
-    other_political_committee_contributions_ytd = ma.fields.Integer()
-    political_party_committee_contributions_period = ma.fields.Integer()
-    political_party_committee_contributions_ytd = ma.fields.Integer()
-    offsets_to_operating_expenditures_period = ma.fields.Integer()
-    offsets_to_operating_expenditures_ytd = ma.fields.Integer()
-    individual_itemized_contributions_period = ma.fields.Integer()
-    report_type = ma.fields.String()
-    report_type_full = ma.fields.String()
-    report_year = ma.fields.Integer()
-    net_contributions_period = ma.fields.Integer()
-    net_operating_expenditures_period = ma.fields.Integer()
-    total_contribution_refunds_period = ma.fields.Integer()
-    total_contribution_refunds_ytd = ma.fields.Integer()
-    refunded_individual_contributions_period = ma.fields.Integer()
-    refunded_individual_contributions_ytd = ma.fields.Integer()
-    refunded_other_political_committee_contributions_period = ma.fields.Integer()
-    refunded_other_political_committee_contributions_ytd = ma.fields.Integer()
-    refunded_political_party_committee_contributions_period = ma.fields.Integer()
-    refunded_political_party_committee_contributions_ytd = ma.fields.Integer()
-    total_contributions_period = ma.fields.Integer()
-    total_contributions_ytd = ma.fields.Integer()
-    total_disbursements_period = ma.fields.Integer()
-    total_disbursements_ytd = ma.fields.Integer()
-    total_receipts_period = ma.fields.Integer()
-    total_receipts_ytd = ma.fields.Integer()
+make_reports_schema = functools.partial(make_schema, options={'exclude': ('idx', 'report_key')})
+CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
+CommitteeReportsHouseSenateSchema = make_reports_schema(models.CommitteeReportsHouseSenate)
+CommitteeReportsPacPartySchema = make_reports_schema(models.CommitteeReportsPacParty)
+
+CommitteeReportsPresidentialPageSchema = make_page_schema(CommitteeReportsPresidentialSchema)
+CommitteeReportsHouseSenatePageSchema = make_page_schema(CommitteeReportsHouseSenateSchema)
+CommitteeReportsPacPartyPageSchema = make_page_schema(CommitteeReportsPacPartySchema)
 
 
-class ReportsPresidentialSchema(ReportsSchema):
-    candidate_contribution_period = ma.fields.Integer()
-    candidate_contribution_ytd = ma.fields.Integer()
-    exempt_legal_accounting_disbursement_period = ma.fields.Integer()
-    exempt_legal_accounting_disbursement_ytd = ma.fields.Integer()
-    expentiture_subject_to_limits = ma.fields.Integer()
-    federal_funds_period = ma.fields.Integer()
-    federal_funds_ytd = ma.fields.Integer()
-    fundraising_disbursements_period = ma.fields.Integer()
-    fundraising_disbursements_ytd = ma.fields.Integer()
-    individual_unitemized_contributions_period = ma.fields.Integer()
-    individual_unitemized_contributions_ytd = ma.fields.Integer()
-    individual_contributions_period = ma.fields.Integer()
-    individual_contributions_ytd = ma.fields.Integer()
-    individual_itemized_contributions_ytd = ma.fields.Integer()
-    items_on_hand_liquidated = ma.fields.Integer()
-    loans_received_from_candidate_period = ma.fields.Integer()
-    loans_received_from_candidate_ytd = ma.fields.Integer()
-    offsets_to_fundraising_expenditures_ytd = ma.fields.Integer()
-    offsets_to_fundraising_expenditures_period = ma.fields.Integer()
-    offsets_to_legal_accounting_period = ma.fields.Integer()
-    offsets_to_legal_accounting_ytd = ma.fields.Integer()
-    operating_expenditures_period = ma.fields.Integer()
-    operating_expenditures_ytd = ma.fields.Integer()
-    other_loans_received_period = ma.fields.Integer()
-    other_loans_received_ytd = ma.fields.Integer()
-    other_receipts_period = ma.fields.Integer()
-    other_receipts_ytd = ma.fields.Integer()
-    repayments_loans_made_by_candidate_period = ma.fields.Integer()
-    repayments_loans_made_candidate_ytd = ma.fields.Integer()
-    repayments_other_loans_period = ma.fields.Integer()
-    repayments_other_loans_ytd = ma.fields.Integer()
-    subtotal_summary_period = ma.fields.Integer()
-    total_loan_repayments_made_period = ma.fields.Integer()
-    total_loan_repayments_made_ytd = ma.fields.Integer()
-    total_loans_received_period = ma.fields.Integer()
-    total_loans_received_ytd = ma.fields.Integer()
-    total_offsets_to_operating_expenditures_period = ma.fields.Integer()
-    total_offsets_to_operating_expenditures_ytd = ma.fields.Integer()
-    total_period = ma.fields.Integer()
-    total_ytd = ma.fields.Integer()
-    transfer_from_affiliated_committee_period = ma.fields.Integer()
-    transfer_from_affiliated_committee_ytd = ma.fields.Integer()
-    transfer_to_other_authorized_committee_period = ma.fields.Integer()
-    transfer_to_other_authorized_committee_ytd = ma.fields.Integer()
+CommitteeTotalsPresidentialSchema = make_schema(models.CommitteeTotalsPresidential)
+CommitteeTotalsHouseSenateSchema = make_schema(models.CommitteeTotalsHouseSenate)
+CommitteeTotalsPacPartySchema = make_schema(models.CommitteeTotalsPacParty)
 
-
-class ReportsHouseSenateSchema(ReportsSchema):
-    net_contributions_ytd = ma.fields.Integer()
-    net_operating_expenditures_ytd = ma.fields.Integer()
-    aggregate_amount_personal_contributions_general = ma.fields.Integer()
-    aggregate_contributions_personal_funds_primary = ma.fields.Integer()
-    all_other_loans_period = ma.fields.Integer()
-    all_other_loans_ytd = ma.fields.Integer()
-    candidate_contribution_period = ma.fields.Integer()
-    candidate_contribution_ytd = ma.fields.Integer()
-    gross_receipt_authorized_committee_general = ma.fields.Integer()
-    gross_receipt_authorized_committee_primary = ma.fields.Integer()
-    gross_receipt_minus_personal_contribution_general = ma.fields.Integer()
-    gross_receipt_minus_personal_contributions_primary = ma.fields.Integer()
-    loan_repayments_candidate_loans_period = ma.fields.Integer()
-    loan_repayments_candidate_loans_ytd = ma.fields.Integer()
-    loan_repayments_other_loans_period = ma.fields.Integer()
-    loan_repayments_other_loans_ytd = ma.fields.Integer()
-    loans_made_by_candidate_period = ma.fields.Integer()
-    loans_made_by_candidate_ytd = ma.fields.Integer()
-    operating_expenditures_period = ma.fields.Integer()
-    operating_expenditures_ytd = ma.fields.Integer()
-    other_receipts_period = ma.fields.Integer()
-    other_receipts_ytd = ma.fields.Integer()
-    refunds_total_contributions_col_total_ytd = ma.fields.Integer()
-    subtotal_period = ma.fields.Integer()
-    total_contribution_refunds_col_total_period = ma.fields.Integer()
-    total_contributions_column_total_period = ma.fields.Integer()
-    total_individual_contributions_period = ma.fields.Integer()
-    total_individual_contributions_ytd = ma.fields.Integer()
-    total_individual_itemized_contributions_ytd = ma.fields.Integer()
-    total_individual_unitemized_contributions_ytd = ma.fields.Integer()
-    total_loan_repayments_period = ma.fields.Integer()
-    total_loan_repayments_ytd = ma.fields.Integer()
-    total_loans_period = ma.fields.Integer()
-    total_loans_ytd = ma.fields.Integer()
-    total_operating_expenditures_period = ma.fields.Integer()
-    total_operating_expenditures_ytd = ma.fields.Integer()
-    transfers_from_other_authorized_committee_period = ma.fields.Integer()
-    transfers_from_other_authorized_committee_ytd = ma.fields.Integer()
-    transfers_to_other_authorized_committee_period = ma.fields.Integer()
-    transfers_to_other_authorized_committee_ytd = ma.fields.Integer()
-
-
-class ReportsPacPartySchema(ReportsSchema):
-    net_contributions_ytd = ma.fields.Integer()
-    net_operating_expenditures_ytd = ma.fields.Integer()
-    all_loans_received_period = ma.fields.Integer()
-    all_loans_received_ytd = ma.fields.Integer()
-    allocated_federal_election_levin_share_period = ma.fields.Integer()
-    calendar_ytd = ma.fields.Integer()
-    cash_on_hand_beginning_calendar_ytd = ma.fields.Integer()
-    cash_on_hand_close_ytd = ma.fields.Integer()
-    coordinated_expenditures_by_party_committee_period = ma.fields.Integer()
-    coordinated_expenditures_by_party_committee_ytd = ma.fields.Integer()
-    fed_candidate_committee_contribution_refunds_ytd = ma.fields.Integer()
-    fed_candidate_committee_contributions_period = ma.fields.Integer()
-    fed_candidate_committee_contributions_ytd = ma.fields.Integer()
-    fed_candidate_contribution_refunds_period = ma.fields.Integer()
-    independent_expenditures_period = ma.fields.Integer()
-    independent_expenditures_ytd = ma.fields.Integer()
-    individual_itemized_contributions_ytd = ma.fields.Integer()
-    individual_unitemized_contributions_period = ma.fields.Integer()
-    individual_unitemized_contributions_ytd = ma.fields.Integer()
-    loan_repayments_made_period = ma.fields.Integer()
-    loan_repayments_made_ytd = ma.fields.Integer()
-    loan_repayments_received_period = ma.fields.Integer()
-    loan_repayments_received_ytd = ma.fields.Integer()
-    loans_made_period = ma.fields.Integer()
-    loans_made_ytd = ma.fields.Integer()
-    non_allocated_fed_election_activity_period = ma.fields.Integer()
-    non_allocated_fed_election_activity_ytd = ma.fields.Integer()
-    nonfed_share_allocated_disbursements_period = ma.fields.Integer()
-    other_fed_operating_expenditures_period = ma.fields.Integer()
-    other_fed_operating_expenditures_ytd = ma.fields.Integer()
-    other_fed_receipts_period = ma.fields.Integer()
-    other_fed_receipts_ytd = ma.fields.Integer()
-    shared_fed_activity_nonfed_ytd = ma.fields.Integer()
-    shared_fed_activity_period = ma.fields.Integer()
-    shared_fed_activity_ytd = ma.fields.Integer()
-    shared_fed_operating_expenditures_period = ma.fields.Integer()
-    shared_fed_operating_expenditures_ytd = ma.fields.Integer()
-    shared_nonfed_operating_expenditures_period = ma.fields.Integer()
-    shared_nonfed_operating_expenditures_ytd = ma.fields.Integer()
-    subtotal_summary_page_period = ma.fields.Integer()
-    subtotal_summary_ytd = ma.fields.Integer()
-    total_fed_disbursements_period = ma.fields.Integer()
-    total_fed_disbursements_ytd = ma.fields.Integer()
-    total_fed_election_activity_period = ma.fields.Integer()
-    total_fed_election_activity_ytd = ma.fields.Integer()
-    total_fed_operating_expenditures_period = ma.fields.Integer()
-    total_fed_operating_expenditures_ytd = ma.fields.Integer()
-    total_fed_receipts_period = ma.fields.Integer()
-    total_fed_receipts_ytd = ma.fields.Integer()
-    total_individual_contributions = ma.fields.Integer()
-    total_individual_contributions_ytd = ma.fields.Integer()
-    total_nonfed_transfers_period = ma.fields.Integer()
-    total_nonfed_transfers_ytd = ma.fields.Integer()
-    total_operating_expenditures_period = ma.fields.Integer()
-    total_operating_expenditures_ytd = ma.fields.Integer()
-    transfers_from_affiliated_party_period = ma.fields.Integer()
-    transfers_from_affiliated_party_ytd = ma.fields.Integer()
-    transfers_from_nonfed_account_period = ma.fields.Integer()
-    transfers_from_nonfed_account_ytd = ma.fields.Integer()
-    transfers_from_nonfed_levin_period = ma.fields.Integer()
-    transfers_from_nonfed_levin_ytd = ma.fields.Integer()
-    transfers_to_affiliated_committee_period = ma.fields.Integer()
-    transfers_to_affilitated_committees_ytd = ma.fields.Integer()
-
-
-ReportsPresidentialPageSchema = make_page_schema(ReportsPresidentialSchema)
-ReportsHouseSenatePageSchema = make_page_schema(ReportsHouseSenateSchema)
-ReportsPacPartyPageSchema = make_page_schema(ReportsPacPartySchema)
-
-
-class TotalsSchema(ma.Schema):
-    committee_id = ma.fields.String()
-    cycle = ma.fields.Integer()
-    offsets_to_operating_expenditures = ma.fields.Integer()
-    political_party_committee_contributions = ma.fields.Integer()
-    other_disbursements = ma.fields.Integer()
-    other_political_committee_contributions = ma.fields.Integer()
-    operating_expenditures = ma.fields.Integer()
-    disbursements = ma.fields.Integer()
-    contributions = ma.fields.Integer()
-    contribution_refunds = ma.fields.Integer()
-    refunded_individual_contributions = ma.fields.Integer()
-    refunded_other_political_committee_contributions = ma.fields.Integer()
-    refunded_political_party_committee_contributions = ma.fields.Integer()
-    receipts = ma.fields.Integer()
-    coverage_start_date = ma.fields.DateTime()
-    coverage_end_date = ma.fields.DateTime()
-    net_contributions = ma.fields.Integer()
-    net_operating_expenditures = ma.fields.Integer()
-    individual_itemized_contributions = ma.fields.Integer()
-    individual_unitemized_contributions = ma.fields.Integer()
-
-
-class TotalsPacPartySchema(TotalsSchema):
-    all_loans_received = ma.fields.Integer()
-    coordinated_expenditures_by_party_committee = ma.fields.Integer()
-    fed_candidate_committee_contributions = ma.fields.Integer()
-    fed_candidate_contribution_refunds = ma.fields.Integer()
-    fed_disbursements = ma.fields.Integer()
-    fed_election_activity = ma.fields.Integer()
-    fed_operating_expenditures = ma.fields.Integer()
-    fed_receipts = ma.fields.Integer()
-    independent_expenditures = ma.fields.Integer()
-    loan_repayments_made = ma.fields.Integer()
-    loan_repayments_received = ma.fields.Integer()
-    loans_made = ma.fields.Integer()
-    non_allocated_fed_election_activity = ma.fields.Integer()
-    nonfed_transfers = ma.fields.Integer()
-    other_fed_operating_expenditures = ma.fields.Integer()
-    other_fed_receipts = ma.fields.Integer()
-    shared_fed_activity = ma.fields.Integer()
-    shared_fed_activity_nonfed = ma.fields.Integer()
-    shared_fed_operating_expenditures = ma.fields.Integer()
-    shared_nonfed_operating_expenditures = ma.fields.Integer()
-    transfers_from_affiliated_party = ma.fields.Integer()
-    transfers_from_nonfed_account = ma.fields.Integer()
-    transfers_from_nonfed_levin = ma.fields.Integer()
-    transfers_to_affiliated_committee = ma.fields.Integer()
-
-
-class TotalsHouseSenateSchema(TotalsSchema):
-    all_other_loans = ma.fields.Integer()
-    candidate_contribution = ma.fields.Integer()
-    individual_contributions = ma.fields.Integer()
-    loan_repayments = ma.fields.Integer()
-    loan_repayments_candidate_loans = ma.fields.Integer()
-    loan_repayments_other_loans = ma.fields.Integer()
-    loans = ma.fields.Integer()
-    loans_made_by_candidate = ma.fields.Integer()
-    other_receipts = ma.fields.Integer()
-    transfers_from_other_authorized_committee = ma.fields.Integer()
-    transfers_to_other_authorized_committee = ma.fields.Integer()
-
-
-class TotalsPresidentialSchema(TotalsSchema):
-    candidate_contribution = ma.fields.Integer()
-    exempt_legal_accounting_disbursement = ma.fields.Integer()
-    federal_funds = ma.fields.Integer()
-    individual_contributions = ma.fields.Integer()
-    loan_repayments_made = ma.fields.Integer()
-    loans_received_from_candidate = ma.fields.Integer()
-    loans_received = ma.fields.Integer()
-    offsets_to_fundraising_expenditures = ma.fields.Integer()
-    offsets_to_legal_accounting = ma.fields.Integer()
-    total_offsets_to_operating_expenditures = ma.fields.Integer()
-    other_loans_received = ma.fields.Integer()
-    other_receipts = ma.fields.Integer()
-    repayments_loans_made_by_candidate = ma.fields.Integer()
-    repayments_other_loans = ma.fields.Integer()
-    transfer_from_affiliated_committee = ma.fields.Integer()
-    transfer_to_other_authorized_committee = ma.fields.Integer()
-
-
-TotalsPresidentialPageSchema = make_page_schema(TotalsPresidentialSchema)
-TotalsHouseSenatePageSchema = make_page_schema(TotalsHouseSenateSchema)
-TotalsPacPartyPageSchema = make_page_schema(TotalsPacPartySchema)
+CommitteeTotalsPresidentialPageSchema = make_page_schema(CommitteeTotalsPresidentialSchema)
+CommitteeTotalsHouseSenatePageSchema = make_page_schema(CommitteeTotalsHouseSenateSchema)
+CommitteeTotalsPacPartyPageSchema = make_page_schema(CommitteeTotalsPacPartySchema)
