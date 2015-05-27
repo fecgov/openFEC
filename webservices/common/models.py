@@ -11,7 +11,7 @@ class BaseModel(db.Model):
 
 
 class NameSearch(BaseModel):
-    __tablename__ = 'name_search_fulltext_mv'
+    __tablename__ = 'ofec_candidate_committee_fulltext_mv'
 
     cand_id = db.Column(db.Integer, nullable=True)
     cmte_id = db.Column(db.Integer, nullable=True)
@@ -21,14 +21,14 @@ class NameSearch(BaseModel):
 
 
 class CandidateSearch(BaseModel):
-    __tablename__ = 'dimcand_fulltext_mv'
+    __tablename__ = 'ofec_candidate_fulltext_mv'
 
     cand_sk = db.Column(db.Integer)
     fulltxt = db.Column(TSVECTOR)
 
 
 class CommitteeSearch(BaseModel):
-    __tablename__ = 'dimcmte_fulltext_mv'
+    __tablename__ = 'ofec_committee_fulltext_mv'
 
     cmte_sk = db.Column(db.Integer)
     fulltxt = db.Column(TSVECTOR)
