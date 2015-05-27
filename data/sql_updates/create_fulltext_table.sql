@@ -17,6 +17,11 @@ create materialized view dimcand_fulltext_mv_tmp as
         select distinct cand_sk from dimcandproperties
         where form_tp != 'F2Z'
     ) f2 on c.cand_sk = f2.cand_sk
+    -- Use same joins as main candidate views to ensure same candidates
+    -- present in all views
+    left join dimcandoffice co on c.cand_sk = co.cand_sk
+    inner join dimoffice using (office_sk)
+    inner join dimparty using (party_sk)
     where p.election_yr >= :START_YEAR
     order by c.cand_sk, p.election_yr desc
 ;
@@ -38,8 +43,22 @@ create materialized view dimcmte_fulltext_mv_tmp as
             end
         as fulltxt
     from dimcmte c
-    left outer join dimcmteproperties p using (cmte_sk)
-    where p.rpt_yr >= :START_YEAR
+    left join dimcmteproperties p using (cmte_sk)
+    left join (
+        select
+            cmte_sk,
+            array_agg(distinct(rpt_yr + rpt_yr % 2))::int[] as cycles
+        from (
+            select cmte_sk, rpt_yr from factpacsandparties_f3x
+            union
+            select cmte_sk, rpt_yr from factpresidential_f3p
+            union
+            select cmte_sk, rpt_yr from facthousesenate_f3
+        ) years
+        where rpt_yr >= :START_YEAR
+        group by cmte_sk
+    ) cp_agg using (cmte_sk)
+    where array_length(cp_agg.cycles, 1) > 0
     order by c.cmte_sk, p.receipt_dt desc
 ;
 
@@ -58,13 +77,14 @@ with
             null::text as cmte_id,
             o.office_tp as office_sought
         from dimcand c
-            join dimcandproperties p on (p.cand_sk = c.cand_sk)
-            join dimcandoffice co on (co.cand_sk = c.cand_sk)
-            join dimoffice o on (co.office_sk = o.office_sk)
-            inner join (
-                select distinct cand_sk from dimcandproperties
-                where form_tp != 'F2Z'
-            ) f2 on c.cand_sk = f2.cand_sk
+        join dimcandproperties p on (p.cand_sk = c.cand_sk)
+        join dimcandoffice co on (co.cand_sk = c.cand_sk)
+        join dimoffice o on (co.office_sk = o.office_sk)
+        join dimparty using (party_sk)
+        inner join (
+            select distinct cand_sk from dimcandproperties
+            where form_tp != 'F2Z'
+        ) f2 on c.cand_sk = f2.cand_sk
         where p.election_yr >= :START_YEAR
         order by c.cand_sk, p.election_yr desc
     ), ranked_cmte as (
@@ -73,8 +93,22 @@ with
             to_tsvector(p.cmte_nm) as name_vec,
             c.cmte_id
         from dimcmte c
-            join dimcmteproperties p using (cmte_sk)
-        where p.rpt_yr >= :START_YEAR
+        left join dimcmteproperties p using (cmte_sk)
+        left join (
+            select
+                cmte_sk,
+                array_agg(distinct(rpt_yr + rpt_yr % 2))::int[] as cycles
+            from (
+                select cmte_sk, rpt_yr from factpacsandparties_f3x
+                union
+                select cmte_sk, rpt_yr from factpresidential_f3p
+                union
+                select cmte_sk, rpt_yr from facthousesenate_f3
+            ) years
+            where rpt_yr >= :START_YEAR
+            group by cmte_sk
+        ) cp_agg using (cmte_sk)
+        where array_length(cp_agg.cycles, 1) > 0
         order by c.cmte_sk, p.receipt_dt desc
     )
     select
