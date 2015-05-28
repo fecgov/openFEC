@@ -25,6 +25,10 @@ class TestReports(ApiBaseTest):
     def test_reports_by_committee_id(self):
         committee = factories.CommitteeFactory(committee_type='P')
         committee_id = committee.committee_id
+        history = factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='P',
+        )
         committee_report = factories.ReportsPresidentialFactory(committee_id=committee_id)
         other_report = factories.ReportsPresidentialFactory()
         results = self._results(api.url_for(ReportsView, committee_id=committee_id))
@@ -99,6 +103,10 @@ class TestReports(ApiBaseTest):
     def test_reports_sort(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
+        history = factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='H',
+        )
         contributions = [0, 100]
         reports = [
             factories.ReportsHouseSenateFactory(committee_id=committee_id, net_contributions_period=contributions[0]),
@@ -110,6 +118,10 @@ class TestReports(ApiBaseTest):
     def test_reports_sort_default(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
+        history = factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='H',
+        )
         dates = [
             datetime.datetime(2015, 7, 4),
             datetime.datetime(2015, 7, 5),
