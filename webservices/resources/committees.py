@@ -130,14 +130,25 @@ class CommitteeHistoryView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.make_sort_args(default=['-cycle']))
     @schemas.marshal_with(schemas.CommitteeHistoryPageSchema())
-    def get(self, committee_id, cycle=None, **kwargs):
-        query = self.get_committee(committee_id, cycle, kwargs)
+    def get(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
+        query = self.get_committee(committee_id, candidate_id, cycle, kwargs)
         return utils.fetch_page(query, kwargs)
 
-    def get_committee(self, committee_id, cycle, kwargs):
-        query = CommitteeHistory.query.filter(
-            CommitteeHistory.committee_id == committee_id
-        )
+    def get_committee(self, committee_id, candidate_id, cycle, kwargs):
+        query = CommitteeHistory.query
+
+        if committee_id:
+            query = query.filter(CommitteeHistory.committee_id == committee_id)
+
+        if candidate_id:
+            query = CommitteeHistory.query.join(
+                CandidateCommitteeLink,
+                CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+            ).filter(
+                CandidateCommitteeLink.candidate_id == candidate_id
+            )
+
         if cycle:
             query = query.filter(CommitteeHistory.cycle == cycle)
+
         return query
