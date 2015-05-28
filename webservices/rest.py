@@ -27,13 +27,14 @@ import sqlalchemy as sa
 from webservices import args
 from webservices import docs
 from webservices import spec
+from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.common.models import db
-from webservices.resources.candidates import CandidateList, CandidateSearch, CandidateView, CandidateHistoryView
-from webservices.resources.totals import TotalsView
-from webservices.resources.reports import ReportsView
-from webservices.resources.committees import CommitteeList, CommitteeView, CommitteeHistoryView
+from webservices.resources import totals
+from webservices.resources import reports
+from webservices.resources import candidates
+from webservices.resources import committees
 
 from .json_encoding import TolerantJSONEncoder
 
@@ -135,33 +136,33 @@ class Help(restful.Resource):
 
 
 api.add_resource(Help, '/')
-api.add_resource(CandidateList, '/candidates')
-api.add_resource(CandidateSearch, '/candidates/search')
+api.add_resource(candidates.CandidateList, '/candidates')
+api.add_resource(candidates.CandidateSearch, '/candidates/search')
 api.add_resource(
-    CandidateView,
+    candidates.CandidateView,
     '/candidate/<string:candidate_id>',
     '/committee/<string:committee_id>/candidates',
 )
 api.add_resource(
-    CandidateHistoryView,
+    candidates.CandidateHistoryView,
     '/candidate/<string:candidate_id>/history/<int:cycle>',
     '/candidate/<string:candidate_id>/history',
 )
-api.add_resource(CommitteeList, '/committees')
+api.add_resource(committees.CommitteeList, '/committees')
 api.add_resource(
-    CommitteeView,
+    committees.CommitteeView,
     '/committee/<string:committee_id>',
     '/candidate/<string:candidate_id>/committees',
 )
 api.add_resource(
-    CommitteeHistoryView,
+    committees.CommitteeHistoryView,
     '/committee/<string:committee_id>/history/<int:cycle>',
     '/committee/<string:committee_id>/history',
     '/candidate/<candidate_id>/committees/history',
     '/candidate/<candidate_id>/committees/history/<int:cycle>',
 )
-api.add_resource(TotalsView, '/committee/<string:committee_id>/totals')
-api.add_resource(ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
+api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
+api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
 api.add_resource(NameSearch, '/names')
 
 
@@ -191,7 +192,8 @@ def register_resource(resource, blueprint=None):
     for rule in rules:
         path = extract_path(rule.rule)
         path_params = [
-            each for each in resource_doc.get('path_params', [])
+            utils.extend({'required': True}, each)
+            for each in resource_doc.get('path_params', [])
             if each['name'] in rule.arguments
         ]
         for method in [method.lower() for method in resource.methods or []]:
@@ -208,13 +210,15 @@ def register_resource(resource, blueprint=None):
 
 
 register_resource(NameSearch, blueprint='v1')
-register_resource(CandidateView, blueprint='v1')
-register_resource(CandidateList, blueprint='v1')
-register_resource(CandidateSearch, blueprint='v1')
-register_resource(CommitteeView, blueprint='v1')
-register_resource(CommitteeList, blueprint='v1')
-register_resource(ReportsView, blueprint='v1')
-register_resource(TotalsView, blueprint='v1')
+register_resource(candidates.CandidateView, blueprint='v1')
+register_resource(candidates.CandidateList, blueprint='v1')
+register_resource(candidates.CandidateSearch, blueprint='v1')
+register_resource(candidates.CandidateHistoryView, blueprint='v1')
+register_resource(committees.CommitteeView, blueprint='v1')
+register_resource(committees.CommitteeList, blueprint='v1')
+register_resource(committees.CommitteeHistoryView, blueprint='v1')
+register_resource(reports.ReportsView, blueprint='v1')
+register_resource(totals.TotalsView, blueprint='v1')
 
 renderers = {
     'application/json': lambda data: jsonify(data),
