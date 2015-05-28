@@ -77,6 +77,26 @@ class TestViews(common.IntegrationTestCase):
         ).count()
         self.assertEqual(count, 0)
 
+    def test_committee_counts(self):
+        counts = [
+            models.Committee.query.count(),
+            models.CommitteeDetail.query.count(),
+            models.CommitteeHistory.query.distinct(models.CommitteeHistory.committee_id).count(),
+            models.CommitteeSearch.query.count(),
+            models.NameSearch.query.filter(models.NameSearch.cmte_id != None).count(),
+        ]
+        assert len(set(counts)) == 1
+
+    def test_candidate_counts(self):
+        counts = [
+            models.Candidate.query.count(),
+            models.CandidateDetail.query.count(),
+            models.CandidateHistory.query.distinct(models.CandidateHistory.candidate_id).count(),
+            models.CandidateSearch.query.count(),
+            models.NameSearch.query.filter(models.NameSearch.cand_id != None).count(),
+        ]
+        assert len(set(counts)) == 1
+
     def test_exclude_z_only_filers(self):
         dcp = sa.Table('dimcandproperties', db.metadata, autoload=True, autoload_with=db.engine)
         s = sa.select([dcp.c.cand_sk]).where(dcp.c.form_tp != 'F2Z').distinct()
