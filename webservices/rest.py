@@ -1,8 +1,5 @@
 """
-A RESTful web service supporting fulltext and field-specific searches on FEC
-candidate data.
-
-SEE DOCUMENTATION FOLDER
+A RESTful web service supporting fulltext and field-specific searches on FEC data. For full documentation visit:  https://api.open.fec.gov/developers
 """
 import os
 import re
