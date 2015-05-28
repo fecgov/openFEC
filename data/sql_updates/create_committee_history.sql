@@ -12,6 +12,7 @@ with
             union
             select cmte_sk, rpt_yr from facthousesenate_f3
         ) years
+        where rpt_yr >= :START_YEAR
     ),
     cycle_agg as (
         select
@@ -49,7 +50,7 @@ inner join dimcmtetpdsgn dd using (cmte_sk)
 left join dimparty p on dcp.cand_pty_affiliation = p.party_affiliation
 left join cycles on dcp.cmte_sk = cycles.cmte_sk and dcp.rpt_yr <= cycles.cycle
 left join cycle_agg on dcp.cmte_sk = cycle_agg.cmte_sk
-where dcp.rpt_yr >= :START_YEAR
+where array_length(cycle_agg.cycles, 1) > 0
 order by dcp.cmte_sk, cycle desc, dcp.rpt_yr desc, dd.receipt_date desc
 ;
 

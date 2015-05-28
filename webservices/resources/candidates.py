@@ -29,7 +29,7 @@ class CandidateList(Resource):
 
     fulltext_query = '''
         SELECT cand_sk
-        FROM   dimcand_fulltext_mv
+        FROM   ofec_candidate_fulltext_mv
         WHERE  fulltxt @@ to_tsquery(:findme)
         ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
    '''
