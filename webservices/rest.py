@@ -232,7 +232,7 @@ def swagger_static(filename):
     return url_for('docs.static', filename='dist/{0}'.format(filename))
 
 
-@docs.route('/swagger/ui')
+@docs.route('/developers')
 def api_ui():
     return render_template('swagger-ui.html', specs_url=url_for('docs.api_spec'))
 
