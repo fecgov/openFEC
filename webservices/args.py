@@ -48,7 +48,7 @@ paging = {
 
 def make_sort_args(default=None):
     return {
-        'sort': Arg(str, multiple=True, default=default),
+        'sort': Arg(str, multiple=True, default=default, description='Provide a field to sort by. Use - for descending.'),
     }
 
 
@@ -71,37 +71,50 @@ names = {
 
 candidate_detail = {
     'cycle': Arg(int, multiple=True, description='Filter records to only those that were applicable to a given election cycle'),
-    'office': Arg(str, multiple=True, description='Governmental office candidate runs for'),
-    'state': Arg(str, multiple=True, description='U.S. State candidate is registered in'),
-    'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
+    'office': Arg(str, multiple=True, enum=['', 'P', 'S', 'H'], description='Governmental office candidate runs for. P for President, H for House and S for Senate.'),
+    'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
+    'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office. For example: DEM=Democrat REP=Republican'),
     'year': Arg(str, dest='election_year', description='See records pertaining to a particular year.'),
     'district': Arg(str, multiple=True, description='Two digit district number'),
-    'candidate_status': Arg(str, multiple=True, description='One letter code explaining if the candidate is a present, future or past candidate'),
-    'incumbent_challenge': Arg(str, multiple=True, description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
+    'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'N', 'P', 'F'], description='One letter code explaining if the candidate is a candidate (C), future candidate (F), not yet a canidate (N), or prior candidate (P)'),
+    'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open. I=incumbent; C=challenger; O=open seat (where no incumbent sought reelection)'),
 }
 
 candidate_list = {
-    'q': Arg(str, description='Text to search all fields for'),
-    'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
-    'fec_id': Arg(str, description="Candidate's FEC ID"),
+    'q': Arg(str, description='Text to search for candidate name and id.'),
+    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. The initial character indicates the office sought. (H)ouse, (S)enate, (P)resident. If a person runs for several offices, they will have separate Candidate IDs for each office."),
+    # I don't think we need this
+    # 'fec_id': Arg(str, description="Candidate's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
 }
 
 committee = {
-    'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
-    'cycle': Arg(int, multiple=True, description='An election cycle that the committee was active- (after original registration date but before expiration date.)'),
-    'designation': Arg(str, multiple=True, description='The one-letter designation code of the organization'),
-    'organization_type': Arg(str, multiple=True, description='The one-letter code for the kind for organization'),
-    'committee_type': Arg(str, multiple=True, description='The one-letter type code of the organization'),
+    'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
+    'cycle': Arg(int, multiple=True, description='A 2-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
+    'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
+        description='The one-letter designation code of the organization: \
+            A = authorized by a candidate, J =joint fundraising committee, P =principal campaign committee of a candidate, \
+            U =unauthorized, B =lobbyist/registrant PAC, D =leadership PAC'
+        ),
+    'organization_type': Arg(str, multiple=True, enum=['', 'C', 'L', 'M', 'T', 'V', 'W'],
+        description='The one-letter code for the kind for organization: C = Corporation, L = Labor Organization, \
+        M = Membership Organization, T = Trade Association, V = Cooperative, W = Corporation Without Capital Stock,'),
+    'committee_type': Arg(str, multiple=True, enum=['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+        description='The one-letter type code of the organization: C = Communication Cost, \
+            D = Delegate, E = Electioneering Communication, H = House, I = Independent Expenditor (Person or Group), \
+            N = PAC - Nonqualified, O = Independent Expenditure-Only (Super PACs), P = Presidential, Q = PAC - Qualified, \
+            S = Senate, U = Single Candidate Independent Expenditure,  V = PAC with Non-Contribution Account - Nonqualified, \
+            W = PAC with Non-Contribution Account - Qualified, X = Party - Nonqualified, Y = Party - Qualified \
+            Z = National Party Nonfederal Account'),
 }
 
 committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
-    'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
-    'state': Arg(str, multiple=True, description='Two digit U.S. State committee is registered in'),
+    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. The initial character indicates the office sought. (H)ouse, (S)enate, (P)resident. If a person runs for several offices, they will have separate Candidate IDs for each office."),
+    'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
-    'party': Arg(str, multiple=True, description='Three letter code for party'),
+    'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
 }
 
 
