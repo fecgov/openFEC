@@ -7,11 +7,8 @@ SEE DOCUMENTATION FOLDER
 import os
 import re
 import sys
-import http
 import logging
 
-import yaml
-import smore.apispec
 from flask import abort
 from flask import request
 from flask import jsonify
@@ -214,16 +211,6 @@ register_resource(CommitteeList, blueprint='v1')
 register_resource(ReportsView, blueprint='v1')
 register_resource(TotalsView, blueprint='v1')
 
-renderers = {
-    'application/json': lambda data: jsonify(data),
-    'application/json;charset=utf-8': lambda data: jsonify(data),
-    'application/yaml': lambda data: yaml.dump(data, default_flow_style=False),
-}
-
-yaml.add_representer(
-    smore.apispec.Path,
-    lambda dumper, data: dumper.represent_dict(data),
-)
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
@@ -237,11 +224,7 @@ docs = Blueprint(
 
 @docs.route('/swagger')
 def api_spec():
-    render_type = request.accept_mimetypes.best_match(renderers.keys())
-    if not render_type:
-        abort(http.client.NOT_ACCEPTABLE)
-    rendered = renderers[render_type](spec.spec.to_dict())
-    return rendered, http.client.OK, {'Content-Type': render_type}
+    return jsonify(spec.spec.to_dict())
 
 
 @docs.add_app_template_global
@@ -249,7 +232,7 @@ def swagger_static(filename):
     return url_for('docs.static', filename='dist/{0}'.format(filename))
 
 
-@docs.route('/swagger/ui')
+@docs.route('/developers')
 def api_ui():
     return render_template('swagger-ui.html', specs_url=url_for('docs.api_spec'))
 
