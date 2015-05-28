@@ -125,6 +125,14 @@ class CommitteeView(Resource):
         return committees
 
 
+@spec.doc(
+    tags=['committee'],
+    path_params=[
+        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+        {'name': 'cycle', 'in': 'path', 'type': 'integer'},
+    ],
+)
 class CommitteeHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
