@@ -76,8 +76,8 @@ candidate_detail = {
     'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office. For example: DEM=Democrat REP=Republican'),
     'year': Arg(str, dest='election_year', description='See records pertaining to a particular year.'),
     'district': Arg(str, multiple=True, description='Two digit district number'),
-    'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'N', 'P', 'F'], description='One letter code explaining if the candidate is a candidate (C), future candidate (F), not yet a canidate (N), or prior candidate (P)'),
-    'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open. I=incumbent; C=challenger; O=open seat (where no incumbent sought reelection)'),
+    'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'N', 'P', 'F'], description='One letter code explaining if the candidate is: C = candidate, F = future candidate, N = not yet a canidate, or P = prior candidate'),
+    'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open. I = incumbent; C = challenger; O = open seat (where no incumbent sought reelection)'),
 }
 
 candidate_list = {
