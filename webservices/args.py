@@ -52,8 +52,20 @@ def make_sort_args(default=None):
     }
 
 
+def one_of(value, options):
+    if value not in options:
+        raise webargs.ValidationError('Value "{0}" not in "{1}"'.format(value, options))
+
+
 names = {
     'q': Arg(str, required=True, description='Name (candidate or committee) to search for'),
+    'type': Arg(
+        str,
+        use=lambda v: v.lower(),
+        validate=functools.partial(one_of, options=['candidate', 'committee']),
+        description='Resource type to search for. May be "candidate" or "committee"; if '
+        'not specified, search both resources.',
+    ),
 }
 
 

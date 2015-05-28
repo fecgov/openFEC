@@ -28,6 +28,7 @@ from webservices import args
 from webservices import docs
 from webservices import spec
 from webservices import schemas
+from webservices.common import models
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateSearch, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
@@ -88,6 +89,11 @@ def after_request(response):
     return response
 
 
+resource_filter_map = {
+    'candidate': models.NameSearch.cand_id,
+    'committee': models.NameSearch.cmte_id,
+}
+
 @spec.doc(
     tags=['search'],
     description=docs.NAME_SEARCH,
@@ -98,26 +104,27 @@ class NameSearch(restful.Resource):
     for typeahead
     """
 
-    fulltext_query = '''
-    select
-        cand_id as candidate_id,
-        cmte_id as committee_id,
-        name,
-        office_sought
-    from name_search_fulltext_mv
-    where name_vec @@ to_tsquery(:findme || ':*')
-    order by ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
-    limit 20
-    '''
-
     @args.register_kwargs(args.names)
     @schemas.marshal_with(schemas.NameSearchListSchema())
     def get(self, **kwargs):
-        query = sa.sql.text(self.fulltext_query)
-        findme = ' & '.join(kwargs['q'].split())
-        with db.session.connection() as conn:
-            rows = conn.execute(query, findme=findme).fetchall()
-        return {'results': rows}
+        vector = ' & '.join(kwargs['q'].split())
+        vector = sa.func.concat(vector, ':*')
+
+        query = models.NameSearch.query.filter(
+            models.NameSearch.name_vec.match(vector)
+        )
+
+        if kwargs['type']:
+            column = resource_filter_map[kwargs['type']]
+            query = query.filter(column != None)  # noqa
+
+        query = query.order_by(
+            sa.desc(sa.func.ts_rank_cd(models.NameSearch.name_vec, sa.func.to_tsquery(vector)))
+        )
+
+        query = query.limit(20)
+
+        return {'results': query.all()}
 
 
 class Help(restful.Resource):
