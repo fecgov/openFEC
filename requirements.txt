@@ -9,6 +9,7 @@ GitPython>=1.0.1
 gunicorn
 
 marshmallow>=2.0.0b2
+marshmallow-sqlalchemy>=0.2.0
 webargs>=0.13.0
 git+https://github.com/marshmallow-code/smore@dev
 

@@ -134,6 +134,11 @@ class Committee(BaseCommittee):
 class CommitteeHistory(BaseCommittee):
     __tablename__ = 'ofec_committee_history_mv'
 
+    street_1 = db.Column(db.String(50))
+    street_2 = db.Column(db.String(50))
+    city = db.Column(db.String(50))
+    state_full = db.Column(db.String(50))
+    zip = db.Column(db.String(9))
     cycle = db.Column(db.Integer)
 
 
@@ -259,7 +264,7 @@ class CommitteeReports(BaseModel):
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
 
 
-class CommitteeReportsHouseOrSenate(CommitteeReports):
+class CommitteeReportsHouseSenate(CommitteeReports):
     __tablename__ = 'ofec_reports_house_senate_mv'
 
     aggregate_amount_personal_contributions_general = db.Column(db.Integer)
@@ -306,7 +311,7 @@ class CommitteeReportsHouseOrSenate(CommitteeReports):
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
 
 
-class CommitteeReportsPacOrParty(CommitteeReports):
+class CommitteeReportsPacParty(CommitteeReports):
     __tablename__ = 'ofec_reports_pacs_parties_mv'
 
     all_loans_received_period = db.Column(db.Integer)
@@ -448,7 +453,7 @@ class CommitteeTotals(BaseModel):
     net_operating_expenditures = db.Column(db.Integer)
 
 
-class CommitteeTotalsPacOrParty(CommitteeTotals):
+class CommitteeTotalsPacParty(CommitteeTotals):
     __tablename__ = 'ofec_totals_pacs_parties_mv'
 
     all_loans_received = db.Column(db.Integer)
@@ -499,7 +504,7 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     transfers_to_other_authorized_committee = db.Column(db.Integer)
 
 
-class CommitteeTotalsHouseOrSenate(CommitteeTotals):
+class CommitteeTotalsHouseSenate(CommitteeTotals):
     __tablename__ = 'ofec_totals_house_senate_mv'
 
     all_other_loans = db.Column(db.Integer)

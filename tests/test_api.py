@@ -138,14 +138,14 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['coverage_end_date'], isoformat(end_dates[0]))
         self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
-        assert response[0].keys() == schema._declared_fields.keys()
+        assert response[0].keys() == schema().fields.keys()
 
     # TODO(jmcarp) Refactor as parameterized tests
     def test_reports(self):
-        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
-        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.ReportsHouseSenateSchema)
-        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.ReportsPresidentialSchema)
-        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.ReportsPacPartySchema)
+        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
+        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
+        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.CommitteeReportsPresidentialSchema)
+        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.CommitteeReportsPacPartySchema)
 
     def test_reports_committee_not_found(self):
         resp = self.app.get(api.url_for(ReportsView, committee_id='fake'))
