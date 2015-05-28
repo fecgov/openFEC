@@ -81,7 +81,7 @@ class CandidateSearch(CandidateList):
     def query(self):
         # Eagerly load principal committees to avoid extra queries
         return Candidate.query.options(
-            sa.orm.joinedload(Candidate.principal_committees)
+            sa.orm.subqueryload(Candidate.principal_committees)
         )
 
     @args.register_kwargs(args.paging)
