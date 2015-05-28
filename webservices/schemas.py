@@ -102,8 +102,8 @@ class ApiSchema(ma.Schema):
 
 
 class NameSearchSchema(ma.Schema):
-    candidate_id = ma.fields.String()
-    committee_id = ma.fields.String()
+    candidate_id = ma.fields.String(attribute='cand_id')
+    committee_id = ma.fields.String(attribute='cmte_id')
     name = ma.fields.String()
     office_sought = ma.fields.String()
 
