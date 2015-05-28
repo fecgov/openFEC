@@ -42,7 +42,7 @@ class CandidateList(Resource):
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
     @args.register_kwargs(args.make_sort_args(default=['name']))
-    @schemas.marshal_with(schemas.CandidateListPageSchema())
+    @schemas.marshal_with(schemas.CandidatePageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
         return utils.fetch_page(query, kwargs, model=Candidate)
