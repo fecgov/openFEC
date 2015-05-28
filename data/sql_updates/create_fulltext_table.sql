@@ -1,29 +1,28 @@
 drop table if exists dimcand_fulltext;
 drop materialized view if exists ofec_candidate_fulltext_mv_tmp;
 create materialized view ofec_candidate_fulltext_mv_tmp as
-    select distinct on (c.cand_sk)
+    select distinct on (cand_sk)
         row_number() over () as idx,
-        c.cand_sk,
+        cand_sk,
         case
-            when p.cand_nm is not null then
-                setweight(to_tsvector(p.cand_nm), 'A') ||
-                setweight(to_tsvector(c.cand_id), 'B')
+            when cand_nm is not null then
+                setweight(to_tsvector(cand_nm), 'A') ||
+                setweight(to_tsvector(cand_id), 'B')
             else null::tsvector
             end
         as fulltxt
-    from dimcand c
-    left outer join dimcandproperties p on c.cand_sk = p.cand_sk
+    from dimcandproperties dcp
     inner join (
         select distinct cand_sk from dimcandproperties
         where form_tp != 'F2Z'
-    ) f2 on c.cand_sk = f2.cand_sk
+    ) f2 using (cand_sk)
     -- Use same joins as main candidate views to ensure same candidates
     -- present in all views
-    left join dimcandoffice co on c.cand_sk = co.cand_sk
+    left join dimcandoffice co using (cand_sk)
     inner join dimoffice using (office_sk)
     inner join dimparty using (party_sk)
-    where p.election_yr >= :START_YEAR
-    order by c.cand_sk, p.election_yr desc
+    where election_yr >= :START_YEAR
+    order by cand_sk, election_yr desc
 ;
 
 create unique index on ofec_candidate_fulltext_mv_tmp(idx);
@@ -32,18 +31,17 @@ create index on ofec_candidate_fulltext_mv_tmp using gin(fulltxt);
 drop table if exists dimcmte_fulltext;
 drop materialized view if exists ofec_committee_fulltext_mv_tmp;
 create materialized view ofec_committee_fulltext_mv_tmp as
-    select distinct on (c.cmte_sk)
+    select distinct on (cmte_sk)
         row_number() over () as idx,
-        c.cmte_sk,
+        cmte_sk,
         case
-            when p.cmte_nm is not null then
-                setweight(to_tsvector(p.cmte_nm), 'A') ||
-                setweight(to_tsvector(c.cmte_id), 'B')
+            when cmte_nm is not null then
+                setweight(to_tsvector(cmte_nm), 'A') ||
+                setweight(to_tsvector(cmte_id), 'B')
             else null::tsvector
             end
         as fulltxt
-    from dimcmte c
-    left join dimcmteproperties p using (cmte_sk)
+    from dimcmteproperties dcp
     left join (
         select
             cmte_sk,
@@ -59,7 +57,7 @@ create materialized view ofec_committee_fulltext_mv_tmp as
         group by cmte_sk
     ) cp_agg using (cmte_sk)
     where array_length(cp_agg.cycles, 1) > 0
-    order by c.cmte_sk, p.receipt_dt desc
+    order by cmte_sk, receipt_dt desc
 ;
 
 create unique index on ofec_committee_fulltext_mv_tmp(idx);
@@ -88,12 +86,11 @@ with
         where p.election_yr >= :START_YEAR
         order by c.cand_sk, p.election_yr desc
     ), ranked_cmte as (
-        select distinct on (c.cmte_sk)
-            p.cmte_nm as name,
-            to_tsvector(p.cmte_nm) as name_vec,
-            c.cmte_id
-        from dimcmte c
-        left join dimcmteproperties p using (cmte_sk)
+        select distinct on (cmte_sk)
+            cmte_nm as name,
+            to_tsvector(cmte_nm) as name_vec,
+            cmte_id
+        from dimcmteproperties dcp
         left join (
             select
                 cmte_sk,
@@ -109,7 +106,7 @@ with
             group by cmte_sk
         ) cp_agg using (cmte_sk)
         where array_length(cp_agg.cycles, 1) > 0
-        order by c.cmte_sk, p.receipt_dt desc
+        order by cmte_sk, receipt_dt desc
     )
     select
         row_number() over () as idx,

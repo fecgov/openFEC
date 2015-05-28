@@ -2,8 +2,8 @@ drop materialized view if exists ofec_candidate_detail_mv_tmp;
 create materialized view ofec_candidate_detail_mv_tmp as
 select
     row_number() over () as idx,
-    dimcand.cand_sk as candidate_key,
-    dimcand.cand_id as candidate_id,
+    dcp.cand_sk as candidate_key,
+    dcp.cand_id as candidate_id,
     max(csi_recent.cand_status) as candidate_status,
     expand_candidate_status(max(csi_recent.cand_status)) as candidate_status_full,
     max(co.cand_election_yr) as active_through,
@@ -27,14 +27,14 @@ select
     expand_candidate_incumbent(max(full_ici.cand_ici_cd)) as incumbent_challenge_full,
     -- I needed help keeping track of where the information is coming from when we have the information to get the forms linked we can link to the forms for each section.
     -- I would like to replace this information with just links to the form and expire dates
-    max(dimcand.form_tp) as form_type,
-    max(dimcand.expire_date) as candidate_expire_date,
+    max(dcp.form_tp) as form_type,
+    max(dcp.expire_date) as candidate_expire_date,
     max(cand_p_most_recent.expire_date) as properties_expire_date,
     max(cand_p_most_recent.form_tp) as properties_form_type,
     max(csi_recent.expire_date) as status_expire_date,
     max(dimoffice.expire_date) as office_expire_date,
     max(dimparty.expire_date) as party_expire_date
-from dimcand
+from dimcandproperties dcp
     -- Restrict to candidates with at least one non-F2Z filing
     inner join (
         select distinct cand_sk
@@ -66,11 +66,10 @@ from dimcand
     ) last_co using (cand_sk)
     inner join dimoffice on last_co.office_sk = dimoffice.office_sk
     inner join dimparty on last_co.party_sk = dimparty.party_sk
-    left join dimcandproperties dcp using (cand_sk)
     where dcp.election_yr >= :START_YEAR
 group by
-    dimcand.cand_sk,
-    dimcand.cand_id
+    dcp.cand_sk,
+    dcp.cand_id
 -- Candidate must have > 0 records after START_YEAR
 having count(dcp) > 0
 ;
