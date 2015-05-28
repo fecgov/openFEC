@@ -9,11 +9,11 @@ from webservices.common import models
 
 
 reports_schema_map = {
-    'P': (models.CommitteeReportsPresidential, schemas.ReportsPresidentialPageSchema),
-    'H': (models.CommitteeReportsHouseOrSenate, schemas.ReportsHouseSenatePageSchema),
-    'S': (models.CommitteeReportsHouseOrSenate, schemas.ReportsHouseSenatePageSchema),
+    'P': (models.CommitteeReportsPresidential, schemas.CommitteeReportsPresidentialPageSchema),
+    'H': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
+    'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
 }
-default_schemas = (models.CommitteeReportsPacOrParty, schemas.ReportsPacPartyPageSchema)
+default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
 
 
 reports_type_map = {

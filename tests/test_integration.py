@@ -12,14 +12,14 @@ CANDIDATE_MODELS = [
     models.CandidateHistory,
 ]
 REPORTS_MODELS = [
-    models.CommitteeReportsPacOrParty,
+    models.CommitteeReportsPacParty,
     models.CommitteeReportsPresidential,
-    models.CommitteeReportsHouseOrSenate,
+    models.CommitteeReportsHouseSenate,
 ]
 TOTALS_MODELS = [
-    models.CommitteeTotalsPacOrParty,
+    models.CommitteeTotalsPacParty,
     models.CommitteeTotalsPresidential,
-    models.CommitteeTotalsHouseOrSenate,
+    models.CommitteeTotalsHouseSenate,
 ]
 
 

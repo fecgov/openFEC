@@ -9,11 +9,11 @@ from webservices.common import models
 
 
 totals_schema_map = {
-    'P': (models.CommitteeTotalsPresidential, schemas.TotalsPresidentialPageSchema),
-    'H': (models.CommitteeTotalsHouseOrSenate, schemas.TotalsHouseSenatePageSchema),
-    'S': (models.CommitteeTotalsHouseOrSenate, schemas.TotalsHouseSenatePageSchema),
+    'P': (models.CommitteeTotalsPresidential, schemas.CommitteeTotalsPresidentialPageSchema),
+    'H': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
+    'S': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
 }
-default_schemas = (models.CommitteeTotalsPacOrParty, schemas.TotalsPacPartyPageSchema)
+default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
 
 
 @spec.doc(
