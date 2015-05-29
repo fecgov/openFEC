@@ -123,30 +123,30 @@ class TestReports(ApiBaseTest):
         self.assertEqual([each['coverage_end_date'] for each in results], dates_formatted[::-1])
 
     def test_reports_for_pdf_link(self):
-        presidential_report_1990 = factories.ReportsPresidentialFactory(report_year=1990)
-        presidential_report_2016 = factories.ReportsPresidentialFactory(report_year=2016)
-        results = self._results(
+        presidential_report_2016 = factories.ReportsPresidentialFactory(
+            report_year=2016,
+            beginning_image_number=12345678901,
+        )
+        presidential_report_1990 = factories.ReportsPresidentialFactory(
+            report_year=1990,
+            beginning_image_number=56789012345,
+        )
+
+        results_pdf = self._results(
             api.url_for(
                 ReportsView,
                 committee_type='presidential',
+                beginning_image_number=12345678901,
             )
         )
-        self._check_pdfs(
-            results,
-            [presidential_report_2016],
-            [presidential_report_2012, house_report_2016],
-        )
-        # Test repeated cycle parameter
-        results = self._results(
-            api.url_for(
-                ReportsView,
-                committee_type='presidential',
-                year=[2016, 2018],
-            )
-        )
-        self._check_committee_ids(
-            results,
-            [presidential_report_2016],
-            [presidential_report_2012, house_report_2016],
-        )
+        self.assertEqual(response_pdf[0]['pdf_url'], 'http://docquery.fec.gov/pdf/901/12345678901/12345678901.pdf')
+
+        # results_none = self._results(
+        #     api.url_for(
+        #         ReportsView,
+        #         committee_type='presidential',
+        #         beginning_image_number=56789012345,
+        #     )
+        # )
+        # self.assertEqual(response_none[0]['pdf_url'], 'null')
 
