@@ -265,7 +265,7 @@ class CommitteeReports(BaseModel):
 
     @property
     def pdf_url(self):
-        if self.report_year > 1994:
+        if self.report_year is not None and self.report_year > 1994:
             return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
                 str(self.beginning_image_number)[-3:],
                 self.beginning_image_number,
