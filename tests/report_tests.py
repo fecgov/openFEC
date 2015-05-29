@@ -6,7 +6,7 @@ from .common import ApiBaseTest
 from tests import factories
 
 from webservices.rest import api
-from webservices.rest import ReportsView
+from webservices.resources.reports import ReportsView
 
 
 class TestReports(ApiBaseTest):

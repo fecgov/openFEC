@@ -12,9 +12,9 @@ from webservices import rest
 from webservices import schemas
 from webservices.rest import api
 from webservices.rest import NameSearch
-from webservices.rest import TotalsView
-from webservices.rest import ReportsView
-from webservices.rest import CandidateList
+from webservices.resources.totals import TotalsView
+from webservices.resources.reports import ReportsView
+from webservices.resources.candidates import CandidateList
 
 
 class OverallTest(ApiBaseTest):
