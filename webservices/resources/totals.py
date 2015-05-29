@@ -28,6 +28,7 @@ class TotalsView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.totals)
     @args.register_kwargs(args.make_sort_args(default=['-cycle']))
+    @schemas.marshal_with(schemas.CommitteeTotalsPageSchema(), wrap=False)
     def get(self, committee_id, **kwargs):
         # TODO(jmcarp) Handle multiple results better
         committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()

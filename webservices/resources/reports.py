@@ -35,6 +35,7 @@ class ReportsView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reports)
     @args.register_kwargs(args.make_sort_args(default=['-coverage_end_date']))
+    @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         reports = self.get_reports(committee_id, committee_type, kwargs)
         reports, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
