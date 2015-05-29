@@ -221,7 +221,12 @@ class CandidateFormatTest(ApiBaseTest):
         candidate_ids = [each.candidate_id for each in candidates]
         results = self._results(api.url_for(CandidateList, sort='candidate_status'))
         self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
+        results = self._results(api.url_for(CandidateSearch, sort='candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
         results = self._results(api.url_for(CandidateList, sort='-candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
+        results = self._results(api.url_for(CandidateSearch, sort='-candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
 
     def test_candidate_multi_sort(self):
         candidates = [

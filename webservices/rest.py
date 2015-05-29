@@ -23,6 +23,7 @@ from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices import exceptions
 from webservices.common import models
 from webservices.common.models import db
 from webservices.resources import totals
@@ -57,6 +58,14 @@ v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)
 
 app.register_blueprint(v1)
+
+
+@app.errorhandler(exceptions.ApiError)
+def handle_error(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
 
 # api.data.gov
 trusted_proxies = ('54.208.160.112', '54.208.160.151')
