@@ -3,8 +3,8 @@ drop materialized view if exists ofec_candidates_mv_tmp;
 create materialized view ofec_candidates_mv_tmp as
 select
     row_number() over () as idx,
-    dimcand.cand_sk as candidate_key,
-    dimcand.cand_id as candidate_id,
+    dcp.cand_sk as candidate_key,
+    dcp.cand_id as candidate_id,
     max(csi_recent.cand_status) as candidate_status,
     expand_candidate_status(max(csi_recent.cand_status)) as candidate_status_full,
     max(dimoffice.office_district) as district,
@@ -19,7 +19,7 @@ select
     clean_party(max(dimparty.party_affiliation_desc)) as party_full,
     max(dimoffice.office_state) as state,
     max(candprops.cand_nm) as name
-from dimcand
+from dimcandproperties dcp
     -- Restrict to candidates with at least one non-F2Z filing
     inner join (
         select distinct cand_sk
@@ -49,11 +49,10 @@ from dimcand
         select distinct on (cand_sk) cand_sk, cand_nm from dimcandproperties
             order by cand_sk, candproperties_sk desc
     ) candprops using (cand_sk)
-    left join dimcandproperties dcp using (cand_sk)
     where dcp.election_yr >= :START_YEAR
 group by
-    dimcand.cand_sk,
-    dimcand.cand_id
+    dcp.cand_sk,
+    dcp.cand_id
 -- Candidate must have > 0 records after START_YEAR
 having count(dcp) > 0
 ;

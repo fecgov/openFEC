@@ -133,6 +133,13 @@ class CandidateView(Resource):
         return candidates.order_by(CandidateDetail.expire_date.desc())
 
 
+@spec.doc(
+    tags=['candidate'],
+    path_params=[
+        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+        {'name': 'cycle', 'in': 'path', 'type': 'integer'},
+    ],
+)
 class CandidateHistoryView(Resource):
 
     @args.register_kwargs(args.paging)

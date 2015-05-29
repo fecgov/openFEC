@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -43,7 +44,7 @@ class ReportsView(Resource):
 
     def get_reports(self, committee_id, committee_type, kwargs):
         reports_class, reports_schema = reports_schema_map.get(
-            self._resolve_committee_type(committee_id, committee_type),
+            self._resolve_committee_type(committee_id, committee_type, kwargs),
             default_schemas,
         )
 
@@ -59,9 +60,13 @@ class ReportsView(Resource):
 
         return reports, reports_schema
 
-    def _resolve_committee_type(self, committee_id, committee_type):
+    def _resolve_committee_type(self, committee_id, committee_type, kwargs):
         if committee_id is not None:
-            committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()
+            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
+            if kwargs['cycle']:
+                query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
+            query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
+            committee = query.first_or_404()
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)

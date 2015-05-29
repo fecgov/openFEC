@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -29,9 +30,10 @@ class TotalsView(Resource):
     @args.register_kwargs(args.totals)
     @args.register_kwargs(args.make_sort_args(default=['-cycle']))
     def get(self, committee_id, **kwargs):
-        # TODO(jmcarp) Handle multiple results better
-        committee = models.Committee.query.filter_by(committee_id=committee_id).first_or_404()
-        totals_class, totals_schema = totals_schema_map.get(committee.committee_type, default_schemas)
+        totals_class, totals_schema = totals_schema_map.get(
+            self._resolve_committee_type(committee_id, kwargs),
+            default_schemas,
+        )
         totals = self.get_totals(committee_id, totals_class, kwargs)
         page = utils.fetch_page(totals, kwargs)
         return totals_schema().dump(page).data
@@ -41,3 +43,11 @@ class TotalsView(Resource):
         if kwargs['cycle']:
             totals = totals.filter(totals_class.cycle.in_(kwargs['cycle']))
         return totals
+
+    def _resolve_committee_type(self, committee_id, kwargs):
+        query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
+        if kwargs['cycle']:
+            query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
+        query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
+        committee = query.first_or_404()
+        return committee.committee_type
