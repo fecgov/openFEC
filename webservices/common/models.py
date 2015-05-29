@@ -262,13 +262,16 @@ class CommitteeReports(BaseModel):
     total_receipts_ytd = db.Column(db.Integer)
     offsets_to_operating_expenditures_period = db.Column(db.Integer)
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
+
     @property
     def pdf_url(self):
         if self.report_year > 1994:
-            return "http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf".format(str(self.image_id)[-3:], self.image_id)
+            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+                str(self.beginning_image_number)[-3:],
+                self.beginning_image_number,
+            )
         else:
             return None
-
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
