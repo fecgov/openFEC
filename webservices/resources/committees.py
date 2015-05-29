@@ -38,7 +38,7 @@ class CommitteeList(Resource):
 
     fulltext_query = '''
         SELECT cmte_sk
-        FROM   dimcmte_fulltext_mv
+        FROM   ofec_committee_fulltext_mv
         WHERE  fulltxt @@ to_tsquery(:findme)
         ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
     '''

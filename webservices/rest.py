@@ -1,17 +1,11 @@
 """
-A RESTful web service supporting fulltext and field-specific searches on FEC
-candidate data.
-
-SEE DOCUMENTATION FOLDER
+A RESTful web service supporting fulltext and field-specific searches on FEC data. For full documentation visit:  https://api.open.fec.gov/developers
 """
 import os
 import re
 import sys
-import http
 import logging
 
-import yaml
-import smore.apispec
 from flask import abort
 from flask import request
 from flask import jsonify
@@ -29,6 +23,7 @@ from webservices import docs
 from webservices import spec
 from webservices import schemas
 from webservices import exceptions
+from webservices.common import models
 from webservices.common.models import db
 from webservices.resources.candidates import CandidateList, CandidateSearch, CandidateView, CandidateHistoryView
 from webservices.resources.totals import TotalsView
@@ -97,6 +92,11 @@ def after_request(response):
     return response
 
 
+resource_filter_map = {
+    'candidate': models.NameSearch.cand_id,
+    'committee': models.NameSearch.cmte_id,
+}
+
 @spec.doc(
     tags=['search'],
     description=docs.NAME_SEARCH,
@@ -107,26 +107,27 @@ class NameSearch(restful.Resource):
     for typeahead
     """
 
-    fulltext_query = '''
-    select
-        cand_id as candidate_id,
-        cmte_id as committee_id,
-        name,
-        office_sought
-    from name_search_fulltext_mv
-    where name_vec @@ to_tsquery(:findme || ':*')
-    order by ts_rank_cd(name_vec, to_tsquery(:findme || ':*')) desc
-    limit 20
-    '''
-
     @args.register_kwargs(args.names)
     @schemas.marshal_with(schemas.NameSearchListSchema())
     def get(self, **kwargs):
-        query = sa.sql.text(self.fulltext_query)
-        findme = ' & '.join(kwargs['q'].split())
-        with db.session.connection() as conn:
-            rows = conn.execute(query, findme=findme).fetchall()
-        return {'results': rows}
+        vector = ' & '.join(kwargs['q'].split())
+        vector = sa.func.concat(vector, ':*')
+
+        query = models.NameSearch.query.filter(
+            models.NameSearch.name_vec.match(vector)
+        )
+
+        if kwargs['type']:
+            column = resource_filter_map[kwargs['type']]
+            query = query.filter(column != None)  # noqa
+
+        query = query.order_by(
+            sa.desc(sa.func.ts_rank_cd(models.NameSearch.name_vec, sa.func.to_tsquery(vector)))
+        )
+
+        query = query.limit(20)
+
+        return {'results': query.all()}
 
 
 class Help(restful.Resource):
@@ -216,16 +217,6 @@ register_resource(CommitteeList, blueprint='v1')
 register_resource(ReportsView, blueprint='v1')
 register_resource(TotalsView, blueprint='v1')
 
-renderers = {
-    'application/json': lambda data: jsonify(data),
-    'application/json;charset=utf-8': lambda data: jsonify(data),
-    'application/yaml': lambda data: yaml.dump(data, default_flow_style=False),
-}
-
-yaml.add_representer(
-    smore.apispec.Path,
-    lambda dumper, data: dumper.represent_dict(data),
-)
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
@@ -239,11 +230,7 @@ docs = Blueprint(
 
 @docs.route('/swagger')
 def api_spec():
-    render_type = request.accept_mimetypes.best_match(renderers.keys())
-    if not render_type:
-        abort(http.client.NOT_ACCEPTABLE)
-    rendered = renderers[render_type](spec.spec.to_dict())
-    return rendered, http.client.OK, {'Content-Type': render_type}
+    return jsonify(spec.spec.to_dict())
 
 
 @docs.add_app_template_global
@@ -251,7 +238,7 @@ def swagger_static(filename):
     return url_for('docs.static', filename='dist/{0}'.format(filename))
 
 
-@docs.route('/swagger/ui')
+@docs.route('/developers')
 def api_ui():
     return render_template('swagger-ui.html', specs_url=url_for('docs.api_spec'))
 
