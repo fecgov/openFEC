@@ -10,10 +10,10 @@ from tests.common import ApiBaseTest
 from webservices import schemas
 from webservices.rest import db
 from webservices.rest import api
-from webservices.rest import CandidateList
-from webservices.rest import CandidateView
-from webservices.rest import CandidateSearch
-from webservices.rest import CandidateHistoryView
+from webservices.resources.candidates import CandidateList
+from webservices.resources.candidates import CandidateView
+from webservices.resources.candidates import CandidateSearch
+from webservices.resources.candidates import CandidateHistoryView
 
 
 fields = dict(
