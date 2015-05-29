@@ -121,3 +121,32 @@ class TestReports(ApiBaseTest):
         ]
         results = self._results(api.url_for(ReportsView, committee_id=committee_id))
         self.assertEqual([each['coverage_end_date'] for each in results], dates_formatted[::-1])
+
+    def test_reports_for_pdf_link(self):
+        presidential_report_1990 = factories.ReportsPresidentialFactory(report_year=1990)
+        presidential_report_2016 = factories.ReportsPresidentialFactory(report_year=2016)
+        results = self._results(
+            api.url_for(
+                ReportsView,
+                committee_type='presidential',
+            )
+        )
+        self._check_pdfs(
+            results,
+            [presidential_report_2016],
+            [presidential_report_2012, house_report_2016],
+        )
+        # Test repeated cycle parameter
+        results = self._results(
+            api.url_for(
+                ReportsView,
+                committee_type='presidential',
+                year=[2016, 2018],
+            )
+        )
+        self._check_committee_ids(
+            results,
+            [presidential_report_2016],
+            [presidential_report_2012, house_report_2016],
+        )
+
