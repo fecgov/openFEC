@@ -180,12 +180,6 @@ class OverallTest(ApiBaseTest):
         results = self._results(api.url_for(TotalsView, committee_id=committee.committee_id))
         self.assertEqual(results[0]['receipts'], totals.receipts)
 
-    @unittest.skip("Not implementing for now.")
-    def test_multiple_committee(self):
-        results = self._results('/total?committee_id=C00002600,C00000422&fields=committtee_id')
-        print(len(results))
-        self.assertEquals(len(results), 2)
-
     # Typeahead name search
     def test_typeahead_name_search(self):
         [
@@ -202,3 +196,47 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(len(cand_ids), len(set(cand_ids)))
         for each in results:
             self.assertIn('bartlet', each['name'].lower())
+
+    def test_typeahead_search_by_resource_bad_resource(self):
+        res = self.app.get(api.url_for(NameSearch, q='bartlet', type='twizzler'))
+        self.assertEqual(res.status_code, 400)
+
+    def test_typeahead_search_by_resource(self):
+        # Create Bartlet candidate records
+        [
+            factories.NameSearchFactory(
+                name='Jed Bartlet {0}'.format(idx),
+                name_vec=sa.func.to_tsvector('Jed Bartlet {0}'.format(idx)),
+                cmte_id=None,
+            )
+            for idx in range(5)
+        ]
+        # Create Bartlet committee records
+        [
+            factories.NameSearchFactory(
+                name='Bartlet {0}'.format(idx),
+                name_vec=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
+                cand_id=None,
+            )
+            for idx in range(5)
+        ]
+        # Create decoy Ritchie records
+        [
+            factories.NameSearchFactory(
+                name='Ritchie {0}'.format(idx),
+                name_vec=sa.func.to_tsvector('Friends of Ritchie {0}'.format(idx)),
+            )
+            for idx in range(5)
+        ]
+
+        res = self._results(api.url_for(NameSearch, q='bartlet', type='candidate'))
+        self.assertEqual(len(res), 5)
+        self.assertTrue(all('bartlet' in each['name'].lower() for each in res))
+        self.assertTrue(all(each['candidate_id'] is not None for each in res))
+        self.assertTrue(all(each['committee_id'] is None for each in res))
+
+        res = self._results(api.url_for(NameSearch, q='bartlet', type='committee'))
+        self.assertEqual(len(res), 5)
+        self.assertTrue(all('bartlet' in each['name'].lower() for each in res))
+        self.assertTrue(all(each['committee_id'] is not None for each in res))
+        self.assertTrue(all(each['candidate_id'] is None for each in res))
