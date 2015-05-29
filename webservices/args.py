@@ -121,7 +121,8 @@ committee_list = {
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
     'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
-    'committee_type': Arg(str, enum=['house-senate', 'presidential', 'pac-party'], description="What kind of record. (Based on if the file forms F3, F3P or F3X)."),
+    # not sure how to tell swagger this is in the path
+    'committee_type': Arg(str, enum=['house-senate', 'presidential', 'pac-party'], description="What kind of record. (Based on if they file forms F3, F3P or F3X)."),
 }
 
 
