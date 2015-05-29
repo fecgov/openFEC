@@ -67,6 +67,7 @@ def make_schema(model, class_name=None, fields=None, options=None):
                 'model': model,
                 'sqla_session': models.db.session,
                 'exclude': ('idx', ),
+                'additional': ('pdf_url',),
             },
             options or {},
         )
@@ -165,7 +166,7 @@ register_schema(CandidateDetailPageSchema)
 register_schema(CandidateHistoryPageSchema)
 
 
-make_reports_schema = functools.partial(make_schema, options={'exclude': ('idx', 'report_key')})
+make_reports_schema = functools.partial(make_schema, options={'exclude': ('idx', 'report_key'), 'additional': ('pdf_url',)})
 CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
 CommitteeReportsHouseSenateSchema = make_reports_schema(models.CommitteeReportsHouseSenate)
 CommitteeReportsPacPartySchema = make_reports_schema(models.CommitteeReportsPacParty)
