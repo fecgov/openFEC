@@ -139,10 +139,7 @@ class TestReports(ApiBaseTest):
             report_year=2016,
             beginning_image_number=12345678901,
         )
-        presidential_report_1990 = factories.ReportsPresidentialFactory(
-            report_year=1990,
-            beginning_image_number=56789012345,
-        )
+
 
         results_pdf = self._results(
             api.url_for(
@@ -153,12 +150,21 @@ class TestReports(ApiBaseTest):
         )
         self.assertEqual(response_pdf[0]['pdf_url'], 'http://docquery.fec.gov/pdf/901/12345678901/12345678901.pdf')
 
-        # results_none = self._results(
-        #     api.url_for(
-        #         ReportsView,
-        #         committee_type='presidential',
-        #         beginning_image_number=56789012345,
-        #     )
-        # )
-        # self.assertEqual(response_none[0]['pdf_url'], 'null')
+    def test_no_pdf_link(self):
+        """
+        Old pdfs don't exist so we should not build links.
+        """
+        presidential_report_1990 = factories.ReportsPresidentialFactory(
+            report_year=1990,
+            beginning_image_number=56789012345,
+        )
+
+        results_none = self._results(
+            api.url_for(
+                ReportsView,
+                committee_type='presidential',
+                beginning_image_number=56789012345,
+            )
+        )
+        self.assertEqual(response_none[0]['pdf_url'], 'null')
 
