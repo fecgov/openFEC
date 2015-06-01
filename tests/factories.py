@@ -101,6 +101,14 @@ class CommitteeDetailFactory(BaseCommitteeFactory):
         paired_factory = lambda: CommitteeFactory
 
 
+class CommitteeHistoryFactory(BaseFactory):
+    class Meta:
+        model = models.CommitteeHistory
+    committee_key = factory.Sequence(lambda n: n + 1)
+    committee_id = factory.Sequence(lambda n: 'id{0}'.format(n))
+    cycle = 2016
+
+
 class CandidateCommitteeLinkFactory(BaseFactory):
     class Meta:
         model = models.CandidateCommitteeLink
