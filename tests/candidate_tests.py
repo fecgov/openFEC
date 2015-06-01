@@ -10,10 +10,10 @@ from tests.common import ApiBaseTest
 from webservices import schemas
 from webservices.rest import db
 from webservices.rest import api
-from webservices.rest import CandidateList
-from webservices.rest import CandidateView
-from webservices.rest import CandidateSearch
-from webservices.rest import CandidateHistoryView
+from webservices.resources.candidates import CandidateList
+from webservices.resources.candidates import CandidateView
+from webservices.resources.candidates import CandidateSearch
+from webservices.resources.candidates import CandidateHistoryView
 
 
 fields = dict(
@@ -221,7 +221,12 @@ class CandidateFormatTest(ApiBaseTest):
         candidate_ids = [each.candidate_id for each in candidates]
         results = self._results(api.url_for(CandidateList, sort='candidate_status'))
         self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
+        results = self._results(api.url_for(CandidateSearch, sort='candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
         results = self._results(api.url_for(CandidateList, sort='-candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
+        results = self._results(api.url_for(CandidateSearch, sort='-candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
 
     def test_candidate_multi_sort(self):
         candidates = [

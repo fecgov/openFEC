@@ -11,9 +11,9 @@ from tests.common import ApiBaseTest
 from webservices import utils
 from webservices.rest import db
 from webservices.rest import api
-from webservices.rest import CommitteeList
-from webservices.rest import CommitteeView
-from webservices.rest import CandidateView
+from webservices.resources.committees import CommitteeList
+from webservices.resources.committees import CommitteeView
+from webservices.resources.candidates import CandidateView
 
 
 ## old, re-factored Committee tests ##
