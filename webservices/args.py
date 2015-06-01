@@ -108,6 +108,7 @@ committee_list = {
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
     'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
+    'type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 
 
