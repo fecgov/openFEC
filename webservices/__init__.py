@@ -1,1 +1,1 @@
-__API_VERSION__ = '0.2'
+__API_VERSION__ = '1.0'
