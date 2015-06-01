@@ -224,7 +224,7 @@ class CommitteeReports(BaseModel):
     committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer)
 
-    beginning_image_number = db.Column(db.Integer)
+    beginning_image_number = db.Column(db.BigInteger)
     cash_on_hand_beginning_period = db.Column(db.Integer)
     cash_on_hand_end_period = db.Column(db.Integer)
     coverage_end_date = db.Column(db.DateTime)
