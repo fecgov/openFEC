@@ -146,7 +146,7 @@ class TestReports(ApiBaseTest):
             factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='M3'),
             factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='TER'),
         ]
-        results = self._results(api.url_for(ReportsView, committee_id=committee_id, type=['Q2', 'M3']))
+        results = self._results(api.url_for(ReportsView, committee_id=committee_id, report_type=['Q2', 'M3']))
         self.assertTrue(all(each['report_type'] in ['Q2', 'M3'] for each in results))
 
     def test_report_type_exclude(self):
@@ -161,5 +161,5 @@ class TestReports(ApiBaseTest):
             factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='M3'),
             factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='TER'),
         ]
-        results = self._results(api.url_for(ReportsView, committee_id=committee_id, type=['-M3']))
+        results = self._results(api.url_for(ReportsView, committee_id=committee_id, report_type=['-M3']))
         self.assertTrue(all(each['report_type'] in ['Q2', 'TER'] for each in results))

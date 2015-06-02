@@ -70,8 +70,8 @@ class ReportsView(Resource):
         if kwargs['cycle']:
             reports = reports.filter(reports_class.cycle.in_(kwargs['cycle']))
 
-        if kwargs['type']:
-            include, exclude = parse_types(kwargs['type'])
+        if kwargs['report_type']:
+            include, exclude = parse_types(kwargs['report_type'])
             if include:
                 reports = reports.filter(reports_class.report_type.in_(include))
             elif exclude:
