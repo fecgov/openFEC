@@ -29,6 +29,7 @@ class TotalsView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.totals)
     @args.register_kwargs(args.make_sort_args(default=['-cycle']))
+    @schemas.marshal_with(schemas.CommitteeTotalsPageSchema(), wrap=False)
     def get(self, committee_id, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
             self._resolve_committee_type(committee_id, kwargs),

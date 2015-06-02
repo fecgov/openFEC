@@ -40,7 +40,7 @@ class CommitteeList(Resource):
         SELECT cmte_sk
         FROM   ofec_committee_fulltext_mv
         WHERE  fulltxt @@ to_tsquery(:findme)
-        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
+        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme || ':*')) desc
     '''
 
     @args.register_kwargs(args.paging)

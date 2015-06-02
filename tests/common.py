@@ -5,6 +5,7 @@ import unittest
 import subprocess
 
 from webservices import rest
+from webservices import __API_VERSION__
 
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm-unit-test')
@@ -64,7 +65,7 @@ class ApiBaseTest(BaseTestCase):
         self.assertEquals(response.status_code, 200)
         result = json.loads(codecs.decode(response.data))
         self.assertNotEqual(result, [], "Empty response!")
-        self.assertEqual(result['api_version'], '0.2')
+        self.assertEqual(result['api_version'], __API_VERSION__)
         return result
 
     def assertResultsEqual(self, actual, expected, prefix=""):
