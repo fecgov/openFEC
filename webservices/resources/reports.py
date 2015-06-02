@@ -58,6 +58,8 @@ class ReportsView(Resource):
             reports = reports.filter(reports_class.report_year.in_(kwargs['year']))
         if kwargs['cycle']:
             reports = reports.filter(reports_class.cycle.in_(kwargs['cycle']))
+        if kwargs['beginning_image_number']:
+            reports = reports.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
 
         return reports, reports_schema
 
