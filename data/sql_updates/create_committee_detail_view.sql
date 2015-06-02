@@ -1,10 +1,10 @@
 drop view if exists ofec_committee_detail_vw;
 drop materialized view if exists ofec_committee_detail_mv_tmp;
 create materialized view ofec_committee_detail_mv_tmp as
-select distinct
+select distinct on (dcp.cmte_sk)
     row_number() over () as idx,
-    dimcmte.cmte_sk as committee_key,
-    dimcmte.cmte_id as committee_id,
+    dcp.cmte_sk as committee_key,
+    dcp.cmte_id as committee_id,
     dd.cmte_dsgn as designation,
     expand_committee_designation(dd.cmte_dsgn) as designation_full,
     dd.cmte_tp as committee_type,
@@ -68,7 +68,7 @@ select distinct
     cp_original.receipt_dt as first_file_date,
     cp_agg.cycles as cycles
 
-from dimcmte
+from dimcmteproperties dcp
     left join (
         select distinct on (cmte_sk) * from dimcmtetpdsgn
             order by cmte_sk, receipt_date desc
@@ -90,10 +90,12 @@ from dimcmte
             array_agg(distinct(rpt_yr + rpt_yr % 2))::int[] as cycles
         from (
             select cmte_sk, rpt_yr from factpacsandparties_f3x
-            union
+            union all
             select cmte_sk, rpt_yr from factpresidential_f3p
-            union
+            union all
             select cmte_sk, rpt_yr from facthousesenate_f3
+            union all
+            select cmte_sk, rpt_yr from dimcmteproperties
         ) years
         where rpt_yr >= :START_YEAR
         group by cmte_sk

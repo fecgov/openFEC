@@ -34,7 +34,7 @@ def _schema_or_ref(schema):
     return _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
 
 
-def marshal_with(schema, code=http.client.OK, description=None):
+def marshal_with(schema, code=http.client.OK, description=None, wrap=True):
     def wrapper(func):
         func.__apidoc__ = getattr(func, '__apidoc__', {})
         func.__apidoc__.setdefault('responses', {}).update({
@@ -44,10 +44,13 @@ def marshal_with(schema, code=http.client.OK, description=None):
             }
         })
 
-        @functools.wraps(func)
-        def wrapped(*args, **kwargs):
-            return schema.dump(func(*args, **kwargs)).data
-        return wrapped
+        if wrap:
+            @functools.wraps(func)
+            def wrapped(*args, **kwargs):
+                return schema.dump(func(*args, **kwargs)).data
+            return wrapped
+        return func
+
     return wrapper
 
 
@@ -165,20 +168,49 @@ register_schema(CandidateDetailPageSchema)
 register_schema(CandidateHistoryPageSchema)
 
 
-make_reports_schema = functools.partial(make_schema, options={'exclude': ('idx', 'report_key')})
+make_reports_schema = functools.partial(
+    make_schema,
+    fields={'pdf_url': ma.fields.Str()},
+    options={'exclude': ('idx', 'report_key')},
+)
+CommitteeReportsSchema = make_reports_schema(
+    models.CommitteeReportsPresidential,
+    class_name='CommitteeReportsSchema',
+    options={'exclude': [
+        each.key for each in models.CommitteeReportsPresidential.__mapper__.iterate_properties
+        if not hasattr(models.CommitteeReports, each.key)
+    ] + ['idx', 'report_key']}
+)
+
 CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
 CommitteeReportsHouseSenateSchema = make_reports_schema(models.CommitteeReportsHouseSenate)
 CommitteeReportsPacPartySchema = make_reports_schema(models.CommitteeReportsPacParty)
 
+CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 CommitteeReportsPresidentialPageSchema = make_page_schema(CommitteeReportsPresidentialSchema)
 CommitteeReportsHouseSenatePageSchema = make_page_schema(CommitteeReportsHouseSenateSchema)
 CommitteeReportsPacPartyPageSchema = make_page_schema(CommitteeReportsPacPartySchema)
 
+register_schema(CommitteeReportsSchema)
+register_schema(CommitteeReportsPageSchema)
 
+
+CommitteeTotalsSchema = make_schema(
+    models.CommitteeTotalsPresidential,
+    class_name='CommitteeTotalsSchema',
+    options={'exclude': [
+        each.key for each in models.CommitteeTotalsPresidential.__mapper__.iterate_properties
+        if not hasattr(models.CommitteeTotals, each.key)
+    ] + ['idx']}
+)
 CommitteeTotalsPresidentialSchema = make_schema(models.CommitteeTotalsPresidential)
 CommitteeTotalsHouseSenateSchema = make_schema(models.CommitteeTotalsHouseSenate)
 CommitteeTotalsPacPartySchema = make_schema(models.CommitteeTotalsPacParty)
 
+CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 CommitteeTotalsPresidentialPageSchema = make_page_schema(CommitteeTotalsPresidentialSchema)
 CommitteeTotalsHouseSenatePageSchema = make_page_schema(CommitteeTotalsHouseSenateSchema)
 CommitteeTotalsPacPartyPageSchema = make_page_schema(CommitteeTotalsPacPartySchema)
+
+register_schema(CommitteeTotalsSchema)
+register_schema(CommitteeTotalsPageSchema)

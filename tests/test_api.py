@@ -12,9 +12,9 @@ from webservices import rest
 from webservices import schemas
 from webservices.rest import api
 from webservices.rest import NameSearch
-from webservices.rest import TotalsView
-from webservices.rest import ReportsView
-from webservices.rest import CandidateList
+from webservices.resources.totals import TotalsView
+from webservices.resources.reports import ReportsView
+from webservices.resources.candidates import CandidateList
 
 
 class OverallTest(ApiBaseTest):
@@ -23,10 +23,6 @@ class OverallTest(ApiBaseTest):
         response = self._response(api.url_for(CandidateList))
         self.assertIn('api_version', response)
         self.assertIn('pagination', response)
-
-    def _results(self, qry):
-        response = self._response(qry)
-        return response['results']
 
     def test_full_text_search(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
@@ -114,6 +110,7 @@ class OverallTest(ApiBaseTest):
     def test_totals_house_senate(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
         [
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
@@ -125,6 +122,10 @@ class OverallTest(ApiBaseTest):
 
     def _check_reports(self, committee_type, factory, schema):
         committee = factories.CommitteeFactory(committee_type=committee_type)
+        factories.CommitteeHistoryFactory(
+            committee_id=committee.committee_id,
+            committee_type=committee_type,
+        )
         end_dates = [datetime.datetime(2012, 1, 1), datetime.datetime(2008, 1, 1)]
         committee_id = committee.committee_id
         [
@@ -174,6 +175,7 @@ class OverallTest(ApiBaseTest):
     def test_total_cycle(self):
         committee = factories.CommitteeFactory(committee_type='P')
         committee_id = committee.committee_id
+        history = factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='P')
         receipts = 5
         totals = factories.TotalsPresidentialFactory(cycle=2012, committee_id=committee_id, receipts=receipts)
 

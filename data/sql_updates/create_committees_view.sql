@@ -1,10 +1,10 @@
 drop view if exists ofec_committees_vw;
 drop materialized view if exists ofec_committees_mv_tmp;
 create materialized view ofec_committees_mv_tmp as
-select distinct
+select distinct on (dcp.cmte_sk)
     row_number() over () as idx,
-    dimcmte.cmte_sk as committee_key,
-    dimcmte.cmte_id as committee_id,
+    dcp.cmte_sk as committee_key,
+    dcp.cmte_id as committee_id,
     dd.cmte_dsgn as designation,
     expand_committee_designation(dd.cmte_dsgn) as designation_full,
     dd.cmte_tp as committee_type,
@@ -21,7 +21,7 @@ select distinct
     cp_most_recent.cmte_nm as name,
     candidates.candidate_ids,
     cp_agg.cycles
-from dimcmte
+from dimcmteproperties dcp
     left join (
         select distinct on (cmte_sk) * from dimcmtetpdsgn
             order by cmte_sk, receipt_date desc
@@ -43,16 +43,24 @@ from dimcmte
             array_agg(distinct(rpt_yr + rpt_yr % 2))::int[] as cycles
         from (
             select cmte_sk, rpt_yr from factpacsandparties_f3x
-            union
+            union all
             select cmte_sk, rpt_yr from factpresidential_f3p
-            union
+            union all
             select cmte_sk, rpt_yr from facthousesenate_f3
+            union all
+            select cmte_sk, rpt_yr from dimcmteproperties
         ) years
         where rpt_yr >= :START_YEAR
         group by cmte_sk
     ) cp_agg using (cmte_sk)
     left join dimparty p on cp_most_recent.cand_pty_affiliation = p.party_affiliation
-    left join (select cmte_sk, array_agg(distinct cand_id)::text[] as candidate_ids from dimlinkages dl group by cmte_sk) candidates on candidates.cmte_sk = dimcmte.cmte_sk
+    left join (
+        select
+            cmte_sk,
+            array_agg(distinct cand_id)::text[] as candidate_ids
+        from dimlinkages dl
+        group by cmte_sk
+    ) candidates on candidates.cmte_sk = dcp.cmte_sk
     -- Committee must have > 0 cycles after START_YEAR
     where array_length(cp_agg.cycles, 1) > 0
 ;
