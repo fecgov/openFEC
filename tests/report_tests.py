@@ -134,6 +134,40 @@ class TestReports(ApiBaseTest):
         results = self._results(api.url_for(ReportsView, committee_id=committee_id))
         self.assertEqual([each['coverage_end_date'] for each in results], dates_formatted[::-1])
 
+    def test_reports_for_pdf_link(self):
+        factories.ReportsPresidentialFactory(
+            report_year=2016,
+            beginning_image_number=12345678901,
+        )
+
+        results = self._results(
+            api.url_for(
+                ReportsView,
+                committee_type='presidential',
+            )
+        )
+        self.assertEqual(
+            results[0]['pdf_url'],
+            'http://docquery.fec.gov/pdf/901/12345678901/12345678901.pdf',
+        )
+
+    def test_no_pdf_link(self):
+        """
+        Old pdfs don't exist so we should not build links.
+        """
+        factories.ReportsPresidentialFactory(
+            report_year=1990,
+            beginning_image_number=56789012345,
+        )
+
+        results = self._results(
+            api.url_for(
+                ReportsView,
+                committee_type='presidential',
+            )
+        )
+        self.assertIsNone(results[0]['pdf_url'])
+
     def test_report_type_include(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
@@ -163,3 +197,4 @@ class TestReports(ApiBaseTest):
         ]
         results = self._results(api.url_for(ReportsView, committee_id=committee_id, report_type=['-M3']))
         self.assertTrue(all(each['report_type'] in ['Q2', 'TER'] for each in results))
+

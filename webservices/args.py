@@ -108,6 +108,7 @@ committee_list = {
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
     'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
+    'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 
