@@ -167,3 +167,34 @@ class TestReports(ApiBaseTest):
             )
         )
         self.assertIsNone(results[0]['pdf_url'])
+
+    def test_report_type_include(self):
+        committee = factories.CommitteeFactory(committee_type='H')
+        committee_id = committee.committee_id
+        factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='H',
+        )
+        [
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='Q2'),
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='M3'),
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='TER'),
+        ]
+        results = self._results(api.url_for(ReportsView, committee_id=committee_id, report_type=['Q2', 'M3']))
+        self.assertTrue(all(each['report_type'] in ['Q2', 'M3'] for each in results))
+
+    def test_report_type_exclude(self):
+        committee = factories.CommitteeFactory(committee_type='H')
+        committee_id = committee.committee_id
+        factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='H',
+        )
+        [
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='Q2'),
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='M3'),
+            factories.ReportsHouseSenateFactory(committee_id=committee_id, report_type='TER'),
+        ]
+        results = self._results(api.url_for(ReportsView, committee_id=committee_id, report_type=['-M3']))
+        self.assertTrue(all(each['report_type'] in ['Q2', 'TER'] for each in results))
+
