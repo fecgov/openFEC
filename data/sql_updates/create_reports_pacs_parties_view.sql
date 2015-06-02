@@ -125,3 +125,4 @@ create unique index on ofec_reports_pacs_parties_mv_tmp(idx);
 
 create index on ofec_reports_pacs_parties_mv_tmp(cycle);
 create index on ofec_reports_pacs_parties_mv_tmp(committee_id);
+create index on ofec_reports_pacs_parties_mv_tmp(report_type);

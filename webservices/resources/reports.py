@@ -24,6 +24,17 @@ reports_type_map = {
 }
 
 
+def parse_types(types):
+    include, exclude = [], []
+    for each in types:
+        target = exclude if each.startswith('-') else include
+        each = each.lstrip('-')
+        target.append(each)
+    if include and exclude:
+        include = [each for each in include if each not in exclude]
+    return include, exclude
+
+
 @spec.doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -58,6 +69,13 @@ class ReportsView(Resource):
             reports = reports.filter(reports_class.report_year.in_(kwargs['year']))
         if kwargs['cycle']:
             reports = reports.filter(reports_class.cycle.in_(kwargs['cycle']))
+
+        if kwargs['report_type']:
+            include, exclude = parse_types(kwargs['report_type'])
+            if include:
+                reports = reports.filter(reports_class.report_type.in_(include))
+            elif exclude:
+                reports = reports.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
         return reports, reports_schema
 
