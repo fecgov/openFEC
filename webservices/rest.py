@@ -16,7 +16,6 @@ from flask import Blueprint
 
 from flask.ext import restful
 import flask.ext.restful.representations.json
-import sqlalchemy as sa
 
 from webservices import args
 from webservices import docs
@@ -111,20 +110,11 @@ class NameSearch(restful.Resource):
     @args.register_kwargs(args.names)
     @schemas.marshal_with(schemas.NameSearchListSchema())
     def get(self, **kwargs):
-        vector = ' & '.join(kwargs['q'].split())
-        vector = sa.func.concat(vector, ':*')
-
-        query = models.NameSearch.query.filter(
-            models.NameSearch.name_vec.match(vector)
-        )
+        query = utils.search_text(models.NameSearch.query, models.NameSearch.name_vec, kwargs['q'])
 
         if kwargs['type']:
             column = resource_filter_map[kwargs['type']]
             query = query.filter(column != None)  # noqa
-
-        query = query.order_by(
-            sa.desc(sa.func.ts_rank_cd(models.NameSearch.name_vec, sa.func.to_tsquery(vector)))
-        )
 
         query = query.limit(20)
 
