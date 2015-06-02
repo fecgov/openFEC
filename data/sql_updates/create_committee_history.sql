@@ -7,10 +7,12 @@ with
             rpt_yr + rpt_yr % 2 as cycle
         from (
             select cmte_sk, rpt_yr from factpacsandparties_f3x
-            union
+            union all
             select cmte_sk, rpt_yr from factpresidential_f3p
-            union
+            union all
             select cmte_sk, rpt_yr from facthousesenate_f3
+            union all
+            select cmte_sk, rpt_yr from dimcmteproperties
         ) years
         where rpt_yr >= :START_YEAR
     ),
