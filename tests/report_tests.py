@@ -135,15 +135,17 @@ class TestReports(ApiBaseTest):
         self.assertEqual([each['coverage_end_date'] for each in results], dates_formatted[::-1])
 
     def test_reports_for_pdf_link(self):
+        number = 12345678901
         factories.ReportsPresidentialFactory(
             report_year=2016,
-            beginning_image_number=12345678901,
+            beginning_image_number=number,
         )
 
         results = self._results(
             api.url_for(
                 ReportsView,
                 committee_type='presidential',
+                beginning_image_number=number,
             )
         )
         self.assertEqual(
@@ -155,15 +157,17 @@ class TestReports(ApiBaseTest):
         """
         Old pdfs don't exist so we should not build links.
         """
+        number = 56789012345
         factories.ReportsPresidentialFactory(
             report_year=1990,
-            beginning_image_number=56789012345,
+            beginning_image_number=number,
         )
 
         results = self._results(
             api.url_for(
                 ReportsView,
                 committee_type='presidential',
+                beginning_image_number=number,
             )
         )
         self.assertIsNone(results[0]['pdf_url'])

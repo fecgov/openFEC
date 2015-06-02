@@ -170,10 +170,8 @@ register_schema(CandidateHistoryPageSchema)
 
 make_reports_schema = functools.partial(
     make_schema,
-    options={
-        'exclude': ('idx', 'report_key'),
-        'additional': ('pdf_url', ),
-    }
+    fields={'pdf_url': ma.fields.Str()},
+    options={'exclude': ('idx', 'report_key')},
 )
 CommitteeReportsSchema = make_reports_schema(
     models.CommitteeReportsPresidential,
