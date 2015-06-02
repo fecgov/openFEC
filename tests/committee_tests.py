@@ -45,7 +45,7 @@ class CommitteeFormatTest(ApiBaseTest):
             cmte_sk=committee.committee_key,
             fulltxt=sa.func.to_tsvector(committee.name),
         )
-        results = self._results(api.url_for(CommitteeList, q='better'))
+        results = self._results(api.url_for(CommitteeList, q='america'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['committee_id'], committee.committee_id)
         self.assertNotEqual(results[0]['committee_id'], decoy_committee.committee_id)
