@@ -18,9 +18,6 @@ from webservices.resources.candidates import CandidateView
 
 ## old, re-factored Committee tests ##
 class CommitteeFormatTest(ApiBaseTest):
-    def _results(self, qry):
-        response = self._response(qry)
-        return response['results']
 
     def test_committee_list_fields(self):
         committee = factories.CommitteeFactory(

@@ -68,6 +68,10 @@ class ApiBaseTest(BaseTestCase):
         self.assertEqual(result['api_version'], __API_VERSION__)
         return result
 
+    def _results(self, qry):
+        response = self._response(qry)
+        return response['results']
+
     def assertResultsEqual(self, actual, expected, prefix=""):
         """This method provides some quick debugging info (rather than the
         cryptic "this 500 attribute dict is different than that one"). prefix

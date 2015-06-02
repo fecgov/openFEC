@@ -11,10 +11,6 @@ from webservices.resources.reports import ReportsView
 
 class TestReports(ApiBaseTest):
 
-    def _results(self, qry):
-        response = self._response(qry)
-        return response['results']
-
     def _check_committee_ids(self, results, positives=None, negatives=None):
         ids = [each['committee_id'] for each in results]
         for positive in (positives or []):

@@ -89,10 +89,6 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertResultsEqual(result['incumbent_challenge'], candidate.incumbent_challenge)
         self.assertResultsEqual(result['candidate_status_full'], candidate.candidate_status_full)
 
-    def _results(self, qry):
-        response = self._response(qry)
-        return response['results']
-
     def test_candidates_search(self):
         principal_committee = factories.CommitteeFactory(designation='P')
         joint_committee = factories.CommitteeFactory(designation='J')
