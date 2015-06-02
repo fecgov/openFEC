@@ -30,8 +30,8 @@ class CandidateList(Resource):
     fulltext_query = '''
         SELECT cand_sk
         FROM   ofec_candidate_fulltext_mv
-        WHERE  fulltxt @@ to_tsquery(:findme)
-        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
+        WHERE  fulltxt @@ to_tsquery(:findme || ':*')
+        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme || ':*')) desc
    '''
 
     @property
@@ -41,11 +41,11 @@ class CandidateList(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args())
+    @args.register_kwargs(args.make_sort_args(default=['name']))
     @schemas.marshal_with(schemas.CandidatePageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=Candidate)
 
     def get_candidates(self, kwargs):
 
@@ -68,7 +68,7 @@ class CandidateList(Resource):
         if kwargs['cycle']:
             candidates = candidates.filter(Candidate.cycles.overlap(kwargs['cycle']))
 
-        return candidates.order_by(Candidate.name)
+        return candidates
 
 
 @spec.doc(
@@ -91,7 +91,7 @@ class CandidateSearch(CandidateList):
     @schemas.marshal_with(schemas.CandidateSearchPageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=Candidate)
 
 
 @spec.doc(
@@ -106,11 +106,11 @@ class CandidateView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args())
+    @args.register_kwargs(args.make_sort_args(default=['-expire_date']))
     @schemas.marshal_with(schemas.CandidateDetailPageSchema())
     def get(self, candidate_id=None, committee_id=None, **kwargs):
         query = self.get_candidate(kwargs, candidate_id, committee_id)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=CandidateDetail)
 
     def get_candidate(self, kwargs, candidate_id=None, committee_id=None):
         if candidate_id is not None:
@@ -130,9 +130,16 @@ class CandidateView(Resource):
         if kwargs['cycle']:
             candidates = candidates.filter(CandidateDetail.cycles.overlap(kwargs['cycle']))
 
-        return candidates.order_by(CandidateDetail.expire_date.desc())
+        return candidates
 
 
+@spec.doc(
+    tags=['candidate'],
+    path_params=[
+        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+        {'name': 'cycle', 'in': 'path', 'type': 'integer'},
+    ],
+)
 class CandidateHistoryView(Resource):
 
     @args.register_kwargs(args.paging)

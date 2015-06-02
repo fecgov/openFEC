@@ -11,16 +11,13 @@ from tests.common import ApiBaseTest
 from webservices import utils
 from webservices.rest import db
 from webservices.rest import api
-from webservices.rest import CommitteeList
-from webservices.rest import CommitteeView
-from webservices.rest import CandidateView
+from webservices.resources.committees import CommitteeList
+from webservices.resources.committees import CommitteeView
+from webservices.resources.candidates import CandidateView
 
 
 ## old, re-factored Committee tests ##
 class CommitteeFormatTest(ApiBaseTest):
-    def _results(self, qry):
-        response = self._response(qry)
-        return response['results']
 
     def test_committee_list_fields(self):
         committee = factories.CommitteeFactory(
@@ -45,7 +42,7 @@ class CommitteeFormatTest(ApiBaseTest):
             cmte_sk=committee.committee_key,
             fulltxt=sa.func.to_tsvector(committee.name),
         )
-        results = self._results(api.url_for(CommitteeList, q='tomorrow'))
+        results = self._results(api.url_for(CommitteeList, q='america'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['committee_id'], committee.committee_id)
         self.assertNotEqual(results[0]['committee_id'], decoy_committee.committee_id)

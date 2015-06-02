@@ -39,8 +39,8 @@ class CommitteeList(Resource):
     fulltext_query = '''
         SELECT cmte_sk
         FROM   ofec_committee_fulltext_mv
-        WHERE  fulltxt @@ to_tsquery(:findme)
-        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme)) desc
+        WHERE  fulltxt @@ to_tsquery(:findme || ':*')
+        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme || ':*')) desc
     '''
 
     @args.register_kwargs(args.paging)
@@ -125,19 +125,38 @@ class CommitteeView(Resource):
         return committees
 
 
+@spec.doc(
+    tags=['committee'],
+    path_params=[
+        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+        {'name': 'cycle', 'in': 'path', 'type': 'integer'},
+    ],
+)
 class CommitteeHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.make_sort_args(default=['-cycle']))
     @schemas.marshal_with(schemas.CommitteeHistoryPageSchema())
-    def get(self, committee_id, cycle=None, **kwargs):
-        query = self.get_committee(committee_id, cycle, kwargs)
+    def get(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
+        query = self.get_committee(committee_id, candidate_id, cycle, kwargs)
         return utils.fetch_page(query, kwargs)
 
-    def get_committee(self, committee_id, cycle, kwargs):
-        query = CommitteeHistory.query.filter(
-            CommitteeHistory.committee_id == committee_id
-        )
+    def get_committee(self, committee_id, candidate_id, cycle, kwargs):
+        query = CommitteeHistory.query
+
+        if committee_id:
+            query = query.filter(CommitteeHistory.committee_id == committee_id)
+
+        if candidate_id:
+            query = CommitteeHistory.query.join(
+                CandidateCommitteeLink,
+                CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+            ).filter(
+                CandidateCommitteeLink.candidate_id == candidate_id
+            )
+
         if cycle:
             query = query.filter(CommitteeHistory.cycle == cycle)
+
         return query

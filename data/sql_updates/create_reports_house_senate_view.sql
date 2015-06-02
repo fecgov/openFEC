@@ -103,3 +103,4 @@ create unique index on ofec_reports_house_senate_mv_tmp(idx);
 
 create index on ofec_reports_house_senate_mv_tmp(cycle);
 create index on ofec_reports_house_senate_mv_tmp(committee_id);
+create index on ofec_reports_house_senate_mv_tmp(report_type);

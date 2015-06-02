@@ -2,18 +2,20 @@ import datetime
 import unittest
 import functools
 
+import sqlalchemy as sa
 from marshmallow.utils import isoformat
 
 from tests import factories
 from tests.common import ApiBaseTest
 
+from webservices import rest
 from webservices import schemas
 from webservices.rest import db
 from webservices.rest import api
-from webservices.rest import CandidateList
-from webservices.rest import CandidateView
-from webservices.rest import CandidateSearch
-from webservices.rest import CandidateHistoryView
+from webservices.resources.candidates import CandidateList
+from webservices.resources.candidates import CandidateView
+from webservices.resources.candidates import CandidateSearch
+from webservices.resources.candidates import CandidateHistoryView
 
 
 fields = dict(
@@ -87,10 +89,6 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertResultsEqual(result['incumbent_challenge'], candidate.incumbent_challenge)
         self.assertResultsEqual(result['candidate_status_full'], candidate.candidate_status_full)
 
-    def _results(self, qry):
-        response = self._response(qry)
-        return response['results']
-
     def test_candidates_search(self):
         principal_committee = factories.CommitteeFactory(designation='P')
         joint_committee = factories.CommitteeFactory(designation='J')
@@ -134,6 +132,22 @@ class CandidateFormatTest(ApiBaseTest):
         response = response[0]
         self.assertIn(candidate.address_street_1, response['address_street_1'])
         self.assertIn(candidate.address_zip, response['address_zip'])
+
+    def test_fulltext_match(self):
+        danielle = factories.CandidateFactory(name='Danielle')
+        factories.CandidateSearchFactory(cand_sk=danielle.candidate_key, fulltxt=sa.func.to_tsvector('Danielle'))
+        dana = factories.CandidateFactory(name='Dana')
+        factories.CandidateSearchFactory(cand_sk=dana.candidate_key, fulltxt=sa.func.to_tsvector('Dana'))
+        rest.db.session.flush()
+        results = self._results(api.url_for(CandidateList, q='danielle'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['candidate_id'], danielle.candidate_id)
+        results = self._results(api.url_for(CandidateList, q='dan'))
+        self.assertEqual(len(results), 2)
+        self.assertEqual(
+            set(each['candidate_id'] for each in results),
+            {danielle.candidate_id, dana.candidate_id},
+        )
 
     def test_cand_filters(self):
         [
@@ -221,7 +235,12 @@ class CandidateFormatTest(ApiBaseTest):
         candidate_ids = [each.candidate_id for each in candidates]
         results = self._results(api.url_for(CandidateList, sort='candidate_status'))
         self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
+        results = self._results(api.url_for(CandidateSearch, sort='candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids[::-1])
         results = self._results(api.url_for(CandidateList, sort='-candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
+        results = self._results(api.url_for(CandidateSearch, sort='-candidate_status'))
+        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
 
     def test_candidate_multi_sort(self):
         candidates = [

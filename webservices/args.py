@@ -83,8 +83,6 @@ candidate_detail = {
 candidate_list = {
     'q': Arg(str, description='Text to search for candidate name and id.'),
     'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. The initial character indicates the office sought. (H)ouse, (S)enate, (P)resident. If a person runs for several offices, they will have separate Candidate IDs for each office."),
-    # I don't think we need this
-    # 'fec_id': Arg(str, description="Candidate's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
 }
 
@@ -120,9 +118,9 @@ committee_list = {
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
-    'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
-    # not sure how to tell swagger this is in the path
-    'committee_type': Arg(str, enum=['house-senate', 'presidential', 'pac-party'], description="What kind of record. (Based on if they file forms F3, F3P or F3X)."),
+    'cycle': Arg(int, multiple=True, default=2016, description='Two-year election cycle in which a candidate runs for office'),
+    'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
+    'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 
 

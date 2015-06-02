@@ -7,10 +7,12 @@ with
             rpt_yr + rpt_yr % 2 as cycle
         from (
             select cmte_sk, rpt_yr from factpacsandparties_f3x
-            union
+            union all
             select cmte_sk, rpt_yr from factpresidential_f3p
-            union
+            union all
             select cmte_sk, rpt_yr from facthousesenate_f3
+            union all
+            select cmte_sk, rpt_yr from dimcmteproperties
         ) years
         where rpt_yr >= :START_YEAR
     ),
@@ -46,10 +48,10 @@ select distinct on (dcp.cmte_sk, cycle)
     clean_party(p.party_affiliation_desc) as party_full,
     cycle_agg.cycles
 from dimcmteproperties dcp
-inner join dimcmtetpdsgn dd using (cmte_sk)
-left join dimparty p on dcp.cand_pty_affiliation = p.party_affiliation
-left join cycles on dcp.cmte_sk = cycles.cmte_sk and dcp.rpt_yr <= cycles.cycle
 left join cycle_agg on dcp.cmte_sk = cycle_agg.cmte_sk
+left join cycles on dcp.cmte_sk = cycles.cmte_sk and dcp.rpt_yr <= cycles.cycle
+left join dimparty p on dcp.cand_pty_affiliation = p.party_affiliation
+left join dimcmtetpdsgn dd on dcp.cmte_sk = dd.cmte_sk and extract(year from dd.receipt_date) <= cycles.cycle
 where array_length(cycle_agg.cycles, 1) > 0
 order by dcp.cmte_sk, cycle desc, dcp.rpt_yr desc, dd.receipt_date desc
 ;
