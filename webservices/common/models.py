@@ -224,7 +224,7 @@ class CommitteeReports(BaseModel):
     committee_id = db.Column(db.String(10))
     cycle = db.Column(db.Integer)
 
-    beginning_image_number = db.Column(db.Integer)
+    beginning_image_number = db.Column(db.BigInteger)
     cash_on_hand_beginning_period = db.Column(db.Integer)
     cash_on_hand_end_period = db.Column(db.Integer)
     coverage_end_date = db.Column(db.DateTime)
@@ -262,6 +262,16 @@ class CommitteeReports(BaseModel):
     total_receipts_ytd = db.Column(db.Integer)
     offsets_to_operating_expenditures_period = db.Column(db.Integer)
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
+
+    @property
+    def pdf_url(self):
+        if self.report_year is not None and self.report_year > 1994:
+            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+                str(self.beginning_image_number)[-3:],
+                self.beginning_image_number,
+            )
+        else:
+            return None
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
