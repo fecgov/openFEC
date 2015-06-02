@@ -100,7 +100,7 @@ select distinct on (dcp.cmte_sk, cycle)
     dd.filing_freq as filing_frequency,
     clean_party(p.party_affiliation_desc) as party_full,
     cycle_agg.cycles,
-    candidate_agg.candidate_ids
+    coalesce(candidate_agg.candidate_ids, '{}'::text[]) as candidate_ids
 from dimcmteproperties dcp
 left join cycle_agg on dcp.cmte_sk = cycle_agg.cmte_sk
 left join cycles on dcp.cmte_sk = cycles.cmte_sk and dcp.rpt_yr <= cycles.cycle
