@@ -48,7 +48,7 @@ class CandidateList(Resource):
             candidates = utils.search_text(
                 candidates.join(
                     models.CandidateSearch,
-                    models.Candidate.candidate_key == models.CandidateSearch.cand_sk,
+                    models.Candidate.candidate_id == models.CandidateSearch.id,
                 ),
                 models.CandidateSearch.fulltxt,
                 kwargs['q'],

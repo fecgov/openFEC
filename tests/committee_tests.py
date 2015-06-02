@@ -42,7 +42,7 @@ class CommitteeFormatTest(ApiBaseTest):
         committee = factories.CommitteeFactory(name='Americans for a Better Tomorrow, Tomorrow')
         decoy_committee = factories.CommitteeFactory()
         factories.CommitteeSearchFactory(
-            cmte_sk=committee.committee_key,
+            id=committee.committee_id,
             fulltxt=sa.func.to_tsvector(committee.name),
         )
         results = self._results(api.url_for(CommitteeList, q='america'))

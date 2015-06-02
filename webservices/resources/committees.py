@@ -57,7 +57,7 @@ class CommitteeList(Resource):
             committees = utils.search_text(
                 committees.join(
                     models.CommitteeSearch,
-                    models.Committee.committee_key == models.CommitteeSearch.cmte_sk,
+                    models.Committee.committee_id == models.CommitteeSearch.id,
                 ),
                 models.CommitteeSearch.fulltxt,
                 kwargs['q'],

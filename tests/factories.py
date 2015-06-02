@@ -11,23 +11,16 @@ class BaseFactory(SQLAlchemyModelFactory):
         sqlalchemy_session = db.session
 
 
-class NameSearchFactory(BaseFactory):
-    class Meta:
-        model = models.NameSearch
-    cand_id = factory.Sequence(lambda n: n)
-    cmte_id = factory.Sequence(lambda n: n)
-
-
 class CandidateSearchFactory(BaseFactory):
     class Meta:
         model = models.CandidateSearch
-    cand_sk = factory.Sequence(lambda n: n)
+    id = factory.Sequence(lambda n: n)
 
 
 class CommitteeSearchFactory(BaseFactory):
     class Meta:
         model = models.CommitteeSearch
-    cmte_sk = factory.Sequence(lambda n: n)
+    id = factory.Sequence(lambda n: n)
 
 
 class PairedOptions(SQLAlchemyOptions):
