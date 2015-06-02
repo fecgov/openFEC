@@ -170,18 +170,16 @@ register_schema(CandidateHistoryPageSchema)
 
 make_reports_schema = functools.partial(
     make_schema,
-    options={
-        'exclude': ('idx', 'report_key'),
-        'additional': ('pdf_url', ),
-    }
+    fields={'pdf_url': ma.fields.Str()},
+    options={'exclude': ('idx', 'report_key')},
 )
 CommitteeReportsSchema = make_reports_schema(
     models.CommitteeReportsPresidential,
     class_name='CommitteeReportsSchema',
-    options={'fields': [
+    options={'exclude': [
         each.key for each in models.CommitteeReportsPresidential.__mapper__.iterate_properties
-        if hasattr(models.CommitteeReports, each.key)
-    ]}
+        if not hasattr(models.CommitteeReports, each.key)
+    ] + ['idx', 'report_key']}
 )
 
 CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
@@ -200,10 +198,10 @@ register_schema(CommitteeReportsPageSchema)
 CommitteeTotalsSchema = make_schema(
     models.CommitteeTotalsPresidential,
     class_name='CommitteeTotalsSchema',
-    options={'fields': [
+    options={'exclude': [
         each.key for each in models.CommitteeTotalsPresidential.__mapper__.iterate_properties
-        if hasattr(models.CommitteeTotals, each.key)
-    ]}
+        if not hasattr(models.CommitteeTotals, each.key)
+    ] + ['idx']}
 )
 CommitteeTotalsPresidentialSchema = make_schema(models.CommitteeTotalsPresidential)
 CommitteeTotalsHouseSenateSchema = make_schema(models.CommitteeTotalsHouseSenate)
