@@ -24,19 +24,20 @@ spec = APISpec(
     tags=[
         {
             'name': 'candidate',
-            'description': 'placeholder',
+            'summary': 'People running for office',
+            'description': docs.CANDIDATE_TAG,
         },
         {
             'name': 'committee',
-            'description': 'placeholder',
+            'description': docs.COMMITTEE_TAG,
         },
         {
             'name': 'financial',
-            'description': 'placeholder',
+            'description': docs.FINANCIAL_TAG,
         },
         {
             'name': 'search',
-            'description': 'placeholder',
+            'description': '',
         },
     ]
 )
