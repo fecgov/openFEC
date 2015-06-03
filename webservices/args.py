@@ -69,7 +69,7 @@ names = {
 }
 
 
-candidate_detail = {
+candidate_list = {
     'cycle': Arg(int, multiple=True, description='Filter records to only those that were applicable to a given election cycle'),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
@@ -80,7 +80,7 @@ candidate_detail = {
     'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
 }
 
-candidate_list = {
+candidate_detail = {
     'q': Arg(str, description='Text to search all fields for'),
     'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
