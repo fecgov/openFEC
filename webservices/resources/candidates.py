@@ -135,6 +135,7 @@ class CandidateView(Resource):
 
 @spec.doc(
     tags=['candidate'],
+    description=docs.CANDIDATE_HISTORY,
     path_params=[
         {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
         {'name': 'cycle', 'in': 'path', 'type': 'integer'},
