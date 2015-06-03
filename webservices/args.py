@@ -78,11 +78,13 @@ candidate_list = {
     'district': Arg(str, multiple=True, description='Two digit district number'),
     'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is; C = present candidate, F = future candidate, N = Not yet a candidate, P = prior candidate'),
     'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
+    'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
 }
 
 committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
+    'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
     'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
