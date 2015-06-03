@@ -71,19 +71,18 @@ names = {
 
 candidate_detail = {
     'cycle': Arg(int, multiple=True, description='Filter records to only those that were applicable to a given election cycle'),
-    'office': Arg(str, multiple=True, description='Governmental office candidate runs for'),
+    'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': Arg(str, multiple=True, description='U.S. State candidate is registered in'),
     'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
     'year': Arg(str, dest='election_year', description='See records pertaining to a particular year.'),
     'district': Arg(str, multiple=True, description='Two digit district number'),
-    'candidate_status': Arg(str, multiple=True, description='One letter code explaining if the candidate is a present, future or past candidate'),
-    'incumbent_challenge': Arg(str, multiple=True, description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
+    'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is; C = present candidate, F = future candidate, N = Not yet a candidate, P = prior candidate'),
+    'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
 }
 
 candidate_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
-    'fec_id': Arg(str, description="Candidate's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
 }
 
