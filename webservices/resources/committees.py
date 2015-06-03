@@ -84,6 +84,7 @@ class CommitteeList(Resource):
 
 @spec.doc(
     tags=['committee'],
+    description=docs.COMMITTEE_DETAIL,
     path_params=[
         {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
         {'name': 'committee_id', 'in': 'path', 'type': 'string'},
@@ -125,6 +126,7 @@ class CommitteeView(Resource):
 
 @spec.doc(
     tags=['committee'],
+    description=docs.COMMITTEE_HISTORY,
     path_params=[
         {'name': 'committee_id', 'in': 'path', 'type': 'string'},
         {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
