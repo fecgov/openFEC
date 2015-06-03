@@ -185,6 +185,15 @@ def resolve(key, docs, default=None):
     return default
 
 
+API_KEY_PARAM = {
+    'in': 'query',
+    'type': 'string',
+    'required': True,
+    'name': 'api_key',
+    'description': docs.API_KEY_DESCRIPTION,
+}
+
+
 def register_resource(resource, blueprint=None):
     key = resource.__name__.lower()
     if blueprint:
@@ -209,6 +218,8 @@ def register_resource(resource, blueprint=None):
                 'description': resolve('description', docs, None),
                 'parameters': resolve('parameters', docs, []) + path_params,
             }
+            if os.getenv('PRODUCTION'):
+                operations[method]['parameters'].insert(0, API_KEY_PARAM)
         spec.spec.add_path(path=path, operations=operations, view=view)
 
 
