@@ -10,27 +10,20 @@ class BaseModel(db.Model):
     idx = db.Column(db.Integer, primary_key=True)
 
 
-class NameSearch(BaseModel):
-    __tablename__ = 'ofec_candidate_committee_fulltext_mv'
-
-    cand_id = db.Column(db.Integer, nullable=True)
-    cmte_id = db.Column(db.Integer, nullable=True)
-    name = db.Column(db.String)
-    office_sought = db.Column(db.String)
-    name_vec = db.Column(TSVECTOR)
-
-
 class CandidateSearch(BaseModel):
     __tablename__ = 'ofec_candidate_fulltext_mv'
 
-    cand_sk = db.Column(db.Integer)
+    id = db.Column(db.String)
+    name = db.Column(db.String)
+    office_sought = db.Column(db.String)
     fulltxt = db.Column(TSVECTOR)
 
 
 class CommitteeSearch(BaseModel):
     __tablename__ = 'ofec_committee_fulltext_mv'
 
-    cmte_sk = db.Column(db.Integer)
+    id = db.Column(db.String)
+    name = db.Column(db.String)
     fulltxt = db.Column(TSVECTOR)
 
 

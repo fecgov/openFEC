@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from webservices import paging
 from webservices import sorting
 
@@ -13,3 +15,18 @@ def extend(*dicts):
     for each in dicts:
         ret.update(each)
     return ret
+
+
+def search_text(query, column, text):
+    vector = ' & '.join(text.split())
+    vector = sa.func.concat(vector, ':*')
+    return query.filter(
+        column.match(vector)
+    ).order_by(
+        sa.desc(
+            sa.func.ts_rank_cd(
+                column,
+                sa.func.to_tsquery(vector)
+            )
+        )
+    )

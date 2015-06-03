@@ -16,7 +16,6 @@ from flask import Blueprint
 
 from flask.ext import restful
 import flask.ext.restful.representations.json
-import sqlalchemy as sa
 
 from webservices import args
 from webservices import docs
@@ -93,42 +92,42 @@ def after_request(response):
     return response
 
 
-resource_filter_map = {
-    'candidate': models.NameSearch.cand_id,
-    'committee': models.NameSearch.cmte_id,
-}
+def search_typeahead_text(model, text):
+    query = utils.search_text(model.query, model.fulltxt, text)
+    query = query.limit(20)
+    return {'results': query.all()}
+
 
 @spec.doc(
     tags=['search'],
     description=docs.NAME_SEARCH,
 )
-class NameSearch(restful.Resource):
+class CandidateNameSearch(restful.Resource):
     """
     A quick name search (candidate or committee) optimized for response time
     for typeahead
     """
 
     @args.register_kwargs(args.names)
-    @schemas.marshal_with(schemas.NameSearchListSchema())
+    @schemas.marshal_with(schemas.CandidateSearchListSchema())
     def get(self, **kwargs):
-        vector = ' & '.join(kwargs['q'].split())
-        vector = sa.func.concat(vector, ':*')
+        return search_typeahead_text(models.CandidateSearch, kwargs['q'])
 
-        query = models.NameSearch.query.filter(
-            models.NameSearch.name_vec.match(vector)
-        )
 
-        if kwargs['type']:
-            column = resource_filter_map[kwargs['type']]
-            query = query.filter(column != None)  # noqa
+@spec.doc(
+    tags=['search'],
+    description=docs.NAME_SEARCH,
+)
+class CommitteeNameSearch(restful.Resource):
+    """
+    A quick name search (candidate or committee) optimized for response time
+    for typeahead
+    """
 
-        query = query.order_by(
-            sa.desc(sa.func.ts_rank_cd(models.NameSearch.name_vec, sa.func.to_tsquery(vector)))
-        )
-
-        query = query.limit(20)
-
-        return {'results': query.all()}
+    @args.register_kwargs(args.names)
+    @schemas.marshal_with(schemas.CommitteeSearchListSchema())
+    def get(self, **kwargs):
+        return search_typeahead_text(models.CommitteeSearch, kwargs['q'])
 
 
 class Help(restful.Resource):
@@ -166,7 +165,8 @@ api.add_resource(
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
-api.add_resource(NameSearch, '/names')
+api.add_resource(CandidateNameSearch, '/names/candidates')
+api.add_resource(CommitteeNameSearch, '/names/committees')
 
 
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
@@ -212,7 +212,8 @@ def register_resource(resource, blueprint=None):
         spec.spec.add_path(path=path, operations=operations, view=view)
 
 
-register_resource(NameSearch, blueprint='v1')
+register_resource(CandidateNameSearch, blueprint='v1')
+register_resource(CommitteeNameSearch, blueprint='v1')
 register_resource(candidates.CandidateView, blueprint='v1')
 register_resource(candidates.CandidateList, blueprint='v1')
 register_resource(candidates.CandidateSearch, blueprint='v1')

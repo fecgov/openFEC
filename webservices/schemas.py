@@ -104,23 +104,39 @@ class ApiSchema(ma.Schema):
         return ret
 
 
-class NameSearchSchema(ma.Schema):
-    candidate_id = ma.fields.String(attribute='cand_id')
-    committee_id = ma.fields.String(attribute='cmte_id')
+class BaseSearchSchema(ma.Schema):
+    id = ma.fields.String()
     name = ma.fields.String()
+
+
+class CandidateSearchSchema(BaseSearchSchema):
     office_sought = ma.fields.String()
 
 
-class NameSearchListSchema(ApiSchema):
+class CommitteeSearchSchema(BaseSearchSchema):
+    pass
+
+
+class CandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
-        NameSearchSchema,
-        ref='#/definitions/NameSearch',
+        CandidateSearchSchema,
+        ref='#/definitions/CandidateSearch',
         many=True,
     )
 
 
-register_schema(NameSearchSchema)
-register_schema(NameSearchListSchema)
+class CommitteeSearchListSchema(ApiSchema):
+    results = ma.fields.Nested(
+        CandidateSearchSchema,
+        ref='#/definitions/CommtteeSearch',
+        many=True,
+    )
+
+
+register_schema(CandidateSearchSchema)
+register_schema(CandidateSearchListSchema)
+register_schema(CommitteeSearchSchema)
+register_schema(CommitteeSearchListSchema)
 
 
 make_committee_schema = functools.partial(make_schema, options={'exclude': ('idx', 'committee_key')})
