@@ -80,13 +80,19 @@ candidate_list = {
     'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
 }
 
-candidate_detail = {
+
+committee = {
+    'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
+    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. The initial character indicates the office sought. (H)ouse, (S)enate, (P)resident. If a person runs for several offices, they will have separate Candidate IDs for each office."),
+}
+
+committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
-}
-
-committee = {
+    'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
+    'name': Arg(str, description="Committee's name (full or partial)"),
+    'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A 2-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
@@ -104,15 +110,6 @@ committee = {
             S = Senate, U = Single Candidate Independent Expenditure,  V = PAC with Non-Contribution Account - Nonqualified, \
             W = PAC with Non-Contribution Account - Qualified, X = Party - Nonqualified, Y = Party - Qualified \
             Z = National Party Nonfederal Account'),
-}
-
-committee_list = {
-    'q': Arg(str, description='Text to search all fields for'),
-    'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
-    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. The initial character indicates the office sought. (H)ouse, (S)enate, (P)resident. If a person runs for several offices, they will have separate Candidate IDs for each office."),
-    'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
-    'name': Arg(str, description="Committee's name (full or partial)"),
-    'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
 }
 
 
