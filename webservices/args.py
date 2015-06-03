@@ -80,12 +80,6 @@ candidate_list = {
     'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
 }
 
-
-committee = {
-    'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
-    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. The initial character indicates the office sought. (H)ouse, (S)enate, (P)resident. If a person runs for several offices, they will have separate Candidate IDs for each office."),
-}
-
 committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
