@@ -11,12 +11,26 @@ collects. Each endpoint focuses on a different aspect of disclosure.
 Information can tied to the underlying forms by file ID and image ID.
 '''
 
-NAME_SEARCH = '''
-Search for candidates or committees by name.
+CANDIDATE_TAG = '''
+Candidate endpoints give you access to information about the people running for office.
+The information is organized by candidate_id. If you are not familiar with canidate_ids
+using  `/candidates/search` will help you locate a particular candidate.
+
+Officially, a candidate is an individual seeking nomination for election to a federal
+office. Someone becomes a candidate when he or she (or agents working on his or her behalf)
+raises contributions or makes expenditures that exceed $5,000.
 '''
 
+NAME_SEARCH = '''
+Search for candidates or committees by name. If you are looking for information on a
+particular person or group, using a name to find the `candidate_id` or `committee_id` on
+this endpoint can be a helpful first step.
+'''
+
+# I am not sure this is being used
 CANDIDATE_LIST = '''
-Fetch basic information about candidates.
+You can fetch basic information about candidates and use parameters to filter for the
+candidates you are looking for.
 
 Each result reflects a unique FEC candidate ID. That ID is unique to the candidate for a
 particular office sought. So, if a candidate runs for the same office over time, that id
@@ -28,16 +42,32 @@ The candidate endpoint uses data from FEC forms 1 and 2 with additional forms to
 context.
 '''
 
-CANDIDATE_SEARCH = '''
-Fetch basic information about a condidate, including the candidate's principal committees.
+CANDIDATE_HISTORY = '''
+Find out a candidate's characteristics over time. This can be particularly useful if the
+candidate runs for office in different districts over time and finding out when a candidate
+first ran.
 
-Identical to `/v1/candidates`, modulo the addition of nested principal committees.
+This information is organized by `candidate_id` so this will not help you find a candidate
+that ran for different offices over time, since he or she will get a new id for each office.
+'''
+
+CANDIDATE_SEARCH = '''
+Fetch basic information about candidates and their principal committees.
+
+Each result reflects a unique FEC candidate ID. That ID is unique to the candidate for a
+particular office sought. So, if a candidate runs for the same office over time, that id
+will stay the same. If the same person runs for another office, for example, a House
+candidate runs for a Senate office, that candidate will get an additional id that will be
+unique to him or her for that office.
+
+The candidate endpoint uses data from FEC forms 1 and 2 with additional forms to provide
+context.
 '''
 
 CANDIDATE_DETAIL = '''
-Fetch detailed information about a candidate.
+This endpoint is useful for finding detailed information about a particular candidate. Use the
+`candidate_id` to find the most recent information about the candidate.
 
-For further description, see `/v1/candidates`.
 '''
 
 COMMITTEE_LIST = '''
