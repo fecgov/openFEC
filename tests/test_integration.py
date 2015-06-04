@@ -83,7 +83,6 @@ class TestViews(common.IntegrationTestCase):
             models.CommitteeDetail.query.count(),
             models.CommitteeHistory.query.distinct(models.CommitteeHistory.committee_id).count(),
             models.CommitteeSearch.query.count(),
-            models.NameSearch.query.filter(models.NameSearch.cmte_id != None).count(),
         ]
         assert len(set(counts)) == 1
 
@@ -93,7 +92,6 @@ class TestViews(common.IntegrationTestCase):
             models.CandidateDetail.query.count(),
             models.CandidateHistory.query.distinct(models.CandidateHistory.candidate_id).count(),
             models.CandidateSearch.query.count(),
-            models.NameSearch.query.filter(models.NameSearch.cand_id != None).count(),
         ]
         assert len(set(counts)) == 1
 
