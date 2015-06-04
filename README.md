@@ -68,11 +68,28 @@ The site can be found at [http://localhost:3000](http://localhost:3000) (or [htt
 
 ### Deployment
 ##### Likely only useful for 18Fers
-If you want to deploy to one of our Cloud Foundry instances, use `deploy.sh`. It takes one argument, the Cloud Foundry space. Be sure to be in the root directory of the codebase, and you must already be logged in to CF with your user account.
+To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
+Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
 
-The script will automatically target the correct manifest file for the environment/space you specify, and it will also deploy the web app at the same time as the API.
+    $ invoke deploy --space dev
 
-    $ ./deploy.sh [dev|stage|prod]
+The `deploy` task will use the `FEC_CF_USERNAME` and `FEC_CF_PASSWORD` environment variables to log in.
+If these variables are not provided, you will be prompted for your Cloud Foundry credentials.
+
+Credentials for Cloud Foundry applications are managed using user-provided services labeled as
+"fec-creds-prod", "fec-creds-stage", and "fec-creds-dev". Services are used to share credentials across
+blue and green versions of blue-green deploys, and between the API and the webapp. To set up a service:
+
+    $ cf target -s dev
+    $ cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
+
+To stand up a user-provided credential service that supports both the API and the webapp, ensure that
+the following keys are set:
+
+* SQLA_CONN
+* FEC_WEB_USERNAME
+* FEC_WEB_PASSWORD
+* NEW_RELIC_LICENSE_KEY
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
