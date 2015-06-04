@@ -156,3 +156,6 @@ their elections.
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at http://api.data.gov/signup.
 '''
+SEARCH_TAG = '''
+Search for candidates or committees by name.
+'''

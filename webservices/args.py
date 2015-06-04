@@ -48,7 +48,7 @@ paging = {
 
 def make_sort_args(default=None):
     return {
-        'sort': Arg(str, multiple=True, default=default),
+        'sort': Arg(str, multiple=True, description='Provide a field to sort by. Use - for descending order.', default=default),
     }
 
 
@@ -75,7 +75,7 @@ candidate_detail = {
 
 candidate_list = {
     'q': Arg(str, description='Text to search all fields for'),
-    'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
+    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office."),
     'name': Arg(str, description="Candidate's name (full or partial)"),
 }
 
@@ -102,7 +102,7 @@ committee = {
 committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
-    'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
+    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office."),
     'name': Arg(str, description="Candidate's name (full or partial)"),
     'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
     'name': Arg(str, description="Committee's name (full or partial)"),

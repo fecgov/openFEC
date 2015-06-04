@@ -24,7 +24,6 @@ spec = APISpec(
     tags=[
         {
             'name': 'candidate',
-            'summary': 'People running for office',
             'description': docs.CANDIDATE_TAG,
         },
         {
@@ -37,7 +36,7 @@ spec = APISpec(
         },
         {
             'name': 'search',
-            'description': '',
+            'description': docs.SEARCH_TAG,
         },
     ]
 )
