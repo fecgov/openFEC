@@ -10,6 +10,7 @@ applications:
   buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
   host: fec-stage-api
   services:
+    # Must provide SQLA_CONN, NEW_RELIC_LICENSE_KEY
     - fec-creds-stage
   env:
     NEW_RELIC_APP_NAME: OpenFEC API (staging)

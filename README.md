@@ -82,6 +82,14 @@ blue and green versions of blue-green deploys, and between the API and the webap
     $ cf target -s dev
     $ cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
 
+To stand up a user-provided credential service that supports both the API and the webapp, ensure that
+the following keys are set:
+
+* SQLA_CONN
+* FEC_WEB_USERNAME
+* FEC_WEB_PASSWORD
+* NEW_RELIC_LICENSE_KEY
+
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
     $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
