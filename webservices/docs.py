@@ -152,3 +152,7 @@ the next year, if the current is an odd-numbered year.
 For presidential and senatorial candidates, there are multiple 2-year cycles in-between
 their elections.
 '''
+
+API_KEY_DESCRIPTION = '''
+API key for https://api.data.gov. Get one at http://api.data.gov/signup.
+'''
