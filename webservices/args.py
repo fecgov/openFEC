@@ -48,7 +48,7 @@ paging = {
 
 def make_sort_args(default=None):
     return {
-        'sort': Arg(str, multiple=True, default=default, description='Provide a field to sort by. Use - for descending.'),
+        'sort': Arg(str, multiple=True, default=default),
     }
 
 
@@ -62,7 +62,7 @@ names = {
 }
 
 
-candidate_list = {
+candidate_detail = {
     'cycle': Arg(int, multiple=True, description='Filter records to only those that were applicable to a given election cycle'),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
@@ -71,17 +71,15 @@ candidate_list = {
     'district': Arg(str, multiple=True, description='Two digit district number'),
     'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is; C = present candidate, F = future candidate, N = Not yet a candidate, P = prior candidate'),
     'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
-    'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
 }
 
-committee_list = {
+candidate_list = {
     'q': Arg(str, description='Text to search all fields for'),
     'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
-    'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
     'name': Arg(str, description="Candidate's name (full or partial)"),
-    'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
-    'name': Arg(str, description="Committee's name (full or partial)"),
-    'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
+}
+
+committee = {
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A 2-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
@@ -101,10 +99,21 @@ committee_list = {
             Z = National Party Nonfederal Account'),
 }
 
+committee_list = {
+    'q': Arg(str, description='Text to search all fields for'),
+    'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
+    'candidate_id': Arg(str, multiple=True, description="Candidate's FEC ID"),
+    'name': Arg(str, description="Candidate's name (full or partial)"),
+    'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
+    'name': Arg(str, description="Committee's name (full or partial)"),
+    'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
+
+}
+
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
-    'cycle': Arg(int, multiple=True, default=2016, description='Two-year election cycle in which a candidate runs for office'),
+    'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
     'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
