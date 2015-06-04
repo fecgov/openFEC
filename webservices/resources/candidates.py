@@ -6,8 +6,8 @@ from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices.common import models
 from webservices.common.util import filter_query
-from webservices.common.models import db, Candidate, CandidateDetail, CandidateHistory, CandidateCommitteeLink
 
 
 filter_fields = {
@@ -27,16 +27,9 @@ filter_fields = {
 )
 class CandidateList(Resource):
 
-    fulltext_query = '''
-        SELECT cand_sk
-        FROM   ofec_candidate_fulltext_mv
-        WHERE  fulltxt @@ to_tsquery(:findme || ':*')
-        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme || ':*')) desc
-   '''
-
     @property
     def query(self):
-        return Candidate.query
+        return models.Candidate.query
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
@@ -44,28 +37,30 @@ class CandidateList(Resource):
     @schemas.marshal_with(schemas.CandidatePageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs, model=Candidate)
+        return utils.fetch_page(query, kwargs, model=models.Candidate)
 
     def get_candidates(self, kwargs):
 
         candidates = self.query
 
         if kwargs.get('q'):
-            findme = ' & '.join(kwargs['q'].split())
-            candidates = candidates.filter(
-                Candidate.candidate_key.in_(
-                    db.session.query('cand_sk').from_statement(sa.text(self.fulltext_query)).params(findme=findme)
-                )
+            candidates = utils.search_text(
+                candidates.join(
+                    models.CandidateSearch,
+                    models.Candidate.candidate_id == models.CandidateSearch.id,
+                ),
+                models.CandidateSearch.fulltxt,
+                kwargs['q'],
             )
 
-        candidates = filter_query(Candidate, candidates, filter_fields, kwargs)
+        candidates = filter_query(models.Candidate, candidates, filter_fields, kwargs)
 
         if kwargs.get('name'):
-            candidates = candidates.filter(Candidate.name.ilike('%{}%'.format(kwargs['name'])))
+            candidates = candidates.filter(models.Candidate.name.ilike('%{}%'.format(kwargs['name'])))
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs['cycle']:
-            candidates = candidates.filter(Candidate.cycles.overlap(kwargs['cycle']))
+            candidates = candidates.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
 
         return candidates
 
@@ -79,8 +74,8 @@ class CandidateSearch(CandidateList):
     @property
     def query(self):
         # Eagerly load principal committees to avoid extra queries
-        return Candidate.query.options(
-            sa.orm.subqueryload(Candidate.principal_committees)
+        return models.Candidate.query.options(
+            sa.orm.subqueryload(models.Candidate.principal_committees)
         )
 
     @args.register_kwargs(args.paging)
@@ -89,7 +84,7 @@ class CandidateSearch(CandidateList):
     @schemas.marshal_with(schemas.CandidateSearchPageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs, model=Candidate)
+        return utils.fetch_page(query, kwargs, model=models.Candidate)
 
 
 @spec.doc(
@@ -107,25 +102,25 @@ class CandidateView(Resource):
     @schemas.marshal_with(schemas.CandidateDetailPageSchema())
     def get(self, candidate_id=None, committee_id=None, **kwargs):
         query = self.get_candidate(kwargs, candidate_id, committee_id)
-        return utils.fetch_page(query, kwargs, model=CandidateDetail)
+        return utils.fetch_page(query, kwargs, model=models.CandidateDetail)
 
     def get_candidate(self, kwargs, candidate_id=None, committee_id=None):
         if candidate_id is not None:
-            candidates = CandidateDetail.query
+            candidates = models.CandidateDetail.query
             candidates = candidates.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
-            candidates = CandidateDetail.query.join(
-                CandidateCommitteeLink
+            candidates = models.CandidateDetail.query.join(
+                models.CandidateCommitteeLink
             ).filter(
-                CandidateCommitteeLink.committee_id == committee_id
+                models.CandidateCommitteeLink.committee_id == committee_id
             )
 
-        candidates = filter_query(CandidateDetail, candidates, filter_fields, kwargs)
+        candidates = filter_query(models.CandidateDetail, candidates, filter_fields, kwargs)
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs['cycle']:
-            candidates = candidates.filter(CandidateDetail.cycles.overlap(kwargs['cycle']))
+            candidates = candidates.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
 
         return candidates
 
@@ -148,7 +143,7 @@ class CandidateHistoryView(Resource):
         return utils.fetch_page(query, kwargs)
 
     def get_candidate(self, candidate_id, cycle, kwargs):
-        query = CandidateHistory.query.filter(CandidateHistory.candidate_id == candidate_id)
+        query = models.CandidateHistory.query.filter(models.CandidateHistory.candidate_id == candidate_id)
         if cycle:
-            query = query.filter(CandidateHistory.two_year_period == cycle)
+            query = query.filter(models.CandidateHistory.two_year_period == cycle)
         return query

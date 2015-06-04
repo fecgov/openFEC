@@ -11,7 +11,8 @@ from tests.common import ApiBaseTest
 from webservices import rest
 from webservices import schemas
 from webservices.rest import api
-from webservices.rest import NameSearch
+from webservices.rest import CandidateNameSearch
+from webservices.rest import CommitteeNameSearch
 from webservices.resources.totals import TotalsView
 from webservices.resources.reports import ReportsView
 from webservices.resources.candidates import CandidateList
@@ -27,7 +28,7 @@ class OverallTest(ApiBaseTest):
     def test_full_text_search(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
         factories.CandidateSearchFactory(
-            cand_sk=candidate.candidate_key,
+            id=candidate.candidate_id,
             fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
         rest.db.session.flush()
@@ -38,7 +39,7 @@ class OverallTest(ApiBaseTest):
     def test_full_text_search_with_whitespace(self):
         candidate = factories.CandidateFactory(name='Josiah Bartlet')
         factories.CandidateSearchFactory(
-            cand_sk=candidate.candidate_key,
+            id=candidate.candidate_id,
             fulltxt=sa.func.to_tsvector('Josiah Bartlet'),
         )
         rest.db.session.flush()
@@ -183,62 +184,34 @@ class OverallTest(ApiBaseTest):
         self.assertEqual(results[0]['receipts'], totals.receipts)
 
     # Typeahead name search
-    def test_typeahead_name_search(self):
+    def test_typeahead_candidate_search(self):
         [
-            factories.NameSearchFactory(
+            factories.CandidateSearchFactory(
                 name='Bartlet {0}'.format(idx),
-                name_vec=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
+                fulltxt=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
             )
             for idx in range(30)
         ]
         rest.db.session.flush()
-        results = self._results(api.url_for(NameSearch, q='bartlet'))
+        results = self._results(api.url_for(CandidateNameSearch, q='bartlet'))
         self.assertEqual(len(results), 20)
-        cand_ids = [r['candidate_id'] for r in results if r['candidate_id']]
-        self.assertEqual(len(cand_ids), len(set(cand_ids)))
+        ids = [r['id'] for r in results if r['id']]
+        self.assertEqual(len(ids), len(set(ids)))
         for each in results:
             self.assertIn('bartlet', each['name'].lower())
 
-    def test_typeahead_search_by_resource_bad_resource(self):
-        res = self.app.get(api.url_for(NameSearch, q='bartlet', type='twizzler'))
-        self.assertEqual(res.status_code, 400)
-
-    def test_typeahead_search_by_resource(self):
-        # Create Bartlet candidate records
+    def test_typeahead_committee_search(self):
         [
-            factories.NameSearchFactory(
-                name='Jed Bartlet {0}'.format(idx),
-                name_vec=sa.func.to_tsvector('Jed Bartlet {0}'.format(idx)),
-                cmte_id=None,
-            )
-            for idx in range(5)
-        ]
-        # Create Bartlet committee records
-        [
-            factories.NameSearchFactory(
+            factories.CommitteeSearchFactory(
                 name='Bartlet {0}'.format(idx),
-                name_vec=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
-                cand_id=None,
+                fulltxt=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
             )
-            for idx in range(5)
+            for idx in range(30)
         ]
-        # Create decoy Ritchie records
-        [
-            factories.NameSearchFactory(
-                name='Ritchie {0}'.format(idx),
-                name_vec=sa.func.to_tsvector('Friends of Ritchie {0}'.format(idx)),
-            )
-            for idx in range(5)
-        ]
-
-        res = self._results(api.url_for(NameSearch, q='bartlet', type='candidate'))
-        self.assertEqual(len(res), 5)
-        self.assertTrue(all('bartlet' in each['name'].lower() for each in res))
-        self.assertTrue(all(each['candidate_id'] is not None for each in res))
-        self.assertTrue(all(each['committee_id'] is None for each in res))
-
-        res = self._results(api.url_for(NameSearch, q='bartlet', type='committee'))
-        self.assertEqual(len(res), 5)
-        self.assertTrue(all('bartlet' in each['name'].lower() for each in res))
-        self.assertTrue(all(each['committee_id'] is not None for each in res))
-        self.assertTrue(all(each['candidate_id'] is None for each in res))
+        rest.db.session.flush()
+        results = self._results(api.url_for(CommitteeNameSearch, q='bartlet'))
+        self.assertEqual(len(results), 20)
+        ids = [r['id'] for r in results if r['id']]
+        self.assertEqual(len(ids), len(set(ids)))
+        for each in results:
+            self.assertIn('bartlet', each['name'].lower())

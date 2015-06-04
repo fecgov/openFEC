@@ -135,9 +135,9 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_fulltext_match(self):
         danielle = factories.CandidateFactory(name='Danielle')
-        factories.CandidateSearchFactory(cand_sk=danielle.candidate_key, fulltxt=sa.func.to_tsvector('Danielle'))
+        factories.CandidateSearchFactory(id=danielle.candidate_id, fulltxt=sa.func.to_tsvector('Danielle'))
         dana = factories.CandidateFactory(name='Dana')
-        factories.CandidateSearchFactory(cand_sk=dana.candidate_key, fulltxt=sa.func.to_tsvector('Dana'))
+        factories.CandidateSearchFactory(id=dana.candidate_id, fulltxt=sa.func.to_tsvector('Dana'))
         rest.db.session.flush()
         results = self._results(api.url_for(CandidateList, q='danielle'))
         self.assertEqual(len(results), 1)
