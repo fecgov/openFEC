@@ -81,8 +81,8 @@ class CommitteeList(Resource):
     tags=['committee'],
     description=docs.COMMITTEE_DETAIL,
     path_params=[
-        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
-        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+        {'name': 'candidate_id','description': 'A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office.', 'in': 'path', 'type': 'string'},
+        {'name': 'committee_id', 'in': 'path', 'description': 'A unique identifier assigned to each committee or filer registered with the FEC.', 'type': 'string'},
     ],
 )
 class CommitteeView(Resource):
@@ -124,8 +124,8 @@ class CommitteeView(Resource):
     tags=['committee'],
     description=docs.COMMITTEE_HISTORY,
     path_params=[
-        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
-        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
+        {'name': 'committee_id','description': 'A unique identifier assigned to each committee or filer registered with the FEC.', 'in': 'path', 'type': 'string'},
+        {'name': 'candidate_id','description': 'A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office.', 'in': 'path', 'type': 'string'},
         {'name': 'cycle', 'in': 'path', 'type': 'integer'},
     ],
 )
