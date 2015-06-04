@@ -115,3 +115,7 @@ election cycle period.
 
 For further description, see `/v1/committee/{committee_id}/reports`.
 '''
+
+API_KEY_DESCRIPTION = '''
+API key for https://api.data.gov. Get one at http://api.data.gov/signup.
+'''

@@ -1,5 +1,4 @@
-from sqlalchemy import extract
-from sqlalchemy.sql import text, or_, and_
+import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -7,8 +6,8 @@ from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices.common import models
 from webservices.common.util import filter_query
-from webservices.common.models import db, Committee, CandidateCommitteeLink, CommitteeDetail, CommitteeHistory
 
 
 list_filter_fields = {'committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type'}
@@ -17,13 +16,13 @@ detail_filter_fields = {'designation', 'organization_type', 'committee_type'}
 
 def filter_year(model, query, years):
     return query.filter(
-        or_(*[
-            and_(
-                or_(
-                    extract('year', model.last_file_date) >= year,
+        sa.or_(*[
+            sa.and_(
+                sa.or_(
+                    sa.extract('year', model.last_file_date) >= year,
                     model.last_file_date == None,
                 ),
-                extract('year', model.first_file_date) <= year,
+                sa.extract('year', model.first_file_date) <= year,
             )
             for year in years
         ])
@@ -36,13 +35,6 @@ def filter_year(model, query, years):
 )
 class CommitteeList(Resource):
 
-    fulltext_query = '''
-        SELECT cmte_sk
-        FROM   ofec_committee_fulltext_mv
-        WHERE  fulltxt @@ to_tsquery(:findme || ':*')
-        ORDER BY ts_rank_cd(fulltxt, to_tsquery(:findme || ':*')) desc
-    '''
-
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.committee)
     @args.register_kwargs(args.committee_list)
@@ -54,31 +46,33 @@ class CommitteeList(Resource):
 
     def get_committees(self, kwargs):
 
-        committees = Committee.query
+        committees = models.Committee.query
 
         if kwargs['candidate_id']:
             committees = committees.filter(
-                Committee.candidate_ids.overlap(kwargs['candidate_id'])
+                models.Committee.candidate_ids.overlap(kwargs['candidate_id'])
             )
 
         if kwargs.get('q'):
-            findme = ' & '.join(kwargs['q'].split())
-            committees = committees.filter(
-                Committee.committee_key.in_(
-                    db.session.query('cmte_sk').from_statement(text(self.fulltext_query)).params(findme=findme)
-                )
+            committees = utils.search_text(
+                committees.join(
+                    models.CommitteeSearch,
+                    models.Committee.committee_id == models.CommitteeSearch.id,
+                ),
+                models.CommitteeSearch.fulltxt,
+                kwargs['q'],
             )
 
         if kwargs.get('name'):
-            committees = committees.filter(Committee.name.ilike('%{}%'.format(kwargs['name'])))
+            committees = committees.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
 
-        committees = filter_query(Committee, committees, list_filter_fields, kwargs)
+        committees = filter_query(models.Committee, committees, list_filter_fields, kwargs)
 
         if kwargs['year']:
-            committees = filter_year(Committee, committees, kwargs['year'])
+            committees = filter_year(models.Committee, committees, kwargs['year'])
 
         if kwargs['cycle']:
-            committees = committees.filter(Committee.cycles.overlap(kwargs['cycle']))
+            committees = committees.filter(models.Committee.cycles.overlap(kwargs['cycle']))
 
         return committees
 
@@ -102,25 +96,25 @@ class CommitteeView(Resource):
 
     def get_committee(self, kwargs, committee_id, candidate_id):
 
-        committees = CommitteeDetail.query
+        committees = models.CommitteeDetail.query
 
         if committee_id is not None:
             committees = committees.filter_by(committee_id=committee_id)
 
         if candidate_id is not None:
-            committees = CommitteeDetail.query.join(
-                CandidateCommitteeLink
+            committees = models.CommitteeDetail.query.join(
+                models.CandidateCommitteeLink
             ).filter(
-                CandidateCommitteeLink.candidate_id == candidate_id
+                models.CandidateCommitteeLink.candidate_id == candidate_id
             )
 
-        committees = filter_query(CommitteeDetail, committees, detail_filter_fields, kwargs)
+        committees = filter_query(models.CommitteeDetail, committees, detail_filter_fields, kwargs)
 
         if kwargs['year']:
-            committees = filter_year(CommitteeDetail, committees, kwargs['year'])
+            committees = filter_year(models.CommitteeDetail, committees, kwargs['year'])
 
         if kwargs['cycle']:
-            committees = committees.filter(CommitteeDetail.cycles.overlap(kwargs['cycle']))
+            committees = committees.filter(models.CommitteeDetail.cycles.overlap(kwargs['cycle']))
 
         return committees
 
@@ -143,20 +137,20 @@ class CommitteeHistoryView(Resource):
         return utils.fetch_page(query, kwargs)
 
     def get_committee(self, committee_id, candidate_id, cycle, kwargs):
-        query = CommitteeHistory.query
+        query = models.CommitteeHistory.query
 
         if committee_id:
-            query = query.filter(CommitteeHistory.committee_id == committee_id)
+            query = query.filter(models.CommitteeHistory.committee_id == committee_id)
 
         if candidate_id:
-            query = CommitteeHistory.query.join(
-                CandidateCommitteeLink,
-                CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+            query = models.CommitteeHistory.query.join(
+                models.CandidateCommitteeLink,
+                models.CandidateCommitteeLink.committee_key == models.CommitteeHistory.committee_key,
             ).filter(
-                CandidateCommitteeLink.candidate_id == candidate_id
+                models.CandidateCommitteeLink.candidate_id == candidate_id
             )
 
         if cycle:
-            query = query.filter(CommitteeHistory.cycle == cycle)
+            query = query.filter(models.CommitteeHistory.cycle == cycle)
 
         return query
