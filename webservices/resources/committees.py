@@ -36,6 +36,7 @@ def filter_year(model, query, years):
 class CommitteeList(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.committee)
     @args.register_kwargs(args.committee_list)
     @args.register_kwargs(args.make_sort_args(default=['name']))
     @schemas.marshal_with(schemas.CommitteePageSchema())
@@ -87,6 +88,7 @@ class CommitteeList(Resource):
 class CommitteeView(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.committee)
     @args.register_kwargs(args.make_sort_args(default=['name']))
     @schemas.marshal_with(schemas.CommitteeDetailPageSchema())
     def get(self, committee_id=None, candidate_id=None, **kwargs):
