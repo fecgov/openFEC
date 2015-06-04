@@ -46,10 +46,15 @@ class BaseCandidate(BaseModel):
     name = db.Column(db.String(100))
 
 
-class Candidate(BaseCandidate):
-    __tablename__ = 'ofec_candidates_mv'
+class BaseConcreteCandidate(BaseCandidate):
+    __tablename__ = 'ofec_candidate_detail_mv'
 
     candidate_key = db.Column(db.Integer, unique=True)
+
+
+class Candidate(BaseConcreteCandidate):
+    __table_args__ = {'extend_existing': True}
+
     active_through = db.Column(db.Integer)
 
     # Customize join to restrict to principal committees
@@ -64,10 +69,9 @@ class Candidate(BaseCandidate):
     )
 
 
-class CandidateDetail(BaseCandidate):
-    __tablename__ = 'ofec_candidate_detail_mv'
+class CandidateDetail(BaseConcreteCandidate):
+    __table_args__ = {'extend_existing': True}
 
-    candidate_key = db.Column(db.Integer, unique=True)
     form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
@@ -77,7 +81,7 @@ class CandidateDetail(BaseCandidate):
     candidate_inactive = db.Column(db.String(1))
     active_through = db.Column(db.Integer)
     load_date = db.Column(db.DateTime)
-    expire_date = db.Column('candidate_expire_date', db.DateTime)
+    expire_date = db.Column(db.DateTime)
 
 
 class CandidateHistory(BaseCandidate):
@@ -116,10 +120,15 @@ class BaseCommittee(BaseModel):
     name = db.Column(db.String(100))
 
 
-class Committee(BaseCommittee):
-    __tablename__ = 'ofec_committees_mv'
+class BaseConcreteCommittee(BaseCommittee):
+    __tablename__ = 'ofec_committee_detail_mv'
 
     candidate_ids = db.Column(ARRAY(db.Text))
+
+
+class Committee(BaseConcreteCommittee):
+    __table_args__ = {'extend_existing': True}
+
     first_file_date = db.Column(db.DateTime)
     last_file_date = db.Column(db.DateTime)
 
@@ -135,8 +144,8 @@ class CommitteeHistory(BaseCommittee):
     cycle = db.Column(db.Integer)
 
 
-class CommitteeDetail(BaseCommittee):
-    __tablename__ = 'ofec_committee_detail_mv'
+class CommitteeDetail(BaseConcreteCommittee):
+    __table_args__ = {'extend_existing': True}
 
     first_file_date = db.Column(db.DateTime)
     last_file_date = db.Column(db.DateTime)
@@ -189,12 +198,10 @@ class CandidateCommitteeLink(BaseModel):
     linkage_key = db.Column(db.Integer)
     committee_key = db.Column(
         db.Integer,
-        db.ForeignKey('ofec_committees_mv.committee_key'),
         db.ForeignKey('ofec_committee_detail_mv.committee_key'),
     )
     candidate_key = db.Column(
         db.Integer,
-        db.ForeignKey('ofec_candidates_mv.candidate_key'),
         db.ForeignKey('ofec_candidate_detail_mv.candidate_key'),
     )
     committee_id = db.Column(db.String)

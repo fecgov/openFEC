@@ -1,4 +1,4 @@
-drop materialized view if exists ofec_candidate_history_mv_tmp;
+drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
 create materialized view ofec_candidate_history_mv_tmp as
 select
     row_number() over () as idx,
@@ -28,7 +28,8 @@ select
     dcp_by_period.party_affiliation as party,
     year_agg.election_years,
     cycle_agg.cycles,
-    clean_party(dcp_by_period.party_affiliation) as party_full
+    active_agg.active_through,
+    clean_party(dcp_by_period.party_affiliation_desc) as party_full
 from ofec_two_year_periods
     left join (
         select distinct on (two_year_period, cand_sk)
@@ -44,7 +45,7 @@ from ofec_two_year_periods
             left join dimcandoffice co using (cand_sk)
             inner join dimoffice using (office_sk)
             inner join dimparty using (party_sk)
-        order by cand_sk, two_year_period, dcp.candproperties_sk desc
+        order by cand_sk, two_year_period desc, dcp.candproperties_sk desc
     ) as dcp_by_period on ofec_two_year_periods.year = two_year_period
     left join (
         select
@@ -58,15 +59,23 @@ from ofec_two_year_periods
             cand_sk,
             array_agg(distinct(election_yr + election_yr % 2))::int[] as cycles
         from dimcandproperties
+        where election_yr >= :START_YEAR
         group by cand_sk
     ) cycle_agg using (cand_sk)
+    left join (
+        select
+            cand_sk,
+            max(cand_election_yr) as active_through
+        from dimcandoffice
+        group by cand_sk
+    ) active_agg using (cand_sk)
     -- Restrict to candidates with at least one non-F2Z filing
     inner join (
         select distinct cand_sk
         from dimcandproperties
         where form_tp != 'F2Z'
     ) f2 using (cand_sk)
-    where two_year_period >= :START_YEAR
+    where array_length(cycle_agg.cycles, 1) > 0
 ;
 
 create unique index on ofec_candidate_history_mv_tmp(idx);
@@ -74,3 +83,27 @@ create unique index on ofec_candidate_history_mv_tmp(idx);
 create index on ofec_candidate_history_mv_tmp(candidate_key);
 create index on ofec_candidate_history_mv_tmp(candidate_id);
 create index on ofec_candidate_history_mv_tmp(two_year_period);
+
+
+drop materialized view if exists ofec_candidate_detail_mv_tmp;
+create materialized view ofec_candidate_detail_mv_tmp as
+select distinct on (candidate_id) * from ofec_candidate_history_mv_tmp
+order by candidate_id, two_year_period desc
+;
+
+create unique index on ofec_candidate_detail_mv_tmp(idx);
+
+create index on ofec_candidate_detail_mv_tmp(name);
+create index on ofec_candidate_detail_mv_tmp(party);
+create index on ofec_candidate_detail_mv_tmp(state);
+create index on ofec_candidate_detail_mv_tmp(office);
+create index on ofec_candidate_detail_mv_tmp(district);
+create index on ofec_candidate_detail_mv_tmp(load_date);
+create index on ofec_candidate_detail_mv_tmp(expire_date);
+create index on ofec_candidate_detail_mv_tmp(candidate_id);
+create index on ofec_candidate_detail_mv_tmp(candidate_key);
+create index on ofec_candidate_detail_mv_tmp(candidate_status);
+create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
+
+create index on ofec_candidate_detail_mv_tmp using gin (cycles);
+create index on ofec_candidate_detail_mv_tmp using gin (election_years);
