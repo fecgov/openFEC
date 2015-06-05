@@ -23,8 +23,8 @@ deactivate
 cd ..
 
 echo "Creating tmuxinator profile"
-cp scripts/bootstrap/tmux/fec-local.yml ~./tmuxinator/fec-local.yml
-sed -i '' 's|<CHANGE>|'`pwd`'|' ~./tmuxinator/fec-local.yml
+cp /vagrant/tmux/fec-local.yml ~/.tmuxinator/fec-local.yml
+sed -i 's|<CHANGE>|'`pwd`'|' ~/.tmuxinator/fec-local.yml
 
 # Set up openFEC Web App
 echo "Done with API, setting up web app"
