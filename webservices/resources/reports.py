@@ -60,7 +60,8 @@ class ReportsView(Resource):
             default_schemas,
         )
 
-        reports = reports_class.query
+        # Load related committees in a subquery to avoid n+1 database operations
+        reports = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
         if committee_id is not None:
             reports = reports.filter_by(committee_id=committee_id)
