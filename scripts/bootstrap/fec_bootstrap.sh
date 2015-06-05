@@ -42,6 +42,7 @@ npm install
 npm run build
 echo "export FEC_WEB_TEST=true" > ~/.fec_vars
 echo "export FEC_WEB_DEBUG=true" >> ~/.fec_vars
+echo "export FEC_WEB_API_URL_PUBLIC=http://localhost:5001" >> ~/.fec_vars
 source ~/.fec_vars
 echo "Web app installed."
 echo ""
