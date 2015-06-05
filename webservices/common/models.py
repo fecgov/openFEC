@@ -263,26 +263,6 @@ class CommitteeReports(BaseModel):
     offsets_to_operating_expenditures_period = db.Column(db.Integer)
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
 
-    @property
-    def pdf_url(self):
-        if self.report_year is None:
-            return None
-        # House records start May 1996
-        if self.committee_type == 'H' and self.report_year < 1996:
-            return None
-        # Senate records start May 2000
-        elif self.committee_type == 'S' and self.report_year < 2000:
-            return None
-        # PAC, Party and Presidential records start May 1993
-        elif self.report_year < 1993:
-            return None
-        else:
-            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-                str(self.beginning_image_number)[-3:],
-                self.beginning_image_number,
-            )
-
-
 
 class CommitteeReportsHouseSenate(CommitteeReports):
     __tablename__ = 'ofec_reports_house_senate_mv'
@@ -329,6 +309,25 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
+
+    @property
+    def pdf_url(self):
+        if self.report_year is None:
+            return None
+        # # House records start May 1996
+        # if self.committee_type == 'H' and self.report_year < 1996:
+        #     return None
+        # # Senate records start May 2000
+        # elif self.committee_type == 'S' and self.report_year < 2000:
+        #     return None
+
+        if self.report_year < 2000:
+            return None
+        else:
+            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+                str(self.beginning_image_number)[-3:],
+                self.beginning_image_number,
+            )
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -399,6 +398,17 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_to_affiliated_committee_period = db.Column(db.Integer)
     transfers_to_affilitated_committees_ytd = db.Column(db.Integer)
 
+    @property
+    # PAC, Party and Presidential records start May 1993
+    def pdf_url(self):
+        if self.report_year is None or self.report_year < 1993:
+            return None
+        else:
+            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+                str(self.beginning_image_number)[-3:],
+                self.beginning_image_number,
+            )
+
 
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
@@ -446,6 +456,17 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfer_from_affiliated_committee_ytd = db.Column(db.Integer)
     transfer_to_other_authorized_committee_period = db.Column(db.Integer)
     transfer_to_other_authorized_committee_ytd = db.Column(db.Integer)
+
+    @property
+    # PAC, Party and Presidential records start May 1993
+    def pdf_url(self):
+        if self.report_year is None or self.report_year < 1993:
+            return None
+        else:
+            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+                str(self.beginning_image_number)[-3:],
+                self.beginning_image_number,
+            )
 
 
 class CommitteeTotals(BaseModel):
