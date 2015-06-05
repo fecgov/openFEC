@@ -148,11 +148,13 @@ select distinct on (committee_id)
     case
         when name is not null then
             setweight(to_tsvector(name), 'A') ||
-            setweight(to_tsvector(name), 'B')
+            setweight(to_tsvector(coalesce(pac."PACRONYM", '')), 'A') ||
+            setweight(to_tsvector(committee_id), 'B')
         else null::tsvector
-        end
+    end
 as fulltxt
-from ofec_committee_detail_mv_tmp
+from ofec_committee_detail_mv_tmp cd
+left join pacronyms pac on cd.committee_id = pac."ID NUMBER"
 ;
 
 create unique index on ofec_committee_fulltext_mv_tmp(idx);
