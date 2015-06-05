@@ -168,6 +168,26 @@ class TestReports(ApiBaseTest):
         )
         self.assertIsNone(results[0]['pdf_url'])
 
+    def test_no_pdf_link_senate(self):
+        """
+        Old pdfs don't exist so we should not build links.
+        """
+        number = 56789012346
+        factories.ReportsHouseSenateFactory(
+            report_year=1999,
+            committee_type='S',
+            beginning_image_number=number,
+        )
+
+        results = self._results(
+            api.url_for(
+                ReportsView,
+                committee_type='presidential',
+                beginning_image_number=number,
+            )
+        )
+        self.assertIsNone(results[0]['pdf_url'])
+
     def test_report_type_include(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
