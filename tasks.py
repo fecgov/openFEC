@@ -141,6 +141,14 @@ DEPLOY_RULES = (
 )
 
 
+def _detect_apps(blue, green):
+    """Detect old and new apps for blue-green deploy."""
+    status = run('cf app {0}'.format(blue), echo=True, warn=True)
+    if status.ok and 'started' in status.stdout:
+        return (blue, green)
+    return (green, blue)
+
+
 @task
 def deploy(space=None, branch=None, yes=False):
     """Deploy app to Cloud Foundry. Log in using credentials stored in
@@ -161,9 +169,20 @@ def deploy(space=None, branch=None, yes=False):
         ('--o', 'fec'),
         ('--s', space),
     )
-    login = 'cf login {0}'.format(' '.join(' '.join(arg) for arg in args))
-    run(login, echo=True)
+    run('cf login {0}'.format(' '.join(' '.join(arg) for arg in args)), echo=True)
+
+    old, new = _detect_apps('api-a', 'api-b')
 
     # Push
-    push = 'cf push -f manifest_{0}.yml'.format(space)
-    run(push, echo=True)
+    push = run('cf push {0} -f manifest_{1}.yml'.format(new, space), echo=True, warn=True)
+    if push.failed:
+        print('Error pushing app {0}'.format(new))
+        run('cf stop {0}'.format(new), echo=True)
+        return
+
+    # Remap
+    route = 'cf.18f.us'
+    host = 'fec-{0}-api'.format(space)
+    run('cf map-route {0} {1} -n {2}'.format(new, route, host), echo=True)
+    run('cf unmap-route {0} {1} -n {2}'.format(old, route, host), echo=True, warn=True)
+    run('cf stop {0}'.format(old), echo=True, warn=True)
