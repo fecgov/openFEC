@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt-get update
+
 sudo apt-get install git python3-dev python-pip postgresql libpq-dev -y
 
 pip install virtualenv
@@ -17,5 +21,5 @@ echo "export WORKON_HOME=~/.virtualenvs" >> ~/.bashrc
 echo "export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv" >> ~/.bashrc
 echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
 sudo -u postgres createuser -s vagrant
-gem install tmuxinator
+sudo gem install tmuxinator
 EOF
