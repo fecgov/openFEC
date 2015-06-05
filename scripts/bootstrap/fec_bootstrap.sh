@@ -16,7 +16,7 @@ npm install
 echo "Creating sample DB"
 dropdb cfdm_test 2>/dev/null
 createdb cfdm_test
-psql -f data/cfdm_test.pgdump.sql cfdm_test >/dev/null
+psql -f data/subset.sql cfdm_test >/dev/null
 echo "Refreshing DB"
 python manage.py update_schemas
 deactivate
@@ -40,11 +40,8 @@ npm config set python `which python2.7`
 npm install -g browserify
 npm install
 npm run build
-echo "Web app uses basic auth. Create username and password:"
-read -p "Name: " name
-read -p "Pass: " pass
-echo "export FEC_WEB_USERNAME=$name" > ~/.fec_vars
-echo "export FEC_WEB_PASSWORD=$pass" >> ~/.fec_vars
+echo "export FEC_WEB_TEST=true" > ~/.fec_vars
+echo "export FEC_WEB_DEBUG=true" >> ~/.fec_vars
 source ~/.fec_vars
 echo "Web app installed."
 echo ""
