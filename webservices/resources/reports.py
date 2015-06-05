@@ -39,7 +39,19 @@ def parse_types(types):
     tags=['financial'],
     description=docs.REPORTS,
     path_params=[
-        {'name': 'id', 'in': 'path', 'type': 'string'},
+        {
+         'name': 'committee_id',
+         'in': 'path',
+         'description': 'A unique identifier assigned to each committee or filer registered with the FEC.',
+         'type': 'string',
+        },
+        {
+         'name': 'committee_type',
+         'in': 'path',
+         'type': 'string',
+         'description': 'House, Senate or presidential',
+         'enum': ['presidential', 'pac-party', 'house-senate'],
+        },
     ],
 )
 class ReportsView(Resource):

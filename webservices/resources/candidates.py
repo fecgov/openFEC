@@ -93,8 +93,18 @@ class CandidateSearch(CandidateList):
     tags=['candidate'],
     description=docs.CANDIDATE_DETAIL,
     path_params=[
-        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
-        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+        {
+            'name': 'candidate_id',
+            'in': 'path',
+            'description': 'A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office.',
+            'type': 'string',
+        },
+        {
+            'name': 'committee_id',
+            'description': 'A unique identifier assigned to each committee or filer registered with the FEC.',
+            'in': 'path',
+            'type': 'string',
+        },
     ],
 )
 class CandidateView(Resource):
@@ -130,9 +140,19 @@ class CandidateView(Resource):
 
 @spec.doc(
     tags=['candidate'],
+    description=docs.CANDIDATE_HISTORY,
     path_params=[
-        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
-        {'name': 'cycle', 'in': 'path', 'type': 'integer'},
+        {
+            'name': 'candidate_id',
+            'in': 'path',
+            'description': 'A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office.',
+            'type': 'string',
+        },
+        {
+            'name': 'cycle',
+            'in': 'path',
+            'type': 'integer'
+        },
     ],
 )
 class CandidateHistoryView(Resource):
