@@ -52,9 +52,28 @@ def execute_sql_folder(path, processes):
 
 
 @manager.command
+def load_pacronyms():
+    count = db.engine.execute(
+        "select count(*) from pg_tables where tablename = 'pacronyms'"
+    ).fetchone()[0]
+    if count:
+        db.engine.execute(
+            'delete from pacronyms'
+        )
+    cmd = ' | '.join([
+        'in2csv data/pacronyms.xlsx',
+        'csvsql --insert --db {dest} --table pacronyms'
+    ]).format(dest=db.engine.url)
+    if count:
+        cmd += ' --no-create'
+    subprocess.call(cmd, shell=True)
+
+
+@manager.command
 def update_schemas(processes=2):
     print("Starting DB refresh...")
     processes = int(processes)
+    load_pacronyms()
     execute_sql_folder('data/sql_prep/', processes=processes)
     execute_sql_folder('data/functions/', processes=processes)
     execute_sql_folder('data/sql_updates/', processes=processes)
