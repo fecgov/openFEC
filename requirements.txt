@@ -1,7 +1,7 @@
 psycopg2
-git+git://github.com/flask-restful/flask-restful.git
-flask-sqlalchemy
-Flask-Script
+Flask-RESTful>=0.3.3
+Flask-SQLAlchemy>=2.0
+Flask-Script>=2.0.5
 newrelic
 celery>=3.1.17
 SQLAlchemy>=0.9.9

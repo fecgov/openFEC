@@ -137,3 +137,23 @@ create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(organization_type);
 
 create index on ofec_committee_detail_mv_tmp using gin (cycles);
+
+drop table if exists dimcmte_fulltext;
+drop materialized view if exists ofec_committee_fulltext_mv_tmp;
+create materialized view ofec_committee_fulltext_mv_tmp as
+select distinct on (committee_id)
+    row_number() over () as idx,
+    committee_id as id,
+    name,
+    case
+        when name is not null then
+            setweight(to_tsvector(name), 'A') ||
+            setweight(to_tsvector(name), 'B')
+        else null::tsvector
+        end
+as fulltxt
+from ofec_committee_detail_mv_tmp
+;
+
+create unique index on ofec_committee_fulltext_mv_tmp(idx);
+create index on ofec_committee_fulltext_mv_tmp using gin(fulltxt);
