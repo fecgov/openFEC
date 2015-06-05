@@ -5,6 +5,7 @@ select
     row_number() over () as idx,
     factpacsandparties_f3x_sk as report_key,
     cmte_id as committee_id,
+    cmte_sk as committee_key,
     two_yr_period_sk as cycle,
     start_date.dw_date as coverage_start_date,
     end_date.dw_date as coverage_end_date,

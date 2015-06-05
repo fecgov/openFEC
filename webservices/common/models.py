@@ -1,5 +1,6 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+from sqlalchemy.ext.declarative import declared_attr
 
 
 db = SQLAlchemy()
@@ -263,6 +264,11 @@ class CommitteeReports(BaseModel):
     offsets_to_operating_expenditures_period = db.Column(db.Integer)
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
 
+    @declared_attr
+    def committee_key(cls):
+        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_key'))
+    committee_type = db.Column(db.String)
+
 
 class CommitteeReportsHouseSenate(CommitteeReports):
     __tablename__ = 'ofec_reports_house_senate_mv'
@@ -314,14 +320,11 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     def pdf_url(self):
         if self.report_year is None:
             return None
-        # # House records start May 1996
-        # if self.committee_type == 'H' and self.report_year < 1996:
-        #     return None
-        # # Senate records start May 2000
-        # elif self.committee_type == 'S' and self.report_year < 2000:
-        #     return None
-
-        if self.report_year < 2000:
+        # House records start May 1996
+        if self.committee_type == 'H' and self.report_year < 1996:
+            return None
+        # Senate records start May 2000
+        elif self.committee_type == 'S' and self.report_year < 2000:
             return None
         else:
             return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
