@@ -265,8 +265,12 @@ class CommitteeReports(BaseModel):
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
 
     @declared_attr
-    def committee_type(cls):
-        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_key'))
+    def committee_id(cls):
+        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_id'))
+
+    @declared_attr
+    def committee(cls):
+        return db.relationship('CommitteeDetail')
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
