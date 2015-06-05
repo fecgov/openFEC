@@ -20,12 +20,12 @@ with
             cand_sk,
             election_yr + election_yr % 2 as cycle
         from dimcandproperties
-        where election_yr >= :START_YEAR
     ),
     cycle_agg as (
         select
             cand_sk,
-            array_agg(cycles.cycle)::int[] as cycles
+            array_agg(cycles.cycle)::int[] as cycles,
+            max(cycles.cycle) as max_cycle
         from cycles
         group by cand_sk
     ),
@@ -74,7 +74,7 @@ left join dimcandoffice co on dcp.cand_sk = co.cand_sk and co.cand_election_yr <
 inner join non_ballot_filers nbf on dcp.cand_sk = nbf.cand_sk
 inner join dimoffice o using (office_sk)
 inner join dimparty dp using (party_sk)
-where array_length(cycle_agg.cycles, 1) > 0
+where max_cycle >= :START_YEAR
 order by
     dcp.cand_sk,
     cycle desc,

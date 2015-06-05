@@ -73,7 +73,7 @@ class TestViews(common.IntegrationTestCase):
         ).group_by(
             getattr(subquery.columns, key)
         ).having(
-            sa.func.min(subquery.columns.cycle) < manage.SQL_CONFIG['START_YEAR']
+            sa.func.max(subquery.columns.cycle) < manage.SQL_CONFIG['START_YEAR']
         ).count()
         self.assertEqual(count, 0)
 
