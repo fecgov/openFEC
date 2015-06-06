@@ -18,11 +18,12 @@ dropdb cfdm_test 2>/dev/null
 createdb cfdm_test
 psql -f data/subset.sql cfdm_test >/dev/null
 echo "Refreshing DB"
-python manage.py update_schemas
+python manage.py update_schemas --processes 1
 deactivate
 cd ..
 
 echo "Creating tmuxinator profile"
+mkdir -p /home/vagrant/.tmuxinator
 cp /vagrant/tmux/fec-local.yml ~/.tmuxinator/fec-local.yml
 sed -i 's|<CHANGE>|'`pwd`'|' ~/.tmuxinator/fec-local.yml
 
@@ -37,7 +38,7 @@ workon openFEC-web-app
 echo "Installing requirements"
 pip install -r requirements.txt
 npm config set python `which python2.7`
-npm install -g browserify
+npm install -g gulp
 npm install
 npm run build
 echo "export FEC_WEB_TEST=true" > ~/.fec_vars
