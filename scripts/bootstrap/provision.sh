@@ -14,8 +14,8 @@ curl https://raw.githubusercontent.com/creationix/nvm/v0.24.1/install.sh | bash
 export NVM_DIR="/home/vagrant/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 source ~/.bashrc
-nvm install v0.11.16
-nvm alias default 0.11.16
+nvm install v0.12.2
+nvm alias default 0.12.2
 mkdir ~/.virtualenvs
 echo "export WORKON_HOME=~/.virtualenvs" >> ~/.bashrc
 echo "export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv" >> ~/.bashrc
