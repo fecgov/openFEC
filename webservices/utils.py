@@ -30,3 +30,10 @@ def search_text(query, column, text):
             )
         )
     )
+
+
+def make_pdf_url(image_number):
+    return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+        str(image_number)[-3:],
+        image_number,
+    )
