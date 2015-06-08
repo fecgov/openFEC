@@ -2,9 +2,13 @@ drop materialized view if exists ofec_committee_history_mv_tmp cascade;
 create materialized view ofec_committee_history_mv_tmp as
 with
     cycles as (
-        select distinct
+        select
             cmte_sk,
-            rpt_yr + rpt_yr % 2 as cycle
+            generate_series(
+                min(rpt_yr + rpt_yr % 2)::int,
+                max(rpt_yr + rpt_yr % 2)::int,
+                2
+            ) as cycle
         from (
             select cmte_sk, rpt_yr from factpacsandparties_f3x
             union all
@@ -14,12 +18,13 @@ with
             union all
             select cmte_sk, rpt_yr from dimcmteproperties
         ) years
-        where rpt_yr >= :START_YEAR
+        group by cmte_sk
     ),
     cycle_agg as (
         select
             cmte_sk,
-            array_agg(cycles.cycle)::int[] as cycles
+            array_agg(cycles.cycle)::int[] as cycles,
+            max(cycles.cycle) as max_cycle
         from cycles
         group by cmte_sk
     ),
@@ -108,7 +113,7 @@ left join dimparty p on dcp.cand_pty_affiliation = p.party_affiliation
 left join dimcmtetpdsgn dd on dcp.cmte_sk = dd.cmte_sk and extract(year from dd.receipt_date) <= cycles.cycle
 left join dcp_original on dcp.cmte_sk = dcp_original.cmte_sk
 left join candidate_agg on dcp.cmte_sk = candidate_agg.cmte_sk
-where array_length(cycle_agg.cycles, 1) > 0
+where max_cycle >= :START_YEAR
 order by dcp.cmte_sk, cycle desc, dcp.rpt_yr desc, dd.receipt_date desc
 ;
 
