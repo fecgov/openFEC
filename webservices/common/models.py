@@ -2,6 +2,8 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
 
+from webservices import utils
+
 
 db = SQLAlchemy()
 
@@ -330,10 +332,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
         # Senate records start May 2000
         elif self.committee.committee_type == 'S' and self.report_year < 2000:
             return None
-        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-            str(self.beginning_image_number)[-3:],
-            self.beginning_image_number,
-        )
+        return utils.make_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -409,11 +408,7 @@ class CommitteeReportsPacParty(CommitteeReports):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        else:
-            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-                str(self.beginning_image_number)[-3:],
-                self.beginning_image_number,
-            )
+        return utils.make_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsPresidential(CommitteeReports):
