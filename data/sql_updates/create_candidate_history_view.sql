@@ -119,9 +119,9 @@ select distinct on (candidate_id)
     case
         when name is not null then
             setweight(to_tsvector(name), 'A') ||
-            setweight(to_tsvector(name), 'B')
+            setweight(to_tsvector(candidate_id), 'B')
         else null::tsvector
-        end
+    end
 as fulltxt
 from ofec_candidate_detail_mv_tmp
 ;
