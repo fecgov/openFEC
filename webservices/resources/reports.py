@@ -50,8 +50,8 @@ class ReportsView(Resource):
     @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         reports = self.get_reports(committee_id, committee_type, kwargs)
-        reports, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
-        page = utils.fetch_page(reports, kwargs)
+        reports, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
+        page = utils.fetch_page(reports, kwargs, model=reports_class)
         return reports_schema().dump(page).data
 
     def get_reports(self, committee_id, committee_type, kwargs):
@@ -60,7 +60,7 @@ class ReportsView(Resource):
             default_schemas,
         )
 
-        # Load related committees in a subquery to avoid n+1 database operations
+        # Eagerly load committees to avoid extra queries
         reports = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
         if committee_id is not None:
@@ -80,7 +80,7 @@ class ReportsView(Resource):
             elif exclude:
                 reports = reports.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
-        return reports, reports_schema
+        return reports, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id, committee_type, kwargs):
         if committee_id is not None:
