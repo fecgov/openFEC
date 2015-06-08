@@ -21,6 +21,24 @@ spec = APISpec(
     security=[
         {'apiKey': []},
     ],
+    tags=[
+        {
+            'name': 'candidate',
+            'description': docs.CANDIDATE_TAG,
+        },
+        {
+            'name': 'committee',
+            'description': docs.COMMITTEE_TAG,
+        },
+        {
+            'name': 'financial',
+            'description': docs.FINANCIAL_TAG,
+        },
+        {
+            'name': 'search',
+            'description': docs.SEARCH_TAG,
+        },
+    ]
 )
 
 

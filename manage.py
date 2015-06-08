@@ -35,6 +35,9 @@ manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
 def execute_sql_file(path):
+    # This helper is typically used within a multiprocessing pool; create a new database
+    # engine for each job.
+    db.engine.dispose()
     print(('Running {}'.format(path)))
     with open(path) as fp:
         cmd = '\n'.join([
@@ -52,9 +55,28 @@ def execute_sql_folder(path, processes):
 
 
 @manager.command
+def load_pacronyms():
+    count = db.engine.execute(
+        "select count(*) from pg_tables where tablename = 'pacronyms'"
+    ).fetchone()[0]
+    if count:
+        db.engine.execute(
+            'delete from pacronyms'
+        )
+    cmd = ' | '.join([
+        'in2csv data/pacronyms.xlsx',
+        'csvsql --insert --db {dest} --table pacronyms'
+    ]).format(dest=db.engine.url)
+    if count:
+        cmd += ' --no-create'
+    subprocess.call(cmd, shell=True)
+
+
+@manager.command
 def update_schemas(processes=2):
     print("Starting DB refresh...")
     processes = int(processes)
+    load_pacronyms()
     execute_sql_folder('data/sql_prep/', processes=processes)
     execute_sql_folder('data/functions/', processes=processes)
     execute_sql_folder('data/sql_updates/', processes=processes)
