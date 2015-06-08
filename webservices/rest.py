@@ -15,7 +15,6 @@ from flask import Flask
 from flask import Blueprint
 
 from flask.ext import restful
-import flask.ext.restful.representations.json
 
 from webservices import args
 from webservices import docs
@@ -30,13 +29,9 @@ from webservices.resources import reports
 from webservices.resources import candidates
 from webservices.resources import committees
 
-from .json_encoding import TolerantJSONEncoder
-
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
 speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
-
-flask.ext.restful.representations.json.settings["cls"] = TolerantJSONEncoder
 
 
 def sqla_conn_string():
