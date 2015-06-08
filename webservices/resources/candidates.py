@@ -93,8 +93,18 @@ class CandidateSearch(CandidateList):
     tags=['candidate'],
     description=docs.CANDIDATE_DETAIL,
     path_params=[
-        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
-        {'name': 'committee_id', 'in': 'path', 'type': 'string'},
+        {
+            'name': 'candidate_id',
+            'in': 'path',
+            'description': docs.CANDIDATE_ID,
+            'type': 'string',
+        },
+        {
+            'name': 'committee_id',
+            'description': docs.COMMITTEE_ID,
+            'in': 'path',
+            'type': 'string',
+        },
     ],
 )
 class CandidateView(Resource):
@@ -130,9 +140,19 @@ class CandidateView(Resource):
 
 @spec.doc(
     tags=['candidate'],
+    description=docs.CANDIDATE_HISTORY,
     path_params=[
-        {'name': 'candidate_id', 'in': 'path', 'type': 'string'},
-        {'name': 'cycle', 'in': 'path', 'type': 'integer'},
+        {
+            'name': 'candidate_id',
+            'type': 'string',
+            'in': 'path',
+            'description': docs.CANDIDATE_ID,
+        },
+        {
+            'name': 'cycle',
+            'type': 'integer',
+            'in': 'path',
+        },
     ],
 )
 class CandidateHistoryView(Resource):
