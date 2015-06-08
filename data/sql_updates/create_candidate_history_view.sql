@@ -16,12 +16,13 @@ with
         group by cand_sk
     ),
     cycles as (
-        select cand_sk,
-        generate_series(
-            min(election_yr + election_yr % 2)::int,
-            max(election_yr + election_yr % 2)::int,
-            2
-        ) as cycle
+        select
+            cand_sk,
+            generate_series(
+                min(election_yr + election_yr % 2)::int,
+                max(election_yr + election_yr % 2)::int,
+                2
+            ) as cycle
         from dimcandproperties
         group by cand_sk
     ),
@@ -69,10 +70,10 @@ select distinct on (dcp.cand_sk, cycle)
     active_agg.active_through,
     clean_party(dp.party_affiliation_desc) as party_full
 from dimcandproperties dcp
-left join cycles on dcp.cand_sk = cycles.cand_sk
 left join years on dcp.cand_sk = years.cand_sk
 left join active_agg on dcp.cand_sk = active_agg.cand_sk
 left join cycle_agg on dcp.cand_sk = cycle_agg.cand_sk
+left join cycles on dcp.cand_sk = cycles.cand_sk and dcp.election_yr <= cycles.cycle
 left join dimcandstatusici dsi on dcp.cand_sk = dsi.cand_sk and dsi.election_yr <= cycles.cycle
 left join dimcandoffice co on dcp.cand_sk = co.cand_sk and co.cand_election_yr <= cycles.cycle
 inner join non_ballot_filers nbf on dcp.cand_sk = nbf.cand_sk
