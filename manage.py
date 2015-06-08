@@ -77,7 +77,6 @@ def update_schemas(processes=2):
     print("Starting DB refresh...")
     processes = int(processes)
     load_pacronyms()
-    execute_sql_folder('data/sql_prep/', processes=processes)
     execute_sql_folder('data/functions/', processes=processes)
     execute_sql_folder('data/sql_updates/', processes=processes)
     execute_sql_file('data/rename_temporary_views.sql')
