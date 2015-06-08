@@ -1,81 +1,91 @@
 drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
 create materialized view ofec_candidate_history_mv_tmp as
-select
-    row_number() over () as idx,
-    dcp_by_period.candproperties_sk as properties_key,
-    dcp_by_period.cand_sk as candidate_key,
-    dcp_by_period.record_cand_id as candidate_id,
-    dcp_by_period.cand_nm as name,
-    dcp_by_period.record_expire_date as expire_date,
-    dcp_by_period.record_load_date as load_date,
-    dcp_by_period.record_form_tp as form_type,
-    dcp_by_period.two_year_period as two_year_period,
-    dcp_by_period.cand_st as address_state,
-    dcp_by_period.cand_city as address_city,
-    dcp_by_period.cand_st1 as address_street_1,
-    dcp_by_period.cand_st2 as address_street_2,
-    dcp_by_period.cand_st2 as address_street,
-    dcp_by_period.cand_zip as address_zip,
-    dcp_by_period.cand_ici_cd as incumbent_challenge,
-    expand_candidate_incumbent(dcp_by_period.cand_ici_cd) as incumbent_challenge_full,
-    dcp_by_period.cand_status_cd as candidate_status,
-    dcp_by_period.cand_status_desc as candidate_status_full,
-    dcp_by_period.cand_inactive_flg as candidate_inactive,
-    dcp_by_period.office_tp as office,
-    dcp_by_period.office_tp_desc as office_full,
-    dcp_by_period.office_state as state,
-    dcp_by_period.office_district as district,
-    dcp_by_period.party_affiliation as party,
-    year_agg.election_years,
-    cycle_agg.cycles,
-    active_agg.active_through,
-    clean_party(dcp_by_period.party_affiliation_desc) as party_full
-from ofec_two_year_periods
-    left join (
-        select distinct on (two_year_period, cand_sk)
-            dcp.election_yr + dcp.election_yr % 2 as two_year_period,
-            dcp.expire_date as record_expire_date,
-            dcp.load_date as record_load_date,
-            dcp.form_tp as record_form_tp,
-            dcp.cand_id as record_cand_id,
-            *
-        from dimcandproperties dcp
-            left join dimcand dc using (cand_sk)
-            left join dimcandstatusici dsi using (cand_sk)
-            left join dimcandoffice co using (cand_sk)
-            inner join dimoffice using (office_sk)
-            inner join dimparty using (party_sk)
-        order by cand_sk, two_year_period desc, dcp.candproperties_sk desc
-    ) as dcp_by_period on ofec_two_year_periods.year = two_year_period
-    left join (
+with
+    years as (
         select
             cand_sk,
             array_agg(distinct(cand_election_yr))::int[] as election_years
         from dimcandoffice
         group by cand_sk
-    ) year_agg using (cand_sk)
-    left join (
-        select
-            cand_sk,
-            array_agg(distinct(election_yr + election_yr % 2))::int[] as cycles
-        from dimcandproperties
-        where election_yr >= :START_YEAR
-        group by cand_sk
-    ) cycle_agg using (cand_sk)
-    left join (
+    ),
+    active_agg as (
         select
             cand_sk,
             max(cand_election_yr) as active_through
         from dimcandoffice
         group by cand_sk
-    ) active_agg using (cand_sk)
-    -- Restrict to candidates with at least one non-F2Z filing
-    inner join (
+    ),
+    cycles as (
+        select
+            cand_sk,
+            generate_series(
+                min(election_yr + election_yr % 2)::int,
+                max(election_yr + election_yr % 2)::int,
+                2
+            ) as cycle
+        from dimcandproperties
+        group by cand_sk
+    ),
+    cycle_agg as (
+        select
+            cand_sk,
+            array_agg(cycles.cycle)::int[] as cycles,
+            max(cycles.cycle) as max_cycle
+        from cycles
+        group by cand_sk
+    ),
+    non_ballot_filers as (
         select distinct cand_sk
         from dimcandproperties
         where form_tp != 'F2Z'
-    ) f2 using (cand_sk)
-    where array_length(cycle_agg.cycles, 1) > 0
+    )
+select distinct on (dcp.cand_sk, cycle)
+    row_number() over () as idx,
+    cycles.cycle as two_year_period,
+    dcp.candproperties_sk as properties_key,
+    dcp.cand_sk as candidate_key,
+    dcp.cand_id as candidate_id,
+    dcp.cand_nm as name,
+    dcp.expire_date as expire_date,
+    dcp.load_date as load_date,
+    dcp.form_tp as form_type,
+    dcp.cand_st as address_state,
+    dcp.cand_city as address_city,
+    dcp.cand_st1 as address_street_1,
+    dcp.cand_st2 as address_street_2,
+    dcp.cand_st2 as address_street,
+    dcp.cand_zip as address_zip,
+    dcp.cand_ici_cd as incumbent_challenge,
+    expand_candidate_incumbent(dcp.cand_ici_cd) as incumbent_challenge_full,
+    dcp.cand_status_cd as candidate_status,
+    dcp.cand_status_desc as candidate_status_full,
+    dsi.cand_inactive_flg as candidate_inactive,
+    o.office_tp as office,
+    o.office_tp_desc as office_full,
+    o.office_state as state,
+    o.office_district as district,
+    dp.party_affiliation as party,
+    cycle_agg.cycles,
+    years.election_years,
+    active_agg.active_through,
+    clean_party(dp.party_affiliation_desc) as party_full
+from dimcandproperties dcp
+left join years on dcp.cand_sk = years.cand_sk
+left join active_agg on dcp.cand_sk = active_agg.cand_sk
+left join cycle_agg on dcp.cand_sk = cycle_agg.cand_sk
+left join cycles on dcp.cand_sk = cycles.cand_sk and dcp.election_yr <= cycles.cycle
+left join dimcandstatusici dsi on dcp.cand_sk = dsi.cand_sk and dsi.election_yr <= cycles.cycle
+left join dimcandoffice co on dcp.cand_sk = co.cand_sk and co.cand_election_yr <= cycles.cycle
+inner join non_ballot_filers nbf on dcp.cand_sk = nbf.cand_sk
+inner join dimoffice o using (office_sk)
+inner join dimparty dp using (party_sk)
+where max_cycle >= :START_YEAR
+order by
+    dcp.cand_sk,
+    cycle desc,
+    dcp.election_yr desc,
+    dsi.election_yr desc,
+    co.cand_election_yr desc
 ;
 
 create unique index on ofec_candidate_history_mv_tmp(idx);
