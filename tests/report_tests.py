@@ -5,6 +5,7 @@ from marshmallow.utils import isoformat
 from .common import ApiBaseTest
 from tests import factories
 
+from webservices.rest import db
 from webservices.rest import api
 from webservices.resources.reports import ReportsView
 
@@ -131,10 +132,14 @@ class TestReports(ApiBaseTest):
         self.assertEqual([each['coverage_end_date'] for each in results], dates_formatted[::-1])
 
     def test_reports_for_pdf_link(self):
+        committee = factories.CommitteeFactory(committee_type='P')
+        committee_key = committee.committee_key
+        db.session.flush()
         number = 12345678901
         factories.ReportsPresidentialFactory(
             report_year=2016,
             beginning_image_number=number,
+            committee_key=committee_key,
         )
 
         results = self._results(
@@ -153,10 +158,14 @@ class TestReports(ApiBaseTest):
         """
         Old pdfs don't exist so we should not build links.
         """
+        committee = factories.CommitteeFactory(committee_type='P')
+        committee_key = committee.committee_key
+        db.session.flush()
         number = 56789012345
         factories.ReportsPresidentialFactory(
             report_year=1990,
             beginning_image_number=number,
+            committee_key=committee_key,
         )
 
         results = self._results(
@@ -172,17 +181,20 @@ class TestReports(ApiBaseTest):
         """
         Old pdfs don't exist so we should not build links.
         """
+        committee = factories.CommitteeFactory(committee_type='S')
+        committee_key = committee.committee_key
+        db.session.flush()
         number = 56789012346
         factories.ReportsHouseSenateFactory(
             report_year=1999,
-            committee_type='S',
             beginning_image_number=number,
+            committee_key=committee_key,
         )
 
         results = self._results(
             api.url_for(
                 ReportsView,
-                committee_type='presidential',
+                committee_type='house-senate',
                 beginning_image_number=number,
             )
         )

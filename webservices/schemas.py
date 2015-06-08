@@ -197,7 +197,7 @@ CommitteeReportsSchema = make_reports_schema(
     class_name='CommitteeReportsSchema',
     options={'exclude': [
         each.key for each in models.CommitteeReportsPresidential.__mapper__.iterate_properties
-        if not hasattr(models.CommitteeReports, each.key)
+        if each.key not in dir(models.CommitteeReports)
     ] + ['idx', 'report_key']}
 )
 
@@ -219,7 +219,7 @@ CommitteeTotalsSchema = make_schema(
     class_name='CommitteeTotalsSchema',
     options={'exclude': [
         each.key for each in models.CommitteeTotalsPresidential.__mapper__.iterate_properties
-        if not hasattr(models.CommitteeTotals, each.key)
+        if each.key not in dir(models.CommitteeTotals)
     ] + ['idx']}
 )
 CommitteeTotalsPresidentialSchema = make_schema(models.CommitteeTotalsPresidential)
