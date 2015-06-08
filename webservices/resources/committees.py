@@ -81,8 +81,18 @@ class CommitteeList(Resource):
     tags=['committee'],
     description=docs.COMMITTEE_DETAIL,
     path_params=[
-        {'name': 'candidate_id','description': 'A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office.', 'in': 'path', 'type': 'string'},
-        {'name': 'committee_id', 'in': 'path', 'description': 'A unique identifier assigned to each committee or filer registered with the FEC.', 'type': 'string'},
+        {
+            'name': 'candidate_id',
+            'type': 'string',
+            'in': 'path',
+            'description': docs.CANDIDATE_ID,
+        },
+        {
+            'name': 'committee_id',
+            'type': 'string',
+            'in': 'path',
+            'description': docs.COMMITTEE_ID,
+        },
     ],
 )
 class CommitteeView(Resource):
