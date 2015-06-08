@@ -7,6 +7,7 @@ celery>=3.1.17
 SQLAlchemy>=0.9.9
 GitPython>=1.0.1
 gunicorn
+csvkit>=0.9.1
 
 marshmallow>=2.0.0b2
 marshmallow-sqlalchemy>=0.2.0
