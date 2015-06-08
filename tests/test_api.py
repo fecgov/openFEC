@@ -125,13 +125,17 @@ class OverallTest(ApiBaseTest):
         committee = factories.CommitteeFactory(committee_type=committee_type)
         factories.CommitteeHistoryFactory(
             committee_id=committee.committee_id,
+            committee_key=committee.committee_key,
             committee_type=committee_type,
         )
         end_dates = [datetime.datetime(2012, 1, 1), datetime.datetime(2008, 1, 1)]
         committee_id = committee.committee_id
+        committee_key = committee.committee_key
+        rest.db.session.flush()
         [
             factory(
                 committee_id=committee_id,
+                committee_key=committee_key,
                 coverage_end_date=end_date,
             )
             for end_date in end_dates
