@@ -105,7 +105,7 @@ class BaseCommittee(BaseModel):
     __abstract__ = True
 
     committee_key = db.Column(db.Integer, unique=True)
-    committee_id = db.Column(db.String(9))
+    committee_id = db.Column(db.String)
     cycles = db.Column(ARRAY(db.Integer))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
@@ -222,7 +222,8 @@ class CommitteeReports(BaseModel):
     __abstract__ = True
 
     report_key = db.Column(db.BigInteger)
-    committee_id = db.Column(db.String(10))
+    committee_id = db.Column(db.String)
+    committee_key = db.Column(db.Integer)
     cycle = db.Column(db.Integer)
 
     beginning_image_number = db.Column(db.BigInteger)
@@ -265,8 +266,8 @@ class CommitteeReports(BaseModel):
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
 
     @declared_attr
-    def committee_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_id'))
+    def committee_key(cls):
+        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_key'))
 
     @declared_attr
     def committee(cls):
@@ -321,19 +322,18 @@ class CommitteeReportsHouseSenate(CommitteeReports):
 
     @property
     def pdf_url(self):
-        if self.report_year is None:
+        if self.report_year is None or self.committee is None:
             return None
         # House records start May 1996
-        if self.committee_type == 'H' and self.report_year < 1996:
+        if self.committee.committee_type == 'H' and self.report_year < 1996:
             return None
         # Senate records start May 2000
-        elif self.committee_type == 'S' and self.report_year < 2000:
+        elif self.committee.committee_type == 'S' and self.report_year < 2000:
             return None
-        else:
-            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-                str(self.beginning_image_number)[-3:],
-                self.beginning_image_number,
-            )
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+            str(self.beginning_image_number)[-3:],
+            self.beginning_image_number,
+        )
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -478,7 +478,7 @@ class CommitteeReportsPresidential(CommitteeReports):
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String(10))
+    committee_id = db.Column(db.String)
     cycle = db.Column(db.Integer, primary_key=True)
     offsets_to_operating_expenditures = db.Column(db.Integer)
     political_party_committee_contributions = db.Column(db.Integer)
