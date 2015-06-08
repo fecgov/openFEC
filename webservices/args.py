@@ -9,6 +9,8 @@ from webargs import Arg
 from webargs.core import text_type
 from webargs.flaskparser import FlaskParser
 
+from webservices import docs
+
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +77,7 @@ candidate_detail = {
 
 candidate_list = {
     'q': Arg(str, description='Text to search all fields for'),
-    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office."),
+    'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
     'name': Arg(str, description="Candidate's name (full or partial)"),
 }
 
@@ -101,13 +103,12 @@ committee = {
 
 committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
-    'committee_id': Arg(str, multiple=True, description="Committee's FEC ID"),
-    'candidate_id': Arg(str, multiple=True, description="A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office."),
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
     'name': Arg(str, description="Candidate's name (full or partial)"),
     'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
     'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
-
 }
 
 

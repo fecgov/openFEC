@@ -1,5 +1,14 @@
 """Narrative API documentation."""
 
+CANDIDATE_ID = '''
+A unique identifier assigned to each candidate registered with the FEC.
+If a person runs for several offices, they will have separate candidate IDs for each office.
+'''
+
+COMMITTEE_ID = '''
+A unique identifier assigned to each committee or filer registered with the FEC.
+'''
+
 DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
