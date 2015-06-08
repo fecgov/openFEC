@@ -97,7 +97,19 @@ Deploys of a single app can be performed manually by targeting the env/space, an
 
     $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 
-### Working with test data
+### Testing
+
+#### Creating a new test database
+
+    $ createdb cfdm_test
+    $ psql -f data/subset.sql cfdm_test
+    $ ./manage.py update_schemas
+
+#### Running the Tests
+
+    $ nosetests
+
+#### The Test Data Subset
 
 This repo includes a small subset of the production database (built 2015/05/05) at `data/subset.sql`. To use the test subset for local development:
 
