@@ -2,9 +2,13 @@ drop materialized view if exists ofec_committee_history_mv_tmp cascade;
 create materialized view ofec_committee_history_mv_tmp as
 with
     cycles as (
-        select distinct
+        select
             cmte_sk,
-            rpt_yr + rpt_yr % 2 as cycle
+            generate_series(
+                min(rpt_yr + rpt_yr % 2)::int,
+                max(rpt_yr + rpt_yr % 2)::int,
+                2
+            ) as cycle
         from (
             select cmte_sk, rpt_yr from factpacsandparties_f3x
             union all
@@ -14,6 +18,7 @@ with
             union all
             select cmte_sk, rpt_yr from dimcmteproperties
         ) years
+        group by cmte_sk
     ),
     cycle_agg as (
         select
