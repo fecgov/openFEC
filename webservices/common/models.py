@@ -271,12 +271,9 @@ class CommitteeReports(BaseModel):
     def committee_key(cls):
         return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_key'))
 
-
-    committee_type = db.Column(
-        db.Integer,
-        db.ForeignKey('ofec_committee_detail_mv.committee_type'),
-    )
-
+    @declared_attr
+    def committee(cls):
+        return db.relationship('CommitteeDetail')
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
