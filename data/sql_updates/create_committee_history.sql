@@ -129,14 +129,20 @@ order by committee_id, cycle desc
 
 create unique index on ofec_committee_detail_mv_tmp(idx);
 
+create index on ofec_committee_detail_mv_tmp(name);
+create index on ofec_committee_detail_mv_tmp(party);
+create index on ofec_committee_detail_mv_tmp(state);
 create index on ofec_committee_detail_mv_tmp(designation);
 create index on ofec_committee_detail_mv_tmp(expire_date);
 create index on ofec_committee_detail_mv_tmp(committee_id);
 create index on ofec_committee_detail_mv_tmp(committee_key);
 create index on ofec_committee_detail_mv_tmp(committee_type);
+create index on ofec_committee_detail_mv_tmp(last_file_date);
+create index on ofec_committee_detail_mv_tmp(first_file_date);
 create index on ofec_committee_detail_mv_tmp(organization_type);
 
 create index on ofec_committee_detail_mv_tmp using gin (cycles);
+create index on ofec_committee_detail_mv_tmp using gin (candidate_ids);
 
 drop table if exists dimcmte_fulltext;
 drop materialized view if exists ofec_committee_fulltext_mv_tmp;

@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import abc
 import math
 import collections
-
 
 import marshmallow as ma
 
@@ -125,7 +122,7 @@ class PageSchema(ma.Schema, metaclass=PageMeta):
 class SqlalchemyPaginator(Paginator):
 
     def _count(self):
-        return self.cursor.count()
+        return self.cursor.order_by(None).count()
 
     def _slice(self, offset, limit):
         offset += (self.cursor._offset or 0)
