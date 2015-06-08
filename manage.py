@@ -35,6 +35,9 @@ manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
 def execute_sql_file(path):
+    # This helper is typically used within a multiprocessing pool; create a new database
+    # engine for each job.
+    db.engine.dispose()
     print(('Running {}'.format(path)))
     with open(path) as fp:
         cmd = '\n'.join([
