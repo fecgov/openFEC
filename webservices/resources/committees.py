@@ -155,7 +155,7 @@ class CommitteeHistoryView(Resource):
             query = query.filter(models.CommitteeHistory.committee_id == committee_id)
 
         if candidate_id:
-            query = models.CommitteeHistory.query.join(
+            query = query.join(
                 models.CandidateCommitteeLink,
                 models.CandidateCommitteeLink.committee_key == models.CommitteeHistory.committee_key,
             ).filter(
