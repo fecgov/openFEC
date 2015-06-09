@@ -1,28 +1,9 @@
 ---
-memory: 512M
-stack: lucid64
+inherit: manifest_base.yml
+host: fec-stage-api
+services:
+  # Must provide SQLA_CONN, NEW_RELIC_LICENSE_KEY
+  - fec-creds-stage
 env:
-  NEW_RELIC_CONFIG_FILE: newrelic.ini
+  NEW_RELIC_APP_NAME: OpenFEC API (staging)
   NEW_RELIC_ENV: staging
-applications:
-- name: api-a
-  path: .
-  buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
-  host: fec-stage-api
-  services:
-    # Must provide SQLA_CONN, NEW_RELIC_LICENSE_KEY
-    - fec-creds-stage
-  env:
-    NEW_RELIC_APP_NAME: OpenFEC API (staging)
-    NEW_RELIC_LOG: stdout
-    WEB_CONCURRENCY: 4
-- name: api-b
-  path: .
-  buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
-  host: fec-stage-api
-  services:
-    - fec-creds-stage
-  env:
-    NEW_RELIC_APP_NAME: OpenFEC API (staging)
-    NEW_RELIC_LOG: stdout
-    WEB_CONCURRENCY: 4
