@@ -463,11 +463,7 @@ class CommitteeReportsPresidential(CommitteeReports):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        else:
-            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-                str(self.beginning_image_number)[-3:],
-                self.beginning_image_number,
-            )
+        return utils.make_pdf_url(self.beginning_image_number)
 
 
 class CommitteeTotals(BaseModel):
