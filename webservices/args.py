@@ -71,7 +71,12 @@ candidate_detail = {
     'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
     'year': Arg(str, dest='election_year', description='See records pertaining to a particular year.'),
     'district': Arg(str, multiple=True, description='Two digit district number'),
-    'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is; C = present candidate, F = future candidate, N = Not yet a candidate, P = prior candidate'),
+    'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is:\n\
+        - C present candidate\n\
+        - F future candidate\n\
+        - N not yet a candidate\n\
+        - P prior candidate\n\
+        '),
     'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
 }
 
@@ -85,20 +90,43 @@ committee = {
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A 2-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
-        description='The one-letter designation code of the organization: \
-            A = authorized by a candidate, J =joint fundraising committee, P =principal campaign committee of a candidate, \
-            U =unauthorized, B =lobbyist/registrant PAC, D =leadership PAC'
+        description='The one-letter designation code of the organization:\n\
+         - A authorized by a candidate\n\
+         - J joint fundraising committee\n\
+         - P principal campaign committee of a candidate\n\
+         - U unauthorized\n\
+         - B lobbyist/registrant PAC\n\
+         - D leadership PAC\n\
+        '
         ),
     'organization_type': Arg(str, multiple=True, enum=['', 'C', 'L', 'M', 'T', 'V', 'W'],
-        description='The one-letter code for the kind for organization: C = Corporation, L = Labor Organization, \
-        M = Membership Organization, T = Trade Association, V = Cooperative, W = Corporation Without Capital Stock,'),
+        description='The one-letter code for the kind for organization:\n\
+        - C corporation\n\
+        - L labor organization\n\
+        - M membership organization\n\
+        - T trade association\n\
+        - V cooperative\n\
+        - W corporation without capital stock\n\
+        '),
     'committee_type': Arg(str, multiple=True, enum=['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'],
-        description='The one-letter type code of the organization: C = Communication Cost, \
-            D = Delegate, E = Electioneering Communication, H = House, I = Independent Expenditor (Person or Group), \
-            N = PAC - Nonqualified, O = Independent Expenditure-Only (Super PACs), P = Presidential, Q = PAC - Qualified, \
-            S = Senate, U = Single Candidate Independent Expenditure,  V = PAC with Non-Contribution Account - Nonqualified, \
-            W = PAC with Non-Contribution Account - Qualified, X = Party - Nonqualified, Y = Party - Qualified \
-            Z = National Party Nonfederal Account'),
+        description='The one-letter type code of the organization:\n\
+        - C Communication Cost\n\
+        - D Delegate\n\
+        - E Electioneering Communication\n\
+        - H House\n\
+        - I Independent Expenditor (Person or Group)\n\
+        - N PAC - Nonqualified\n\
+        - O Independent Expenditure-Only (Super PACs)\n\
+        - P Presidential\n\
+        - Q PAC - Qualified\n\
+        - S Senate\n\
+        - U Single Candidate Independent Expenditure\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+        - Z national party nonfederal account\n\
+        '),
 }
 
 committee_list = {
