@@ -136,7 +136,7 @@ def _detect_space(branch=None, yes=False):
 
 DEPLOY_RULES = (
     ('prod', _detect_prod),
-    ('stage', lambda _, branch: branch == 'master'),
+    ('stage', lambda _, branch: branch == 'release'),
     ('dev', lambda _, branch: branch == 'develop'),
 )
 
