@@ -18,6 +18,8 @@ This API allows you to explore the vast array of campaign finance data that the 
 collects. Each endpoint focuses on a different aspect of disclosure.
 
 Information can tied to the underlying forms by file ID and image ID.
+
+[View source code](https://github.com/18F/openFEC). Issues and pull requests welcome!
 '''
 
 CANDIDATE_TAG = '''
