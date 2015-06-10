@@ -142,8 +142,10 @@ api.add_resource(
 )
 api.add_resource(
     candidates.CandidateHistoryView,
-    '/candidate/<string:candidate_id>/history/<int:cycle>',
     '/candidate/<string:candidate_id>/history',
+    '/candidate/<string:candidate_id>/history/<int:cycle>',
+    '/committee/<string:committee_id>/candidates/history',
+    '/committee/<string:committee_id>/candidates/history/<int:cycle>',
 )
 api.add_resource(committees.CommitteeList, '/committees')
 api.add_resource(
@@ -153,8 +155,8 @@ api.add_resource(
 )
 api.add_resource(
     committees.CommitteeHistoryView,
-    '/committee/<string:committee_id>/history/<int:cycle>',
     '/committee/<string:committee_id>/history',
+    '/committee/<string:committee_id>/history/<int:cycle>',
     '/candidate/<candidate_id>/committees/history',
     '/candidate/<candidate_id>/committees/history/<int:cycle>',
 )
