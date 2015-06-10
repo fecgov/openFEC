@@ -6,7 +6,6 @@ select
     factpresidential_f3p_sk as report_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
-    cmte_tp as committee_type,
     start_date.dw_date as coverage_start_date,
     end_date.dw_date as coverage_end_date,
     begin_image_num as beginning_image_number,
@@ -24,15 +23,20 @@ select
     fed_funds_ytd as federal_funds_ytd,
     fndrsg_disb_per as fundraising_disbursements_period,
     fndrsg_disb_ytd as fundraising_disbursements_ytd,
+    indv_unitem_contb_per as individual_unitemized_contributions_period,
+    indv_unitem_contb_ytd as individual_unitemized_contributions_ytd,
+    indv_item_contb_per as individual_itemized_contributions_period,
+    indv_item_contb_ytd as individual_itemized_contributions_ytd,
     indv_contb_per as individual_contributions_period,
     indv_contb_ytd as individual_contributions_ytd,
     items_on_hand_liquidated as items_on_hand_liquidated,
     loans_received_from_cand_per as loans_received_from_candidate_period,
     loans_received_from_cand_ytd as loans_received_from_candidate_ytd,
-    net_contb_sum_page_per as net_contribution_summary_period,
-    net_op_exp_sum_page_per as net_operating_expenses_summary_period,
+    net_contb_sum_page_per as net_contributions_period,
+    net_op_exp_sum_page_per as net_operating_expenditures_period,
     offsets_to_fndrsg_exp_ytd as offsets_to_fundraising_exp_ytd,
-    offsets_to_fndrsg_exp_per as offsets_to_fundraising_expenses_period,
+    offsets_to_fndrsg_exp_per as offsets_to_fundraising_expenditures_period,
+    offsets_to_fndrsg_exp_ytd as offsets_to_fundraising_expenditures_ytd,
     offsets_to_legal_acctg_per as offsets_to_legal_accounting_period,
     offsets_to_legal_acctg_ytd as offsets_to_legal_accounting_ytd,
     offsets_to_op_exp_per as offsets_to_operating_expenditures_period,
@@ -49,12 +53,12 @@ select
     other_receipts_ytd as other_receipts_ytd,
     pol_pty_cmte_contb_per as political_party_committee_contributions_period,
     pol_pty_cmte_contb_ytd as political_party_committee_contributions_ytd,
+    ref_indv_contb_per as refunded_individual_contributions_period,
     ref_indv_contb_ytd as refunded_individual_contributions_ytd,
     ref_other_pol_cmte_contb_per as refunded_other_political_committee_contributions_period,
     ref_other_pol_cmte_contb_ytd as refunded_other_political_committee_contributions_ytd,
     ref_pol_pty_cmte_contb_per as refunded_political_party_committee_contributions_period,
     ref_pol_pty_cmte_contb_ytd as refunded_political_party_committee_contributions_ytd,
-    ref_indv_contb_per as refunds_individual_contributions_period,
     repymts_loans_made_by_cand_per as repayments_loans_made_by_candidate_period,
     repymts_loans_made_cand_ytd as repayments_loans_made_candidate_ytd,
     repymts_other_loans_per as repayments_other_loans_period,
@@ -65,8 +69,7 @@ select
     ttl_contb_ref_ytd as total_contribution_refunds_ytd,
     ttl_contb_per as total_contributions_period,
     ttl_contb_ytd as total_contributions_ytd,
-    ttl_disb_per as total_disbursements_period,
-    ttl_disb_sum_page_per as total_disbursements_summary_period,
+    coalesce(ttl_disb_per, ttl_disb_sum_page_per) as total_disbursements_period,
     ttl_disb_ytd as total_disbursements_ytd,
     ttl_loan_repymts_made_per as total_loan_repayments_made_period,
     ttl_loan_repymts_made_ytd as total_loan_repayments_made_ytd,
@@ -75,8 +78,7 @@ select
     ttl_offsets_to_op_exp_per as total_offsets_to_operating_expenditures_period,
     ttl_offsets_to_op_exp_ytd as total_offsets_to_operating_expenditures_ytd,
     ttl_per as total_period,
-    ttl_receipts_per as total_receipts_period,
-    ttl_receipts_sum_page_per as total_receipts_summary_period,
+    coalesce(ttl_receipts_per, ttl_receipts_sum_page_per) as total_receipts_period,
     ttl_receipts_ytd as total_receipts_ytd,
     ttl_ytd as total_ytd,
     tranf_from_affilated_cmte_per as transfer_from_affiliated_committee_period,
@@ -89,14 +91,21 @@ select
     f3p.load_date as load_date
 from
     dimcmte c
-    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join factpresidential_f3p f3p using (cmte_sk)
     inner join dimreporttype rt using (reporttype_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+where
+    two_yr_period_sk >= :START_YEAR
+    and f3p.expire_date is null
 ;
 
 create unique index on ofec_reports_presidential_mv_tmp(idx);
 
 create index on ofec_reports_presidential_mv_tmp(cycle);
+create index on ofec_reports_presidential_mv_tmp(report_type);
+create index on ofec_reports_presidential_mv_tmp(report_year);
 create index on ofec_reports_presidential_mv_tmp(committee_id);
+create index on ofec_reports_presidential_mv_tmp(coverage_end_date);
+create index on ofec_reports_presidential_mv_tmp(coverage_start_date);
+create index on ofec_reports_presidential_mv_tmp(beginning_image_number);

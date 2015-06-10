@@ -6,7 +6,6 @@ select
     facthousesenate_f3_sk as report_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
-    cmte_tp as committee_type,
     start_date.dw_date as coverage_start_date,
     end_date.dw_date as coverage_end_date,
     agr_amt_pers_contrib_gen as aggregate_amount_personal_contributions_general,
@@ -17,8 +16,7 @@ select
     cand_contb_per as candidate_contribution_period,
     cand_contb_ytd as candidate_contribution_ytd,
     coh_bop as cash_on_hand_beginning_period,
-    coh_cop_i as cash_on_hand_end_period,
-    -- TODO: find out which is the right one to use: coh_cop_ii as cash_on_hand_end_period,
+    coalesce(coh_cop_i, coh_cop_ii) as cash_on_hand_end_period,
     debts_owed_by_cmte as debts_owed_by_committee,
     debts_owed_to_cmte as debts_owed_to_committee,
     end_image_num as end_image_number,
@@ -50,12 +48,12 @@ select
     other_receipts_ytd as other_receipts_ytd,
     pol_pty_cmte_contb_per as political_party_committee_contributions_period,
     pol_pty_cmte_contb_ytd as political_party_committee_contributions_ytd,
-    ref_indv_contb_per as refunds_individual_contributions_period,
-    ref_indv_contb_ytd as refunds_individual_contributions_ytd,
-    ref_other_pol_cmte_contb_per as refunds_other_political_committee_contributions_period,
-    ref_other_pol_cmte_contb_ytd as refunds_other_political_committee_contributions_ytd,
-    ref_pol_pty_cmte_contb_per as refunds_political_party_committee_contributions_period,
-    ref_pol_pty_cmte_contb_ytd as refunds_political_party_committee_contributions_ytd,
+    ref_indv_contb_per as refunded_individual_contributions_period,
+    ref_indv_contb_ytd as refunded_individual_contributions_ytd,
+    ref_other_pol_cmte_contb_per as refunded_other_political_committee_contributions_period,
+    ref_other_pol_cmte_contb_ytd as refunded_other_political_committee_contributions_ytd,
+    ref_pol_pty_cmte_contb_per as refunded_political_party_committee_contributions_period,
+    ref_pol_pty_cmte_contb_ytd as refunded_political_party_committee_contributions_ytd,
     ref_ttl_contb_col_ttl_ytd as refunds_total_contributions_col_total_ytd,
     rpt_yr as report_ytd,
     subttl_per as subtotal_period,
@@ -65,8 +63,7 @@ select
     ttl_contb_column_ttl_per as total_contributions_column_total_period,
     ttl_contb_per as total_contributions_period,
     ttl_contb_ytd as total_contributions_ytd,
-    ttl_disb_per_i as total_disbursements_period,
-    --ttl_disb_per_ii as total_disbursements_period,
+    coalesce(ttl_disb_per_i, ttl_disb_per_ii) as total_disbursements_period,
     ttl_disb_ytd as total_disbursements_ytd,
     ttl_indv_contb_per as total_individual_contributions_period,
     ttl_indv_contb_ytd as total_individual_contributions_ytd,
@@ -80,8 +77,7 @@ select
     ttl_offsets_to_op_exp_ytd as total_offsets_to_operating_expenditures_ytd,
     ttl_op_exp_per as total_operating_expenditures_period,
     ttl_op_exp_ytd as total_operating_expenditures_ytd,
-    ttl_receipts_ii as total_receipts,
-    ttl_receipts_per_i as total_receipts_period,
+    coalesce(ttl_receipts_per_i, ttl_receipts_ii) as total_receipts_period,
     ttl_receipts_ytd as total_receipts_ytd,
     tranf_from_other_auth_cmte_per as transfers_from_other_authorized_committee_period,
     tranf_from_other_auth_cmte_ytd as transfers_from_other_authorized_committee_ytd,
@@ -94,14 +90,21 @@ select
     f3.load_date as load_date
 from
     dimcmte c
-    inner join dimcmtetpdsgn ctd using (cmte_sk)
     inner join facthousesenate_f3 f3 using (cmte_sk)
     inner join dimreporttype rt using (reporttype_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+where
+    two_yr_period_sk >= :START_YEAR
+    and f3.expire_date is null
 ;
 
 create unique index on ofec_reports_house_senate_mv_tmp(idx);
 
 create index on ofec_reports_house_senate_mv_tmp(cycle);
+create index on ofec_reports_house_senate_mv_tmp(report_type);
+create index on ofec_reports_house_senate_mv_tmp(report_year);
 create index on ofec_reports_house_senate_mv_tmp(committee_id);
+create index on ofec_reports_house_senate_mv_tmp(coverage_end_date);
+create index on ofec_reports_house_senate_mv_tmp(coverage_start_date);
+create index on ofec_reports_house_senate_mv_tmp(beginning_image_number);
