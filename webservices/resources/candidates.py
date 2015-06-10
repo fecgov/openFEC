@@ -149,6 +149,12 @@ class CandidateView(Resource):
             'description': docs.CANDIDATE_ID,
         },
         {
+            'name': 'committee_id',
+            'type': 'string',
+            'in': 'path',
+            'description': docs.COMMITTEE_ID,
+        },
+        {
             'name': 'cycle',
             'type': 'integer',
             'in': 'path',
@@ -160,12 +166,25 @@ class CandidateHistoryView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.make_sort_args(default=['-two_year_period']))
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
-    def get(self, candidate_id, cycle=None, **kwargs):
-        query = self.get_candidate(candidate_id, cycle, kwargs)
+    def get(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
+        query = self.get_candidate(candidate_id, committee_id, cycle, kwargs)
         return utils.fetch_page(query, kwargs)
 
-    def get_candidate(self, candidate_id, cycle, kwargs):
-        query = models.CandidateHistory.query.filter(models.CandidateHistory.candidate_id == candidate_id)
+    def get_candidate(self, candidate_id, committee_id, cycle, kwargs):
+        query = models.CandidateHistory.query
+
+        if candidate_id:
+            query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
+
+        if committee_id:
+            query = query.join(
+                models.CandidateCommitteeLink,
+                models.CandidateCommitteeLink.candidate_key == models.CandidateHistory.candidate_key,
+            ).filter(
+                models.CandidateCommitteeLink.committee_id == committee_id
+            )
+
         if cycle:
             query = query.filter(models.CandidateHistory.two_year_period == cycle)
+
         return query
