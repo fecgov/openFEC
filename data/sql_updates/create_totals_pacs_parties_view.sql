@@ -7,6 +7,7 @@ select
     min(start_date.dw_date) as coverage_start_date,
     max(end_date.dw_date) as coverage_end_date,
     sum(all_loans_received_per) as all_loans_received,
+    sum(shared_fed_actvy_nonfed_per) as allocated_federal_election_levin_share,
     sum(coalesce(ttl_contb_ref_per_i, ttl_contb_ref_per_ii)) as contribution_refunds,
     sum(ttl_contb_per) as contributions,
     sum(coord_exp_by_pty_cmte_per) as coordinated_expenditures_by_party_committee,
