@@ -16,9 +16,3 @@ def filter_query(model, query, fields, kwargs):
         column = getattr(model, field)
         query = query.filter(column.in_(value))
     return query
-
-def make_pdf_url(imagenumber):
-    return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-                str(self.beginning_image_number)[-3:],
-                self.beginning_image_number,
-            )
