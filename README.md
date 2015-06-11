@@ -177,6 +177,9 @@ new records are added):
 * Delete previous development instance
 * Rinse and repeat for staging
 
+**Important**: Verify that all newly created snapshots are tagged with the same client
+as the production instance.
+
 ### Testing
 
 #### Creating a new test database
