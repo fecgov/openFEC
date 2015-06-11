@@ -67,7 +67,8 @@ Assuming you ran the bootstrap script, you can launch the API and the Web App wi
 The site can be found at [http://localhost:3000](http://localhost:3000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant). Remember the username and password you created when running the script.
 
 ### Deployment
-##### Likely only useful for 18Fers
+
+#### Likely only useful for 18Fers
 To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
 Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
 
@@ -96,6 +97,42 @@ the following keys are set:
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
     $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+
+#### Git-flow and continuous deployment
+
+We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed
+through Travis CI accordingly.
+
+##### To create a new feature:
+* Developer creates a feature branch
+
+        $ git flow feature start my-feature
+
+* Reviewer merges feature branch into develop and pushes to origin
+* [auto] Develop is deployed to dev
+
+##### To create a hotfix:
+* Developer creates a hotfix branch
+
+        $ git flow hotfix start my-hotfix
+
+* Reviewer merges hotfix branch into develop and master and pushes to origin
+* [auto] Develop is deployed to dev
+* [auto] Master is deployed to prod
+
+##### To create a release:
+* Developer creates a release branch and pushes to origin
+
+        $ git flow release start my-release
+        $ git flow release publish my-release
+
+* [auto] Release is deployed to stage
+* Review of staging
+* Developer merges release branch into master and pushes to origin
+
+        $ git flow release finish my-release
+
+* [auto] Master is deployed to prod
 
 ### Testing
 
