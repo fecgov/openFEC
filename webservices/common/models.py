@@ -495,6 +495,7 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     __tablename__ = 'ofec_totals_pacs_parties_mv'
 
     all_loans_received = db.Column(db.Integer)
+    allocated_federal_election_levin_share = db.Column(db.Integer)
     coordinated_expenditures_by_party_committee = db.Column(db.Integer)
     fed_candidate_committee_contributions = db.Column(db.Integer)
     fed_candidate_contribution_refunds = db.Column(db.Integer)
