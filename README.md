@@ -134,6 +134,52 @@ through Travis CI accordingly.
 
 * [auto] Master is deployed to prod
 
+#### Data for development and staging environments
+
+Note: The following can be automated using Boto or the AWS CLI if we continue on with this model and need
+to update snapshots frequently.
+
+The production environment uses an RDS instance that receives streaming updates from the FEC database.
+The development and staging environments use separate RDS instances that are created from snapshots of
+the primary instance. To update the development and staging instances (e.g. when schemas change or
+new records are added):
+
+* Create a new snapshot of the production data
+
+        RDS :: Instances :: fec-goldengate-target :: Take DB Snapshot
+
+* Restore the snapshot to a new development RDS
+
+        RDS :: Snapshots :: <snapshot-name> :: Restore Snapshot
+
+    * DB Instance Class: db.m3.medium
+    * Multi-AZ Deployment: No
+    * Storage Type: General Purpose
+    * DB Instance Identifier: fec-goldengate-dev-YYYY-mm-dd
+    * VPC: Not in VPC
+
+* Add the new instance to the FEC security group
+
+        RDS :: Instances :: <instance-name> :: Modify
+
+    * Security Group: fec-open
+    * Apply Immediately
+
+* Configure DNS to point to new instance
+        
+        Route 53 :: Hosted Zones :: open.fec.gov :: goldengate-dev.open.fec.gov
+
+    * Value: <instance-endpoint>
+        * Example: fec-goldengate-dev-YYYY-mm-dd...rds.amazonaws.com
+
+* Wait up to `TTL` seconds for DNS records to propagate
+* Verify that new instance is reachable at goldengate-dev.open.fec.gov
+* Delete previous development instance
+* Rinse and repeat for staging
+
+**Important**: Verify that all newly created snapshots are tagged with the same client
+as the production instance.
+
 ### Testing
 
 #### Creating a new test database
