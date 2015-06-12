@@ -8,3 +8,4 @@ env:
   PRODUCTION: True
   NEW_RELIC_APP_NAME: OpenFEC API (production)
   NEW_RELIC_ENV: development
+  FEC_CACHE_AGE: 3600
