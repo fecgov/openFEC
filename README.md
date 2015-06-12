@@ -139,10 +139,9 @@ through Travis CI accordingly.
 Note: The following can be automated using Boto or the AWS CLI if we continue on with this model and need
 to update snapshots frequently.
 
-The production environment uses an RDS instance that receives streaming updates from the FEC database.
-The development and staging environments use separate RDS instances that are created from snapshots of
-the primary instance. To update the development and staging instances (e.g. when schemas change or
-new records are added):
+The production and staging environments use RDS instances that receive streaming updates from the FEC database.
+The development environment uses a separate RDS instance created from a snapshot of the production instance.
+To update the development instance (e.g. when schemas change or new records are added):
 
 * Create a new snapshot of the production data
 
@@ -166,7 +165,7 @@ new records are added):
     * Apply Immediately
 
 * Configure DNS to point to new instance
-        
+
         Route 53 :: Hosted Zones :: open.fec.gov :: goldengate-dev.open.fec.gov
 
     * Value: <instance-endpoint>
@@ -175,9 +174,8 @@ new records are added):
 * Wait up to `TTL` seconds for DNS records to propagate
 * Verify that new instance is reachable at goldengate-dev.open.fec.gov
 * Delete previous development instance
-* Rinse and repeat for staging
 
-**Important**: Verify that all newly created snapshots are tagged with the same client
+**Important**: Verify that all newly created instances are tagged with the same client
 as the production instance.
 
 ### Testing
