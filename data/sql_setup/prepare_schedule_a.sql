@@ -16,7 +16,7 @@ select
 from sched_a
 ;
 
-create unique index on ofec_sched_a_fulltext (sched_a_sk);
+alter table ofec_sched_a_fulltext add primary key (sched_a_sk);
 create index on ofec_sched_a_fulltext using gin (contributor_name_text);
 create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
 create index on ofec_sched_a_fulltext using gin (contributor_occupation_text);
