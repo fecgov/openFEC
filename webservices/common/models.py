@@ -624,3 +624,12 @@ class ScheduleA(db.Model):
     filing_form = db.Column(db.String)
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+
+
+class ScheduleASearch(db.Model):
+    __tablename__ = 'ofec_sched_a_fulltext'
+
+    sched_a_sk = db.Column(db.Integer, primary_key=True)
+    contributor_name_text = db.Column(TSVECTOR)
+    contributor_employer_text = db.Column(TSVECTOR)
+    contributor_occupation_text = db.Column(TSVECTOR)
