@@ -80,10 +80,18 @@ def limit_remote_addr():
 
 
 @app.after_request
-def after_request(response):
+def add_cors_headers(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Methods', 'GET')
     response.headers.add('Access-Control-Max-Age', '3000')
+    return response
+
+
+@app.after_request
+def add_caching_headers(response):
+    max_age = os.getenv('FEC_CACHE_AGE')
+    if max_age is not None:
+        response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
     return response
 
 
