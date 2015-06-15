@@ -183,29 +183,19 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_year_filter_skips_null_first_file_date(self):
         # Build fixtures
-        committee_id = 'concannon'
         dates = [
             datetime.datetime(2012, 1, 1),
             datetime.datetime(2015, 1, 1),
         ]
-        partial = functools.partial(factories.CommitteeFactory, committee_id=committee_id)
         [
-            partial(first_file_date=None, last_file_date=None),
-            partial(first_file_date=dates[0], last_file_date=None),
-            partial(first_file_date=None, last_file_date=dates[1]),
-            partial(first_file_date=dates[0], last_file_date=dates[1]),
+            factories.CommitteeFactory(first_file_date=None, last_file_date=None),
+            factories.CommitteeFactory(first_file_date=dates[0], last_file_date=None),
+            factories.CommitteeFactory(first_file_date=None, last_file_date=dates[1]),
+            factories.CommitteeFactory(first_file_date=dates[0], last_file_date=dates[1]),
         ]
 
         # Check committee list results
         results = self._results(api.url_for(CommitteeList, year=2013))
-        self.assertEqual(len(results), 2)
-        for each in results:
-            self.assertIsNotNone(each['first_file_date'])
-
-        # Check committee detail results
-        results = self._results(
-            api.url_for(CommitteeView, committee_id=committee_id, year=2013)
-        )
         self.assertEqual(len(results), 2)
         for each in results:
             self.assertIsNotNone(each['first_file_date'])

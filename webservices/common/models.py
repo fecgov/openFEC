@@ -1,5 +1,8 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+from sqlalchemy.ext.declarative import declared_attr
+
+from webservices import utils
 
 
 db = SQLAlchemy()
@@ -104,7 +107,7 @@ class BaseCommittee(BaseModel):
     __abstract__ = True
 
     committee_key = db.Column(db.Integer, unique=True)
-    committee_id = db.Column(db.String(9))
+    committee_id = db.Column(db.String)
     cycles = db.Column(ARRAY(db.Integer))
     designation = db.Column(db.String(1))
     designation_full = db.Column(db.String(25))
@@ -221,7 +224,8 @@ class CommitteeReports(BaseModel):
     __abstract__ = True
 
     report_key = db.Column(db.BigInteger)
-    committee_id = db.Column(db.String(10))
+    committee_id = db.Column(db.String)
+    committee_key = db.Column(db.Integer)
     cycle = db.Column(db.Integer)
 
     beginning_image_number = db.Column(db.BigInteger)
@@ -263,15 +267,13 @@ class CommitteeReports(BaseModel):
     offsets_to_operating_expenditures_period = db.Column(db.Integer)
     offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
 
-    @property
-    def pdf_url(self):
-        if self.report_year is not None and self.report_year > 1994:
-            return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-                str(self.beginning_image_number)[-3:],
-                self.beginning_image_number,
-            )
-        else:
-            return None
+    @declared_attr
+    def committee_key(cls):
+        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_key'))
+
+    @declared_attr
+    def committee(cls):
+        return db.relationship('CommitteeDetail')
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
@@ -319,6 +321,18 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
+
+    @property
+    def pdf_url(self):
+        if self.report_year is None or self.committee is None:
+            return None
+        # House records start May 1996
+        if self.committee.committee_type == 'H' and self.report_year < 1996:
+            return None
+        # Senate records start May 2000
+        elif self.committee.committee_type == 'S' and self.report_year < 2000:
+            return None
+        return utils.make_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -389,6 +403,13 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_to_affiliated_committee_period = db.Column(db.Integer)
     transfers_to_affilitated_committees_ytd = db.Column(db.Integer)
 
+    @property
+    # PAC, Party and Presidential records start May 1993
+    def pdf_url(self):
+        if self.report_year is None or self.report_year < 1993:
+            return None
+        return utils.make_pdf_url(self.beginning_image_number)
+
 
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
@@ -437,11 +458,18 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfer_to_other_authorized_committee_period = db.Column(db.Integer)
     transfer_to_other_authorized_committee_ytd = db.Column(db.Integer)
 
+    @property
+    # PAC, Party and Presidential records start May 1993
+    def pdf_url(self):
+        if self.report_year is None or self.report_year < 1993:
+            return None
+        return utils.make_pdf_url(self.beginning_image_number)
+
 
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String(10))
+    committee_id = db.Column(db.String)
     cycle = db.Column(db.Integer, primary_key=True)
     offsets_to_operating_expenditures = db.Column(db.Integer)
     political_party_committee_contributions = db.Column(db.Integer)
