@@ -15,7 +15,7 @@ This API allows you to explore the way candidates and committees fund their camp
 This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
 we’re actively working on it and adding new features. The official site for FEC
 data is still the [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml).
-While we plan on versioning any breaking changes, expect things to change as the
+While we plan on versioning any changes that are not backwards compatible, expect things to change as the
 API develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
