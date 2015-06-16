@@ -11,6 +11,13 @@ A unique identifier assigned to each committee or filer registered with the FEC.
 
 DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
+
+This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
+we’re actively working on it and adding new features. The official site for FEC
+data is still the [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml).
+While we plan on versioning any breaking changes, expect things to change as the
+API develops.
+
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 Federal Election Commission (FEC) data.
 
