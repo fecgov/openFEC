@@ -246,7 +246,7 @@ here, _ = os.path.split(__file__)
 docs = Blueprint(
     'docs',
     __name__,
-    static_folder=os.path.join(here, os.pardir, 'node_modules', 'swagger-ui'),
+    static_folder=os.path.join(here, os.pardir, 'node_modules', 'swagger-ui', 'dist'),
     static_url_path='/docs/static',
 )
 
@@ -258,7 +258,7 @@ def api_spec():
 
 @docs.add_app_template_global
 def swagger_static(filename):
-    return url_for('docs.static', filename='dist/{0}'.format(filename))
+    return url_for('docs.static', filename=filename)
 
 
 @docs.route('/developers')
