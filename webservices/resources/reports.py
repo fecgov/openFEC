@@ -13,6 +13,9 @@ reports_schema_map = {
     'P': (models.CommitteeReportsPresidential, schemas.CommitteeReportsPresidentialPageSchema),
     'H': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
+    # 'C': (models.CommitteeReportsIEOnly, ),
+    # 'E': (models.CommitteeReportsIEOnly, ),
+    # 'I': (models.CommitteeReportsIEOnly, ),
 }
 default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
 
