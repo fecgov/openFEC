@@ -213,6 +213,16 @@ CommitteeReportsPacPartyPageSchema = make_page_schema(CommitteeReportsPacPartySc
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 
+make_ie_reports_schema = functools.partial(
+    make_schema,
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'committee_type': 'I',
+    },
+    options={'exclude': ('idx', 'report_key', 'committee')},
+)
+CommitteeReportsIEOnlySchema = make_ie_reports_schema(
+    models.CommitteeReportsIEOnly)
 
 CommitteeTotalsSchema = make_schema(
     models.CommitteeTotalsPresidential,
