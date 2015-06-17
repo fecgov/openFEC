@@ -15,6 +15,17 @@ from webservices.rest import app, db
 from webservices.common.util import get_full_path
 
 
+def get_cycle_start(year):
+    """Round year down to the first year of the two-year election cycle. Used
+    when filtering original data for election cycle.
+    """
+    return year if year % 2 == 1 else year - 1
+
+
+SQL_CONFIG = {
+    'START_YEAR': get_cycle_start(1980),
+}
+
 manager = Manager(app)
 
 # The Flask app server should only be used for local testing, so we default to
@@ -24,13 +35,16 @@ manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
 def execute_sql_file(path):
+    # This helper is typically used within a multiprocessing pool; create a new database
+    # engine for each job.
+    db.engine.dispose()
     print(('Running {}'.format(path)))
     with open(path) as fp:
         cmd = '\n'.join([
             line for line in fp.readlines()
             if not line.startswith('--')
         ])
-        db.engine.execute(sqla_text(cmd))
+        db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
 
 
 def execute_sql_folder(path, processes):
@@ -41,10 +55,29 @@ def execute_sql_folder(path, processes):
 
 
 @manager.command
+def load_pacronyms():
+    count = db.engine.execute(
+        "select count(*) from pg_tables where tablename = 'pacronyms'"
+    ).fetchone()[0]
+    if count:
+        db.engine.execute(
+            'delete from pacronyms'
+        )
+    cmd = ' | '.join([
+        'in2csv data/pacronyms.xlsx',
+        'csvsql --insert --db {dest} --table pacronyms'
+    ]).format(dest=db.engine.url)
+    if count:
+        cmd += ' --no-create'
+    subprocess.call(cmd, shell=True)
+
+
+@manager.command
 def update_schemas(processes=2):
     print("Starting DB refresh...")
     processes = int(processes)
-    execute_sql_folder('data/sql_prep/', processes=processes)
+    load_pacronyms()
+    execute_sql_folder('data/functions/', processes=processes)
     execute_sql_folder('data/sql_updates/', processes=processes)
     execute_sql_file('data/rename_temporary_views.sql')
     print("Finished DB refresh.")

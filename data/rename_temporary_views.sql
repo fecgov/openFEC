@@ -12,7 +12,7 @@ RETURNS INT AS $$
     LOOP
       RAISE NOTICE 'Renaming %.%', schema_arg, view.matviewname;
       view_name := replace(view.matviewname, suffix, '');
-      EXECUTE 'DROP MATERIALIZED VIEW IF EXISTS ' || schema_arg || '.' || view_name;
+      EXECUTE 'DROP MATERIALIZED VIEW IF EXISTS ' || schema_arg || '.' || view_name || ' CASCADE';
       EXECUTE 'ALTER MATERIALIZED VIEW ' || schema_arg || '.' || view.matviewname || ' RENAME TO ' || view_name;
     END LOOP;
     RETURN 1;
