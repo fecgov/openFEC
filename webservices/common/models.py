@@ -484,6 +484,13 @@ class CommitteeReportsIEOnly(BaseModel):
     report_type = db.Column(db.String)
     report_type_full = db.Column(db.String)
 
+    @property
+    # PAC, Party and Presidential records start May 1993
+    def pdf_url(self):
+        if self.report_year is None or self.report_year < 1993:
+            return None
+        return utils.make_pdf_url(self.beginning_image_number)
+
 
 class CommitteeTotals(BaseModel):
     __abstract__ = True
