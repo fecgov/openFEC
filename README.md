@@ -1,5 +1,11 @@
 # openFEC
 
+[![Build Status](https://travis-ci.org/18F/openFEC.svg?branch=master)](https://travis-ci.org/18F/openFEC)
+[![Code Climate](https://codeclimate.com/github/18F/openFEC/badges/gpa.svg)](https://codeclimate.com/github/18F/openFEC)
+[![Test Coverage](http://codecov.io/github/18F/openFEC/coverage.svg?branch=develop)](http://codecov.io/github/18F/openFEC?branch=develop)
+[![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
+![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)
+
 We are taking data from the Federal Election Commission and creating an API around it. We will be harmonizing/cleaning it up to make it easier for external developers to use and analyze as well as creating a web application to make some analyzation and comparison of the data easier.
 
 **Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
@@ -59,3 +65,152 @@ Assuming you ran the bootstrap script, you can launch the API and the Web App wi
     $ tmuxinator fec-local
 
 The site can be found at [http://localhost:3000](http://localhost:3000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant). Remember the username and password you created when running the script.
+
+### Deployment
+
+#### Likely only useful for 18Fers
+To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
+Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
+
+    $ invoke deploy --space dev
+
+The `deploy` task will use the `FEC_CF_USERNAME` and `FEC_CF_PASSWORD` environment variables to log in.
+If these variables are not provided, you will be prompted for your Cloud Foundry credentials.
+
+Credentials for Cloud Foundry applications are managed using user-provided services labeled as
+"fec-creds-prod", "fec-creds-stage", and "fec-creds-dev". Services are used to share credentials across
+blue and green versions of blue-green deploys, and between the API and the webapp. To set up a service:
+
+    $ cf target -s dev
+    $ cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
+
+To stand up a user-provided credential service that supports both the API and the webapp, ensure that
+the following keys are set:
+
+* SQLA_CONN
+* FEC_WEB_USERNAME
+* FEC_WEB_PASSWORD
+* FEC_WEB_API_KEY
+* FEC_WEB_API_KEY_PUBLIC
+* NEW_RELIC_LICENSE_KEY
+
+Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
+
+    $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+
+#### Git-flow and continuous deployment
+
+We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed
+through Travis CI accordingly.
+
+##### To create a new feature:
+* Developer creates a feature branch
+
+        $ git flow feature start my-feature
+
+* Reviewer merges feature branch into develop and pushes to origin
+* [auto] Develop is deployed to dev
+
+##### To create a hotfix:
+* Developer creates a hotfix branch
+
+        $ git flow hotfix start my-hotfix
+
+* Reviewer merges hotfix branch into develop and master and pushes to origin
+* [auto] Develop is deployed to dev
+* [auto] Master is deployed to prod
+
+##### To create a release:
+* Developer creates a release branch and pushes to origin
+
+        $ git flow release start my-release
+        $ git flow release publish my-release
+
+* [auto] Release is deployed to stage
+* Review of staging
+* Developer merges release branch into master and pushes to origin
+
+        $ git flow release finish my-release
+
+* [auto] Master is deployed to prod
+
+#### Data for development and staging environments
+
+Note: The following can be automated using Boto or the AWS CLI if we continue on with this model and need
+to update snapshots frequently.
+
+The production and staging environments use RDS instances that receive streaming updates from the FEC database.
+The development environment uses a separate RDS instance created from a snapshot of the production instance.
+To update the development instance (e.g. when schemas change or new records are added):
+
+* Create a new snapshot of the production data
+
+        RDS :: Instances :: fec-goldengate-target :: Take DB Snapshot
+
+* Restore the snapshot to a new development RDS
+
+        RDS :: Snapshots :: <snapshot-name> :: Restore Snapshot
+
+    * DB Instance Class: db.m3.medium
+    * Multi-AZ Deployment: No
+    * Storage Type: General Purpose
+    * DB Instance Identifier: fec-goldengate-dev-YYYY-mm-dd
+    * VPC: Not in VPC
+
+* Add the new instance to the FEC security group
+
+        RDS :: Instances :: <instance-name> :: Modify
+
+    * Security Group: fec-open
+    * Apply Immediately
+
+* Configure DNS to point to new instance
+
+        Route 53 :: Hosted Zones :: open.fec.gov :: goldengate-dev.open.fec.gov
+
+    * Value: <instance-endpoint>
+        * Example: fec-goldengate-dev-YYYY-mm-dd...rds.amazonaws.com
+
+* Wait up to `TTL` seconds for DNS records to propagate
+* Verify that new instance is reachable at goldengate-dev.open.fec.gov
+* Delete previous development instance
+
+**Important**: Verify that all newly created instances are tagged with the same client
+as the production instance.
+
+### Testing
+
+#### Creating a new test database
+
+    $ createdb cfdm_test
+    $ psql -f data/subset.sql cfdm_test
+    $ ./manage.py update_schemas
+
+#### Running the Tests
+
+    $ nosetests
+
+#### The Test Data Subset
+
+This repo includes a small subset of the production database (built 2015/05/05) at `data/subset.sql`. To use the test subset for local development:
+
+    $ psql -f data/subset.sql <dest>
+
+To build a new test subset, use the `build_test` invoke task:
+
+    $ invoke build_test <source> <dest>
+
+where both `source` and `dest` are valid PostgreSQL connection strings.
+
+### Git Hooks
+
+This repo includes optional post-merge and post-checkout hooks to ensure that
+dependencies are up to date. If enabled, these hooks will update Python
+dependencies on checking out or merging changes to `requirements.txt`. To
+enable the hooks, run
+
+    $ invoke add_hooks
+
+To disable, run
+
+    $ invoke remove_hooks

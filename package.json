@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+     "swagger-ui": "git://github.com/18F/swagger-ui.git"
+  }
+}
