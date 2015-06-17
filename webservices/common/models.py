@@ -466,6 +466,25 @@ class CommitteeReportsPresidential(CommitteeReports):
         return utils.make_pdf_url(self.beginning_image_number)
 
 
+# Other reports are based on form 3, 3x, 3P
+# This is based on form 5
+class CommitteeReportsIEOnly(BaseModel):
+    __tablename__ = 'ofec_totals_independent_mv'
+
+    beginning_image_number = db.Column(db.BigInteger)
+    committee_id = db.Column(db.String)
+    cycle = db.Column(db.Integer)
+    coverage_start_date = db.Column(db.DateTime())
+    coverage_end_date = db.Column(db.DateTime())
+    election_type = db.Column(db.String)
+    election_type_full = db.Column(db.String)
+    report_year = db.Column(db.Integer)
+    total_independent_contributions = db.Column(db.Integer)
+    total_independent_expenditures = db.Column(db.Integer)
+    report_type = db.Column(db.String)
+    report_type_full = db.Column(db.String)
+
+
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
