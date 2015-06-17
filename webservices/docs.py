@@ -31,7 +31,7 @@ Information can tied to the underlying forms by file ID and image ID.
 
 CANDIDATE_TAG = '''
 Candidate endpoints give you access to information about the people running for office.
-The information is organized by candidate_id. If you are not familiar with canidate_ids
+The information is organized by candidate_id. If you are not familiar with candidate_ids
 using  `/candidates/search` will help you locate a particular candidate.
 
 Officially, a candidate is an individual seeking nomination for election to a federal

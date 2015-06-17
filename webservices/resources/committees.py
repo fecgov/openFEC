@@ -134,8 +134,8 @@ class CommitteeView(Resource):
     tags=['committee'],
     description=docs.COMMITTEE_HISTORY,
     path_params=[
-        {'name': 'committee_id','description': 'A unique identifier assigned to each committee or filer registered with the FEC.', 'in': 'path', 'type': 'string'},
-        {'name': 'candidate_id','description': 'A unique identifier assigned to each candidate registered with the FEC. If a person runs for several offices, they will have separate candidate IDs for each office.', 'in': 'path', 'type': 'string'},
+        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
+        {'name': 'candidate_id', 'description': docs.CANDIDATE_ID, 'in': 'path', 'type': 'string'},
         {'name': 'cycle', 'in': 'path', 'type': 'integer'},
     ],
 )
