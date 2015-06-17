@@ -98,6 +98,22 @@ Deploys of a single app can be performed manually by targeting the env/space, an
 
     $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 
+#### Production stack
+
+The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
+an nginx reverse proxy. Static files are compressed and served directly through nginx;
+dynamic content is routed to the Flask application via `proxy_pass`. The entire application
+is served through the [API Umbrella](http://apiumbrella.io), which handles API keys,
+caching, and rate limiting.
+
+#### Caching
+
+All API responses are set to expire after one hour (`Cache-Control: public, max-age=3600`).
+In production, the [API Umbrella](http://apiumbrella.io) will check this response header
+and cache responses for the specified interval, such that repeated requests to a given
+endpoint will only reach the Flask application once. This means that responses may be
+stale for up to an hour following the nightly refresh of the materialized views.
+
 #### Git-flow and continuous deployment
 
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed
