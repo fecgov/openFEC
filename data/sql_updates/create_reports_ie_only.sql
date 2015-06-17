@@ -6,7 +6,6 @@ select
     cmte_id as committee_id,
     factindpexpcontb_f5_sk as key,
     form_5_sk as form_key,
-    rpt_tp as report_type,
     two_yr_period_sk as cycle,
     -- will this stay the same?
     transaction_sk as transaction_id,
@@ -22,8 +21,9 @@ select
     end_image_num as end_image_number,
     ief5.load_date as load_date,
     ief5.expire_date as expire_date,
-    rpt_tp as report_type,
-    electiontp as election_type,
+    rt.rpt_tp as report_type,
+    election_type_id as election_type,
+    election_type_desc as election_type_full,
     rpt_tp_desc as report_type_full
 from
     dimcmte c
@@ -33,7 +33,7 @@ from
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
-    two_yr_period_sk >= 1999--:START_YEAR
+    two_yr_period_sk >= :START_YEAR
     and ief5.expire_date is null
 ;
 
