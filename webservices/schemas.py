@@ -217,7 +217,6 @@ make_ie_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
-        'committee_type': 'I',
     },
     options={'exclude': ('idx', 'report_key', 'committee')},
 )
