@@ -13,6 +13,8 @@ totals_schema_map = {
     'P': (models.CommitteeTotalsPresidential, schemas.CommitteeTotalsPresidentialPageSchema),
     'H': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
     'S': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
+    'I': (models.CommitteeTotalsIEOnly, schemas.
+        CommitteeTotalsIEOnlyPageSchema)
 }
 default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
 
