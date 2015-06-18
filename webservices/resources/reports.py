@@ -53,8 +53,8 @@ def parse_types(types):
          'name': 'committee_type',
          'in': 'path',
          'type': 'string',
-         'description': 'House, Senate or presidential',
-         'enum': ['presidential', 'pac-party', 'house-senate'],
+         'description': 'House, Senate, Presidential, independent expenditure only',
+         'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
         },
     ],
 )
