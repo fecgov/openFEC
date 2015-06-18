@@ -234,8 +234,8 @@ class TestReports(ApiBaseTest):
         number = 12345678902
         report = factories.ReportsIEOnlyFactory(
             beginning_image_number=number,
-            total_independent_contributions=200,
-            total_independent_expenditures=100,
+            independent_contributions_period=200,
+            independent_expenditures_period=100,
         )
         results = self._results(
             api.url_for(
@@ -245,8 +245,8 @@ class TestReports(ApiBaseTest):
             )
         )
         self.assertEqual(
-            results[0]['total_independent_contributions'], report.total_independent_contributions
+            results[0]['independent_contributions_period'], report.independent_contributions_period
         )
         self.assertEqual(
-            results[0]['total_independent_expenditures'], report.total_independent_expenditures
+            results[0]['independent_expenditures_period'], report.independent_expenditures_period
         )
