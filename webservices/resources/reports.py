@@ -13,7 +13,8 @@ reports_schema_map = {
     'P': (models.CommitteeReportsPresidential, schemas.CommitteeReportsPresidentialPageSchema),
     'H': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
-    'I': (models.CommitteeReportsIEOnly, ),
+    'I': (models.CommitteeReportsIEOnly, schemas.
+        CommitteeReportsIEOnlySchema),
 }
 # We don't have report data for C and E yet
 default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
