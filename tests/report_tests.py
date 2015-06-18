@@ -231,20 +231,12 @@ class TestReports(ApiBaseTest):
         self.assertTrue(all(each['report_type'] in ['Q2', 'TER'] for each in results))
 
     def test_ie_only(self):
-        factories.ReportsIEOnlyFactory(
-            committee_id='C90013723',
-            total_independent_contributions=200,
-            total_independent_expenditures=100,
-        )
-        db.session.flush()
         number = 12345678902
-        factories.ReportsIEOnlyFactory(
+        report = factories.ReportsIEOnlyFactory(
             beginning_image_number=number,
             total_independent_contributions=200,
             total_independent_expenditures=100,
         )
-
-
         results = self._results(
             api.url_for(
                 ReportsView,
@@ -253,8 +245,8 @@ class TestReports(ApiBaseTest):
             )
         )
         self.assertEqual(
-            results[0]['total_independent_contributions'], 200
+            results[0]['total_independent_contributions'], report.total_independent_contributions
         )
         self.assertEqual(
-            results[0]['total_independent_expenditures'], 100
+            results[0]['total_independent_expenditures'], report.total_independent_expenditures
         )
