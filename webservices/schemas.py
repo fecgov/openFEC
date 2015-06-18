@@ -188,6 +188,7 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
+        'report_form': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
     },
     options={'exclude': ('idx', 'report_key', 'committee')},
@@ -213,13 +214,13 @@ CommitteeReportsPacPartyPageSchema = make_page_schema(CommitteeReportsPacPartySc
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 
-make_ie_reports_schema = (make_schema
+CommitteeReportsIEOnlySchema = make_schema(
+    models.CommitteeReportsIEOnly,
     fields={
         'pdf_url': ma.fields.Str(),
+        'report_form': ma.fields.Str(),
     },
 )
-CommitteeReportsIEOnlySchema = make_ie_reports_schema(
-    models.CommitteeReportsIEOnly)
 CommitteeReportsIEOnlyPageSchema =make_page_schema(CommitteeReportsIEOnlySchema)
 
 CommitteeTotalsSchema = make_schema(
