@@ -6,9 +6,15 @@ run with Python 2.
 
 import os
 import random
+import resource
 
 import furl
 import locust
+import requests
+
+
+# Avoid "Too many open files" error
+resource.setrlimit(resource.RLIMIT_NOFILE, (9999, 999999))
 
 
 WEB_URL = 'https://open.fec.gov'
@@ -41,19 +47,25 @@ TERMS = [
 ]
 
 
+def fetch_ids(endpoint, key):
+    url = furl.furl(API_URL)
+    url.path.add(endpoint)
+    url.args.update({
+        'per_page': 100,
+        'api_key': API_KEY,
+    })
+    resp = requests.get(url.url, auth=AUTH)
+    return [result[key] for result in resp.json()['results']]
+
+
+CANDIDATE_IDS = fetch_ids('candidates', 'candidate_id')
+COMMITTEE_IDS = fetch_ids('committees', 'committee_id')
+
+
 class Tasks(locust.TaskSet):
 
     def on_start(self):
         self.client.auth = AUTH
-        self.candidate_ids = self.fetch_ids('candidates', 'candidate_id')
-        self.committee_ids = self.fetch_ids('committees', 'committee_id')
-
-    def fetch_ids(self, endpoint, key):
-        url = furl.furl(API_URL)
-        url.path.add(endpoint)
-        url.args.update({'api_key': API_KEY})
-        resp = self.client.get(url.url)
-        return [result[key] for result in resp.json()['results']]
 
     @locust.task
     def load_home(self):
@@ -101,12 +113,12 @@ class Tasks(locust.TaskSet):
 
     @locust.task
     def load_candidate_detail(self, candidate_id=None):
-        candidate_id = candidate_id or random.choice(self.candidate_ids)
+        candidate_id = candidate_id or random.choice(CANDIDATE_IDS)
         self.client.get(os.path.join('/candidate', candidate_id), name='candidate_detail')
 
     @locust.task
     def load_committee_detail(self, committee_id=None):
-        committee_id = committee_id or random.choice(self.committee_ids)
+        committee_id = committee_id or random.choice(COMMITTEE_IDS)
         self.client.get(os.path.join('/committee', committee_id), name='committee_detail')
 
 

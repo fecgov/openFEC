@@ -91,7 +91,7 @@ select
     ttl_fed_op_exp_ytd as total_fed_operating_expenditures_ytd,
     ttl_fed_receipts_per as total_fed_receipts_period,
     ttl_fed_receipts_ytd as total_fed_receipts_ytd,
-    ttl_indv_contb as total_individual_contributions,
+    ttl_indv_contb as total_individual_contributions_period,
     ttl_indv_contb_ytd as total_individual_contributions_ytd,
     ttl_nonfed_tranf_per as total_nonfed_transfers_period,
     ttl_nonfed_tranf_ytd as total_nonfed_transfers_ytd,

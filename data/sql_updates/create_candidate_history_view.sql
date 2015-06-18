@@ -85,7 +85,8 @@ order by
     cycle desc,
     dcp.election_yr desc,
     dsi.election_yr desc,
-    co.cand_election_yr desc
+    co.cand_election_yr desc,
+    dcp.form_sk desc
 ;
 
 create unique index on ofec_candidate_history_mv_tmp(idx);
