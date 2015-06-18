@@ -469,7 +469,7 @@ class CommitteeReportsPresidential(CommitteeReports):
 # Other reports are based on form 3, 3x, 3P
 # This is based on form 5
 class CommitteeReportsIEOnly(BaseModel):
-    __tablename__ = 'ofec_totals_independent_mv'
+    __tablename__ = 'ofec_reports_ie_only'
 
     beginning_image_number = db.Column(db.BigInteger)
     committee_id = db.Column(db.String)
