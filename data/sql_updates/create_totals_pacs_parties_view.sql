@@ -22,6 +22,7 @@ select
     sum(indv_contb_ref_per) as refunded_individual_contributions,
     sum(indv_item_contb_per) as individual_itemized_contributions,
     sum(indv_unitem_contb_per) as individual_unitemized_contributions,
+    sum(ttl_indv_contb) as individual_contributions,
     sum(loan_repymts_made_per) as loan_repayments_made,
     sum(loan_repymts_received_per) as loan_repayments_received,
     sum(loans_made_per) as loans_made,

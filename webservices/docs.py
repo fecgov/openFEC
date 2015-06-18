@@ -11,6 +11,13 @@ A unique identifier assigned to each committee or filer registered with the FEC.
 
 DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
+
+This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
+we’re actively working on it and adding new features. The official site for FEC
+data is still the [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml).
+While we plan on versioning any changes that are not backwards compatible, expect things to change as the
+API develops.
+
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 Federal Election Commission (FEC) data.
 
@@ -24,7 +31,7 @@ Information can tied to the underlying forms by file ID and image ID.
 
 CANDIDATE_TAG = '''
 Candidate endpoints give you access to information about the people running for office.
-The information is organized by candidate_id. If you are not familiar with canidate_ids
+The information is organized by candidate_id. If you are not familiar with candidate_ids
 using  `/candidates/search` will help you locate a particular candidate.
 
 Officially, a candidate is an individual seeking nomination for election to a federal
