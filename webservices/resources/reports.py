@@ -14,7 +14,7 @@ reports_schema_map = {
     'H': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'I': (models.CommitteeReportsIEOnly, schemas.
-        CommitteeReportsIEOnlySchema),
+        CommitteeReportsIEOnlyPageSchema),
 }
 # We don't have report data for C and E yet
 default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
@@ -90,7 +90,7 @@ class ReportsView(Resource):
             # Eagerly load committees to avoid extra queries
             reports = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
         else:
-            reports = reports_class
+            reports = reports_class.query.options()
 
         if committee_id is not None:
             reports = reports.filter_by(committee_id=committee_id)
