@@ -233,3 +233,9 @@ CommitteeTotalsPacPartyPageSchema = make_page_schema(CommitteeTotalsPacPartySche
 
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
+
+
+ScheduleASchema = make_schema(models.ScheduleA)
+ScheduleAPageSchema = make_page_schema(ScheduleASchema)
+register_schema(ScheduleASchema)
+register_schema(ScheduleAPageSchema)

@@ -153,3 +153,13 @@ reports = {
 totals = {
     'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
 }
+
+
+schedule_a = {
+    'year': Arg(int, multiple=True),
+    'committee_id': Arg(str, multiple=True),
+    'contributor_id': Arg(str, multiple=True),
+    'contributor_name': Arg(str),
+    'contributor_employer': Arg(str),
+    'contributor_occupation': Arg(str),
+}
