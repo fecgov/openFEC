@@ -62,13 +62,6 @@ def parse_types(types):
 class ReportsView(Resource):
 
     @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
-    def get_form_3(self, data):
-        return data
-
-    @schemas.marshal_with(schemas.CommitteeReportsIEOnlySchema(), wrap=False)
-    def get_form_5(self, data):
-        return data
-
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reports)
     @args.register_kwargs(args.make_sort_args(default=['-coverage_end_date']))
@@ -76,9 +69,7 @@ class ReportsView(Resource):
         reports = self.get_reports(committee_id, committee_type, kwargs)
         reports, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
         page = utils.fetch_page(reports, kwargs, model=reports_class)
-        if committee_type == 'ie-only':
-            return self.get_form_5(reports_schema().dump(page).data)
-        return self.get_form_3(reports_schema().dump(page).data)
+        return reports_schema().dump(page).data
 
     def get_reports(self, committee_id, committee_type, kwargs):
         reports_class, reports_schema = reports_schema_map.get(
