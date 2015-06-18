@@ -82,7 +82,8 @@ def make_schema(model, class_name=None, fields=None, options=None):
     )
 
 
-def make_page_schema(schema, class_name=None, definition_name=None):
+def make_page_schema(schema, page_type=paging.OffsetPageSchema, class_name=None,
+                     definition_name=None):
     class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
 
@@ -92,7 +93,7 @@ def make_page_schema(schema, class_name=None, definition_name=None):
 
     return type(
         class_name,
-        (paging.PageSchema, ApiSchema),
+        (page_type, ApiSchema),
         {'Meta': Meta},
     )
 
@@ -236,6 +237,6 @@ register_schema(CommitteeTotalsPageSchema)
 
 
 ScheduleASchema = make_schema(models.ScheduleA)
-ScheduleAPageSchema = make_page_schema(ScheduleASchema)
+ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)

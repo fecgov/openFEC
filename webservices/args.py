@@ -52,7 +52,22 @@ paging = {
 
 def make_sort_args(default=None):
     return {
-        'sort': Arg(str, multiple=True, description='Provide a field to sort by. Use - for descending order.', default=default),
+        'sort': Arg(
+            str,
+            multiple=True,
+            description='Provide a field to sort by. Use - for descending order.',
+            default=default
+        ),
+    }
+
+
+def make_seek_args(type=int, description=None):
+    return {
+        'per_page': Natural(default=20, description='The number of results returned per page. Defaults to 20.'),
+        'last_index': Arg(
+            type,
+            description=description or 'Index of last result from previous page',
+        ),
     }
 
 

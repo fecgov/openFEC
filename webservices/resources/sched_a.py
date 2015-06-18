@@ -1,11 +1,9 @@
-import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
-from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices.common import counts
 from webservices.common import models
 
 
@@ -22,19 +20,21 @@ fulltext_fields = [
 
 class ScheduleAView(Resource):
 
-    @args.register_kwargs(args.paging)
     @args.register_kwargs(args.schedule_a)
-    @schemas.marshal_with(schemas.ScheduleASchema())
+    @args.register_kwargs(args.make_seek_args())
+    @args.register_kwargs(args.make_sort_args())
+    @schemas.marshal_with(schemas.ScheduleAPageSchema())
     def get(self, **kwargs):
-        query = self.buid_query(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.ScheduleA)
+        query = self.build_query(kwargs)
+        count = counts.count_estimate(query, models.db.session)
+        return utils.fetch_seek_page(query, kwargs, models.ScheduleA.sched_a_sk, count=count)
 
     def build_query(self, kwargs):
         query = models.ScheduleA.query
 
         query = utils.filter_multi(query, filter_multi_fields, kwargs)
 
-        if any(kwargs[key] for key in fulltext_fields):
+        if any(kwargs[key] for key, column in fulltext_fields):
             query = query.join(
                 models.ScheduleA,
                 models.ScheduleA.sched_a_sk == models.ScheduleASearch.sched_a_sk,
