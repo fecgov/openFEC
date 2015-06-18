@@ -321,6 +321,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
+    report_form = 'Form 3'
 
     @property
     def pdf_url(self):
@@ -402,6 +403,7 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_from_nonfed_levin_ytd = db.Column(db.Integer)
     transfers_to_affiliated_committee_period = db.Column(db.Integer)
     transfers_to_affilitated_committees_ytd = db.Column(db.Integer)
+    report_form = 'Form 3X'
 
     @property
     # PAC, Party and Presidential records start May 1993
@@ -457,6 +459,7 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfer_from_affiliated_committee_ytd = db.Column(db.Integer)
     transfer_to_other_authorized_committee_period = db.Column(db.Integer)
     transfer_to_other_authorized_committee_ytd = db.Column(db.Integer)
+    report_form = 'Form 3P'
 
     @property
     # PAC, Party and Presidential records start May 1993
@@ -466,8 +469,6 @@ class CommitteeReportsPresidential(CommitteeReports):
         return utils.make_pdf_url(self.beginning_image_number)
 
 
-# Other reports are based on form 3, 3x, 3P
-# This is based on form 5
 class CommitteeReportsIEOnly(BaseModel):
     __tablename__ = 'ofec_reports_ie_only_mv'
 
@@ -483,6 +484,7 @@ class CommitteeReportsIEOnly(BaseModel):
     total_independent_expenditures = db.Column(db.Integer)
     report_type = db.Column(db.String)
     report_type_full = db.Column(db.String)
+    report_form = 'Form 5'
 
     @property
     # PAC, Party and Presidential records start May 1993
