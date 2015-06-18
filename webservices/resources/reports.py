@@ -44,17 +44,18 @@ def parse_types(types):
     description=docs.REPORTS,
     path_params=[
         {
-         'name': 'committee_id',
-         'in': 'path',
-         'description': 'A unique identifier assigned to each committee or filer registered with the FEC.',
-         'type': 'string',
+            'name': 'committee_id',
+            'in': 'path',
+            'description': docs.COMMITTEE_ID,
+            'type': 'string',
         },
         {
-         'name': 'committee_type',
-         'in': 'path',
-         'type': 'string',
-         'description': 'House, Senate, Presidential, independent expenditure only',
-         'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
+
+            'name': 'committee_type',
+            'in': 'path',
+            'type': 'string',
+            'description': 'House, Senate, presidential, independent expenditure only',
+            'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
         },
     ],
 )
