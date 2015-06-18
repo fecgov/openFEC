@@ -22,6 +22,7 @@ from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices import exceptions
+from webservices.common import util
 from webservices.common import models
 from webservices.common.models import db
 from webservices.resources import totals
@@ -51,6 +52,9 @@ db.init_app(app)
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)
+
+# Encode using ujson for speed and decimal encoding
+api.representations['application/json'] = util.output_json
 
 app.register_blueprint(v1)
 

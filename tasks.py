@@ -3,7 +3,7 @@ from invoke import run
 from invoke import task
 
 
-DEFAULT_FRACTION = 0.015
+DEFAULT_FRACTION = 0.5
 FULL_TABLES = [
     'dimdates',
     'dimparty',
@@ -15,14 +15,19 @@ EXCLUDE_TABLES = [
     '*_mv',
     '*_tmp',
     '*_old',
-    'sched_a',
     'sched_b',
+    'sched_e',
+    'sched_b2',
+    'sched_e2',
+    'pacronyms',
     'ofec_two_year_periods',
+    'ofec_sched_a_fulltext',
 ]
-# Include Nancy Pelosi and John Boehner for debugging purposes
+# Include records used in integration tests
 FORCE_INCLUDE = [
-    ('dimcand', 10024584),
-    ('dimcand', 10034937),
+    ('dimcand', 10024584),  # Nancy Pelosi
+    ('dimcand', 10034937),  # John Boehner
+    ('dimcmte', 10031117),  # Raul Grijalva (committee)
 ]
 
 
@@ -45,8 +50,10 @@ def fetch_full(source, dest):
 
 
 @task
-def fetch_subset(source, dest, fraction=DEFAULT_FRACTION):
+def fetch_subset(source, dest, fraction=DEFAULT_FRACTION, log=True):
     cmd = 'rdbms-subsetter {source} {dest} {fraction}'.format(**locals())
+    if log:
+        cmd += ' --logarithmic'
     for table in (FULL_TABLES + EXCLUDE_TABLES):
         cmd += ' --exclude-table {0}'.format(table)
     for table, key in FORCE_INCLUDE:
@@ -57,10 +64,10 @@ def fetch_subset(source, dest, fraction=DEFAULT_FRACTION):
 
 
 @task
-def build_test(source, dest, fraction=DEFAULT_FRACTION):
+def build_test(source, dest, fraction=DEFAULT_FRACTION, log=True):
     fetch_full(source, dest)
     fetch_schemas(source, dest)
-    fetch_subset(source, dest, fraction=fraction)
+    fetch_subset(source, dest, fraction=fraction, log=log)
 
 
 @task
