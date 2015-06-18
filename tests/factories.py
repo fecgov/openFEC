@@ -107,3 +107,7 @@ class ReportsPresidentialFactory(BaseTotalsFactory):
 class ReportsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeReportsPacParty
+
+class ReportsIEOnlyFactory(BaseFactory):
+    class Meta:
+        model = models.CommitteeReportsIEOnly
