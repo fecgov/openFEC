@@ -480,8 +480,8 @@ class CommitteeReportsIEOnly(BaseModel):
     election_type = db.Column(db.String)
     election_type_full = db.Column(db.String)
     report_year = db.Column(db.Integer)
-    total_independent_contributions_period = db.Column(db.Integer)
-    total_independent_expenditures_period = db.Column(db.Integer)
+    independent_contributions_period = db.Column(db.Integer)
+    independent_expenditures_period = db.Column(db.Integer)
     report_type = db.Column(db.String)
     report_type_full = db.Column(db.String)
     report_form = 'Form 5'
