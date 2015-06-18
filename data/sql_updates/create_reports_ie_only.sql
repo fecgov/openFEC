@@ -1,6 +1,6 @@
-drop view if exists ofec_totals_independent_vw;
-drop materialized view if exists ofec_totals_independent_mv_tmp;
-create materialized view ofec_totals_independent_mv_tmp as
+drop view if exists ofec_reports_ie_only_vw;
+drop materialized view if exists ofec_reports_ie_only_mv_tmp;
+create materialized view ofec_reports_ie_only_mv_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
@@ -37,12 +37,12 @@ where
     and ief5.expire_date is null
 ;
 
-create unique index on ofec_totals_independent_mv_tmp(idx);
+create unique index on ofec_reports_ie_only_mv_tmp(idx);
 
-create index on ofec_totals_independent_mv_tmp(cycle);
-create index on ofec_totals_independent_mv_tmp(report_type);
-create index on ofec_totals_independent_mv_tmp(report_year);
-create index on ofec_totals_independent_mv_tmp(committee_id);
-create index on ofec_totals_independent_mv_tmp(coverage_end_date);
-create index on ofec_totals_independent_mv_tmp(coverage_start_date);
-create index on ofec_totals_independent_mv_tmp(beginning_image_number);
+create index on ofec_reports_ie_only_mv_tmp(cycle);
+create index on ofec_reports_ie_only_mv_tmp(report_type);
+create index on ofec_reports_ie_only_mv_tmp(report_year);
+create index on ofec_reports_ie_only_mv_tmp(committee_id);
+create index on ofec_reports_ie_only_mv_tmp(coverage_end_date);
+create index on ofec_reports_ie_only_mv_tmp(coverage_start_date);
+create index on ofec_reports_ie_only_mv_tmp(beginning_image_number);
