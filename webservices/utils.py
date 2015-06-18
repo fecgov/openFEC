@@ -4,10 +4,17 @@ from webservices import paging
 from webservices import sorting
 
 
-def fetch_page(query, kwargs, model=None, clear=False):
+def fetch_page(query, kwargs, model=None, clear=False, count=None):
     query = sorting.sort(query, kwargs['sort'], model=model, clear=clear)
-    paginator = paging.SqlalchemyPaginator(query, kwargs['per_page'])
+    paginator = paging.SqlalchemyOffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
+
+
+def fetch_seek_page(query, kwargs, index_column, clear=False, count=None):
+    model = index_column.class_
+    query = sorting.sort(query, kwargs['sort'], model=model, clear=clear)
+    paginator = paging.SqlalchemySeekPaginator(query, kwargs['per_page'], index_column, count=count)
+    return paginator.get_page(kwargs['last_index'])
 
 
 def extend(*dicts):
