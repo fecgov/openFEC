@@ -223,6 +223,7 @@ make_ie_reports_schema = functools.partial(
 )
 CommitteeReportsIEOnlySchema = make_ie_reports_schema(
     models.CommitteeReportsIEOnly)
+CommitteeReportsIEOnlyPageSchema =make_page_schema(CommitteeReportsIEOnlySchema)
 
 CommitteeTotalsSchema = make_schema(
     models.CommitteeTotalsPresidential,
