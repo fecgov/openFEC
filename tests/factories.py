@@ -89,6 +89,10 @@ class TotalsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsPacParty
 
+class TotalsIEOnlyFactory(BaseFactory):
+    class Meta:
+        model = models.CommitteeTotalsIEOnly
+
 
 class BaseReportsFactory(BaseFactory):
     committee_id = factory.LazyAttribute(lambda o: CommitteeFactory().committee_id)

@@ -9,15 +9,34 @@ from webservices.rest import db
 from webservices.rest import api
 from webservices.resources.totals import TotalsView
 
+def merge_dicts(x, y):
+    z = x.copy()
+    z.update(y)
+    return z
+
+shared_fields =  {
+    'offsets_to_operating_expenditures': 112,
+    'political_party_committee_contributions': 113,
+    'other_disbursements': 114,
+    'other_political_committee_contributions': 115,
+    'individual_itemized_contributions': 116,
+    'individual_unitemized_contributions': 117,
+    'operating_expenditures': 118,
+    'disbursements': 119,
+    'contributions': 120,
+    'contribution_refunds': 121,
+    'individual_contributions': 122,
+    'refunded_individual_contributions': 123,
+    'refunded_other_political_committee_contributions': 124,
+    'refunded_political_party_committee_contributions': 125,
+    'receipts': 126,
+    'coverage_start_date': None,
+    'coverage_end_date': None,
+    'net_contributions': 127,
+    'net_operating_expenditures': 128,
+}
 
 class TestTotals(ApiBaseTest):
-
-    def _check_committee_ids(self, results, positives=None, negatives=None):
-        ids = [each['committee_id'] for each in results]
-        for positive in (positives or []):
-            self.assertIn(positive.committee_id, ids)
-        for negative in (negatives or []):
-            self.assertNotIn(negative.committee_id, ids)
 
     def test_Presidential_totals(self):
         committee_id = 'C8675309'
@@ -25,29 +44,36 @@ class TestTotals(ApiBaseTest):
             committee_id=committee_id,
             committee_type='P',
         )
+        presidential_fields = {
+            'committee_id': 'C8675309',
+            'cycle': 2016,
+            'candidate_contribution': 1,
+            'exempt_legal_accounting_disbursement': 2,
+            'federal_funds': 3,
+            'fundraising_disbursements': 4,
+            'loan_repayments_made': 16,
+            'loans_received': 5,
+            'loans_received_from_candidate': 6,
+            'offsets_to_fundraising_expenditures': 7,
+            'offsets_to_legal_accounting': 8,
+            'total_offsets_to_operating_expenditures': 9,
+            'other_loans_received': 10,
+            'other_receipts': 11,
+            'repayments_loans_made_by_candidate': 12,
+            'repayments_other_loans': 13,
+            'transfers_from_affiliated_committee': 14,
+            'transfers_to_other_authorized_committee': 15,
+
+        }
+
+        fields = merge_dicts(shared_fields, presidential_fields)
+
         committee_total = factories.TotalsPresidentialFactory(
-            committee_id=committee_id,
-            cycle =2016,
-            # fields unique to presidential
-            candidate_contribution = 1,
-            exempt_legal_accounting_disbursement = 2,
-            federal_funds = 3,
-            fundraising_disbursements = 4,
-            loan_repayments_made = 16,
-            loans_received = 5,
-            loans_received_from_candidate = 6,
-            offsets_to_fundraising_expenditures = 7,
-            offsets_to_legal_accounting = 8,
-            total_offsets_to_operating_expenditures = 9,
-            other_loans_received = 10,
-            other_receipts = 11,
-            repayments_loans_made_by_candidate = 12,
-            repayments_other_loans = 13,
-            transfers_from_affiliated_committee = 14,
-            transfers_to_other_authorized_committee = 15,
+            **fields
         )
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
-        self._check_committee_ids(results, [committee_total])
+
+        self.assertEqual(results[0], fields)
 
     def test_House_Senate_totals(self):
         committee_id = 'C8675310'
@@ -55,23 +81,30 @@ class TestTotals(ApiBaseTest):
             committee_id=committee_id,
             committee_type='S',
         )
+
+        house_senate_fields = {
+            'committee_id': committee_id,
+            'cycle': 2016,
+            'all_other_loans': 1,
+            'candidate_contribution': 2,
+            'loan_repayments': 3,
+            'loan_repayments_candidate_loans': 4,
+            'loan_repayments_other_loans': 5,
+            'loans': 6,
+            'loans_made_by_candidate': 7,
+            'other_receipts': 8,
+            'transfers_from_other_authorized_committee': 9,
+            'transfers_to_other_authorized_committee': 10,
+        }
+        fields = merge_dicts(house_senate_fields, shared_fields)
+
         committee_total = factories.TotalsHouseSenateFactory(
-            committee_id=committee_id,
-            cycle =2016,
-            # fields unique to House and Senate
-            all_other_loans = 1,
-            candidate_contribution = 2,
-            loan_repayments = 3,
-            loan_repayments_candidate_loans = 4,
-            loan_repayments_other_loans = 5,
-            loans = 6,
-            loans_made_by_candidate = 7,
-            other_receipts = 8,
-            transfers_from_other_authorized_committee = 9,
-            transfers_to_other_authorized_committee = 10,
+            **fields
         )
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
-        self._check_committee_ids(results, [committee_total])
+
+        self.assertEqual(results[0], fields)
+
 
     def test_Pac_Party_totals(self):
         committee_id = 'C8675311'
@@ -79,39 +112,57 @@ class TestTotals(ApiBaseTest):
             committee_id=committee_id,
             committee_type='Q',
         )
+        pac_party_fields = {
+            'committee_id': committee_id,
+            'cycle': 2016,
+            'all_loans_received': 1,
+            'allocated_federal_election_levin_share': 2,
+            'coordinated_expenditures_by_party_committee': 3,
+            'fed_candidate_committee_contributions': 4,
+            'fed_candidate_contribution_refunds': 5,
+            'fed_disbursements': 6,
+            'fed_election_activity': 7,
+            'fed_operating_expenditures': 8,
+            'fed_receipts': 9,
+            'independent_expenditures': 10,
+            'loan_repayments_made': 11,
+            'loan_repayments_received': 12,
+            'loans_made': 13,
+            'non_allocated_fed_election_activity': 14,
+            'nonfed_transfers': 15,
+            'other_fed_operating_expenditures': 16,
+            'other_fed_receipts': 17,
+            'shared_fed_activity': 18,
+            'shared_fed_activity_nonfed': 19,
+            'shared_fed_operating_expenditures': 20,
+            'shared_nonfed_operating_expenditures': 21,
+            'transfers_from_affiliated_party': 22,
+            'transfers_from_nonfed_account': 23,
+            'transfers_from_nonfed_levin': 24,
+            'transfers_to_affiliated_committee': 25,
+        }
+        fields = merge_dicts(pac_party_fields, shared_fields)
+
         committee_total = factories.TotalsPacPartyFactory(
-            committee_id=committee_id,
-            cycle =2016,
-            # fields unique to PACs and Parties
-            all_loans_received = 1,
-            allocated_federal_election_levin_share = 2,
-            coordinated_expenditures_by_party_committee = 3,
-            fed_candidate_committee_contributions = 4,
-            fed_candidate_contribution_refunds = 5,
-            fed_disbursements = 6,
-            fed_election_activity = 7,
-            fed_operating_expenditures = 8,
-            fed_receipts = 9,
-            independent_expenditures = 10,
-            loan_repayments_made = 11,
-            loan_repayments_received = 12,
-            loans_made = 13,
-            non_allocated_fed_election_activity = 14,
-            nonfed_transfers = 15,
-            other_fed_operating_expenditures = 16,
-            other_fed_receipts = 17,
-            shared_fed_activity = 18,
-            shared_fed_activity_nonfed = 19,
-            shared_fed_operating_expenditures = 20,
-            shared_nonfed_operating_expenditures = 21,
-            transfers_from_affiliated_party = 22,
-            transfers_from_nonfed_account = 23,
-            transfers_from_nonfed_levin = 24,
-            transfers_to_affiliated_committee = 25,
+            **fields
         )
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
-        self._check_committee_ids(results, [committee_total])
+
+        self.assertEqual(results[0], fields)
 
 
+# not working
+    # def test_ie_totals(self):
+    #     committee_id = 'C8675310'
+    #     ie_total = factories.TotalsIEOnlyFactory(
+    #         committee_id=committee_id,
+    #         cycle =2014,
+    #         coverage_start_date=isoformat(datetime.datetime(2014, 1, 1)),
+    #         coverage_end_date=isoformat(datetime.datetime(2014, 3, 31)),
+    #         total_independent_contributions=300,
+    #         total_independent_expenditures=20,
+    #     )
+    #     results = self._results(api.url_for(TotalsView, committee_id=committee_id))
+    #     self.assertTrue(results, ie_total)
 
 
