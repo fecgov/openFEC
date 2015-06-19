@@ -5,6 +5,7 @@ from smore import swagger
 from flask.ext.restful import abort
 
 import webargs
+from webargs import Arg
 from webargs.core import text_type
 from webargs.flaskparser import FlaskParser
 
@@ -12,9 +13,6 @@ from webservices import docs
 
 
 logger = logging.getLogger(__name__)
-
-
-Arg = functools.partial(webargs.Arg, collectionFormat='multi')
 
 
 class FlaskRestParser(FlaskParser):
