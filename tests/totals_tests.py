@@ -151,18 +151,21 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(results[0], fields)
 
 
-# not working
+
     # def test_ie_totals(self):
-    #     committee_id = 'C8675310'
-    #     ie_total = factories.TotalsIEOnlyFactory(
-    #         committee_id=committee_id,
-    #         cycle =2014,
-    #         coverage_start_date=isoformat(datetime.datetime(2014, 1, 1)),
-    #         coverage_end_date=isoformat(datetime.datetime(2014, 3, 31)),
-    #         total_independent_contributions=300,
-    #         total_independent_expenditures=20,
+    #     committee_id = 'C8675312'
+    #     ie_fields = {
+    #         'committee_id': committee_id,
+    #         'cycle': 2014,
+    #         # 'coverage_start_date': None,
+    #         # 'coverage_end_date': None,
+    #         'total_independent_contributions': 1,
+    #         'total_independent_expenditures': 2,
+    #     }
+
+    #     committee_total = factories.TotalsIEOnlyFactory(
+    #         **ie_fields
     #     )
     #     results = self._results(api.url_for(TotalsView, committee_id=committee_id))
-    #     self.assertTrue(results, ie_total)
 
-
+    #     self.assertEqual(results[0], fields)

@@ -22,6 +22,7 @@ class BaseTestCase(unittest.TestCase):
     def setUpClass(cls):
         rest.app.config['TESTING'] = True
         rest.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
+        rest.app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
         cls.app = rest.app.test_client()
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
