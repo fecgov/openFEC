@@ -25,8 +25,8 @@ EXCLUDE_TABLES = [
 ]
 # Include records used in integration tests
 FORCE_INCLUDE = [
-    ('dimcand', 10024584),  # Nancy Pelosi
-    ('dimcand', 10034937),  # John Boehner
+    ('dimcand', 10025229),  # Nancy Pelosi
+    ('dimcand', 10012694),  # John Boehner
     ('dimcmte', 10031117),  # Raul Grijalva (committee)
 ]
 
