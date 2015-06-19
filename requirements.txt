@@ -13,7 +13,7 @@ ujson>=1.33
 marshmallow>=2.0.0b2
 marshmallow-sqlalchemy>=0.2.0
 webargs>=0.13.0
-git+https://github.com/jmcarp/smore@respect-exclude
+git+https://github.com/jmcarp/smore@current
 
 nose>=1.3.6
 factory-boy>=2.5.2
