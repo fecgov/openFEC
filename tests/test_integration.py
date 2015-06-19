@@ -1,9 +1,15 @@
+import unittest
+
 import sqlalchemy as sa
 
 import manage
 from tests import common
 from webservices.rest import db
+from webservices.spec import spec
 from webservices.common import models
+
+from smore import exceptions
+from smore.apispec import utils
 
 
 CANDIDATE_MODELS = [
@@ -21,6 +27,15 @@ TOTALS_MODELS = [
     models.CommitteeTotalsPresidential,
     models.CommitteeTotalsHouseSenate,
 ]
+
+
+class TestSwagger(unittest.TestCase):
+
+    def test_swagger_valid(self):
+        try:
+            utils.validate_swagger(spec)
+        except exceptions.SwaggerError as error:
+            self.fail(str(error))
 
 
 class TestViews(common.IntegrationTestCase):
