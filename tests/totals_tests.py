@@ -152,20 +152,24 @@ class TestTotals(ApiBaseTest):
 
 
 
-    # def test_ie_totals(self):
-    #     committee_id = 'C8675312'
-    #     ie_fields = {
-    #         'committee_id': committee_id,
-    #         'cycle': 2014,
-    #         # 'coverage_start_date': None,
-    #         # 'coverage_end_date': None,
-    #         'total_independent_contributions': 1,
-    #         'total_independent_expenditures': 2,
-    #     }
+    def test_ie_totals(self):
+        committee_id = 'C8675312'
+        history = factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='I',
+        )
+        ie_fields = {
+            'committee_id': committee_id,
+            'cycle': 2014,
+            'coverage_start_date': None,
+            'coverage_end_date': None,
+            'total_independent_contributions': 1,
+            'total_independent_expenditures': 2,
+        }
 
-    #     committee_total = factories.TotalsIEOnlyFactory(
-    #         **ie_fields
-    #     )
-    #     results = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        committee_total = factories.TotalsIEOnlyFactory(
+            **ie_fields
+        )
+        results = self._results(api.url_for(TotalsView, committee_id=committee_id))
 
-    #     self.assertEqual(results[0], fields)
+        self.assertEqual(results[0], ie_fields)
