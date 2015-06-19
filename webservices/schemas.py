@@ -128,7 +128,7 @@ class CandidateSearchListSchema(ApiSchema):
 class CommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         CandidateSearchSchema,
-        ref='#/definitions/CommtteeSearch',
+        ref='#/definitions/CommitteeSearch',
         many=True,
     )
 
