@@ -1,6 +1,8 @@
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
+from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import counts
@@ -18,6 +20,10 @@ fulltext_fields = [
 ]
 
 
+@spec.doc(
+    tags=['filings'],
+    description=docs.SCHEDULE_A,
+)
 class ScheduleAView(Resource):
 
     @args.register_kwargs(args.schedule_a)

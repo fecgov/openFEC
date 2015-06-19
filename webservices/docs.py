@@ -171,6 +171,10 @@ For presidential and senatorial candidates, there are multiple 2-year cycles in-
 their elections.
 '''
 
+SCHEDULE_A = '''
+Schedule A filings describe donations to campaigns.
+'''
+
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at http://api.data.gov/signup.
 '''
