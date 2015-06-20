@@ -250,3 +250,29 @@ class TestReports(ApiBaseTest):
         self.assertEqual(
             results[0]['independent_expenditures_period'], report.independent_expenditures_period
         )
+
+    def test_ie_committee(self):
+        committee_id="C777777777"
+        committee = factories.CommitteeFactory(committee_type='I')
+        committee_id = committee.committee_id
+        factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='I',
+        )
+        report = factories.ReportsIEOnlyFactory(
+            committee_id=committee_id,
+            independent_contributions_period=200,
+            independent_expenditures_period=100,
+        )
+        results = self._results(
+            api.url_for(
+                ReportsView,
+                committee_id=committee_id,
+            )
+        )
+        self.assertEqual(
+            results[0]['independent_contributions_period'], report.independent_contributions_period
+        )
+        self.assertEqual(
+            results[0]['independent_expenditures_period'], report.independent_expenditures_period
+        )
