@@ -76,8 +76,9 @@ class ReportsView(Resource):
             self._resolve_committee_type(committee_id, committee_type, kwargs),
             default_schemas,
         )
+        print ()
 
-        if committee_type != 'ie-only':
+        if reports_schema_map['I'] == reports_schema:
             # Eagerly load committees to avoid extra queries
             reports = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
         else:
