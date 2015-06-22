@@ -216,27 +216,24 @@ CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 
-CommitteeTotalsSchema = make_schema(
-    models.CommitteeTotalsPresidential,
-    class_name='CommitteeTotalsSchema',
-    options={'exclude': [
-        each.key for each in models.CommitteeTotalsPresidential.__mapper__.iterate_properties
-        if each.key not in dir(models.CommitteeTotals)
-    ] + ['idx']}
-)
 CommitteeTotalsPresidentialSchema = make_schema(models.CommitteeTotalsPresidential)
 CommitteeTotalsHouseSenateSchema = make_schema(models.CommitteeTotalsHouseSenate)
 CommitteeTotalsPacPartySchema = make_schema(models.CommitteeTotalsPacParty)
+CommitteeTotalsIEOnlySchema = make_schema(models.CommitteeTotalsIEOnly)
 
-CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 CommitteeTotalsPresidentialPageSchema = make_page_schema(CommitteeTotalsPresidentialSchema)
 CommitteeTotalsHouseSenatePageSchema = make_page_schema(CommitteeTotalsHouseSenateSchema)
 CommitteeTotalsPacPartyPageSchema = make_page_schema(CommitteeTotalsPacPartySchema)
+CommitteeTotalsIEOnlyPageSchema = make_page_schema(CommitteeTotalsIEOnlySchema)
+
+totals_schemas = (
+    CommitteeTotalsPresidentialSchema,
+    CommitteeTotalsHouseSenateSchema,
+    CommitteeTotalsPacPartySchema,
+    CommitteeTotalsIEOnlySchema,
+)
+CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
+CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
-
-CommitteeTotalsIEOnlySchema = make_schema(
-    models.CommitteeTotalsIEOnly,
-)
-CommitteeTotalsIEOnlyPageSchema =make_page_schema(CommitteeTotalsIEOnlySchema)

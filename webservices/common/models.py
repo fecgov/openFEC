@@ -595,4 +595,3 @@ class CommitteeTotalsIEOnly(BaseModel):
     coverage_end_date = db.Column(db.DateTime)
     total_independent_contributions = db.Column(db.Integer)
     total_independent_expenditures = db.Column(db.Integer)
-
