@@ -235,3 +235,8 @@ CommitteeTotalsPacPartyPageSchema = make_page_schema(CommitteeTotalsPacPartySche
 
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
+
+CommitteeTotalsIEOnlySchema = make_schema(
+    models.CommitteeTotalsIEOnly,
+)
+CommitteeTotalsIEOnlyPageSchema =make_page_schema(CommitteeTotalsIEOnlySchema)

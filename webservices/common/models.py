@@ -584,3 +584,15 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
     other_receipts = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
+
+
+class CommitteeTotalsIEOnly(BaseModel):
+    __tablename__ = 'ofec_totals_ie_only_mv'
+
+    committee_id = db.Column(db.String)
+    cycle = db.Column(db.Integer)
+    coverage_start_date = db.Column(db.DateTime)
+    coverage_end_date = db.Column(db.DateTime)
+    total_independent_contributions = db.Column(db.Integer)
+    total_independent_expenditures = db.Column(db.Integer)
+
