@@ -63,6 +63,9 @@ class ReportsView(Resource):
     def get(self, committee_id=None, committee_type=None, **kwargs):
         reports = self.get_reports(committee_id, committee_type, kwargs)
         reports, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
+        validator = args.IndexValidator(reports_class)
+        for key in kwargs['sort']:
+            validator(key)
         page = utils.fetch_page(reports, kwargs, model=reports_class)
         return reports_schema().dump(page).data
 

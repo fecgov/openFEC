@@ -41,6 +41,9 @@ class TotalsView(Resource):
             self._resolve_committee_type(committee_id, kwargs),
             default_schemas,
         )
+        validator = args.IndexValidator(totals_class)
+        for key in kwargs['sort']:
+            validator(key)
         totals = self.get_totals(committee_id, totals_class, kwargs)
         page = utils.fetch_page(totals, kwargs)
         return totals_schema().dump(page).data
