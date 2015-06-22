@@ -193,35 +193,28 @@ make_reports_schema = functools.partial(
     },
     options={'exclude': ('idx', 'report_key', 'committee')},
 )
-CommitteeReportsSchema = make_reports_schema(
-    models.CommitteeReportsPresidential,
-    class_name='CommitteeReportsSchema',
-    options={'exclude': [
-        each.key for each in models.CommitteeReportsPresidential.__mapper__.iterate_properties
-        if each.key not in dir(models.CommitteeReports)
-    ] + ['idx', 'report_key']}
-)
 
 CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
 CommitteeReportsHouseSenateSchema = make_reports_schema(models.CommitteeReportsHouseSenate)
 CommitteeReportsPacPartySchema = make_reports_schema(models.CommitteeReportsPacParty)
+CommitteeReportsIEOnlySchema = make_reports_schema(models.CommitteeReportsIEOnly)
 
-CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 CommitteeReportsPresidentialPageSchema = make_page_schema(CommitteeReportsPresidentialSchema)
 CommitteeReportsHouseSenatePageSchema = make_page_schema(CommitteeReportsHouseSenateSchema)
 CommitteeReportsPacPartyPageSchema = make_page_schema(CommitteeReportsPacPartySchema)
+CommitteeReportsIEOnlyPageSchema = make_page_schema(CommitteeReportsIEOnlySchema)
+
+reports_schemas = (
+    CommitteeReportsPresidentialSchema,
+    CommitteeReportsHouseSenateSchema,
+    CommitteeReportsPacPartySchema,
+    CommitteeReportsIEOnlySchema,
+)
+CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
+CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
-
-CommitteeReportsIEOnlySchema = make_schema(
-    models.CommitteeReportsIEOnly,
-    fields={
-        'pdf_url': ma.fields.Str(),
-        'report_form': ma.fields.Str(),
-    },
-)
-CommitteeReportsIEOnlyPageSchema =make_page_schema(CommitteeReportsIEOnlySchema)
 
 CommitteeTotalsSchema = make_schema(
     models.CommitteeTotalsPresidential,
