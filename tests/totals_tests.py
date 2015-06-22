@@ -1,18 +1,10 @@
-import datetime
-
-from marshmallow.utils import isoformat
-
 from .common import ApiBaseTest
 from tests import factories
 
-from webservices.rest import db
+from webservices import utils
 from webservices.rest import api
 from webservices.resources.totals import TotalsView
 
-def merge_dicts(x, y):
-    z = x.copy()
-    z.update(y)
-    return z
 
 shared_fields =  {
     'offsets_to_operating_expenditures': 112,
@@ -66,11 +58,9 @@ class TestTotals(ApiBaseTest):
 
         }
 
-        fields = merge_dicts(shared_fields, presidential_fields)
+        fields = utils.extend(shared_fields, presidential_fields)
 
-        committee_total = factories.TotalsPresidentialFactory(
-            **fields
-        )
+        committee_total = factories.TotalsPresidentialFactory(**fields)
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
 
         self.assertEqual(results[0], fields)
@@ -96,15 +86,12 @@ class TestTotals(ApiBaseTest):
             'transfers_from_other_authorized_committee': 9,
             'transfers_to_other_authorized_committee': 10,
         }
-        fields = merge_dicts(house_senate_fields, shared_fields)
+        fields = utils.extend(house_senate_fields, shared_fields)
 
-        committee_total = factories.TotalsHouseSenateFactory(
-            **fields
-        )
+        committee_total = factories.TotalsHouseSenateFactory(**fields)
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
 
         self.assertEqual(results[0], fields)
-
 
     def test_Pac_Party_totals(self):
         committee_id = 'C8675311'
@@ -141,16 +128,12 @@ class TestTotals(ApiBaseTest):
             'transfers_from_nonfed_levin': 24,
             'transfers_to_affiliated_committee': 25,
         }
-        fields = merge_dicts(pac_party_fields, shared_fields)
+        fields = utils.extend(pac_party_fields, shared_fields)
 
-        committee_total = factories.TotalsPacPartyFactory(
-            **fields
-        )
+        committee_total = factories.TotalsPacPartyFactory(**fields)
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
 
         self.assertEqual(results[0], fields)
-
-
 
     def test_ie_totals(self):
         committee_id = 'C8675312'
@@ -167,9 +150,7 @@ class TestTotals(ApiBaseTest):
             'total_independent_expenditures': 2,
         }
 
-        committee_total = factories.TotalsIEOnlyFactory(
-            **ie_fields
-        )
+        committee_total = factories.TotalsIEOnlyFactory(**ie_fields)
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
 
         self.assertEqual(results[0], ie_fields)
