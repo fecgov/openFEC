@@ -244,15 +244,11 @@ class TestReports(ApiBaseTest):
                 beginning_image_number=number,
             )
         )
-        self.assertEqual(
-            results[0]['independent_contributions_period'], report.independent_contributions_period
-        )
-        self.assertEqual(
-            results[0]['independent_expenditures_period'], report.independent_expenditures_period
-        )
+        result = results[0]
+        for key in ['report_form', 'independent_contributions_period', 'independent_expenditures_period']:
+            self.assertEqual(result[key], getattr(report, key))
 
     def test_ie_committee(self):
-        committee_id="C777777777"
         committee = factories.CommitteeFactory(committee_type='I')
         committee_id = committee.committee_id
         factories.CommitteeHistoryFactory(
@@ -270,9 +266,6 @@ class TestReports(ApiBaseTest):
                 committee_id=committee_id,
             )
         )
-        self.assertEqual(
-            results[0]['independent_contributions_period'], report.independent_contributions_period
-        )
-        self.assertEqual(
-            results[0]['independent_expenditures_period'], report.independent_expenditures_period
-        )
+        result = results[0]
+        for key in ['report_form', 'independent_contributions_period', 'independent_expenditures_period']:
+            self.assertEqual(result[key], getattr(report, key))
