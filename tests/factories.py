@@ -30,7 +30,6 @@ class BaseCandidateFactory(BaseFactory):
 class CandidateFactory(BaseCandidateFactory):
     class Meta:
         model = models.Candidate
-
     election_years = [2012, 2014]
 
 
@@ -107,3 +106,16 @@ class ReportsPresidentialFactory(BaseTotalsFactory):
 class ReportsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeReportsPacParty
+
+
+class ScheduleAFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleA
+    sched_a_sk = factory.Sequence(lambda n: n)
+    report_year = 2016
+
+
+class ScheduleASearchFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleASearch
+    sched_a_sk = factory.Sequence(lambda n: n)

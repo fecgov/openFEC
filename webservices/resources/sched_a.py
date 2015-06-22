@@ -13,6 +13,8 @@ from webservices.config import SQL_CONFIG
 filter_multi_fields = [
     ('committee_id', models.ScheduleA.committee_id),
     ('contributor_id', models.ScheduleA.contributor_id),
+    ('contributor_city', models.ScheduleA.contributor_city),
+    ('contributor_state', models.ScheduleA.contributor_state),
 ]
 fulltext_fields = [
     ('contributor_name', models.ScheduleASearch.contributor_name_text),
@@ -49,7 +51,7 @@ class ScheduleAView(Resource):
 
         if any(kwargs[key] for key, column in fulltext_fields):
             query = query.join(
-                models.ScheduleA,
+                models.ScheduleASearch,
                 models.ScheduleA.sched_a_sk == models.ScheduleASearch.sched_a_sk,
             )
         for key, column in fulltext_fields:
