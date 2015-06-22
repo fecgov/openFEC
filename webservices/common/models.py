@@ -224,9 +224,9 @@ class CommitteeReports(BaseModel):
     __abstract__ = True
 
     report_key = db.Column(db.BigInteger)
-    committee_id = db.Column(db.String)
-    committee_key = db.Column(db.Integer)
-    cycle = db.Column(db.Integer)
+    committee_id = db.Column(db.String, index=True)
+    committee_key = db.Column(db.Integer, index=True)
+    cycle = db.Column(db.Integer, index=True)
 
     beginning_image_number = db.Column(db.BigInteger)
     cash_on_hand_beginning_period = db.Column(db.Integer)
@@ -321,6 +321,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
+    report_form = 'Form 3'
 
     @property
     def pdf_url(self):
@@ -402,6 +403,7 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_from_nonfed_levin_ytd = db.Column(db.Integer)
     transfers_to_affiliated_committee_period = db.Column(db.Integer)
     transfers_to_affilitated_committees_ytd = db.Column(db.Integer)
+    report_form = 'Form 3X'
 
     @property
     # PAC, Party and Presidential records start May 1993
@@ -457,6 +459,32 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfer_from_affiliated_committee_ytd = db.Column(db.Integer)
     transfer_to_other_authorized_committee_period = db.Column(db.Integer)
     transfer_to_other_authorized_committee_ytd = db.Column(db.Integer)
+    report_form = 'Form 3P'
+
+    @property
+    # PAC, Party and Presidential records start May 1993
+    def pdf_url(self):
+        if self.report_year is None or self.report_year < 1993:
+            return None
+        return utils.make_pdf_url(self.beginning_image_number)
+
+
+class CommitteeReportsIEOnly(BaseModel):
+    __tablename__ = 'ofec_reports_ie_only_mv'
+
+    beginning_image_number = db.Column(db.BigInteger)
+    committee_id = db.Column(db.String)
+    cycle = db.Column(db.Integer)
+    coverage_start_date = db.Column(db.DateTime(), index=True)
+    coverage_end_date = db.Column(db.DateTime(), index=True)
+    election_type = db.Column(db.String)
+    election_type_full = db.Column(db.String)
+    report_year = db.Column(db.Integer)
+    independent_contributions_period = db.Column(db.Integer)
+    independent_expenditures_period = db.Column(db.Integer)
+    report_type = db.Column(db.String)
+    report_type_full = db.Column(db.String)
+    report_form = 'Form 5'
 
     @property
     # PAC, Party and Presidential records start May 1993
@@ -556,6 +584,17 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
     other_receipts = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
+
+
+class CommitteeTotalsIEOnly(BaseModel):
+    __tablename__ = 'ofec_totals_ie_only_mv'
+
+    committee_id = db.Column(db.String, index=True)
+    cycle = db.Column(db.Integer, index=True)
+    coverage_start_date = db.Column(db.DateTime)
+    coverage_end_date = db.Column(db.DateTime)
+    total_independent_contributions = db.Column(db.Integer)
+    total_independent_expenditures = db.Column(db.Integer)
 
 
 class ScheduleA(db.Model):
