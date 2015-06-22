@@ -28,24 +28,29 @@ create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
 -- Create trigger to maintain Schedule A fulltext table
 create function ofec_sched_a_trigger() returns trigger as $$
 begin
-    if new.rpt_yr < :START_YEAR_ITEMIZED then
-      return new;
-    end if;
     if tg_op = 'INSERT' then
-        insert into ofec_sched_a_trigger
-            (sched_a_sk, contributor_name_text, contributor_employer_text, contributor_occupation_text)
-            values (new.sched_a_sk, to_tsvector(contbr_nm), to_tsvector(contbr_employer), to_tsvector(contbr_occupation))
-        ;
-    elsif tp_op = 'UPDATE' then
-        update ofec_sched_a_fulltext
-            set (sched_a_sk, contributor_name_text, contributor_employer_text, contributor_occupation_text) =
-            (new.sched_a_sk, to_tsvector(new.contbr_nm), to_tsvector(new.contbr_employer), to_tsvector(contbr_occupation))
-        where sched_a_sk = new.sched_a_sk
-        ;
-    elsif tp_op = 'DELETE' then
-        delete from ofec_sched_a_fulltext where sched_a_sk = old.sched_a_sk;
+        if new.rpt_yr >= :START_YEAR_ITEMIZED then
+            insert into ofec_sched_a_fulltext
+                (sched_a_sk, contributor_name_text, contributor_employer_text)
+                values (new.sched_a_sk, to_tsvector(new.contbr_nm), to_tsvector(new.contbr_employer))
+            ;
+        end if;
+        return new;
+    elsif tg_op = 'UPDATE' then
+        if new.rpt_yr >= :START_YEAR_ITEMIZED then
+            update ofec_sched_a_fulltext
+                set (sched_a_sk, contributor_name_text, contributor_employer_text) =
+                (new.sched_a_sk, to_tsvector(new.contbr_nm), to_tsvector(new.contbr_employer))
+            where sched_a_sk = new.sched_a_sk
+            ;
+        end if;
+        return new;
+    elsif tg_op = 'DELETE' then
+        if old.rpt_yr >= :START_YEAR_ITEMIZED then
+            delete from ofec_sched_a_fulltext where sched_a_sk = old.sched_a_sk;
+        end if;
+        return old;
     end if;
-    return new;
 end
 $$ language plpgsql;
 
