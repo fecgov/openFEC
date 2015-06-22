@@ -1,25 +1,28 @@
--- Create indices on queried Schedule A columns
-create index on sched_a(rpt_yr);
+-- Create simple indices on filtered columns
 create index on sched_a(cmte_id);
 create index on sched_a(contbr_id);
 create index on sched_a(contbr_st);
 create index on sched_a(contbr_city);
-create index on sched_a(contb_receipt_amt);
+
+-- Create bidirectional composite indices on sortable columns
+create index on sched_a(rpt_yr, sched_a_sk);
+create index on sched_a(rpt_yr desc, sched_a_sk);
+create index on sched_a(contb_receipt_amt, sched_a_sk);
+create index on sched_a(contb_receipt_amt desc, sched_a_sk);
 
 -- Create Schedule A fulltext table
 create table ofec_sched_a_fulltext as
 select
     sched_a_sk,
     to_tsvector(contbr_nm) as contributor_name_text,
-    to_tsvector(contbr_employer) as contributor_employer_text,
-    to_tsvector(contbr_occupation) as contributor_occupation_text
+    to_tsvector(contbr_employer) as contributor_employer_text
 from sched_a
 ;
 
+-- Create indices on filtered fulltext columns
 alter table ofec_sched_a_fulltext add primary key (sched_a_sk);
 create index on ofec_sched_a_fulltext using gin (contributor_name_text);
 create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
-create index on ofec_sched_a_fulltext using gin (contributor_occupation_text);
 
 -- Create trigger to maintain Schedule A fulltext table
 create function ofec_sched_a_trigger() returns trigger as $$
