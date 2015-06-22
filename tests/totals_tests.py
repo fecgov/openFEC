@@ -1,9 +1,11 @@
-from .common import ApiBaseTest
-from tests import factories
+import json
 
 from webservices import utils
 from webservices.rest import api
 from webservices.resources.totals import TotalsView
+
+from tests import factories
+from .common import ApiBaseTest
 
 
 shared_fields =  {
@@ -154,3 +156,23 @@ class TestTotals(ApiBaseTest):
         results = self._results(api.url_for(TotalsView, committee_id=committee_id))
 
         self.assertEqual(results[0], ie_fields)
+
+    def test_totals_house_senate(self):
+        committee = factories.CommitteeFactory(committee_type='H')
+        committee_id = committee.committee_id
+        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
+        [
+            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
+            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
+        ]
+        response = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['cycle'], 2012)
+        self.assertEqual(response[1]['cycle'], 2008)
+
+    def test_totals_committee_not_found(self):
+        resp = self.app.get(api.url_for(TotalsView, committee_id='fake'))
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertIn('not found', data['message'].lower())

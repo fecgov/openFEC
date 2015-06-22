@@ -1,3 +1,4 @@
+import json
 import datetime
 
 from marshmallow.utils import isoformat
@@ -5,6 +6,7 @@ from marshmallow.utils import isoformat
 from .common import ApiBaseTest
 from tests import factories
 
+from webservices import schemas
 from webservices.rest import db
 from webservices.rest import api
 from webservices.resources.reports import ReportsView
@@ -269,3 +271,42 @@ class TestReports(ApiBaseTest):
         result = results[0]
         for key in ['report_form', 'independent_contributions_period', 'independent_expenditures_period']:
             self.assertEqual(result[key], getattr(report, key))
+
+    def _check_reports(self, committee_type, factory, schema):
+        committee = factories.CommitteeFactory(committee_type=committee_type)
+        factories.CommitteeHistoryFactory(
+            committee_id=committee.committee_id,
+            committee_key=committee.committee_key,
+            committee_type=committee_type,
+        )
+        end_dates = [datetime.datetime(2012, 1, 1), datetime.datetime(2008, 1, 1)]
+        committee_id = committee.committee_id
+        committee_key = committee.committee_key
+        db.session.flush()
+        [
+            factory(
+                committee_id=committee_id,
+                committee_key=committee_key,
+                coverage_end_date=end_date,
+            )
+            for end_date in end_dates
+        ]
+        response = self._results(api.url_for(ReportsView, committee_id=committee_id))
+        self.assertEqual(len(response), 2)
+        self.assertEqual(response[0]['coverage_end_date'], isoformat(end_dates[0]))
+        self.assertEqual(response[1]['coverage_end_date'], isoformat(end_dates[1]))
+        assert response[0].keys() == schema().fields.keys()
+
+    # TODO(jmcarp) Refactor as parameterized tests
+    def test_reports(self):
+        self._check_reports('H', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
+        self._check_reports('S', factories.ReportsHouseSenateFactory, schemas.CommitteeReportsHouseSenateSchema)
+        self._check_reports('P', factories.ReportsPresidentialFactory, schemas.CommitteeReportsPresidentialSchema)
+        self._check_reports('X', factories.ReportsPacPartyFactory, schemas.CommitteeReportsPacPartySchema)
+
+    def test_reports_committee_not_found(self):
+        resp = self.app.get(api.url_for(ReportsView, committee_id='fake'))
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data.decode('utf-8'))
+        self.assertIn('not found', data['message'].lower())
