@@ -82,7 +82,7 @@ class CandidateSearch(CandidateList):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args())
+    @args.register_kwargs(args.make_sort_args(validator=args.IndexValidator(models.Candidate)))
     @schemas.marshal_with(schemas.CandidateSearchPageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
@@ -111,7 +111,12 @@ class CandidateView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args(default=['-expire_date']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['-expire_date'],
+            validator=args.IndexValidator(models.CandidateDetail),
+        )
+    )
     @schemas.marshal_with(schemas.CandidateDetailPageSchema())
     def get(self, candidate_id=None, committee_id=None, **kwargs):
         query = self.get_candidate(kwargs, candidate_id, committee_id)
@@ -164,7 +169,12 @@ class CandidateView(Resource):
 class CandidateHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.make_sort_args(default=['-two_year_period']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['-two_year_period'],
+            validator=args.IndexValidator(models.CandidateHistory),
+        )
+    )
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
     def get(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
         query = self.get_candidate(candidate_id, committee_id, cycle, kwargs)

@@ -16,7 +16,6 @@ filter_multi_fields = [
 fulltext_fields = [
     ('contributor_name', models.ScheduleASearch.contributor_name_text),
     ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
-    ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
 ]
 
 
@@ -28,7 +27,12 @@ class ScheduleAView(Resource):
 
     @args.register_kwargs(args.schedule_a)
     @args.register_kwargs(args.make_seek_args())
-    @args.register_kwargs(args.make_sort_args())
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.OptionValidator(['report_year', 'contributor_receipt_amount']),
+            multiple=False,
+        )
+    )
     @schemas.marshal_with(schemas.ScheduleAPageSchema())
     def get(self, **kwargs):
         query = self.build_query(kwargs)

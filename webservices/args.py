@@ -1,8 +1,8 @@
 import logging
 import functools
 
+import sqlalchemy as sa
 from smore import swagger
-from flask.ext.restful import abort
 
 import webargs
 from webargs import Arg
@@ -10,6 +10,8 @@ from webargs.core import text_type
 from webargs.flaskparser import FlaskParser
 
 from webservices import docs
+from webservices import exceptions
+from webservices.common.models import db
 
 
 logger = logging.getLogger(__name__)
@@ -19,9 +21,10 @@ class FlaskRestParser(FlaskParser):
 
     def handle_error(self, error):
         logger.error(error)
+        message = text_type(error)
         status_code = getattr(error, 'status_code', 400)
-        data = getattr(error, 'data', {})
-        abort(status_code, message=text_type(error), **data)
+        payload = getattr(error, 'data', {})
+        raise exceptions.ApiError(message, status_code, payload)
 
 
 parser = FlaskRestParser()
@@ -48,13 +51,51 @@ paging = {
 }
 
 
-def make_sort_args(default=None):
+class OptionValidator(object):
+
+    def __init__(self, values):
+        self.values = values
+
+    def __call__(self, value):
+        if value .lstrip('-') not in self.values:
+            import ipdb; ipdb.set_trace()
+            raise webargs.ValidationError('Cannot sort on value "{0}"'.format(value))
+
+
+class IndexValidator(OptionValidator):
+
+    def __init__(self, model, include=None, exclude=None):
+        self.model = model
+        self.include = include or []
+        self.exclude = exclude or []
+
+    @property
+    def values(self):
+        if self.include:
+            return self.include
+        inspector = sa.inspect(db.engine)
+        column_map = {
+            column.key: label
+            for label, column in self.model.__mapper__.columns.items()
+        }
+        return [
+            column_map[column['column_names'][0]]
+            for column in inspector.get_indexes(self.model.__tablename__)
+            if not self._is_excluded(column_map.get(column['column_names'][0]))
+        ]
+
+    def _is_excluded(self, value):
+        return not value or value in self.exclude
+
+
+def make_sort_args(default=None, multiple=True, validator=None):
     return {
         'sort': Arg(
             str,
-            multiple=True,
+            multiple=multiple,
             description='Provide a field to sort by. Use - for descending order.',
-            default=default
+            default=default,
+            validate=validator,
         ),
     }
 
