@@ -58,8 +58,7 @@ class OptionValidator(object):
 
     def __call__(self, value):
         if value .lstrip('-') not in self.values:
-            import ipdb; ipdb.set_trace()
-            raise webargs.ValidationError('Cannot sort on value "{0}"'.format(value))
+            raise exceptions.ApiError('Cannot sort on value "{0}"'.format(value))
 
 
 class IndexValidator(OptionValidator):
