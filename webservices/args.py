@@ -12,6 +12,7 @@ from webargs.flaskparser import FlaskParser
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
+from webservices.config import SQL_CONFIG
 
 
 logger = logging.getLogger(__name__)
@@ -209,7 +210,11 @@ totals = {
 
 
 schedule_a = {
-    'year': Arg(int, multiple=True),
+    'year': Arg(
+        int,
+        multiple=True,
+        validate=lambda value: value >= SQL_CONFIG['START_YEAR_ITEMIZED'],
+    ),
     'committee_id': Arg(str, multiple=True),
     'contributor_id': Arg(str, multiple=True),
     'contributor_name': Arg(str),

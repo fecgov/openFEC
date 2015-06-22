@@ -7,6 +7,7 @@ from webservices import utils
 from webservices import schemas
 from webservices.common import counts
 from webservices.common import models
+from webservices.config import SQL_CONFIG
 
 
 filter_multi_fields = [
@@ -40,7 +41,9 @@ class ScheduleAView(Resource):
         return utils.fetch_seek_page(query, kwargs, models.ScheduleA.sched_a_sk, count=count)
 
     def build_query(self, kwargs):
-        query = models.ScheduleA.query
+        query = models.ScheduleA.query.filter(
+            models.ScheduleA.report_year >= SQL_CONFIG['START_YEAR_ITEMIZED'],
+        )
 
         query = utils.filter_multi(query, filter_multi_fields, kwargs)
 
