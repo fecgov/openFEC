@@ -1,14 +1,14 @@
 -- Create simple indices on filtered columns
-create index on sched_a(cmte_id);
-create index on sched_a(contbr_id);
-create index on sched_a(contbr_st);
-create index on sched_a(contbr_city);
+create index on sched_a (cmte_id) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (contbr_id) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (contbr_st) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (contbr_city) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create bidirectional composite indices on sortable columns
-create index on sched_a(rpt_yr, sched_a_sk);
-create index on sched_a(rpt_yr desc, sched_a_sk);
-create index on sched_a(contb_receipt_amt, sched_a_sk);
-create index on sched_a(contb_receipt_amt desc, sched_a_sk);
+create index on sched_a(rpt_yr, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a(rpt_yr desc, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a(contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a(contb_receipt_amt desc, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create Schedule A fulltext table
 create table ofec_sched_a_fulltext as
@@ -17,6 +17,7 @@ select
     to_tsvector(contbr_nm) as contributor_name_text,
     to_tsvector(contbr_employer) as contributor_employer_text
 from sched_a
+where rpt_yr >= :START_YEAR_ITEMIZED
 ;
 
 -- Create indices on filtered fulltext columns
@@ -27,6 +28,9 @@ create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
 -- Create trigger to maintain Schedule A fulltext table
 create function ofec_sched_a_trigger() returns trigger as $$
 begin
+    if new.rpt_yr < :START_YEAR_ITEMIZED then
+      return new;
+    end if;
     if tg_op = 'INSERT' then
         insert into ofec_sched_a_trigger
             (sched_a_sk, contributor_name_text, contributor_employer_text, contributor_occupation_text)
