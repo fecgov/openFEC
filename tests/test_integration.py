@@ -1,15 +1,17 @@
+import datetime
 import unittest
 
 import sqlalchemy as sa
+
+from smore import exceptions
+from smore.apispec import utils
 
 import manage
 from tests import common
 from webservices.rest import db
 from webservices.spec import spec
 from webservices.common import models
-
-from smore import exceptions
-from smore.apispec import utils
+from webservices.config import SQL_CONFIG
 
 
 CANDIDATE_MODELS = [
@@ -118,3 +120,40 @@ class TestViews(common.IntegrationTestCase):
         for model in CANDIDATE_MODELS:
             observed = [each.candidate_key for each in model.query.all()]
             self.assertFalse(set(observed).difference(expected))
+
+    def test_sched_a_fulltext(self):
+        self.assertEqual(
+            models.ScheduleA.query.filter(
+                models.ScheduleA.report_year >= SQL_CONFIG['START_YEAR_ITEMIZED']
+            ).count(),
+            models.ScheduleASearch.query.count(),
+        )
+
+    def test_sched_a_fulltext_trigger(self):
+        filing = models.ScheduleA(
+            sched_a_sk=42,
+            report_year=2014,
+            contributor_name='Sheldon Adelson',
+            load_date=datetime.datetime.now(),
+            sub_id=7,
+        )
+        db.session.add(filing)
+        db.session.commit()
+        search = models.ScheduleASearch.query.filter(
+            models.ScheduleASearch.sched_a_sk == 42
+        ).one()
+        self.assertEqual(search.contributor_name_text, "'adelson':2 'sheldon':1")
+        filing.contributor_name = 'Shelly Adelson'
+        db.session.commit()
+        search = models.ScheduleASearch.query.filter(
+            models.ScheduleASearch.sched_a_sk == 42
+        ).one()
+        self.assertEqual(search.contributor_name_text, "'adelson':2 'shelli':1")
+        db.session.delete(filing)
+        db.session.commit()
+        self.assertEqual(
+            models.ScheduleASearch.query.filter(
+                models.ScheduleASearch.sched_a_sk == 42
+            ).count(),
+            0,
+        )
