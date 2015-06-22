@@ -189,48 +189,52 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
+        'report_form': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
     },
     options={'exclude': ('idx', 'report_key', 'committee')},
-)
-CommitteeReportsSchema = make_reports_schema(
-    models.CommitteeReportsPresidential,
-    class_name='CommitteeReportsSchema',
-    options={'exclude': [
-        each.key for each in models.CommitteeReportsPresidential.__mapper__.iterate_properties
-        if each.key not in dir(models.CommitteeReports)
-    ] + ['idx', 'report_key']}
 )
 
 CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
 CommitteeReportsHouseSenateSchema = make_reports_schema(models.CommitteeReportsHouseSenate)
 CommitteeReportsPacPartySchema = make_reports_schema(models.CommitteeReportsPacParty)
+CommitteeReportsIEOnlySchema = make_reports_schema(models.CommitteeReportsIEOnly)
 
-CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 CommitteeReportsPresidentialPageSchema = make_page_schema(CommitteeReportsPresidentialSchema)
 CommitteeReportsHouseSenatePageSchema = make_page_schema(CommitteeReportsHouseSenateSchema)
 CommitteeReportsPacPartyPageSchema = make_page_schema(CommitteeReportsPacPartySchema)
+CommitteeReportsIEOnlyPageSchema = make_page_schema(CommitteeReportsIEOnlySchema)
+
+reports_schemas = (
+    CommitteeReportsPresidentialSchema,
+    CommitteeReportsHouseSenateSchema,
+    CommitteeReportsPacPartySchema,
+    CommitteeReportsIEOnlySchema,
+)
+CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
+CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 
-
-CommitteeTotalsSchema = make_schema(
-    models.CommitteeTotalsPresidential,
-    class_name='CommitteeTotalsSchema',
-    options={'exclude': [
-        each.key for each in models.CommitteeTotalsPresidential.__mapper__.iterate_properties
-        if each.key not in dir(models.CommitteeTotals)
-    ] + ['idx']}
-)
 CommitteeTotalsPresidentialSchema = make_schema(models.CommitteeTotalsPresidential)
 CommitteeTotalsHouseSenateSchema = make_schema(models.CommitteeTotalsHouseSenate)
 CommitteeTotalsPacPartySchema = make_schema(models.CommitteeTotalsPacParty)
+CommitteeTotalsIEOnlySchema = make_schema(models.CommitteeTotalsIEOnly)
 
-CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 CommitteeTotalsPresidentialPageSchema = make_page_schema(CommitteeTotalsPresidentialSchema)
 CommitteeTotalsHouseSenatePageSchema = make_page_schema(CommitteeTotalsHouseSenateSchema)
 CommitteeTotalsPacPartyPageSchema = make_page_schema(CommitteeTotalsPacPartySchema)
+CommitteeTotalsIEOnlyPageSchema = make_page_schema(CommitteeTotalsIEOnlySchema)
+
+totals_schemas = (
+    CommitteeTotalsPresidentialSchema,
+    CommitteeTotalsHouseSenateSchema,
+    CommitteeTotalsPacPartySchema,
+    CommitteeTotalsIEOnlySchema,
+)
+CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
+CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)

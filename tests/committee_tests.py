@@ -13,6 +13,7 @@ from webservices.rest import api
 from webservices.resources.committees import CommitteeList
 from webservices.resources.committees import CommitteeView
 from webservices.resources.candidates import CandidateView
+from webservices.resources.totals import TotalsView
 
 
 ## old, re-factored Committee tests ##
