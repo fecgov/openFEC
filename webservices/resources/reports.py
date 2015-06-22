@@ -13,8 +13,7 @@ reports_schema_map = {
     'P': (models.CommitteeReportsPresidential, schemas.CommitteeReportsPresidentialPageSchema),
     'H': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
-    'I': (models.CommitteeReportsIEOnly, schemas.
-        CommitteeReportsIEOnlyPageSchema),
+    'I': (models.CommitteeReportsIEOnly, schemas.CommitteeReportsIEOnlyPageSchema),
 }
 # We don't have report data for C and E yet
 default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
@@ -61,14 +60,13 @@ def parse_types(types):
 )
 class ReportsView(Resource):
 
-    @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reports)
     @args.register_kwargs(args.make_sort_args(default=['-coverage_end_date']))
+    @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
-        reports = self.get_reports(committee_id, committee_type, kwargs)
-        reports, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
-        page = utils.fetch_page(reports, kwargs, model=reports_class)
+        query, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
+        page = utils.fetch_page(query, kwargs, model=reports_class)
         return reports_schema().dump(page).data
 
     def get_reports(self, committee_id, committee_type, kwargs):
@@ -76,32 +74,31 @@ class ReportsView(Resource):
             self._resolve_committee_type(committee_id, committee_type, kwargs),
             default_schemas,
         )
-        print ()
 
-        if reports_schema_map['I'] == reports_schema:
-            # Eagerly load committees to avoid extra queries
-            reports = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
-        else:
-            reports = reports_class.query.options()
+        query = reports_class.query
+
+        # Eagerly load committees if applicable
+        if hasattr(reports_class, 'committee'):
+            query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
         if committee_id is not None:
-            reports = reports.filter_by(committee_id=committee_id)
+            query = query.filter_by(committee_id=committee_id)
 
         if kwargs['year']:
-            reports = reports.filter(reports_class.report_year.in_(kwargs['year']))
+            query = query.filter(reports_class.report_year.in_(kwargs['year']))
         if kwargs['cycle']:
-            reports = reports.filter(reports_class.cycle.in_(kwargs['cycle']))
+            query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
         if kwargs['beginning_image_number']:
-            reports = reports.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
+            query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
 
         if kwargs['report_type']:
             include, exclude = parse_types(kwargs['report_type'])
             if include:
-                reports = reports.filter(reports_class.report_type.in_(include))
+                query = query.filter(reports_class.report_type.in_(include))
             elif exclude:
-                reports = reports.filter(sa.not_(reports_class.report_type.in_(exclude)))
+                query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
-        return reports, reports_class, reports_schema
+        return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id, committee_type, kwargs):
         if committee_id is not None:
