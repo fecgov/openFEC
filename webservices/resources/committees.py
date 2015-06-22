@@ -38,7 +38,12 @@ class CommitteeList(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.committee)
     @args.register_kwargs(args.committee_list)
-    @args.register_kwargs(args.make_sort_args(default=['name']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['name'],
+            validator=args.IndexValidator(models.Committee),
+        )
+    )
     @schemas.marshal_with(schemas.CommitteePageSchema())
     def get(self, **kwargs):
         query = self.get_committees(kwargs)
@@ -99,7 +104,12 @@ class CommitteeView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.committee)
-    @args.register_kwargs(args.make_sort_args(default=['name']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['name'],
+            validator=args.IndexValidator(models.CommitteeDetail),
+        )
+    )
     @schemas.marshal_with(schemas.CommitteeDetailPageSchema())
     def get(self, committee_id=None, candidate_id=None, **kwargs):
         query = self.get_committee(kwargs, committee_id, candidate_id)
@@ -142,7 +152,12 @@ class CommitteeView(Resource):
 class CommitteeHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.make_sort_args(default=['-cycle']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['-cycle'],
+            validator=args.IndexValidator(models.CommitteeHistory),
+        )
+    )
     @schemas.marshal_with(schemas.CommitteeHistoryPageSchema())
     def get(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
         query = self.get_committee(committee_id, candidate_id, cycle, kwargs)

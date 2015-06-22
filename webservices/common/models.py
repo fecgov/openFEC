@@ -34,19 +34,19 @@ class BaseCandidate(BaseModel):
     __abstract__ = True
 
     candidate_id = db.Column(db.String(10))
-    candidate_status = db.Column(db.String(1))
+    candidate_status = db.Column(db.String(1), index=True)
     candidate_status_full = db.Column(db.String(11))
-    district = db.Column(db.String(2))
-    election_years = db.Column(ARRAY(db.Integer))
-    cycles = db.Column(ARRAY(db.Integer))
-    incumbent_challenge = db.Column(db.String(1))
+    district = db.Column(db.String(2), index=True)
+    election_years = db.Column(ARRAY(db.Integer), index=True)
+    cycles = db.Column(ARRAY(db.Integer), index=True)
+    incumbent_challenge = db.Column(db.String(1), index=True)
     incumbent_challenge_full = db.Column(db.String(10))
-    office = db.Column(db.String(1))
+    office = db.Column(db.String(1), index=True)
     office_full = db.Column(db.String(9))
-    party = db.Column(db.String(3))
+    party = db.Column(db.String(3), index=True)
     party_full = db.Column(db.String(255))
-    state = db.Column(db.String(2))
-    name = db.Column(db.String(100))
+    state = db.Column(db.String(2), index=True)
+    name = db.Column(db.String(100), index=True)
 
 
 class BaseConcreteCandidate(BaseCandidate):
@@ -107,20 +107,20 @@ class BaseCommittee(BaseModel):
     __abstract__ = True
 
     committee_key = db.Column(db.Integer, unique=True)
-    committee_id = db.Column(db.String)
-    cycles = db.Column(ARRAY(db.Integer))
-    designation = db.Column(db.String(1))
+    committee_id = db.Column(db.String, index=True)
+    cycles = db.Column(ARRAY(db.Integer), index=True)
+    designation = db.Column(db.String(1), index=True)
     designation_full = db.Column(db.String(25))
     treasurer_name = db.Column(db.String(100))
-    organization_type = db.Column(db.String(1))
+    organization_type = db.Column(db.String(1), index=True)
     organization_type_full = db.Column(db.String(100))
-    state = db.Column(db.String(2))
-    committee_type = db.Column(db.String(1))
+    state = db.Column(db.String(2), index=True)
+    committee_type = db.Column(db.String(1), index=True)
     committee_type_full = db.Column(db.String(50))
     expire_date = db.Column(db.DateTime())
-    party = db.Column(db.String(3))
+    party = db.Column(db.String(3), index=True)
     party_full = db.Column(db.String(50))
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(100), index=True)
 
 
 class BaseConcreteCommittee(BaseCommittee):
@@ -631,4 +631,3 @@ class ScheduleASearch(db.Model):
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     contributor_name_text = db.Column(TSVECTOR)
     contributor_employer_text = db.Column(TSVECTOR)
-    contributor_occupation_text = db.Column(TSVECTOR)

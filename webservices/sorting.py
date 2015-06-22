@@ -20,9 +20,18 @@ def parse_option(option, model=None):
     return order(column)
 
 
+def ensure_list(value):
+    if isinstance(value, list):
+        return value
+    if value:
+        return [value]
+    return []
+
+
 def sort(query, options, model=None, clear=False):
     if clear:
         query = query.order_by(False)
+    options = ensure_list(options)
     for option in options:
         order = parse_option(option, model=model)
         query = query.order_by(order)
