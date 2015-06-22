@@ -1,6 +1,5 @@
 import urllib
 import datetime
-import functools
 
 import sqlalchemy as sa
 from marshmallow.utils import isoformat

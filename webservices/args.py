@@ -218,6 +218,8 @@ schedule_a = {
     'committee_id': Arg(str, multiple=True),
     'contributor_id': Arg(str, multiple=True),
     'contributor_name': Arg(str),
+    'contributor_city': Arg(str, multiple=True),
+    'contributor_state': Arg(str, multiple=True),
     'contributor_employer': Arg(str),
     'contributor_occupation': Arg(str),
 }

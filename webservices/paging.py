@@ -58,7 +58,9 @@ class SeekPage(BasePage):
 
     @property
     def last_index(self):
-        return self.paginator._get_index_value(self.results[-1])
+        if self.results:
+            return self.paginator._get_index_value(self.results[-1])
+        return None
 
     @property
     def info(self):
