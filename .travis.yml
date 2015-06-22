@@ -1,5 +1,9 @@
 language: python
 
+sudo: false
+
+cache: pip
+
 python:
   - "3.4"
 
@@ -14,8 +18,9 @@ env:
 before_install:
   - travis_retry pip install codecov
   - travis_retry npm install -g swagger-tools
-  - travis_retry curl -L -o cf.deb "https://cli.run.pivotal.io/stable?release=debian64&version=6.11.2&source=github-rel"
-  - sudo dpkg -i cf.deb
+  - travis_retry curl -L -o cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.11.3&source=github-rel"
+  - tar xzvf cf.tgz
+  - export PATH=.:$PATH
 
 before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
