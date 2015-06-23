@@ -223,3 +223,17 @@ schedule_a = {
     'contributor_employer': Arg(str),
     'contributor_occupation': Arg(str),
 }
+
+
+schedule_b = {
+    'year': Arg(
+        int,
+        multiple=True,
+        validate=lambda value: value >= SQL_CONFIG['START_YEAR_ITEMIZED'],
+    ),
+    'committee_id': Arg(str, multiple=True),
+    'recipient_committee_id': Arg(str, multiple=True),
+    'recipient_name': Arg(str),
+    'recipient_city': Arg(str, multiple=True),
+    'recipient_state': Arg(str, multiple=True),
+}
