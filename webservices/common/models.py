@@ -687,7 +687,7 @@ class ScheduleB(db.Model):
     amendment_indicator = db.Column('amndt_ind', db.String)
     tran_id = db.Column(db.String)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
-    back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
+    back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
     report_type = db.Column('rpt_tp', db.String)
     record_number = db.Column('record_num', db.Integer)

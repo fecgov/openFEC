@@ -30,7 +30,7 @@ begin
     if tg_op = 'INSERT' then
         if new.rpt_yr >= :START_YEAR_ITEMIZED then
             insert into ofec_sched_b_fulltext
-                (sched_b_sk, recipient_name_text) =
+                (sched_b_sk, recipient_name_text)
                 values (new.sched_b_sk, to_tsvector(new.recipient_cmte_nm))
             ;
         end if;

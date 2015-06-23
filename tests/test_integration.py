@@ -47,6 +47,7 @@ class TestViews(common.IntegrationTestCase):
         super(TestViews, cls).setUpClass()
         manage.update_schemas(processes=1)
         manage.update_schedule_a()
+        manage.update_schedule_b()
 
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():

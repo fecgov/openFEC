@@ -81,6 +81,13 @@ def update_schedule_a():
 
 
 @manager.command
+def update_schedule_b():
+    print('Updating Schedule B tables...')
+    execute_sql_file('data/sql_setup/prepare_schedule_b.sql')
+    print('Finished Schedule B update.')
+
+
+@manager.command
 def list_routes():
     output = []
     for rule in app.url_map.iter_rules():
