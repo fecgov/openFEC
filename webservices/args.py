@@ -222,6 +222,8 @@ schedule_a = {
     'contributor_state': Arg(str, multiple=True),
     'contributor_employer': Arg(str),
     'contributor_occupation': Arg(str),
+    'min_amount': Arg(float),
+    'max_amount': Arg(float),
 }
 
 
@@ -236,4 +238,6 @@ schedule_b = {
     'recipient_name': Arg(str),
     'recipient_city': Arg(str, multiple=True),
     'recipient_state': Arg(str, multiple=True),
+    'min_amount': Arg(float),
+    'max_amount': Arg(float),
 }
