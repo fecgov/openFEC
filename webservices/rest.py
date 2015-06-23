@@ -28,6 +28,7 @@ from webservices.common.models import db
 from webservices.resources import totals
 from webservices.resources import reports
 from webservices.resources import sched_a
+from webservices.resources import sched_b
 from webservices.resources import candidates
 from webservices.resources import committees
 
@@ -178,6 +179,7 @@ api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports'
 api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
 api.add_resource(sched_a.ScheduleAView, '/filings/schedule_a')
+api.add_resource(sched_b.ScheduleBView, '/filings/schedule_b')
 
 
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
@@ -246,6 +248,7 @@ register_resource(committees.CommitteeHistoryView, blueprint='v1')
 register_resource(reports.ReportsView, blueprint='v1')
 register_resource(totals.TotalsView, blueprint='v1')
 register_resource(sched_a.ScheduleAView, blueprint='v1')
+register_resource(sched_b.ScheduleBView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus

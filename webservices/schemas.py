@@ -244,3 +244,9 @@ ScheduleASchema = make_schema(models.ScheduleA)
 ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
+
+
+ScheduleBSchema = make_schema(models.ScheduleB)
+ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
+register_schema(ScheduleBSchema)
+register_schema(ScheduleBPageSchema)

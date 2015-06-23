@@ -172,7 +172,11 @@ their elections.
 '''
 
 SCHEDULE_A = '''
-Schedule A filings describe donations to campaigns.
+Schedule A filings describe itemized receipts from committees.
+'''
+
+SCHEDULE_B = '''
+Schedule B filings describe itemized disbursements from committees.
 '''
 
 API_KEY_DESCRIPTION = '''
