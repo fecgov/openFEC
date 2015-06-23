@@ -59,7 +59,8 @@ def load_pacronyms():
     ]).format(dest=db.engine.url)
     if count:
         cmd += ' --no-create'
-    subprocess.call(cmd, shell=True)
+    with open(os.devnull, 'w') as null:
+        subprocess.call(cmd, shell=True, stdout=null, stderr=null)
 
 
 @manager.command
