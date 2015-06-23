@@ -15,13 +15,13 @@ EXCLUDE_TABLES = [
     '*_mv',
     '*_tmp',
     '*_old',
-    'sched_b',
     'sched_e',
     'sched_b2',
     'sched_e2',
     'pacronyms',
     'ofec_two_year_periods',
     'ofec_sched_a_fulltext',
+    'ofec_sched_b_fulltext',
 ]
 # Include records used in integration tests
 FORCE_INCLUDE = [
