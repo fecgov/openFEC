@@ -11,6 +11,7 @@ create index on sched_a(contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YE
 create index on sched_a(contb_receipt_amt desc, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create Schedule A fulltext table
+drop table if exists ofec_sched_a_fulltext;
 create table ofec_sched_a_fulltext as
 select
     sched_a_sk,
@@ -26,7 +27,7 @@ create index on ofec_sched_a_fulltext using gin (contributor_name_text);
 create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
 
 -- Create trigger to maintain Schedule A fulltext table
-create function ofec_sched_a_trigger() returns trigger as $$
+create or replace function ofec_sched_a_update() returns trigger as $$
 begin
     if tg_op = 'INSERT' then
         if new.rpt_yr >= :START_YEAR_ITEMIZED then
@@ -54,6 +55,7 @@ begin
 end
 $$ language plpgsql;
 
-create trigger tsvectorupdate before insert or update or delete
-    on sched_a for each row execute procedure ofec_sched_a_trigger()
+drop trigger if exists ofec_sched_a_trigger on sched_a;
+create trigger ofec_sched_a_trigger before insert or update or delete
+    on sched_a for each row execute procedure ofec_sched_a_update()
 ;
