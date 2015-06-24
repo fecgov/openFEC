@@ -1,4 +1,3 @@
-import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
