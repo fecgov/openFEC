@@ -25,6 +25,8 @@ class ScheduleBView(ItemizedResource):
         return self.model.disbursement_amount
 
     filter_multi_fields = [
+        ('report_year', models.ScheduleB.report_year),
+        ('image_number', models.ScheduleB.image_number),
         ('committee_id', models.ScheduleB.committee_id),
         ('recipient_city', models.ScheduleB.recipient_city),
         ('recipient_state', models.ScheduleB.recipient_state),
@@ -34,11 +36,12 @@ class ScheduleBView(ItemizedResource):
         ('recipient_name', models.ScheduleASearch.contributor_name_text),
     ]
 
+    @args.register_kwargs(args.itemized)
     @args.register_kwargs(args.schedule_b)
     @args.register_kwargs(args.make_seek_args())
     @args.register_kwargs(
         args.make_sort_args(
-            validator=args.OptionValidator(['report_year', 'disbursement_amount']),
+            validator=args.OptionValidator(['receipt_date', 'disbursement_amount']),
             multiple=False,
         )
     )

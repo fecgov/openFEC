@@ -209,12 +209,18 @@ totals = {
 }
 
 
-schedule_a = {
-    'year': Arg(
+itemized = {
+    'report_year': Arg(
         int,
         multiple=True,
         validate=lambda value: value >= SQL_CONFIG['START_YEAR_ITEMIZED'],
     ),
+    'image_number': Arg(int, multiple=True),
+    'min_amount': Arg(float),
+    'max_amount': Arg(float),
+}
+
+schedule_a = {
     'committee_id': Arg(str, multiple=True),
     'contributor_id': Arg(str, multiple=True),
     'contributor_name': Arg(str),
@@ -222,22 +228,13 @@ schedule_a = {
     'contributor_state': Arg(str, multiple=True),
     'contributor_employer': Arg(str),
     'contributor_occupation': Arg(str),
-    'min_amount': Arg(float),
-    'max_amount': Arg(float),
 }
 
 
 schedule_b = {
-    'year': Arg(
-        int,
-        multiple=True,
-        validate=lambda value: value >= SQL_CONFIG['START_YEAR_ITEMIZED'],
-    ),
     'committee_id': Arg(str, multiple=True),
     'recipient_committee_id': Arg(str, multiple=True),
     'recipient_name': Arg(str),
     'recipient_city': Arg(str, multiple=True),
     'recipient_state': Arg(str, multiple=True),
-    'min_amount': Arg(float),
-    'max_amount': Arg(float),
 }

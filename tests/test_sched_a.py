@@ -1,3 +1,5 @@
+import datetime
+
 import sqlalchemy as sa
 
 from tests import factories
@@ -8,16 +10,16 @@ from webservices.rest import api
 from webservices.resources.sched_a import ScheduleAView
 
 
-class CommitteeFormatTest(ApiBaseTest):
+class TestItemized(ApiBaseTest):
 
     def test_sorting(self):
         [
-            factories.ScheduleAFactory(report_year=2014),
-            factories.ScheduleAFactory(report_year=2012),
-            factories.ScheduleAFactory(report_year=1986),
+            factories.ScheduleAFactory(report_year=2014, receipt_date=datetime.datetime(2014, 1, 1)),
+            factories.ScheduleAFactory(report_year=2012, receipt_date=datetime.datetime(2012, 1, 1)),
+            factories.ScheduleAFactory(report_year=1986, receipt_date=datetime.datetime(1986, 1, 1)),
         ]
         db.session.flush()
-        response = self._response(api.url_for(ScheduleAView, sort='report_year'))
+        response = self._response(api.url_for(ScheduleAView, sort='receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
             [2012, 2014]
