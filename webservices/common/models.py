@@ -597,11 +597,11 @@ class CommitteeTotalsIEOnly(BaseModel):
     total_independent_expenditures = db.Column(db.Integer)
 
 
-class Filings(BaseModel):
+class Filings():
     __tablename__ = 'vw_filing_history'
 
     committee_id = db.Column(db.String)
-    sub_id = db.Column(db.BigInteger)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
     coverage_start_date = db.Column(db.DateTime)
     coverage_end_date = db.Column(db.DateTime)
     receipt_date = db.Column(db.DateTime)
