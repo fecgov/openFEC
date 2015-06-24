@@ -139,6 +139,13 @@ committee_list = {
     'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
 }
 
+filings = {
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
+    'report_type': Arg(str, multiple=True, description='Report type'),
+    'report_year': Arg(str, multiple=True, description='Report year'),
+}
+
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),

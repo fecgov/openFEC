@@ -237,3 +237,7 @@ CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
+
+FilingsSchema = make_schema(Filings)
+
+FilingsPageSchema = make_page_schema(FilingsSchema)
