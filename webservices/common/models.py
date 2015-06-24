@@ -597,7 +597,7 @@ class CommitteeTotalsIEOnly(BaseModel):
     total_independent_expenditures = db.Column(db.Integer)
 
 
-class Filings():
+class Filings(db.Model):
     __tablename__ = 'vw_filing_history'
 
     committee_id = db.Column(db.String)
