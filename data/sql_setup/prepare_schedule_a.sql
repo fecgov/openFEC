@@ -1,14 +1,16 @@
 -- Create simple indices on filtered columns
+create index on sched_a (rpt_yr) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (cmte_id) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (image_num) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_id) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_st) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_city) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create bidirectional composite indices on sortable columns
-create index on sched_a(rpt_yr, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a(rpt_yr desc, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a(contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a(contb_receipt_amt desc, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (receipt_dt desc, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (contb_receipt_amt desc, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create Schedule A fulltext table
 drop table if exists ofec_sched_a_fulltext;

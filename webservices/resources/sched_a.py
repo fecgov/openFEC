@@ -25,6 +25,8 @@ class ScheduleAView(ItemizedResource):
         return self.model.contributor_receipt_amount
 
     filter_multi_fields = [
+        ('report_year', models.ScheduleA.report_year),
+        ('image_number', models.ScheduleA.image_number),
         ('committee_id', models.ScheduleA.committee_id),
         ('contributor_id', models.ScheduleA.contributor_id),
         ('contributor_city', models.ScheduleA.contributor_city),
@@ -35,11 +37,12 @@ class ScheduleAView(ItemizedResource):
         ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
     ]
 
+    @args.register_kwargs(args.itemized)
     @args.register_kwargs(args.schedule_a)
     @args.register_kwargs(args.make_seek_args())
     @args.register_kwargs(
         args.make_sort_args(
-            validator=args.OptionValidator(['report_year', 'contributor_receipt_amount']),
+            validator=args.OptionValidator(['receipt_date', 'contributor_receipt_amount']),
             multiple=False,
         )
     )
