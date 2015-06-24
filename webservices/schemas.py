@@ -238,7 +238,10 @@ CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
 
-FilingsSchema = make_schema(models.Filings)
+FilingsSchema = make_schema(
+    models.Filings,
+    fields= {'pdf_url': ma.fields.Str()},
+)
 FilingsPageSchema = make_page_schema(FilingsSchema)
 register_schema(FilingsSchema)
 register_schema(FilingsPageSchema)
