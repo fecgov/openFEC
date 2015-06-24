@@ -8,6 +8,7 @@ from tests.common import ApiBaseTest
 from webservices.rest import db
 from webservices.rest import api
 from webservices.resources.sched_a import ScheduleAView
+from webservices.resources.sched_b import ScheduleBView
 
 
 class TestItemized(ApiBaseTest):
@@ -73,3 +74,31 @@ class TestItemized(ApiBaseTest):
             [each['sched_a_sk'] for each in page2],
             [each.sched_a_sk for each in filings[20:]],
         )
+
+    def test_amount_sched_a(self):
+        [
+            factories.ScheduleAFactory(contributor_receipt_amount=50),
+            factories.ScheduleAFactory(contributor_receipt_amount=100),
+            factories.ScheduleAFactory(contributor_receipt_amount=150),
+            factories.ScheduleAFactory(contributor_receipt_amount=200),
+        ]
+        results = self._results(api.url_for(ScheduleAView, min_amount=100))
+        self.assertTrue(all(each['contributor_receipt_amount'] >= 100 for each in results))
+        results = self._results(api.url_for(ScheduleAView, max_amount=150))
+        self.assertTrue(all(each['contributor_receipt_amount'] <= 150 for each in results))
+        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
+        self.assertTrue(all(100 <= each['contributor_receipt_amount'] <= 150 for each in results))
+
+    def test_amount_sched_b(self):
+        [
+            factories.ScheduleBFactory(disbursement_amount=50),
+            factories.ScheduleBFactory(disbursement_amount=100),
+            factories.ScheduleBFactory(disbursement_amount=150),
+            factories.ScheduleBFactory(disbursement_amount=200),
+        ]
+        results = self._results(api.url_for(ScheduleBView, min_amount=100))
+        self.assertTrue(all(each['disbursement_amount'] >= 100 for each in results))
+        results = self._results(api.url_for(ScheduleBView, max_amount=150))
+        self.assertTrue(all(each['disbursement_amount'] <= 150 for each in results))
+        results = self._results(api.url_for(ScheduleBView, min_amount=100, max_amount=150))
+        self.assertTrue(all(100 <= each['disbursement_amount'] <= 150 for each in results))
