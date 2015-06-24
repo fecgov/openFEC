@@ -640,4 +640,8 @@ class Filings(db.Model):
     amendment_indicator = db.Column(db.String)
     update_date = db.Column(db.DateTime)
 
+    @property
+    def pdf_url(self):
+        return utils.make_pdf_url(self.beginning_image_number)
+
 
