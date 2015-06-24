@@ -642,6 +642,6 @@ class Filings(db.Model):
 
     @property
     def pdf_url(self):
-        return utils.make_pdf_url(self.beginning_image_number)
-
+        #return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_pdf_url(self.begin_image_numeric)
 
