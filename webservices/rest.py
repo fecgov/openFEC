@@ -175,7 +175,7 @@ api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
 api.add_resource(
     filings.FilingsView,
-    '/committee/<string:committee_id>/totals',
+    '/committee/<string:committee_id>/filings',
     '/filings'
 )
 

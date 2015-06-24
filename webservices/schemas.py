@@ -240,3 +240,5 @@ register_schema(CommitteeTotalsPageSchema)
 
 FilingsSchema = make_schema(models.Filings)
 FilingsPageSchema = make_page_schema(FilingsSchema)
+register_schema(FilingsSchema)
+register_schema(FilingsPageSchema)
