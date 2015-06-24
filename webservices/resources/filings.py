@@ -10,7 +10,7 @@ from webservices.common.util import filter_query
 
 filter_fields = {
     'committee_id',
-    'beginning_image_number',
+    'begin_image_numeric',
     'report_type',
     'report_year',
 }
