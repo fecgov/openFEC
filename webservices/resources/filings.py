@@ -33,12 +33,9 @@ class FilingsView(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reports)
     @args.register_kwargs(args.make_sort_args(default=['-coverage_end_date']))
-    @schemas.marshal_with(schemas.FilingsPageSchema(), wrap=False)
+    @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         query = self.get_filings(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Filings)
-
-    def get_filings(self, kwargs, committee_id=None):
         filings = filter_query(models.Filings, models.Filings.query, filter_fields, kwargs)
         return filings
 
