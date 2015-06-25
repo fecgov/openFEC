@@ -39,9 +39,15 @@ def execute_sql_file(path):
 
 def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
+    if not sql_dir.endswith('/'):
+        sql_dir += '/'
     paths = glob.glob(sql_dir + '*.sql')
-    pool = multiprocessing.Pool(processes=processes)
-    pool.map(execute_sql_file, paths)
+    if processes > 1:
+        pool = multiprocessing.Pool(processes=processes)
+        pool.map(execute_sql_file, paths)
+    else:
+        for path in paths:
+            execute_sql_file(path)
 
 
 @manager.command
@@ -89,10 +95,10 @@ def update_schedule_b():
 
 
 @manager.command
-def update_aggregates():
-    execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_zip.sql')
-    execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_state.sql')
-    execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_size.sql')
+def update_aggregates(processes=2):
+    print('Updating incremental aggregates...')
+    execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
+    print('Finished updating incremental aggregates.')
 
 
 @manager.command
