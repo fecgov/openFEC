@@ -1,7 +1,7 @@
 ---
 path: .
 memory: 512M
-stack: lucid64
+stack: cflinuxfs2
 buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
 env:
   NEW_RELIC_CONFIG_FILE: newrelic.ini
