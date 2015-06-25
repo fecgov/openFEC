@@ -3,6 +3,7 @@ begin
     -- Update aggregates in place
     perform ofec_sched_a_update_aggregate_zip();
     perform ofec_sched_a_update_aggregate_state();
+    perform ofec_sched_a_update_aggregate_size();
 
     -- Clear queue tables
     delete from ofec_sched_a_queue_new;
