@@ -33,11 +33,12 @@ class FilingsView(Resource):
     @args.register_kwargs(args.make_sort_args(default=['-receipt_date']))
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, committee_id=None, begin_image_numeric=None, **kwargs):
-            query = models.Filings.query.filter_by(recipt_date>=1980)
+        filings = models.Filings.query
         if committee_id:
-            query = query(committee_id=committee_id)
+            filings = filings.filter_by(committee_id=committee_id)
 
-        return utils.fetch_page(query, kwargs, model=models.Filings)
+
+        return utils.fetch_page(filings, kwargs, model=models.Filings)
 
 
 
