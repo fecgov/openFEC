@@ -18,7 +18,7 @@ select
     contribution_size(contb_receipt_amt) as size,
     sum(contb_receipt_amt) as total
 from sched_a
-where rpt_yr >= 2011
+where rpt_yr >= :START_YEAR_ITEMIZED
 and contb_receipt_amt > 200
 group by cmte_id, cycle, size
 ;
