@@ -1,0 +1,70 @@
+create or replace function contribution_size(value numeric) returns int as $$
+begin
+    return case
+        when value < 500 then 200
+        when value < 1000 then 500
+        when value < 2000 then 1000
+        else 2000
+    end;
+end
+$$ language plpgsql;
+
+-- Create initial aggregate
+drop table if exists ofec_sched_a_aggregate_size;
+create table ofec_sched_a_aggregate_size as
+select
+    cmte_id,
+    rpt_yr + rpt_yr % 2 as cycle,
+    contribution_size(contb_receipt_amt) as size,
+    sum(contb_receipt_amt) as total
+from sched_a
+where rpt_yr >= 2011
+and contb_receipt_amt > 200
+group by cmte_id, cycle, size
+;
+
+-- Create indices on aggregate
+create index on ofec_sched_a_aggregate_size (cmte_id);
+create index on ofec_sched_a_aggregate_size (cycle);
+create index on ofec_sched_a_aggregate_size (size);
+
+-- Create update function
+create or replace function ofec_sched_a_update_aggregate_size() returns void as $$
+begin
+    with new as (
+        select
+            cmte_id,
+            rpt_yr + rpt_yr % 2 as cycle,
+            contribution_size(contb_receipt_amt) as size,
+            sum(contb_receipt_amt) as total
+        from ofec_sched_a_queue_new
+        group by cmte_id, cycle, size
+    ),
+    old as (
+        select
+            cmte_id,
+            rpt_yr + rpt_yr % 2 as cycle,
+            contribution_size(contb_receipt_amt) as size,
+            -1 * sum(contb_receipt_amt) as total
+        from ofec_sched_a_queue_old
+        group by cmte_id, cycle, size
+    ),
+    patch as (
+        select * from new
+        union all
+        select * from old
+    ),
+    inc as (
+        update ofec_sched_a_aggregate_size ag
+        set total = ag.total + patch.total
+        from patch
+        where (ag.cmte_id, ag.cycle, ag.size) = (patch.cmte_id, patch.cycle, patch.size)
+    )
+    insert into ofec_sched_a_aggregate_size (
+        select patch.* from patch
+        left join ofec_sched_a_aggregate_size ag using (cmte_id, cycle, size)
+        where ag.cmte_id is null
+    )
+    ;
+end
+$$ language plpgsql;

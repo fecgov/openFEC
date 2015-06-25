@@ -92,6 +92,7 @@ def update_schedule_b():
 def update_aggregates():
     execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_zip.sql')
     execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_state.sql')
+    execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_size.sql')
 
 
 @manager.command
