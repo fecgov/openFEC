@@ -8,6 +8,7 @@ from smore.apispec import utils
 
 import manage
 from tests import common
+from tests import factories
 from webservices.rest import db
 from webservices.spec import spec
 from webservices.common import models
@@ -48,6 +49,7 @@ class TestViews(common.IntegrationTestCase):
         manage.update_schemas(processes=1)
         manage.update_schedule_a()
         manage.update_schedule_b()
+        manage.update_aggregates()
 
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():
@@ -158,3 +160,119 @@ class TestViews(common.IntegrationTestCase):
             ).count(),
             0,
         )
+
+    def test_update_aggregate_state_create(self):
+        filing = factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id='C12345',
+            contributor_receipt_amount=538,
+            contributor_state='NY',
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        rows = models.ScheduleAByState.query.filter_by(
+            cycle=2016,
+            committee_id='C12345',
+            state='NY',
+        ).all()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].total, 538)
+        filing.contributor_receipt_amount = 53
+        db.session.add(filing)
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(rows[0])
+        self.assertEqual(rows[0].total, 0)
+
+    def test_update_aggregate_state_existing(self):
+        existing = models.ScheduleAByState.query.filter_by(
+            cycle=2016,
+        ).first()
+        total = existing.total
+        factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id=existing.committee_id,
+            contributor_state=existing.state,
+            contributor_receipt_amount=538,
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(existing)
+        self.assertEqual(existing.total, total + 538)
+
+    def test_update_aggregate_zip_create(self):
+        filing = factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id='C12345',
+            contributor_receipt_amount=538,
+            contributor_zip='07605',
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        rows = models.ScheduleAByZip.query.filter_by(
+            cycle=2016,
+            committee_id='C12345',
+            zip='07605',
+        ).all()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].total, 538)
+        filing.contributor_receipt_amount = 53
+        db.session.add(filing)
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(rows[0])
+        self.assertEqual(rows[0].total, 0)
+
+    def test_update_aggregate_zip_existing(self):
+        existing = models.ScheduleAByZip.query.filter_by(
+            cycle=2016,
+        ).first()
+        total = existing.total
+        factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id=existing.committee_id,
+            contributor_zip=existing.zip,
+            contributor_receipt_amount=538,
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(existing)
+        self.assertEqual(existing.total, total + 538)
+
+    def test_update_aggregate_size_create(self):
+        filing = factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id='C12345',
+            contributor_receipt_amount=538,
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        rows = models.ScheduleABySize.query.filter_by(
+            cycle=2016,
+            committee_id='C12345',
+            size=500,
+        ).all()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].total, 538)
+        filing.contributor_receipt_amount = 53
+        db.session.add(filing)
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(rows[0])
+        self.assertEqual(rows[0].total, 0)
+
+    def test_update_aggregate_size_existing(self):
+        existing = models.ScheduleABySize.query.filter_by(
+            size=500,
+            cycle=2016,
+        ).first()
+        total = existing.total
+        factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id=existing.committee_id,
+            contributor_receipt_amount=538,
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(existing)
+        self.assertEqual(existing.total, total + 538)
