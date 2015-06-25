@@ -89,6 +89,12 @@ def update_schedule_b():
 
 
 @manager.command
+def update_aggregates():
+    execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_zip.sql')
+    execute_sql_file('data/sql_setup/prepare_schedule_a_aggregate_state.sql')
+
+
+@manager.command
 def list_routes():
     output = []
     for rule in app.url_map.iter_rules():

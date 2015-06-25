@@ -5,6 +5,7 @@ create index on sched_a (image_num) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_id) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_st) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_city) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create bidirectional composite indices on sortable columns
 create index on sched_a (receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
@@ -60,4 +61,46 @@ $$ language plpgsql;
 drop trigger if exists ofec_sched_a_trigger on sched_a;
 create trigger ofec_sched_a_trigger before insert or update or delete
     on sched_a for each row execute procedure ofec_sched_a_update()
+;
+
+-- Create queue tables to hold changes to Schedule A
+drop table if exists ofec_sched_a_queue_new;
+drop table if exists ofec_sched_a_queue_old;
+create table ofec_sched_a_queue_new as select * from sched_a limit 0;
+create table ofec_sched_a_queue_old as select * from sched_a limit 0;
+
+-- Create trigger to maintain Schedule A queues
+create or replace function ofec_sched_a_update_queues() returns trigger as $$
+begin
+  if tg_op = 'INSERT' then
+    if new.rpt_yr >= :START_YEAR_ITEMIZED then
+      insert into ofec_sched_a_queue_new
+      values (new.*)
+      ;
+    end if;
+    return new;
+  elsif tg_op = 'UPDATE' then
+    if new.rpt_yr >= :START_YEAR_ITEMIZED then
+      insert into ofec_sched_a_queue_new
+      values (new.*)
+      ;
+      insert into ofec_sched_a_queue_old
+      values (old.*)
+      ;
+    end if;
+    return new;
+  elsif tg_op = 'DELETE' then
+    if old.rpt_yr >= :START_YEAR_ITEMIZED then
+      insert into ofec_sched_a_queue_old
+      values (old.*)
+      ;
+    end if;
+    return old;
+  end if;
+end
+$$ language plpgsql;
+
+drop trigger if exists ofec_sched_a_queue_trigger on sched_a;
+create trigger ofec_sched_a_queue_trigger before insert or update or delete
+    on sched_a for each row execute procedure ofec_sched_a_update_queues()
 ;
