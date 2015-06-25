@@ -662,6 +662,29 @@ class ScheduleASearch(db.Model):
     contributor_employer_text = db.Column(TSVECTOR)
 
 
+class BaseAggregate(db.Model):
+    __abstract__ = True
+
+    committee_id = db.Column('cmte_id', db.String, primary_key=True)
+    cycle = db.Column(db.Integer)
+    total = db.Column(db.Float)
+
+
+class ScheduleABySize(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_size'
+    size = db.Column(db.Integer)
+
+
+class ScheduleAByState(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_state'
+    state = db.Column(db.String)
+
+
+class ScheduleAByZip(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_zip'
+    zip = db.Column(db.String)
+
+
 class ScheduleB(db.Model):
     __tablename__ = 'sched_b'
 
