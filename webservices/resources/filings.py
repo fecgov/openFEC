@@ -9,9 +9,14 @@ from webservices.common import models
 from webservices.common.util import filter_query
 
 filter_fields = {
+    'committee_id',
     'begin_image_numeric',
     'report_type',
     'report_year',
+    'recipt_date',
+    'form_type',
+    'report_pgi',
+    'amendment_indicator',
 }
 
 @spec.doc(
