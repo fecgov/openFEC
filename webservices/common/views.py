@@ -52,7 +52,7 @@ class ItemizedResource(Resource):
             query = self.join_fulltext(query)
         for key, column in self.filter_fulltext_fields:
             if kwargs[key]:
-                query = utils.search_text(query, column, kwargs[key])
+                query = utils.search_text(query, column, kwargs[key], order=False)
         return query
 
     def filter_amount(self, query, kwargs):
