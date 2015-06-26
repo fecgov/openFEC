@@ -9,6 +9,7 @@ from webservices.common import models
 from webservices.common.util import filter_query
 
 filter_fields = {
+    'committee_id'
     'begin_image_numeric',
     'report_type',
     'report_year',
@@ -33,16 +34,24 @@ tags=['filings'],
 class FilingsView(Resource):
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.make_sort_args(default=['-receipt_date']))
+    @schemas.marshal_with(schemas.FilingsPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        filings = models.Filings.query
+        filings = filings.filter_by(committee_id=committee_id)
+
+        return utils.fetch_page(filings, kwargs, model=models.Filings)
+
+
+class FilingsList(Resource):
+
+    @args.register_kwargs(args.paging)
     @args.register_kwargs(args.filings)
     @args.register_kwargs(args.make_sort_args(default=['-receipt_date']))
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, committee_id=None, **kwargs):
         filings = models.Filings.query
-        if committee_id:
-            filings = filings.filter(committee_id=committee_id)
-        else:
-            filings = filter_query(models.Filings, filings, filter_fields, kwargs)
+
+        filings = filter_query(models.Filings, filings, filter_fields, kwargs)
 
         return utils.fetch_page(filings, kwargs, model=models.Filings)
-
-

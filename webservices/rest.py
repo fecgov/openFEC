@@ -173,11 +173,8 @@ api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
 api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
-api.add_resource(
-    filings.FilingsView,
-    '/committee/<string:committee_id>/filings',
-    '/filings',
-)
+api.add_resource(filings.FilingsView,'/committee/<string:committee_id>/filings')
+api.add_resource(filings.FilingsList, '/filings')
 
 
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
