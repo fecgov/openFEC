@@ -33,7 +33,7 @@ class TestFilings(ApiBaseTest):
         [
             factories.FilingsFactory(committee_id='C0004'),
             factories.FilingsFactory(committee_id='C0005'),
-            factories.FilingsFactory(begin_image_numeric=123456789021234567890),
+            factories.FilingsFactory(begin_image_numeric=123456789021234567),
             factories.FilingsFactory(form_type='3'),
             factories.FilingsFactory(report_pgi='G'),
             factories.FilingsFactory(amendment_indicator='A'),
@@ -42,8 +42,7 @@ class TestFilings(ApiBaseTest):
         ]
 
         filter_fields = (
-            ('committee_id', ['00', '02']),
-            ('begin_image_numeric', 123456789021234567890),
+            ('begin_image_numeric', 123456789021234567),
             ('form_type', '3'),
             ('report_pgi', 'G'),
             ('amendment_indicator', 'A'),

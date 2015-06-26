@@ -1,5 +1,6 @@
 import logging
 import functools
+import time
 
 from smore import swagger
 from flask.ext.restful import abort
@@ -40,6 +41,9 @@ def _validate_natural(value):
     if value < 0:
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
+
+def make_date(datestr):
+    return time.strptime(datestr, '%Y-%m-%d')
 
 
 paging = {
@@ -141,12 +145,12 @@ committee_list = {
 
 filings = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
-    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER)e
+    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type'),
     'report_year': Arg(int, multiple=True, description='Report year'),
-    'begin_image_numeric',
+    'begin_image_numeric': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
-    'recipt_date'Arg( ),
+    'recipt_date': Arg(str, multiple=True, description='The day the filing was received by the FEC', type=make_date ),
     'form_type': Arg(str, multiple=True, description='Form type'),
     'report_pgi': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
     'amendment_indicator': Arg(str, multiple=True, description='''
@@ -158,7 +162,7 @@ filings = {
         -S   secondary\n\
 
     Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
-    ''',
+    '''),
 }
 
 
