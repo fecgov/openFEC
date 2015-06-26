@@ -26,6 +26,7 @@ class ItemizedResource(Resource):
         )
 
         query = self.filter_multi(query, kwargs)
+        query = self.filter_cycle(query, kwargs)
         query = self.filter_fulltext(query, kwargs)
         query = self.filter_amount(query, kwargs)
 
@@ -35,6 +36,15 @@ class ItemizedResource(Resource):
         for key, column in self.filter_multi_fields:
             if kwargs[key]:
                 query = query.filter(column.in_(kwargs[key]))
+        return query
+
+    def filter_cycle(self, query, kwargs):
+        if kwargs['cycle']:
+            cycles = sum(
+                [[cycle - 1, cycle] for cycle in kwargs['cycle']],
+                []
+            )
+            query = query.filter(self.year_column.in_(cycles))
         return query
 
     def filter_fulltext(self, query, kwargs):
