@@ -115,3 +115,7 @@ class ReportsPacPartyFactory(BaseTotalsFactory):
 class ReportsIEOnlyFactory(BaseFactory):
     class Meta:
         model = models.CommitteeReportsIEOnly
+
+class FilingsFactory(BaseFactory):
+    class Meta:
+        model = models.Filings
