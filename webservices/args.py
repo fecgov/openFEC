@@ -12,7 +12,6 @@ from webargs.flaskparser import FlaskParser
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
-from webservices.config import SQL_CONFIG
 
 
 logger = logging.getLogger(__name__)
@@ -44,6 +43,8 @@ def _validate_natural(value):
     if value < 0:
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
+
+IString = functools.partial(Arg, str, use=lambda v: v.lower())
 
 
 paging = {
@@ -213,7 +214,10 @@ itemized = {
     'report_year': Arg(
         int,
         multiple=True,
-        validate=lambda value: value >= SQL_CONFIG['START_YEAR_ITEMIZED'],
+    ),
+    'cycle': Arg(
+        int,
+        multiple=True,
     ),
     'image_number': Arg(int, multiple=True),
     'min_amount': Arg(float),
@@ -221,20 +225,20 @@ itemized = {
 }
 
 schedule_a = {
-    'committee_id': Arg(str, multiple=True),
-    'contributor_id': Arg(str, multiple=True),
-    'contributor_name': Arg(str),
-    'contributor_city': Arg(str, multiple=True),
-    'contributor_state': Arg(str, multiple=True),
+    'committee_id': IString(multiple=True),
+    'contributor_id': IString(multiple=True),
+    'contributor_name': IString(),
+    'contributor_city': IString(multiple=True),
+    'contributor_state': IString(multiple=True),
     'contributor_employer': Arg(str),
     'contributor_occupation': Arg(str),
 }
 
 
 schedule_b = {
-    'committee_id': Arg(str, multiple=True),
-    'recipient_committee_id': Arg(str, multiple=True),
+    'committee_id': IString(multiple=True),
+    'recipient_committee_id': IString(multiple=True),
     'recipient_name': Arg(str),
-    'recipient_city': Arg(str, multiple=True),
-    'recipient_state': Arg(str, multiple=True),
+    'recipient_city': IString(multiple=True),
+    'recipient_state': IString(multiple=True),
 }

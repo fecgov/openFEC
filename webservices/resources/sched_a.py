@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from webservices import args
 from webservices import docs
 from webservices import spec
@@ -27,10 +29,10 @@ class ScheduleAView(ItemizedResource):
     filter_multi_fields = [
         ('report_year', models.ScheduleA.report_year),
         ('image_number', models.ScheduleA.image_number),
-        ('committee_id', models.ScheduleA.committee_id),
-        ('contributor_id', models.ScheduleA.contributor_id),
-        ('contributor_city', models.ScheduleA.contributor_city),
-        ('contributor_state', models.ScheduleA.contributor_state),
+        ('committee_id', sa.func.lower(models.ScheduleA.committee_id)),
+        ('contributor_id', sa.func.lower(models.ScheduleA.contributor_id)),
+        ('contributor_city', sa.func.lower(models.ScheduleA.contributor_city)),
+        ('contributor_state', sa.func.lower(models.ScheduleA.contributor_state)),
     ]
     filter_fulltext_fields = [
         ('contributor_name', models.ScheduleASearch.contributor_name_text),
