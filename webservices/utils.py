@@ -24,19 +24,25 @@ def extend(*dicts):
     return ret
 
 
-def search_text(query, column, text):
+def search_text(query, column, text, order=True):
+    """
+
+    :param order: Order results by text similarity, descending; prohibitively
+        slow for large collections
+    """
     vector = ' & '.join(text.split())
     vector = sa.func.concat(vector, ':*')
-    return query.filter(
-        column.match(vector)
-    ).order_by(
-        sa.desc(
-            sa.func.ts_rank_cd(
-                column,
-                sa.func.to_tsquery(vector)
+    query = query.filter(column.match(vector))
+    if order:
+        query = query.order_by(
+            sa.desc(
+                sa.func.ts_rank_cd(
+                    column,
+                    sa.func.to_tsquery(vector)
+                )
             )
         )
-    )
+    return query
 
 
 def make_pdf_url(image_number):
