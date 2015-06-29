@@ -2,10 +2,10 @@
 create index on sched_b (rpt_yr) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_b (image_num) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_b (sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (lower(cmte_id)) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (lower(recipient_st)) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (lower(recipient_city)) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (lower(recipient_cmte_id)) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_b (cmte_id) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_b (recipient_st) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_b (recipient_city) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_b (recipient_cmte_id) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create composite indices on sortable columns
 create index on sched_b(receipt_dt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;

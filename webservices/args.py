@@ -45,7 +45,7 @@ def _validate_natural(value):
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
 
-IString = functools.partial(Arg, str, use=lambda v: v.lower())
+IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
 paging = {
