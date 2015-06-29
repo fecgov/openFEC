@@ -17,7 +17,7 @@ def parse_option(option, model=None):
             column = getattr(model, column)
         except AttributeError:
             raise ApiError('Field "{0}" not found'.format(column))
-    return order(column)
+    return column, order
 
 
 def ensure_list(value):
@@ -32,7 +32,9 @@ def sort(query, options, model=None, clear=False):
     if clear:
         query = query.order_by(False)
     options = ensure_list(options)
+    columns = []
     for option in options:
-        order = parse_option(option, model=model)
-        query = query.order_by(order)
-    return query
+        column, order = parse_option(option, model=model)
+        query = query.order_by(order(column))
+        columns.append((column, order))
+    return query, columns

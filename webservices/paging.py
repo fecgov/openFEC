@@ -1,10 +1,19 @@
 import abc
 import math
+import datetime
 import collections
 
+import sqlalchemy as sa
 import marshmallow as ma
+from marshmallow.utils import isoformat
 
 from webservices.spec import spec
+
+
+def _format_value(value):
+    if isinstance(value, datetime.datetime):
+        return isoformat(value)
+    return value
 
 
 class BasePage(collections.Sequence):
@@ -57,9 +66,9 @@ class OffsetPage(BasePage):
 class SeekPage(BasePage):
 
     @property
-    def last_index(self):
+    def last_indexes(self):
         if self.results:
-            return self.paginator._get_index_value(self.results[-1])
+            return self.paginator._get_index_values(self.results[-1])
         return None
 
     @property
@@ -68,7 +77,7 @@ class SeekPage(BasePage):
             'count': self.paginator.count,
             'pages': self.paginator.pages,
             'per_page': self.paginator.per_page,
-            'last_index': self.last_index,
+            'last_indexes': self.last_indexes,
         }
 
 
@@ -103,19 +112,20 @@ class OffsetPaginator(BasePaginator):
 
 class SeekPaginator(BasePaginator):
 
-    def __init__(self, cursor, per_page, index_column, count=None):
+    def __init__(self, cursor, per_page, index_column, sort_column=None, count=None):
         self.index_column = index_column
+        self.sort_column = sort_column
         super(SeekPaginator, self).__init__(cursor, per_page, count=count)
 
-    def get_page(self, last_index=None):
-        return SeekPage(self._fetch(last_index), self)
+    def get_page(self, last_index=None, sort_index=None):
+        return SeekPage(self._fetch(last_index, sort_index), self)
 
     @abc.abstractmethod
-    def _fetch(self, last_index, limit):
+    def _fetch(self, last_indexes, limit):
         pass
 
     @abc.abstractmethod
-    def _get_index_value(self, result):
+    def _get_index_values(self, result):
         pass
 
 
@@ -137,14 +147,28 @@ class SqlalchemyOffsetPaginator(SqlalchemyMixin, OffsetPaginator):
 
 class SqlalchemySeekPaginator(SqlalchemyMixin, SeekPaginator):
 
-    def _fetch(self, last_index):
+    def _fetch(self, last_index, sort_index=None):
         cursor, limit = self.cursor, self.per_page
+        lhs, rhs = (), ()
+        direction = sa.asc
+        if sort_index is not None:
+            lhs += (self.sort_column[0], )
+            rhs += (sort_index, )
+            direction = self.sort_column[1]
         if last_index is not None:
-            cursor = cursor.filter(self.index_column > last_index)
+            lhs += (self.index_column, )
+            rhs += (last_index, )
+        if any(rhs):
+            filter = lhs > rhs if direction == sa.asc else lhs < rhs
+            cursor = cursor.filter(filter)
         return cursor.order_by(self.index_column).limit(limit).all()
 
-    def _get_index_value(self, result):
-        return getattr(result, self.index_column.key)
+    def _get_index_values(self, result):
+        ret = {'last_index': getattr(result, self.index_column.key)}
+        if self.sort_column:
+            key = 'last_{0}'.format(self.sort_column[0].key)
+            ret[key] = _format_value(getattr(result, self.sort_column[0].key))
+        return ret
 
 
 class PageSchemaOpts(ma.schema.SchemaOpts):
@@ -182,7 +206,7 @@ class OffsetInfoSchema(BaseInfoSchema):
 
 
 class SeekInfoSchema(BaseInfoSchema):
-    last_index = ma.fields.Integer()
+    last_indexes = ma.fields.Raw()
 
 
 class OffsetPageSchema(ma.Schema, metaclass=PageMeta):

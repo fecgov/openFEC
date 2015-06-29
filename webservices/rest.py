@@ -49,6 +49,7 @@ def sqla_conn_string():
 app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
+# app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
