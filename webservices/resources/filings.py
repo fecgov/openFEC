@@ -52,6 +52,8 @@ class FilingsList(Resource):
     def get(self, **kwargs):
         filings = models.Filings.query
 
+        # To Do : need to eagerly load committee name after adding to the models
+
         filings = filter_query(models.Filings, filings, fields, kwargs)
 
         return utils.fetch_page(filings, kwargs, model=models.Filings)
