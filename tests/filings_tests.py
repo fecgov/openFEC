@@ -3,7 +3,7 @@ import datetime
 
 from webservices import utils
 from webservices.rest import api
-from webservices.resources.filings import FilingsView
+from webservices.resources.filings import FilingsView, FilingsList
 
 from tests import factories
 from .common import ApiBaseTest
@@ -26,7 +26,7 @@ class TestFilings(ApiBaseTest):
         filing_1 = factories.FilingsFactory(committee_id = 'C001')
         filing_2 = factories.FilingsFactory(committee_id = 'C002')
 
-        results = self._results(api.url_for(FilingsView))
+        results = self._results(api.url_for(FilingsList))
         self.assertEqual(len(results), 2)
 
     def test_filings_filters(self):
@@ -51,11 +51,11 @@ class TestFilings(ApiBaseTest):
         )
 
         # checking one example from each field
-        orig_response = self._response(api.url_for(FilingsView))
+        orig_response = self._response(api.url_for(FilingsList))
         original_count = orig_response['pagination']['count']
 
         for field, example in filter_fields:
-            page = api.url_for(FilingsView, **{field: example})
+            page = api.url_for(FilingsList, **{field: example})
             # returns at least one result
             results = self._results(page)
             self.assertGreater(len(results), 0)
