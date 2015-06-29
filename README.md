@@ -6,7 +6,7 @@
 [![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
 ![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)
 
-We are taking data from the Federal Election Commission and creating an API around it. We will be harmonizing/cleaning it up to make it easier for external developers to use and analyze as well as creating a web application to make some analyzation and comparison of the data easier.
+The first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency-seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app).
 
 **Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
 
@@ -22,7 +22,8 @@ For those interested in contributing, please check out our [contributing guideli
 
 * [fec](https://github.com/18F/fec) - A discussion forum where we can discuss the project.
 * [openfec](https://github.com/18F/openfec) - Where the API work happens. We also use this as the central repo to create issues related to each sprint and our backlog here. If you're interested in contribution, please look for "help wanted" tags or ask!
-* [openfec-web-app](https://github.com/18f/openfec-web-app) - Where the web app work happens. Note that issues and discussion tend to happen in the other repos.
+* [openfec-web-app](https://github.com/18f/openfec-web-app) - Where the campaign finance web app work happens. Note that issues and discussion tend to happen in the other repos.
+* [fec-alpha](https://github.com/18F/fec-alpha) - A place to explore and evolve a new site for the Federal Election Commission.
 
 ## Installation
 
