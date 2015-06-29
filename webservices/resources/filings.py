@@ -8,8 +8,8 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common.util import filter_query
 
-filter_fields = {
-    'committee_id'
+fields = {
+    'committee_id',
     'begin_image_numeric',
     'report_type',
     'report_year',
@@ -49,9 +49,9 @@ class FilingsList(Resource):
     @args.register_kwargs(args.filings)
     @args.register_kwargs(args.make_sort_args(default=['-receipt_date']))
     @schemas.marshal_with(schemas.FilingsPageSchema())
-    def get(self, committee_id=None, **kwargs):
+    def get(self, **kwargs):
         filings = models.Filings.query
 
-        filings = filter_query(models.Filings, filings, filter_fields, kwargs)
+        filings = filter_query(models.Filings, filings, fields, kwargs)
 
         return utils.fetch_page(filings, kwargs, model=models.Filings)
