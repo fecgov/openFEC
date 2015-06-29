@@ -150,18 +150,17 @@ class SqlalchemySeekPaginator(SqlalchemyMixin, SeekPaginator):
     def _fetch(self, last_index, sort_index=None):
         cursor, limit = self.cursor, self.per_page
         lhs, rhs = (), ()
-        direction = sa.asc
+        direction = self.sort_column[1] if self.sort_column else sa.asc
         if sort_index is not None:
             lhs += (self.sort_column[0], )
             rhs += (sort_index, )
-            direction = self.sort_column[1]
         if last_index is not None:
             lhs += (self.index_column, )
             rhs += (last_index, )
         if any(rhs):
             filter = lhs > rhs if direction == sa.asc else lhs < rhs
             cursor = cursor.filter(filter)
-        return cursor.order_by(self.index_column).limit(limit).all()
+        return cursor.order_by(direction(self.index_column)).limit(limit).all()
 
     def _get_index_values(self, result):
         ret = {'last_index': getattr(result, self.index_column.key)}

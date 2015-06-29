@@ -7,11 +7,9 @@ create index on sched_b (lower(recipient_st)) where rpt_yr >= :START_YEAR_ITEMIZ
 create index on sched_b (lower(recipient_city)) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_b (lower(recipient_cmte_id)) where rpt_yr >= :START_YEAR_ITEMIZED;
 
--- Create bidirectional composite indices on sortable columns
+-- Create composite indices on sortable columns
 create index on sched_b(receipt_dt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b(receipt_dt desc, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_b(disb_amt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b(disb_amt desc, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create Schedule B fulltext table
 drop table if exists ofec_sched_b_fulltext;
