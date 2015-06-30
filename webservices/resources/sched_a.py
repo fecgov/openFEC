@@ -20,6 +20,9 @@ class ScheduleAView(ItemizedResource):
     def year_column(self):
         return self.model.report_year
     @property
+    def date_column(self):
+        return self.model.contributor_receipt_date
+    @property
     def index_column(self):
         return self.model.sched_a_sk
     @property
@@ -27,7 +30,6 @@ class ScheduleAView(ItemizedResource):
         return self.model.contributor_receipt_amount
 
     filter_multi_fields = [
-        ('report_year', models.ScheduleA.report_year),
         ('image_number', models.ScheduleA.image_number),
         ('committee_id', models.ScheduleA.committee_id),
         ('contributor_id', models.ScheduleA.contributor_id),
