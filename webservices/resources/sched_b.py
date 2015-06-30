@@ -20,6 +20,9 @@ class ScheduleBView(ItemizedResource):
     def year_column(self):
         return self.model.report_year
     @property
+    def date_column(self):
+        return self.model.disbursement_date
+    @property
     def index_column(self):
         return self.model.sched_b_sk
     @property
@@ -27,7 +30,6 @@ class ScheduleBView(ItemizedResource):
         return self.model.disbursement_amount
 
     filter_multi_fields = [
-        ('report_year', models.ScheduleB.report_year),
         ('image_number', models.ScheduleB.image_number),
         ('committee_id', models.ScheduleB.committee_id),
         ('recipient_city', models.ScheduleB.recipient_city),

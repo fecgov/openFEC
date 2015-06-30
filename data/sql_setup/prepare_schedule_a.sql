@@ -8,7 +8,7 @@ create index on sched_a (contbr_st) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_city) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create composite indices on sortable columns
-create index on sched_a (receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (contb_receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create Schedule A fulltext table

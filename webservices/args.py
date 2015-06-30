@@ -212,17 +212,11 @@ totals = {
 
 
 itemized = {
-    'report_year': Arg(
-        int,
-        multiple=True,
-    ),
-    'cycle': Arg(
-        int,
-        multiple=True,
-    ),
     'image_number': Arg(int, multiple=True),
     'min_amount': Arg(float),
     'max_amount': Arg(float),
+    'start_date': Arg(parse_date),
+    'end_date': Arg(parse_date),
 }
 
 schedule_a = {
