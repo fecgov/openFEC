@@ -18,7 +18,7 @@ If you'd like to contribute to our project, please check out our [openfec](https
 
 For those interested in contributing, please check out our [contributing guidelies](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md) we use to guide our development processes internally. You don't have to adhere to them to participate, but following them may help keep things from getting messy.
 
-If you would like to be an FEC API beta tester, file an issue in the [fec repo](https://github.com/18F/fec)
+If you would like to be an FEC API beta tester, get an [API key](https://api.data.gov/signup/) check out the experimental [API](https://api.open.fec.gov/developers) give us your feedback by filing issues.
 
 ## Our Repos
 
