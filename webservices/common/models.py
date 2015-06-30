@@ -679,23 +679,23 @@ class BaseAggregate(db.Model):
     __abstract__ = True
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
-    cycle = db.Column(db.Integer)
+    cycle = db.Column(db.Integer, primary_key=True)
     total = db.Column(db.Float)
 
 
 class ScheduleABySize(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_size'
-    size = db.Column(db.Integer)
+    size = db.Column(db.Integer, primary_key=True)
 
 
 class ScheduleAByState(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_state'
-    state = db.Column(db.String)
+    state = db.Column(db.String, primary_key=True)
 
 
 class ScheduleAByZip(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_zip'
-    zip = db.Column(db.String)
+    zip = db.Column(db.String, primary_key=True)
 
 
 class ScheduleB(db.Model):
