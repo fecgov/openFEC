@@ -19,9 +19,7 @@ EXCLUDE_TABLES = [
     'sched_b2',
     'sched_e2',
     'pacronyms',
-    'ofec_two_year_periods',
-    'ofec_sched_a_fulltext',
-    'ofec_sched_b_fulltext',
+    'ofec_*',
 ]
 # Include records used in integration tests
 FORCE_INCLUDE = [
@@ -64,9 +62,18 @@ def fetch_subset(source, dest, fraction=DEFAULT_FRACTION, log=True):
 
 
 @task
+def clear_triggers(dest):
+    """Clear all triggers in database `dest`.
+    """
+    cmd = 'psql -f data/functions/strip_triggers.sql {dest}'.format(**locals())
+    run(cmd, echo=True)
+
+
+@task
 def build_test(source, dest, fraction=DEFAULT_FRACTION, log=True):
     fetch_full(source, dest)
     fetch_schemas(source, dest)
+    clear_triggers(dest)
     fetch_subset(source, dest, fraction=fraction, log=log)
 
 
