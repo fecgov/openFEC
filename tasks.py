@@ -15,14 +15,17 @@ EXCLUDE_TABLES = [
     '*_mv',
     '*_tmp',
     '*_old',
-    'sched_a',
-    'sched_b',
-    'ofec_two_year_periods',
+    'sched_e',
+    'sched_b2',
+    'sched_e2',
+    'pacronyms',
+    'ofec_*',
 ]
-# Include Nancy Pelosi and John Boehner for debugging purposes
+# Include records used in integration tests
 FORCE_INCLUDE = [
-    ('dimcand', 10024584),
-    ('dimcand', 10034937),
+    ('dimcand', 10025229),  # Nancy Pelosi
+    ('dimcand', 10012694),  # John Boehner
+    ('dimcmte', 10031117),  # Raul Grijalva (committee)
 ]
 
 
@@ -45,8 +48,10 @@ def fetch_full(source, dest):
 
 
 @task
-def fetch_subset(source, dest, fraction=DEFAULT_FRACTION):
+def fetch_subset(source, dest, fraction=DEFAULT_FRACTION, log=True):
     cmd = 'rdbms-subsetter {source} {dest} {fraction}'.format(**locals())
+    if log:
+        cmd += ' --logarithmic'
     for table in (FULL_TABLES + EXCLUDE_TABLES):
         cmd += ' --exclude-table {0}'.format(table)
     for table, key in FORCE_INCLUDE:
