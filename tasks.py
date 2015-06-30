@@ -3,7 +3,7 @@ from invoke import run
 from invoke import task
 
 
-DEFAULT_FRACTION = 0.015
+DEFAULT_FRACTION = 0.5
 FULL_TABLES = [
     'dimdates',
     'dimparty',
