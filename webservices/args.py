@@ -91,8 +91,8 @@ candidate_list = {
 }
 
 committee = {
-    'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
-    'cycle': Arg(int, multiple=True, description='A 2-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
+    'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
+    'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
         description='The one-letter designation code of the organization:\n\
          - A authorized by a candidate\n\
@@ -114,17 +114,17 @@ committee = {
         '),
     'committee_type': Arg(str, multiple=True, enum=['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'],
         description='The one-letter type code of the organization:\n\
-        - C Communication Cost\n\
-        - D Delegate\n\
-        - E Electioneering Communication\n\
+        - C communication cost\n\
+        - D delegate\n\
+        - E electioneering communication\n\
         - H House\n\
-        - I Independent Expenditor (Person or Group)\n\
-        - N PAC - Nonqualified\n\
-        - O Independent Expenditure-Only (Super PACs)\n\
-        - P Presidential\n\
-        - Q PAC - Qualified\n\
+        - I independent expenditor (person or group)\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - P presidential\n\
+        - Q PAC - qualified\n\
         - S Senate\n\
-        - U Single Candidate Independent Expenditure\n\
+        - U single candidate independent expenditure\n\
         - V PAC with non-contribution account, nonqualified\n\
         - W PAC with non-contribution account, qualified\n\
         - X party, nonqualified\n\
@@ -138,9 +138,9 @@ committee_list = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
     'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
     'name': Arg(str, description="Candidate's name (full or partial)"),
-    'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
+    'state': Arg(str, multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
-    'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
+    'party': Arg(str, multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
 }
 
 filings = {
