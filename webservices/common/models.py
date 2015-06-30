@@ -704,8 +704,22 @@ class ScheduleB(db.Model):
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     form_type = db.Column('form_tp', db.String)
     committee_id = db.Column('cmte_id', db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleB.committee_id) == CommitteeHistory.committee_id,
+            ScheduleB.report_year + ScheduleB.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     entity_type = db.Column('entity_tp', db.String)
     recipient_committee_id = db.Column('recipient_cmte_id', db.String)
+    recipient_committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleB.recipient_committee_id) == CommitteeHistory.committee_id,
+            ScheduleB.report_year + ScheduleB.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     recipient_name = db.Column('recipient_nm', db.String)
     recipient_street_1 = db.Column('recipient_st1', db.String)
     recipient_street_2 = db.Column('recipient_st2', db.String)

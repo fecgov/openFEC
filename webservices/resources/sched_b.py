@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from webservices import args
 from webservices import docs
 from webservices import spec
@@ -48,6 +50,12 @@ class ScheduleBView(ItemizedResource):
     @schemas.marshal_with(schemas.ScheduleBPageSchema())
     def get(self, **kwargs):
         return super(ScheduleBView, self).get(**kwargs)
+
+    def build_query(self, kwargs):
+        query = super(ScheduleBView, self).build_query(kwargs)
+        query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
+        query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
+        return query
 
     def join_fulltext(self, query):
         return query.join(
