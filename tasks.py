@@ -57,10 +57,19 @@ def fetch_subset(source, dest, fraction=DEFAULT_FRACTION):
 
 
 @task
-def build_test(source, dest, fraction=DEFAULT_FRACTION):
+def clear_triggers(dest):
+    """Clear all triggers in database `dest`.
+    """
+    cmd = 'psql -f data/functions/strip_triggers.sql {dest}'.format(**locals())
+    run(cmd, echo=True)
+
+
+@task
+def build_test(source, dest, fraction=DEFAULT_FRACTION, log=True):
     fetch_full(source, dest)
     fetch_schemas(source, dest)
-    fetch_subset(source, dest, fraction=fraction)
+    clear_triggers(dest)
+    fetch_subset(source, dest, fraction=fraction, log=log)
 
 
 @task
