@@ -53,6 +53,8 @@ class FilingsList(Resource):
         filings = models.Filings.query
 
         # To Do : need to eagerly load committee name after adding to the models
+        if hasattr(filings, 'committee'):
+            query = filings.query.options(sa.orm.joinedload(filings.committee))
 
         filings = filter_query(models.Filings, filings, fields, kwargs)
 
