@@ -608,7 +608,7 @@ class Filings(db.Model):
     election_year = db.Column(db.Integer)
     form_type = db.Column(db.String)
     report_year = db.Column(db.Integer)
-    report_type = db.Column(db.String)
+    report_type = db.Column(db.Integer)
     # document_type = db.Column(db.String)
     to_from_indicator  = db.Column(db.String)
     # beginning_image_number = db.Column(db.BigInteger)
@@ -642,6 +642,19 @@ class Filings(db.Model):
 
     @property
     def pdf_url(self):
-        #return utils.make_pdf_url(self.beginning_image_number)
-        return utils.make_pdf_url(self.begin_image_numeric)
+        return utils.pdf_by_form(self.image_numeric, self.form_type, self.report_year)
+
+    @declared_attr
+    def committee_id(cls):
+        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_id'))
+
+    @declared_attr
+    def committee(cls):
+        return db.relationship('CommitteeDetail')
+
+
+
+
+
+
 
