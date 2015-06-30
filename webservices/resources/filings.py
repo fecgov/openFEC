@@ -38,6 +38,8 @@ class FilingsView(Resource):
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, committee_id=None, **kwargs):
         filings = models.Filings.query
+        if hasattr(filings, 'committee'):
+            query = filings.query.options(sa.orm.joinedload(filings.committee))
         filings = filings.filter_by(committee_id=committee_id)
 
         return utils.fetch_page(filings, kwargs, model=models.Filings)

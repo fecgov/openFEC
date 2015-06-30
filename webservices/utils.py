@@ -43,6 +43,8 @@ def pdf_by_form(image_number, form_type, report_year):
         return None
     elif form_type in ['F3X', 'F3P'] and report_year > 1993:
         return make_pdf_url(image_number)
+    # elif form_type == 'F3' and committee_type == 'H' and report_year > 1996:
+    #     return make_pdf_url(image_number)
     elif report_year > 2000:
         return make_pdf_url(image_number)
     else:
