@@ -257,6 +257,8 @@ register_schema(ScheduleAPageSchema)
 ScheduleBSchema = make_schema(
     models.ScheduleB,
     fields={
+        'committee': ma.fields.Nested(CommitteeHistorySchema),
+        'recipient_committee': ma.fields.Nested(CommitteeHistorySchema),
         'disbursement_amount': ma.fields.Decimal(places=2),
         'semi_annual_bundled_refund': ma.fields.Decimal(places=2),
     },
