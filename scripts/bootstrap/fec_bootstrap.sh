@@ -16,15 +16,16 @@ npm install
 echo "Creating sample DB"
 dropdb cfdm_test 2>/dev/null
 createdb cfdm_test
-psql -f data/cfdm_test.pgdump.sql cfdm_test >/dev/null
+psql -f data/subset.sql cfdm_test >/dev/null
 echo "Refreshing DB"
-python manage.py update_schemas
+python manage.py update_schemas --processes 1
 deactivate
 cd ..
 
 echo "Creating tmuxinator profile"
-cp scripts/bootstrap/tmux/fec-local.yml ~./tmuxinator/fec-local.yml
-sed -i '' 's|<CHANGE>|'`pwd`'|' ~./tmuxinator/fec-local.yml
+mkdir -p /home/vagrant/.tmuxinator
+cp /vagrant/tmux/fec-local.yml ~/.tmuxinator/fec-local.yml
+sed -i 's|<CHANGE>|'`pwd`'|' ~/.tmuxinator/fec-local.yml
 
 # Set up openFEC Web App
 echo "Done with API, setting up web app"
@@ -37,14 +38,12 @@ workon openFEC-web-app
 echo "Installing requirements"
 pip install -r requirements.txt
 npm config set python `which python2.7`
-npm install -g browserify
+npm install -g gulp
 npm install
 npm run build
-echo "Web app uses basic auth. Create username and password:"
-read -p "Name: " name
-read -p "Pass: " pass
-echo "export FEC_WEB_USERNAME=$name" > ~/.fec_vars
-echo "export FEC_WEB_PASSWORD=$pass" >> ~/.fec_vars
+echo "export FEC_WEB_TEST=true" > ~/.fec_vars
+echo "export FEC_WEB_DEBUG=true" >> ~/.fec_vars
+echo "export FEC_WEB_API_URL_PUBLIC=http://localhost:5001" >> ~/.fec_vars
 source ~/.fec_vars
 echo "Web app installed."
 echo ""
