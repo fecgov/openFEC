@@ -240,13 +240,27 @@ register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
 
 
-ScheduleASchema = make_schema(models.ScheduleA)
+ScheduleASchema = make_schema(
+    models.ScheduleA,
+    fields={
+        'committee': ma.fields.Nested(CommitteeHistorySchema),
+        'contributor': ma.fields.Nested(CommitteeHistorySchema),
+        'contributor_receipt_amount': ma.fields.Decimal(places=2),
+        'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
+    },
+)
 ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
 
-ScheduleBSchema = make_schema(models.ScheduleB)
+ScheduleBSchema = make_schema(
+    models.ScheduleB,
+    fields={
+        'disbursement_amount': ma.fields.Decimal(places=2),
+        'semi_annual_bundled_refund': ma.fields.Decimal(places=2),
+    },
+)
 ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)

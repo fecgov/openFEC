@@ -603,9 +603,22 @@ class ScheduleA(db.Model):
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     form_type = db.Column('form_tp', db.String)
     committee_id = db.Column('cmte_id', db.String)
-    committee_name = db.Column('cmte_nm', db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleA.committee_id) == CommitteeHistory.committee_id,
+            ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     entity_type = db.Column('entity_tp', db.String)
     contributor_id = db.Column('contbr_id', db.String)
+    contributor = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleA.contributor_id) == CommitteeHistory.committee_id,
+            ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     contributor_name = db.Column('contbr_nm', db.String)
     contributor_prefix = db.Column('contbr_prefix', db.String)
     contributor_first_name = db.Column('contbr_f_nm', db.String)
