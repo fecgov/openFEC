@@ -219,6 +219,12 @@ To build a new test subset, use the `build_test` invoke task:
 
 where both `source` and `dest` are valid PostgreSQL connection strings.
 
+To update the version-controlled test subset after rebuilding, run:
+
+    $ invoke dump <source> data/subset.dump
+
+where `source` is the database containing the newly created test subset.
+
 ### Git Hooks
 
 This repo includes optional post-merge and post-checkout hooks to ensure that
