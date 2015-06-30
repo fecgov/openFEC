@@ -133,6 +133,7 @@ class TestViews(common.IntegrationTestCase):
         )
 
     def test_sched_a_fulltext_trigger(self):
+        # Test create
         filing = models.ScheduleA(
             sched_a_sk=42,
             report_year=2014,
@@ -142,18 +143,25 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.add(filing)
         db.session.commit()
+        db.session.execute('select update_aggregates()')
         search = models.ScheduleASearch.query.filter(
             models.ScheduleASearch.sched_a_sk == 42
         ).one()
         self.assertEqual(search.contributor_name_text, "'adelson':2 'sheldon':1")
+
+        # Test update
         filing.contributor_name = 'Shelly Adelson'
         db.session.commit()
+        db.session.execute('select update_aggregates()')
         search = models.ScheduleASearch.query.filter(
             models.ScheduleASearch.sched_a_sk == 42
         ).one()
         self.assertEqual(search.contributor_name_text, "'adelson':2 'shelli':1")
+
+        # Test delete
         db.session.delete(filing)
         db.session.commit()
+        db.session.execute('select update_aggregates()')
         self.assertEqual(
             models.ScheduleASearch.query.filter(
                 models.ScheduleASearch.sched_a_sk == 42
