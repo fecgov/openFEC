@@ -602,9 +602,9 @@ class Filings(db.Model):
 
     committee_id = db.Column(db.String)
     sub_id = db.Column(db.BigInteger, primary_key=True)
-    coverage_start_date = db.Column(db.DateTime)
-    coverage_end_date = db.Column(db.DateTime)
-    receipt_date = db.Column(db.DateTime)
+    coverage_start_date = db.Column(db.Date)
+    coverage_end_date = db.Column(db.Date)
+    receipt_date = db.Column(db.Date)
     election_year = db.Column(db.Integer)
     form_type = db.Column(db.String)
     report_year = db.Column(db.Integer)
@@ -638,7 +638,7 @@ class Filings(db.Model):
     report_pgi = db.Column(db.String)
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String)
-    update_date = db.Column(db.DateTime)
+    update_date = db.Column(db.Date)
 
     @property
     def pdf_url(self):
