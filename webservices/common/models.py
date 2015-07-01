@@ -596,6 +596,12 @@ class CommitteeTotalsIEOnly(BaseModel):
     total_independent_contributions = db.Column(db.Integer)
     total_independent_expenditures = db.Column(db.Integer)
 
+class Reports(db.Model):
+    __tablename__ = 'dimreporttype'
+
+    rpt_tp = db.Column(db.String, primary_key=True)
+    rpt_tp_desc = db.Column(db.String)
+
 
 class Filings(db.Model):
     __tablename__ = 'vw_filing_history'
@@ -647,6 +653,16 @@ class Filings(db.Model):
     @declared_attr
     def committee(cls):
         return db.relationship('CommitteeDetail')
+
+
+    @declared_attr
+    def report_type(cls):
+        return db.Column(db.Integer, db.ForeignKey('dimreporttype.rpt_tp'))
+
+    @declared_attr
+    def report(cls):
+        return db.relationship('Reports')
+
 
     @property
     def pdf_url(self):
