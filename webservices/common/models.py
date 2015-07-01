@@ -333,7 +333,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
         # Senate records start May 2000
         elif self.committee.committee_type == 'S' and self.report_year < 2000:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -410,7 +410,7 @@ class CommitteeReportsPacParty(CommitteeReports):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsPresidential(CommitteeReports):
@@ -466,7 +466,7 @@ class CommitteeReportsPresidential(CommitteeReports):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsIEOnly(BaseModel):
@@ -491,7 +491,7 @@ class CommitteeReportsIEOnly(BaseModel):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeTotals(BaseModel):
@@ -666,6 +666,10 @@ class ScheduleA(db.Model):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
+    @property
+    def pdf_url(self):
+        return utils.make_image_pdf_url(self.image_number)
+
 
 class ScheduleASearch(db.Model):
     __tablename__ = 'ofec_sched_a_fulltext'
@@ -758,6 +762,10 @@ class ScheduleB(db.Model):
     filing_form = db.Column(db.String)
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+
+    @property
+    def pdf_url(self):
+        return utils.make_image_pdf_url(self.image_number)
 
 
 class ScheduleBSearch(db.Model):

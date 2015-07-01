@@ -56,8 +56,12 @@ def search_text(query, column, text, order=True):
     return query
 
 
-def make_pdf_url(image_number):
+def make_report_pdf_url(image_number):
     return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
         str(image_number)[-3:],
         image_number,
     )
+
+
+def make_image_pdf_url(image_number):
+    return 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number)
