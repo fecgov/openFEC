@@ -43,12 +43,12 @@ select
     update_date
 from vw_filing_history fh
     select distinct on (com.committee_id, com.committee_key)
-        from vw_filing_history fh left join ofec_committee_history_mv com on fh.committee_id=com.committee_id
+        from fh left join ofec_committee_history_mv com on fh.committee_id=com.committee_id
         where fh.committee_id like 'C%'
         order by com.committee_key desc
     select distinct on (cand.candidate_id, cand.candidate_key)
-        from vw_filing_history fh left join ofec_candidate_history_mv cand on fh.committee_id=cand.candidate_id
-        where fh.committee_id like 'C%'
+        from fh left join ofec_candidate_history_mv cand on fh.committee_id=cand.candidate_id
+        where fh.committee_id not like 'C%'
         order by cand.candidate_key desc
     left join dimreporttype report on fh.report_type = dimreporttype.rpt_tp
 where
