@@ -15,12 +15,12 @@ class TestItemized(ApiBaseTest):
 
     def test_sorting(self):
         [
-            factories.ScheduleAFactory(report_year=2014, receipt_date=datetime.datetime(2014, 1, 1)),
-            factories.ScheduleAFactory(report_year=2012, receipt_date=datetime.datetime(2012, 1, 1)),
-            factories.ScheduleAFactory(report_year=1986, receipt_date=datetime.datetime(1986, 1, 1)),
+            factories.ScheduleAFactory(report_year=2014, contributor_receipt_date=datetime.datetime(2014, 1, 1)),
+            factories.ScheduleAFactory(report_year=2012, contributor_receipt_date=datetime.datetime(2012, 1, 1)),
+            factories.ScheduleAFactory(report_year=1986, contributor_receipt_date=datetime.datetime(1986, 1, 1)),
         ]
         db.session.flush()
-        response = self._response(api.url_for(ScheduleAView, sort='receipt_date'))
+        response = self._response(api.url_for(ScheduleAView, sort='contributor_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
             [2012, 2014]
