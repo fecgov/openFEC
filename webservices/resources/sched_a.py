@@ -58,6 +58,14 @@ class ScheduleAView(ItemizedResource):
         query = super(ScheduleAView, self).build_query(kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
+        query = self.filter_contributor_type(query, kwargs)
+        return query
+
+    def filter_contributor_type(self, query, kwargs):
+        if kwargs['contributor_type'] == ['individual']:
+            query = query.filter(self.model.contributor_id == None)  # noqa
+        elif kwargs['contributor_type'] == ['committee']:
+            query = query.filter(self.model.contributor_id != None)  # noqa
         return query
 
     def join_fulltext(self, query):
