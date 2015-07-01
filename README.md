@@ -22,10 +22,10 @@ If you would like to be an FEC API beta tester, get an [API key](https://api.dat
 
 ## Our Repos
 
-* [fec](https://github.com/18F/fec) - A discussion forum where we can discuss the project.
-* [openfec](https://github.com/18F/openfec) - Where the API work happens. We also use this as the central repo to create issues related to each sprint and our backlog here. If you're interested in contribution, please look for "help wanted" tags or ask!
-* [openfec-web-app](https://github.com/18f/openfec-web-app) - Where the campaign finance web app work happens. Note that issues and discussion tend to happen in the other repos.
-* [fec-alpha](https://github.com/18F/fec-alpha) - A place to explore and evolve a new site for the Federal Election Commission.
+* [FEC](https://github.com/18F/fec) - A discussion forum for the project.
+* [openFEC](https://github.com/18F/openfec) - Where the API work happens. We also use this as the central repo to create issues related to each sprint and our backlog. If you're interested in contributing, please look for ["help wanted"](https://github.com/18F/openFEC/labels/help%20wanted%21) tags or ask!
+* [openFEC-web-app](https://github.com/18f/openfec-web-app) - Where the campaign finance web app work happens. Note that issues and discussion tend to happen in the other repos.
+* [fec-alpha](https://github.com/18F/fec-alpha) - A place to explore and develop a new site for the Federal Election Commission.
 
 ## Installation
 
