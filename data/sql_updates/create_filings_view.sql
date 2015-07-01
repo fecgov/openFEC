@@ -43,7 +43,6 @@ select
     update_date
 from vw_filing_history fh
 join ofec_committee_history_mv com on fh.committee_id = com.committee_id and fh.report_year + fh.report_year % 2 = com.cycle
--- debug
 join ofec_candidate_history_mv cand on fh.committee_id = cand.candidate_id and fh.report_year + fh.report_year % 2 = cand.cycle
 join dimreporttype report on fh.report_type = report.rpt_tp
 where
@@ -52,10 +51,10 @@ where
 
 create index on public.ofec_filings_vw_tmp(committee_id);
 create index on public.ofec_filings_vw_tmp(candidate_id);
-create index on public.ofec_filings_vw_tmp(begin_image_numeric);
+create index on public.ofec_filings_vw_tmp(beginning_image_number);
 create index on public.ofec_filings_vw_tmp(receipt_date);
 create index on public.ofec_filings_vw_tmp(form_type);
-create index on public.ofec_filings_vw_tmp(report_pgi);
+create index on public.ofec_filings_vw_tmp(primary_general_indicator);
 create index on public.ofec_filings_vw_tmp(amendment_indicator);
 create index on public.ofec_filings_vw_tmp(report_type);
 create index on public.ofec_filings_vw_tmp(report_year);
