@@ -229,6 +229,11 @@ schedule_a = {
     'contributor_occupation': Arg(str),
     'last_contributor_receipt_date': Arg(parse_date),
     'last_contributor_receipt_amount': Arg(float),
+    'contributor_type': Arg(
+        str,
+        multiple=True,
+        validate=lambda v: v in ['individual', 'committee'],
+    ),
 }
 
 
