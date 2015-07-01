@@ -3,7 +3,7 @@ drop materialized view if exists ofec_filings_vw_tmp;
 create materialized view ofec_filings_vw_tmp as
 select
     row_number() over () as idx,
-    cand.commmittee_id as candidate_id,
+    cand.candidate_id as candidate_id,
     cand.name as candidate_name,
     com.committee_id as committee_id,
     com.name as committee_name,
@@ -12,7 +12,7 @@ select
     coverage_end_date,
     receipt_date,
     election_year,
-    form_type,
+    fh.form_type,
     report_year,
     report_type,
     to_from_indicator as document_type,
@@ -33,7 +33,7 @@ select
     house_personal_funds,
     senate_personal_funds,
     opposition_personal_funds,
-    treasurer_name,
+    fh.treasurer_name,
     file_numeric as file_number,
     previous_file_numeric as previous_file_number,
     report.rpt_tp_desc as report_type_full,
@@ -42,15 +42,10 @@ select
     amendment_indicator,
     update_date
 from vw_filing_history fh
-    select distinct on (com.committee_id, com.committee_key)
-        from fh left join ofec_committee_history_mv com on fh.committee_id=com.committee_id
-        where fh.committee_id like 'C%'
-        order by com.committee_key desc
-    select distinct on (cand.candidate_id, cand.candidate_key)
-        from fh left join ofec_candidate_history_mv cand on fh.committee_id=cand.candidate_id
-        where fh.committee_id not like 'C%'
-        order by cand.candidate_key desc
-    left join dimreporttype report on fh.report_type = dimreporttype.rpt_tp
+join ofec_committee_history_mv com on fh.committee_id = com.committee_id and fh.report_year + fh.report_year % 2 = com.cycle
+-- debug
+join ofec_candidate_history_mv cand on fh.committee_id = cand.candidate_id and fh.report_year + fh.report_year % 2 = cand.cycle
+join dimreporttype report on fh.report_type = report.rpt_tp
 where
     report_year >= :START_YEAR
 ;
