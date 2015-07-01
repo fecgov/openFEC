@@ -227,7 +227,7 @@ schedule_a = {
     'contributor_state': IString(multiple=True),
     'contributor_employer': Arg(str),
     'contributor_occupation': Arg(str),
-    'last_receipt_date': Arg(parse_date),
+    'last_contributor_receipt_date': Arg(parse_date),
     'last_contributor_receipt_amount': Arg(float),
 }
 
@@ -238,6 +238,6 @@ schedule_b = {
     'recipient_name': Arg(str),
     'recipient_city': IString(multiple=True),
     'recipient_state': IString(multiple=True),
-    'last_receipt_date': Arg(parse_date),
+    'last_disbursement_date': Arg(parse_date),
     'last_disbursement_amount': Arg(float),
 }
