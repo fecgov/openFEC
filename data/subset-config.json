@@ -64,6 +64,14 @@
         "constrained_columns": ["cmte_sk"]
       }
     ],
+    "factindpexpcontb_f5": [
+      {
+        "referred_schema": null,
+        "referred_table": "dimcmte",
+        "referred_columns": ["cmte_sk"],
+        "constrained_columns": ["indv_org_sk"]
+      }
+    ],
     "dimlinkages": [
       {
         "referred_schema": null,

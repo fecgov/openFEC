@@ -12,12 +12,12 @@ csvkit==0.9.1
 # Marshalling
 marshmallow==2.0.0b3
 marshmallow-sqlalchemy==0.3.0.dev0
-git+https://github.com/jmcarp/smore@current
+git+https://github.com/marshmallow-code/smore@dev
 
 # Development
 invoke==0.10.1
 Flask-Script==2.0.5
-git+https://github.com/jmcarp/rdbms-subsetter@current
+git+https://github.com/jmcarp/rdbms-subsetter@wildcard-exclude
 
 # Testing
 nose>=1.3.6
