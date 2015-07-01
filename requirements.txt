@@ -11,8 +11,8 @@ csvkit==0.9.1
 
 # Marshalling
 marshmallow==2.0.0b3
-marshmallow-sqlalchemy==0.3.0.dev0
-git+https://github.com/jmcarp/smore@current
+git+https://github.com/marshmallow-code/smore@dev
+git+https://github.com/marshmallow-code/marshmallow-sqlalchemy@dev
 
 # Development
 invoke==0.10.1
