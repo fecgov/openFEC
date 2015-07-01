@@ -45,7 +45,7 @@ class ScheduleBView(ItemizedResource):
     @args.register_kwargs(args.make_seek_args())
     @args.register_kwargs(
         args.make_sort_args(
-            validator=args.OptionValidator(['receipt_date', 'disbursement_amount']),
+            validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
             multiple=False,
         )
     )
