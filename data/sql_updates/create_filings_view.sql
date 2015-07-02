@@ -5,7 +5,7 @@ select
     row_number() over () as idx,
     cand.candidate_id as candidate_id,
     cand.name as candidate_name,
-    com.committee_id as committee_id,
+    fh.committee_id as committee_id,
     com.name as committee_name,
     sub_id,
     coverage_start_date,
