@@ -10,9 +10,7 @@ class ItemizedResource(Resource):
 
     model = None
     year_column = None
-    date_column = None
     index_column = None
-    amount_column = None
     filter_multi_fields = []
     filter_fulltext_fields = []
 
@@ -26,22 +24,11 @@ class ItemizedResource(Resource):
             self.year_column >= SQL_CONFIG['START_YEAR_ITEMIZED'],
         )
 
-        query = self.filter_date(query, kwargs)
-        query = self.filter_multi(query, kwargs)
+        query = utils.filter_multi(query, kwargs, self.filter_multi_fields)
+        query = utils.filter_range(query, kwargs, self.filter_range_fields)
         query = self.filter_fulltext(query, kwargs)
-        query = self.filter_amount(query, kwargs)
 
         return query
-
-    def filter_date(self, query, kwargs):
-        if kwargs['start_date']:
-            query = query.filter(self.date_column >= kwargs['start_date'])
-        if kwargs['end_date']:
-            query = query.filter(self.date_column <= kwargs['end_date'])
-        return query
-
-    def filter_multi(self, query, kwargs):
-        return utils.filter_multi(query, kwargs, self.filter_multi_fields)
 
     def filter_fulltext(self, query, kwargs):
         if any(kwargs[key] for key, column in self.filter_fulltext_fields):
@@ -49,11 +36,4 @@ class ItemizedResource(Resource):
         for key, column in self.filter_fulltext_fields:
             if kwargs[key]:
                 query = utils.search_text(query, column, kwargs[key], order=False)
-        return query
-
-    def filter_amount(self, query, kwargs):
-        if kwargs['min_amount'] is not None:
-            query = query.filter(self.amount_column >= kwargs['min_amount'])
-        if kwargs['max_amount'] is not None:
-            query = query.filter(self.amount_column <= kwargs['max_amount'])
         return query

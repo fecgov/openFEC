@@ -20,9 +20,6 @@ class ScheduleAView(ItemizedResource):
     def year_column(self):
         return self.model.report_year
     @property
-    def date_column(self):
-        return self.model.contributor_receipt_date
-    @property
     def index_column(self):
         return self.model.sched_a_sk
     @property
@@ -39,6 +36,11 @@ class ScheduleAView(ItemizedResource):
     filter_fulltext_fields = [
         ('contributor_name', models.ScheduleASearch.contributor_name_text),
         ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
+    ]
+    filter_range_fields = [
+        (('min_date', 'max_date'), models.ScheduleA.contributor_receipt_date),
+        (('min_amount', 'max_amount'), models.ScheduleA.contributor_receipt_amount),
+        (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
     ]
 
     @args.register_kwargs(args.itemized)
