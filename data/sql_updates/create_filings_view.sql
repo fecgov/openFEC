@@ -42,9 +42,9 @@ select
     amendment_indicator,
     update_date
 from vw_filing_history fh
-join ofec_committee_history_mv com on fh.committee_id = com.committee_id and fh.report_year + fh.report_year % 2 = com.cycle
-join ofec_candidate_history_mv cand on fh.committee_id = cand.candidate_id and fh.report_year + fh.report_year % 2 = cand.cycle
-join dimreporttype report on fh.report_type = report.rpt_tp
+left join ofec_committee_history_mv com on fh.committee_id = com.committee_id and fh.report_year + fh.report_year % 2 = com.cycle
+left join ofec_candidate_history_mv cand on fh.committee_id = cand.candidate_id and fh.report_year + fh.report_year % 2 = cand.cycle
+left join dimreporttype report on fh.report_type = report.rpt_tp
 where
     report_year >= :START_YEAR
 ;
