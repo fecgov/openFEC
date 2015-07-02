@@ -29,6 +29,7 @@ from webservices.resources import totals
 from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
+from webservices.resources import aggregates
 from webservices.resources import candidates
 from webservices.resources import committees
 
@@ -181,6 +182,21 @@ api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
 api.add_resource(sched_a.ScheduleAView, '/filings/schedule_a')
 api.add_resource(sched_b.ScheduleBView, '/filings/schedule_b')
+api.add_resource(
+    aggregates.ScheduleABySizeView,
+    '/filings/schedule_a/by_size',
+    '/committee/<committee_id>/filings/schedule_a/by_size',
+)
+api.add_resource(
+    aggregates.ScheduleAByStateView,
+    '/filings/schedule_a/by_state',
+    '/committee/<committee_id>/filings/schedule_a/by_state',
+)
+api.add_resource(
+    aggregates.ScheduleAByZipView,
+    '/filings/schedule_a/by_zip',
+    '/committee/<committee_id>/filings/schedule_a/by_zip',
+)
 
 
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')

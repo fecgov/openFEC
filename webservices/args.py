@@ -237,6 +237,24 @@ schedule_a = {
 }
 
 
+schedule_a_by_size = {
+    'cycle': Arg(int, multiple=True),
+    'size': Arg(int, multiple=True),
+}
+
+
+schedule_a_by_state = {
+    'cycle': Arg(int, multiple=True),
+    'state': Arg(str, multiple=True),
+}
+
+
+schedule_a_by_zip = {
+    'cycle': Arg(int, multiple=True),
+    'zip': Arg(str, multiple=True),
+}
+
+
 schedule_b = {
     'committee_id': IString(multiple=True),
     'recipient_committee_id': IString(multiple=True),

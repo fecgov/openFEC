@@ -56,6 +56,13 @@ def search_text(query, column, text, order=True):
     return query
 
 
+def filter_multi(query, kwargs, fields):
+    for key, column in fields:
+        if kwargs[key]:
+            query = query.filter(column.in_(kwargs[key]))
+    return query
+
+
 def make_report_pdf_url(image_number):
     return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
         str(image_number)[-3:],
