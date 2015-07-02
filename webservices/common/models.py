@@ -604,9 +604,12 @@ class Reports(db.Model):
 
 
 class Filings(db.Model):
-    __tablename__ = 'vw_filing_history'
+    __tablename__ = 'ofec_filings_vw'
 
     committee_id = db.Column(db.String)
+    committee_name = db.Column(db.String)
+    candidate_id = db.Column(db.String)
+    candidate_name = db.Column(db.String)
     sub_id = db.Column(db.BigInteger, primary_key=True)
     coverage_start_date = db.Column(db.Date)
     coverage_end_date = db.Column(db.Date)
@@ -636,27 +639,10 @@ class Filings(db.Model):
     file_number = db.Column(db.BigInteger)
     previous_file_number = db.Column(db.BigInteger)
     primary_general_indicator = db.Column(db.String)
+    report_type_full = db.Column(db.String)
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String)
     update_date = db.Column(db.Date)
-
-    @declared_attr
-    def committee_id(cls):
-        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_id'))
-
-    @declared_attr
-    def committee(cls):
-        return db.relationship('CommitteeDetail')
-
-
-    @declared_attr
-    def report_type(cls):
-        return db.Column(db.Integer, db.ForeignKey('dimreporttype.rpt_tp'))
-
-    @declared_attr
-    def report(cls):
-        return db.relationship('Reports')
-
 
     @property
     def pdf_url(self):

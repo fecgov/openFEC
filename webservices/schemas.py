@@ -242,8 +242,6 @@ FilingsSchema = make_schema(
     models.Filings,
     fields= {
         'pdf_url': ma.fields.Str(),
-        'committee_name': ma.fields.Str(attribute='committee.name'),
-        'report_type_full': ma.fields.Str(attribute='report.rpt_tp_desc'),
     },
 )
 FilingsPageSchema = make_page_schema(FilingsSchema)
