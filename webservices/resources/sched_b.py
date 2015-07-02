@@ -20,14 +20,8 @@ class ScheduleBView(ItemizedResource):
     def year_column(self):
         return self.model.report_year
     @property
-    def date_column(self):
-        return self.model.disbursement_date
-    @property
     def index_column(self):
         return self.model.sched_b_sk
-    @property
-    def amount_column(self):
-        return self.model.disbursement_amount
 
     filter_multi_fields = [
         ('image_number', models.ScheduleB.image_number),
@@ -37,7 +31,12 @@ class ScheduleBView(ItemizedResource):
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
     ]
     filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleASearch.contributor_name_text),
+        ('recipient_name', models.ScheduleBSearch.recipient_name_text),
+    ]
+    filter_range_fields = [
+        (('min_date', 'max_date'), models.ScheduleB.disbursement_date),
+        (('min_amount', 'max_amount'), models.ScheduleB.disbursement_amount),
+        (('min_image_number', 'max_image_number'), models.ScheduleB.image_number),
     ]
 
     @args.register_kwargs(args.itemized)

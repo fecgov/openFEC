@@ -213,10 +213,12 @@ totals = {
 
 itemized = {
     'image_number': Arg(int, multiple=True),
+    'min_image_number': Arg(int),
+    'max_image_number': Arg(int),
     'min_amount': Arg(float),
     'max_amount': Arg(float),
-    'start_date': Arg(parse_date),
-    'end_date': Arg(parse_date),
+    'min_date': Arg(parse_date),
+    'max_date': Arg(parse_date),
 }
 
 schedule_a = {
