@@ -271,16 +271,22 @@ class CommitteeFormatTest(ApiBaseTest):
             factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 3, 1)),
             factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 4, 1)),
         ]
-        results = self._results(api.url_for(CommitteeList, start_date='02/01/2015'))
+        results = self._results(api.url_for(CommitteeList, min_first_file_date='02/01/2015'))
         self.assertTrue(all(each['first_file_date'] >= isoformat(datetime.datetime(2015, 2, 1)) for each in results))
-        results = self._results(api.url_for(CommitteeList, end_date='02/03/2015'))
+        results = self._results(api.url_for(CommitteeList, max_first_file_date='02/03/2015'))
         self.assertTrue(all(each['first_file_date'] <= isoformat(datetime.datetime(2015, 3, 1)) for each in results))
-        results = self._results(api.url_for(CommitteeList, start_date='02/01/2015', end_date='02/03/2015'))
+        results = self._results(
+            api.url_for(
+                CommitteeList,
+                min_first_file_date='02/01/2015',
+                max_first_file_date='02/03/2015',
+            )
+        )
         self.assertTrue(
             all(
                 isoformat(datetime.datetime(2015, 2, 1))
-                    <= each['first_file_date']
-                    <= isoformat(datetime.datetime(2015, 3, 1))
+                <= each['first_file_date']
+                <= isoformat(datetime.datetime(2015, 3, 1))
                 for each in results
             )
         )
