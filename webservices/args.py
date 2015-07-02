@@ -139,8 +139,8 @@ committee_list = {
     'state': Arg(str, multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
     'party': Arg(str, multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
-    'start_date': Arg(parse_date),
-    'end_date': Arg(parse_date),
+    'start_date': Arg(parse_date, description='The receipt date of the first filing by a committee.'),
+    'end_date': Arg(parse_date, description=''),
 }
 
 
