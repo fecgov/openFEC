@@ -596,11 +596,20 @@ class CommitteeTotalsIEOnly(BaseModel):
     total_independent_contributions = db.Column(db.Integer)
     total_independent_expenditures = db.Column(db.Integer)
 
+class Reports(db.Model):
+    __tablename__ = 'dimreporttype'
+
+    rpt_tp = db.Column(db.String, primary_key=True)
+    rpt_tp_desc = db.Column(db.String)
+
 
 class Filings(db.Model):
-    __tablename__ = 'vw_filing_history'
+    __tablename__ = 'ofec_filings_vw'
 
     committee_id = db.Column(db.String)
+    committee_name = db.Column(db.String)
+    candidate_id = db.Column(db.String)
+    candidate_name = db.Column(db.String)
     sub_id = db.Column(db.BigInteger, primary_key=True)
     coverage_start_date = db.Column(db.Date)
     coverage_end_date = db.Column(db.Date)
@@ -609,12 +618,9 @@ class Filings(db.Model):
     form_type = db.Column(db.String)
     report_year = db.Column(db.Integer)
     report_type = db.Column(db.String)
-    # document_type = db.Column(db.String)
-    to_from_indicator  = db.Column(db.String)
-    # beginning_image_number = db.Column(db.BigInteger)
-    begin_image_numeric = db.Column(db.BigInteger)
-    # ending_image_number = db.Column(db.BigInteger)
-    end_image_numeric = db.Column(db.BigInteger)
+    document_type = db.Column(db.String)
+    beginning_image_number = db.Column(db.BigInteger)
+    ending_image_number = db.Column(db.BigInteger)
     pages = db.Column(db.Integer)
     total_receipts = db.Column(db.Integer)
     total_individual_contributions = db.Column(db.Integer)
@@ -622,26 +628,29 @@ class Filings(db.Model):
     total_disbursements = db.Column(db.Integer)
     total_independent_expenditures = db.Column(db.Integer)
     total_communication_cost = db.Column(db.Integer)
-    beginning_cash_on_hand = db.Column(db.Integer)
-    ending_cash_on_hand = db.Column(db.Integer)
-    debts_owed_by = db.Column(db.Integer)
-    debts_owed_to = db.Column(db.Integer)
+    cash_on_hand_beginning_period = db.Column(db.Integer)
+    cash_on_hand_end_period = db.Column(db.Integer)
+    debts_owed_by_committee = db.Column(db.Integer)
+    debts_owed_to_committee = db.Column(db.Integer)
     house_personal_funds = db.Column(db.Integer)
     senate_personal_funds = db.Column(db.Integer)
     opposition_personal_funds = db.Column(db.Integer)
     treasurer_name = db.Column(db.String)
-    # file_number = db.Column(db.BigInteger)
-    file_numeric = db.Column(db.BigInteger)
-    # previous_file_number = db.Column(db.BigInteger)
-    previous_file_numeric = db.Column(db.BigInteger)
-    # primary_general_indicator = db.Column(db.String)
-    report_pgi = db.Column(db.String)
+    file_number = db.Column(db.BigInteger)
+    previous_file_number = db.Column(db.BigInteger)
+    primary_general_indicator = db.Column(db.String)
+    report_type_full = db.Column(db.String)
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String)
     update_date = db.Column(db.Date)
 
     @property
     def pdf_url(self):
-        #return utils.make_pdf_url(self.beginning_image_number)
-        return utils.make_pdf_url(self.begin_image_numeric)
-
+        if self.form_type is None:
+            return None
+        elif self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
+            return utils.make_pdf_url(self.begin_image_numeric)
+        elif self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
+            return utils.make_pdf_url(self.begin_image_numeric)
+        else:
+            return None
