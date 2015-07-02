@@ -3,6 +3,7 @@ import functools
 
 from smore import swagger
 from flask.ext.restful import abort
+from dateutil.parser import parse as parse_date
 
 import webargs
 from webargs import Arg
@@ -89,7 +90,8 @@ candidate_list = {
 committee = {
     'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
-    'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
+    'designation': Arg(
+        str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
         description='The one-letter designation code of the organization:\n\
          - A authorized by a candidate\n\
          - J joint fundraising committee\n\
@@ -98,7 +100,7 @@ committee = {
          - B lobbyist/registrant PAC\n\
          - D leadership PAC\n\
         '
-        ),
+    ),
     'organization_type': Arg(str, multiple=True, enum=['', 'C', 'L', 'M', 'T', 'V', 'W'],
         description='The one-letter code for the kind for organization:\n\
         - C corporation\n\
@@ -126,7 +128,7 @@ committee = {
         - X party, nonqualified\n\
         - Y party, qualified\n\
         - Z national party nonfederal account\n\
-        '),
+    '),
 }
 
 committee_list = {
@@ -137,6 +139,8 @@ committee_list = {
     'state': Arg(str, multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
     'party': Arg(str, multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
+    'start_date': Arg(parse_date),
+    'end_date': Arg(parse_date),
 }
 
 

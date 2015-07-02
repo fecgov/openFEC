@@ -11,4 +11,3 @@ class ApiError(Exception):
         ret = self.payload or {}
         ret['message'] = self.message
         return ret
-
