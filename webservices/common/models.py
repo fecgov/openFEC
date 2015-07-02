@@ -619,6 +619,7 @@ class Filings(db.Model):
     report_year = db.Column(db.Integer)
     report_type = db.Column(db.String)
     document_type = db.Column(db.String)
+    report_type_full = db.Column(db.String)
     beginning_image_number = db.Column(db.BigInteger)
     ending_image_number = db.Column(db.BigInteger)
     pages = db.Column(db.Integer)
@@ -646,11 +647,11 @@ class Filings(db.Model):
 
     @property
     def pdf_url(self):
-        if self.form_type is None:
-            return None
+        if self.report_year >=2000:
+            return utils.make_pdf_url(self.beginning_image_number)
         elif self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
-            return utils.make_pdf_url(self.begin_image_numeric)
+            return utils.make_pdf_url(self.beginning_image_number)
         elif self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
-            return utils.make_pdf_url(self.begin_image_numeric)
+            return utils.make_pdf_url(self.beginning_image_number)
         else:
             return None
