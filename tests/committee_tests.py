@@ -1,6 +1,5 @@
 import urllib
 import datetime
-import functools
 
 import sqlalchemy as sa
 from marshmallow.utils import isoformat
@@ -14,7 +13,6 @@ from webservices.rest import api
 from webservices.resources.committees import CommitteeList
 from webservices.resources.committees import CommitteeView
 from webservices.resources.candidates import CandidateView
-from webservices.resources.totals import TotalsView
 
 
 ## old, re-factored Committee tests ##
@@ -265,3 +263,24 @@ class CommitteeFormatTest(ApiBaseTest):
         committee_ids = [each.committee_id for each in committees]
         results = self._results(api.url_for(CommitteeList))
         self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
+
+    def test_committee_date_filters(self):
+        [
+            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 1, 1)),
+            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 2, 1)),
+            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 3, 1)),
+            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 4, 1)),
+        ]
+        results = self._results(api.url_for(CommitteeList, start_date='02/01/2015'))
+        self.assertTrue(all(each['first_file_date'] >= isoformat(datetime.datetime(2015, 2, 1)) for each in results))
+        results = self._results(api.url_for(CommitteeList, end_date='02/03/2015'))
+        self.assertTrue(all(each['first_file_date'] <= isoformat(datetime.datetime(2015, 3, 1)) for each in results))
+        results = self._results(api.url_for(CommitteeList, start_date='02/01/2015', end_date='02/03/2015'))
+        self.assertTrue(
+            all(
+                isoformat(datetime.datetime(2015, 2, 1))
+                    <= each['first_file_date']
+                    <= isoformat(datetime.datetime(2015, 3, 1))
+                for each in results
+            )
+        )
