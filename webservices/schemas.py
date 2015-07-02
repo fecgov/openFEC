@@ -254,6 +254,27 @@ ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPag
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+make_aggregate_schema = functools.partial(
+    make_schema,
+    fields={
+        'total': ma.fields.Decimal(places=2),
+    }
+)
+ScheduleABySizeSchema = make_aggregate_schema(models.ScheduleABySize)
+ScheduleAByStateSchema = make_aggregate_schema(models.ScheduleAByState)
+ScheduleAByZipSchema = make_aggregate_schema(models.ScheduleAByZip)
+
+ScheduleABySizePageSchema = make_page_schema(ScheduleABySizeSchema)
+ScheduleAByStatePageSchema = make_page_schema(ScheduleAByStateSchema)
+ScheduleAByZipPageSchema = make_page_schema(ScheduleAByZipSchema)
+
+register_schema(ScheduleABySizeSchema)
+register_schema(ScheduleAByStateSchema)
+register_schema(ScheduleAByZipSchema)
+register_schema(ScheduleABySizePageSchema)
+register_schema(ScheduleAByStatePageSchema)
+register_schema(ScheduleAByZipPageSchema)
+
 
 ScheduleBSchema = make_schema(
     models.ScheduleB,

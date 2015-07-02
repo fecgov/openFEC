@@ -41,10 +41,7 @@ class ItemizedResource(Resource):
         return query
 
     def filter_multi(self, query, kwargs):
-        for key, column in self.filter_multi_fields:
-            if kwargs[key]:
-                query = query.filter(column.in_(kwargs[key]))
-        return query
+        return utils.filter_multi(query, kwargs, self.filter_multi_fields)
 
     def filter_fulltext(self, query, kwargs):
         if any(kwargs[key] for key, column in self.filter_fulltext_fields):
