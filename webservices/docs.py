@@ -97,7 +97,7 @@ will lead you to more granular financial information.
 
 The committee endpoints include all FEC filers, even if they aren't registered as a committee.
 
-Officially, committees include the committees and organizations that file with the FEC. 
+Officially, committees include the committees and organizations that file with the FEC.
 Several different types of organizations file financial reports with the FEC:
 
 * Campaign committees authorized by particular candidates to raise and spend funds in
@@ -130,10 +130,10 @@ committees change treasurers, designation, or `committee_type`.
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
 
-Most committees are required to summarize their financial activity in each filing; those summaries 
-are included in these files. Generally, committees file reports on a quarterly or monthly basis, but 
-some must also submit a report 12 days before primary elections. Therefore, during the primary 
-season, the period covered by this file may be different for different committees. These totals 
+Most committees are required to summarize their financial activity in each filing; those summaries
+are included in these files. Generally, committees file reports on a quarterly or monthly basis, but
+some must also submit a report 12 days before primary elections. Therefore, during the primary
+season, the period covered by this file may be different for different committees. These totals
 also incorporate any changes made by committees, if any report covering the period is amended.
 
 Information is made available on the API as soon as it's processed. Keep in mind, complex
@@ -142,7 +142,7 @@ paper filings take longer to process.
 The financial endpoints use data from FEC Form 3, Form 3X and Form 3P.
 '''
 
-REPORTS='''
+REPORTS = '''
 Each report represents the summary information from FEC Form 3, Form 3X and Form 3P.
 These reports have key statistics that illuminate the financial status of a given committee.
 Things like cash on hand, debts owed by committee, total receipts, and total disbursements
@@ -151,7 +151,7 @@ are especially helpful for understanding a committee's financial dealings.
 If a report is amended, this endpoint shows only the final, amended version.
 
 Several different reporting structures exist, depending on the type of organization that
-submits financial information. To see an example of these reporting requirements, 
+submits financial information. To see an example of these reporting requirements,
 look at the summary and detailed summary pages of the FEC Form 3, Form 3X, and Form 3P.
 '''
 
@@ -160,7 +160,7 @@ This endpoint provides information about a committee's Form 3, Form 3X, or Form 
 which are aggregated by two-year period. We refer to two-year periods as a `cycle`.
 
 The cycle is named after the even-numbered year and includes the year before it. To see
-totals from 2013 and 2014, you would use 2014. In odd-numbered years, the current cycle 
+totals from 2013 and 2014, you would use 2014. In odd-numbered years, the current cycle
 is the next year — for example, in 2015, the current cycle is 2016.
 
 For presidential and Senate candidates, multiple two-year cycles exist between elections.
