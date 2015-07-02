@@ -45,6 +45,10 @@ class FilingsView(Resource):
         return utils.fetch_page(filings, kwargs, model=models.Filings)
 
 
+@spec.doc(
+    tags=['filings'],
+    description=docs.FILINGS,
+)
 class FilingsList(Resource):
 
     @args.register_kwargs(args.paging)

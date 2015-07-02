@@ -173,7 +173,7 @@ api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
 api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
-api.add_resource(filings.FilingsView,'/committee/<string:committee_id>/filings')
+api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings')
 api.add_resource(filings.FilingsList, '/filings')
 
 
@@ -242,6 +242,8 @@ register_resource(committees.CommitteeList, blueprint='v1')
 register_resource(committees.CommitteeHistoryView, blueprint='v1')
 register_resource(reports.ReportsView, blueprint='v1')
 register_resource(totals.TotalsView, blueprint='v1')
+register_resource(filings.FilingsView, blueprint='v1')
+register_resource(filings.FilingsList, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
