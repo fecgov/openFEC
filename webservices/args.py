@@ -1,9 +1,9 @@
 import logging
 import functools
-import time
 
 from smore import swagger
 from flask.ext.restful import abort
+from dateutil.parser import parse as parse_date
 
 import webargs
 from webargs import Arg
@@ -41,9 +41,6 @@ def _validate_natural(value):
     if value < 0:
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
-
-def make_date(datestr):
-    return time.strptime(datestr, '%Y-%m-%d')
 
 
 paging = {
@@ -148,11 +145,11 @@ filings = {
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type'),
     'report_year': Arg(int, multiple=True, description='Report year'),
-    'begin_image_numeric': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
-    'recipt_date': Arg(str, multiple=True, description='The day the filing was received by the FEC', type=make_date ),
+    'recipt_date': Arg(parse_date, multiple=True, description='The day the filing was received by the FEC'),
     'form_type': Arg(str, multiple=True, description='Form type'),
-    'report_pgi': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
+    'primary_general_indicator': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
     'amendment_indicator': Arg(str, multiple=True, description='''
         -N   new\n\
         -A   amendment\n\
