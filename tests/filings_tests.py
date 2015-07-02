@@ -1,7 +1,3 @@
-import json
-import datetime
-
-from webservices import utils
 from webservices.rest import api
 from webservices.resources.filings import FilingsView, FilingsList
 
