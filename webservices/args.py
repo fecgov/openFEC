@@ -148,11 +148,11 @@ filings = {
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type'),
     'report_year': Arg(int, multiple=True, description='Report year'),
-    'begin_image_numeric': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
     'recipt_date': Arg(str, multiple=True, description='The day the filing was received by the FEC', type=make_date ),
     'form_type': Arg(str, multiple=True, description='Form type'),
-    'report_pgi': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
+    'primary_general_indicator': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
     'amendment_indicator': Arg(str, multiple=True, description='''
         -N   new\n\
         -A   amendment\n\

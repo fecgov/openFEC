@@ -10,17 +10,17 @@ from webservices.common.util import filter_query
 
 fields = {
     'committee_id',
-    'begin_image_numeric',
+    'beginning_image_number',
     'report_type',
     'report_year',
     'recipt_date',
     'form_type',
-    'report_pgi',
+    'primary_general_indicator',
     'amendment_indicator',
 }
 
 @spec.doc(
-tags=['filings'],
+    tags=['filings'],
     description=docs.FILINGS,
     path_params=[
         {

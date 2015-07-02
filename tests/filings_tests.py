@@ -23,8 +23,8 @@ class TestFilings(ApiBaseTest):
 
     def test_filings(self):
         """ Check filings returns in general endpoint"""
-        filing_1 = factories.FilingsFactory(committee_id = 'C001')
-        filing_2 = factories.FilingsFactory(committee_id = 'C002')
+        filing_1 = factories.FilingsFactory(committee_id='C001')
+        filing_2 = factories.FilingsFactory(committee_id='C002')
 
         results = self._results(api.url_for(FilingsList))
         self.assertEqual(len(results), 2)
@@ -33,18 +33,18 @@ class TestFilings(ApiBaseTest):
         [
             factories.FilingsFactory(committee_id='C0004'),
             factories.FilingsFactory(committee_id='C0005'),
-            factories.FilingsFactory(begin_image_numeric=123456789021234567),
+            factories.FilingsFactory(beginning_image_number=123456789021234567),
             factories.FilingsFactory(form_type='3'),
-            factories.FilingsFactory(report_pgi='G'),
+            factories.FilingsFactory(primary_general_indicator='G'),
             factories.FilingsFactory(amendment_indicator='A'),
             factories.FilingsFactory(report_type='Post General'),
             factories.FilingsFactory(report_year=1999),
         ]
 
         filter_fields = (
-            ('begin_image_numeric', 123456789021234567),
+            ('beginning_image_number', 123456789021234567),
             ('form_type', '3'),
-            ('report_pgi', 'G'),
+            ('primary_general_indicator', 'G'),
             ('amendment_indicator', 'A'),
             ('report_type', 'Post General'),
             ('report_year', 1999),

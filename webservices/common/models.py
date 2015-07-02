@@ -646,11 +646,8 @@ class Filings(db.Model):
 
     @property
     def pdf_url(self):
-        if self.form_type is None:
-            return None
-        elif self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
-            return utils.make_pdf_url(self.begin_image_numeric)
-        elif self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
-            return utils.make_pdf_url(self.begin_image_numeric)
-        else:
-            return None
+        if self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
+            return utils.make_pdf_url(self.beginning_image_number)
+        if self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
+            return utils.make_pdf_url(self.beginning_image_number)
+        return None
