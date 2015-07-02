@@ -25,8 +25,8 @@ select
     total_disbursements,
     total_independent_expenditures,
     total_communication_cost,
-    beginning_cash_on_hand,
-    ending_cash_on_hand,
+    beginning_cash_on_hand as cash_on_hand_beginning_period,
+    ending_cash_on_hand as cash_on_hand_end_period,
     debts_owed_by as debts_owed_by_committee,
     debts_owed_to as debts_owed_to_committee,
     -- personal funds aren't a thing anymore
