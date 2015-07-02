@@ -185,18 +185,21 @@ class TestViews(common.IntegrationTestCase):
         ).all()
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].total, 538)
+        self.assertEqual(rows[0].count, 1)
         filing.contributor_receipt_amount = 53
         db.session.add(filing)
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
+        self.assertEqual(rows[0].count, 0)
 
     def test_update_aggregate_state_existing(self):
         existing = models.ScheduleAByState.query.filter_by(
             cycle=2016,
         ).first()
         total = existing.total
+        count = existing.count
         factories.ScheduleAFactory(
             report_year=2015,
             committee_id=existing.committee_id,
@@ -207,6 +210,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('select update_aggregates()')
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
+        self.assertEqual(existing.count, count + 1)
 
     def test_update_aggregate_zip_create(self):
         filing = factories.ScheduleAFactory(
@@ -224,18 +228,21 @@ class TestViews(common.IntegrationTestCase):
         ).all()
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].total, 538)
+        self.assertEqual(rows[0].count, 1)
         filing.contributor_receipt_amount = 53
         db.session.add(filing)
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
+        self.assertEqual(rows[0].count, 0)
 
     def test_update_aggregate_zip_existing(self):
         existing = models.ScheduleAByZip.query.filter_by(
             cycle=2016,
         ).first()
         total = existing.total
+        count = existing.count
         factories.ScheduleAFactory(
             report_year=2015,
             committee_id=existing.committee_id,
@@ -246,6 +253,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('select update_aggregates()')
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
+        self.assertEqual(existing.count, count + 1)
 
     def test_update_aggregate_size_create(self):
         filing = factories.ScheduleAFactory(
@@ -262,12 +270,14 @@ class TestViews(common.IntegrationTestCase):
         ).all()
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].total, 538)
+        self.assertEqual(rows[0].count, 1)
         filing.contributor_receipt_amount = 53
         db.session.add(filing)
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
+        self.assertEqual(rows[0].count, 0)
 
     def test_update_aggregate_size_existing(self):
         existing = models.ScheduleABySize.query.filter_by(
@@ -275,6 +285,7 @@ class TestViews(common.IntegrationTestCase):
             cycle=2016,
         ).first()
         total = existing.total
+        count = existing.count
         factories.ScheduleAFactory(
             report_year=2015,
             committee_id=existing.committee_id,
@@ -284,3 +295,4 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('select update_aggregates()')
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
+        self.assertEqual(existing.count, count + 1)
