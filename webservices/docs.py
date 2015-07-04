@@ -9,6 +9,19 @@ COMMITTEE_ID = '''
 A unique identifier assigned to each committee or filer registered with the FEC.
 '''
 
+CANDIDIATE_CYCLE = '''
+Two-year election cycle in which a candidate runs for office. Calculated from FEC form 2.
+'''
+
+COMMITTEE_CYCLE = '''
+A two year election cycle that the committee was active- (after original registration
+date but before expiration date in FEC form 1s)
+'''
+
+DOCUMENT_RECORDS = '''
+Filter records to only those that were applicable to a given two-year period.
+'''
+
 DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 

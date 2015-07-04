@@ -121,7 +121,7 @@ names = {
 
 
 candidate_detail = {
-    'cycle': Arg(int, multiple=True, description='Filter records to only those that were applicable to a given election cycle'),
+    'cycle': Arg(int, multiple=True, description=docs.CANDIDIATE_CYCLE),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
@@ -144,7 +144,7 @@ candidate_list = {
 
 committee = {
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
-    'cycle': Arg(int, multiple=True, description='A 2-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
+    'cycle': Arg(int, multiple=True, description=docs.COMMITTEE_CYCLE),
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
         description='The one-letter designation code of the organization:\n\
          - A authorized by a candidate\n\
@@ -198,14 +198,14 @@ committee_list = {
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
-    'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
+    'cycle': Arg(int, multiple=True, description=docs.DOCUMENT_RECORDS),
     'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 
 
 totals = {
-    'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
+    'cycle': Arg(int, multiple=True, description=docs.DOCUMENT_RECORDS),
 }
 
 
@@ -214,10 +214,11 @@ itemized = {
         int,
         multiple=True,
         validate=lambda value: value >= SQL_CONFIG['START_YEAR_ITEMIZED'],
+        description='Year the report pertains to. See receipt date for the year the report was submitted to the FEC.'
     ),
-    'image_number': Arg(int, multiple=True),
-    'min_amount': Arg(float),
-    'max_amount': Arg(float),
+    'image_number': Arg(int, multiple=True, description='The image number of the page where the schedule item is reported'),
+    'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
+    'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
 }
 
 schedule_a = {
