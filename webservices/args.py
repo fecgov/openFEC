@@ -221,20 +221,20 @@ itemized = {
 }
 
 schedule_a = {
-    'committee_id': Arg(str, multiple=True),
-    'contributor_id': Arg(str, multiple=True),
-    'contributor_name': Arg(str),
-    'contributor_city': Arg(str, multiple=True),
-    'contributor_state': Arg(str, multiple=True),
-    'contributor_employer': Arg(str),
-    'contributor_occupation': Arg(str),
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'contributor_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC.'),
+    'contributor_name': Arg(str, description='Name of contributor.'),
+    'contributor_city': Arg(str, multiple=True, description='City of contributor'),
+    'contributor_state': Arg(str, multiple=True, description='State of contributor'),
+    'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
+    'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
 }
 
 
 schedule_b = {
-    'committee_id': Arg(str, multiple=True),
-    'recipient_committee_id': Arg(str, multiple=True),
-    'recipient_name': Arg(str),
-    'recipient_city': Arg(str, multiple=True),
-    'recipient_state': Arg(str, multiple=True),
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'recipient_committee_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),
+    'recipient_name': Arg(str, description='Name of recipient'),
+    'recipient_city': Arg(str, multiple=True, description='City of recipient'),
+    'recipient_state': Arg(str, multiple=True, description='State of recipient'),
 }
