@@ -159,10 +159,11 @@ If a report is amended, this endpoint just shows the final amended version.
 There are several different reporting structures, depending on what type of organization
 is submitting financial information. Form 5 only filers are required to disclose the least
 amount of information. To see an example of these reporting requirements you can look at
-[FEC form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf) or the summary and detailed summary
-pages of the FEC [form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf) for House and Senate
-committees, [form 3X] (http://www.fec.gov/pdf/forms/fecfrm3x.pdf) for PACs and parties,
-and form [3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf)for presidential committees.
+[FEC form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf), for independent expenditors; or the
+summary and detailed summary pages of the FEC
+[form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
+[form 3X](http://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
+and form [3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
 TOTALS = '''
@@ -197,6 +198,16 @@ SCHEDULE_B = '''
 Schedule B filings describe itemized disbursements that committees. This data
 explains how committees and other filers spend their money. These figures are
 reported on F3, F3X and F3P forms.
+'''
+
+# If we add schedules as a grouping
+SCHEDULES = '''
+Schedules come from particular sections on forms and contain detailed transactional data.
+
+Schedule A explains where contributions come from. If you are interested in
+individual donors, this will be the endpoint you use.
+
+Schedule B explains how money is spent.
 '''
 
 API_KEY_DESCRIPTION = '''
