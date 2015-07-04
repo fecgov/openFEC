@@ -24,6 +24,10 @@ Federal Election Commission (FEC) data.
 This API allows you to explore the vast array of campaign finance data that the FEC
 collects. Each endpoint focuses on a different aspect of disclosure.
 
+There is a lot of data, but a good places to start exploring is to use search to find
+candidates and committees you are interested in and look up details using IDs on the other
+endpoints. If you are interested in individual donors, check out schedule_a.
+
 Information can tied to the underlying forms by file ID and image ID.
 
 [View source code](https://github.com/18F/openFEC). Issues and pull requests welcome!
