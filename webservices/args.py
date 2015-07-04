@@ -121,7 +121,7 @@ names = {
 
 
 candidate_detail = {
-    'cycle': Arg(int, multiple=True, description=docs.CANDIDIATE_CYCLE),
+    'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
@@ -198,14 +198,14 @@ committee_list = {
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
-    'cycle': Arg(int, multiple=True, description=docs.DOCUMENT_RECORDS),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 
 
 totals = {
-    'cycle': Arg(int, multiple=True, description=docs.DOCUMENT_RECORDS),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
 }
 
 
