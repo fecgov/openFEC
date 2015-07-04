@@ -32,10 +32,9 @@ While we plan on versioning any changes that are not backwards compatible, expec
 to change as the API develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
-Federal Election Commission (FEC) data.
-
-This API allows you to explore the vast array of campaign finance data that the FEC
-collects. Each endpoint focuses on a different aspect of disclosure.
+Federal Election Commission (FEC) data.This API allows you to explore the vast array of
+campaign finance data that the FEC collects. Each endpoint focuses on a different aspect
+of disclosure.
 
 There is a lot of data, but a good place to start exploring, is using search to find
 interesting candidates and committees and then, looking up report or line item details
@@ -56,7 +55,9 @@ Officially, a candidate is an individual seeking nomination for election to a fe
 office. Someone becomes a candidate when he or she (or agents working on his or her behalf)
 raises contributions or makes expenditures that exceed $5,000.
 
-The candidate endpoints primarily use data from FEC registration forms 1 and 2.
+The candidate endpoints primarily use data from FEC registration forms
+[1 for candidates](http://www.fec.gov/pdf/forms/fecfrm1.pdf) and
+[2 for committees](http://www.fec.gov/pdf/forms/fecfrm2.pdf).
 '''
 
 NAME_SEARCH = '''
@@ -94,8 +95,10 @@ will stay the same. If the same person runs for another office, for example, a H
 candidate runs for a Senate office, that candidate will get an additional id that will be
 unique to him or her for that office.
 
-The candidate endpoint uses data from FEC forms 1 and 2 with additional forms to provide
-context.
+The candidate endpoints primarily use data from FEC registration forms
+[1 for candidates](http://www.fec.gov/pdf/forms/fecfrm1.pdf) and
+[2 for committees](http://www.fec.gov/pdf/forms/fecfrm2.pdf) with additional forms to
+provide context.
 '''
 
 CANDIDATE_DETAIL = '''
@@ -161,7 +164,11 @@ covering the period is amended.
 Information is made available on the API as soon as it is processed. Keep in mind, complex
 paper filings take longer to process.
 
-The financial endpoints use data from FEC form 3, form 3X and form 3P.
+The financial endpoints use data from FEC [form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf),
+for independent expenditors; or the summary and detailed summary pages of the FEC
+[form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
+[form 3X](http://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
+and [form 3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
 REPORTS='''
