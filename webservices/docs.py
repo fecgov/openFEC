@@ -147,7 +147,9 @@ The financial endpoints use data from FEC form 3, form 3X and form 3P.
 '''
 
 REPORTS='''
-Each report represents the summary information from FEC form 3, form 3X and form 3P.
+Each report represents the summary information from FEC form 3, form 3X, form 3P and
+form 5 reports.
+
 These reports have key statistics to see the financial status of a given committee.
 Things like cash on hand, debts owed by committee, total receipts and total disbursements
 are especially helpful for understanding a committee's financial dealings.
@@ -155,8 +157,12 @@ are especially helpful for understanding a committee's financial dealings.
 If a report is amended, this endpoint just shows the final amended version.
 
 There are several different reporting structures, depending on what type of organization
-is submitting financial information. To see an example of these reporting requirements you
-can look at the summary and detailed summary pages of the FEC form 3, form 3X and form 3P.
+is submitting financial information. Form 5 only filers are required to disclose the least
+amount of information. To see an example of these reporting requirements you can look at
+[FEC form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf) or the summary and detailed summary
+pages of the FEC [form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf) for House and Senate
+committees, [form 3X] (http://www.fec.gov/pdf/forms/fecfrm3x.pdf) for PACs and parties,
+and form [3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf)for presidential committees.
 '''
 
 TOTALS = '''
