@@ -172,11 +172,25 @@ their elections.
 '''
 
 SCHEDULE_A = '''
-Schedule A filings describe itemized receipts from committees.
+Schedule A filings describe itemized receipts reported by a committee. This is where
+you can look for individual contributors.
+
+Once a person gives more than a total of $200, the donations of that person must be
+reported by committees that file F3, F3X and F3P forms.
+
+Contributions under $200 are not required to be itemized, but you can find the total
+amount of these small donations by looking up the "unitemized" field in the `/reports`
+endpoint.
+
+When comparing the totals from reports to line items. the totals will not match unless you
+take out items where `"memo_code":'X'`. Memoed items are subtotals of receipts that are
+already accounted for in another schedule a line item.
 '''
 
 SCHEDULE_B = '''
-Schedule B filings describe itemized disbursements from committees.
+Schedule B filings describe itemized disbursements that committees. This data
+explains how committees and other filers spend their money. These figures are
+reported on F3, F3X and F3P forms.
 '''
 
 API_KEY_DESCRIPTION = '''
