@@ -15,8 +15,8 @@ This API allows you to explore the way candidates and committees fund their camp
 This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
 we’re actively working on it and adding new features. The official site for FEC
 data is still the [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml).
-While we plan on versioning any changes that are not backwards compatible, expect things to change as the
-API develops.
+While we plan on versioning any changes that are not backwards compatible, expect things
+to change as the API develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 Federal Election Commission (FEC) data.
@@ -24,9 +24,10 @@ Federal Election Commission (FEC) data.
 This API allows you to explore the vast array of campaign finance data that the FEC
 collects. Each endpoint focuses on a different aspect of disclosure.
 
-There is a lot of data, but a good places to start exploring is to use search to find
-candidates and committees you are interested in and look up details using IDs on the other
-endpoints. If you are interested in individual donors, check out schedule_a.
+There is a lot of data, but a good place to start exploring, is using search to find
+interesting candidates and committees and then, looking up report or line item details
+using IDs on the other endpoints. If you are interested in individual donors, check
+out contributor information in schedule_a.
 
 Information can tied to the underlying forms by file ID and image ID.
 
