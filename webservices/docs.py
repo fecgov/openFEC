@@ -9,7 +9,7 @@ COMMITTEE_ID = '''
 A unique identifier assigned to each committee or filer registered with the FEC.
 '''
 
-CANDIDIATE_CYCLE = '''
+CANDIDATE_CYCLE = '''
 Two-year election cycle in which a candidate runs for office. Calculated from FEC form 2.
 '''
 
@@ -18,7 +18,7 @@ A two year election cycle that the committee was active- (after original registr
 date but before expiration date in FEC form 1s)
 '''
 
-DOCUMENT_RECORDS = '''
+RECORD_CYCLE = '''
 Filter records to only those that were applicable to a given two-year period.
 '''
 
