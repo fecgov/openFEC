@@ -38,6 +38,10 @@ spec = APISpec(
             'name': 'search',
             'description': docs.SEARCH_TAG,
         },
+        {
+            'name': 'filings',
+            'description': docs.FILINGS,
+        },
     ]
 )
 
