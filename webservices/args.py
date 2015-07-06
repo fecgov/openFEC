@@ -145,13 +145,11 @@ candidate_list = {
 }
 
 committee = {
-<<<<<<< HEAD
+
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description=docs.COMMITTEE_CYCLE),
-=======
     'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
->>>>>>> feature/incremental-aggreates
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
         description='The one-letter designation code of the organization:\n\
          - A authorized by a candidate\n\
@@ -245,20 +243,21 @@ schedule_a = {
 
 
 schedule_a_by_size = {
-    'cycle': Arg(int, multiple=True),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    # add choices
     'size': Arg(int, multiple=True),
 }
 
 
 schedule_a_by_state = {
-    'cycle': Arg(int, multiple=True),
-    'state': Arg(str, multiple=True),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'state': Arg(str, multiple=True, description='State of contributor'),
 }
 
 
 schedule_a_by_zip = {
-    'cycle': Arg(int, multiple=True),
-    'zip': Arg(str, multiple=True),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'zip': Arg(str, multiple=True, description='Zip code'),
 }
 
 
@@ -268,6 +267,6 @@ schedule_b = {
     'recipient_name': Arg(str, description='Name of recipient'),
     'recipient_city': Arg(str, multiple=True, description='City of recipient'),
     'recipient_state': Arg(str, multiple=True, description='State of recipient'),
-    'last_disbursement_date': Arg(parse_date),
-    'last_disbursement_amount': Arg(float),
+    'last_disbursement_date': Arg(parse_date, description='Filter for records before this date'),
+    'last_disbursement_amount': Arg(float, description='Filter for records'),
 }
