@@ -106,12 +106,12 @@ class ApiSchema(ma.Schema):
 
 
 class BaseSearchSchema(ma.Schema):
-    id = ma.fields.String()
-    name = ma.fields.String()
+    id = ma.fields.Str()
+    name = ma.fields.Str()
 
 
 class CandidateSearchSchema(BaseSearchSchema):
-    office_sought = ma.fields.String()
+    office_sought = ma.fields.Str()
 
 
 class CommitteeSearchSchema(BaseSearchSchema):
@@ -240,13 +240,60 @@ register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
 
 
-ScheduleASchema = make_schema(models.ScheduleA)
+ScheduleASchema = make_schema(
+    models.ScheduleA,
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'memoed_subtotal': ma.fields.Boolean(),
+        'committee': ma.fields.Nested(CommitteeHistorySchema),
+        'contributor': ma.fields.Nested(CommitteeHistorySchema),
+        'contributor_receipt_amount': ma.fields.Decimal(places=2),
+        'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
+    },
+    options={
+        'exclude': ('memo_code', ),
+    }
+)
 ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+make_aggregate_schema = functools.partial(
+    make_schema,
+    fields={
+        'total': ma.fields.Decimal(places=2),
+    }
+)
+ScheduleABySizeSchema = make_aggregate_schema(models.ScheduleABySize)
+ScheduleAByStateSchema = make_aggregate_schema(models.ScheduleAByState)
+ScheduleAByZipSchema = make_aggregate_schema(models.ScheduleAByZip)
 
-ScheduleBSchema = make_schema(models.ScheduleB)
+ScheduleABySizePageSchema = make_page_schema(ScheduleABySizeSchema)
+ScheduleAByStatePageSchema = make_page_schema(ScheduleAByStateSchema)
+ScheduleAByZipPageSchema = make_page_schema(ScheduleAByZipSchema)
+
+register_schema(ScheduleABySizeSchema)
+register_schema(ScheduleAByStateSchema)
+register_schema(ScheduleAByZipSchema)
+register_schema(ScheduleABySizePageSchema)
+register_schema(ScheduleAByStatePageSchema)
+register_schema(ScheduleAByZipPageSchema)
+
+
+ScheduleBSchema = make_schema(
+    models.ScheduleB,
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'memoed_subtotal': ma.fields.Boolean(),
+        'committee': ma.fields.Nested(CommitteeHistorySchema),
+        'recipient_committee': ma.fields.Nested(CommitteeHistorySchema),
+        'disbursement_amount': ma.fields.Decimal(places=2),
+        'semi_annual_bundled_refund': ma.fields.Decimal(places=2),
+    },
+    options={
+        'exclude': ('memo_code', ),
+    }
+)
 ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)

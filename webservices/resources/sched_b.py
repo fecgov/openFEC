@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from webservices import args
 from webservices import docs
 from webservices import spec
@@ -20,12 +22,8 @@ class ScheduleBView(ItemizedResource):
     @property
     def index_column(self):
         return self.model.sched_b_sk
-    @property
-    def amount_column(self):
-        return self.model.disbursement_amount
 
     filter_multi_fields = [
-        ('report_year', models.ScheduleB.report_year),
         ('image_number', models.ScheduleB.image_number),
         ('committee_id', models.ScheduleB.committee_id),
         ('recipient_city', models.ScheduleB.recipient_city),
@@ -33,7 +31,12 @@ class ScheduleBView(ItemizedResource):
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
     ]
     filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleASearch.contributor_name_text),
+        ('recipient_name', models.ScheduleBSearch.recipient_name_text),
+    ]
+    filter_range_fields = [
+        (('min_date', 'max_date'), models.ScheduleB.disbursement_date),
+        (('min_amount', 'max_amount'), models.ScheduleB.disbursement_amount),
+        (('min_image_number', 'max_image_number'), models.ScheduleB.image_number),
     ]
 
     @args.register_kwargs(args.itemized)
@@ -41,13 +44,19 @@ class ScheduleBView(ItemizedResource):
     @args.register_kwargs(args.make_seek_args())
     @args.register_kwargs(
         args.make_sort_args(
-            validator=args.OptionValidator(['receipt_date', 'disbursement_amount']),
+            validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
             multiple=False,
         )
     )
     @schemas.marshal_with(schemas.ScheduleBPageSchema())
     def get(self, **kwargs):
         return super(ScheduleBView, self).get(**kwargs)
+
+    def build_query(self, kwargs):
+        query = super(ScheduleBView, self).build_query(kwargs)
+        query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
+        query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
+        return query
 
     def join_fulltext(self, query):
         return query.join(

@@ -6,23 +6,26 @@
 [![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
 ![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)
 
-We are taking data from the Federal Election Commission and creating an API around it. We will be harmonizing/cleaning it up to make it easier for external developers to use and analyze as well as creating a web application to make some analyzation and comparison of the data easier.
+This is the first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app).
 
 **Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
 
 ## Outside Contributors
 
-Hello! If you're interested in learning more about this project, check out some related repos and don't be afraid to ask us questions (general questions usually go here: [fec](https://github.com/18F/fec)).
+Hello! If you're interested in learning more about this project, check out some related repos and don't be afraid to ask us questions (general questions are usually posted in the [18F/FEC repo](https://github.com/18F/fec)).
 
-If you'd like to contribute to our project, please check out our [openfec](https://github.com/18F/openfec) repo. We try to tag things that are easy to pick up without being entrenched in our project with a "help wanted" tag. Things in our [backlog](https://github.com/18F/openfec/milestones/Backlog) are usually also up for grabs, so let us know if you'd like to pick something up from there.
+If you'd like to contribute to our project, please check out our [openfec](https://github.com/18F/openfec) repo. We try to tag things that are easy to pick up without being entrenched in our project with a ["help wanted"](https://github.com/18F/openFEC/labels/help%20wanted%21) tag. Things in our [backlog](https://github.com/18F/openfec/milestones/Backlog) are usually also up for grabs, so let us know if you'd like to pick something up from there.
 
-For those interested in contributing, please check out our [contributing guidelies](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md) we use to guide our development processes internally. You don't have to adhere to them to participate, but following them may help keep things from getting messy.
+If you are interested in contributing, please check out our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md), which we use to guide our development processes internally. You don't have to adhere to them to participate, but following them may help keep things from getting messy.
+
+If you would like to be an FEC API beta tester, get an [API key](https://api.data.gov/signup/), check out the experimental [API](https://api.open.fec.gov/developers), and give us your feedback by filing issues.
 
 ## Our Repos
 
-* [fec](https://github.com/18F/fec) - A discussion forum where we can discuss the project.
-* [openfec](https://github.com/18F/openfec) - Where the API work happens. We also use this as the central repo to create issues related to each sprint and our backlog here. If you're interested in contribution, please look for "help wanted" tags or ask!
-* [openfec-web-app](https://github.com/18f/openfec-web-app) - Where the web app work happens. Note that issues and discussion tend to happen in the other repos.
+* [FEC](https://github.com/18F/fec) - A discussion forum for the project.
+* [openFEC](https://github.com/18F/openfec) - Where the API work happens. We also use this as the central repo to create issues related to each sprint and our backlog. If you're interested in contributing, please look for ["help wanted"](https://github.com/18F/openFEC/labels/help%20wanted%21) tags or ask!
+* [openFEC-web-app](https://github.com/18f/openfec-web-app) - Where the campaign finance web app work happens. Note that issues and discussion tend to happen in the other repos.
+* [fec-alpha](https://github.com/18F/fec-alpha) - A place to explore and develop a new site for the Federal Election Commission.
 
 ## Installation
 
@@ -217,6 +220,12 @@ To build a new test subset, use the `build_test` invoke task:
     $ invoke build_test <source> <dest>
 
 where both `source` and `dest` are valid PostgreSQL connection strings.
+
+To update the version-controlled test subset after rebuilding, run:
+
+    $ invoke dump <source> data/subset.dump
+
+where `source` is the database containing the newly created test subset.
 
 ### Git Hooks
 

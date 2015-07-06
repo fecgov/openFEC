@@ -15,12 +15,12 @@ class TestItemized(ApiBaseTest):
 
     def test_sorting(self):
         [
-            factories.ScheduleAFactory(report_year=2014, receipt_date=datetime.datetime(2014, 1, 1)),
-            factories.ScheduleAFactory(report_year=2012, receipt_date=datetime.datetime(2012, 1, 1)),
-            factories.ScheduleAFactory(report_year=1986, receipt_date=datetime.datetime(1986, 1, 1)),
+            factories.ScheduleAFactory(report_year=2014, contributor_receipt_date=datetime.datetime(2014, 1, 1)),
+            factories.ScheduleAFactory(report_year=2012, contributor_receipt_date=datetime.datetime(2012, 1, 1)),
+            factories.ScheduleAFactory(report_year=1986, contributor_receipt_date=datetime.datetime(1986, 1, 1)),
         ]
         db.session.flush()
-        response = self._response(api.url_for(ScheduleAView, sort='receipt_date'))
+        response = self._response(api.url_for(ScheduleAView, sort='contributor_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
             [2012, 2014]
@@ -74,6 +74,36 @@ class TestItemized(ApiBaseTest):
             [each['sched_a_sk'] for each in page2],
             [each.sched_a_sk for each in filings[20:]],
         )
+
+    def test_pdf_url(self):
+        # TODO(jmcarp) Refactor as parameterized tests
+        image_number = 39
+        params = [
+            (factories.ScheduleAFactory, ScheduleAView),
+            (factories.ScheduleBFactory, ScheduleBView),
+        ]
+        for factory, resource in params:
+            factory(image_number=image_number)
+            results = self._results(api.url_for(resource))
+            self.assertEqual(len(results), 1)
+            self.assertEqual(
+                results[0]['pdf_url'],
+                'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number),
+            )
+
+    def test_memoed(self):
+        params = [
+            (factories.ScheduleAFactory, ScheduleAView),
+            (factories.ScheduleBFactory, ScheduleBView),
+        ]
+        for factory, resource in params:
+            [
+                factory(),
+                factory(memo_code='X'),
+            ]
+            results = self._results(api.url_for(resource))
+            self.assertFalse(results[0]['memoed_subtotal'])
+            self.assertTrue(results[1]['memoed_subtotal'])
 
     def test_amount_sched_a(self):
         [

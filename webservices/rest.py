@@ -29,6 +29,7 @@ from webservices.resources import totals
 from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
+from webservices.resources import aggregates
 from webservices.resources import candidates
 from webservices.resources import committees
 
@@ -49,6 +50,7 @@ def sqla_conn_string():
 app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
+# app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
@@ -178,8 +180,23 @@ api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
 api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
-api.add_resource(sched_a.ScheduleAView, '/filings/schedule_a')
-api.add_resource(sched_b.ScheduleBView, '/filings/schedule_b')
+api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
+api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
+api.add_resource(
+    aggregates.ScheduleABySizeView,
+    '/schedules/schedule_a/by_size',
+    '/committee/<committee_id>/schedules/schedule_a/by_size',
+)
+api.add_resource(
+    aggregates.ScheduleAByStateView,
+    '/schedules/schedule_a/by_state',
+    '/committee/<committee_id>/schedules/schedule_a/by_state',
+)
+api.add_resource(
+    aggregates.ScheduleAByZipView,
+    '/schedules/schedule_a/by_zip',
+    '/committee/<committee_id>/schedules/schedule_a/by_zip',
+)
 
 
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
