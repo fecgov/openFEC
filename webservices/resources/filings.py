@@ -8,6 +8,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common.util import filter_query
 
+
 fields = {
     'committee_id',
     'beginning_image_number',
@@ -18,6 +19,7 @@ fields = {
     'primary_general_indicator',
     'amendment_indicator',
 }
+
 
 @spec.doc(
     tags=['filings'],
@@ -38,10 +40,7 @@ class FilingsView(Resource):
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, committee_id=None, **kwargs):
         filings = models.Filings.query
-        if hasattr(filings, 'committee'):
-            query = filings.query.options(sa.orm.joinedload(filings.committee))
         filings = filings.filter_by(committee_id=committee_id)
-
         return utils.fetch_page(filings, kwargs, model=models.Filings)
 
 
@@ -57,11 +56,5 @@ class FilingsList(Resource):
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         filings = models.Filings.query
-
-        # To Do : need to eagerly load committee name after adding to the models
-        if hasattr(filings, 'committee'):
-            query = filings.query.options(sa.orm.joinedload(filings.committee))
-
         filings = filter_query(models.Filings, filings, fields, kwargs)
-
         return utils.fetch_page(filings, kwargs, model=models.Filings)

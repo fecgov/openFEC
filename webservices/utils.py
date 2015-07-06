@@ -37,7 +37,3 @@ def make_pdf_url(image_number):
         str(image_number)[-3:],
         image_number,
     )
-
-
-
-
