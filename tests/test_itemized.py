@@ -91,6 +91,20 @@ class TestItemized(ApiBaseTest):
                 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number),
             )
 
+    def test_memoed(self):
+        params = [
+            (factories.ScheduleAFactory, ScheduleAView),
+            (factories.ScheduleBFactory, ScheduleBView),
+        ]
+        for factory, resource in params:
+            [
+                factory(),
+                factory(memo_code='X'),
+            ]
+            results = self._results(api.url_for(resource))
+            self.assertFalse(results[0]['memoed_subtotal'])
+            self.assertTrue(results[1]['memoed_subtotal'])
+
     def test_amount_sched_a(self):
         [
             factories.ScheduleAFactory(contributor_receipt_amount=50),

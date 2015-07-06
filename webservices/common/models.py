@@ -1,6 +1,7 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from webservices import utils
 
@@ -666,6 +667,10 @@ class ScheduleA(db.Model):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
+    @hybrid_property
+    def memoed_subtotal(self):
+        return self.memo_code == 'X'
+
     @property
     def pdf_url(self):
         return utils.make_image_pdf_url(self.image_number)
@@ -763,6 +768,10 @@ class ScheduleB(db.Model):
     filing_form = db.Column(db.String)
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+
+    @hybrid_property
+    def memoed_subtotal(self):
+        return self.memo_code == 'X'
 
     @property
     def pdf_url(self):

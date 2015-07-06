@@ -244,11 +244,15 @@ ScheduleASchema = make_schema(
     models.ScheduleA,
     fields={
         'pdf_url': ma.fields.Str(),
+        'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(CommitteeHistorySchema),
         'contributor': ma.fields.Nested(CommitteeHistorySchema),
         'contributor_receipt_amount': ma.fields.Decimal(places=2),
         'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
     },
+    options={
+        'exclude': ('memo_code', ),
+    }
 )
 ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleASchema)
@@ -280,11 +284,15 @@ ScheduleBSchema = make_schema(
     models.ScheduleB,
     fields={
         'pdf_url': ma.fields.Str(),
+        'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(CommitteeHistorySchema),
         'recipient_committee': ma.fields.Nested(CommitteeHistorySchema),
         'disbursement_amount': ma.fields.Decimal(places=2),
         'semi_annual_bundled_refund': ma.fields.Decimal(places=2),
     },
+    options={
+        'exclude': ('memo_code', ),
+    }
 )
 ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleBSchema)
