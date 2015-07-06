@@ -1,5 +1,10 @@
 """Narrative API documentation."""
 
+BEGINNING_IMAGE_NUMBER = '''
+Unique identifier for the electronic or paper report. This number is used to construct pdf urls to the original document.
+'''
+
+
 CANDIDATE_ID = '''
 A unique identifier assigned to each candidate registered with the FEC.
 If a person runs for several offices, that person will have separate candidate IDs for each office.
@@ -8,6 +13,12 @@ If a person runs for several offices, that person will have separate candidate I
 COMMITTEE_ID = '''
 A unique identifier assigned to each committee or filer registered with the FEC.
 '''
+
+# committee uses a different definition for cycle because it is less straight forward
+CYCLE = '''
+Filter records to only those that are applicable to a given two-year period.
+'''
+
 
 DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
@@ -172,3 +183,13 @@ API key for https://api.data.gov. Get one at http://api.data.gov/signup.
 SEARCH_TAG = '''
 Search for candidates or committees by name.
 '''
+
+FILINGS_TAG = '''
+Search for financial reports and other FEC documents.
+'''
+
+FILINGS = '''
+All official records and reports filed by or delivered to the FEC.
+'''
+
+

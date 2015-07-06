@@ -595,3 +595,62 @@ class CommitteeTotalsIEOnly(BaseModel):
     coverage_end_date = db.Column(db.DateTime)
     total_independent_contributions = db.Column(db.Integer)
     total_independent_expenditures = db.Column(db.Integer)
+
+class Reports(db.Model):
+    __tablename__ = 'dimreporttype'
+
+    rpt_tp = db.Column(db.String, primary_key=True)
+    rpt_tp_desc = db.Column(db.String)
+
+
+class Filings(db.Model):
+    __tablename__ = 'ofec_filings_vw'
+
+    committee_id = db.Column(db.String)
+    committee_name = db.Column(db.String)
+    candidate_id = db.Column(db.String)
+    candidate_name = db.Column(db.String)
+    sub_id = db.Column(db.BigInteger, primary_key=True)
+    coverage_start_date = db.Column(db.Date)
+    coverage_end_date = db.Column(db.Date)
+    receipt_date = db.Column(db.Date)
+    election_year = db.Column(db.Integer)
+    form_type = db.Column(db.String)
+    report_year = db.Column(db.Integer)
+    report_type = db.Column(db.String)
+    document_type = db.Column(db.String)
+    report_type_full = db.Column(db.String)
+    beginning_image_number = db.Column(db.BigInteger)
+    ending_image_number = db.Column(db.BigInteger)
+    pages = db.Column(db.Integer)
+    total_receipts = db.Column(db.Integer)
+    total_individual_contributions = db.Column(db.Integer)
+    net_donations = db.Column(db.Integer)
+    total_disbursements = db.Column(db.Integer)
+    total_independent_expenditures = db.Column(db.Integer)
+    total_communication_cost = db.Column(db.Integer)
+    cash_on_hand_beginning_period = db.Column(db.Integer)
+    cash_on_hand_end_period = db.Column(db.Integer)
+    debts_owed_by_committee = db.Column(db.Integer)
+    debts_owed_to_committee = db.Column(db.Integer)
+    house_personal_funds = db.Column(db.Integer)
+    senate_personal_funds = db.Column(db.Integer)
+    opposition_personal_funds = db.Column(db.Integer)
+    treasurer_name = db.Column(db.String)
+    file_number = db.Column(db.BigInteger)
+    previous_file_number = db.Column(db.BigInteger)
+    primary_general_indicator = db.Column(db.String)
+    report_type_full = db.Column(db.String)
+    request_type = db.Column(db.String)
+    amendment_indicator = db.Column(db.String)
+    update_date = db.Column(db.Date)
+
+    @property
+    def pdf_url(self):
+        if self.report_year and self.report_year >= 2000:
+            return utils.make_pdf_url(self.beginning_image_number)
+        if self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
+            return utils.make_pdf_url(self.beginning_image_number)
+        if self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
+            return utils.make_pdf_url(self.beginning_image_number)
+        return None
