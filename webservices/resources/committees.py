@@ -151,7 +151,7 @@ class CommitteeView(Resource):
     path_params=[
         {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
         {'name': 'candidate_id', 'description': docs.CANDIDATE_ID, 'in': 'path', 'type': 'string'},
-        {'name': 'cycle', 'description': docs.COMMITTEE_CYCLE,'in': 'path', 'type': 'integer'},
+        {'name': 'cycle', 'description': docs.COMMITTEE_CYCLE, 'in': 'path', 'type': 'integer'},
     ],
 )
 class CommitteeHistoryView(Resource):

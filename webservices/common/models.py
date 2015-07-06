@@ -785,13 +785,6 @@ class ScheduleBSearch(db.Model):
     recipient_name_text = db.Column(TSVECTOR)
 
 
-class Reports(db.Model):
-    __tablename__ = 'dimreporttype'
-
-    rpt_tp = db.Column(db.String, primary_key=True)
-    rpt_tp_desc = db.Column(db.String)
-
-
 class Filings(db.Model):
     __tablename__ = 'ofec_filings_vw'
 
