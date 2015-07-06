@@ -145,3 +145,8 @@ class ScheduleBSearchFactory(BaseFactory):
     class Meta:
         model = models.ScheduleBSearch
     sched_b_sk = factory.Sequence(lambda n: n)
+
+
+class FilingsFactory(BaseFactory):
+    class Meta:
+        model = models.Filings
