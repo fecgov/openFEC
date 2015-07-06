@@ -16,7 +16,7 @@ class ItemizedResource(Resource):
 
     def get(self, **kwargs):
         query = self.build_query(kwargs)
-        count = counts.count_estimate(query, models.db.session)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
 
     def build_query(self, kwargs):
