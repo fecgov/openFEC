@@ -66,6 +66,9 @@ class ReportsView(Resource):
     @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
+        validator = args.IndexValidator(reports_class)
+        for key in kwargs['sort']:
+            validator(key)
         page = utils.fetch_page(query, kwargs, model=reports_class)
         return reports_schema().dump(page).data
 

@@ -1,3 +1,5 @@
+import datetime
+
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
@@ -30,7 +32,6 @@ class BaseCandidateFactory(BaseFactory):
 class CandidateFactory(BaseCandidateFactory):
     class Meta:
         model = models.Candidate
-
     election_years = [2012, 2014]
 
 
@@ -112,9 +113,39 @@ class ReportsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeReportsPacParty
 
+
 class ReportsIEOnlyFactory(BaseFactory):
     class Meta:
         model = models.CommitteeReportsIEOnly
+
+
+class ScheduleAFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleA
+    load_date = datetime.datetime.utcnow()
+    sched_a_sk = factory.Sequence(lambda n: n)
+    sub_id = factory.Sequence(lambda n: n)
+    report_year = 2016
+
+
+class ScheduleASearchFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleASearch
+    sched_a_sk = factory.Sequence(lambda n: n)
+
+
+class ScheduleBFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleB
+    sched_b_sk = factory.Sequence(lambda n: n)
+    report_year = 2016
+
+
+class ScheduleBSearchFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleBSearch
+    sched_b_sk = factory.Sequence(lambda n: n)
+
 
 class FilingsFactory(BaseFactory):
     class Meta:

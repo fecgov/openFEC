@@ -40,7 +40,7 @@ spec = APISpec(
         },
         {
             'name': 'filings',
-            'description': docs.FILINGS,
+            'description': docs.SCHEDULES,
         },
     ]
 )

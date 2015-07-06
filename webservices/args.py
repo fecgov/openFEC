@@ -1,8 +1,8 @@
 import logging
 import functools
 
+import sqlalchemy as sa
 from smore import swagger
-from flask.ext.restful import abort
 from dateutil.parser import parse as parse_date
 
 import webargs
@@ -11,6 +11,8 @@ from webargs.core import text_type
 from webargs.flaskparser import FlaskParser
 
 from webservices import docs
+from webservices import exceptions
+from webservices.common.models import db
 
 
 logger = logging.getLogger(__name__)
@@ -20,9 +22,10 @@ class FlaskRestParser(FlaskParser):
 
     def handle_error(self, error):
         logger.error(error)
+        message = text_type(error)
         status_code = getattr(error, 'status_code', 400)
-        data = getattr(error, 'data', {})
-        abort(status_code, message=text_type(error), **data)
+        payload = getattr(error, 'data', {})
+        raise exceptions.ApiError(message, status_code, payload)
 
 
 parser = FlaskRestParser()
@@ -42,6 +45,8 @@ def _validate_natural(value):
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
 
+IString = functools.partial(Arg, str, use=lambda v: v.upper())
+
 
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
@@ -49,9 +54,61 @@ paging = {
 }
 
 
-def make_sort_args(default=None):
+class OptionValidator(object):
+
+    def __init__(self, values):
+        self.values = values
+
+    def __call__(self, value):
+        if value .lstrip('-') not in self.values:
+            raise exceptions.ApiError('Cannot sort on value "{0}"'.format(value))
+
+
+class IndexValidator(OptionValidator):
+
+    def __init__(self, model, include=None, exclude=None):
+        self.model = model
+        self.include = include or []
+        self.exclude = exclude or []
+
+    @property
+    def values(self):
+        if self.include:
+            return self.include
+        inspector = sa.inspect(db.engine)
+        column_map = {
+            column.key: label
+            for label, column in self.model.__mapper__.columns.items()
+        }
+        return [
+            column_map[column['column_names'][0]]
+            for column in inspector.get_indexes(self.model.__tablename__)
+            if not self._is_excluded(column_map.get(column['column_names'][0]))
+        ]
+
+    def _is_excluded(self, value):
+        return not value or value in self.exclude
+
+
+def make_sort_args(default=None, multiple=True, validator=None):
     return {
-        'sort': Arg(str, multiple=True, description='Provide a field to sort by. Use - for descending order.', default=default),
+        'sort': Arg(
+            str,
+            multiple=multiple,
+            description='Provide a field to sort by. Use - for descending order.',
+            default=default,
+            validate=validator,
+        ),
+    }
+
+
+def make_seek_args(type=int, description=None):
+    return {
+        'per_page': Natural(default=20, description='The number of results returned per page. Defaults to 20.'),
+        'last_index': Arg(
+            type,
+            description=description or 'Index of last result from previous page',
+        ),
     }
 
 
@@ -66,7 +123,7 @@ names = {
 
 
 candidate_detail = {
-    'cycle': Arg(int, multiple=True, description=docs.CYCLE),
+    'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
@@ -88,6 +145,9 @@ candidate_list = {
 }
 
 committee = {
+
+    'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
+    'cycle': Arg(int, multiple=True, description=docs.COMMITTEE_CYCLE),
     'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
     'designation': Arg(
@@ -169,12 +229,70 @@ filings = {
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
-    'cycle': Arg(int, multiple=True, description=docs.CYCLE),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 
 
 totals = {
-    'cycle': Arg(int, multiple=True, description=docs.CYCLE),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+}
+
+
+itemized = {
+    'image_number': Arg(str, multiple=True, description='The image number of the page where the schedule item is reported'),
+    'min_image_number': Arg(int),
+    'max_image_number': Arg(int),
+    'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
+    'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
+    'min_date': Arg(parse_date),
+    'max_date': Arg(parse_date),
+}
+
+schedule_a = {
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'contributor_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC.'),
+    'contributor_name': Arg(str, description='Name of contributor.'),
+    'contributor_city': Arg(str, multiple=True, description='City of contributor'),
+    'contributor_state': Arg(str, multiple=True, description='State of contributor'),
+    'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
+    'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
+    'last_contributor_receipt_date': Arg(parse_date),
+    'last_contributor_receipt_amount': Arg(float),
+    'contributor_type': Arg(
+        str,
+        multiple=True,
+        validate=lambda v: v in ['individual', 'committee'],
+    ),
+}
+
+
+schedule_a_by_size = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    # add choices
+    'size': Arg(int, multiple=True),
+}
+
+
+schedule_a_by_state = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'state': Arg(str, multiple=True, description='State of contributor'),
+}
+
+
+schedule_a_by_zip = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'zip': Arg(str, multiple=True, description='Zip code'),
+}
+
+
+schedule_b = {
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'recipient_committee_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),
+    'recipient_name': Arg(str, description='Name of recipient'),
+    'recipient_city': Arg(str, multiple=True, description='City of recipient'),
+    'recipient_state': Arg(str, multiple=True, description='State of recipient'),
+    'last_disbursement_date': Arg(parse_date, description='Filter for records before this date'),
+    'last_disbursement_amount': Arg(float, description='Filter for records'),
 }

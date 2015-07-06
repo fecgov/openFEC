@@ -12,19 +12,9 @@ from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
 
 from webservices.rest import app, db
+from webservices.config import SQL_CONFIG
 from webservices.common.util import get_full_path
 
-
-def get_cycle_start(year):
-    """Round year down to the first year of the two-year election cycle. Used
-    when filtering original data for election cycle.
-    """
-    return year if year % 2 == 1 else year - 1
-
-
-SQL_CONFIG = {
-    'START_YEAR': get_cycle_start(1980),
-}
 
 manager = Manager(app)
 
@@ -49,9 +39,15 @@ def execute_sql_file(path):
 
 def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
+    if not sql_dir.endswith('/'):
+        sql_dir += '/'
     paths = glob.glob(sql_dir + '*.sql')
-    pool = multiprocessing.Pool(processes=processes)
-    pool.map(execute_sql_file, paths)
+    if processes > 1:
+        pool = multiprocessing.Pool(processes=processes)
+        pool.map(execute_sql_file, sorted(paths))
+    else:
+        for path in paths:
+            execute_sql_file(path)
 
 
 @manager.command
@@ -69,7 +65,8 @@ def load_pacronyms():
     ]).format(dest=db.engine.url)
     if count:
         cmd += ' --no-create'
-    subprocess.call(cmd, shell=True)
+    with open(os.devnull, 'w') as null:
+        subprocess.call(cmd, shell=True, stdout=null, stderr=null)
 
 
 @manager.command
@@ -81,6 +78,27 @@ def update_schemas(processes=2):
     execute_sql_folder('data/sql_updates/', processes=processes)
     execute_sql_file('data/rename_temporary_views.sql')
     print("Finished DB refresh.")
+
+
+@manager.command
+def update_schedule_a():
+    print('Updating Schedule A tables...')
+    execute_sql_file('data/sql_setup/prepare_schedule_a.sql')
+    print('Finished Schedule A update.')
+
+
+@manager.command
+def update_schedule_b():
+    print('Updating Schedule B tables...')
+    execute_sql_file('data/sql_setup/prepare_schedule_b.sql')
+    print('Finished Schedule B update.')
+
+
+@manager.command
+def update_aggregates(processes=2):
+    print('Updating incremental aggregates...')
+    execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
+    print('Finished updating incremental aggregates.')
 
 
 @manager.command
