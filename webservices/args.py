@@ -123,7 +123,7 @@ names = {
 
 
 candidate_detail = {
-    'cycle': Arg(int, multiple=True, description='Filter records to only those that were applicable to a given election cycle'),
+    'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
@@ -145,6 +145,9 @@ candidate_list = {
 }
 
 committee = {
+
+    'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
+    'cycle': Arg(int, multiple=True, description=docs.COMMITTEE_CYCLE),
     'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
@@ -200,35 +203,35 @@ committee_list = {
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
-    'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 
 
 totals = {
-    'cycle': Arg(int, multiple=True, description='Two-year election cycle in which a candidate runs for office'),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
 }
 
 
 itemized = {
-    'image_number': Arg(int, multiple=True),
+    'image_number': Arg(int, multiple=True, description='The image number of the page where the schedule item is reported'),
     'min_image_number': Arg(int),
     'max_image_number': Arg(int),
-    'min_amount': Arg(float),
-    'max_amount': Arg(float),
+    'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
+    'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
     'min_date': Arg(parse_date),
     'max_date': Arg(parse_date),
 }
 
 schedule_a = {
-    'committee_id': IString(multiple=True),
-    'contributor_id': IString(multiple=True),
-    'contributor_name': IString(),
-    'contributor_city': IString(multiple=True),
-    'contributor_state': IString(multiple=True),
-    'contributor_employer': Arg(str),
-    'contributor_occupation': Arg(str),
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'contributor_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC.'),
+    'contributor_name': Arg(str, description='Name of contributor.'),
+    'contributor_city': Arg(str, multiple=True, description='City of contributor'),
+    'contributor_state': Arg(str, multiple=True, description='State of contributor'),
+    'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
+    'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
     'last_contributor_receipt_date': Arg(parse_date),
     'last_contributor_receipt_amount': Arg(float),
     'contributor_type': Arg(
@@ -240,29 +243,30 @@ schedule_a = {
 
 
 schedule_a_by_size = {
-    'cycle': Arg(int, multiple=True),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    # add choices
     'size': Arg(int, multiple=True),
 }
 
 
 schedule_a_by_state = {
-    'cycle': Arg(int, multiple=True),
-    'state': Arg(str, multiple=True),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'state': Arg(str, multiple=True, description='State of contributor'),
 }
 
 
 schedule_a_by_zip = {
-    'cycle': Arg(int, multiple=True),
-    'zip': Arg(str, multiple=True),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'zip': Arg(str, multiple=True, description='Zip code'),
 }
 
 
 schedule_b = {
-    'committee_id': IString(multiple=True),
-    'recipient_committee_id': IString(multiple=True),
-    'recipient_name': Arg(str),
-    'recipient_city': IString(multiple=True),
-    'recipient_state': IString(multiple=True),
-    'last_disbursement_date': Arg(parse_date),
-    'last_disbursement_amount': Arg(float),
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'recipient_committee_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),
+    'recipient_name': Arg(str, description='Name of recipient'),
+    'recipient_city': Arg(str, multiple=True, description='City of recipient'),
+    'recipient_state': Arg(str, multiple=True, description='State of recipient'),
+    'last_disbursement_date': Arg(parse_date, description='Filter for records before this date'),
+    'last_disbursement_amount': Arg(float, description='Filter for records'),
 }
