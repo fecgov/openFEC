@@ -20,6 +20,10 @@ fields = {
     'amendment_indicator',
 }
 
+range_fields = [
+    (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
+]
+
 
 @spec.doc(
     tags=['filings'],
@@ -55,6 +59,7 @@ class FilingsList(Resource):
     @args.register_kwargs(args.make_sort_args(default=['-receipt_date']))
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
-        filings = models.Filings.query
-        filings = filter_query(models.Filings, filings, fields, kwargs)
-        return utils.fetch_page(filings, kwargs, model=models.Filings)
+        query = models.Filings.query
+        query = filter_query(models.Filings, query, fields, kwargs)
+        query = utils.filter_range(query, kwargs, range_fields)
+        return utils.fetch_page(query, kwargs, model=models.Filings)
