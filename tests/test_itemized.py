@@ -91,6 +91,16 @@ class TestItemized(ApiBaseTest):
                 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number),
             )
 
+    def test_image_number(self):
+        image_number = '12345'
+        [
+            factories.ScheduleAFactory(),
+            factories.ScheduleAFactory(image_number=image_number),
+        ]
+        results = self._results(api.url_for(ScheduleAView, image_number=image_number))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['image_number'], image_number)
+
     def test_memoed(self):
         params = [
             (factories.ScheduleAFactory, ScheduleAView),

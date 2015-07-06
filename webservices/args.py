@@ -241,7 +241,7 @@ totals = {
 
 
 itemized = {
-    'image_number': Arg(int, multiple=True, description='The image number of the page where the schedule item is reported'),
+    'image_number': Arg(str, multiple=True, description='The image number of the page where the schedule item is reported'),
     'min_image_number': Arg(int),
     'max_image_number': Arg(int),
     'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
