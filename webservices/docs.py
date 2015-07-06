@@ -9,20 +9,38 @@ COMMITTEE_ID = '''
 A unique identifier assigned to each committee or filer registered with the FEC.
 '''
 
+CANDIDATE_CYCLE = '''
+Two-year election cycle in which a candidate runs for office. Calculated from FEC form 2.
+'''
+
+COMMITTEE_CYCLE = '''
+A two year election cycle that the committee was active- (after original registration
+date but before expiration date in FEC form 1s)
+'''
+
+RECORD_CYCLE = '''
+Filter records to only those that were applicable to a given two-year period.
+'''
+
 DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 
 This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
-we’re actively working on it and adding new features. The official site for Federal Election Commission (FEC)
-data is still the [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml).
-While we plan on versioning any changes that aren't backwards compatible, expect things to change as the
-API develops.
+we’re actively working on it and adding new features. The official site for Federal
+Election Commission (FEC) data is still the
+[Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml). While we plan on
+versioning any changes that are not backwards compatible, expect things to change as the API
+develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
-FEC data.
+FEC data.This API allows you to explore the vast array of campaign finance data that the FEC
+collects. Each endpoint focuses on a different aspect
+of disclosure.
 
-This API allows you to explore the vast array of campaign finance data that the FEC
-collects. Each endpoint focuses on a different aspect of disclosure.
+There is a lot of data, but a good place to start exploring, is using search to find
+interesting candidates and committees and then, looking up report or line item details
+using IDs on the other endpoints. If you are interested in individual donors, check
+out contributor information in schedule_a.
 
 Information is tied to the underlying forms by file ID and image ID.
 
@@ -38,7 +56,9 @@ Officially, a candidate is an individual seeking nomination for election to a fe
 office. People become candidates when they (or agents working on their behalf)
 raise contributions or make expenditures that exceed $5,000.
 
-The candidate endpoints primarily use data from FEC registration Form 1 and Form 2.
+The candidate endpoints primarily use data from FEC registration
+[Form 1](http://www.fec.gov/pdf/forms/fecfrm1.pdf), for candidate information, and
+[Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf), for committee information.
 '''
 
 NAME_SEARCH = '''
@@ -74,8 +94,10 @@ particular office sought. If a candidate runs for the same office over time, tha
 stays the same. If the same person runs for multiple offices — for example, a House
 candidate runs for a Senate office — that candidate will get a unique ID for each office.
 
-The candidate endpoint uses data from FEC Form 1 and Form 2, with additional forms to provide
-context.
+The candidate endpoints primarily use data from FEC registration
+[Form 1](http://www.fec.gov/pdf/forms/fecfrm1.pdf), for candidate information, and
+[Form 2](http://www.fec.gov/pdf/forms/fecfrm2.pdf), for committees information, with additional information
+to provide context.
 '''
 
 CANDIDATE_DETAIL = '''
@@ -97,7 +119,7 @@ will lead you to more granular financial information.
 
 The committee endpoints include all FEC filers, even if they aren't registered as a committee.
 
-Officially, committees include the committees and organizations that file with the FEC. 
+Officially, committees include the committees and organizations that file with the FEC.
 Several different types of organizations file financial reports with the FEC:
 
 * Campaign committees authorized by particular candidates to raise and spend funds in
@@ -130,16 +152,20 @@ committees change treasurers, designation, or `committee_type`.
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
 
-Most committees are required to summarize their financial activity in each filing; those summaries 
-are included in these files. Generally, committees file reports on a quarterly or monthly basis, but 
-some must also submit a report 12 days before primary elections. Therefore, during the primary 
-season, the period covered by this file may be different for different committees. These totals 
+Most committees are required to summarize their financial activity in each filing; those summaries
+are included in these files. Generally, committees file reports on a quarterly or monthly basis, but
+some must also submit a report 12 days before primary elections. Therefore, during the primary
+season, the period covered by this file may be different for different committees. These totals
 also incorporate any changes made by committees, if any report covering the period is amended.
 
 Information is made available on the API as soon as it's processed. Keep in mind, complex
 paper filings take longer to process.
 
-The financial endpoints use data from FEC Form 3, Form 3X and Form 3P.
+The financial endpoints use data from FEC [form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf),
+for independent expenditors; or the summary and detailed summary pages of the FEC
+[form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
+[form 3X](http://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
+and [form 3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
 REPORTS='''
@@ -151,8 +177,12 @@ are especially helpful for understanding a committee's financial dealings.
 If a report is amended, this endpoint shows only the final, amended version.
 
 Several different reporting structures exist, depending on the type of organization that
-submits financial information. To see an example of these reporting requirements, 
-look at the summary and detailed summary pages of the FEC Form 3, Form 3X, and Form 3P.
+submits financial information. To see an example of these reporting requirements you can look at
+[FEC form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf), for independent expenditors; or the
+summary and detailed summary pages of the FEC
+[form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
+[form 3X](http://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
+and form [3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
 TOTALS = '''
@@ -160,18 +190,42 @@ This endpoint provides information about a committee's Form 3, Form 3X, or Form 
 which are aggregated by two-year period. We refer to two-year periods as a `cycle`.
 
 The cycle is named after the even-numbered year and includes the year before it. To see
-totals from 2013 and 2014, you would use 2014. In odd-numbered years, the current cycle 
+totals from 2013 and 2014, you would use 2014. In odd-numbered years, the current cycle
 is the next year — for example, in 2015, the current cycle is 2016.
 
 For presidential and Senate candidates, multiple two-year cycles exist between elections.
 '''
 
 SCHEDULE_A = '''
-Schedule A filings describe itemized receipts from committees.
+Schedule A filings describe itemized receipts reported by a committee. This is where
+you can look for individual contributors.
+
+Once a person gives more than a total of $200, the donations of that person must be
+reported by committees that file F3, F3X and F3P forms.
+
+Contributions under $200 are not required to be itemized, but you can find the total
+amount of these small donations by looking up the "unitemized" field in the `/reports`
+endpoint.
+
+When comparing the totals from reports to line items. the totals will not match unless you
+take out items where `"memo_code":'X'`. Memoed items are subtotals of receipts that are
+already accounted for in another schedule a line item.
 '''
 
 SCHEDULE_B = '''
-Schedule B filings describe itemized disbursements from committees.
+Schedule B filings describe itemized disbursements that committees. This data
+explains how committees and other filers spend their money. These figures are
+reported on F3, F3X and F3P forms.
+'''
+
+# If we add schedules as a grouping
+SCHEDULES = '''
+Schedules come from particular sections on forms and contain detailed transactional data.
+
+Schedule A explains where contributions come from. If you are interested in
+individual donors, this will be the endpoint you use.
+
+Schedule B explains how money is spent.
 '''
 
 API_KEY_DESCRIPTION = '''

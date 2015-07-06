@@ -163,6 +163,7 @@ class CandidateView(Resource):
             'name': 'cycle',
             'type': 'integer',
             'in': 'path',
+            'description': docs.CANDIDATE_CYCLE,
         },
     ],
 )
