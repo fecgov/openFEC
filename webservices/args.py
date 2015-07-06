@@ -203,11 +203,34 @@ committee_list = {
     'max_first_file_date': Arg(parse_date, description='Filters out committees that first filed their registration after this date. Can bu used as a range with start_date. To see when a Committee first filed its F1.'),
 }
 
+filings = {
+    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
+    'report_type': Arg(str, multiple=True, description='Report type'),
+    'report_year': Arg(int, multiple=True, description='Report year'),
+    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
+    'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
+    'min_receipt_date': Arg(parse_date, description='Minimum day the filing was received by the FEC'),
+    'max_receipt_date': Arg(parse_date, description='Maximum day the filing was received by the FEC'),
+    'form_type': Arg(str, multiple=True, description='Form type'),
+    'primary_general_indicator': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
+    'amendment_indicator': Arg(str, multiple=True, description='''
+        -N   new\n\
+        -A   amendment\n\
+        -T   terminated\n\
+        -C   consolidated\n\
+        -M   multi-candidate\n\
+        -S   secondary\n\
+
+    Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+    '''),
+}
+
 
 reports = {
     'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'beginning_image_number': Arg(int, multiple=True, description='Unique identifier for the electronic or paper report. If report is amended, it will show the most recent report.'),
+    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
 }
 

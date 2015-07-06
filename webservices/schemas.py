@@ -297,3 +297,14 @@ ScheduleBSchema = make_schema(
 ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
+
+
+FilingsSchema = make_schema(
+    models.Filings,
+    fields={
+        'pdf_url': ma.fields.Str(),
+    },
+)
+FilingsPageSchema = make_page_schema(FilingsSchema)
+register_schema(FilingsSchema)
+register_schema(FilingsPageSchema)
