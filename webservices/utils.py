@@ -32,6 +32,15 @@ def search_text(query, column, text):
     )
 
 
+def filter_range(query, kwargs, fields):
+    for (min_key, max_key), column in fields:
+        if kwargs[min_key] is not None:
+            query = query.filter(column >= kwargs[min_key])
+        if kwargs[max_key] is not None:
+            query = query.filter(column <= kwargs[max_key])
+    return query
+
+
 def make_pdf_url(image_number):
     return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
         str(image_number)[-3:],

@@ -1,3 +1,7 @@
+import datetime
+
+from marshmallow.utils import isoformat
+
 from webservices.rest import api
 from webservices.resources.filings import FilingsView, FilingsList
 
@@ -24,6 +28,27 @@ class TestFilings(ApiBaseTest):
 
         results = self._results(api.url_for(FilingsList))
         self.assertEqual(len(results), 2)
+
+    def test_filter_date(self):
+        [
+            factories.FilingsFactory(receipt_date=datetime.datetime(2012, 1, 1)),
+            factories.FilingsFactory(receipt_date=datetime.datetime(2013, 1, 1)),
+            factories.FilingsFactory(receipt_date=datetime.datetime(2014, 1, 1)),
+            factories.FilingsFactory(receipt_date=datetime.datetime(2015, 1, 1)),
+        ]
+        min_date = datetime.datetime(2013, 1, 1)
+        results = self._results(api.url_for(FilingsList, min_receipt_date=min_date))
+        self.assertTrue(all(each for each in results if each['receipt_date'] >= isoformat(min_date)))
+        max_date = datetime.datetime(2014, 1, 1)
+        results = self._results(api.url_for(FilingsList, max_receipt_date=max_date))
+        self.assertTrue(all(each for each in results if each['receipt_date'] <= isoformat(max_date)))
+        results = self._results(api.url_for(FilingsList, min_receipt_date=min_date, max_receipt_date=max_date))
+        self.assertTrue(
+            all(
+                each for each in results
+                if isoformat(min_date) <= each['receipt_date'] <= isoformat(max_date)
+            )
+        )
 
     def test_filings_filters(self):
         [

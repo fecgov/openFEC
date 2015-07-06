@@ -147,7 +147,8 @@ filings = {
     'report_year': Arg(int, multiple=True, description='Report year'),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
-    'recipt_date': Arg(parse_date, multiple=True, description='The day the filing was received by the FEC'),
+    'min_receipt_date': Arg(parse_date, description='Minimum day the filing was received by the FEC'),
+    'max_receipt_date': Arg(parse_date, description='Maximum day the filing was received by the FEC'),
     'form_type': Arg(str, multiple=True, description='Form type'),
     'primary_general_indicator': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
     'amendment_indicator': Arg(str, multiple=True, description='''
