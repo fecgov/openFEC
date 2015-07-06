@@ -27,7 +27,7 @@ select
     rpt_tp_desc as report_type_full
 from
     dimcmte c
-    inner join factindpexpcontb_f5 ief5 on indv_org_sk = c.cmte_sk
+    right join factindpexpcontb_f5 ief5 on indv_org_sk = c.cmte_sk
     left join dimreporttype rt using (reporttype_sk)
     left join dimelectiontp et using (electiontp_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1

@@ -9,5 +9,6 @@ class ApiError(Exception):
 
     def to_dict(self):
         ret = self.payload or {}
+        ret['status'] = self.status_code
         ret['message'] = self.message
         return ret

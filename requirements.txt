@@ -8,6 +8,7 @@ GitPython==1.0.1
 gunicorn==19.3.0
 webargs==0.14.0
 csvkit==0.9.1
+ujson==1.33
 
 # Marshalling
 marshmallow==2.0.0b3

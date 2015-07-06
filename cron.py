@@ -27,7 +27,11 @@ app.conf.update(
         'refresh': {
             'task': 'cron.refresh',
             'schedule': crontab(minute=0, hour=0),
-        }
+        },
+        'update_aggregates': {
+            'task': 'cron.update_aggregates',
+            'schedule': crontab(minute=0, hour=0),
+        },
     }
 )
 
@@ -36,6 +40,12 @@ app.conf.update(
 def refresh():
     with manage.app.test_request_context():
         manage.refresh_materialized()
+
+
+@app.task
+def update_aggregates():
+    with manage.app.test_request_context():
+        manage.update_aggregates()
 
 
 if __name__ == '__main__':
