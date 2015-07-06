@@ -168,7 +168,7 @@ for independent expenditors; or the summary and detailed summary pages of the FE
 and [form 3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
-REPORTS='''
+REPORTS = '''
 Each report represents the summary information from FEC Form 3, Form 3X and Form 3P.
 These reports have key statistics that illuminate the financial status of a given committee.
 Things like cash on hand, debts owed by committee, total receipts, and total disbursements
@@ -177,12 +177,8 @@ are especially helpful for understanding a committee's financial dealings.
 If a report is amended, this endpoint shows only the final, amended version.
 
 Several different reporting structures exist, depending on the type of organization that
-submits financial information. To see an example of these reporting requirements you can look at
-[FEC form 5](http://www.fec.gov/pdf/forms/fecfrm5.pdf), for independent expenditors; or the
-summary and detailed summary pages of the FEC
-[form 3](http://www.fec.gov/pdf/forms/fecfrm3.pdf), for House and Senate committees;
-[form 3X](http://www.fec.gov/pdf/forms/fecfrm3x.pdf), for PACs and parties;
-and form [3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
+submits financial information. To see an example of these reporting requirements,
+look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 3P.
 '''
 
 TOTALS = '''

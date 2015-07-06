@@ -79,6 +79,11 @@ class CommitteeList(Resource):
         if kwargs['cycle']:
             committees = committees.filter(models.Committee.cycles.overlap(kwargs['cycle']))
 
+        if kwargs['min_first_file_date']:
+            committees = committees.filter(models.Committee.first_file_date >= kwargs['min_first_file_date'])
+        if kwargs['max_first_file_date']:
+            committees = committees.filter(models.Committee.first_file_date <= kwargs['max_first_file_date'])
+
         return committees
 
 
