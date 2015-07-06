@@ -191,5 +191,3 @@ Search for financial reports and other FEC documents.
 FILINGS = '''
 All official records and reports filed by or delivered to the FEC.
 '''
-
-

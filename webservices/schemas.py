@@ -240,7 +240,7 @@ register_schema(CommitteeTotalsPageSchema)
 
 FilingsSchema = make_schema(
     models.Filings,
-    fields= {
+    fields={
         'pdf_url': ma.fields.Str(),
     },
 )
