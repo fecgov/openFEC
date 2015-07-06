@@ -1,3 +1,5 @@
+import datetime
+
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
@@ -120,7 +122,9 @@ class ReportsIEOnlyFactory(BaseFactory):
 class ScheduleAFactory(BaseFactory):
     class Meta:
         model = models.ScheduleA
+    load_date = datetime.datetime.utcnow()
     sched_a_sk = factory.Sequence(lambda n: n)
+    sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
 
 

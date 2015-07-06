@@ -3,6 +3,7 @@ import functools
 
 import sqlalchemy as sa
 from smore import swagger
+from dateutil.parser import parse as parse_date
 
 import webargs
 from webargs import Arg
@@ -12,7 +13,6 @@ from webargs.flaskparser import FlaskParser
 from webservices import docs
 from webservices import exceptions
 from webservices.common.models import db
-from webservices.config import SQL_CONFIG
 
 
 logger = logging.getLogger(__name__)
@@ -44,6 +44,8 @@ def _validate_natural(value):
     if value < 0:
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
+
+IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
 paging = {
@@ -143,8 +145,13 @@ candidate_list = {
 }
 
 committee = {
+<<<<<<< HEAD
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description=docs.COMMITTEE_CYCLE),
+=======
+    'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
+    'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
+>>>>>>> feature/incremental-aggreates
     'designation': Arg(str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
         description='The one-letter designation code of the organization:\n\
          - A authorized by a candidate\n\
@@ -166,17 +173,17 @@ committee = {
         '),
     'committee_type': Arg(str, multiple=True, enum=['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'],
         description='The one-letter type code of the organization:\n\
-        - C Communication Cost\n\
-        - D Delegate\n\
-        - E Electioneering Communication\n\
+        - C communication cost\n\
+        - D delegate\n\
+        - E electioneering communication\n\
         - H House\n\
-        - I Independent Expenditor (Person or Group)\n\
-        - N PAC - Nonqualified\n\
-        - O Independent Expenditure-Only (Super PACs)\n\
-        - P Presidential\n\
-        - Q PAC - Qualified\n\
+        - I independent expenditor (person or group)\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - P presidential\n\
+        - Q PAC - qualified\n\
         - S Senate\n\
-        - U Single Candidate Independent Expenditure\n\
+        - U single candidate independent expenditure\n\
         - V PAC with non-contribution account, nonqualified\n\
         - W PAC with non-contribution account, qualified\n\
         - X party, nonqualified\n\
@@ -190,9 +197,9 @@ committee_list = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
     'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
     'name': Arg(str, description="Candidate's name (full or partial)"),
-    'state': Arg(str, multiple=True, description='Two character U.S. state or territory that committee is registered in.'),
+    'state': Arg(str, multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
-    'party': Arg(str, multiple=True, description='Three letter code for the party. For example: DEM=Democrat REP=Republican'),
+    'party': Arg(str, multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
 }
 
 
@@ -210,15 +217,13 @@ totals = {
 
 
 itemized = {
-    'report_year': Arg(
-        int,
-        multiple=True,
-        validate=lambda value: value >= SQL_CONFIG['START_YEAR_ITEMIZED'],
-        description='Year the report pertains to. See receipt date for the year the report was submitted to the FEC.'
-    ),
     'image_number': Arg(int, multiple=True, description='The image number of the page where the schedule item is reported'),
+    'min_image_number': Arg(int),
+    'max_image_number': Arg(int),
     'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
     'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
+    'min_date': Arg(parse_date),
+    'max_date': Arg(parse_date),
 }
 
 schedule_a = {
@@ -229,6 +234,31 @@ schedule_a = {
     'contributor_state': Arg(str, multiple=True, description='State of contributor'),
     'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
     'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
+    'last_contributor_receipt_date': Arg(parse_date),
+    'last_contributor_receipt_amount': Arg(float),
+    'contributor_type': Arg(
+        str,
+        multiple=True,
+        validate=lambda v: v in ['individual', 'committee'],
+    ),
+}
+
+
+schedule_a_by_size = {
+    'cycle': Arg(int, multiple=True),
+    'size': Arg(int, multiple=True),
+}
+
+
+schedule_a_by_state = {
+    'cycle': Arg(int, multiple=True),
+    'state': Arg(str, multiple=True),
+}
+
+
+schedule_a_by_zip = {
+    'cycle': Arg(int, multiple=True),
+    'zip': Arg(str, multiple=True),
 }
 
 
@@ -238,4 +268,6 @@ schedule_b = {
     'recipient_name': Arg(str, description='Name of recipient'),
     'recipient_city': Arg(str, multiple=True, description='City of recipient'),
     'recipient_state': Arg(str, multiple=True, description='State of recipient'),
+    'last_disbursement_date': Arg(parse_date),
+    'last_disbursement_amount': Arg(float),
 }

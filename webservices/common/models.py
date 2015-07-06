@@ -1,6 +1,7 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from webservices import utils
 
@@ -110,13 +111,13 @@ class BaseCommittee(BaseModel):
     committee_id = db.Column(db.String, index=True)
     cycles = db.Column(ARRAY(db.Integer), index=True)
     designation = db.Column(db.String(1), index=True)
-    designation_full = db.Column(db.String(25))
-    treasurer_name = db.Column(db.String(100))
+    designation_full = db.Column(db.String(25), index=True)
+    treasurer_name = db.Column(db.String(100), index=True)
     organization_type = db.Column(db.String(1), index=True)
-    organization_type_full = db.Column(db.String(100))
+    organization_type_full = db.Column(db.String(100), index=True)
     state = db.Column(db.String(2), index=True)
     committee_type = db.Column(db.String(1), index=True)
-    committee_type_full = db.Column(db.String(50))
+    committee_type_full = db.Column(db.String(50), index=True)
     expire_date = db.Column(db.DateTime())
     party = db.Column(db.String(3), index=True)
     party_full = db.Column(db.String(50))
@@ -333,7 +334,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
         # Senate records start May 2000
         elif self.committee.committee_type == 'S' and self.report_year < 2000:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -410,7 +411,7 @@ class CommitteeReportsPacParty(CommitteeReports):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsPresidential(CommitteeReports):
@@ -466,7 +467,7 @@ class CommitteeReportsPresidential(CommitteeReports):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeReportsIEOnly(BaseModel):
@@ -491,7 +492,7 @@ class CommitteeReportsIEOnly(BaseModel):
     def pdf_url(self):
         if self.report_year is None or self.report_year < 1993:
             return None
-        return utils.make_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
 
 class CommitteeTotals(BaseModel):
@@ -603,9 +604,22 @@ class ScheduleA(db.Model):
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     form_type = db.Column('form_tp', db.String)
     committee_id = db.Column('cmte_id', db.String)
-    committee_name = db.Column('cmte_nm', db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleA.committee_id) == CommitteeHistory.committee_id,
+            ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     entity_type = db.Column('entity_tp', db.String)
     contributor_id = db.Column('contbr_id', db.String)
+    contributor = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleA.contributor_id) == CommitteeHistory.committee_id,
+            ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     contributor_name = db.Column('contbr_nm', db.String)
     contributor_prefix = db.Column('contbr_prefix', db.String)
     contributor_first_name = db.Column('contbr_f_nm', db.String)
@@ -653,6 +667,14 @@ class ScheduleA(db.Model):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
+    @hybrid_property
+    def memoed_subtotal(self):
+        return self.memo_code == 'X'
+
+    @property
+    def pdf_url(self):
+        return utils.make_image_pdf_url(self.image_number)
+
 
 class ScheduleASearch(db.Model):
     __tablename__ = 'ofec_sched_a_fulltext'
@@ -662,14 +684,52 @@ class ScheduleASearch(db.Model):
     contributor_employer_text = db.Column(TSVECTOR)
 
 
+class BaseAggregate(db.Model):
+    __abstract__ = True
+
+    committee_id = db.Column('cmte_id', db.String, primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True)
+    total = db.Column(db.Float)
+    count = db.Column(db.Integer)
+
+
+class ScheduleABySize(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_size'
+    size = db.Column(db.Integer, primary_key=True)
+
+
+class ScheduleAByState(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_state'
+    state = db.Column(db.String, primary_key=True)
+
+
+class ScheduleAByZip(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_zip'
+    zip = db.Column(db.String, primary_key=True)
+
+
 class ScheduleB(db.Model):
     __tablename__ = 'sched_b'
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     form_type = db.Column('form_tp', db.String)
     committee_id = db.Column('cmte_id', db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleB.committee_id) == CommitteeHistory.committee_id,
+            ScheduleB.report_year + ScheduleB.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     entity_type = db.Column('entity_tp', db.String)
     recipient_committee_id = db.Column('recipient_cmte_id', db.String)
+    recipient_committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleB.recipient_committee_id) == CommitteeHistory.committee_id,
+            ScheduleB.report_year + ScheduleB.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     recipient_name = db.Column('recipient_nm', db.String)
     recipient_street_1 = db.Column('recipient_st1', db.String)
     recipient_street_2 = db.Column('recipient_st2', db.String)
@@ -708,6 +768,14 @@ class ScheduleB(db.Model):
     filing_form = db.Column(db.String)
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+
+    @hybrid_property
+    def memoed_subtotal(self):
+        return self.memo_code == 'X'
+
+    @property
+    def pdf_url(self):
+        return utils.make_image_pdf_url(self.image_number)
 
 
 class ScheduleBSearch(db.Model):
