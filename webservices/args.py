@@ -45,7 +45,19 @@ def _validate_natural(value):
         raise webargs.ValidationError('Must be a natural number')
 Natural = functools.partial(Arg, int, validate=_validate_natural)
 
+
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
+
+
+class Date(webargs.Arg):
+    """Special `Arg` that handles dates and throw an appropriate error for non-date inputs.
+    TODO(jmcarp): Find or build a better solution
+    """
+    def _validate(self, name, value):
+        try:
+            return parse_date(value)
+        except (ValueError, TypeError, OverflowError):
+            raise webargs.ValidationError('Expected date for {0}; got "{1}"'.format(name, value))
 
 
 paging = {
@@ -199,8 +211,8 @@ committee_list = {
     'state': Arg(str, multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
     'party': Arg(str, multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
-    'min_first_file_date': Arg(parse_date, description='Filters out committees that first filed their registration before this date. Can bu used as a range with max_first_file_date. To see when a Committee first filed its F1.'),
-    'max_first_file_date': Arg(parse_date, description='Filters out committees that first filed their registration after this date. Can bu used as a range with start_date. To see when a Committee first filed its F1.'),
+    'min_first_file_date': Date(description='Filters out committees that first filed their registration before this date. Can bu used as a range with max_first_file_date. To see when a Committee first filed its F1.'),
+    'max_first_file_date': Date(description='Filters out committees that first filed their registration after this date. Can bu used as a range with start_date. To see when a Committee first filed its F1.'),
 }
 
 filings = {
@@ -210,8 +222,8 @@ filings = {
     'report_year': Arg(int, multiple=True, description='Report year'),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
-    'min_receipt_date': Arg(parse_date, description='Minimum day the filing was received by the FEC'),
-    'max_receipt_date': Arg(parse_date, description='Maximum day the filing was received by the FEC'),
+    'min_receipt_date': Date(description='Minimum day the filing was received by the FEC'),
+    'max_receipt_date': Date(description='Maximum day the filing was received by the FEC'),
     'form_type': Arg(str, multiple=True, description='Form type'),
     'primary_general_indicator': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
     'amendment_indicator': Arg(str, multiple=True, description='''
@@ -246,8 +258,8 @@ itemized = {
     'max_image_number': Arg(int),
     'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
     'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
-    'min_date': Arg(parse_date),
-    'max_date': Arg(parse_date),
+    'min_date': Date(),
+    'max_date': Date(),
 }
 
 schedule_a = {
@@ -258,7 +270,7 @@ schedule_a = {
     'contributor_state': Arg(str, multiple=True, description='State of contributor'),
     'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
     'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
-    'last_contributor_receipt_date': Arg(parse_date),
+    'last_contributor_receipt_date': Date(),
     'last_contributor_receipt_amount': Arg(float),
     'contributor_type': Arg(
         str,
@@ -293,6 +305,6 @@ schedule_b = {
     'recipient_name': Arg(str, description='Name of recipient'),
     'recipient_city': Arg(str, multiple=True, description='City of recipient'),
     'recipient_state': Arg(str, multiple=True, description='State of recipient'),
-    'last_disbursement_date': Arg(parse_date, description='Filter for records before this date'),
+    'last_disbursement_date': Date(description='Filter for records before this date'),
     'last_disbursement_amount': Arg(float, description='Filter for records'),
 }
