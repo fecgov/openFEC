@@ -42,12 +42,12 @@ class BaseCandidate(BaseModel):
     cycles = db.Column(ARRAY(db.Integer), index=True)
     incumbent_challenge = db.Column(db.String(1), index=True)
     incumbent_challenge_full = db.Column(db.String(10))
-    office = db.Column(db.String(1), index=True)
-    office_full = db.Column(db.String(9))
-    party = db.Column(db.String(3), index=True)
-    party_full = db.Column(db.String(255))
-    state = db.Column(db.String(2), index=True)
-    name = db.Column(db.String(100), index=True)
+    office = db.Column(db.String(1), index=True, doc='Office sought (abbreviated)')
+    office_full = db.Column(db.String(9), doc='Office sought (full)')
+    party = db.Column(db.String(3), index=True, doc='Political party (abbreviated)')
+    party_full = db.Column(db.String(255), doc='Political party (full)')
+    state = db.Column(db.String(2), index=True, doc='Candidate state, if applicable; based on form F1')
+    name = db.Column(db.String(100), index=True, doc='Candidate name; based on form F1')
 
 
 class BaseConcreteCandidate(BaseCandidate):
