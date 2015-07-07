@@ -245,9 +245,10 @@ totals = {
 
 
 itemized = {
+    # TODO(jmcarp) Request integer image numbers from FEC and update argument types
     'image_number': Arg(str, multiple=True, description='The image number of the page where the schedule item is reported'),
-    'min_image_number': Arg(int),
-    'max_image_number': Arg(int),
+    'min_image_number': Arg(str),
+    'max_image_number': Arg(str),
     'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
     'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
     'min_date': Arg(parse_date),
