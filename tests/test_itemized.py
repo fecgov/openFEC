@@ -101,6 +101,20 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['image_number'], image_number)
 
+    def test_image_number_range(self):
+        [
+            factories.ScheduleAFactory(image_number='1'),
+            factories.ScheduleAFactory(image_number='2'),
+            factories.ScheduleAFactory(image_number='3'),
+            factories.ScheduleAFactory(image_number='4'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, min_image_number='2'))
+        self.assertTrue(all(each['image_number'] >= '2' for each in results))
+        results = self._results(api.url_for(ScheduleAView, max_image_number='3'))
+        self.assertTrue(all(each['image_number'] <= '3' for each in results))
+        results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3'))
+        self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
+
     def test_memoed(self):
         params = [
             (factories.ScheduleAFactory, ScheduleAView),
