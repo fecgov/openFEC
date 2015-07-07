@@ -28,7 +28,7 @@ class TestItemized(ApiBaseTest):
 
     def test_sorting_bad_column(self):
         response = self.app.get(api.url_for(ScheduleAView, sort='bad_column'))
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
         self.assertIn(b'Cannot sort on value', response.data)
 
     def test_filter(self):

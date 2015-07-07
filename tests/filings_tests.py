@@ -14,9 +14,7 @@ class TestFilings(ApiBaseTest):
     def test_committee_filing(self):
         """ Check filing returns with a specified committee id"""
         committee_id = 'C8675309'
-        filing = factories.FilingsFactory(
-            committee_id = committee_id,
-        )
+        filing = factories.FilingsFactory(committee_id=committee_id)
 
         results = self._results(api.url_for(FilingsView, committee_id=committee_id))
         self.assertEqual(results[0]['committee_id'], committee_id)
@@ -83,3 +81,18 @@ class TestFilings(ApiBaseTest):
             # doesn't return all results
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
+
+    def test_sort(self):
+        [
+            factories.FilingsFactory(beginning_image_number=2),
+            factories.FilingsFactory(beginning_image_number=1),
+        ]
+        results = self._results(api.url_for(FilingsList, sort='beginning_image_number'))
+        self.assertTrue(
+            [each['beginning_image_number'] for each in results],
+            [1, 2]
+        )
+
+    def test_sort_bad_column(self):
+        response = self.app.get(api.url_for(FilingsList, sort='request_type'))
+        self.assertEqual(response.status_code, 422)
