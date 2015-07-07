@@ -40,7 +40,12 @@ range_fields = [
 class FilingsView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.make_sort_args(default=['-receipt_date']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['-receipt_date'],
+            validator=args.IndexValidator(models.Filings),
+        )
+    )
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, committee_id=None, **kwargs):
         filings = models.Filings.query
@@ -56,7 +61,12 @@ class FilingsList(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.filings)
-    @args.register_kwargs(args.make_sort_args(default=['-receipt_date']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['-receipt_date'],
+            validator=args.IndexValidator(models.Filings),
+        )
+    )
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         query = models.Filings.query

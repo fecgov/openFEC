@@ -55,26 +55,30 @@ paging = {
 
 
 class OptionValidator(object):
+    """Ensure that value is one of acceptable options.
 
+    :param list values: Valid options.
+    """
     def __init__(self, values):
         self.values = values
 
     def __call__(self, value):
         if value .lstrip('-') not in self.values:
-            raise exceptions.ApiError('Cannot sort on value "{0}"'.format(value))
+            raise exceptions.ApiError('Cannot sort on value "{0}"'.format(value), status_code=422)
 
 
 class IndexValidator(OptionValidator):
+    """Ensure that value is an indexed column on the specified model.
 
-    def __init__(self, model, include=None, exclude=None):
+    :param Base model: SQLALchemy model.
+    :param list exclude: Optional list of columns to exclude.
+    """
+    def __init__(self, model, exclude=None):
         self.model = model
-        self.include = include or []
         self.exclude = exclude or []
 
     @property
     def values(self):
-        if self.include:
-            return self.include
         inspector = sa.inspect(db.engine)
         column_map = {
             column.key: label
