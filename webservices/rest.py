@@ -1,15 +1,16 @@
 """
-A RESTful web service supporting fulltext and field-specific searches on FEC data. For full documentation visit:  https://api.open.fec.gov/developers
+A RESTful web service supporting fulltext and field-specific searches on FEC data. For
+full documentation visit: https://api.open.fec.gov/developers.
 """
 import os
 import re
-import sys
 import logging
 
 from flask import abort
 from flask import request
 from flask import jsonify
 from flask import url_for
+from flask import redirect
 from flask import render_template
 from flask import Flask
 from flask import Blueprint
@@ -53,6 +54,7 @@ app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
+
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)
@@ -142,14 +144,6 @@ class CommitteeNameSearch(restful.Resource):
         return search_typeahead_text(models.CommitteeSearch, kwargs['q'])
 
 
-class Help(restful.Resource):
-    def get(self):
-        result = {'doc': sys.modules[__name__].__doc__,
-                  'endpoints': {}}
-        return result
-
-
-api.add_resource(Help, '/')
 api.add_resource(candidates.CandidateList, '/candidates')
 api.add_resource(candidates.CandidateSearch, '/candidates/search')
 api.add_resource(
@@ -291,6 +285,12 @@ def api_spec():
 @docs.add_app_template_global
 def swagger_static(filename):
     return url_for('docs.static', filename=filename)
+
+
+@app.route('/')
+@app.route('/v1/')
+def api_ui_redirect():
+    return redirect(url_for('docs.api_ui'))
 
 
 @docs.route('/developers')
