@@ -216,12 +216,54 @@ endpoint.
 When comparing the totals from reports to line items. the totals will not match unless you
 take out items where `"memo_code":'X'`. Memoed items are subtotals of receipts that are
 already accounted for in another schedule a line item.
+
+Due to the large quantity of Schedule A filings, this endpoint is not paginated by
+page number. Instead, you can request the next page of results by adding the values in
+the `last_indexes` object from `pagination` to the URL of your last request. For
+example, when sorting by `contributor_receipt_date`, you might receive a page of
+results with the following pagination information:
+
+```
+pagination: {
+    pages: 2152643,
+    per_page: 20,
+    count: 43052850,
+    last_indexes: {
+        last_index: 230880619,
+        last_contributor_receipt_date: "2014-01-01"
+    }
+}
+```
+
+To fetch the next page of results, append "last_index=230880619&last_contributor_receipt_date=2014-01-01"
+to the URL.
 '''
 
 SCHEDULE_B = '''
 Schedule B filings describe itemized disbursements that committees. This data
 explains how committees and other filers spend their money. These figures are
 reported on F3, F3X and F3P forms.
+
+Due to the large quantity of Schedule B filings, this endpoint is not paginated by
+page number. Instead, you can request the next page of results by adding the values in
+the `last_indexes` object from `pagination` to the URL of your last request. For
+example, when sorting by `contributor_receipt_date`, you might receive a page of
+results with the following pagination information:
+
+```
+pagination: {
+    pages: 965191,
+    per_page: 20,
+    count: 19303814,
+    last_indexes: {
+        last_index: 230906248,
+        last_disbursement_date: "2014-07-04"
+    }
+}
+```
+
+To fetch the next page of results, append "last_index=230906248&amp;last_disbursement_date=2014-07-04"
+to the URL.
 '''
 
 # If we add schedules as a grouping
