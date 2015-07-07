@@ -9,7 +9,7 @@ from webservices.common.views import ItemizedResource
 
 
 @spec.doc(
-    tags=['filings'],
+    tags=['schedules'],
     description=docs.SCHEDULE_B,
 )
 class ScheduleBView(ItemizedResource):
