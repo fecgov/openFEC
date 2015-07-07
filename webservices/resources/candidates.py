@@ -34,7 +34,12 @@ class CandidateList(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args(default=['name']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['name'],
+            validator=args.IndexValidator(models.Candidate),
+        )
+    )
     @schemas.marshal_with(schemas.CandidatePageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
