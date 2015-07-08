@@ -40,36 +40,38 @@ create table ofec_sched_a_queue_old as select * from sched_a limit 0;
 
 -- Create trigger to maintain Schedule A queues
 create or replace function ofec_sched_a_update_queues() returns trigger as $$
+declare
+    start_year int = TG_ARGV[0]::int;
 begin
-  if tg_op = 'INSERT' then
-    if new.rpt_yr >= :START_YEAR_ITEMIZED then
-      insert into ofec_sched_a_queue_new
-      values (new.*)
-      ;
+    if tg_op = 'INSERT' then
+        if new.rpt_yr >= start_year then
+            insert into ofec_sched_a_queue_new
+            values (new.*)
+            ;
+        end if;
+        return new;
+    elsif tg_op = 'UPDATE' then
+        if new.rpt_yr >= start_year then
+            insert into ofec_sched_a_queue_new
+            values (new.*)
+            ;
+            insert into ofec_sched_a_queue_old
+            values (old.*)
+            ;
+        end if;
+        return new;
+    elsif tg_op = 'DELETE' then
+        if old.rpt_yr >= start_year then
+            insert into ofec_sched_a_queue_old
+            values (old.*)
+            ;
+        end if;
+        return old;
     end if;
-    return new;
-  elsif tg_op = 'UPDATE' then
-    if new.rpt_yr >= :START_YEAR_ITEMIZED then
-      insert into ofec_sched_a_queue_new
-      values (new.*)
-      ;
-      insert into ofec_sched_a_queue_old
-      values (old.*)
-      ;
-    end if;
-    return new;
-  elsif tg_op = 'DELETE' then
-    if old.rpt_yr >= :START_YEAR_ITEMIZED then
-      insert into ofec_sched_a_queue_old
-      values (old.*)
-      ;
-    end if;
-    return old;
-  end if;
 end
 $$ language plpgsql;
 
 drop trigger if exists ofec_sched_a_queue_trigger on sched_a;
 create trigger ofec_sched_a_queue_trigger before insert or update or delete
-    on sched_a for each row execute procedure ofec_sched_a_update_queues()
+    on sched_a for each row execute procedure ofec_sched_a_update_queues(:START_YEAR_ITEMIZED)
 ;
