@@ -1,9 +1,10 @@
 create or replace function contribution_size(value numeric) returns int as $$
 begin
     return case
-        when value < 500 then 200
-        when value < 1000 then 500
-        when value < 2000 then 1000
+        when abs(value) < 200 then 0
+        when abs(value) < 500 then 200
+        when abs(value) < 1000 then 500
+        when abs(value) < 2000 then 1000
         else 2000
     end;
 end
@@ -20,7 +21,6 @@ select
     count(contb_receipt_amt) as count
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
-and contb_receipt_amt > 200
 group by cmte_id, cycle, size
 ;
 
