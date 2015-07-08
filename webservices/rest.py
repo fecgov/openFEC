@@ -4,6 +4,7 @@ full documentation visit: https://api.open.fec.gov/developers.
 """
 import os
 import re
+import http
 import logging
 
 from flask import abort
@@ -289,8 +290,9 @@ def swagger_static(filename):
 
 @app.route('/')
 @app.route('/v1/')
+@docs.route('/developer')
 def api_ui_redirect():
-    return redirect(url_for('docs.api_ui'))
+    return redirect(url_for('docs.api_ui'), code=http.client.MOVED_PERMANENTLY)
 
 
 @docs.route('/developers')
