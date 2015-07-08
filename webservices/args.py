@@ -106,7 +106,7 @@ class IndexValidator(OptionValidator):
         return not value or value in self.exclude
 
 
-def make_sort_args(default=None, multiple=True, validator=None):
+def make_sort_args(default=None, multiple=True, validator=None, default_hide_null=False):
     return {
         'sort': Arg(
             str,
@@ -115,6 +115,11 @@ def make_sort_args(default=None, multiple=True, validator=None):
             default=default,
             validate=validator,
         ),
+        'sort_hide_null': Arg(
+            bool,
+            default=default_hide_null,
+            description='Hide null values on sorted column(s).'
+        )
     }
 
 
