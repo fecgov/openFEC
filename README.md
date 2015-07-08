@@ -6,7 +6,9 @@
 [![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
 ![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)
 
-This is the first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app).
+This is the first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app). 
+
+Our code is [licensed under CC0](https://github.com/18F/openFEC/blob/develop/LICENSE.md), but a few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. [Learn more on FEC.gov.](http://www.fec.gov/pages/brochures/saleuse.shtml)
 
 **Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
 
