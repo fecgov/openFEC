@@ -1,4 +1,3 @@
-drop view if exists ofec_filings_vw;
 drop materialized view if exists ofec_filings_vw_tmp;
 create materialized view ofec_filings_vw_tmp as
 select
