@@ -694,7 +694,7 @@ class BaseAggregate(db.Model):
 
 
 class ScheduleABySize(BaseAggregate):
-    __tablename__ = 'ofec_sched_a_aggregate_size_merged'
+    __tablename__ = 'ofec_sched_a_aggregate_size_merged_mv'
     size = db.Column(db.Integer, primary_key=True)
 
 
