@@ -213,9 +213,9 @@ as the production instance.
 
 #### The Test Data Subset
 
-This repo includes a small subset of the production database (built 2015/05/05) at `data/subset.sql`. To use the test subset for local development:
+This repo includes a small subset of the production database (built 2015/06/30) at `data/subset.dump`. To use the test subset for local development:
 
-    $ psql -f data/subset.sql <dest>
+    $ pg_restore --dbname <dest> data/subset.dump
 
 To build a new test subset, use the `build_test` invoke task:
 
