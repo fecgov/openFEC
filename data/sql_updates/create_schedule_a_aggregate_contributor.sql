@@ -6,6 +6,7 @@ select distinct on (cmte_id, contbr_id, cycle, year)
     row_number() over () as idx,
     cmte_id,
     contbr_id,
+    image_num,
     case
         when filing_form = 'F3X' then null
         else rpt_yr + rpt_yr % 2
@@ -16,7 +17,7 @@ select distinct on (cmte_id, contbr_id, cycle, year)
     end as year,
     contb_aggregate_ytd as total
 from sched_a
-where rpt_yr >= 2011
+where rpt_yr >= :START_YEAR_ITEMIZED
 and contbr_id is not null
 and entity_tp != 'IND'
 order by cmte_id, contbr_id, cycle, year, contb_receipt_dt desc
