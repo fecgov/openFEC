@@ -306,6 +306,7 @@ schedule_a_by_zip = {
 
 schedule_a_by_contributor = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'contributor_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
 }
 
