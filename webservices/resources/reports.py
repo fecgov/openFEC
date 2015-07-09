@@ -42,14 +42,8 @@ def parse_types(types):
     tags=['financial'],
     description=docs.REPORTS,
     path_params=[
+        utils.committee_param,
         {
-            'name': 'committee_id',
-            'in': 'path',
-            'description': docs.COMMITTEE_ID,
-            'type': 'string',
-        },
-        {
-
             'name': 'committee_type',
             'in': 'path',
             'type': 'string',

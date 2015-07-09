@@ -28,14 +28,7 @@ range_fields = [
 @spec.doc(
     tags=['filings'],
     description=docs.FILINGS,
-    path_params=[
-        {
-            'name': 'committee_id',
-            'in': 'path',
-            'description': docs.COMMITTEE_ID,
-            'type': 'string',
-        },
-    ],
+    path_params=[utils.committee_param],
 )
 class FilingsView(Resource):
 
