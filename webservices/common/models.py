@@ -714,6 +714,7 @@ class ScheduleAByContributor(db.Model):
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
     contributor_id = db.Column('contbr_id', db.String, primary_key=True)
     cycle = db.Column(db.Integer, primary_key=True)
+    year = db.Column(db.Integer, primary_key=True)
     total = db.Column(db.Float)
 
 
