@@ -264,7 +264,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         rows = models.ScheduleABySize.query.filter_by(
             cycle=2016,
             committee_id='C12345',
@@ -277,7 +277,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(filing)
         db.session.flush()
         db.session.execute('select update_aggregates()')
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
@@ -296,7 +296,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
@@ -332,7 +332,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(existing)
         # Updated total includes new Schedule A filing and new report
         self.assertEqual(existing.total, total + 75 + 20)
