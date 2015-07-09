@@ -47,7 +47,7 @@ class CommitteeList(Resource):
     @schemas.marshal_with(schemas.CommitteePageSchema())
     def get(self, **kwargs):
         query = self.get_committees(kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=models.Committee)
 
     def get_committees(self, kwargs):
 
@@ -118,7 +118,7 @@ class CommitteeView(Resource):
     @schemas.marshal_with(schemas.CommitteeDetailPageSchema())
     def get(self, committee_id=None, candidate_id=None, **kwargs):
         query = self.get_committee(kwargs, committee_id, candidate_id)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=models.CommitteeDetail)
 
     def get_committee(self, kwargs, committee_id, candidate_id):
 
@@ -166,7 +166,7 @@ class CommitteeHistoryView(Resource):
     @schemas.marshal_with(schemas.CommitteeHistoryPageSchema())
     def get(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
         query = self.get_committee(committee_id, candidate_id, cycle, kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=models.CommitteeHistory)
 
     def get_committee(self, committee_id, candidate_id, cycle, kwargs):
         query = models.CommitteeHistory.query

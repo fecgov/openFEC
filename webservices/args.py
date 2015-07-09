@@ -49,6 +49,13 @@ Natural = functools.partial(Arg, int, validate=_validate_natural)
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
+bool_map = {
+    'true': True,
+    'false': False,
+}
+Bool = functools.partial(Arg, bool, use=lambda v: bool_map.get(v.lower()))
+
+
 class Date(webargs.Arg):
     """Special `Arg` that handles dates and throw an appropriate error for non-date inputs.
     TODO(jmcarp): Find or build a better solution
@@ -115,8 +122,7 @@ def make_sort_args(default=None, multiple=True, validator=None, default_hide_nul
             default=default,
             validate=validator,
         ),
-        'sort_hide_null': Arg(
-            bool,
+        'sort_hide_null': Bool(
             default=default_hide_null,
             description='Hide null values on sorted column(s).'
         )
