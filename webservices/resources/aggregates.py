@@ -1,7 +1,6 @@
 from flask.ext.restful import Resource
 
 from webservices import args
-from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
@@ -10,9 +9,7 @@ from webservices.common import models
 
 @spec.doc(
     tags=['schedules'],
-    path_params=[
-        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
-    ],
+    path_params=[utils.committee_param],
 )
 class ScheduleAAggregateView(Resource):
 

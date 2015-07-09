@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 
+from webservices import docs
 from webservices import paging
 from webservices import sorting
 
@@ -81,3 +82,25 @@ def make_report_pdf_url(image_number):
 
 def make_image_pdf_url(image_number):
     return 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number)
+
+
+committee_param = {
+    'name': 'committee_id',
+    'type': 'string',
+    'in': 'path',
+    'description': docs.COMMITTEE_ID,
+}
+candidate_param = {
+    'name': 'candidate_id',
+    'type': 'string',
+    'in': 'path',
+    'description': docs.CANDIDATE_ID,
+}
+def cycle_param(**kwargs):
+    ret = {
+        'name': 'cycle',
+        'type': 'integer',
+        'in': 'path',
+    }
+    ret.update(kwargs)
+    return ret
