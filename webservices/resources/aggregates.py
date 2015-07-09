@@ -8,6 +8,12 @@ from webservices import schemas
 from webservices.common import models
 
 
+@spec.doc(
+    tags=['schedules'],
+    path_params=[
+        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
+    ],
+)
 class ScheduleAAggregateView(Resource):
 
     model = None
@@ -25,13 +31,7 @@ class ScheduleAAggregateView(Resource):
         return query
 
 
-@spec.doc(
-    tags=['schedules'],
-    description='Schedule A receipts aggregated by contribution size',
-    path_params=[
-        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
-    ],
-)
+@spec.doc(description='Schedule A receipts aggregated by contribution size')
 class ScheduleABySizeView(ScheduleAAggregateView):
 
     model = models.ScheduleABySize
@@ -52,13 +52,7 @@ class ScheduleABySizeView(ScheduleAAggregateView):
         return super(ScheduleABySizeView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(
-    tags=['schedules'],
-    description='Schedule A receipts aggregated by contributor state',
-    path_params=[
-        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
-    ],
-)
+@spec.doc(description='Schedule A receipts aggregated by contributor state')
 class ScheduleAByStateView(ScheduleAAggregateView):
 
     model = models.ScheduleAByState
@@ -79,13 +73,7 @@ class ScheduleAByStateView(ScheduleAAggregateView):
         return super(ScheduleAByStateView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(
-    tags=['schedules'],
-    description='Schedule A receipts aggregated by contributor zip code',
-    path_params=[
-        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
-    ],
-)
+@spec.doc(description='Schedule A receipts aggregated by contributor zip code')
 class ScheduleAByZipView(ScheduleAAggregateView):
 
     model = models.ScheduleAByZip
@@ -107,11 +95,7 @@ class ScheduleAByZipView(ScheduleAAggregateView):
 
 
 @spec.doc(
-    tags=['schedules'],
     description='Schedule A receipts aggregated by contributor ID',
-    path_params=[
-        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
-    ],
 )
 class ScheduleAByContributorView(ScheduleAAggregateView):
 
