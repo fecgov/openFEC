@@ -1,6 +1,8 @@
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
+from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -23,6 +25,13 @@ class ScheduleAAggregateView(Resource):
         return query
 
 
+@spec.doc(
+    tags=['schedules'],
+    description='Schedule A receipts aggregated by contribution size',
+    path_params=[
+        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
+    ],
+)
 class ScheduleABySizeView(ScheduleAAggregateView):
 
     model = models.ScheduleABySize
@@ -43,6 +52,13 @@ class ScheduleABySizeView(ScheduleAAggregateView):
         return super(ScheduleABySizeView, self).get(committee_id=committee_id, **kwargs)
 
 
+@spec.doc(
+    tags=['schedules'],
+    description='Schedule A receipts aggregated by contributor state',
+    path_params=[
+        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
+    ],
+)
 class ScheduleAByStateView(ScheduleAAggregateView):
 
     model = models.ScheduleAByState
@@ -63,6 +79,13 @@ class ScheduleAByStateView(ScheduleAAggregateView):
         return super(ScheduleAByStateView, self).get(committee_id=committee_id, **kwargs)
 
 
+@spec.doc(
+    tags=['schedules'],
+    description='Schedule A receipts aggregated by contributor zip code',
+    path_params=[
+        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
+    ],
+)
 class ScheduleAByZipView(ScheduleAAggregateView):
 
     model = models.ScheduleAByZip
@@ -81,3 +104,30 @@ class ScheduleAByZipView(ScheduleAAggregateView):
     @schemas.marshal_with(schemas.ScheduleAByZipPageSchema())
     def get(self, committee_id=None, **kwargs):
         return super(ScheduleAByZipView, self).get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(
+    tags=['schedules'],
+    description='Schedule A receipts aggregated by contributor ID',
+    path_params=[
+        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
+    ],
+)
+class ScheduleAByContributorView(ScheduleAAggregateView):
+
+    model = models.ScheduleAByContributor
+    fields = [
+        ('cycle', models.ScheduleAByContributor.cycle),
+        ('contributor_id', models.ScheduleAByContributor.contributor_id),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_a_by_contributor)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleAByContributor)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleAByContributorPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super(ScheduleAByContributorView, self).get(committee_id=committee_id, **kwargs)

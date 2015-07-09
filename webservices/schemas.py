@@ -267,17 +267,21 @@ make_aggregate_schema = functools.partial(
 ScheduleABySizeSchema = make_aggregate_schema(models.ScheduleABySize)
 ScheduleAByStateSchema = make_aggregate_schema(models.ScheduleAByState)
 ScheduleAByZipSchema = make_aggregate_schema(models.ScheduleAByZip)
+ScheduleAByContributorSchema = make_aggregate_schema(models.ScheduleAByContributor)
 
 ScheduleABySizePageSchema = make_page_schema(ScheduleABySizeSchema)
 ScheduleAByStatePageSchema = make_page_schema(ScheduleAByStateSchema)
 ScheduleAByZipPageSchema = make_page_schema(ScheduleAByZipSchema)
+ScheduleAByContributorPageSchema = make_page_schema(ScheduleAByContributorSchema)
 
 register_schema(ScheduleABySizeSchema)
 register_schema(ScheduleAByStateSchema)
 register_schema(ScheduleAByZipSchema)
+register_schema(ScheduleAByContributorSchema)
 register_schema(ScheduleABySizePageSchema)
 register_schema(ScheduleAByStatePageSchema)
 register_schema(ScheduleAByZipPageSchema)
+register_schema(ScheduleAByContributorPageSchema)
 
 
 ScheduleBSchema = make_schema(
