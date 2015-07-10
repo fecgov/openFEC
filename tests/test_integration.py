@@ -213,6 +213,24 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
 
+    def test_update_aggregate_state_existing_null_amount(self):
+        existing = models.ScheduleAByState.query.filter_by(
+            cycle=2016,
+        ).first()
+        total = existing.total
+        count = existing.count
+        factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id=existing.committee_id,
+            contributor_state=existing.state,
+            contributor_receipt_amount=None,
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(existing)
+        self.assertEqual(existing.total, total)
+        self.assertEqual(existing.count, count)
+
     def test_update_aggregate_zip_create(self):
         filing = factories.ScheduleAFactory(
             report_year=2015,
