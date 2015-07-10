@@ -91,18 +91,8 @@ class CommitteeList(Resource):
     tags=['committee'],
     description=docs.COMMITTEE_DETAIL,
     path_params=[
-        {
-            'name': 'candidate_id',
-            'type': 'string',
-            'in': 'path',
-            'description': docs.CANDIDATE_ID,
-        },
-        {
-            'name': 'committee_id',
-            'type': 'string',
-            'in': 'path',
-            'description': docs.COMMITTEE_ID,
-        },
+        utils.candidate_param,
+        utils.committee_param,
     ],
 )
 class CommitteeView(Resource):
@@ -149,9 +139,9 @@ class CommitteeView(Resource):
     tags=['committee'],
     description=docs.COMMITTEE_HISTORY,
     path_params=[
-        {'name': 'committee_id', 'description': docs.COMMITTEE_ID, 'in': 'path', 'type': 'string'},
-        {'name': 'candidate_id', 'description': docs.CANDIDATE_ID, 'in': 'path', 'type': 'string'},
-        {'name': 'cycle', 'description': docs.COMMITTEE_CYCLE, 'in': 'path', 'type': 'integer'},
+        utils.candidate_param,
+        utils.committee_param,
+        utils.cycle_param(description=docs.COMMITTEE_CYCLE),
     ],
 )
 class CommitteeHistoryView(Resource):
