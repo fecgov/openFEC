@@ -18,7 +18,7 @@ class ScheduleAAggregateView(Resource):
 
     def get(self, committee_id=None, **kwargs):
         query = self._build_query(committee_id, kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=self.model)
 
     def _build_query(self, committee_id, kwargs):
         query = self.model.query

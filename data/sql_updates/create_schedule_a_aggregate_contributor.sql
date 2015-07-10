@@ -6,6 +6,7 @@ select distinct on (cmte_id, contbr_id, cycle, year)
     row_number() over () as idx,
     cmte_id,
     contbr_id,
+    contbr_nm,
     image_num,
     case
         when filing_form = 'F3X' then null
