@@ -47,7 +47,7 @@ class TotalsView(Resource):
         for key in kwargs['sort']:
             validator(key)
         totals = self.get_totals(committee_id, totals_class, kwargs)
-        page = utils.fetch_page(totals, kwargs)
+        page = utils.fetch_page(totals, kwargs, model=totals_class)
         return totals_schema().dump(page).data
 
     def get_totals(self, committee_id, totals_class, kwargs):

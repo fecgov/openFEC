@@ -28,7 +28,16 @@ def ensure_list(value):
     return []
 
 
-def sort(query, options, model=None, clear=False):
+def sort(query, options, model, clear=False, hide_null=False):
+    """Sort query using string-formatted columns.
+
+    :param query: Original query
+    :param options: String or list of strings of column names; prepend with "-"
+        for descending sort
+    :param model: SQLAlchemy model
+    :param clear: Clear existing sort conditions
+    :param hide_null: Exclude null values on sorted column(s)
+    """
     if clear:
         query = query.order_by(False)
     options = ensure_list(options)
@@ -36,5 +45,7 @@ def sort(query, options, model=None, clear=False):
     for option in options:
         column, order = parse_option(option, model=model)
         query = query.order_by(order(column))
+        if hide_null:
+            query = query.filter(column != None)  # noqa
         columns.append((column, order))
     return query, columns
