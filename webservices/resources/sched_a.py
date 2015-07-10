@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from webservices import args
 from webservices import docs
 from webservices import spec
+from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ItemizedResource
@@ -60,14 +61,7 @@ class ScheduleAView(ItemizedResource):
         query = super(ScheduleAView, self).build_query(kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
-        query = self.filter_contributor_type(query, kwargs)
-        return query
-
-    def filter_contributor_type(self, query, kwargs):
-        if kwargs['contributor_type'] == ['individual']:
-            query = query.filter(self.model.contributor_id == None)  # noqa
-        elif kwargs['contributor_type'] == ['committee']:
-            query = query.filter(self.model.contributor_id != None)  # noqa
+        query =  utils.filter_contributor_type(query, self.model.line_number, kwargs)
         return query
 
     def join_fulltext(self, query):

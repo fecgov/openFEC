@@ -75,6 +75,15 @@ def filter_range(query, kwargs, fields):
     return query
 
 
+INDIVIDUAL_LINE_NUMBERS = ['11AI', '17A', '17C']
+def filter_contributor_type(query, column, kwargs):
+    if kwargs['contributor_type'] == ['individual']:
+        return query.filter(column.in_(INDIVIDUAL_LINE_NUMBERS))
+    if kwargs['contributor_type'] == ['committee']:
+        return query.filter(sa.not_(column.in_(INDIVIDUAL_LINE_NUMBERS)))
+    return query
+
+
 def make_report_pdf_url(image_number):
     return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
         str(image_number)[-3:],
