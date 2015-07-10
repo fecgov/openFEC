@@ -184,7 +184,7 @@ class CandidateHistoryView(Resource):
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
     def get(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
         query = self.get_candidate(candidate_id, committee_id, cycle, kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=models.CandidateHistory)
 
     def get_candidate(self, candidate_id, committee_id, cycle, kwargs):
         query = models.CandidateHistory.query
