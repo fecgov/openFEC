@@ -22,15 +22,7 @@ default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPar
 @spec.doc(
     tags=['financial'],
     description=docs.TOTALS,
-    path_params=[
-        {'name': 'id', 'in': 'path', 'type': 'string'},
-        {
-            'name': 'committee_id',
-            'in': 'path',
-            'description': docs.COMMITTEE_ID,
-            'type': 'string',
-        },
-    ],
+    path_params=[utils.committee_param],
 )
 class TotalsView(Resource):
 

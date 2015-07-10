@@ -9,12 +9,14 @@ create index on sched_a (contbr_city) where rpt_yr >= :START_YEAR_ITEMIZED;
 -- Create composite indices on sortable columns
 create index on sched_a (contb_receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (contb_aggregate_ytd, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create composite indices on `cmte_id`; else filtering by committee can be very slow
 -- TODO(jmcarp) Find a better solution
 create index on sched_a (cmte_id, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (cmte_id, contb_receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (cmte_id, contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on sched_a (cmte_id, contb_aggregate_ytd, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create Schedule A fulltext table
 drop table if exists ofec_sched_a_fulltext;

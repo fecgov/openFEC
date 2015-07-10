@@ -27,6 +27,10 @@ RECORD_CYCLE = '''
 Filter records to only those that were applicable to a given two-year period.
 '''
 
+RECORD_YEAR = '''
+Filter records to only those that were applicable to a given year.
+'''
+
 # committee uses a different definition for cycle because it is less straight forward
 CYCLE = '''
 Filter records to only those that are applicable to a given two-year period.
