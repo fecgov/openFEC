@@ -46,10 +46,11 @@ class TestViews(common.IntegrationTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestViews, cls).setUpClass()
-        manage.update_schemas(processes=1)
+        manage.update_functions(processes=1)
         manage.update_schedule_a()
         manage.update_schedule_b()
         manage.update_aggregates(processes=1)
+        manage.update_schemas(processes=1)
 
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():
@@ -212,6 +213,24 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
 
+    def test_update_aggregate_state_existing_null_amount(self):
+        existing = models.ScheduleAByState.query.filter_by(
+            cycle=2016,
+        ).first()
+        total = existing.total
+        count = existing.count
+        factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id=existing.committee_id,
+            contributor_state=existing.state,
+            contributor_receipt_amount=None,
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(existing)
+        self.assertEqual(existing.total, total)
+        self.assertEqual(existing.count, count)
+
     def test_update_aggregate_zip_create(self):
         filing = factories.ScheduleAFactory(
             report_year=2015,
@@ -263,6 +282,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         rows = models.ScheduleABySize.query.filter_by(
             cycle=2016,
             committee_id='C12345',
@@ -275,6 +295,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(filing)
         db.session.flush()
         db.session.execute('select update_aggregates()')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
@@ -293,6 +314,44 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
+
+    def test_update_aggregate_size_existing_merged(self):
+        existing = models.ScheduleABySize.query.filter_by(
+            size=0,
+            cycle=2016,
+        ).first()
+        total = existing.total
+        factories.ScheduleAFactory(
+            report_year=2015,
+            committee_id=existing.committee_id,
+            contributor_receipt_amount=75,
+        )
+        # Create a committee and committee report
+        dc = sa.Table('dimcmte', db.metadata, autoload=True, autoload_with=db.engine)
+        ins = dc.insert().values(
+            cmte_sk=7,
+            cmte_id=existing.committee_id,
+            load_date=datetime.datetime.now(),
+        )
+        db.session.execute(ins)
+        rep = sa.Table('facthousesenate_f3', db.metadata, autoload=True, autoload_with=db.engine)
+        ins = rep.insert().values(
+            cmte_sk=7,
+            indv_unitem_contb_per=20,
+            facthousesenate_f3_sk=3,
+            two_yr_period_sk=2016,
+            load_date=datetime.datetime.now(),
+        )
+        db.session.execute(ins)
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        db.session.refresh(existing)
+        # Updated total includes new Schedule A filing and new report
+        self.assertEqual(existing.total, total + 75 + 20)
+        self.assertEqual(existing.count, None)
