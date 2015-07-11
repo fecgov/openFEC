@@ -125,6 +125,13 @@ and cache responses for the specified interval, such that repeated requests to a
 endpoint will only reach the Flask application once. This means that responses may be
 stale for up to an hour following the nightly refresh of the materialized views.
 
+#### API Umbrella
+
+The staging and production environments use the [API Umbrella](http://apiumbrella.io) for
+rate limiting, authentication, caching, and HTTPS termination and redirection. Both
+environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
+through the API Umbrella.
+
 #### Git-flow and continuous deployment
 
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed
@@ -210,7 +217,7 @@ as the production instance.
 #### Creating a new test database
 
     $ createdb cfdm_test
-    $ pg_restore --dbname <dest> data/subset.dump
+    $ pg_restore --dbname cfdm_test data/subset.dump
     $ ./manage.py update_all
 
 #### Running the Tests
