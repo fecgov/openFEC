@@ -210,8 +210,8 @@ as the production instance.
 #### Creating a new test database
 
     $ createdb cfdm_test
-    $ psql -f data/subset.sql cfdm_test
-    $ ./manage.py update_schemas
+    $ pg_restore --dbname <dest> data/subset.dump
+    $ ./manage.py update_all
 
 #### Running the Tests
 
