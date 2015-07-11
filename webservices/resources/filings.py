@@ -5,6 +5,7 @@ from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices.common import counts
 from webservices.common import models
 from webservices.common.util import filter_query
 
@@ -41,9 +42,10 @@ class FilingsView(Resource):
     )
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, committee_id=None, **kwargs):
-        filings = models.Filings.query
-        filings = filings.filter_by(committee_id=committee_id)
-        return utils.fetch_page(filings, kwargs, model=models.Filings)
+        query = models.Filings.query
+        query = query.filter_by(committee_id=committee_id)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=models.Filings, count=count)
 
 
 @spec.doc(
@@ -65,4 +67,5 @@ class FilingsList(Resource):
         query = models.Filings.query
         query = filter_query(models.Filings, query, fields, kwargs)
         query = utils.filter_range(query, kwargs, range_fields)
-        return utils.fetch_page(query, kwargs, model=models.Filings)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=models.Filings, count=count)
