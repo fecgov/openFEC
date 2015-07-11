@@ -798,7 +798,7 @@ class ScheduleBSearch(db.Model):
 
 
 class Filings(db.Model):
-    __tablename__ = 'ofec_filings_vw'
+    __tablename__ = 'ofec_filings_mv'
 
     committee_id = db.Column(db.String, index=True)
     committee_name = db.Column(db.String)
