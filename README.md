@@ -217,7 +217,7 @@ as the production instance.
 #### Creating a new test database
 
     $ createdb cfdm_test
-    $ pg_restore --dbname <dest> data/subset.dump
+    $ pg_restore --dbname cfdm_test data/subset.dump
     $ ./manage.py update_all
 
 #### Running the Tests
