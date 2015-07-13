@@ -110,6 +110,7 @@ create index on ofec_candidate_detail_mv_tmp(state);
 create index on ofec_candidate_detail_mv_tmp(office);
 create index on ofec_candidate_detail_mv_tmp(district);
 create index on ofec_candidate_detail_mv_tmp(load_date);
+create index on ofec_candidate_detail_mv_tmp(party_full);
 create index on ofec_candidate_detail_mv_tmp(expire_date);
 create index on ofec_candidate_detail_mv_tmp(candidate_id);
 create index on ofec_candidate_detail_mv_tmp(candidate_key);
