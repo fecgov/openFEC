@@ -11,7 +11,7 @@ end
 $$ language plpgsql;
 
 -- Create initial aggregate
-drop table if exists ofec_sched_a_aggregate_size;
+drop table if exists ofec_sched_a_aggregate_size cascade;
 create table ofec_sched_a_aggregate_size as
 select
     cmte_id,
