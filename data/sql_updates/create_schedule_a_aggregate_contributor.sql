@@ -8,6 +8,7 @@ select distinct on (cmte_id, contbr_id, cycle, year)
     contbr_id,
     contbr_nm,
     image_num,
+    line_num,
     case
         when filing_form = 'F3X' then null
         else rpt_yr + rpt_yr % 2
