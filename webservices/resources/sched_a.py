@@ -49,7 +49,11 @@ class ScheduleAView(ItemizedResource):
     @args.register_kwargs(args.make_seek_args())
     @args.register_kwargs(
         args.make_sort_args(
-            validator=args.OptionValidator(['contributor_receipt_date', 'contributor_receipt_amount']),
+            validator=args.OptionValidator([
+                'contributor_receipt_date',
+                'contributor_receipt_amount',
+                'contributor_aggregate_ytd',
+            ]),
             multiple=False,
         )
     )
@@ -61,7 +65,7 @@ class ScheduleAView(ItemizedResource):
         query = super(ScheduleAView, self).build_query(kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
-        query =  utils.filter_contributor_type(query, self.model.line_number, kwargs)
+        query = utils.filter_contributor_type(query, self.model.entity_type, kwargs)
         return query
 
     def join_fulltext(self, query):

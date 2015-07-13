@@ -112,8 +112,3 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
     @schemas.marshal_with(schemas.ScheduleAByContributorPageSchema())
     def get(self, committee_id=None, **kwargs):
         return super(ScheduleAByContributorView, self).get(committee_id=committee_id, **kwargs)
-
-    def _build_query(self, committee_id, kwargs):
-        query = super(ScheduleAByContributorView, self)._build_query(committee_id, kwargs)
-        query = utils.filter_contributor_type(query, self.model.line_number, kwargs)
-        return query
