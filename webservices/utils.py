@@ -75,12 +75,11 @@ def filter_range(query, kwargs, fields):
     return query
 
 
-INDIVIDUAL_LINE_NUMBERS = ['11AI', '17A', '17C']
 def filter_contributor_type(query, column, kwargs):
     if kwargs['contributor_type'] == ['individual']:
-        return query.filter(column.in_(INDIVIDUAL_LINE_NUMBERS))
+        return query.filter(column == 'IND')
     if kwargs['contributor_type'] == ['committee']:
-        return query.filter(sa.not_(column.in_(INDIVIDUAL_LINE_NUMBERS)))
+        return query.filter(column != 'IND')
     return query
 
 

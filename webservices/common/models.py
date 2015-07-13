@@ -717,7 +717,6 @@ class ScheduleAByContributor(db.Model):
     year = db.Column(db.Integer, primary_key=True, nullable=True)
     contributor_name = db.Column('contbr_nm', db.String)
     image_number = db.Column('image_num', db.String)
-    line_number = db.Column('line_num', db.String)
     total = db.Column(db.Float)
 
 
