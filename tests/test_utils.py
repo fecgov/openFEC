@@ -48,41 +48,53 @@ class TestSort(ApiBaseTest):
 
 class TestFilter(ApiBaseTest):
 
+    params = (
+        (models.ScheduleA, factories.ScheduleAFactory),
+        (models.ScheduleAByContributor, factories.ScheduleAByContributorFactory),
+    )
     def setUp(self):
         super(TestFilter, self).setUp()
-        self.receipts = [
-            factories.ScheduleAFactory(line_number='11AI'),
-            factories.ScheduleAFactory(line_number='17A'),
-            factories.ScheduleAFactory(line_number='17C'),
-            factories.ScheduleAFactory(line_number='11C'),
-        ]
+        self.receipts = {}
+        for model, factory in self.params:
+            self.receipts[model] = [
+                factory(line_number='11AI'),
+                factory(line_number='17A'),
+                factory(line_number='17C'),
+                factory(line_number='11C'),
+            ]
 
     def test_filter_contributor_type_individual(self):
-        query = utils.filter_contributor_type(
-            models.ScheduleA.query,
-            models.ScheduleA.line_number,
-            {'contributor_type': ['individual']},
-        )
-        self.assertEqual(
-            set(query.all()),
-            set(each for each in self.receipts if each.line_number in ['11AI', '17A', '17C'])
-        )
+        for model, factory in self.params:
+            query = utils.filter_contributor_type(
+                model.query,
+                model.line_number,
+                {'contributor_type': ['individual']},
+            )
+            with self.subTest(model=model):
+                self.assertEqual(
+                    set(query.all()),
+                    set(each for each in self.receipts[model] if each.line_number in ['11AI', '17A', '17C'])
+                )
 
     def test_filter_contributor_type_committee(self):
-        query = utils.filter_contributor_type(
-            models.ScheduleA.query,
-            models.ScheduleA.line_number,
-            {'contributor_type': ['committee']},
-        )
-        self.assertEqual(
-            set(query.all()),
-            set(each for each in self.receipts if each.line_number not in ['11AI', '17A', '17C'])
-        )
+        for model, factory in self.params:
+            query = utils.filter_contributor_type(
+                model.query,
+                model.line_number,
+                {'contributor_type': ['committee']},
+            )
+            with self.subTest(model=model):
+                self.assertEqual(
+                    set(query.all()),
+                    set(each for each in self.receipts[model] if each.line_number not in ['11AI', '17A', '17C'])
+                )
 
     def test_filter_contributor_type_none(self):
-        query = utils.filter_contributor_type(
-            models.ScheduleA.query,
-            models.ScheduleA.line_number,
-            {'contributor_type': ['individual', 'committee']},
-        )
-        self.assertEqual(set(query.all()), set(self.receipts))
+        for model, factory in self.params:
+            query = utils.filter_contributor_type(
+                model.query,
+                model.line_number,
+                {'contributor_type': ['individual', 'committee']},
+            )
+            with self.subTest(model=model):
+                self.assertEqual(set(query.all()), set(self.receipts[model]))
