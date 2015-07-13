@@ -109,6 +109,7 @@ def update_aggregates(processes=2):
 def update_all(processes=2):
     """Update all derived data. Warning: Extremely slow on production data.
     """
+    processes = int(processes)
     update_functions(processes=processes)
     update_schedule_a()
     update_schedule_b()
