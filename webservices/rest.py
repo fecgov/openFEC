@@ -80,6 +80,9 @@ FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
 
 @app.before_request
 def limit_remote_addr():
+    """If `FEC_API_WHITELIST_IPS` is set, reject all requests that are not
+    routed through the API Umbrella.
+    """
     falses = (False, 'False', 'false', 'f')
     if FEC_API_WHITELIST_IPS not in falses:
         try:
