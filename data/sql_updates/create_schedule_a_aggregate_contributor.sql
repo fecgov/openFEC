@@ -21,6 +21,7 @@ from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 and contbr_id is not null
 and entity_tp != 'IND'
+and memo_cd != 'X'
 order by cmte_id, contbr_id, cycle, year, contb_receipt_dt desc
 ;
 
