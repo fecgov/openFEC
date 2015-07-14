@@ -1,7 +1,7 @@
 create or replace function contribution_size(value numeric) returns int as $$
 begin
     return case
-        when abs(value) < 200 then 0
+        when abs(value) <= 200 then 0
         when abs(value) < 500 then 200
         when abs(value) < 1000 then 500
         when abs(value) < 2000 then 1000
