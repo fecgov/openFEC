@@ -4,6 +4,7 @@ from webservices import args
 from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices.common import counts
 from webservices.common import models
 
 
@@ -109,7 +110,9 @@ class ScheduleAByEmployerView(ScheduleAAggregateView):
     )
     @schemas.marshal_with(schemas.ScheduleAByEmployerPageSchema())
     def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
+        query = self._build_query(committee_id, kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
 
 @spec.doc(description='Schedule A receipts aggregated by contributor occupation')
@@ -130,7 +133,9 @@ class ScheduleAByOccupationView(ScheduleAAggregateView):
     )
     @schemas.marshal_with(schemas.ScheduleAByOccupationPageSchema())
     def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
+        query = self._build_query(committee_id, kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
 
 @spec.doc(description='Schedule A receipts aggregated by contributor ID')
