@@ -46,6 +46,7 @@ def _validate_natural(value):
 Natural = functools.partial(Arg, int, validate=_validate_natural)
 
 
+Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
@@ -276,8 +277,8 @@ itemized = {
     ),
     'min_image_number': Arg(str),
     'max_image_number': Arg(str),
-    'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
-    'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': Date(),
     'max_date': Date(),
 }

@@ -11,7 +11,7 @@ end
 $$ language plpgsql;
 
 -- Create initial aggregate
-drop table if exists ofec_sched_a_aggregate_size;
+drop table if exists ofec_sched_a_aggregate_size cascade;
 create table ofec_sched_a_aggregate_size as
 select
     cmte_id,
@@ -22,6 +22,7 @@ select
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 and contb_receipt_amt is not null
+and (memo_cd != 'X' or memo_cd is null)
 group by cmte_id, cycle, size
 ;
 
@@ -44,6 +45,7 @@ begin
             count(contb_receipt_amt) as count
         from ofec_sched_a_queue_new
         where contb_receipt_amt is not null
+        and (memo_cd != 'X' or memo_cd is null)
         group by cmte_id, cycle, size
     ),
     old as (
@@ -55,6 +57,7 @@ begin
             -1 * count(contb_receipt_amt) as count
         from ofec_sched_a_queue_old
         where contb_receipt_amt is not null
+        and (memo_cd != 'X' or memo_cd is null)
         group by cmte_id, cycle, size
     ),
     patch as (

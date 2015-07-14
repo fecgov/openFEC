@@ -106,6 +106,18 @@ def update_aggregates(processes=2):
 
 
 @manager.command
+def update_all(processes=2):
+    """Update all derived data. Warning: Extremely slow on production data.
+    """
+    processes = int(processes)
+    update_functions(processes=processes)
+    update_schedule_a()
+    update_schedule_b()
+    update_aggregates(processes=processes)
+    update_schemas(processes=processes)
+
+
+@manager.command
 def list_routes():
     output = []
     for rule in app.url_map.iter_rules():
