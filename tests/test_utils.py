@@ -1,7 +1,14 @@
+import unittest
+
+from flask import request
+from webargs import flaskparser
+
 from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices import utils
+from webservices import args
+from webservices import rest
 from webservices import sorting
 from webservices.common import models
 
@@ -86,3 +93,11 @@ class TestFilter(ApiBaseTest):
             {'contributor_type': ['individual', 'committee']},
         )
         self.assertEqual(set(query.all()), set(self.receipts))
+
+
+class TestArgs(unittest.TestCase):
+
+    def test_currency(self):
+        with rest.app.test_request_context('?dollars=$24.50'):
+            parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request)
+            self.assertEqual(parsed, {'dollars': 24.50})
