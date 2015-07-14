@@ -9,7 +9,11 @@ from webservices import __API_VERSION__
 spec = APISpec(
     title='OpenFEC',
     version=__API_VERSION__,
-    info={'description': docs.DESCRIPTION},
+    info={
+        'description': docs.DESCRIPTION,
+        'license': 'https://github.com/18F/openFEC/blob/develop/LICENSE.md',
+        'contact': {'url': 'https://github.com/18F/openFEC/issues'},
+        },
     basePath='/v1',
     produces=['application/json'],
     plugins=['smore.ext.marshmallow'],
