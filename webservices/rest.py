@@ -197,6 +197,16 @@ api.add_resource(
     '/committee/<committee_id>/schedules/schedule_a/by_zip',
 )
 api.add_resource(
+    aggregates.ScheduleAByEmployerView,
+    '/schedules/schedule_a/by_employer',
+    '/committee/<committee_id>/schedules/schedule_a/by_employer',
+)
+api.add_resource(
+    aggregates.ScheduleAByOccupationView,
+    '/schedules/schedule_a/by_occupation',
+    '/committee/<committee_id>/schedules/schedule_a/by_occupation',
+)
+api.add_resource(
     aggregates.ScheduleAByContributorView,
     '/schedules/schedule_a/by_contributor',
     '/committee/<committee_id>/schedules/schedule_a/by_contributor',
