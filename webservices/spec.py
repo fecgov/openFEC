@@ -11,8 +11,6 @@ spec = APISpec(
     version=__API_VERSION__,
     info={
         'description': docs.DESCRIPTION,
-        'license': 'https://github.com/18F/openFEC/blob/develop/LICENSE.md',
-        'contact': {'url': 'https://github.com/18F/openFEC/issues'},
         },
     basePath='/v1',
     produces=['application/json'],
