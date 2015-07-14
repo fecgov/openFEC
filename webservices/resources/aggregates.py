@@ -91,9 +91,49 @@ class ScheduleAByZipView(ScheduleAAggregateView):
         return super(ScheduleAByZipView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(
-    description='Schedule A receipts aggregated by contributor ID',
-)
+@spec.doc(description='Schedule A receipts aggregated by contributor zip code')
+class ScheduleAByEmployerView(ScheduleAAggregateView):
+
+    model = models.ScheduleAByEmployer
+    fields = [
+        ('cycle', models.ScheduleAByEmployer.cycle),
+        ('employer', models.ScheduleAByEmployer.employer),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_a_by_employer)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleAByEmployer)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleAByEmployerPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(description='Schedule A receipts aggregated by contributor occupation')
+class ScheduleAByOccupationView(ScheduleAAggregateView):
+
+    model = models.ScheduleAByZip
+    fields = [
+        ('cycle', models.ScheduleAByOccupation.cycle),
+        ('occupation', models.ScheduleAByOccupation.occupation),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_a_by_employer)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleAByOccupation)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleAByOccupationPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(description='Schedule A receipts aggregated by contributor ID')
 class ScheduleAByContributorView(ScheduleAAggregateView):
 
     model = models.ScheduleAByContributor

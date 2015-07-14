@@ -316,6 +316,18 @@ schedule_a_by_zip = {
 }
 
 
+schedule_a_by_employer = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'employer': Arg(str, multiple=True, description='Employer'),
+}
+
+
+schedule_a_by_occupation = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'occupation': Arg(str, multiple=True, description='Occupation'),
+}
+
+
 schedule_a_by_contributor = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
