@@ -267,20 +267,28 @@ make_aggregate_schema = functools.partial(
 ScheduleABySizeSchema = make_aggregate_schema(models.ScheduleABySize)
 ScheduleAByStateSchema = make_aggregate_schema(models.ScheduleAByState)
 ScheduleAByZipSchema = make_aggregate_schema(models.ScheduleAByZip)
+ScheduleAByEmployerSchema = make_aggregate_schema(models.ScheduleAByEmployer)
+ScheduleAByOccupationSchema = make_aggregate_schema(models.ScheduleAByOccupation)
 ScheduleAByContributorSchema = make_aggregate_schema(models.ScheduleAByContributor)
 
 ScheduleABySizePageSchema = make_page_schema(ScheduleABySizeSchema)
 ScheduleAByStatePageSchema = make_page_schema(ScheduleAByStateSchema)
 ScheduleAByZipPageSchema = make_page_schema(ScheduleAByZipSchema)
+ScheduleAByEmployerPageSchema = make_page_schema(ScheduleAByEmployerSchema)
+ScheduleAByOccupationPageSchema = make_page_schema(ScheduleAByOccupationSchema)
 ScheduleAByContributorPageSchema = make_page_schema(ScheduleAByContributorSchema)
 
 register_schema(ScheduleABySizeSchema)
 register_schema(ScheduleAByStateSchema)
 register_schema(ScheduleAByZipSchema)
+register_schema(ScheduleAByEmployerSchema)
+register_schema(ScheduleAByOccupationSchema)
 register_schema(ScheduleAByContributorSchema)
 register_schema(ScheduleABySizePageSchema)
 register_schema(ScheduleAByStatePageSchema)
 register_schema(ScheduleAByZipPageSchema)
+register_schema(ScheduleAByEmployerPageSchema)
+register_schema(ScheduleAByOccupationPageSchema)
 register_schema(ScheduleAByContributorPageSchema)
 
 
