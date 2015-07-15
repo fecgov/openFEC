@@ -299,8 +299,7 @@ schedule_a = {
 
 schedule_a_by_size = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    # add choices
-    'size': Arg(int, multiple=True),
+    'size': Arg(int, multiple=True, enum=[0, 200, 500, 1000, 2000], description=docs.SIZE),
 }
 
 
