@@ -47,23 +47,23 @@ Election Commission (FEC) data is still the
 versioning any changes that are not backwards compatible, expect things to change as the API
 develops.
 
-The FEC API is a RESTful web service supporting full-text and field-specific searches on
-FEC data.This API allows you to explore the vast array of campaign finance data that the FEC
-collects. Each endpoint focuses on a different aspect of disclosure. Information is tied to
+The FEC API is a RESTful web service supporting full-text and field-specific searches of
+FEC data. Each endpoint focuses on a different aspect of disclosure. Information is tied to
 the underlying forms by file ID and image ID.
 
-There is a lot of data, but a good place to start exploring, is using search to find
-interesting candidates and committees and then, looking up report or line item details
+There is a lot of data, but a good place to start exploring is using search to find
+interesting candidates and committees and then looking up report or line item details
 using IDs on the other endpoints. If you are interested in individual donors, check
-out contributor information in schedule_a.
+out contributor information in schedule_a. A few restrictions limit the way you can
+use FEC data. For example, you can’t use contributorn lists for commercial purposes or
+to solicit donations. [Learn more here](http://www.fec.gov/pages/brochures/saleuse.shtml).
 
-A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
-lists for commercial purposes or to solicit donations.
-[Learn more here](http://www.fec.gov/pages/brochures/saleuse.shtml).
+[View our source code](https://github.com/18F/openFEC). We welcome issues and pull
+requests! You can also discuss the data in the
+[FEC data google group](https://groups.google.com/forum/#!forum/fec-data) or post questions
+to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec).
 
-[View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
-
-Get an [API key here](https://api.data.gov/signup/)!
+Get an [API key here](https://api.data.gov/signup/)! Or you can use DEMO_KEY.
 
 Base URL: https://api.open.fec.gov/v1
 '''
