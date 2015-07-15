@@ -48,7 +48,7 @@ develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data.This API allows you to explore the vast array of campaign finance data that the FEC
-collects. Each endpoint focuses on a different aspectof disclosure. Information is tied to
+collects. Each endpoint focuses on a different aspect of disclosure. Information is tied to
 the underlying forms by file ID and image ID.
 
 There is a lot of data, but a good place to start exploring, is using search to find
@@ -58,9 +58,9 @@ out contributor information in schedule_a.
 
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
 
-Get an [API key here]!(https://api.data.gov/signup/)
+Get an [API key here](https://api.data.gov/signup/)!
 
-base url: open.fec.gov/v1/
+Base URL: https://api.open.fec.gov/v1
 '''
 
 CANDIDATE_TAG = '''
@@ -217,7 +217,7 @@ reported by committees that file F3, F3X and F3P forms.
 
 Contributions $200 and under are not required to be itemized, but you can find the total
 amount of these small donations by looking up the "unitemized" field in the `/reports`
-or '/totals endpoints.
+or `/totals` endpoints.
 
 When comparing the totals from reports to line items. the totals will not match unless you
 take out items where `"memo_code":'X'`. Memoed items are subtotals of receipts that are
@@ -284,7 +284,7 @@ For the Schedule A aggregates, "memoed" items are not included to avoid double c
 Schedule B explains how money is spent.
 '''
 
-SIZE_DESCRIPTION='''
+SIZE_DESCRIPTION = '''
 This endpoint aggregates Schedule A donations based on size:
 
  - $200 and under
