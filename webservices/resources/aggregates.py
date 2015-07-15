@@ -139,14 +139,14 @@ class ScheduleAByEmployerView(ScheduleAAggregateView):
 )
 class ScheduleAByOccupationView(ScheduleAAggregateView):
 
-    model = models.ScheduleAByZip
+    model = models.ScheduleAByOccupation
     fields = [
         ('cycle', models.ScheduleAByOccupation.cycle),
         ('occupation', models.ScheduleAByOccupation.occupation),
     ]
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_employer)
+    @args.register_kwargs(args.schedule_a_by_occupation)
     @args.register_kwargs(
         args.make_sort_args(
             validator=args.IndexValidator(models.ScheduleAByOccupation)
