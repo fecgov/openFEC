@@ -4,6 +4,7 @@ begin
     perform ofec_sched_a_update_aggregate_zip();
     perform ofec_sched_a_update_aggregate_state();
     perform ofec_sched_a_update_aggregate_size();
+    perform ofec_sched_b_update_aggregate_purpose();
 
     -- Update full-text tables in place
     perform ofec_sched_a_update_fulltext();
@@ -12,5 +13,7 @@ begin
     -- Clear queue tables
     delete from ofec_sched_a_queue_new;
     delete from ofec_sched_a_queue_old;
+    delete from ofec_sched_b_queue_new;
+    delete from ofec_sched_b_queue_old;
 end
 $$ language plpgsql;

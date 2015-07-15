@@ -138,6 +138,7 @@ class ScheduleBFactory(BaseFactory):
     class Meta:
         model = models.ScheduleB
     sched_b_sk = factory.Sequence(lambda n: n)
+    load_date = datetime.datetime.utcnow()
     report_year = 2016
 
 
