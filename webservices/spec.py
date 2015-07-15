@@ -9,9 +9,7 @@ from webservices import __API_VERSION__
 spec = APISpec(
     title='OpenFEC',
     version=__API_VERSION__,
-    info={
-        'description': docs.DESCRIPTION,
-        },
+    info={'description': docs.DESCRIPTION},
     basePath='/v1',
     produces=['application/json'],
     plugins=['smore.ext.marshmallow'],
@@ -22,9 +20,7 @@ spec = APISpec(
             'in': 'query',
         },
     },
-    security=[
-        {'apiKey': []},
-    ],
+    security=[{'apiKey': []}],
     tags=[
         {
             'name': 'candidate',
