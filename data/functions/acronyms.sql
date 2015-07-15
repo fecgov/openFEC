@@ -77,3 +77,68 @@ returns text as $$
         end;
     end
 $$ language plpgsql;
+
+create or replace function expand_state(acronym text)
+returns text as $$
+    begin
+        return case acronym
+            when 'AK' then 'Alaska'
+            when 'AL' then 'Alabama'
+            when 'AS' then 'American Samoa'
+            when 'AR' then 'Arkansas'
+            when 'AZ' then 'Arizona'
+            when 'CA' then 'California'
+            when 'CO' then 'Colorado'
+            when 'CT' then 'Connecticut'
+            when 'DC' then 'District Of Columbia'
+            when 'DE' then 'Delaware'
+            when 'FL' then 'Florida'
+            when 'GA' then 'Georgia'
+            when 'GU' then 'Guam'
+            when 'HI' then 'Hawaii'
+            when 'IA' then 'Iowa'
+            when 'ID' then 'Idaho'
+            when 'IL' then 'Illinois'
+            when 'IN' then 'Indiana'
+            when 'KS' then 'Kansas'
+            when 'KY' then 'Kentucky'
+            when 'LA' then 'Louisiana'
+            when 'MA' then 'Massachusetts'
+            when 'MD' then 'Maryland'
+            when 'ME' then 'Maine'
+            when 'MI' then 'Michigan'
+            when 'MN' then 'Minnesota'
+            when 'MO' then 'Missouri'
+            when 'MS' then 'Mississippi'
+            when 'MT' then 'Montana'
+            when 'NC' then 'North Carolina'
+            when 'ND' then 'North Dakota'
+            when 'NE' then 'Nebraska'
+            when 'NH' then 'New Hampshire'
+            when 'NJ' then 'New Jersey'
+            when 'NM' then 'New Mexico'
+            when 'NV' then 'Nevada'
+            when 'NY' then 'New York'
+            when 'MP' then 'Northern Mariana Islands'
+            when 'OH' then 'Ohio'
+            when 'OK' then 'Oklahoma'
+            when 'OR' then 'Oregon'
+            when 'PA' then 'Pennsylvania'
+            when 'PR' then 'Puerto Rico'
+            when 'RI' then 'Rhode Island'
+            when 'SC' then 'South Carolina'
+            when 'SD' then 'South Dakota'
+            when 'TN' then 'Tennessee'
+            when 'TX' then 'Texas'
+            when 'UT' then 'Utah'
+            when 'VI' then 'Virgin Islands'
+            when 'VA' then 'Virginia'
+            when 'VT' then 'Vermont'
+            when 'WA' then 'Washington'
+            when 'WI' then 'Wisconsin'
+            when 'WV' then 'West Virginia'
+            when 'WY' then 'Wyoming'
+            else null
+        end;
+    end
+$$ language plpgsql;

@@ -312,6 +312,7 @@ schedule_a_by_state = {
 schedule_a_by_zip = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'zip': Arg(str, multiple=True, description='Zip code'),
+    'state': Arg(str, multiple=True, description='State of contributor'),
 }
 
 
