@@ -287,7 +287,7 @@ register_resource(aggregates.ScheduleAByStateView, blueprint='v1')
 register_resource(aggregates.ScheduleAByZipView, blueprint='v1')
 register_resource(aggregates.ScheduleAByContributorView, blueprint='v1')
 register_resource(aggregates.ScheduleAByEmployerView, blueprint='v1')
-register_resource(aggregates.ScheduleAByOccpuationView, blueprint='v1')
+register_resource(aggregates.ScheduleAByOccupationView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
 
@@ -325,3 +325,4 @@ def api_ui():
 
 
 app.register_blueprint(docs)
+
