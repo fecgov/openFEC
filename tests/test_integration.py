@@ -188,8 +188,8 @@ class TestViews(common.IntegrationTestCase):
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.refresh(rows[0])
-        self.assertEqual(rows[0].total, 0)
-        self.assertEqual(rows[0].count, 0)
+        self.assertEqual(rows[0].total, 53)
+        self.assertEqual(rows[0].count, 1)
 
     def _check_update_aggregate_existing(self, item_key, total_key, total_model):
         existing = total_model.query.filter(
