@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
@@ -28,7 +29,7 @@ class ScheduleAAggregateView(Resource):
         return query
 
 
-@spec.doc(description='Schedule A receipts aggregated by contribution size')
+@spec.doc(description=docs.SIZE_DESCRIPTION)
 class ScheduleABySizeView(ScheduleAAggregateView):
 
     model = models.ScheduleABySize
@@ -49,7 +50,7 @@ class ScheduleABySizeView(ScheduleAAggregateView):
         return super(ScheduleABySizeView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor state')
+@spec.doc(description='Schedule A receipts aggregated by contributor state. To avoid double counting, memoed items are not included.')
 class ScheduleAByStateView(ScheduleAAggregateView):
 
     model = models.ScheduleAByState
@@ -70,7 +71,7 @@ class ScheduleAByStateView(ScheduleAAggregateView):
         return super(ScheduleAByStateView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor zip code')
+@spec.doc(description='Schedule A receipts aggregated by contributor zip code. To avoid double counting, memoed items are not included.')
 class ScheduleAByZipView(ScheduleAAggregateView):
 
     model = models.ScheduleAByZip
@@ -92,7 +93,7 @@ class ScheduleAByZipView(ScheduleAAggregateView):
 
 
 @spec.doc(
-    description='Schedule A receipts aggregated by contributor ID',
+    description="Schedule A receipts aggregated by a contributor's FEC ID, if the have one and it is in the record. To avoid double counting, memoed items are not included.",
 )
 class ScheduleAByContributorView(ScheduleAAggregateView):
 

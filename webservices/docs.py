@@ -48,17 +48,19 @@ develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data.This API allows you to explore the vast array of campaign finance data that the FEC
-collects. Each endpoint focuses on a different aspect
-of disclosure.
+collects. Each endpoint focuses on a different aspect of disclosure. Information is tied to
+the underlying forms by file ID and image ID.
 
 There is a lot of data, but a good place to start exploring, is using search to find
 interesting candidates and committees and then, looking up report or line item details
 using IDs on the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
-Information is tied to the underlying forms by file ID and image ID.
-
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
+
+Get an [API key here](https://api.data.gov/signup/)!
+
+Base URL: https://api.open.fec.gov/v1
 '''
 
 CANDIDATE_TAG = '''
@@ -213,9 +215,9 @@ you can look for individual contributors.
 Once a person gives more than a total of $200, the donations of that person must be
 reported by committees that file F3, F3X and F3P forms.
 
-Contributions under $200 are not required to be itemized, but you can find the total
+Contributions $200 and under are not required to be itemized, but you can find the total
 amount of these small donations by looking up the "unitemized" field in the `/reports`
-endpoint.
+or `/totals` endpoints.
 
 When comparing the totals from reports to line items. the totals will not match unless you
 take out items where `"memo_code":'X'`. Memoed items are subtotals of receipts that are
@@ -283,7 +285,37 @@ Schedules come from particular sections on forms and contain detailed transactio
 Schedule A explains where contributions come from. If you are interested in
 individual donors, this will be the endpoint you use.
 
+For the Schedule A aggregates, "memoed" items are not included to avoid double counting.
+
 Schedule B explains how money is spent.
+'''
+
+SIZE_DESCRIPTION = '''
+This endpoint aggregates Schedule A donations based on size:
+
+ - $200 and under
+ - $200.01 - $499.99
+ - $500 - $999.99
+ - $1000 - $1999.99
+ - $2000 +
+
+In cases where the donations are $200 or less, the results include small donations
+that are reported on Schedule A, but filers are not required to itemize those small
+donations, so we also add unitemized contributions. Unitemized contributions come
+from the summary section of the forms. It represents the total money brought in from
+donors that are not reported on Schedule A and have given $200 or less.
+'''
+
+SIZE = '''
+The total all contributions in the following ranges:
+```
+  -0    $200 and under
+  -200  $200.01 - $499.99
+  -500  $500 - $999.99
+  -1000 $1000 - $1999.99
+  -2000 $2000 +
+```
+Unitemized contributions are included in the `0` category.
 '''
 
 API_KEY_DESCRIPTION = '''

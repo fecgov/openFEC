@@ -46,6 +46,7 @@ def _validate_natural(value):
 Natural = functools.partial(Arg, int, validate=_validate_natural)
 
 
+Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
@@ -272,8 +273,8 @@ itemized = {
     'image_number': Arg(str, multiple=True, description='The image number of the page where the schedule item is reported'),
     'min_image_number': Arg(str),
     'max_image_number': Arg(str),
-    'min_amount': Arg(float, description='Filter for all amounts greater than a value.'),
-    'max_amount': Arg(float, description='Filter for all amounts less than a value.'),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': Date(),
     'max_date': Date(),
 }
@@ -298,8 +299,7 @@ schedule_a = {
 
 schedule_a_by_size = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    # add choices
-    'size': Arg(int, multiple=True),
+    'size': Arg(int, multiple=True, enum=[0, 200, 500, 1000, 2000], description=docs.SIZE),
 }
 
 
