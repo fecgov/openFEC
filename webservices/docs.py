@@ -220,8 +220,8 @@ amount of these small donations by looking up the "unitemized" field in the `/re
 or `/totals` endpoints.
 
 When comparing the totals from reports to line items. the totals will not match unless you
-take out items where `"memo_code":'X'`. Memoed items are subtotals of receipts that are
-already accounted for in another schedule a line item.
+take out items where `"memoed_subtotal":true`. Memoed items are subtotals of receipts
+that are already accounted for in another schedule a line item.
 
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
