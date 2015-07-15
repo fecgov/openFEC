@@ -13,7 +13,7 @@ from webservices.common import models
     tags=['schedules'],
     path_params=[utils.committee_param],
 )
-class ScheduleAAggregateView(Resource):
+class BaseAggregateView(Resource):
 
     model = None
     fields = {}
@@ -31,7 +31,7 @@ class ScheduleAAggregateView(Resource):
 
 
 @spec.doc(description=docs.SIZE_DESCRIPTION)
-class ScheduleABySizeView(ScheduleAAggregateView):
+class ScheduleABySizeView(BaseAggregateView):
 
     model = models.ScheduleABySize
     fields = [
@@ -57,7 +57,7 @@ class ScheduleABySizeView(ScheduleAAggregateView):
         'memoed items are not included.'
     )
 )
-class ScheduleAByStateView(ScheduleAAggregateView):
+class ScheduleAByStateView(BaseAggregateView):
 
     model = models.ScheduleAByState
     fields = [
@@ -83,7 +83,7 @@ class ScheduleAByStateView(ScheduleAAggregateView):
         'counting, memoed items are not included.'
     )
 )
-class ScheduleAByZipView(ScheduleAAggregateView):
+class ScheduleAByZipView(BaseAggregateView):
 
     model = models.ScheduleAByZip
     fields = [
@@ -109,7 +109,7 @@ class ScheduleAByZipView(ScheduleAAggregateView):
         'counting, memoed items are not included.'
     )
 )
-class ScheduleAByEmployerView(ScheduleAAggregateView):
+class ScheduleAByEmployerView(BaseAggregateView):
 
     model = models.ScheduleAByEmployer
     fields = [
@@ -137,7 +137,7 @@ class ScheduleAByEmployerView(ScheduleAAggregateView):
         'counting, memoed items are not included.'
     )
 )
-class ScheduleAByOccupationView(ScheduleAAggregateView):
+class ScheduleAByOccupationView(BaseAggregateView):
 
     model = models.ScheduleAByOccupation
     fields = [
@@ -165,7 +165,7 @@ class ScheduleAByOccupationView(ScheduleAAggregateView):
         'double counting, memoed items are not included.'
     )
 )
-class ScheduleAByContributorView(ScheduleAAggregateView):
+class ScheduleAByContributorView(BaseAggregateView):
 
     model = models.ScheduleAByContributor
     fields = [
@@ -183,3 +183,29 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
     @schemas.marshal_with(schemas.ScheduleAByContributorPageSchema())
     def get(self, committee_id=None, **kwargs):
         return super(ScheduleAByContributorView, self).get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(
+    description=(
+        'Schedule B receipts aggregated by contributor employer name. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
+class ScheduleBByPurposeView(BaseAggregateView):
+
+    model = models.ScheduleBByPurpose
+    fields = [
+        ('cycle', models.ScheduleBByPurpose.cycle),
+        ('employer', models.ScheduleBByPurpose.purpose),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_b_by_purpose)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleBByPurpose)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleBByPurposePageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
