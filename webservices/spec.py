@@ -1,3 +1,5 @@
+import copy
+
 from smore.apispec import APISpec
 
 from webservices import docs
@@ -18,9 +20,7 @@ spec = APISpec(
             'in': 'query',
         },
     },
-    security=[
-        {'apiKey': []},
-    ],
+    security=[{'apiKey': []}],
     tags=[
         {
             'name': 'candidate',
@@ -38,13 +38,21 @@ spec = APISpec(
             'name': 'search',
             'description': docs.SEARCH_TAG,
         },
+        {
+            'name': 'filings',
+            'description': docs.FILINGS,
+        },
+        {
+            'name': 'schedules',
+            'description': docs.SCHEDULES,
+        },
     ]
 )
 
 
 def doc(**kwargs):
     def wrapper(func):
-        func.__apidoc__ = func.__dict__.get('__apidoc__', {})
+        func.__apidoc__ = copy.deepcopy(getattr(func, '__apidoc__', {}))
         func.__apidoc__.update(kwargs)
         return func
     return wrapper

@@ -8,6 +8,7 @@ GitPython==1.0.1
 gunicorn==19.3.0
 webargs==0.14.0
 csvkit==0.9.1
+ujson==1.33
 
 # Marshalling
 marshmallow==2.0.0b3
@@ -17,7 +18,8 @@ git+https://github.com/marshmallow-code/marshmallow-sqlalchemy@dev
 # Development
 invoke==0.10.1
 Flask-Script==2.0.5
-git+https://github.com/jmcarp/rdbms-subsetter@current
+# TODO(jmcarp) Install from PyPI after 0.2.4 release
+git+https://github.com/18F/rdbms-subsetter
 
 # Testing
 nose>=1.3.6

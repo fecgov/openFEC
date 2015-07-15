@@ -34,7 +34,12 @@ class CandidateList(Resource):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args(default=['name']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['name'],
+            validator=args.IndexValidator(models.Candidate),
+        )
+    )
     @schemas.marshal_with(schemas.CandidatePageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
@@ -82,7 +87,7 @@ class CandidateSearch(CandidateList):
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_list)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args())
+    @args.register_kwargs(args.make_sort_args(validator=args.IndexValidator(models.Candidate)))
     @schemas.marshal_with(schemas.CandidateSearchPageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
@@ -93,25 +98,20 @@ class CandidateSearch(CandidateList):
     tags=['candidate'],
     description=docs.CANDIDATE_DETAIL,
     path_params=[
-        {
-            'name': 'candidate_id',
-            'in': 'path',
-            'description': docs.CANDIDATE_ID,
-            'type': 'string',
-        },
-        {
-            'name': 'committee_id',
-            'description': docs.COMMITTEE_ID,
-            'in': 'path',
-            'type': 'string',
-        },
+        utils.candidate_param,
+        utils.committee_param,
     ],
 )
 class CandidateView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.candidate_detail)
-    @args.register_kwargs(args.make_sort_args(default=['-expire_date']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['-expire_date'],
+            validator=args.IndexValidator(models.CandidateDetail),
+        )
+    )
     @schemas.marshal_with(schemas.CandidateDetailPageSchema())
     def get(self, candidate_id=None, committee_id=None, **kwargs):
         query = self.get_candidate(kwargs, candidate_id, committee_id)
@@ -142,33 +142,24 @@ class CandidateView(Resource):
     tags=['candidate'],
     description=docs.CANDIDATE_HISTORY,
     path_params=[
-        {
-            'name': 'candidate_id',
-            'type': 'string',
-            'in': 'path',
-            'description': docs.CANDIDATE_ID,
-        },
-        {
-            'name': 'committee_id',
-            'type': 'string',
-            'in': 'path',
-            'description': docs.COMMITTEE_ID,
-        },
-        {
-            'name': 'cycle',
-            'type': 'integer',
-            'in': 'path',
-        },
+        utils.candidate_param,
+        utils.committee_param,
+        utils.cycle_param(description=docs.CANDIDATE_CYCLE),
     ],
 )
 class CandidateHistoryView(Resource):
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.make_sort_args(default=['-two_year_period']))
+    @args.register_kwargs(
+        args.make_sort_args(
+            default=['-two_year_period'],
+            validator=args.IndexValidator(models.CandidateHistory),
+        )
+    )
     @schemas.marshal_with(schemas.CandidateHistoryPageSchema())
     def get(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
         query = self.get_candidate(candidate_id, committee_id, cycle, kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=models.CandidateHistory)
 
     def get_candidate(self, candidate_id, committee_id, cycle, kwargs):
         query = models.CandidateHistory.query
