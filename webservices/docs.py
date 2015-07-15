@@ -61,7 +61,7 @@ to solicit donations. [Learn more here](http://www.fec.gov/pages/brochures/saleu
 
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
 
-Get an [API key here](https://api.data.gov/signup/)!
+Get an [API key here](https://api.data.gov/signup/)! Or you can use DEMO_KEY.
 
 Base URL: https://api.open.fec.gov/v1
 '''
