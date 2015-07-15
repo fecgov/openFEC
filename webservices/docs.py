@@ -220,8 +220,8 @@ amount of these small donations by looking up the "unitemized" field in the `/re
 or `/totals` endpoints.
 
 When comparing the totals from reports to line items. the totals will not match unless you
-take out items where `"memo_code":'X'`. Memoed items are subtotals of receipts that are
-already accounted for in another schedule a line item.
+take out items where `"memoed_subtotal":true`. Memoed items are subtotals of receipts
+that are already accounted for in another schedule a line item.
 
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -243,6 +243,9 @@ pagination: {
 
 To fetch the next page of results, append "last_index=230880619&last_contributor_receipt_date=2014-01-01"
 to the URL.
+
+Note: because the Schedule A data includes many records, counts for
+large result sets are approximate.
 '''
 
 SCHEDULE_B = '''
@@ -270,6 +273,9 @@ pagination: {
 
 To fetch the next page of results, append "last_index=230906248&amp;last_disbursement_date=2014-07-04"
 to the URL.
+
+Note: because the Schedule A data includes many records, counts for
+large result sets are approximate.
 '''
 
 # If we add schedules as a grouping
@@ -325,4 +331,7 @@ Search for financial reports and other FEC documents.
 
 FILINGS = '''
 All official records and reports filed by or delivered to the FEC.
+
+Note: because the filings data includes many records, counts for large
+result sets are approximate.
 '''

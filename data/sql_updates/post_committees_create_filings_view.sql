@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_filings_vw_tmp;
-create materialized view ofec_filings_vw_tmp as
+drop materialized view if exists ofec_filings_mv_tmp;
+create materialized view ofec_filings_mv_tmp as
 select
     row_number() over () as idx,
     cand.candidate_id as candidate_id,
@@ -48,17 +48,17 @@ where
     report_year >= :START_YEAR
 ;
 
-create unique index on ofec_filings_vw_tmp (idx);
+create unique index on ofec_filings_mv_tmp (idx);
 
-create index on ofec_filings_vw_tmp (committee_id);
-create index on ofec_filings_vw_tmp (candidate_id);
-create index on ofec_filings_vw_tmp (beginning_image_number);
-create index on ofec_filings_vw_tmp (receipt_date);
-create index on ofec_filings_vw_tmp (form_type);
-create index on ofec_filings_vw_tmp (primary_general_indicator);
-create index on ofec_filings_vw_tmp (amendment_indicator);
-create index on ofec_filings_vw_tmp (report_type);
-create index on ofec_filings_vw_tmp (report_year);
-create index on ofec_filings_vw_tmp (total_receipts);
-create index on ofec_filings_vw_tmp (total_disbursements);
-create index on ofec_filings_vw_tmp (total_independent_expenditures);
+create index on ofec_filings_mv_tmp (committee_id);
+create index on ofec_filings_mv_tmp (candidate_id);
+create index on ofec_filings_mv_tmp (beginning_image_number);
+create index on ofec_filings_mv_tmp (receipt_date);
+create index on ofec_filings_mv_tmp (form_type);
+create index on ofec_filings_mv_tmp (primary_general_indicator);
+create index on ofec_filings_mv_tmp (amendment_indicator);
+create index on ofec_filings_mv_tmp (report_type);
+create index on ofec_filings_mv_tmp (report_year);
+create index on ofec_filings_mv_tmp (total_receipts);
+create index on ofec_filings_mv_tmp (total_disbursements);
+create index on ofec_filings_mv_tmp (total_independent_expenditures);

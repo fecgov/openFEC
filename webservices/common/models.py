@@ -626,8 +626,9 @@ class ScheduleA(db.Model):
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
     contributor_last_name = db.Column('contbr_l_nm', db.String)
     contributor_suffix = db.Column('contbr_suffix', db.String)
-    contributor_street_1 = db.Column('contbr_st1', db.String)
-    contributor_street_2 = db.Column('contbr_st2', db.String)
+    # Street address omitted per FEC policy
+    # contributor_street_1 = db.Column('contbr_st1', db.String)
+    # contributor_street_2 = db.Column('contbr_st2', db.String)
     contributor_city = db.Column('contbr_city', db.String)
     contributor_state = db.Column('contbr_st', db.String)
     contributor_zip = db.Column('contbr_zip', db.String)
@@ -753,8 +754,9 @@ class ScheduleB(db.Model):
         )'''
     )
     recipient_name = db.Column('recipient_nm', db.String)
-    recipient_street_1 = db.Column('recipient_st1', db.String)
-    recipient_street_2 = db.Column('recipient_st2', db.String)
+    # Street address omitted per FEC policy
+    # recipient_street_1 = db.Column('recipient_st1', db.String)
+    # recipient_street_2 = db.Column('recipient_st2', db.String)
     recipient_city = db.Column(db.String)
     recipient_state = db.Column('recipient_st', db.String)
     recipient_zip = db.Column(db.String)
@@ -808,7 +810,7 @@ class ScheduleBSearch(db.Model):
 
 
 class Filings(db.Model):
-    __tablename__ = 'ofec_filings_vw'
+    __tablename__ = 'ofec_filings_mv'
 
     committee_id = db.Column(db.String, index=True)
     committee_name = db.Column(db.String)

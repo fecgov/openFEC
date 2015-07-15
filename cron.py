@@ -33,7 +33,7 @@ app.conf.update(
 
 
 @app.task
-def update_aggregates():
+def refresh():
     with manage.app.test_request_context():
         manage.update_aggregates()
         manage.refresh_materialized()
