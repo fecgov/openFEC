@@ -48,8 +48,7 @@ versioning any changes that are not backwards compatible, expect things to chang
 develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches of
-FEC data. This API allows you to explore the vast array of campaign finance data that the FEC
-collects. Each endpoint focuses on a different aspect of disclosure. Information is tied to
+FEC data. Each endpoint focuses on a different aspect of disclosure. Information is tied to
 the underlying forms by file ID and image ID.
 
 There is a lot of data, but a good place to start exploring, is using search to find
