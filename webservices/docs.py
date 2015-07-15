@@ -243,6 +243,9 @@ pagination: {
 
 To fetch the next page of results, append "last_index=230880619&last_contributor_receipt_date=2014-01-01"
 to the URL.
+
+Note: because the Schedule A data includes many records, counts for
+large result sets are approximate.
 '''
 
 SCHEDULE_B = '''
@@ -270,6 +273,9 @@ pagination: {
 
 To fetch the next page of results, append "last_index=230906248&amp;last_disbursement_date=2014-07-04"
 to the URL.
+
+Note: because the Schedule A data includes many records, counts for
+large result sets are approximate.
 '''
 
 # If we add schedules as a grouping
@@ -325,4 +331,7 @@ Search for financial reports and other FEC documents.
 
 FILINGS = '''
 All official records and reports filed by or delivered to the FEC.
+
+Note: because the filings data includes many records, counts for large
+result sets are approximate.
 '''
