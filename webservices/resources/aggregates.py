@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
@@ -29,7 +30,7 @@ class ScheduleAAggregateView(Resource):
         return query
 
 
-@spec.doc(description='Schedule A receipts aggregated by contribution size')
+@spec.doc(description=docs.SIZE_DESCRIPTION)
 class ScheduleABySizeView(ScheduleAAggregateView):
 
     model = models.ScheduleABySize
@@ -50,7 +51,12 @@ class ScheduleABySizeView(ScheduleAAggregateView):
         return super(ScheduleABySizeView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor state')
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor state. To avoid double counting, '
+        'memoed items are not included.'
+    )
+)
 class ScheduleAByStateView(ScheduleAAggregateView):
 
     model = models.ScheduleAByState
@@ -71,7 +77,12 @@ class ScheduleAByStateView(ScheduleAAggregateView):
         return super(ScheduleAByStateView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor zip code')
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor zip code. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
 class ScheduleAByZipView(ScheduleAAggregateView):
 
     model = models.ScheduleAByZip
@@ -92,7 +103,12 @@ class ScheduleAByZipView(ScheduleAAggregateView):
         return super(ScheduleAByZipView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor zip code')
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor employer name. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
 class ScheduleAByEmployerView(ScheduleAAggregateView):
 
     model = models.ScheduleAByEmployer
@@ -115,7 +131,12 @@ class ScheduleAByEmployerView(ScheduleAAggregateView):
         return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor occupation')
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor occupation. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
 class ScheduleAByOccupationView(ScheduleAAggregateView):
 
     model = models.ScheduleAByZip
@@ -138,7 +159,12 @@ class ScheduleAByOccupationView(ScheduleAAggregateView):
         return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor ID')
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor FEC ID, if applicable. To avoid '
+        'double counting, memoed items are not included.'
+    )
+)
 class ScheduleAByContributorView(ScheduleAAggregateView):
 
     model = models.ScheduleAByContributor

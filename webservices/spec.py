@@ -20,9 +20,7 @@ spec = APISpec(
             'in': 'query',
         },
     },
-    security=[
-        {'apiKey': []},
-    ],
+    security=[{'apiKey': []}],
     tags=[
         {
             'name': 'candidate',
