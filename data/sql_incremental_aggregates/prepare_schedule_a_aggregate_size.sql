@@ -1,7 +1,7 @@
 create or replace function contribution_size(value numeric) returns int as $$
 begin
     return case
-        when abs(value) < 200 then 0
+        when abs(value) <= 200 then 0
         when abs(value) < 500 then 200
         when abs(value) < 1000 then 500
         when abs(value) < 2000 then 1000
@@ -22,6 +22,7 @@ select
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 and contb_receipt_amt is not null
+and (memo_cd != 'X' or memo_cd is null)
 group by cmte_id, cycle, size
 ;
 
@@ -44,6 +45,7 @@ begin
             count(contb_receipt_amt) as count
         from ofec_sched_a_queue_new
         where contb_receipt_amt is not null
+        and (memo_cd != 'X' or memo_cd is null)
         group by cmte_id, cycle, size
     ),
     old as (
@@ -55,6 +57,7 @@ begin
             -1 * count(contb_receipt_amt) as count
         from ofec_sched_a_queue_old
         where contb_receipt_amt is not null
+        and (memo_cd != 'X' or memo_cd is null)
         group by cmte_id, cycle, size
     ),
     patch as (

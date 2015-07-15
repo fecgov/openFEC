@@ -1,10 +1,16 @@
 # openFEC
 
-[![Build Status](https://travis-ci.org/18F/openFEC.svg?branch=master)](https://travis-ci.org/18F/openFEC)
-[![Code Climate](https://codeclimate.com/github/18F/openFEC/badges/gpa.svg)](https://codeclimate.com/github/18F/openFEC)
-[![Test Coverage](http://codecov.io/github/18F/openFEC/coverage.svg?branch=develop)](http://codecov.io/github/18F/openFEC?branch=develop)
-[![Stories in Ready](https://badge.waffle.io/18F/openFEC.svg?label=ready&title=Ready)](http://waffle.io/18F/openFEC)
-![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)
+**Develop**
+[![Build Status](https://img.shields.io/travis/18F/openFEC/develop.svg)](https://travis-ci.org/18F/openFEC)
+[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/develop.svg)](https://codecov.io/github/18F/openFEC)
+
+**Master**
+[![Build Status](https://img.shields.io/travis/18F/openFEC/master.svg)](https://travis-ci.org/18F/openFEC)
+[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
+[![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
+[![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
+
+[![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
 
 This is the first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app). 
 
@@ -119,6 +125,13 @@ and cache responses for the specified interval, such that repeated requests to a
 endpoint will only reach the Flask application once. This means that responses may be
 stale for up to an hour following the nightly refresh of the materialized views.
 
+#### API Umbrella
+
+The staging and production environments use the [API Umbrella](http://apiumbrella.io) for
+rate limiting, authentication, caching, and HTTPS termination and redirection. Both
+environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
+through the API Umbrella.
+
 #### Git-flow and continuous deployment
 
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed
@@ -204,8 +217,8 @@ as the production instance.
 #### Creating a new test database
 
     $ createdb cfdm_test
-    $ psql -f data/subset.sql cfdm_test
-    $ ./manage.py update_schemas
+    $ pg_restore --dbname cfdm_test data/subset.dump
+    $ ./manage.py update_all
 
 #### Running the Tests
 
