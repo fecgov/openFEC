@@ -82,7 +82,8 @@ def make_schema(model, class_name=None, fields=None, options=None):
     )
 
 
-def make_page_schema(schema, class_name=None, definition_name=None):
+def make_page_schema(schema, page_type=paging.OffsetPageSchema, class_name=None,
+                     definition_name=None):
     class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
 
@@ -92,7 +93,7 @@ def make_page_schema(schema, class_name=None, definition_name=None):
 
     return type(
         class_name,
-        (paging.PageSchema, ApiSchema),
+        (page_type, ApiSchema),
         {'Meta': Meta},
     )
 
@@ -105,12 +106,12 @@ class ApiSchema(ma.Schema):
 
 
 class BaseSearchSchema(ma.Schema):
-    id = ma.fields.String()
-    name = ma.fields.String()
+    id = ma.fields.Str()
+    name = ma.fields.Str()
 
 
 class CandidateSearchSchema(BaseSearchSchema):
-    office_sought = ma.fields.String()
+    office_sought = ma.fields.Str()
 
 
 class CommitteeSearchSchema(BaseSearchSchema):
@@ -128,7 +129,7 @@ class CandidateSearchListSchema(ApiSchema):
 class CommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         CandidateSearchSchema,
-        ref='#/definitions/CommtteeSearch',
+        ref='#/definitions/CommitteeSearch',
         many=True,
     )
 
@@ -188,48 +189,126 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
+        'report_form': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
     },
     options={'exclude': ('idx', 'report_key', 'committee')},
-)
-CommitteeReportsSchema = make_reports_schema(
-    models.CommitteeReportsPresidential,
-    class_name='CommitteeReportsSchema',
-    options={'exclude': [
-        each.key for each in models.CommitteeReportsPresidential.__mapper__.iterate_properties
-        if each.key not in dir(models.CommitteeReports)
-    ] + ['idx', 'report_key']}
 )
 
 CommitteeReportsPresidentialSchema = make_reports_schema(models.CommitteeReportsPresidential)
 CommitteeReportsHouseSenateSchema = make_reports_schema(models.CommitteeReportsHouseSenate)
 CommitteeReportsPacPartySchema = make_reports_schema(models.CommitteeReportsPacParty)
+CommitteeReportsIEOnlySchema = make_reports_schema(models.CommitteeReportsIEOnly)
 
-CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 CommitteeReportsPresidentialPageSchema = make_page_schema(CommitteeReportsPresidentialSchema)
 CommitteeReportsHouseSenatePageSchema = make_page_schema(CommitteeReportsHouseSenateSchema)
 CommitteeReportsPacPartyPageSchema = make_page_schema(CommitteeReportsPacPartySchema)
+CommitteeReportsIEOnlyPageSchema = make_page_schema(CommitteeReportsIEOnlySchema)
+
+reports_schemas = (
+    CommitteeReportsPresidentialSchema,
+    CommitteeReportsHouseSenateSchema,
+    CommitteeReportsPacPartySchema,
+    CommitteeReportsIEOnlySchema,
+)
+CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
+CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 
-
-CommitteeTotalsSchema = make_schema(
-    models.CommitteeTotalsPresidential,
-    class_name='CommitteeTotalsSchema',
-    options={'exclude': [
-        each.key for each in models.CommitteeTotalsPresidential.__mapper__.iterate_properties
-        if each.key not in dir(models.CommitteeTotals)
-    ] + ['idx']}
-)
 CommitteeTotalsPresidentialSchema = make_schema(models.CommitteeTotalsPresidential)
 CommitteeTotalsHouseSenateSchema = make_schema(models.CommitteeTotalsHouseSenate)
 CommitteeTotalsPacPartySchema = make_schema(models.CommitteeTotalsPacParty)
+CommitteeTotalsIEOnlySchema = make_schema(models.CommitteeTotalsIEOnly)
 
-CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 CommitteeTotalsPresidentialPageSchema = make_page_schema(CommitteeTotalsPresidentialSchema)
 CommitteeTotalsHouseSenatePageSchema = make_page_schema(CommitteeTotalsHouseSenateSchema)
 CommitteeTotalsPacPartyPageSchema = make_page_schema(CommitteeTotalsPacPartySchema)
+CommitteeTotalsIEOnlyPageSchema = make_page_schema(CommitteeTotalsIEOnlySchema)
+
+totals_schemas = (
+    CommitteeTotalsPresidentialSchema,
+    CommitteeTotalsHouseSenateSchema,
+    CommitteeTotalsPacPartySchema,
+    CommitteeTotalsIEOnlySchema,
+)
+CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
+CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
+
+
+ScheduleASchema = make_schema(
+    models.ScheduleA,
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'memoed_subtotal': ma.fields.Boolean(),
+        'committee': ma.fields.Nested(CommitteeHistorySchema),
+        'contributor': ma.fields.Nested(CommitteeHistorySchema),
+        'contributor_receipt_amount': ma.fields.Decimal(places=2),
+        'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
+    },
+    options={
+        'exclude': ('memo_code', ),
+    }
+)
+ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
+register_schema(ScheduleASchema)
+register_schema(ScheduleAPageSchema)
+
+make_aggregate_schema = functools.partial(
+    make_schema,
+    fields={
+        'total': ma.fields.Decimal(places=2),
+    }
+)
+ScheduleABySizeSchema = make_aggregate_schema(models.ScheduleABySize)
+ScheduleAByStateSchema = make_aggregate_schema(models.ScheduleAByState)
+ScheduleAByZipSchema = make_aggregate_schema(models.ScheduleAByZip)
+ScheduleAByContributorSchema = make_aggregate_schema(models.ScheduleAByContributor)
+
+ScheduleABySizePageSchema = make_page_schema(ScheduleABySizeSchema)
+ScheduleAByStatePageSchema = make_page_schema(ScheduleAByStateSchema)
+ScheduleAByZipPageSchema = make_page_schema(ScheduleAByZipSchema)
+ScheduleAByContributorPageSchema = make_page_schema(ScheduleAByContributorSchema)
+
+register_schema(ScheduleABySizeSchema)
+register_schema(ScheduleAByStateSchema)
+register_schema(ScheduleAByZipSchema)
+register_schema(ScheduleAByContributorSchema)
+register_schema(ScheduleABySizePageSchema)
+register_schema(ScheduleAByStatePageSchema)
+register_schema(ScheduleAByZipPageSchema)
+register_schema(ScheduleAByContributorPageSchema)
+
+
+ScheduleBSchema = make_schema(
+    models.ScheduleB,
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'memoed_subtotal': ma.fields.Boolean(),
+        'committee': ma.fields.Nested(CommitteeHistorySchema),
+        'recipient_committee': ma.fields.Nested(CommitteeHistorySchema),
+        'disbursement_amount': ma.fields.Decimal(places=2),
+        'semi_annual_bundled_refund': ma.fields.Decimal(places=2),
+    },
+    options={
+        'exclude': ('memo_code', ),
+    }
+)
+ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
+register_schema(ScheduleBSchema)
+register_schema(ScheduleBPageSchema)
+
+
+FilingsSchema = make_schema(
+    models.Filings,
+    fields={
+        'pdf_url': ma.fields.Str(),
+    },
+)
+FilingsPageSchema = make_page_schema(FilingsSchema)
+register_schema(FilingsSchema)
+register_schema(FilingsPageSchema)

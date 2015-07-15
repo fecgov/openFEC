@@ -65,7 +65,7 @@ returns text as $$
             when 'E' then 'Electioneering Communication'
             when 'I' then 'Independent Expenditor (Person or Group)'
             when 'N' then 'PAC - Nonqualified'
-            when 'O' then 'Independent Expenditure-Only (Super PACs)'
+            when 'O' then 'Super PAC (Independent Expenditure-Only)'
             when 'Q' then 'PAC - Qualified'
             when 'U' then 'Single Candidate Independent Expenditure'
             when 'V' then 'PAC with Non-Contribution Account - Nonqualified'

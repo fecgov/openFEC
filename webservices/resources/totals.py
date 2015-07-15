@@ -13,6 +13,8 @@ totals_schema_map = {
     'P': (models.CommitteeTotalsPresidential, schemas.CommitteeTotalsPresidentialPageSchema),
     'H': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
     'S': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
+    'I': (models.CommitteeTotalsIEOnly, schemas.
+        CommitteeTotalsIEOnlyPageSchema)
 }
 default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
 
@@ -20,9 +22,7 @@ default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPar
 @spec.doc(
     tags=['financial'],
     description=docs.TOTALS,
-    path_params=[
-        {'name': 'id', 'in': 'path', 'type': 'string'},
-    ],
+    path_params=[utils.committee_param],
 )
 class TotalsView(Resource):
 
@@ -35,8 +35,11 @@ class TotalsView(Resource):
             self._resolve_committee_type(committee_id, kwargs),
             default_schemas,
         )
+        validator = args.IndexValidator(totals_class)
+        for key in kwargs['sort']:
+            validator(key)
         totals = self.get_totals(committee_id, totals_class, kwargs)
-        page = utils.fetch_page(totals, kwargs)
+        page = utils.fetch_page(totals, kwargs, model=totals_class)
         return totals_schema().dump(page).data
 
     def get_totals(self, committee_id, totals_class, kwargs):
