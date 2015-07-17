@@ -709,6 +709,16 @@ class ScheduleAByZip(BaseAggregate):
     zip = db.Column(db.String, primary_key=True)
 
 
+class ScheduleAByEmployer(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_employer'
+    employer = db.Column(db.String, primary_key=True)
+
+
+class ScheduleAByOccupation(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_occupation'
+    occupation = db.Column(db.String, primary_key=True)
+
+
 class ScheduleAByContributor(db.Model):
     __tablename__ = 'ofec_sched_a_aggregate_contributor_mv'
 

@@ -197,6 +197,16 @@ api.add_resource(
     '/committee/<committee_id>/schedules/schedule_a/by_zip',
 )
 api.add_resource(
+    aggregates.ScheduleAByEmployerView,
+    '/schedules/schedule_a/by_employer',
+    '/committee/<committee_id>/schedules/schedule_a/by_employer',
+)
+api.add_resource(
+    aggregates.ScheduleAByOccupationView,
+    '/schedules/schedule_a/by_occupation',
+    '/committee/<committee_id>/schedules/schedule_a/by_occupation',
+)
+api.add_resource(
     aggregates.ScheduleAByContributorView,
     '/schedules/schedule_a/by_contributor',
     '/committee/<committee_id>/schedules/schedule_a/by_contributor',
@@ -275,6 +285,8 @@ register_resource(sched_b.ScheduleBView, blueprint='v1')
 register_resource(aggregates.ScheduleABySizeView, blueprint='v1')
 register_resource(aggregates.ScheduleAByStateView, blueprint='v1')
 register_resource(aggregates.ScheduleAByZipView, blueprint='v1')
+register_resource(aggregates.ScheduleAByEmployerView, blueprint='v1')
+register_resource(aggregates.ScheduleAByOccupationView, blueprint='v1')
 register_resource(aggregates.ScheduleAByContributorView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')

@@ -5,6 +5,7 @@ from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices.common import counts
 from webservices.common import models
 
 
@@ -50,7 +51,12 @@ class ScheduleABySizeView(ScheduleAAggregateView):
         return super(ScheduleABySizeView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor state. To avoid double counting, memoed items are not included.')
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor state. To avoid double counting, '
+        'memoed items are not included.'
+    )
+)
 class ScheduleAByStateView(ScheduleAAggregateView):
 
     model = models.ScheduleAByState
@@ -71,7 +77,12 @@ class ScheduleAByStateView(ScheduleAAggregateView):
         return super(ScheduleAByStateView, self).get(committee_id=committee_id, **kwargs)
 
 
-@spec.doc(description='Schedule A receipts aggregated by contributor zip code. To avoid double counting, memoed items are not included.')
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor zip code. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
 class ScheduleAByZipView(ScheduleAAggregateView):
 
     model = models.ScheduleAByZip
@@ -93,7 +104,66 @@ class ScheduleAByZipView(ScheduleAAggregateView):
 
 
 @spec.doc(
-    description="Schedule A receipts aggregated by a contributor's FEC ID, if the have one and it is in the record. To avoid double counting, memoed items are not included.",
+    description=(
+        'Schedule A receipts aggregated by contributor employer name. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
+class ScheduleAByEmployerView(ScheduleAAggregateView):
+
+    model = models.ScheduleAByEmployer
+    fields = [
+        ('cycle', models.ScheduleAByEmployer.cycle),
+        ('employer', models.ScheduleAByEmployer.employer),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_a_by_employer)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleAByEmployer)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleAByEmployerPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        query = self._build_query(committee_id, kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count)
+
+
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor occupation. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
+class ScheduleAByOccupationView(ScheduleAAggregateView):
+
+    model = models.ScheduleAByOccupation
+    fields = [
+        ('cycle', models.ScheduleAByOccupation.cycle),
+        ('occupation', models.ScheduleAByOccupation.occupation),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_a_by_occupation)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleAByOccupation)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleAByOccupationPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        query = self._build_query(committee_id, kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count)
+
+
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor FEC ID, if applicable. To avoid '
+        'double counting, memoed items are not included.'
+    )
 )
 class ScheduleAByContributorView(ScheduleAAggregateView):
 
