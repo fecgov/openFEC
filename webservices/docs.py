@@ -1,7 +1,8 @@
 """Narrative API documentation."""
 
 BEGINNING_IMAGE_NUMBER = '''
-Unique identifier for the electronic or paper report. This number is used to construct pdf urls to the original document.
+Unique identifier for the electronic or paper report. This number is used to construct
+PDF URLs to the original document.
 '''
 
 
@@ -55,6 +56,10 @@ There is a lot of data, but a good place to start exploring, is using search to 
 interesting candidates and committees and then, looking up report or line item details
 using IDs on the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
+
+A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
+lists for commercial purposes or to solicit donations.
+[Learn more here](http://www.fec.gov/pages/brochures/saleuse.shtml).
 
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
 
