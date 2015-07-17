@@ -306,12 +306,14 @@ schedule_a_by_size = {
 schedule_a_by_state = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'state': Arg(str, multiple=True, description='State of contributor'),
+    'hide_null': Bool(default=False, description='Exclude values with missing state'),
 }
 
 
 schedule_a_by_zip = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'zip': Arg(str, multiple=True, description='Zip code'),
+    'state': Arg(str, multiple=True, description='State of contributor'),
 }
 
 

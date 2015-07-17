@@ -76,6 +76,12 @@ class ScheduleAByStateView(ScheduleAAggregateView):
     def get(self, committee_id=None, **kwargs):
         return super(ScheduleAByStateView, self).get(committee_id=committee_id, **kwargs)
 
+    def _build_query(self, committee_id, kwargs):
+        query = super()._build_query(committee_id, kwargs)
+        if kwargs['hide_null']:
+            query = query.filter(self.model.state_full != None)
+        return query
+
 
 @spec.doc(
     description=(
