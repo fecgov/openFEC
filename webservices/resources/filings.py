@@ -12,6 +12,7 @@ from webservices.common.util import filter_query
 
 fields = {
     'committee_id',
+    'candidate_id',
     'beginning_image_number',
     'report_type',
     'report_year',
