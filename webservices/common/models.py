@@ -702,11 +702,14 @@ class ScheduleABySize(BaseAggregate):
 class ScheduleAByState(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_state'
     state = db.Column(db.String, primary_key=True)
+    state_full = db.Column(db.String, primary_key=True)
 
 
 class ScheduleAByZip(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_zip'
     zip = db.Column(db.String, primary_key=True)
+    state = db.Column(db.String)
+    state_full = db.Column(db.String)
 
 
 class ScheduleAByEmployer(BaseAggregate):
