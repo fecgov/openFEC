@@ -233,6 +233,7 @@ committee_list = {
 
 filings = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type'),
     'report_year': Arg(int, multiple=True, description='Report year'),

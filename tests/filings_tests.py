@@ -52,6 +52,7 @@ class TestFilings(ApiBaseTest):
         [
             factories.FilingsFactory(committee_id='C0004'),
             factories.FilingsFactory(committee_id='C0005'),
+            factories.FilingsFactory(candidate_id='H0001'),
             factories.FilingsFactory(beginning_image_number=123456789021234567),
             factories.FilingsFactory(form_type='3'),
             factories.FilingsFactory(primary_general_indicator='G'),
@@ -67,6 +68,7 @@ class TestFilings(ApiBaseTest):
             ('amendment_indicator', 'A'),
             ('report_type', 'Post General'),
             ('report_year', 1999),
+            ('candidate_id', 'H0001'),
         )
 
         # checking one example from each field
