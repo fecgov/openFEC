@@ -151,3 +151,12 @@ class ScheduleBSearchFactory(BaseFactory):
 class FilingsFactory(BaseFactory):
     class Meta:
         model = models.Filings
+
+
+class ScheduleAByContributorFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleAByContributor
+    committee_id = factory.Sequence(lambda n: str(n))
+    contributor_id = factory.Sequence(lambda n: str(n))
+    cycle = 2016
+    year = 2015
