@@ -237,6 +237,7 @@ API_KEY_PARAM = {
     'required': True,
     'name': 'api_key',
     'description': docs.API_KEY_DESCRIPTION,
+    'default': 'DEMO_KEY',
 }
 
 
