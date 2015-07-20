@@ -287,6 +287,7 @@ contributor_type = Arg(
     str,
     multiple=True,
     validate=lambda v: v in ['individual', 'committee'],
+    description="Filters individual or committee contributions based on line number."
 )
 
 
