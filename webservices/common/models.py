@@ -659,7 +659,7 @@ class ScheduleA(db.Model):
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     sub_id = db.Column(db.Integer)
     link_id = db.Column(db.Integer)
-    line_number = db.Column('line_num', db.Integer)
+    line_number = db.Column('line_num', db.String)
     image_number = db.Column('image_num', db.String)
     report_year = db.Column('rpt_yr', db.Integer)
     transaction_id = db.Column(db.Integer)
@@ -702,11 +702,14 @@ class ScheduleABySize(BaseAggregate):
 class ScheduleAByState(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_state'
     state = db.Column(db.String, primary_key=True)
+    state_full = db.Column(db.String, primary_key=True)
 
 
 class ScheduleAByZip(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_zip'
     zip = db.Column(db.String, primary_key=True)
+    state = db.Column(db.String)
+    state_full = db.Column(db.String)
 
 
 class ScheduleAByEmployer(BaseAggregate):
@@ -724,8 +727,8 @@ class ScheduleAByContributor(db.Model):
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
     contributor_id = db.Column('contbr_id', db.String, primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True, nullable=True)
+    year = db.Column(db.Integer, primary_key=True, nullable=True)
     contributor_name = db.Column('contbr_nm', db.String)
     image_number = db.Column('image_num', db.String)
     total = db.Column(db.Float)
@@ -789,7 +792,7 @@ class ScheduleB(db.Model):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Float)
     sub_id = db.Column(db.Integer)
     link_id = db.Column(db.Integer)
-    line_number = db.Column('line_num', db.Integer)
+    line_number = db.Column('line_num', db.String)
     image_number = db.Column('image_num', db.String)
     report_year = db.Column('rpt_yr', db.Integer)
     transaction_id = db.Column(db.Integer)
