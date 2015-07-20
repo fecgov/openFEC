@@ -271,7 +271,11 @@ totals = {
 
 itemized = {
     # TODO(jmcarp) Request integer image numbers from FEC and update argument types
-    'image_number': Arg(str, multiple=True, description='The image number of the page where the schedule item is reported'),
+    'image_number': Arg(
+        str,
+        multiple=True,
+        description='The image number of the page where the schedule item is reported',
+    ),
     'min_image_number': Arg(str),
     'max_image_number': Arg(str),
     'min_amount': Currency(description='Filter for all amounts greater than a value.'),
@@ -279,6 +283,14 @@ itemized = {
     'min_date': Date(),
     'max_date': Date(),
 }
+
+contributor_type = Arg(
+    str,
+    multiple=True,
+    validate=lambda v: v in ['individual', 'committee'],
+    description="Filters individual or committee contributions based on line number."
+)
+
 
 schedule_a = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
@@ -290,11 +302,8 @@ schedule_a = {
     'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
     'last_contributor_receipt_date': Date(),
     'last_contributor_receipt_amount': Arg(float),
-    'contributor_type': Arg(
-        str,
-        multiple=True,
-        validate=lambda v: v in ['individual', 'committee'],
-    ),
+    'last_contributor_aggregate_ytd': Arg(float),
+    'contributor_type': contributor_type,
 }
 
 
