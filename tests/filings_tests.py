@@ -100,3 +100,15 @@ class TestFilings(ApiBaseTest):
     def test_sort_bad_column(self):
         response = self.app.get(api.url_for(FilingsList, sort='request_type'))
         self.assertEqual(response.status_code, 422)
+
+    def test_regex(self):
+        """ Getting rid of extra text that comes in the tables."""
+        filing = factories.FilingsFactory(
+            report_type_full='report {more information than we want}',
+            committee_id='C007',
+            report_year=2004,
+        )
+
+        results = self._results(api.url_for(FilingsView, committee_id='C007'))
+
+        self.assertEqual(results[0]['document_description'], 'report 2004')
