@@ -181,36 +181,24 @@ api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
-api.add_resource(
-    aggregates.ScheduleABySizeView,
-    '/schedules/schedule_a/by_size',
-    '/committee/<committee_id>/schedules/schedule_a/by_size',
-)
-api.add_resource(
-    aggregates.ScheduleAByStateView,
-    '/schedules/schedule_a/by_state',
-    '/committee/<committee_id>/schedules/schedule_a/by_state',
-)
-api.add_resource(
-    aggregates.ScheduleAByZipView,
-    '/schedules/schedule_a/by_zip',
-    '/committee/<committee_id>/schedules/schedule_a/by_zip',
-)
-api.add_resource(
-    aggregates.ScheduleAByEmployerView,
-    '/schedules/schedule_a/by_employer',
-    '/committee/<committee_id>/schedules/schedule_a/by_employer',
-)
-api.add_resource(
-    aggregates.ScheduleAByOccupationView,
-    '/schedules/schedule_a/by_occupation',
-    '/committee/<committee_id>/schedules/schedule_a/by_occupation',
-)
-api.add_resource(
-    aggregates.ScheduleAByContributorView,
-    '/schedules/schedule_a/by_contributor',
-    '/committee/<committee_id>/schedules/schedule_a/by_contributor',
-)
+
+def add_aggregate_resource(api, view, schedule, label):
+    api.add_resource(
+        view,
+        '/schedules/schedule_{schedule}/by_{label}'.format(**locals()),
+        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}'.format(**locals()),
+    )
+
+add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
+add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
+add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
+add_aggregate_resource(api, aggregates.ScheduleAByEmployerView, 'a', 'employer')
+add_aggregate_resource(api, aggregates.ScheduleAByOccupationView, 'a', 'occupation')
+add_aggregate_resource(api, aggregates.ScheduleAByContributorView, 'a', 'contributor')
+
+add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
+add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
+
 api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings')
 api.add_resource(filings.FilingsList, '/filings')
 
@@ -289,6 +277,8 @@ register_resource(aggregates.ScheduleAByZipView, blueprint='v1')
 register_resource(aggregates.ScheduleAByEmployerView, blueprint='v1')
 register_resource(aggregates.ScheduleAByOccupationView, blueprint='v1')
 register_resource(aggregates.ScheduleAByContributorView, blueprint='v1')
+register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
+register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
 
