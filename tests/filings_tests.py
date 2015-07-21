@@ -59,6 +59,7 @@ class TestFilings(ApiBaseTest):
             factories.FilingsFactory(amendment_indicator='A'),
             factories.FilingsFactory(report_type='Post General'),
             factories.FilingsFactory(report_year=1999),
+            factories.FilingsFactory(document_type='X'),
         ]
 
         filter_fields = (
@@ -69,6 +70,7 @@ class TestFilings(ApiBaseTest):
             ('report_type', 'Post General'),
             ('report_year', 1999),
             ('candidate_id', 'H0001'),
+            ('document_type', 'X')
         )
 
         # checking one example from each field

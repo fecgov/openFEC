@@ -236,6 +236,7 @@ filings = {
     'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type'),
+    'document_type': Arg(str, multiple=True, description=docs.DOC_TYPE),
     'report_year': Arg(int, multiple=True, description='Report year'),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
