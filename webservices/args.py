@@ -346,6 +346,18 @@ schedule_a_by_contributor = {
 }
 
 
+schedule_b_by_recipient = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'recipient': Arg(str, multiple=True, description='Recipient name'),
+}
+
+
+schedule_b_by_recipient_id = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'recipient_id': Arg(str, multiple=True, description='Recipient Committee ID'),
+}
+
+
 schedule_b = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
     'recipient_committee_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),

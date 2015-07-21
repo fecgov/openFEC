@@ -5,6 +5,7 @@ select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
     recipient_cmte_id,
+    max(recipient_nm) as recipient_nm,
     sum(disb_amt) as total,
     count(disb_amt) as count
 from sched_b
@@ -38,6 +39,7 @@ begin
             cmte_id,
             rpt_yr + rpt_yr % 2 as cycle,
             recipient_cmte_id,
+            max(recipient_nm) as recipient_nm,
             sum(disb_amt * multiplier) as total,
             sum(multiplier) as count
         from (
