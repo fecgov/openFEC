@@ -189,3 +189,55 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
     @schemas.marshal_with(schemas.ScheduleAByContributorPageSchema())
     def get(self, committee_id=None, **kwargs):
         return super(ScheduleAByContributorView, self).get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(
+    description=(
+        'Schedule B receipts aggregated by recipient name. To avoid '
+        'double counting, memoed items are not included.'
+    )
+)
+class ScheduleBByRecipientView(ScheduleAAggregateView):
+
+    model = models.ScheduleBByRecipient
+    fields = [
+        ('cycle', models.ScheduleBByRecipient.cycle),
+        ('recipient_name', models.ScheduleBByRecipient.recipient_name),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_b_by_recipient)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleBByRecipient)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleBByRecipientPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(
+    description=(
+        'Schedule B receipts aggregated by recipient committee ID, if applicable. To avoid '
+        'double counting, memoed items are not included.'
+    )
+)
+class ScheduleBByRecipientIDView(ScheduleAAggregateView):
+
+    model = models.ScheduleBByRecipientID
+    fields = [
+        ('cycle', models.ScheduleBByRecipientID.cycle),
+        ('recipient_id', models.ScheduleBByRecipientID.recipient_id),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_b_by_recipient_id)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleBByRecipientID)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleBByRecipientIDPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
