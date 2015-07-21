@@ -15,6 +15,7 @@ fields = {
     'candidate_id',
     'beginning_image_number',
     'report_type',
+    'document_type',
     'report_year',
     'recipt_date',
     'form_type',
