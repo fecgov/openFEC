@@ -232,7 +232,7 @@ class ScheduleBByRecipientIDView(ScheduleAAggregateView):
     ]
 
     @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_b_by_recipient)
+    @args.register_kwargs(args.schedule_b_by_recipient_id)
     @args.register_kwargs(
         args.make_sort_args(
             validator=args.IndexValidator(models.ScheduleBByRecipientID)

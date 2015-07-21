@@ -348,7 +348,7 @@ schedule_a_by_contributor = {
 
 schedule_b_by_recipient = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'recipient': Arg(str, multiple=True, description='Recipient name'),
+    'recipient_name': Arg(str, multiple=True, description='Recipient name'),
 }
 
 
