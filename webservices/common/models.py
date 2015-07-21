@@ -1,3 +1,4 @@
+import re
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
@@ -857,11 +858,10 @@ class Filings(db.Model):
 
     @property
     def document_description(self):
-        if self.report_type_full and self.report_type_full != '':
-            clean_report = report_typere.sub(r'\{[^)]*\}', '', self.report_type_full)
+        if self.report_type_full:
+            clean_report = re.sub(r'\{[^)]*\}', '', self.report_type_full)
             return clean_report + str(self.report_year)
-        elif self.document_type_full and self.doument_type_full != '':
-            # need to translate these codes tool
+        elif self.document_type_full:
             return self.document_type_full + str(self.report_year)
         else:
             return "Document " + str(self.report_year)
