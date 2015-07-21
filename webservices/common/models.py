@@ -821,6 +821,7 @@ class ScheduleBSearch(db.Model):
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     recipient_name_text = db.Column(TSVECTOR)
+    disbursement_description_text = db.Column(TSVECTOR)
 
 
 class Filings(db.Model):
