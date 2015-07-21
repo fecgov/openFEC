@@ -722,6 +722,17 @@ class ScheduleAByOccupation(BaseAggregate):
     occupation = db.Column(db.String, primary_key=True)
 
 
+class ScheduleBByRecipient(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_recipient'
+    recipient_name = db.Column('recipient_nm', db.String, primary_key=True)
+
+
+class ScheduleBByRecipientID(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_recipient_id'
+    recipient_id = db.Column('recipient_cmte_id', db.String, primary_key=True)
+    recipient_name = db.Column('recipient_nm', db.String)
+
+
 class ScheduleAByContributor(db.Model):
     __tablename__ = 'ofec_sched_a_aggregate_contributor_mv'
 

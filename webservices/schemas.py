@@ -272,6 +272,8 @@ augment_models(
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
     models.ScheduleAByContributor,
+    models.ScheduleBByRecipient,
+    models.ScheduleBByRecipientID,
 )
 
 ScheduleBSchema = make_schema(
