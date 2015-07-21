@@ -362,6 +362,7 @@ schedule_b = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
     'recipient_committee_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),
     'recipient_name': Arg(str, description='Name of recipient'),
+    'disbursement_description': Arg(str, description='Description of disbursement'),
     'recipient_city': Arg(str, multiple=True, description='City of recipient'),
     'recipient_state': Arg(str, multiple=True, description='State of recipient'),
     'last_disbursement_date': Date(description='Filter for records before this date'),

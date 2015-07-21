@@ -21,7 +21,8 @@ drop table if exists ofec_sched_b_fulltext;
 create table ofec_sched_b_fulltext as
 select
     sched_b_sk,
-    to_tsvector(recipient_nm) as recipient_name_text
+    to_tsvector(recipient_nm) as recipient_name_text,
+    to_tsvector(disb_desc) as disbursement_description_text
 from sched_b
 where rpt_yr >= :START_YEAR_ITEMIZED
 ;
@@ -29,6 +30,7 @@ where rpt_yr >= :START_YEAR_ITEMIZED
 -- Create indices on filtered fulltext columns
 alter table ofec_sched_b_fulltext add primary key (sched_b_sk);
 create index on ofec_sched_b_fulltext using gin (recipient_name_text);
+create index on ofec_sched_b_fulltext using gin (disbursement_description_text);
 
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
