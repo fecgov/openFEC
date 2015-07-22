@@ -299,6 +299,7 @@ FilingsSchema = make_schema(
     models.Filings,
     fields={
         'pdf_url': ma.fields.Str(),
+        'document_description': ma.fields.Str(),
     },
 )
 augment_schemas(FilingsSchema)

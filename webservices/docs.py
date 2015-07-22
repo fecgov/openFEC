@@ -340,3 +340,31 @@ All official records and reports filed by or delivered to the FEC.
 Note: because the filings data includes many records, counts for large
 result sets are approximate.
 '''
+
+DOC_TYPE = '''
+The type of document, for documents other than reports:
+    - 2 24 Hour Contribution Notice
+    - 4 48 Hour Contribution Notice
+    - A Debt Settlement Statement
+    - B Acknowledgment of Receipt of Debt Settlement Statement
+    - C RFAI: Debt Settlement First Notice
+    - D Commission Debt Settlement Review
+    - E Commission Response TO Debt Settlement Request
+    - F Administrative Termination
+    - G Debt Settlement Plan Amendment
+    - H Disavowal Notice
+    - I Disavowal Response
+    - J Conduit Report
+    - K Termination Approval
+    - L Repeat Non-Filer Notice
+    - M Filing Frequency Change Notice
+    - N Paper Amendment to Electronic Report
+    - O Acknowledgment of Filing Frequency Change
+    - S RFAI: Debt Settlement Second
+    - T Miscellaneous Report TO FEC
+    - V Repeat Violation Notice (441A OR 441B)
+    - P Notice of Paper Filing
+    - R F3L Filing Frequency Change Notice
+    - Q Acknowledgment of F3L Filing Frequency Change
+    - U Unregistered Committee Notice
+'''
