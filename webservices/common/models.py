@@ -1,3 +1,4 @@
+import re
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
@@ -839,7 +840,8 @@ class Filings(db.Model):
     form_type = db.Column(db.String, index=True)
     report_year = db.Column(db.Integer, index=True)
     report_type = db.Column(db.String, index=True)
-    document_type = db.Column(db.String)
+    document_type = db.Column(db.String, index=True)
+    document_type_full = db.Column(db.String)
     report_type_full = db.Column(db.String)
     beginning_image_number = db.Column(db.BigInteger, index=True)
     ending_image_number = db.Column(db.BigInteger)
@@ -865,6 +867,16 @@ class Filings(db.Model):
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String, index=True)
     update_date = db.Column(db.Date)
+
+    @property
+    def document_description(self):
+        if self.report_type_full:
+            clean_report = re.sub(r'\{[^)]*\}', '', self.report_type_full)
+            return clean_report + str(self.report_year)
+        elif self.document_type_full:
+            return self.document_type_full + str(self.report_year)
+        else:
+            return "Document " + str(self.report_year)
 
     @property
     def pdf_url(self):
