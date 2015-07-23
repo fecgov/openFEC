@@ -3,6 +3,7 @@ import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common.models import (
@@ -11,7 +12,7 @@ from webservices.common.models import (
 )
 
 
-office_map = {
+office_report_map = {
     'house': CommitteeReportsHouseSenate,
     'senate': CommitteeReportsHouseSenate,
     'presidential': CommitteeReportsPresidential,
@@ -23,6 +24,7 @@ office_args_map = {
 }
 
 
+@spec.doc(description='Candidate financial summaries by election')
 class ElectionView(Resource):
 
     @args.register_kwargs(args.elections)
@@ -34,7 +36,7 @@ class ElectionView(Resource):
         return utils.fetch_page(query, kwargs, model=CandidateHistory)
 
     def _get_records(self, kwargs):
-        reports_model = office_map[kwargs['office']]
+        reports_model = office_report_map[kwargs['office']]
         required_args = office_args_map.get(kwargs['office'], [])
         for arg in required_args:
             if kwargs[arg] is None:
