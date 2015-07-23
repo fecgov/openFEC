@@ -1,4 +1,3 @@
-import webargs
 import sqlalchemy as sa
 from flask.ext.restful import Resource
 
@@ -6,6 +5,7 @@ from webservices import args
 from webservices import spec
 from webservices import utils
 from webservices import schemas
+from webservices import exceptions
 from webservices.common.models import (
     CandidateHistory, CommitteeHistory, CandidateCommitteeLink, Filings,
 )
@@ -32,11 +32,12 @@ class ElectionView(Resource):
         required_args = office_args_map.get(kwargs['office'], [])
         for arg in required_args:
             if kwargs[arg] is None:
-                raise webargs.ValidationError(
+                raise exceptions.ApiError(
                     'Must include argument "{0}" with office type "{1}"'.format(
                         arg,
                         kwargs['office'],
-                    )
+                    ),
+                    status_code=422,
                 )
         query = CandidateHistory.query.with_entities(
             CandidateHistory,
