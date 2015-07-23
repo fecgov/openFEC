@@ -46,6 +46,12 @@ def _validate_natural(value):
 Natural = functools.partial(Arg, int, validate=_validate_natural)
 
 
+def _validate_per_page(value):
+    _validate_natural(value)
+    if value > 100:
+        raise webargs.ValidationError('Must be <= 100')
+
+
 Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
@@ -70,7 +76,7 @@ class Date(webargs.Arg):
 
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Natural(default=20, description='The number of results returned per page. Defaults to 20.'),
+    'per_page': Natural(default=20, validate=_validate_per_page, description='The number of results returned per page. Defaults to 20.'),
 }
 
 
