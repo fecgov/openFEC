@@ -1,5 +1,4 @@
 import datetime
-import unittest
 import functools
 
 import sqlalchemy as sa
