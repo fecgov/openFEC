@@ -375,3 +375,11 @@ schedule_b = {
     'last_disbursement_date': Date(description='Filter for records before this date'),
     'last_disbursement_amount': Arg(float, description='Filter for records'),
 }
+
+
+elections = {
+    'state': Arg(str, description='U.S. State candidate or territory where a candidate runs for office.'),
+    'district': Arg(str, description='Two digit district number'),
+    'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
+    'office': Arg(str, required=True, validate=lambda v: v.lower() in ['house', 'senate', 'presidential']),
+}

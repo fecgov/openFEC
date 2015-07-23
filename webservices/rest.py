@@ -34,6 +34,7 @@ from webservices.resources import sched_b
 from webservices.resources import aggregates
 from webservices.resources import candidates
 from webservices.resources import committees
+from webservices.resources import elections
 from webservices.resources import filings
 
 speedlogger = logging.getLogger('speed')
@@ -181,6 +182,7 @@ api.add_resource(CandidateNameSearch, '/names/candidates')
 api.add_resource(CommitteeNameSearch, '/names/committees')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
+api.add_resource(elections.ElectionView, '/elections')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -281,6 +283,7 @@ register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
+register_resource(elections.ElectionView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus

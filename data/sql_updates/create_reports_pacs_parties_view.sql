@@ -128,6 +128,7 @@ create index on ofec_reports_pacs_parties_mv_tmp(cycle);
 create index on ofec_reports_pacs_parties_mv_tmp(report_type);
 create index on ofec_reports_pacs_parties_mv_tmp(report_year);
 create index on ofec_reports_pacs_parties_mv_tmp(committee_id);
+create index on ofec_reports_pacs_parties_mv_tmp(committee_key);
 create index on ofec_reports_pacs_parties_mv_tmp(coverage_end_date);
 create index on ofec_reports_pacs_parties_mv_tmp(coverage_start_date);
 create index on ofec_reports_pacs_parties_mv_tmp(beginning_image_number);
