@@ -283,6 +283,7 @@ register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
+register_resource(elections.ElectionView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
