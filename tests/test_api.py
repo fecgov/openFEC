@@ -69,6 +69,8 @@ class OverallTest(ApiBaseTest):
     def test_invalid_per_page_param(self):
         results = self.app.get(api.url_for(CandidateList, per_page=-10))
         self.assertEquals(results.status_code, 422)
+        results = self.app.get(api.url_for(CandidateList, per_page=101))
+        self.assertEquals(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page=34.2))
         self.assertEquals(results.status_code, 422)
         results = self.app.get(api.url_for(CandidateList, per_page='dynamic-wombats'))
