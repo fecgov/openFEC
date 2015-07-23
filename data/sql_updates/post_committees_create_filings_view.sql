@@ -63,3 +63,5 @@ create index on ofec_filings_mv_tmp (report_year);
 create index on ofec_filings_mv_tmp (total_receipts);
 create index on ofec_filings_mv_tmp (total_disbursements);
 create index on ofec_filings_mv_tmp (total_independent_expenditures);
+create index on ofec_filings_mv_tmp (coverage_start_date);
+create index on ofec_filings_mv_tmp (coverage_end_date);

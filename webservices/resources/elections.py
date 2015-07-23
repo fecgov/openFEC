@@ -7,16 +7,9 @@ from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common.models import (
-    CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
-    CommitteeReportsPresidential, CommitteeReportsHouseSenate,
+    CandidateHistory, CommitteeHistory, CandidateCommitteeLink, Filings,
 )
 
-
-office_report_map = {
-    'house': CommitteeReportsHouseSenate,
-    'senate': CommitteeReportsHouseSenate,
-    'presidential': CommitteeReportsPresidential,
-}
 
 office_args_map = {
     'house': ['state', 'district'],
@@ -36,7 +29,6 @@ class ElectionView(Resource):
         return utils.fetch_page(query, kwargs, model=CandidateHistory)
 
     def _get_records(self, kwargs):
-        reports_model = office_report_map[kwargs['office']]
         required_args = office_args_map.get(kwargs['office'], [])
         for arg in required_args:
             if kwargs[arg] is None:
@@ -47,11 +39,8 @@ class ElectionView(Resource):
                     )
                 )
         query = CandidateHistory.query.with_entities(
-            CandidateHistory.candidate_id,
-            CandidateHistory.name,
-            reports_model.total_receipts_period,
-            reports_model.total_disbursements_period,
-            reports_model.cash_on_hand_end_period,
+            CandidateHistory,
+            Filings,
         ).distinct(
             CandidateHistory.candidate_key,
         ).join(
@@ -61,12 +50,15 @@ class ElectionView(Resource):
             CommitteeHistory,
             CandidateCommitteeLink.committee_id == CommitteeHistory.committee_id,
         ).join(
-            reports_model,
-            CommitteeHistory.committee_id == reports_model.committee_id,
+            Filings,
+            CommitteeHistory.committee_id == Filings.committee_id,
         ).filter(
             CandidateHistory.two_year_period == kwargs['cycle'],
             CommitteeHistory.cycle == kwargs['cycle'],
             CommitteeHistory.designation == 'P',
+            Filings.form_type == 'F3',
+            Filings.report_type != 'TER',
+            Filings.report_year.in_([kwargs['cycle'] - 1, kwargs['cycle']]),
         )
         if kwargs['state']:
             query = query.filter(CandidateHistory.state == kwargs['state'])
@@ -74,6 +66,6 @@ class ElectionView(Resource):
             query = query.filter(CandidateHistory.district == kwargs['district'])
         query = query.order_by(
             CandidateHistory.candidate_key,
-            sa.desc(reports_model.coverage_end_date),
+            sa.desc(Filings.coverage_end_date),
         )
         return query
