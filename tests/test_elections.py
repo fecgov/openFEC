@@ -1,6 +1,6 @@
 import datetime
 
-from webservices.rest import api
+from webservices.rest import db, api
 from webservices.resources.elections import ElectionView
 
 from tests import factories
@@ -15,18 +15,25 @@ class TestElections(ApiBaseTest):
             state='NY',
             district='07',
             two_year_period=2012,
+            office='H',
         )
         self.committees = [
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
+        factories.CandidateDetailFactory(candidate_key=self.candidate.candidate_key)
+        [
+            factories.CommitteeDetailFactory(committee_key=each.committee_key)
+            for each in self.committees
+        ]
+        db.session.flush()
         factories.CandidateCommitteeLinkFactory(
-            candidate_id=self.candidate.candidate_id,
-            committee_id=self.committees[0].committee_id,
+            candidate_key=self.candidate.candidate_key,
+            committee_key=self.committees[0].committee_key,
         )
         factories.CandidateCommitteeLinkFactory(
-            candidate_id=self.candidate.candidate_id,
-            committee_id=self.committees[1].committee_id,
+            candidate_key=self.candidate.candidate_key,
+            committee_key=self.committees[1].committee_key,
         )
         self.filings = [
             factories.FilingsFactory(
