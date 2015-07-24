@@ -170,6 +170,23 @@ Explore a filer's characteristics over time. This can be particularly useful if 
 committees change treasurers, designation, or `committee_type`.
 '''
 
+ELECTIONS = '''
+Look at the top-level financial information for all candidates running for the same
+office.
+
+Choose a 2-year cycle, and `house`, `senate` or `presidential`.
+
+If you are looking for a Senate seat, you will need to select the state using a two-letter
+abbreviation.
+
+House races require state and a two-digit district number.
+
+Since this endpoint reflects financial information, it will only have candidates once they file
+financial reporting forms. Query the `/candidates` endpoint to see an up to date list of all the
+candidates that filed to run for a particular seat.
+'''
+
+
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
 
