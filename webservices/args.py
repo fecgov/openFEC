@@ -381,5 +381,5 @@ elections = {
     'state': Arg(str, description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': Arg(str, description='Two digit district number'),
     'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
-    'office': Arg(str, required=True, validate=lambda v: v.lower() in ['house', 'senate', 'presidential']),
+    'office': Arg(str, required=True, enum=['house', 'senate', 'presidential'], validate=lambda v: v.lower() in ['house', 'senate', 'presidential']),
 }
