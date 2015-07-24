@@ -71,15 +71,16 @@ class ElectionView(Resource):
             CommitteeHistory.committee_key,
         ).join(
             CandidateCommitteeLink,
-            CandidateHistory.candidate_id == CandidateCommitteeLink.candidate_id,
+            CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
         ).join(
             CommitteeHistory,
-            CandidateCommitteeLink.committee_id == CommitteeHistory.committee_id,
+            CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
         ).join(
             Filings,
             CommitteeHistory.committee_id == Filings.committee_id,
         ).filter(
             CandidateHistory.two_year_period == kwargs['cycle'],
+            CandidateHistory.office == kwargs['office'][0].upper(),
             CommitteeHistory.cycle == kwargs['cycle'],
             CommitteeHistory.designation.in_(['P', 'A']),
             Filings.form_type == 'F3',

@@ -122,6 +122,7 @@ create unique index on ofec_committee_history_mv_tmp(idx);
 create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
 create index on ofec_committee_history_mv_tmp(committee_key);
+create index on ofec_committee_history_mv_tmp(designation);
 
 
 drop materialized view if exists ofec_committee_detail_mv_tmp;
