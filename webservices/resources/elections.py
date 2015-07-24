@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
@@ -17,7 +18,10 @@ office_args_map = {
 }
 
 
-@spec.doc(description='Candidate financial summaries by election')
+@spec.doc(
+    description=docs.ELECTIONS,
+    tags=['financial']
+)
 class ElectionView(Resource):
 
     @args.register_kwargs(args.elections)
