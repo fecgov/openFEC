@@ -5,7 +5,7 @@ from webservices import paging
 from webservices import sorting
 
 
-def fetch_page(query, kwargs, model, clear=False, count=None):
+def fetch_page(query, kwargs, model=None, clear=False, count=None):
     sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
     query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null)
     paginator = paging.SqlalchemyOffsetPaginator(query, kwargs['per_page'], count=count)
