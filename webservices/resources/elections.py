@@ -83,7 +83,7 @@ class ElectionView(Resource):
             CandidateHistory.office == kwargs['office'][0].upper(),
             CommitteeHistory.cycle == kwargs['cycle'],
             CommitteeHistory.designation.in_(['P', 'A']),
-            Filings.form_type == 'F3',
+            Filings.form_type.in_(['F3', 'F3P']),
             Filings.report_type != 'TER',
             Filings.report_year.in_([kwargs['cycle'] - 1, kwargs['cycle']]),
         )
