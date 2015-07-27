@@ -94,6 +94,9 @@ create unique index on ofec_candidate_history_mv_tmp(idx);
 create index on ofec_candidate_history_mv_tmp(candidate_key);
 create index on ofec_candidate_history_mv_tmp(candidate_id);
 create index on ofec_candidate_history_mv_tmp(two_year_period);
+create index on ofec_candidate_history_mv_tmp(office);
+create index on ofec_candidate_history_mv_tmp(state);
+create index on ofec_candidate_history_mv_tmp(district);
 
 
 drop materialized view if exists ofec_candidate_detail_mv_tmp;
