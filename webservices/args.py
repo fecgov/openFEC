@@ -287,8 +287,8 @@ itemized = {
     'max_image_number': Arg(str),
     'min_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': Date(),
-    'max_date': Date(),
+    'min_date': Date(description='Minium date'),
+    'max_date': Date(description='Maxium date'),
 }
 
 contributor_type = Arg(
@@ -298,6 +298,13 @@ contributor_type = Arg(
     description="Filters individual or committee contributions based on line number."
 )
 
+reporting_dates = {
+    'due_date': Date(description='Date the filing is done'),
+    'report_year': Date(description='Year of report'),
+    'report_type': Arg(str, description='Type of report'),
+    'create_date': Date(description='Date this record was added to the system'),
+    'update_date': Date(description='Date this record was last updated'),
+}
 
 schedule_a = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
