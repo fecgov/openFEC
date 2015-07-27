@@ -887,3 +887,17 @@ class Filings(db.Model):
         if self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
             return utils.make_report_pdf_url(self.beginning_image_number)
         return None
+
+class ReportingDates(db.Model):
+    __tablename__ = 'trc_report_due_date'
+
+    trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
+    report_year = db.Column(db.Integer, index=True)
+    report_type = db.Column(db.String, index=True)
+    due_date = db.Column(db.Date, index=True)
+    trc_election_id = db.Column(db.Integer, index=True)
+    create_date = db.Column(db.Date, index=True)
+    update_date = db.Column(db.Date, index=True)
+    pg_date = db.Column(db.Date, index=True)
+
+

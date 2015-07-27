@@ -31,6 +31,10 @@ spec = APISpec(
             'description': docs.COMMITTEE_TAG,
         },
         {
+            'name': 'dates',
+            'description': "Election and reporting dates.",
+        },
+        {
             'name': 'financial',
             'description': docs.FINANCIAL_TAG,
         },
