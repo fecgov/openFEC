@@ -1,4 +1,6 @@
-from webservices.rest import api
+import datetime
+
+from webservices.rest import db, api
 from webservices.resources.elections import ElectionView
 
 from tests import factories
@@ -13,19 +15,50 @@ class TestElections(ApiBaseTest):
             state='NY',
             district='07',
             two_year_period=2012,
+            office='H',
         )
-        self.committee = factories.CommitteeHistoryFactory(cycle=2012, designation='P')
+        self.committees = [
+            factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
+            factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
+        ]
+        factories.CandidateDetailFactory(candidate_key=self.candidate.candidate_key)
+        [
+            factories.CommitteeDetailFactory(committee_key=each.committee_key)
+            for each in self.committees
+        ]
+        db.session.flush()
         factories.CandidateCommitteeLinkFactory(
-            candidate_id=self.candidate.candidate_id,
-            committee_id=self.committee.committee_id,
+            candidate_key=self.candidate.candidate_key,
+            committee_key=self.committees[0].committee_key,
         )
-        self.filing = factories.FilingsFactory(
-            form_type='F3',
-            report_type='Q3',
-            report_year=2012,
-            cash_on_hand_end_period=1979,
-            committee_id=self.committee.committee_id,
+        factories.CandidateCommitteeLinkFactory(
+            candidate_key=self.candidate.candidate_key,
+            committee_key=self.committees[1].committee_key,
         )
+        self.filings = [
+            factories.FilingsFactory(
+                form_type='F3',
+                report_type='Q3',
+                report_year=2012,
+                total_receipts=50,
+                total_disbursements=75,
+                cash_on_hand_end_period=1979,
+                committee_id=self.committees[0].committee_id,
+                report_type_full='Quarter Three',
+                coverage_end_date=datetime.datetime(2012, 9, 30),
+            ),
+            factories.FilingsFactory(
+                form_type='F3',
+                report_type='Q4',
+                report_year=2012,
+                total_receipts=50,
+                total_disbursements=75,
+                cash_on_hand_end_period=25,
+                committee_id=self.committees[1].committee_id,
+                report_type_full='Quarter Four',
+                coverage_end_date=datetime.datetime(2012, 12, 31),
+            ),
+        ]
 
     def test_missing_params(self):
         response = self.app.get(api.url_for(ElectionView))
@@ -50,10 +83,10 @@ class TestElections(ApiBaseTest):
             'candidate_id': self.candidate.candidate_id,
             'candidate_name': self.candidate.name,
             'candidate_status_full': self.candidate.candidate_status_full,
-            'total_receipts': self.filing.total_receipts,
-            'total_disbursements': self.filing.total_disbursements,
-            'cash_on_hand_end_period': self.filing.cash_on_hand_end_period,
-            'document_description': self.filing.document_description,
-            'pdf_url': self.filing.pdf_url,
+            'total_receipts': sum(each.total_receipts for each in self.filings),
+            'total_disbursements': sum(each.total_disbursements for each in self.filings),
+            'cash_on_hand_end_period': sum(each.cash_on_hand_end_period for each in self.filings),
+            'document_description': self.filings[1].document_description,
+            'pdf_url': self.filings[1].pdf_url,
         }
         self.assertEqual(results[0], expected)

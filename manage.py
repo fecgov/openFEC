@@ -41,7 +41,7 @@ def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
     if not sql_dir.endswith('/'):
         sql_dir += '/'
-    paths = glob.glob(sql_dir + '*.sql')
+    paths = sorted(glob.glob(sql_dir + '*.sql'))
     if processes > 1:
         pool = multiprocessing.Pool(processes=processes)
         pool.map(execute_sql_file, sorted(paths))
