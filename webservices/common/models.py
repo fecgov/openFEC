@@ -888,16 +888,28 @@ class Filings(db.Model):
             return utils.make_report_pdf_url(self.beginning_image_number)
         return None
 
+class ReportType(db.Model):
+    __tablename__ = 'dimreporttype'
+    rpt_tp_desc = db.Column(db.String, index=True)
+    rpt_tp = db.Column(db.String, primary_key=True)
+
+
 class ReportingDates(db.Model):
     __tablename__ = 'trc_report_due_date'
 
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True)
-    report_type = db.Column(db.String, index=True)
+    report_type = db.Column(db.String)
     due_date = db.Column(db.Date, index=True)
-    trc_election_id = db.Column(db.Integer, index=True)
     create_date = db.Column(db.Date, index=True)
     update_date = db.Column(db.Date, index=True)
-    pg_date = db.Column(db.Date, index=True)
 
+
+    @declared_attr
+    def report_type(cls):
+        return db.Column(db.String, db.ForeignKey('dimreporttype.rpt_tp'))
+
+    @declared_attr
+    def report(cls):
+        return db.relationship('ReportType')
 
