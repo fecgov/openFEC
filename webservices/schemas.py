@@ -304,7 +304,9 @@ FilingsSchema = make_schema(
 )
 augment_schemas(FilingsSchema)
 
-ReportingDatesSchema = make_schema(models.ReportingDates)
+ReportingDatesSchema = make_schema(
+    models.ReportingDates,
+)
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
 
