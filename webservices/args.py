@@ -299,11 +299,11 @@ contributor_type = Arg(
 )
 
 reporting_dates = {
-    'due_date': Date(description='Date the filing is done'),
-    'report_year': Date(description='Year of report'),
+    'due_date': Date(multiple=True, description='Date the filing is done'),
+    'report_year': Date(multiple=True, description='Year of report'),
     'report_type': Arg(str, multiple=True, description='Type of report'),
-    'create_date': Date(description='Date this record was added to the system'),
-    'update_date': Date(description='Date this record was last updated'),
+    'create_date': Date(multiple=True, description='Date this record was added to the system'),
+    'update_date': Date(multiple=True, description='Date this record was last updated'),
 }
 
 schedule_a = {
