@@ -301,7 +301,7 @@ contributor_type = Arg(
 reporting_dates = {
     'due_date': Date(description='Date the filing is done'),
     'report_year': Date(description='Year of report'),
-    'report_type': Arg(str, description='Type of report'),
+    'report_type': Arg(str, multiple=True, description='Type of report'),
     'create_date': Date(description='Date this record was added to the system'),
     'update_date': Date(description='Date this record was last updated'),
 }
