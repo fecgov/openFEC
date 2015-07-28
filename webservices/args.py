@@ -304,6 +304,7 @@ reporting_dates = {
     'report_type': Arg(str, multiple=True, description='Type of report'),
     'create_date': Date(multiple=True, description='Date this record was added to the system'),
     'update_date': Date(multiple=True, description='Date this record was last updated'),
+    'upcoming': Bool(default=False, description='Only show future due dates for each type of report.')
 }
 
 schedule_a = {
