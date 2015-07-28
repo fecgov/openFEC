@@ -1,3 +1,5 @@
+from datetime import date
+
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -30,7 +32,12 @@ class ReportingDatesView(Resource):
     )
     @schemas.marshal_with(schemas.ReportingDatesPageSchema())
     def get(self, **kwargs):
-        reporting_dates = models.ReportingDates.query
-        reporting_dates = filter_query(models.ReportingDates, reporting_dates, filter_fields, kwargs)
-        return utils.fetch_page(reporting_dates, kwargs, model=models.ReportingDates)
+        reporting_date_query = models.ReportingDates.query
+        reporting_date_query = filter_query(models.ReportingDates, reporting_date_query, filter_fields, kwargs)
+
+        if kwargs.get('upcoming'):
+            # choose reporting dates in the future, unique to report type, order by due date
+            reporting_date_query = reporting_date_query.filter(models.ReportingDates.due_date >= date.today())
+
+        return utils.fetch_page(reporting_date_query, kwargs, model=models.ReportingDates)
 
