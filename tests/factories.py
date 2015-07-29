@@ -166,6 +166,14 @@ class ScheduleAByStateFactory(BaseFactory):
     cycle = 2016
 
 
+class ScheduleAByContributorTypeFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleAByContributorType
+    committee_id = factory.Sequence(lambda n: str(n))
+    individual = True
+    cycle = 2016
+
+
 class ScheduleAByContributorFactory(BaseFactory):
     class Meta:
         model = models.ScheduleAByContributor

@@ -205,6 +205,7 @@ add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipie
 
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate')
+api.add_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, '/schedules/schedule_a/by_contributor_type/by_candidate')
 
 api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings')
 api.add_resource(filings.FilingsList, '/filings')
@@ -289,6 +290,7 @@ register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
+register_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
 register_resource(elections.ElectionView, blueprint='v1')
