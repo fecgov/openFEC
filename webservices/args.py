@@ -295,7 +295,7 @@ contributor_type = Arg(
     str,
     multiple=True,
     validate=lambda v: v in ['individual', 'committee'],
-    description="Filters individual or committee contributions based on line number."
+    description='Filters individual or committee contributions based on line number.'
 )
 
 
@@ -303,8 +303,8 @@ schedule_a = {
     'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
     'contributor_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC.'),
     'contributor_name': Arg(str, description='Name of contributor.'),
-    'contributor_city': Arg(str, multiple=True, description='City of contributor'),
-    'contributor_state': Arg(str, multiple=True, description='State of contributor'),
+    'contributor_city': IString(multiple=True, description='City of contributor'),
+    'contributor_state': IString(multiple=True, description='State of contributor'),
     'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
     'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
     'last_contributor_receipt_date': Date(),
@@ -322,7 +322,7 @@ schedule_a_by_size = {
 
 schedule_a_by_state = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'state': Arg(str, multiple=True, description='State of contributor'),
+    'state': IString(multiple=True, description='State of contributor'),
     'hide_null': Bool(default=False, description='Exclude values with missing state'),
 }
 
@@ -330,19 +330,19 @@ schedule_a_by_state = {
 schedule_a_by_zip = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'zip': Arg(str, multiple=True, description='Zip code'),
-    'state': Arg(str, multiple=True, description='State of contributor'),
+    'state': IString(multiple=True, description='State of contributor'),
 }
 
 
 schedule_a_by_employer = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'employer': Arg(str, multiple=True, description='Employer'),
+    'employer': IString(multiple=True, description='Employer'),
 }
 
 
 schedule_a_by_occupation = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'occupation': Arg(str, multiple=True, description='Occupation'),
+    'occupation': IString(multiple=True, description='Occupation'),
 }
 
 
@@ -350,6 +350,13 @@ schedule_a_by_contributor = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'contributor_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+}
+
+
+schedule_a_by_contributor_type = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'individual': Arg(bool, description='Restrict to individual donors'),
 }
 
 
@@ -370,18 +377,23 @@ schedule_b = {
     'recipient_committee_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),
     'recipient_name': Arg(str, description='Name of recipient'),
     'disbursement_description': Arg(str, description='Description of disbursement'),
-    'recipient_city': Arg(str, multiple=True, description='City of recipient'),
-    'recipient_state': Arg(str, multiple=True, description='State of recipient'),
+    'recipient_city': IString(multiple=True, description='City of recipient'),
+    'recipient_state': IString(multiple=True, description='State of recipient'),
     'last_disbursement_date': Date(description='Filter for records before this date'),
     'last_disbursement_amount': Arg(float, description='Filter for records'),
 }
 
 
 elections = {
-    'state': Arg(str, description='U.S. State candidate or territory where a candidate runs for office.'),
-    'district': Arg(str, description='Two digit district number'),
+    'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
+    'district': IString(description='Two digit district number'),
     'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
-    'office': Arg(str, required=True, enum=['house', 'senate', 'presidential'], validate=lambda v: v.lower() in ['house', 'senate', 'presidential']),
+    'office': Arg(
+        str,
+        required=True,
+        enum=['house', 'senate', 'presidential'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'presidential']
+    ),
 }
 
 

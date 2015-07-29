@@ -272,6 +272,7 @@ augment_models(
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
     models.ScheduleAByContributor,
+    models.ScheduleAByContributorType,
     models.ScheduleBByRecipient,
     models.ScheduleBByRecipientID,
 )
