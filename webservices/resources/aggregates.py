@@ -193,6 +193,32 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
 
 @spec.doc(
     description=(
+        'Schedule A receipts aggregated by contributor type (individual or committee), if applicable. '
+        'To avoid double counting, memoed items are not included.'
+    )
+)
+class ScheduleAByContributorTypeView(ScheduleAAggregateView):
+
+    model = models.ScheduleAByContributorType
+    fields = [
+        ('cycle', models.ScheduleAByContributorType.cycle),
+        ('individual', models.ScheduleAByContributorType.individual),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_a_by_contributor_type)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleAByContributorType)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleAByContributorTypePageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super(ScheduleAByContributorTypeView, self).get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(
+    description=(
         'Schedule B receipts aggregated by recipient name. To avoid '
         'double counting, memoed items are not included.'
     )
