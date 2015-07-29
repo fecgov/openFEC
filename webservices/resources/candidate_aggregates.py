@@ -38,7 +38,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     )
 
 
-class ScheduleABySizeCandidate(Resource):
+class ScheduleABySizeCandidateView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.make_sort_args())
@@ -50,7 +50,7 @@ class ScheduleABySizeCandidate(Resource):
         return utils.fetch_page(query, kwargs)
 
 
-class ScheduleAByStateCandidate(Resource):
+class ScheduleAByStateCandidateView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.make_sort_args())
