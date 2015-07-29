@@ -2,6 +2,7 @@ import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
+from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common.models import (
@@ -11,6 +12,13 @@ from webservices.common.models import (
 
 
 def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
+    """Aggregate committee totals by candidate.
+
+    :param aggregate_model: SQLAlchemy aggregate model
+    :param list label_columns: List of label columns; must include group-by columns
+    :param list group_columns: List of group-by columns
+    :param dict kwargs: Parsed arguments from request
+    """
     return CandidateHistory.query.with_entities(
         CandidateHistory.candidate_id,
         aggregate_model.cycle,
@@ -38,6 +46,10 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     )
 
 
+@spec.doc(
+    tags=['schedules'],
+    description='Schedule A receipts aggregated by contribution size.',
+)
 class ScheduleABySizeCandidateView(Resource):
 
     @args.register_kwargs(args.paging)
@@ -50,6 +62,10 @@ class ScheduleABySizeCandidateView(Resource):
         return utils.fetch_page(query, kwargs)
 
 
+@spec.doc(
+    tags=['schedules'],
+    description='Schedule A receipts aggregated by contributor state.',
+)
 class ScheduleAByStateCandidateView(Resource):
 
     @args.register_kwargs(args.paging)
