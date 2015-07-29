@@ -387,5 +387,5 @@ elections = {
 
 schedule_a_candidate_aggregate = {
     'candidate_id': Arg(str, multiple=True, required=True),
-    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
 }
