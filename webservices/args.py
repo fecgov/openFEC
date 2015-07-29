@@ -356,7 +356,7 @@ schedule_a_by_contributor = {
 schedule_a_by_contributor_type = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'individual': Arg(bool, description='Restrict to individual donors'),
+    'individual': Bool(multiple=True, description='Restrict to individual donors'),
 }
 
 
