@@ -59,7 +59,7 @@ class ScheduleABySizeCandidateView(Resource):
     def get(self, **kwargs):
         group_columns = [ScheduleABySize.size]
         query = candidate_aggregate(ScheduleABySize, group_columns, group_columns, kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, cap=None)
 
 
 @spec.doc(
@@ -82,4 +82,4 @@ class ScheduleAByStateCandidateView(Resource):
             [ScheduleAByState.state],
             kwargs,
         )
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, cap=0)
