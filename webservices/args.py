@@ -49,7 +49,7 @@ Natural = functools.partial(Arg, int, validate=_validate_natural)
 def _validate_per_page(value):
     _validate_natural(value)
     if value > 100:
-        raise webargs.ValidationError('Must be <= 100')
+        raise webargs.ValidationError('Parameter "per_page" must be <= 100')
 
 
 Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
