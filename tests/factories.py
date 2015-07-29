@@ -152,6 +152,20 @@ class FilingsFactory(BaseFactory):
         model = models.Filings
 
 
+class ScheduleABySizeFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleABySize
+    committee_id = factory.Sequence(lambda n: str(n))
+    cycle = 2016
+
+
+class ScheduleAByStateFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleAByState
+    committee_id = factory.Sequence(lambda n: str(n))
+    cycle = 2016
+
+
 class ScheduleAByContributorFactory(BaseFactory):
     class Meta:
         model = models.ScheduleAByContributor
