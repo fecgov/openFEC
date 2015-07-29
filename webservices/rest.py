@@ -32,6 +32,7 @@ from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
 from webservices.resources import aggregates
+from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
 from webservices.resources import committees
 from webservices.resources import elections
@@ -201,6 +202,9 @@ add_aggregate_resource(api, aggregates.ScheduleAByContributorView, 'a', 'contrib
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
 
+api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate')
+api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate')
+
 api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings')
 api.add_resource(filings.FilingsList, '/filings')
 
@@ -281,6 +285,8 @@ register_resource(aggregates.ScheduleAByOccupationView, blueprint='v1')
 register_resource(aggregates.ScheduleAByContributorView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
+register_resource(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
+register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
 register_resource(elections.ElectionView, blueprint='v1')
