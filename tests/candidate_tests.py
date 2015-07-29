@@ -157,8 +157,8 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateFactory(name='Obama'),
             factories.CandidateFactory(party='DEM'),
             factories.CandidateFactory(cycles=[2006]),
-            factories.CandidateFactory(candidate_id='barlet'),
-            factories.CandidateFactory(candidate_id='ritchie'),
+            factories.CandidateFactory(candidate_id='BARLET'),
+            factories.CandidateFactory(candidate_id='RITCHIE'),
         ]
 
         filter_fields = (
@@ -168,7 +168,7 @@ class CandidateFormatTest(ApiBaseTest):
             ('name', 'Obama'),
             ('party', 'DEM'),
             ('cycle', '2006'),
-            ('candidate_id', ['bartlet', 'ritchie'])
+            ('candidate_id', ['BARTLET', 'RITCHIE'])
         )
 
         # checking one example from each field

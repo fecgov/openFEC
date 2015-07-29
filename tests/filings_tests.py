@@ -57,7 +57,7 @@ class TestFilings(ApiBaseTest):
             factories.FilingsFactory(form_type='3'),
             factories.FilingsFactory(primary_general_indicator='G'),
             factories.FilingsFactory(amendment_indicator='A'),
-            factories.FilingsFactory(report_type='Post General'),
+            factories.FilingsFactory(report_type='POST GENERAL'),
             factories.FilingsFactory(report_year=1999),
             factories.FilingsFactory(document_type='X'),
         ]
