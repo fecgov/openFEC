@@ -159,33 +159,31 @@ names = {
 candidate_detail = {
     'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
-    'state': Arg(str, multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
-    'party': Arg(str, multiple=True, description='Three letter code for the party under which a candidate ran for office'),
+    'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
+    'party': IString(multiple=True, description='Three letter code for the party under which a candidate ran for office'),
     'year': Arg(str, dest='election_year', description='See records pertaining to a particular year.'),
     'district': Arg(str, multiple=True, description='Two digit district number'),
-    'candidate_status': Arg(str, multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is:\n\
+    'candidate_status': IString(multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is:\n\
         - C present candidate\n\
         - F future candidate\n\
         - N not yet a candidate\n\
         - P prior candidate\n\
         '),
-    'incumbent_challenge': Arg(str, multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
+    'incumbent_challenge': IString(multiple=True, enum=['', 'I', 'C', 'O'], description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'),
 }
 
 candidate_list = {
     'q': Arg(str, description='Text to search all fields for'),
-    'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
     'name': Arg(str, description="Candidate's name (full or partial)"),
 }
 
 committee = {
-
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description=docs.COMMITTEE_CYCLE),
-    'year': Arg(int, multiple=True, description='A year that the committee was active- (after original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
-    'designation': Arg(
-        str, multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
+    'designation': IString(
+        multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
         description='The one-letter designation code of the organization:\n\
          - A authorized by a candidate\n\
          - J joint fundraising committee\n\
@@ -195,7 +193,7 @@ committee = {
          - D leadership PAC\n\
         '
     ),
-    'organization_type': Arg(str, multiple=True, enum=['', 'C', 'L', 'M', 'T', 'V', 'W'],
+    'organization_type': IString(multiple=True, enum=['', 'C', 'L', 'M', 'T', 'V', 'W'],
         description='The one-letter code for the kind for organization:\n\
         - C corporation\n\
         - L labor organization\n\
@@ -204,7 +202,7 @@ committee = {
         - V cooperative\n\
         - W corporation without capital stock\n\
         '),
-    'committee_type': Arg(str, multiple=True, enum=['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+    'committee_type': IString(multiple=True, enum=['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'],
         description='The one-letter type code of the organization:\n\
         - C communication cost\n\
         - D delegate\n\
@@ -227,30 +225,30 @@ committee = {
 
 committee_list = {
     'q': Arg(str, description='Text to search all fields for'),
-    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
-    'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
     'name': Arg(str, description="Candidate's name (full or partial)"),
-    'state': Arg(str, multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
+    'state': IString(multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
-    'party': Arg(str, multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
+    'party': IString(multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
     'min_first_file_date': Date(description='Filters out committees that first filed their registration before this date. Can bu used as a range with max_first_file_date. To see when a Committee first filed its F1.'),
     'max_first_file_date': Date(description='Filters out committees that first filed their registration after this date. Can bu used as a range with start_date. To see when a Committee first filed its F1.'),
 }
 
 filings = {
-    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
-    'candidate_id': Arg(str, multiple=True, description=docs.CANDIDATE_ID),
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
-    'report_type': Arg(str, multiple=True, description='Report type'),
-    'document_type': Arg(str, multiple=True, description=docs.DOC_TYPE),
+    'report_type': IString(multiple=True, description='Report type'),
+    'document_type': IString(multiple=True, description=docs.DOC_TYPE),
     'report_year': Arg(int, multiple=True, description='Report year'),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
-    'report_year': Arg(str, multiple=True, description='Year that the report applies to'),
+    'report_year': Arg(int, multiple=True, description='Year that the report applies to'),
     'min_receipt_date': Date(description='Minimum day the filing was received by the FEC'),
     'max_receipt_date': Date(description='Maximum day the filing was received by the FEC'),
-    'form_type': Arg(str, multiple=True, description='Form type'),
-    'primary_general_indicator': Arg(str, multiple=True, description='Primary Gereral or Special election indicator.'),
-    'amendment_indicator': Arg(str, multiple=True, description='''
+    'form_type': IString(multiple=True, description='Form type'),
+    'primary_general_indicator': IString(multiple=True, description='Primary Gereral or Special election indicator.'),
+    'amendment_indicator': IString(multiple=True, description='''
         -N   new\n\
         -A   amendment\n\
         -T   terminated\n\
@@ -300,8 +298,8 @@ contributor_type = Arg(
 
 
 schedule_a = {
-    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
-    'contributor_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC.'),
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'contributor_id': IString(multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC.'),
     'contributor_name': Arg(str, description='Name of contributor.'),
     'contributor_city': IString(multiple=True, description='City of contributor'),
     'contributor_state': IString(multiple=True, description='State of contributor'),
@@ -349,14 +347,14 @@ schedule_a_by_occupation = {
 schedule_a_by_contributor = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'contributor_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
+    'contributor_id': IString(multiple=True, description=docs.COMMITTEE_ID),
 }
 
 
 schedule_a_by_contributor_type = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'individual': Bool(multiple=True, description='Restrict to individual donors'),
+    'individual': Bool(description='Restrict to individual donors'),
 }
 
 
@@ -368,13 +366,13 @@ schedule_b_by_recipient = {
 
 schedule_b_by_recipient_id = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'recipient_id': Arg(str, multiple=True, description='Recipient Committee ID'),
+    'recipient_id': IString(multiple=True, description='Recipient Committee ID'),
 }
 
 
 schedule_b = {
-    'committee_id': Arg(str, multiple=True, description=docs.COMMITTEE_ID),
-    'recipient_committee_id': Arg(str, multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'recipient_committee_id': IString(multiple=True, description='The FEC identifier should be represented here the contributor is registered with the FEC'),
     'recipient_name': Arg(str, description='Name of recipient'),
     'disbursement_description': Arg(str, description='Description of disbursement'),
     'recipient_city': IString(multiple=True, description='City of recipient'),
@@ -386,7 +384,7 @@ schedule_b = {
 
 elections = {
     'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
-    'district': IString(description='Two digit district number'),
+    'district': Arg(str, description='Two digit district number'),
     'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
     'office': Arg(
         str,
@@ -398,6 +396,6 @@ elections = {
 
 
 schedule_a_candidate_aggregate = {
-    'candidate_id': Arg(str, multiple=True, required=True),
+    'candidate_id': IString(multiple=True, required=True),
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
 }
