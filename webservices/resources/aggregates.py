@@ -16,7 +16,8 @@ from webservices.common import models
 class ScheduleAAggregateView(Resource):
 
     model = None
-    fields = {}
+    match_fields = []
+    fields = []
 
     def get(self, committee_id=None, **kwargs):
         query = self._build_query(committee_id, kwargs)
@@ -26,6 +27,7 @@ class ScheduleAAggregateView(Resource):
         query = self.model.query
         if committee_id is not None:
             query = query.filter(self.model.committee_id == committee_id)
+        query = utils.filter_match(query, kwargs, self.match_fields)
         query = utils.filter_multi(query, kwargs, self.fields)
         return query
 
@@ -200,9 +202,11 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
 class ScheduleAByContributorTypeView(ScheduleAAggregateView):
 
     model = models.ScheduleAByContributorType
+    match_fields = [
+        ('individual', models.ScheduleAByContributorType.individual),
+    ]
     fields = [
         ('cycle', models.ScheduleAByContributorType.cycle),
-        ('individual', models.ScheduleAByContributorType.individual),
     ]
 
     @args.register_kwargs(args.paging)

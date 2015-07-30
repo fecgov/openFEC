@@ -71,6 +71,13 @@ def search_text(query, column, text, order=True):
     return query
 
 
+def filter_match(query, kwargs, fields):
+    for key, column in fields:
+        if kwargs[key] is not None:
+            query = query.filter(column == kwargs[key])
+    return query
+
+
 def filter_multi(query, kwargs, fields):
     for key, column in fields:
         if kwargs[key]:
