@@ -9,6 +9,7 @@ from smore.apispec import utils
 import manage
 from tests import common
 from tests import factories
+from webservices import updates
 from webservices.rest import db
 from webservices.spec import spec
 from webservices.common import models
@@ -174,6 +175,7 @@ class TestViews(common.IntegrationTestCase):
             item_key: value,
         })
         db.session.flush()
+        updates.update_all(conn=db.session.connection())
         db.session.execute('select update_aggregates()')
         rows = total_model.query.filter_by(**{
             'cycle': 2016,
@@ -186,10 +188,11 @@ class TestViews(common.IntegrationTestCase):
         filing.contributor_receipt_amount = 53
         db.session.add(filing)
         db.session.flush()
+        updates.update_all(conn=db.session.connection())
         db.session.execute('select update_aggregates()')
         db.session.refresh(rows[0])
-        self.assertEqual(rows[0].total, 0)
-        self.assertEqual(rows[0].count, 0)
+        self.assertEqual(rows[0].total, 53)
+        self.assertEqual(rows[0].count, 1)
 
     def _check_update_aggregate_existing(self, item_key, total_key, total_model):
         existing = total_model.query.filter(
@@ -205,6 +208,7 @@ class TestViews(common.IntegrationTestCase):
             item_key: getattr(existing, total_key),
         })
         db.session.flush()
+        updates.update_all(conn=db.session.connection())
         db.session.execute('select update_aggregates()')
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
@@ -247,6 +251,7 @@ class TestViews(common.IntegrationTestCase):
             contributor_receipt_amount=538,
         )
         db.session.flush()
+        updates.update_all(conn=db.session.connection())
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         rows = models.ScheduleABySize.query.filter_by(
@@ -260,6 +265,7 @@ class TestViews(common.IntegrationTestCase):
         filing.contributor_receipt_amount = 53
         db.session.add(filing)
         db.session.flush()
+        updates.update_all(conn=db.session.connection())
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(rows[0])
@@ -279,6 +285,7 @@ class TestViews(common.IntegrationTestCase):
             contributor_receipt_amount=538,
         )
         db.session.flush()
+        updates.update_all(conn=db.session.connection())
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(existing)
@@ -314,6 +321,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.execute(ins)
         db.session.flush()
+        updates.update_all(conn=db.session.connection())
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
