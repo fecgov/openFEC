@@ -161,7 +161,7 @@ candidate_detail = {
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': IString(multiple=True, description='Three letter code for the party under which a candidate ran for office'),
-    'year': Arg(str, dest='election_year', description='See records pertaining to a particular year.'),
+    'year': Arg(str, dest='election_year', description='See records pertaining to a particular election year.'),
     'district': Arg(str, multiple=True, description='Two digit district number'),
     'candidate_status': IString(multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is:\n\
         - C present candidate\n\
@@ -181,7 +181,6 @@ candidate_list = {
 committee = {
     'year': Arg(int, multiple=True, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': Arg(int, multiple=True, description=docs.COMMITTEE_CYCLE),
-    'cycle': Arg(int, multiple=True, description='A two-year election cycle that the committee was active- (after original registration date but before expiration date.)'),
     'designation': IString(
         multiple=True, enum=['', 'A', 'J', 'P', 'U', 'B', 'D'],
         description='The one-letter designation code of the organization:\n\
@@ -241,9 +240,8 @@ filings = {
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': IString(multiple=True, description='Report type'),
     'document_type': IString(multiple=True, description=docs.DOC_TYPE),
-    'report_year': Arg(int, multiple=True, description='Report year'),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
-    'report_year': Arg(int, multiple=True, description='Year that the report applies to'),
+    'report_year': Arg(int, multiple=True, description=docs.REPORT_YEAR),
     'min_receipt_date': Date(description='Minimum day the filing was received by the FEC'),
     'max_receipt_date': Date(description='Maximum day the filing was received by the FEC'),
     'form_type': IString(multiple=True, description='Form type'),
@@ -346,14 +344,14 @@ schedule_a_by_occupation = {
 
 schedule_a_by_contributor = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'year': Arg(int, multiple=True, description=docs.REPORT_YEAR),
     'contributor_id': IString(multiple=True, description=docs.COMMITTEE_ID),
 }
 
 
 schedule_a_by_contributor_type = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'year': Arg(int, multiple=True, description=docs.REPORT_YEAR),
     'individual': Bool(description='Restrict to individual donors'),
 }
 
