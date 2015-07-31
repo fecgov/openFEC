@@ -40,6 +40,15 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
+    def test_filter_case_insensitive(self):
+        [
+            factories.ScheduleAFactory(contributor_city='NEW YORK'),
+            factories.ScheduleAFactory(contributor_city='DES MOINES'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_city='new york'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
+
     def test_filter_fulltext(self):
         names = ['David Koch', 'George Soros']
         filings = [

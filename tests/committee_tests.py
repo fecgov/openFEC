@@ -47,7 +47,7 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertNotEqual(results[0]['committee_id'], decoy_committee.committee_id)
 
     def test_filter_by_candidate_id(self):
-        candidate_id = 'id0'
+        candidate_id = 'ID0'
         candidate_committees = [factories.CommitteeFactory(candidate_ids=[candidate_id]) for _ in range(2)]
         other_committees = [factories.CommitteeFactory() for _ in range(3)]  # noqa
         response = self._response(api.url_for(CommitteeList, candidate_id=candidate_id))
@@ -57,7 +57,7 @@ class CommitteeFormatTest(ApiBaseTest):
         )
 
     def test_filter_by_candidate_ids(self):
-        candidate_ids = ['id0', 'id1']
+        candidate_ids = ['ID0', 'ID1']
         candidate1_committees = [factories.CommitteeFactory(candidate_ids=[candidate_ids[0]]) for _ in range(2)]
         candidate2_committees = [factories.CommitteeFactory(candidate_ids=[candidate_ids[1]]) for _ in range(2)]
         other_committees = [factories.CommitteeFactory() for _ in range(3)]  # noqa

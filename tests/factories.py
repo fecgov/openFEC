@@ -26,7 +26,7 @@ class CommitteeSearchFactory(BaseFactory):
 
 class BaseCandidateFactory(BaseFactory):
     candidate_key = factory.Sequence(lambda n: n)
-    candidate_id = factory.Sequence(lambda n: 'id{0}'.format(n))
+    candidate_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
 class CandidateFactory(BaseCandidateFactory):
@@ -48,7 +48,7 @@ class CandidateHistoryFactory(BaseCandidateFactory):
 
 class BaseCommitteeFactory(BaseFactory):
     committee_key = factory.Sequence(lambda n: n + 1)
-    committee_id = factory.Sequence(lambda n: 'id{0}'.format(n))
+    committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
 class CommitteeFactory(BaseCommitteeFactory):
@@ -150,6 +150,28 @@ class ScheduleBSearchFactory(BaseFactory):
 class FilingsFactory(BaseFactory):
     class Meta:
         model = models.Filings
+
+
+class ScheduleABySizeFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleABySize
+    committee_id = factory.Sequence(lambda n: str(n))
+    cycle = 2016
+
+
+class ScheduleAByStateFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleAByState
+    committee_id = factory.Sequence(lambda n: str(n))
+    cycle = 2016
+
+
+class ScheduleAByContributorTypeFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleAByContributorType
+    committee_id = factory.Sequence(lambda n: str(n))
+    individual = True
+    cycle = 2016
 
 
 class ScheduleAByContributorFactory(BaseFactory):
