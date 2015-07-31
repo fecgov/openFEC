@@ -49,7 +49,7 @@ Natural = functools.partial(Arg, int, validate=_validate_natural)
 def _validate_per_page(value):
     _validate_natural(value)
     if value > 100:
-        raise webargs.ValidationError('Must be <= 100')
+        raise webargs.ValidationError('Parameter "per_page" must be <= 100')
 
 
 Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
@@ -293,7 +293,7 @@ contributor_type = Arg(
     str,
     multiple=True,
     validate=lambda v: v in ['individual', 'committee'],
-    description="Filters individual or committee contributions based on line number."
+    description='Filters individual or committee contributions based on line number.'
 )
 
 
@@ -351,6 +351,13 @@ schedule_a_by_contributor = {
 }
 
 
+schedule_a_by_contributor_type = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'year': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'individual': Bool(description='Restrict to individual donors'),
+}
+
+
 schedule_b_by_recipient = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'recipient_name': Arg(str, multiple=True, description='Recipient name'),
@@ -379,7 +386,12 @@ elections = {
     'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': Arg(str, description='Two digit district number'),
     'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
-    'office': Arg(str, required=True, enum=['house', 'senate', 'presidential'], validate=lambda v: v.lower() in ['house', 'senate', 'presidential']),
+    'office': Arg(
+        str,
+        required=True,
+        enum=['house', 'senate', 'presidential'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'presidential']
+    ),
 }
 
 
