@@ -47,7 +47,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 
 
 @spec.doc(
-    tags=['schedules'],
+    tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contribution size.',
 )
 class ScheduleABySizeCandidateView(Resource):
@@ -63,7 +63,7 @@ class ScheduleABySizeCandidateView(Resource):
 
 
 @spec.doc(
-    tags=['schedules'],
+    tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contributor state.',
 )
 class ScheduleAByStateCandidateView(Resource):
@@ -86,7 +86,7 @@ class ScheduleAByStateCandidateView(Resource):
 
 
 @spec.doc(
-    tags=['schedules'],
+    tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contributor type.',
 )
 class ScheduleAByContributorTypeCandidateView(Resource):
