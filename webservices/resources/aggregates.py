@@ -16,7 +16,8 @@ from webservices.common import models
 class ScheduleAAggregateView(Resource):
 
     model = None
-    fields = {}
+    match_fields = []
+    fields = []
 
     def get(self, committee_id=None, **kwargs):
         query = self._build_query(committee_id, kwargs)
@@ -26,6 +27,7 @@ class ScheduleAAggregateView(Resource):
         query = self.model.query
         if committee_id is not None:
             query = query.filter(self.model.committee_id == committee_id)
+        query = utils.filter_match(query, kwargs, self.match_fields)
         query = utils.filter_multi(query, kwargs, self.fields)
         return query
 
@@ -189,6 +191,34 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
     @schemas.marshal_with(schemas.ScheduleAByContributorPageSchema())
     def get(self, committee_id=None, **kwargs):
         return super(ScheduleAByContributorView, self).get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(
+    description=(
+        'Schedule A receipts aggregated by contributor type (individual or committee), if applicable. '
+        'To avoid double counting, memoed items are not included.'
+    )
+)
+class ScheduleAByContributorTypeView(ScheduleAAggregateView):
+
+    model = models.ScheduleAByContributorType
+    match_fields = [
+        ('individual', models.ScheduleAByContributorType.individual),
+    ]
+    fields = [
+        ('cycle', models.ScheduleAByContributorType.cycle),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_a_by_contributor_type)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleAByContributorType)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleAByContributorTypePageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super(ScheduleAByContributorTypeView, self).get(committee_id=committee_id, **kwargs)
 
 
 @spec.doc(

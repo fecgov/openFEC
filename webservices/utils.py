@@ -3,16 +3,28 @@ import sqlalchemy as sa
 from webservices import docs
 from webservices import paging
 from webservices import sorting
+from webservices import exceptions
 
 
-def fetch_page(query, kwargs, model=None, clear=False, count=None):
+def check_cap(kwargs, cap):
+    if cap:
+        if not kwargs['per_page']:
+            raise exceptions.ApiError(
+                'Parameter "per_page" must be > 0'.format(cap),
+                status_code=422,
+            )
+
+
+def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
+    check_cap(kwargs, cap)
     sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
     query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null)
     paginator = paging.SqlalchemyOffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
 
-def fetch_seek_page(query, kwargs, index_column, clear=False, count=None):
+def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100):
+    check_cap(kwargs, cap)
     model = index_column.class_
     sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
     query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null)
@@ -56,6 +68,13 @@ def search_text(query, column, text, order=True):
                 )
             )
         )
+    return query
+
+
+def filter_match(query, kwargs, fields):
+    for key, column in fields:
+        if kwargs[key] is not None:
+            query = query.filter(column == kwargs[key])
     return query
 
 
