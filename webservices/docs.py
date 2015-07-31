@@ -218,6 +218,10 @@ Several different reporting structures exist, depending on the type of organizat
 submits financial information. To see an example of these reporting requirements,
 look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 3P.
 '''
+REPORT_YEAR = '''
+Year that the record applies to. Sometimes records are amended in subsequent
+years so this can differ from underlying form's receipt date.
+'''
 
 TOTALS = '''
 This endpoint provides information about a committee's Form 3, Form 3X, or Form 3P financial reports,
