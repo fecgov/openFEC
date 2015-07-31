@@ -181,3 +181,7 @@ class ScheduleAByContributorFactory(BaseFactory):
     contributor_id = factory.Sequence(lambda n: str(n))
     cycle = 2016
     year = 2015
+
+class ReportingDatesFactory(BaseFactory):
+    class Meta:
+        model = models.ReportingDates
