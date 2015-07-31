@@ -218,6 +218,10 @@ Several different reporting structures exist, depending on the type of organizat
 submits financial information. To see an example of these reporting requirements,
 look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 3P.
 '''
+REPORT_YEAR = '''
+Year that the record applies to. Sometimes records are amended in subsequent
+years so this can differ from underlying form's receipt date.
+'''
 
 TOTALS = '''
 This endpoint provides information about a committee's Form 3, Form 3X, or Form 3P financial reports,
@@ -230,9 +234,10 @@ is the next year — for example, in 2015, the current cycle is 2016.
 For presidential and Senate candidates, multiple two-year cycles exist between elections.
 '''
 
-SCHEDULE_A = '''
-Schedule A filings describe itemized receipts reported by a committee. This is where
-you can look for individual contributors.
+SCHEDULE_A_TAG = '''
+Schedule A records describe itemized receipts reported by a committee. This is where
+you can look for individual contributors. If you are interested in
+individual donors, `/schedules/schedule_a` will be the endpoint you use.
 
 Once a person gives more than a total of $200, the donations of that person must be
 reported by committees that file F3, F3X and F3P forms.
@@ -244,6 +249,12 @@ or `/totals` endpoints.
 When comparing the totals from reports to line items. the totals will not match unless you
 take out items where `"memoed_subtotal":true`. Memoed items are subtotals of receipts
 that are already accounted for in another schedule a line item.
+
+For the Schedule A aggregates, "memoed" items are not included to avoid double counting.
+
+'''
+
+SCHEDULE_A = SCHEDULE_A_TAG + '''
 
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -270,10 +281,13 @@ Note: because the Schedule A data includes many records, counts for
 large result sets are approximate.
 '''
 
-SCHEDULE_B = '''
-Schedule B filings describe itemized disbursements that committees. This data
+SCHEDULE_B_TAG = '''
+Schedule B filings describe itemized disbursements. This data
 explains how committees and other filers spend their money. These figures are
-reported on F3, F3X and F3P forms.
+reported as part of forms F3, F3X and F3P.
+'''
+
+SCHEDULE_B = SCHEDULE_B_TAG + '''
 
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -298,18 +312,6 @@ to the URL.
 
 Note: because the Schedule A data includes many records, counts for
 large result sets are approximate.
-'''
-
-# If we add schedules as a grouping
-SCHEDULES = '''
-Schedules come from particular sections on forms and contain detailed transactional data.
-
-Schedule A explains where contributions come from. If you are interested in
-individual donors, this will be the endpoint you use.
-
-For the Schedule A aggregates, "memoed" items are not included to avoid double counting.
-
-Schedule B explains how money is spent.
 '''
 
 SIZE_DESCRIPTION = '''
