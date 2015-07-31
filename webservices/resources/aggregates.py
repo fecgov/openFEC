@@ -10,7 +10,7 @@ from webservices.common import models
 
 
 @spec.doc(
-    tags=['schedules'],
+    tags=['schedules/schedule_a'],
     path_params=[utils.committee_param],
 )
 class ScheduleAAggregateView(Resource):
@@ -32,7 +32,10 @@ class ScheduleAAggregateView(Resource):
         return query
 
 
-@spec.doc(description=docs.SIZE_DESCRIPTION)
+@spec.doc(
+    tags=['schedules/schedule_a'],
+    description=docs.SIZE_DESCRIPTION,
+)
 class ScheduleABySizeView(ScheduleAAggregateView):
 
     model = models.ScheduleABySize
@@ -54,6 +57,7 @@ class ScheduleABySizeView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor state. To avoid double counting, '
         'memoed items are not included.'
@@ -86,6 +90,7 @@ class ScheduleAByStateView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor zip code. To avoid double '
         'counting, memoed items are not included.'
@@ -112,6 +117,7 @@ class ScheduleAByZipView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor employer name. To avoid double '
         'counting, memoed items are not included.'
@@ -140,6 +146,7 @@ class ScheduleAByEmployerView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor occupation. To avoid double '
         'counting, memoed items are not included.'
@@ -168,6 +175,7 @@ class ScheduleAByOccupationView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor FEC ID, if applicable. To avoid '
         'double counting, memoed items are not included.'
@@ -194,6 +202,7 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor type (individual or committee), if applicable. '
         'To avoid double counting, memoed items are not included.'
@@ -222,6 +231,7 @@ class ScheduleAByContributorTypeView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_b'],
     description=(
         'Schedule B receipts aggregated by recipient name. To avoid '
         'double counting, memoed items are not included.'
@@ -248,6 +258,7 @@ class ScheduleBByRecipientView(ScheduleAAggregateView):
 
 
 @spec.doc(
+    tags=['schedules/schedule_b'],
     description=(
         'Schedule B receipts aggregated by recipient committee ID, if applicable. To avoid '
         'double counting, memoed items are not included.'
