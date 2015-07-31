@@ -6,6 +6,7 @@ begin
     perform ofec_sched_a_update_aggregate_state();
     perform ofec_sched_a_update_aggregate_employer();
     perform ofec_sched_a_update_aggregate_occupation();
+    perform ofec_sched_a_update_aggregate_contributor_type();
 
     perform ofec_sched_b_update_aggregate_recipient();
     perform ofec_sched_b_update_aggregate_recipient_id();
