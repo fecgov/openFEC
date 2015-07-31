@@ -80,6 +80,7 @@ class ElectionView(Resource):
             CommitteeHistory.committee_id == Filings.committee_id,
         ).filter(
             CandidateHistory.two_year_period == kwargs['cycle'],
+            CandidateHistory.election_years.any(kwargs['cycle']),
             CandidateHistory.office == kwargs['office'][0].upper(),
             CommitteeHistory.cycle == kwargs['cycle'],
             CommitteeHistory.designation.in_(['P', 'A']),
