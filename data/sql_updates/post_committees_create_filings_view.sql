@@ -15,6 +15,7 @@ select
     report_year,
     report_type,
     to_from_indicator as document_type,
+    expand_document(to_from_indicator) as document_type_full,
     begin_image_numeric as beginning_image_number,
     end_image_numeric as ending_image_number,
     pages,
@@ -62,3 +63,5 @@ create index on ofec_filings_mv_tmp (report_year);
 create index on ofec_filings_mv_tmp (total_receipts);
 create index on ofec_filings_mv_tmp (total_disbursements);
 create index on ofec_filings_mv_tmp (total_independent_expenditures);
+create index on ofec_filings_mv_tmp (coverage_start_date);
+create index on ofec_filings_mv_tmp (coverage_end_date);

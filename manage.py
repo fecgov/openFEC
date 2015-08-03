@@ -41,7 +41,7 @@ def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
     if not sql_dir.endswith('/'):
         sql_dir += '/'
-    paths = glob.glob(sql_dir + '*.sql')
+    paths = sorted(glob.glob(sql_dir + '*.sql'))
     if processes > 1:
         pool = multiprocessing.Pool(processes=processes)
         pool.map(execute_sql_file, sorted(paths))
@@ -70,7 +70,7 @@ def load_pacronyms():
 
 
 @manager.command
-def update_schemas(processes=2):
+def update_schemas(processes=1):
     print("Starting DB refresh...")
     processes = int(processes)
     load_pacronyms()
@@ -80,7 +80,7 @@ def update_schemas(processes=2):
 
 
 @manager.command
-def update_functions(processes=2):
+def update_functions(processes=1):
     execute_sql_folder('data/functions/', processes=processes)
 
 
@@ -99,14 +99,14 @@ def update_schedule_b():
 
 
 @manager.command
-def update_aggregates(processes=2):
+def update_aggregates(processes=1):
     print('Updating incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     print('Finished updating incremental aggregates.')
 
 
 @manager.command
-def update_all(processes=2):
+def update_all(processes=1):
     """Update all derived data. Warning: Extremely slow on production data.
     """
     processes = int(processes)
