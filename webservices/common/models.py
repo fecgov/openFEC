@@ -909,12 +909,3 @@ class ReportingDates(db.Model):
     create_date = db.Column(db.Date, index=True)
     update_date = db.Column(db.Date, index=True)
 
-
-    @declared_attr
-    def report_type(cls):
-        return db.Column(db.String, db.ForeignKey('dimreporttype.rpt_tp'))
-
-    @declared_attr
-    def report(cls):
-        return db.relationship('ReportType')
-
