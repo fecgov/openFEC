@@ -1,10 +1,19 @@
-create or replace function disbursement_purpose(value varchar) returns varchar as $$
+create or replace function disbursement_purpose(code varchar, description varchar) returns varchar as $$
 begin
     return case
-        when value ~* '(^|\s)(consultant|staff|payroll|salary)(\s|$)' then 'STAFF'
-        when value ~* '(^|\s)(ad|tv|radio)(\s|$)' then 'MEDIA'
-        when value ~* '(^|\s)(clipboard|volunteer)(\s|$)' then 'ORGANIZING'
-        else null
+        when code in ('24G') then 'TRANSFERS'
+        when code in ('24K') then 'CONTRIBUTIONS'
+        when code in ('20C', '20F', '20G', '20R', '22J', '22K', '22L', '22U') then 'LOAN-REPAYMENTS'
+        when code in ('17R', '20Y', '21Y', '22R', '22Y', '22Z', '23Y', '28L', '40T', '40Y', '40Z', '41T', '41Y', '41Z', '42T', '42Y', '42Z') then 'REFUNDS'
+        when description ~* '(^|\s)(salary|overhead|rent|postage|office supplies|office equipment|furniture|ballot access fees|petition drive|party fee|legal fee|accounting fee)(\s|$)' then 'ADMINISTRATIVE'
+        when description ~* '(^|\s)(travel reimbursement|commercial carrier ticket|reimbursement for use of private vehicle|advance payments? for corporate aircraft|lodging|meal)(\s|$)' then 'TRAVEL'
+        when description ~* '(^|\s)(direct mail|fundraising event|mailing list|consultant fee|call list|invitations including printing|catering|event space rental)(\s|$)' then 'FUNDRAISING'
+        when description ~* '(^|\s)(general public advertising|radio|television|print|related production costs|media)(\s|$)' then 'ADVERTISING'
+        when description ~* '(^|\s)(opinion poll)(\s|$)' then 'POLLING'
+        when description ~* '(^|\s)(buttons|bumper stickers|brochures|mass mailings|pens|posters|balloons)(\s|$)' then 'MATERIALS'
+        when description ~* '(^|\s)(candidate appearance|campaign rall(y|ies)|town meeting|phone bank|catering|get out the vote|canvassing|driving voters to polls)(\s|$)' then 'EVENTS'
+        when description ~* '(^|\s)(contributions? to federal candidate|contributions? to federal political committee|donations? to nonfederal candidate|donations? to nonfederal committee)(\s|$)' then 'CONTRIBUTIONS'
+        else 'OTHER'
     end;
 end
 $$ language plpgsql;
@@ -14,7 +23,7 @@ create table ofec_sched_b_aggregate_purpose as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
-    disbursement_purpose(disb_desc) as purpose,
+    disbursement_purpose(disb_tp, disb_desc) as purpose,
     sum(disb_amt) as total,
     count(disb_amt) as count
 from sched_b
@@ -45,7 +54,7 @@ begin
         select
             cmte_id,
             rpt_yr + rpt_yr % 2 as cycle,
-            disbursement_purpose(disb_desc) as purpose,
+            disbursement_purpose(disb_tp, disb_desc) as purpose,
             sum(disb_amt * multiplier) as total,
             sum(multiplier) as count
         from (
