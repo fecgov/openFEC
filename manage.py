@@ -11,6 +11,7 @@ from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
 
+from webservices import updates
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG
 from webservices.common.util import get_full_path
@@ -99,15 +100,17 @@ def update_schedule_b():
 
 
 @manager.command
-def rebuild_aggregates(processes=1):
+def rebuild_aggregates(processes=1, conn=None):
     print('Rebuilding incremental aggregates...')
+    updates.build_all(conn)
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     print('Finished rebuilding incremental aggregates.')
 
 
 @manager.command
-def update_aggregates():
+def update_aggregates(conn=None):
     print('Updating incremental aggregates...')
+    updates.update_all(conn)
     db.engine.execute('select update_aggregates()')
     print('Finished updating incremental aggregates.')
 

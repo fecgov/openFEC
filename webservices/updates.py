@@ -42,11 +42,7 @@ class IncrementalAggregate(object):
         select = cls.create_table(group_column, source, conn, columns=columns)
         create_table = TableAs(cls.aggregate_table, select)
         with conn.begin():
-            try:
-                table = load_table(cls.aggregate_table, autoload_with=conn)
-                conn.execute(sa.text('drop table {0} cascade'.format(table.name)))
-            except sa.exc.NoSuchTableError:
-                pass
+            conn.execute(sa.text('drop table if exists {0} cascade'.format(cls.aggregate_table)))
             conn.execute(create_table)
             table = load_table(cls.aggregate_table, autoload_with=conn)
             for label, column in table.columns.items():
@@ -233,6 +229,15 @@ class ScheduleAOccupationAggregate(ScheduleAAggregate):
         return queued.c.contbr_occupation.label('occupation')
 
 
+class ScheduleAContributorTypeAggregate(ScheduleAAggregate):
+
+    aggregate_table = 'ofec_sched_a_aggregate_contributor_type'
+
+    @classmethod
+    def group_column_factory(cls, queued):
+        return sa.func.contributor_type(queued.c.line_num).label('individual')
+
+
 class ScheduleASizeAggregate(ScheduleAAggregate):
 
     aggregate_table = 'ofec_sched_a_aggregate_size'
@@ -274,11 +279,18 @@ aggregates = [
     ScheduleAZipAggregate,
     ScheduleAEmployerAggregate,
     ScheduleAOccupationAggregate,
+    ScheduleAContributorTypeAggregate,
     ScheduleBRecipientAggregate,
     ScheduleBRecipientIDAggregate,
 ]
 
+def build_all(conn=None):
+    conn = conn or db.engine.connect()
+    for aggregate in aggregates:
+        aggregate.build(conn=conn)
+
 
 def update_all(conn=None):
+    conn = conn or db.engine.connect()
     for aggregate in aggregates:
         aggregate.run(conn=conn)
