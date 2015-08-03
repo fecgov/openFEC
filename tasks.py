@@ -15,7 +15,6 @@ EXCLUDE_TABLES = [
     '*_mv',
     '*_tmp',
     '*_old',
-    'sched_e',
     'sched_b2',
     'sched_e2',
     'pacronyms',
