@@ -44,10 +44,14 @@ class IncrementalAggregate(object):
         with conn.begin():
             try:
                 table = load_table(cls.aggregate_table, autoload_with=conn)
-                table.drop(conn)
+                conn.execute(sa.text('drop table {0} cascade'.format(table.name)))
             except sa.exc.NoSuchTableError:
                 pass
             conn.execute(create_table)
+            table = load_table(cls.aggregate_table, autoload_with=conn)
+            for label, column in table.columns.items():
+                index = sa.Index('_'.join([table.name, label, 'idx']), column)
+                index.create(conn)
 
     @classmethod
     def run(cls, conn=None):
