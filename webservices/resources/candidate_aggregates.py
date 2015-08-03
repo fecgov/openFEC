@@ -7,7 +7,7 @@ from webservices import utils
 from webservices import schemas
 from webservices.common.models import (
     CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
-    ScheduleABySize, ScheduleAByState,
+    ScheduleABySize, ScheduleAByState, ScheduleAByContributorType,
 )
 
 
@@ -47,7 +47,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 
 
 @spec.doc(
-    tags=['schedules'],
+    tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contribution size.',
 )
 class ScheduleABySizeCandidateView(Resource):
@@ -59,11 +59,11 @@ class ScheduleABySizeCandidateView(Resource):
     def get(self, **kwargs):
         group_columns = [ScheduleABySize.size]
         query = candidate_aggregate(ScheduleABySize, group_columns, group_columns, kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, cap=None)
 
 
 @spec.doc(
-    tags=['schedules'],
+    tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contributor state.',
 )
 class ScheduleAByStateCandidateView(Resource):
@@ -82,4 +82,20 @@ class ScheduleAByStateCandidateView(Resource):
             [ScheduleAByState.state],
             kwargs,
         )
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, cap=0)
+
+
+@spec.doc(
+    tags=['schedules/schedule_a'],
+    description='Schedule A receipts aggregated by contributor type.',
+)
+class ScheduleAByContributorTypeCandidateView(Resource):
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.make_sort_args())
+    @args.register_kwargs(args.schedule_a_candidate_aggregate)
+    @schemas.marshal_with(schemas.ScheduleAByContributorTypeCandidatePageSchema())
+    def get(self, **kwargs):
+        group_columns = [ScheduleAByContributorType.individual]
+        query = candidate_aggregate(ScheduleAByContributorType, group_columns, group_columns, kwargs)
+        return utils.fetch_page(query, kwargs, cap=0)
