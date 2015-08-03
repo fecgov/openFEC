@@ -57,8 +57,9 @@ class TestFilings(ApiBaseTest):
             factories.FilingsFactory(form_type='3'),
             factories.FilingsFactory(primary_general_indicator='G'),
             factories.FilingsFactory(amendment_indicator='A'),
-            factories.FilingsFactory(report_type='Post General'),
+            factories.FilingsFactory(report_type='POST GENERAL'),
             factories.FilingsFactory(report_year=1999),
+            factories.FilingsFactory(document_type='X'),
         ]
 
         filter_fields = (
@@ -69,6 +70,7 @@ class TestFilings(ApiBaseTest):
             ('report_type', 'Post General'),
             ('report_year', 1999),
             ('candidate_id', 'H0001'),
+            ('document_type', 'X')
         )
 
         # checking one example from each field
@@ -98,3 +100,15 @@ class TestFilings(ApiBaseTest):
     def test_sort_bad_column(self):
         response = self.app.get(api.url_for(FilingsList, sort='request_type'))
         self.assertEqual(response.status_code, 422)
+
+    def test_regex(self):
+        """ Getting rid of extra text that comes in the tables."""
+        filing = factories.FilingsFactory(
+            report_type_full='report {more information than we want}',
+            committee_id='C007',
+            report_year=2004,
+        )
+
+        results = self._results(api.url_for(FilingsView, committee_id='C007'))
+
+        self.assertEqual(results[0]['document_description'], 'report 2004')

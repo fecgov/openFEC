@@ -1,3 +1,4 @@
+import re
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
@@ -722,6 +723,22 @@ class ScheduleAByOccupation(BaseAggregate):
     occupation = db.Column(db.String, primary_key=True)
 
 
+class ScheduleAByContributorType(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_contributor_type'
+    individual = db.Column(db.Boolean, primary_key=True)
+
+
+class ScheduleBByRecipient(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_recipient'
+    recipient_name = db.Column('recipient_nm', db.String, primary_key=True)
+
+
+class ScheduleBByRecipientID(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_recipient_id'
+    recipient_id = db.Column('recipient_cmte_id', db.String, primary_key=True)
+    recipient_name = db.Column('recipient_nm', db.String)
+
+
 class ScheduleAByContributor(db.Model):
     __tablename__ = 'ofec_sched_a_aggregate_contributor_mv'
 
@@ -815,6 +832,7 @@ class ScheduleBSearch(db.Model):
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     recipient_name_text = db.Column(TSVECTOR)
+    disbursement_description_text = db.Column(TSVECTOR)
 
 
 class Filings(db.Model):
@@ -832,7 +850,8 @@ class Filings(db.Model):
     form_type = db.Column(db.String, index=True)
     report_year = db.Column(db.Integer, index=True)
     report_type = db.Column(db.String, index=True)
-    document_type = db.Column(db.String)
+    document_type = db.Column(db.String, index=True)
+    document_type_full = db.Column(db.String)
     report_type_full = db.Column(db.String)
     beginning_image_number = db.Column(db.BigInteger, index=True)
     ending_image_number = db.Column(db.BigInteger)
@@ -858,6 +877,16 @@ class Filings(db.Model):
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String, index=True)
     update_date = db.Column(db.Date)
+
+    @property
+    def document_description(self):
+        if self.report_type_full:
+            clean_report = re.sub(r'\{[^)]*\}', '', self.report_type_full)
+            return clean_report + str(self.report_year)
+        elif self.document_type_full:
+            return self.document_type_full + str(self.report_year)
+        else:
+            return "Document " + str(self.report_year)
 
     @property
     def pdf_url(self):
