@@ -7,16 +7,18 @@ from webservices.rest import db
 
 # Adapted from http://stackoverflow.com/a/30577608/1222326
 
-class TempTableAs(Executable, ClauseElement):
+class TableAs(Executable, ClauseElement):
 
-    def __init__(cls, name, query):
+    def __init__(cls, name, query, temporary=False):
         cls.name = name
         cls.query = query
+        cls.temporary = temporary
 
 
-@compiles(TempTableAs, 'postgresql')
+@compiles(TableAs, 'postgresql')
 def _create_table_as(element, compiler, **kwargs):
-    return 'create temporary table {0} as {1}'.format(
+    return 'create {0} table {1} as {2}'.format(
+        'temporary' if element.temporary else '',
         element.name,
         compiler.process(element.query),
     )
@@ -27,6 +29,25 @@ def load_table(name, autoload_with=None):
 
 
 class IncrementalAggregate(object):
+
+    @classmethod
+    def build(cls, conn=None):
+        conn = conn or db.engine.connect()
+        source = load_table(cls.source_table)
+        group_column = cls.group_column_factory(source)
+        columns = [
+            sa.func.sum(getattr(source.c, cls.total_column)).label('total'),
+            sa.func.count(source.c.cmte_id).label('count'),
+        ]
+        select = cls.create_table(group_column, source, conn, columns=columns)
+        create_table = TableAs(cls.aggregate_table, select)
+        with conn.begin():
+            try:
+                table = load_table(cls.aggregate_table, autoload_with=conn)
+                table.drop(conn)
+            except sa.exc.NoSuchTableError:
+                pass
+            conn.execute(create_table)
 
     @classmethod
     def run(cls, conn=None):
@@ -53,30 +74,41 @@ class IncrementalAggregate(object):
         return sa.union(new, old)
 
     @classmethod
-    def patch(cls, group_column, queued, conn):
-        select = sa.select([
-            queued.c.cmte_id,
-            (queued.c.rpt_yr + queued.c.rpt_yr % 2).label('cycle'),
-            sa.func.sum(queued.c.multiplier * getattr(queued.c, cls.total_column)).label('total'),
-            sa.func.sum(queued.c.multiplier).label('count'),
-            group_column,
-        ] + cls.extra_columns_factory(queued)).where(
-            getattr(queued.c, cls.total_column) != None,  # noqa
+    def create_table(cls, group_column, source, conn, columns=None):
+        select = sa.select(
+            [
+                source.c.cmte_id,
+                (source.c.rpt_yr + source.c.rpt_yr % 2).label('cycle'),
+                group_column,
+            ] +
+            cls.extra_columns_factory(source) +
+            (columns or [])
+        ).where(
+            getattr(source.c, cls.total_column) != None,  # noqa
         ).where(
             sa.or_(
-                queued.c.memo_cd != 'X',
-                queued.c.memo_cd == None,
+                source.c.memo_cd != 'X',
+                source.c.memo_cd == None,
             ),
         ).group_by(
-            queued.c.cmte_id,
+            source.c.cmte_id,
             'cycle',
             group_column.name,
         )
-        where = cls.where_factory(queued)
+        where = cls.where_factory(source)
         if where is not None:
             select = select.where(where)
+        return select
+
+    @classmethod
+    def patch(cls, group_column, queued, conn):
+        columns = [
+            sa.func.sum(queued.c.multiplier * getattr(queued.c, cls.total_column)).label('total'),
+            sa.func.sum(queued.c.multiplier).label('count'),
+        ]
+        select = cls.create_table(group_column, queued, conn, columns=columns)
         temp_name = 'temp_{0}'.format(cls.aggregate_table)
-        create_temp = TempTableAs(temp_name, select)
+        create_temp = TableAs(temp_name, select, temporary=True)
         conn.execute(create_temp)
         return load_table(temp_name, autoload_with=conn)
 
@@ -126,6 +158,7 @@ class IncrementalAggregate(object):
 
 class ScheduleAAggregate(IncrementalAggregate):
 
+    source_table = 'sched_a'
     total_column = 'contb_receipt_amt'
 
     @classmethod
@@ -138,6 +171,7 @@ class ScheduleAAggregate(IncrementalAggregate):
 
 class ScheduleBAggregate(IncrementalAggregate):
 
+    source_table = 'sched_b'
     total_column = 'disb_amt'
 
     @classmethod
