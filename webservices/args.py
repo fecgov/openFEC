@@ -387,8 +387,8 @@ elections = {
     'office': Arg(
         str,
         required=True,
-        enum=['house', 'senate', 'presidential'],
-        validate=lambda v: v.lower() in ['house', 'senate', 'presidential']
+        enum=['house', 'senate', 'president'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'president']
     ),
 }
 
