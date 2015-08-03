@@ -99,9 +99,16 @@ def update_schedule_b():
 
 
 @manager.command
-def update_aggregates(processes=1):
-    print('Updating incremental aggregates...')
+def rebuild_aggregates(processes=1):
+    print('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
+    print('Finished rebuilding incremental aggregates.')
+
+
+@manager.command
+def update_aggregates():
+    print('Updating incremental aggregates...')
+    db.engine.execute('select update_aggregates()')
     print('Finished updating incremental aggregates.')
 
 
@@ -113,7 +120,7 @@ def update_all(processes=1):
     update_functions(processes=processes)
     update_schedule_a()
     update_schedule_b()
-    update_aggregates(processes=processes)
+    rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
 
