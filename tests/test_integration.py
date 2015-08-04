@@ -327,3 +327,54 @@ class TestViews(common.IntegrationTestCase):
         # Updated total includes new Schedule A filing and new report
         self.assertAlmostEqual(existing.total, total + 75 + 20)
         self.assertEqual(existing.count, None)
+
+    def test_update_aggregate_purpose_create(self):
+        filing = factories.ScheduleBFactory(
+            report_year=2015,
+            committee_id='C12345',
+            disbursement_amount=538,
+            disbursement_description='CAMPAIGN BUTTONS',
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        rows = models.ScheduleBByPurpose.query.filter_by(
+            cycle=2016,
+            committee_id='C12345',
+            purpose='MATERIALS',
+        ).all()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].total, 538)
+        self.assertEqual(rows[0].count, 1)
+        filing.disbursement_description = 'BUMPER STICKERS'
+        db.session.add(filing)
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(rows[0])
+        self.assertEqual(rows[0].total, 538)
+        self.assertEqual(rows[0].count, 1)
+        filing.disbursement_description = 'HANGING OUT'
+        db.session.add(filing)
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(rows[0])
+        self.assertEqual(rows[0].total, 0)
+        self.assertEqual(rows[0].count, 0)
+
+    def test_update_aggregate_purpose_existing(self):
+        existing = models.ScheduleBByPurpose.query.filter_by(
+            purpose='CONTRIBUTIONS',
+            cycle=2016,
+        ).first()
+        total = existing.total
+        count = existing.count
+        factories.ScheduleBFactory(
+            report_year=2015,
+            committee_id=existing.committee_id,
+            disbursement_amount=538,
+            disbursement_type='24K',
+        )
+        db.session.flush()
+        db.session.execute('select update_aggregates()')
+        db.session.refresh(existing)
+        self.assertEqual(existing.total, total + 538)
+        self.assertEqual(existing.count, count + 1)
