@@ -23,7 +23,6 @@ election_filter_fields = {
     'election_party',
     'office_sought',
     'election_date',
-    'election_notes',
     'trc_election_type_id',
     'trc_election_status_id',
     'update_date',
@@ -51,12 +50,17 @@ class ReportingDatesView(Resource):
         reporting_date_query = filter_query(models.ReportingDates, reporting_date_query, reporting_filter_fields, kwargs)
 
         if kwargs.get('upcoming'):
-            # choose reporting dates in the future, unique to report type, order by due date
+            # choose reporting dates in the future
             reporting_date_query = reporting_date_query.filter(models.ReportingDates.due_date >= date.today())
 
         return utils.fetch_page(reporting_date_query, kwargs, model=models.ReportingDates)
 
 
+
+@spec.doc(
+    tags=['dates'],
+    description='FEC election dates since 1995.',
+)
 class ElectionDatesView(Resource):
 
     @args.register_kwargs(args.paging)
@@ -72,8 +76,8 @@ class ElectionDatesView(Resource):
         election_date_query = filter_query(models.ElectionDates, election_date_query, election_filter_fields, kwargs)
 
         if kwargs.get('upcoming'):
-            # choose Election dates in the future, unique to report type, order by due date
-            election_date_query = election_date_query.filter(models.ElectionDates.election_date >= date.today())
+            # choose Election dates in the future
+            election_date_query = election_date_query.filter(election_date_query.election_date >= date.today())
 
         return utils.fetch_page(election_date_query, kwargs, model=models.ElectionDates)
 
