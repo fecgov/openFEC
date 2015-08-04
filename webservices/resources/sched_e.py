@@ -75,6 +75,7 @@ class ScheduleEView(ItemizedResource):
         ).filter(
             models.CandidateHistory.two_year_period == kwargs['cycle'],
             models.CandidateHistory.office == kwargs['office'][0].upper(),
+            models.ScheduleE.report_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
         )
         if kwargs['state']:
             query = query.filter(models.CandidateHistory.state == kwargs['state'])
