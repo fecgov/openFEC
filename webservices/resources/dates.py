@@ -77,7 +77,7 @@ class ElectionDatesView(Resource):
 
         if kwargs.get('upcoming'):
             # choose Election dates in the future
-            election_date_query = election_date_query.filter(election_date_query.election_date >= date.today())
+            election_date_query = election_date_query.filter(models.ElectionDates.election_date >= date.today())
 
         return utils.fetch_page(election_date_query, kwargs, model=models.ElectionDates)
 

@@ -314,6 +314,8 @@ augment_schemas(ReportingDatesSchema)
 
 ElectionDatesSchema = make_schema(
     models.ElectionDates,
+    fields={'election_type_full': ma.fields.Str()},
+    options={'exclude': ('trc_election_id', )},
 )
 ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
