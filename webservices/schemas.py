@@ -295,6 +295,23 @@ ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPag
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
 
+ScheduleESchema = make_schema(
+    models.ScheduleE,
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'memoed_subtotal': ma.fields.Boolean(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'expenditure_amount': ma.fields.Decimal(places=2),
+        'ytd_election_office': ma.fields.Decimal(places=2),
+    },
+    options={
+        'exclude': ('memo_code', ),
+    }
+)
+ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging.SeekPageSchema)
+register_schema(ScheduleESchema)
+register_schema(ScheduleEPageSchema)
+
 
 FilingsSchema = make_schema(
     models.Filings,

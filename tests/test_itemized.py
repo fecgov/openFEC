@@ -9,6 +9,7 @@ from webservices.rest import db
 from webservices.rest import api
 from webservices.resources.sched_a import ScheduleAView
 from webservices.resources.sched_b import ScheduleBView
+from webservices.resources.sched_e import ScheduleEView
 
 
 class TestItemized(ApiBaseTest):
@@ -165,3 +166,17 @@ class TestItemized(ApiBaseTest):
         self.assertTrue(all(each['disbursement_amount'] <= 150 for each in results))
         results = self._results(api.url_for(ScheduleBView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['disbursement_amount'] <= 150 for each in results))
+
+    def test_amount_sched_e(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=50),
+            factories.ScheduleEFactory(expenditure_amount=100),
+            factories.ScheduleEFactory(expenditure_amount=150),
+            factories.ScheduleEFactory(expenditure_amount=200),
+        ]
+        results = self._results(api.url_for(ScheduleEView, min_amount=100))
+        self.assertTrue(all(each['expenditure_amount'] >= 100 for each in results))
+        results = self._results(api.url_for(ScheduleAView, max_amount=150))
+        self.assertTrue(all(each['expenditure_amount'] <= 150 for each in results))
+        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
+        self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))
