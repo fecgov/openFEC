@@ -397,3 +397,12 @@ schedule_a_candidate_aggregate = {
     'candidate_id': IString(multiple=True, required=True),
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
 }
+
+
+schedule_e = {
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True),
+    'last_expenditure_date': Date(),
+    'last_expenditure_amount': Arg(float),
+    'last_ytd_election_office': Arg(float),
+}
