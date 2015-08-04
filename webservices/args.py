@@ -405,4 +405,5 @@ schedule_e = {
     'last_expenditure_date': Date(),
     'last_expenditure_amount': Arg(float),
     'last_ytd_election_office': Arg(float),
+    'payee_name': Arg(str),
 }
