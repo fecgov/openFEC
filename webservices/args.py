@@ -387,6 +387,11 @@ schedule_b = {
     'last_disbursement_amount': Arg(float, description='Filter for records'),
 }
 
+schedule_b_by_purpose = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'purpose': Arg(str, multiple=True, description='Disbursement purpose category'),
+}
+
 
 elections = {
     'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
