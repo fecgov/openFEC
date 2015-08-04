@@ -9,11 +9,8 @@ from webservices.common import counts
 from webservices.common import models
 
 
-@spec.doc(
-    tags=['schedules/schedule_a'],
-    path_params=[utils.committee_param],
-)
-class ScheduleAAggregateView(Resource):
+@spec.doc(path_params=[utils.committee_param])
+class BaseAggregateView(Resource):
 
     model = None
     match_fields = []
@@ -36,7 +33,7 @@ class ScheduleAAggregateView(Resource):
     tags=['schedules/schedule_a'],
     description=docs.SIZE_DESCRIPTION,
 )
-class ScheduleABySizeView(ScheduleAAggregateView):
+class ScheduleABySizeView(BaseAggregateView):
 
     model = models.ScheduleABySize
     fields = [
@@ -63,7 +60,7 @@ class ScheduleABySizeView(ScheduleAAggregateView):
         'memoed items are not included.'
     )
 )
-class ScheduleAByStateView(ScheduleAAggregateView):
+class ScheduleAByStateView(BaseAggregateView):
 
     model = models.ScheduleAByState
     fields = [
@@ -85,7 +82,7 @@ class ScheduleAByStateView(ScheduleAAggregateView):
     def _build_query(self, committee_id, kwargs):
         query = super()._build_query(committee_id, kwargs)
         if kwargs['hide_null']:
-            query = query.filter(self.model.state_full != None)
+            query = query.filter(self.model.state_full != None)  # noqa
         return query
 
 
@@ -96,7 +93,7 @@ class ScheduleAByStateView(ScheduleAAggregateView):
         'counting, memoed items are not included.'
     )
 )
-class ScheduleAByZipView(ScheduleAAggregateView):
+class ScheduleAByZipView(BaseAggregateView):
 
     model = models.ScheduleAByZip
     fields = [
@@ -123,7 +120,7 @@ class ScheduleAByZipView(ScheduleAAggregateView):
         'counting, memoed items are not included.'
     )
 )
-class ScheduleAByEmployerView(ScheduleAAggregateView):
+class ScheduleAByEmployerView(BaseAggregateView):
 
     model = models.ScheduleAByEmployer
     fields = [
@@ -152,7 +149,7 @@ class ScheduleAByEmployerView(ScheduleAAggregateView):
         'counting, memoed items are not included.'
     )
 )
-class ScheduleAByOccupationView(ScheduleAAggregateView):
+class ScheduleAByOccupationView(BaseAggregateView):
 
     model = models.ScheduleAByOccupation
     fields = [
@@ -181,7 +178,7 @@ class ScheduleAByOccupationView(ScheduleAAggregateView):
         'double counting, memoed items are not included.'
     )
 )
-class ScheduleAByContributorView(ScheduleAAggregateView):
+class ScheduleAByContributorView(BaseAggregateView):
 
     model = models.ScheduleAByContributor
     fields = [
@@ -208,7 +205,7 @@ class ScheduleAByContributorView(ScheduleAAggregateView):
         'To avoid double counting, memoed items are not included.'
     )
 )
-class ScheduleAByContributorTypeView(ScheduleAAggregateView):
+class ScheduleAByContributorTypeView(BaseAggregateView):
 
     model = models.ScheduleAByContributorType
     match_fields = [
@@ -237,7 +234,7 @@ class ScheduleAByContributorTypeView(ScheduleAAggregateView):
         'double counting, memoed items are not included.'
     )
 )
-class ScheduleBByRecipientView(ScheduleAAggregateView):
+class ScheduleBByRecipientView(BaseAggregateView):
 
     model = models.ScheduleBByRecipient
     fields = [
@@ -264,7 +261,7 @@ class ScheduleBByRecipientView(ScheduleAAggregateView):
         'double counting, memoed items are not included.'
     )
 )
-class ScheduleBByRecipientIDView(ScheduleAAggregateView):
+class ScheduleBByRecipientIDView(BaseAggregateView):
 
     model = models.ScheduleBByRecipientID
     fields = [
@@ -280,5 +277,32 @@ class ScheduleBByRecipientIDView(ScheduleAAggregateView):
         )
     )
     @schemas.marshal_with(schemas.ScheduleBByRecipientIDPageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
+
+
+@spec.doc(
+    tags=['schedules/schedule_b'],
+    description=(
+        'Schedule B receipts aggregated by disbursement purpose category. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
+class ScheduleBByPurposeView(BaseAggregateView):
+
+    model = models.ScheduleBByPurpose
+    fields = [
+        ('cycle', models.ScheduleBByPurpose.cycle),
+        ('purpose', models.ScheduleBByPurpose.purpose),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_b_by_purpose)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleBByPurpose)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleBByPurposePageSchema())
     def get(self, committee_id=None, **kwargs):
         return super().get(committee_id=committee_id, **kwargs)
