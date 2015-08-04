@@ -204,6 +204,7 @@ add_aggregate_resource(api, aggregates.ScheduleAByContributorTypeView, 'a', 'con
 
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
+add_aggregate_resource(api, aggregates.ScheduleBByPurposeView, 'b', 'purpose')
 
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate')
@@ -291,6 +292,7 @@ register_resource(aggregates.ScheduleAByContributorView, blueprint='v1')
 register_resource(aggregates.ScheduleAByContributorTypeView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
+register_resource(aggregates.ScheduleBByPurposeView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')
@@ -332,3 +334,4 @@ def api_ui():
 
 
 app.register_blueprint(docs)
+

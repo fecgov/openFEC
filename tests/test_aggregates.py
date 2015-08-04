@@ -1,4 +1,7 @@
 from webservices.rest import db, api
+from webservices.resources.aggregates import (
+    ScheduleBByPurposeView,
+)
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
@@ -7,6 +10,35 @@ from webservices.resources.candidate_aggregates import (
 
 from tests import factories
 from tests.common import ApiBaseTest
+
+
+class TestAggregates(ApiBaseTest):
+
+    def setUp(self):
+        super(TestAggregates, self).setUp()
+        self.committee = factories.CommitteeHistoryFactory(cycle=2012)
+
+    def test_disbursement_purpose(self):
+        aggregate = factories.ScheduleBByPurposeFactory(
+            committee_id=self.committee.committee_id,
+            cycle=self.committee.cycle,
+        )
+        results = self._results(
+            api.url_for(
+                ScheduleBByPurposeView,
+                committee_id=self.committee.committee_id,
+                cycle=2012,
+            )
+        )
+        self.assertEqual(len(results), 1)
+        expected = {
+            'committee_id': self.committee.committee_id,
+            'purpose': 'ADMINISTRATIVE',
+            'cycle': 2012,
+            'total': aggregate.total,
+            'count': aggregate.count,
+        }
+        self.assertEqual(results[0], expected)
 
 
 class TestCandidateAggregates(ApiBaseTest):
