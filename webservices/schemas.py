@@ -308,6 +308,7 @@ augment_schemas(FilingsSchema)
 
 ReportingDatesSchema = make_schema(
     models.ReportingDates,
+    options={'exclude': ('trc_report_due_date_id'),}
 )
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
