@@ -312,6 +312,12 @@ ReportingDatesSchema = make_schema(
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
 
+ElectionDatesSchema = make_schema(
+    models.ElectionDates,
+)
+ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
+augment_schemas(ElectionDatesSchema)
+
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     candidate_name = ma.fields.Str()
