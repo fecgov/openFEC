@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from webservices import utils
+from webservices import decoders
 
 
 db = SQLAlchemy()
@@ -898,11 +899,6 @@ class Filings(db.Model):
             return utils.make_report_pdf_url(self.beginning_image_number)
         return None
 
-class ReportType(db.Model):
-    __tablename__ = 'dimreporttype'
-    rpt_tp_desc = db.Column(db.String, index=True)
-    rpt_tp = db.Column(db.String, primary_key=True)
-
 
 class ReportingDates(db.Model):
     __tablename__ = 'trc_report_due_date'
@@ -913,6 +909,18 @@ class ReportingDates(db.Model):
     due_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
     update_date = db.Column(db.Date, index=True)
+
+
+class ReportType(db.Model):
+    __tablename__ = 'dimreporttype'
+
+    rpt_tp_desc = db.Column(db.String, index=True)
+    rpt_tp = db.Column(
+        db.String,
+        db.ForeignKey(ReportingDates.report_type),
+        primary_key=True
+    )
+
 
 class ElectionDates(db.Model):
     __tablename__ = 'trc_election'
@@ -930,3 +938,9 @@ class ElectionDates(db.Model):
     create_date = db.Column(db.Date, index=True)
     election_yr = db.Column(db.Integer, index=True)
     pg_date = db.Column(db.Date, index=True)
+
+    @property
+    def election_type_full(self):
+        if self.trc_election_type_id:
+            return decoders.election_types[self.trc_election_type_id]
+        return None
