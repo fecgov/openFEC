@@ -12,12 +12,6 @@ from webservices.common.models import (
 )
 
 
-office_args_map = {
-    'house': ['state', 'district'],
-    'senate': ['state'],
-}
-
-
 @spec.doc(
     description=docs.ELECTIONS,
     tags=['financial']
@@ -33,16 +27,7 @@ class ElectionView(Resource):
         return utils.fetch_page(query, kwargs)
 
     def _get_records(self, kwargs):
-        required_args = office_args_map.get(kwargs['office'], [])
-        for arg in required_args:
-            if kwargs[arg] is None:
-                raise exceptions.ApiError(
-                    'Must include argument "{0}" with office type "{1}"'.format(
-                        arg,
-                        kwargs['office'],
-                    ),
-                    status_code=422,
-                )
+        utils.check_election_arguments(kwargs)
         pairs = self._get_pairs(kwargs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
         filings = self._get_filings(pairs).subquery()

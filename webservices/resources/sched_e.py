@@ -2,6 +2,7 @@ import sqlalchemy as sa
 
 from webservices import args
 from webservices import spec
+from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ItemizedResource
@@ -40,6 +41,7 @@ class ScheduleEView(ItemizedResource):
     ]
 
     @args.register_kwargs(args.itemized)
+    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.schedule_e)
     @args.register_kwargs(args.make_seek_args())
     @args.register_kwargs(
@@ -60,6 +62,24 @@ class ScheduleEView(ItemizedResource):
         query = super(ScheduleEView, self).build_query(kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleE.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleE.candidate))
+        query = self.filter_election(query, kwargs)
+        return query
+
+    def filter_election(self, query, kwargs):
+        if not kwargs['office']:
+            return query
+        utils.check_election_arguments(kwargs)
+        query = query.join(
+            models.CandidateHistory,
+            models.ScheduleE.candidate_id == models.CandidateHistory.candidate_id,
+        ).filter(
+            models.CandidateHistory.two_year_period == kwargs['cycle'],
+            models.CandidateHistory.office == kwargs['office'][0].upper(),
+        )
+        if kwargs['state']:
+            query = query.filter(models.CandidateHistory.state == kwargs['state'])
+        if kwargs['district']:
+            query = query.filter(models.CandidateHistory.district == kwargs['district'])
         return query
 
     def join_fulltext(self, query):
