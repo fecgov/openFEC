@@ -284,7 +284,7 @@ class ScheduleBByRecipientIDView(BaseAggregateView):
 @spec.doc(
     tags=['schedules/schedule_b'],
     description=(
-        'Schedule B receipts aggregated by contributor employer name. To avoid double '
+        'Schedule B receipts aggregated by disbursement purpose category. To avoid double '
         'counting, memoed items are not included.'
     )
 )
@@ -293,7 +293,7 @@ class ScheduleBByPurposeView(BaseAggregateView):
     model = models.ScheduleBByPurpose
     fields = [
         ('cycle', models.ScheduleBByPurpose.cycle),
-        ('employer', models.ScheduleBByPurpose.purpose),
+        ('purpose', models.ScheduleBByPurpose.purpose),
     ]
 
     @args.register_kwargs(args.paging)
@@ -306,4 +306,3 @@ class ScheduleBByPurposeView(BaseAggregateView):
     @schemas.marshal_with(schemas.ScheduleBByPurposePageSchema())
     def get(self, committee_id=None, **kwargs):
         return super().get(committee_id=committee_id, **kwargs)
-

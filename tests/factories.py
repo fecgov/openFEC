@@ -182,3 +182,11 @@ class ScheduleAByContributorFactory(BaseFactory):
     contributor_id = factory.Sequence(lambda n: str(n))
     cycle = 2016
     year = 2015
+
+
+class ScheduleBByPurposeFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleBByPurpose
+    committee_id = factory.Sequence(lambda n: str(n))
+    purpose = 'ADMINISTRATIVE'
+    cycle = 2016
