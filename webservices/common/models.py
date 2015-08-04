@@ -736,6 +736,18 @@ class ScheduleAByContributorType(BaseAggregate):
     individual = db.Column(db.Boolean, primary_key=True)
 
 
+class ScheduleAByContributor(db.Model):
+    __tablename__ = 'ofec_sched_a_aggregate_contributor_mv'
+
+    committee_id = db.Column('cmte_id', db.String, primary_key=True)
+    contributor_id = db.Column('contbr_id', db.String, primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True, nullable=True)
+    year = db.Column(db.Integer, primary_key=True, nullable=True)
+    contributor_name = db.Column('contbr_nm', db.String)
+    image_number = db.Column('image_num', db.String)
+    total = db.Column(db.Float)
+
+
 class ScheduleBByRecipient(BaseAggregate):
     __tablename__ = 'ofec_sched_b_aggregate_recipient'
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True)
@@ -747,16 +759,9 @@ class ScheduleBByRecipientID(BaseAggregate):
     recipient_name = db.Column('recipient_nm', db.String)
 
 
-class ScheduleAByContributor(db.Model):
-    __tablename__ = 'ofec_sched_a_aggregate_contributor_mv'
-
-    committee_id = db.Column('cmte_id', db.String, primary_key=True)
-    contributor_id = db.Column('contbr_id', db.String, primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True, nullable=True)
-    year = db.Column(db.Integer, primary_key=True, nullable=True)
-    contributor_name = db.Column('contbr_nm', db.String)
-    image_number = db.Column('image_num', db.String)
-    total = db.Column(db.Float)
+class ScheduleBByPurpose(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_purpose'
+    purpose = db.Column(db.String, primary_key=True)
 
 
 class ScheduleB(BaseItemized):
