@@ -171,6 +171,7 @@ class TestViews(common.IntegrationTestCase):
             'report_year': 2015,
             'committee_id': 'C12345',
             'contributor_receipt_amount': 538,
+            'line_number': '11AI',
             item_key: value,
         })
         db.session.flush()
@@ -188,8 +189,8 @@ class TestViews(common.IntegrationTestCase):
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.refresh(rows[0])
-        self.assertEqual(rows[0].total, 0)
-        self.assertEqual(rows[0].count, 0)
+        self.assertEqual(rows[0].total, 53)
+        self.assertEqual(rows[0].count, 1)
 
     def _check_update_aggregate_existing(self, item_key, total_key, total_model):
         existing = total_model.query.filter(
@@ -202,6 +203,7 @@ class TestViews(common.IntegrationTestCase):
             'report_year': 2015,
             'committee_id': existing.committee_id,
             'contributor_receipt_amount': 538,
+            'line_number': '11AI',
             item_key: getattr(existing, total_key),
         })
         db.session.flush()
@@ -233,6 +235,7 @@ class TestViews(common.IntegrationTestCase):
             committee_id=existing.committee_id,
             contributor_state=existing.state,
             contributor_receipt_amount=None,
+            line_number='11AI',
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -245,6 +248,7 @@ class TestViews(common.IntegrationTestCase):
             report_year=2015,
             committee_id='C12345',
             contributor_receipt_amount=538,
+            line_number='11AI',
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -277,6 +281,7 @@ class TestViews(common.IntegrationTestCase):
             report_year=2015,
             committee_id=existing.committee_id,
             contributor_receipt_amount=538,
+            line_number='11AI',
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -295,6 +300,7 @@ class TestViews(common.IntegrationTestCase):
             report_year=2015,
             committee_id=existing.committee_id,
             contributor_receipt_amount=75,
+            line_number='11AI',
         )
         # Create a committee and committee report
         dc = sa.Table('dimcmte', db.metadata, autoload=True, autoload_with=db.engine)
@@ -319,5 +325,5 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(existing)
         # Updated total includes new Schedule A filing and new report
-        self.assertEqual(existing.total, total + 75 + 20)
+        self.assertAlmostEqual(existing.total, total + 75 + 20)
         self.assertEqual(existing.count, None)
