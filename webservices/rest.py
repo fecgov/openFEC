@@ -185,6 +185,7 @@ api.add_resource(CommitteeNameSearch, '/names/committees')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
 api.add_resource(elections.ElectionView, '/elections')
+api.add_resource(dates.ElectionDatesView, '/election-dates')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates')
 
 def add_aggregate_resource(api, view, schedule, label):
