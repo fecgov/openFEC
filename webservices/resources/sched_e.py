@@ -2,7 +2,6 @@ import sqlalchemy as sa
 
 from webservices import args
 from webservices import spec
-from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ItemizedResource
@@ -30,13 +29,10 @@ class ScheduleEView(ItemizedResource):
         ('image_number', models.ScheduleE.image_number),
         ('committee_id', models.ScheduleE.committee_id),
         ('candidate_id', models.ScheduleE.candidate_id),
-        # ('contributor_city', models.ScheduleE.contributor_city),
-        # ('contributor_state', models.ScheduleE.contributor_state),
     ]
-    # filter_fulltext_fields = [
-    #     ('contributor_name', models.ScheduleESearch.contributor_name_text),
-    #     ('contributor_employer', models.ScheduleESearch.contributor_employer_text),
-    # ]
+    filter_fulltext_fields = [
+        ('payee_name', models.ScheduleESearch.payee_name_text),
+    ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
         (('min_amount', 'max_amount'), models.ScheduleE.expenditure_amount),
@@ -69,5 +65,5 @@ class ScheduleEView(ItemizedResource):
     def join_fulltext(self, query):
         return query.join(
             models.ScheduleESearch,
-            models.ScheduleE.sched_a_sk == models.ScheduleESearch.sched_a_sk,
+            models.ScheduleE.sched_e_sk == models.ScheduleESearch.sched_e_sk,
         )

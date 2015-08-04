@@ -867,6 +867,13 @@ class ScheduleE(BaseItemized):
     update_date = db.Column(db.DateTime)
 
 
+class ScheduleESearch(db.Model):
+    __tablename__ = 'ofec_sched_e_fulltext'
+
+    sched_e_sk = db.Column(db.Integer, primary_key=True)
+    payee_name_text = db.Column(TSVECTOR)
+
+
 class Filings(db.Model):
     __tablename__ = 'ofec_filings_mv'
 
