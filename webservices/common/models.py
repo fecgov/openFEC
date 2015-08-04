@@ -751,6 +751,11 @@ class ScheduleAByContributor(db.Model):
     total = db.Column(db.Float)
 
 
+class ScheduleBByPurpose(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_purpose'
+    purpose = db.Column(db.String, primary_key=True)
+
+
 class ScheduleB(db.Model):
     __tablename__ = 'sched_b'
 
