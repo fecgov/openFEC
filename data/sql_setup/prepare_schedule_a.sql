@@ -25,7 +25,8 @@ create table ofec_sched_a_fulltext as
 select
     sched_a_sk,
     to_tsvector(contbr_nm) as contributor_name_text,
-    to_tsvector(contbr_employer) as contributor_employer_text
+    to_tsvector(contbr_employer) as contributor_employer_text,
+    to_tsvector(contbr_employer) as contributor_occupation_text
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 ;
@@ -34,6 +35,7 @@ where rpt_yr >= :START_YEAR_ITEMIZED
 alter table ofec_sched_a_fulltext add primary key (sched_a_sk);
 create index on ofec_sched_a_fulltext using gin (contributor_name_text);
 create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
+create index on ofec_sched_a_fulltext using gin (contributor_occupation_text);
 
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;

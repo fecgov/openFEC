@@ -37,6 +37,7 @@ class ScheduleAView(ItemizedResource):
     filter_fulltext_fields = [
         ('contributor_name', models.ScheduleASearch.contributor_name_text),
         ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
+        ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleA.contributor_receipt_date),
