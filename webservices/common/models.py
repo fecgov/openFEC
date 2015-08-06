@@ -521,6 +521,11 @@ class CommitteeTotals(BaseModel):
     net_contributions = db.Column(db.Integer)
     net_operating_expenditures = db.Column(db.Integer)
 
+    last_report_year = db.Column(db.Integer)
+    last_report_type_full = db.Column(db.String)
+    last_beginning_image_number = db.Column(db.Integer)
+    last_cash_on_hand_end_period = db.Column(db.Float)
+
 
 class CommitteeTotalsPacParty(CommitteeTotals):
     __tablename__ = 'ofec_totals_pacs_parties_mv'
@@ -881,20 +886,17 @@ class Filings(db.Model):
 
     @property
     def document_description(self):
-        if self.report_type_full:
-            clean_report = re.sub(r'\{[^)]*\}', '', self.report_type_full)
-            return clean_report + str(self.report_year)
-        elif self.document_type_full:
-            return self.document_type_full + str(self.report_year)
-        else:
-            return "Document " + str(self.report_year)
+        return utils.document_description(
+            self.report_year,
+            self.report_type_full,
+            self.document_type_full,
+        )
 
     @property
     def pdf_url(self):
-        if self.report_year and self.report_year >= 2000:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        if self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        if self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        return None
+        return utils.report_pdf_url(
+            self.report_year,
+            self.beginning_image_number,
+            committee_type=self.committee.committee_type,
+            form_type=self.form_type,
+        )

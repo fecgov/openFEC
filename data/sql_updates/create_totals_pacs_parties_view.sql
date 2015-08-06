@@ -1,5 +1,25 @@
 drop materialized view if exists ofec_totals_pacs_parties_mv_tmp;
 create materialized view ofec_totals_pacs_parties_mv_tmp as
+with last as (
+    select distinct on (
+        cmte_sk,
+        two_yr_period_sk
+    )
+        cmte_sk,
+        two_yr_period_sk,
+        coh_bop as cash_on_hand_end_period,
+        begin_image_num as beginning_image_number,
+        rpt_yr as report_year,
+        rt.rpt_tp_desc as report_type_full,
+        end_date.dw_date as coverage_end_date
+    from factpacsandparties_f3x
+    inner join dimreporttype rt using (reporttype_sk)
+    left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+    order by
+        cmte_sk,
+        two_yr_period_sk,
+        coverage_end_date desc
+)
 select
     row_number() over () as idx,
     cmte_id as committee_id,
@@ -47,16 +67,21 @@ select
     sum(tranf_from_affiliated_pty_per) as transfers_from_affiliated_party,
     sum(tranf_from_nonfed_acct_per) as transfers_from_nonfed_account,
     sum(tranf_from_nonfed_levin_per) as transfers_from_nonfed_levin,
-    sum(tranf_to_affliliated_cmte_per) as transfers_to_affiliated_committee
+    sum(tranf_to_affliliated_cmte_per) as transfers_to_affiliated_committee,
+    max(last.report_type_full) as last_report_type_full,
+    max(beginning_image_number) as last_beginning_image_number,
+    max(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
+    max(report_year) as last_report_year
 from
     dimcmte c
     inner join factpacsandparties_f3x pnp using (cmte_sk)
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+    left join last using (cmte_sk, two_yr_period_sk)
 where
     pnp.expire_date is null
     and two_yr_period_sk >= :START_YEAR
-group by committee_id, cycle
+group by c.cmte_id, pnp.two_yr_period_sk
 ;
 
 create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
