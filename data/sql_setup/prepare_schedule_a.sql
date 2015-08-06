@@ -26,7 +26,7 @@ select
     sched_a_sk,
     to_tsvector(contbr_nm) as contributor_name_text,
     to_tsvector(contbr_employer) as contributor_employer_text,
-    to_tsvector(contbr_employer) as contributor_occupation_text
+    to_tsvector(contbr_occupation) as contributor_occupation_text
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 ;
