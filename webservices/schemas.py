@@ -306,6 +306,13 @@ FilingsSchema = make_schema(
 )
 augment_schemas(FilingsSchema)
 
+class ElectionSearchSchema(ma.Schema):
+    state = ma.fields.Str()
+    office = ma.fields.Str()
+    district = ma.fields.Str()
+    cycle = ma.fields.Int(attribute='two_year_period')
+augment_schemas(ElectionSearchSchema)
+
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     candidate_name = ma.fields.Str()

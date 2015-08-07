@@ -1,10 +1,29 @@
 import datetime
 
 from webservices.rest import db, api
-from webservices.resources.elections import ElectionView
+from webservices.resources.elections import ElectionList, ElectionView
 
 from tests import factories
 from tests.common import ApiBaseTest
+
+
+class TestElectionSearch(ApiBaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.candidates = [
+            factories.CandidateHistoryFactory(office='P', state='US', district=None, two_year_period=2012),
+            factories.CandidateHistoryFactory(office='S', state='NJ', district=None, two_year_period=2012),
+            factories.CandidateHistoryFactory(office='H', state='NJ', district='09', two_year_period=2012),
+            factories.CandidateHistoryFactory(office='H', state='VA', district='05', two_year_period=2012),
+        ]
+
+    def test_search_district(self):
+        results = self._results(api.url_for(ElectionList, state='NJ', district='09'))
+        self.assertEqual(len(results), 3)
+        self.assertEqual(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
+        self.assertEqual(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': None})
+        self.assertEqual(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
 
 class TestElections(ApiBaseTest):

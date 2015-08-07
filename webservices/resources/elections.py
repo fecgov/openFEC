@@ -19,13 +19,69 @@ office_args_map = {
 
 
 @spec.doc(
+    description=docs.ELECTION_SEARCH,
+    tags=['financial']
+)
+class ElectionList(Resource):
+
+    filter_multi_fields = [
+        ('office', CandidateHistory.office),
+        ('cycle', CandidateHistory.two_year_period),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.election_search)
+    @args.register_kwargs(args.make_sort_args(default=['-office']))
+    @schemas.marshal_with(schemas.ElectionSearchPageSchema())
+    def get(self, **kwargs):
+        query = self._get_records(kwargs)
+        return utils.fetch_page(query, kwargs)
+
+    def _get_records(self, kwargs):
+        """Get election records, sorted by status of office (P > S > H).
+        """
+        elections = self._get_elections(kwargs).subquery()
+        return db.session.query(
+            elections,
+            sa.case(
+                [
+                    (elections.c.office == 'P', 1),
+                    (elections.c.office == 'S', 2),
+                    (elections.c.office == 'H', 3),
+                ],
+                else_=4,
+            ).label('_office_status'),
+        ).order_by(
+            '_office_status',
+        )
+
+    def _get_elections(self, kwargs):
+        query = CandidateHistory.query.distinct(
+            CandidateHistory.state,
+            CandidateHistory.office,
+            CandidateHistory.district,
+            CandidateHistory.two_year_period,
+        )
+        if kwargs['state']:
+            query = query.filter(CandidateHistory.state.in_(kwargs['state'] + ['US']))
+        if kwargs['district']:
+            query = query.filter(
+                sa.or_(
+                    CandidateHistory.district.in_(kwargs['district']),
+                    CandidateHistory.district == None  # noqa
+                ),
+            )
+        return utils.filter_multi(query, kwargs, self.filter_multi_fields)
+
+
+@spec.doc(
     description=docs.ELECTIONS,
     tags=['financial']
 )
 class ElectionView(Resource):
 
-    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.make_sort_args(default=['-total_receipts']))
     @schemas.marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
