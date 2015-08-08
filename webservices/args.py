@@ -389,6 +389,7 @@ election_search = {
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': Arg(str, multiple=True, description='Two digit district number'),
     'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
+    'zip': Arg(int, multiple=True),
     'office': Arg(
         str,
         multiple=True,
