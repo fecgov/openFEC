@@ -56,6 +56,7 @@ class ElectionList(Resource):
         )
 
     def _get_elections(self, kwargs):
+        """Get elections from candidate history records."""
         query = CandidateHistory.query.distinct(
             CandidateHistory.state,
             CandidateHistory.office,
@@ -71,7 +72,38 @@ class ElectionList(Resource):
                     CandidateHistory.district == None  # noqa
                 ),
             )
+        if kwargs['zip']:
+            query = self._filter_zip(query, kwargs)
         return utils.filter_multi(query, kwargs, self.filter_multi_fields)
+
+    def _filter_zip(self, query, kwargs):
+        """Filter query by zip codes."""
+        fips_states = sa.Table('ofec_fips_states', db.metadata, autoload_with=db.engine)
+        zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
+        districts = db.session.query(
+            zips_districts,
+            fips_states,
+        ).join(
+            fips_states,
+            zips_districts.c['State'] == fips_states.c['FIPS State Numeric Code'],
+        ).filter(
+            zips_districts.c['ZCTA'].in_(kwargs['zip'])
+        ).subquery()
+        return query.join(
+            districts,
+            sa.or_(
+                # House races from matching states and districts
+                sa.and_(
+                    CandidateHistory.district_number == districts.c['Congressional District'],
+                    CandidateHistory.state == districts.c['Official USPS Code'],
+                ),
+                # Senate and presidential races from matching states
+                sa.and_(
+                    CandidateHistory.district_number == None,  # noqa
+                    CandidateHistory.state.in_([districts.c['Official USPS Code'], 'US'])
+                ),
+            )
+        )
 
 
 @spec.doc(
