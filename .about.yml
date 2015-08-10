@@ -1,0 +1,19 @@
+---
+name: openfec
+type: app
+owner_type: project
+status: active
+stage: beta
+testable: true
+tasks: https://github.com/18F/openFEC/issues
+links:
+- url: https://api.open.fec.gov/developers
+  text: OpenFEC API Documentation
+team:
+- github: arowla
+- github: jmcarp
+- github: lindsayyoung
+services:
+- name: Travis CI
+  category: CI
+  url: https://travis-ci.org/18F/openFEC
