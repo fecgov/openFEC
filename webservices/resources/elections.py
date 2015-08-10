@@ -6,7 +6,6 @@ from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
-from webservices import exceptions
 from webservices.common.models import (
     db, CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
@@ -39,16 +38,7 @@ class ElectionView(Resource):
         return utils.fetch_page(query, kwargs, cap=0)
 
     def _get_records(self, kwargs):
-        required_args = office_args_map.get(kwargs['office'], [])
-        for arg in required_args:
-            if kwargs[arg] is None:
-                raise exceptions.ApiError(
-                    'Must include argument "{0}" with office type "{1}"'.format(
-                        arg,
-                        kwargs['office'],
-                    ),
-                    status_code=422,
-                )
+        utils.check_election_arguments(kwargs)
         totals_model = office_totals_map[kwargs['office']]
         pairs = self._get_pairs(totals_model, kwargs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
