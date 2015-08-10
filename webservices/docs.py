@@ -170,6 +170,10 @@ Explore a filer's characteristics over time. This can be particularly useful if 
 committees change treasurers, designation, or `committee_type`.
 '''
 
+ELECTION_SEARCH = '''
+List elections by cycle, office, state, and district.
+'''
+
 ELECTIONS = '''
 Look at the top-level financial information for all candidates running for the same
 office.

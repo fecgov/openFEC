@@ -39,6 +39,7 @@ class BaseCandidate(BaseModel):
     candidate_status = db.Column(db.String(1), index=True)
     candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2), index=True)
+    district_number = db.Column(db.Integer, index=True)
     election_years = db.Column(ARRAY(db.Integer), index=True)
     cycles = db.Column(ARRAY(db.Integer), index=True)
     incumbent_challenge = db.Column(db.String(1), index=True)
