@@ -30,13 +30,12 @@ office_args_map = {
 class ElectionList(Resource):
 
     filter_multi_fields = [
-        ('office', CandidateHistory.office),
         ('cycle', CandidateHistory.two_year_period),
     ]
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.election_search)
-    @args.register_kwargs(args.make_sort_args(default=['-office']))
+    @args.register_kwargs(args.make_sort_args(default=['-_office_status']))
     @schemas.marshal_with(schemas.ElectionSearchPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
@@ -68,6 +67,9 @@ class ElectionList(Resource):
             CandidateHistory.district,
             CandidateHistory.two_year_period,
         )
+        if kwargs['office']:
+            values = [each[0].upper() for each in kwargs['office']]
+            query = query.filter(CandidateHistory.office.in_(values))
         if kwargs['state']:
             query = query.filter(CandidateHistory.state.in_(kwargs['state'] + ['US']))
         if kwargs['district']:

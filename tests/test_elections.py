@@ -27,6 +27,11 @@ class TestElectionSearch(ApiBaseTest):
         self.assertEqual(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': None})
         self.assertEqual(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
+    def test_search_office(self):
+        results = self._results(api.url_for(ElectionList, office='senate'))
+        self.assertEqual(len(results), 2)
+        self.assertTrue(all([each['office'] == 'S' for each in results]))
+
     def test_search_zip(self):
         results = self._results(api.url_for(ElectionList, zip='22902'))
         self.assertEqual(len(results), 3)
