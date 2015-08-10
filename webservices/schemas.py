@@ -303,7 +303,7 @@ ScheduleESchema = make_schema(
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'expenditure_amount': ma.fields.Decimal(places=2),
-        'ytd_election_office': ma.fields.Decimal(places=2),
+        'office_total_ytd': ma.fields.Decimal(places=2),
     },
     options={
         'exclude': ('memo_code', ),

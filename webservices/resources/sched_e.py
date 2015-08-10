@@ -49,7 +49,7 @@ class ScheduleEView(ItemizedResource):
             validator=args.OptionValidator([
                 'expenditure_date',
                 'expenditure_amount',
-                'ytd_election_office',
+                'office_total_ytd',
             ]),
             multiple=False,
         )
