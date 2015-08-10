@@ -394,7 +394,7 @@ election_search = {
         str,
         multiple=True,
         enum=['house', 'senate', 'president'],
-        validate=lambda v: v.lower() in ['house', 'senate', 'president']
+        validate=lambda v: v.lower() in ['house', 'senate', 'president'],
     ),
 }
 
