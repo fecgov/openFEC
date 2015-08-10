@@ -52,7 +52,7 @@ def _validate_per_page(value):
         raise webargs.ValidationError('Parameter "per_page" must be <= 100')
 
 
-Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
+Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$').replace(',', ''))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
@@ -391,8 +391,14 @@ elections = {
     'cycle': Arg(int, description=docs.CANDIDATE_CYCLE),
     'office': Arg(
         str,
+<<<<<<< HEAD
         enum=['house', 'senate', 'presidential'],
         validate=lambda v: v.lower() in ['house', 'senate', 'presidential']
+=======
+        required=True,
+        enum=['house', 'senate', 'president'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'president']
+>>>>>>> develop
     ),
 }
 

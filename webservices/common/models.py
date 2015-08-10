@@ -692,6 +692,7 @@ class ScheduleASearch(db.Model):
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     contributor_name_text = db.Column(TSVECTOR)
     contributor_employer_text = db.Column(TSVECTOR)
+    contributor_occupation_text = db.Column(TSVECTOR)
 
 
 class BaseAggregate(db.Model):

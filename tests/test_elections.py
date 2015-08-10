@@ -65,7 +65,7 @@ class TestElections(ApiBaseTest):
         self.assertEquals(response.status_code, 422)
 
     def test_conditional_missing_params(self):
-        response = self.app.get(api.url_for(ElectionView, office='presidential', cycle=2012))
+        response = self.app.get(api.url_for(ElectionView, office='president', cycle=2012))
         self.assertEquals(response.status_code, 200)
         response = self.app.get(api.url_for(ElectionView, office='senate', cycle=2012))
         self.assertEquals(response.status_code, 422)
