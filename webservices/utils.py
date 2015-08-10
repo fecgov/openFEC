@@ -1,3 +1,5 @@
+import re
+
 import sqlalchemy as sa
 
 from webservices import docs
@@ -124,6 +126,26 @@ def filter_contributor_type(query, column, kwargs):
     if kwargs['contributor_type'] == ['committee']:
         return query.filter(column != 'IND')
     return query
+
+
+def document_description(report_year, report_type=None, document_type=None):
+    if report_type:
+        clean = re.sub(r'\{[^)]*\}', '', report_type)
+    elif document_type:
+        clean = document_type
+    else:
+        clean = 'Document '
+    return '{0}{1}'.format(clean, report_year)
+
+
+def report_pdf_url(report_year, beginning_image_number, form_type=None, committee_type=None):
+    if report_year and report_year >= 2000:
+        return make_report_pdf_url(beginning_image_number)
+    if form_type in ['F3X', 'F3P'] and report_year > 1993:
+        return make_report_pdf_url(beginning_image_number)
+    if form_type == 'F3' and committee_type == 'H' and report_year > 1996:
+        return make_report_pdf_url(beginning_image_number)
+    return None
 
 
 def make_report_pdf_url(image_number):

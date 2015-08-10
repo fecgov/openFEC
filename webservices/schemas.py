@@ -216,8 +216,17 @@ reports_schemas = (
 CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
 CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
-augment_models(
+make_totals_schema = functools.partial(
     make_schema,
+    fields={
+        'pdf_url': ma.fields.Str(),
+        'report_form': ma.fields.Str(),
+        'committee_type': ma.fields.Str(attribute='committee.committee_type'),
+        'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
+    },
+)
+augment_models(
+    make_totals_schema,
     models.CommitteeTotalsPresidential,
     models.CommitteeTotalsHouseSenate,
     models.CommitteeTotalsPacParty,
@@ -326,12 +335,25 @@ augment_schemas(FilingsSchema)
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     candidate_name = ma.fields.Str()
-    candidate_status_full = ma.fields.Str()
+    incumbent_challenge_full = ma.fields.Str()
+    party_full = ma.fields.Str()
     total_receipts = ma.fields.Decimal()
     total_disbursements = ma.fields.Decimal()
     cash_on_hand_end_period = ma.fields.Decimal()
-    document_description = ma.fields.Function(models.Filings.document_description.__get__)
-    pdf_url = ma.fields.Function(models.Filings.pdf_url.__get__)
+    document_description = ma.fields.Function(
+        lambda o: utils.document_description(
+            o.report_year,
+            o.report_type_full,
+        )
+    )
+    pdf_url = ma.fields.Function(
+        lambda o: utils.report_pdf_url(
+            o.report_year,
+            o.beginning_image_number,
+            'F3P' if o.office == 'P' else 'F3',
+            o.office[0].upper(),
+        )
+    )
 augment_schemas(ElectionSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
