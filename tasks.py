@@ -1,18 +1,6 @@
-import functools
-
 import git
 from invoke import run
 from invoke import task
-
-from webservices.rest import db, app
-
-
-def with_context(func):
-    @functools.wraps(func)
-    def wrapped(*args, **kwargs):
-        with app.app_context():
-            return func(*args, **kwargs)
-    return wrapped
 
 
 DEFAULT_FRACTION = 0.5
@@ -93,40 +81,6 @@ def dump(source, dest):
     cmd = 'pg_dump {source} --format c --no-acl --no-owner -f {dest}'.format(**locals())
     for table in EXCLUDE_TABLES:
         cmd += ' --exclude-table {0}'.format(table)
-    run(cmd, echo=True)
-
-
-@task
-@with_context
-def build_districts():
-    import pandas as pd
-    import sqlalchemy as sa
-    db.engine.execute('drop table if exists ofec_fips_states')
-    db.engine.execute('drop table if exists ofec_zips_districts')
-    pd.read_csv('data/fips_states.csv').to_sql('ofec_fips_states', db.engine)
-    pd.read_csv('data/natl_zccd_delim.csv').to_sql('ofec_zips_districts', db.engine)
-    zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
-    sa.Index('ix_zcta', zips_districts.c['ZCTA']).create(db.engine)
-
-
-@task
-@with_context
-def dump_districts(dest=None):
-    source = db.engine.url
-    dest = dest or './data/districts.dump'
-    cmd = (
-        'pg_dump {source} --format c --no-acl --no-owner -f {dest} '
-        '-t ofec_fips_states -t ofec_zips_districts'
-    ).format(**locals())
-    run(cmd, echo=True)
-
-
-@task
-@with_context
-def load_districts(source=None):
-    source = source or './data/districts.dump'
-    dest = db.engine.url
-    cmd = 'pg_restore --dbname {dest} --no-acl --no-owner {source}'.format(**locals())
     run(cmd, echo=True)
 
 

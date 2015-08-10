@@ -15,6 +15,7 @@ class TestElectionSearch(ApiBaseTest):
             factories.CandidateHistoryFactory(office='P', state='US', district=None, two_year_period=2012),
             factories.CandidateHistoryFactory(office='S', state='NJ', district=None, two_year_period=2012),
             factories.CandidateHistoryFactory(office='H', state='NJ', district='09', two_year_period=2012),
+            factories.CandidateHistoryFactory(office='S', state='VA', district=None, two_year_period=2012),
             factories.CandidateHistoryFactory(office='H', state='VA', district='05', two_year_period=2012),
         ]
 
@@ -24,6 +25,13 @@ class TestElectionSearch(ApiBaseTest):
         self.assertEqual(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
         self.assertEqual(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': None})
         self.assertEqual(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
+
+    def test_search_zip(self):
+        results = self._results(api.url_for(ElectionList, zip='22902'))
+        self.assertEqual(len(results), 3)
+        self.assertEqual(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
+        self.assertEqual(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': None})
+        self.assertEqual(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
 
 
 class TestElections(ApiBaseTest):
