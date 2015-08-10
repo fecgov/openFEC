@@ -76,7 +76,7 @@ class Date(webargs.Arg):
 
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Natural(default=20, validate=_validate_per_page, description='The number of results returned per page. Defaults to 20.'),
+    'per_page': Natural(default=20, validate=_validate_per_page, description='The number of results returned per page. Defaults to 20. The maximum per_page is 100.'),
 }
 
 
