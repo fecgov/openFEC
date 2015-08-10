@@ -151,32 +151,32 @@ class CommitteeNameSearch(restful.Resource):
         return search_typeahead_text(models.CommitteeSearch, kwargs['q'])
 
 
-api.add_resource(candidates.CandidateList, '/candidates')
-api.add_resource(candidates.CandidateSearch, '/candidates/search')
+api.add_resource(candidates.CandidateList, '/candidates/')
+api.add_resource(candidates.CandidateSearch, '/candidates/search/')
 api.add_resource(
     candidates.CandidateView,
-    '/candidate/<string:candidate_id>',
-    '/committee/<string:committee_id>/candidates',
+    '/candidate/<string:candidate_id>/',
+    '/committee/<string:committee_id>/candidates/',
 )
 api.add_resource(
     candidates.CandidateHistoryView,
-    '/candidate/<string:candidate_id>/history',
-    '/candidate/<string:candidate_id>/history/<int:cycle>',
-    '/committee/<string:committee_id>/candidates/history',
-    '/committee/<string:committee_id>/candidates/history/<int:cycle>',
+    '/candidate/<string:candidate_id>/history/',
+    '/candidate/<string:candidate_id>/history/<int:cycle>/',
+    '/committee/<string:committee_id>/candidates/history/',
+    '/committee/<string:committee_id>/candidates/history/<int:cycle>/',
 )
-api.add_resource(committees.CommitteeList, '/committees')
+api.add_resource(committees.CommitteeList, '/committees/')
 api.add_resource(
     committees.CommitteeView,
-    '/committee/<string:committee_id>',
-    '/candidate/<string:candidate_id>/committees',
+    '/committee/<string:committee_id>/',
+    '/candidate/<string:candidate_id>/committees/',
 )
 api.add_resource(
     committees.CommitteeHistoryView,
-    '/committee/<string:committee_id>/history',
-    '/committee/<string:committee_id>/history/<int:cycle>',
-    '/candidate/<candidate_id>/committees/history',
-    '/candidate/<candidate_id>/committees/history/<int:cycle>',
+    '/committee/<string:committee_id>/history/',
+    '/committee/<string:committee_id>/history/<int:cycle>/',
+    '/candidate/<candidate_id>/committees/history/',
+    '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
@@ -185,13 +185,14 @@ api.add_resource(CommitteeNameSearch, '/names/committees')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e')
-api.add_resource(elections.ElectionView, '/elections')
+api.add_resource(elections.ElectionList, '/elections/search/')
+api.add_resource(elections.ElectionView, '/elections/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
         view,
-        '/schedules/schedule_{schedule}/by_{label}'.format(**locals()),
-        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}'.format(**locals()),
+        '/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
+        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
     )
 
 add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
@@ -210,8 +211,8 @@ api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate')
 api.add_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, '/schedules/schedule_a/by_contributor_type/by_candidate')
 
-api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings')
-api.add_resource(filings.FilingsList, '/filings')
+api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings/')
+api.add_resource(filings.FilingsList, '/filings/')
 
 
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
@@ -298,6 +299,7 @@ register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint=
 register_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
+register_resource(elections.ElectionList, blueprint='v1')
 register_resource(elections.ElectionView, blueprint='v1')
 
 

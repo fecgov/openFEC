@@ -70,6 +70,37 @@ def load_pacronyms():
 
 
 @manager.command
+def build_districts():
+    import pandas as pd
+    import sqlalchemy as sa
+    db.engine.execute('drop table if exists ofec_fips_states')
+    db.engine.execute('drop table if exists ofec_zips_districts')
+    pd.read_csv('data/fips_states.csv').to_sql('ofec_fips_states', db.engine)
+    pd.read_csv('data/natl_zccd_delim.csv').to_sql('ofec_zips_districts', db.engine)
+    zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
+    sa.Index('ix_zcta', zips_districts.c['ZCTA']).create(db.engine)
+
+
+@manager.command
+def dump_districts(dest=None):
+    source = db.engine.url
+    dest = dest or './data/districts.dump'
+    cmd = (
+        'pg_dump {source} --format c --no-acl --no-owner -f {dest} '
+        '-t ofec_fips_states -t ofec_zips_districts'
+    ).format(**locals())
+    subprocess.call(cmd, shell=True)
+
+
+@manager.command
+def load_districts(source=None):
+    source = source or './data/districts.dump'
+    dest = db.engine.url
+    cmd = 'pg_restore --dbname {dest} --no-acl --no-owner {source}'.format(**locals())
+    subprocess.call(cmd, shell=True)
+
+
+@manager.command
 def update_schemas(processes=1):
     print("Starting DB refresh...")
     processes = int(processes)
@@ -111,6 +142,7 @@ def update_all(processes=1):
     """
     processes = int(processes)
     update_functions(processes=processes)
+    load_districts()
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')

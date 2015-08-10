@@ -24,13 +24,103 @@ office_args_map = {
 
 
 @spec.doc(
+    description=docs.ELECTION_SEARCH,
+    tags=['financial']
+)
+class ElectionList(Resource):
+
+    filter_multi_fields = [
+        ('cycle', CandidateHistory.two_year_period),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.election_search)
+    @args.register_kwargs(args.make_sort_args(default=['-_office_status']))
+    @schemas.marshal_with(schemas.ElectionSearchPageSchema())
+    def get(self, **kwargs):
+        query = self._get_records(kwargs)
+        return utils.fetch_page(query, kwargs)
+
+    def _get_records(self, kwargs):
+        """Get election records, sorted by status of office (P > S > H).
+        """
+        elections = self._get_elections(kwargs).subquery()
+        return db.session.query(
+            elections,
+            sa.case(
+                [
+                    (elections.c.office == 'P', 1),
+                    (elections.c.office == 'S', 2),
+                    (elections.c.office == 'H', 3),
+                ],
+                else_=4,
+            ).label('_office_status'),
+        ).order_by(
+            '_office_status',
+        )
+
+    def _get_elections(self, kwargs):
+        """Get elections from candidate history records."""
+        query = CandidateHistory.query.distinct(
+            CandidateHistory.state,
+            CandidateHistory.office,
+            CandidateHistory.district,
+            CandidateHistory.two_year_period,
+        )
+        if kwargs['office']:
+            values = [each[0].upper() for each in kwargs['office']]
+            query = query.filter(CandidateHistory.office.in_(values))
+        if kwargs['state']:
+            query = query.filter(CandidateHistory.state.in_(kwargs['state'] + ['US']))
+        if kwargs['district']:
+            query = query.filter(
+                sa.or_(
+                    CandidateHistory.district.in_(kwargs['district']),
+                    CandidateHistory.district == None  # noqa
+                ),
+            )
+        if kwargs['zip']:
+            query = self._filter_zip(query, kwargs)
+        return utils.filter_multi(query, kwargs, self.filter_multi_fields)
+
+    def _filter_zip(self, query, kwargs):
+        """Filter query by zip codes."""
+        fips_states = sa.Table('ofec_fips_states', db.metadata, autoload_with=db.engine)
+        zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
+        districts = db.session.query(
+            zips_districts,
+            fips_states,
+        ).join(
+            fips_states,
+            zips_districts.c['State'] == fips_states.c['FIPS State Numeric Code'],
+        ).filter(
+            zips_districts.c['ZCTA'].in_(kwargs['zip'])
+        ).subquery()
+        return query.join(
+            districts,
+            sa.or_(
+                # House races from matching states and districts
+                sa.and_(
+                    CandidateHistory.district_number == districts.c['Congressional District'],
+                    CandidateHistory.state == districts.c['Official USPS Code'],
+                ),
+                # Senate and presidential races from matching states
+                sa.and_(
+                    CandidateHistory.district_number == None,  # noqa
+                    CandidateHistory.state.in_([districts.c['Official USPS Code'], 'US'])
+                ),
+            )
+        )
+
+
+@spec.doc(
     description=docs.ELECTIONS,
     tags=['financial']
 )
 class ElectionView(Resource):
 
-    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.make_sort_args(default=['-total_receipts']))
     @schemas.marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
