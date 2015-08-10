@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 
 from webservices import args
+from webservices import docs
 from webservices import spec
 from webservices import utils
 from webservices import schemas
@@ -10,7 +11,7 @@ from webservices.common.views import ItemizedResource
 
 @spec.doc(
     tags=['schedules/schedule_e'],
-    description='Schedule E',
+    description=docs.SCHEDULE_E,
 )
 class ScheduleEView(ItemizedResource):
 
