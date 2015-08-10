@@ -1,5 +1,6 @@
 import datetime
 
+from webservices import utils
 from webservices.rest import db, api
 from webservices.resources.elections import ElectionList, ElectionView
 
@@ -57,33 +58,35 @@ class TestElections(ApiBaseTest):
         factories.CandidateCommitteeLinkFactory(
             candidate_key=self.candidate.candidate_key,
             committee_key=self.committees[0].committee_key,
+            election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_key=self.candidate.candidate_key,
             committee_key=self.committees[1].committee_key,
+            election_year=2011,
         )
-        self.filings = [
-            factories.FilingsFactory(
-                form_type='F3',
-                report_type='Q3',
-                report_year=2012,
-                total_receipts=50,
-                total_disbursements=75,
-                cash_on_hand_end_period=1979,
+        self.totals = [
+            factories.TotalsHouseSenateFactory(
+                receipts=50,
+                disbursements=75,
                 committee_id=self.committees[0].committee_id,
-                report_type_full='Quarter Three',
                 coverage_end_date=datetime.datetime(2012, 9, 30),
+                last_beginning_image_number=123,
+                last_report_type_full='Quarter Three',
+                last_cash_on_hand_end_period=1979,
+                last_report_year=2012,
+                cycle=2012,
             ),
-            factories.FilingsFactory(
-                form_type='F3',
-                report_type='Q4',
-                report_year=2012,
-                total_receipts=50,
-                total_disbursements=75,
-                cash_on_hand_end_period=25,
+            factories.TotalsHouseSenateFactory(
+                receipts=50,
+                disbursements=75,
                 committee_id=self.committees[1].committee_id,
-                report_type_full='Quarter Four',
                 coverage_end_date=datetime.datetime(2012, 12, 31),
+                last_beginning_image_number=456,
+                last_report_type_full='Quarter Three',
+                last_cash_on_hand_end_period=1979,
+                last_report_year=2012,
+                cycle=2012,
             ),
         ]
 
@@ -109,11 +112,20 @@ class TestElections(ApiBaseTest):
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'candidate_name': self.candidate.name,
-            'candidate_status_full': self.candidate.candidate_status_full,
-            'total_receipts': sum(each.total_receipts for each in self.filings),
-            'total_disbursements': sum(each.total_disbursements for each in self.filings),
-            'cash_on_hand_end_period': sum(each.cash_on_hand_end_period for each in self.filings),
-            'document_description': self.filings[1].document_description,
-            'pdf_url': self.filings[1].pdf_url,
+            'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
+            'party_full': self.candidate.party_full,
+            'total_receipts': sum(each.receipts for each in self.totals),
+            'total_disbursements': sum(each.disbursements for each in self.totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in self.totals),
+            'document_description': utils.document_description(
+                self.totals[1].last_report_year,
+                self.totals[1].last_report_type_full,
+            ),
+            'pdf_url': utils.report_pdf_url(
+                self.totals[1].last_report_year,
+                self.totals[1].last_beginning_image_number,
+                'F3',
+                'S',
+            )
         }
         self.assertEqual(results[0], expected)

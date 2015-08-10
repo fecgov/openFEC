@@ -402,17 +402,27 @@ election_search = {
 elections = {
     'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': Arg(str, description='Two digit district number'),
-    'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
+    'cycle': Arg(int, description=docs.CANDIDATE_CYCLE),
     'office': Arg(
         str,
-        required=True,
         enum=['house', 'senate', 'president'],
-        validate=lambda v: v.lower() in ['house', 'senate', 'president']
+        validate=lambda v: v.lower() in ['house', 'senate', 'president'],
+        description='Office sought, either President, House or Senate.',
     ),
 }
 
 
 schedule_a_candidate_aggregate = {
-    'candidate_id': IString(multiple=True, required=True),
+    'candidate_id': IString(multiple=True, required=True, description=docs.CANDIDATE_ID),
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
+}
+
+
+schedule_e = {
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+    'last_expenditure_date': Date(description='For paging through schedule E data by date.'),
+    'last_expenditure_amount': Arg(float, description='For paging through schedule E data by expenditure amount.'),
+    'last_office_total_ytd': Arg(float, description='For paging through total year to date spent on an office'),
+    'payee_name': Arg(str, description='Name of the entity that received the payment.'),
 }

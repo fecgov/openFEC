@@ -31,6 +31,7 @@ from webservices.resources import totals
 from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
+from webservices.resources import sched_e
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
@@ -177,12 +178,13 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/',
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
-api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
-api.add_resource(CandidateNameSearch, '/names/candidates/')
-api.add_resource(CommitteeNameSearch, '/names/committees/')
-api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
-api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
+api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
+api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
+api.add_resource(CandidateNameSearch, '/names/candidates')
+api.add_resource(CommitteeNameSearch, '/names/committees')
+api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
+api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
+api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e')
 api.add_resource(elections.ElectionList, '/elections/search/')
 api.add_resource(elections.ElectionView, '/elections/')
 
@@ -281,6 +283,7 @@ register_resource(reports.ReportsView, blueprint='v1')
 register_resource(totals.TotalsView, blueprint='v1')
 register_resource(sched_a.ScheduleAView, blueprint='v1')
 register_resource(sched_b.ScheduleBView, blueprint='v1')
+register_resource(sched_e.ScheduleEView, blueprint='v1')
 register_resource(aggregates.ScheduleABySizeView, blueprint='v1')
 register_resource(aggregates.ScheduleAByStateView, blueprint='v1')
 register_resource(aggregates.ScheduleAByZipView, blueprint='v1')

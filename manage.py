@@ -116,17 +116,10 @@ def update_functions(processes=1):
 
 
 @manager.command
-def update_schedule_a():
-    print('Updating Schedule A tables...')
-    execute_sql_file('data/sql_setup/prepare_schedule_a.sql')
-    print('Finished Schedule A update.')
-
-
-@manager.command
-def update_schedule_b():
-    print('Updating Schedule B tables...')
-    execute_sql_file('data/sql_setup/prepare_schedule_b.sql')
-    print('Finished Schedule B update.')
+def update_itemized(schedule):
+    print('Updating Schedule {0} tables...'.format(schedule))
+    execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
+    print('Finished Schedule {0} update.'.format(schedule))
 
 
 @manager.command
@@ -150,8 +143,9 @@ def update_all(processes=1):
     processes = int(processes)
     update_functions(processes=processes)
     load_districts()
-    update_schedule_a()
-    update_schedule_b()
+    update_itemized('a')
+    update_itemized('b')
+    update_itemized('e')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
