@@ -860,7 +860,7 @@ class ScheduleE(BaseItemized):
     receipt_date = db.Column('receipt_dt', db.DateTime)
     record_number = db.Column('record_num', db.Integer)
     report_primary_general = db.Column('rpt_pgi', db.String)
-    ytd_election_office = db.Column('cal_ytd_ofc_sought', db.Float)
+    office_total_ytd = db.Column('cal_ytd_ofc_sought', db.Float)
     category_code = db.Column('catg_cd', db.String)
     category_code_full = db.Column('catg_cd_desc', db.String)
     filer_prefix = db.Column(db.String)
