@@ -73,6 +73,30 @@ def search_text(query, column, text, order=True):
     return query
 
 
+office_args_required = ['office', 'cycle']
+office_args_map = {
+    'house': ['state', 'district'],
+    'senate': ['state'],
+}
+def check_election_arguments(kwargs):
+    for arg in office_args_required:
+        if kwargs[arg] is None:
+            raise exceptions.ApiError(
+                'Required parameter "{0}" not found.'.format(arg),
+                status_code=422,
+            )
+    conditional_args = office_args_map.get(kwargs['office'], [])
+    for arg in conditional_args:
+        if kwargs[arg] is None:
+            raise exceptions.ApiError(
+                'Must include argument "{0}" with office type "{1}"'.format(
+                    arg,
+                    kwargs['office'],
+                ),
+                status_code=422,
+            )
+
+
 def filter_match(query, kwargs, fields):
     for key, column in fields:
         if kwargs[key] is not None:
