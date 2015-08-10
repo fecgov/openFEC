@@ -254,7 +254,9 @@ When comparing the totals from reports to line items. the totals will not match 
 take out items where `"memoed_subtotal":true`. Memoed items are subtotals of receipts
 that are already accounted for in another schedule a line item.
 
-For the Schedule A aggregates, "memoed" items are not included to avoid double counting.
+For the Schedule A aggregates such as `by_occupation` and `by_state` reflect individual
+contributions. Aggregates for individual contributions only come from line numbers 11AI and
+17A. Again, "memoed" items are not included to avoid double counting.
 
 '''
 
