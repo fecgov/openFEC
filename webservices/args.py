@@ -391,9 +391,9 @@ elections = {
     'cycle': Arg(int, description=docs.CANDIDATE_CYCLE),
     'office': Arg(
         str,
-        enum=['house', 'senate', 'presidential'],
-        validate=lambda v: v.lower() in ['house', 'senate', 'presidential'],
-        description='Office sought, either Presidential, House or Senate.',
+        enum=['house', 'senate', 'president'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'president'],
+        description='Office sought, either President, House or Senate.',
     ),
 }
 
