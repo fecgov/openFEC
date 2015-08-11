@@ -120,7 +120,7 @@ class IndexValidator(OptionValidator):
         return not value or value in self.exclude
 
 
-def make_sort_args(default=None, multiple=True, validator=None, default_hide_null=False):
+def make_sort_args(default=None, multiple=True, validator=None, default_hide_null=False, default_nulls_large=True):
     return {
         'sort': Arg(
             str,
@@ -132,6 +132,10 @@ def make_sort_args(default=None, multiple=True, validator=None, default_hide_nul
         'sort_hide_null': Bool(
             default=default_hide_null,
             description='Hide null values on sorted column(s).'
+        ),
+        'sort_nulls_large': Bool(
+            default=default_nulls_large,
+            description='Treat null values as large on sorted column(s)',
         )
     }
 

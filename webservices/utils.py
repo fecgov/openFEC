@@ -19,8 +19,8 @@ def check_cap(kwargs, cap):
 
 def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
-    query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null)
+    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
+    query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     paginator = paging.SqlalchemyOffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
@@ -28,8 +28,8 @@ def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.class_
-    sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
-    query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null)
+    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
+    query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     sort_column = sort_columns[0] if sort_columns else None
     paginator = paging.SqlalchemySeekPaginator(
         query,
