@@ -1,4 +1,3 @@
-import re
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
@@ -135,8 +134,8 @@ class BaseConcreteCommittee(BaseCommittee):
 class Committee(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
 
-    first_file_date = db.Column(db.DateTime)
-    last_file_date = db.Column(db.DateTime)
+    first_file_date = db.Column(db.Date)
+    last_file_date = db.Column(db.Date)
 
 
 class CommitteeHistory(BaseCommittee):
@@ -153,8 +152,8 @@ class CommitteeHistory(BaseCommittee):
 class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
 
-    first_file_date = db.Column(db.DateTime)
-    last_file_date = db.Column(db.DateTime)
+    first_file_date = db.Column(db.Date)
+    last_file_date = db.Column(db.Date)
     filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50))
     fax = db.Column(db.String(10))
@@ -165,7 +164,7 @@ class CommitteeDetail(BaseConcreteCommittee):
     lobbyist_registrant_pac = db.Column(db.String(1))
     party_type = db.Column(db.String(3))
     party_type_full = db.Column(db.String(15))
-    qualifying_date = db.Column(db.DateTime())
+    qualifying_date = db.Column(db.Date())
     street_1 = db.Column(db.String(50))
     street_2 = db.Column(db.String(50))
     city = db.Column(db.String(50))
@@ -674,7 +673,7 @@ class ScheduleA(BaseItemized):
     contributor_employer = db.Column('contbr_employer', db.String)
     contributor_occupation = db.Column('contbr_occupation', db.String)
     contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Float)
-    contributor_receipt_date = db.Column('contb_receipt_dt', db.DateTime)
+    contributor_receipt_date = db.Column('contb_receipt_dt', db.Date)
     contributor_receipt_amount = db.Column('contb_receipt_amt', db.Float)
     receipt_type = db.Column('receipt_tp', db.String)
     receipt_type_full = db.Column('receipt_desc', db.String)
@@ -686,7 +685,7 @@ class ScheduleA(BaseItemized):
     record_number = db.Column('record_num', db.Integer)
     report_primary_general = db.Column('rpt_pgi', db.String)
     form_type_full = db.Column('form_tp_cd', db.String)
-    receipt_date = db.Column('receipt_dt', db.DateTime)
+    receipt_date = db.Column('receipt_dt', db.Date)
     increased_limit = db.Column(db.String)
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
@@ -792,7 +791,7 @@ class ScheduleB(BaseItemized):
     recipient_zip = db.Column(db.String)
     disbursement_type = db.Column('disb_tp', db.String)
     disbursement_description = db.Column('disb_desc', db.String)
-    disbursement_date = db.Column('disb_dt', db.DateTime)
+    disbursement_date = db.Column('disb_dt', db.Date)
     disbursement_amount = db.Column('disb_amt', db.Float)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
@@ -801,7 +800,7 @@ class ScheduleB(BaseItemized):
     election_type_full = db.Column('election_tp_desc', db.String)
     record_number = db.Column('record_num', db.Integer)
     report_primary_general = db.Column('rpt_pgi', db.String)
-    receipt_date = db.Column('receipt_dt', db.DateTime)
+    receipt_date = db.Column('receipt_dt', db.Date)
     beneficiary_committee_name = db.Column('benef_cmte_nm', db.String)
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Float)
     load_date = db.Column(db.DateTime)
@@ -863,7 +862,7 @@ class ScheduleE(BaseItemized):
     notary_commission_expiration_date = db.Column('notary_commission_exprtn_dt', db.Date)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
-    receipt_date = db.Column('receipt_dt', db.DateTime)
+    receipt_date = db.Column('receipt_dt', db.Date)
     record_number = db.Column('record_num', db.Integer)
     report_primary_general = db.Column('rpt_pgi', db.String)
     office_total_ytd = db.Column('cal_ytd_ofc_sought', db.Float)

@@ -5,8 +5,9 @@ import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.rest import db
 from webservices.rest import api
+from webservices.schemas import ScheduleASchema
+from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView
 from webservices.resources.sched_b import ScheduleBView
 from webservices.resources.sched_e import ScheduleEView
@@ -14,13 +15,23 @@ from webservices.resources.sched_e import ScheduleEView
 
 class TestItemized(ApiBaseTest):
 
+    def test_fields(self):
+        params = [
+            (factories.ScheduleAFactory, ScheduleAView, ScheduleASchema),
+            (factories.ScheduleBFactory, ScheduleBView, ScheduleBSchema),
+        ]
+        for factory, resource, schema in params:
+            factory()
+            results = self._results(api.url_for(resource))
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].keys(), schema().fields.keys())
+
     def test_sorting(self):
         [
             factories.ScheduleAFactory(report_year=2014, contributor_receipt_date=datetime.datetime(2014, 1, 1)),
             factories.ScheduleAFactory(report_year=2012, contributor_receipt_date=datetime.datetime(2012, 1, 1)),
             factories.ScheduleAFactory(report_year=1986, contributor_receipt_date=datetime.datetime(1986, 1, 1)),
         ]
-        db.session.flush()
         response = self._response(api.url_for(ScheduleAView, sort='contributor_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
