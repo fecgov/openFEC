@@ -112,3 +112,14 @@ class TestFilings(ApiBaseTest):
         results = self._results(api.url_for(FilingsView, committee_id='C007'))
 
         self.assertEqual(results[0]['document_description'], 'report 2004')
+
+    def test_pdf_url(self):
+        factories.FilingsFactory(
+            report_type_full='report {more information than we want}',
+            beginning_image_number=123456,
+            committee_id='C007',
+            report_year=2004,
+        )
+        results = self._results(api.url_for(FilingsView, committee_id='C007'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['pdf_url'], 'http://docquery.fec.gov/pdf/456/123456/123456.pdf')
