@@ -48,6 +48,7 @@ class TestElections(ApiBaseTest):
             state='NY',
             district='07',
             two_year_period=2012,
+            election_years=[2010, 2012],
             office='H',
         )
         self.committees = [
