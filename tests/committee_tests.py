@@ -20,7 +20,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_list_fields(self):
         committee = factories.CommitteeFactory(
-            first_file_date=datetime.datetime(1982, 12, 31),
+            first_file_date=datetime.date(1982, 12, 31),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
@@ -29,7 +29,7 @@ class CommitteeFormatTest(ApiBaseTest):
         result = response['results'][0]
         # main fields
         # original registration date doesn't make sense in this example, need to look into this more
-        self.assertEqual(result['first_file_date'], isoformat(committee.first_file_date))
+        self.assertEqual(result['first_file_date'], committee.first_file_date.isoformat())
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
@@ -69,7 +69,7 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_detail_fields(self):
         committee = factories.CommitteeDetailFactory(
-            first_file_date=datetime.datetime(1982, 12, 31),
+            first_file_date=datetime.date(1982, 12, 31),
             committee_type='P',
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
@@ -81,7 +81,7 @@ class CommitteeFormatTest(ApiBaseTest):
         response = self._response(api.url_for(CommitteeView, committee_id=committee.committee_id))
         result = response['results'][0]
         # main fields
-        self.assertEqual(result['first_file_date'], isoformat(committee.first_file_date))
+        self.assertEqual(result['first_file_date'], committee.first_file_date.isoformat())
         self.assertEqual(result['committee_type'], committee.committee_type)
         self.assertEqual(result['treasurer_name'], committee.treasurer_name)
         self.assertEqual(result['party'], committee.party)
@@ -183,8 +183,8 @@ class CommitteeFormatTest(ApiBaseTest):
     def test_committee_year_filter_skips_null_first_file_date(self):
         # Build fixtures
         dates = [
-            datetime.datetime(2012, 1, 1),
-            datetime.datetime(2015, 1, 1),
+            datetime.date(2012, 1, 1),
+            datetime.date(2015, 1, 1),
         ]
         [
             factories.CommitteeFactory(first_file_date=None, last_file_date=None),
@@ -266,15 +266,15 @@ class CommitteeFormatTest(ApiBaseTest):
 
     def test_committee_date_filters(self):
         [
-            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 1, 1)),
-            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 2, 1)),
-            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 3, 1)),
-            factories.CommitteeFactory(first_file_date=datetime.datetime(2015, 4, 1)),
+            factories.CommitteeFactory(first_file_date=datetime.date(2015, 1, 1)),
+            factories.CommitteeFactory(first_file_date=datetime.date(2015, 2, 1)),
+            factories.CommitteeFactory(first_file_date=datetime.date(2015, 3, 1)),
+            factories.CommitteeFactory(first_file_date=datetime.date(2015, 4, 1)),
         ]
         results = self._results(api.url_for(CommitteeList, min_first_file_date='02/01/2015'))
-        self.assertTrue(all(each['first_file_date'] >= isoformat(datetime.datetime(2015, 2, 1)) for each in results))
+        self.assertTrue(all(each['first_file_date'] >= datetime.date(2015, 2, 1).isoformat() for each in results))
         results = self._results(api.url_for(CommitteeList, max_first_file_date='02/03/2015'))
-        self.assertTrue(all(each['first_file_date'] <= isoformat(datetime.datetime(2015, 3, 1)) for each in results))
+        self.assertTrue(all(each['first_file_date'] <= datetime.date(2015, 3, 1).isoformat() for each in results))
         results = self._results(
             api.url_for(
                 CommitteeList,
@@ -284,9 +284,9 @@ class CommitteeFormatTest(ApiBaseTest):
         )
         self.assertTrue(
             all(
-                isoformat(datetime.datetime(2015, 2, 1))
+                datetime.date(2015, 2, 1).isoformat()
                 <= each['first_file_date']
-                <= isoformat(datetime.datetime(2015, 3, 1))
+                <= datetime.date(2015, 3, 1).isoformat()
                 for each in results
             )
         )

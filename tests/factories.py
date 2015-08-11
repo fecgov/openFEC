@@ -138,6 +138,7 @@ class ScheduleBFactory(BaseFactory):
     class Meta:
         model = models.ScheduleB
     sched_b_sk = factory.Sequence(lambda n: n)
+    load_date = datetime.datetime.utcnow()
     report_year = 2016
 
 
@@ -145,6 +146,13 @@ class ScheduleBSearchFactory(BaseFactory):
     class Meta:
         model = models.ScheduleBSearch
     sched_b_sk = factory.Sequence(lambda n: n)
+
+
+class ScheduleEFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleE
+    sched_e_sk = factory.Sequence(lambda n: n)
+    report_year = 2016
 
 
 class FilingsFactory(BaseFactory):
@@ -181,3 +189,11 @@ class ScheduleAByContributorFactory(BaseFactory):
     contributor_id = factory.Sequence(lambda n: str(n))
     cycle = 2016
     year = 2015
+
+
+class ScheduleBByPurposeFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleBByPurpose
+    committee_id = factory.Sequence(lambda n: str(n))
+    purpose = 'ADMINISTRATIVE'
+    cycle = 2016

@@ -52,7 +52,7 @@ def _validate_per_page(value):
         raise webargs.ValidationError('Parameter "per_page" must be <= 100')
 
 
-Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
+Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$').replace(',', ''))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
@@ -76,7 +76,7 @@ class Date(webargs.Arg):
 
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Natural(default=20, validate=_validate_per_page, description='The number of results returned per page. Defaults to 20.'),
+    'per_page': Natural(default=20, validate=_validate_per_page, description='The number of results returned per page. Defaults to 20. The maximum per_page is 100.'),
 }
 
 
@@ -379,21 +379,50 @@ schedule_b = {
     'last_disbursement_amount': Arg(float, description='Filter for records'),
 }
 
+schedule_b_by_purpose = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'purpose': Arg(str, multiple=True, description='Disbursement purpose category'),
+}
+
+
+election_search = {
+    'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
+    'district': Arg(str, multiple=True, description='Two digit district number'),
+    'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
+    'zip': Arg(int, multiple=True),
+    'office': Arg(
+        str,
+        multiple=True,
+        enum=['house', 'senate', 'president'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'president'],
+    ),
+}
+
 
 elections = {
     'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': Arg(str, description='Two digit district number'),
-    'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
+    'cycle': Arg(int, description=docs.CANDIDATE_CYCLE),
     'office': Arg(
         str,
-        required=True,
-        enum=['house', 'senate', 'presidential'],
-        validate=lambda v: v.lower() in ['house', 'senate', 'presidential']
+        enum=['house', 'senate', 'president'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'president'],
+        description='Office sought, either President, House or Senate.',
     ),
 }
 
 
 schedule_a_candidate_aggregate = {
-    'candidate_id': IString(multiple=True, required=True),
+    'candidate_id': IString(multiple=True, required=True, description=docs.CANDIDATE_ID),
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
+}
+
+
+schedule_e = {
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+    'last_expenditure_date': Date(description='For paging through schedule E data by date.'),
+    'last_expenditure_amount': Arg(float, description='For paging through schedule E data by expenditure amount.'),
+    'last_office_total_ytd': Arg(float, description='For paging through total year to date spent on an office'),
+    'payee_name': Arg(str, description='Name of the entity that received the payment.'),
 }

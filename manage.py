@@ -70,6 +70,37 @@ def load_pacronyms():
 
 
 @manager.command
+def build_districts():
+    import pandas as pd
+    import sqlalchemy as sa
+    db.engine.execute('drop table if exists ofec_fips_states')
+    db.engine.execute('drop table if exists ofec_zips_districts')
+    pd.read_csv('data/fips_states.csv').to_sql('ofec_fips_states', db.engine)
+    pd.read_csv('data/natl_zccd_delim.csv').to_sql('ofec_zips_districts', db.engine)
+    zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
+    sa.Index('ix_zcta', zips_districts.c['ZCTA']).create(db.engine)
+
+
+@manager.command
+def dump_districts(dest=None):
+    source = db.engine.url
+    dest = dest or './data/districts.dump'
+    cmd = (
+        'pg_dump {source} --format c --no-acl --no-owner -f {dest} '
+        '-t ofec_fips_states -t ofec_zips_districts'
+    ).format(**locals())
+    subprocess.call(cmd, shell=True)
+
+
+@manager.command
+def load_districts(source=None):
+    source = source or './data/districts.dump'
+    dest = db.engine.url
+    cmd = 'pg_restore --dbname {dest} --no-acl --no-owner {source}'.format(**locals())
+    subprocess.call(cmd, shell=True)
+
+
+@manager.command
 def update_schemas(processes=1):
     print("Starting DB refresh...")
     processes = int(processes)
@@ -85,23 +116,23 @@ def update_functions(processes=1):
 
 
 @manager.command
-def update_schedule_a():
-    print('Updating Schedule A tables...')
-    execute_sql_file('data/sql_setup/prepare_schedule_a.sql')
-    print('Finished Schedule A update.')
+def update_itemized(schedule):
+    print('Updating Schedule {0} tables...'.format(schedule))
+    execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
+    print('Finished Schedule {0} update.'.format(schedule))
 
 
 @manager.command
-def update_schedule_b():
-    print('Updating Schedule B tables...')
-    execute_sql_file('data/sql_setup/prepare_schedule_b.sql')
-    print('Finished Schedule B update.')
-
-
-@manager.command
-def update_aggregates(processes=1):
-    print('Updating incremental aggregates...')
+def rebuild_aggregates(processes=1):
+    print('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
+    print('Finished rebuilding incremental aggregates.')
+
+
+@manager.command
+def update_aggregates():
+    print('Updating incremental aggregates...')
+    db.engine.execute('select update_aggregates()')
     print('Finished updating incremental aggregates.')
 
 
@@ -111,9 +142,11 @@ def update_all(processes=1):
     """
     processes = int(processes)
     update_functions(processes=processes)
-    update_schedule_a()
-    update_schedule_b()
-    update_aggregates(processes=processes)
+    load_districts()
+    update_itemized('a')
+    update_itemized('b')
+    update_itemized('e')
+    rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
 
