@@ -90,7 +90,9 @@ class BasePaginator(object):
 
     @property
     def pages(self):
-        return int(math.ceil(self.count / self.per_page))
+        if self.per_page:
+            return int(math.ceil(self.count / self.per_page))
+        return 0
 
     @abc.abstractmethod
     def _count(self):
