@@ -8,7 +8,7 @@ from tests import factories
 from .common import ApiBaseTest
 
 
-shared_fields =  {
+shared_fields = {
     'offsets_to_operating_expenditures': 112,
     'political_party_committee_contributions': 113,
     'other_disbursements': 114,
@@ -28,6 +28,10 @@ shared_fields =  {
     'coverage_end_date': None,
     'net_contributions': 127,
     'net_operating_expenditures': 128,
+    'last_report_year': 2012,
+    'last_report_type_full': 'Q3',
+    'last_beginning_image_number': 123,
+    'last_cash_on_hand_end_period': 538,
 }
 
 class TestTotals(ApiBaseTest):
