@@ -148,6 +148,7 @@ class ElectionView(Resource):
             CandidateHistory.party_full,
             CandidateHistory.incumbent_challenge_full,
             CandidateHistory.office,
+            totals_model.committee_id,
             totals_model.receipts,
             totals_model.disbursements,
             totals_model.last_report_year.label('report_year'),
@@ -194,6 +195,7 @@ class ElectionView(Resource):
             sa.func.sum(pairs.c.receipts).label('total_receipts'),
             sa.func.sum(pairs.c.disbursements).label('total_disbursements'),
             sa.func.sum(pairs.c.cash_on_hand_end_period).label('cash_on_hand_end_period'),
+            sa.func.array_agg(pairs.c.committee_id).label('committee_ids'),
         ).group_by(
             pairs.c.candidate_id,
         )
