@@ -890,6 +890,13 @@ class Filings(db.Model):
 
     committee_id = db.Column(db.String, index=True)
     committee_name = db.Column(db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(Filings.committee_id) == CommitteeHistory.committee_id,
+            Filings.report_year + Filings.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     candidate_id = db.Column(db.String, index=True)
     candidate_name = db.Column(db.String)
     sub_id = db.Column(db.BigInteger, primary_key=True)
@@ -941,6 +948,6 @@ class Filings(db.Model):
         return utils.report_pdf_url(
             self.report_year,
             self.beginning_image_number,
-            committee_type=self.committee.committee_type,
+            committee_type=self.committee.committee_type if self.committee else None,
             form_type=self.form_type,
         )

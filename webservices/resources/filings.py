@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -67,6 +68,7 @@ class FilingsList(Resource):
     @schemas.marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         query = models.Filings.query
+        query = query.options(sa.orm.joinedload(models.Filings.committee))
         query = filter_query(models.Filings, query, fields, kwargs)
         query = utils.filter_range(query, kwargs, range_fields)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
