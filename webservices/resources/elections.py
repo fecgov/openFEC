@@ -121,7 +121,7 @@ class ElectionView(Resource):
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.elections)
-    @args.register_kwargs(args.make_sort_args(default=['-total_receipts']))
+    @args.register_kwargs(args.make_sort_args(default=['-total_receipts'], default_nulls_large=False))
     @schemas.marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
