@@ -168,6 +168,7 @@ class ElectionView(Resource):
             CommitteeHistory.committee_id == totals_model.committee_id,
         ).filter(
             CandidateHistory.two_year_period == kwargs['cycle'],
+            CandidateHistory.election_years.any(kwargs['cycle']),
             CandidateHistory.office == kwargs['office'][0].upper(),
             CandidateCommitteeLink.election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
             CommitteeHistory.cycle == kwargs['cycle'],
