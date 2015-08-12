@@ -74,9 +74,24 @@ class Date(webargs.Arg):
             raise webargs.ValidationError('Expected date for {0}; got "{1}"'.format(name, value))
 
 
+def _parse_district(value):
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        raise webargs.ValidationError('District must be a number')
+    if value < 0:
+        raise webargs.ValidationError('District must be a natural number')
+    return '{0:0>2}'.format(value)
+District = functools.partial(Arg, str, use=_parse_district, description='Two-digit district number')
+
+
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Natural(default=20, validate=_validate_per_page, description='The number of results returned per page. Defaults to 20. The maximum per_page is 100.'),
+    'per_page': Natural(
+        default=20,
+        validate=_validate_per_page,
+        description='The number of results returned per page. Defaults to 20. The maximum per_page is 100.'
+    ),
 }
 
 
@@ -159,14 +174,13 @@ names = {
     'q': Arg(str, required=True, description='Name (candidate or committee) to search for'),
 }
 
-
 candidate_detail = {
     'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': IString(multiple=True, description='Three letter code for the party under which a candidate ran for office'),
     'year': Arg(str, dest='election_year', description='See records pertaining to a particular election year.'),
-    'district': Arg(str, multiple=True, description='Two digit district number'),
+    'district': District(multiple=True),
     'candidate_status': IString(multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is:\n\
         - C present candidate\n\
         - F future candidate\n\
@@ -391,7 +405,7 @@ schedule_b_by_purpose = {
 
 election_search = {
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
-    'district': Arg(str, multiple=True, description='Two digit district number'),
+    'district': District(multiple=True),
     'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
     'zip': Arg(int, multiple=True),
     'office': Arg(
@@ -405,7 +419,7 @@ election_search = {
 
 elections = {
     'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
-    'district': Arg(str, description='Two digit district number'),
+    'district': District(),
     'cycle': Arg(int, description=docs.CANDIDATE_CYCLE),
     'office': Arg(
         str,
