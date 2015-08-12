@@ -101,6 +101,12 @@ def load_districts(source=None):
 
 
 @manager.command
+def build_district_counts(outname='districts.json'):
+    import utils
+    utils.write_district_counts(outname)
+
+
+@manager.command
 def update_schemas(processes=1):
     print("Starting DB refresh...")
     processes = int(processes)
