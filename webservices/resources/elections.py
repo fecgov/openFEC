@@ -66,7 +66,11 @@ class ElectionList(Resource):
             CandidateHistory.office,
             CandidateHistory.district,
             CandidateHistory.two_year_period,
+        ).filter(
+            CandidateHistory.candidate_status == 'C',
         )
+        if kwargs['cycle']:
+            query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
         if kwargs['office']:
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(CandidateHistory.office.in_(values))
