@@ -283,8 +283,8 @@ itemized = {
     'max_image_number': Arg(str),
     'min_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': Date(description='Minium date'),
-    'max_date': Date(description='Maxium date'),
+    'min_date': Date(description='Minimum date'),
+    'max_date': Date(description='Maximum date'),
 }
 
 contributor_type = Arg(
@@ -307,11 +307,11 @@ election_dates = {
     'election_state': Arg(str, multiple=True, description='State of the office sought.'),
     'election_district': Arg(str, multiple=True,
         description='House district of the office sought, if applicable.'),
-    'election_party': Arg(str, multiple=True,  description='Party, if applicable.'),
+    'election_party': Arg(str, multiple=True, description='Party, if applicable.'),
     'office_sought': Arg(str, multiple=True, enum=['H', 'S', 'P'], description='House, Senate or presidential office'),
     'election_date': Date(multiple=True, description='Date of election.'),
-    'trc_election_type_id':Arg(str, multiple=True,  description='Election type'),
-    'trc_election_status_id':Arg(str, multiple=True,  description=''),
+    'trc_election_type_id': Arg(str, multiple=True, description='Election type'),
+    'trc_election_status_id': Arg(str, multiple=True, description=''),
     'update_date': Date(multiple=True, description='Date this record was last updated.'),
     'create_date': Date(multiple=True, description='Date this record was added to the system.'),
     'election_yr': Arg(str, multiple=True, description='Year of election.'),
