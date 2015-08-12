@@ -130,6 +130,7 @@ class TestElections(ApiBaseTest):
             'candidate_name': self.candidate.name,
             'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
             'party_full': self.candidate.party_full,
+            'committee_ids': [each.committee_id for each in self.committees],
             'total_receipts': sum(each.receipts for each in self.totals),
             'total_disbursements': sum(each.disbursements for each in self.totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in self.totals),
