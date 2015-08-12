@@ -16,6 +16,7 @@ from flask import render_template
 from flask import Flask
 from flask import Blueprint
 
+from flask.ext import cors
 from flask.ext import restful
 
 from webservices import args
@@ -58,6 +59,7 @@ app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
+cors.CORS(app)
 
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
@@ -95,14 +97,6 @@ def limit_remote_addr():
         else:
             if api_data_route not in trusted_proxies:
                 abort(403)
-
-
-@app.after_request
-def add_cors_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Methods', 'GET')
-    response.headers.add('Access-Control-Max-Age', '3000')
-    return response
 
 
 @app.after_request
