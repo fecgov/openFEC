@@ -1,4 +1,5 @@
 import datetime
+import functools
 
 from webservices import utils
 from webservices.rest import db, api
@@ -12,12 +13,18 @@ class TestElectionSearch(ApiBaseTest):
 
     def setUp(self):
         super().setUp()
+        factory = functools.partial(
+            factories.CandidateHistoryFactory,
+            two_year_period=2012,
+            election_years=[2012],
+            candidate_status='C',
+        )
         self.candidates = [
-            factories.CandidateHistoryFactory(office='P', state='US', district=None, two_year_period=2012),
-            factories.CandidateHistoryFactory(office='S', state='NJ', district=None, two_year_period=2012),
-            factories.CandidateHistoryFactory(office='H', state='NJ', district='09', two_year_period=2012),
-            factories.CandidateHistoryFactory(office='S', state='VA', district=None, two_year_period=2012),
-            factories.CandidateHistoryFactory(office='H', state='VA', district='05', two_year_period=2012),
+            factory(office='P', state='US', district=None),
+            factory(office='S', state='NJ', district=None),
+            factory(office='H', state='NJ', district='09'),
+            factory(office='S', state='VA', district=None),
+            factory(office='H', state='VA', district='05'),
         ]
 
     def test_search_district(self):
