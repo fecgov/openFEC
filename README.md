@@ -226,7 +226,7 @@ as the production instance.
 
 #### The Test Data Subset
 
-This repo includes a small subset of the staging database (built 2015/08/03) at `data/subset.dump`. To use the test subset for local development:
+This repo includes a small subset of the staging database (built 2015/08/12) at `data/subset.dump`. To use the test subset for local development:
 
     $ pg_restore --dbname <dest> data/subset.dump
 
