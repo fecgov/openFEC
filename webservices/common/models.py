@@ -911,17 +911,6 @@ class ReportingDates(db.Model):
     update_date = db.Column(db.Date, index=True)
 
 
-class ReportType(db.Model):
-    __tablename__ = 'dimreporttype'
-
-    rpt_tp_desc = db.Column(db.String, index=True)
-    rpt_tp = db.Column(
-        db.String,
-        db.ForeignKey(ReportingDates.report_type),
-        primary_key=True
-    )
-
-
 class ElectionDates(db.Model):
     __tablename__ = 'trc_election'
 

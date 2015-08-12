@@ -9,33 +9,38 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common.util import filter_query
 
-reporring_filter_fields = {
-    'due_date',
-    'report_year',
-    'report_type',
-    'create_date',
-    'update_date',
-}
 
-election_filter_fields = {
-    'election_state',
-    'election_district',
-    'election_party',
-    'office_sought',
-    'election_date',
-    'trc_election_type_id',
-    'trc_election_status_id',
-    'update_date',
-    'create_date',
-    'election_yr',
-    'pg_date',
-}
+def filter_upcoming(query, column, kwargs):
+    if kwargs['upcoming']:
+        return query.filter(column >= date.today())
+    return query
 
-@spec.doc(
-    tags=['dates'],
-    description='FEC reporting dates since 1995.',
-)
-class ReportingDatesView(Resource):
+
+@spec.doc(tags=['dates'])
+class DatesResource(Resource):
+
+    def get(self, **kwargs):
+        query = self.model.query
+        query = filter_query(self.model, query, self.filter_fields, kwargs)
+        query = filter_upcoming(query, self.date_column, kwargs)
+        return utils.fetch_page(query, kwargs, model=self.model)
+
+
+@spec.doc(description='FEC reporting dates since 1995.')
+class ReportingDatesView(DatesResource):
+
+    model = models.ReportingDates
+    @property
+    def date_column(self):
+        return self.model.due_date
+
+    filter_fields = {
+        'due_date',
+        'report_year',
+        'report_type',
+        'create_date',
+        'update_date',
+    }
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reporting_dates)
@@ -46,22 +51,30 @@ class ReportingDatesView(Resource):
     )
     @schemas.marshal_with(schemas.ReportingDatesPageSchema())
     def get(self, **kwargs):
-        reporting_date_query = models.ReportingDates.query
-        reporting_date_query = filter_query(models.ReportingDates, reporting_date_query, reporting_filter_fields, kwargs)
-
-        if kwargs.get('upcoming'):
-            # choose reporting dates in the future
-            reporting_date_query = reporting_date_query.filter(models.ReportingDates.due_date >= date.today())
-
-        return utils.fetch_page(reporting_date_query, kwargs, model=models.ReportingDates)
+        return super().get(**kwargs)
 
 
+@spec.doc(description='FEC election dates since 1995.')
+class ElectionDatesView(DatesResource):
 
-@spec.doc(
-    tags=['dates'],
-    description='FEC election dates since 1995.',
-)
-class ElectionDatesView(Resource):
+    model = models.ElectionDates
+    @property
+    def date_column(self):
+        return self.model.election_date
+
+    filter_fields = {
+        'election_state',
+        'election_district',
+        'election_party',
+        'office_sought',
+        'election_date',
+        'trc_election_type_id',
+        'trc_election_status_id',
+        'update_date',
+        'create_date',
+        'election_yr',
+        'pg_date',
+    }
 
     @args.register_kwargs(args.paging)
     @args.register_kwargs(args.reporting_dates)
@@ -72,16 +85,4 @@ class ElectionDatesView(Resource):
     )
     @schemas.marshal_with(schemas.ElectionDatesPageSchema())
     def get(self, **kwargs):
-        election_date_query = models.ElectionDates.query
-        election_date_query = filter_query(models.ElectionDates, election_date_query, election_filter_fields, kwargs)
-
-        if kwargs.get('upcoming'):
-            # choose Election dates in the future
-            election_date_query = election_date_query.filter(models.ElectionDates.election_date >= date.today())
-
-        return utils.fetch_page(election_date_query, kwargs, model=models.ElectionDates)
-
-
-
-
-
+        return super().get(**kwargs)

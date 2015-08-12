@@ -195,3 +195,8 @@ class ScheduleBByPurposeFactory(BaseFactory):
 class ReportingDatesFactory(BaseFactory):
     class Meta:
         model = models.ReportingDates
+
+
+class ElectionDatesFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionDates
