@@ -27,6 +27,12 @@ class TestElectionSearch(ApiBaseTest):
         self.assertEqual(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': None})
         self.assertEqual(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
+    def test_search_district_padding(self):
+        results_padded = self._results(api.url_for(ElectionList, district='09'))
+        results_unpadded = self._results(api.url_for(ElectionList, district=9))
+        self.assertEqual(len(results_padded), 4)
+        self.assertEqual(len(results_unpadded), 4)
+
     def test_search_office(self):
         results = self._results(api.url_for(ElectionList, office='senate'))
         self.assertEqual(len(results), 2)
