@@ -335,4 +335,3 @@ def api_ui():
 
 
 app.register_blueprint(docs)
-
