@@ -1,3 +1,5 @@
+import re
+
 import sqlalchemy as sa
 
 from webservices import docs
@@ -17,8 +19,8 @@ def check_cap(kwargs, cap):
 
 def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
-    query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null)
+    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
+    query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     paginator = paging.SqlalchemyOffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
@@ -26,8 +28,8 @@ def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.class_
-    sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
-    query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null)
+    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
+    query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     sort_column = sort_columns[0] if sort_columns else None
     paginator = paging.SqlalchemySeekPaginator(
         query,
@@ -71,6 +73,30 @@ def search_text(query, column, text, order=True):
     return query
 
 
+office_args_required = ['office', 'cycle']
+office_args_map = {
+    'house': ['state', 'district'],
+    'senate': ['state'],
+}
+def check_election_arguments(kwargs):
+    for arg in office_args_required:
+        if kwargs[arg] is None:
+            raise exceptions.ApiError(
+                'Required parameter "{0}" not found.'.format(arg),
+                status_code=422,
+            )
+    conditional_args = office_args_map.get(kwargs['office'], [])
+    for arg in conditional_args:
+        if kwargs[arg] is None:
+            raise exceptions.ApiError(
+                'Must include argument "{0}" with office type "{1}"'.format(
+                    arg,
+                    kwargs['office'],
+                ),
+                status_code=422,
+            )
+
+
 def filter_match(query, kwargs, fields):
     for key, column in fields:
         if kwargs[key] is not None:
@@ -100,6 +126,26 @@ def filter_contributor_type(query, column, kwargs):
     if kwargs['contributor_type'] == ['committee']:
         return query.filter(column != 'IND')
     return query
+
+
+def document_description(report_year, report_type=None, document_type=None):
+    if report_type:
+        clean = re.sub(r'\{[^)]*\}', '', report_type)
+    elif document_type:
+        clean = document_type
+    else:
+        clean = 'Document '
+    return '{0}{1}'.format(clean, report_year)
+
+
+def report_pdf_url(report_year, beginning_image_number, form_type=None, committee_type=None):
+    if report_year and report_year >= 2000:
+        return make_report_pdf_url(beginning_image_number)
+    if form_type in ['F3X', 'F3P'] and report_year > 1993:
+        return make_report_pdf_url(beginning_image_number)
+    if form_type == 'F3' and committee_type == 'H' and report_year > 1996:
+        return make_report_pdf_url(beginning_image_number)
+    return None
 
 
 def make_report_pdf_url(image_number):

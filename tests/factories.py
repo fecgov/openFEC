@@ -148,6 +148,13 @@ class ScheduleBSearchFactory(BaseFactory):
     sched_b_sk = factory.Sequence(lambda n: n)
 
 
+class ScheduleEFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleE
+    sched_e_sk = factory.Sequence(lambda n: n)
+    report_year = 2016
+
+
 class FilingsFactory(BaseFactory):
     class Meta:
         model = models.Filings

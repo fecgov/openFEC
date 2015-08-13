@@ -52,7 +52,7 @@ def _validate_per_page(value):
         raise webargs.ValidationError('Parameter "per_page" must be <= 100')
 
 
-Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$'))
+Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$').replace(',', ''))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
 
@@ -74,9 +74,24 @@ class Date(webargs.Arg):
             raise webargs.ValidationError('Expected date for {0}; got "{1}"'.format(name, value))
 
 
+def _parse_district(value):
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        raise webargs.ValidationError('District must be a number')
+    if value < 0:
+        raise webargs.ValidationError('District must be a natural number')
+    return '{0:0>2}'.format(value)
+District = functools.partial(Arg, str, use=_parse_district, description='Two-digit district number')
+
+
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Natural(default=20, validate=_validate_per_page, description='The number of results returned per page. Defaults to 20.'),
+    'per_page': Natural(
+        default=20,
+        validate=_validate_per_page,
+        description='The number of results returned per page. Defaults to 20. The maximum per_page is 100.'
+    ),
 }
 
 
@@ -120,7 +135,7 @@ class IndexValidator(OptionValidator):
         return not value or value in self.exclude
 
 
-def make_sort_args(default=None, multiple=True, validator=None, default_hide_null=False):
+def make_sort_args(default=None, multiple=True, validator=None, default_hide_null=False, default_nulls_large=True):
     return {
         'sort': Arg(
             str,
@@ -132,6 +147,10 @@ def make_sort_args(default=None, multiple=True, validator=None, default_hide_nul
         'sort_hide_null': Bool(
             default=default_hide_null,
             description='Hide null values on sorted column(s).'
+        ),
+        'sort_nulls_large': Bool(
+            default=default_nulls_large,
+            description='Treat null values as large on sorted column(s)',
         )
     }
 
@@ -155,14 +174,13 @@ names = {
     'q': Arg(str, required=True, description='Name (candidate or committee) to search for'),
 }
 
-
 candidate_detail = {
     'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': IString(multiple=True, description='Three letter code for the party under which a candidate ran for office'),
     'year': Arg(str, dest='election_year', description='See records pertaining to a particular election year.'),
-    'district': Arg(str, multiple=True, description='Two digit district number'),
+    'district': District(multiple=True),
     'candidate_status': IString(multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is:\n\
         - C present candidate\n\
         - F future candidate\n\
@@ -409,20 +427,44 @@ schedule_b_by_purpose = {
 }
 
 
-elections = {
-    'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
-    'district': Arg(str, description='Two digit district number'),
-    'cycle': Arg(int, required=True, description=docs.CANDIDATE_CYCLE),
+election_search = {
+    'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
+    'district': District(multiple=True),
+    'cycle': Arg(int, multiple=True, description=docs.CANDIDATE_CYCLE),
+    'zip': Arg(int, multiple=True),
     'office': Arg(
         str,
-        required=True,
-        enum=['house', 'senate', 'presidential'],
-        validate=lambda v: v.lower() in ['house', 'senate', 'presidential']
+        multiple=True,
+        enum=['house', 'senate', 'president'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'president'],
+    ),
+}
+
+
+elections = {
+    'state': IString(description='U.S. State candidate or territory where a candidate runs for office.'),
+    'district': District(),
+    'cycle': Arg(int, description=docs.CANDIDATE_CYCLE),
+    'office': Arg(
+        str,
+        enum=['house', 'senate', 'president'],
+        validate=lambda v: v.lower() in ['house', 'senate', 'president'],
+        description='Office sought, either President, House or Senate.',
     ),
 }
 
 
 schedule_a_candidate_aggregate = {
-    'candidate_id': IString(multiple=True, required=True),
+    'candidate_id': IString(multiple=True, required=True, description=docs.CANDIDATE_ID),
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
+}
+
+
+schedule_e = {
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+    'last_expenditure_date': Date(description='For paging through schedule E data by date.'),
+    'last_expenditure_amount': Arg(float, description='For paging through schedule E data by expenditure amount.'),
+    'last_office_total_ytd': Arg(float, description='For paging through total year to date spent on an office'),
+    'payee_name': Arg(str, description='Name of the entity that received the payment.'),
 }

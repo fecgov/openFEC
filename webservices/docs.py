@@ -170,6 +170,10 @@ Explore a filer's characteristics over time. This can be particularly useful if 
 committees change treasurers, designation, or `committee_type`.
 '''
 
+ELECTION_SEARCH = '''
+List elections by cycle, office, state, and district.
+'''
+
 ELECTIONS = '''
 Look at the top-level financial information for all candidates running for the same
 office.
@@ -250,7 +254,9 @@ When comparing the totals from reports to line items. the totals will not match 
 take out items where `"memoed_subtotal":true`. Memoed items are subtotals of receipts
 that are already accounted for in another schedule a line item.
 
-For the Schedule A aggregates, "memoed" items are not included to avoid double counting.
+For the Schedule A aggregates, such as by_occupation and by_state, include only individual 
+contributions, i.e. receipts from line numbers 11AI and 17A. Again, "memoed" items are not 
+included to avoid double counting.
 
 '''
 
@@ -311,6 +317,46 @@ To fetch the next page of results, append "last_index=230906248&amp;last_disburs
 to the URL.
 
 Note: because the Schedule A data includes many records, counts for
+large result sets are approximate.
+'''
+
+SCHEDULE_E_TAG = '''
+Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
+bought and adds on TV to oppose a federal candidate, each ad purchase would be recorded here with
+the expenditure amount, name and id of the candidate, and weather the ad supported or opposed the candidate.
+
+An independent expenditure is an expenditure for a communication "expressly advocating the election or
+defeat of a clearly identified candidate that is not made in cooperation, consultation, or concert with,
+or at the request or suggestion of, a candidate, a candidate’s authorized committee, or their agents, or
+a political party or its agents."
+
+'''
+
+SCHEDULE_E = SCHEDULE_E_TAG + '''
+
+Due to the large quantity of Schedule E filings, this endpoint is not paginated by
+page number. Instead, you can request the next page of results by adding the values in
+the `last_indexes` object from `pagination` to the URL of your last request. For
+example, when sorting by `expenditure_amount`, you might receive a page of
+results with the following pagination information:
+
+```
+ "pagination": {
+    "count": 152623,
+    "last_indexes": {
+      "last_index": 3023037,
+      "last_expenditure_amount": -17348.5
+    },
+    "per_page": 20,
+    "pages": 7632
+  }
+}
+```
+
+To fetch the next page of results, append
+"&last_index=3023037&last_expenditure_amount=-17348.5" to the URL.
+
+Note: because the Schedule E data includes many records, counts for
 large result sets are approximate.
 '''
 
