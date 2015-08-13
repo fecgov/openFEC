@@ -32,7 +32,7 @@ range_fields = [
 @spec.doc(
     tags=['filings'],
     description=docs.FILINGS,
-    path_params=[utils.committee_param],
+    path_params=[utils.committee_param, utils.candidate_param],
 )
 class FilingsView(Resource):
 
@@ -44,9 +44,12 @@ class FilingsView(Resource):
         )
     )
     @schemas.marshal_with(schemas.FilingsPageSchema())
-    def get(self, committee_id=None, **kwargs):
+    def get(self, committee_id=None, candidate_id=None, **kwargs):
         query = models.Filings.query
-        query = query.filter_by(committee_id=committee_id)
+        if committee_id:
+            query = query.filter(models.Filings.committee_id == committee_id)
+        if candidate_id:
+            query = query.filter(models.Filings.candidate_id == candidate_id)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=models.Filings, count=count)
 
