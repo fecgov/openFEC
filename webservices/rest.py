@@ -205,7 +205,11 @@ api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate')
 api.add_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, '/schedules/schedule_a/by_contributor_type/by_candidate')
 
-api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings/')
+api.add_resource(
+    filings.FilingsView,
+    '/committee/<string:committee_id>/filings/',
+    '/candidate/<string:candidate_id>/filings/',
+)
 api.add_resource(filings.FilingsList, '/filings/')
 
 

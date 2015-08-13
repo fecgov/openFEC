@@ -11,13 +11,20 @@ from .common import ApiBaseTest
 
 class TestFilings(ApiBaseTest):
 
-    def test_committee_filing(self):
+    def test_committee_filings(self):
         """ Check filing returns with a specified committee id"""
         committee_id = 'C8675309'
         filing = factories.FilingsFactory(committee_id=committee_id)
 
         results = self._results(api.url_for(FilingsView, committee_id=committee_id))
         self.assertEqual(results[0]['committee_id'], committee_id)
+
+    def test_candidate_filings(self):
+        candidate_id = 'P12345'
+        factories.FilingsFactory(candidate_id=candidate_id)
+        results = self._results(api.url_for(FilingsView, candidate_id=candidate_id))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['candidate_id'], candidate_id)
 
     def test_filings(self):
         """ Check filings returns in general endpoint"""
