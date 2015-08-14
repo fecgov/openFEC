@@ -32,7 +32,7 @@ spec = APISpec(
         },
         {
             'name': 'dates',
-            'description': "Election and reporting dates.",
+            'description': 'Election and reporting dates.',
         },
         {
             'name': 'financial',
