@@ -52,6 +52,13 @@ def _validate_per_page(value):
         raise webargs.ValidationError('Parameter "per_page" must be <= 100')
 
 
+per_page = Natural(
+    default=20,
+    validate=_validate_per_page,
+    description='The number of results returned per page. Defaults to 20.',
+)
+
+
 Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$').replace(',', ''))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
@@ -87,11 +94,7 @@ District = functools.partial(Arg, str, use=_parse_district, description='Two-dig
 
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Natural(
-        default=20,
-        validate=_validate_per_page,
-        description='The number of results returned per page. Defaults to 20. The maximum per_page is 100.'
-    ),
+    'per_page': per_page,
 }
 
 
@@ -154,10 +157,9 @@ def make_sort_args(default=None, multiple=True, validator=None, default_hide_nul
         )
     }
 
-
 def make_seek_args(type=int, description=None):
     return {
-        'per_page': Natural(default=20, description='The number of results returned per page. Defaults to 20.'),
+        'per_page': per_page,
         'last_index': Arg(
             type,
             description=description or 'Index of last result from previous page',

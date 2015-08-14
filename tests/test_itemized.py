@@ -130,6 +130,10 @@ class TestItemized(ApiBaseTest):
             [each.sched_a_sk for each in filings[20:]],
         )
 
+    def test_pagination_bad_per_page(self):
+        response = self.app.get(api.url_for(ScheduleAView, per_page=999))
+        self.assertEqual(response.status_code, 422)
+
     def test_pdf_url(self):
         # TODO(jmcarp) Refactor as parameterized tests
         image_number = 39
