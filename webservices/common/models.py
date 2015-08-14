@@ -770,6 +770,14 @@ class ScheduleBByPurpose(BaseAggregate):
     __tablename__ = 'ofec_sched_b_aggregate_purpose'
     purpose = db.Column(db.String, primary_key=True)
 
+class CommunicationCostByCandidate(db.Model):
+    __tablename__ = 'ofec_aggregate_communication_cost_candidate_mv'
+    candidate_id = db.Column(db.String, primary_key=True)
+    committee_id = db.Column(db.String)
+    support_oppose_indicator = db.Column(db.String)
+    cycle = db.Column(db.Integer)
+    total = db.Column(db.Float)
+    count = db.Column(db.Integer)
 
 class ScheduleB(BaseItemized):
     __tablename__ = 'sched_b'
@@ -878,6 +886,8 @@ class ScheduleE(BaseItemized):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
+# class CommunicaionCost(db.Model):
+#     __tablename__ =  'form_76'
 
 class ScheduleESearch(db.Model):
     __tablename__ = 'ofec_sched_e_fulltext'

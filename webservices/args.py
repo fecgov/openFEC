@@ -458,6 +458,10 @@ schedule_a_candidate_aggregate = {
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
 }
 
+communicaion_cost_by_candidate = {
+    'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
+}
+
 
 schedule_e = {
     'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
