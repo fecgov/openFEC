@@ -18,7 +18,7 @@ fields = {
     'report_type',
     'document_type',
     'report_year',
-    'recipt_date',
+    'receipt_date',
     'form_type',
     'primary_general_indicator',
     'amendment_indicator',

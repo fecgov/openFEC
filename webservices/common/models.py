@@ -946,13 +946,12 @@ class Filings(db.Model):
 
     @property
     def pdf_url(self):
-        if self.report_year and self.report_year >= 2000:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        if self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        if self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        return None
+        return utils.report_pdf_url(
+            self.report_year,
+            self.beginning_image_number,
+            committee_type=self.committee.committee_type if self.committee else None,
+            form_type=self.form_type,
+        )
 
 
 class ReportingDates(db.Model):
@@ -980,11 +979,9 @@ class ElectionDates(db.Model):
     trc_election_status_id = db.Column(db.String, index=True)
     update_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
-    election_yr = db.Column(db.Integer, index=True)
+    election_year = db.Column('election_yr', db.Integer, index=True)
     pg_date = db.Column(db.Date, index=True)
 
     @property
     def election_type_full(self):
-        if self.trc_election_type_id:
-            return decoders.election_types[self.trc_election_type_id]
-        return None
+        return decoders.election_types.get(self.trc_election_type_id)

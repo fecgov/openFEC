@@ -59,3 +59,11 @@ class TestElectionDates(ApiBaseTest):
         results = self._results(page)
 
         self.assertEqual(len(results), 1)
+
+    def test_election_type(self):
+        election_date = factories.ElectionDatesFactory(trc_election_type_id='PR')
+        self.assertEqual(election_date.election_type_full, 'Primary runoff')
+        election_date = factories.ElectionDatesFactory(trc_election_type_id='INVALID')
+        self.assertEqual(election_date.election_type_full, None)
+        election_date = factories.ElectionDatesFactory(trc_election_type_id=None)
+        self.assertEqual(election_date.election_type_full, None)

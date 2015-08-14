@@ -255,7 +255,6 @@ committee_list = {
 filings = {
     'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
     'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
-    'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': IString(multiple=True, description='Report type'),
     'document_type': IString(multiple=True, description=docs.DOC_TYPE),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),

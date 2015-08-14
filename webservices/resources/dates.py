@@ -72,7 +72,7 @@ class ElectionDatesView(DatesResource):
         'trc_election_status_id',
         'update_date',
         'create_date',
-        'election_yr',
+        'election_year',
         'pg_date',
     }
 
