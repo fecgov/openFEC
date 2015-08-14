@@ -197,3 +197,13 @@ class ScheduleBByPurposeFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: str(n))
     purpose = 'ADMINISTRATIVE'
     cycle = 2016
+
+
+class ReportingDatesFactory(BaseFactory):
+    class Meta:
+        model = models.ReportingDates
+
+
+class ElectionDatesFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionDates

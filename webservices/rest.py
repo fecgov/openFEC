@@ -39,6 +39,7 @@ from webservices.resources import candidates
 from webservices.resources import committees
 from webservices.resources import elections
 from webservices.resources import filings
+from webservices.resources import dates
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -172,15 +173,17 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/',
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
-api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
-api.add_resource(CandidateNameSearch, '/names/candidates')
-api.add_resource(CommitteeNameSearch, '/names/committees')
-api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
-api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
-api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e')
-api.add_resource(elections.ElectionList, '/elections/search/')
+api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
+api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>/')
+api.add_resource(CandidateNameSearch, '/names/candidates/')
+api.add_resource(CommitteeNameSearch, '/names/committees/')
+api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
+api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
+api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(elections.ElectionView, '/elections/')
+api.add_resource(elections.ElectionList, '/elections/search/')
+api.add_resource(dates.ElectionDatesView, '/election-dates/')
+api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -201,9 +204,12 @@ add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
 add_aggregate_resource(api, aggregates.ScheduleBByPurposeView, 'b', 'purpose')
 
-api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate')
-api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate')
-api.add_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, '/schedules/schedule_a/by_contributor_type/by_candidate')
+api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
+api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
+api.add_resource(
+    candidate_aggregates.ScheduleAByContributorTypeCandidateView,
+    '/schedules/schedule_a/by_contributor_type/by_candidate/',
+)
 
 api.add_resource(
     filings.FilingsView,
@@ -299,6 +305,7 @@ register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
 register_resource(elections.ElectionList, blueprint='v1')
 register_resource(elections.ElectionView, blueprint='v1')
+register_resource(dates.ReportingDatesView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
@@ -334,4 +341,3 @@ def api_ui():
 
 
 app.register_blueprint(docs)
-

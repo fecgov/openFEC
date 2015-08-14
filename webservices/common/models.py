@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from webservices import utils
+from webservices import decoders
 
 
 db = SQLAlchemy()
@@ -945,9 +946,45 @@ class Filings(db.Model):
 
     @property
     def pdf_url(self):
-        return utils.report_pdf_url(
-            self.report_year,
-            self.beginning_image_number,
-            committee_type=self.committee.committee_type if self.committee else None,
-            form_type=self.form_type,
-        )
+        if self.report_year and self.report_year >= 2000:
+            return utils.make_report_pdf_url(self.beginning_image_number)
+        if self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
+            return utils.make_report_pdf_url(self.beginning_image_number)
+        if self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
+            return utils.make_report_pdf_url(self.beginning_image_number)
+        return None
+
+
+class ReportingDates(db.Model):
+    __tablename__ = 'trc_report_due_date'
+
+    trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
+    report_year = db.Column(db.Integer, index=True)
+    report_type = db.Column(db.String, index=True)
+    due_date = db.Column(db.Date, index=True)
+    create_date = db.Column(db.Date, index=True)
+    update_date = db.Column(db.Date, index=True)
+
+
+class ElectionDates(db.Model):
+    __tablename__ = 'trc_election'
+
+    trc_election_id = db.Column(db.BigInteger, primary_key=True)
+    election_state = db.Column(db.String, index=True)
+    election_district = db.Column(db.Integer, index=True)
+    election_party = db.Column(db.String, index=True)
+    office_sought = db.Column(db.String, index=True)
+    election_date = db.Column(db.Date, index=True)
+    election_notes = db.Column(db.String, index=True)
+    trc_election_type_id = db.Column(db.String, index=True)
+    trc_election_status_id = db.Column(db.String, index=True)
+    update_date = db.Column(db.Date, index=True)
+    create_date = db.Column(db.Date, index=True)
+    election_yr = db.Column(db.Integer, index=True)
+    pg_date = db.Column(db.Date, index=True)
+
+    @property
+    def election_type_full(self):
+        if self.trc_election_type_id:
+            return decoders.election_types[self.trc_election_type_id]
+        return None
