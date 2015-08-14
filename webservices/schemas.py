@@ -332,6 +332,21 @@ FilingsSchema = make_schema(
 )
 augment_schemas(FilingsSchema)
 
+ReportingDatesSchema = make_schema(
+    models.ReportingDates,
+    options={'exclude': ('trc_report_due_date_id', )},
+)
+ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
+augment_schemas(ReportingDatesSchema)
+
+ElectionDatesSchema = make_schema(
+    models.ElectionDates,
+    fields={'election_type_full': ma.fields.Str()},
+    options={'exclude': ('trc_election_id', )},
+)
+ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
+augment_schemas(ElectionDatesSchema)
+
 class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
     office = ma.fields.Str()
