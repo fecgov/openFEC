@@ -170,7 +170,7 @@ class TestViews(common.IntegrationTestCase):
         filing = factories.ScheduleAFactory(**{
             'report_year': 2015,
             'committee_id': 'C12345',
-            'contributor_receipt_amount': 538,
+            'contribution_receipt_amount': 538,
             'line_number': '11AI',
             item_key: value,
         })
@@ -184,7 +184,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].total, 538)
         self.assertEqual(rows[0].count, 1)
-        filing.contributor_receipt_amount = 53
+        filing.contribution_receipt_amount = 53
         db.session.add(filing)
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -202,7 +202,7 @@ class TestViews(common.IntegrationTestCase):
         factories.ScheduleAFactory(**{
             'report_year': 2015,
             'committee_id': existing.committee_id,
-            'contributor_receipt_amount': 538,
+            'contribution_receipt_amount': 538,
             'line_number': '11AI',
             item_key: getattr(existing, total_key),
         })
@@ -234,7 +234,7 @@ class TestViews(common.IntegrationTestCase):
             report_year=2015,
             committee_id=existing.committee_id,
             contributor_state=existing.state,
-            contributor_receipt_amount=None,
+            contribution_receipt_amount=None,
             line_number='11AI',
         )
         db.session.flush()
@@ -247,7 +247,7 @@ class TestViews(common.IntegrationTestCase):
         filing = factories.ScheduleAFactory(
             report_year=2015,
             committee_id='C12345',
-            contributor_receipt_amount=538,
+            contribution_receipt_amount=538,
             line_number='11AI',
         )
         db.session.flush()
@@ -261,7 +261,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].total, 538)
         self.assertEqual(rows[0].count, 1)
-        filing.contributor_receipt_amount = 53
+        filing.contribution_receipt_amount = 53
         db.session.add(filing)
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -280,7 +280,7 @@ class TestViews(common.IntegrationTestCase):
         factories.ScheduleAFactory(
             report_year=2015,
             committee_id=existing.committee_id,
-            contributor_receipt_amount=538,
+            contribution_receipt_amount=538,
             line_number='11AI',
         )
         db.session.flush()
@@ -299,7 +299,7 @@ class TestViews(common.IntegrationTestCase):
         factories.ScheduleAFactory(
             report_year=2015,
             committee_id=existing.committee_id,
-            contributor_receipt_amount=75,
+            contribution_receipt_amount=75,
             line_number='11AI',
         )
         # Create a committee and committee report

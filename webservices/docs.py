@@ -254,8 +254,8 @@ When comparing the totals from reports to line items. the totals will not match 
 take out items where `"memoed_subtotal":true`. Memoed items are subtotals of receipts
 that are already accounted for in another schedule a line item.
 
-For the Schedule A aggregates, such as by_occupation and by_state, include only individual 
-contributions, i.e. receipts from line numbers 11AI and 17A. Again, "memoed" items are not 
+For the Schedule A aggregates, such as by_occupation and by_state, include only individual
+contributions, i.e. receipts from line numbers 11AI and 17A. Again, "memoed" items are not
 included to avoid double counting.
 
 '''
@@ -265,7 +265,7 @@ SCHEDULE_A = SCHEDULE_A_TAG + '''
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
 the `last_indexes` object from `pagination` to the URL of your last request. For
-example, when sorting by `contributor_receipt_date`, you might receive a page of
+example, when sorting by `contribution_receipt_date`, you might receive a page of
 results with the following pagination information:
 
 ```
@@ -275,12 +275,12 @@ pagination: {
     count: 43052850,
     last_indexes: {
         last_index: 230880619,
-        last_contributor_receipt_date: "2014-01-01"
+        last_contribution_receipt_date: "2014-01-01"
     }
 }
 ```
 
-To fetch the next page of results, append "last_index=230880619&last_contributor_receipt_date=2014-01-01"
+To fetch the next page of results, append "last_index=230880619&last_contribution_receipt_date=2014-01-01"
 to the URL.
 
 Note: because the Schedule A data includes many records, counts for
@@ -298,7 +298,7 @@ SCHEDULE_B = SCHEDULE_B_TAG + '''
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
 the `last_indexes` object from `pagination` to the URL of your last request. For
-example, when sorting by `contributor_receipt_date`, you might receive a page of
+example, when sorting by `contribution_receipt_date`, you might receive a page of
 results with the following pagination information:
 
 ```

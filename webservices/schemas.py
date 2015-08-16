@@ -255,7 +255,7 @@ ScheduleASchema = make_schema(
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'contributor_receipt_amount': ma.fields.Decimal(places=2),
+        'contribution_receipt_amount': ma.fields.Decimal(places=2),
         'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
     },
     options={
