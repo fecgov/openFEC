@@ -64,8 +64,6 @@ lists for commercial purposes or to solicit donations.
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
 
 Get an [API key here](https://api.data.gov/signup/)!
-
-Base URL: https://api.open.fec.gov/v1
 '''
 
 CANDIDATE_TAG = '''
