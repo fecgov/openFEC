@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from flask.ext.restful import Resource
 
 from webservices import args
@@ -335,4 +336,8 @@ class ScheduleEByCandidateView(BaseAggregateView):
     def _build_query(self, committee_id, kwargs):
         query = super()._build_query(committee_id, kwargs)
         query = filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
+        query = query.options(
+            sa.orm.joinedload(self.model.candidate),
+            sa.orm.joinedload(self.model.committee),
+        )
         return query

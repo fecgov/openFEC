@@ -62,7 +62,8 @@ class TestAggregates(ApiBaseTest):
             'total': aggregate.total,
             'count': aggregate.count,
         }
-        self.assertEqual(results[0], expected)
+        for key, value in expected.items():
+            self.assertEqual(results[0][key], value)
 
 
 class TestCandidateAggregates(ApiBaseTest):
