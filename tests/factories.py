@@ -199,6 +199,15 @@ class ScheduleBByPurposeFactory(BaseFactory):
     cycle = 2016
 
 
+class ScheduleEByCandidateFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleEByCandidate
+    committee_id = factory.Sequence(lambda n: str(n))
+    candidate_id = factory.Sequence(lambda n: str(n))
+    support_oppose_indicator = 'S'
+    cycle = 2016
+
+
 class ReportingDatesFactory(BaseFactory):
     class Meta:
         model = models.ReportingDates

@@ -771,6 +771,12 @@ class ScheduleBByPurpose(BaseAggregate):
     purpose = db.Column(db.String, primary_key=True)
 
 
+class ScheduleEByCandidate(BaseAggregate):
+    __tablename__ = 'ofec_sched_e_aggregate_candidate_mv'
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+    support_oppose_indicator = db.Column(db.String, primary_key=True)
+
+
 class ScheduleB(BaseItemized):
     __tablename__ = 'sched_b'
 

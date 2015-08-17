@@ -306,3 +306,26 @@ class ScheduleBByPurposeView(BaseAggregateView):
     @schemas.marshal_with(schemas.ScheduleBByPurposePageSchema())
     def get(self, committee_id=None, **kwargs):
         return super().get(committee_id=committee_id, **kwargs)
+
+
+class ScheduleEByCandidateView(BaseAggregateView):
+
+    model = models.ScheduleEByCandidate
+    fields = [
+        ('cycle', models.ScheduleEByCandidate.cycle),
+        ('candidate_id', models.ScheduleEByCandidate.candidate_id),
+    ]
+    match_fields = [
+        ('support_oppose', models.ScheduleEByCandidate.support_oppose_indicator),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.schedule_e_by_candidate)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ScheduleEByCandidate)
+        )
+    )
+    @schemas.marshal_with(schemas.ScheduleEByCandidatePageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
