@@ -4,6 +4,7 @@ from webservices import args
 from webservices import docs
 from webservices import spec
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.common import counts
 from webservices.common import models
@@ -24,8 +25,8 @@ class BaseAggregateView(Resource):
         query = self.model.query
         if committee_id is not None:
             query = query.filter(self.model.committee_id == committee_id)
-        query = utils.filter_match(query, kwargs, self.match_fields)
-        query = utils.filter_multi(query, kwargs, self.fields)
+        query = filters.filter_match(query, kwargs, self.match_fields)
+        query = filters.filter_multi(query, kwargs, self.fields)
         return query
 
 
@@ -320,6 +321,7 @@ class ScheduleEByCandidateView(BaseAggregateView):
     ]
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.schedule_e_by_candidate)
     @args.register_kwargs(
         args.make_sort_args(
@@ -329,3 +331,8 @@ class ScheduleEByCandidateView(BaseAggregateView):
     @schemas.marshal_with(schemas.ScheduleEByCandidatePageSchema())
     def get(self, committee_id=None, **kwargs):
         return super().get(committee_id=committee_id, **kwargs)
+
+    def _build_query(self, committee_id, kwargs):
+        query = super()._build_query(committee_id, kwargs)
+        query = filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
+        return query

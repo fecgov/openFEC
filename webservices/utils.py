@@ -97,37 +97,6 @@ def check_election_arguments(kwargs):
             )
 
 
-def filter_match(query, kwargs, fields):
-    for key, column in fields:
-        if kwargs[key] is not None:
-            query = query.filter(column == kwargs[key])
-    return query
-
-
-def filter_multi(query, kwargs, fields):
-    for key, column in fields:
-        if kwargs[key]:
-            query = query.filter(column.in_(kwargs[key]))
-    return query
-
-
-def filter_range(query, kwargs, fields):
-    for (min_key, max_key), column in fields:
-        if kwargs[min_key] is not None:
-            query = query.filter(column >= kwargs[min_key])
-        if kwargs[max_key] is not None:
-            query = query.filter(column <= kwargs[max_key])
-    return query
-
-
-def filter_contributor_type(query, column, kwargs):
-    if kwargs['contributor_type'] == ['individual']:
-        return query.filter(column == 'IND')
-    if kwargs['contributor_type'] == ['committee']:
-        return query.filter(column != 'IND')
-    return query
-
-
 def document_description(report_year, report_type=None, document_type=None):
     if report_type:
         clean = re.sub(r'\{[^)]*\}', '', report_type)
