@@ -266,15 +266,8 @@ ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPag
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
-make_aggregate_schema = functools.partial(
-    make_schema,
-    fields={
-        'total': ma.fields.Decimal(places=2),
-    }
-)
-
 augment_models(
-    make_aggregate_schema,
+    make_schema,
     models.ScheduleAByZip,
     models.ScheduleABySize,
     models.ScheduleAByState,
@@ -285,8 +278,16 @@ augment_models(
     models.ScheduleBByRecipient,
     models.ScheduleBByRecipientID,
     models.ScheduleBByPurpose,
-    models.ScheduleEByCandidate,
 )
+
+ScheduleEByCandidateSchema = make_schema(
+    models.ScheduleEByCandidate,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+    }
+)
+augment_schemas(ScheduleEByCandidateSchema)
 
 ScheduleBSchema = make_schema(
     models.ScheduleB,
@@ -295,8 +296,6 @@ ScheduleBSchema = make_schema(
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'disbursement_amount': ma.fields.Decimal(places=2),
-        'semi_annual_bundled_refund': ma.fields.Decimal(places=2),
     },
     options={
         'exclude': ('memo_code', ),
