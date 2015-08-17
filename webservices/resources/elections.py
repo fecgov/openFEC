@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import spec
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.common.models import (
     db, CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
@@ -85,7 +86,7 @@ class ElectionList(Resource):
             )
         if kwargs['zip']:
             query = self._filter_zip(query, kwargs)
-        return utils.filter_multi(query, kwargs, self.filter_multi_fields)
+        return filters.filter_multi(query, kwargs, self.filter_multi_fields)
 
     def _filter_zip(self, query, kwargs):
         """Filter query by zip codes."""

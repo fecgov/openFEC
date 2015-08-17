@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import spec
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.common import counts
 from webservices.common import models
@@ -73,6 +74,6 @@ class FilingsList(Resource):
         query = models.Filings.query
         query = query.options(sa.orm.joinedload(models.Filings.committee))
         query = filter_query(models.Filings, query, fields, kwargs)
-        query = utils.filter_range(query, kwargs, range_fields)
+        query = filters.filter_range(query, kwargs, range_fields)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=models.Filings, count=count)
