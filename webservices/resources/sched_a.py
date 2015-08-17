@@ -25,7 +25,7 @@ class ScheduleAView(ItemizedResource):
         return self.model.sched_a_sk
     @property
     def amount_column(self):
-        return self.model.contributor_receipt_amount
+        return self.model.contribution_receipt_amount
 
     filter_multi_fields = [
         ('image_number', models.ScheduleA.image_number),
@@ -40,8 +40,8 @@ class ScheduleAView(ItemizedResource):
         ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
     ]
     filter_range_fields = [
-        (('min_date', 'max_date'), models.ScheduleA.contributor_receipt_date),
-        (('min_amount', 'max_amount'), models.ScheduleA.contributor_receipt_amount),
+        (('min_date', 'max_date'), models.ScheduleA.contribution_receipt_date),
+        (('min_amount', 'max_amount'), models.ScheduleA.contribution_receipt_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
     ]
 
@@ -51,8 +51,8 @@ class ScheduleAView(ItemizedResource):
     @args.register_kwargs(
         args.make_sort_args(
             validator=args.OptionValidator([
-                'contributor_receipt_date',
-                'contributor_receipt_amount',
+                'contribution_receipt_date',
+                'contribution_receipt_amount',
                 'contributor_aggregate_ytd',
             ]),
             multiple=False,

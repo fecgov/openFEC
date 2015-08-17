@@ -346,8 +346,8 @@ schedule_a = {
     'contributor_state': IString(multiple=True, description='State of contributor'),
     'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
     'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
-    'last_contributor_receipt_date': Date(),
-    'last_contributor_receipt_amount': Arg(float),
+    'last_contribution_receipt_date': Date(),
+    'last_contribution_receipt_amount': Arg(float),
     'last_contributor_aggregate_ytd': Arg(float),
     'contributor_type': contributor_type,
 }
