@@ -1,6 +1,7 @@
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
     ScheduleBByPurposeView,
+    ScheduleEByCandidateView,
 )
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
@@ -35,6 +36,29 @@ class TestAggregates(ApiBaseTest):
             'committee_id': self.committee.committee_id,
             'purpose': 'ADMINISTRATIVE',
             'cycle': 2012,
+            'total': aggregate.total,
+            'count': aggregate.count,
+        }
+        self.assertEqual(results[0], expected)
+
+    def test_independent_expenditure_candidate(self):
+        aggregate = factories.ScheduleEByCandidateFactory(
+            committee_id=self.committee.committee_id,
+            cycle=self.committee.cycle,
+        )
+        results = self._results(
+            api.url_for(
+                ScheduleEByCandidateView,
+                committee_id=self.committee.committee_id,
+                cycle=2012,
+            )
+        )
+        self.assertEqual(len(results), 1)
+        expected = {
+            'committee_id': self.committee.committee_id,
+            'candidate_id': aggregate.candidate_id,
+            'support_oppose_indicator': aggregate.support_oppose_indicator,
+            'cycle': aggregate.cycle,
             'total': aggregate.total,
             'count': aggregate.count,
         }

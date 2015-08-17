@@ -428,6 +428,18 @@ schedule_b_by_purpose = {
 }
 
 
+schedule_e_by_candidate = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+    'support_oppose': IString(
+        default=None,
+        enum=['S', 'O'],
+        validate=lambda v: v.upper() in ['S', 'O'],
+        description='Support or opposition'
+    ),
+}
+
+
 election_search = {
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': District(multiple=True),
