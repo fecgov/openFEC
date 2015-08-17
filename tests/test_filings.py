@@ -1,7 +1,5 @@
 import datetime
 
-from marshmallow.utils import isoformat
-
 from webservices.rest import api
 from webservices.resources.filings import FilingsView, FilingsList
 
@@ -14,7 +12,7 @@ class TestFilings(ApiBaseTest):
     def test_committee_filings(self):
         """ Check filing returns with a specified committee id"""
         committee_id = 'C8675309'
-        filing = factories.FilingsFactory(committee_id=committee_id)
+        factories.FilingsFactory(committee_id=committee_id)
 
         results = self._results(api.url_for(FilingsView, committee_id=committee_id))
         self.assertEqual(results[0]['committee_id'], committee_id)
@@ -28,30 +26,30 @@ class TestFilings(ApiBaseTest):
 
     def test_filings(self):
         """ Check filings returns in general endpoint"""
-        filing_1 = factories.FilingsFactory(committee_id='C001')
-        filing_2 = factories.FilingsFactory(committee_id='C002')
+        factories.FilingsFactory(committee_id='C001')
+        factories.FilingsFactory(committee_id='C002')
 
         results = self._results(api.url_for(FilingsList))
         self.assertEqual(len(results), 2)
 
     def test_filter_date(self):
         [
-            factories.FilingsFactory(receipt_date=datetime.datetime(2012, 1, 1)),
-            factories.FilingsFactory(receipt_date=datetime.datetime(2013, 1, 1)),
-            factories.FilingsFactory(receipt_date=datetime.datetime(2014, 1, 1)),
-            factories.FilingsFactory(receipt_date=datetime.datetime(2015, 1, 1)),
+            factories.FilingsFactory(receipt_date=datetime.date(2012, 1, 1)),
+            factories.FilingsFactory(receipt_date=datetime.date(2013, 1, 1)),
+            factories.FilingsFactory(receipt_date=datetime.date(2014, 1, 1)),
+            factories.FilingsFactory(receipt_date=datetime.date(2015, 1, 1)),
         ]
-        min_date = datetime.datetime(2013, 1, 1)
+        min_date = datetime.date(2013, 1, 1)
         results = self._results(api.url_for(FilingsList, min_receipt_date=min_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] >= isoformat(min_date)))
-        max_date = datetime.datetime(2014, 1, 1)
+        self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
+        max_date = datetime.date(2014, 1, 1)
         results = self._results(api.url_for(FilingsList, max_receipt_date=max_date))
-        self.assertTrue(all(each for each in results if each['receipt_date'] <= isoformat(max_date)))
+        self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
         results = self._results(api.url_for(FilingsList, min_receipt_date=min_date, max_receipt_date=max_date))
         self.assertTrue(
             all(
                 each for each in results
-                if isoformat(min_date) <= each['receipt_date'] <= isoformat(max_date)
+                if min_date.isoformat() <= each['receipt_date'] <= max_date.isoformat()
             )
         )
 
@@ -110,7 +108,7 @@ class TestFilings(ApiBaseTest):
 
     def test_regex(self):
         """ Getting rid of extra text that comes in the tables."""
-        filing = factories.FilingsFactory(
+        factories.FilingsFactory(
             report_type_full='report {more information than we want}',
             committee_id='C007',
             report_year=2004,
