@@ -255,8 +255,6 @@ committee_list = {
 }
 
 filings = {
-    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
-    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
     'report_type': IString(multiple=True, description='Report type'),
     'document_type': IString(multiple=True, description=docs.DOC_TYPE),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
@@ -264,7 +262,7 @@ filings = {
     'min_receipt_date': Date(description='Minimum day the filing was received by the FEC'),
     'max_receipt_date': Date(description='Maximum day the filing was received by the FEC'),
     'form_type': IString(multiple=True, description='Form type'),
-    'primary_general_indicator': IString(multiple=True, description='Primary Gereral or Special election indicator.'),
+    'primary_general_indicator': IString(multiple=True, description='Primary General or Special election indicator.'),
     'amendment_indicator': IString(multiple=True, description='''
         -N   new\n\
         -A   amendment\n\
@@ -460,6 +458,11 @@ schedule_a_candidate_aggregate = {
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
 }
 
+
+entities = {
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+}
 
 schedule_e = {
     'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),

@@ -213,8 +213,8 @@ api.add_resource(
 
 api.add_resource(
     filings.FilingsView,
-    '/committee/<string:committee_id>/filings/',
-    '/candidate/<string:candidate_id>/filings/',
+    '/committee/<committee_id>/filings/',
+    '/candidate/<candidate_id>/filings/',
 )
 api.add_resource(filings.FilingsList, '/filings/')
 
