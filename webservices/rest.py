@@ -205,6 +205,8 @@ add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
 add_aggregate_resource(api, aggregates.ScheduleBByPurposeView, 'b', 'purpose')
 
+add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate')
+
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
 api.add_resource(
@@ -220,8 +222,8 @@ api.add_resource(
 
 api.add_resource(
     filings.FilingsView,
-    '/committee/<string:committee_id>/filings/',
-    '/candidate/<string:candidate_id>/filings/',
+    '/committee/<committee_id>/filings/',
+    '/candidate/<candidate_id>/filings/',
 )
 api.add_resource(filings.FilingsList, '/filings/')
 

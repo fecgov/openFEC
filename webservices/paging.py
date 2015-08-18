@@ -13,6 +13,8 @@ from webservices.spec import spec
 def _format_value(value):
     if isinstance(value, datetime.datetime):
         return isoformat(value)
+    if isinstance(value, datetime.date):
+        return value.isoformat()
     return value
 
 
@@ -159,7 +161,9 @@ class SqlalchemySeekPaginator(SqlalchemyMixin, SeekPaginator):
         if last_index is not None:
             lhs += (self.index_column, )
             rhs += (last_index, )
-        if any(rhs):
+        lhs = sa.tuple_(*lhs)
+        rhs = sa.tuple_(*rhs)
+        if rhs.clauses:
             filter = lhs > rhs if direction == sa.asc else lhs < rhs
             cursor = cursor.filter(filter)
         return cursor.order_by(direction(self.index_column)).limit(limit).all()

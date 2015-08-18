@@ -52,6 +52,13 @@ def _validate_per_page(value):
         raise webargs.ValidationError('Parameter "per_page" must be <= 100')
 
 
+per_page = Natural(
+    default=20,
+    validate=_validate_per_page,
+    description='The number of results returned per page. Defaults to 20.',
+)
+
+
 Currency = functools.partial(Arg, float, use=lambda v: v.lstrip('$').replace(',', ''))
 IString = functools.partial(Arg, str, use=lambda v: v.upper())
 
@@ -87,11 +94,7 @@ District = functools.partial(Arg, str, use=_parse_district, description='Two-dig
 
 paging = {
     'page': Natural(default=1, description='For paginating through results, starting at page 1'),
-    'per_page': Natural(
-        default=20,
-        validate=_validate_per_page,
-        description='The number of results returned per page. Defaults to 20. The maximum per_page is 100.'
-    ),
+    'per_page': per_page,
 }
 
 
@@ -154,10 +157,9 @@ def make_sort_args(default=None, multiple=True, validator=None, default_hide_nul
         )
     }
 
-
 def make_seek_args(type=int, description=None):
     return {
-        'per_page': Natural(default=20, description='The number of results returned per page. Defaults to 20.'),
+        'per_page': per_page,
         'last_index': Arg(
             type,
             description=description or 'Index of last result from previous page',
@@ -253,8 +255,6 @@ committee_list = {
 }
 
 filings = {
-    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
-    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
     'report_type': IString(multiple=True, description='Report type'),
     'document_type': IString(multiple=True, description=docs.DOC_TYPE),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
@@ -262,7 +262,7 @@ filings = {
     'min_receipt_date': Date(description='Minimum day the filing was received by the FEC'),
     'max_receipt_date': Date(description='Maximum day the filing was received by the FEC'),
     'form_type': IString(multiple=True, description='Form type'),
-    'primary_general_indicator': IString(multiple=True, description='Primary Gereral or Special election indicator.'),
+    'primary_general_indicator': IString(multiple=True, description='Primary General or Special election indicator.'),
     'amendment_indicator': IString(multiple=True, description='''
         -N   new\n\
         -A   amendment\n\
@@ -344,8 +344,8 @@ schedule_a = {
     'contributor_state': IString(multiple=True, description='State of contributor'),
     'contributor_employer': Arg(str, description='Employer of contributor, filers need to make an effort to gather this information'),
     'contributor_occupation': Arg(str, description='Occupation of contributor, filers need to make an effort to gather this information'),
-    'last_contributor_receipt_date': Date(),
-    'last_contributor_receipt_amount': Arg(float),
+    'last_contribution_receipt_date': Date(),
+    'last_contribution_receipt_amount': Arg(float),
     'last_contributor_aggregate_ytd': Arg(float),
     'contributor_type': contributor_type,
 }
@@ -426,6 +426,18 @@ schedule_b_by_purpose = {
 }
 
 
+schedule_e_by_candidate = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+    'support_oppose': IString(
+        default=None,
+        enum=['S', 'O'],
+        validate=lambda v: v.upper() in ['S', 'O'],
+        description='Support or opposition'
+    ),
+}
+
+
 election_search = {
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': District(multiple=True),
@@ -462,6 +474,11 @@ communicaion_cost_by_candidate = {
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
 }
 
+
+entities = {
+    'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+}
 
 schedule_e = {
     'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
