@@ -17,6 +17,7 @@ class BaseAggregateView(Resource):
     model = None
     match_fields = []
     fields = []
+    joins = []
 
     def get(self, committee_id=None, **kwargs):
         query = self._build_query(committee_id, kwargs)
@@ -28,6 +29,8 @@ class BaseAggregateView(Resource):
             query = query.filter(self.model.committee_id == committee_id)
         query = filters.filter_match(query, kwargs, self.match_fields)
         query = filters.filter_multi(query, kwargs, self.fields)
+        for join in self.joins:
+            query = query.options(sa.orm.joinedload(join))
         return query
 
 
@@ -310,6 +313,13 @@ class ScheduleBByPurposeView(BaseAggregateView):
         return super().get(committee_id=committee_id, **kwargs)
 
 
+@spec.doc(
+    tags=['schedules/schedule_b'],
+    description=(
+        'Schedule E receipts aggregated by recipient candidate. To avoid double '
+        'counting, memoed items are not included.'
+    )
+)
 class ScheduleEByCandidateView(BaseAggregateView):
 
     model = models.ScheduleEByCandidate
@@ -319,6 +329,10 @@ class ScheduleEByCandidateView(BaseAggregateView):
     ]
     match_fields = [
         ('support_oppose', models.ScheduleEByCandidate.support_oppose_indicator),
+    ]
+    joins = [
+        models.ScheduleEByCandidate.candidate,
+        models.ScheduleEByCandidate.committee,
     ]
 
     @args.register_kwargs(args.paging)
@@ -335,12 +349,7 @@ class ScheduleEByCandidateView(BaseAggregateView):
 
     def _build_query(self, committee_id, kwargs):
         query = super()._build_query(committee_id, kwargs)
-        query = filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
-        query = query.options(
-            sa.orm.joinedload(self.model.candidate),
-            sa.orm.joinedload(self.model.committee),
-        )
-        return query
+        return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
 
 
 @spec.doc(
@@ -361,8 +370,13 @@ class CommunicationCostByCandidateView(BaseAggregateView):
     match_fields = [
         ('support_oppose', models.CommunicationCostByCandidate.support_oppose_indicator),
     ]
+    joins = [
+        models.CommunicationCostByCandidate.candidate,
+        models.CommunicationCostByCandidate.committee,
+    ]
 
     @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.communication_cost_by_candidate)
     @args.register_kwargs(
         args.make_sort_args(
@@ -372,3 +386,7 @@ class CommunicationCostByCandidateView(BaseAggregateView):
     @schemas.marshal_with(schemas.CommunicationCostByCandidatePageSchema())
     def get(self, committee_id=None, **kwargs):
         return super().get(committee_id=committee_id, **kwargs)
+
+    def _build_query(self, committee_id, kwargs):
+        query = super()._build_query(committee_id, kwargs)
+        return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)

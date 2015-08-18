@@ -278,7 +278,6 @@ augment_models(
     models.ScheduleBByRecipient,
     models.ScheduleBByRecipientID,
     models.ScheduleBByPurpose,
-    models.CommunicationCostByCandidate,
 )
 
 ScheduleEByCandidateSchema = make_schema(
@@ -286,9 +285,18 @@ ScheduleEByCandidateSchema = make_schema(
     fields={
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
-    }
+    },
 )
 augment_schemas(ScheduleEByCandidateSchema)
+
+CommunicationCostByCandidateSchema = make_schema(
+    models.CommunicationCostByCandidate,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+    },
+)
+augment_schemas(CommunicationCostByCandidateSchema)
 
 ScheduleBSchema = make_schema(
     models.ScheduleB,
