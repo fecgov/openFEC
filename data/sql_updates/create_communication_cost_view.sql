@@ -10,7 +10,7 @@ select
         cast(extract(YEAR from communication_dt) as integer) % 2
         as cycle
 from form_76
-where extract( YEAR from communication_dt) >= :START_YEAR
+where extract(YEAR from communication_dt) >= :START_YEAR
 and s_o_cand_id is not null
 and amndt_ind != 'A'
 group by
