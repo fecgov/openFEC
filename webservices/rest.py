@@ -40,7 +40,6 @@ from webservices.resources import committees
 from webservices.resources import elections
 from webservices.resources import filings
 from webservices.resources import dates
-from webservices.resources import communication_cost
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -215,9 +214,9 @@ api.add_resource(
 )
 
 api.add_resource(
-    communication_cost.CommunicationCostByCandidateView,
-    '/candidate/<string:candidate_id>/communication_costs',
-    '/committee/<string:committee_id>/communicaiton_costs',
+    aggregates.CommunicationCostByCandidateView,
+    '/communication_costs/by_candidate/',
+    '/committee/<string:committee_id>/communication_costs/by_candidate/',
 )
 
 api.add_resource(
@@ -307,7 +306,7 @@ register_resource(aggregates.ScheduleAByContributorTypeView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 register_resource(aggregates.ScheduleBByPurposeView, blueprint='v1')
-register_resource(communication_cost.CommunicationCostByCandidateView, blueprint='v1')
+register_resource(aggregates.CommunicationCostByCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')

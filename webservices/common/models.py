@@ -781,14 +781,13 @@ class ScheduleEByCandidate(BaseAggregate):
     candidate = utils.related_candidate('candidate_id', 'cycle')
 
 
-class CommunicationCostByCandidate(db.Model):
+class CommunicationCostByCandidate(BaseAggregate):
     __tablename__ = 'ofec_aggregate_communication_cost_candidate_mv'
-    candidate_id = db.Column(db.String, primary_key=True)
-    committee_id = db.Column(db.String)
-    support_oppose_indicator = db.Column(db.String)
-    cycle = db.Column(db.Integer)
-    total = db.Column(db.Float)
-    count = db.Column(db.Integer)
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+    support_oppose_indicator = db.Column(db.String, primary_key=True)
+
+    committee = utils.related_committee('committee_id', 'cycle')
+    candidate = utils.related_candidate('candidate_id', 'cycle')
 
 
 class ScheduleB(BaseItemized):
@@ -898,8 +897,6 @@ class ScheduleE(BaseItemized):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
-# class CommunicaionCost(db.Model):
-#     __tablename__ =  'form_76'
 
 class ScheduleESearch(db.Model):
     __tablename__ = 'ofec_sched_e_fulltext'
