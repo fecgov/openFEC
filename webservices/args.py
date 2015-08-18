@@ -470,8 +470,15 @@ schedule_a_candidate_aggregate = {
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
 }
 
-communicaion_cost_by_candidate = {
+communication_cost_by_candidate = {
+    'candidate_id': IString(multiple=True, required=True, description=docs.CANDIDATE_ID),
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
+    'support_oppose': IString(
+        default=None,
+        enum=['S', 'O'],
+        validate=lambda v: v.upper() in ['S', 'O'],
+        description='Support or opposition',
+    ),
 }
 
 

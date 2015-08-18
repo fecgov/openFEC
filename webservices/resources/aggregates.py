@@ -341,3 +341,34 @@ class ScheduleEByCandidateView(BaseAggregateView):
             sa.orm.joinedload(self.model.committee),
         )
         return query
+
+
+@spec.doc(
+    tags=['communication_cost'],
+    path_params=[
+        utils.candidate_param,
+        utils.committee_param,
+    ],
+    description='Communication cost aggregated by candidate ID and committee ID.',
+)
+class CommunicationCostByCandidateView(BaseAggregateView):
+
+    model = models.CommunicationCostByCandidate
+    fields = [
+        ('cycle', models.CommunicationCostByCandidate.cycle),
+        ('candidate_id', models.CommunicationCostByCandidate.candidate_id),
+    ]
+    match_fields = [
+        ('support_oppose', models.CommunicationCostByCandidate.support_oppose_indicator),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.communication_cost_by_candidate)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.CommunicationCostByCandidate)
+        )
+    )
+    @schemas.marshal_with(schemas.CommunicationCostByCandidatePageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
