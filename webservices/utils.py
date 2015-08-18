@@ -1,6 +1,8 @@
 import re
 
 import sqlalchemy as sa
+from sqlalchemy.orm import foreign
+from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import docs
 from webservices import paging
@@ -97,35 +99,46 @@ def check_election_arguments(kwargs):
             )
 
 
-def filter_match(query, kwargs, fields):
-    for key, column in fields:
-        if kwargs[key] is not None:
-            query = query.filter(column == kwargs[key])
-    return query
+def get_model(name):
+    from webservices.common.models import db
+    return db.Model._decl_class_registry.get(name)
 
 
-def filter_multi(query, kwargs, fields):
-    for key, column in fields:
-        if kwargs[key]:
-            query = query.filter(column.in_(kwargs[key]))
-    return query
+def related(related_model, related_id, related_cycle, id_label, cycle_label):
+    from webservices.common.models import db
+    @declared_attr
+    def related(cls):
+        id_column = getattr(cls, id_label)
+        cycle_column = getattr(cls, cycle_label)
+        return db.relationship(
+            related_model,
+            primaryjoin=sa.and_(
+                foreign(id_column) == related_id,
+                cycle_column == related_cycle,
+            ),
+        )
+    return related
 
 
-def filter_range(query, kwargs, fields):
-    for (min_key, max_key), column in fields:
-        if kwargs[min_key] is not None:
-            query = query.filter(column >= kwargs[min_key])
-        if kwargs[max_key] is not None:
-            query = query.filter(column <= kwargs[max_key])
-    return query
+def related_committee(id_label, cycle_label):
+    related_model = get_model('CommitteeHistory')
+    return related(
+        related_model,
+        related_model.committee_id,
+        related_model.cycle,
+        id_label,
+        cycle_label,
+    )
 
-
-def filter_contributor_type(query, column, kwargs):
-    if kwargs['contributor_type'] == ['individual']:
-        return query.filter(column == 'IND')
-    if kwargs['contributor_type'] == ['committee']:
-        return query.filter(column != 'IND')
-    return query
+def related_candidate(id_label, cycle_label):
+    related_model = get_model('CandidateHistory')
+    return related(
+        related_model,
+        related_model.candidate_id,
+        related_model.two_year_period,
+        id_label,
+        cycle_label,
+    )
 
 
 def document_description(report_year, report_type=None, document_type=None):

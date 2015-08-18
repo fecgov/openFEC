@@ -3,7 +3,7 @@ import sqlalchemy as sa
 from webservices import args
 from webservices import docs
 from webservices import spec
-from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ItemizedResource
@@ -66,7 +66,7 @@ class ScheduleAView(ItemizedResource):
         query = super(ScheduleAView, self).build_query(kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
-        query = utils.filter_contributor_type(query, self.model.entity_type, kwargs)
+        query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         return query
 
     def join_fulltext(self, query):
