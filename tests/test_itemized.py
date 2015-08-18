@@ -27,15 +27,22 @@ class TestItemized(ApiBaseTest):
             self.assertEqual(results[0].keys(), schema().fields.keys())
 
     def test_sorting(self):
-        [
-            factories.ScheduleAFactory(report_year=2014, contributor_receipt_date=datetime.datetime(2014, 1, 1)),
-            factories.ScheduleAFactory(report_year=2012, contributor_receipt_date=datetime.datetime(2012, 1, 1)),
-            factories.ScheduleAFactory(report_year=1986, contributor_receipt_date=datetime.datetime(1986, 1, 1)),
+        receipts = [
+            factories.ScheduleAFactory(report_year=2014, contribution_receipt_date=datetime.date(2014, 1, 1)),
+            factories.ScheduleAFactory(report_year=2012, contribution_receipt_date=datetime.date(2012, 1, 1)),
+            factories.ScheduleAFactory(report_year=1986, contribution_receipt_date=datetime.date(1986, 1, 1)),
         ]
-        response = self._response(api.url_for(ScheduleAView, sort='contributor_receipt_date'))
+        response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
             [2012, 2014]
+        )
+        self.assertEqual(
+            response['pagination']['last_indexes'],
+            {
+                'last_index': receipts[0].sched_a_sk,
+                'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
+            }
         )
 
     def test_sorting_bad_column(self):
@@ -130,6 +137,10 @@ class TestItemized(ApiBaseTest):
             [each.sched_a_sk for each in filings[20:]],
         )
 
+    def test_pagination_bad_per_page(self):
+        response = self.app.get(api.url_for(ScheduleAView, per_page=999))
+        self.assertEqual(response.status_code, 422)
+
     def test_pdf_url(self):
         # TODO(jmcarp) Refactor as parameterized tests
         image_number = 39
@@ -186,17 +197,17 @@ class TestItemized(ApiBaseTest):
 
     def test_amount_sched_a(self):
         [
-            factories.ScheduleAFactory(contributor_receipt_amount=50),
-            factories.ScheduleAFactory(contributor_receipt_amount=100),
-            factories.ScheduleAFactory(contributor_receipt_amount=150),
-            factories.ScheduleAFactory(contributor_receipt_amount=200),
+            factories.ScheduleAFactory(contribution_receipt_amount=50),
+            factories.ScheduleAFactory(contribution_receipt_amount=100),
+            factories.ScheduleAFactory(contribution_receipt_amount=150),
+            factories.ScheduleAFactory(contribution_receipt_amount=200),
         ]
         results = self._results(api.url_for(ScheduleAView, min_amount=100))
-        self.assertTrue(all(each['contributor_receipt_amount'] >= 100 for each in results))
+        self.assertTrue(all(each['contribution_receipt_amount'] >= 100 for each in results))
         results = self._results(api.url_for(ScheduleAView, max_amount=150))
-        self.assertTrue(all(each['contributor_receipt_amount'] <= 150 for each in results))
+        self.assertTrue(all(each['contribution_receipt_amount'] <= 150 for each in results))
         results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
-        self.assertTrue(all(100 <= each['contributor_receipt_amount'] <= 150 for each in results))
+        self.assertTrue(all(100 <= each['contribution_receipt_amount'] <= 150 for each in results))
 
     def test_amount_sched_b(self):
         [
