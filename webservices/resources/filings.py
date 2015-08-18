@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import spec
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.common import counts
 from webservices.common import models
@@ -13,10 +14,7 @@ from webservices.common import models
 @spec.doc(
     tags=['filings'],
     description=docs.FILINGS,
-    path_params=[
-        utils.extend(utils.committee_param, {'name': 'committee_id'}),
-        utils.extend(utils.candidate_param, {'name': 'candidate_id'}),
-    ],
+    path_params=[utils.committee_param, utils.candidate_param],
 )
 class BaseFilings(Resource):
 
@@ -42,8 +40,8 @@ class BaseFilings(Resource):
     def _build_query(self, **kwargs):
         query = models.Filings.query
         query = query.options(sa.orm.joinedload(models.Filings.committee))
-        query = utils.filter_multi(query, kwargs, self.multi_fields)
-        query = utils.filter_range(query, kwargs, self.range_fields)
+        query = filters.filter_multi(query, kwargs, self.multi_fields)
+        query = filters.filter_range(query, kwargs, self.range_fields)
         return query
 
 

@@ -42,7 +42,6 @@ class ScheduleEView(ItemizedResource):
     ]
 
     @args.register_kwargs(args.itemized)
-    @args.register_kwargs(args.elections)
     @args.register_kwargs(args.schedule_e)
     @args.register_kwargs(args.make_seek_args())
     @args.register_kwargs(
@@ -63,7 +62,6 @@ class ScheduleEView(ItemizedResource):
         query = super(ScheduleEView, self).build_query(kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleE.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleE.candidate))
-        query = self.filter_election(query, kwargs)
         return query
 
     def filter_election(self, query, kwargs):

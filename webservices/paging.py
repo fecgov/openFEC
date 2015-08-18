@@ -13,6 +13,8 @@ from webservices.spec import spec
 def _format_value(value):
     if isinstance(value, datetime.datetime):
         return isoformat(value)
+    if isinstance(value, datetime.date):
+        return value.isoformat()
     return value
 
 

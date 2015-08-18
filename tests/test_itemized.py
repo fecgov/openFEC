@@ -27,15 +27,22 @@ class TestItemized(ApiBaseTest):
             self.assertEqual(results[0].keys(), schema().fields.keys())
 
     def test_sorting(self):
-        [
-            factories.ScheduleAFactory(report_year=2014, contribution_receipt_date=datetime.datetime(2014, 1, 1)),
-            factories.ScheduleAFactory(report_year=2012, contribution_receipt_date=datetime.datetime(2012, 1, 1)),
-            factories.ScheduleAFactory(report_year=1986, contribution_receipt_date=datetime.datetime(1986, 1, 1)),
+        receipts = [
+            factories.ScheduleAFactory(report_year=2014, contribution_receipt_date=datetime.date(2014, 1, 1)),
+            factories.ScheduleAFactory(report_year=2012, contribution_receipt_date=datetime.date(2012, 1, 1)),
+            factories.ScheduleAFactory(report_year=1986, contribution_receipt_date=datetime.date(1986, 1, 1)),
         ]
         response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
             [2012, 2014]
+        )
+        self.assertEqual(
+            response['pagination']['last_indexes'],
+            {
+                'last_index': receipts[0].sched_a_sk,
+                'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
+            }
         )
 
     def test_sorting_bad_column(self):

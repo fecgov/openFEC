@@ -1,7 +1,8 @@
-from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
+
+from flask.ext.sqlalchemy import SQLAlchemy
 
 from webservices import utils
 from webservices import decoders
@@ -706,7 +707,7 @@ class BaseAggregate(db.Model):
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
     cycle = db.Column(db.Integer, primary_key=True)
-    total = db.Column(db.Float)
+    total = db.Column(db.Numeric(30, 2))
     count = db.Column(db.Integer)
 
 
@@ -752,7 +753,7 @@ class ScheduleAByContributor(db.Model):
     year = db.Column(db.Integer, primary_key=True, nullable=True)
     contributor_name = db.Column('contbr_nm', db.String)
     image_number = db.Column('image_num', db.String)
-    total = db.Column(db.Float)
+    total = db.Column(db.Numeric(30, 2))
 
 
 class ScheduleBByRecipient(BaseAggregate):
@@ -769,6 +770,15 @@ class ScheduleBByRecipientID(BaseAggregate):
 class ScheduleBByPurpose(BaseAggregate):
     __tablename__ = 'ofec_sched_b_aggregate_purpose'
     purpose = db.Column(db.String, primary_key=True)
+
+
+class ScheduleEByCandidate(BaseAggregate):
+    __tablename__ = 'ofec_sched_e_aggregate_candidate_mv'
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+    support_oppose_indicator = db.Column(db.String, primary_key=True)
+
+    committee = utils.related_committee('committee_id', 'cycle')
+    candidate = utils.related_candidate('candidate_id', 'cycle')
 
 
 class ScheduleB(BaseItemized):
@@ -793,7 +803,7 @@ class ScheduleB(BaseItemized):
     disbursement_type = db.Column('disb_tp', db.String)
     disbursement_description = db.Column('disb_desc', db.String)
     disbursement_date = db.Column('disb_dt', db.Date)
-    disbursement_amount = db.Column('disb_amt', db.Float)
+    disbursement_amount = db.Column('disb_amt', db.Numeric(30, 2))
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
@@ -803,7 +813,7 @@ class ScheduleB(BaseItemized):
     report_primary_general = db.Column('rpt_pgi', db.String)
     receipt_date = db.Column('receipt_dt', db.Date)
     beneficiary_committee_name = db.Column('benef_cmte_nm', db.String)
-    semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Float)
+    semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
