@@ -289,6 +289,15 @@ ScheduleEByCandidateSchema = make_schema(
 )
 augment_schemas(ScheduleEByCandidateSchema)
 
+ElectioneeringByCandidateSchema = make_schema(
+    models.ElectioneeringByCandidate,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+    }
+)
+augment_schemas(ElectioneeringByCandidateSchema)
+
 ScheduleBSchema = make_schema(
     models.ScheduleB,
     fields={

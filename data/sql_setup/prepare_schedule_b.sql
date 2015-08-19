@@ -16,6 +16,9 @@ create index on sched_b (cmte_id, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZ
 create index on sched_b (cmte_id, disb_dt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_b (cmte_id, disb_amt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
+-- Create index for join on electioneering costs
+create index on sched_b (link_id) where rpt_yr >= 2002;
+
 -- Create Schedule B fulltext table
 drop table if exists ofec_sched_b_fulltext;
 create table ofec_sched_b_fulltext as

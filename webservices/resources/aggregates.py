@@ -341,3 +341,33 @@ class ScheduleEByCandidateView(BaseAggregateView):
             sa.orm.joinedload(self.model.committee),
         )
         return query
+
+
+@spec.doc(
+    tags=['electioneering'],
+    path_params=[utils.committee_param],
+    description='Electioneering costs aggregated by candidate.',
+)
+class ElectioneeringByCandidateView(BaseAggregateView):
+
+    model = models.ElectioneeringByCandidate
+    fields = [
+        ('cycle', models.ElectioneeringByCandidate.cycle),
+        ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
+    ]
+
+    @args.register_kwargs(args.paging)
+    @args.register_kwargs(args.elections)
+    @args.register_kwargs(args.electioneering_by_candidate)
+    @args.register_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ElectioneeringByCandidate)
+        )
+    )
+    @schemas.marshal_with(schemas.ElectioneeringByCandidatePageSchema())
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
+
+    def _build_query(self, committee_id, kwargs):
+        query = super()._build_query(committee_id, kwargs)
+        return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)

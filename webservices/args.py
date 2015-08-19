@@ -438,6 +438,12 @@ schedule_e_by_candidate = {
 }
 
 
+electioneering_by_candidate = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+}
+
+
 election_search = {
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'district': District(multiple=True),
