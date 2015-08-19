@@ -777,8 +777,8 @@ class ScheduleEByCandidate(BaseAggregate):
     candidate_id = db.Column('cand_id', db.String, primary_key=True)
     support_oppose_indicator = db.Column(db.String, primary_key=True)
 
-    committee = utils.related_committee('committee_id', 'cycle')
-    candidate = utils.related_candidate('candidate_id', 'cycle')
+    committee = utils.related_committee('committee_id')
+    candidate = utils.related_candidate('candidate_id')
 
 
 class CommunicationCostByCandidate(BaseAggregate):
@@ -786,16 +786,16 @@ class CommunicationCostByCandidate(BaseAggregate):
     candidate_id = db.Column('cand_id', db.String, primary_key=True)
     support_oppose_indicator = db.Column(db.String, primary_key=True)
 
-    committee = utils.related_committee('committee_id', 'cycle')
-    candidate = utils.related_candidate('candidate_id', 'cycle')
+    committee = utils.related_committee('committee_id')
+    candidate = utils.related_candidate('candidate_id')
 
 
 class ElectioneeringByCandidate(BaseAggregate):
     __tablename__ = 'ofec_electioneering_aggregate_candidate_mv'
     candidate_id = db.Column('cand_id', db.String, primary_key=True)
 
-    committee = utils.related_committee('committee_id', 'cycle')
-    candidate = utils.related_candidate('candidate_id', 'cycle')
+    committee = utils.related_committee('committee_id')
+    candidate = utils.related_candidate('candidate_id')
 
 
 class ScheduleB(BaseItemized):

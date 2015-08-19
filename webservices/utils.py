@@ -1,4 +1,5 @@
 import re
+import functools
 
 import sqlalchemy as sa
 from sqlalchemy.orm import foreign
@@ -104,41 +105,40 @@ def get_model(name):
     return db.Model._decl_class_registry.get(name)
 
 
-def related(related_model, related_id, related_cycle, id_label, cycle_label):
+def related(related_model, id_label, related_id_label, cycle_label=None, related_cycle_label=None):
     from webservices.common.models import db
+    related_model = get_model(related_model)
     @declared_attr
     def related(cls):
         id_column = getattr(cls, id_label)
-        cycle_column = getattr(cls, cycle_label)
+        related_id_column = getattr(related_model, related_id_label)
+        filters = [foreign(id_column) == related_id_column]
+        if cycle_label:
+            cycle_column = getattr(cls, cycle_label)
+            related_cycle_column = getattr(related_model, related_cycle_label)
+            filters.append(cycle_column == related_cycle_column)
         return db.relationship(
             related_model,
-            primaryjoin=sa.and_(
-                foreign(id_column) == related_id,
-                cycle_column == related_cycle,
-            ),
+            primaryjoin=sa.and_(*filters),
         )
     return related
 
 
-def related_committee(id_label, cycle_label):
-    related_model = get_model('CommitteeHistory')
-    return related(
-        related_model,
-        related_model.committee_id,
-        related_model.cycle,
-        id_label,
-        cycle_label,
-    )
+related_committee = functools.partial(related, 'CommitteeDetail', 'committee_id')
+related_candidate = functools.partial(related, 'CandidateDetail', 'candidate_id')
 
-def related_candidate(id_label, cycle_label):
-    related_model = get_model('CandidateHistory')
-    return related(
-        related_model,
-        related_model.candidate_id,
-        related_model.two_year_period,
-        id_label,
-        cycle_label,
-    )
+related_committee_history = functools.partial(
+    related,
+    'CommitteeHistory',
+    'committee_id',
+    related_cycle_label='cycle',
+)
+related_candidate_history = functools.partial(
+    related,
+    'CandidateHistory',
+    'candidate_id',
+    related_cycle_label='two_year_period',
+)
 
 
 def document_description(report_year, report_type=None, document_type=None):
