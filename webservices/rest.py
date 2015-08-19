@@ -214,6 +214,11 @@ api.add_resource(
 )
 
 api.add_resource(
+    aggregates.CommunicationCostByCandidateView,
+    '/communication_costs/by_candidate/',
+    '/committee/<string:committee_id>/communication_costs/by_candidate/',
+)
+api.add_resource(
     aggregates.ElectioneeringByCandidateView,
     '/electioneering_costs/by_candidate/',
     '/committee/<string:committee_id>/electioneering_costs/by_candidate/',
@@ -306,6 +311,8 @@ register_resource(aggregates.ScheduleAByContributorTypeView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
 register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 register_resource(aggregates.ScheduleBByPurposeView, blueprint='v1')
+register_resource(aggregates.ScheduleEByCandidateView, blueprint='v1')
+register_resource(aggregates.CommunicationCostByCandidateView, blueprint='v1')
 register_resource(aggregates.ElectioneeringByCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
 register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')

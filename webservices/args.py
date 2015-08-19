@@ -31,11 +31,25 @@ class FlaskRestParser(FlaskParser):
 parser = FlaskRestParser()
 
 
+def unique_on(values, predicate):
+    seen = set()
+    for value in values:
+        key = predicate(value)
+        if key not in seen:
+            seen.add(key)
+            yield value
+
+
 def register_kwargs(arg_dict):
     def wrapper(func):
         params = swagger.args2parameters(arg_dict, default_in='query')
         func.__apidoc__ = getattr(func, '__apidoc__', {})
-        func.__apidoc__.setdefault('parameters', []).extend(params)
+        func.__apidoc__['parameters'] = list(
+            unique_on(
+                params + func.__apidoc__.get('parameters', []),
+                lambda value: value['name'],
+            )
+        )
         return parser.use_kwargs(arg_dict)(func)
     return wrapper
 
@@ -474,6 +488,17 @@ elections = {
 schedule_a_candidate_aggregate = {
     'candidate_id': IString(multiple=True, required=True, description=docs.CANDIDATE_ID),
     'cycle': Arg(int, multiple=True, required=True, description=docs.RECORD_CYCLE),
+}
+
+communication_cost_by_candidate = {
+    'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
+    'support_oppose': IString(
+        default=None,
+        enum=['S', 'O'],
+        validate=lambda v: v.upper() in ['S', 'O'],
+        description='Support or opposition',
+    ),
 }
 
 
