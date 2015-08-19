@@ -1,8 +1,10 @@
+from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
     ScheduleBByPurposeView,
     ScheduleEByCandidateView,
     CommunicationCostByCandidateView,
+    ElectioneeringByCandidateView,
 )
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
@@ -20,101 +22,80 @@ class TestAggregates(ApiBaseTest):
         super(TestAggregates, self).setUp()
         self.committee = factories.CommitteeHistoryFactory(cycle=2012)
 
-    def test_disbursement_purpose(self):
-        aggregate = factories.ScheduleBByPurposeFactory(
-            committee_id=self.committee.committee_id,
-            cycle=self.committee.cycle,
-        )
-        results = self._results(
-            api.url_for(
+    def test_aggregates_by_committee(self):
+        params = [
+            (
+                factories.ScheduleBByPurposeFactory,
                 ScheduleBByPurposeView,
-                committee_id=self.committee.committee_id,
-                cycle=2012,
-            )
-        )
-        self.assertEqual(len(results), 1)
-        expected = {
-            'committee_id': self.committee.committee_id,
-            'purpose': 'ADMINISTRATIVE',
-            'cycle': 2012,
-            'total': aggregate.total,
-            'count': aggregate.count,
-        }
-        self.assertEqual(results[0], expected)
-
-    def test_independent_expenditure_candidate(self):
-        aggregate = factories.ScheduleEByCandidateFactory(
-            committee_id=self.committee.committee_id,
-            cycle=self.committee.cycle,
-        )
-        results = self._results(
-            api.url_for(
+                schemas.ScheduleBByPurposeSchema,
+            ),
+            (
+                factories.ScheduleEByCandidateFactory,
                 ScheduleEByCandidateView,
-                committee_id=self.committee.committee_id,
-                cycle=2012,
-            )
-        )
-        self.assertEqual(len(results), 1)
-        expected = {
-            'committee_id': self.committee.committee_id,
-            'candidate_id': aggregate.candidate_id,
-            'support_oppose_indicator': aggregate.support_oppose_indicator,
-            'cycle': aggregate.cycle,
-            'total': aggregate.total,
-            'count': aggregate.count,
-        }
-        for key, value in expected.items():
-            self.assertEqual(results[0][key], value)
-
-    def test_communication_cost(self):
-        aggregate = factories.CommunicationCostByCandidateFactory(
-            committee_id=self.committee.committee_id,
-            cycle=self.committee.cycle,
-        )
-        results = self._results(
-            api.url_for(
+                schemas.ScheduleEByCandidateSchema,
+            ),
+            (
+                factories.CommunicationCostByCandidateFactory,
                 CommunicationCostByCandidateView,
+                schemas.CommunicationCostByCandidateSchema,
+            ),
+            (
+                factories.ElectioneeringByCandidateFactory,
+                ElectioneeringByCandidateView,
+                schemas.ElectioneeringByCandidateSchema,
+            ),
+        ]
+        for factory, resource, schema in params:
+            aggregate = factory(
                 committee_id=self.committee.committee_id,
-                cycle=2012,
+                cycle=self.committee.cycle,
             )
-        )
-        self.assertEqual(len(results), 1)
-        expected = {
-            'committee_id': self.committee.committee_id,
-            'candidate_id': aggregate.candidate_id,
-            'support_oppose_indicator': aggregate.support_oppose_indicator,
-            'cycle': aggregate.cycle,
-            'total': aggregate.total,
-            'count': aggregate.count,
-        }
-        for key, value in expected.items():
-            self.assertEqual(results[0][key], value)
+            results = self._results(
+                api.url_for(
+                    resource,
+                    committee_id=self.committee.committee_id,
+                    cycle=2012,
+                )
+            )
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0], schema().dump(aggregate).data)
 
-    def test_communication_cost_by_election(self):
-        candidate = factories.CandidateHistoryFactory(
+    def test_aggregates_by_election(self):
+        params = [
+            (factories.CommunicationCostByCandidateFactory, CommunicationCostByCandidateView),
+            (factories.ElectioneeringByCandidateFactory, ElectioneeringByCandidateView),
+        ]
+        candidate = factories.CandidateFactory(
+            election_years=[2012],
+            office='P',
+        )
+        factories.CandidateHistoryFactory(
+            candidate_id=candidate.candidate_id,
+            candidate_key=candidate.candidate_key,
             two_year_period=2012,
             election_years=[2012],
             office='P',
         )
-        [
-            factories.CommunicationCostByCandidateFactory(
-                committee_id=self.committee.committee_id,
-                candidate_id=candidate.candidate_id,
-                cycle=self.committee.cycle,
-            ),
-            factories.CommunicationCostByCandidateFactory(
-                cycle=self.committee.cycle,
-            ),
-        ]
-        results = self._results(
-            api.url_for(
-                CommunicationCostByCandidateView,
-                office='president',
-                cycle=2012,
+        for factory, resource in params:
+            [
+                factory(
+                    committee_id=self.committee.committee_id,
+                    candidate_id=candidate.candidate_id,
+                    cycle=self.committee.cycle,
+                ),
+                factory(
+                    cycle=self.committee.cycle,
+                ),
+            ]
+            results = self._results(
+                api.url_for(
+                    resource,
+                    office='president',
+                    cycle=2012,
+                )
             )
-        )
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['candidate']['candidate_id'], candidate.candidate_id)
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['candidate']['candidate_id'], candidate.candidate_id)
 
 
 class TestCandidateAggregates(ApiBaseTest):

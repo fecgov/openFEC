@@ -160,61 +160,58 @@ class FilingsFactory(BaseFactory):
         model = models.Filings
 
 
-class ScheduleABySizeFactory(BaseFactory):
+class BaseAggregateFactory(BaseFactory):
+    committee_id = factory.Sequence(lambda n: str(n))
+    cycle = 2016
+
+
+class ScheduleABySizeFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleABySize
-    committee_id = factory.Sequence(lambda n: str(n))
-    cycle = 2016
 
 
-class ScheduleAByStateFactory(BaseFactory):
+class ScheduleAByStateFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleAByState
-    committee_id = factory.Sequence(lambda n: str(n))
-    cycle = 2016
 
 
-class ScheduleAByContributorTypeFactory(BaseFactory):
+class ScheduleAByContributorTypeFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleAByContributorType
-    committee_id = factory.Sequence(lambda n: str(n))
     individual = True
-    cycle = 2016
 
 
-class ScheduleAByContributorFactory(BaseFactory):
+class ScheduleAByContributorFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleAByContributor
-    committee_id = factory.Sequence(lambda n: str(n))
     contributor_id = factory.Sequence(lambda n: str(n))
-    cycle = 2016
     year = 2015
 
 
-class ScheduleBByPurposeFactory(BaseFactory):
+class ScheduleBByPurposeFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleBByPurpose
-    committee_id = factory.Sequence(lambda n: str(n))
     purpose = 'ADMINISTRATIVE'
-    cycle = 2016
 
 
-class ScheduleEByCandidateFactory(BaseFactory):
+class ScheduleEByCandidateFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleEByCandidate
-    committee_id = factory.Sequence(lambda n: str(n))
     candidate_id = factory.Sequence(lambda n: str(n))
     support_oppose_indicator = 'S'
-    cycle = 2016
 
 
-class CommunicationCostByCandidateFactory(BaseFactory):
+class CommunicationCostByCandidateFactory(BaseAggregateFactory):
     class Meta:
         model = models.CommunicationCostByCandidate
-    committee_id = factory.Sequence(lambda n: str(n))
     candidate_id = factory.Sequence(lambda n: str(n))
     support_oppose_indicator = 'S'
-    cycle = 2016
+
+
+class ElectioneeringByCandidateFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ElectioneeringByCandidate
+    candidate_id = factory.Sequence(lambda n: str(n))
 
 
 class ReportingDatesFactory(BaseFactory):
