@@ -1,16 +1,15 @@
-drop materialized view if exists ofec_aggregate_communication_cost_candidate_mv_tmp;
-create materialized view ofec_aggregate_communication_cost_candidate_mv_tmp as
+drop materialized view if exists ofec_communication_cost_aggregate_candidate_mv_tmp;
+create materialized view ofec_communication_cost_aggregate_candidate_mv_tmp as
 select
+    row_number() over () as idx,
     org_id as cmte_id,
     s_o_cand_id as cand_id,
     s_o_ind as support_oppose_indicator,
     sum(communication_cost) as total,
     count(communication_cost) as count,
-    cast(extract(YEAR from communication_dt) AS integer) +
-        cast(extract(YEAR from communication_dt) as integer) % 2
-        as cycle
+    date_part('year', communication_dt)::int + date_part('year', communication_dt)::int % 2 as cycle
 from form_76
-where extract(YEAR from communication_dt) >= :START_YEAR
+where date_part('year', communication_dt)::int >= :START_YEAR
 and s_o_cand_id is not null
 and amndt_ind != 'A'
 group by
@@ -20,9 +19,11 @@ group by
     cycle
 ;
 
-create index on ofec_aggregate_communication_cost_candidate_mv_tmp (cmte_id);
-create index on ofec_aggregate_communication_cost_candidate_mv_tmp (cand_id);
-create index on ofec_aggregate_communication_cost_candidate_mv_tmp (support_oppose_indicator);
-create index on ofec_aggregate_communication_cost_candidate_mv_tmp (cycle);
-create index on ofec_aggregate_communication_cost_candidate_mv_tmp (total);
-create index on ofec_aggregate_communication_cost_candidate_mv_tmp (count);
+create unique index on ofec_communication_cost_aggregate_candidate_mv_tmp (idx);
+
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (cmte_id);
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (cand_id);
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (support_oppose_indicator);
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (cycle);
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (total);
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (count);

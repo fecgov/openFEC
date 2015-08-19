@@ -782,7 +782,7 @@ class ScheduleEByCandidate(BaseAggregate):
 
 
 class CommunicationCostByCandidate(BaseAggregate):
-    __tablename__ = 'ofec_aggregate_communication_cost_candidate_mv'
+    __tablename__ = 'ofec_communication_cost_aggregate_candidate_mv'
     candidate_id = db.Column('cand_id', db.String, primary_key=True)
     support_oppose_indicator = db.Column(db.String, primary_key=True)
 
