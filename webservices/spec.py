@@ -58,6 +58,10 @@ spec = APISpec(
             'name': 'schedules/schedule_e',
             'description': docs.SCHEDULE_E_TAG,
         },
+        {
+            'name': 'communication_cost',
+            'description': 'Reports of communication costs by corporations and membership orgnizations from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).',
+        },
     ]
 )
 

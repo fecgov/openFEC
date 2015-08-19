@@ -781,6 +781,15 @@ class ScheduleEByCandidate(BaseAggregate):
     candidate = utils.related_candidate('candidate_id', 'cycle')
 
 
+class CommunicationCostByCandidate(BaseAggregate):
+    __tablename__ = 'ofec_communication_cost_aggregate_candidate_mv'
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+    support_oppose_indicator = db.Column(db.String, primary_key=True)
+
+    committee = utils.related_committee('committee_id', 'cycle')
+    candidate = utils.related_candidate('candidate_id', 'cycle')
+
+
 class ElectioneeringByCandidate(BaseAggregate):
     __tablename__ = 'ofec_electioneering_aggregate_candidate_mv'
     candidate_id = db.Column('cand_id', db.String, primary_key=True)
