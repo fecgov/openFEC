@@ -22,8 +22,7 @@ select
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 and contb_receipt_amt is not null
-and (memo_cd != 'X' or memo_cd is null)
-and line_num in ('11AI', '17A')
+and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_text)
 group by cmte_id, cycle, size
 ;
 
@@ -58,8 +57,7 @@ begin
             select * from old
         ) t
         where contb_receipt_amt is not null
-        and (memo_cd != 'X' or memo_cd is null)
-        and line_num in ('11AI', '17A')
+        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_text)
         group by cmte_id, cycle, size
     ),
     inc as (
