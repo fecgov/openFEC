@@ -13,6 +13,7 @@ class ItemizedResource(Resource):
     year_column = None
     index_column = None
     filter_multi_fields = []
+    filter_match_fields = []
     filter_fulltext_fields = []
 
     def get(self, **kwargs):
@@ -26,6 +27,7 @@ class ItemizedResource(Resource):
         )
 
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
+        query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
         query = self.filter_fulltext(query, kwargs)
 
