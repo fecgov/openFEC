@@ -171,7 +171,7 @@ class TestViews(common.IntegrationTestCase):
             'report_year': 2015,
             'committee_id': 'C12345',
             'contribution_receipt_amount': 538,
-            'line_number': '11AI',
+            'receipt_type': '15J',
             item_key: value,
         })
         db.session.flush()
@@ -203,7 +203,7 @@ class TestViews(common.IntegrationTestCase):
             'report_year': 2015,
             'committee_id': existing.committee_id,
             'contribution_receipt_amount': 538,
-            'line_number': '11AI',
+            'receipt_type': '15J',
             item_key: getattr(existing, total_key),
         })
         db.session.flush()
@@ -235,7 +235,7 @@ class TestViews(common.IntegrationTestCase):
             committee_id=existing.committee_id,
             contributor_state=existing.state,
             contribution_receipt_amount=None,
-            line_number='11AI',
+            receipt_type='15J',
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -248,7 +248,7 @@ class TestViews(common.IntegrationTestCase):
             report_year=2015,
             committee_id='C12345',
             contribution_receipt_amount=538,
-            line_number='11AI',
+            receipt_type='15J',
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -281,7 +281,7 @@ class TestViews(common.IntegrationTestCase):
             report_year=2015,
             committee_id=existing.committee_id,
             contribution_receipt_amount=538,
-            line_number='11AI',
+            receipt_type='15J',
         )
         db.session.flush()
         db.session.execute('select update_aggregates()')
@@ -300,7 +300,7 @@ class TestViews(common.IntegrationTestCase):
             report_year=2015,
             committee_id=existing.committee_id,
             contribution_receipt_amount=75,
-            line_number='11AI',
+            receipt_type='15J',
         )
         # Create a committee and committee report
         dc = sa.Table('dimcmte', db.metadata, autoload=True, autoload_with=db.engine)

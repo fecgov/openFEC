@@ -1,6 +1,6 @@
-from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 
 from flask.ext.sqlalchemy import SQLAlchemy
 
@@ -674,9 +674,9 @@ class ScheduleA(BaseItemized):
     contributor_zip = db.Column('contbr_zip', db.String)
     contributor_employer = db.Column('contbr_employer', db.String)
     contributor_occupation = db.Column('contbr_occupation', db.String)
-    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Float)
+    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
     contribution_receipt_date = db.Column('contb_receipt_dt', db.Date)
-    contribution_receipt_amount = db.Column('contb_receipt_amt', db.Float)
+    contribution_receipt_amount = db.Column('contb_receipt_amt', db.Numeric(30, 2))
     receipt_type = db.Column('receipt_tp', db.String)
     receipt_type_full = db.Column('receipt_desc', db.String)
     election_type = db.Column('election_tp', db.String)
