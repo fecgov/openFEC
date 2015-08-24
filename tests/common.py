@@ -50,6 +50,7 @@ class ApiBaseTest(BaseTestCase):
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
         manage.load_districts()
+        manage.update_functions()
         rest.db.create_all()
 
     def setUp(self):
