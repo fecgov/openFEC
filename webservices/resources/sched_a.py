@@ -9,6 +9,14 @@ from webservices.common import models
 from webservices.common.views import ItemizedResource
 
 
+is_individual = sa.func.is_individual(
+    models.ScheduleA.contribution_receipt_amount,
+    models.ScheduleA.receipt_type,
+    models.ScheduleA.line_number,
+    models.ScheduleA.memo_text,
+)
+
+
 @spec.doc(
     tags=['schedules/schedule_a'],
     description=docs.SCHEDULE_A,
@@ -34,15 +42,18 @@ class ScheduleAView(ItemizedResource):
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
     ]
-    filter_fulltext_fields = [
-        ('contributor_name', models.ScheduleASearch.contributor_name_text),
-        ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
-        ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
+    filter_match_fields = [
+        ('is_individual', is_individual),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleA.contribution_receipt_date),
         (('min_amount', 'max_amount'), models.ScheduleA.contribution_receipt_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
+    ]
+    filter_fulltext_fields = [
+        ('contributor_name', models.ScheduleASearch.contributor_name_text),
+        ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
+        ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
     ]
 
     @args.register_kwargs(args.itemized)
