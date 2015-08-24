@@ -8,7 +8,9 @@ create index on sched_a (contbr_st) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (contbr_city) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create functional index on individual receipts
-create index on sched_a (is_individual(contb_receipt_amt, receipt_tp, line_num, memo_text));
+create index on sched_a
+    (is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text))
+    where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create composite indices on sortable columns
 create index on sched_a (contb_receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
