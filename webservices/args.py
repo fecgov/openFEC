@@ -318,13 +318,6 @@ itemized = {
     'max_date': Date(description='Maximum date'),
 }
 
-contributor_type = Arg(
-    str,
-    multiple=True,
-    validate=lambda v: v in ['individual', 'committee'],
-    description='Filters individual or committee contributions based on line number.'
-)
-
 reporting_dates = {
     'due_date': Date(multiple=True, description='Date the filing is done.'),
     'report_year': Arg(int, multiple=True, description='Year of report.'),
@@ -361,7 +354,13 @@ schedule_a = {
     'last_contribution_receipt_date': Date(),
     'last_contribution_receipt_amount': Arg(float),
     'last_contributor_aggregate_ytd': Arg(float),
-    'contributor_type': contributor_type,
+    'is_individual': Bool(default=None, description='Restrict to non-earmarked individual contributions'),
+    'contributor_type': Arg(
+        str,
+        multiple=True,
+        validate=lambda v: v in ['individual', 'committee'],
+        description='Filters individual or committee contributions based on line number.'
+    ),
 }
 
 

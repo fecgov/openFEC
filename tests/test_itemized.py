@@ -195,6 +195,26 @@ class TestItemized(ApiBaseTest):
             self.assertFalse(results[0]['memoed_subtotal'])
             self.assertTrue(results[1]['memoed_subtotal'])
 
+    def test_filter_individual_sched_a(self):
+        individuals = [
+            factories.ScheduleAFactory(receipt_type='15J'),
+            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150),
+        ]
+        earmarks = [
+            factories.ScheduleAFactory(),
+            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, memo_text='earmark'),
+        ]
+        results = self._results(api.url_for(ScheduleAView))
+        self.assertEqual(
+            [each['sched_a_sk'] for each in results],
+            [each.sched_a_sk for each in individuals + earmarks],
+        )
+        results = self._results(api.url_for(ScheduleAView, is_individual='true'))
+        self.assertEqual(
+            [each['sched_a_sk'] for each in results],
+            [each.sched_a_sk for each in individuals],
+        )
+
     def test_amount_sched_a(self):
         [
             factories.ScheduleAFactory(contribution_receipt_amount=50),
