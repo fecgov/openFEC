@@ -121,8 +121,8 @@ class SeekPaginator(BasePaginator):
         self.sort_column = sort_column
         super(SeekPaginator, self).__init__(cursor, per_page, count=count)
 
-    def get_page(self, last_index=None, sort_index=None):
-        return SeekPage(self._fetch(last_index, sort_index), self)
+    def get_page(self, last_index=None, sort_index=None, eager=True):
+        return SeekPage(self._fetch(last_index, sort_index, eager=eager), self)
 
     @abc.abstractmethod
     def _fetch(self, last_indexes, limit):
@@ -141,17 +141,18 @@ class SqlalchemyMixin(object):
 
 class SqlalchemyOffsetPaginator(SqlalchemyMixin, OffsetPaginator):
 
-    def _fetch(self, page):
+    def _fetch(self, page, eager=True):
         offset, limit = self._get_offset(page), self.per_page
         offset += (self.cursor._offset or 0)
         if self.cursor._limit:
             limit = min(limit, self.cursor._limit - offset)
-        return self.cursor.offset(offset).limit(limit).all()
+        query = self.cursor.offset(offset).limit(limit)
+        return query.all() if eager else query
 
 
 class SqlalchemySeekPaginator(SqlalchemyMixin, SeekPaginator):
 
-    def _fetch(self, last_index, sort_index=None):
+    def _fetch(self, last_index, sort_index=None, eager=True):
         cursor, limit = self.cursor, self.per_page
         lhs, rhs = (), ()
         direction = self.sort_column[1] if self.sort_column else sa.asc
@@ -166,7 +167,8 @@ class SqlalchemySeekPaginator(SqlalchemyMixin, SeekPaginator):
         if rhs.clauses:
             filter = lhs > rhs if direction == sa.asc else lhs < rhs
             cursor = cursor.filter(filter)
-        return cursor.order_by(direction(self.index_column)).limit(limit).all()
+        query = cursor.order_by(direction(self.index_column)).limit(limit)
+        return query.all() if eager else query
 
     def _get_index_values(self, result):
         ret = {'last_index': getattr(result, self.index_column.key)}
