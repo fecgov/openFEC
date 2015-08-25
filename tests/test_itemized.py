@@ -202,7 +202,7 @@ class TestItemized(ApiBaseTest):
         ]
         earmarks = [
             factories.ScheduleAFactory(),
-            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, memo_text='earmark'),
+            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, memo_code='X', memo_text='earmark'),
         ]
         results = self._results(api.url_for(ScheduleAView))
         self.assertEqual(
