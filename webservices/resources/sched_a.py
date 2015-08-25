@@ -13,6 +13,7 @@ is_individual = sa.func.is_individual(
     models.ScheduleA.contribution_receipt_amount,
     models.ScheduleA.receipt_type,
     models.ScheduleA.line_number,
+    models.ScheduleA.memo_code,
     models.ScheduleA.memo_text,
 )
 
