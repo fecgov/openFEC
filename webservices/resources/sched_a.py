@@ -3,8 +3,12 @@ import sqlalchemy as sa
 from webservices import args
 from webservices import docs
 from webservices import spec
+from webservices import utils
 from webservices import filters
 from webservices import schemas
+from webservices import sorting
+from webservices import exceptions
+from webservices.common import counts
 from webservices.common import models
 from webservices.common.views import ItemizedResource
 
@@ -72,14 +76,47 @@ class ScheduleAView(ItemizedResource):
     )
     @schemas.marshal_with(schemas.ScheduleAPageSchema())
     def get(self, **kwargs):
+        if len(kwargs['committee_id']) > 5:
+            raise exceptions.ApiError(
+                'Can only specify up to five values for "committee_id".',
+                status_code=422,
+            )
+        if len(kwargs['committee_id']) > 1:
+            query, count = self.join_committee_queries(kwargs)
+            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         return super(ScheduleAView, self).get(**kwargs)
 
-    def build_query(self, kwargs):
+    def build_query(self, kwargs, join=True):
         query = super(ScheduleAView, self).build_query(kwargs)
+        query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
+        if join:
+            query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
+            query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
+        return query
+
+    def join_committee_queries(self, kwargs):
+        queries = []
+        total = 0
+        for committee_id in kwargs['committee_id']:
+            query, count = self.build_committee_query(kwargs, committee_id)
+            queries.append(query.subquery().select())
+            total += count
+        query = models.db.session.query(
+            models.ScheduleA
+        ).select_entity_from(
+            sa.union_all(*queries)
+        )
         query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
-        query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
-        return query
+        return query, total
+
+    def build_committee_query(self, kwargs, committee_id):
+        query = self.build_query(utils.extend(kwargs, {'committee_id': [committee_id]}), join=False)
+        sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
+        query, _ = sorting.sort(query, sort, model=models.ScheduleA, hide_null=hide_null, nulls_large=nulls_large)
+        page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return page_query, count
 
     def join_fulltext(self, query):
         return query.join(
