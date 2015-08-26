@@ -28,7 +28,7 @@ def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
     return paginator.get_page(kwargs['page'])
 
 
-def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100):
+def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
     check_cap(kwargs, cap)
     model = index_column.class_
     sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
@@ -45,7 +45,7 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
         sort_index = kwargs['last_{0}'.format(sort_column[0].key)]
     else:
         sort_index = None
-    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index)
+    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
 
 
 def extend(*dicts):
