@@ -53,8 +53,8 @@ class ScheduleBView(ItemizedResource):
     def get(self, **kwargs):
         return super(ScheduleBView, self).get(**kwargs)
 
-    def build_query(self, kwargs):
-        query = super(ScheduleBView, self).build_query(kwargs)
+    def build_query(self, **kwargs):
+        query = super(ScheduleBView, self).build_query(**kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
         return query
