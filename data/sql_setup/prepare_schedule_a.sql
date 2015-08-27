@@ -24,6 +24,9 @@ create index on sched_a (cmte_id, contb_receipt_dt, sched_a_sk) where rpt_yr >= 
 create index on sched_a (cmte_id, contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 create index on sched_a (cmte_id, contb_aggregate_ytd, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
+-- Use smaller histogram bins on state column for faster queries on rare states (AS, PR)
+alter table sched_a alter column contbr_st set statistics 1000;
+
 -- Create Schedule A fulltext table
 drop table if exists ofec_sched_a_fulltext;
 create table ofec_sched_a_fulltext as
@@ -41,6 +44,10 @@ alter table ofec_sched_a_fulltext add primary key (sched_a_sk);
 create index on ofec_sched_a_fulltext using gin (contributor_name_text);
 create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
 create index on ofec_sched_a_fulltext using gin (contributor_occupation_text);
+
+-- Analyze tables
+analyze sched_a;
+analyze ofec_sched_a_fulltext;
 
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;
