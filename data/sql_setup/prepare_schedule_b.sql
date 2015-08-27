@@ -19,6 +19,9 @@ create index on sched_b (cmte_id, disb_amt, sched_b_sk) where rpt_yr >= :START_Y
 -- Create index for join on electioneering costs
 create index on sched_b (link_id) where rpt_yr >= 2002;
 
+-- Use smaller histogram bins on state column for faster queries on rare states (AS, PR)
+alter table sched_b alter column recipient_st set statistics 1000;
+
 -- Create Schedule B fulltext table
 drop table if exists ofec_sched_b_fulltext;
 create table ofec_sched_b_fulltext as
@@ -34,6 +37,10 @@ where rpt_yr >= :START_YEAR_ITEMIZED
 alter table ofec_sched_b_fulltext add primary key (sched_b_sk);
 create index on ofec_sched_b_fulltext using gin (recipient_name_text);
 create index on ofec_sched_b_fulltext using gin (disbursement_description_text);
+
+-- Analyze tables
+analyze sched_b;
+analyze ofec_sched_b_fulltext;
 
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
