@@ -100,6 +100,12 @@ class ApiBaseTest(BaseTestCase):
             self.assertResultsEqual(actual[key], expected[key],
                                     prefix + '.' + key)
 
+    def assertDictsSubset(self, first, second):
+        self.assertResultsEqual(
+            {key: first.get(key) for key in second},
+            second,
+        )
+
     def assertListsEqual(self, actual, expected, prefix):
         """Check length, order, and recurse"""
         self.assertEqual(

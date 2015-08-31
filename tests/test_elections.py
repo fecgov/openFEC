@@ -30,9 +30,9 @@ class TestElectionSearch(ApiBaseTest):
     def test_search_district(self):
         results = self._results(api.url_for(ElectionList, state='NJ', district='09'))
         self.assertEqual(len(results), 3)
-        self.assertEqual(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
-        self.assertEqual(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': None})
-        self.assertEqual(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
+        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
+        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': None})
+        self.assertDictsSubset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
     def test_search_district_padding(self):
         results_padded = self._results(api.url_for(ElectionList, district='09'))
@@ -48,9 +48,24 @@ class TestElectionSearch(ApiBaseTest):
     def test_search_zip(self):
         results = self._results(api.url_for(ElectionList, zip='22902'))
         self.assertEqual(len(results), 3)
-        self.assertEqual(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
-        self.assertEqual(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': None})
-        self.assertEqual(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
+        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
+        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': None})
+        self.assertDictsSubset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
+
+    def test_search_incumbent(self):
+        [
+            factories.ElectionResultFactory(
+                cand_office='S',
+                election_yr=2012,
+                cand_office_st='NJ',
+                cand_office_district='00',
+                cand_id='S012345',
+                cand_name='Howard Stackhouse',
+            )
+        ]
+        results = self._results(api.url_for(ElectionList, office='senate', state='NJ'))
+        self.assertEqual(len(results), 1)
+        self.assertDictsSubset(results[0], {'incumbent_id': 'S012345', 'incumbent_name': 'Howard Stackhouse'})
 
 
 class TestElections(ApiBaseTest):
