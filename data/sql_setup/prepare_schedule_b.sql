@@ -17,7 +17,7 @@ create index on sched_b (cmte_id, disb_dt, sched_b_sk) where rpt_yr >= :START_YE
 create index on sched_b (cmte_id, disb_amt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
 
 -- Create index for join on electioneering costs
-create index on sched_b (link_id) where rpt_yr >= 2002;
+create index on sched_b (link_id);
 
 -- Use smaller histogram bins on state column for faster queries on rare states (AS, PR)
 alter table sched_b alter column recipient_st set statistics 1000;
