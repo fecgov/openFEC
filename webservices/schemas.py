@@ -34,7 +34,7 @@ def marshal_with(schema, code=http.client.OK, description=None, wrap=True):
 
 def register_schema(schema, definition_name=None):
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
-    spec.definition(definition_name, schema=schema())
+    spec.definition(definition_name, schema=schema)
 
 
 def make_schema(model, class_name=None, fields=None, options=None):
@@ -63,11 +63,9 @@ def make_schema(model, class_name=None, fields=None, options=None):
 def make_page_schema(schema, page_type=paging.OffsetPageSchema, class_name=None,
                      definition_name=None):
     class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
-    definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
 
     class Meta:
         results_schema_class = schema
-        results_schema_options = {'ref': '#/definitions/{0}'.format(definition_name)}
 
     return type(
         class_name,
