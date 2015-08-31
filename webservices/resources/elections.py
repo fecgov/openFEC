@@ -46,8 +46,10 @@ class ElectionList(Resource):
         """Get election records, sorted by status of office (P > S > H).
         """
         elections = self._get_elections(kwargs).subquery()
+        incumbents = sa.Table('ofec_election_result_mv', db.metadata, autoload_with=db.engine)
         return db.session.query(
             elections,
+            incumbents,
             sa.case(
                 [
                     (elections.c.office == 'P', 1),
@@ -56,6 +58,14 @@ class ElectionList(Resource):
                 ],
                 else_=4,
             ).label('_office_status'),
+        ).outerjoin(
+            incumbents,
+            sa.and_(
+                elections.c.state == incumbents.c.cand_office_st,
+                elections.c.office == incumbents.c.cand_office,
+                sa.func.coalesce(elections.c.district, '00') == incumbents.c.cand_office_district,
+                elections.c.two_year_period == incumbents.c.election_yr,
+            ),
         ).order_by(
             '_office_status',
         )
