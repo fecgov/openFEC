@@ -56,7 +56,7 @@ class TestElectionSearch(ApiBaseTest):
         [
             factories.ElectionResultFactory(
                 cand_office='S',
-                election_yr=2012,
+                election_yr=2006,
                 cand_office_st='NJ',
                 cand_office_district='00',
                 cand_id='S012345',
