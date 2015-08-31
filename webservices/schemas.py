@@ -370,6 +370,8 @@ class ElectionSearchSchema(ma.Schema):
     office = ma.fields.Str()
     district = ma.fields.Str()
     cycle = ma.fields.Int(attribute='two_year_period')
+    incumbent_id = ma.fields.Str(attribute='cand_id')
+    incumbent_name = ma.fields.Str(attribute='cand_name')
 augment_schemas(ElectionSearchSchema)
 
 class ElectionSchema(ma.Schema):
