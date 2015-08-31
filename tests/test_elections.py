@@ -165,6 +165,27 @@ class TestElections(ApiBaseTest):
                 self.totals[1].last_beginning_image_number,
                 'F3',
                 'S',
-            )
+            ),
+            'won': False,
         }
         self.assertEqual(results[0], expected)
+
+    def test_elections_winner(self):
+        [
+            factories.ElectionResultFactory(
+                cand_office='H',
+                election_yr=2012,
+                cand_office_st='NY',
+                cand_office_district='07',
+                cand_id=self.candidate.candidate_id,
+                cand_name=self.candidate.name,
+            )
+        ]
+        results = self._results(api.url_for(ElectionView, office='house', cycle=2012, state='NY', district='07'))
+        self.assertEqual(len(results), 1)
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'candidate_name': self.candidate.name,
+            'won': True,
+        }
+        self.assertDictsSubset(results[0], expected)

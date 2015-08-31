@@ -383,6 +383,7 @@ class ElectionSchema(ma.Schema):
     total_receipts = ma.fields.Decimal()
     total_disbursements = ma.fields.Decimal()
     cash_on_hand_end_period = ma.fields.Decimal()
+    won = ma.fields.Boolean()
     document_description = ma.fields.Function(
         lambda o: utils.document_description(
             o.report_year,

@@ -157,12 +157,17 @@ class ElectionView(Resource):
         pairs = self._get_pairs(totals_model, kwargs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
         filings = self._get_filings(pairs).subquery()
+        outcomes = self._get_outcomes(kwargs).subquery()
         return db.session.query(
             aggregates,
             filings,
+            sa.case([(outcomes.c.cand_id != None, True)], else_=False).label('won'),
         ).join(
             filings,
             aggregates.c.candidate_id == filings.c.candidate_id,
+        ).outerjoin(
+            outcomes,
+            aggregates.c.candidate_id == outcomes.c.cand_id,
         )
 
     def _get_pairs(self, totals_model, kwargs):
@@ -236,4 +241,14 @@ class ElectionView(Resource):
         ).order_by(
             pairs.c.candidate_id,
             sa.desc(pairs.c.coverage_end_date),
+        )
+
+    def _get_outcomes(self, kwargs):
+        return db.session.query(
+            ElectionResult.cand_id
+        ).filter(
+            ElectionResult.election_yr == kwargs['cycle'],
+            ElectionResult.cand_office == kwargs['office'][0].upper(),
+            ElectionResult.cand_office_st == (kwargs['state'] or 'US'),
+            ElectionResult.cand_office_district == (kwargs['district'] or '00'),
         )
