@@ -24,6 +24,14 @@ office_args_map = {
     'senate': ['state'],
 }
 
+def cycle_length(elections):
+    return sa.case(
+        [
+            (elections.c.office == 'P', 4),
+            (elections.c.office == 'S', 6),
+            (elections.c.office == 'H', 6),
+        ]
+    )
 
 @spec.doc(
     description=docs.ELECTION_SEARCH,
@@ -65,7 +73,7 @@ class ElectionList(Resource):
                 elections.c.state == ElectionResult.cand_office_st,
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
-                elections.c.two_year_period == ElectionResult.election_yr,
+                elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
             ),
         ).order_by(
             '_office_status',
