@@ -8,7 +8,6 @@ from webservices import schemas
 from webservices.common.models import (
     CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
     ScheduleABySize, ScheduleAByState, ScheduleAByContributorType,
-    CommunicationCostByCandidate,
 )
 
 
