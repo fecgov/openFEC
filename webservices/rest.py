@@ -268,9 +268,8 @@ def register_resource(resource, blueprint=None):
     for rule in rules:
         path = extract_path(rule.rule)
         path_params = [
-            utils.extend({'required': True}, each)
-            for each in resource_doc.get('path_params', [])
-            if each['name'] in rule.arguments
+            param for param in resource_doc.get('path_params', [])
+            if param['name'] in rule.arguments
         ]
         for method in [method.lower() for method in resource.methods or []]:
             view = getattr(resource, method)
