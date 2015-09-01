@@ -22,6 +22,7 @@ select
     election_year,
     fh.form_type,
     filings_year(report_year, receipt_date) as report_year,
+    report_year + report_year % 2 as cycle,
     report_type,
     to_from_indicator as document_type,
     expand_document(to_from_indicator) as document_type_full,
