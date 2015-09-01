@@ -65,6 +65,7 @@ class TestFilings(ApiBaseTest):
             factories.FilingsFactory(report_type='POST GENERAL'),
             factories.FilingsFactory(report_year=1999),
             factories.FilingsFactory(document_type='X'),
+            factories.FilingsFactory(cycle=2000),
         ]
 
         filter_fields = (
@@ -75,7 +76,8 @@ class TestFilings(ApiBaseTest):
             ('report_type', 'Post General'),
             ('report_year', 1999),
             ('candidate_id', 'H0001'),
-            ('document_type', 'X')
+            ('document_type', 'X'),
+            ('cycle', 2000),
         )
 
         # checking one example from each field
@@ -109,14 +111,14 @@ class TestFilings(ApiBaseTest):
     def test_regex(self):
         """ Getting rid of extra text that comes in the tables."""
         factories.FilingsFactory(
-            report_type_full='report {more information than we want}',
+            report_type_full='report    {more information than we want}',
             committee_id='C007',
             report_year=2004,
         )
 
         results = self._results(api.url_for(FilingsView, committee_id='C007'))
 
-        self.assertEqual(results[0]['document_description'], 'report 2004')
+        self.assertEqual(results[0]['document_description'], 'RFAI: report 2004')
 
     def test_pdf_url(self):
         factories.FilingsFactory(
