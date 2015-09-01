@@ -398,14 +398,12 @@ schedule_a_by_occupation = {
 
 schedule_a_by_contributor = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'year': Arg(int, multiple=True, description=docs.REPORT_YEAR),
     'contributor_id': IString(multiple=True, description=docs.COMMITTEE_ID),
 }
 
 
 schedule_a_by_contributor_type = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'year': Arg(int, multiple=True, description=docs.REPORT_YEAR),
     'individual': Bool(description='Restrict to individual donors'),
 }
 
