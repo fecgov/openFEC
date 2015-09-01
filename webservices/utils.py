@@ -4,9 +4,9 @@ import functools
 import sqlalchemy as sa
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
+from marshmallow_pagination import paginators
 
 from webservices import docs
-from webservices import paging
 from webservices import sorting
 from webservices import exceptions
 
@@ -24,7 +24,7 @@ def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
     query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
-    paginator = paging.SqlalchemyOffsetPaginator(query, kwargs['per_page'], count=count)
+    paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
 
@@ -34,7 +34,7 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
     sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
     query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     sort_column = sort_columns[0] if sort_columns else None
-    paginator = paging.SqlalchemySeekPaginator(
+    paginator = paginators.SeekPaginator(
         query,
         kwargs['per_page'],
         index_column,

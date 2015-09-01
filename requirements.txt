@@ -15,6 +15,7 @@ ujson==1.33
 marshmallow==2.0.0b3
 git+https://github.com/marshmallow-code/smore@dev
 git+https://github.com/marshmallow-code/marshmallow-sqlalchemy@dev
+git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Development
 invoke==0.10.1
