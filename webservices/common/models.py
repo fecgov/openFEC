@@ -739,21 +739,15 @@ class ScheduleAByOccupation(BaseAggregate):
     occupation = db.Column(db.String, primary_key=True)
 
 
+class ScheduleAByContributor(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_contributor'
+    contributor_id = db.Column('contbr_id', db.String, primary_key=True)
+    contributor_name = db.Column('contbr_nm', db.String)
+
+
 class ScheduleAByContributorType(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_contributor_type'
     individual = db.Column(db.Boolean, primary_key=True)
-
-
-class ScheduleAByContributor(db.Model):
-    __tablename__ = 'ofec_sched_a_aggregate_contributor_mv'
-
-    committee_id = db.Column('cmte_id', db.String, primary_key=True)
-    contributor_id = db.Column('contbr_id', db.String, primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True, nullable=True)
-    year = db.Column(db.Integer, primary_key=True, nullable=True)
-    contributor_name = db.Column('contbr_nm', db.String)
-    image_number = db.Column('image_num', db.String)
-    total = db.Column(db.Numeric(30, 2))
 
 
 class ScheduleBByRecipient(BaseAggregate):
