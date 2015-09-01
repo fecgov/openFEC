@@ -58,8 +58,8 @@ class ScheduleEView(ItemizedResource):
     def get(self, **kwargs):
         return super(ScheduleEView, self).get(**kwargs)
 
-    def build_query(self, kwargs):
-        query = super(ScheduleEView, self).build_query(kwargs)
+    def build_query(self, **kwargs):
+        query = super(ScheduleEView, self).build_query(**kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleE.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleE.candidate))
         return query
