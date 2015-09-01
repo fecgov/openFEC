@@ -970,6 +970,7 @@ class Filings(db.Model):
             self.report_year,
             self.report_type_full,
             self.document_type_full,
+            self.form_type,
         )
 
     @property
