@@ -5,12 +5,16 @@ import functools
 import marshmallow as ma
 from smore import swagger
 from marshmallow_sqlalchemy import ModelSchema
+from marshmallow_pagination import schemas as paging_schemas
 
 from webservices import utils
-from webservices import paging
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
+
+
+spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
+spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 
 def _get_class(value):
@@ -82,7 +86,7 @@ def make_schema(model, class_name=None, fields=None, options=None):
     )
 
 
-def make_page_schema(schema, page_type=paging.OffsetPageSchema, class_name=None,
+def make_page_schema(schema, page_type=paging_schemas.OffsetPageSchema, class_name=None,
                      definition_name=None):
     class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
@@ -262,7 +266,7 @@ ScheduleASchema = make_schema(
         'exclude': ('memo_code', ),
     }
 )
-ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
+ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
@@ -319,7 +323,7 @@ ScheduleBSchema = make_schema(
         'exclude': ('memo_code', ),
     }
 )
-ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
+ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
 
@@ -336,7 +340,7 @@ ScheduleESchema = make_schema(
         'exclude': ('memo_code', ),
     }
 )
-ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging.SeekPageSchema)
+ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
