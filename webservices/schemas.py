@@ -16,27 +16,6 @@ spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
 spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 
-def _get_class(value):
-    return value if isinstance(value, type) else type(value)
-
-
-def _format_ref(ref):
-    return {'$ref': '#/definitions/{0}'.format(ref)}
-
-
-def _schema_or_ref(schema):
-    schema_class = _get_class(schema)
-    ref = next(
-        (
-            ref_name
-            for ref_schema, ref_name in spec.plugins['smore.ext.marshmallow']['refs'].items()
-            if schema_class is _get_class(ref_schema)
-        ),
-        None,
-    )
-    return _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
-
-
 def marshal_with(schema, code=http.client.OK, description=None, wrap=True):
     def wrapper(func):
         func.__apidoc__ = getattr(func, '__apidoc__', {})
