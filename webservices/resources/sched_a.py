@@ -60,6 +60,10 @@ class ScheduleAView(ItemizedResource):
         ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
         ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
     ]
+    query_options = [
+        sa.orm.joinedload(models.ScheduleA.committee),
+        sa.orm.joinedload(models.ScheduleA.contributor),
+    ]
 
     @args.register_kwargs(args.itemized)
     @args.register_kwargs(args.schedule_a)
@@ -86,12 +90,9 @@ class ScheduleAView(ItemizedResource):
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         return super(ScheduleAView, self).get(**kwargs)
 
-    def build_query(self, kwargs, join=True):
-        query = super(ScheduleAView, self).build_query(kwargs)
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
-        if join:
-            query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
-            query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
         return query
 
     def join_committee_queries(self, kwargs):
@@ -106,12 +107,11 @@ class ScheduleAView(ItemizedResource):
         ).select_entity_from(
             sa.union_all(*queries)
         )
-        query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
-        query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
+        query = query.options(*self.query_options)
         return query, total
 
     def build_committee_query(self, kwargs, committee_id):
-        query = self.build_query(utils.extend(kwargs, {'committee_id': [committee_id]}), join=False)
+        query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
         sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
         query, _ = sorting.sort(query, sort, model=models.ScheduleA, hide_null=hide_null, nulls_large=nulls_large)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
