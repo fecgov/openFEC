@@ -30,6 +30,7 @@ class BaseFilings(Resource):
         ('form_type', models.Filings.form_type),
         ('primary_general_indicator', models.Filings.primary_general_indicator),
         ('amendment_indicator', models.Filings.amendment_indicator),
+        ('cycle', models.Filings.cycle),
     ]
 
     def get(self, **kwargs):
