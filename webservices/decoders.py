@@ -22,5 +22,4 @@ form_types = {
     'F11': '24-hour notice of opposition personal funds amount',
     'F12': '24-hour notice of suspension of increased limits',
     'F99': 'Miscellaneous Document',
-    'RFAI': 'Request for additional information',
 }

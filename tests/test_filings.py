@@ -113,6 +113,7 @@ class TestFilings(ApiBaseTest):
         factories.FilingsFactory(
             report_type_full='report    {more information than we want}',
             committee_id='C007',
+            form_type='RFAI',
             report_year=2004,
         )
 

@@ -144,13 +144,16 @@ related_candidate_history = functools.partial(
 
 def document_description(report_year, report_type=None, document_type=None, form_type=None):
     if report_type:
-        clean = "RFAI: " + re.sub(r'\{[^)]*\}', '', report_type)
+        clean = re.sub(r'\{[^)]*\}', '', report_type)
     elif document_type:
         clean = document_type
     elif form_type and form_type in decoders.form_types:
         clean = decoders.form_types[form_type]
     else:
         clean = 'Document '
+
+    if form_type and form_type == 'RFAI':
+       clean = "RFAI: " + clean
     return re.sub("\s\s+" , " ", '{0} {1}'.format(clean, report_year))
 
 
