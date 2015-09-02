@@ -1,12 +1,11 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
 
 from webservices import args
 from webservices import docs
 from webservices import spec
 from webservices import utils
-from webservices import filters
 from webservices import schemas
+from webservices.common import views
 from webservices.common import counts
 from webservices.common import models
 
@@ -16,13 +15,11 @@ from webservices.common import models
     description=docs.FILINGS,
     path_params=[utils.committee_param, utils.candidate_param],
 )
-class BaseFilings(Resource):
+class BaseFilings(views.ApiResource):
 
-    range_fields = [
-        (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
-    ]
+    model = models.Filings
 
-    multi_fields = [
+    filter_multi_fields = [
         ('beginning_image_number', models.Filings.beginning_image_number),
         ('report_type', models.Filings.report_type),
         ('document_type', models.Filings.document_type),
@@ -33,17 +30,16 @@ class BaseFilings(Resource):
         ('cycle', models.Filings.cycle),
     ]
 
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
+    ]
+
+    query_options = [sa.orm.joinedload(models.Filings.committee)]
+
     def get(self, **kwargs):
-        query = self._build_query(**kwargs)
+        query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=models.Filings, count=count)
-
-    def _build_query(self, **kwargs):
-        query = models.Filings.query
-        query = query.options(sa.orm.joinedload(models.Filings.committee))
-        query = filters.filter_multi(query, kwargs, self.multi_fields)
-        query = filters.filter_range(query, kwargs, self.range_fields)
-        return query
 
 
 class FilingsView(BaseFilings):
@@ -60,8 +56,8 @@ class FilingsView(BaseFilings):
     def get(self, **kwargs):
         return super().get(**kwargs)
 
-    def _build_query(self, committee_id=None, candidate_id=None, **kwargs):
-        query = super()._build_query(**kwargs)
+    def build_query(self, committee_id=None, candidate_id=None, **kwargs):
+        query = super().build_query(**kwargs)
         if committee_id:
             query = query.filter(models.Filings.committee_id == committee_id)
         if candidate_id:
@@ -71,7 +67,7 @@ class FilingsView(BaseFilings):
 
 class FilingsList(BaseFilings):
 
-    multi_fields = BaseFilings.multi_fields + [
+    filter_multi_fields = BaseFilings.filter_multi_fields + [
         ('committee_id', models.Filings.committee_id),
         ('candidate_id', models.Filings.candidate_id),
     ]
