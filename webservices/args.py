@@ -269,6 +269,7 @@ committee_list = {
 }
 
 filings = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'report_type': IString(multiple=True, description='Report type'),
     'document_type': IString(multiple=True, description=docs.DOC_TYPE),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
