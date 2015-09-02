@@ -10,6 +10,7 @@ from webservices import schemas
 from webservices.common.models import (
     db, CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
+    ElectionResult,
 )
 
 
@@ -23,6 +24,14 @@ office_args_map = {
     'senate': ['state'],
 }
 
+def cycle_length(elections):
+    return sa.case(
+        [
+            (elections.c.office == 'P', 4),
+            (elections.c.office == 'S', 6),
+            (elections.c.office == 'H', 6),
+        ]
+    )
 
 @spec.doc(
     description=docs.ELECTION_SEARCH,
@@ -48,6 +57,8 @@ class ElectionList(Resource):
         elections = self._get_elections(kwargs).subquery()
         return db.session.query(
             elections,
+            ElectionResult.cand_id,
+            ElectionResult.cand_name,
             sa.case(
                 [
                     (elections.c.office == 'P', 1),
@@ -56,6 +67,14 @@ class ElectionList(Resource):
                 ],
                 else_=4,
             ).label('_office_status'),
+        ).outerjoin(
+            ElectionResult,
+            sa.and_(
+                elections.c.state == ElectionResult.cand_office_st,
+                elections.c.office == ElectionResult.cand_office,
+                sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
+                elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
+            ),
         ).order_by(
             '_office_status',
         )
@@ -138,12 +157,17 @@ class ElectionView(Resource):
         pairs = self._get_pairs(totals_model, kwargs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
         filings = self._get_filings(pairs).subquery()
+        outcomes = self._get_outcomes(kwargs).subquery()
         return db.session.query(
             aggregates,
             filings,
+            sa.case([(outcomes.c.cand_id != None, True)], else_=False).label('won'),
         ).join(
             filings,
             aggregates.c.candidate_id == filings.c.candidate_id,
+        ).outerjoin(
+            outcomes,
+            aggregates.c.candidate_id == outcomes.c.cand_id,
         )
 
     def _get_pairs(self, totals_model, kwargs):
@@ -217,4 +241,14 @@ class ElectionView(Resource):
         ).order_by(
             pairs.c.candidate_id,
             sa.desc(pairs.c.coverage_end_date),
+        )
+
+    def _get_outcomes(self, kwargs):
+        return db.session.query(
+            ElectionResult.cand_id
+        ).filter(
+            ElectionResult.election_yr == kwargs['cycle'],
+            ElectionResult.cand_office == kwargs['office'][0].upper(),
+            ElectionResult.cand_office_st == (kwargs['state'] or 'US'),
+            ElectionResult.cand_office_district == (kwargs['district'] or '00'),
         )
