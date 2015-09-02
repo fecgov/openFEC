@@ -324,6 +324,7 @@ register_schema(ScheduleEPageSchema)
 FilingsSchema = make_schema(
     models.Filings,
     fields={
+        'cycle': ma.fields.Int(),
         'pdf_url': ma.fields.Str(),
         'document_description': ma.fields.Str(),
     },

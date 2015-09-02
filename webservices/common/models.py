@@ -921,6 +921,7 @@ class Filings(db.Model):
     )
     candidate_id = db.Column(db.String, index=True)
     candidate_name = db.Column(db.String)
+    cycle = db.Column(db.Integer)
     sub_id = db.Column(db.BigInteger, primary_key=True)
     coverage_start_date = db.Column(db.Date)
     coverage_end_date = db.Column(db.Date)
@@ -963,6 +964,7 @@ class Filings(db.Model):
             self.report_year,
             self.report_type_full,
             self.document_type_full,
+            self.form_type,
         )
 
     @property

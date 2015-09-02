@@ -9,6 +9,7 @@ from marshmallow_pagination import paginators
 from webservices import docs
 from webservices import sorting
 from webservices import exceptions
+from webservices import decoders
 
 
 def check_cap(kwargs, cap):
@@ -141,14 +142,19 @@ related_candidate_history = functools.partial(
 )
 
 
-def document_description(report_year, report_type=None, document_type=None):
+def document_description(report_year, report_type=None, document_type=None, form_type=None):
     if report_type:
         clean = re.sub(r'\{[^)]*\}', '', report_type)
     elif document_type:
         clean = document_type
+    elif form_type and form_type in decoders.form_types:
+        clean = decoders.form_types[form_type]
     else:
         clean = 'Document '
-    return '{0}{1}'.format(clean, report_year)
+
+    if form_type and form_type == 'RFAI':
+       clean = "RFAI: " + clean
+    return re.sub("\s\s+" , " ", '{0} {1}'.format(clean, report_year))
 
 
 def report_pdf_url(report_year, beginning_image_number, form_type=None, committee_type=None):
