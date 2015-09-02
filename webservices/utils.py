@@ -150,11 +150,11 @@ def document_description(report_year, report_type=None, document_type=None, form
     elif form_type and form_type in decoders.form_types:
         clean = decoders.form_types[form_type]
     else:
-        clean = 'Document '
+        clean = 'Document'
 
     if form_type and form_type == 'RFAI':
-       clean = "RFAI: " + clean
-    return re.sub("\s\s+" , " ", '{0} {1}'.format(clean, report_year))
+        clean = 'RFAI: ' + clean
+    return '{0} {1}'.format(clean.strip(), report_year)
 
 
 def report_pdf_url(report_year, beginning_image_number, form_type=None, committee_type=None):
