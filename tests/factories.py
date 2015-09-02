@@ -222,3 +222,10 @@ class ReportingDatesFactory(BaseFactory):
 class ElectionDatesFactory(BaseFactory):
     class Meta:
         model = models.ElectionDates
+
+
+class ElectionResultFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionResult
+    election_yr = 2016
+    cand_office_st = 'US'

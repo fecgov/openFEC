@@ -350,6 +350,8 @@ class ElectionSearchSchema(ma.Schema):
     office = ma.fields.Str()
     district = ma.fields.Str()
     cycle = ma.fields.Int(attribute='two_year_period')
+    incumbent_id = ma.fields.Str(attribute='cand_id')
+    incumbent_name = ma.fields.Str(attribute='cand_name')
 augment_schemas(ElectionSearchSchema)
 
 class ElectionSchema(ma.Schema):
@@ -361,6 +363,7 @@ class ElectionSchema(ma.Schema):
     total_receipts = ma.fields.Decimal()
     total_disbursements = ma.fields.Decimal()
     cash_on_hand_end_period = ma.fields.Decimal()
+    won = ma.fields.Boolean()
     document_description = ma.fields.Function(
         lambda o: utils.document_description(
             o.report_year,
