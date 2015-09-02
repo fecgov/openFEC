@@ -7,7 +7,7 @@ with last as (
     )
         cmte_sk,
         two_yr_period_sk,
-        coh_cop as cash_on_hand_end_period,
+        coalesce(coh_cop_i, coh_cop_ii) as cash_on_hand_end_period,
         begin_image_num as beginning_image_number,
         rpt_yr as report_year,
         rt.rpt_tp_desc as report_type_full,
