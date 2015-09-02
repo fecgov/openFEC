@@ -70,6 +70,7 @@ create index on ofec_filings_mv_tmp (primary_general_indicator);
 create index on ofec_filings_mv_tmp (amendment_indicator);
 create index on ofec_filings_mv_tmp (report_type);
 create index on ofec_filings_mv_tmp (report_year);
+create index on ofec_filings_mv_tmp (cycle);
 create index on ofec_filings_mv_tmp (total_receipts);
 create index on ofec_filings_mv_tmp (total_disbursements);
 create index on ofec_filings_mv_tmp (total_independent_expenditures);
