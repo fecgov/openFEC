@@ -452,10 +452,10 @@ class CommitteeReportsPresidential(CommitteeReports):
     total_offsets_to_operating_expenditures_ytd = db.Column(db.Integer)
     total_period = db.Column(db.Integer)
     total_ytd = db.Column(db.Integer)
-    transfer_from_affiliated_committee_period = db.Column(db.Integer)
-    transfer_from_affiliated_committee_ytd = db.Column(db.Integer)
-    transfer_to_other_authorized_committee_period = db.Column(db.Integer)
-    transfer_to_other_authorized_committee_ytd = db.Column(db.Integer)
+    transfers_from_affiliated_committee_period = db.Column(db.Integer)
+    transfers_from_affiliated_committee_ytd = db.Column(db.Integer)
+    transfers_to_other_authorized_committee_period = db.Column(db.Integer)
+    transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
     report_form = 'Form 3P'
 
     @property
