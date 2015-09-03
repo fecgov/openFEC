@@ -5,25 +5,44 @@ import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.rest import db
 from webservices.rest import api
+from webservices.schemas import ScheduleASchema
+from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView
 from webservices.resources.sched_b import ScheduleBView
+from webservices.resources.sched_e import ScheduleEView
 
 
 class TestItemized(ApiBaseTest):
 
-    def test_sorting(self):
-        [
-            factories.ScheduleAFactory(report_year=2014, contributor_receipt_date=datetime.datetime(2014, 1, 1)),
-            factories.ScheduleAFactory(report_year=2012, contributor_receipt_date=datetime.datetime(2012, 1, 1)),
-            factories.ScheduleAFactory(report_year=1986, contributor_receipt_date=datetime.datetime(1986, 1, 1)),
+    def test_fields(self):
+        params = [
+            (factories.ScheduleAFactory, ScheduleAView, ScheduleASchema),
+            (factories.ScheduleBFactory, ScheduleBView, ScheduleBSchema),
         ]
-        db.session.flush()
-        response = self._response(api.url_for(ScheduleAView, sort='contributor_receipt_date'))
+        for factory, resource, schema in params:
+            factory()
+            results = self._results(api.url_for(resource))
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0].keys(), schema().fields.keys())
+
+    def test_sorting(self):
+        receipts = [
+            factories.ScheduleAFactory(report_year=2014, contribution_receipt_date=datetime.date(2014, 1, 1)),
+            factories.ScheduleAFactory(report_year=2012, contribution_receipt_date=datetime.date(2012, 1, 1)),
+            factories.ScheduleAFactory(report_year=1986, contribution_receipt_date=datetime.date(1986, 1, 1)),
+        ]
+        response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
             [2012, 2014]
+        )
+        self.assertEqual(
+            response['pagination']['last_indexes'],
+            {
+                'last_index': receipts[0].sched_a_sk,
+                'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
+            }
         )
 
     def test_sorting_bad_column(self):
@@ -39,6 +58,15 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, contributor_state='CA'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
+
+    def test_filter_case_insensitive(self):
+        [
+            factories.ScheduleAFactory(contributor_city='NEW YORK'),
+            factories.ScheduleAFactory(contributor_city='DES MOINES'),
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_city='new york'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
 
     def test_filter_fulltext(self):
         names = ['David Koch', 'George Soros']
@@ -56,6 +84,40 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, contributor_name='soros'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_name'], 'George Soros')
+
+    def test_filter_fulltext_employer(self):
+        employers = ['Acme Corporation', 'Vandelay Industries']
+        filings = [
+            factories.ScheduleAFactory(contributor_employer=employer)
+            for employer in employers
+        ]
+        [
+            factories.ScheduleASearchFactory(
+                sched_a_sk=filing.sched_a_sk,
+                contributor_employer_text=sa.func.to_tsvector(employer),
+            )
+            for filing, employer in zip(filings, employers)
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='vandelay'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
+
+    def test_filter_fulltext_occupation(self):
+        occupations = ['Attorney at Law', 'Doctor of Philosophy']
+        filings = [
+            factories.ScheduleAFactory(contributor_occupation=occupation)
+            for occupation in occupations
+        ]
+        [
+            factories.ScheduleASearchFactory(
+                sched_a_sk=filing.sched_a_sk,
+                contributor_occupation_text=sa.func.to_tsvector(occupation),
+            )
+            for filing, occupation in zip(filings, occupations)
+        ]
+        results = self._results(api.url_for(ScheduleAView, contributor_occupation='doctor'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_occupation'], 'Doctor of Philosophy')
 
     def test_pagination(self):
         filings = [
@@ -133,19 +195,39 @@ class TestItemized(ApiBaseTest):
             self.assertFalse(results[0]['memoed_subtotal'])
             self.assertTrue(results[1]['memoed_subtotal'])
 
+    def test_filter_individual_sched_a(self):
+        individuals = [
+            factories.ScheduleAFactory(receipt_type='15J'),
+            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150),
+        ]
+        earmarks = [
+            factories.ScheduleAFactory(),
+            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, memo_code='X', memo_text='earmark'),
+        ]
+        results = self._results(api.url_for(ScheduleAView))
+        self.assertEqual(
+            [each['sched_a_sk'] for each in results],
+            [each.sched_a_sk for each in individuals + earmarks],
+        )
+        results = self._results(api.url_for(ScheduleAView, is_individual='true'))
+        self.assertEqual(
+            [each['sched_a_sk'] for each in results],
+            [each.sched_a_sk for each in individuals],
+        )
+
     def test_amount_sched_a(self):
         [
-            factories.ScheduleAFactory(contributor_receipt_amount=50),
-            factories.ScheduleAFactory(contributor_receipt_amount=100),
-            factories.ScheduleAFactory(contributor_receipt_amount=150),
-            factories.ScheduleAFactory(contributor_receipt_amount=200),
+            factories.ScheduleAFactory(contribution_receipt_amount=50),
+            factories.ScheduleAFactory(contribution_receipt_amount=100),
+            factories.ScheduleAFactory(contribution_receipt_amount=150),
+            factories.ScheduleAFactory(contribution_receipt_amount=200),
         ]
         results = self._results(api.url_for(ScheduleAView, min_amount=100))
-        self.assertTrue(all(each['contributor_receipt_amount'] >= 100 for each in results))
+        self.assertTrue(all(each['contribution_receipt_amount'] >= 100 for each in results))
         results = self._results(api.url_for(ScheduleAView, max_amount=150))
-        self.assertTrue(all(each['contributor_receipt_amount'] <= 150 for each in results))
+        self.assertTrue(all(each['contribution_receipt_amount'] <= 150 for each in results))
         results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
-        self.assertTrue(all(100 <= each['contributor_receipt_amount'] <= 150 for each in results))
+        self.assertTrue(all(100 <= each['contribution_receipt_amount'] <= 150 for each in results))
 
     def test_amount_sched_b(self):
         [
@@ -160,3 +242,17 @@ class TestItemized(ApiBaseTest):
         self.assertTrue(all(each['disbursement_amount'] <= 150 for each in results))
         results = self._results(api.url_for(ScheduleBView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['disbursement_amount'] <= 150 for each in results))
+
+    def test_amount_sched_e(self):
+        [
+            factories.ScheduleEFactory(expenditure_amount=50),
+            factories.ScheduleEFactory(expenditure_amount=100),
+            factories.ScheduleEFactory(expenditure_amount=150),
+            factories.ScheduleEFactory(expenditure_amount=200),
+        ]
+        results = self._results(api.url_for(ScheduleEView, min_amount=100))
+        self.assertTrue(all(each['expenditure_amount'] >= 100 for each in results))
+        results = self._results(api.url_for(ScheduleAView, max_amount=150))
+        self.assertTrue(all(each['expenditure_amount'] <= 150 for each in results))
+        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
+        self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))

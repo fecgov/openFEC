@@ -1,3 +1,12 @@
+create or replace function filings_year(report_year numeric, receipt_date date) returns int as $$
+begin
+    return case
+        when report_year != 0 then report_year
+        else date_part('year', receipt_date)
+    end;
+end
+$$ language plpgsql;
+
 drop materialized view if exists ofec_filings_mv_tmp;
 create materialized view ofec_filings_mv_tmp as
 select
@@ -12,9 +21,10 @@ select
     receipt_date,
     election_year,
     fh.form_type,
-    report_year,
+    filings_year(report_year, receipt_date) as report_year,
     report_type,
     to_from_indicator as document_type,
+    expand_document(to_from_indicator) as document_type_full,
     begin_image_numeric as beginning_image_number,
     end_image_numeric as ending_image_number,
     pages,
@@ -41,11 +51,11 @@ select
     amendment_indicator,
     update_date
 from vw_filing_history fh
-left join ofec_committee_history_mv_tmp com on fh.committee_id = com.committee_id and fh.report_year + fh.report_year % 2 = com.cycle
-left join ofec_candidate_history_mv_tmp cand on fh.committee_id = cand.candidate_id and fh.report_year + fh.report_year % 2 = cand.two_year_period
+left join ofec_committee_history_mv_tmp com on fh.committee_id = com.committee_id and get_cycle(fh.report_year) = com.cycle
+left join ofec_candidate_history_mv_tmp cand on fh.committee_id = cand.candidate_id and get_cycle(fh.report_year) = cand.two_year_period
 left join dimreporttype report on fh.report_type = report.rpt_tp
 where
-    report_year >= :START_YEAR
+    filings_year(report_year, receipt_date) >= :START_YEAR
 ;
 
 create unique index on ofec_filings_mv_tmp (idx);
@@ -62,3 +72,5 @@ create index on ofec_filings_mv_tmp (report_year);
 create index on ofec_filings_mv_tmp (total_receipts);
 create index on ofec_filings_mv_tmp (total_disbursements);
 create index on ofec_filings_mv_tmp (total_independent_expenditures);
+create index on ofec_filings_mv_tmp (coverage_start_date);
+create index on ofec_filings_mv_tmp (coverage_end_date);

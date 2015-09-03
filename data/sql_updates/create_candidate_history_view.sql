@@ -64,6 +64,7 @@ select distinct on (dcp.cand_sk, cycle)
     o.office_tp_desc as office_full,
     o.office_state as state,
     o.office_district as district,
+    o.office_district::int as district_number,
     dp.party_affiliation as party,
     cycle_agg.cycles,
     years.election_years,
@@ -94,6 +95,10 @@ create unique index on ofec_candidate_history_mv_tmp(idx);
 create index on ofec_candidate_history_mv_tmp(candidate_key);
 create index on ofec_candidate_history_mv_tmp(candidate_id);
 create index on ofec_candidate_history_mv_tmp(two_year_period);
+create index on ofec_candidate_history_mv_tmp(office);
+create index on ofec_candidate_history_mv_tmp(state);
+create index on ofec_candidate_history_mv_tmp(district);
+create index on ofec_candidate_history_mv_tmp(district_number);
 
 
 drop materialized view if exists ofec_candidate_detail_mv_tmp;
@@ -112,6 +117,7 @@ create index on ofec_candidate_detail_mv_tmp(district);
 create index on ofec_candidate_detail_mv_tmp(load_date);
 create index on ofec_candidate_detail_mv_tmp(party_full);
 create index on ofec_candidate_detail_mv_tmp(expire_date);
+create index on ofec_candidate_detail_mv_tmp(office_full);
 create index on ofec_candidate_detail_mv_tmp(candidate_id);
 create index on ofec_candidate_detail_mv_tmp(candidate_key);
 create index on ofec_candidate_detail_mv_tmp(candidate_status);

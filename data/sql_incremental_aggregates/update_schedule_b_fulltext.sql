@@ -6,7 +6,8 @@ begin
     insert into ofec_sched_b_fulltext (
         select
             sched_b_sk,
-            to_tsvector(recipient_nm) as recipient_name_text
+            to_tsvector(recipient_nm) as recipient_name_text,
+            to_tsvector(disb_desc) as disbursement_description_text
         from ofec_sched_b_queue_new
     )
     ;
