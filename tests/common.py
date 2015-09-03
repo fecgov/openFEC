@@ -4,6 +4,7 @@ import codecs
 import unittest
 import subprocess
 
+import manage
 from webservices import rest
 from webservices import __API_VERSION__
 
@@ -48,6 +49,8 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
+        manage.load_districts()
+        manage.update_functions()
         rest.db.create_all()
 
     def setUp(self):

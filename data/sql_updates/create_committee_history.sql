@@ -114,7 +114,7 @@ left join dimcmtetpdsgn dd on dcp.cmte_sk = dd.cmte_sk and extract(year from dd.
 left join dcp_original on dcp.cmte_sk = dcp_original.cmte_sk
 left join candidate_agg on dcp.cmte_sk = candidate_agg.cmte_sk
 where max_cycle >= :START_YEAR
-order by dcp.cmte_sk, cycle desc, dcp.rpt_yr desc, dd.receipt_date desc
+order by dcp.cmte_sk, cycle desc, dcp.rpt_yr desc
 ;
 
 create unique index on ofec_committee_history_mv_tmp(idx);
@@ -122,6 +122,7 @@ create unique index on ofec_committee_history_mv_tmp(idx);
 create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
 create index on ofec_committee_history_mv_tmp(committee_key);
+create index on ofec_committee_history_mv_tmp(designation);
 
 
 drop materialized view if exists ofec_committee_detail_mv_tmp;

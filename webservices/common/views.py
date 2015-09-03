@@ -1,6 +1,7 @@
 from flask.ext.restful import Resource
 
 from webservices import utils
+from webservices import filters
 from webservices.common import counts
 from webservices.common import models
 from webservices.config import SQL_CONFIG
@@ -12,6 +13,7 @@ class ItemizedResource(Resource):
     year_column = None
     index_column = None
     filter_multi_fields = []
+    filter_match_fields = []
     filter_fulltext_fields = []
 
     def get(self, **kwargs):
@@ -24,8 +26,9 @@ class ItemizedResource(Resource):
             self.year_column >= SQL_CONFIG['START_YEAR_ITEMIZED'],
         )
 
-        query = utils.filter_multi(query, kwargs, self.filter_multi_fields)
-        query = utils.filter_range(query, kwargs, self.filter_range_fields)
+        query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
+        query = filters.filter_match(query, kwargs, self.filter_match_fields)
+        query = filters.filter_range(query, kwargs, self.filter_range_fields)
         query = self.filter_fulltext(query, kwargs)
 
         return query

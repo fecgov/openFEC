@@ -85,6 +85,14 @@
         "referred_columns": ["cmte_sk"],
         "constrained_columns": ["cmte_sk"]
       }
+    ],
+    "sched_b": [
+      {
+        "referred_schema": null,
+        "referred_table": "form_94",
+        "referred_columns": ["link_id"],
+        "constrained_columns": ["link_id"]
+      }
     ]
   }
 }

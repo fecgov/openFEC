@@ -16,6 +16,7 @@ from flask import render_template
 from flask import Flask
 from flask import Blueprint
 
+from flask.ext import cors
 from flask.ext import restful
 
 from webservices import args
@@ -31,10 +32,14 @@ from webservices.resources import totals
 from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
+from webservices.resources import sched_e
 from webservices.resources import aggregates
+from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
 from webservices.resources import committees
+from webservices.resources import elections
 from webservices.resources import filings
+from webservices.resources import dates
 
 speedlogger = logging.getLogger('speed')
 speedlogger.setLevel(logging.CRITICAL)
@@ -55,6 +60,7 @@ app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
+cors.CORS(app)
 
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
@@ -92,14 +98,6 @@ def limit_remote_addr():
         else:
             if api_data_route not in trusted_proxies:
                 abort(403)
-
-
-@app.after_request
-def add_cors_headers(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Methods', 'GET')
-    response.headers.add('Access-Control-Max-Age', '3000')
-    return response
 
 
 @app.after_request
@@ -148,61 +146,90 @@ class CommitteeNameSearch(restful.Resource):
         return search_typeahead_text(models.CommitteeSearch, kwargs['q'])
 
 
-api.add_resource(candidates.CandidateList, '/candidates')
-api.add_resource(candidates.CandidateSearch, '/candidates/search')
+api.add_resource(candidates.CandidateList, '/candidates/')
+api.add_resource(candidates.CandidateSearch, '/candidates/search/')
 api.add_resource(
     candidates.CandidateView,
-    '/candidate/<string:candidate_id>',
-    '/committee/<string:committee_id>/candidates',
+    '/candidate/<string:candidate_id>/',
+    '/committee/<string:committee_id>/candidates/',
 )
 api.add_resource(
     candidates.CandidateHistoryView,
-    '/candidate/<string:candidate_id>/history',
-    '/candidate/<string:candidate_id>/history/<int:cycle>',
-    '/committee/<string:committee_id>/candidates/history',
-    '/committee/<string:committee_id>/candidates/history/<int:cycle>',
+    '/candidate/<string:candidate_id>/history/',
+    '/candidate/<string:candidate_id>/history/<int:cycle>/',
+    '/committee/<string:committee_id>/candidates/history/',
+    '/committee/<string:committee_id>/candidates/history/<int:cycle>/',
 )
-api.add_resource(committees.CommitteeList, '/committees')
+api.add_resource(committees.CommitteeList, '/committees/')
 api.add_resource(
     committees.CommitteeView,
-    '/committee/<string:committee_id>',
-    '/candidate/<string:candidate_id>/committees',
+    '/committee/<string:committee_id>/',
+    '/candidate/<string:candidate_id>/committees/',
 )
 api.add_resource(
     committees.CommitteeHistoryView,
-    '/committee/<string:committee_id>/history',
-    '/committee/<string:committee_id>/history/<int:cycle>',
-    '/candidate/<candidate_id>/committees/history',
-    '/candidate/<candidate_id>/committees/history/<int:cycle>',
+    '/committee/<string:committee_id>/history/',
+    '/committee/<string:committee_id>/history/<int:cycle>/',
+    '/candidate/<candidate_id>/committees/history/',
+    '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals')
-api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>')
-api.add_resource(CandidateNameSearch, '/names/candidates')
-api.add_resource(CommitteeNameSearch, '/names/committees')
-api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a')
-api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b')
+api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
+api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>/')
+api.add_resource(CandidateNameSearch, '/names/candidates/')
+api.add_resource(CommitteeNameSearch, '/names/committees/')
+api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
+api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
+api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
+api.add_resource(elections.ElectionView, '/elections/')
+api.add_resource(elections.ElectionList, '/elections/search/')
+api.add_resource(dates.ElectionDatesView, '/election-dates/')
+api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
+
+def add_aggregate_resource(api, view, schedule, label):
+    api.add_resource(
+        view,
+        '/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
+        '/committee/<committee_id>/schedules/schedule_{schedule}/by_{label}/'.format(**locals()),
+    )
+
+add_aggregate_resource(api, aggregates.ScheduleABySizeView, 'a', 'size')
+add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
+add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
+add_aggregate_resource(api, aggregates.ScheduleAByEmployerView, 'a', 'employer')
+add_aggregate_resource(api, aggregates.ScheduleAByOccupationView, 'a', 'occupation')
+add_aggregate_resource(api, aggregates.ScheduleAByContributorView, 'a', 'contributor')
+add_aggregate_resource(api, aggregates.ScheduleAByContributorTypeView, 'a', 'contributor_type')
+
+add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
+add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
+add_aggregate_resource(api, aggregates.ScheduleBByPurposeView, 'b', 'purpose')
+
+add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate')
+
+api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
+api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
 api.add_resource(
-    aggregates.ScheduleABySizeView,
-    '/schedules/schedule_a/by_size',
-    '/committee/<committee_id>/schedules/schedule_a/by_size',
+    candidate_aggregates.ScheduleAByContributorTypeCandidateView,
+    '/schedules/schedule_a/by_contributor_type/by_candidate/',
+)
+
+api.add_resource(
+    aggregates.CommunicationCostByCandidateView,
+    '/communication_costs/by_candidate/',
+    '/committee/<string:committee_id>/communication_costs/by_candidate/',
 )
 api.add_resource(
-    aggregates.ScheduleAByStateView,
-    '/schedules/schedule_a/by_state',
-    '/committee/<committee_id>/schedules/schedule_a/by_state',
+    aggregates.ElectioneeringByCandidateView,
+    '/electioneering_costs/by_candidate/',
+    '/committee/<string:committee_id>/electioneering_costs/by_candidate/',
 )
+
 api.add_resource(
-    aggregates.ScheduleAByZipView,
-    '/schedules/schedule_a/by_zip',
-    '/committee/<committee_id>/schedules/schedule_a/by_zip',
+    filings.FilingsView,
+    '/committee/<committee_id>/filings/',
+    '/candidate/<candidate_id>/filings/',
 )
-api.add_resource(
-    aggregates.ScheduleAByContributorView,
-    '/schedules/schedule_a/by_contributor',
-    '/committee/<committee_id>/schedules/schedule_a/by_contributor',
-)
-api.add_resource(filings.FilingsView, '/committee/<string:committee_id>/filings')
-api.add_resource(filings.FilingsList, '/filings')
+api.add_resource(filings.FilingsList, '/filings/')
 
 
 RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
@@ -227,6 +254,7 @@ API_KEY_PARAM = {
     'required': True,
     'name': 'api_key',
     'description': docs.API_KEY_DESCRIPTION,
+    'default': 'DEMO_KEY',
 }
 
 
@@ -272,12 +300,28 @@ register_resource(reports.ReportsView, blueprint='v1')
 register_resource(totals.TotalsView, blueprint='v1')
 register_resource(sched_a.ScheduleAView, blueprint='v1')
 register_resource(sched_b.ScheduleBView, blueprint='v1')
+register_resource(sched_e.ScheduleEView, blueprint='v1')
 register_resource(aggregates.ScheduleABySizeView, blueprint='v1')
 register_resource(aggregates.ScheduleAByStateView, blueprint='v1')
 register_resource(aggregates.ScheduleAByZipView, blueprint='v1')
+register_resource(aggregates.ScheduleAByEmployerView, blueprint='v1')
+register_resource(aggregates.ScheduleAByOccupationView, blueprint='v1')
 register_resource(aggregates.ScheduleAByContributorView, blueprint='v1')
+register_resource(aggregates.ScheduleAByContributorTypeView, blueprint='v1')
+register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
+register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
+register_resource(aggregates.ScheduleBByPurposeView, blueprint='v1')
+register_resource(aggregates.ScheduleEByCandidateView, blueprint='v1')
+register_resource(aggregates.CommunicationCostByCandidateView, blueprint='v1')
+register_resource(aggregates.ElectioneeringByCandidateView, blueprint='v1')
+register_resource(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
+register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
+register_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')
 register_resource(filings.FilingsView, blueprint='v1')
 register_resource(filings.FilingsList, blueprint='v1')
+register_resource(elections.ElectionList, blueprint='v1')
+register_resource(elections.ElectionView, blueprint='v1')
+register_resource(dates.ReportingDatesView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus

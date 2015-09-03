@@ -9,7 +9,7 @@ from webservices.common.views import ItemizedResource
 
 
 @spec.doc(
-    tags=['schedules'],
+    tags=['schedules/schedule_b'],
     description=docs.SCHEDULE_B,
 )
 class ScheduleBView(ItemizedResource):
@@ -32,6 +32,7 @@ class ScheduleBView(ItemizedResource):
     ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleBSearch.recipient_name_text),
+        ('disbursement_description', models.ScheduleBSearch.disbursement_description_text),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleB.disbursement_date),

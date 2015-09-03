@@ -1,9 +1,11 @@
-from flask.ext.sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
-from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+
+from flask.ext.sqlalchemy import SQLAlchemy
 
 from webservices import utils
+from webservices import decoders
 
 
 db = SQLAlchemy()
@@ -38,6 +40,7 @@ class BaseCandidate(BaseModel):
     candidate_status = db.Column(db.String(1), index=True)
     candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2), index=True)
+    district_number = db.Column(db.Integer, index=True)
     election_years = db.Column(ARRAY(db.Integer), index=True)
     cycles = db.Column(ARRAY(db.Integer), index=True)
     incumbent_challenge = db.Column(db.String(1), index=True)
@@ -133,8 +136,8 @@ class BaseConcreteCommittee(BaseCommittee):
 class Committee(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
 
-    first_file_date = db.Column(db.DateTime)
-    last_file_date = db.Column(db.DateTime)
+    first_file_date = db.Column(db.Date)
+    last_file_date = db.Column(db.Date)
 
 
 class CommitteeHistory(BaseCommittee):
@@ -151,8 +154,8 @@ class CommitteeHistory(BaseCommittee):
 class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
 
-    first_file_date = db.Column(db.DateTime)
-    last_file_date = db.Column(db.DateTime)
+    first_file_date = db.Column(db.Date)
+    last_file_date = db.Column(db.Date)
     filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50))
     fax = db.Column(db.String(10))
@@ -163,7 +166,7 @@ class CommitteeDetail(BaseConcreteCommittee):
     lobbyist_registrant_pac = db.Column(db.String(1))
     party_type = db.Column(db.String(3))
     party_type_full = db.Column(db.String(15))
-    qualifying_date = db.Column(db.DateTime())
+    qualifying_date = db.Column(db.Date())
     street_1 = db.Column(db.String(50))
     street_2 = db.Column(db.String(50))
     city = db.Column(db.String(50))
@@ -520,6 +523,11 @@ class CommitteeTotals(BaseModel):
     net_contributions = db.Column(db.Integer)
     net_operating_expenditures = db.Column(db.Integer)
 
+    last_report_year = db.Column(db.Integer)
+    last_report_type_full = db.Column(db.String)
+    last_beginning_image_number = db.Column(db.Integer)
+    last_cash_on_hand_end_period = db.Column(db.Float)
+
 
 class CommitteeTotalsPacParty(CommitteeTotals):
     __tablename__ = 'ofec_totals_pacs_parties_mv'
@@ -598,20 +606,52 @@ class CommitteeTotalsIEOnly(BaseModel):
     total_independent_expenditures = db.Column(db.Integer)
 
 
-class ScheduleA(db.Model):
+class BaseItemized(db.Model):
+    __abstract__ = True
+
+    committee_id = db.Column('cmte_id', db.String)
+    report_year = db.Column('rpt_yr', db.Integer)
+    report_type = db.Column('rpt_tp', db.String)
+    form_type = db.Column('form_tp', db.String)
+    entity_type = db.Column('entity_tp', db.String)
+    image_number = db.Column('image_num', db.String)
+    memo_code = db.Column('memo_cd', db.String)
+    memo_text = db.Column(db.String)
+    filing_type = db.Column(db.String)
+    filing_form = db.Column(db.String)
+    link_id = db.Column(db.Integer)
+    sub_id = db.Column(db.Integer)
+    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    amendment_indicator = db.Column('amndt_ind', db.String)
+    line_number = db.Column('line_num', db.String)
+    tran_id = db.Column(db.String)
+    transaction_id = db.Column(db.Integer)
+    status = db.Column(db.String)
+    file_number = db.Column('file_num', db.Integer)
+
+    @declared_attr
+    def committee(cls):
+        return db.relationship(
+            CommitteeHistory,
+            primaryjoin='''and_(
+                foreign({cls.__name__}.committee_id) == CommitteeHistory.committee_id,
+                {cls.__name__}.report_year + {cls.__name__}.report_year % 2 == CommitteeHistory.cycle,
+            )'''.format(cls=cls)
+        )
+
+    @hybrid_property
+    def memoed_subtotal(self):
+        return self.memo_code == 'X'
+
+    @property
+    def pdf_url(self):
+        return utils.make_image_pdf_url(self.image_number)
+
+
+class ScheduleA(BaseItemized):
     __tablename__ = 'sched_a'
 
     sched_a_sk = db.Column(db.Integer, primary_key=True)
-    form_type = db.Column('form_tp', db.String)
-    committee_id = db.Column('cmte_id', db.String)
-    committee = db.relationship(
-        'CommitteeHistory',
-        primaryjoin='''and_(
-            foreign(ScheduleA.committee_id) == CommitteeHistory.committee_id,
-            ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
-        )'''
-    )
-    entity_type = db.Column('entity_tp', db.String)
     contributor_id = db.Column('contbr_id', db.String)
     contributor = db.relationship(
         'CommitteeHistory',
@@ -632,49 +672,25 @@ class ScheduleA(db.Model):
     contributor_city = db.Column('contbr_city', db.String)
     contributor_state = db.Column('contbr_st', db.String)
     contributor_zip = db.Column('contbr_zip', db.String)
-    election_type = db.Column('election_tp', db.String)
-    election_type_full = db.Column('election_tp_desc', db.String)
     contributor_employer = db.Column('contbr_employer', db.String)
     contributor_occupation = db.Column('contbr_occupation', db.String)
-    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Float)
-    contributor_receipt_date = db.Column('contb_receipt_dt', db.DateTime)
-    contributor_receipt_amount = db.Column('contb_receipt_amt', db.Float)
+    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
+    contribution_receipt_date = db.Column('contb_receipt_dt', db.Date)
+    contribution_receipt_amount = db.Column('contb_receipt_amt', db.Numeric(30, 2))
     receipt_type = db.Column('receipt_tp', db.String)
     receipt_type_full = db.Column('receipt_desc', db.String)
-    memo_code = db.Column('memo_cd', db.String)
-    memo_text = db.Column(db.String)
-    amendment_indicator = db.Column('amndt_ind', db.String)
-    tran_id = db.Column(db.String)
+    election_type = db.Column('election_tp', db.String)
+    election_type_full = db.Column('election_tp_desc', db.String)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
     record_number = db.Column('record_num', db.Integer)
-    report_type = db.Column('rpt_tp', db.String)
     report_primary_general = db.Column('rpt_pgi', db.String)
     form_type_full = db.Column('form_tp_cd', db.String)
-    receipt_date = db.Column('receipt_dt', db.DateTime)
-    status = db.Column(db.String)
-    file_number = db.Column('file_num', db.Integer)
+    receipt_date = db.Column('receipt_dt', db.Date)
     increased_limit = db.Column(db.String)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
-    sub_id = db.Column(db.Integer)
-    link_id = db.Column(db.Integer)
-    line_number = db.Column('line_num', db.Integer)
-    image_number = db.Column('image_num', db.String)
-    report_year = db.Column('rpt_yr', db.Integer)
-    transaction_id = db.Column(db.Integer)
-    filing_type = db.Column(db.String)
-    filing_form = db.Column(db.String)
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
-
-    @hybrid_property
-    def memoed_subtotal(self):
-        return self.memo_code == 'X'
-
-    @property
-    def pdf_url(self):
-        return utils.make_image_pdf_url(self.image_number)
 
 
 class ScheduleASearch(db.Model):
@@ -683,6 +699,7 @@ class ScheduleASearch(db.Model):
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     contributor_name_text = db.Column(TSVECTOR)
     contributor_employer_text = db.Column(TSVECTOR)
+    contributor_occupation_text = db.Column(TSVECTOR)
 
 
 class BaseAggregate(db.Model):
@@ -690,7 +707,7 @@ class BaseAggregate(db.Model):
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
     cycle = db.Column(db.Integer, primary_key=True)
-    total = db.Column(db.Float)
+    total = db.Column(db.Numeric(30, 2))
     count = db.Column(db.Integer)
 
 
@@ -702,11 +719,29 @@ class ScheduleABySize(BaseAggregate):
 class ScheduleAByState(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_state'
     state = db.Column(db.String, primary_key=True)
+    state_full = db.Column(db.String, primary_key=True)
 
 
 class ScheduleAByZip(BaseAggregate):
     __tablename__ = 'ofec_sched_a_aggregate_zip'
     zip = db.Column(db.String, primary_key=True)
+    state = db.Column(db.String)
+    state_full = db.Column(db.String)
+
+
+class ScheduleAByEmployer(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_employer'
+    employer = db.Column(db.String, primary_key=True)
+
+
+class ScheduleAByOccupation(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_occupation'
+    occupation = db.Column(db.String, primary_key=True)
+
+
+class ScheduleAByContributorType(BaseAggregate):
+    __tablename__ = 'ofec_sched_a_aggregate_contributor_type'
+    individual = db.Column(db.Boolean, primary_key=True)
 
 
 class ScheduleAByContributor(db.Model):
@@ -714,27 +749,59 @@ class ScheduleAByContributor(db.Model):
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
     contributor_id = db.Column('contbr_id', db.String, primary_key=True)
-    cycle = db.Column(db.Integer, primary_key=True)
-    year = db.Column(db.Integer, primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True, nullable=True)
+    year = db.Column(db.Integer, primary_key=True, nullable=True)
     contributor_name = db.Column('contbr_nm', db.String)
     image_number = db.Column('image_num', db.String)
-    total = db.Column(db.Float)
+    total = db.Column(db.Numeric(30, 2))
 
 
-class ScheduleB(db.Model):
+class ScheduleBByRecipient(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_recipient'
+    recipient_name = db.Column('recipient_nm', db.String, primary_key=True)
+
+
+class ScheduleBByRecipientID(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_recipient_id'
+    recipient_id = db.Column('recipient_cmte_id', db.String, primary_key=True)
+    recipient_name = db.Column('recipient_nm', db.String)
+
+
+class ScheduleBByPurpose(BaseAggregate):
+    __tablename__ = 'ofec_sched_b_aggregate_purpose'
+    purpose = db.Column(db.String, primary_key=True)
+
+
+class ScheduleEByCandidate(BaseAggregate):
+    __tablename__ = 'ofec_sched_e_aggregate_candidate_mv'
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+    support_oppose_indicator = db.Column(db.String, primary_key=True)
+
+    committee = utils.related_committee('committee_id')
+    candidate = utils.related_candidate('candidate_id')
+
+
+class CommunicationCostByCandidate(BaseAggregate):
+    __tablename__ = 'ofec_communication_cost_aggregate_candidate_mv'
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+    support_oppose_indicator = db.Column(db.String, primary_key=True)
+
+    committee = utils.related_committee('committee_id')
+    candidate = utils.related_candidate('candidate_id')
+
+
+class ElectioneeringByCandidate(BaseAggregate):
+    __tablename__ = 'ofec_electioneering_aggregate_candidate_mv'
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+
+    committee = utils.related_committee('committee_id')
+    candidate = utils.related_candidate('candidate_id')
+
+
+class ScheduleB(BaseItemized):
     __tablename__ = 'sched_b'
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
-    form_type = db.Column('form_tp', db.String)
-    committee_id = db.Column('cmte_id', db.String)
-    committee = db.relationship(
-        'CommitteeHistory',
-        primaryjoin='''and_(
-            foreign(ScheduleB.committee_id) == CommitteeHistory.committee_id,
-            ScheduleB.report_year + ScheduleB.report_year % 2 == CommitteeHistory.cycle,
-        )'''
-    )
-    entity_type = db.Column('entity_tp', db.String)
     recipient_committee_id = db.Column('recipient_cmte_id', db.String)
     recipient_committee = db.relationship(
         'CommitteeHistory',
@@ -752,44 +819,20 @@ class ScheduleB(db.Model):
     recipient_zip = db.Column(db.String)
     disbursement_type = db.Column('disb_tp', db.String)
     disbursement_description = db.Column('disb_desc', db.String)
-    election_type = db.Column('election_tp', db.String)
-    election_type_full = db.Column('election_tp_desc', db.String)
-    disbursement_date = db.Column('disb_dt', db.DateTime)
-    disbursement_amount = db.Column('disb_amt', db.Float)
-    memo_code = db.Column('memo_cd', db.String)
-    memo_text = db.Column(db.String)
-    amendment_indicator = db.Column('amndt_ind', db.String)
-    tran_id = db.Column(db.String)
+    disbursement_date = db.Column('disb_dt', db.Date)
+    disbursement_amount = db.Column('disb_amt', db.Numeric(30, 2))
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
-    report_type = db.Column('rpt_tp', db.String)
+    election_type = db.Column('election_tp', db.String)
+    election_type_full = db.Column('election_tp_desc', db.String)
     record_number = db.Column('record_num', db.Integer)
     report_primary_general = db.Column('rpt_pgi', db.String)
-    receipt_date = db.Column('receipt_dt', db.DateTime)
-    status = db.Column(db.String)
-    file_number = db.Column('file_num', db.Integer)
+    receipt_date = db.Column('receipt_dt', db.Date)
     beneficiary_committee_name = db.Column('benef_cmte_nm', db.String)
-    original_sub_id = db.Column('orig_sub_id', db.Integer)
-    semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Float)
-    sub_id = db.Column(db.Integer)
-    link_id = db.Column(db.Integer)
-    line_number = db.Column('line_num', db.Integer)
-    image_number = db.Column('image_num', db.String)
-    report_year = db.Column('rpt_yr', db.Integer)
-    transaction_id = db.Column(db.Integer)
-    filing_type = db.Column(db.String)
-    filing_form = db.Column(db.String)
+    semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
-
-    @hybrid_property
-    def memoed_subtotal(self):
-        return self.memo_code == 'X'
-
-    @property
-    def pdf_url(self):
-        return utils.make_image_pdf_url(self.image_number)
 
 
 class ScheduleBSearch(db.Model):
@@ -797,6 +840,77 @@ class ScheduleBSearch(db.Model):
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     recipient_name_text = db.Column(TSVECTOR)
+    disbursement_description_text = db.Column(TSVECTOR)
+
+
+class ScheduleE(BaseItemized):
+    __tablename__ = 'sched_e'
+
+    sched_e_sk = db.Column(db.Integer, primary_key=True)
+
+    committee_name = db.Column('cmte_nm', db.String)
+    payee_name = db.Column('pye_nm', db.String)
+    payee_street_1 = db.Column('pye_st1', db.String)
+    payee_street_2 = db.Column('pye_st2', db.String)
+    payee_city = db.Column('pye_city', db.String)
+    payee_state = db.Column('pye_st', db.String)
+    payee_zip = db.Column('pye_zip', db.String)
+    payee_prefix = db.Column(db.String)
+    payee_first_name = db.Column('payee_f_nm', db.String)
+    payee_middle_name = db.Column('payee_m_nm', db.String)
+    payee_last_name = db.Column('payee_l_nm', db.String)
+    payee_suffix = db.Column(db.String)
+    expenditure_description = db.Column('exp_desc', db.String)
+    expenditure_date = db.Column('exp_dt', db.Date)
+    expenditure_amount = db.Column('exp_amt', db.Float)
+    support_oppose_indicator = db.Column('s_o_ind', db.String)
+    candidate_id = db.Column('s_o_cand_id', db.String)
+    candidate = db.relationship(
+        'CandidateHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleE.candidate_id) == CandidateHistory.candidate_id,
+            ScheduleE.report_year + ScheduleE.report_year % 2 == CandidateHistory.two_year_period,
+        )'''
+    )
+    candidate_name = db.Column('s_o_cand_nm', db.String)
+    candidate_prefix = db.Column('s_0_cand_prefix', db.String)
+    candidate_first_name = db.Column('s_0_cand_f_nm', db.String)
+    candidate_middle_name = db.Column('s_0_cand_m_nm', db.String)
+    candidate_last_name = db.Column('s_0_cand_l_nm', db.String)
+    candidate_suffix = db.Column('s_0_cand_suffix', db.String)
+    candidate_office = db.Column('s_o_cand_office', db.String)
+    cand_office_state = db.Column('s_o_cand_office_st', db.String)
+    cand_office_district = db.Column('s_o_cand_office_district', db.String)
+    election_type = db.Column('election_tp', db.String)
+    election_type_full = db.Column('fec_election_tp_desc', db.String)
+    independent_sign_name = db.Column('indt_sign_nm', db.String)
+    independent_sign_date = db.Column('indt_sign_dt', db.Date)
+    notary_sign_name = db.Column('notary_sign_nm', db.String)
+    notary_sign_date = db.Column('notary_sign_dt', db.Date)
+    notary_commission_expiration_date = db.Column('notary_commission_exprtn_dt', db.Date)
+    back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
+    back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
+    receipt_date = db.Column('receipt_dt', db.Date)
+    record_number = db.Column('record_num', db.Integer)
+    report_primary_general = db.Column('rpt_pgi', db.String)
+    office_total_ytd = db.Column('cal_ytd_ofc_sought', db.Float)
+    category_code = db.Column('catg_cd', db.String)
+    category_code_full = db.Column('catg_cd_desc', db.String)
+    filer_prefix = db.Column(db.String)
+    filer_first_name = db.Column('filer_f_nm', db.String)
+    filer_middle_name = db.Column('filer_m_nm', db.String)
+    filer_last_name = db.Column('filer_l_nm', db.String)
+    filer_suffix = db.Column(db.String)
+    dissemination_date = db.Column('dissem_dt', db.Date)
+    load_date = db.Column(db.DateTime)
+    update_date = db.Column(db.DateTime)
+
+
+class ScheduleESearch(db.Model):
+    __tablename__ = 'ofec_sched_e_fulltext'
+
+    sched_e_sk = db.Column(db.Integer, primary_key=True)
+    payee_name_text = db.Column(TSVECTOR)
 
 
 class Filings(db.Model):
@@ -804,6 +918,13 @@ class Filings(db.Model):
 
     committee_id = db.Column(db.String, index=True)
     committee_name = db.Column(db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(Filings.committee_id) == CommitteeHistory.committee_id,
+            Filings.report_year + Filings.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
     candidate_id = db.Column(db.String, index=True)
     candidate_name = db.Column(db.String)
     sub_id = db.Column(db.BigInteger, primary_key=True)
@@ -814,7 +935,8 @@ class Filings(db.Model):
     form_type = db.Column(db.String, index=True)
     report_year = db.Column(db.Integer, index=True)
     report_type = db.Column(db.String, index=True)
-    document_type = db.Column(db.String)
+    document_type = db.Column(db.String, index=True)
+    document_type_full = db.Column(db.String)
     report_type_full = db.Column(db.String)
     beginning_image_number = db.Column(db.BigInteger, index=True)
     ending_image_number = db.Column(db.BigInteger)
@@ -842,11 +964,51 @@ class Filings(db.Model):
     update_date = db.Column(db.Date)
 
     @property
+    def document_description(self):
+        return utils.document_description(
+            self.report_year,
+            self.report_type_full,
+            self.document_type_full,
+        )
+
+    @property
     def pdf_url(self):
-        if self.report_year and self.report_year >= 2000:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        if self.form_type in ['F3X', 'F3P'] and self.report_year > 1993:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        if self.form_type == 'F3' and self.committee.committee_type == 'H' and self.report_year > 1996:
-            return utils.make_report_pdf_url(self.beginning_image_number)
-        return None
+        return utils.report_pdf_url(
+            self.report_year,
+            self.beginning_image_number,
+            committee_type=self.committee.committee_type if self.committee else None,
+            form_type=self.form_type,
+        )
+
+
+class ReportingDates(db.Model):
+    __tablename__ = 'trc_report_due_date'
+
+    trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
+    report_year = db.Column(db.Integer, index=True)
+    report_type = db.Column(db.String, index=True)
+    due_date = db.Column(db.Date, index=True)
+    create_date = db.Column(db.Date, index=True)
+    update_date = db.Column(db.Date, index=True)
+
+
+class ElectionDates(db.Model):
+    __tablename__ = 'trc_election'
+
+    trc_election_id = db.Column(db.BigInteger, primary_key=True)
+    election_state = db.Column(db.String, index=True)
+    election_district = db.Column(db.Integer, index=True)
+    election_party = db.Column(db.String, index=True)
+    office_sought = db.Column(db.String, index=True)
+    election_date = db.Column(db.Date, index=True)
+    election_notes = db.Column(db.String, index=True)
+    trc_election_type_id = db.Column(db.String, index=True)
+    trc_election_status_id = db.Column(db.String, index=True)
+    update_date = db.Column(db.Date, index=True)
+    create_date = db.Column(db.Date, index=True)
+    election_year = db.Column('election_yr', db.Integer, index=True)
+    pg_date = db.Column(db.Date, index=True)
+
+    @property
+    def election_type_full(self):
+        return decoders.election_types.get(self.trc_election_type_id)

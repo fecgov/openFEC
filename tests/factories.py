@@ -26,7 +26,7 @@ class CommitteeSearchFactory(BaseFactory):
 
 class BaseCandidateFactory(BaseFactory):
     candidate_key = factory.Sequence(lambda n: n)
-    candidate_id = factory.Sequence(lambda n: 'id{0}'.format(n))
+    candidate_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
 class CandidateFactory(BaseCandidateFactory):
@@ -48,7 +48,7 @@ class CandidateHistoryFactory(BaseCandidateFactory):
 
 class BaseCommitteeFactory(BaseFactory):
     committee_key = factory.Sequence(lambda n: n + 1)
-    committee_id = factory.Sequence(lambda n: 'id{0}'.format(n))
+    committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
 class CommitteeFactory(BaseCommitteeFactory):
@@ -138,6 +138,7 @@ class ScheduleBFactory(BaseFactory):
     class Meta:
         model = models.ScheduleB
     sched_b_sk = factory.Sequence(lambda n: n)
+    load_date = datetime.datetime.utcnow()
     report_year = 2016
 
 
@@ -147,6 +148,77 @@ class ScheduleBSearchFactory(BaseFactory):
     sched_b_sk = factory.Sequence(lambda n: n)
 
 
+class ScheduleEFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleE
+    sched_e_sk = factory.Sequence(lambda n: n)
+    report_year = 2016
+
+
 class FilingsFactory(BaseFactory):
     class Meta:
         model = models.Filings
+
+
+class BaseAggregateFactory(BaseFactory):
+    committee_id = factory.Sequence(lambda n: str(n))
+    cycle = 2016
+
+
+class ScheduleABySizeFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleABySize
+
+
+class ScheduleAByStateFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleAByState
+
+
+class ScheduleAByContributorTypeFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleAByContributorType
+    individual = True
+
+
+class ScheduleAByContributorFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleAByContributor
+    contributor_id = factory.Sequence(lambda n: str(n))
+    year = 2015
+
+
+class ScheduleBByPurposeFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleBByPurpose
+    purpose = 'ADMINISTRATIVE'
+
+
+class ScheduleEByCandidateFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleEByCandidate
+    candidate_id = factory.Sequence(lambda n: str(n))
+    support_oppose_indicator = 'S'
+
+
+class CommunicationCostByCandidateFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.CommunicationCostByCandidate
+    candidate_id = factory.Sequence(lambda n: str(n))
+    support_oppose_indicator = 'S'
+
+
+class ElectioneeringByCandidateFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ElectioneeringByCandidate
+    candidate_id = factory.Sequence(lambda n: str(n))
+
+
+class ReportingDatesFactory(BaseFactory):
+    class Meta:
+        model = models.ReportingDates
+
+
+class ElectionDatesFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionDates

@@ -5,12 +5,14 @@ select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
     contbr_zip as zip,
+    max(contbr_st) as state,
+    expand_state(max(contbr_st)) as state_full,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 and contb_receipt_amt is not null
-and (memo_cd != 'X' or memo_cd is null)
+and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, zip
 ;
 
@@ -18,6 +20,8 @@ group by cmte_id, cycle, zip
 create index on ofec_sched_a_aggregate_zip (cmte_id);
 create index on ofec_sched_a_aggregate_zip (cycle);
 create index on ofec_sched_a_aggregate_zip (zip);
+create index on ofec_sched_a_aggregate_zip (state);
+create index on ofec_sched_a_aggregate_zip (state_full);
 create index on ofec_sched_a_aggregate_zip (total);
 create index on ofec_sched_a_aggregate_zip (count);
 
@@ -25,33 +29,30 @@ create index on ofec_sched_a_aggregate_zip (count);
 create or replace function ofec_sched_a_update_aggregate_zip() returns void as $$
 begin
     with new as (
-        select
-            cmte_id,
-            rpt_yr + rpt_yr % 2 as cycle,
-            contbr_zip as zip,
-            sum(contb_receipt_amt) as total,
-            count(contb_receipt_amt) as count
+        select 1 as multiplier, *
         from ofec_sched_a_queue_new
-        where contb_receipt_amt is not null
-        and (memo_cd != 'X' or memo_cd is null)
-        group by cmte_id, cycle, zip
     ),
     old as (
+        select -1 as multiplier, *
+        from ofec_sched_a_queue_old
+    ),
+    patch as (
         select
             cmte_id,
             rpt_yr + rpt_yr % 2 as cycle,
             contbr_zip as zip,
-            -1 * sum(contb_receipt_amt) as total,
-            -1 * count(contb_receipt_amt) as count
-        from ofec_sched_a_queue_old
+            max(contbr_st) as state,
+            expand_state(max(contbr_st)) as state_full,
+            sum(contb_receipt_amt * multiplier) as total,
+            sum(multiplier) as count
+        from (
+            select * from new
+            union all
+            select * from old
+        ) t
         where contb_receipt_amt is not null
-        and (memo_cd != 'X' or memo_cd is null)
+        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
         group by cmte_id, cycle, zip
-    ),
-    patch as (
-      select * from new
-      union all
-      select * from old
     ),
     inc as (
         update ofec_sched_a_aggregate_zip ag
