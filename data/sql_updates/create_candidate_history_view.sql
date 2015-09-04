@@ -4,8 +4,11 @@ with
     years as (
         select
             cand_sk,
-            array_agg(distinct(cand_election_yr))::int[] as election_years
+            array_agg(cand_election_yr)::int[] as election_years,
+            array_agg(office_district)::text[] as election_districts
         from dimcandoffice
+        join dimoffice using (office_sk)
+        where dimcandoffice.expire_date is null
         group by cand_sk
     ),
     active_agg as (
@@ -68,6 +71,7 @@ select distinct on (dcp.cand_sk, cycle)
     dp.party_affiliation as party,
     cycle_agg.cycles,
     years.election_years,
+    years.election_districts,
     active_agg.active_through,
     clean_party(dp.party_affiliation_desc) as party_full
 from dimcandproperties dcp
