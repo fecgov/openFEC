@@ -7,9 +7,18 @@ class BaseAggregate(db.Model):
     __abstract__ = True
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
+    committee = utils.related_committee('committee_id')
+
     cycle = db.Column(db.Integer, primary_key=True)
     total = db.Column(db.Numeric(30, 2))
     count = db.Column(db.Integer)
+
+
+class BaseCandidateAggregate(BaseAggregate):
+    __abstract__ = True
+
+    candidate_id = db.Column('cand_id', db.String, primary_key=True)
+    candidate = utils.related_candidate('candidate_id')
 
 
 class ScheduleABySize(BaseAggregate):
@@ -67,27 +76,15 @@ class ScheduleBByPurpose(BaseAggregate):
     purpose = db.Column(db.String, primary_key=True)
 
 
-class ScheduleEByCandidate(BaseAggregate):
+class ScheduleEByCandidate(BaseCandidateAggregate):
     __tablename__ = 'ofec_sched_e_aggregate_candidate_mv'
-    candidate_id = db.Column('cand_id', db.String, primary_key=True)
     support_oppose_indicator = db.Column(db.String, primary_key=True)
 
-    committee = utils.related_committee('committee_id')
-    candidate = utils.related_candidate('candidate_id')
 
-
-class CommunicationCostByCandidate(BaseAggregate):
+class CommunicationCostByCandidate(BaseCandidateAggregate):
     __tablename__ = 'ofec_communication_cost_aggregate_candidate_mv'
-    candidate_id = db.Column('cand_id', db.String, primary_key=True)
     support_oppose_indicator = db.Column(db.String, primary_key=True)
 
-    committee = utils.related_committee('committee_id')
-    candidate = utils.related_candidate('candidate_id')
 
-
-class ElectioneeringByCandidate(BaseAggregate):
+class ElectioneeringByCandidate(BaseCandidateAggregate):
     __tablename__ = 'ofec_electioneering_aggregate_candidate_mv'
-    candidate_id = db.Column('cand_id', db.String, primary_key=True)
-
-    committee = utils.related_committee('committee_id')
-    candidate = utils.related_candidate('candidate_id')
