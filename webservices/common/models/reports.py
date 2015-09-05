@@ -5,7 +5,20 @@ from webservices import utils
 from .base import db, BaseModel
 
 
-class CommitteeReports(BaseModel):
+class PdfMixin(object):
+
+    @property
+    def pdf_url(self):
+        if self.has_pdf:
+            return utils.make_report_pdf_url(self.beginning_image_number)
+        return None
+
+    @property
+    def has_pdf(self):
+        return self.report_year and self.report_year >= 1993
+
+
+class CommitteeReports(PdfMixin, BaseModel):
     __abstract__ = True
 
     report_key = db.Column(db.BigInteger)
@@ -110,16 +123,15 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     report_form = 'Form 3'
 
     @property
-    def pdf_url(self):
-        if self.report_year is None or self.committee is None:
-            return None
-        # House records start May 1996
-        if self.committee.committee_type == 'H' and self.report_year < 1996:
-            return None
-        # Senate records start May 2000
-        elif self.committee.committee_type == 'S' and self.report_year < 2000:
-            return None
-        return utils.make_report_pdf_url(self.beginning_image_number)
+    def has_pdf(self):
+        committee = self.committee
+        return (
+            self.report_year and committee and
+            (
+                committee.committee_type == 'H' and self.report_year >= 1996 or
+                committee.committee_type == 'S' and self.report_year >= 2000
+            )
+        )
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -187,13 +199,6 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_to_affilitated_committees_ytd = db.Column(db.Integer)
     report_form = 'Form 3X'
 
-    @property
-    # PAC, Party and Presidential records start May 1993
-    def pdf_url(self):
-        if self.report_year is None or self.report_year < 1993:
-            return None
-        return utils.make_report_pdf_url(self.beginning_image_number)
-
 
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
@@ -239,15 +244,8 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
     report_form = 'Form 3P'
 
-    @property
-    # PAC, Party and Presidential records start May 1993
-    def pdf_url(self):
-        if self.report_year is None or self.report_year < 1993:
-            return None
-        return utils.make_report_pdf_url(self.beginning_image_number)
 
-
-class CommitteeReportsIEOnly(BaseModel):
+class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     __tablename__ = 'ofec_reports_ie_only_mv'
 
     beginning_image_number = db.Column(db.BigInteger)
@@ -263,10 +261,3 @@ class CommitteeReportsIEOnly(BaseModel):
     report_type = db.Column(db.String)
     report_type_full = db.Column(db.String)
     report_form = 'Form 5'
-
-    @property
-    # PAC, Party and Presidential records start May 1993
-    def pdf_url(self):
-        if self.report_year is None or self.report_year < 1993:
-            return None
-        return utils.make_report_pdf_url(self.beginning_image_number)
