@@ -1,4 +1,4 @@
-from webservices import utils, decoders
+from webservices import decoders
 
 from .base import db
 
