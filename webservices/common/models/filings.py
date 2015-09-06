@@ -7,14 +7,8 @@ class Filings(db.Model):
     __tablename__ = 'ofec_filings_mv'
 
     committee_id = db.Column(db.String, index=True)
+    committee = utils.related_committee_history('committee_id', cycle_label='report_year')
     committee_name = db.Column(db.String)
-    committee = db.relationship(
-        'CommitteeHistory',
-        primaryjoin='''and_(
-            foreign(Filings.committee_id) == CommitteeHistory.committee_id,
-            Filings.report_year + Filings.report_year % 2 == CommitteeHistory.cycle,
-        )'''
-    )
     candidate_id = db.Column(db.String, index=True)
     candidate_name = db.Column(db.String)
     cycle = db.Column(db.Integer)

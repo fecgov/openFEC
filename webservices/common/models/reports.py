@@ -1,5 +1,3 @@
-from sqlalchemy.ext.declarative import declared_attr
-
 from webservices import utils
 
 from .base import db, BaseModel
@@ -24,6 +22,7 @@ class CommitteeReports(PdfMixin, BaseModel):
     report_key = db.Column(db.BigInteger)
     committee_id = db.Column(db.String, index=True)
     committee_key = db.Column(db.Integer, index=True)
+    committee = utils.related('CommitteeHistory', 'committee_key', 'committee_key', 'report_year', 'cycle')
     cycle = db.Column(db.Integer, index=True)
 
     beginning_image_number = db.Column(db.BigInteger)
@@ -69,14 +68,6 @@ class CommitteeReports(PdfMixin, BaseModel):
     individual_unitemized_contributions_period = db.Column(db.Integer)
     individual_itemized_contributions_ytd = db.Column(db.Integer)
     individual_itemized_contributions_period = db.Column(db.Integer)
-
-    @declared_attr
-    def committee_key(cls):
-        return db.Column(db.Integer, db.ForeignKey('ofec_committee_detail_mv.committee_key'))
-
-    @declared_attr
-    def committee(cls):
-        return db.relationship('CommitteeDetail')
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):

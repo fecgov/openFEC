@@ -1,6 +1,5 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import utils
 
@@ -11,6 +10,7 @@ class BaseItemized(db.Model):
     __abstract__ = True
 
     committee_id = db.Column('cmte_id', db.String)
+    committee = utils.related_committee_history('committee_id', cycle_label='report_year')
     report_year = db.Column('rpt_yr', db.Integer)
     report_type = db.Column('rpt_tp', db.String)
     form_type = db.Column('form_tp', db.String)
@@ -29,16 +29,6 @@ class BaseItemized(db.Model):
     transaction_id = db.Column(db.Integer)
     status = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
-
-    @declared_attr
-    def committee(cls):
-        return db.relationship(
-            'CommitteeHistory',
-            primaryjoin='''and_(
-                foreign({cls.__name__}.committee_id) == CommitteeHistory.committee_id,
-                {cls.__name__}.report_year + {cls.__name__}.report_year % 2 == CommitteeHistory.cycle,
-            )'''.format(cls=cls)
-        )
 
     @hybrid_property
     def memoed_subtotal(self):
@@ -170,13 +160,7 @@ class ScheduleE(BaseItemized):
     expenditure_amount = db.Column('exp_amt', db.Float)
     support_oppose_indicator = db.Column('s_o_ind', db.String)
     candidate_id = db.Column('s_o_cand_id', db.String)
-    candidate = db.relationship(
-        'CandidateHistory',
-        primaryjoin='''and_(
-            foreign(ScheduleE.candidate_id) == CandidateHistory.candidate_id,
-            ScheduleE.report_year + ScheduleE.report_year % 2 == CandidateHistory.two_year_period,
-        )'''
-    )
+    candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
     candidate_name = db.Column('s_o_cand_nm', db.String)
     candidate_prefix = db.Column('s_0_cand_prefix', db.String)
     candidate_first_name = db.Column('s_0_cand_f_nm', db.String)
