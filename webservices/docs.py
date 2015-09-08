@@ -49,7 +49,8 @@ develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data.This API allows you to explore the vast array of campaign finance data that the FEC
-collects. Each endpoint focuses on a different aspect of disclosure. Information is tied to
+collects. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
+site. Each endpoint focuses on a different aspect of disclosure. Information is tied to
 the underlying forms by file ID and image ID.
 
 There is a lot of data, but a good place to start exploring, is using search to find
@@ -57,13 +58,14 @@ interesting candidates and committees and then, looking up report or line item d
 using IDs on the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
+Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
+calls an hour. Each call is limited to 100 results per page.
+
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
 [Learn more here](http://www.fec.gov/pages/brochures/saleuse.shtml).
 
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
-
-Get an [API key here](https://api.data.gov/signup/)!
 '''
 
 CANDIDATE_TAG = '''
