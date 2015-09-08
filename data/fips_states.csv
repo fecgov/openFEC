@@ -1,11 +1,11 @@
 Name,FIPS State Numeric Code,Official USPS Code
-Alabama,1,AL
-Alaska,2,AK
-Arizona,4,AZ
-Arkansas,5,AR
-California,6,CA
-Colorado,8,CO
-Connecticut,9,CT
+Alabama,01,AL
+Alaska,02,AK
+Arizona,04,AZ
+Arkansas,05,AR
+California,06,CA
+Colorado,08,CO
+Connecticut,09,CT
 Delaware,10,DE
 District of Columbia,11,DC
 Florida,12,FL
