@@ -278,6 +278,7 @@ class TestReports(ApiBaseTest):
             committee_id=committee.committee_id,
             committee_key=committee.committee_key,
             committee_type=committee_type,
+            cycle=2012,
         )
         end_dates = [datetime.datetime(2012, 1, 1), datetime.datetime(2008, 1, 1)]
         committee_id = committee.committee_id
@@ -288,6 +289,7 @@ class TestReports(ApiBaseTest):
                 committee_id=committee_id,
                 committee_key=committee_key,
                 coverage_end_date=end_date,
+                report_year=2011,
             )
             for end_date in end_dates
         ]
