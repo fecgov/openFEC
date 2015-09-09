@@ -238,17 +238,20 @@ class ElectionView(Resource):
 class ElectionSummary(Resource):
 
     @args.register_kwargs(args.elections)
+    @schemas.marshal_with(schemas.ElectionSummarySchema())
     def get(self, **kwargs):
+        utils.check_election_arguments(kwargs)
         totals_model = office_totals_map[kwargs['office']]
         query = db.session.query(
             sa.func.count(sa.distinct(CandidateHistory.candidate_id)).label('count'),
             sa.func.sum(totals_model.receipts).label('receipts'),
+            sa.func.sum(totals_model.disbursements).label('disbursements'),
         ).select_from(
             CandidateHistory
         )
         query = join_candidate_totals(query, kwargs, totals_model)
         query = filter_candidate_totals(query, kwargs, totals_model)
-        return {'results': query.first()._asdict()}
+        return query.first()
 
 
 def join_candidate_totals(query, kwargs, totals_model):

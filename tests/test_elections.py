@@ -3,7 +3,7 @@ import functools
 
 from webservices import utils
 from webservices.rest import db, api
-from webservices.resources.elections import ElectionList, ElectionView
+from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -189,3 +189,9 @@ class TestElections(ApiBaseTest):
             'won': True,
         }
         self.assertDictsSubset(results[0], expected)
+
+    def test_election_summary(self):
+        results = self._response(api.url_for(ElectionSummary, office='house', cycle=2012, state='NY', district='07'))
+        self.assertEqual(results['count'], 1)
+        self.assertEqual(results['receipts'], sum(each.receipts for each in self.totals))
+        self.assertEqual(results['disbursements'], sum(each.disbursements for each in self.totals))
