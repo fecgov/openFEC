@@ -354,6 +354,12 @@ class ElectionSearchSchema(ma.Schema):
     incumbent_name = ma.fields.Str(attribute='cand_name')
 augment_schemas(ElectionSearchSchema)
 
+class ElectionSummarySchema(ApiSchema):
+    count = ma.fields.Int()
+    receipts = ma.fields.Decimal(places=2)
+    disbursements = ma.fields.Decimal(places=2)
+augment_schemas(ElectionSummarySchema)
+
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     candidate_name = ma.fields.Str()
