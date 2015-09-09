@@ -174,7 +174,7 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
-api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports', '/reports/<string:committee_type>/')
+api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
 api.add_resource(CandidateNameSearch, '/names/candidates/')
 api.add_resource(CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
@@ -182,6 +182,7 @@ api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionList, '/elections/search/')
+api.add_resource(elections.ElectionSummary, '/elections/summary/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 
