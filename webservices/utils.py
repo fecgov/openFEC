@@ -106,9 +106,12 @@ def get_model(name):
     return db.Model._decl_class_registry.get(name)
 
 
-def related(related_model, id_label, related_id_label, cycle_label=None, related_cycle_label=None):
+def related(related_model, id_label, related_id_label=None, cycle_label=None,
+            related_cycle_label=None, use_modulus=True):
     from webservices.common.models import db
     related_model = get_model(related_model)
+    related_id_label = related_id_label or id_label
+    related_cycle_label = related_cycle_label or cycle_label
     @declared_attr
     def related(cls):
         id_column = getattr(cls, id_label)
@@ -116,6 +119,8 @@ def related(related_model, id_label, related_id_label, cycle_label=None, related
         filters = [foreign(id_column) == related_id_column]
         if cycle_label:
             cycle_column = getattr(cls, cycle_label)
+            if use_modulus:
+                cycle_column = cycle_column + cycle_column % 2
             related_cycle_column = getattr(related_model, related_cycle_label)
             filters.append(cycle_column == related_cycle_column)
         return db.relationship(
