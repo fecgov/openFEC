@@ -358,6 +358,7 @@ class ElectionSummarySchema(ApiSchema):
     count = ma.fields.Int()
     receipts = ma.fields.Decimal(places=2)
     disbursements = ma.fields.Decimal(places=2)
+    independent_expenditures = ma.fields.Decimal(places=2)
 augment_schemas(ElectionSummarySchema)
 
 class ElectionSchema(ma.Schema):
