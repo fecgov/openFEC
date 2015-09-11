@@ -51,7 +51,7 @@ class ScheduleBView(ItemizedResource):
     )
     @schemas.marshal_with(schemas.ScheduleBPageSchema())
     def get(self, **kwargs):
-        return super(ScheduleBView, self).get(**kwargs)
+        return super().get(**kwargs)
 
     def build_query(self, **kwargs):
         query = super(ScheduleBView, self).build_query(**kwargs)
