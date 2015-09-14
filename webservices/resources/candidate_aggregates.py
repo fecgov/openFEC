@@ -1,8 +1,7 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common.models import (
@@ -46,32 +45,32 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     )
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contribution size.',
 )
-class ScheduleABySizeCandidateView(Resource):
+class ScheduleABySizeCandidateView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.make_sort_args())
-    @args.register_kwargs(args.schedule_a_candidate_aggregate)
-    @schemas.marshal_with(schemas.ScheduleABySizeCandidatePageSchema())
+    @use_kwargs(args.paging)
+    @use_kwargs(args.make_sort_args())
+    @use_kwargs(args.schedule_a_candidate_aggregate)
+    @marshal_with(schemas.ScheduleABySizeCandidatePageSchema())
     def get(self, **kwargs):
         group_columns = [ScheduleABySize.size]
         query = candidate_aggregate(ScheduleABySize, group_columns, group_columns, kwargs)
         return utils.fetch_page(query, kwargs, cap=None)
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contributor state.',
 )
-class ScheduleAByStateCandidateView(Resource):
+class ScheduleAByStateCandidateView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.make_sort_args())
-    @args.register_kwargs(args.schedule_a_candidate_aggregate)
-    @schemas.marshal_with(schemas.ScheduleAByStateCandidatePageSchema())
+    @use_kwargs(args.paging)
+    @use_kwargs(args.make_sort_args())
+    @use_kwargs(args.schedule_a_candidate_aggregate)
+    @marshal_with(schemas.ScheduleAByStateCandidatePageSchema())
     def get(self, **kwargs):
         query = candidate_aggregate(
             ScheduleAByState,
@@ -85,16 +84,16 @@ class ScheduleAByStateCandidateView(Resource):
         return utils.fetch_page(query, kwargs, cap=0)
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description='Schedule A receipts aggregated by contributor type.',
 )
-class ScheduleAByContributorTypeCandidateView(Resource):
+class ScheduleAByContributorTypeCandidateView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.make_sort_args())
-    @args.register_kwargs(args.schedule_a_candidate_aggregate)
-    @schemas.marshal_with(schemas.ScheduleAByContributorTypeCandidatePageSchema())
+    @use_kwargs(args.paging)
+    @use_kwargs(args.make_sort_args())
+    @use_kwargs(args.schedule_a_candidate_aggregate)
+    @marshal_with(schemas.ScheduleAByContributorTypeCandidatePageSchema())
     def get(self, **kwargs):
         group_columns = [ScheduleAByContributorType.individual]
         query = candidate_aggregate(ScheduleAByContributorType, group_columns, group_columns, kwargs)

@@ -1,8 +1,10 @@
 import sqlalchemy as sa
 
+from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore.utils import Ref
+
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import filters
 from webservices import schemas
@@ -11,8 +13,22 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@spec.doc(path_params=[utils.committee_param])
+@doc(params={'committee_id': {'description': docs.COMMITTEE_ID}})
 class AggregateResource(ApiResource):
+
+    schema = None
+    query_args = {}
+
+    @property
+    def sort_args(self):
+        return args.make_sort_args(validator=args.IndexValidator(self.model))
+
+    @use_kwargs(args.paging)
+    @use_kwargs(Ref('sort_args'))
+    @use_kwargs(Ref('query_args'))
+    @marshal_with(Ref('schema'))
+    def get(self, committee_id=None, **kwargs):
+        return super().get(committee_id=committee_id, **kwargs)
 
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(**kwargs)
@@ -21,31 +37,22 @@ class AggregateResource(ApiResource):
         return query
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=docs.SIZE_DESCRIPTION,
 )
 class ScheduleABySizeView(AggregateResource):
 
     model = models.ScheduleABySize
+    schema = schemas.ScheduleABySizePageSchema
+    query_args = args.schedule_a_by_size
     filter_multi_fields = [
         ('cycle', models.ScheduleABySize.cycle),
         ('size', models.ScheduleABySize.size),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_size)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleABySize)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleABySizePageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super(ScheduleABySizeView, self).get(committee_id=committee_id, **kwargs)
 
-
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor state. To avoid double counting, '
@@ -55,21 +62,12 @@ class ScheduleABySizeView(AggregateResource):
 class ScheduleAByStateView(AggregateResource):
 
     model = models.ScheduleAByState
+    schema = schemas.ScheduleAByStatePageSchema
+    query_args = args.schedule_a_by_state
     filter_multi_fields = [
         ('cycle', models.ScheduleAByState.cycle),
         ('state', models.ScheduleAByState.state),
     ]
-
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_state)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleAByState)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleAByStatePageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super(ScheduleAByStateView, self).get(committee_id=committee_id, **kwargs)
 
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(committee_id, **kwargs)
@@ -78,7 +76,7 @@ class ScheduleAByStateView(AggregateResource):
         return query
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor zip code. To avoid double '
@@ -88,24 +86,15 @@ class ScheduleAByStateView(AggregateResource):
 class ScheduleAByZipView(AggregateResource):
 
     model = models.ScheduleAByZip
+    schema = schemas.ScheduleAByZipPageSchema
+    query_args = args.schedule_a_by_zip
     filter_multi_fields = [
         ('cycle', models.ScheduleAByZip.cycle),
         ('zip', models.ScheduleAByZip.zip),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_zip)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleAByZip)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleAByZipPageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
-
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor employer name. To avoid double '
@@ -115,26 +104,20 @@ class ScheduleAByZipView(AggregateResource):
 class ScheduleAByEmployerView(AggregateResource):
 
     model = models.ScheduleAByEmployer
+    schema = schemas.ScheduleAByEmployerPageSchema
+    query_args = args.schedule_a_by_employer
     filter_multi_fields = [
         ('cycle', models.ScheduleAByEmployer.cycle),
         ('employer', models.ScheduleAByEmployer.employer),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_employer)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleAByEmployer)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleAByEmployerPageSchema())
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor occupation. To avoid double '
@@ -144,26 +127,20 @@ class ScheduleAByEmployerView(AggregateResource):
 class ScheduleAByOccupationView(AggregateResource):
 
     model = models.ScheduleAByOccupation
+    schema = schemas.ScheduleAByOccupationPageSchema
+    query_args = args.schedule_a_by_occupation
     filter_multi_fields = [
         ('cycle', models.ScheduleAByOccupation.cycle),
         ('occupation', models.ScheduleAByOccupation.occupation),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_occupation)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleAByOccupation)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleAByOccupationPageSchema())
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor FEC ID, if applicable. To avoid '
@@ -173,24 +150,15 @@ class ScheduleAByOccupationView(AggregateResource):
 class ScheduleAByContributorView(AggregateResource):
 
     model = models.ScheduleAByContributor
+    schema = schemas.ScheduleAByContributorPageSchema
+    query_args = args.schedule_a_by_contributor
     filter_multi_fields = [
         ('cycle', models.ScheduleAByContributor.cycle),
         ('contributor_id', models.ScheduleAByContributor.contributor_id),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_contributor)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleAByContributor)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleAByContributorPageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
-
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=(
         'Schedule A receipts aggregated by contributor type (individual or committee), if applicable. '
@@ -200,6 +168,8 @@ class ScheduleAByContributorView(AggregateResource):
 class ScheduleAByContributorTypeView(AggregateResource):
 
     model = models.ScheduleAByContributorType
+    schema = schemas.ScheduleAByContributorTypePageSchema
+    query_args = args.schedule_a_by_contributor_type
     filter_match_fields = [
         ('individual', models.ScheduleAByContributorType.individual),
     ]
@@ -207,19 +177,8 @@ class ScheduleAByContributorTypeView(AggregateResource):
         ('cycle', models.ScheduleAByContributorType.cycle),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_a_by_contributor_type)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleAByContributorType)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleAByContributorTypePageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
-
-@spec.doc(
+@doc(
     tags=['schedules/schedule_b'],
     description=(
         'Schedule B receipts aggregated by recipient name. To avoid '
@@ -229,24 +188,15 @@ class ScheduleAByContributorTypeView(AggregateResource):
 class ScheduleBByRecipientView(AggregateResource):
 
     model = models.ScheduleBByRecipient
+    schema = schemas.ScheduleBByRecipientPageSchema
+    query_args = args.schedule_b_by_recipient
     filter_multi_fields = [
         ('cycle', models.ScheduleBByRecipient.cycle),
         ('recipient_name', models.ScheduleBByRecipient.recipient_name),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_b_by_recipient)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleBByRecipient)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleBByRecipientPageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
-
-@spec.doc(
+@doc(
     tags=['schedules/schedule_b'],
     description=(
         'Schedule B receipts aggregated by recipient committee ID, if applicable. To avoid '
@@ -256,24 +206,15 @@ class ScheduleBByRecipientView(AggregateResource):
 class ScheduleBByRecipientIDView(AggregateResource):
 
     model = models.ScheduleBByRecipientID
+    schema = schemas.ScheduleBByRecipientIDPageSchema
+    query_args = args.schedule_b_by_recipient_id
     filter_multi_fields = [
         ('cycle', models.ScheduleBByRecipientID.cycle),
         ('recipient_id', models.ScheduleBByRecipientID.recipient_id),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_b_by_recipient_id)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleBByRecipientID)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleBByRecipientIDPageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
-
-@spec.doc(
+@doc(
     tags=['schedules/schedule_b'],
     description=(
         'Schedule B receipts aggregated by disbursement purpose category. To avoid double '
@@ -283,24 +224,15 @@ class ScheduleBByRecipientIDView(AggregateResource):
 class ScheduleBByPurposeView(AggregateResource):
 
     model = models.ScheduleBByPurpose
+    schema = schemas.ScheduleBByPurposePageSchema
+    query_args = args.schedule_b_by_purpose
     filter_multi_fields = [
         ('cycle', models.ScheduleBByPurpose.cycle),
         ('purpose', models.ScheduleBByPurpose.purpose),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.schedule_b_by_purpose)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleBByPurpose)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleBByPurposePageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
-
-@spec.doc(
+@doc(
     tags=['schedules/schedule_b'],
     description=(
         'Schedule E receipts aggregated by recipient candidate. To avoid double '
@@ -310,6 +242,8 @@ class ScheduleBByPurposeView(AggregateResource):
 class ScheduleEByCandidateView(AggregateResource):
 
     model = models.ScheduleEByCandidate
+    schema = schemas.ScheduleEByCandidatePageSchema
+    query_args = utils.extend(args.elections, args.schedule_e_by_candidate)
     filter_multi_fields = [
         ('cycle', models.ScheduleEByCandidate.cycle),
         ('candidate_id', models.ScheduleEByCandidate.candidate_id),
@@ -322,30 +256,20 @@ class ScheduleEByCandidateView(AggregateResource):
         sa.orm.joinedload(models.ScheduleEByCandidate.committee),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.elections)
-    @args.register_kwargs(args.schedule_e_by_candidate)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ScheduleEByCandidate)
-        )
-    )
-    @schemas.marshal_with(schemas.ScheduleEByCandidatePageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
-
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
 
 
-@spec.doc(
+@doc(
     tags=['communication_cost'],
     description='Communication cost aggregated by candidate ID and committee ID.',
 )
 class CommunicationCostByCandidateView(AggregateResource):
 
     model = models.CommunicationCostByCandidate
+    schema = schemas.CommunicationCostByCandidatePageSchema
+    query_args = utils.extend(args.elections, args.communication_cost_by_candidate)
     filter_multi_fields = [
         ('cycle', models.CommunicationCostByCandidate.cycle),
         ('candidate_id', models.CommunicationCostByCandidate.candidate_id),
@@ -358,46 +282,24 @@ class CommunicationCostByCandidateView(AggregateResource):
         sa.orm.joinedload(models.CommunicationCostByCandidate.committee),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.elections)
-    @args.register_kwargs(args.communication_cost_by_candidate)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.CommunicationCostByCandidate)
-        )
-    )
-    @schemas.marshal_with(schemas.CommunicationCostByCandidatePageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
-
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
 
 
-@spec.doc(
+@doc(
     tags=['electioneering'],
     description='Electioneering costs aggregated by candidate.',
 )
 class ElectioneeringByCandidateView(AggregateResource):
 
     model = models.ElectioneeringByCandidate
+    schema = schemas.ElectioneeringByCandidatePageSchema
+    query_args = utils.extend(args.elections, args.electioneering_by_candidate)
     filter_multi_fields = [
         ('cycle', models.ElectioneeringByCandidate.cycle),
         ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
     ]
-
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.elections)
-    @args.register_kwargs(args.electioneering_by_candidate)
-    @args.register_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.ElectioneeringByCandidate)
-        )
-    )
-    @schemas.marshal_with(schemas.ElectioneeringByCandidatePageSchema())
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(committee_id, **kwargs)

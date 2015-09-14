@@ -1,5 +1,3 @@
-import copy
-
 from smore.apispec import APISpec
 
 from webservices import docs
@@ -64,11 +62,3 @@ spec = APISpec(
         },
     ]
 )
-
-
-def doc(**kwargs):
-    def wrapper(func):
-        func.__apidoc__ = copy.deepcopy(getattr(func, '__apidoc__', {}))
-        func.__apidoc__.update(kwargs)
-        return func
-    return wrapper

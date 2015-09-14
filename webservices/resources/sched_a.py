@@ -1,8 +1,8 @@
 import sqlalchemy as sa
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import filters
 from webservices import schemas
@@ -22,7 +22,7 @@ is_individual = sa.func.is_individual(
 )
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=docs.SCHEDULE_A,
 )
@@ -65,10 +65,10 @@ class ScheduleAView(ItemizedResource):
         sa.orm.joinedload(models.ScheduleA.contributor),
     ]
 
-    @args.register_kwargs(args.itemized)
-    @args.register_kwargs(args.schedule_a)
-    @args.register_kwargs(args.make_seek_args())
-    @args.register_kwargs(
+    @use_kwargs(args.itemized)
+    @use_kwargs(args.schedule_a)
+    @use_kwargs(args.make_seek_args())
+    @use_kwargs(
         args.make_sort_args(
             validator=args.OptionValidator([
                 'contribution_receipt_date',
@@ -78,7 +78,7 @@ class ScheduleAView(ItemizedResource):
             multiple=False,
         )
     )
-    @schemas.marshal_with(schemas.ScheduleAPageSchema())
+    @marshal_with(schemas.ScheduleAPageSchema())
     def get(self, **kwargs):
         if len(kwargs['committee_id']) > 5:
             raise exceptions.ApiError(

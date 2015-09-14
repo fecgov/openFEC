@@ -1,9 +1,8 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -19,17 +18,17 @@ totals_schema_map = {
 default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
 
 
-@spec.doc(
+@doc(
     tags=['financial'],
     description=docs.TOTALS,
-    path_params=[utils.committee_param],
+    params={'committee_id': {'description': docs.COMMITTEE_ID}},
 )
-class TotalsView(Resource):
+class TotalsView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.totals)
-    @args.register_kwargs(args.make_sort_args(default=['-cycle']))
-    @schemas.marshal_with(schemas.CommitteeTotalsPageSchema(), wrap=False)
+    @use_kwargs(args.paging)
+    @use_kwargs(args.totals)
+    @use_kwargs(args.make_sort_args(default=['-cycle']))
+    @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id, **kwargs):
         totals_class, totals_schema = totals_schema_map.get(
             self._resolve_committee_type(committee_id, kwargs),

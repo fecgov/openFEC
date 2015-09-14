@@ -1,8 +1,8 @@
 import sqlalchemy as sa
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import views
@@ -10,10 +10,13 @@ from webservices.common import counts
 from webservices.common import models
 
 
-@spec.doc(
+@doc(
     tags=['filings'],
     description=docs.FILINGS,
-    path_params=[utils.committee_param, utils.candidate_param],
+    params={
+        'candidate_id': {'description': docs.CANDIDATE_ID},
+        'committee_id': {'description': docs.COMMITTEE_ID},
+    },
 )
 class BaseFilings(views.ApiResource):
 
@@ -44,15 +47,15 @@ class BaseFilings(views.ApiResource):
 
 class FilingsView(BaseFilings):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.filings)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.filings)
+    @use_kwargs(
         args.make_sort_args(
             default=['-receipt_date'],
             validator=args.IndexValidator(models.Filings),
         )
     )
-    @schemas.marshal_with(schemas.FilingsPageSchema())
+    @marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)
 
@@ -72,15 +75,15 @@ class FilingsList(BaseFilings):
         ('candidate_id', models.Filings.candidate_id),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.filings)
-    @args.register_kwargs(args.entities)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.filings)
+    @use_kwargs(args.entities)
+    @use_kwargs(
         args.make_sort_args(
             default=['-receipt_date'],
             validator=args.IndexValidator(models.Filings),
         )
     )
-    @schemas.marshal_with(schemas.FilingsPageSchema())
+    @marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)
