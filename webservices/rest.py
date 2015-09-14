@@ -353,7 +353,11 @@ def api_ui_redirect():
 
 @docs.route('/developers')
 def api_ui():
-    return render_template('swagger-ui.html', specs_url=url_for('docs.api_spec'))
+    return render_template(
+        'swagger-ui.html',
+        specs_url=url_for('docs.api_spec'),
+        PRODUCTION=os.getenv('PRODUCTION'),
+    )
 
 
 app.register_blueprint(docs)
