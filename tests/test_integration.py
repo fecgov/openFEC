@@ -54,6 +54,9 @@ class TestViews(common.IntegrationTestCase):
                 continue
             self.assertGreater(model.query.count(), 0)
 
+    def test_refresh_materialized(self):
+        db.session.execute('select refresh_materialized()')
+
     def test_committee_year_filter(self):
         self._check_entity_model(models.Committee, 'committee_key')
         self._check_entity_model(models.CommitteeDetail, 'committee_key')
