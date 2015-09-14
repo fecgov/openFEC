@@ -88,6 +88,7 @@ class ElectionList(Resource):
             CandidateHistory.two_year_period,
         ).filter(
             CandidateHistory.candidate_status == 'C',
+            CandidateHistory.candidate_inactive == None,  # noqa
         )
         if kwargs['cycle']:
             query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
@@ -308,6 +309,7 @@ def filter_candidates(query, kwargs):
 def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
+        CandidateHistory.candidate_inactive == None,  # noqa
         CandidateCommitteeLink.election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
         CommitteeHistory.cycle == kwargs['cycle'],
         CommitteeHistory.designation.in_(['P', 'A']),
