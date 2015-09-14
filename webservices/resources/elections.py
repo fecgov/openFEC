@@ -286,7 +286,7 @@ def join_candidate_totals(query, kwargs, totals_model):
     ).join(
         CommitteeHistory,
         CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
-    ).join(
+    ).outerjoin(
         totals_model,
         CommitteeHistory.committee_id == totals_model.committee_id,
     )
@@ -311,6 +311,9 @@ def filter_candidate_totals(query, kwargs, totals_model):
         CandidateCommitteeLink.election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
         CommitteeHistory.cycle == kwargs['cycle'],
         CommitteeHistory.designation.in_(['P', 'A']),
-        totals_model.cycle == kwargs['cycle'],
+        sa.or_(
+            totals_model.cycle == None,  # noqa
+            totals_model.cycle == kwargs['cycle'],
+        ),
     )
     return query

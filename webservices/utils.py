@@ -163,7 +163,9 @@ def document_description(report_year, report_type=None, document_type=None, form
 
 
 def report_pdf_url(report_year, beginning_image_number, form_type=None, committee_type=None):
-    if report_year and report_year >= 2000:
+    if not report_year:
+        return None
+    if report_year >= 2000:
         return make_report_pdf_url(beginning_image_number)
     if form_type in ['F3X', 'F3P'] and report_year > 1993:
         return make_report_pdf_url(beginning_image_number)
