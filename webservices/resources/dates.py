@@ -1,9 +1,8 @@
 from datetime import date
 
-from flask.ext.restful import Resource
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -16,8 +15,8 @@ def filter_upcoming(query, column, kwargs):
     return query
 
 
-@spec.doc(tags=['dates'])
-class DatesResource(Resource):
+@doc(tags=['dates'])
+class DatesResource(utils.Resource):
 
     def get(self, **kwargs):
         query = self.model.query
@@ -26,7 +25,7 @@ class DatesResource(Resource):
         return utils.fetch_page(query, kwargs, model=self.model)
 
 
-@spec.doc(description='FEC reporting dates since 1995.')
+@doc(description='FEC reporting dates since 1995.')
 class ReportingDatesView(DatesResource):
 
     model = models.ReportingDates
@@ -42,19 +41,19 @@ class ReportingDatesView(DatesResource):
         'update_date',
     }
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.reporting_dates)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.reporting_dates)
+    @use_kwargs(
         args.make_sort_args(
             default=['-due_date'],
         )
     )
-    @schemas.marshal_with(schemas.ReportingDatesPageSchema())
+    @marshal_with(schemas.ReportingDatesPageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)
 
 
-@spec.doc(description='FEC election dates since 1995.')
+@doc(description='FEC election dates since 1995.')
 class ElectionDatesView(DatesResource):
 
     model = models.ElectionDates
@@ -76,13 +75,13 @@ class ElectionDatesView(DatesResource):
         'pg_date',
     }
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.reporting_dates)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.reporting_dates)
+    @use_kwargs(
         args.make_sort_args(
             default=['-election_date'],
         )
     )
-    @schemas.marshal_with(schemas.ElectionDatesPageSchema())
+    @marshal_with(schemas.ElectionDatesPageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)

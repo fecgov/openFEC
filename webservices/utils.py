@@ -1,15 +1,22 @@
 import re
 import functools
 
+import six
 import sqlalchemy as sa
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
-from marshmallow_pagination import paginators
 
-from webservices import docs
+from flask.ext import restful
+from marshmallow_pagination import paginators
+from flask_smore.views import MethodResourceMeta
+
 from webservices import sorting
 from webservices import exceptions
 from webservices import decoders
+
+
+class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
+    pass
 
 
 def check_cap(kwargs, cap):
@@ -183,18 +190,6 @@ def make_image_pdf_url(image_number):
     return 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number)
 
 
-committee_param = {
-    'name': 'committee_id',
-    'type': 'string',
-    'in': 'path',
-    'description': docs.COMMITTEE_ID,
-}
-candidate_param = {
-    'name': 'candidate_id',
-    'type': 'string',
-    'in': 'path',
-    'description': docs.CANDIDATE_ID,
-}
 def cycle_param(**kwargs):
     ret = {
         'name': 'cycle',

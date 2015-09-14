@@ -1,9 +1,8 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -38,26 +37,23 @@ def parse_types(types):
     return include, exclude
 
 
-@spec.doc(
+@doc(
     tags=['financial'],
     description=docs.REPORTS,
-    path_params=[
-        utils.committee_param,
-        {
-            'name': 'committee_type',
-            'in': 'path',
-            'type': 'string',
+    params={
+        'committee_id': {'description': docs.COMMITTEE_ID},
+        'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
             'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
         },
-    ],
+    },
 )
-class ReportsView(Resource):
+class ReportsView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.reports)
-    @args.register_kwargs(args.make_sort_args(default=['-coverage_end_date']))
-    @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
+    @use_kwargs(args.paging)
+    @use_kwargs(args.reports)
+    @use_kwargs(args.make_sort_args(default=['-coverage_end_date']))
+    @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
         validator = args.IndexValidator(reports_class)

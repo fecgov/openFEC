@@ -1,9 +1,8 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import filters
 from webservices import schemas
@@ -33,20 +32,20 @@ def cycle_length(elections):
         ]
     )
 
-@spec.doc(
+@doc(
     description=docs.ELECTION_SEARCH,
     tags=['financial']
 )
-class ElectionList(Resource):
+class ElectionList(utils.Resource):
 
     filter_multi_fields = [
         ('cycle', CandidateHistory.two_year_period),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.election_search)
-    @args.register_kwargs(args.make_sort_args(default=['-_office_status']))
-    @schemas.marshal_with(schemas.ElectionSearchPageSchema())
+    @use_kwargs(args.paging)
+    @use_kwargs(args.election_search)
+    @use_kwargs(args.make_sort_args(default=['-_office_status']))
+    @marshal_with(schemas.ElectionSearchPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
         return utils.fetch_page(query, kwargs)
@@ -137,16 +136,16 @@ class ElectionList(Resource):
         )
 
 
-@spec.doc(
+@doc(
     description=docs.ELECTIONS,
     tags=['financial']
 )
-class ElectionView(Resource):
+class ElectionView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.elections)
-    @args.register_kwargs(args.make_sort_args(default=['-total_receipts'], default_nulls_large=False))
-    @schemas.marshal_with(schemas.ElectionPageSchema())
+    @use_kwargs(args.paging)
+    @use_kwargs(args.elections)
+    @use_kwargs(args.make_sort_args(default=['-total_receipts'], default_nulls_large=False))
+    @marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
         return utils.fetch_page(query, kwargs, cap=0)
@@ -235,10 +234,10 @@ class ElectionView(Resource):
         )
 
 
-class ElectionSummary(Resource):
+class ElectionSummary(utils.Resource):
 
-    @args.register_kwargs(args.elections)
-    @schemas.marshal_with(schemas.ElectionSummarySchema())
+    @use_kwargs(args.elections)
+    @marshal_with(schemas.ElectionSummarySchema())
     def get(self, **kwargs):
         utils.check_election_arguments(kwargs)
         aggregates = self.get_aggregates(kwargs).subquery()
@@ -248,7 +247,7 @@ class ElectionSummary(Resource):
             aggregates.c.receipts,
             aggregates.c.disbursements,
             expenditures.c.independent_expenditures,
-        ).first()
+        ).first()._asdict()
 
     def get_aggregates(self, kwargs):
         totals_model = office_totals_map[kwargs['office']]

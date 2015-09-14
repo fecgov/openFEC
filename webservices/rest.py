@@ -3,7 +3,6 @@ A RESTful web service supporting fulltext and field-specific searches on FEC dat
 full documentation visit: https://api.open.fec.gov/developers.
 """
 import os
-import re
 import http
 import logging
 
@@ -18,6 +17,8 @@ from flask import Blueprint
 
 from flask.ext import cors
 from flask.ext import restful
+
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
 from webservices import docs
@@ -58,6 +59,7 @@ def sqla_conn_string():
 app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
+app.config['SMORE_FORMAT_RESPONSE'] = None
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
@@ -113,35 +115,34 @@ def search_typeahead_text(model, text):
     query = query.limit(20)
     return {'results': query.all()}
 
-
-@spec.doc(
+@doc(
     tags=['search'],
     description=docs.NAME_SEARCH,
 )
-class CandidateNameSearch(restful.Resource):
+class CandidateNameSearch(utils.Resource):
     """
     A quick name search (candidate or committee) optimized for response time
     for typeahead
     """
 
-    @args.register_kwargs(args.names)
-    @schemas.marshal_with(schemas.CandidateSearchListSchema())
+    @use_kwargs(args.names)
+    @marshal_with(schemas.CandidateSearchListSchema())
     def get(self, **kwargs):
         return search_typeahead_text(models.CandidateSearch, kwargs['q'])
 
 
-@spec.doc(
+@doc(
     tags=['search'],
     description=docs.NAME_SEARCH,
 )
-class CommitteeNameSearch(restful.Resource):
+class CommitteeNameSearch(utils.Resource):
     """
     A quick name search (candidate or committee) optimized for response time
     for typeahead
     """
 
-    @args.register_kwargs(args.names)
-    @schemas.marshal_with(schemas.CommitteeSearchListSchema())
+    @use_kwargs(args.names)
+    @marshal_with(schemas.CommitteeSearchListSchema())
     def get(self, **kwargs):
         return search_typeahead_text(models.CommitteeSearch, kwargs['q'])
 
@@ -233,22 +234,6 @@ api.add_resource(
 api.add_resource(filings.FilingsList, '/filings/')
 
 
-RE_URL = re.compile(r'<(?:[^:<>]+:)?([^<>]+)>')
-def extract_path(path):
-    '''
-    Transform a Flask/Werkzeug URL pattern in a Swagger one.
-    '''
-    return RE_URL.sub(r'{\1}', path)
-
-
-def resolve(key, docs, default=None):
-    for doc in docs:
-        value = doc.get(key)
-        if value:
-            return value
-    return default
-
-
 API_KEY_PARAM = {
     'in': 'query',
     'type': 'string',
@@ -258,70 +243,45 @@ API_KEY_PARAM = {
     'default': 'DEMO_KEY',
 }
 
+from flask_smore.apidoc import Documentation
+docs = Documentation(app, spec.spec)
 
-def register_resource(resource, blueprint=None):
-    key = resource.__name__.lower()
-    if blueprint:
-        key = '{0}.{1}'.format(blueprint, key)
-    rules = app.url_map._rules_by_endpoint[key]
-    resource_doc = getattr(resource, '__apidoc__', {})
-    operations = {}
-    for rule in rules:
-        path = extract_path(rule.rule)
-        path_params = [
-            param for param in resource_doc.get('path_params', [])
-            if param['name'] in rule.arguments
-        ]
-        for method in [method.lower() for method in resource.methods or []]:
-            view = getattr(resource, method)
-            method_doc = getattr(view, '__apidoc__', {})
-            docs = [method_doc, resource_doc]
-            operations[method] = {
-                'tags': resolve('tags', docs, []),
-                'responses': resolve('responses', docs, {}),
-                'description': resolve('description', docs, None),
-                'parameters': resolve('parameters', docs, []) + path_params,
-            }
-            if os.getenv('PRODUCTION'):
-                operations[method]['parameters'].insert(0, API_KEY_PARAM)
-        spec.spec.add_path(path=path, operations=operations, view=view)
-
-
-register_resource(CandidateNameSearch, blueprint='v1')
-register_resource(CommitteeNameSearch, blueprint='v1')
-register_resource(candidates.CandidateView, blueprint='v1')
-register_resource(candidates.CandidateList, blueprint='v1')
-register_resource(candidates.CandidateSearch, blueprint='v1')
-register_resource(candidates.CandidateHistoryView, blueprint='v1')
-register_resource(committees.CommitteeView, blueprint='v1')
-register_resource(committees.CommitteeList, blueprint='v1')
-register_resource(committees.CommitteeHistoryView, blueprint='v1')
-register_resource(reports.ReportsView, blueprint='v1')
-register_resource(totals.TotalsView, blueprint='v1')
-register_resource(sched_a.ScheduleAView, blueprint='v1')
-register_resource(sched_b.ScheduleBView, blueprint='v1')
-register_resource(sched_e.ScheduleEView, blueprint='v1')
-register_resource(aggregates.ScheduleABySizeView, blueprint='v1')
-register_resource(aggregates.ScheduleAByStateView, blueprint='v1')
-register_resource(aggregates.ScheduleAByZipView, blueprint='v1')
-register_resource(aggregates.ScheduleAByEmployerView, blueprint='v1')
-register_resource(aggregates.ScheduleAByOccupationView, blueprint='v1')
-register_resource(aggregates.ScheduleAByContributorView, blueprint='v1')
-register_resource(aggregates.ScheduleAByContributorTypeView, blueprint='v1')
-register_resource(aggregates.ScheduleBByRecipientView, blueprint='v1')
-register_resource(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
-register_resource(aggregates.ScheduleBByPurposeView, blueprint='v1')
-register_resource(aggregates.ScheduleEByCandidateView, blueprint='v1')
-register_resource(aggregates.CommunicationCostByCandidateView, blueprint='v1')
-register_resource(aggregates.ElectioneeringByCandidateView, blueprint='v1')
-register_resource(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
-register_resource(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
-register_resource(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')
-register_resource(filings.FilingsView, blueprint='v1')
-register_resource(filings.FilingsList, blueprint='v1')
-register_resource(elections.ElectionList, blueprint='v1')
-register_resource(elections.ElectionView, blueprint='v1')
-register_resource(dates.ReportingDatesView, blueprint='v1')
+docs.register(CandidateNameSearch, blueprint='v1')
+docs.register(CommitteeNameSearch, blueprint='v1')
+docs.register(candidates.CandidateView, blueprint='v1')
+docs.register(candidates.CandidateList, blueprint='v1')
+docs.register(candidates.CandidateSearch, blueprint='v1')
+docs.register(candidates.CandidateHistoryView, blueprint='v1')
+docs.register(committees.CommitteeView, blueprint='v1')
+docs.register(committees.CommitteeList, blueprint='v1')
+docs.register(committees.CommitteeHistoryView, blueprint='v1')
+docs.register(reports.ReportsView, blueprint='v1')
+docs.register(totals.TotalsView, blueprint='v1')
+docs.register(sched_a.ScheduleAView, blueprint='v1')
+docs.register(sched_b.ScheduleBView, blueprint='v1')
+docs.register(sched_e.ScheduleEView, blueprint='v1')
+docs.register(aggregates.ScheduleABySizeView, blueprint='v1')
+docs.register(aggregates.ScheduleAByStateView, blueprint='v1')
+docs.register(aggregates.ScheduleAByZipView, blueprint='v1')
+docs.register(aggregates.ScheduleAByEmployerView, blueprint='v1')
+docs.register(aggregates.ScheduleAByOccupationView, blueprint='v1')
+docs.register(aggregates.ScheduleAByContributorView, blueprint='v1')
+docs.register(aggregates.ScheduleAByContributorTypeView, blueprint='v1')
+docs.register(aggregates.ScheduleBByRecipientView, blueprint='v1')
+docs.register(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
+docs.register(aggregates.ScheduleBByPurposeView, blueprint='v1')
+docs.register(aggregates.ScheduleEByCandidateView, blueprint='v1')
+docs.register(aggregates.CommunicationCostByCandidateView, blueprint='v1')
+docs.register(aggregates.ElectioneeringByCandidateView, blueprint='v1')
+docs.register(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
+docs.register(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
+docs.register(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')
+docs.register(filings.FilingsView, blueprint='v1')
+docs.register(filings.FilingsList, blueprint='v1')
+docs.register(elections.ElectionList, blueprint='v1')
+docs.register(elections.ElectionView, blueprint='v1')
+docs.register(elections.ElectionSummary, blueprint='v1')
+docs.register(dates.ReportingDatesView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
