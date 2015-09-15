@@ -3,30 +3,22 @@ create materialized view ofec_committee_history_mv_tmp as
 with
     cycles as (
         select
-            cmte_sk,
+            committee_id,
             generate_series(
-                min(rpt_yr + rpt_yr % 2)::int,
-                max(rpt_yr + rpt_yr % 2)::int,
+                min(get_cycle(report_year)),
+                max(get_cycle(report_year)),
                 2
             ) as cycle
-        from (
-            select cmte_sk, rpt_yr from factpacsandparties_f3x
-            union all
-            select cmte_sk, rpt_yr from factpresidential_f3p
-            union all
-            select cmte_sk, rpt_yr from facthousesenate_f3
-            union all
-            select cmte_sk, rpt_yr from dimcmteproperties
-        ) years
-        group by cmte_sk
+        from vw_filing_history
+        group by committee_id
     ),
     cycle_agg as (
         select
-            cmte_sk,
+            committee_id,
             array_agg(cycles.cycle)::int[] as cycles,
             max(cycles.cycle) as max_cycle
         from cycles
-        group by cmte_sk
+        group by committee_id
     ),
     dcp_original as (
         select cmte_sk, min(receipt_dt) receipt_dt from dimcmteproperties
@@ -107,8 +99,8 @@ select distinct on (dcp.cmte_sk, cycle)
     cycle_agg.cycles,
     coalesce(candidate_agg.candidate_ids, '{}'::text[]) as candidate_ids
 from dimcmteproperties dcp
-left join cycle_agg on dcp.cmte_sk = cycle_agg.cmte_sk
-left join cycles on dcp.cmte_sk = cycles.cmte_sk and dcp.rpt_yr <= cycles.cycle
+left join cycle_agg on dcp.cmte_id = cycle_agg.committee_id
+left join cycles on dcp.cmte_id = cycles.committee_id and dcp.rpt_yr <= cycles.cycle
 left join dimparty p on dcp.cand_pty_affiliation = p.party_affiliation
 left join dimcmtetpdsgn dd on dcp.cmte_sk = dd.cmte_sk and extract(year from dd.receipt_date) <= cycles.cycle
 left join dcp_original on dcp.cmte_sk = dcp_original.cmte_sk

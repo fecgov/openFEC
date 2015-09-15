@@ -22,8 +22,8 @@ with
         select
             cand_sk,
             generate_series(
-                min(election_yr + election_yr % 2)::int,
-                max(election_yr + election_yr % 2)::int,
+                min(get_cycle(election_yr)),
+                max(get_cycle(election_yr)),
                 2
             ) as cycle
         from dimcandproperties
