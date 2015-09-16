@@ -29,7 +29,7 @@ def cycle_length(elections):
         [
             (elections.c.office == 'P', 4),
             (elections.c.office == 'S', 6),
-            (elections.c.office == 'H', 6),
+            (elections.c.office == 'H', 2),
         ]
     )
 
