@@ -232,6 +232,31 @@ class ScheduleBByPurposeView(AggregateResource):
     ]
 
 
+class CandidateAggregateResource(AggregateResource):
+    @property
+    def sort_args(self):
+        return args.make_sort_args(
+            validator=args.IndexValidator(
+                self.model,
+                extra=['candidate', 'committee'],
+            ),
+        )
+
+    @property
+    def query_options(self):
+        return [
+            sa.orm.joinedload(self.model.candidate),
+            sa.orm.joinedload(self.model.committee),
+        ]
+
+    @property
+    def join_columns(self):
+        return {
+            'committee': (models.CommitteeDetail.name, self.model.committee),
+            'candidate': (models.CandidateDetail.name, self.model.candidate),
+        }
+
+
 @doc(
     tags=['schedules/schedule_b'],
     description=(
@@ -239,7 +264,7 @@ class ScheduleBByPurposeView(AggregateResource):
         'counting, memoed items are not included.'
     )
 )
-class ScheduleEByCandidateView(AggregateResource):
+class ScheduleEByCandidateView(CandidateAggregateResource):
 
     model = models.ScheduleEByCandidate
     schema = schemas.ScheduleEByCandidatePageSchema
@@ -251,10 +276,6 @@ class ScheduleEByCandidateView(AggregateResource):
     filter_match_fields = [
         ('support_oppose', models.ScheduleEByCandidate.support_oppose_indicator),
     ]
-    query_options = [
-        sa.orm.joinedload(models.ScheduleEByCandidate.candidate),
-        sa.orm.joinedload(models.ScheduleEByCandidate.committee),
-    ]
 
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(committee_id, **kwargs)
@@ -265,7 +286,7 @@ class ScheduleEByCandidateView(AggregateResource):
     tags=['communication_cost'],
     description='Communication cost aggregated by candidate ID and committee ID.',
 )
-class CommunicationCostByCandidateView(AggregateResource):
+class CommunicationCostByCandidateView(CandidateAggregateResource):
 
     model = models.CommunicationCostByCandidate
     schema = schemas.CommunicationCostByCandidatePageSchema
@@ -277,10 +298,6 @@ class CommunicationCostByCandidateView(AggregateResource):
     filter_match_fields = [
         ('support_oppose', models.CommunicationCostByCandidate.support_oppose_indicator),
     ]
-    query_options = [
-        sa.orm.joinedload(models.CommunicationCostByCandidate.candidate),
-        sa.orm.joinedload(models.CommunicationCostByCandidate.committee),
-    ]
 
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(committee_id, **kwargs)
@@ -291,7 +308,7 @@ class CommunicationCostByCandidateView(AggregateResource):
     tags=['electioneering'],
     description='Electioneering costs aggregated by candidate.',
 )
-class ElectioneeringByCandidateView(AggregateResource):
+class ElectioneeringByCandidateView(CandidateAggregateResource):
 
     model = models.ElectioneeringByCandidate
     schema = schemas.ElectioneeringByCandidatePageSchema

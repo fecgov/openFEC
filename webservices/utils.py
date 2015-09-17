@@ -28,10 +28,10 @@ def check_cap(kwargs, cap):
             )
 
 
-def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
+def fetch_page(query, kwargs, model=None, join_columns=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
-    query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
+    query, _ = sorting.sort(query, sort, model=model, join_columns=join_columns, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
