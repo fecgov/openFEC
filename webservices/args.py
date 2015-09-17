@@ -2,7 +2,6 @@ import logging
 import functools
 
 import sqlalchemy as sa
-from smore import swagger
 from dateutil.parser import parse as parse_date
 
 import webargs
@@ -29,29 +28,6 @@ class FlaskRestParser(FlaskParser):
 
 
 parser = FlaskRestParser()
-
-
-def unique_on(values, predicate):
-    seen = set()
-    for value in values:
-        key = predicate(value)
-        if key not in seen:
-            seen.add(key)
-            yield value
-
-
-def register_kwargs(arg_dict):
-    def wrapper(func):
-        params = swagger.args2parameters(arg_dict, default_in='query')
-        func.__apidoc__ = getattr(func, '__apidoc__', {})
-        func.__apidoc__['parameters'] = list(
-            unique_on(
-                params + func.__apidoc__.get('parameters', []),
-                lambda value: value['name'],
-            )
-        )
-        return parser.use_kwargs(arg_dict)(func)
-    return wrapper
 
 
 def _validate_natural(value):
