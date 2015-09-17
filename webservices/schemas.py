@@ -1,5 +1,4 @@
 import re
-import http
 import functools
 
 import marshmallow as ma
@@ -14,26 +13,6 @@ from webservices import __API_VERSION__
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
 spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
-
-
-def marshal_with(schema, code=http.client.OK, description=None, wrap=True):
-    def wrapper(func):
-        func.__apidoc__ = getattr(func, '__apidoc__', {})
-        func.__apidoc__.setdefault('responses', {}).update({
-            code: {
-                'schema': schema,
-                'description': description or '',
-            }
-        })
-
-        if wrap:
-            @functools.wraps(func)
-            def wrapped(*args, **kwargs):
-                return schema.dump(func(*args, **kwargs)).data
-            return wrapped
-        return func
-
-    return wrapper
 
 
 def register_schema(schema, definition_name=None):
@@ -359,7 +338,7 @@ class ElectionSummarySchema(ApiSchema):
     receipts = ma.fields.Decimal(places=2)
     disbursements = ma.fields.Decimal(places=2)
     independent_expenditures = ma.fields.Decimal(places=2)
-augment_schemas(ElectionSummarySchema)
+register_schema(ElectionSummarySchema)
 
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()

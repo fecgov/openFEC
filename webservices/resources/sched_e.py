@@ -1,15 +1,15 @@
 import sqlalchemy as sa
+from flask_smore import doc, use_kwargs, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.common.views import ItemizedResource
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_e'],
     description=docs.SCHEDULE_E,
 )
@@ -41,10 +41,10 @@ class ScheduleEView(ItemizedResource):
         (('min_image_number', 'max_image_number'), models.ScheduleE.image_number),
     ]
 
-    @args.register_kwargs(args.itemized)
-    @args.register_kwargs(args.schedule_e)
-    @args.register_kwargs(args.make_seek_args())
-    @args.register_kwargs(
+    @use_kwargs(args.itemized)
+    @use_kwargs(args.schedule_e)
+    @use_kwargs(args.make_seek_args())
+    @use_kwargs(
         args.make_sort_args(
             validator=args.OptionValidator([
                 'expenditure_date',
@@ -54,7 +54,7 @@ class ScheduleEView(ItemizedResource):
             multiple=False,
         )
     )
-    @schemas.marshal_with(schemas.ScheduleEPageSchema())
+    @marshal_with(schemas.ScheduleEPageSchema())
     def get(self, **kwargs):
         return super(ScheduleEView, self).get(**kwargs)
 

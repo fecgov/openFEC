@@ -1,5 +1,4 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
 
 from webservices import utils
 from webservices import filters
@@ -10,7 +9,7 @@ from webservices.common import models
 from webservices.config import SQL_CONFIG
 
 
-class ApiResource(Resource):
+class ApiResource(utils.Resource):
 
     model = None
     filter_match_fields = []
