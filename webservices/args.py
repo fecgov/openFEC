@@ -107,8 +107,9 @@ class IndexValidator(OptionValidator):
     :param Base model: SQLALchemy model.
     :param list exclude: Optional list of columns to exclude.
     """
-    def __init__(self, model, exclude=None):
+    def __init__(self, model, extra=None, exclude=None):
         self.model = model
+        self.extra = extra or []
         self.exclude = exclude or []
 
     @property
@@ -122,7 +123,7 @@ class IndexValidator(OptionValidator):
             column_map[column['column_names'][0]]
             for column in inspector.get_indexes(self.model.__tablename__)
             if not self._is_excluded(column_map.get(column['column_names'][0]))
-        ]
+        ] + self.extra
 
     def _is_excluded(self, value):
         return not value or value in self.exclude
