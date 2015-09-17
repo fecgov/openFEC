@@ -16,10 +16,11 @@ class ApiResource(utils.Resource):
     filter_multi_fields = []
     filter_range_fields = []
     query_options = []
+    join_columns = {}
 
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
-        return utils.fetch_page(query, kwargs, model=self.model)
+        return utils.fetch_page(query, kwargs, model=self.model, join_columns=self.join_columns)
 
     def build_query(self, _apply_options=True, **kwargs):
         query = self.model.query
