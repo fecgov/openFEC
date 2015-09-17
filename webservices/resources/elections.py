@@ -28,7 +28,7 @@ def cycle_length(elections):
         [
             (elections.c.office == 'P', 4),
             (elections.c.office == 'S', 6),
-            (elections.c.office == 'H', 6),
+            (elections.c.office == 'H', 2),
         ]
     )
 
@@ -87,6 +87,7 @@ class ElectionList(utils.Resource):
             CandidateHistory.two_year_period,
         ).filter(
             CandidateHistory.candidate_status == 'C',
+            CandidateHistory.candidate_inactive == None,  # noqa
         )
         if kwargs['cycle']:
             query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
@@ -160,7 +161,10 @@ class ElectionView(utils.Resource):
         return db.session.query(
             aggregates,
             filings,
-            sa.case([(outcomes.c.cand_id != None, True)], else_=False).label('won'),
+            sa.case(
+                [(outcomes.c.cand_id != None, True)],  # noqa
+                else_=False,
+            ).label('won'),
         ).join(
             filings,
             aggregates.c.candidate_id == filings.c.candidate_id,
@@ -307,6 +311,7 @@ def filter_candidates(query, kwargs):
 def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
+        CandidateHistory.candidate_inactive == None,  # noqa
         CandidateCommitteeLink.election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
         CommitteeHistory.cycle == kwargs['cycle'],
         CommitteeHistory.designation.in_(['P', 'A']),
