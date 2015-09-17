@@ -258,7 +258,7 @@ class CandidateAggregateResource(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_b'],
+    tags=['schedules/schedule_e'],
     description=(
         'Schedule E receipts aggregated by recipient candidate. To avoid double '
         'counting, memoed items are not included.'
