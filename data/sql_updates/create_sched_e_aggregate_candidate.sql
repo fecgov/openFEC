@@ -1,6 +1,7 @@
 drop materialized view if exists ofec_sched_e_aggregate_candidate_mv_tmp;
 create materialized view ofec_sched_e_aggregate_candidate_mv_tmp as
 select
+    row_number() over () as idx,
     cmte_id,
     s_o_cand_id as cand_id,
     s_o_ind as support_oppose_indicator,
@@ -16,6 +17,8 @@ group by
     support_oppose_indicator,
     cycle
 ;
+
+create unique index on ofec_sched_e_aggregate_candidate_mv_tmp (idx);
 
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (cmte_id);
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (cand_id);

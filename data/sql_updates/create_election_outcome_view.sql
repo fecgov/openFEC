@@ -39,6 +39,8 @@ union all
 )
 ;
 
+create unique index on ofec_election_result_mv_tmp (cand_valid_yr_id);
+
 create index on ofec_election_result_mv_tmp (election_yr);
 create index on ofec_election_result_mv_tmp (cand_office);
 create index on ofec_election_result_mv_tmp (cand_office_st);
