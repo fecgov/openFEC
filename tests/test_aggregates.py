@@ -116,10 +116,12 @@ class TestCandidateAggregates(ApiBaseTest):
         factories.CandidateCommitteeLinkFactory(
             candidate_key=self.candidate.candidate_key,
             committee_key=self.committees[0].committee_key,
+            election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_key=self.candidate.candidate_key,
             committee_key=self.committees[1].committee_key,
+            election_year=2012,
         )
 
     def test_by_size(self):
