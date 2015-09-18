@@ -25,19 +25,31 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
         *label_columns
     ).join(
         CandidateCommitteeLink,
-        CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
+        sa.and_(
+            CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
+            CandidateCommitteeLink.election_year.in_([
+                CandidateHistory.two_year_period,
+                CandidateHistory.two_year_period - 1,
+            ]),
+        )
     ).join(
         CommitteeHistory,
-        CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+        sa.and_(
+            CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+            CandidateCommitteeLink.election_year.in_([
+                CommitteeHistory.cycle,
+                CommitteeHistory.cycle - 1,
+            ]),
+        )
     ).join(
         aggregate_model,
-        CommitteeHistory.committee_id == aggregate_model.committee_id,
+        sa.and_(
+            CommitteeHistory.committee_id == aggregate_model.committee_id,
+            CommitteeHistory.cycle == aggregate_model.cycle,
+        )
     ).filter(
         CandidateHistory.candidate_id.in_(kwargs['candidate_id']),
-        CandidateHistory.two_year_period.in_(kwargs['cycle']),
-        CommitteeHistory.cycle.in_(kwargs['cycle']),
         CommitteeHistory.designation.in_(['P', 'A']),
-        aggregate_model.cycle.in_(kwargs['cycle']),
     ).group_by(
         CandidateHistory.candidate_id,
         aggregate_model.cycle,
