@@ -23,8 +23,6 @@ class CommitteeTotals(BaseModel):
     receipts = db.Column(db.Integer)
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
-    net_contributions = db.Column(db.Integer)
-    net_operating_expenditures = db.Column(db.Integer)
 
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
@@ -60,6 +58,8 @@ class CommitteeTotalsPacParty(CommitteeTotals):
     transfers_from_nonfed_account = db.Column(db.Integer)
     transfers_from_nonfed_levin = db.Column(db.Integer)
     transfers_to_affiliated_committee = db.Column(db.Integer)
+    net_contributions = db.Column(db.Integer)
+    net_operating_expenditures = db.Column(db.Integer)
 
 
 class CommitteeTotalsPresidential(CommitteeTotals):
@@ -96,6 +96,8 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
     other_receipts = db.Column(db.Integer)
     transfers_from_other_authorized_committee = db.Column(db.Integer)
     transfers_to_other_authorized_committee = db.Column(db.Integer)
+    net_contributions = db.Column(db.Integer)
+    net_operating_expenditures = db.Column(db.Integer)
 
 
 class CommitteeTotalsIEOnly(BaseModel):
