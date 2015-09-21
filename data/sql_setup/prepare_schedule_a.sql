@@ -1,53 +1,50 @@
--- Create simple indices on filtered columns
-create index on sched_a (rpt_yr) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (entity_tp) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (image_num) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (contbr_id) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (contbr_st) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (contbr_city) where rpt_yr >= :START_YEAR_ITEMIZED;
-
--- Create functional index on individual receipts
-create index on sched_a
-    (is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text))
-    where rpt_yr >= :START_YEAR_ITEMIZED;
-
--- Create composite indices on sortable columns
-create index on sched_a (contb_receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (contb_aggregate_ytd, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-
--- Create composite indices on `cmte_id`; else filtering by committee can be very slow
--- TODO(jmcarp) Find a better solution
-create index on sched_a (cmte_id, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (cmte_id, contb_receipt_dt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (cmte_id, contb_receipt_amt, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_a (cmte_id, contb_aggregate_ytd, sched_a_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-
--- Use smaller histogram bins on state column for faster queries on rare states (AS, PR)
-alter table sched_a alter column contbr_st set statistics 1000;
-
--- Create Schedule A fulltext table
-drop table if exists ofec_sched_a_fulltext;
-create table ofec_sched_a_fulltext as
+-- Create Schedule A table
+drop table if exists ofec_sched_a;
+create table ofec_sched_a as
 select
-    sched_a_sk,
+    *,
     to_tsvector(contbr_nm) as contributor_name_text,
     to_tsvector(contbr_employer) as contributor_employer_text,
-    to_tsvector(contbr_occupation) as contributor_occupation_text
+    to_tsvector(contbr_occupation) as contributor_occupation_text,
+    is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
+        as is_individual
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 ;
 
+alter table ofec_sched_a add primary key (sched_a_sk);
+
+-- Create simple indices on filtered columns
+create index on ofec_sched_a (rpt_yr);
+create index on ofec_sched_a (entity_tp);
+create index on ofec_sched_a (image_num);
+create index on ofec_sched_a (sched_a_sk);
+create index on ofec_sched_a (contbr_id);
+create index on ofec_sched_a (contbr_st);
+create index on ofec_sched_a (contbr_city);
+create index on ofec_sched_a (is_individual);
+
+-- Create composite indices on sortable columns
+create index on ofec_sched_a (contb_receipt_dt, sched_a_sk);
+create index on ofec_sched_a (contb_receipt_amt, sched_a_sk);
+create index on ofec_sched_a (contb_aggregate_ytd, sched_a_sk);
+
+-- Create composite indices on `cmte_id`; else filtering by committee can be very slow
+create index on ofec_sched_a (cmte_id, sched_a_sk);
+create index on ofec_sched_a (cmte_id, contb_receipt_dt, sched_a_sk);
+create index on ofec_sched_a (cmte_id, contb_receipt_amt, sched_a_sk);
+create index on ofec_sched_a (cmte_id, contb_aggregate_ytd, sched_a_sk);
+
 -- Create indices on filtered fulltext columns
-alter table ofec_sched_a_fulltext add primary key (sched_a_sk);
-create index on ofec_sched_a_fulltext using gin (contributor_name_text);
-create index on ofec_sched_a_fulltext using gin (contributor_employer_text);
-create index on ofec_sched_a_fulltext using gin (contributor_occupation_text);
+create index on ofec_sched_a using gin (contributor_name_text);
+create index on ofec_sched_a using gin (contributor_employer_text);
+create index on ofec_sched_a using gin (contributor_occupation_text);
+
+-- Use smaller histogram bins on state column for faster queries on rare states (AS, PR)
+alter table ofec_sched_a alter column contbr_st set statistics 1000;
 
 -- Analyze tables
 analyze sched_a;
-analyze ofec_sched_a_fulltext;
 
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;

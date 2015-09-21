@@ -218,7 +218,12 @@ ScheduleASchema = make_schema(
         'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
     },
     options={
-        'exclude': ('memo_code', ),
+        'exclude': (
+            'memo_code',
+            'contributor_name_text',
+            'contributor_employer_text',
+            'contributor_occupation_text',
+        ),
     }
 )
 ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas.SeekPageSchema)
@@ -275,7 +280,11 @@ ScheduleBSchema = make_schema(
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
     },
     options={
-        'exclude': ('memo_code', ),
+        'exclude': (
+            'memo_code',
+            'recipient_name_text',
+            'disbursement_description_text'
+        ),
     }
 )
 ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas.SeekPageSchema)
@@ -292,7 +301,10 @@ ScheduleESchema = make_schema(
         'office_total_ytd': ma.fields.Decimal(places=2),
     },
     options={
-        'exclude': ('memo_code', ),
+        'exclude': (
+            'memo_code',
+            'payee_name_text',
+        ),
     }
 )
 ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas.SeekPageSchema)

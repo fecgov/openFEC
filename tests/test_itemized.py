@@ -30,7 +30,6 @@ class TestItemized(ApiBaseTest):
         receipts = [
             factories.ScheduleAFactory(report_year=2014, contribution_receipt_date=datetime.date(2014, 1, 1)),
             factories.ScheduleAFactory(report_year=2012, contribution_receipt_date=datetime.date(2012, 1, 1)),
-            factories.ScheduleAFactory(report_year=1986, contribution_receipt_date=datetime.date(1986, 1, 1)),
         ]
         response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
         self.assertEqual(
@@ -71,15 +70,11 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext(self):
         names = ['David Koch', 'George Soros']
         filings = [
-            factories.ScheduleAFactory(contributor_name=name)
-            for name in names
-        ]
-        [
-            factories.ScheduleASearchFactory(
-                sched_a_sk=filing.sched_a_sk,
+            factories.ScheduleAFactory(
+                contributor_name=name,
                 contributor_name_text=sa.func.to_tsvector(name),
             )
-            for filing, name in zip(filings, names)
+            for name in names
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_name='soros'))
         self.assertEqual(len(results), 1)
@@ -88,15 +83,11 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
         filings = [
-            factories.ScheduleAFactory(contributor_employer=employer)
-            for employer in employers
-        ]
-        [
-            factories.ScheduleASearchFactory(
-                sched_a_sk=filing.sched_a_sk,
+            factories.ScheduleAFactory(
+                contributor_employer=employer,
                 contributor_employer_text=sa.func.to_tsvector(employer),
             )
-            for filing, employer in zip(filings, employers)
+            for employer in employers
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_employer='vandelay'))
         self.assertEqual(len(results), 1)
@@ -105,15 +96,11 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
         filings = [
-            factories.ScheduleAFactory(contributor_occupation=occupation)
-            for occupation in occupations
-        ]
-        [
-            factories.ScheduleASearchFactory(
-                sched_a_sk=filing.sched_a_sk,
+            factories.ScheduleAFactory(
+                contributor_occupation=occupation,
                 contributor_occupation_text=sa.func.to_tsvector(occupation),
             )
-            for filing, occupation in zip(filings, occupations)
+            for occupation in occupations
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_occupation='doctor'))
         self.assertEqual(len(results), 1)

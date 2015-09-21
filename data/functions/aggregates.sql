@@ -15,9 +15,9 @@ begin
     perform ofec_sched_b_update_aggregate_recipient_id();
 
     -- Update full-text tables in place
-    perform ofec_sched_a_update_fulltext();
-    perform ofec_sched_b_update_fulltext();
-    perform ofec_sched_e_update_fulltext();
+    perform ofec_sched_a_update();
+    perform ofec_sched_b_update();
+    perform ofec_sched_e_update();
 
     -- Clear queue tables
     delete from ofec_sched_a_queue_new;

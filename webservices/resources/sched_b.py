@@ -31,8 +31,8 @@ class ScheduleBView(ItemizedResource):
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
     ]
     filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleBSearch.recipient_name_text),
-        ('disbursement_description', models.ScheduleBSearch.disbursement_description_text),
+        ('recipient_name', models.ScheduleB.recipient_name_text),
+        ('disbursement_description', models.ScheduleB.disbursement_description_text),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleB.disbursement_date),
@@ -58,9 +58,3 @@ class ScheduleBView(ItemizedResource):
         query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
         return query
-
-    def join_fulltext(self, query):
-        return query.join(
-            models.ScheduleBSearch,
-            models.ScheduleB.sched_b_sk == models.ScheduleBSearch.sched_b_sk,
-        )

@@ -1,27 +1,26 @@
--- Create simple indices on filtered columns
-create index on sched_e (cmte_id);
-create index on sched_e (s_o_cand_id);
-create index on sched_e (entity_tp);
-create index on sched_e (image_num);
-create index on sched_e (rpt_yr);
-
--- Create composite indices on sortable columns
-create index on sched_e (exp_dt, sched_e_sk);
-create index on sched_e (exp_amt, sched_e_sk);
-create index on sched_e (cal_ytd_ofc_sought, sched_e_sk);
-
--- Create Schedule E fulltext table
-drop table if exists ofec_sched_e_fulltext;
-create table ofec_sched_e_fulltext as
+-- Create Schedule E table
+drop table if exists ofec_sched_e;
+create table ofec_sched_e as
 select
-    sched_e_sk,
+    *,
     to_tsvector(pye_nm) as payee_name_text
 from sched_e
 ;
 
+-- Create simple indices on filtered columns
+create index on ofec_sched_e (cmte_id);
+create index on ofec_sched_e (s_o_cand_id);
+create index on ofec_sched_e (entity_tp);
+create index on ofec_sched_e (image_num);
+create index on ofec_sched_e (rpt_yr);
+
+-- Create composite indices on sortable columns
+create index on ofec_sched_e (exp_dt, sched_e_sk);
+create index on ofec_sched_e (exp_amt, sched_e_sk);
+create index on ofec_sched_e (cal_ytd_ofc_sought, sched_e_sk);
+
 -- Create indices on filtered fulltext columns
-alter table ofec_sched_e_fulltext add primary key (sched_e_sk);
-create index on ofec_sched_e_fulltext using gin (payee_name_text);
+create index on ofec_sched_e using gin (payee_name_text);
 
 -- Create queue tables to hold changes to Schedule E
 drop table if exists ofec_sched_e_queue_new;

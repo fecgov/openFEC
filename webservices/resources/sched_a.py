@@ -52,9 +52,9 @@ class ScheduleAView(ItemizedResource):
         (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
     ]
     filter_fulltext_fields = [
-        ('contributor_name', models.ScheduleASearch.contributor_name_text),
-        ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
-        ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
+        ('contributor_name', models.ScheduleA.contributor_name_text),
+        ('contributor_employer', models.ScheduleA.contributor_employer_text),
+        ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
     ]
     query_options = [
         sa.orm.joinedload(models.ScheduleA.committee),
@@ -82,9 +82,3 @@ class ScheduleAView(ItemizedResource):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         return query
-
-    def join_fulltext(self, query):
-        return query.join(
-            models.ScheduleASearch,
-            models.ScheduleA.sched_a_sk == models.ScheduleASearch.sched_a_sk,
-        )

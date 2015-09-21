@@ -1,46 +1,46 @@
+-- Create Schedule B table
+drop table if exists ofec_sched_b;
+create table ofec_sched_b as
+select
+    *,
+    to_tsvector(recipient_nm) as recipient_name_text,
+    to_tsvector(disb_desc) as disbursement_description_text,
+    disbursement_purpose(disb_tp, disb_desc) as disbursement_purpose_category
+from sched_b
+where rpt_yr >= :START_YEAR_ITEMIZED
+;
+
+alter table ofec_sched_b add primary key (sched_b_sk);
+
 -- Create simple indices on filtered columns
-create index on sched_b (rpt_yr) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (image_num) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (recipient_st) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (recipient_city) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (recipient_cmte_id) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on ofec_sched_b (rpt_yr);
+create index on ofec_sched_b (image_num);
+create index on ofec_sched_b (sched_b_sk);
+create index on ofec_sched_b (recipient_st);
+create index on ofec_sched_b (recipient_city);
+create index on ofec_sched_b (recipient_cmte_id);
 
 -- Create composite indices on sortable columns
-create index on sched_b(disb_dt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b(disb_amt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on ofec_sched_b(disb_dt, sched_b_sk);
+create index on ofec_sched_b(disb_amt, sched_b_sk);
 
 -- Create composite indices on `cmte_id`; else filtering by committee can be very slow
--- TODO(jmcarp) Find a better solution
-create index on sched_b (cmte_id, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (cmte_id, disb_dt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
-create index on sched_b (cmte_id, disb_amt, sched_b_sk) where rpt_yr >= :START_YEAR_ITEMIZED;
+create index on ofec_sched_b (cmte_id, sched_b_sk);
+create index on ofec_sched_b (cmte_id, disb_dt, sched_b_sk);
+create index on ofec_sched_b (cmte_id, disb_amt, sched_b_sk);
+
+-- Create indices on fulltext columns
+create index on ofec_sched_b using gin (recipient_name_text);
+create index on ofec_sched_b using gin (disbursement_description_text);
 
 -- Create index for join on electioneering costs
 create index on sched_b (link_id);
 
 -- Use smaller histogram bins on state column for faster queries on rare states (AS, PR)
-alter table sched_b alter column recipient_st set statistics 1000;
-
--- Create Schedule B fulltext table
-drop table if exists ofec_sched_b_fulltext;
-create table ofec_sched_b_fulltext as
-select
-    sched_b_sk,
-    to_tsvector(recipient_nm) as recipient_name_text,
-    to_tsvector(disb_desc) as disbursement_description_text
-from sched_b
-where rpt_yr >= :START_YEAR_ITEMIZED
-;
-
--- Create indices on filtered fulltext columns
-alter table ofec_sched_b_fulltext add primary key (sched_b_sk);
-create index on ofec_sched_b_fulltext using gin (recipient_name_text);
-create index on ofec_sched_b_fulltext using gin (disbursement_description_text);
+alter table ofec_sched_b alter column recipient_st set statistics 1000;
 
 -- Analyze tables
 analyze sched_b;
-analyze ofec_sched_b_fulltext;
 
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
