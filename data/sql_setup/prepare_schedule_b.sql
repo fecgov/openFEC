@@ -40,7 +40,7 @@ create index on sched_b (link_id);
 alter table ofec_sched_b alter column recipient_st set statistics 1000;
 
 -- Analyze tables
-analyze sched_b;
+analyze ofec_sched_b;
 
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
