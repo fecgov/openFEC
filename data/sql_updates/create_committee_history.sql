@@ -20,7 +20,7 @@ with
         from cycles
         group by committee_id
     ),
-    dcp_original as (
+    filings_original as (
         select committee_id, min(receipt_date) receipt_date from vw_filing_history
         where report_year >= :START_YEAR
         group by committee_id
@@ -103,7 +103,7 @@ left join cycle_agg on dcp.cmte_id = cycle_agg.committee_id
 left join cycles on dcp.cmte_id = cycles.committee_id and dcp.rpt_yr <= cycles.cycle
 left join dimparty p on dcp.cand_pty_affiliation = p.party_affiliation
 left join dimcmtetpdsgn dd on dcp.cmte_sk = dd.cmte_sk and extract(year from dd.receipt_date) <= cycles.cycle
-left join dcp_original on dcp.cmte_id = dcp_original.committee_id
+left join filings_original on dcp.cmte_id = filings_original.committee_id
 left join candidate_agg on dcp.cmte_sk = candidate_agg.cmte_sk
 where max_cycle >= :START_YEAR
 order by dcp.cmte_sk, cycle desc, dcp.rpt_yr desc

@@ -241,8 +241,8 @@ committee_list = {
     'state': IString(multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
     'party': IString(multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
-    'min_first_file_date': Date(description='Filters out committees that first filed their registration before this date. Can bu used as a range with max_first_file_date. To see when a Committee first filed its F1.'),
-    'max_first_file_date': Date(description='Filters out committees that first filed their registration after this date. Can bu used as a range with start_date. To see when a Committee first filed its F1.'),
+    'min_first_file_date': Date(description='Filters out committees that first filed their filing before this date. Can be used as a range with max_first_file_date. To see when a Committee first filed.'),
+    'max_first_file_date': Date(description='Filters out committees that first filed their registration after this date. Can bu used as a range with start_date. To see when a Committee first filed.'),
 }
 
 filings = {
