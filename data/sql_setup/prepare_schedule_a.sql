@@ -44,7 +44,7 @@ create index on ofec_sched_a using gin (contributor_occupation_text);
 alter table ofec_sched_a alter column contbr_st set statistics 1000;
 
 -- Analyze tables
-analyze sched_a;
+analyze ofec_sched_a;
 
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;

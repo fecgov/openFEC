@@ -24,7 +24,7 @@ before_install:
 
 before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
-  - pip install -r requirements.txt
+  - pip install -U -r requirements.txt
 
 script: nosetests -s
 
