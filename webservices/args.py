@@ -380,12 +380,6 @@ schedule_a_by_contributor = {
 }
 
 
-schedule_a_by_contributor_type = {
-    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'individual': Bool(description='Restrict to individual donors'),
-}
-
-
 schedule_b_by_recipient = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'recipient_name': Arg(str, multiple=True, description='Recipient name'),

@@ -159,26 +159,6 @@ class ScheduleAByContributorView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
-    description=(
-        'Schedule A receipts aggregated by contributor type (individual or committee), if applicable. '
-        'To avoid double counting, memoed items are not included.'
-    )
-)
-class ScheduleAByContributorTypeView(AggregateResource):
-
-    model = models.ScheduleAByContributorType
-    schema = schemas.ScheduleAByContributorTypePageSchema
-    query_args = args.schedule_a_by_contributor_type
-    filter_match_fields = [
-        ('individual', models.ScheduleAByContributorType.individual),
-    ]
-    filter_multi_fields = [
-        ('cycle', models.ScheduleAByContributorType.cycle),
-    ]
-
-
-@doc(
     tags=['schedules/schedule_b'],
     description=(
         'Schedule B receipts aggregated by recipient name. To avoid '
