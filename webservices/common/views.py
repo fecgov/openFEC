@@ -6,7 +6,6 @@ from webservices import sorting
 from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
-from webservices.config import SQL_CONFIG
 
 
 class ApiResource(utils.Resource):
@@ -58,7 +57,6 @@ class ItemizedResource(ApiResource):
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
-        query = query.filter(self.year_column >= SQL_CONFIG['START_YEAR_ITEMIZED'])
         query = self.filter_fulltext(query, kwargs)
         return query
 
@@ -90,8 +88,6 @@ class ItemizedResource(ApiResource):
         return page_query, count
 
     def filter_fulltext(self, query, kwargs):
-        if any(kwargs[key] for key, column in self.filter_fulltext_fields):
-            query = self.join_fulltext(query)
         for key, column in self.filter_fulltext_fields:
             if kwargs[key]:
                 query = utils.search_text(query, column, kwargs[key], order=False)

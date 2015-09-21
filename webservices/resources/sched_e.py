@@ -33,7 +33,7 @@ class ScheduleEView(ItemizedResource):
         ('candidate_id', models.ScheduleE.candidate_id),
     ]
     filter_fulltext_fields = [
-        ('payee_name', models.ScheduleESearch.payee_name_text),
+        ('payee_name', models.ScheduleE.payee_name_text),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
@@ -81,9 +81,3 @@ class ScheduleEView(ItemizedResource):
         if kwargs['district']:
             query = query.filter(models.CandidateHistory.district == kwargs['district'])
         return query
-
-    def join_fulltext(self, query):
-        return query.join(
-            models.ScheduleESearch,
-            models.ScheduleE.sched_e_sk == models.ScheduleESearch.sched_e_sk,
-        )

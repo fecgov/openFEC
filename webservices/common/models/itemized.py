@@ -40,7 +40,7 @@ class BaseItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __tablename__ = 'sched_a'
+    __tablename__ = 'ofec_sched_a'
 
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     contributor_id = db.Column('contbr_id', db.String)
@@ -83,18 +83,14 @@ class ScheduleA(BaseItemized):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
-
-class ScheduleASearch(db.Model):
-    __tablename__ = 'ofec_sched_a_fulltext'
-
-    sched_a_sk = db.Column(db.Integer, primary_key=True)
+    # Auxiliary fields
     contributor_name_text = db.Column(TSVECTOR)
     contributor_employer_text = db.Column(TSVECTOR)
     contributor_occupation_text = db.Column(TSVECTOR)
 
 
 class ScheduleB(BaseItemized):
-    __tablename__ = 'sched_b'
+    __tablename__ = 'ofec_sched_b'
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     recipient_committee_id = db.Column('recipient_cmte_id', db.String)
@@ -129,17 +125,14 @@ class ScheduleB(BaseItemized):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
-
-class ScheduleBSearch(db.Model):
-    __tablename__ = 'ofec_sched_b_fulltext'
-
-    sched_b_sk = db.Column(db.Integer, primary_key=True)
+    # Auxiliary fields
     recipient_name_text = db.Column(TSVECTOR)
     disbursement_description_text = db.Column(TSVECTOR)
+    disbursement_purpose_category = db.String()
 
 
 class ScheduleE(BaseItemized):
-    __tablename__ = 'sched_e'
+    __tablename__ = 'ofec_sched_e'
 
     sched_e_sk = db.Column(db.Integer, primary_key=True)
 
@@ -194,9 +187,5 @@ class ScheduleE(BaseItemized):
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
 
-
-class ScheduleESearch(db.Model):
-    __tablename__ = 'ofec_sched_e_fulltext'
-
-    sched_e_sk = db.Column(db.Integer, primary_key=True)
+    # Auxiliary fields
     payee_name_text = db.Column(TSVECTOR)
