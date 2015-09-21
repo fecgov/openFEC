@@ -89,7 +89,7 @@ select distinct on (dcp.cmte_sk, cycle)
     dcp.party_cmte_type_desc as party_type_full,
     dcp.qual_dt as qualifying_date,
     dcp.receipt_dt as last_file_date,
-    dcp_original.receipt_date as first_file_date,
+    filings_original.receipt_date as first_file_date,
     dd.cmte_dsgn as designation,
     expand_committee_designation(dd.cmte_dsgn) as designation_full,
     dd.cmte_tp as committee_type,
