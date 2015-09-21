@@ -6,7 +6,7 @@ from webservices import utils
 from webservices import schemas
 from webservices.common.models import (
     CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
-    ScheduleABySize, ScheduleAByState, ScheduleAByContributorType,
+    ScheduleABySize, ScheduleAByState,
 )
 
 
@@ -93,20 +93,4 @@ class ScheduleAByStateCandidateView(utils.Resource):
             [ScheduleAByState.state],
             kwargs,
         )
-        return utils.fetch_page(query, kwargs, cap=0)
-
-
-@doc(
-    tags=['schedules/schedule_a'],
-    description='Schedule A receipts aggregated by contributor type.',
-)
-class ScheduleAByContributorTypeCandidateView(utils.Resource):
-
-    @use_kwargs(args.paging)
-    @use_kwargs(args.make_sort_args())
-    @use_kwargs(args.schedule_a_candidate_aggregate)
-    @marshal_with(schemas.ScheduleAByContributorTypeCandidatePageSchema())
-    def get(self, **kwargs):
-        group_columns = [ScheduleAByContributorType.individual]
-        query = candidate_aggregate(ScheduleAByContributorType, group_columns, group_columns, kwargs)
         return utils.fetch_page(query, kwargs, cap=0)
