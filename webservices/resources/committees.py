@@ -65,7 +65,7 @@ class CommitteeList(utils.Resource):
                 ),
                 models.CommitteeSearch.fulltxt,
                 kwargs['q'],
-            )
+            ).distinct()
 
         if kwargs.get('name'):
             committees = committees.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
@@ -121,7 +121,7 @@ class CommitteeView(utils.Resource):
                 models.CandidateCommitteeLink
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
-            )
+            ).distinct()
 
         committees = filter_query(models.CommitteeDetail, committees, detail_filter_fields, kwargs)
 
@@ -169,7 +169,7 @@ class CommitteeHistoryView(utils.Resource):
                 models.CandidateCommitteeLink.committee_key == models.CommitteeHistory.committee_key,
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
-            )
+            ).distinct()
 
         if cycle:
             query = query.filter(models.CommitteeHistory.cycle == cycle)

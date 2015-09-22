@@ -56,7 +56,7 @@ class CandidateList(utils.Resource):
                 ),
                 models.CandidateSearch.fulltxt,
                 kwargs['q'],
-            )
+            ).distinct()
 
         candidates = filter_query(models.Candidate, candidates, filter_fields, kwargs)
 
@@ -126,7 +126,7 @@ class CandidateView(utils.Resource):
                 models.CandidateCommitteeLink
             ).filter(
                 models.CandidateCommitteeLink.committee_id == committee_id
-            )
+            ).distinct()
 
         candidates = filter_query(models.CandidateDetail, candidates, filter_fields, kwargs)
 
@@ -172,7 +172,7 @@ class CandidateHistoryView(utils.Resource):
                 models.CandidateCommitteeLink.candidate_key == models.CandidateHistory.candidate_key,
             ).filter(
                 models.CandidateCommitteeLink.committee_id == committee_id
-            )
+            ).distinct()
 
         if cycle:
             query = query.filter(models.CandidateHistory.two_year_period == cycle)

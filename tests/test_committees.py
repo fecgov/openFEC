@@ -218,6 +218,26 @@ class CommitteeFormatTest(ApiBaseTest):
             set((each.committee_id for each in committees)),
         )
 
+    def test_committees_by_candidatee_count(self):
+        candidate_id = 'id0'
+        committee = factories.CommitteeFactory()
+        db.session.flush()
+        [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=candidate_id,
+                committee_id=committee.committee_id,
+                committee_key=committee.committee_key,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=candidate_id,
+                committee_id=committee.committee_id,
+                committee_key=committee.committee_key,
+            ),
+        ]
+        response = self._response(api.url_for(CommitteeView, candidate_id=candidate_id))
+        self.assertEqual(response['pagination']['count'], 1)
+        self.assertEqual(len(response['results']), 1)
+
     def test_committee_by_cand_filter(self):
         candidate_id = 'id0'
         committee = factories.CommitteeFactory(designation='P')
