@@ -200,7 +200,6 @@ add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
 add_aggregate_resource(api, aggregates.ScheduleAByEmployerView, 'a', 'employer')
 add_aggregate_resource(api, aggregates.ScheduleAByOccupationView, 'a', 'occupation')
 add_aggregate_resource(api, aggregates.ScheduleAByContributorView, 'a', 'contributor')
-add_aggregate_resource(api, aggregates.ScheduleAByContributorTypeView, 'a', 'contributor_type')
 
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
@@ -210,10 +209,6 @@ add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate
 
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
-api.add_resource(
-    candidate_aggregates.ScheduleAByContributorTypeCandidateView,
-    '/schedules/schedule_a/by_contributor_type/by_candidate/',
-)
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,
@@ -266,7 +261,6 @@ docs.register(aggregates.ScheduleAByZipView, blueprint='v1')
 docs.register(aggregates.ScheduleAByEmployerView, blueprint='v1')
 docs.register(aggregates.ScheduleAByOccupationView, blueprint='v1')
 docs.register(aggregates.ScheduleAByContributorView, blueprint='v1')
-docs.register(aggregates.ScheduleAByContributorTypeView, blueprint='v1')
 docs.register(aggregates.ScheduleBByRecipientView, blueprint='v1')
 docs.register(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 docs.register(aggregates.ScheduleBByPurposeView, blueprint='v1')
@@ -275,7 +269,6 @@ docs.register(aggregates.CommunicationCostByCandidateView, blueprint='v1')
 docs.register(aggregates.ElectioneeringByCandidateView, blueprint='v1')
 docs.register(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
 docs.register(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
-docs.register(candidate_aggregates.ScheduleAByContributorTypeCandidateView, blueprint='v1')
 docs.register(filings.FilingsView, blueprint='v1')
 docs.register(filings.FilingsList, blueprint='v1')
 docs.register(elections.ElectionList, blueprint='v1')
