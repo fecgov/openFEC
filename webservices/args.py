@@ -483,6 +483,7 @@ entities = {
 }
 
 schedule_e = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
     'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
     'last_expenditure_date': Date(description='For paging through schedule E data by date.'),
