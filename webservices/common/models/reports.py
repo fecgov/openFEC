@@ -40,8 +40,6 @@ class CommitteeReports(PdfMixin, BaseModel):
     other_political_committee_contributions_ytd = db.Column(db.Integer)
     political_party_committee_contributions_period = db.Column(db.Integer)
     political_party_committee_contributions_ytd = db.Column(db.Integer)
-    net_contributions_period = db.Column(db.Integer, index=True)
-    net_operating_expenditures_period = db.Column(db.Integer)
     report_type = db.Column(db.String)
     report_type_full = db.Column(db.String)
     report_year = db.Column(db.Integer)
@@ -91,6 +89,8 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     loans_made_by_candidate_ytd = db.Column(db.Integer)
     net_contributions_ytd = db.Column(db.Integer)
     net_operating_expenditures_ytd = db.Column(db.Integer)
+    net_contributions_period = db.Column(db.Integer, index=True)
+    net_operating_expenditures_period = db.Column(db.Integer)
     operating_expenditures_period = db.Column(db.Integer)
     operating_expenditures_ytd = db.Column(db.Integer)
     other_receipts_period = db.Column(db.Integer)
@@ -233,6 +233,8 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfers_from_affiliated_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
+    net_contributions_cycle_to_date = db.Column(db.Numeric(30, 2))
+    net_operating_expenditures_cycle_to_date = db.Column(db.Numeric(30, 2))
     report_form = 'Form 3P'
 
 
