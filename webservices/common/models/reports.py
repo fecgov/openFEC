@@ -32,7 +32,7 @@ class CommitteeReports(PdfMixin, BaseModel):
     coverage_start_date = db.Column(db.DateTime, index=True)
     debts_owed_by_committee = db.Column(db.Integer)
     debts_owed_to_committee = db.Column(db.Integer)
-    end_image_number = db.Column(db.Integer)
+    end_image_number = db.Column(db.BigInteger)
     expire_date = db.Column(db.DateTime)
     other_disbursements_period = db.Column(db.Integer)
     other_disbursements_ytd = db.Column(db.Integer)
