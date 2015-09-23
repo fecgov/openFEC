@@ -233,6 +233,8 @@ class CommitteeReportsPresidential(CommitteeReports):
     transfers_from_affiliated_committee_ytd = db.Column(db.Integer)
     transfers_to_other_authorized_committee_period = db.Column(db.Integer)
     transfers_to_other_authorized_committee_ytd = db.Column(db.Integer)
+    net_contributions_cycle_to_date = db.Column(db.Numeric(30, 2))
+    net_operating_expenditures_cycle_to_date = db.Column(db.Numeric(30, 2))
     report_form = 'Form 3P'
 
 
