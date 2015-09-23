@@ -30,7 +30,7 @@ shared_fields = {
     'net_operating_expenditures': 128,
     'last_report_year': 2012,
     'last_report_type_full': 'Q3',
-    'last_beginning_image_number': 123,
+    'last_beginning_image_number': '123',
     'last_cash_on_hand_end_period': 538,
 }
 
