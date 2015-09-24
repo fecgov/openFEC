@@ -11,7 +11,7 @@ select
 from sched_e
 where
     exp_amt is not null and
-    filing_form = 'F3X' and
+    filing_form in ('F3X', 'F5') and
     (memo_cd != 'X' or memo_cd is null)
 group by
     cmte_id,
