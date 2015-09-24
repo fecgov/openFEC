@@ -9,8 +9,10 @@ select
     sum(exp_amt) as total,
     count(exp_amt) as count
 from sched_e
-where exp_amt is not null
-and (memo_cd != 'X' or memo_cd is null)
+where
+    exp_amt is not null and
+    filing_form in ('F3X', 'F5') and
+    (memo_cd != 'X' or memo_cd is null)
 group by
     cmte_id,
     cand_id,
