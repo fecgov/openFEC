@@ -241,8 +241,8 @@ committee_list = {
     'state': IString(multiple=True, description='Two-character U.S. state or territory in which the committee is registered.'),
     'name': Arg(str, description="Committee's name (full or partial)"),
     'party': IString(multiple=True, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
-    'min_first_file_date': Date(description='Filters out committees that first filed their registration before this date. Can bu used as a range with max_first_file_date. To see when a Committee first filed its F1.'),
-    'max_first_file_date': Date(description='Filters out committees that first filed their registration after this date. Can bu used as a range with start_date. To see when a Committee first filed its F1.'),
+    'min_first_file_date': Date(description='Minimum date of the first form filed by the committee.'),
+    'max_first_file_date': Date(description='Maximum date of the first form filed by the committee.'),
 }
 
 filings = {
@@ -380,12 +380,6 @@ schedule_a_by_contributor = {
 }
 
 
-schedule_a_by_contributor_type = {
-    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
-    'individual': Bool(description='Restrict to individual donors'),
-}
-
-
 schedule_b_by_recipient = {
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'recipient_name': Arg(str, multiple=True, description='Recipient name'),
@@ -483,6 +477,7 @@ entities = {
 }
 
 schedule_e = {
+    'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'committee_id': IString(multiple=True, description=docs.COMMITTEE_ID),
     'candidate_id': IString(multiple=True, description=docs.CANDIDATE_ID),
     'last_expenditure_date': Date(description='For paging through schedule E data by date.'),

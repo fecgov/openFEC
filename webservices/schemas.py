@@ -154,6 +154,8 @@ make_reports_schema = functools.partial(
         'pdf_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
+        'beginning_image_number': ma.fields.Str(),
+        'end_image_number': ma.fields.Str(),
     },
     options={'exclude': ('idx', 'report_key', 'committee')},
 )
@@ -182,6 +184,7 @@ make_totals_schema = functools.partial(
         'report_form': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
         'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
+        'last_beginning_image_number': ma.fields.Str(),
     },
 )
 augment_models(
@@ -216,6 +219,7 @@ ScheduleASchema = make_schema(
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contribution_receipt_amount': ma.fields.Decimal(places=2),
         'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
+        'image_number': ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -238,7 +242,6 @@ augment_models(
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
     models.ScheduleAByContributor,
-    models.ScheduleAByContributorType,
     models.ScheduleBByRecipient,
     models.ScheduleBByRecipientID,
     models.ScheduleBByPurpose,
@@ -278,6 +281,7 @@ ScheduleBSchema = make_schema(
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'image_number': ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -299,6 +303,7 @@ ScheduleESchema = make_schema(
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'expenditure_amount': ma.fields.Decimal(places=2),
         'office_total_ytd': ma.fields.Decimal(places=2),
+        'image_number': ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -317,6 +322,8 @@ FilingsSchema = make_schema(
     fields={
         'pdf_url': ma.fields.Str(),
         'document_description': ma.fields.Str(),
+        'beginning_image_number': ma.fields.Str(),
+        'ending_image_number': ma.fields.Str(),
     },
 )
 augment_schemas(FilingsSchema)

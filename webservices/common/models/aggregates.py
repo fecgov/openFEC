@@ -46,11 +46,6 @@ class ScheduleAByContributor(BaseAggregate):
     contributor_name = db.Column('contbr_nm', db.String)
 
 
-class ScheduleAByContributorType(BaseAggregate):
-    __tablename__ = 'ofec_sched_a_aggregate_contributor_type'
-    individual = db.Column(db.Boolean, primary_key=True)
-
-
 class ScheduleBByRecipient(BaseAggregate):
     __tablename__ = 'ofec_sched_b_aggregate_recipient'
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True)

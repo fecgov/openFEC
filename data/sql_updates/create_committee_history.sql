@@ -20,10 +20,10 @@ with
         from cycles
         group by committee_id
     ),
-    dcp_original as (
-        select cmte_sk, min(receipt_dt) receipt_dt from dimcmteproperties
-        where form_tp = 'F1'
-        group by cmte_sk
+    filings_original as (
+        select committee_id, min(receipt_date) receipt_date from vw_filing_history
+        where report_year >= :START_YEAR
+        group by committee_id
     ),
     candidate_agg as (
         select
@@ -89,7 +89,7 @@ select distinct on (dcp.cmte_sk, cycle)
     dcp.party_cmte_type_desc as party_type_full,
     dcp.qual_dt as qualifying_date,
     dcp.receipt_dt as last_file_date,
-    dcp_original.receipt_dt as first_file_date,
+    filings_original.receipt_date as first_file_date,
     dd.cmte_dsgn as designation,
     expand_committee_designation(dd.cmte_dsgn) as designation_full,
     dd.cmte_tp as committee_type,
@@ -103,7 +103,7 @@ left join cycle_agg on dcp.cmte_id = cycle_agg.committee_id
 left join cycles on dcp.cmte_id = cycles.committee_id and dcp.rpt_yr <= cycles.cycle
 left join dimparty p on dcp.cand_pty_affiliation = p.party_affiliation
 left join dimcmtetpdsgn dd on dcp.cmte_sk = dd.cmte_sk and extract(year from dd.receipt_date) <= cycles.cycle
-left join dcp_original on dcp.cmte_sk = dcp_original.cmte_sk
+left join filings_original on dcp.cmte_id = filings_original.committee_id
 left join candidate_agg on dcp.cmte_sk = candidate_agg.cmte_sk
 where max_cycle >= :START_YEAR
 order by dcp.cmte_sk, cycle desc, dcp.rpt_yr desc
