@@ -28,6 +28,7 @@ class ScheduleEView(ItemizedResource):
         return self.model.expenditure_amount
 
     filter_multi_fields = [
+        ('cycle', sa.func.get_cycle(models.ScheduleE.report_year)),
         ('image_number', models.ScheduleE.image_number),
         ('committee_id', models.ScheduleE.committee_id),
         ('candidate_id', models.ScheduleE.candidate_id),
@@ -39,6 +40,10 @@ class ScheduleEView(ItemizedResource):
         (('min_date', 'max_date'), models.ScheduleE.expenditure_date),
         (('min_amount', 'max_amount'), models.ScheduleE.expenditure_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleE.image_number),
+    ]
+    query_options = [
+        sa.orm.joinedload(models.ScheduleE.candidate),
+        sa.orm.joinedload(models.ScheduleE.committee),
     ]
 
     @use_kwargs(args.itemized)
@@ -57,12 +62,6 @@ class ScheduleEView(ItemizedResource):
     @marshal_with(schemas.ScheduleEPageSchema())
     def get(self, **kwargs):
         return super(ScheduleEView, self).get(**kwargs)
-
-    def build_query(self, **kwargs):
-        query = super(ScheduleEView, self).build_query(**kwargs)
-        query = query.options(sa.orm.joinedload(models.ScheduleE.committee))
-        query = query.options(sa.orm.joinedload(models.ScheduleE.candidate))
-        return query
 
     def filter_election(self, query, kwargs):
         if not kwargs['office']:

@@ -1,16 +1,41 @@
 drop materialized view if exists ofec_sched_e_aggregate_candidate_mv_tmp;
 create materialized view ofec_sched_e_aggregate_candidate_mv_tmp as
+with records as (
+    select
+        cmte_id,
+        s_o_cand_id as cand_id,
+        s_o_ind as support_oppose_indicator,
+        rpt_yr,
+        rpt_tp,
+        memo_cd,
+        exp_amt
+    from sched_e
+    union all
+    select
+        filer_cmte_id as cmte_id,
+        s_o_cand_id as cand_id,
+        s_o_in as support_oppose_indicator,
+        rpt_yr,
+        rpt_tp,
+        null as memo_cd,
+        exp_amt
+    from form_57
+    join form_5
+        on (form_5.sub_id = form_57.link_id)
+)
 select
     row_number() over () as idx,
     cmte_id,
-    s_o_cand_id as cand_id,
-    s_o_ind as support_oppose_indicator,
+    cand_id,
+    support_oppose_indicator,
     rpt_yr + rpt_yr % 2 as cycle,
     sum(exp_amt) as total,
     count(exp_amt) as count
-from sched_e
-where exp_amt is not null
-and (memo_cd != 'X' or memo_cd is null)
+from records
+where
+    exp_amt is not null and
+    rpt_tp not in ('24', '48') and
+    (memo_cd != 'X' or memo_cd is null)
 group by
     cmte_id,
     cand_id,
