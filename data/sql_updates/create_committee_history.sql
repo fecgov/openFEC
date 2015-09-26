@@ -10,6 +10,7 @@ with
                 2
             ) as cycle
         from vw_filing_history
+        where report_year != 0
         group by committee_id
     ),
     cycle_agg as (
