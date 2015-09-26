@@ -22,5 +22,5 @@ form_types = {
     'F11': '24-hour notice of opposition personal funds amount',
     'F12': '24-hour notice of suspension of increased limits',
     'F99': 'Miscellaneous document',
-    'F6': '48-hour notice contribution or loans',
+    'F6': '48-hour notice of contribution/loans received',
 }
