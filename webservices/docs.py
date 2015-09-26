@@ -44,7 +44,7 @@ This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
 we’re actively working on it and adding new features. The official site for Federal
 Election Commission (FEC) data is still the
 [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml). While we plan to
-version any changes that are not backwards compatible, expect things to change as the API
+version big changes that are not backwards compatible, expect things to change as the API
 develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
