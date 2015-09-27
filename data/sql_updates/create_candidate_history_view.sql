@@ -1,42 +1,32 @@
 drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
 create materialized view ofec_candidate_history_mv_tmp as
 with
-    filings as (
-        select distinct on (dcp.cand_sk, dcp.election_yr)
-            dcp.cand_sk,
-            dco.cand_election_yr,
-            co.office_district
-        from dimcandproperties dcp
-        join dimcandoffice dco on
-            dcp.cand_sk = dco.cand_sk and
-            dcp.election_yr > dco.cand_election_yr
-        join dimoffice co using (office_sk)
-        where
-            dcp.form_tp = 'F2' and
-            dco.expire_date is null
-        order by
-            dcp.cand_sk,
-            dcp.election_yr desc,
-            dco.cand_election_yr desc
-    ),
     years as (
         select
             cand_sk,
-            max(cand_election_yr) as active_through,
             array_agg(cand_election_yr)::int[] as election_years,
             array_agg(office_district)::text[] as election_districts
-        from filings
+        from dimcandoffice
+        join dimoffice using (office_sk)
+        where dimcandoffice.expire_date is null
+        group by cand_sk
+    ),
+    active_agg as (
+        select
+            cand_sk,
+            max(cand_election_yr) as active_through
+        from dimcandoffice
         group by cand_sk
     ),
     cycles as (
         select
             cand_sk,
             generate_series(
-                min(get_cycle(cand_election_yr)),
-                max(get_cycle(cand_election_yr)),
+                min(get_cycle(election_yr)),
+                max(get_cycle(election_yr)),
                 2
             ) as cycle
-        from filings
+        from dimcandproperties
         group by cand_sk
     ),
     cycle_agg as (
@@ -82,10 +72,11 @@ select distinct on (dcp.cand_sk, cycle)
     cycle_agg.cycles,
     years.election_years,
     years.election_districts,
-    years.active_through,
+    active_agg.active_through,
     clean_party(dp.party_affiliation_desc) as party_full
 from dimcandproperties dcp
 left join years on dcp.cand_sk = years.cand_sk
+left join active_agg on dcp.cand_sk = active_agg.cand_sk
 left join cycle_agg on dcp.cand_sk = cycle_agg.cand_sk
 left join cycles on dcp.cand_sk = cycles.cand_sk and dcp.election_yr <= cycles.cycle
 left join dimcandstatusici dsi on dcp.cand_sk = dsi.cand_sk and dsi.election_yr <= cycles.cycle
