@@ -433,3 +433,12 @@ The type of document, for documents other than reports:
     - Q Acknowledgment of F3L Filing Frequency Change
     - U Unregistered Committee Notice
 '''
+DATES_TAG = '''
+Reporting dates.
+'''
+COMMUNICATION_TAG = '''
+Reports of communication costs by corporations and membership organizations
+from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
+'''
+
+

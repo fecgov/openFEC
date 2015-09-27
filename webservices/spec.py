@@ -30,7 +30,7 @@ spec = APISpec(
         },
         {
             'name': 'dates',
-            'description': 'Election and reporting dates.',
+            'description': docs.DATES_TAG,
         },
         {
             'name': 'financial',
@@ -58,7 +58,7 @@ spec = APISpec(
         },
         {
             'name': 'communication_cost',
-            'description': 'Reports of communication costs by corporations and membership orgnizations from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).',
+            'description': docs.COMMUNICATION_TAG,
         },
     ]
 )
