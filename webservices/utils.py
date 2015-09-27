@@ -1,3 +1,4 @@
+import os
 import re
 import functools
 
@@ -8,15 +9,28 @@ from sqlalchemy.ext.declarative import declared_attr
 
 from flask.ext import restful
 from marshmallow_pagination import paginators
+
+from webargs import Arg
+from flask_smore import use_kwargs
 from flask_smore.views import MethodResourceMeta
 
+from webservices import docs
 from webservices import sorting
-from webservices import exceptions
 from webservices import decoders
+from webservices import exceptions
 
 
 class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
     pass
+
+API_KEY_ARG = Arg(
+    str,
+    required=True,
+    default='DEMO_KEY',
+    description=docs.API_KEY_DESCRIPTION,
+)
+if os.getenv('PRODUCTION'):
+    Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
 
 
 def check_cap(kwargs, cap):
