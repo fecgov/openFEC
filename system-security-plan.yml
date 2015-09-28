@@ -1,5 +1,5 @@
 ---
-name: College Choice
+name: openFEC
 uniqueID: FEC-20141001-20150915-01
 version: 1.2.0
 phase: beta
@@ -48,8 +48,8 @@ purpose: https://github.com/18F/openFEC/blob/develop/README.md
 components: 
 - https://github.com/18F/openFEC/blob/develop/requirements.txt
 - https://github.com/18F/openFEC-web-app/blob/develop/requirements.txt
-diagram: 
-network-architecture: 
+diagram: [tbd]
+network-architecture: [tbd]
 environments:
 - Cloud Foundry
 - Amazon Web Services East / West
