@@ -9,6 +9,7 @@
 [![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/5e91408cecf44ce8bb8d9f1b904bdd99/badge.svg)](https://www.quantifiedcode.com/app/project/5e91408cecf44ce8bb8d9f1b904bdd99)
 
 [![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
 
