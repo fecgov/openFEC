@@ -229,15 +229,6 @@ api.add_resource(
 api.add_resource(filings.FilingsList, '/filings/')
 
 
-API_KEY_PARAM = {
-    'in': 'query',
-    'type': 'string',
-    'required': True,
-    'name': 'api_key',
-    'description': docs.API_KEY_DESCRIPTION,
-    'default': 'DEMO_KEY',
-}
-
 from flask_smore.apidoc import Documentation
 docs = Documentation(app, spec.spec)
 
