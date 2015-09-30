@@ -237,7 +237,10 @@ class ElectionView(utils.Resource):
             ElectionResult.cand_office_district == (kwargs['district'] or '00'),
         )
 
-
+@doc(
+    description=docs.ELECTION_SEARCH,
+    tags=['financial']
+)
 class ElectionSummary(utils.Resource):
 
     @use_kwargs(args.elections)
