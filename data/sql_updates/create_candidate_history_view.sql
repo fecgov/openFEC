@@ -27,6 +27,7 @@ with
                 2
             ) as cycle
         from dimcandproperties
+        where form_tp != 'F2Z'
         group by cand_sk
     ),
     cycle_agg as (
