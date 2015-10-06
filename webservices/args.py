@@ -172,7 +172,7 @@ candidate_detail = {
     'office': Arg(str, multiple=True, enum=['', 'H', 'S', 'P'], description='Governmental office candidate runs for: House, Senate or President.'),
     'state': IString(multiple=True, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': IString(multiple=True, description='Three letter code for the party under which a candidate ran for office'),
-    'year': Arg(str, dest='election_year', description='See records pertaining to a particular election year.'),
+    'year': Arg(str, dest='election_year', description='See records pertaining to a particular election year. The list of election years is based on a candidate filing a F2 for that year.'),
     'district': District(multiple=True),
     'candidate_status': IString(multiple=True, enum=['', 'C', 'F', 'N', 'P'], description='One letter code explaining if the candidate is:\n\
         - C present candidate\n\
@@ -269,7 +269,7 @@ filings = {
 
 
 reports = {
-    'year': Arg(int, multiple=True, description='Year in which a candidate runs for office'),
+    'year': Arg(int, multiple=True, description=docs.REPORT_YEAR),
     'cycle': Arg(int, multiple=True, description=docs.RECORD_CYCLE),
     'beginning_image_number': Arg(int, multiple=True, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': Arg(str, multiple=True, description='Report type; prefix with "-" to exclude'),
@@ -306,7 +306,7 @@ reporting_dates = {
 }
 
 election_dates = {
-    'election_state': Arg(str, multiple=True, description='State of the office sought.'),
+    'election_state': Arg(str, multiple=True, description='State or territory of the office sought.'),
     'election_district': Arg(str, multiple=True,
         description='House district of the office sought, if applicable.'),
     'election_party': Arg(str, multiple=True, description='Party, if applicable.'),
