@@ -146,6 +146,7 @@ select distinct on (candidate_id)
     end
 as fulltxt
 from ofec_candidate_detail_mv_tmp
+where candidate_status is not null
 ;
 
 create unique index on ofec_candidate_fulltext_mv_tmp(idx);
