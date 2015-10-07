@@ -1,11 +1,12 @@
 import sqlalchemy as sa
-from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import filters
 from webservices import schemas
+from webservices.utils import use_kwargs
 from webservices.common.models import (
     db, CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,

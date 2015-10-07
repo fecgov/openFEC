@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 
-from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore import doc, marshal_with
 from flask_smore.utils import Ref
 
 from webservices import args
@@ -10,6 +10,7 @@ from webservices import filters
 from webservices import schemas
 from webservices.common import counts
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 
 

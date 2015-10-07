@@ -8,7 +8,7 @@ import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
 from smore import exceptions
-from smore.apispec import utils
+from apispec import utils
 
 import manage
 from tests import common

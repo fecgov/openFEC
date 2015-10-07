@@ -1,4 +1,4 @@
-from smore.apispec import APISpec
+from apispec import APISpec
 
 from webservices import docs
 from webservices import __API_VERSION__

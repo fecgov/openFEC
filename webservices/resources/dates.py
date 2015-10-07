@@ -1,11 +1,12 @@
 from datetime import date
 
-from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.util import filter_query
 
 
