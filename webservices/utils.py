@@ -11,13 +11,16 @@ from flask.ext import restful
 from marshmallow_pagination import paginators
 
 from webargs import fields
-from flask_smore import use_kwargs
+from flask_smore import use_kwargs as use_kwargs_original
 from flask_smore.views import MethodResourceMeta
 
 from webservices import docs
 from webservices import sorting
 from webservices import decoders
 from webservices import exceptions
+
+
+use_kwargs = functools.partial(use_kwargs_original, locations=('query', ))
 
 
 class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
