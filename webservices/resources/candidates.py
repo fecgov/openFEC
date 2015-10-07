@@ -64,7 +64,7 @@ class CandidateList(utils.Resource):
             candidates = candidates.filter(models.Candidate.name.ilike('%{}%'.format(kwargs['name'])))
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             candidates = candidates.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
 
         return candidates
@@ -131,7 +131,7 @@ class CandidateView(utils.Resource):
         candidates = filter_query(models.CandidateDetail, candidates, filter_fields, kwargs)
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             candidates = candidates.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
 
         return candidates

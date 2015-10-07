@@ -43,12 +43,13 @@ class ItemizedResource(ApiResource):
         to avoid slow queries when one or more relevant committees has many
         records.
         """
-        if len(kwargs['committee_id']) > 5:
+        committee_ids = kwargs.get('committee_id', [])
+        if len(committee_ids) > 5:
             raise exceptions.ApiError(
                 'Can only specify up to five values for "committee_id".',
                 status_code=422,
             )
-        if len(kwargs['committee_id']) > 1:
+        if len(committee_ids) > 1:
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
@@ -65,7 +66,7 @@ class ItemizedResource(ApiResource):
         """
         queries = []
         total = 0
-        for committee_id in kwargs['committee_id']:
+        for committee_id in kwargs.get('committee_id', []):
             query, count = self.build_committee_query(kwargs, committee_id)
             queries.append(query.subquery().select())
             total += count
@@ -89,6 +90,6 @@ class ItemizedResource(ApiResource):
 
     def filter_fulltext(self, query, kwargs):
         for key, column in self.filter_fulltext_fields:
-            if kwargs[key]:
+            if kwargs.get(key):
                 query = utils.search_text(query, column, kwargs[key], order=False)
         return query
