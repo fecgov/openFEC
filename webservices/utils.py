@@ -10,7 +10,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from flask.ext import restful
 from marshmallow_pagination import paginators
 
-from webargs import Arg
+from webargs import fields
 from flask_smore import use_kwargs
 from flask_smore.views import MethodResourceMeta
 
@@ -23,10 +23,9 @@ from webservices import exceptions
 class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
     pass
 
-API_KEY_ARG = Arg(
-    str,
+API_KEY_ARG = fields.Str(
     required=True,
-    default='DEMO_KEY',
+    missing='DEMO_KEY',
     description=docs.API_KEY_DESCRIPTION,
 )
 if os.getenv('PRODUCTION'):
@@ -35,7 +34,7 @@ if os.getenv('PRODUCTION'):
 
 def check_cap(kwargs, cap):
     if cap:
-        if not kwargs['per_page']:
+        if not kwargs.get('per_page'):
             raise exceptions.ApiError(
                 'Parameter "per_page" must be > 0'.format(cap),
                 status_code=422,
@@ -44,7 +43,7 @@ def check_cap(kwargs, cap):
 
 def fetch_page(query, kwargs, model=None, join_columns=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
+    sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
     query, _ = sorting.sort(query, sort, model=model, join_columns=join_columns, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
@@ -105,14 +104,14 @@ office_args_map = {
 }
 def check_election_arguments(kwargs):
     for arg in office_args_required:
-        if kwargs[arg] is None:
+        if kwargs.get(arg) is None:
             raise exceptions.ApiError(
                 'Required parameter "{0}" not found.'.format(arg),
                 status_code=422,
             )
     conditional_args = office_args_map.get(kwargs['office'], [])
     for arg in conditional_args:
-        if kwargs[arg] is None:
+        if kwargs.get(arg) is None:
             raise exceptions.ApiError(
                 'Must include argument "{0}" with office type "{1}"'.format(
                     arg,
