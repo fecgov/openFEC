@@ -12,11 +12,11 @@ csvkit==0.9.1
 ujson==1.33
 
 # Marshalling
-smore==0.1.0
-marshmallow==2.0.0b4
+smore==0.2.0
+marshmallow==2.1.0
+marshmallow-sqlalchemy==0.6.0
 git+https://github.com/jmcarp/flask-smore@master
 git+https://github.com/jmcarp/marshmallow-pagination@master
-git+https://github.com/marshmallow-code/marshmallow-sqlalchemy@dev
 
 # Development
 invoke==0.10.1
