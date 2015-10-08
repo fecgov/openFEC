@@ -1,11 +1,12 @@
 import sqlalchemy as sa
-from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.utils import use_kwargs
 
 
 reports_schema_map = {
@@ -77,14 +78,14 @@ class ReportsView(utils.Resource):
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
 
-        if kwargs['year']:
+        if kwargs.get('year'):
             query = query.filter(reports_class.report_year.in_(kwargs['year']))
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
-        if kwargs['beginning_image_number']:
+        if kwargs.get('beginning_image_number'):
             query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
 
-        if kwargs['report_type']:
+        if kwargs.get('report_type'):
             include, exclude = parse_types(kwargs['report_type'])
             if include:
                 query = query.filter(reports_class.report_type.in_(include))
@@ -96,7 +97,7 @@ class ReportsView(utils.Resource):
     def _resolve_committee_type(self, committee_id, committee_type, kwargs):
         if committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
-            if kwargs['cycle']:
+            if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
             committee = query.first_or_404()

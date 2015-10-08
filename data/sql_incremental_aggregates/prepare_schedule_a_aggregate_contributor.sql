@@ -9,7 +9,7 @@ select
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
 from sched_a
-where rpt_yr >= :START_YEAR_ITEMIZED
+where rpt_yr >= :START_YEAR_AGGREGATE
 and contb_receipt_amt is not null
 and contbr_id is not null
 and entity_tp != 'IND'

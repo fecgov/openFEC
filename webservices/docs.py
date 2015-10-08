@@ -44,7 +44,7 @@ This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
 we’re actively working on it and adding new features. The official site for Federal
 Election Commission (FEC) data is still the
 [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml). While we plan to
-version any changes that are not backwards compatible, expect things to change as the API
+version big changes that are not backwards compatible, expect things to change as the API
 develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
@@ -433,3 +433,18 @@ The type of document, for documents other than reports:
     - Q Acknowledgment of F3L Filing Frequency Change
     - U Unregistered Committee Notice
 '''
+DATES_TAG = '''
+Reporting dates.
+'''
+COMMUNICATION_TAG = '''
+Reports of communication costs by corporations and membership organizations
+from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
+'''
+ELECTIONEERING = '''
+An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
+
+- The communication refers to a clearly identified federal candidate;
+- The communication is publicly distributed by a television station, radio station, cable television system or satellite system for a fee; and
+- The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office.
+'''
+

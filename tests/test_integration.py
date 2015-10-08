@@ -7,8 +7,7 @@ from sqlalchemy.ext.automap import automap_base
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
-from smore import exceptions
-from smore.apispec import utils
+from apispec import utils, exceptions
 
 import manage
 from tests import common
