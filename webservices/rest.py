@@ -18,7 +18,8 @@ from flask import Blueprint
 from flask.ext import cors
 from flask.ext import restful
 
-from flask_smore import doc, use_kwargs, marshal_with
+from webargs.flaskparser import FlaskParser
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
@@ -28,6 +29,7 @@ from webservices import schemas
 from webservices import exceptions
 from webservices.common import util
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.models import db
 from webservices.resources import totals
 from webservices.resources import reports
@@ -64,6 +66,18 @@ app.config['SMORE_FORMAT_RESPONSE'] = None
 db.init_app(app)
 cors.CORS(app)
 
+logger = logging.getLogger(__name__)
+
+class FlaskRestParser(FlaskParser):
+
+    def handle_error(self, error):
+        logger.error(error)
+        message = error.messages
+        status_code = getattr(error, 'status_code', 422)
+        raise exceptions.ApiError(message, status_code)
+
+parser = FlaskRestParser()
+app.config['SMORE_WEBARGS_PARSER'] = parser
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)

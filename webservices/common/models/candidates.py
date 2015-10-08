@@ -68,14 +68,14 @@ class CandidateDetail(BaseConcreteCandidate):
     candidate_inactive = db.Column(db.String(1))
     active_through = db.Column(db.Integer)
     load_date = db.Column(db.DateTime)
-    expire_date = db.Column(db.DateTime)
+    expire_date = db.Column(db.DateTime, index=True)
 
 
 class CandidateHistory(BaseCandidate):
     __tablename__ = 'ofec_candidate_history_mv'
 
     candidate_key = db.Column(db.Integer)
-    two_year_period = db.Column(db.Integer)
+    two_year_period = db.Column(db.Integer, index=True)
     form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
@@ -84,4 +84,4 @@ class CandidateHistory(BaseCandidate):
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
     load_date = db.Column(db.DateTime)
-    expire_date = db.Column(db.DateTime)
+    expire_date = db.Column(db.DateTime, index=True)

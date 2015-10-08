@@ -1,12 +1,3 @@
-create or replace function filings_year(report_year numeric, receipt_date date) returns int as $$
-begin
-    return case
-        when report_year != 0 then report_year
-        else date_part('year', receipt_date)
-    end;
-end
-$$ language plpgsql;
-
 drop materialized view if exists ofec_filings_mv_tmp;
 create materialized view ofec_filings_mv_tmp as
 select
@@ -21,7 +12,7 @@ select
     receipt_date,
     election_year,
     fh.form_type,
-    filings_year(report_year, receipt_date) as report_year,
+    date_part('year', receipt_date) as report_year,
     report_year + report_year % 2 as cycle,
     report_type,
     to_from_indicator as document_type,

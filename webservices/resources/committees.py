@@ -1,11 +1,12 @@
 import sqlalchemy as sa
-from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.util import filter_query
 
 
@@ -52,7 +53,7 @@ class CommitteeList(utils.Resource):
 
         committees = models.Committee.query
 
-        if kwargs['candidate_id']:
+        if kwargs.get('candidate_id'):
             committees = committees.filter(
                 models.Committee.candidate_ids.overlap(kwargs['candidate_id'])
             )
@@ -72,15 +73,15 @@ class CommitteeList(utils.Resource):
 
         committees = filter_query(models.Committee, committees, list_filter_fields, kwargs)
 
-        if kwargs['year']:
+        if kwargs.get('year'):
             committees = filter_year(models.Committee, committees, kwargs['year'])
 
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             committees = committees.filter(models.Committee.cycles.overlap(kwargs['cycle']))
 
-        if kwargs['min_first_file_date']:
+        if kwargs.get('min_first_file_date'):
             committees = committees.filter(models.Committee.first_file_date >= kwargs['min_first_file_date'])
-        if kwargs['max_first_file_date']:
+        if kwargs.get('max_first_file_date'):
             committees = committees.filter(models.Committee.first_file_date <= kwargs['max_first_file_date'])
 
         return committees
@@ -125,10 +126,10 @@ class CommitteeView(utils.Resource):
 
         committees = filter_query(models.CommitteeDetail, committees, detail_filter_fields, kwargs)
 
-        if kwargs['year']:
+        if kwargs.get('year'):
             committees = filter_year(models.CommitteeDetail, committees, kwargs['year'])
 
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             committees = committees.filter(models.CommitteeDetail.cycles.overlap(kwargs['cycle']))
 
         return committees

@@ -12,8 +12,8 @@ addons:
 
 env:
   global:
-    - secure: "Lj0OkjCNEVTEAb6x6xnFiE93YogXRxAGHytMrnPr/oBkim0RVN35gQdYE+J3HMObLVhu6D5mtMYxJkgi674KfuAWw74ZG0VxXH3fB8I+DtHxt7Ql3HoBryz2VP31lZ14IyV+BGBht7wPOhD7iSmNAnsAyXW2FmgodAhoXyfZMTg="
-    - secure: "hylNba7PhzwQMtfrKiVBRFvLbAvazVpVozkR7LoTdKZKf9jyyW9Z9lxH/tvaXoUCsGPtOQxSdlN9vkkJtxHMZegD+mY8n/m6WuBZzgeZbCD3LMpdzWDcvhQjU8RRZabd8Dn5lLvFmmb3nRSxdi5X1IkLj+ptvC9Caa2NBB78ipk="
+    - secure: "cpOgenTtFAeKEdUBcynR1sZFsx7tSqKUytWAQ7oxDQgSbuHNhlazOfyQd9qytyKsc2jFZgfctGajAoZ/LvN71R21MxyQyFQDUg3RTsY9mNjg6GtcPyH+iUdIUxJkhEu/tdJqz5pzuz+hH8FGtTLP4A83N7En/apyAxQaJRL5A1Y="
+    - secure: "WXquMki0USRcQ8vVvwKOk3mcUmoMufMLdDfbiIR/IZ9D1JL2Qu7/431BG9UBLDqs8OZXQRQNFrGhZpz6roczbcePZz7Wl5cdj8yd48WunkRpZDG1fIepHqppb3ydi/UfGXBPA6CaMAmjR1ErBchDl88ykQZE0L6mAdx4iyflOAg="
 
 before_install:
   - travis_retry pip install codecov
@@ -25,8 +25,6 @@ before_install:
 before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
   - pip install -U -r requirements.txt
-  - pip install -U git+https://github.com/marshmallow-code/marshmallow-sqlalchemy@dev
-  - pip install marshmallow==2.0.0b4
 
 script: nosetests -s
 

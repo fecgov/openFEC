@@ -1,11 +1,12 @@
 import sqlalchemy as sa
-from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import filters
 from webservices import schemas
+from webservices.utils import use_kwargs
 from webservices.common.models import (
     db, CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
@@ -89,21 +90,21 @@ class ElectionList(utils.Resource):
             CandidateHistory.candidate_status == 'C',
             CandidateHistory.candidate_inactive == None,  # noqa
         )
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
-        if kwargs['office']:
+        if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(CandidateHistory.office.in_(values))
-        if kwargs['state']:
+        if kwargs.get('state'):
             query = query.filter(CandidateHistory.state.in_(kwargs['state'] + ['US']))
-        if kwargs['district']:
+        if kwargs.get('district'):
             query = query.filter(
                 sa.or_(
                     CandidateHistory.district.in_(kwargs['district']),
                     CandidateHistory.district == None  # noqa
                 ),
             )
-        if kwargs['zip']:
+        if kwargs.get('zip'):
             query = self._filter_zip(query, kwargs)
         return filters.filter_multi(query, kwargs, self.filter_multi_fields)
 
@@ -233,11 +234,14 @@ class ElectionView(utils.Resource):
         ).filter(
             ElectionResult.election_yr == kwargs['cycle'],
             ElectionResult.cand_office == kwargs['office'][0].upper(),
-            ElectionResult.cand_office_st == (kwargs['state'] or 'US'),
-            ElectionResult.cand_office_district == (kwargs['district'] or '00'),
+            ElectionResult.cand_office_st == (kwargs.get('state', 'US')),
+            ElectionResult.cand_office_district == (kwargs.get('district', '00')),
         )
 
-
+@doc(
+    description=docs.ELECTION_SEARCH,
+    tags=['financial']
+)
 class ElectionSummary(utils.Resource):
 
     @use_kwargs(args.elections)
@@ -301,9 +305,9 @@ def filter_candidates(query, kwargs):
         CandidateHistory.election_years.any(kwargs['cycle']),
         CandidateHistory.office == kwargs['office'][0].upper(),
     )
-    if kwargs['state']:
+    if kwargs.get('state'):
         query = query.filter(CandidateHistory.state == kwargs['state'])
-    if kwargs['district']:
+    if kwargs.get('district'):
         query = query.filter(CandidateHistory.district == kwargs['district'])
     return query
 
