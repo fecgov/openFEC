@@ -57,5 +57,5 @@ $$ language plpgsql;
 
 drop trigger if exists ofec_sched_e_queue_trigger on sched_e;
 create trigger ofec_sched_e_queue_trigger before insert or update or delete
-    on sched_e for each row execute procedure ofec_sched_e_update_queues(:START_YEAR_ITEMIZED)
+    on sched_e for each row execute procedure ofec_sched_e_update_queues(:START_YEAR_AGGREGATE)
 ;
