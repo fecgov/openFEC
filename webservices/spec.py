@@ -10,7 +10,7 @@ spec = APISpec(
     info={'description': docs.DESCRIPTION},
     basePath='/v1',
     produces=['application/json'],
-    plugins=['smore.ext.marshmallow'],
+    plugins=['apispec.ext.marshmallow'],
     securityDefinitions={
         'apiKey': {
             'type': 'apiKey',
