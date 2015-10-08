@@ -12,3 +12,7 @@
     * data/fips_stats.csv
     * https://www.census.gov/geo/reference/ansi_statetables.html
     * Added Guam and American Samoa to enable results
+
+* Election years and Senate classes
+    * data/election_dates.xlsx
+    * Sent by @PaulClark2
