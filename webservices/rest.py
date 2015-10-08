@@ -18,9 +18,8 @@ from flask import Blueprint
 from flask.ext import cors
 from flask.ext import restful
 
-from marshmallow.compat import text_type
 from webargs.flaskparser import FlaskParser
-from flask_smore import doc, use_kwargs, marshal_with
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
@@ -30,6 +29,7 @@ from webservices import schemas
 from webservices import exceptions
 from webservices.common import util
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.models import db
 from webservices.resources import totals
 from webservices.resources import reports

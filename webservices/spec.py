@@ -1,4 +1,4 @@
-from smore.apispec import APISpec
+from apispec import APISpec
 
 from webservices import docs
 from webservices import __API_VERSION__
@@ -10,7 +10,7 @@ spec = APISpec(
     info={'description': docs.DESCRIPTION},
     basePath='/v1',
     produces=['application/json'],
-    plugins=['smore.ext.marshmallow'],
+    plugins=['apispec.ext.marshmallow'],
     securityDefinitions={
         'apiKey': {
             'type': 'apiKey',
