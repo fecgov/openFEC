@@ -60,5 +60,9 @@ spec = APISpec(
             'name': 'communication_cost',
             'description': docs.COMMUNICATION_TAG,
         },
+        {
+            'name': 'electioneering',
+            'description': docs.ELECTIONEERING,
+        },
     ]
 )
