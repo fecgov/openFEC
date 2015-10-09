@@ -12,7 +12,7 @@ select
     receipt_date,
     election_year,
     fh.form_type,
-    date_part('year', receipt_date) as report_year,
+    cast (date_part('year', receipt_date) as numeric) as report_year,
     report_year + report_year % 2 as cycle,
     report_type,
     to_from_indicator as document_type,
