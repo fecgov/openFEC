@@ -1,62 +1,23 @@
 import re
-import http
 import functools
 
 import marshmallow as ma
-from smore import swagger
 from marshmallow_sqlalchemy import ModelSchema
+from marshmallow_pagination import schemas as paging_schemas
 
 from webservices import utils
-from webservices import paging
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
 
 
-def _get_class(value):
-    return value if isinstance(value, type) else type(value)
-
-
-def _format_ref(ref):
-    return {'$ref': '#/definitions/{0}'.format(ref)}
-
-
-def _schema_or_ref(schema):
-    schema_class = _get_class(schema)
-    ref = next(
-        (
-            ref_name
-            for ref_schema, ref_name in spec.plugins['smore.ext.marshmallow']['refs'].items()
-            if schema_class is _get_class(ref_schema)
-        ),
-        None,
-    )
-    return _format_ref(ref) if ref else swagger.schema2jsonschema(schema)
-
-
-def marshal_with(schema, code=http.client.OK, description=None, wrap=True):
-    def wrapper(func):
-        func.__apidoc__ = getattr(func, '__apidoc__', {})
-        func.__apidoc__.setdefault('responses', {}).update({
-            code: {
-                'schema': _schema_or_ref(schema),
-                'description': description or '',
-            }
-        })
-
-        if wrap:
-            @functools.wraps(func)
-            def wrapped(*args, **kwargs):
-                return schema.dump(func(*args, **kwargs)).data
-            return wrapped
-        return func
-
-    return wrapper
+spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
+spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 
 def register_schema(schema, definition_name=None):
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
-    spec.definition(definition_name, schema=schema())
+    spec.definition(definition_name, schema=schema)
 
 
 def make_schema(model, class_name=None, fields=None, options=None):
@@ -82,14 +43,12 @@ def make_schema(model, class_name=None, fields=None, options=None):
     )
 
 
-def make_page_schema(schema, page_type=paging.OffsetPageSchema, class_name=None,
+def make_page_schema(schema, page_type=paging_schemas.OffsetPageSchema, class_name=None,
                      definition_name=None):
     class_name = class_name or '{0}PageSchema'.format(re.sub(r'Schema$', '', schema.__name__))
-    definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
 
     class Meta:
         results_schema_class = schema
-        results_schema_options = {'ref': '#/definitions/{0}'.format(definition_name)}
 
     return type(
         class_name,
@@ -195,6 +154,8 @@ make_reports_schema = functools.partial(
         'pdf_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
+        'beginning_image_number': ma.fields.Str(),
+        'end_image_number': ma.fields.Str(),
     },
     options={'exclude': ('idx', 'report_key', 'committee')},
 )
@@ -223,6 +184,7 @@ make_totals_schema = functools.partial(
         'report_form': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
         'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
+        'last_beginning_image_number': ma.fields.Str(),
     },
 )
 augment_models(
@@ -257,12 +219,18 @@ ScheduleASchema = make_schema(
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contribution_receipt_amount': ma.fields.Decimal(places=2),
         'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
+        'image_number': ma.fields.Str(),
     },
     options={
-        'exclude': ('memo_code', ),
+        'exclude': (
+            'memo_code',
+            'contributor_name_text',
+            'contributor_employer_text',
+            'contributor_occupation_text',
+        ),
     }
 )
-ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging.SeekPageSchema)
+ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
@@ -274,7 +242,6 @@ augment_models(
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
     models.ScheduleAByContributor,
-    models.ScheduleAByContributorType,
     models.ScheduleBByRecipient,
     models.ScheduleBByRecipientID,
     models.ScheduleBByPurpose,
@@ -314,12 +281,17 @@ ScheduleBSchema = make_schema(
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'image_number': ma.fields.Str(),
     },
     options={
-        'exclude': ('memo_code', ),
+        'exclude': (
+            'memo_code',
+            'recipient_name_text',
+            'disbursement_description_text'
+        ),
     }
 )
-ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging.SeekPageSchema)
+ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleBSchema)
 register_schema(ScheduleBPageSchema)
 
@@ -331,12 +303,16 @@ ScheduleESchema = make_schema(
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'expenditure_amount': ma.fields.Decimal(places=2),
         'office_total_ytd': ma.fields.Decimal(places=2),
+        'image_number': ma.fields.Str(),
     },
     options={
-        'exclude': ('memo_code', ),
+        'exclude': (
+            'memo_code',
+            'payee_name_text',
+        ),
     }
 )
-ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging.SeekPageSchema)
+ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
@@ -346,6 +322,8 @@ FilingsSchema = make_schema(
     fields={
         'pdf_url': ma.fields.Str(),
         'document_description': ma.fields.Str(),
+        'beginning_image_number': ma.fields.Str(),
+        'ending_image_number': ma.fields.Str(),
     },
 )
 augment_schemas(FilingsSchema)
@@ -370,7 +348,16 @@ class ElectionSearchSchema(ma.Schema):
     office = ma.fields.Str()
     district = ma.fields.Str()
     cycle = ma.fields.Int(attribute='two_year_period')
+    incumbent_id = ma.fields.Str(attribute='cand_id')
+    incumbent_name = ma.fields.Str(attribute='cand_name')
 augment_schemas(ElectionSearchSchema)
+
+class ElectionSummarySchema(ApiSchema):
+    count = ma.fields.Int()
+    receipts = ma.fields.Decimal(places=2)
+    disbursements = ma.fields.Decimal(places=2)
+    independent_expenditures = ma.fields.Decimal(places=2)
+register_schema(ElectionSummarySchema)
 
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -381,6 +368,7 @@ class ElectionSchema(ma.Schema):
     total_receipts = ma.fields.Decimal()
     total_disbursements = ma.fields.Decimal()
     cash_on_hand_end_period = ma.fields.Decimal()
+    won = ma.fields.Boolean()
     document_description = ma.fields.Function(
         lambda o: utils.document_description(
             o.report_year,

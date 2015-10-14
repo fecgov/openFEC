@@ -1,15 +1,12 @@
 import sqlalchemy as sa
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
-from webservices import utils
 from webservices import filters
 from webservices import schemas
-from webservices import sorting
-from webservices import exceptions
-from webservices.common import counts
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.views import ItemizedResource
 
 
@@ -22,7 +19,7 @@ is_individual = sa.func.is_individual(
 )
 
 
-@spec.doc(
+@doc(
     tags=['schedules/schedule_a'],
     description=docs.SCHEDULE_A,
 )
@@ -56,15 +53,19 @@ class ScheduleAView(ItemizedResource):
         (('min_image_number', 'max_image_number'), models.ScheduleA.image_number),
     ]
     filter_fulltext_fields = [
-        ('contributor_name', models.ScheduleASearch.contributor_name_text),
-        ('contributor_employer', models.ScheduleASearch.contributor_employer_text),
-        ('contributor_occupation', models.ScheduleASearch.contributor_occupation_text),
+        ('contributor_name', models.ScheduleA.contributor_name_text),
+        ('contributor_employer', models.ScheduleA.contributor_employer_text),
+        ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
+    ]
+    query_options = [
+        sa.orm.joinedload(models.ScheduleA.committee),
+        sa.orm.joinedload(models.ScheduleA.contributor),
     ]
 
-    @args.register_kwargs(args.itemized)
-    @args.register_kwargs(args.schedule_a)
-    @args.register_kwargs(args.make_seek_args())
-    @args.register_kwargs(
+    @use_kwargs(args.itemized)
+    @use_kwargs(args.schedule_a)
+    @use_kwargs(args.make_seek_args())
+    @use_kwargs(
         args.make_sort_args(
             validator=args.OptionValidator([
                 'contribution_receipt_date',
@@ -74,52 +75,11 @@ class ScheduleAView(ItemizedResource):
             multiple=False,
         )
     )
-    @schemas.marshal_with(schemas.ScheduleAPageSchema())
+    @marshal_with(schemas.ScheduleAPageSchema())
     def get(self, **kwargs):
-        if len(kwargs['committee_id']) > 5:
-            raise exceptions.ApiError(
-                'Can only specify up to five values for "committee_id".',
-                status_code=422,
-            )
-        if len(kwargs['committee_id']) > 1:
-            query, count = self.join_committee_queries(kwargs)
-            return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-        return super(ScheduleAView, self).get(**kwargs)
+        return super().get(**kwargs)
 
-    def build_query(self, kwargs, join=True):
-        query = super(ScheduleAView, self).build_query(kwargs)
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
-        if join:
-            query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
-            query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
         return query
-
-    def join_committee_queries(self, kwargs):
-        queries = []
-        total = 0
-        for committee_id in kwargs['committee_id']:
-            query, count = self.build_committee_query(kwargs, committee_id)
-            queries.append(query.subquery().select())
-            total += count
-        query = models.db.session.query(
-            models.ScheduleA
-        ).select_entity_from(
-            sa.union_all(*queries)
-        )
-        query = query.options(sa.orm.joinedload(models.ScheduleA.committee))
-        query = query.options(sa.orm.joinedload(models.ScheduleA.contributor))
-        return query, total
-
-    def build_committee_query(self, kwargs, committee_id):
-        query = self.build_query(utils.extend(kwargs, {'committee_id': [committee_id]}), join=False)
-        sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
-        query, _ = sorting.sort(query, sort, model=models.ScheduleA, hide_null=hide_null, nulls_large=nulls_large)
-        page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return page_query, count
-
-    def join_fulltext(self, query):
-        return query.join(
-            models.ScheduleASearch,
-            models.ScheduleA.sched_a_sk == models.ScheduleASearch.sched_a_sk,
-        )

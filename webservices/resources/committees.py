@@ -1,12 +1,12 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.util import filter_query
 
 
@@ -29,22 +29,22 @@ def filter_year(model, query, years):
     )  # noqa
 
 
-@spec.doc(
+@doc(
     tags=['committee'],
     description=docs.COMMITTEE_LIST,
 )
-class CommitteeList(Resource):
+class CommitteeList(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.committee)
-    @args.register_kwargs(args.committee_list)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.committee)
+    @use_kwargs(args.committee_list)
+    @use_kwargs(
         args.make_sort_args(
             default=['name'],
             validator=args.IndexValidator(models.Committee),
         )
     )
-    @schemas.marshal_with(schemas.CommitteePageSchema())
+    @marshal_with(schemas.CommitteePageSchema())
     def get(self, **kwargs):
         query = self.get_committees(kwargs)
         return utils.fetch_page(query, kwargs, model=models.Committee)
@@ -53,7 +53,7 @@ class CommitteeList(Resource):
 
         committees = models.Committee.query
 
-        if kwargs['candidate_id']:
+        if kwargs.get('candidate_id'):
             committees = committees.filter(
                 models.Committee.candidate_ids.overlap(kwargs['candidate_id'])
             )
@@ -66,46 +66,46 @@ class CommitteeList(Resource):
                 ),
                 models.CommitteeSearch.fulltxt,
                 kwargs['q'],
-            )
+            ).distinct()
 
         if kwargs.get('name'):
             committees = committees.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
 
         committees = filter_query(models.Committee, committees, list_filter_fields, kwargs)
 
-        if kwargs['year']:
+        if kwargs.get('year'):
             committees = filter_year(models.Committee, committees, kwargs['year'])
 
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             committees = committees.filter(models.Committee.cycles.overlap(kwargs['cycle']))
 
-        if kwargs['min_first_file_date']:
+        if kwargs.get('min_first_file_date'):
             committees = committees.filter(models.Committee.first_file_date >= kwargs['min_first_file_date'])
-        if kwargs['max_first_file_date']:
+        if kwargs.get('max_first_file_date'):
             committees = committees.filter(models.Committee.first_file_date <= kwargs['max_first_file_date'])
 
         return committees
 
 
-@spec.doc(
+@doc(
     tags=['committee'],
     description=docs.COMMITTEE_DETAIL,
-    path_params=[
-        utils.candidate_param,
-        utils.committee_param,
-    ],
+    params={
+        'candidate_id': {'description': docs.CANDIDATE_ID},
+        'committee_id': {'description': docs.COMMITTEE_ID},
+    },
 )
-class CommitteeView(Resource):
+class CommitteeView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.committee)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.committee)
+    @use_kwargs(
         args.make_sort_args(
             default=['name'],
             validator=args.IndexValidator(models.CommitteeDetail),
         )
     )
-    @schemas.marshal_with(schemas.CommitteeDetailPageSchema())
+    @marshal_with(schemas.CommitteeDetailPageSchema())
     def get(self, committee_id=None, candidate_id=None, **kwargs):
         query = self.get_committee(kwargs, committee_id, candidate_id)
         return utils.fetch_page(query, kwargs, model=models.CommitteeDetail)
@@ -122,38 +122,38 @@ class CommitteeView(Resource):
                 models.CandidateCommitteeLink
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
-            )
+            ).distinct()
 
         committees = filter_query(models.CommitteeDetail, committees, detail_filter_fields, kwargs)
 
-        if kwargs['year']:
+        if kwargs.get('year'):
             committees = filter_year(models.CommitteeDetail, committees, kwargs['year'])
 
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             committees = committees.filter(models.CommitteeDetail.cycles.overlap(kwargs['cycle']))
 
         return committees
 
 
-@spec.doc(
+@doc(
     tags=['committee'],
     description=docs.COMMITTEE_HISTORY,
-    path_params=[
-        utils.candidate_param,
-        utils.committee_param,
-        utils.cycle_param(description=docs.COMMITTEE_CYCLE),
-    ],
+    params={
+        'candidate_id': {'description': docs.CANDIDATE_ID},
+        'committee_id': {'description': docs.COMMITTEE_ID},
+        'cycle': {'description': docs.COMMITTEE_CYCLE},
+    },
 )
-class CommitteeHistoryView(Resource):
+class CommitteeHistoryView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(
         args.make_sort_args(
             default=['-cycle'],
             validator=args.IndexValidator(models.CommitteeHistory),
         )
     )
-    @schemas.marshal_with(schemas.CommitteeHistoryPageSchema())
+    @marshal_with(schemas.CommitteeHistoryPageSchema())
     def get(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
         query = self.get_committee(committee_id, candidate_id, cycle, kwargs)
         return utils.fetch_page(query, kwargs, model=models.CommitteeHistory)
@@ -170,7 +170,7 @@ class CommitteeHistoryView(Resource):
                 models.CandidateCommitteeLink.committee_key == models.CommitteeHistory.committee_key,
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
-            )
+            ).distinct()
 
         if cycle:
             query = query.filter(models.CommitteeHistory.cycle == cycle)

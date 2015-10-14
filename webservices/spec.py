@@ -1,6 +1,4 @@
-import copy
-
-from smore.apispec import APISpec
+from apispec import APISpec
 
 from webservices import docs
 from webservices import __API_VERSION__
@@ -12,7 +10,7 @@ spec = APISpec(
     info={'description': docs.DESCRIPTION},
     basePath='/v1',
     produces=['application/json'],
-    plugins=['smore.ext.marshmallow'],
+    plugins=['apispec.ext.marshmallow'],
     securityDefinitions={
         'apiKey': {
             'type': 'apiKey',
@@ -32,7 +30,7 @@ spec = APISpec(
         },
         {
             'name': 'dates',
-            'description': 'Election and reporting dates.',
+            'description': docs.DATES_TAG,
         },
         {
             'name': 'financial',
@@ -60,15 +58,11 @@ spec = APISpec(
         },
         {
             'name': 'communication_cost',
-            'description': 'Reports of communication costs by corporations and membership orgnizations from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).',
+            'description': docs.COMMUNICATION_TAG,
+        },
+        {
+            'name': 'electioneering',
+            'description': docs.ELECTIONEERING,
         },
     ]
 )
-
-
-def doc(**kwargs):
-    def wrapper(func):
-        func.__apidoc__ = copy.deepcopy(getattr(func, '__apidoc__', {}))
-        func.__apidoc__.update(kwargs)
-        return func
-    return wrapper
