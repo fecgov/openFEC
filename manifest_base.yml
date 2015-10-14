@@ -2,6 +2,7 @@
 path: .
 memory: 512M
 stack: cflinuxfs2
+domain: 18f.gov
 buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
 env:
   NEW_RELIC_CONFIG_FILE: newrelic.ini

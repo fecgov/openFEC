@@ -1,30 +1,54 @@
+import os
 import re
 import functools
 
+import six
 import sqlalchemy as sa
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 
+from flask.ext import restful
+from marshmallow_pagination import paginators
+
+from webargs import fields
+from flask_smore import use_kwargs as use_kwargs_original
+from flask_smore.views import MethodResourceMeta
+
 from webservices import docs
-from webservices import paging
 from webservices import sorting
+from webservices import decoders
 from webservices import exceptions
+
+
+use_kwargs = functools.partial(use_kwargs_original, locations=('query', ))
+
+
+class Resource(six.with_metaclass(MethodResourceMeta, restful.Resource)):
+    pass
+
+API_KEY_ARG = fields.Str(
+    required=True,
+    missing='DEMO_KEY',
+    description=docs.API_KEY_DESCRIPTION,
+)
+if os.getenv('PRODUCTION'):
+    Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
 
 
 def check_cap(kwargs, cap):
     if cap:
-        if not kwargs['per_page']:
+        if not kwargs.get('per_page'):
             raise exceptions.ApiError(
                 'Parameter "per_page" must be > 0'.format(cap),
                 status_code=422,
             )
 
 
-def fetch_page(query, kwargs, model=None, clear=False, count=None, cap=100):
+def fetch_page(query, kwargs, model=None, join_columns=None, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
-    query, _ = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
-    paginator = paging.SqlalchemyOffsetPaginator(query, kwargs['per_page'], count=count)
+    sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
+    query, _ = sorting.sort(query, sort, model=model, join_columns=join_columns, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
+    paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
 
@@ -34,7 +58,7 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
     sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
     query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     sort_column = sort_columns[0] if sort_columns else None
-    paginator = paging.SqlalchemySeekPaginator(
+    paginator = paginators.SeekPaginator(
         query,
         kwargs['per_page'],
         index_column,
@@ -83,14 +107,14 @@ office_args_map = {
 }
 def check_election_arguments(kwargs):
     for arg in office_args_required:
-        if kwargs[arg] is None:
+        if kwargs.get(arg) is None:
             raise exceptions.ApiError(
                 'Required parameter "{0}" not found.'.format(arg),
                 status_code=422,
             )
     conditional_args = office_args_map.get(kwargs['office'], [])
     for arg in conditional_args:
-        if kwargs[arg] is None:
+        if kwargs.get(arg) is None:
             raise exceptions.ApiError(
                 'Must include argument "{0}" with office type "{1}"'.format(
                     arg,
@@ -105,9 +129,12 @@ def get_model(name):
     return db.Model._decl_class_registry.get(name)
 
 
-def related(related_model, id_label, related_id_label, cycle_label=None, related_cycle_label=None):
+def related(related_model, id_label, related_id_label=None, cycle_label=None,
+            related_cycle_label=None, use_modulus=True):
     from webservices.common.models import db
     related_model = get_model(related_model)
+    related_id_label = related_id_label or id_label
+    related_cycle_label = related_cycle_label or cycle_label
     @declared_attr
     def related(cls):
         id_column = getattr(cls, id_label)
@@ -115,6 +142,8 @@ def related(related_model, id_label, related_id_label, cycle_label=None, related
         filters = [foreign(id_column) == related_id_column]
         if cycle_label:
             cycle_column = getattr(cls, cycle_label)
+            if use_modulus:
+                cycle_column = cycle_column + cycle_column % 2
             related_cycle_column = getattr(related_model, related_cycle_label)
             filters.append(cycle_column == related_cycle_column)
         return db.relationship(
@@ -141,14 +170,19 @@ related_candidate_history = functools.partial(
 )
 
 
-def document_description(report_year, report_type=None, document_type=None):
+def document_description(report_year, report_type=None, document_type=None, form_type=None):
     if report_type:
         clean = re.sub(r'\{[^)]*\}', '', report_type)
     elif document_type:
         clean = document_type
+    elif form_type and form_type in decoders.form_types:
+        clean = decoders.form_types[form_type]
     else:
-        clean = 'Document '
-    return '{0}{1}'.format(clean, report_year)
+        clean = 'Document'
+
+    if form_type and form_type == 'RFAI':
+        clean = 'RFAI: ' + clean
+    return '{0} {1}'.format(clean.strip(), report_year)
 
 
 def report_pdf_url(report_year, beginning_image_number, form_type=None, committee_type=None):
@@ -172,18 +206,6 @@ def make_image_pdf_url(image_number):
     return 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number)
 
 
-committee_param = {
-    'name': 'committee_id',
-    'type': 'string',
-    'in': 'path',
-    'description': docs.COMMITTEE_ID,
-}
-candidate_param = {
-    'name': 'candidate_id',
-    'type': 'string',
-    'in': 'path',
-    'description': docs.CANDIDATE_ID,
-}
 def cycle_param(**kwargs):
     ret = {
         'name': 'cycle',

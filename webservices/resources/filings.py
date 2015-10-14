@@ -1,28 +1,29 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
-from webservices import filters
 from webservices import schemas
+from webservices.common import views
 from webservices.common import counts
 from webservices.common import models
+from webservices.utils import use_kwargs
 
 
-@spec.doc(
+@doc(
     tags=['filings'],
     description=docs.FILINGS,
-    path_params=[utils.committee_param, utils.candidate_param],
+    params={
+        'candidate_id': {'description': docs.CANDIDATE_ID},
+        'committee_id': {'description': docs.COMMITTEE_ID},
+    },
 )
-class BaseFilings(Resource):
+class BaseFilings(views.ApiResource):
 
-    range_fields = [
-        (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
-    ]
+    model = models.Filings
 
-    multi_fields = [
+    filter_multi_fields = [
         ('beginning_image_number', models.Filings.beginning_image_number),
         ('report_type', models.Filings.report_type),
         ('document_type', models.Filings.document_type),
@@ -30,37 +31,37 @@ class BaseFilings(Resource):
         ('form_type', models.Filings.form_type),
         ('primary_general_indicator', models.Filings.primary_general_indicator),
         ('amendment_indicator', models.Filings.amendment_indicator),
+        ('cycle', models.Filings.cycle),
     ]
 
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
+    ]
+
+    query_options = [sa.orm.joinedload(models.Filings.committee)]
+
     def get(self, **kwargs):
-        query = self._build_query(**kwargs)
+        query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=models.Filings, count=count)
-
-    def _build_query(self, **kwargs):
-        query = models.Filings.query
-        query = query.options(sa.orm.joinedload(models.Filings.committee))
-        query = filters.filter_multi(query, kwargs, self.multi_fields)
-        query = filters.filter_range(query, kwargs, self.range_fields)
-        return query
 
 
 class FilingsView(BaseFilings):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.filings)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.filings)
+    @use_kwargs(
         args.make_sort_args(
             default=['-receipt_date'],
             validator=args.IndexValidator(models.Filings),
         )
     )
-    @schemas.marshal_with(schemas.FilingsPageSchema())
+    @marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)
 
-    def _build_query(self, committee_id=None, candidate_id=None, **kwargs):
-        query = super()._build_query(**kwargs)
+    def build_query(self, committee_id=None, candidate_id=None, **kwargs):
+        query = super().build_query(**kwargs)
         if committee_id:
             query = query.filter(models.Filings.committee_id == committee_id)
         if candidate_id:
@@ -70,20 +71,20 @@ class FilingsView(BaseFilings):
 
 class FilingsList(BaseFilings):
 
-    multi_fields = BaseFilings.multi_fields + [
+    filter_multi_fields = BaseFilings.filter_multi_fields + [
         ('committee_id', models.Filings.committee_id),
         ('candidate_id', models.Filings.candidate_id),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.filings)
-    @args.register_kwargs(args.entities)
-    @args.register_kwargs(
+    @use_kwargs(args.paging)
+    @use_kwargs(args.filings)
+    @use_kwargs(args.entities)
+    @use_kwargs(
         args.make_sort_args(
             default=['-receipt_date'],
             validator=args.IndexValidator(models.Filings),
         )
     )
-    @schemas.marshal_with(schemas.FilingsPageSchema())
+    @marshal_with(schemas.FilingsPageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)

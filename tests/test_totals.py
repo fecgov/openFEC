@@ -26,11 +26,9 @@ shared_fields = {
     'receipts': 126,
     'coverage_start_date': None,
     'coverage_end_date': None,
-    'net_contributions': 127,
-    'net_operating_expenditures': 128,
     'last_report_year': 2012,
     'last_report_type_full': 'Q3',
-    'last_beginning_image_number': 123,
+    'last_beginning_image_number': '123',
     'last_cash_on_hand_end_period': 538,
 }
 
@@ -91,6 +89,8 @@ class TestTotals(ApiBaseTest):
             'other_receipts': 8,
             'transfers_from_other_authorized_committee': 9,
             'transfers_to_other_authorized_committee': 10,
+            'net_contributions': 127,
+            'net_operating_expenditures': 128,
         }
         fields = utils.extend(house_senate_fields, shared_fields)
 
@@ -133,6 +133,8 @@ class TestTotals(ApiBaseTest):
             'transfers_from_nonfed_account': 23,
             'transfers_from_nonfed_levin': 24,
             'transfers_to_affiliated_committee': 25,
+            'net_contributions': 127,
+            'net_operating_expenditures': 128,
         }
         fields = utils.extend(pac_party_fields, shared_fields)
 

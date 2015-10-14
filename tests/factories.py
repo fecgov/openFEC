@@ -128,24 +128,12 @@ class ScheduleAFactory(BaseFactory):
     report_year = 2016
 
 
-class ScheduleASearchFactory(BaseFactory):
-    class Meta:
-        model = models.ScheduleASearch
-    sched_a_sk = factory.Sequence(lambda n: n)
-
-
 class ScheduleBFactory(BaseFactory):
     class Meta:
         model = models.ScheduleB
     sched_b_sk = factory.Sequence(lambda n: n)
     load_date = datetime.datetime.utcnow()
     report_year = 2016
-
-
-class ScheduleBSearchFactory(BaseFactory):
-    class Meta:
-        model = models.ScheduleBSearch
-    sched_b_sk = factory.Sequence(lambda n: n)
 
 
 class ScheduleEFactory(BaseFactory):
@@ -173,12 +161,6 @@ class ScheduleABySizeFactory(BaseAggregateFactory):
 class ScheduleAByStateFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleAByState
-
-
-class ScheduleAByContributorTypeFactory(BaseAggregateFactory):
-    class Meta:
-        model = models.ScheduleAByContributorType
-    individual = True
 
 
 class ScheduleAByContributorFactory(BaseAggregateFactory):
@@ -222,3 +204,10 @@ class ReportingDatesFactory(BaseFactory):
 class ElectionDatesFactory(BaseFactory):
     class Meta:
         model = models.ElectionDates
+
+
+class ElectionResultFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionResult
+    election_yr = 2016
+    cand_office_st = 'US'

@@ -1,12 +1,12 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.utils import use_kwargs
 
 
 reports_schema_map = {
@@ -38,26 +38,23 @@ def parse_types(types):
     return include, exclude
 
 
-@spec.doc(
+@doc(
     tags=['financial'],
     description=docs.REPORTS,
-    path_params=[
-        utils.committee_param,
-        {
-            'name': 'committee_type',
-            'in': 'path',
-            'type': 'string',
+    params={
+        'committee_id': {'description': docs.COMMITTEE_ID},
+        'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
             'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
         },
-    ],
+    },
 )
-class ReportsView(Resource):
+class ReportsView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.reports)
-    @args.register_kwargs(args.make_sort_args(default=['-coverage_end_date']))
-    @schemas.marshal_with(schemas.CommitteeReportsPageSchema(), wrap=False)
+    @use_kwargs(args.paging)
+    @use_kwargs(args.reports)
+    @use_kwargs(args.make_sort_args(default=['-coverage_end_date']))
+    @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
         validator = args.IndexValidator(reports_class)
@@ -81,14 +78,14 @@ class ReportsView(Resource):
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
 
-        if kwargs['year']:
+        if kwargs.get('year'):
             query = query.filter(reports_class.report_year.in_(kwargs['year']))
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
-        if kwargs['beginning_image_number']:
+        if kwargs.get('beginning_image_number'):
             query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
 
-        if kwargs['report_type']:
+        if kwargs.get('report_type'):
             include, exclude = parse_types(kwargs['report_type'])
             if include:
                 query = query.filter(reports_class.report_type.in_(include))
@@ -100,7 +97,7 @@ class ReportsView(Resource):
     def _resolve_committee_type(self, committee_id, committee_type, kwargs):
         if committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
-            if kwargs['cycle']:
+            if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
             committee = query.first_or_404()

@@ -4,8 +4,11 @@ with
     years as (
         select
             cand_sk,
-            array_agg(distinct(cand_election_yr))::int[] as election_years
+            array_agg(cand_election_yr)::int[] as election_years,
+            array_agg(office_district)::text[] as election_districts
         from dimcandoffice
+        join dimoffice using (office_sk)
+        where dimcandoffice.expire_date is null
         group by cand_sk
     ),
     active_agg as (
@@ -19,11 +22,12 @@ with
         select
             cand_sk,
             generate_series(
-                min(election_yr + election_yr % 2)::int,
-                max(election_yr + election_yr % 2)::int,
+                min(get_cycle(election_yr)),
+                max(get_cycle(election_yr)),
                 2
             ) as cycle
         from dimcandproperties
+        where form_tp != 'F2Z'
         group by cand_sk
     ),
     cycle_agg as (
@@ -68,6 +72,7 @@ select distinct on (dcp.cand_sk, cycle)
     dp.party_affiliation as party,
     cycle_agg.cycles,
     years.election_years,
+    years.election_districts,
     active_agg.active_through,
     clean_party(dp.party_affiliation_desc) as party_full
 from dimcandproperties dcp
@@ -142,6 +147,7 @@ select distinct on (candidate_id)
     end
 as fulltxt
 from ofec_candidate_detail_mv_tmp
+where candidate_status is not null
 ;
 
 create unique index on ofec_candidate_fulltext_mv_tmp(idx);

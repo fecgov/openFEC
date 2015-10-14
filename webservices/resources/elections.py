@@ -1,15 +1,16 @@
 import sqlalchemy as sa
-from flask.ext.restful import Resource
+from flask_smore import doc, marshal_with
 
 from webservices import args
 from webservices import docs
-from webservices import spec
 from webservices import utils
 from webservices import filters
 from webservices import schemas
+from webservices.utils import use_kwargs
 from webservices.common.models import (
     db, CandidateHistory, CommitteeHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
+    ElectionResult, ScheduleEByCandidate,
 )
 
 
@@ -23,21 +24,29 @@ office_args_map = {
     'senate': ['state'],
 }
 
+def cycle_length(elections):
+    return sa.case(
+        [
+            (elections.c.office == 'P', 4),
+            (elections.c.office == 'S', 6),
+            (elections.c.office == 'H', 2),
+        ]
+    )
 
-@spec.doc(
+@doc(
     description=docs.ELECTION_SEARCH,
     tags=['financial']
 )
-class ElectionList(Resource):
+class ElectionList(utils.Resource):
 
     filter_multi_fields = [
         ('cycle', CandidateHistory.two_year_period),
     ]
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.election_search)
-    @args.register_kwargs(args.make_sort_args(default=['-_office_status']))
-    @schemas.marshal_with(schemas.ElectionSearchPageSchema())
+    @use_kwargs(args.paging)
+    @use_kwargs(args.election_search)
+    @use_kwargs(args.make_sort_args(default=['-_office_status']))
+    @marshal_with(schemas.ElectionSearchPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
         return utils.fetch_page(query, kwargs)
@@ -48,6 +57,8 @@ class ElectionList(Resource):
         elections = self._get_elections(kwargs).subquery()
         return db.session.query(
             elections,
+            ElectionResult.cand_id,
+            ElectionResult.cand_name,
             sa.case(
                 [
                     (elections.c.office == 'P', 1),
@@ -56,6 +67,14 @@ class ElectionList(Resource):
                 ],
                 else_=4,
             ).label('_office_status'),
+        ).outerjoin(
+            ElectionResult,
+            sa.and_(
+                elections.c.state == ElectionResult.cand_office_st,
+                elections.c.office == ElectionResult.cand_office,
+                sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
+                elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
+            ),
         ).order_by(
             '_office_status',
         )
@@ -69,22 +88,23 @@ class ElectionList(Resource):
             CandidateHistory.two_year_period,
         ).filter(
             CandidateHistory.candidate_status == 'C',
+            CandidateHistory.candidate_inactive == None,  # noqa
         )
-        if kwargs['cycle']:
+        if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
-        if kwargs['office']:
+        if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(CandidateHistory.office.in_(values))
-        if kwargs['state']:
+        if kwargs.get('state'):
             query = query.filter(CandidateHistory.state.in_(kwargs['state'] + ['US']))
-        if kwargs['district']:
+        if kwargs.get('district'):
             query = query.filter(
                 sa.or_(
                     CandidateHistory.district.in_(kwargs['district']),
                     CandidateHistory.district == None  # noqa
                 ),
             )
-        if kwargs['zip']:
+        if kwargs.get('zip'):
             query = self._filter_zip(query, kwargs)
         return filters.filter_multi(query, kwargs, self.filter_multi_fields)
 
@@ -118,16 +138,16 @@ class ElectionList(Resource):
         )
 
 
-@spec.doc(
+@doc(
     description=docs.ELECTIONS,
     tags=['financial']
 )
-class ElectionView(Resource):
+class ElectionView(utils.Resource):
 
-    @args.register_kwargs(args.paging)
-    @args.register_kwargs(args.elections)
-    @args.register_kwargs(args.make_sort_args(default=['-total_receipts'], default_nulls_large=False))
-    @schemas.marshal_with(schemas.ElectionPageSchema())
+    @use_kwargs(args.paging)
+    @use_kwargs(args.elections)
+    @use_kwargs(args.make_sort_args(default=['-total_receipts'], default_nulls_large=False))
+    @marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
         return utils.fetch_page(query, kwargs, cap=0)
@@ -138,12 +158,20 @@ class ElectionView(Resource):
         pairs = self._get_pairs(totals_model, kwargs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
         filings = self._get_filings(pairs).subquery()
+        outcomes = self._get_outcomes(kwargs).subquery()
         return db.session.query(
             aggregates,
             filings,
+            sa.case(
+                [(outcomes.c.cand_id != None, True)],  # noqa
+                else_=False,
+            ).label('won'),
         ).join(
             filings,
             aggregates.c.candidate_id == filings.c.candidate_id,
+        ).outerjoin(
+            outcomes,
+            aggregates.c.candidate_id == outcomes.c.cand_id,
         )
 
     def _get_pairs(self, totals_model, kwargs):
@@ -163,28 +191,9 @@ class ElectionView(Resource):
         ).distinct(
             CandidateHistory.candidate_key,
             CommitteeHistory.committee_key,
-        ).join(
-            CandidateCommitteeLink,
-            CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
-        ).join(
-            CommitteeHistory,
-            CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
-        ).join(
-            totals_model,
-            CommitteeHistory.committee_id == totals_model.committee_id,
-        ).filter(
-            CandidateHistory.two_year_period == kwargs['cycle'],
-            CandidateHistory.election_years.any(kwargs['cycle']),
-            CandidateHistory.office == kwargs['office'][0].upper(),
-            CandidateCommitteeLink.election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
-            CommitteeHistory.cycle == kwargs['cycle'],
-            CommitteeHistory.designation.in_(['P', 'A']),
-            totals_model.cycle == kwargs['cycle'],
         )
-        if kwargs['state']:
-            pairs = pairs.filter(CandidateHistory.state == kwargs['state'])
-        if kwargs['district']:
-            pairs = pairs.filter(CandidateHistory.district == kwargs['district'])
+        pairs = join_candidate_totals(pairs, kwargs, totals_model)
+        pairs = filter_candidate_totals(pairs, kwargs, totals_model)
         return pairs.order_by(
             CandidateHistory.candidate_key,
             CommitteeHistory.committee_key,
@@ -218,3 +227,98 @@ class ElectionView(Resource):
             pairs.c.candidate_id,
             sa.desc(pairs.c.coverage_end_date),
         )
+
+    def _get_outcomes(self, kwargs):
+        return db.session.query(
+            ElectionResult.cand_id
+        ).filter(
+            ElectionResult.election_yr == kwargs['cycle'],
+            ElectionResult.cand_office == kwargs['office'][0].upper(),
+            ElectionResult.cand_office_st == (kwargs.get('state', 'US')),
+            ElectionResult.cand_office_district == (kwargs.get('district', '00')),
+        )
+
+@doc(
+    description=docs.ELECTION_SEARCH,
+    tags=['financial']
+)
+class ElectionSummary(utils.Resource):
+
+    @use_kwargs(args.elections)
+    @marshal_with(schemas.ElectionSummarySchema())
+    def get(self, **kwargs):
+        utils.check_election_arguments(kwargs)
+        aggregates = self.get_aggregates(kwargs).subquery()
+        expenditures = self.get_expenditures(kwargs).subquery()
+        return db.session.query(
+            aggregates.c.count,
+            aggregates.c.receipts,
+            aggregates.c.disbursements,
+            expenditures.c.independent_expenditures,
+        ).first()._asdict()
+
+    def get_aggregates(self, kwargs):
+        totals_model = office_totals_map[kwargs['office']]
+        aggregates = db.session.query(
+            sa.func.count(sa.distinct(CandidateHistory.candidate_id)).label('count'),
+            sa.func.sum(totals_model.receipts).label('receipts'),
+            sa.func.sum(totals_model.disbursements).label('disbursements'),
+        ).select_from(
+            CandidateHistory
+        )
+        aggregates = join_candidate_totals(aggregates, kwargs, totals_model)
+        aggregates = filter_candidate_totals(aggregates, kwargs, totals_model)
+        return aggregates
+
+    def get_expenditures(self, kwargs):
+        expenditures = db.session.query(
+            sa.func.sum(ScheduleEByCandidate.total).label('independent_expenditures'),
+        ).select_from(
+            CandidateHistory
+        ).join(
+            ScheduleEByCandidate,
+            sa.and_(
+                CandidateHistory.candidate_id == ScheduleEByCandidate.candidate_id,
+                ScheduleEByCandidate.cycle == kwargs['cycle'],
+            ),
+        )
+        expenditures = filter_candidates(expenditures, kwargs)
+        return expenditures
+
+
+def join_candidate_totals(query, kwargs, totals_model):
+    return query.join(
+        CandidateCommitteeLink,
+        CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
+    ).join(
+        CommitteeHistory,
+        CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+    ).join(
+        totals_model,
+        CommitteeHistory.committee_id == totals_model.committee_id,
+    )
+
+
+def filter_candidates(query, kwargs):
+    query = query.filter(
+        CandidateHistory.two_year_period == kwargs['cycle'],
+        CandidateHistory.election_years.any(kwargs['cycle']),
+        CandidateHistory.office == kwargs['office'][0].upper(),
+    )
+    if kwargs.get('state'):
+        query = query.filter(CandidateHistory.state == kwargs['state'])
+    if kwargs.get('district'):
+        query = query.filter(CandidateHistory.district == kwargs['district'])
+    return query
+
+
+def filter_candidate_totals(query, kwargs, totals_model):
+    query = filter_candidates(query, kwargs)
+    query = query.filter(
+        CandidateHistory.candidate_inactive == None,  # noqa
+        CandidateCommitteeLink.election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
+        CommitteeHistory.cycle == kwargs['cycle'],
+        CommitteeHistory.designation.in_(['P', 'A']),
+        totals_model.cycle == kwargs['cycle'],
+    )
+    return query

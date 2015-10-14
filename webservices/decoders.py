@@ -12,3 +12,15 @@ election_types = {
     'R': 'Runoff',
     'SR': 'Special runoff',
 }
+
+form_types = {
+    'F1': 'Statement of organization',
+    'F1M': 'Notification of multicandidate status',
+    'F2': 'Statement of candidacy',
+    'F9': '24-hour notice of disbursements for electioneering communications',
+    'F10': '24-hour notice of expenditure of personal funds',
+    'F11': '24-hour notice of opposition personal funds amount',
+    'F12': '24-hour notice of suspension of increased limits',
+    'F99': 'Miscellaneous document',
+    'F6': '48-hour notice of contribution/loans received',
+}

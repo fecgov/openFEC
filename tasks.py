@@ -183,7 +183,7 @@ def deploy(space=None, branch=None, yes=False):
 
     # Log in
     args = (
-        ('--a', 'https://api.18f.gov'),
+        ('--a', 'https://api.cloud.gov'),
         ('--u', '$FEC_CF_USERNAME'),
         ('--p', '$FEC_CF_PASSWORD'),
         ('--o', 'fec'),
