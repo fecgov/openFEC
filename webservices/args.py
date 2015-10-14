@@ -288,7 +288,7 @@ reporting_dates = {
 }
 
 election_dates = {
-    'election_state': fields.List(fields.Str, description='State of the office sought.'),
+    'election_state': fields.List(fields.Str, description='State or territory of the office sought.'),
     'election_district': fields.List(fields.Str, description='House district of the office sought, if applicable.'),
     'election_party': fields.List(fields.Str, description='Party, if applicable.'),
     'office_sought': fields.List(fields.Str(validate=validate.OneOf(['H', 'S', 'P'])), description='House, Senate or presidential office'),
