@@ -143,7 +143,7 @@ candidate_detail = {
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or President.'),
     'state': fields.List(IStr, description='U.S. State candidate or territory where a candidate runs for office.'),
     'party': fields.List(IStr, description='Three letter code for the party under which a candidate ran for office'),
-    'election_year': fields.Str(attribute='year', description='See records pertaining to a particular election year.'),
+    'year': fields.Str(attribute='year', description='See records pertaining to a particular election year. The list of election years is based on a candidate filing a statement of candidacy (F2) for that year.'),
     'district': fields.List(District),
     'candidate_status': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'F', 'N', 'P'])),
@@ -252,7 +252,7 @@ filings = {
 }
 
 reports = {
-    'year': fields.List(fields.Int, description='Year in which a candidate runs for office'),
+    'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Int, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
@@ -288,7 +288,7 @@ reporting_dates = {
 }
 
 election_dates = {
-    'election_state': fields.List(fields.Str, description='State of the office sought.'),
+    'election_state': fields.List(fields.Str, description='State or territory of the office sought.'),
     'election_district': fields.List(fields.Str, description='House district of the office sought, if applicable.'),
     'election_party': fields.List(fields.Str, description='Party, if applicable.'),
     'office_sought': fields.List(fields.Str(validate=validate.OneOf(['H', 'S', 'P'])), description='House, Senate or presidential office'),
@@ -297,7 +297,7 @@ election_dates = {
     'trc_election_status_id': fields.List(fields.Str, description=''),
     'update_date': fields.List(fields.Date, description='Date this record was last updated.'),
     'create_date': fields.List(fields.Date, description='Date this record was added to the system.'),
-    'election_yr': fields.List(fields.Str, description='Year of election.'),
+    'election_year': fields.List(fields.Str, description='Year of election.'),
     'pg_date': fields.List(fields.Date, description='Date'),
     'upcoming': fields.Bool(missing=False, description='Only show future due dates for each type of report.'),
 }
