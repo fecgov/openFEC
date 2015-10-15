@@ -10,6 +10,18 @@ returns text as $$
     end
 $$ language plpgsql;
 
+create or replace function expand_office(acronym text)
+returns text as $$
+    begin
+        return case acronym
+            when 'P' then 'President'
+            when 'S' then 'Senate'
+            when 'H' then 'House'
+            else 'Unknown'
+        end;
+    end
+$$ language plpgsql;
+
 create or replace function expand_candidate_status(acronym text)
 returns text as $$
     begin
