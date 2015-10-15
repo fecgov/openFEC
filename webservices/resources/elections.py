@@ -89,6 +89,11 @@ class ElectionList(utils.Resource):
             CandidateHistory.two_year_period,
         ).filter(
             CandidateHistory.candidate_inactive == None,  # noqa
+            # TODO(jmcarp) Revert after #1271 is resolved
+            sa.or_(
+                CandidateHistory.district == None,  # noqa
+                CandidateHistory.district != '99',
+            )
         )
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
