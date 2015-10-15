@@ -87,7 +87,6 @@ class ElectionList(utils.Resource):
             CandidateHistory.district,
             CandidateHistory.two_year_period,
         ).filter(
-            CandidateHistory.candidate_status == 'C',
             CandidateHistory.candidate_inactive == None,  # noqa
         )
         if kwargs.get('cycle'):
