@@ -77,6 +77,7 @@ class ElectionList(utils.Resource):
             ),
         ).order_by(
             '_office_status',
+            ElectionResult.cand_office_district,
         )
 
     def _get_elections(self, kwargs):
