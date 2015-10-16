@@ -1,19 +1,20 @@
 drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
 create materialized view ofec_candidate_history_mv_tmp as
 with
+    elections as (
+        select distinct
+            cand_id,
+            cand_election_yr,
+            cand_office_district
+        from cand_valid_fec_yr
+    ),
     years as (
         select
             cand_id,
+            max(cand_election_yr) as active_through,
             array_agg(cand_election_yr)::int[] as election_years,
             array_agg(cand_office_district)::text[] as election_districts
-        from cand_valid_fec_yr
-        group by cand_id
-    ),
-    active_agg as (
-        select
-            cand_id,
-            max(cand_election_yr) as active_through
-        from cand_valid_fec_yr
+        from elections
         group by cand_id
     ),
     cycles as (
@@ -72,10 +73,9 @@ select distinct on (dcp.cand_sk, cycle)
     cycle_agg.cycles,
     years.election_years,
     years.election_districts,
-    active_agg.active_through
+    years.active_through
 from dimcandproperties dcp
 left join years using (cand_id)
-left join active_agg using (cand_id)
 left join cycle_agg on dcp.cand_sk = cycle_agg.cand_sk
 left join cycles on dcp.cand_sk = cycles.cand_sk and dcp.election_yr <= cycles.cycle
 left join dimcandstatusici dsi on dcp.cand_sk = dsi.cand_sk and dsi.election_yr <= cycles.cycle
