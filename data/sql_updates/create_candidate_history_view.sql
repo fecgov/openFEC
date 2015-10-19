@@ -1,12 +1,25 @@
 drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
 create materialized view ofec_candidate_history_mv_tmp as
 with
+    -- cand_valid_fec_yr has accurate party and district data but includes
+    -- extraneous election years; join on F2 filings in dimcandproperties to
+    -- limit to appropriate years.
     elections as (
         select distinct
-            cand_id,
-            cand_election_yr,
-            cand_office_district
-        from cand_valid_fec_yr
+            dcp.cand_id,
+            dcp.election_yr,
+            fec_yr.cand_election_yr,
+            fec_yr.cand_office_district
+        from dimcandproperties dcp
+        join cand_valid_fec_yr fec_yr on
+            dcp.cand_id = fec_yr.cand_id and
+            dcp.election_yr = fec_yr.cand_election_yr
+        where dcp.form_tp = 'F2'
+        order by
+            dcp.cand_id,
+            dcp.election_yr,
+            fec_yr.cand_election_yr,
+            fec_yr.cand_office_district
     ),
     years as (
         select
@@ -17,30 +30,26 @@ with
         from elections
         group by cand_id
     ),
+    -- TODO: Consider getting cycles from cand_valid_fec_yr.fec_election_yr;
+    --  this may match FEC Viewer better.
     cycles as (
         select
-            cand_sk,
+            cand_id,
             generate_series(
                 min(get_cycle(election_yr)),
                 max(get_cycle(election_yr)),
                 2
             ) as cycle
-        from dimcandproperties
-        where form_tp != 'F2Z'
-        group by cand_sk
+        from elections
+        group by cand_id
     ),
     cycle_agg as (
         select
-            cand_sk,
+            cand_id,
             array_agg(cycles.cycle)::int[] as cycles,
             max(cycles.cycle) as max_cycle
         from cycles
-        group by cand_sk
-    ),
-    non_ballot_filers as (
-        select distinct cand_sk
-        from dimcandproperties
-        where form_tp != 'F2Z'
+        group by cand_id
     )
 select distinct on (dcp.cand_sk, cycle)
     row_number() over () as idx,
@@ -76,10 +85,9 @@ select distinct on (dcp.cand_sk, cycle)
     years.active_through
 from dimcandproperties dcp
 left join years using (cand_id)
-left join cycle_agg on dcp.cand_sk = cycle_agg.cand_sk
-left join cycles on dcp.cand_sk = cycles.cand_sk and dcp.election_yr <= cycles.cycle
+left join cycle_agg using (cand_id)
+left join cycles on dcp.cand_id = cycles.cand_id and dcp.election_yr <= cycles.cycle
 left join dimcandstatusici dsi on dcp.cand_sk = dsi.cand_sk and dsi.election_yr <= cycles.cycle
-inner join non_ballot_filers nbf on dcp.cand_sk = nbf.cand_sk
 inner join cand_valid_fec_yr fec_yr on dcp.cand_id = fec_yr.cand_id and fec_yr.fec_election_yr <= cycles.cycle
 inner join dimparty dp on fec_yr.cand_pty_affiliation = dp.party_affiliation
 where max_cycle >= :START_YEAR
