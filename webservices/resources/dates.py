@@ -1,6 +1,6 @@
 from datetime import date
 
-from flask_smore import doc, marshal_with
+from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import utils
