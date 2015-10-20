@@ -11,8 +11,8 @@ from flask.ext import restful
 from marshmallow_pagination import paginators
 
 from webargs import fields
-from flask_smore import use_kwargs as use_kwargs_original
-from flask_smore.views import MethodResourceMeta
+from flask_apispec import use_kwargs as use_kwargs_original
+from flask_apispec.views import MethodResourceMeta
 
 from webservices import docs
 from webservices import sorting
