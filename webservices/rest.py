@@ -19,7 +19,7 @@ from flask.ext import cors
 from flask.ext import restful
 
 from webargs.flaskparser import FlaskParser
-from flask_smore import doc, marshal_with
+from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import docs
@@ -61,7 +61,7 @@ def sqla_conn_string():
 app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
-app.config['SMORE_FORMAT_RESPONSE'] = None
+app.config['APISPEC_FORMAT_RESPONSE'] = None
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
@@ -77,7 +77,7 @@ class FlaskRestParser(FlaskParser):
         raise exceptions.ApiError(message, status_code)
 
 parser = FlaskRestParser()
-app.config['SMORE_WEBARGS_PARSER'] = parser
+app.config['APISPEC_WEBARGS_PARSER'] = parser
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)
@@ -243,7 +243,7 @@ api.add_resource(
 api.add_resource(filings.FilingsList, '/filings/')
 
 
-from flask_smore.apidoc import Documentation
+from flask_apispec.apidoc import Documentation
 docs = Documentation(app, spec.spec)
 
 docs.register(CandidateNameSearch, blueprint='v1')

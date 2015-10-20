@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 
-from flask_smore import doc, marshal_with
-from flask_smore.utils import Ref
+from flask_apispec import doc, marshal_with
+from flask_apispec.utils import Ref
 
 from webservices import args
 from webservices import docs

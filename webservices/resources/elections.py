@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from flask_smore import doc, marshal_with
+from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import docs
