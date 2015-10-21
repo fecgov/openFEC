@@ -17,7 +17,6 @@ class CandidateCommitteeLink(BaseModel):
     candidate_id = db.Column(db.String)
     election_year = db.Column(db.Integer)
     active_through = db.Column(db.Integer)
-    expire_date = db.Column(db.DateTime)
     committee_name = db.Column(db.String)
     candidate_name = db.Column(db.String)
     committee_designation = db.Column(db.String)
