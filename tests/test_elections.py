@@ -89,6 +89,12 @@ class TestElections(ApiBaseTest):
             for each in self.committees
         ]
         db.session.flush()
+        # Simulate duplicate candidate-committee links per year in `dimlinkages`
+        factories.CandidateCommitteeLinkFactory(
+            candidate_key=self.candidate.candidate_key,
+            committee_key=self.committees[0].committee_key,
+            election_year=2012,
+        )
         factories.CandidateCommitteeLinkFactory(
             candidate_key=self.candidate.candidate_key,
             committee_key=self.committees[0].committee_key,
