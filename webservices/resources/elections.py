@@ -263,17 +263,23 @@ class ElectionSummary(utils.Resource):
         ).first()._asdict()
 
     def get_aggregates(self, kwargs):
+        """Aggregate candidate count, receipts, and disbursements.
+
+        Note: first create subquery on candidate total per period using
+        DISTINCT ON candidate and committee IDs to avoid duplicate linkage
+        records.
+        """
         totals_model = office_totals_map[kwargs['office']]
-        aggregates = db.session.query(
-            sa.func.count(sa.distinct(CandidateHistory.candidate_id)).label('count'),
-            sa.func.sum(totals_model.receipts).label('receipts'),
-            sa.func.sum(totals_model.disbursements).label('disbursements'),
-        ).select_from(
-            CandidateHistory
+        totals = db.session.query(CandidateHistory, totals_model)
+        totals = join_candidate_totals(totals, kwargs, totals_model)
+        totals = filter_candidate_totals(totals, kwargs, totals_model)
+        totals = totals.distinct(CandidateHistory.candidate_id, CommitteeHistory.committee_id)
+        totals = totals.subquery()
+        return db.session.query(
+            sa.func.count(sa.distinct(totals.c.candidate_id)).label('count'),
+            sa.func.sum(totals.c.receipts).label('receipts'),
+            sa.func.sum(totals.c.disbursements).label('disbursements'),
         )
-        aggregates = join_candidate_totals(aggregates, kwargs, totals_model)
-        aggregates = filter_candidate_totals(aggregates, kwargs, totals_model)
-        return aggregates
 
     def get_expenditures(self, kwargs):
         expenditures = db.session.query(
