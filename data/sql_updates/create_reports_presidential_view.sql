@@ -98,12 +98,12 @@ from
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
     two_yr_period_sk >= :START_YEAR
-    and f3p.expire_date is null
 ;
 
 create unique index on ofec_reports_presidential_mv_tmp(idx);
 
 create index on ofec_reports_presidential_mv_tmp(cycle);
+create index on ofec_reports_presidential_mv_tmp(expire_date);
 create index on ofec_reports_presidential_mv_tmp(report_type);
 create index on ofec_reports_presidential_mv_tmp(report_year);
 create index on ofec_reports_presidential_mv_tmp(committee_id);
