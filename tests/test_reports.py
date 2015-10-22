@@ -69,6 +69,23 @@ class TestReports(ApiBaseTest):
             [presidential_report_2012, house_report_2016],
         )
 
+    def test_reports_by_amended(self):
+        reports = [
+            factories.ReportsPresidentialFactory(expire_date=None),
+            factories.ReportsPresidentialFactory(expire_date=datetime.date(2014, 1, 1)),
+        ]
+
+        results = self._results(api.url_for(ReportsView, committee_type='presidential'))
+        self.assertEqual(len(results), 2)
+
+        results = self._results(api.url_for(ReportsView, committee_type='presidential', amended='false'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['committee_id'], reports[0].committee_id)
+
+        results = self._results(api.url_for(ReportsView, committee_type='presidential', amended='true'))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['committee_id'], reports[1].committee_id)
+
     def test_reports_by_committee_type_and_year(self):
         presidential_report_2012 = factories.ReportsPresidentialFactory(report_year=2012)
         presidential_report_2016 = factories.ReportsPresidentialFactory(report_year=2016)
