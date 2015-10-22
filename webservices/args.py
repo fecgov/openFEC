@@ -256,6 +256,7 @@ reports = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Int, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
+    'is_amended': fields.Bool(description='Report has been amended'),
 }
 
 

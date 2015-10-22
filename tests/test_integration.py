@@ -99,11 +99,6 @@ class TestViews(common.IntegrationTestCase):
         for model in TOTALS_MODELS:
             self._check_financial_model(model)
 
-    def test_keeps_only_non_expired_reports(self):
-        for model in REPORTS_MODELS:
-            with self.subTest(report_model=model):
-                self.assertFalse(model.query.filter(model.expire_date != None).count())
-
     def _check_financial_model(self, model):
         count = model.query.filter(
             model.cycle < manage.SQL_CONFIG['START_YEAR']
