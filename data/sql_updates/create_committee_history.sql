@@ -30,6 +30,7 @@ with
             cmte_sk,
             array_agg(distinct cand_id)::text[] as candidate_ids
         from dimlinkages dl
+        where dl.expire_date is null
         group by cmte_sk
     )
 select distinct on (dcp.cmte_sk, cycle)
