@@ -78,11 +78,11 @@ class TestReports(ApiBaseTest):
         results = self._results(api.url_for(ReportsView, committee_type='presidential'))
         self.assertEqual(len(results), 2)
 
-        results = self._results(api.url_for(ReportsView, committee_type='presidential', amended='false'))
+        results = self._results(api.url_for(ReportsView, committee_type='presidential', is_amended='false'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['committee_id'], reports[0].committee_id)
 
-        results = self._results(api.url_for(ReportsView, committee_type='presidential', amended='true'))
+        results = self._results(api.url_for(ReportsView, committee_type='presidential', is_amended='true'))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['committee_id'], reports[1].committee_id)
 
