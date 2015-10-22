@@ -220,6 +220,8 @@ ScheduleASchema = make_schema(
         'contribution_receipt_amount': ma.fields.Decimal(places=2),
         'contributor_aggregate_ytd': ma.fields.Decimal(places=2),
         'image_number': ma.fields.Str(),
+        'original_sub_id': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -282,6 +284,8 @@ ScheduleBSchema = make_schema(
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'image_number': ma.fields.Str(),
+        'original_sub_id': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -304,6 +308,8 @@ ScheduleESchema = make_schema(
         'expenditure_amount': ma.fields.Decimal(places=2),
         'office_total_ytd': ma.fields.Decimal(places=2),
         'image_number': ma.fields.Str(),
+        'original_sub_id': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -324,6 +330,7 @@ FilingsSchema = make_schema(
         'document_description': ma.fields.Str(),
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
     },
 )
 augment_schemas(FilingsSchema)
