@@ -92,6 +92,10 @@ class ReportsView(utils.Resource):
             elif exclude:
                 query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
+        if kwargs.get('is_amended') is not None:
+            column = reports_class.expire_date
+            query = query.filter(column != None if kwargs['is_amended'] else column == None)  # noqa
+
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id, committee_type, kwargs):
