@@ -136,7 +136,13 @@ class ElectionList(utils.Resource):
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
-                    CandidateHistory.district_number == None,  # noqa
+                    # Note: Missing districts may be represented as "00" or `None`.
+                    # For now, handle both values; going forward, we should choose
+                    # a consistent representation.
+                    sa.or_(
+                        CandidateHistory.district_number == 0,
+                        CandidateHistory.district_number == None,  # noqa
+                    ),
                     CandidateHistory.state.in_([districts.c['Official USPS Code'], 'US'])
                 ),
             )
