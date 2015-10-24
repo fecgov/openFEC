@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from webservices import utils
 from webservices import exceptions
 from webservices.common import models
@@ -30,7 +32,7 @@ def filter_contributor_type(query, column, kwargs):
     if kwargs.get('contributor_type') == ['individual']:
         return query.filter(column == 'IND')
     if kwargs.get('contributor_type') == ['committee']:
-        return query.filter(column != 'IND')
+        return query.filter(sa.or_(column != 'IND', column == None))  # noqa
     return query
 
 
