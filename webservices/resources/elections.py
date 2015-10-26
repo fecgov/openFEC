@@ -77,6 +77,7 @@ class ElectionList(utils.Resource):
             ),
         ).order_by(
             '_office_status',
+            ElectionResult.cand_office_district,
         )
 
     def _get_elections(self, kwargs):
@@ -87,8 +88,12 @@ class ElectionList(utils.Resource):
             CandidateHistory.district,
             CandidateHistory.two_year_period,
         ).filter(
-            CandidateHistory.candidate_status == 'C',
             CandidateHistory.candidate_inactive == None,  # noqa
+            # TODO(jmcarp) Revert after #1271 is resolved
+            sa.or_(
+                CandidateHistory.district == None,  # noqa
+                CandidateHistory.district != '99',
+            )
         )
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
@@ -131,7 +136,13 @@ class ElectionList(utils.Resource):
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
-                    CandidateHistory.district_number == None,  # noqa
+                    # Note: Missing districts may be represented as "00" or `None`.
+                    # For now, handle both values; going forward, we should choose
+                    # a consistent representation.
+                    sa.or_(
+                        CandidateHistory.district_number == 0,
+                        CandidateHistory.district_number == None,  # noqa
+                    ),
                     CandidateHistory.state.in_([districts.c['Official USPS Code'], 'US'])
                 ),
             )

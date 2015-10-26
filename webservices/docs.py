@@ -216,7 +216,9 @@ These reports have key statistics that illuminate the financial status of a give
 Things like cash on hand, debts owed by committee, total receipts, and total disbursements
 are especially helpful for understanding a committee's financial dealings.
 
-If a report is amended, this endpoint shows only the final, amended version.
+By default, this endpoint includes both amended and final versions of each report. To restrict
+to only the final versions of each report, use `is_amended=false`; to view only reports that
+have been amended, use `is_amended=true`.
 
 Several different reporting structures exist, depending on the type of organization that
 submits financial information. To see an example of these reporting requirements,

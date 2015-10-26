@@ -12,7 +12,7 @@ links:
 team:
 - github: arowla
 - github: jmcarp
-- github: lindsayyoung
+- github: LindsayYoung
 services:
 - name: Travis CI
   category: CI
