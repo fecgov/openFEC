@@ -10,6 +10,7 @@ class TestFilter(ApiBaseTest):
     def setUp(self):
         super(TestFilter, self).setUp()
         self.receipts = [
+            factories.ScheduleAFactory(entity_type=None),
             factories.ScheduleAFactory(entity_type='IND'),
             factories.ScheduleAFactory(entity_type='CCM'),
             factories.ScheduleAFactory(entity_type='COM'),

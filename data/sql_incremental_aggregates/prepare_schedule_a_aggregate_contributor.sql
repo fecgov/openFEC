@@ -12,7 +12,7 @@ from sched_a
 where rpt_yr >= :START_YEAR_AGGREGATE
 and contb_receipt_amt is not null
 and contbr_id is not null
-and entity_tp != 'IND'
+and coalesce(entity_tp, '') != 'IND'
 and (memo_cd != 'X' or memo_cd is null)
 group by cmte_id, cycle, contbr_id
 ;
@@ -50,7 +50,7 @@ begin
         ) t
         where contb_receipt_amt is not null
         and contbr_id is not null
-        and entity_tp != 'IND'
+        and coalesce(entity_tp, '') != 'IND'
         and (memo_cd != 'X' or memo_cd is null)
         group by cmte_id, cycle, contbr_id
     ),
