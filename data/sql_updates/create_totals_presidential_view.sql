@@ -19,7 +19,7 @@ select
     sum(p.cand_contb_per) as candidate_contribution,
     sum(p.ttl_contb_ref_per) as contribution_refunds,
     sum(p.ttl_contb_per) as contributions,
-    sum(coalesce(p.ttl_disb_per, p.ttl_disb_sum_page_per)) as disbursements,
+    sum(greatest(p.ttl_disb_per, p.ttl_disb_sum_page_per)) as disbursements,
     sum(p.exempt_legal_acctg_disb_per) as exempt_legal_accounting_disbursement,
     sum(p.fed_funds_per) as federal_funds,
     sum(p.fndrsg_disb_per) as fundraising_disbursements,
@@ -39,7 +39,7 @@ select
     sum(p.other_pol_cmte_contb_per) as other_political_committee_contributions,
     sum(p.other_receipts_per) as other_receipts,
     sum(p.pol_pty_cmte_contb_per) as political_party_committee_contributions,
-    sum(coalesce(p.ttl_receipts_per, p.ttl_receipts_sum_page_per)) as receipts,
+    sum(greatest(p.ttl_receipts_per, p.ttl_receipts_sum_page_per)) as receipts,
     sum(p.ref_indv_contb_per) as refunded_individual_contributions, -- renamed from "refunds_"
     sum(p.ref_other_pol_cmte_contb_per) as refunded_other_political_committee_contributions,
     sum(p.ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
