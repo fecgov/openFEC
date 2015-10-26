@@ -3,10 +3,8 @@
 import os
 import glob
 import subprocess
-import urllib.parse
 import multiprocessing
 
-from flask import url_for
 from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
@@ -36,7 +34,6 @@ def execute_sql_file(path):
         ])
         db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
 
-
 def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
     if not sql_dir.endswith('/'):
@@ -48,7 +45,6 @@ def execute_sql_folder(path, processes):
     else:
         for path in paths:
             execute_sql_file(path)
-
 
 @manager.command
 def load_pacronyms():
@@ -68,18 +64,29 @@ def load_pacronyms():
     with open(os.devnull, 'w') as null:
         subprocess.call(cmd, shell=True, stdout=null, stderr=null)
 
+def load_table(frame, tablename, indexes=()):
+    import sqlalchemy as sa
+    db.engine.execute('drop table if exists {}'.format(tablename))
+    frame.to_sql(tablename, db.engine)
+    table = sa.Table(tablename, db.metadata, autoload_with=db.engine)
+    for index in indexes:
+        sa.Index('{}_{}_idx'.format(tablename, index), table.c[index]).create(db.engine)
 
 @manager.command
 def build_districts():
     import pandas as pd
-    import sqlalchemy as sa
-    db.engine.execute('drop table if exists ofec_fips_states')
-    db.engine.execute('drop table if exists ofec_zips_districts')
-    pd.read_csv('data/fips_states.csv').to_sql('ofec_fips_states', db.engine)
-    pd.read_csv('data/natl_zccd_delim.csv').to_sql('ofec_zips_districts', db.engine)
-    zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
-    sa.Index('ix_zcta', zips_districts.c['ZCTA']).create(db.engine)
+    load_table('ofec_fips_states', pd.read_csv('data/fips_states.csv'))
+    load_table('ofec_zips_districts', pd.read_csv('data/natl_zccd_delim.csv'), indexes=('zcta', ))
 
+@manager.command
+def load_election_dates():
+    import pandas as pd
+    frame = pd.read_excel('data/election_dates.xlsx')
+    frame.columns = [column.lower() for column in frame.columns]
+    load_table(
+        frame, 'ofec_election_dates',
+        indexes=('office', 'state', 'district', 'election_yr', 'senate_class'),
+    )
 
 @manager.command
 def dump_districts(dest=None):
@@ -91,7 +98,6 @@ def dump_districts(dest=None):
     ).format(**locals())
     subprocess.call(cmd, shell=True)
 
-
 @manager.command
 def load_districts(source=None):
     source = source or './data/districts.dump'
@@ -99,27 +105,24 @@ def load_districts(source=None):
     cmd = 'pg_restore --dbname {dest} --no-acl --no-owner {source}'.format(**locals())
     subprocess.call(cmd, shell=True)
 
-
 @manager.command
 def build_district_counts(outname='districts.json'):
     import utils
     utils.write_district_counts(outname)
-
 
 @manager.command
 def update_schemas(processes=1):
     print("Starting DB refresh...")
     processes = int(processes)
     load_pacronyms()
+    load_election_dates()
     execute_sql_folder('data/sql_updates/', processes=processes)
     execute_sql_file('data/rename_temporary_views.sql')
     print("Finished DB refresh.")
 
-
 @manager.command
 def update_functions(processes=1):
     execute_sql_folder('data/functions/', processes=processes)
-
 
 @manager.command
 def update_itemized(schedule):
@@ -127,20 +130,17 @@ def update_itemized(schedule):
     execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
     print('Finished Schedule {0} update.'.format(schedule))
 
-
 @manager.command
 def rebuild_aggregates(processes=1):
     print('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     print('Finished rebuilding incremental aggregates.')
 
-
 @manager.command
 def update_aggregates():
     print('Updating incremental aggregates...')
     db.engine.execute('select update_aggregates()')
     print('Finished updating incremental aggregates.')
-
 
 @manager.command
 def update_all(processes=1):
@@ -155,34 +155,12 @@ def update_all(processes=1):
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
-
-@manager.command
-def list_routes():
-    output = []
-    for rule in app.url_map.iter_rules():
-
-        options = {}
-        for arg in rule.arguments:
-            options[arg] = "[{0}]".format(arg)
-
-        methods = ','.join(rule.methods)
-        url = url_for(rule.endpoint, **options)
-        line = urllib.parse.unquote(
-            '{:50s} {:20s} {}'.format(rule.endpoint, methods, url)
-        )
-        output.append(line)
-
-    for line in sorted(output):
-        print(line)
-
-
 @manager.command
 def refresh_materialized():
     """Refresh materialized views."""
     print('Refreshing materialized views...')
     execute_sql_file('data/refresh_materialized_views.sql')
     print('Finished refreshing materialized views.')
-
 
 @manager.command
 def stop_beat():
@@ -195,7 +173,6 @@ def stop_beat():
         shell=True,
     )
 
-
 @manager.command
 def start_beat():
     """Start celery beat workers in the background using subprocess.
@@ -203,7 +180,6 @@ def start_beat():
     # Stop beat workers synchronously
     stop_beat().wait()
     return subprocess.Popen(['python', 'cron.py'])
-
 
 @manager.command
 def cf_startup():
@@ -214,7 +190,6 @@ def cf_startup():
     if instance_id == '0':
         start_beat()
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
-
 
 if __name__ == '__main__':
     manager.run()

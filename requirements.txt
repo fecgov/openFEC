@@ -17,6 +17,9 @@ marshmallow-sqlalchemy==0.6.0
 git+https://github.com/jmcarp/flask-apispec@master
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
+# Data import
+pandas==0.16.2
+
 # Development
 invoke==0.10.1
 Flask-Script==2.0.5

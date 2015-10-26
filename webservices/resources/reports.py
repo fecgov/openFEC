@@ -92,6 +92,10 @@ class ReportsView(utils.Resource):
             elif exclude:
                 query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
+        if kwargs.get('is_amended') is not None:
+            column = reports_class.expire_date
+            query = query.filter(column != None if kwargs['is_amended'] else column == None)  # noqa
+
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id, committee_type, kwargs):
@@ -100,7 +104,12 @@ class ReportsView(utils.Resource):
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
-            committee = query.first_or_404()
+            committee = (
+                query.first() or
+                models.CommitteeDetail.query.filter_by(
+                    committee_id=committee_id
+                ).first_or_404()
+            )
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
