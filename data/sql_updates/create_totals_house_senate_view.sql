@@ -20,7 +20,7 @@ select
     sum(hs.cand_contb_per) as candidate_contribution,
     sum(hs.ttl_contb_ref_per) as contribution_refunds,
     sum(hs.ttl_contb_per) as contributions,
-    sum(coalesce(hs.ttl_disb_per_i, hs.ttl_disb_per_ii)) as disbursements,
+    sum(greatest(hs.ttl_disb_per_i, hs.ttl_disb_per_ii)) as disbursements,
     sum(hs.ttl_indv_contb_per) as individual_contributions,
     sum(hs.indv_item_contb_per) as individual_itemized_contributions,
     sum(hs.indv_unitem_contb_per) as individual_unitemized_contributions,
@@ -37,7 +37,7 @@ select
     sum(hs.other_pol_cmte_contb_per) as other_political_committee_contributions,
     sum(hs.other_receipts_per) as other_receipts,
     sum(hs.pol_pty_cmte_contb_per) as political_party_committee_contributions,
-    sum(coalesce(hs.ttl_receipts_per_i, hs.ttl_receipts_ii)) as receipts,
+    sum(greatest(hs.ttl_receipts_per_i, hs.ttl_receipts_ii)) as receipts,
     sum(hs.ref_indv_contb_per) as refunded_individual_contributions,
     sum(hs.ref_other_pol_cmte_contb_per) as refunded_other_political_committee_contributions,
     sum(hs.ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
@@ -45,7 +45,7 @@ select
     sum(hs.tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee,
     max(last.rpt_tp_desc) as last_report_type_full,
     max(last.begin_image_num) as last_beginning_image_number,
-    max(coalesce(last.coh_cop_i, last.coh_cop_ii)) as last_cash_on_hand_end_period,
+    max(greatest(last.coh_cop_i, last.coh_cop_ii)) as last_cash_on_hand_end_period,
     max(last.rpt_yr) as last_report_year
 from
     dimcmte c
