@@ -21,6 +21,11 @@ team:
 - github: LindsayYoung
 - github: noahmanger
 - github: onezerojeremy
+milestones:
+- June 2014: Project Discovery stage started
+- May 2015: Alpha testing of API and website
+- July 2015: Beta testing of the API
+- October 2015: Public release of beta site
 partners: FEC
 services:
 - name: Travis CI
