@@ -36,6 +36,7 @@ licenses:
   betaFEC:
     name: CC0-1.0
     url: https://github.com/18F/openfec/blob/master/LICENSE.md
+blog: fec
 links:
 - url: https://beta.fec.gov
   text: betaFEC
