@@ -1,4 +1,4 @@
-## Team Processes
+## Team processes
 
 * Use PEP8 as the coding standard for Python (but don't worry about fitting lines within 79 characters).
 * Pull requests for all commits, even typos.
@@ -31,7 +31,7 @@ Use checklists (via `- [ ]`) to keep track of sub-items wherever possible.
 - Be sure to talk about the nature of the change you're making instead of describing the bug or task. Explain why the change was needed if it is relevant.
 
 
-### Pull Requests
+### Pull requests
 
 When creating a new pull request:
 
@@ -41,7 +41,7 @@ When creating a new pull request:
 * If you decide to review a pull request with the intent of merging it (or deciding what still needs to be done before merge), then **assign the PR to yourself** so that it's clear that someone's grabbed it.
 * Anyone is welcome to informally review a PR and comment on it at any time, no matter who is assigned.
 
-## Team Workflow
+## Team workflow
 
 1. Pull an issue from the current sprint only, please (unless there is an *URGENT* issue). Take an unassigned issue or re-assign an issue with the label "[stealable](https://github.com/18F/openFEC/labels/stealable)." If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PM or tech lead on slack.
 2. Before starting, [write the dev issue checklist](https://github.com/18f/openFEC/blob/develop/CONTRIBUTING.md#development-issues-should-include).
