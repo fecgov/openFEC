@@ -70,21 +70,29 @@ class TestReports(ApiBaseTest):
         )
 
     def test_reports_by_amended(self):
-        reports = [
-            factories.ReportsPresidentialFactory(expire_date=None),
-            factories.ReportsPresidentialFactory(expire_date=datetime.date(2014, 1, 1)),
+        params = [
+            ('house-senate', factories.ReportsHouseSenateFactory),
+            ('presidential', factories.ReportsPresidentialFactory),
+            ('pac-party', factories.ReportsPacPartyFactory),
+            ('ie-only', factories.ReportsIEOnlyFactory),
         ]
 
-        results = self._results(api.url_for(ReportsView, committee_type='presidential'))
-        self.assertEqual(len(results), 2)
+        for category, factory in params:
+            reports = [
+                factory(expire_date=None),
+                factory(expire_date=datetime.date(2014, 1, 1)),
+            ]
 
-        results = self._results(api.url_for(ReportsView, committee_type='presidential', is_amended='false'))
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['committee_id'], reports[0].committee_id)
+            results = self._results(api.url_for(ReportsView, committee_type=category))
+            self.assertEqual(len(results), 2)
 
-        results = self._results(api.url_for(ReportsView, committee_type='presidential', is_amended='true'))
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['committee_id'], reports[1].committee_id)
+            results = self._results(api.url_for(ReportsView, committee_type=category, is_amended='false'))
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['committee_id'], reports[0].committee_id)
+
+            results = self._results(api.url_for(ReportsView, committee_type=category, is_amended='true'))
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['committee_id'], reports[1].committee_id)
 
     def test_reports_by_committee_type_and_year(self):
         presidential_report_2012 = factories.ReportsPresidentialFactory(report_year=2012)

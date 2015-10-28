@@ -241,6 +241,7 @@ class CommitteeReportsPresidential(CommitteeReports):
 class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     __tablename__ = 'ofec_reports_ie_only_mv'
 
+    expire_date = db.Column(db.DateTime)
     beginning_image_number = db.Column(db.BigInteger)
     committee_id = db.Column(db.String)
     cycle = db.Column(db.Integer)
