@@ -32,11 +32,6 @@ services:
 - name: Travis CI
   category: CI
   url: https://travis-ci.org/18F/openFEC
-# Licenses that apply to the project and/or its components (required)
-# Items by property name pattern:
-#   .*:
-#     name: Name of the license from the Software Package Data Exchange (SPDX): https://spdx.org/licenses/
-#     url: URL for the text of the license
 licenses:
   betaFEC:
     name: CC0-1.0
