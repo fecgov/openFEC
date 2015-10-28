@@ -21,7 +21,13 @@ team:
 - github: LindsayYoung
 - github: noahmanger
 - github: onezerojeremy
+partners: FEC
 services:
 - name: Travis CI
   category: CI
   url: https://travis-ci.org/18F/openFEC
+links:
+- url: https://beta.fec.gov
+  text: betaFEC
+- url: https://api.open.fec.gov/developers
+  text: betaFEC API Documentation
