@@ -27,6 +27,7 @@ milestones:
 - July 2015: Beta testing of the API
 - October 2015: Public release of beta site
 partners: Federal Election Commission
+impact: The FEC collects data about how campaigns are financed that affect all 318 million Americans every 2 years.
 services:
 - name: Travis CI
   category: CI
