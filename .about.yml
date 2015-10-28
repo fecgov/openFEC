@@ -5,7 +5,7 @@ type: app
 owner_type: project
 stage: beta
 status: active
-description: A new Federal Election Commission (FEC) homepage that will make campaign finance information more accessible and understandable to all users.
+description: A new Federal Election Commission (FEC) website that will make campaign finance information more accessible and understandable to all users.
 testable: true
 tasks: https://github.com/18F/openFEC/issues
 links:
