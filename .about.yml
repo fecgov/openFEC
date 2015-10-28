@@ -26,7 +26,7 @@ milestones:
 - May 2015: Alpha testing of API and website
 - July 2015: Beta testing of the API
 - October 2015: Public release of beta site
-partners: FEC
+partners: Federal Election Commission
 services:
 - name: Travis CI
   category: CI
