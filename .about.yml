@@ -31,3 +31,5 @@ links:
   text: betaFEC
 - url: https://api.open.fec.gov/developers
   text: betaFEC API Documentation
+contact: 
+- betafeedback@fec.gov
