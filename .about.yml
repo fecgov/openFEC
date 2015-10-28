@@ -1,5 +1,6 @@
 ---
-name: openfec
+name: betaFEC
+full_name: betaFEC
 type: app
 owner_type: project
 status: active
