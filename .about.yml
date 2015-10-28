@@ -13,8 +13,14 @@ links:
   text: OpenFEC API Documentation
 team:
 - github: arowla
+- github: emileighoutlaw
+- github: jenniferthibault
 - github: jmcarp
+- github: LeahBannon
+  role: product manager
 - github: LindsayYoung
+- github: noahmanger
+- github: onezerojeremy
 services:
 - name: Travis CI
   category: CI
