@@ -13,11 +13,16 @@ Customizable invocation: ::
 
 """
 
+import logging
+import datetime
+
 import celery
 from celery.schedules import crontab
 
+import mail
 import manage
 
+logger = logging.getLogger(__name__)
 
 app = celery.Celery('cron')
 app.conf.update(
@@ -31,13 +36,18 @@ app.conf.update(
     }
 )
 
-
 @app.task
 def refresh():
-    with manage.app.test_request_context():
-        manage.update_aggregates()
-        manage.refresh_materialized()
-
+    start_time = datetime.datetime.utcnow()
+    with mail.LogInterceptor(manage.logger) as interceptor:
+        with manage.app.test_request_context():
+            manage.update_aggregates()
+            manage.refresh_materialized()
+    end_time = datetime.datetime.utcnow()
+    try:
+        mail.send_mail(interceptor.buffer, start_time, end_time)
+    except Exception as error:
+        logger.exception(error)
 
 if __name__ == '__main__':
     app.worker_main(['worker', '--beat'])
