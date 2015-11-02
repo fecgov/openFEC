@@ -13,7 +13,7 @@
 
 [![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
 
-This is the first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app). 
+This is the first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app).
 
 Our code is [licensed under CC0](https://github.com/18F/openFEC/blob/develop/LICENSE.md), but a few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. [Learn more on FEC.gov.](http://www.fec.gov/pages/brochures/saleuse.shtml)
 
@@ -117,6 +117,13 @@ an nginx reverse proxy. Static files are compressed and served directly through 
 dynamic content is routed to the Flask application via `proxy_pass`. The entire application
 is served through the [API Umbrella](http://apiumbrella.io), which handles API keys,
 caching, and rate limiting.
+
+#### Nightly updates
+
+Incrementally-updated aggregates and materialized views are updated nightly; see
+`cron.py` for details. When the nightly update finishes, logs and error reports are
+emailed to the development team--specifically, to email addresses specified in
+`FEC_EMAIL_RECIPIENTS`.
 
 #### Caching
 
@@ -223,7 +230,7 @@ as the production instance.
 
 #### Running the Tests
 
-    $ nosetests
+    $ py.test
 
 #### The Test Data Subset
 

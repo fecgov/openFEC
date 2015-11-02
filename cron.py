@@ -38,6 +38,9 @@ app.conf.update(
 
 @app.task
 def refresh():
+    """Update incremental aggregates and materialized views, then email logs
+    to the development team.
+    """
     buffer = io.StringIO()
     with mail.CaptureLogs(manage.logger, buffer):
         with manage.app.test_request_context():
