@@ -43,9 +43,12 @@ def refresh():
     """
     buffer = io.StringIO()
     with mail.CaptureLogs(manage.logger, buffer):
-        with manage.app.test_request_context():
-            manage.update_aggregates()
-            manage.refresh_materialized()
+        try:
+            with manage.app.test_request_context():
+                manage.update_aggregates()
+                manage.refresh_materialized()
+        except Exception as error:
+            manage.logger.exception(error)
     try:
         mail.send_mail(buffer)
     except Exception as error:
