@@ -19,8 +19,8 @@ import logging
 import celery
 from celery.schedules import crontab
 
-import mail
 import manage
+from webservices import mail
 
 logger = logging.getLogger(__name__)
 
