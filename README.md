@@ -56,7 +56,7 @@ Prior to running, ensure you have the following requirements installed:
 
 Then, simply run:
 
-    $ curl https://raw.githubusercontent.com/18F/openFEC/master/scripts/bootstrap/fec_bootstrap.sh | bash
+    curl https://raw.githubusercontent.com/18F/openFEC/master/scripts/bootstrap/fec_bootstrap.sh | bash
 
 This will clone both openFEC repos, set up virtual environments, and set some environment variables (that you supply) in ~/.fec_vars. It might be a good idea to source that file in your ~/.bashrc or ~/.zshrc.
 
@@ -67,14 +67,14 @@ There is also a Vagrantfile and provisioning shell script available. This will c
 
 From scripts/bootstrap, simply:
 
-    $ vagrant up
-    $ vagrant ssh
-    $ cp /vagrant/fec_bootstrap.sh fec_bootstrap.sh && ./fec_bootstrap.sh
+    vagrant up
+    vagrant ssh
+    cp /vagrant/fec_bootstrap.sh fec_bootstrap.sh && ./fec_bootstrap.sh
 
 ### Running the apps using tmuxinator
 Assuming you ran the bootstrap script, you can launch the API and the Web App with a single command:
 
-    $ tmuxinator fec-local
+    tmuxinator fec-local
 
 The site can be found at [http://localhost:3000](http://localhost:3000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant). Remember the username and password you created when running the script.
 
@@ -84,7 +84,7 @@ The site can be found at [http://localhost:3000](http://localhost:3000) (or [htt
 To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
 Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
 
-    $ invoke deploy --space dev
+    invoke deploy --space dev
 
 The `deploy` task will use the `FEC_CF_USERNAME` and `FEC_CF_PASSWORD` environment variables to log in.
 If these variables are not provided, you will be prompted for your Cloud Foundry credentials.
@@ -93,8 +93,8 @@ Credentials for Cloud Foundry applications are managed using user-provided servi
 "fec-creds-prod", "fec-creds-stage", and "fec-creds-dev". Services are used to share credentials across
 blue and green versions of blue-green deploys, and between the API and the webapp. To set up a service:
 
-    $ cf target -s dev
-    $ cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
+    cf target -s dev
+    cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
 
 To stand up a user-provided credential service that supports both the API and the webapp, ensure that
 the following keys are set:
@@ -108,7 +108,7 @@ the following keys are set:
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
-    $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+    cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 
 #### Production stack
 
@@ -141,7 +141,7 @@ through Travis CI accordingly.
 ##### To create a new feature:
 * Developer creates a feature branch
 
-        $ git flow feature start my-feature
+        git flow feature start my-feature
 
 * Reviewer merges feature branch into develop and pushes to origin
 * [auto] Develop is deployed to dev
@@ -149,7 +149,7 @@ through Travis CI accordingly.
 ##### To create a hotfix:
 * Developer creates a hotfix branch
 
-        $ git flow hotfix start my-hotfix
+        git flow hotfix start my-hotfix
 
 * Reviewer merges hotfix branch into develop and master and pushes to origin
 * [auto] Develop is deployed to dev
@@ -158,14 +158,14 @@ through Travis CI accordingly.
 ##### To create a release:
 * Developer creates a release branch and pushes to origin
 
-        $ git flow release start my-release
-        $ git flow release publish my-release
+        git flow release start my-release
+        git flow release publish my-release
 
 * [auto] Release is deployed to stage
 * Review of staging
 * Developer merges release branch into master and pushes to origin
 
-        $ git flow release finish my-release
+        git flow release finish my-release
 
 * [auto] Master is deployed to prod
 
@@ -217,29 +217,29 @@ as the production instance.
 
 #### Creating a new test database
 
-    $ createdb cfdm_test
-    $ pg_restore --dbname cfdm_test data/subset.dump
-    $ ./manage.py update_all
+    createdb cfdm_test
+    pg_restore --dbname cfdm_test data/subset.dump
+    ./manage.py update_all
 
 #### Running the Tests
 
-    $ nosetests
+    nosetests
 
 #### The Test Data Subset
 
 This repo includes a small subset of the staging database (built 2015/08/12) at `data/subset.dump`. To use the test subset for local development:
 
-    $ pg_restore --dbname <dest> data/subset.dump
+    pg_restore --dbname <dest> data/subset.dump
 
 To build a new test subset, use the `build_test` invoke task:
 
-    $ invoke build_test <source> <dest>
+    invoke build_test <source> <dest>
 
 where both `source` and `dest` are valid PostgreSQL connection strings.
 
 To update the version-controlled test subset after rebuilding, run:
 
-    $ invoke dump <source> data/subset.dump
+    invoke dump <source> data/subset.dump
 
 where `source` is the database containing the newly created test subset.
 
@@ -250,8 +250,8 @@ dependencies are up to date. If enabled, these hooks will update Python
 dependencies on checking out or merging changes to `requirements.txt`. To
 enable the hooks, run
 
-    $ invoke add_hooks
+    invoke add_hooks
 
 To disable, run
 
-    $ invoke remove_hooks
+    invoke remove_hooks
