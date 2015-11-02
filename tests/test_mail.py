@@ -1,4 +1,5 @@
 import io
+import logging
 
 import mock
 import pytest
@@ -42,6 +43,30 @@ class TestHelpers:
             {'email': 'cj@whitehouse.gov'},
             {'email': 'toby@whitehouse.gov'},
         ]
+
+class TestCaptureLogs:
+
+    @pytest.fixture
+    def logger(self):
+        logging.basicConfig(level=logging.INFO)
+        return logging.getLogger('test')
+
+    @pytest.fixture
+    def buffer(self):
+        return io.StringIO()
+
+    def test_capture_logs(self, logger, buffer):
+        with mail.CaptureLogs(logger, buffer):
+            logger.info('beep')
+        assert 'INFO:test:beep' in buffer.getvalue()
+
+    def test_capture_exception(self, logger, buffer):
+        with mail.CaptureLogs(logger, buffer):
+            try:
+                0 / 0
+            except Exception as error:
+                logger.exception(error)
+        assert 'ERROR:test:division by zero' in buffer.getvalue()
 
 class TestSendMail:
 

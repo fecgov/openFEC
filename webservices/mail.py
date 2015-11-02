@@ -22,8 +22,6 @@ class CaptureLogs:
         self.logger.addHandler(self.handler)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        if exc_value is not None:
-            self.logger.exception(exc_value)
         self.logger.removeHandler(self.handler)
 
 def send_mail(buffer):
