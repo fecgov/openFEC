@@ -13,8 +13,8 @@ Customizable invocation: ::
 
 """
 
+import io
 import logging
-import datetime
 
 import celery
 from celery.schedules import crontab
@@ -38,14 +38,13 @@ app.conf.update(
 
 @app.task
 def refresh():
-    start_time = datetime.datetime.utcnow()
-    with mail.LogInterceptor(manage.logger) as interceptor:
+    buffer = io.StringIO()
+    with mail.CaptureLogs(manage.logger, buffer):
         with manage.app.test_request_context():
             manage.update_aggregates()
             manage.refresh_materialized()
-    end_time = datetime.datetime.utcnow()
     try:
-        mail.send_mail(interceptor.buffer, start_time, end_time)
+        mail.send_mail(buffer)
     except Exception as error:
         logger.exception(error)
 
