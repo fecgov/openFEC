@@ -2,7 +2,7 @@ from .base import db
 
 
 class CandidateCommitteeLink(db.Model):
-    __tablename__ = 'cand_cmte_linkage'
+    __tablename__ = 'ofec_cand_cmte_linkage_mv'
 
     linkage_id = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column('cmte_id', db.String, db.ForeignKey('ofec_committee_detail_mv.committee_id'))
