@@ -85,18 +85,18 @@ class TestElections(ApiBaseTest):
         ]
         factories.CandidateDetailFactory(candidate_key=self.candidate.candidate_key)
         [
-            factories.CommitteeDetailFactory(committee_key=each.committee_key)
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
         ]
         db.session.flush()
         factories.CandidateCommitteeLinkFactory(
             candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[0].committee_key,
+            committee_id=self.committees[0].committee_id,
             election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[1].committee_key,
+            committee_id=self.committees[1].committee_id,
             election_year=2011,
         )
         self.totals = [
