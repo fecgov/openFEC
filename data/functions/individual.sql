@@ -10,7 +10,7 @@ $$ language plpgsql immutable;
 
 create or replace function is_coded_individual(receipt_type text) returns bool as $$
 begin
-    return receipt_type is not null and receipt_type in ('15', '15E', '15J', '18J');
+    return receipt_type is not null and receipt_type in ('10', '15', '15E', '15J', '18J');
 end
 $$ language plpgsql immutable;
 
