@@ -12,9 +12,9 @@ csvkit==0.9.1
 ujson==1.33
 
 # Marshalling
+flask-apispec==0.2.0
 marshmallow==2.1.0
 marshmallow-sqlalchemy==0.6.0
-git+https://github.com/jmcarp/flask-apispec@master
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data import
