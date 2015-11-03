@@ -1,5 +1,4 @@
 import datetime
-import functools
 
 import sqlalchemy as sa
 from marshmallow.utils import isoformat
@@ -95,12 +94,12 @@ class CandidateFormatTest(ApiBaseTest):
         db.session.flush()
         [
             factories.CandidateCommitteeLinkFactory(
-                candidate_key=candidate.candidate_key,
-                committee_key=principal_committee.committee_key,
+                candidate_id=candidate.candidate_id,
+                committee_id=principal_committee.committee_id,
             ),
             factories.CandidateCommitteeLinkFactory(
-                candidate_key=candidate.candidate_key,
-                committee_key=joint_committee.committee_key,
+                candidate_id=candidate.candidate_id,
+                committee_id=joint_committee.committee_id,
             ),
         ]
         results = self._results(api.url_for(CandidateSearch))
@@ -184,47 +183,35 @@ class CandidateFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-    def test_candidate_history_by_year(self):
-        key = 0
-        id = 'id0'
-        partial = functools.partial(
-            factories.CandidateHistoryFactory,
-            candidate_id=id, candidate_key=key,
+    def test_candidate_history(self):
+        history_2012 = factories.CandidateHistoryFactory(two_year_period=2012)
+        history_2008 = factories.CandidateHistoryFactory(two_year_period=2008, candidate_id=history_2012.candidate_id)
+        results = self._results(
+            api.url_for(CandidateHistoryView, candidate_id=history_2012.candidate_id)
         )
-        histories = [
-            partial(two_year_period=2012),
-            partial(two_year_period=2008),
-        ]
+
+        self.assertEqual(results[0]['candidate_id'], history_2012.candidate_id)
+        self.assertEqual(results[1]['candidate_id'], history_2012.candidate_id)
+        self.assertEqual(results[0]['two_year_period'], history_2012.two_year_period)
+        self.assertEqual(results[1]['two_year_period'], history_2008.two_year_period)
+
+    def test_candidate_history_by_year(self):
+        history_2012 = factories.CandidateHistoryFactory(two_year_period=2012)
+        history_2008 = factories.CandidateHistoryFactory(two_year_period=2008, candidate_id=history_2012.candidate_id)
+        results = self._results(
+            api.url_for(CandidateHistoryView, candidate_id=history_2012.candidate_id)
+        )
+
         results = self._results(
             api.url_for(
                 CandidateHistoryView,
-                candidate_id=id,
-                cycle=histories[1].two_year_period,
+                candidate_id=history_2012.candidate_id,
+                cycle=history_2008.two_year_period,
             )
         )
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['candidate_id'], id)
-        self.assertEqual(results[0]['two_year_period'], histories[1].two_year_period)
-
-    def test_candidate_history(self):
-        key = 0
-        id = 'id0'
-        partial = functools.partial(
-            factories.CandidateHistoryFactory,
-            candidate_id=id, candidate_key=key,
-        )
-        histories = [
-            partial(two_year_period=2012),
-            partial(two_year_period=2008),
-        ]
-        results = self._results(
-            api.url_for(CandidateHistoryView, candidate_id=id)
-        )
-
-        self.assertEqual(results[0]['candidate_id'], id)
-        self.assertEqual(results[1]['candidate_id'], id)
-        self.assertEqual(results[0]['two_year_period'], histories[0].two_year_period)
-        self.assertEqual(results[1]['two_year_period'], histories[1].two_year_period)
+        self.assertEqual(results[0]['candidate_id'], history_2012.candidate_id)
+        self.assertEqual(results[0]['two_year_period'], history_2008.two_year_period)
 
     def test_candidate_sort(self):
         candidates = [
