@@ -46,9 +46,9 @@ class Candidate(BaseConcreteCandidate):
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
         'Committee',
-        secondary='cand_cmte_linkage',
+        secondary='ofec_cand_cmte_linkage_mv',
         secondaryjoin='''and_(
-            Committee.committee_id == cand_cmte_linkage.c.cmte_id,
+            Committee.committee_id == ofec_cand_cmte_linkage_mv.c.cmte_id,
             Committee.designation == 'P',
         )''',
         order_by='desc(Committee.last_file_date)',
