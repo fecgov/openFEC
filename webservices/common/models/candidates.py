@@ -15,7 +15,6 @@ class CandidateSearch(BaseModel):
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
-    candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1), index=True)
     candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2), index=True)
@@ -36,7 +35,7 @@ class BaseCandidate(BaseModel):
 class BaseConcreteCandidate(BaseCandidate):
     __tablename__ = 'ofec_candidate_detail_mv'
 
-    candidate_key = db.Column(db.Integer, unique=True)
+    candidate_id = db.Column(db.String, unique=True)
 
 
 class Candidate(BaseConcreteCandidate):
@@ -47,9 +46,9 @@ class Candidate(BaseConcreteCandidate):
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
         'Committee',
-        secondary='ofec_name_linkage_mv',
+        secondary='cand_cmte_linkage',
         secondaryjoin='''and_(
-            Committee.committee_key == ofec_name_linkage_mv.c.committee_key,
+            Committee.committee_id == cand_cmte_linkage.c.cmte_id,
             Committee.designation == 'P',
         )''',
         order_by='desc(Committee.last_file_date)',
@@ -74,8 +73,8 @@ class CandidateDetail(BaseConcreteCandidate):
 class CandidateHistory(BaseCandidate):
     __tablename__ = 'ofec_candidate_history_mv'
 
-    candidate_key = db.Column(db.Integer)
-    two_year_period = db.Column(db.Integer, index=True)
+    candidate_id = db.Column(db.String, primary_key=True)
+    two_year_period = db.Column(db.Integer, primary_key=True, index=True)
     form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
