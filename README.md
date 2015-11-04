@@ -1,4 +1,33 @@
-# openFEC
+## Campaign finance for everyone
+The Federal Election Commission (FEC) releases information to the public about money that’s raised and spent in federal elections — that’s elections for US president, Senate, and House of Representatives. 
+
+Are you interested in seeing how much money a candidate raised? Or spent? How much debt they took on? Who contributed to their campaign? The FEC is the authoritative source for that information.
+
+betaFEC is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users. 
+
+This repository houses betaFEC's API.
+
+## FEC repositories 
+We welcome you to explore our FEC repositories, make suggestions, and contribute to our code. Our repositories are:
+
+- [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from betaFEC’s feedback widget here, and this is the best place to submit general feedback.
+- [openFEC](https://github.com/18F/openfec): betaFEC’s API
+- [openFEC-web-app](https://github.com/18f/openfec-web-app): the betaFEC web app for exploring campaign finance data
+- [fec-style](https://github.com/18F/fec-style): shared styles and user interface components
+- [fec-cms](https://github.com/18F/fec-cms): the content management system (CMS) for betaFEC
+
+## How you can help
+We’re thrilled you want to get involved! Here are some suggestions:
+- Check out our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
+- [Send us an email](mailto:betafeedback@fec.gov).
+- If you’re a developer, follow the installation instructions in the README.md page of each repository to run the apps on your computer. 
+
+## Copyright and licensing
+This project is in the public domain within the United States, and we waive worldwide copyright and related rights through [CC0 universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/). Read more on our license page.
+
+A few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. Learn more on FEC.gov.
+
+---
 
 **Develop**
 [![Build Status](https://img.shields.io/travis/18F/openFEC/develop.svg)](https://travis-ci.org/18F/openFEC)
@@ -12,29 +41,6 @@
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/d3b2c96b3781466081d418fd50762726/badge.svg)](https://www.quantifiedcode.com/app/project/d3b2c96b3781466081d418fd50762726)
 
 [![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
-
-This is the first RESTful API for the Federal Election Commission. We're aiming to make campaign finance more accessible for journalists, academics, developers, and other transparency seekers. This is also fueling the campaign finance data in the upcoming [FEC website](https://github.com/18f/openfec-web-app). 
-
-Our code is [licensed under CC0](https://github.com/18F/openFEC/blob/develop/LICENSE.md), but a few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. [Learn more on FEC.gov.](http://www.fec.gov/pages/brochures/saleuse.shtml)
-
-**Note**: This project is still in alpha and not yet deployed. We're still investigating the best ways to present this data to the public.
-
-## Outside Contributors
-
-Hello! If you're interested in learning more about this project, check out some related repos and don't be afraid to ask us questions (general questions are usually posted in the [18F/FEC repo](https://github.com/18F/fec)).
-
-If you'd like to contribute to our project, please check out our [openfec](https://github.com/18F/openfec) repo. We try to tag things that are easy to pick up without being entrenched in our project with a ["help wanted"](https://github.com/18F/openFEC/labels/help%20wanted%21) tag. Things in our [backlog](https://github.com/18F/openfec/milestones/Backlog) are usually also up for grabs, so let us know if you'd like to pick something up from there.
-
-If you are interested in contributing, please check out our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md), which we use to guide our development processes internally. You don't have to adhere to them to participate, but following them may help keep things from getting messy.
-
-If you would like to be an FEC API beta tester, get an [API key](https://api.data.gov/signup/), check out the experimental [API](https://api.open.fec.gov/developers), and give us your feedback by filing issues.
-
-## Our Repos
-
-* [FEC](https://github.com/18F/fec) - A discussion forum for the project.
-* [openFEC](https://github.com/18F/openfec) - Where the API work happens. We also use this as the central repo to create issues related to each sprint and our backlog. If you're interested in contributing, please look for ["help wanted"](https://github.com/18F/openFEC/labels/help%20wanted%21) tags or ask!
-* [openFEC-web-app](https://github.com/18f/openfec-web-app) - Where the campaign finance web app work happens. Note that issues and discussion tend to happen in the other repos.
-* [fec-alpha](https://github.com/18F/fec-alpha) - A place to explore and develop a new site for the Federal Election Commission.
 
 ## Installation
 
@@ -80,7 +86,7 @@ The site can be found at [http://localhost:3000](http://localhost:3000) (or [htt
 
 ### Deployment
 
-#### Likely only useful for 18Fers
+#### Likely only useful for 18F team members
 To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
 Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
 
@@ -126,7 +132,7 @@ and cache responses for the specified interval, such that repeated requests to a
 endpoint will only reach the Flask application once. This means that responses may be
 stale for up to an hour following the nightly refresh of the materialized views.
 
-#### API Umbrella
+#### API umbrella
 
 The staging and production environments use the [API Umbrella](http://apiumbrella.io) for
 rate limiting, authentication, caching, and HTTPS termination and redirection. Both
@@ -221,11 +227,11 @@ as the production instance.
     $ pg_restore --dbname cfdm_test data/subset.dump
     $ ./manage.py update_all
 
-#### Running the Tests
+#### Running the tests
 
     $ nosetests
 
-#### The Test Data Subset
+#### The test data subset
 
 This repo includes a small subset of the staging database (built 2015/08/12) at `data/subset.dump`. To use the test subset for local development:
 
@@ -243,7 +249,7 @@ To update the version-controlled test subset after rebuilding, run:
 
 where `source` is the database containing the newly created test subset.
 
-### Git Hooks
+### Git hooks
 
 This repo includes optional post-merge and post-checkout hooks to ensure that
 dependencies are up to date. If enabled, these hooks will update Python
