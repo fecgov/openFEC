@@ -5,6 +5,8 @@ Are you interested in seeing how much money a candidate raised? Or spent? How mu
 
 betaFEC is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users. 
 
+This repository houses betaFEC's API.
+
 ## FEC repositories 
 We welcome you to explore our FEC repositories, make suggestions, and contribute to our code. Our repositories are:
 
