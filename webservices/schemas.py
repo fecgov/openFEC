@@ -116,7 +116,7 @@ register_schema(CommitteeSearchSchema)
 register_schema(CommitteeSearchListSchema)
 
 
-make_committee_schema = functools.partial(make_schema, options={'exclude': ('idx', 'committee_key')})
+make_committee_schema = functools.partial(make_schema, options={'exclude': ('idx', )})
 
 augment_models(
     make_committee_schema,
@@ -128,7 +128,7 @@ augment_models(
 
 make_candidate_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', 'candidate_key', 'principal_committees')},
+    options={'exclude': ('idx', 'principal_committees')},
 )
 
 augment_models(
@@ -140,7 +140,7 @@ augment_models(
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
-    options={'exclude': ('idx', 'candidate_key')},
+    options={'exclude': ('idx', )},
     fields={'principal_committees': ma.fields.Nested(schemas['CommitteeSchema'], many=True)},
 )
 CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
@@ -157,7 +157,7 @@ make_reports_schema = functools.partial(
         'beginning_image_number': ma.fields.Str(),
         'end_image_number': ma.fields.Str(),
     },
-    options={'exclude': ('idx', 'report_key', 'committee')},
+    options={'exclude': ('idx', 'committee')},
 )
 
 augment_models(
