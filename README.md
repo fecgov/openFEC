@@ -1,3 +1,16 @@
+**Develop**
+[![Build Status](https://img.shields.io/travis/18F/openFEC/develop.svg)](https://travis-ci.org/18F/openFEC)
+[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/develop.svg)](https://codecov.io/github/18F/openFEC)
+
+**Master**
+[![Build Status](https://img.shields.io/travis/18F/openFEC/master.svg)](https://travis-ci.org/18F/openFEC)
+[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
+[![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
+[![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/d3b2c96b3781466081d418fd50762726/badge.svg)](https://www.quantifiedcode.com/app/project/d3b2c96b3781466081d418fd50762726)
+
+[![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
+
 ## Campaign finance for everyone
 The Federal Election Commission (FEC) releases information to the public about money that’s raised and spent in federal elections — that’s elections for US president, Senate, and House of Representatives. 
 
@@ -28,19 +41,6 @@ This project is in the public domain within the United States, and we waive worl
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. Learn more on FEC.gov.
 
 ---
-
-**Develop**
-[![Build Status](https://img.shields.io/travis/18F/openFEC/develop.svg)](https://travis-ci.org/18F/openFEC)
-[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/develop.svg)](https://codecov.io/github/18F/openFEC)
-
-**Master**
-[![Build Status](https://img.shields.io/travis/18F/openFEC/master.svg)](https://travis-ci.org/18F/openFEC)
-[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
-[![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
-[![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
-[![Code Issues](https://www.quantifiedcode.com/api/v1/project/d3b2c96b3781466081d418fd50762726/badge.svg)](https://www.quantifiedcode.com/app/project/d3b2c96b3781466081d418fd50762726)
-
-[![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
 
 ## Installation
 

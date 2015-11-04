@@ -10,7 +10,7 @@ If you’d prefer, you can also reach us by [email](mailto:betafeedback@fec.gov)
 ## Public domain
 By submitting a pull request, you agree to comply with the policies on our [LICENSE](LICENSE.md) page.
 
-### Issues
+## Issues
 We use GitHub issues to track user issues and team tasks. Whenever possible, we follow this outline:
  
 1. Goal: a quick blurb explaining the bug or what the issue should accomplish. What is the user need?
@@ -24,13 +24,13 @@ We use GitHub issues to track user issues and team tasks. Whenever possible, we 
 Unknown tasks or dependencies that need investigation
 [The boilerplate tasks for each development issue](https://gist.github.com/theresaanna/86be7e29214a7f31ab73)
 
-### Commit messages
+## Commit messages
 - Good commit messages start with a verb, like “adds” or “changes” or “removes.” 
 - Be sure to talk about the nature of the change you're making. Explain why the change is needed, rather than simply describing the bug or task it addresses. 
 - If your commit resolves an issue, reference it in the commit messages. For example “fixes #555.” Read more GitHub guidance on [closing issues via commit messages](https://help.github.com/articles/closing-issues-via-commit-messages/).
 - We encourage you to follow the [50/72 format](http://stackoverflow.com/questions/2290016/git-commit-messages-50-72-formatting).
 
-### Pull requests
+## Pull requests
 - Anyone may informally review a pull request and make comments or suggestions. 
 - When a pull request is ready for review, label it `plz-review`. 
 - Include a summary of all work and changes.
