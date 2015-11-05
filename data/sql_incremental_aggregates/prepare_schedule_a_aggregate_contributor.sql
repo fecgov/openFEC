@@ -4,17 +4,17 @@ create table ofec_sched_a_aggregate_contributor as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
-    contbr_id,
+    clean_repeated(contbr_id, cmte_id) as contbr_id,
     max(contbr_nm) as contbr_nm,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
 from sched_a
 where rpt_yr >= :START_YEAR_AGGREGATE
 and contb_receipt_amt is not null
-and contbr_id is not null
+and clean_repeated(contbr_id, cmte_id) is not null
 and coalesce(entity_tp, '') != 'IND'
 and (memo_cd != 'X' or memo_cd is null)
-group by cmte_id, cycle, contbr_id
+group by cmte_id, cycle, clean_repeated(contbr_id, cmte_id)
 ;
 
 -- Create indices on aggregate
@@ -39,7 +39,7 @@ begin
         select
             cmte_id,
             rpt_yr + rpt_yr % 2 as cycle,
-            contbr_id,
+            clean_repeated(contbr_id, cmte_id) as contbr_id,
             max(contbr_nm) as contbr_nm,
             sum(contb_receipt_amt * multiplier) as total,
             sum(multiplier) as count
@@ -49,10 +49,10 @@ begin
             select * from old
         ) t
         where contb_receipt_amt is not null
-        and contbr_id is not null
+        and clean_repeated(contbr_id, cmte_id) is not null
         and coalesce(entity_tp, '') != 'IND'
         and (memo_cd != 'X' or memo_cd is null)
-        group by cmte_id, cycle, contbr_id
+        group by cmte_id, cycle, clean_repeated(contbr_id, cmte_id)
     ),
     inc as (
         update ofec_sched_a_aggregate_contributor ag
