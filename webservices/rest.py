@@ -19,7 +19,7 @@ from flask.ext import cors
 from flask.ext import restful
 
 from webargs.flaskparser import FlaskParser
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc, marshal_with, FlaskApiSpec
 
 from webservices import args
 from webservices import docs
@@ -243,43 +243,47 @@ api.add_resource(
 api.add_resource(filings.FilingsList, '/filings/')
 
 
-from flask_apispec.apidoc import Documentation
-docs = Documentation(app, spec.spec)
+app.config.update({
+    'APISPEC_SWAGGER_URL': None,
+    'APISPEC_SWAGGER_UI_URL': None,
+    'APISPEC_SPEC': spec.spec,
+})
+apidoc = FlaskApiSpec(app)
 
-docs.register(CandidateNameSearch, blueprint='v1')
-docs.register(CommitteeNameSearch, blueprint='v1')
-docs.register(candidates.CandidateView, blueprint='v1')
-docs.register(candidates.CandidateList, blueprint='v1')
-docs.register(candidates.CandidateSearch, blueprint='v1')
-docs.register(candidates.CandidateHistoryView, blueprint='v1')
-docs.register(committees.CommitteeView, blueprint='v1')
-docs.register(committees.CommitteeList, blueprint='v1')
-docs.register(committees.CommitteeHistoryView, blueprint='v1')
-docs.register(reports.ReportsView, blueprint='v1')
-docs.register(totals.TotalsView, blueprint='v1')
-docs.register(sched_a.ScheduleAView, blueprint='v1')
-docs.register(sched_b.ScheduleBView, blueprint='v1')
-docs.register(sched_e.ScheduleEView, blueprint='v1')
-docs.register(aggregates.ScheduleABySizeView, blueprint='v1')
-docs.register(aggregates.ScheduleAByStateView, blueprint='v1')
-docs.register(aggregates.ScheduleAByZipView, blueprint='v1')
-docs.register(aggregates.ScheduleAByEmployerView, blueprint='v1')
-docs.register(aggregates.ScheduleAByOccupationView, blueprint='v1')
-docs.register(aggregates.ScheduleAByContributorView, blueprint='v1')
-docs.register(aggregates.ScheduleBByRecipientView, blueprint='v1')
-docs.register(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
-docs.register(aggregates.ScheduleBByPurposeView, blueprint='v1')
-docs.register(aggregates.ScheduleEByCandidateView, blueprint='v1')
-docs.register(aggregates.CommunicationCostByCandidateView, blueprint='v1')
-docs.register(aggregates.ElectioneeringByCandidateView, blueprint='v1')
-docs.register(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
-docs.register(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
-docs.register(filings.FilingsView, blueprint='v1')
-docs.register(filings.FilingsList, blueprint='v1')
-docs.register(elections.ElectionList, blueprint='v1')
-docs.register(elections.ElectionView, blueprint='v1')
-docs.register(elections.ElectionSummary, blueprint='v1')
-docs.register(dates.ReportingDatesView, blueprint='v1')
+apidoc.register(CandidateNameSearch, blueprint='v1')
+apidoc.register(CommitteeNameSearch, blueprint='v1')
+apidoc.register(candidates.CandidateView, blueprint='v1')
+apidoc.register(candidates.CandidateList, blueprint='v1')
+apidoc.register(candidates.CandidateSearch, blueprint='v1')
+apidoc.register(candidates.CandidateHistoryView, blueprint='v1')
+apidoc.register(committees.CommitteeView, blueprint='v1')
+apidoc.register(committees.CommitteeList, blueprint='v1')
+apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
+apidoc.register(reports.ReportsView, blueprint='v1')
+apidoc.register(totals.TotalsView, blueprint='v1')
+apidoc.register(sched_a.ScheduleAView, blueprint='v1')
+apidoc.register(sched_b.ScheduleBView, blueprint='v1')
+apidoc.register(sched_e.ScheduleEView, blueprint='v1')
+apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
+apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
+apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')
+apidoc.register(aggregates.ScheduleAByEmployerView, blueprint='v1')
+apidoc.register(aggregates.ScheduleAByOccupationView, blueprint='v1')
+apidoc.register(aggregates.ScheduleAByContributorView, blueprint='v1')
+apidoc.register(aggregates.ScheduleBByRecipientView, blueprint='v1')
+apidoc.register(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
+apidoc.register(aggregates.ScheduleBByPurposeView, blueprint='v1')
+apidoc.register(aggregates.ScheduleEByCandidateView, blueprint='v1')
+apidoc.register(aggregates.CommunicationCostByCandidateView, blueprint='v1')
+apidoc.register(aggregates.ElectioneeringByCandidateView, blueprint='v1')
+apidoc.register(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
+apidoc.register(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
+apidoc.register(filings.FilingsView, blueprint='v1')
+apidoc.register(filings.FilingsList, blueprint='v1')
+apidoc.register(elections.ElectionList, blueprint='v1')
+apidoc.register(elections.ElectionView, blueprint='v1')
+apidoc.register(elections.ElectionSummary, blueprint='v1')
+apidoc.register(dates.ReportingDatesView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
@@ -292,7 +296,7 @@ docs = Blueprint(
 )
 
 
-@docs.route('/swagger')
+@docs.route('/swagger/')
 def api_spec():
     return jsonify(spec.spec.to_dict())
 
@@ -304,12 +308,12 @@ def swagger_static(filename):
 
 @app.route('/')
 @app.route('/v1/')
-@docs.route('/developer')
+@docs.route('/developer/')
 def api_ui_redirect():
     return redirect(url_for('docs.api_ui'), code=http.client.MOVED_PERMANENTLY)
 
 
-@docs.route('/developers')
+@docs.route('/developers/')
 def api_ui():
     return render_template(
         'swagger-ui.html',
