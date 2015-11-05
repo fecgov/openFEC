@@ -43,7 +43,7 @@ class ScheduleA(BaseItemized):
     __tablename__ = 'ofec_sched_a'
 
     sched_a_sk = db.Column(db.Integer, primary_key=True)
-    contributor_id = db.Column('contbr_id', db.String)
+    contributor_id = db.Column('clean_contbr_id', db.String)
     contributor = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
@@ -93,7 +93,7 @@ class ScheduleB(BaseItemized):
     __tablename__ = 'ofec_sched_b'
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
-    recipient_committee_id = db.Column('recipient_cmte_id', db.String)
+    recipient_committee_id = db.Column('clean_recipient_cmte_id', db.String)
     recipient_committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
