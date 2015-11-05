@@ -85,8 +85,10 @@ def search_text(query, column, text, order=True):
     :param order: Order results by text similarity, descending; prohibitively
         slow for large collections
     """
-    vector = ' & '.join(text.split())
-    vector = sa.func.concat(vector, ':*')
+    vector = ' & '.join([
+        part + ':*'
+        for part in re.sub(r'\W', ' ', text).split()
+    ])
     query = query.filter(column.match(vector))
     if order:
         query = query.order_by(
