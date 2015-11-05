@@ -2,6 +2,7 @@
 
 import os
 import glob
+import logging
 import subprocess
 import multiprocessing
 
@@ -15,6 +16,8 @@ from webservices.common.util import get_full_path
 
 
 manager = Manager(app)
+logger = logging.getLogger('manager')
+logging.basicConfig(level=logging.INFO)
 
 # The Flask app server should only be used for local testing, so we default to
 # using debug mode and auto-reload. To disable debug mode locally, pass the
@@ -26,7 +29,7 @@ def execute_sql_file(path):
     # This helper is typically used within a multiprocessing pool; create a new database
     # engine for each job.
     db.engine.dispose()
-    print(('Running {}'.format(path)))
+    logger.info(('Running {}'.format(path)))
     with open(path) as fp:
         cmd = '\n'.join([
             line for line in fp.readlines()
@@ -112,13 +115,13 @@ def build_district_counts(outname='districts.json'):
 
 @manager.command
 def update_schemas(processes=1):
-    print("Starting DB refresh...")
+    logger.info("Starting DB refresh...")
     processes = int(processes)
     load_pacronyms()
     load_election_dates()
     execute_sql_folder('data/sql_updates/', processes=processes)
     execute_sql_file('data/rename_temporary_views.sql')
-    print("Finished DB refresh.")
+    logger.info("Finished DB refresh.")
 
 @manager.command
 def update_functions(processes=1):
@@ -126,21 +129,21 @@ def update_functions(processes=1):
 
 @manager.command
 def update_itemized(schedule):
-    print('Updating Schedule {0} tables...'.format(schedule))
+    logger.info('Updating Schedule {0} tables...'.format(schedule))
     execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
-    print('Finished Schedule {0} update.'.format(schedule))
+    logger.info('Finished Schedule {0} update.'.format(schedule))
 
 @manager.command
 def rebuild_aggregates(processes=1):
-    print('Rebuilding incremental aggregates...')
+    logger.info('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
-    print('Finished rebuilding incremental aggregates.')
+    logger.info('Finished rebuilding incremental aggregates.')
 
 @manager.command
 def update_aggregates():
-    print('Updating incremental aggregates...')
+    logger.info('Updating incremental aggregates...')
     db.engine.execute('select update_aggregates()')
-    print('Finished updating incremental aggregates.')
+    logger.info('Finished updating incremental aggregates.')
 
 @manager.command
 def update_all(processes=1):
@@ -158,9 +161,9 @@ def update_all(processes=1):
 @manager.command
 def refresh_materialized():
     """Refresh materialized views."""
-    print('Refreshing materialized views...')
+    logger.info('Refreshing materialized views...')
     execute_sql_file('data/refresh_materialized_views.sql')
-    print('Finished refreshing materialized views.')
+    logger.info('Finished refreshing materialized views.')
 
 @manager.command
 def stop_beat():
