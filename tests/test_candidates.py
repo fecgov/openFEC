@@ -30,7 +30,6 @@ fields = dict(
     candidate_inactive='Y',
     candidate_status='C',
     incumbent_challenge='I',
-    candidate_status_full='Candidate',
     office='H',
     district='08',
     state='VA',
@@ -62,11 +61,6 @@ class CandidateFormatTest(ApiBaseTest):
         result = response['results'][0]
         self.assertEqual(result['candidate_id'], candidate.candidate_id)
         self.assertEqual(result['form_type'], 'F2')
-        # @todo - check for a value for expire_data
-        self.assertEqual(result['expire_date'], None)
-        # # most recent record should be first
-        self.assertEqual(result['load_date'], isoformat(candidate.load_date))
-        self.assertNotEqual(result['load_date'], isoformat(candidate_old.load_date))
         self.assertResultsEqual(result['name'], candidate.name)
         # #address
         self.assertEqual(result['address_city'], candidate.address_city)
