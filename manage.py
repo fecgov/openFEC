@@ -102,7 +102,9 @@ def dump_districts(dest=None):
 def load_districts(source=None):
     source = source or './data/districts.dump'
     dest = db.engine.url
-    cmd = 'pg_restore --dbname {dest} --no-acl --no-owner {source}'.format(**locals())
+    cmd = (
+        'pg_restore --dbname {dest} --no-acl --no-owner --clean {source}'
+    ).format(**locals())
     subprocess.call(cmd, shell=True)
 
 @manager.command
