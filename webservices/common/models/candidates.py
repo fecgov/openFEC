@@ -50,9 +50,12 @@ class Candidate(BaseConcreteCandidate):
         secondary='ofec_name_linkage_mv',
         secondaryjoin='''and_(
             Committee.committee_key == ofec_name_linkage_mv.c.committee_key,
-            Committee.designation == 'P',
+            ofec_name_linkage_mv.c.committee_designation == 'P',
         )''',
-        order_by='desc(Committee.last_file_date)',
+        order_by=(
+            'desc(ofec_name_linkage_mv.c.election_year),'
+            'desc(Committee.last_file_date),'
+        )
     )
 
 
