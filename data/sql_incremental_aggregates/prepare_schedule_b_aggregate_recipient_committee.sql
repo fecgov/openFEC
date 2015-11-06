@@ -4,7 +4,7 @@ create table ofec_sched_b_aggregate_recipient_id as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
-    recipient_cmte_id,
+    clean_repeated(recipient_cmte_id, cmte_id) as recipient_cmte_id,
     max(recipient_nm) as recipient_nm,
     sum(disb_amt) as total,
     count(disb_amt) as count
@@ -12,8 +12,8 @@ from sched_b
 where rpt_yr >= :START_YEAR_AGGREGATE
 and disb_amt is not null
 and (memo_cd != 'X' or memo_cd is null)
-and recipient_cmte_id is not null
-group by cmte_id, cycle, recipient_cmte_id
+and clean_repeated(recipient_cmte_id, cmte_id) is not null
+group by cmte_id, cycle, clean_repeated(recipient_cmte_id, cmte_id)
 ;
 
 -- Create indices on aggregate
@@ -38,7 +38,7 @@ begin
         select
             cmte_id,
             rpt_yr + rpt_yr % 2 as cycle,
-            recipient_cmte_id,
+            clean_repeated(recipient_cmte_id, cmte_id) as recipient_cmte_id,
             max(recipient_nm) as recipient_nm,
             sum(disb_amt * multiplier) as total,
             sum(multiplier) as count
@@ -49,8 +49,8 @@ begin
         ) t
         where disb_amt is not null
         and (memo_cd != 'X' or memo_cd is null)
-        and recipient_cmte_id is not null
-        group by cmte_id, cycle, recipient_cmte_id
+        and clean_repeated(recipient_cmte_id, cmte_id) is not null
+        group by cmte_id, cycle, clean_repeated(recipient_cmte_id, cmte_id)
     ),
     inc as (
         update ofec_sched_b_aggregate_recipient_id ag
