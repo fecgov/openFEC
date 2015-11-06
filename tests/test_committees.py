@@ -40,10 +40,17 @@ class CommitteeFormatTest(ApiBaseTest):
             id=committee.committee_id,
             fulltxt=sa.func.to_tsvector(committee.name),
         )
-        results = self._results(api.url_for(CommitteeList, q='america'))
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['committee_id'], committee.committee_id)
-        self.assertNotEqual(results[0]['committee_id'], decoy_committee.committee_id)
+        queries = [
+            'america',
+            'tomorrow',
+            'america tomorrow',
+            'america & tomorrow',
+        ]
+        for query in queries:
+            results = self._results(api.url_for(CommitteeList, q=query))
+            self.assertEqual(len(results), 1)
+            self.assertEqual(results[0]['committee_id'], committee.committee_id)
+            self.assertNotEqual(results[0]['committee_id'], decoy_committee.committee_id)
 
     def test_filter_by_candidate_id(self):
         candidate_id = 'ID0'
@@ -210,7 +217,7 @@ class CommitteeFormatTest(ApiBaseTest):
             set((each.committee_id for each in committees)),
         )
 
-    def test_committees_by_candidatee_count(self):
+    def test_committees_by_candidate_count(self):
         committee = factories.CommitteeFactory()
         candidate = factories.CandidateFactory()
         db.session.flush()

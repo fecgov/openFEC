@@ -96,6 +96,7 @@ class CandidateFormatTest(ApiBaseTest):
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=candidate.candidate_id,
                 committee_id=principal_committee.committee_id,
+                committee_designation='P',
             ),
             factories.CandidateCommitteeLinkFactory(
                 candidate_id=candidate.candidate_id,
