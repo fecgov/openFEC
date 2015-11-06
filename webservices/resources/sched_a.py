@@ -10,15 +10,6 @@ from webservices.utils import use_kwargs
 from webservices.common.views import ItemizedResource
 
 
-is_individual = sa.func.is_individual(
-    models.ScheduleA.contribution_receipt_amount,
-    models.ScheduleA.receipt_type,
-    models.ScheduleA.line_number,
-    models.ScheduleA.memo_code,
-    models.ScheduleA.memo_text,
-)
-
-
 @doc(
     tags=['schedules/schedule_a'],
     description=docs.SCHEDULE_A,
@@ -45,7 +36,7 @@ class ScheduleAView(ItemizedResource):
         ('contributor_state', models.ScheduleA.contributor_state),
     ]
     filter_match_fields = [
-        ('is_individual', is_individual),
+        ('is_individual', models.ScheduleA.is_individual),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleA.contribution_receipt_date),

@@ -24,9 +24,10 @@ before_install:
 
 before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
-  - pip install -U -r requirements.txt
+  - travis_retry pip install -U pip wheel
+  - travis_retry pip install -U -r requirements.txt
 
-script: nosetests -s
+script: py.test
 
 after_success:
   # Deploy to appropriate Cloud Foundry space on success
