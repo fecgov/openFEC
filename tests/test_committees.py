@@ -81,7 +81,6 @@ class CommitteeFormatTest(ApiBaseTest):
             treasurer_name='Robert J. Lipshutz',
             party='DEM',
             form_type='F1Z',
-            load_date=datetime.datetime(1982, 12, 31),
             street_1='1795 Peachtree Road',
             zip='30309',
         )
@@ -94,7 +93,6 @@ class CommitteeFormatTest(ApiBaseTest):
         self.assertEqual(result['party'], committee.party)
         # Things on the detailed view
         self.assertEqual(result['form_type'], committee.form_type)
-        self.assertEqual(result['load_date'], isoformat(committee.load_date))
         self.assertEqual(result['street_1'], committee.street_1)
         self.assertEqual(result['zip'], committee.zip)
 

@@ -303,7 +303,7 @@ def join_candidate_totals(query, kwargs, totals_model):
         CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
     ).join(
         CommitteeHistory,
-        CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+        CandidateCommitteeLink.committee_id == CommitteeHistory.committee_id,
     ).join(
         totals_model,
         CommitteeHistory.committee_id == totals_model.committee_id,
