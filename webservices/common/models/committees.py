@@ -66,7 +66,6 @@ class CommitteeDetail(BaseConcreteCommittee):
     website = db.Column(db.String(50))
     form_type = db.Column(db.String(3))
     leadership_pac = db.Column(db.String(50))
-    load_date = db.Column(db.DateTime())
     lobbyist_registrant_pac = db.Column(db.String(1))
     party_type = db.Column(db.String(3))
     party_type_full = db.Column(db.String(15))

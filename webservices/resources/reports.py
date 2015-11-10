@@ -104,12 +104,7 @@ class ReportsView(utils.Resource):
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
-            committee = (
-                query.first() or
-                models.CommitteeDetail.query.filter_by(
-                    committee_id=committee_id
-                ).first_or_404()
-            )
+            committee = query.first_or_404()
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
