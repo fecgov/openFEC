@@ -1,4 +1,3 @@
-import urllib
 import datetime
 
 import sqlalchemy as sa
@@ -116,14 +115,11 @@ class CommitteeFormatTest(ApiBaseTest):
     # TODO(jmcarp) Generalize to /committees endpoint
     # TODO(jmcarp) Generalize to candidate models
     def test_filters_generic(self):
-        committee = factories.CommitteeFactory()
-        committee_id = committee.committee_id
-        base_url = api.url_for(CommitteeView, committee_id=committee_id)
-        self._check_filter('designation', ['B', 'P'], base_url, committee_id=committee_id)
-        self._check_filter('organization_type', ['M', 'T'], base_url, committee_id=committee_id)
-        self._check_filter('committee_type', ['H', 'X'], base_url, committee_id=committee_id)
+        self._check_filter('designation', ['B', 'P'])
+        self._check_filter('organization_type', ['M', 'T'])
+        self._check_filter('committee_type', ['H', 'X'])
 
-    def _check_filter(self, field, values, base_url, alt=None, **attrs):
+    def _check_filter(self, field, values, alt=None, **attrs):
 
         # Build fixtures
         factories.CommitteeFactory(**utils.extend(attrs, {field: alt}))
@@ -135,17 +131,14 @@ class CommitteeFormatTest(ApiBaseTest):
         # Assert that exactly one record is found for each single-valued search
         # (e.g. field=value1)
         for value in values:
-            url = '{0}?{1}={2}'.format(base_url, field, value)
+            url = api.url_for(CommitteeList, **{field: value})
             results = self._results(url)
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0][field], value)
 
         # Assert that `len(values)` records are found for multi-valued search
         # (e.g. field=value1,value2...valueN)
-        url = '{0}?{1}'.format(
-            base_url,
-            urllib.parse.urlencode({field: values}, doseq=True)
-        )
+        url = api.url_for(CommitteeList, **{field: values})
         results = self._results(url)
         self.assertEqual(len(results), len(values))
         for result in results:
@@ -205,18 +198,17 @@ class CommitteeFormatTest(ApiBaseTest):
             self.assertIsNotNone(each['first_file_date'])
 
     def test_committees_by_cand_id(self):
-        candidate_id = 'id0'
         committees = [factories.CommitteeFactory() for _ in range(3)]
+        candidate = factories.CandidateFactory()
         db.session.flush()
         [
             factories.CandidateCommitteeLinkFactory(
-                candidate_id=candidate_id,
+                candidate_id=candidate.candidate_id,
                 committee_id=committee.committee_id,
-                committee_key=committee.committee_key,
             )
             for committee in committees
         ]
-        results = self._results(api.url_for(CommitteeView, candidate_id=candidate_id))
+        results = self._results(api.url_for(CommitteeView, candidate_id=candidate.candidate_id))
 
         self.assertEqual(
             set((each['committee_id'] for each in results)),
@@ -224,49 +216,45 @@ class CommitteeFormatTest(ApiBaseTest):
         )
 
     def test_committees_by_candidate_count(self):
-        candidate_id = 'id0'
         committee = factories.CommitteeFactory()
+        candidate = factories.CandidateFactory()
         db.session.flush()
         [
             factories.CandidateCommitteeLinkFactory(
-                candidate_id=candidate_id,
+                candidate_id=candidate.candidate_id,
                 committee_id=committee.committee_id,
-                committee_key=committee.committee_key,
             ),
             factories.CandidateCommitteeLinkFactory(
-                candidate_id=candidate_id,
+                candidate_id=candidate.candidate_id,
                 committee_id=committee.committee_id,
-                committee_key=committee.committee_key,
             ),
         ]
-        response = self._response(api.url_for(CommitteeView, candidate_id=candidate_id))
+        response = self._response(api.url_for(CommitteeView, candidate_id=candidate.candidate_id))
         self.assertEqual(response['pagination']['count'], 1)
         self.assertEqual(len(response['results']), 1)
 
     def test_committee_by_cand_filter(self):
-        candidate_id = 'id0'
         committee = factories.CommitteeFactory(designation='P')
-        db.session.flush()
-        factories.CandidateCommitteeLinkFactory(
-            candidate_id=candidate_id,
-            committee_key=committee.committee_key,
-            committee_id=committee.committee_id,
-        )
-        results = self._results(
-            api.url_for(CommitteeView, candidate_id=candidate_id, designation='P')
-        )
-        self.assertEqual(1, len(results))
-
-    def test_candidates_by_com(self):
-        committee_id = 'id0'
         candidate = factories.CandidateFactory()
         db.session.flush()
         factories.CandidateCommitteeLinkFactory(
             candidate_id=candidate.candidate_id,
-            candidate_key=candidate.candidate_key,
-            committee_id=committee_id,
+            committee_id=committee.committee_id,
         )
-        results = self._results(api.url_for(CandidateView, committee_id=committee_id))
+        results = self._results(
+            api.url_for(CommitteeView, candidate_id=candidate.candidate_id, designation='P')
+        )
+        self.assertEqual(1, len(results))
+
+    def test_candidates_by_com(self):
+        committee = factories.CommitteeFactory()
+        candidate = factories.CandidateFactory()
+        db.session.flush()
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=candidate.candidate_id,
+            committee_id=committee.committee_id,
+        )
+        results = self._results(api.url_for(CandidateView, committee_id=committee.committee_id))
         self.assertEquals(1, len(results))
 
     def test_committee_sort(self):
