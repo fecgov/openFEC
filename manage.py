@@ -69,7 +69,7 @@ def load_pacronyms():
 
 def load_table(frame, tablename, indexes=()):
     import sqlalchemy as sa
-    db.engine.execute('drop table if exists {}'.format(tablename))
+    db.engine.execute('drop table if exists "{}"'.format(tablename))
     frame.to_sql(tablename, db.engine)
     table = sa.Table(tablename, db.metadata, autoload_with=db.engine)
     for index in indexes:
@@ -78,8 +78,8 @@ def load_table(frame, tablename, indexes=()):
 @manager.command
 def build_districts():
     import pandas as pd
-    load_table('ofec_fips_states', pd.read_csv('data/fips_states.csv'))
-    load_table('ofec_zips_districts', pd.read_csv('data/natl_zccd_delim.csv'), indexes=('zcta', ))
+    load_table(pd.read_csv('data/fips_states.csv'), 'ofec_fips_states')
+    load_table(pd.read_csv('data/natl_zccd_delim.csv'), 'ofec_zips_districts', indexes=('ZCTA', ))
 
 @manager.command
 def load_election_dates():
@@ -105,7 +105,9 @@ def dump_districts(dest=None):
 def load_districts(source=None):
     source = source or './data/districts.dump'
     dest = db.engine.url
-    cmd = 'pg_restore --dbname {dest} --no-acl --no-owner {source}'.format(**locals())
+    cmd = (
+        'pg_restore --dbname {dest} --no-acl --no-owner --clean {source}'
+    ).format(**locals())
     subprocess.call(cmd, shell=True)
 
 @manager.command
