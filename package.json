@@ -1,5 +1,9 @@
 {
   "dependencies": {
      "swagger-ui": "git://github.com/18F/swagger-ui.git"
+  },
+  "engines": {
+    "node": "0.12.7",
+    "npm": "2.11.3"
   }
 }
