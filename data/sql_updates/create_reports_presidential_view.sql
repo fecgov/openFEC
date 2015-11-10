@@ -3,8 +3,6 @@ drop materialized view if exists ofec_reports_presidential_mv_tmp;
 create materialized view ofec_reports_presidential_mv_tmp as
 select
     row_number() over () as idx,
-    factpresidential_f3p_sk as report_key,
-    cmte_sk as committee_key,
     cmte_id as committee_id,
     two_yr_period_sk as cycle,
     start_date.dw_date as coverage_start_date,

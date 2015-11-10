@@ -27,8 +27,8 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     ).join(
         CandidateCommitteeLink,
         sa.and_(
-            CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
-            CandidateCommitteeLink.election_year.in_([
+            CandidateHistory.candidate_id == CandidateCommitteeLink.candidate_id,
+            CandidateCommitteeLink.cand_election_year.in_([
                 CandidateHistory.two_year_period,
                 CandidateHistory.two_year_period - 1,
             ]),
@@ -36,8 +36,8 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     ).join(
         CommitteeHistory,
         sa.and_(
-            CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
-            CandidateCommitteeLink.election_year.in_([
+            CandidateCommitteeLink.committee_id == CommitteeHistory.committee_id,
+            CandidateCommitteeLink.cand_election_year.in_([
                 CommitteeHistory.cycle,
                 CommitteeHistory.cycle - 1,
             ]),

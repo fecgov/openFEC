@@ -54,8 +54,6 @@ with
 select distinct on (dcp.cand_sk, cycle)
     row_number() over () as idx,
     cycles.cycle as two_year_period,
-    dcp.candproperties_sk as properties_key,
-    dcp.cand_sk as candidate_key,
     dcp.cand_id as candidate_id,
     dcp.cand_nm as name,
     dcp.expire_date as expire_date,
@@ -102,7 +100,6 @@ order by
 
 create unique index on ofec_candidate_history_mv_tmp(idx);
 
-create index on ofec_candidate_history_mv_tmp(candidate_key);
 create index on ofec_candidate_history_mv_tmp(candidate_id);
 create index on ofec_candidate_history_mv_tmp(two_year_period);
 create index on ofec_candidate_history_mv_tmp(office);
@@ -129,7 +126,6 @@ create index on ofec_candidate_detail_mv_tmp(party_full);
 create index on ofec_candidate_detail_mv_tmp(expire_date);
 create index on ofec_candidate_detail_mv_tmp(office_full);
 create index on ofec_candidate_detail_mv_tmp(candidate_id);
-create index on ofec_candidate_detail_mv_tmp(candidate_key);
 create index on ofec_candidate_detail_mv_tmp(candidate_status);
 create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
 
