@@ -4,7 +4,6 @@ full documentation visit: https://api.open.fec.gov/developers.
 """
 import os
 import http
-import logging
 
 from flask import abort
 from flask import request
@@ -44,10 +43,6 @@ from webservices.resources import elections
 from webservices.resources import filings
 from webservices.resources import dates
 
-speedlogger = logging.getLogger('speed')
-speedlogger.setLevel(logging.CRITICAL)
-speedlogger.addHandler(logging.FileHandler(('rest_speed.log')))
-
 
 def sqla_conn_string():
     sqla_conn_string = os.getenv('SQLA_CONN')
@@ -66,12 +61,9 @@ app.config['APISPEC_FORMAT_RESPONSE'] = None
 db.init_app(app)
 cors.CORS(app)
 
-logger = logging.getLogger(__name__)
-
 class FlaskRestParser(FlaskParser):
 
     def handle_error(self, error):
-        logger.error(error)
         message = error.messages
         status_code = getattr(error, 'status_code', 422)
         raise exceptions.ApiError(message, status_code)

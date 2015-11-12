@@ -17,8 +17,11 @@ class CaptureLogs:
             fmt='%(asctime)s %(levelname)s:%(name)s:%(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
         )
+
         self.handler = logging.StreamHandler(self.buffer)
         self.handler.setFormatter(self.formatter)
+        self.handler.setLevel(logging.INFO)
+
         self.logger.addHandler(self.handler)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
@@ -37,7 +40,7 @@ def send_mail(buffer):
 
 def get_subject(settings):
     return 'FEC Update: {space} | {app}'.format(
-        space=settings.get('space-name', 'unknown-space'),
+        space=settings.get('space_name', 'unknown-space'),
         app=settings.get('name', 'unknown-app'),
     )
 
