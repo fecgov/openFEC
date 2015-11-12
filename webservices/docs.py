@@ -325,7 +325,7 @@ large result sets are approximate.
 SCHEDULE_E_TAG = '''
 Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
 bought and adds on TV to oppose a federal candidate, each ad purchase would be recorded here with
-the expenditure amount, name and id of the candidate, and weather the ad supported or opposed the candidate.
+the expenditure amount, name and id of the candidate, and whether the ad supported or opposed the candidate.
 
 An independent expenditure is an expenditure for a communication "expressly advocating the election or
 defeat of a clearly identified candidate that is not made in cooperation, consultation, or concert with,
