@@ -18,8 +18,7 @@ with
         select
             cmte_id,
             array_agg(distinct cand_id)::text[] as candidate_ids
-        from dimlinkages dl
-        where dl.expire_date is null
+        from cand_cmte_linkage
         group by cmte_id
     )
 select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
