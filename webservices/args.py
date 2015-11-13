@@ -421,6 +421,11 @@ schedule_a_candidate_aggregate = {
     'period': fields.Bool(missing=False),
 }
 
+totals_candidate_aggregate = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'period': fields.Bool(missing=False),
+}
+
 communication_cost_by_candidate = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
