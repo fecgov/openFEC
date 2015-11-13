@@ -187,6 +187,7 @@ class TotalsCandidateView(utils.Resource):
             CandidateCommitteeLink.candidate_id,
             CandidateCommitteeLink.committee_id,
             totals_model.last_cash_on_hand_end_period,
+            totals_model.last_debts_owed_by_committee,
         ).distinct(
             CandidateCommitteeLink.candidate_id,
             CandidateCommitteeLink.committee_id,
@@ -198,6 +199,7 @@ class TotalsCandidateView(utils.Resource):
         return db.session.query(
             latest.c.cand_id,
             sa.func.sum(latest.c.last_cash_on_hand_end_period).label('cash_on_hand_end_period'),
+            sa.func.sum(latest.c.last_debts_owed_by_committee).label('debts_owed_by_committee'),
         ).group_by(
             latest.c.cand_id,
         )

@@ -30,6 +30,7 @@ shared_fields = {
     'last_report_type_full': 'Q3',
     'last_beginning_image_number': '123',
     'last_cash_on_hand_end_period': 538,
+    'last_debts_owed_by_committee': 42,
 }
 
 class TestTotals(ApiBaseTest):

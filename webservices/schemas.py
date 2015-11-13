@@ -372,37 +372,38 @@ class ElectionSchema(ma.Schema):
     incumbent_challenge_full = ma.fields.Str()
     party_full = ma.fields.Str()
     committee_ids = ma.fields.List(ma.fields.Str)
-    total_receipts = ma.fields.Decimal()
-    total_disbursements = ma.fields.Decimal()
-    cash_on_hand_end_period = ma.fields.Decimal()
+    total_receipts = ma.fields.Decimal(places=2)
+    total_disbursements = ma.fields.Decimal(places=2)
+    cash_on_hand_end_period = ma.fields.Decimal(places=2)
     won = ma.fields.Boolean()
 augment_schemas(ElectionSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    total = ma.fields.Decimal()
+    total = ma.fields.Decimal(places=2)
     size = ma.fields.Int()
 
 class ScheduleAByStateCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    total = ma.fields.Decimal()
+    total = ma.fields.Decimal(places=2)
     state = ma.fields.Str()
     state_full = ma.fields.Str()
 
 class ScheduleAByContributorTypeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    total = ma.fields.Decimal()
+    total = ma.fields.Decimal(places=2)
     individual = ma.fields.Bool()
 
 class TotalsCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
-    receipts = ma.fields.Decimal()
-    disbursements = ma.fields.Decimal()
-    cash_on_hand_end_period = ma.fields.Decimal()
+    receipts = ma.fields.Decimal(places=2)
+    disbursements = ma.fields.Decimal(places=2)
+    cash_on_hand_end_period = ma.fields.Decimal(places=2)
+    debts_owed_by_committee = ma.fields.Decimal(places=2)
 
 augment_schemas(
     ScheduleABySizeCandidateSchema,
