@@ -1,7 +1,6 @@
 import datetime
 import functools
 
-from webservices import utils
 from webservices.rest import db, api
 from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
 
@@ -92,12 +91,14 @@ class TestElections(ApiBaseTest):
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
             committee_id=self.committees[0].committee_id,
-            cand_election_year=2012,
+            committee_designation='A',
+            fec_election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
             committee_id=self.committees[1].committee_id,
-            cand_election_year=2011,
+            committee_designation='P',
+            fec_election_year=2012,
         )
         self.totals = [
             factories.TotalsHouseSenateFactory(
@@ -105,10 +106,7 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[0].committee_id,
                 coverage_end_date=datetime.datetime(2012, 9, 30),
-                last_beginning_image_number=123,
-                last_report_type_full='Quarter Three',
                 last_cash_on_hand_end_period=1979,
-                last_report_year=2012,
                 cycle=2012,
             ),
             factories.TotalsHouseSenateFactory(
@@ -116,10 +114,7 @@ class TestElections(ApiBaseTest):
                 disbursements=75,
                 committee_id=self.committees[1].committee_id,
                 coverage_end_date=datetime.datetime(2012, 12, 31),
-                last_beginning_image_number=456,
-                last_report_type_full='Quarter Three',
                 last_cash_on_hand_end_period=1979,
-                last_report_year=2012,
                 cycle=2012,
             ),
         ]
@@ -156,16 +151,6 @@ class TestElections(ApiBaseTest):
             'total_receipts': sum(each.receipts for each in self.totals),
             'total_disbursements': sum(each.disbursements for each in self.totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in self.totals),
-            'document_description': utils.document_description(
-                self.totals[1].last_report_year,
-                self.totals[1].last_report_type_full,
-            ),
-            'pdf_url': utils.report_pdf_url(
-                self.totals[1].last_report_year,
-                self.totals[1].last_beginning_image_number,
-                'F3',
-                'S',
-            ),
             'won': False,
         }
         self.assertEqual(results[0], expected)

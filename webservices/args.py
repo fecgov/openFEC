@@ -412,6 +412,7 @@ elections = {
         validate=validate.OneOf(['house', 'senate', 'president']),
         description='Office sought, either President, House or Senate.',
     ),
+    'period': fields.Bool(missing=False),
 }
 
 schedule_a_candidate_aggregate = {

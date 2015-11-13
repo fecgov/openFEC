@@ -376,20 +376,6 @@ class ElectionSchema(ma.Schema):
     total_disbursements = ma.fields.Decimal()
     cash_on_hand_end_period = ma.fields.Decimal()
     won = ma.fields.Boolean()
-    document_description = ma.fields.Function(
-        lambda o: utils.document_description(
-            o.report_year,
-            o.report_type_full,
-        )
-    )
-    pdf_url = ma.fields.Function(
-        lambda o: utils.report_pdf_url(
-            o.report_year,
-            o.beginning_image_number,
-            'F3P' if o.office == 'P' else 'F3',
-            o.office[0].upper(),
-        )
-    )
 augment_schemas(ElectionSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
