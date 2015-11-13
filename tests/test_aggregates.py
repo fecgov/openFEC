@@ -105,7 +105,10 @@ class TestCandidateAggregates(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
-        factories.CandidateDetailFactory(candidate_id=self.candidate.candidate_id)
+        factories.CandidateDetailFactory(
+            candidate_id=self.candidate.candidate_id,
+            election_years=[2008, 2012],
+        )
         [
             factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
@@ -114,12 +117,14 @@ class TestCandidateAggregates(ApiBaseTest):
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
             committee_id=self.committees[0].committee_id,
-            cand_election_year=2012,
+            committee_designation='P',
+            fec_election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
             committee_id=self.committees[1].committee_id,
-            cand_election_year=2012,
+            committee_designation='A',
+            fec_election_year=2012,
         )
 
     def test_by_size(self):
