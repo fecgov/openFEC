@@ -169,12 +169,17 @@ class ElectionView(utils.Resource):
         pairs = self._get_pairs(totals_model, kwargs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
         outcomes = self._get_outcomes(kwargs).subquery()
+        latest = self._get_latest(pairs).subquery()
         return db.session.query(
             aggregates,
+            latest,
             sa.case(
                 [(outcomes.c.cand_id != None, True)],  # noqa
                 else_=False,
             ).label('won'),
+        ).join(
+            latest,
+            aggregates.c.candidate_id == latest.c.candidate_id,
         ).outerjoin(
             outcomes,
             aggregates.c.candidate_id == outcomes.c.cand_id,
@@ -187,6 +192,7 @@ class ElectionView(utils.Resource):
             CandidateHistory.party_full,
             CandidateHistory.incumbent_challenge_full,
             CandidateHistory.office,
+            CandidateHistory.two_year_period,
             CandidateCommitteeLink.committee_id,
             totals_model.receipts,
             totals_model.disbursements,
@@ -195,6 +201,24 @@ class ElectionView(utils.Resource):
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)
         return pairs
+
+    def _get_latest(self, pairs):
+        latest = db.session.query(
+            pairs.c.cash_on_hand_end_period,
+        ).distinct(
+            pairs.c.candidate_id,
+            pairs.c.cmte_id,
+        ).order_by(
+            pairs.c.candidate_id,
+            pairs.c.cmte_id,
+            sa.desc(pairs.c.two_year_period),
+        ).subquery()
+        return db.session.query(
+            latest.c.candidate_id,
+            sa.func.sum(latest.c.cash_on_hand_end_period).label('cash_on_hand_end_period'),
+        ).group_by(
+            latest.c.candidate_id,
+        )
 
     def _get_aggregates(self, pairs):
         return db.session.query(
@@ -206,7 +230,7 @@ class ElectionView(utils.Resource):
             sa.func.sum(pairs.c.receipts).label('total_receipts'),
             sa.func.sum(pairs.c.disbursements).label('total_disbursements'),
             sa.func.sum(pairs.c.cash_on_hand_end_period).label('cash_on_hand_end_period'),
-            sa.func.array_agg(pairs.c.cmte_id).label('committee_ids'),
+            sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
         ).group_by(
             pairs.c.candidate_id,
         )
