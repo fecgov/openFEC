@@ -5,7 +5,11 @@ from webservices import args
 from webservices import utils
 from webservices import schemas
 from webservices.utils import use_kwargs
-from webservices.common.models import (CandidateCommitteeLink, ScheduleABySize, ScheduleAByState, db)
+from webservices.common.models import (
+    CandidateDetail, CandidateCommitteeLink,
+    ScheduleABySize, ScheduleAByState,
+    db
+)
 
 
 election_duration = sa.case(
@@ -24,12 +28,10 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     :param list group_columns: List of group-by columns
     :param dict kwargs: Parsed arguments from request
     """
-    cand_valid = sa.Table('cand_valid_fec_yr', db.metadata, autoload_with=db.engine)
-
-    elections = get_elections(cand_valid, kwargs).subquery()
+    elections = get_elections(kwargs).subquery()
 
     cycle_column = (
-        elections.c.cand_election_yr
+        elections.c.cand_election_year
         if kwargs.get('period')
         else CandidateCommitteeLink.fec_election_year
     ).label('cycle')
@@ -37,7 +39,6 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     query = db.session.query(
         CandidateCommitteeLink.candidate_id,
         cycle_column,
-        ScheduleABySize.size,
         sa.func.sum(aggregate_model.total).label('total'),
         *label_columns
     ).join(
@@ -58,14 +59,19 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 
     return join_elections(query, elections, kwargs)
 
-def get_elections(cand_valid, kwargs):
-    return db.session.query(
-        cand_valid.c.cand_id,
-        cand_valid.c.cand_election_yr,
+def get_elections(kwargs):
+    candidates = CandidateDetail.query.with_entities(
+        CandidateDetail.candidate_id,
+        sa.func.unnest(CandidateDetail.election_years).label('cand_election_year'),
     ).filter(
-        cand_valid.c.cand_id.in_(kwargs['candidate_id']),
-        cand_valid.c.cand_election_yr.in_(kwargs['cycle']),
-    ).distinct()
+        CandidateDetail.candidate_id.in_(kwargs['candidate_id']),
+    ).subquery()
+    return db.session.query(
+        candidates.c.candidate_id,
+        candidates.c.cand_election_year,
+    ).filter(
+        candidates.c.cand_election_year.in_(kwargs['cycle']),
+    )
 
 def join_elections(query, elections, kwargs):
     if not kwargs.get('period'):
@@ -73,9 +79,9 @@ def join_elections(query, elections, kwargs):
     return query.join(
         elections,
         sa.and_(
-            CandidateCommitteeLink.candidate_id == elections.c.cand_id,
-            CandidateCommitteeLink.fec_election_year <= elections.c.cand_election_yr,
-            CandidateCommitteeLink.fec_election_year > (elections.c.cand_election_yr - election_duration),
+            CandidateCommitteeLink.candidate_id == elections.c.candidate_id,
+            CandidateCommitteeLink.fec_election_year <= elections.c.cand_election_year,
+            CandidateCommitteeLink.fec_election_year > (elections.c.cand_election_year - election_duration),
         ),
     )
 
