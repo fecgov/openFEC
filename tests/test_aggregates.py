@@ -93,7 +93,7 @@ class TestAggregates(ApiBaseTest):
                 )
             )
             self.assertEqual(len(results), 1)
-            self.assertEqual(results[0]['candidate']['candidate_id'], candidate.candidate_id)
+            self.assertEqual(results[0]['candidate_id'], candidate.candidate_id)
 
 
 class TestCandidateAggregates(ApiBaseTest):
