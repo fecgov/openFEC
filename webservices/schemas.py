@@ -252,8 +252,10 @@ augment_models(
 ScheduleEByCandidateSchema = make_schema(
     models.ScheduleEByCandidate,
     fields={
-        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+        'committee_id': ma.fields.Str(),
+        'candidate_id': ma.fields.Str(),
+        'committee_name': ma.fields.Str(),
+        'candidate_name': ma.fields.Str(),
     },
 )
 augment_schemas(ScheduleEByCandidateSchema)
@@ -261,8 +263,10 @@ augment_schemas(ScheduleEByCandidateSchema)
 CommunicationCostByCandidateSchema = make_schema(
     models.CommunicationCostByCandidate,
     fields={
-        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+        'committee_id': ma.fields.Str(),
+        'candidate_id': ma.fields.Str(),
+        'committee_name': ma.fields.Str(),
+        'candidate_name': ma.fields.Str(),
     },
 )
 augment_schemas(CommunicationCostByCandidateSchema)
@@ -270,8 +274,10 @@ augment_schemas(CommunicationCostByCandidateSchema)
 ElectioneeringByCandidateSchema = make_schema(
     models.ElectioneeringByCandidate,
     fields={
-        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+        'committee_id': ma.fields.Str(),
+        'candidate_id': ma.fields.Str(),
+        'committee_name': ma.fields.Str(),
+        'candidate_name': ma.fields.Str(),
     }
 )
 augment_schemas(ElectioneeringByCandidateSchema)

@@ -13,13 +13,7 @@ from webservices.common.models import (
 )
 
 
-election_duration = sa.case(
-    [
-        (CandidateCommitteeLink.committee_designation == 'S', 6),
-        (CandidateCommitteeLink.committee_designation == 'P', 4),
-    ],
-    else_=2,
-)
+election_duration = utils.get_election_duration(CandidateCommitteeLink.committee_designation)
 
 def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     """Aggregate committee totals by candidate.
@@ -73,7 +67,9 @@ def get_elections(kwargs):
         CandidateDetail.candidate_id,
         sa.func.unnest(CandidateDetail.election_years).label('cand_election_year'),
     ).filter(
-        CandidateDetail.candidate_id.in_(kwargs['candidate_id']),
+        CandidateDetail.candidate_id.in_(kwargs['candidate_id'])
+        if kwargs.get('candidate_id')
+        else True
     ).subquery()
     return db.session.query(
         candidates.c.candidate_id,

@@ -19,7 +19,7 @@ class ApiResource(utils.Resource):
 
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
-        return utils.fetch_page(query, kwargs, model=self.model, join_columns=self.join_columns)
+        return utils.fetch_page(query, kwargs, join_columns=self.join_columns)
 
     def build_query(self, _apply_options=True, **kwargs):
         query = self.model.query
