@@ -4,12 +4,17 @@ import codecs
 import unittest
 import subprocess
 
+from nplusone.ext.flask_sqlalchemy import NPlusOne
+
 import manage
 from webservices import rest
 from webservices import __API_VERSION__
 
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm-unit-test')
+
+rest.app.config['NPLUSONE_RAISE'] = True
+NPlusOne(rest.app)
 
 
 def _reset_schema():
@@ -120,13 +125,6 @@ class ApiBaseTest(BaseTestCase):
         for i in range(len(expected)):
             self.assertResultsEqual(actual[i], expected[i],
                                     prefix + '[%d]' % i)
-
-    def prettyPrint(self, thing):
-        """
-        Pretty-printing for debugging purposes.
-        """
-        import pprint; pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(thing)
 
 
 class IntegrationTestCase(BaseTestCase):
