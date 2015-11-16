@@ -280,8 +280,8 @@ class CandidateAggregateResource(AggregateResource):
         query = query.subquery()
         return models.db.session.query(
             query,
-            models.CandidateHistory.name.label('candidate_id'),
-            models.CommitteeHistory.name.label('committee_id'),
+            models.CandidateHistory.candidate_id.label('candidate_id'),
+            models.CommitteeHistory.committee_id.label('committee_id'),
             models.CandidateHistory.name.label('candidate_name'),
             models.CommitteeHistory.name.label('committee_name'),
         ).join(
