@@ -31,7 +31,7 @@ class AggregateResource(ApiResource):
     def get(self, committee_id=None, **kwargs):
         return super().get(committee_id=committee_id, **kwargs)
 
-    def build_query(self, committee_id, **kwargs):
+    def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(**kwargs)
         if committee_id is not None:
             query = query.filter(self.model.committee_id == committee_id)
