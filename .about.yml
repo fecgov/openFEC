@@ -26,7 +26,8 @@ milestones:
 - 'May 2015: Alpha testing of API and website'
 - 'July 2015: Beta testing of the API'
 - 'October 2015: Public release of beta site'
-partners: Federal Election Commission
+partners:
+- Federal Election Commission
 impact: The FEC collects data about how campaigns are financed that affect all 318 million Americans every 2 years.
 services:
 - name: Travis CI
@@ -36,11 +37,13 @@ licenses:
   betaFEC:
     name: CC0-1.0
     url: https://github.com/18F/openfec/blob/master/LICENSE.md
-blog: fec
+blog:
+- fec
 links:
 - url: https://beta.fec.gov
   text: betaFEC
 - url: https://api.open.fec.gov/developers
   text: betaFEC API Documentation
 contact: 
-- leah.bannon@gsa.gov
+- url: mailto:leah.bannon@gsa.gov
+  text: Leah Bannon
