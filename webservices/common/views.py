@@ -17,6 +17,11 @@ class ApiResource(utils.Resource):
     query_options = []
     join_columns = {}
 
+    @property
+    def index_column(self):
+        column = self.model.__mapper__.primary_key[0]
+        return getattr(self.model, column.key)
+
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         return utils.fetch_page(query, kwargs, model=self.model, join_columns=self.join_columns)

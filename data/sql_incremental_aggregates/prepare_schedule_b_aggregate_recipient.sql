@@ -14,12 +14,14 @@ and (memo_cd != 'X' or memo_cd is null)
 group by cmte_id, cycle, recipient_nm
 ;
 
+alter table ofec_sched_b_aggregate_recipient add column idx serial primary key;
+
 -- Create indices on aggregate
-create index on ofec_sched_b_aggregate_recipient (cmte_id);
-create index on ofec_sched_b_aggregate_recipient (cycle);
-create index on ofec_sched_b_aggregate_recipient (recipient_nm);
-create index on ofec_sched_b_aggregate_recipient (total);
-create index on ofec_sched_b_aggregate_recipient (count);
+create index on ofec_sched_b_aggregate_recipient (cmte_id, idx);
+create index on ofec_sched_b_aggregate_recipient (cycle, idx);
+create index on ofec_sched_b_aggregate_recipient (recipient_nm, idx);
+create index on ofec_sched_b_aggregate_recipient (total, idx);
+create index on ofec_sched_b_aggregate_recipient (count, idx);
 
 -- Create update function
 create or replace function ofec_sched_b_update_aggregate_recipient() returns void as $$

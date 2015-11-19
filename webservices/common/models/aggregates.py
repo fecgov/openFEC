@@ -1,9 +1,9 @@
 from webservices import utils
 
-from .base import db
+from .base import db, BaseModel
 
 
-class BaseAggregate(db.Model):
+class BaseAggregate(BaseModel):
     __abstract__ = True
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
