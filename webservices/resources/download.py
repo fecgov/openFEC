@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 from flask import redirect
 from flask_restful import Resource
 
-from webservices import tasks
+# from webservices import tasks
 
 client = boto3.client('s3')
 
