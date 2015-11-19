@@ -63,7 +63,7 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
 
 def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    model = index_column.class_
+    model = index_column.parent.class_
     sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
     query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     sort_column = sort_columns[0] if sort_columns else None
