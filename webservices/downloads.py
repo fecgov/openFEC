@@ -15,7 +15,8 @@ def call_resource(path, qs, per_page=5000):
     kwargs['per_page'] = per_page
     query = resource.build_query(**utils.extend(arguments, kwargs))
     count = counts.count_estimate(query, db.session, threshold=5000)
-    return utils.fetch_seek_paginator(query, kwargs, resource.index_column, count=count)
+    paginator = utils.fetch_seek_paginator(query, kwargs, resource.index_column, count=count)
+    return paginator, resource.schema
 
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
@@ -25,7 +26,7 @@ def parse_kwargs(resource, qs):
             kwargs.update(flaskparser.parser.parse(option['args']))
     return kwargs
 
-def iter_query(paginator):
+def iter_paginator(paginator):
     last_index, sort_index = (None, None)
     while True:
         page = paginator.get_page(last_index=last_index, sort_index=sort_index)

@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 
-from flask_apispec import doc, marshal_with
-from flask_apispec.utils import Ref
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
@@ -10,7 +9,6 @@ from webservices import filters
 from webservices import schemas
 from webservices.common import counts
 from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 
 
@@ -21,15 +19,16 @@ class AggregateResource(ApiResource):
     query_args = {}
 
     @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            self.query_args,
+            self.sort_args,
+        )
+
+    @property
     def sort_args(self):
         return args.make_sort_args(validator=args.IndexValidator(self.model))
-
-    @use_kwargs(args.paging)
-    @use_kwargs(Ref('sort_args'))
-    @use_kwargs(Ref('query_args'))
-    @marshal_with(Ref('schema'))
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
 
     def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(**kwargs)
@@ -70,7 +69,7 @@ class ScheduleAByStateView(AggregateResource):
         ('state', models.ScheduleAByState.state),
     ]
 
-    def build_query(self, committee_id, **kwargs):
+    def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         if kwargs['hide_null']:
             query = query.filter(self.model.state_full != None)  # noqa
@@ -258,7 +257,7 @@ class ScheduleEByCandidateView(CandidateAggregateResource):
         ('support_oppose', models.ScheduleEByCandidate.support_oppose_indicator),
     ]
 
-    def build_query(self, committee_id, **kwargs):
+    def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
 
@@ -280,7 +279,7 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
         ('support_oppose', models.CommunicationCostByCandidate.support_oppose_indicator),
     ]
 
-    def build_query(self, committee_id, **kwargs):
+    def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
 
@@ -299,6 +298,6 @@ class ElectioneeringByCandidateView(CandidateAggregateResource):
         ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
     ]
 
-    def build_query(self, committee_id, **kwargs):
+    def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
