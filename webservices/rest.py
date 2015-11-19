@@ -35,6 +35,7 @@ from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
 from webservices.resources import sched_e
+from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
@@ -234,6 +235,7 @@ api.add_resource(
 )
 api.add_resource(filings.FilingsList, '/filings/')
 
+api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
