@@ -168,32 +168,12 @@ def refresh_materialized():
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
-def stop_beat():
-    """Kill all celery beat workers.
-    Note: In the future, it would be more elegant to use a process manager like
-    supervisor or forever.
-    """
-    return subprocess.Popen(
-        "ps aux | grep 'cron.py' | awk '{print $2}' | xargs kill -9",
-        shell=True,
-    )
-
-@manager.command
-def start_beat():
-    """Start celery beat workers in the background using subprocess.
-    """
-    # Stop beat workers synchronously
-    stop_beat().wait()
-    return subprocess.Popen(['python', 'cron.py'])
-
-@manager.command
 def cf_startup():
     """Start celery beat and schema migration on `cf-push`. Services are only
     started if running on 0th instance.
     """
     instance_id = os.getenv('CF_INSTANCE_INDEX')
     if instance_id == '0':
-        start_beat()
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 
 if __name__ == '__main__':
