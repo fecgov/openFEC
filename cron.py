@@ -3,19 +3,18 @@
 not daemonize itself, so this script should be run in a subprocess or managed
 using supervisor or a similar tool.
 
-Simple invocation: ::
+Usage: ::
 
-    $ ./cron.py
-
-Customizable invocation: ::
-
-    celery worker -app cron --beat
+    celery worker --app cron --beat
 
 """
 
 import io
+import os
+import json
 import logging
 
+import furl
 import celery
 from celery.schedules import crontab
 
@@ -24,9 +23,21 @@ from webservices import mail
 
 logger = logging.getLogger(__name__)
 
+def redis_url():
+    return os.getenv('FEC_REDIS_URL') or vcap_redis_url()
+
+def vcap_redis_url():
+    services = json.loads(os.getenv('VCAP_SERVICES', '{}'))
+    credentials = services['redis28-swarm'][0]['credentials']
+    url = furl.furl('redis://')
+    url.host = credentials['hostname']
+    url.password = credentials['password']
+    url.port = credentials['port']
+    return url.url
+
 app = celery.Celery('cron')
 app.conf.update(
-    BROKER_URL='sqla+sqlite:///beat.sqlite',
+    BROKER_URL=redis_url(),
     CELERY_IMPORTS=('cron', ),
     CELERYBEAT_SCHEDULE={
         'refresh': {
@@ -53,6 +64,3 @@ def refresh():
         mail.send_mail(buffer)
     except Exception as error:
         logger.exception(error)
-
-if __name__ == '__main__':
-    app.worker_main(['worker', '--beat'])
