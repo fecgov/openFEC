@@ -21,6 +21,9 @@ git+https://github.com/jmcarp/marshmallow-pagination@master
 # Data import
 pandas==0.16.2
 
+# Data export
+boto3==1.2.2
+
 # Development
 invoke==0.10.1
 Flask-Script==2.0.5
