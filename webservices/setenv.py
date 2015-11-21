@@ -10,7 +10,7 @@ def main():
     services = json.loads(os.getenv('VCAP_SERVICES', '{}'))
     for ups in services.get('user-provided', []):
         for key, value in ups.get('credentials', {}).items():
-            print('export {key}={value};'.format(**locals()))
+            print('export {key}="{value}";'.format(**locals()))
 
 
 if __name__ == '__main__':
