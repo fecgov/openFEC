@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 app = celery.Celery('cron')
 app.conf.update(
     BROKER_URL='sqla+sqlite:///beat.sqlite',
-    CELERY_IMPORTS=('cron', ),
+    CELERY_IMPORTS=('cron', 'webservices.downloads'),
     CELERYBEAT_SCHEDULE={
         'refresh': {
             'task': 'cron.refresh',
