@@ -316,7 +316,7 @@ def join_candidate_totals(query, kwargs, totals_model):
 def filter_candidates(query, kwargs):
     duration = (
         election_durations.get(kwargs['office'], 2)
-        if kwargs.get('period')
+        if kwargs.get('election_full')
         else 2
     )
     query = query.filter(

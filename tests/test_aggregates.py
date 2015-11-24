@@ -93,7 +93,7 @@ class TestAggregates(ApiBaseTest):
             })
             assert results[0] == serialized
 
-    def test_candidate_aggregates_by_committee_period(self):
+    def test_candidate_aggregates_by_committee_full(self):
         for factory, resource, schema in self.cases:
             aggregates = self.make_aggregates(factory)
             results = self._results(
@@ -102,7 +102,7 @@ class TestAggregates(ApiBaseTest):
                     candidate_id=self.candidate.candidate_id,
                     committee_id=self.committee.committee_id,
                     cycle=2012,
-                    period='true',
+                    election_full='true',
                 )
             )
             assert len(results) == 1
@@ -279,7 +279,7 @@ class TestCandidateAggregates(ApiBaseTest):
             'debts_owed_by_committee': sum(each.last_debts_owed_by_committee for each in last_totals),
         }
 
-    def test_totals_period(self):
+    def test_totals_full(self):
         totals = self.get_totals()
         last_totals = totals[:2]
         results = self._results(
@@ -287,7 +287,7 @@ class TestCandidateAggregates(ApiBaseTest):
                 TotalsCandidateView,
                 candidate_id=self.candidate.candidate_id,
                 cycle=2012,
-                period='true',
+                election_full='true',
             )
         )
         assert len(results) == 1

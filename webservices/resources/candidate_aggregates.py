@@ -27,7 +27,7 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
 
     cycle_column = (
         elections.c.cand_election_year
-        if kwargs.get('period')
+        if kwargs.get('election_full')
         else CandidateCommitteeLink.fec_election_year
     ).label('cycle')
 
@@ -80,7 +80,7 @@ def get_elections(kwargs):
     )
 
 def join_elections(query, elections, kwargs):
-    if not kwargs.get('period'):
+    if not kwargs.get('election_full'):
         return query
     return query.join(
         elections,
