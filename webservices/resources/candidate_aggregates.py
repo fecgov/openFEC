@@ -13,7 +13,7 @@ from webservices.common.models import (
 )
 
 
-election_duration = utils.get_election_duration(CandidateCommitteeLink.committee_designation)
+election_duration = utils.get_election_duration(CandidateCommitteeLink.committee_type)
 
 def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     """Aggregate committee totals by candidate.
@@ -53,7 +53,6 @@ def candidate_aggregate(aggregate_model, label_columns, group_columns, kwargs):
     aggregates = rows.with_entities(
         CandidateCommitteeLink.candidate_id,
         cycle_column,
-        # sa.func.sum(aggregate_model.total).label('total'),
         *label_columns
     ).group_by(
         CandidateCommitteeLink.candidate_id,
