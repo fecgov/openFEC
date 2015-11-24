@@ -65,6 +65,7 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
     cycle = 2016
 
 
+# Force linked factories to share sequence counters
 for each in BaseCandidateFactory.__subclasses__():
     each._meta.counter_reference = BaseCandidateFactory
 
