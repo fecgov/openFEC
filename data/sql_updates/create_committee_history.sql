@@ -149,7 +149,7 @@ select distinct on (committee_id)
     end
 as fulltxt
 from ofec_committee_detail_mv_tmp cd
-left join pacronyms pac on cd.committee_id = pac."ID NUMBER"
+left join ofec_pacronyms pac on cd.committee_id = pac."ID NUMBER"
 ;
 
 create unique index on ofec_committee_fulltext_mv_tmp(idx);

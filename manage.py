@@ -51,26 +51,18 @@ def execute_sql_folder(path, processes):
 
 @manager.command
 def load_pacronyms():
-    count = db.engine.execute(
-        "select count(*) from pg_tables where tablename = 'pacronyms'"
-    ).fetchone()[0]
-    if count:
-        db.engine.execute(
-            'delete from pacronyms'
-        )
-    cmd = ' | '.join([
-        'in2csv data/pacronyms.xlsx',
-        'csvsql --insert --db {dest} --table pacronyms'
-    ]).format(dest=db.engine.url)
-    if count:
-        cmd += ' --no-create'
-    with open(os.devnull, 'w') as null:
-        subprocess.call(cmd, shell=True, stdout=null, stderr=null)
-
-def load_table(frame, tablename, indexes=()):
+    import pandas as pd
     import sqlalchemy as sa
-    db.engine.execute('drop table if exists "{}"'.format(tablename))
-    frame.to_sql(tablename, db.engine)
+    try:
+        table = sa.Table('ofec_pacronyms', db.metadata, autoload_with=db.engine)
+        db.engine.execute(table.delete())
+    except sa.exc.NoSuchTableError:
+        pass
+    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', indexes=('ID NUMBER', ))
+
+def load_table(frame, tablename, if_exists='replace', indexes=()):
+    import sqlalchemy as sa
+    frame.to_sql(tablename, db.engine, if_exists=if_exists)
     table = sa.Table(tablename, db.metadata, autoload_with=db.engine)
     for index in indexes:
         sa.Index('{}_{}_idx'.format(tablename, index), table.c[index]).create(db.engine)
