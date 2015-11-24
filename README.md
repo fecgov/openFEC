@@ -115,6 +115,17 @@ Deploys of a single app can be performed manually by targeting the env/space, an
 
     $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 
+##### Task queue
+
+Periodic tasks, such as refreshing materialized views and updating incremental
+aggregates, are scheduled using celery. We use redis as the celery message broker. To
+work with celery and redis locally, install redis and start a redis server. By default,
+we connect to redis at `redis://localhost:6379`; if redis is running at a different URL,
+set the `FEC_REDIS_URL` environment variable. On Cloud Foundry, we use the redis28-swarm
+service. The redis service can be created as follows:
+
+    $ cf create-service redis28-swarm standard fec-redis
+
 ##### Production stack
 
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind

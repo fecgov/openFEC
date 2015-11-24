@@ -11,10 +11,8 @@ Usage: ::
 
 import io
 import os
-import json
 import logging
 
-import furl
 import celery
 from celery.schedules import crontab
 
@@ -25,7 +23,7 @@ from webservices.env import env
 logger = logging.getLogger(__name__)
 
 def redis_url():
-    redis = env.get_service('redis28-swarm')
+    redis = env.get_service(label='redis28-swarm')
     if redis:
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
