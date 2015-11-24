@@ -231,15 +231,15 @@ class CandidateAggregateResource(AggregateResource):
     def build_query(self, committee_id, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         elections = get_elections(kwargs).subquery()
-        use_period = kwargs.get('period')
-        if use_period and not (kwargs.get('candidate_id') or kwargs.get('office')):
+        election_full = kwargs.get('election_full')
+        if election_full and not (kwargs.get('candidate_id') or kwargs.get('office')):
             raise exceptions.ApiError(
                 'Must include "candidate_id" or "office" argument(s)',
                 status_code=422,
             )
         cycle_column = (
             elections.c.cand_election_year
-            if use_period
+            if election_full
             else self.model.cycle
         )
         query = filters.filter_election(query, kwargs, self.model.candidate_id, cycle_column)
@@ -248,7 +248,7 @@ class CandidateAggregateResource(AggregateResource):
             if kwargs.get('cycle')
             else True
         )
-        if use_period:
+        if election_full:
             query = self.aggregate_cycles(query, elections, cycle_column)
         return self.join_entity_names(query)
 

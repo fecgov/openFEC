@@ -179,8 +179,8 @@ class TestElections(ApiBaseTest):
         }
         self.assertEqual(results[0], expected)
 
-    def test_elections_period(self):
-        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY', period='true'))
+    def test_elections_full(self):
+        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY', election_full='true'))
         self.assertEqual(len(results), 1)
         totals = self.totals
         last_totals = self.totals[:2]
