@@ -20,20 +20,16 @@ from celery.schedules import crontab
 
 import manage
 from webservices import mail
+from webservices.env import env
 
 logger = logging.getLogger(__name__)
 
 def redis_url():
-    return os.getenv('FEC_REDIS_URL') or vcap_redis_url()
-
-def vcap_redis_url():
-    services = json.loads(os.getenv('VCAP_SERVICES', '{}'))
-    credentials = services['redis28-swarm'][0]['credentials']
-    url = furl.furl('redis://')
-    url.host = credentials['hostname']
-    url.password = credentials['password']
-    url.port = credentials['port']
-    return url.url
+    redis = env.get_service('redis28-swarm')
+    if redis:
+        url = redis.get_url(host='hostname', password='password', port='port')
+        return 'redis://{}'.format(url)
+    return os.getenv('FEC_REDIS_URL', 'redis://')
 
 app = celery.Celery('cron')
 app.conf.update(

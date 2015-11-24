@@ -120,7 +120,7 @@ Deploys of a single app can be performed manually by targeting the env/space, an
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
 an nginx reverse proxy. Static files are compressed and served directly through nginx;
 dynamic content is routed to the Flask application via `proxy_pass`. The entire application
-is served through the [API Umbrella](http://apiumbrella.io), which handles API keys,
+is served through the [API Umbrella](https://apiumbrella.io), which handles API keys,
 caching, and rate limiting.
 
 ##### Nightly updates
@@ -133,14 +133,14 @@ emailed to the development team--specifically, to email addresses specified in
 ##### Caching
 
 All API responses are set to expire after one hour (`Cache-Control: public, max-age=3600`).
-In production, the [API Umbrella](http://apiumbrella.io) will check this response header
+In production, the [API Umbrella](https://apiumbrella.io) will check this response header
 and cache responses for the specified interval, such that repeated requests to a given
 endpoint will only reach the Flask application once. This means that responses may be
 stale for up to an hour following the nightly refresh of the materialized views.
 
 ##### API umbrella
 
-The staging and production environments use the [API Umbrella](http://apiumbrella.io) for
+The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
 rate limiting, authentication, caching, and HTTPS termination and redirection. Both
 environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
 through the API Umbrella.
@@ -153,7 +153,7 @@ through Travis CI accordingly.
 ###### To create a new feature:
 * Developer creates a feature branch
 
-        $ git flow feature start my-feature
+    $ git flow feature start my-feature
 
 * Reviewer merges feature branch into develop and pushes to origin
 * [auto] Develop is deployed to dev
@@ -161,7 +161,7 @@ through Travis CI accordingly.
 ###### To create a hotfix:
 * Developer creates a hotfix branch
 
-        $ git flow hotfix start my-hotfix
+    $ git flow hotfix start my-hotfix
 
 * Reviewer merges hotfix branch into develop and master and pushes to origin
 * [auto] Develop is deployed to dev
@@ -170,14 +170,14 @@ through Travis CI accordingly.
 ###### To create a release:
 * Developer creates a release branch and pushes to origin
 
-        $ git flow release start my-release
-        $ git flow release publish my-release
+    $ git flow release start my-release
+    $ git flow release publish my-release
 
 * [auto] Release is deployed to stage
 * Review of staging
 * Developer merges release branch into master and pushes to origin
 
-        $ git flow release finish my-release
+    $ git flow release finish my-release
 
 * [auto] Master is deployed to prod
 

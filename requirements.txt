@@ -1,3 +1,4 @@
+cfenv==0.2.0
 psycopg2==2.6
 Flask-Cors==2.1.0
 Flask-Script==2.0.5
