@@ -65,6 +65,13 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
     cycle = 2016
 
 
+for each in BaseCandidateFactory.__subclasses__():
+    each._meta.counter_reference = BaseCandidateFactory
+
+for each in BaseCommitteeFactory.__subclasses__():
+    each._meta.counter_reference = BaseCommitteeFactory
+
+
 class CandidateCommitteeLinkFactory(BaseFactory):
     class Meta:
         model = models.CandidateCommitteeLink
@@ -210,3 +217,4 @@ class ElectionResultFactory(BaseFactory):
         model = models.ElectionResult
     election_yr = 2016
     cand_office_st = 'US'
+    cand_office_district = '00'
