@@ -284,13 +284,13 @@ class CandidateAggregateResource(AggregateResource):
             models.CommitteeHistory.committee_id.label('committee_id'),
             models.CandidateHistory.name.label('candidate_name'),
             models.CommitteeHistory.name.label('committee_name'),
-        ).join(
+        ).outerjoin(
             models.CandidateHistory,
             sa.and_(
                 query.c.cand_id == models.CandidateHistory.candidate_id,
                 query.c.cycle == models.CandidateHistory.two_year_period,
             ),
-        ).join(
+        ).outerjoin(
             models.CommitteeHistory,
             sa.and_(
                 query.c.cmte_id == models.CommitteeHistory.committee_id,

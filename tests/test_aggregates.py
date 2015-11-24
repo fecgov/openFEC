@@ -1,7 +1,6 @@
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
-    ScheduleBByPurposeView,
     ScheduleEByCandidateView,
     CommunicationCostByCandidateView,
     ElectioneeringByCandidateView,
@@ -17,38 +16,65 @@ from tests.common import ApiBaseTest
 
 class TestAggregates(ApiBaseTest):
 
+    cases = [
+        (
+            factories.ScheduleEByCandidateFactory,
+            ScheduleEByCandidateView,
+            schemas.ScheduleEByCandidateSchema,
+        ),
+        (
+            factories.CommunicationCostByCandidateFactory,
+            CommunicationCostByCandidateView,
+            schemas.CommunicationCostByCandidateSchema,
+        ),
+        (
+            factories.ElectioneeringByCandidateFactory,
+            ElectioneeringByCandidateView,
+            schemas.ElectioneeringByCandidateSchema,
+        ),
+    ]
+
     def setUp(self):
         super(TestAggregates, self).setUp()
-        self.committee = factories.CommitteeHistoryFactory(cycle=2012)
+        self.committee = factories.CommitteeHistoryFactory(
+            name='Ritchie for America',
+            cycle=2012,
+        )
+        self.candidate = factories.CandidateDetailFactory(
+            candidate_id='P123',
+            name='Robert Ritchie',
+            election_years=[2012],
+            office='P',
+        )
+        self.candidate_history = factories.CandidateHistoryFactory(
+            candidate_id='P123',
+            name='Robert Ritchie',
+            election_years=[2012],
+            two_year_period=2012,
+            office='P',
+        )
 
-    def test_aggregates_by_committee(self):
-        params = [
-            (
-                factories.ScheduleBByPurposeFactory,
-                ScheduleBByPurposeView,
-                schemas.ScheduleBByPurposeSchema,
-            ),
-            (
-                factories.ScheduleEByCandidateFactory,
-                ScheduleEByCandidateView,
-                schemas.ScheduleEByCandidateSchema,
-            ),
-            (
-                factories.CommunicationCostByCandidateFactory,
-                CommunicationCostByCandidateView,
-                schemas.CommunicationCostByCandidateSchema,
-            ),
-            (
-                factories.ElectioneeringByCandidateFactory,
-                ElectioneeringByCandidateView,
-                schemas.ElectioneeringByCandidateSchema,
-            ),
-        ]
-        for factory, resource, schema in params:
-            aggregate = factory(
+    def make_aggregates(self, factory):
+        return [
+            factory(
+                candidate_id=self.candidate.candidate_id,
                 committee_id=self.committee.committee_id,
                 cycle=self.committee.cycle,
-            )
+                total=100,
+                count=5,
+            ),
+            factory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committee.committee_id,
+                cycle=self.committee.cycle - 2,
+                total=100,
+                count=5,
+            ),
+        ]
+
+    def test_candidate_aggregates_by_committee(self):
+        for factory, resource, schema in self.cases:
+            aggregates = self.make_aggregates(factory)
             results = self._results(
                 api.url_for(
                     resource,
@@ -56,29 +82,42 @@ class TestAggregates(ApiBaseTest):
                     cycle=2012,
                 )
             )
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0], schema().dump(aggregate).data)
+            assert len(results) == 1
+            serialized = schema().dump(aggregates[0]).data
+            serialized.update({
+                'committee_name': self.committee.name,
+                'candidate_name': self.candidate.name,
+            })
+            assert results[0] == serialized
 
-    def test_aggregates_by_election(self):
-        params = [
-            (factories.CommunicationCostByCandidateFactory, CommunicationCostByCandidateView),
-            (factories.ElectioneeringByCandidateFactory, ElectioneeringByCandidateView),
-        ]
-        candidate = factories.CandidateFactory(
-            election_years=[2012],
-            office='P',
-        )
-        factories.CandidateHistoryFactory(
-            candidate_id=candidate.candidate_id,
-            two_year_period=2012,
-            election_years=[2012],
-            office='P',
-        )
-        for factory, resource in params:
+    def test_candidate_aggregates_by_committee_period(self):
+        for factory, resource, schema in self.cases:
+            aggregates = self.make_aggregates(factory)
+            results = self._results(
+                api.url_for(
+                    resource,
+                    candidate_id=self.candidate.candidate_id,
+                    committee_id=self.committee.committee_id,
+                    cycle=2012,
+                    period='true',
+                )
+            )
+            assert len(results) == 1
+            serialized = schema().dump(aggregates[0]).data
+            serialized.update({
+                'committee_name': self.committee.name,
+                'candidate_name': self.candidate.name,
+                'total': sum(each.total for each in aggregates),
+                'count': sum(each.count for each in aggregates),
+            })
+            assert results[0] == serialized
+
+    def test_candidate_aggregates_by_election(self):
+        for factory, resource, _ in self.cases:
             [
                 factory(
                     committee_id=self.committee.committee_id,
-                    candidate_id=candidate.candidate_id,
+                    candidate_id=self.candidate.candidate_id,
                     cycle=self.committee.cycle,
                 ),
                 factory(
@@ -92,8 +131,8 @@ class TestAggregates(ApiBaseTest):
                     cycle=2012,
                 )
             )
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0]['candidate_id'], candidate.candidate_id)
+            assert len(results) == 1
+            assert results[0]['candidate_id'] == self.candidate.candidate_id
 
 
 class TestCandidateAggregates(ApiBaseTest):

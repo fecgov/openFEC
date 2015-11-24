@@ -249,37 +249,24 @@ augment_models(
     models.ScheduleBByPurpose,
 )
 
-ScheduleEByCandidateSchema = make_schema(
-    models.ScheduleEByCandidate,
+make_aggregate_schema = functools.partial(
+    make_schema,
     fields={
         'committee_id': ma.fields.Str(),
         'candidate_id': ma.fields.Str(),
         'committee_name': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
     },
+    options={'exclude': ('idx', 'committee', 'candidate')},
 )
+
+ScheduleEByCandidateSchema = make_aggregate_schema(models.ScheduleEByCandidate)
 augment_schemas(ScheduleEByCandidateSchema)
 
-CommunicationCostByCandidateSchema = make_schema(
-    models.CommunicationCostByCandidate,
-    fields={
-        'committee_id': ma.fields.Str(),
-        'candidate_id': ma.fields.Str(),
-        'committee_name': ma.fields.Str(),
-        'candidate_name': ma.fields.Str(),
-    },
-)
+CommunicationCostByCandidateSchema = make_aggregate_schema(models.CommunicationCostByCandidate)
 augment_schemas(CommunicationCostByCandidateSchema)
 
-ElectioneeringByCandidateSchema = make_schema(
-    models.ElectioneeringByCandidate,
-    fields={
-        'committee_id': ma.fields.Str(),
-        'candidate_id': ma.fields.Str(),
-        'committee_name': ma.fields.Str(),
-        'candidate_name': ma.fields.Str(),
-    }
-)
+ElectioneeringByCandidateSchema = make_aggregate_schema(models.ElectioneeringByCandidate)
 augment_schemas(ElectioneeringByCandidateSchema)
 
 ScheduleBSchema = make_schema(
