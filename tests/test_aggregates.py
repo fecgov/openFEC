@@ -1,3 +1,5 @@
+import functools
+
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
@@ -8,6 +10,7 @@ from webservices.resources.aggregates import (
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
+    TotalsCandidateView,
 )
 
 from tests import factories
@@ -139,7 +142,10 @@ class TestCandidateAggregates(ApiBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.candidate = factories.CandidateHistoryFactory(two_year_period=2012)
+        self.candidate = factories.CandidateHistoryFactory(
+            candidate_id='S123',
+            two_year_period=2012,
+        )
         self.committees = [
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
@@ -157,13 +163,22 @@ class TestCandidateAggregates(ApiBaseTest):
             candidate_id=self.candidate.candidate_id,
             committee_id=self.committees[0].committee_id,
             committee_designation='P',
+            committee_type='S',
             fec_election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
             committee_id=self.committees[1].committee_id,
             committee_designation='A',
+            committee_type='S',
             fec_election_year=2012,
+        )
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[1].committee_id,
+            committee_designation='A',
+            committee_type='S',
+            fec_election_year=2010,
         )
 
     def test_by_size(self):
@@ -230,3 +245,56 @@ class TestCandidateAggregates(ApiBaseTest):
             'state_full': 'New York',
         }
         self.assertEqual(results[0], expected)
+
+    def get_totals(self):
+        factory = functools.partial(
+            factories.TotalsHouseSenateFactory,
+            receipts=100,
+            disbursements=100,
+            last_cash_on_hand_end_period=50,
+            last_debts_owed_by_committee=50,
+        )
+        return [
+            factory(committee_id=self.committees[0].committee_id, cycle=2012),
+            factory(committee_id=self.committees[1].committee_id, cycle=2012),
+            factory(committee_id=self.committees[1].committee_id, cycle=2010),
+        ]
+
+    def test_totals(self):
+        totals = self.get_totals()
+        last_totals = totals[:2]
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+            )
+        )
+        assert len(results) == 1
+        assert results[0] == {
+            'cycle': 2012,
+            'receipts': sum(each.receipts for each in last_totals),
+            'disbursements': sum(each.disbursements for each in last_totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
+            'debts_owed_by_committee': sum(each.last_debts_owed_by_committee for each in last_totals),
+        }
+
+    def test_totals_period(self):
+        totals = self.get_totals()
+        last_totals = totals[:2]
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                period='true',
+            )
+        )
+        assert len(results) == 1
+        assert results[0] == {
+            'cycle': 2012,
+            'receipts': sum(each.receipts for each in totals),
+            'disbursements': sum(each.disbursements for each in totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
+            'debts_owed_by_committee': sum(each.last_debts_owed_by_committee for each in last_totals),
+        }

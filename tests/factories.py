@@ -81,6 +81,7 @@ class CandidateCommitteeLinkFactory(BaseFactory):
 
 class BaseTotalsFactory(BaseFactory):
     committee_id = factory.LazyAttribute(lambda o: CommitteeFactory().committee_id)
+    cycle = 2016
 
 
 class TotalsHouseSenateFactory(BaseTotalsFactory):
