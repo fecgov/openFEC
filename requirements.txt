@@ -10,6 +10,7 @@ GitPython==1.0.1
 gunicorn==19.3.0
 webargs==0.18.0
 csvkit==0.9.1
+raven==5.8.1
 ujson==1.33
 
 # Marshalling
