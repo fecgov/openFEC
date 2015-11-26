@@ -63,9 +63,6 @@ app.config['APISPEC_FORMAT_RESPONSE'] = None
 db.init_app(app)
 cors.CORS(app)
 
-if os.getenv('SENTRY_DSN'):
-    Sentry(app, dsn=os.getenv('SENTRY_DSN'))
-
 class FlaskRestParser(FlaskParser):
 
     def handle_error(self, error):
@@ -330,3 +327,6 @@ def initialize_newrelic():
         newrelic.agent.initialize()
 
 initialize_newrelic()
+
+if env.get_credential('SENTRY_DSN'):
+    Sentry(app, dsn=env.get_credential('SENTRY_DSN'))

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import glob
 import logging
 import subprocess
@@ -10,6 +9,7 @@ from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
 
+from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG
 from webservices.common.util import get_full_path
@@ -161,11 +161,8 @@ def refresh_materialized():
 
 @manager.command
 def cf_startup():
-    """Start celery beat and schema migration on `cf-push`. Services are only
-    started if running on 0th instance.
-    """
-    instance_id = os.getenv('CF_INSTANCE_INDEX')
-    if instance_id == '0':
+    """Migrate schemas on `cf push`."""
+    if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 
 if __name__ == '__main__':
