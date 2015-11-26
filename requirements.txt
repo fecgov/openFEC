@@ -10,6 +10,7 @@ mandrill==1.0.57
 GitPython==1.0.1
 gunicorn==19.3.0
 webargs==0.18.0
+raven==5.8.1
 ujson==1.33
 furl==0.4.6
 
