@@ -16,6 +16,7 @@ from flask import Blueprint
 
 from flask.ext import cors
 from flask.ext import restful
+from raven.contrib.flask import Sentry
 
 from webargs.flaskparser import FlaskParser
 from flask_apispec import doc, marshal_with, FlaskApiSpec
@@ -61,6 +62,9 @@ app.config['APISPEC_FORMAT_RESPONSE'] = None
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
+
+if os.getenv('SENTRY_DSN'):
+    Sentry(app, dsn=os.getenv('SENTRY_DSN'))
 
 class FlaskRestParser(FlaskParser):
 
