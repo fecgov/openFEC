@@ -1,3 +1,6 @@
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, backref
+
 from webservices import decoders
 
 from .base import db
@@ -5,8 +8,8 @@ from .base import db
 class ReportNames(db.Model):
     __tablename__ = 'dimreporttype'
 
-    rpt_tp = db.Column(db.String, index=True, primary_key=True)
-    rpt_tp_desc = db.Column('report_type_full', db.String, index=True)
+    rpt_tp = db.Column(db.String, ForeignKey('ReportingDates.report_type'), index=True, primary_key=True)
+    rpt_tp_desc = db.Column(db.String, index=True)
 
 
 class ReportingDates(db.Model):
@@ -14,13 +17,13 @@ class ReportingDates(db.Model):
 
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True)
-    report_type = db.Column(db.String, index=True)
+    report_type = db.Column(db.String, ForeignKey(ReportNames.rpt_tp), index=True)
     due_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
     update_date = db.Column(db.Date, index=True)
 
     report = db.relationship(
-        'CommitteeHistory',
+        'ReportNames',
         primaryjoin='''and_(
             foreign(ReportingDates.report_type) == ReportNames.rpt_tp,
         )'''
