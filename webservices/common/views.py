@@ -14,6 +14,7 @@ class ApiResource(utils.Resource):
     args = {}
     model = None
     schema = None
+    page_schema = None
     filter_match_fields = []
     filter_multi_fields = []
     filter_range_fields = []
@@ -26,7 +27,7 @@ class ApiResource(utils.Resource):
         return getattr(self.model, column.key)
 
     @use_kwargs(Ref('args'))
-    @marshal_with(Ref('schema'))
+    @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
         return utils.fetch_page(query, kwargs, model=self.model, join_columns=self.join_columns)
