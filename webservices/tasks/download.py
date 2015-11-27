@@ -9,17 +9,14 @@ from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
 
 from webservices import utils
-from webservices.rest import app as flask_app
 from webservices.common import counts
 from webservices.common.models import db
+from webservices.rest import app as flask_app
+from webservices.env import env
 
 from webservices.tasks import app
 
 adapter = flask_app.url_map.bind('')
-
-# TODO: Get bucket name from environ
-# TODO: Set up bucket / IAM credentials
-BUCKETNAME = ''
 
 def call_resource(path, qs, per_page=5000):
     endpoint, arguments = adapter.match(path)
@@ -110,10 +107,14 @@ def get_s3_name(path, qs):
     return hashlib.sha224(call.encode('utf-8')).hexdigest()
 
 
-s3 = boto3.resource('s3')
+session = boto3.Session(
+    aws_access_key_id=env.get_credential('FEC_DOWNLOAD_ACCESS_KEY'),
+    aws_secret_access_key=env.get_credential('FEC_DOWNLOAD_SECRET_KEY'),
+)
+s3 = session.resource('s3')
 
 def upload_s3(name, file):
-    s3.Bucket(BUCKETNAME).put_object(Key=name, Body=file)
+    s3.Bucket(env.get_credential('FEC_DOWNLOAD_BUCKET')).put_object(Key=name, Body=file)
 
 @app.task
 def export_query(path, qs):
