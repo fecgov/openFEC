@@ -3,17 +3,14 @@
 not daemonize itself, so this script should be run in a subprocess or managed
 using supervisor or a similar tool.
 
-Simple invocation: ::
+Usage: ::
 
-    $ ./cron.py
-
-Customizable invocation: ::
-
-    celery worker -app cron --beat
+    celery worker --app cron --beat
 
 """
 
 import io
+import os
 import logging
 
 import celery
@@ -23,12 +20,20 @@ from celery.schedules import crontab
 import manage
 from webservices import mail
 from webservices.rest import app as flask_app
+from webservices.env import env
 
 logger = logging.getLogger(__name__)
 
+def redis_url():
+    redis = env.get_service(label='redis28-swarm')
+    if redis:
+        url = redis.get_url(host='hostname', password='password', port='port')
+        return 'redis://{}'.format(url)
+    return os.getenv('FEC_REDIS_URL', 'redis://')
+
 app = celery.Celery('cron')
 app.conf.update(
-    BROKER_URL='sqla+sqlite:///beat.sqlite',
+    BROKER_URL=redis_url(),
     CELERY_IMPORTS=('cron', 'webservices.downloads'),
     CELERYBEAT_SCHEDULE={
         'refresh': {
