@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc, Ref
 
 from webservices import args
 from webservices import docs
@@ -22,6 +22,7 @@ from webservices.utils import use_kwargs
 class BaseFilings(views.ApiResource):
 
     model = models.Filings
+    schema = schemas.FilingsPageSchema
 
     filter_multi_fields = [
         ('beginning_image_number', models.Filings.beginning_image_number),
@@ -40,6 +41,18 @@ class BaseFilings(views.ApiResource):
 
     query_options = [sa.orm.joinedload(models.Filings.committee)]
 
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.filings,
+            args.make_sort_args(
+                default=['-receipt_date'],
+                validator=args.IndexValidator(models.Filings),
+            ),
+        )
+
+    @use_kwargs(Ref('args'))
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
@@ -47,18 +60,6 @@ class BaseFilings(views.ApiResource):
 
 
 class FilingsView(BaseFilings):
-
-    @use_kwargs(args.paging)
-    @use_kwargs(args.filings)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-receipt_date'],
-            validator=args.IndexValidator(models.Filings),
-        )
-    )
-    @marshal_with(schemas.FilingsPageSchema())
-    def get(self, **kwargs):
-        return super().get(**kwargs)
 
     def build_query(self, committee_id=None, candidate_id=None, **kwargs):
         query = super().build_query(**kwargs)
@@ -76,15 +77,6 @@ class FilingsList(BaseFilings):
         ('candidate_id', models.Filings.candidate_id),
     ]
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.filings)
-    @use_kwargs(args.entities)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-receipt_date'],
-            validator=args.IndexValidator(models.Filings),
-        )
-    )
-    @marshal_with(schemas.FilingsPageSchema())
-    def get(self, **kwargs):
-        return super().get(**kwargs)
+    @property
+    def args(self):
+        return utils.extend(super().args, args.entities)

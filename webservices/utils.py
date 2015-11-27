@@ -53,23 +53,27 @@ def fetch_page(query, kwargs, model=None, join_columns=None, clear=False, count=
 
 
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
+    paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
+    if paginator.sort_column is not None:
+        sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
+    else:
+        sort_index = None
+    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
+
+
+def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    model = index_column.class_
+    model = index_column.parent.class_
     sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
     query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     sort_column = sort_columns[0] if sort_columns else None
-    paginator = paginators.SeekPaginator(
+    return paginators.SeekPaginator(
         query,
         kwargs['per_page'],
         index_column,
         sort_column=sort_column,
         count=count,
     )
-    if sort_column is not None:
-        sort_index = kwargs['last_{0}'.format(sort_column[0].key)]
-    else:
-        sort_index = None
-    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
 
 
 def extend(*dicts):
