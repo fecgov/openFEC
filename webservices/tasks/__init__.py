@@ -12,11 +12,13 @@ def redis_url():
     if redis:
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
-    return os.getenv('FEC_REDIS_URL', 'redis://')
+    return os.getenv('FEC_REDIS_URL', 'redis://localhost:6379/0')
 
 app = celery.Celery('openfec')
 app.conf.update(
     BROKER_URL=redis_url(),
+    ONCE_REDIS_URL=redis_url(),
+    ONCE_DEFAULT_TIMEOUT=60 * 60,
     CELERY_IMPORTS=(
         'webservices.tasks.refresh',
         'webservices.tasks.download',

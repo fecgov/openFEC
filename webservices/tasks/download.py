@@ -7,6 +7,7 @@ import boto3
 import marshmallow
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
+from celery_once import QueueOnce
 
 from webservices import utils
 from webservices.common import counts
@@ -117,7 +118,7 @@ bucket = s3.Bucket(env.get_credential('FEC_DOWNLOAD_BUCKET'))
 def upload_s3(key, body):
     bucket.put_object(Key=key, Body=body)
 
-@app.task
+@app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):
     paginator, schema = call_resource(path, qs)
     query = iter_paginator(paginator)
