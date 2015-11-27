@@ -13,7 +13,7 @@ from webservices.rest import app as flask_app
 from webservices.common import counts
 from webservices.common.models import db
 
-from cron import app
+from webservices.tasks import app
 
 adapter = flask_app.url_map.bind('')
 
