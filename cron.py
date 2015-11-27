@@ -17,10 +17,12 @@ import io
 import logging
 
 import celery
+from celery import signals
 from celery.schedules import crontab
 
 import manage
 from webservices import mail
+from webservices.rest import app as flask_app
 
 logger = logging.getLogger(__name__)
 
@@ -44,15 +46,29 @@ def refresh():
     buffer = io.StringIO()
     with mail.CaptureLogs(manage.logger, buffer):
         try:
-            with manage.app.test_request_context():
-                manage.update_aggregates()
-                manage.refresh_materialized()
+            manage.update_aggregates()
+            manage.refresh_materialized()
         except Exception as error:
             manage.logger.exception(error)
     try:
         mail.send_mail(buffer)
     except Exception as error:
         logger.exception(error)
+
+context = {}
+
+@signals.task_prerun.connect
+def push_context(task_id, task, *args, **kwargs):
+    print('pushing context')
+    context[task_id] = flask_app.app_context()
+    context[task_id].push()
+
+@signals.task_postrun.connect
+def pop_context(task_id, task, *args, **kwargs):
+    if task_id in context:
+        print('popping context')
+        context[task_id].pop()
+        context.pop(task_id)
 
 if __name__ == '__main__':
     app.worker_main(['worker', '--beat'])
