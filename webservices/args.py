@@ -280,7 +280,7 @@ itemized = {
 }
 
 reporting_dates = {
-    'due_date': fields.List(fields.Date, description='Date the filing is done.'),
+    'due_date': fields.List(fields.Date, description='Date the report is due.'),
     'report_year': fields.List(fields.Int, description='Year of report.'),
     'report_type': fields.List(fields.Str, description='Type of report.'),
     'create_date': fields.List(fields.Date, description='Date this record was added to the system.'),
