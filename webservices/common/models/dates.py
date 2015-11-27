@@ -2,6 +2,12 @@ from webservices import decoders
 
 from .base import db
 
+class ReportNames(db.Model):
+    __tablename__ = 'dimreporttype'
+
+    rpt_tp = db.Column(db.String, index=True, primary_key=True)
+    rpt_tp_desc = db.Column('report_type_full', db.String, index=True)
+
 
 class ReportingDates(db.Model):
     __tablename__ = 'trc_report_due_date'
@@ -12,6 +18,13 @@ class ReportingDates(db.Model):
     due_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
     update_date = db.Column(db.Date, index=True)
+
+    report = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ReportingDates.report_type) == ReportNames.rpt_tp,
+        )'''
+    )
 
 
 class ElectionDates(db.Model):
