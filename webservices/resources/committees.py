@@ -1,13 +1,13 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.util import filter_query
+from webservices.common.views import ApiResource
 
 
 list_filter_fields = {'committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type'}
@@ -33,23 +33,25 @@ def filter_year(model, query, years):
     tags=['committee'],
     description=docs.COMMITTEE_LIST,
 )
-class CommitteeList(utils.Resource):
+class CommitteeList(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.committee)
-    @use_kwargs(args.committee_list)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['name'],
-            validator=args.IndexValidator(models.Committee),
+    model = models.Committee
+    schema = schemas.CommitteeSchema
+    page_schema = schemas.CommitteePageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.committee,
+            args.committee_list,
+            args.make_sort_args(
+                default=['name'],
+                validator=args.IndexValidator(self.model),
+            ),
         )
-    )
-    @marshal_with(schemas.CommitteePageSchema())
-    def get(self, **kwargs):
-        query = self.get_committees(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Committee)
 
-    def get_committees(self, kwargs):
+    def build_query(self, **kwargs):
 
         committees = models.Committee.query
 
@@ -95,22 +97,24 @@ class CommitteeList(utils.Resource):
         'committee_id': {'description': docs.COMMITTEE_ID},
     },
 )
-class CommitteeView(utils.Resource):
+class CommitteeView(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.committee)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['name'],
-            validator=args.IndexValidator(models.CommitteeDetail),
+    model = models.CommitteeDetail
+    schema = schemas.CommitteeDetailSchema
+    page_schema = schemas.CommitteeDetailPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.committee,
+            args.make_sort_args(
+                default=['name'],
+                validator=args.IndexValidator(self.model),
+            ),
         )
-    )
-    @marshal_with(schemas.CommitteeDetailPageSchema())
-    def get(self, committee_id=None, candidate_id=None, **kwargs):
-        query = self.get_committee(kwargs, committee_id, candidate_id)
-        return utils.fetch_page(query, kwargs, model=models.CommitteeDetail)
 
-    def get_committee(self, kwargs, committee_id, candidate_id):
+    def build_query(self, committee_id=None, candidate_id=None, **kwargs):
 
         committees = models.CommitteeDetail.query
 
@@ -144,21 +148,23 @@ class CommitteeView(utils.Resource):
         'cycle': {'description': docs.COMMITTEE_CYCLE},
     },
 )
-class CommitteeHistoryView(utils.Resource):
+class CommitteeHistoryView(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-cycle'],
-            validator=args.IndexValidator(models.CommitteeHistory),
+    model = models.CommitteeHistory
+    schema = schemas.CommitteeHistorySchema
+    page_schema = schemas.CommitteeHistoryPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.make_sort_args(
+                default=['-cycle'],
+                validator=args.IndexValidator(self.model),
+            ),
         )
-    )
-    @marshal_with(schemas.CommitteeHistoryPageSchema())
-    def get(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
-        query = self.get_committee(committee_id, candidate_id, cycle, kwargs)
-        return utils.fetch_page(query, kwargs, model=models.CommitteeHistory)
 
-    def get_committee(self, committee_id, candidate_id, cycle, kwargs):
+    def build_query(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
         query = models.CommitteeHistory.query
 
         if committee_id:
