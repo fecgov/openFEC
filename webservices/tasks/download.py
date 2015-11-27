@@ -12,16 +12,15 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.rest import app as flask_app
 from webservices.env import env
 
 from webservices.tasks import app
-
-adapter = flask_app.url_map.bind('')
+from webservices.tasks import utils as task_utils
 
 def call_resource(path, qs, per_page=5000):
-    endpoint, arguments = adapter.match(path)
-    resource = flask_app.view_functions[endpoint].view_class()
+    app = task_utils.get_app()
+    endpoint, arguments = app.url_map.bind('').match(path)
+    resource = app.view_functions[endpoint].view_class()
     kwargs = parse_kwargs(resource, qs)
     kwargs = utils.extend(arguments, kwargs)
     kwargs['per_page'] = per_page
@@ -33,7 +32,7 @@ def call_resource(path, qs, per_page=5000):
 
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
-    with flask_app.test_request_context(qs):
+    with task_utils.get_app().test_request_context(qs):
         kwargs = {}
         for option in annotation.options:
             kwargs.update(flaskparser.parser.parse(option['args']))
@@ -104,8 +103,9 @@ def get_s3_name(path, qs):
     """
     # TODO: consider including path in name
     # TODO: consider base64 vs hash
-    call = '{}{}.csv'.format(path, qs)
-    return hashlib.sha224(call.encode('utf-8')).hexdigest()
+    raw = '{}{}'.format(path, qs)
+    hashed = hashlib.sha224(raw.encode('utf-8')).hexdigest()
+    return '{}.csv'.format(hashed)
 
 
 session = boto3.Session(

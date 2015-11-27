@@ -5,7 +5,7 @@ from celery import signals
 from celery.schedules import crontab
 
 from webservices.env import env
-from webservices.rest import app as flask_app
+from webservices.tasks import utils
 
 def redis_url():
     redis = env.get_service(label='redis28-swarm')
@@ -35,7 +35,7 @@ context = {}
 
 @signals.task_prerun.connect
 def push_context(task_id, task, *args, **kwargs):
-    context[task_id] = flask_app.app_context()
+    context[task_id] = utils.get_app().app_context()
     context[task_id].push()
 
 @signals.task_postrun.connect
