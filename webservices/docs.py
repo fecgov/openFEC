@@ -49,7 +49,8 @@ develops. You can view the [change log on GitHub](https://github.com/18F/openFEC
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
-site. Information is tied to the underlying forms by file ID and image ID.
+site. Information is tied to the underlying forms by file ID and image ID. Data is updated
+nightly.
 
 There is a lot of data, but a good place to start is to use search to find
 interesting candidates and committees. Then, you can use their IDs to find report or line
