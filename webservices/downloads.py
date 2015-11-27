@@ -25,11 +25,13 @@ def call_resource(path, qs, per_page=5000):
     endpoint, arguments = adapter.match(path)
     resource = flask_app.view_functions[endpoint].view_class()
     kwargs = parse_kwargs(resource, qs)
+    kwargs = utils.extend(arguments, kwargs)
     kwargs['per_page'] = per_page
-    query = resource.build_query(**utils.extend(arguments, kwargs))
+    query, model, schema = unpack(resource.build_query(**kwargs), 3)
     count = counts.count_estimate(query, db.session, threshold=5000)
-    paginator = utils.fetch_seek_paginator(query, kwargs, resource.index_column, count=count)
-    return paginator, resource.schema
+    index_column = utils.get_index_column(model or resource.model)
+    paginator = utils.fetch_seek_paginator(query, kwargs, index_column, count=count)
+    return paginator, schema or resource.schema
 
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
@@ -51,6 +53,10 @@ def iter_paginator(paginator):
         last_index = last_indexes['last_index']
         if paginator.sort_column:
             sort_index = last_indexes['last_{}'.format(paginator.sort_column[0].key)]
+
+def unpack(values, size):
+    values = values if isinstance(values, tuple) else (values, )
+    return values + (None, ) * (size - len(values))
 
 # don't know if we will need this one
 def un_nest(d, parent_key='', sep='_'):

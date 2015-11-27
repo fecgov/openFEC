@@ -67,5 +67,5 @@ group by c.cmte_id, p.two_yr_period_sk
 
 create unique index on ofec_totals_presidential_mv_tmp(idx);
 
-create index on ofec_totals_presidential_mv_tmp(cycle);
-create index on ofec_totals_presidential_mv_tmp(committee_id);
+create index on ofec_totals_presidential_mv_tmp(cycle, idx);
+create index on ofec_totals_presidential_mv_tmp(committee_id, idx);
