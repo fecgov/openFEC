@@ -181,7 +181,7 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/',
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
+api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
 api.add_resource(CandidateNameSearch, '/names/candidates/')
 api.add_resource(CommitteeNameSearch, '/names/committees/')

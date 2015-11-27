@@ -15,16 +15,12 @@ class ApiResource(utils.Resource):
     model = None
     schema = None
     page_schema = None
+    index_column = None
     filter_match_fields = []
     filter_multi_fields = []
     filter_range_fields = []
     query_options = []
     join_columns = {}
-
-    @property
-    def index_column(self):
-        column = self.model.__mapper__.primary_key[0]
-        return getattr(self.model, column.key)
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
