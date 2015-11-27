@@ -67,6 +67,17 @@ def load_pacronyms():
     with open(os.devnull, 'w') as null:
         subprocess.call(cmd, shell=True, stdout=null, stderr=null)
 
+@manager.command
+def load_nicknames():
+    import pandas as pd
+    import sqlalchemy as sa
+    try:
+        table = sa.Table('ofec_nicknames', db.metadata, autoload_with=db.engine)
+        db.engine.execute(table.delete())
+    except sa.exc.NoSuchTableError:
+        pass
+    load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames')
+
 def load_table(frame, tablename, indexes=()):
     import sqlalchemy as sa
     db.engine.execute('drop table if exists "{}"'.format(tablename))
@@ -120,6 +131,7 @@ def update_schemas(processes=1):
     logger.info("Starting DB refresh...")
     processes = int(processes)
     load_pacronyms()
+    load_nicknames()
     load_election_dates()
     execute_sql_folder('data/sql_updates/', processes=processes)
     execute_sql_file('data/rename_temporary_views.sql')
