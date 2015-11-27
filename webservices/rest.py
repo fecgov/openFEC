@@ -43,10 +43,11 @@ from webservices.resources import committees
 from webservices.resources import elections
 from webservices.resources import filings
 from webservices.resources import dates
+from webservices.env import env
 
 
 def sqla_conn_string():
-    sqla_conn_string = os.getenv('SQLA_CONN')
+    sqla_conn_string = env.get_credential('SQLA_CONN')
     if not sqla_conn_string:
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
@@ -61,9 +62,6 @@ app.config['APISPEC_FORMAT_RESPONSE'] = None
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
-
-if os.getenv('SENTRY_DSN'):
-    Sentry(app, dsn=os.getenv('SENTRY_DSN'))
 
 class FlaskRestParser(FlaskParser):
 
@@ -319,3 +317,16 @@ def api_ui():
 
 
 app.register_blueprint(docs)
+
+def initialize_newrelic():
+    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
+    if license_key:
+        import newrelic.agent
+        settings = newrelic.agent.global_settings()
+        settings.license_key = license_key
+        newrelic.agent.initialize()
+
+initialize_newrelic()
+
+if env.get_credential('SENTRY_DSN'):
+    Sentry(app, dsn=env.get_credential('SENTRY_DSN'))
