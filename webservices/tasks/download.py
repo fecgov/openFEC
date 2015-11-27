@@ -112,15 +112,18 @@ session = boto3.Session(
     aws_secret_access_key=env.get_credential('FEC_DOWNLOAD_SECRET_KEY'),
 )
 s3 = session.resource('s3')
+bucket = s3.Bucket(env.get_credential('FEC_DOWNLOAD_BUCKET'))
 
-def upload_s3(name, file):
-    s3.Bucket(env.get_credential('FEC_DOWNLOAD_BUCKET')).put_object(Key=name, Body=file)
+def upload_s3(key, body):
+    bucket.put_object(Key=key, Body=body)
 
 @app.task
 def export_query(path, qs):
     paginator, schema = call_resource(path, qs)
     query = iter_paginator(paginator)
     name = get_s3_name(path, qs)
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv') as fp:
+    # Note: Write CSV as unicode; read for upload as bytes
+    with tempfile.NamedTemporaryFile(mode='w') as fp:
         rows_to_csv(query, schema, fp)
-        upload_s3(name, fp)
+        fp.flush()
+        upload_s3(name, open(fp.name, mode='rb'))
