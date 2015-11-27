@@ -11,6 +11,7 @@ gunicorn==19.3.0
 webargs==0.18.0
 csvkit==0.9.1
 ujson==1.33
+furl==0.4.8
 
 # Marshalling
 flask-apispec==0.2.0
