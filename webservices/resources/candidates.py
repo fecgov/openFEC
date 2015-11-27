@@ -1,13 +1,13 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.util import filter_query
+from webservices.common.views import ApiResource
 
 
 filter_fields = {
@@ -25,27 +25,29 @@ filter_fields = {
     tags=['candidate'],
     description=docs.CANDIDATE_LIST,
 )
-class CandidateList(utils.Resource):
+class CandidateList(ApiResource):
+
+    model = models.Candidate
+    schema = schemas.CandidateSchema
+    page_schema = schemas.CandidatePageSchema
 
     @property
     def query(self):
         return models.Candidate.query
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.candidate_list)
-    @use_kwargs(args.candidate_detail)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['name'],
-            validator=args.IndexValidator(models.Candidate),
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.candidate_list,
+            args.candidate_detail,
+            args.make_sort_args(
+                default=['name'],
+                validator=args.IndexValidator(self.model)
+            )
         )
-    )
-    @marshal_with(schemas.CandidatePageSchema())
-    def get(self, **kwargs):
-        query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Candidate)
 
-    def get_candidates(self, kwargs):
+    def build_query(self, **kwargs):
 
         candidates = self.query
 
@@ -77,21 +79,15 @@ class CandidateList(utils.Resource):
 )
 class CandidateSearch(CandidateList):
 
+    schema = schemas.CandidateSearchSchema
+    page_schema = schemas.CandidateSearchPageSchema
+
     @property
     def query(self):
         # Eagerly load principal committees to avoid extra queries
         return models.Candidate.query.options(
             sa.orm.subqueryload(models.Candidate.principal_committees)
         )
-
-    @use_kwargs(args.paging)
-    @use_kwargs(args.candidate_list)
-    @use_kwargs(args.candidate_detail)
-    @use_kwargs(args.make_sort_args(validator=args.IndexValidator(models.Candidate)))
-    @marshal_with(schemas.CandidateSearchPageSchema())
-    def get(self, **kwargs):
-        query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Candidate)
 
 
 @doc(
@@ -102,22 +98,24 @@ class CandidateSearch(CandidateList):
         'committee_id': {'description': docs.COMMITTEE_ID},
     },
 )
-class CandidateView(utils.Resource):
+class CandidateView(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.candidate_detail)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-expire_date'],
-            validator=args.IndexValidator(models.CandidateDetail),
+    model = models.CandidateDetail
+    schema = schemas.CandidateDetailSchema
+    page_schema = schemas.CandidateDetailPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.candidate_detail,
+            args.make_sort_args(
+                default=['-expire_date'],
+                validator=args.IndexValidator(self.model),
+            ),
         )
-    )
-    @marshal_with(schemas.CandidateDetailPageSchema())
-    def get(self, candidate_id=None, committee_id=None, **kwargs):
-        query = self.get_candidate(kwargs, candidate_id, committee_id)
-        return utils.fetch_page(query, kwargs, model=models.CandidateDetail)
 
-    def get_candidate(self, kwargs, candidate_id=None, committee_id=None):
+    def build_query(self, candidate_id=None, committee_id=None, **kwargs):
         if candidate_id is not None:
             candidates = models.CandidateDetail.query
             candidates = candidates.filter_by(candidate_id=candidate_id)
@@ -147,21 +145,23 @@ class CandidateView(utils.Resource):
         'cycle': {'description': docs.CANDIDATE_CYCLE},
     },
 )
-class CandidateHistoryView(utils.Resource):
+class CandidateHistoryView(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-two_year_period'],
-            validator=args.IndexValidator(models.CandidateHistory),
+    model = models.CandidateHistory
+    schema = schemas.CandidateHistorySchema
+    page_schema = schemas.CandidateHistoryPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.make_sort_args(
+                default=['-two_year_period'],
+                validator=args.IndexValidator(self.model),
+            ),
         )
-    )
-    @marshal_with(schemas.CandidateHistoryPageSchema())
-    def get(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
-        query = self.get_candidate(candidate_id, committee_id, cycle, kwargs)
-        return utils.fetch_page(query, kwargs, model=models.CandidateHistory)
 
-    def get_candidate(self, candidate_id, committee_id, cycle, kwargs):
+    def build_query(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
         query = models.CandidateHistory.query
 
         if candidate_id:
