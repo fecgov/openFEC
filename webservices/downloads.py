@@ -9,12 +9,9 @@ from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
 
 from webservices import utils
-from webservices import schemas
 from webservices.rest import app as flask_app
 from webservices.common import counts
-from webservices.common import models
 from webservices.common.models import db
-from webservices.resources import sched_a
 
 from cron import app
 
@@ -92,7 +89,6 @@ def rows_to_csv(query, schema, csvfile):
     headers = create_headers(schema)
     writer = csv.DictWriter(csvfile, fieldnames=headers)
     writer.writeheader()
-    # CALL QUERY ITERATIOR
     write_query_to_csv(query, schema, writer)
 
 def get_s3_name(path, qs):
@@ -115,12 +111,9 @@ def upload_s3(name, file):
 
 @app.task
 def export_query(path, qs):
-    # TODO: consider moving app context to celery worker init
-    with flask_app.app_context():
-        paginator, schema = call_resource(path, qs)
-        query = iter_paginator(paginator)
-        name = get_s3_name(path, qs)
-        # TODO: Can we pass the file mode to csv instead?
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.csv') as fp:
-            rows_to_csv(query, schema, fp)
-            upload_s3(name, fp)
+    paginator, schema = call_resource(path, qs)
+    query = iter_paginator(paginator)
+    name = get_s3_name(path, qs)
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv') as fp:
+        rows_to_csv(query, schema, fp)
+        upload_s3(name, fp)
