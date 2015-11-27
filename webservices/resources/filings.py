@@ -22,7 +22,8 @@ from webservices.utils import use_kwargs
 class BaseFilings(views.ApiResource):
 
     model = models.Filings
-    schema = schemas.FilingsPageSchema
+    schema = schemas.FilingsSchema
+    page_schema = schemas.FilingsPageSchema
 
     filter_multi_fields = [
         ('beginning_image_number', models.Filings.beginning_image_number),

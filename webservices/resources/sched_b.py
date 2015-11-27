@@ -16,7 +16,8 @@ from webservices.common.views import ItemizedResource
 class ScheduleBView(ItemizedResource):
 
     model = models.ScheduleB
-    schema = schemas.ScheduleBPageSchema
+    schema = schemas.ScheduleBSchema
+    page_schema = schemas.ScheduleBPageSchema
 
     @property
     def year_column(self):
