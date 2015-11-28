@@ -3,7 +3,6 @@ import hashlib
 import tempfile
 import collections
 
-import boto3
 import marshmallow
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
@@ -12,7 +11,6 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.env import env
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -108,15 +106,8 @@ def get_s3_name(path, qs):
     return '{}.csv'.format(hashed)
 
 
-session = boto3.Session(
-    aws_access_key_id=env.get_credential('FEC_DOWNLOAD_ACCESS_KEY'),
-    aws_secret_access_key=env.get_credential('FEC_DOWNLOAD_SECRET_KEY'),
-)
-s3 = session.resource('s3')
-bucket = s3.Bucket(env.get_credential('FEC_DOWNLOAD_BUCKET'))
-
 def upload_s3(key, body):
-    bucket.put_object(Key=key, Body=body)
+    task_utils.get_bucket().put_object(Key=key, Body=body)
 
 @app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):
