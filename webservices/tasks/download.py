@@ -53,14 +53,13 @@ def unpack(values, size):
     values = values if isinstance(values, tuple) else (values, )
     return values + (None, ) * (size - len(values))
 
-# don't know if we will need this one
 def un_nest(d, parent_key='', sep='_'):
     items = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
         if v is None:
             continue
-        if isinstance(v, collections.MutableMapping):
+        if isinstance(v, collections.Mapping):
             items.extend(un_nest(v, new_key, sep=sep).items())
         else:
             items.append((new_key, v))
@@ -80,9 +79,9 @@ def create_headers(schema, parent_key='', sep='_'):
 
 def write_query_to_csv(query, schema, writer):
     """Write each query result subset to a csv."""
-
+    instance = schema()
     for result in query:
-        result_dict = schema().dump(result).data
+        result_dict = instance.dump(result).data
         row = un_nest(result_dict)
         writer.writerow(row)
 
