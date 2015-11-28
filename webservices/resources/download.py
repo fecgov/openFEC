@@ -7,6 +7,7 @@ from flask import request, redirect
 
 from webservices import utils
 from webservices.tasks import download
+from webservices.tasks import utils as task_utils
 
 client = boto3.client('s3')
 
@@ -24,7 +25,7 @@ class DownloadView(utils.Resource):
 
 def get_cached_file(path, qs):
     key = download.get_s3_name(path, qs)
-    obj = download.bucket.Object(key=key)
+    obj = task_utils.get_bucket().Object(key=key)
     try:
         obj.metadata
         client = obj.meta.client
