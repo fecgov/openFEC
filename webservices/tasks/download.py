@@ -55,22 +55,20 @@ def unpack(values, size):
 
 def un_nest(d, parent_key='', sep='_'):
     items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if v is None:
+    for key, value in d.items():
+        new_key = sep.join([parent_key, key]) if parent_key else key
+        if value is None:
             continue
-        if isinstance(v, collections.Mapping):
-            items.extend(un_nest(v, new_key, sep=sep).items())
+        if isinstance(value, collections.Mapping):
+            items.extend(un_nest(value, new_key, sep=sep).items())
         else:
-            items.append((new_key, v))
+            items.append((new_key, value))
     return dict(items)
 
-# TODO: consider abstracting recursion
 def create_headers(schema, parent_key='', sep='_'):
     items = []
     for name, field in schema._declared_fields.items():
-        # TODO: use string formatting or string.join
-        new_key = parent_key + sep + name if parent_key else name
+        new_key = sep.join([parent_key, name]) if parent_key else name
         if isinstance(field, marshmallow.fields.Nested):
             items.extend(create_headers(field.nested, new_key, sep=sep))
         else:
