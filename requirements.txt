@@ -1,4 +1,4 @@
-cfenv==0.3.0
+cfenv==0.4.0
 psycopg2==2.6
 Flask-Cors==2.1.0
 Flask-Script==2.0.5
@@ -10,6 +10,7 @@ mandrill==1.0.57
 GitPython==1.0.1
 gunicorn==19.3.0
 webargs==0.18.0
+slacker==0.8.6
 raven==5.8.1
 ujson==1.33
 furl==0.4.6
