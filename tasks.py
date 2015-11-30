@@ -1,6 +1,11 @@
+import os
+
 import git
 from invoke import run
 from invoke import task
+from slacker import Slacker
+
+from webservices.env import env
 
 
 DEFAULT_FRACTION = 0.5
@@ -116,28 +121,25 @@ def _resolve_rule(repo, branch):
     return None
 
 
-def _detect_space(branch=None, yes=False):
+def _detect_branch(repo):
+    try:
+        return repo.active_branch.name
+    except TypeError:
+        return None
+
+
+def _detect_space(repo, branch=None, yes=False):
     """Detect space from active git branch.
 
     :param str branch: Optional branch name override
     :param bool yes: Skip confirmation
     :returns: Space name if space is detected and confirmed, else `None`
     """
-    repo = git.Repo('.')
-    # Fail gracefully if `branch` is not provided and repo is in detached
-    # `HEAD` mode
-    try:
-        branch = branch or repo.active_branch.name
-    except TypeError:
-        return None
     space = _resolve_rule(repo, branch)
     if space is None:
-        print(
-            'No space detected from repo {repo}; '
-            'skipping deploy'.format(**locals())
-        )
+        print('No space detected')
         return None
-    print('Detected space {space} from repo {repo}'.format(**locals()))
+    print('Detected space {space}'.format(**locals()))
     if not yes:
         run = input(
             'Deploy to space {space} (enter "yes" to deploy)? > '.format(**locals())
@@ -177,7 +179,9 @@ def deploy(space=None, branch=None, yes=False):
     or `branch` if repo is in detached HEAD mode, e.g. when running on Travis.
     """
     # Detect space
-    space = space or _detect_space(branch, yes)
+    repo = git.Repo('.')
+    branch = branch or _detect_branch(repo)
+    space = space or _detect_space(repo, branch, yes)
     if space is None:
         return
 
@@ -213,3 +217,16 @@ def deploy(space=None, branch=None, yes=False):
     # Deploy worker applications
     run('cf push celery-beat -f manifest_{0}.yml'.format(space))
     run('cf push celery-worker -f manifest_{0}.yml'.format(space))
+
+    # Notify after deploy
+    notify(space, branch)
+
+@task
+def notify(space, branch):
+    slack = Slacker(env.get_credential('FEC_SLACK_TOKEN'))
+    user = os.getenv('USER')
+    slack.chat.post_message(
+        env.get_credential('FEC_SLACK_CHANNEL', '#fec'),
+        'branch {branch} deployed to space {space} by {user}'.format(**locals()),
+        username=env.get_credential('FEC_SLACK_BOT', 'fec-bot'),
+    )
