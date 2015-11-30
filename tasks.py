@@ -225,8 +225,9 @@ def deploy(space=None, branch=None, yes=False):
 def notify(space, branch):
     slack = Slacker(env.get_credential('FEC_SLACK_TOKEN'))
     user = os.getenv('USER')
+    repo = os.path.split(os.getcwd())[-1]
     slack.chat.post_message(
         env.get_credential('FEC_SLACK_CHANNEL', '#fec'),
-        'branch {branch} deployed to space {space} by {user}'.format(**locals()),
+        'branch {branch} of repo {repo} deployed to space {space} by {user}'.format(**locals()),
         username=env.get_credential('FEC_SLACK_BOT', 'fec-bot'),
     )
