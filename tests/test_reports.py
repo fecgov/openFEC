@@ -3,8 +3,8 @@ import datetime
 
 from marshmallow.utils import isoformat
 
-from .common import ApiBaseTest
 from tests import factories
+from tests.common import ApiBaseTest
 
 from webservices import schemas
 from webservices.rest import db
