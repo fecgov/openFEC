@@ -2,6 +2,7 @@ import io
 import logging
 
 import mock
+import cfenv
 import pytest
 import mandrill
 
@@ -12,7 +13,8 @@ def environ(monkeypatch):
     monkeypatch.setenv('MANDRILL_API_KEY', '12345')
     monkeypatch.setenv('FEC_EMAIL_SENDER', 'cj@whitehouse.gov')
     monkeypatch.setenv('FEC_EMAIL_RECIPIENTS', 'toby@whitehouse.gov')
-    monkeypatch.setenv('VCAP_APPLICATION', '{"name": "api", "space-name": "dev"}')
+    monkeypatch.setenv('VCAP_APPLICATION', '{"name": "api", "space_name": "dev"}')
+    monkeypatch.setattr(mail, 'env', cfenv.AppEnv())
 
 @pytest.fixture
 def client():
@@ -29,7 +31,7 @@ class TestHelpers:
 
     def test_get_subject(self):
         settings = {
-            'space-name': 'dev',
+            'space_name': 'dev',
             'name': 'api',
         }
         assert mail.get_subject(settings) == 'FEC Update: dev | api'

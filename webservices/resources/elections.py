@@ -101,12 +101,17 @@ class ElectionList(utils.Resource):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(CandidateHistory.office.in_(values))
         if kwargs.get('state'):
-            query = query.filter(CandidateHistory.state.in_(kwargs['state'] + ['US']))
+            query = query.filter(
+                sa.or_(
+                    CandidateHistory.state.in_(kwargs['state']),
+                    CandidateHistory.office == 'P',
+                )
+            )
         if kwargs.get('district'):
             query = query.filter(
                 sa.or_(
                     CandidateHistory.district.in_(kwargs['district']),
-                    CandidateHistory.district == None  # noqa
+                    CandidateHistory.office.in_(['P', 'S']),
                 ),
             )
         if kwargs.get('zip'):

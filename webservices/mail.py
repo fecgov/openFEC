@@ -1,8 +1,8 @@
-import os
-import json
 import logging
 
 import mandrill
+
+from webservices.env import env
 
 logger = logging.getLogger(__name__)
 
@@ -17,27 +17,29 @@ class CaptureLogs:
             fmt='%(asctime)s %(levelname)s:%(name)s:%(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
         )
+
         self.handler = logging.StreamHandler(self.buffer)
         self.handler.setFormatter(self.formatter)
+        self.handler.setLevel(logging.INFO)
+
         self.logger.addHandler(self.handler)
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         self.logger.removeHandler(self.handler)
 
 def send_mail(buffer):
-    client = mandrill.Mandrill(os.getenv('MANDRILL_API_KEY'))
-    settings = json.loads(os.getenv('VCAP_APPLICATION', '{}'))
+    client = mandrill.Mandrill(env.get_credential('MANDRILL_API_KEY'))
     message = {
         'text': buffer.getvalue(),
-        'subject': get_subject(settings),
-        'from_email': os.getenv('FEC_EMAIL_SENDER'),
-        'to': get_recipients(os.getenv('FEC_EMAIL_RECIPIENTS')),
+        'subject': get_subject(env.app),
+        'from_email': env.get_credential('FEC_EMAIL_SENDER'),
+        'to': get_recipients(env.get_credential('FEC_EMAIL_RECIPIENTS')),
     }
     client.messages.send(message=message, async=False)
 
 def get_subject(settings):
     return 'FEC Update: {space} | {app}'.format(
-        space=settings.get('space-name', 'unknown-space'),
+        space=settings.get('space_name', 'unknown-space'),
         app=settings.get('name', 'unknown-app'),
     )
 
