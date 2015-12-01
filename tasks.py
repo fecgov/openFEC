@@ -197,12 +197,20 @@ def deploy(space=None, branch=None, yes=False):
 
     old, new = _detect_apps('api-a', 'api-b')
 
+    # Set deploy variables
+    run('cf set-env {0} DEPLOY_BRANCH "{1}"'.format(new, branch))
+    run('cf set-env {0} DEPLOY_USER "{1}"'.format(new, os.getenv('USER')))
+
     # Push
     push = run('cf push {0} -f manifest_{1}.yml'.format(new, space), echo=True, warn=True)
     if push.failed:
         print('Error pushing app {0}'.format(new))
         run('cf stop {0}'.format(new), echo=True)
         return
+
+    # Unset deploy variables
+    run('cf unset-env {0} DEPLOY_BRANCH'.format(new))
+    run('cf unset-env {0} DEPLOY_USER'.format(new))
 
     # Remap
     for route, host in SPACE_URLS[space]:
@@ -218,16 +226,16 @@ def deploy(space=None, branch=None, yes=False):
     run('cf push celery-beat -f manifest_{0}.yml'.format(space))
     run('cf push celery-worker -f manifest_{0}.yml'.format(space))
 
-    # Notify after deploy
-    notify(space, branch)
-
 @task
-def notify(space, branch):
+def notify():
     slack = Slacker(env.get_credential('FEC_SLACK_TOKEN'))
-    user = os.getenv('USER')
-    repo = os.path.split(os.getcwd())[-1]
     slack.chat.post_message(
         env.get_credential('FEC_SLACK_CHANNEL', '#fec'),
-        'branch {branch} of repo {repo} deployed to space {space} by {user}'.format(**locals()),
+        'deploying branch {branch} of app {name} to space {space} by {user}'.format(
+            name=env.name,
+            space=env.space,
+            user=os.getenv('DEPLOY_USER'),
+            branch=os.getenv('DEPLOY_BRANCH'),
+        ),
         username=env.get_credential('FEC_SLACK_BOT', 'fec-bot'),
     )
