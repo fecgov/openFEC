@@ -249,7 +249,7 @@ class TestItemized(ApiBaseTest):
         ]
         results = self._results(api.url_for(ScheduleEView, min_amount=100))
         self.assertTrue(all(each['expenditure_amount'] >= 100 for each in results))
-        results = self._results(api.url_for(ScheduleAView, max_amount=150))
+        results = self._results(api.url_for(ScheduleEView, max_amount=150))
         self.assertTrue(all(each['expenditure_amount'] <= 150 for each in results))
-        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
+        results = self._results(api.url_for(ScheduleEView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))
