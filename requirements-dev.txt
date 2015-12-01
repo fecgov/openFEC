@@ -1,0 +1,8 @@
+# Data import
+pandas==0.16.2
+xlrd==0.9.4
+
+# Development
+invoke==0.10.1
+# TODO(jmcarp) Install from PyPI after 0.2.4 release
+git+https://github.com/18F/rdbms-subsetter

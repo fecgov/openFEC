@@ -140,7 +140,7 @@ with pacronyms as (
     select
         "ID NUMBER" as committee_id,
         string_agg("PACRONYM", ' ') as pacronyms
-    from pacronyms
+    from ofec_pacronyms
     group by committee_id
 )
 select distinct on (committee_id)
