@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import glob
 import logging
 import subprocess
@@ -10,6 +9,7 @@ from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
 
+from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG
 from webservices.common.util import get_full_path
@@ -50,24 +50,6 @@ def execute_sql_folder(path, processes):
             execute_sql_file(path)
 
 @manager.command
-def load_pacronyms():
-    count = db.engine.execute(
-        "select count(*) from pg_tables where tablename = 'pacronyms'"
-    ).fetchone()[0]
-    if count:
-        db.engine.execute(
-            'delete from pacronyms'
-        )
-    cmd = ' | '.join([
-        'in2csv data/pacronyms.xlsx',
-        'csvsql --insert --db {dest} --table pacronyms'
-    ]).format(dest=db.engine.url)
-    if count:
-        cmd += ' --no-create'
-    with open(os.devnull, 'w') as null:
-        subprocess.call(cmd, shell=True, stdout=null, stderr=null)
-
-@manager.command
 def load_nicknames():
     import pandas as pd
     import sqlalchemy as sa
@@ -78,10 +60,20 @@ def load_nicknames():
         pass
     load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames')
 
-def load_table(frame, tablename, indexes=()):
+@manager.command
+def load_pacronyms():
+    import pandas as pd
     import sqlalchemy as sa
-    db.engine.execute('drop table if exists "{}"'.format(tablename))
-    frame.to_sql(tablename, db.engine)
+    try:
+        table = sa.Table('ofec_pacronyms', db.metadata, autoload_with=db.engine)
+        db.engine.execute(table.delete())
+    except sa.exc.NoSuchTableError:
+        pass
+    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', indexes=('ID NUMBER', ))
+
+def load_table(frame, tablename, if_exists='replace', indexes=()):
+    import sqlalchemy as sa
+    frame.to_sql(tablename, db.engine, if_exists=if_exists)
     table = sa.Table(tablename, db.metadata, autoload_with=db.engine)
     for index in indexes:
         sa.Index('{}_{}_idx'.format(tablename, index), table.c[index]).create(db.engine)
@@ -180,32 +172,9 @@ def refresh_materialized():
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
-def stop_beat():
-    """Kill all celery beat workers.
-    Note: In the future, it would be more elegant to use a process manager like
-    supervisor or forever.
-    """
-    return subprocess.Popen(
-        "ps aux | grep 'cron.py' | awk '{print $2}' | xargs kill -9",
-        shell=True,
-    )
-
-@manager.command
-def start_beat():
-    """Start celery beat workers in the background using subprocess.
-    """
-    # Stop beat workers synchronously
-    stop_beat().wait()
-    return subprocess.Popen(['python', 'cron.py'])
-
-@manager.command
 def cf_startup():
-    """Start celery beat and schema migration on `cf-push`. Services are only
-    started if running on 0th instance.
-    """
-    instance_id = os.getenv('CF_INSTANCE_INDEX')
-    if instance_id == '0':
-        start_beat()
+    """Migrate schemas on `cf push`."""
+    if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 
 if __name__ == '__main__':
