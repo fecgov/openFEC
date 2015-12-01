@@ -1,16 +1,20 @@
+cfenv==0.4.0
+invoke==0.10.1
 psycopg2==2.6
 Flask-Cors==2.1.0
+Flask-Script==2.0.5
 Flask-RESTful==0.3.3
 Flask-SQLAlchemy==2.0
 newrelic==2.52.0.40
-celery==3.1.18
 SQLAlchemy==1.0.8
 mandrill==1.0.57
 GitPython==1.0.1
 gunicorn==19.3.0
 webargs==0.18.0
-csvkit==0.9.1
+slacker==0.8.6
+raven[flask]==5.8.1
 ujson==1.33
+furl==0.4.6
 
 # Marshalling
 flask-apispec==0.2.0
@@ -18,18 +22,6 @@ marshmallow==2.1.0
 marshmallow-sqlalchemy==0.6.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
-# Data import
-pandas==0.16.2
-
-# Development
-invoke==0.10.1
-Flask-Script==2.0.5
-# TODO(jmcarp) Install from PyPI after 0.2.4 release
-git+https://github.com/18F/rdbms-subsetter
-
-# Testing
-mock>=1.3.0
-pytest>=2.6.4
-pytest-cov>=1.8.1
-factory-boy>=2.5.2
-nplusone>=0.3.0
+# Task queue
+celery==3.1.19
+redis==2.10.5

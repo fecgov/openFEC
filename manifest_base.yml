@@ -11,3 +11,15 @@ env:
 applications:
 - name: api-a
 - name: api-b
+- name: celery-beat
+  instances: 1
+  memory: 256M
+  no-route: true
+  command: eval $(python webservices/setenv.py) && celery beat --app cron
+  buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.1
+- name: celery-worker
+  instances: 1
+  memory: 256M
+  no-route: true
+  command: eval $(python webservices/setenv.py) && celery worker --app cron
+  buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.1
