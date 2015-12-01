@@ -26,6 +26,7 @@ before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
   - travis_retry pip install -U pip wheel
   - travis_retry pip install -U -r requirements.txt
+  - travis_retry pip install -U -r requirements-dev.txt
 
 script: py.test
 
