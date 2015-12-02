@@ -124,3 +124,8 @@ def export_query(path, qs):
         rows_to_csv(query, schema, fp)
         fp.flush()
         upload_s3(name, open(fp.name, mode='rb'))
+
+@app.task
+def clear_bucket():
+    for key in task_utils.get_bucket().objects.all():
+        key.delete()
