@@ -3,7 +3,7 @@ import furl
 import boto3
 from botocore.exceptions import ClientError
 
-from flask import request, redirect
+from flask import request
 
 from webservices import utils
 from webservices.tasks import download
@@ -19,7 +19,10 @@ class DownloadView(utils.Resource):
         path = '/'.join(parts)
         cached_file = get_cached_file(path, request.query_string)
         if cached_file:
-            return redirect(cached_file)
+            return {
+                'status': 'complete',
+                'url': cached_file,
+            }
         download.export_query.delay(path, request.query_string)
         return {'status': 'queued'}
 

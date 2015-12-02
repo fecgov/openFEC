@@ -30,7 +30,7 @@ def call_resource(path, qs, per_page=5000):
 
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
-    with task_utils.get_app().test_request_context(qs):
+    with task_utils.get_app().test_request_context(b'?' + qs):
         kwargs = {}
         for option in annotation.options:
             kwargs.update(flaskparser.parser.parse(option['args']))
