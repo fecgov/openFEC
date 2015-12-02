@@ -21,5 +21,5 @@ applications:
   instances: 1
   memory: 256M
   no-route: true
-  command: celery worker --app webservices.tasks
+  command: celery worker --app webservices.tasks --loglevel INFO
   buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.1

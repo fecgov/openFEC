@@ -1,5 +1,6 @@
 import csv
 import hashlib
+import logging
 import tempfile
 import collections
 
@@ -14,6 +15,8 @@ from webservices.common.models import db
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
+
+logger = logging.getLogger(__name__)
 
 def call_resource(path, qs, per_page=5000):
     app = task_utils.get_app()
@@ -39,6 +42,11 @@ def parse_kwargs(resource, qs):
 def iter_paginator(paginator):
     last_index, sort_index = (None, None)
     while True:
+        logger.info(
+            'Fetching page with last_index={last_index}, sort_index={sort_index}'.format(
+                **locals()
+            )
+        )
         page = paginator.get_page(last_index=last_index, sort_index=sort_index)
         if not page.results:
             return
@@ -101,7 +109,6 @@ def get_s3_name(path, qs):
     raw = '{}{}'.format(path, qs)
     hashed = hashlib.sha224(raw.encode('utf-8')).hexdigest()
     return '{}.csv'.format(hashed)
-
 
 def upload_s3(key, body):
     task_utils.get_bucket().put_object(Key=key, Body=body)
