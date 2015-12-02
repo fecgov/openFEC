@@ -1,3 +1,4 @@
+import os
 import csv
 import hashlib
 import logging
@@ -119,7 +120,7 @@ def export_query(path, qs):
     query = iter_paginator(paginator)
     name = get_s3_name(path, qs)
     # Note: Write CSV as unicode; read for upload as bytes
-    with tempfile.NamedTemporaryFile(mode='w') as fp:
+    with tempfile.NamedTemporaryFile(mode='w', dir=os.getenv('TMPDIR')) as fp:
         rows_to_csv(query, schema, fp)
         fp.flush()
         upload_s3(name, open(fp.name, mode='rb'))
