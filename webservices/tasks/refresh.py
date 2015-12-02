@@ -3,7 +3,7 @@ import logging
 
 import manage
 from webservices import mail
-from webservices.tasks import app
+from webservices.tasks import app, download
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,7 @@ def refresh():
         try:
             manage.update_aggregates()
             manage.refresh_materialized()
+            download.clear_bucket()
         except Exception as error:
             manage.logger.exception(error)
     try:
