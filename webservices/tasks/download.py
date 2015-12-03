@@ -2,6 +2,8 @@ import os
 import csv
 import hashlib
 import logging
+import zipfile
+import datetime
 import tempfile
 import collections
 
@@ -30,7 +32,16 @@ def call_resource(path, qs, per_page=5000):
     count = counts.count_estimate(query, db.session, threshold=5000)
     index_column = utils.get_index_column(model or resource.model)
     paginator = utils.fetch_seek_paginator(query, kwargs, index_column, count=count)
-    return paginator, schema or resource.schema
+    return {
+        'path': path,
+        'qs': qs,
+        'name': get_s3_name(path, qs),
+        'paginator': paginator,
+        'schema': schema or resource.schema,
+        'resource': resource,
+        'count': count,
+        'timestamp': datetime.datetime.utcnow(),
+    }
 
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
@@ -109,21 +120,40 @@ def get_s3_name(path, qs):
     # TODO: consider base64 vs hash
     raw = '{}{}'.format(path, qs)
     hashed = hashlib.sha224(raw.encode('utf-8')).hexdigest()
-    return '{}.csv'.format(hashed)
+    return '{}.zip'.format(hashed)
 
 def upload_s3(key, body):
     task_utils.get_bucket().put_object(Key=key, Body=body)
 
+def make_csv(resource, query, path):
+    with open(os.path.join(path, 'data.csv'), 'w') as fp:
+        rows_to_csv(query, resource['schema'], fp)
+
+def make_manifest(resource, path):
+    with open(os.path.join(path, 'manifest.txt'), 'w') as fp:
+        fp.write('Time: {}\n'.format(resource['timestamp']))
+        fp.write('Resource: {}\n'.format(resource['path']))
+        fp.write('Filters: {}\n'.format(resource['qs']))
+        fp.write('Count: {}\n'.format(resource['count']))
+
+def make_bundle(resource, query):
+    with tempfile.TemporaryDirectory(dir=os.getenv('TMPDIR')) as tmpdir:
+        make_csv(resource, query, tmpdir)
+        make_manifest(resource, tmpdir)
+        with tempfile.TemporaryFile(mode='w+b', dir=os.getenv('TMPDIR')) as tmpfile:
+            archive = zipfile.ZipFile(tmpfile, 'w')
+            for path in os.listdir(tmpdir):
+                _, arcname = os.path.split(path)
+                archive.write(os.path.join(tmpdir, path), arcname=arcname)
+            archive.close()
+            tmpfile.seek(0)
+            upload_s3(resource['name'], tmpfile)
+
 @app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):
-    paginator, schema = call_resource(path, qs)
-    query = iter_paginator(paginator)
-    name = get_s3_name(path, qs)
-    # Note: Write CSV as unicode; read for upload as bytes
-    with tempfile.NamedTemporaryFile(mode='w', dir=os.getenv('TMPDIR')) as fp:
-        rows_to_csv(query, schema, fp)
-        fp.flush()
-        upload_s3(name, open(fp.name, mode='rb'))
+    resource = call_resource(path, qs)
+    query = iter_paginator(resource['paginator'])
+    make_bundle(resource, query)
 
 @app.task
 def clear_bucket():
