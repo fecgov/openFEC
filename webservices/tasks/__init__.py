@@ -4,6 +4,9 @@ import celery
 from celery import signals
 from celery.schedules import crontab
 
+from raven import Client
+from raven.contrib.celery import register_signal, register_logger_signal
+
 from webservices.env import env
 from webservices.tasks import utils
 
@@ -30,6 +33,11 @@ app.conf.update(
         },
     }
 )
+
+client = Client(env.get_credential('SENTRY_DSN'))
+
+register_signal(client)
+register_logger_signal(client)
 
 context = {}
 
