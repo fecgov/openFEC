@@ -1,5 +1,6 @@
 from datetime import date
 
+import sqlalchemy as sa
 from flask_apispec import doc, marshal_with
 
 from webservices import args
