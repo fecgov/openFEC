@@ -29,6 +29,10 @@ class ReportingDates(db.Model):
         )'''
     )
 
+    @property
+    def report_type_full(self):
+        return self.report.rpt_tp_desc
+
 
 class ElectionDates(db.Model):
     __tablename__ = 'trc_election'

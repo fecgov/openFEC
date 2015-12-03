@@ -41,6 +41,8 @@ class ReportingDatesView(DatesResource):
         'create_date',
         'update_date',
     }
+    # TODO: sub-class api resource
+    query_options = [sa.orm.joinedload(models.ReportingDates.report)]
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reporting_dates)
