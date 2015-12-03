@@ -14,7 +14,7 @@ class TestDownload(ApiBaseTest):
     def test_get_filename(self):
         path = '/v1/candidates/'
         qs = '?office=H&sort=name'
-        expected = hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.csv'
+        expected = hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.zip'
         assert download.get_s3_name(path, qs) == expected
 
     def test_write_csv(self):
