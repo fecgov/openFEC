@@ -1,3 +1,6 @@
+from tests import factories
+from tests.common import ApiBaseTest
+
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
@@ -10,9 +13,6 @@ from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
 )
-
-from tests import factories
-from tests.common import ApiBaseTest
 
 
 class TestAggregates(ApiBaseTest):

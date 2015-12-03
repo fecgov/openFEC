@@ -2,12 +2,12 @@
 
 import datetime
 
+from tests import factories
+from tests.common import ApiBaseTest
+
 from webservices.rest import api
 from webservices.resources.dates import ElectionDatesView
 from webservices.resources.dates import ReportingDatesView
-
-from tests import factories
-from tests.common import ApiBaseTest
 
 
 class TestReportingDates(ApiBaseTest):
