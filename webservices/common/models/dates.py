@@ -1,5 +1,6 @@
+import re
+
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship, backref
 
 from webservices import decoders
 
@@ -31,7 +32,7 @@ class ReportingDates(db.Model):
 
     @property
     def report_type_full(self):
-        return self.report.rpt_tp_desc
+        return re.sub(r'\{[^)]*\}', '', self.report.rpt_tp_desc.strip())
 
 
 class ElectionDates(db.Model):

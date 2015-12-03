@@ -46,6 +46,17 @@ class TestReportingDates(ApiBaseTest):
 
         self.assertEqual(len(results), 1)
 
+    def test_field_cleaning(self):
+        [
+            factories.ReportingNameFactory(rpt_tp='Q1', rpt_tp_disc="April Quarterly {One of 4 valid Report Codes on Form 5, RptCode}"),
+            factories.ReportingDatesFactory(report_type='Q1', due_date=datetime.datetime(2015, 1, 2))
+        ]
+
+        page = api.url_for(ReportingDatesView)
+        results = self._results(page)
+        self.assertEqual(results[0]['report_type_full', 'April Quarterly'])
+
+
 
 class TestElectionDates(ApiBaseTest):
 

@@ -340,8 +340,11 @@ register_schema(ReportNameSchema)
 
 ReportingDatesSchema = make_schema(
     models.ReportingDates,
-    fields = {'report_type_full': ma.fields.Str()},
-    options = {'exclude': ('trc_report_due_date_id', )},
+    fields = {
+        'report_type_full': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+    },
+    options = {'exclude': ('trc_report_due_date_id', 'report')},
 )
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
