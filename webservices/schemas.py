@@ -18,6 +18,8 @@ spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 class BaseSchema(ModelSchema):
 
     def get_attribute(self, attr, obj, default):
+        if '.' in attr:
+            return super().get_attribute(attr, obj, default)
         return getattr(obj, attr, default)
 
 

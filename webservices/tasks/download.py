@@ -98,8 +98,11 @@ def create_headers(schema, parent_key='', sep='_'):
 def write_query_to_csv(query, schema, writer):
     """Write each query result subset to a csv."""
     instance = schema()
+    updated = False
     for result in query:
-        result_dict = instance.dump(result).data
+        if not updated:
+            updated = True
+        result_dict = instance.dump(result, update_fields=not updated).data
         row = un_nest(result_dict)
         writer.writerow(row)
 
