@@ -15,7 +15,6 @@ class CandidateSearch(BaseModel):
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
-    candidate_id = db.Column(db.String(10))
     candidate_status = db.Column(db.String(1), index=True)
     district = db.Column(db.String(2), index=True)
     district_number = db.Column(db.Integer, index=True)
@@ -35,6 +34,8 @@ class BaseCandidate(BaseModel):
 class BaseConcreteCandidate(BaseCandidate):
     __tablename__ = 'ofec_candidate_detail_mv'
 
+    candidate_id = db.Column(db.String, unique=True)
+
 
 class Candidate(BaseConcreteCandidate):
     __table_args__ = {'extend_existing': True}
@@ -44,19 +45,21 @@ class Candidate(BaseConcreteCandidate):
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
         'Committee',
-        secondary='ofec_name_linkage_mv',
+        secondary='ofec_cand_cmte_linkage_mv',
         secondaryjoin='''and_(
-            Committee.committee_id == ofec_name_linkage_mv.c.committee_id,
-            Committee.designation == 'P',
+            Committee.committee_id == ofec_cand_cmte_linkage_mv.c.cmte_id,
+            ofec_cand_cmte_linkage_mv.c.cmte_dsgn == 'P',
         )''',
-        order_by='desc(Committee.last_file_date)',
+        order_by=(
+            'desc(ofec_cand_cmte_linkage_mv.c.cand_election_yr),'
+            'desc(Committee.last_file_date),'
+        )
     )
 
 
 class CandidateDetail(BaseConcreteCandidate):
     __table_args__ = {'extend_existing': True}
 
-    form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
     address_street_1 = db.Column(db.String(200))
@@ -69,8 +72,8 @@ class CandidateDetail(BaseConcreteCandidate):
 class CandidateHistory(BaseCandidate):
     __tablename__ = 'ofec_candidate_history_mv'
 
-    two_year_period = db.Column(db.Integer, index=True)
-    form_type = db.Column(db.String(3))
+    candidate_id = db.Column(db.String, primary_key=True, index=True)
+    two_year_period = db.Column(db.Integer, primary_key=True, index=True)
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
     address_street_1 = db.Column(db.String(200))

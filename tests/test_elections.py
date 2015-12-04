@@ -1,12 +1,12 @@
 import datetime
 import functools
 
+from tests import factories
+from tests.common import ApiBaseTest
+
 from webservices import utils
 from webservices.rest import db, api
 from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
-
-from tests import factories
-from tests.common import ApiBaseTest
 
 
 class TestElectionSearch(ApiBaseTest):
@@ -20,18 +20,18 @@ class TestElectionSearch(ApiBaseTest):
             candidate_status='C',
         )
         self.candidates = [
-            factory(office='P', state='US', district=None),
-            factory(office='S', state='NJ', district=None),
+            factory(office='P', state='US', district='00'),
+            factory(office='S', state='NJ', district='00'),
             factory(office='H', state='NJ', district='09'),
-            factory(office='S', state='VA', district=None),
+            factory(office='S', state='VA', district='00'),
             factory(office='H', state='VA', district='05'),
         ]
 
     def test_search_district(self):
         results = self._results(api.url_for(ElectionList, state='NJ', district='09'))
         self.assertEqual(len(results), 3)
-        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
-        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': None})
+        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'})
         self.assertDictsSubset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
     def test_search_district_padding(self):
@@ -48,8 +48,8 @@ class TestElectionSearch(ApiBaseTest):
     def test_search_zip(self):
         results = self._results(api.url_for(ElectionList, zip='22902'))
         self.assertEqual(len(results), 3)
-        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': None})
-        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': None})
+        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'})
         self.assertDictsSubset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
 
     def test_search_incumbent(self):
@@ -83,21 +83,21 @@ class TestElections(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
-        factories.CandidateDetailFactory(candidate_key=self.candidate.candidate_key)
+        factories.CandidateDetailFactory(candidate_id=self.candidate.candidate_id)
         [
-            factories.CommitteeDetailFactory(committee_key=each.committee_key)
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
         ]
         db.session.flush()
         factories.CandidateCommitteeLinkFactory(
-            candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[0].committee_key,
-            election_year=2012,
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[0].committee_id,
+            cand_election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
-            candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[1].committee_key,
-            election_year=2011,
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[1].committee_id,
+            cand_election_year=2011,
         )
         self.totals = [
             factories.TotalsHouseSenateFactory(

@@ -25,7 +25,6 @@ class CommitteeSearchFactory(BaseFactory):
 
 
 class BaseCandidateFactory(BaseFactory):
-    candidate_key = factory.Sequence(lambda n: n)
     candidate_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
@@ -47,7 +46,6 @@ class CandidateHistoryFactory(BaseCandidateFactory):
 
 
 class BaseCommitteeFactory(BaseFactory):
-    committee_key = factory.Sequence(lambda n: n + 1)
     committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
@@ -70,6 +68,7 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
 class CandidateCommitteeLinkFactory(BaseFactory):
     class Meta:
         model = models.CandidateCommitteeLink
+    linkage_id = factory.Sequence(lambda n: n)
 
 
 class BaseTotalsFactory(BaseFactory):
