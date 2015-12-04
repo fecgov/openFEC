@@ -14,12 +14,14 @@ class TestReportingDates(ApiBaseTest):
 
     def test_reporting_dates_filters(self):
         [
+            factories.ReportNameFactory(rpt_tp='YE', rpt_tp_desc="Year End"),
             factories.ReportingDatesFactory(due_date=datetime.datetime(2014, 1, 2)),
             factories.ReportingDatesFactory(report_year=2015),
             factories.ReportingDatesFactory(report_type='YE'),
             factories.ReportingDatesFactory(create_date=datetime.datetime(2014, 3, 2)),
             factories.ReportingDatesFactory(update_date=datetime.datetime(2014, 4, 2)),
         ]
+
 
         filter_fields = (
             ('due_date', '2014-01-02'),
@@ -37,6 +39,7 @@ class TestReportingDates(ApiBaseTest):
 
     def test_upcoming(self):
         [
+            factories.ReportNameFactory(rpt_tp='YE', rpt_tp_desc="Year End"),
             factories.ReportingDatesFactory(report_type='YE', due_date=datetime.datetime(2014, 1, 2)),
             factories.ReportingDatesFactory(report_type='YE', due_date=datetime.datetime(2017, 1, 3)),
         ]
@@ -48,13 +51,13 @@ class TestReportingDates(ApiBaseTest):
 
     def test_field_cleaning(self):
         [
-            factories.ReportingNameFactory(rpt_tp='Q1', rpt_tp_disc="April Quarterly {One of 4 valid Report Codes on Form 5, RptCode}"),
+            factories.ReportNameFactory(rpt_tp='Q1', rpt_tp_desc="April Quarterly {One of 4 valid Report Codes on Form 5, RptCode}"),
             factories.ReportingDatesFactory(report_type='Q1', due_date=datetime.datetime(2015, 1, 2))
         ]
 
         page = api.url_for(ReportingDatesView)
         results = self._results(page)
-        self.assertEqual(results[0]['report_type_full', 'April Quarterly'])
+        self.assertEqual(results[0]['report_type_full'], 'April Quarterly')
 
 
 

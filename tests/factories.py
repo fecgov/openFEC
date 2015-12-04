@@ -194,7 +194,7 @@ class ElectioneeringByCandidateFactory(BaseAggregateFactory):
         model = models.ElectioneeringByCandidate
     candidate_id = factory.Sequence(lambda n: str(n))
 
-class ReportNamesFactory(BaseFactory):
+class ReportNameFactory(BaseFactory):
     class Meta:
         model = models.ReportNames
 

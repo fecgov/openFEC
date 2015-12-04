@@ -9,7 +9,8 @@ from .base import db
 class ReportNames(db.Model):
     __tablename__ = 'dimreporttype'
 
-    rpt_tp = db.Column(db.String, ForeignKey('ReportingDates.report_type'), index=True, primary_key=True)
+    # TODO: rename to `report_type` etc.
+    rpt_tp = db.Column(db.String, index=True, primary_key=True)
     rpt_tp_desc = db.Column(db.String, index=True)
 
 
@@ -32,7 +33,7 @@ class ReportingDates(db.Model):
 
     @property
     def report_type_full(self):
-        return re.sub(r'\{[^)]*\}', '', self.report.rpt_tp_desc.strip())
+        return re.sub(r'\{[^)]*\}', '', self.report.rpt_tp_desc).strip()
 
 
 class ElectionDates(db.Model):
