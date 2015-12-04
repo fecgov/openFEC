@@ -108,7 +108,7 @@ class CandidateView(utils.Resource):
     @use_kwargs(args.candidate_detail)
     @use_kwargs(
         args.make_sort_args(
-            default=['-expire_date'],
+            default=['name'],
             validator=args.IndexValidator(models.CandidateDetail),
         )
     )
@@ -170,7 +170,7 @@ class CandidateHistoryView(utils.Resource):
         if committee_id:
             query = query.join(
                 models.CandidateCommitteeLink,
-                models.CandidateCommitteeLink.candidate_key == models.CandidateHistory.candidate_key,
+                models.CandidateCommitteeLink.candidate_id == models.CandidateHistory.candidate_id,
             ).filter(
                 models.CandidateCommitteeLink.committee_id == committee_id
             ).distinct()

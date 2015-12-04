@@ -6,6 +6,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
+from webservices.common.models import ScheduleA
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView
@@ -189,18 +190,27 @@ class TestItemized(ApiBaseTest):
         ]
         earmarks = [
             factories.ScheduleAFactory(),
-            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, memo_code='X', memo_text='earmark'),
+            factories.ScheduleAFactory(
+                line_number='12',
+                contribution_receipt_amount=150,
+                memo_text='earmark',
+                memo_code='X',
+            ),
         ]
-        results = self._results(api.url_for(ScheduleAView))
-        self.assertEqual(
-            [each['sched_a_sk'] for each in results],
-            [each.sched_a_sk for each in individuals + earmarks],
+
+        is_individual = sa.func.is_individual(
+            ScheduleA.contribution_receipt_amount,
+            ScheduleA.receipt_type,
+            ScheduleA.line_number,
+            ScheduleA.memo_code,
+            ScheduleA.memo_text,
         )
-        results = self._results(api.url_for(ScheduleAView, is_individual='true'))
-        self.assertEqual(
-            [each['sched_a_sk'] for each in results],
-            [each.sched_a_sk for each in individuals],
-        )
+
+        rows = ScheduleA.query.all()
+        self.assertEqual(rows, individuals + earmarks)
+
+        rows = ScheduleA.query.filter(is_individual).all()
+        self.assertEqual(rows, individuals)
 
     def test_amount_sched_a(self):
         [
@@ -239,7 +249,7 @@ class TestItemized(ApiBaseTest):
         ]
         results = self._results(api.url_for(ScheduleEView, min_amount=100))
         self.assertTrue(all(each['expenditure_amount'] >= 100 for each in results))
-        results = self._results(api.url_for(ScheduleAView, max_amount=150))
+        results = self._results(api.url_for(ScheduleEView, max_amount=150))
         self.assertTrue(all(each['expenditure_amount'] <= 150 for each in results))
-        results = self._results(api.url_for(ScheduleAView, min_amount=100, max_amount=150))
+        results = self._results(api.url_for(ScheduleEView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))

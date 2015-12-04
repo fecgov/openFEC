@@ -7,7 +7,8 @@ select
     to_tsvector(contbr_employer) as contributor_employer_text,
     to_tsvector(contbr_occupation) as contributor_occupation_text,
     is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
-        as is_individual
+        as is_individual,
+    clean_repeated(contbr_id, cmte_id) as clean_contbr_id
 from sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 ;
@@ -19,10 +20,10 @@ create index on ofec_sched_a (rpt_yr);
 create index on ofec_sched_a (entity_tp);
 create index on ofec_sched_a (image_num);
 create index on ofec_sched_a (sched_a_sk);
-create index on ofec_sched_a (contbr_id);
 create index on ofec_sched_a (contbr_st);
 create index on ofec_sched_a (contbr_city);
 create index on ofec_sched_a (is_individual);
+create index on ofec_sched_a (clean_contbr_id);
 
 -- Create composite indices on sortable columns
 create index on ofec_sched_a (contb_receipt_dt, sched_a_sk);

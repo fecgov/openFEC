@@ -84,12 +84,12 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('select refresh_materialized()')
 
     def test_committee_year_filter(self):
-        self._check_entity_model(models.Committee, 'committee_key')
-        self._check_entity_model(models.CommitteeDetail, 'committee_key')
+        self._check_entity_model(models.Committee, 'committee_id')
+        self._check_entity_model(models.CommitteeDetail, 'committee_id')
 
     def test_candidate_year_filter(self):
-        self._check_entity_model(models.Candidate, 'candidate_key')
-        self._check_entity_model(models.CandidateDetail, 'candidate_key')
+        self._check_entity_model(models.Candidate, 'candidate_id')
+        self._check_entity_model(models.CandidateDetail, 'candidate_id')
 
     def test_reports_year_filter(self):
         for model in REPORTS_MODELS:
@@ -136,14 +136,6 @@ class TestViews(common.IntegrationTestCase):
             models.CandidateSearch.query.count(),
         ]
         assert len(set(counts)) == 1
-
-    def test_exclude_z_only_filers(self):
-        dcp = sa.Table('dimcandproperties', db.metadata, autoload=True, autoload_with=db.engine)
-        s = sa.select([dcp.c.cand_sk]).where(dcp.c.form_tp != 'F2Z').distinct()
-        expected = [int(each.cand_sk) for each in db.engine.execute(s).fetchall()]
-        for model in CANDIDATE_MODELS:
-            observed = [each.candidate_key for each in model.query.all()]
-            self.assertFalse(set(observed).difference(expected))
 
     def test_sched_a_fulltext_trigger(self):
         # Test create

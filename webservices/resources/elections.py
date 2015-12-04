@@ -101,12 +101,17 @@ class ElectionList(utils.Resource):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(CandidateHistory.office.in_(values))
         if kwargs.get('state'):
-            query = query.filter(CandidateHistory.state.in_(kwargs['state'] + ['US']))
+            query = query.filter(
+                sa.or_(
+                    CandidateHistory.state.in_(kwargs['state']),
+                    CandidateHistory.office == 'P',
+                )
+            )
         if kwargs.get('district'):
             query = query.filter(
                 sa.or_(
                     CandidateHistory.district.in_(kwargs['district']),
-                    CandidateHistory.district == None  # noqa
+                    CandidateHistory.office.in_(['P', 'S']),
                 ),
             )
         if kwargs.get('zip'):
@@ -192,7 +197,7 @@ class ElectionView(utils.Resource):
             CandidateHistory.party_full,
             CandidateHistory.incumbent_challenge_full,
             CandidateHistory.office,
-            totals_model.committee_id,
+            CommitteeHistory.committee_id,
             totals_model.receipts,
             totals_model.disbursements,
             totals_model.last_report_year.label('report_year'),
@@ -200,14 +205,14 @@ class ElectionView(utils.Resource):
             totals_model.last_beginning_image_number.label('beginning_image_number'),
             totals_model.last_cash_on_hand_end_period.label('cash_on_hand_end_period'),
         ).distinct(
-            CandidateHistory.candidate_key,
-            CommitteeHistory.committee_key,
+            CandidateHistory.candidate_id,
+            CommitteeHistory.committee_id,
         )
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)
         return pairs.order_by(
-            CandidateHistory.candidate_key,
-            CommitteeHistory.committee_key,
+            CandidateHistory.candidate_id,
+            CommitteeHistory.committee_id,
             sa.desc(totals_model.coverage_end_date),
         )
 
@@ -300,10 +305,10 @@ class ElectionSummary(utils.Resource):
 def join_candidate_totals(query, kwargs, totals_model):
     return query.join(
         CandidateCommitteeLink,
-        CandidateHistory.candidate_key == CandidateCommitteeLink.candidate_key,
+        CandidateHistory.candidate_id == CandidateCommitteeLink.candidate_id,
     ).join(
         CommitteeHistory,
-        CandidateCommitteeLink.committee_key == CommitteeHistory.committee_key,
+        CandidateCommitteeLink.committee_id == CommitteeHistory.committee_id,
     ).join(
         totals_model,
         CommitteeHistory.committee_id == totals_model.committee_id,
@@ -327,7 +332,7 @@ def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
         CandidateHistory.candidate_inactive == None,  # noqa
-        CandidateCommitteeLink.election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
+        CandidateCommitteeLink.cand_election_year.in_([kwargs['cycle'], kwargs['cycle'] - 1]),
         CommitteeHistory.cycle == kwargs['cycle'],
         CommitteeHistory.designation.in_(['P', 'A']),
         totals_model.cycle == kwargs['cycle'],

@@ -1,3 +1,6 @@
+from tests import factories
+from tests.common import ApiBaseTest
+
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
@@ -10,9 +13,6 @@ from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
 )
-
-from tests import factories
-from tests.common import ApiBaseTest
 
 
 class TestAggregates(ApiBaseTest):
@@ -70,7 +70,6 @@ class TestAggregates(ApiBaseTest):
         )
         factories.CandidateHistoryFactory(
             candidate_id=candidate.candidate_id,
-            candidate_key=candidate.candidate_key,
             two_year_period=2012,
             election_years=[2012],
             office='P',
@@ -106,21 +105,21 @@ class TestCandidateAggregates(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
-        factories.CandidateDetailFactory(candidate_key=self.candidate.candidate_key)
+        factories.CandidateDetailFactory(candidate_id=self.candidate.candidate_id)
         [
-            factories.CommitteeDetailFactory(committee_key=each.committee_key)
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
         ]
         db.session.flush()
         factories.CandidateCommitteeLinkFactory(
-            candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[0].committee_key,
-            election_year=2012,
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[0].committee_id,
+            cand_election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
-            candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[1].committee_key,
-            election_year=2012,
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[1].committee_id,
+            cand_election_year=2012,
         )
 
     def test_by_size(self):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import os
 import glob
+import logging
 import subprocess
 import multiprocessing
 
@@ -9,12 +9,15 @@ from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
 
+from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG
 from webservices.common.util import get_full_path
 
 
 manager = Manager(app)
+logger = logging.getLogger('manager')
+logging.basicConfig(level=logging.INFO)
 
 # The Flask app server should only be used for local testing, so we default to
 # using debug mode and auto-reload. To disable debug mode locally, pass the
@@ -26,7 +29,7 @@ def execute_sql_file(path):
     # This helper is typically used within a multiprocessing pool; create a new database
     # engine for each job.
     db.engine.dispose()
-    print(('Running {}'.format(path)))
+    logger.info(('Running {}'.format(path)))
     with open(path) as fp:
         cmd = '\n'.join([
             line for line in fp.readlines()
@@ -48,26 +51,18 @@ def execute_sql_folder(path, processes):
 
 @manager.command
 def load_pacronyms():
-    count = db.engine.execute(
-        "select count(*) from pg_tables where tablename = 'pacronyms'"
-    ).fetchone()[0]
-    if count:
-        db.engine.execute(
-            'delete from pacronyms'
-        )
-    cmd = ' | '.join([
-        'in2csv data/pacronyms.xlsx',
-        'csvsql --insert --db {dest} --table pacronyms'
-    ]).format(dest=db.engine.url)
-    if count:
-        cmd += ' --no-create'
-    with open(os.devnull, 'w') as null:
-        subprocess.call(cmd, shell=True, stdout=null, stderr=null)
-
-def load_table(frame, tablename, indexes=()):
+    import pandas as pd
     import sqlalchemy as sa
-    db.engine.execute('drop table if exists {}'.format(tablename))
-    frame.to_sql(tablename, db.engine)
+    try:
+        table = sa.Table('ofec_pacronyms', db.metadata, autoload_with=db.engine)
+        db.engine.execute(table.delete())
+    except sa.exc.NoSuchTableError:
+        pass
+    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', indexes=('ID NUMBER', ))
+
+def load_table(frame, tablename, if_exists='replace', indexes=()):
+    import sqlalchemy as sa
+    frame.to_sql(tablename, db.engine, if_exists=if_exists)
     table = sa.Table(tablename, db.metadata, autoload_with=db.engine)
     for index in indexes:
         sa.Index('{}_{}_idx'.format(tablename, index), table.c[index]).create(db.engine)
@@ -75,8 +70,8 @@ def load_table(frame, tablename, indexes=()):
 @manager.command
 def build_districts():
     import pandas as pd
-    load_table('ofec_fips_states', pd.read_csv('data/fips_states.csv'))
-    load_table('ofec_zips_districts', pd.read_csv('data/natl_zccd_delim.csv'), indexes=('zcta', ))
+    load_table(pd.read_csv('data/fips_states.csv'), 'ofec_fips_states')
+    load_table(pd.read_csv('data/natl_zccd_delim.csv'), 'ofec_zips_districts', indexes=('ZCTA', ))
 
 @manager.command
 def load_election_dates():
@@ -102,7 +97,9 @@ def dump_districts(dest=None):
 def load_districts(source=None):
     source = source or './data/districts.dump'
     dest = db.engine.url
-    cmd = 'pg_restore --dbname {dest} --no-acl --no-owner {source}'.format(**locals())
+    cmd = (
+        'pg_restore --dbname {dest} --no-acl --no-owner --clean {source}'
+    ).format(**locals())
     subprocess.call(cmd, shell=True)
 
 @manager.command
@@ -112,13 +109,11 @@ def build_district_counts(outname='districts.json'):
 
 @manager.command
 def update_schemas(processes=1):
-    print("Starting DB refresh...")
+    logger.info("Starting DB refresh...")
     processes = int(processes)
-    load_pacronyms()
-    load_election_dates()
     execute_sql_folder('data/sql_updates/', processes=processes)
     execute_sql_file('data/rename_temporary_views.sql')
-    print("Finished DB refresh.")
+    logger.info("Finished DB refresh.")
 
 @manager.command
 def update_functions(processes=1):
@@ -126,21 +121,21 @@ def update_functions(processes=1):
 
 @manager.command
 def update_itemized(schedule):
-    print('Updating Schedule {0} tables...'.format(schedule))
+    logger.info('Updating Schedule {0} tables...'.format(schedule))
     execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
-    print('Finished Schedule {0} update.'.format(schedule))
+    logger.info('Finished Schedule {0} update.'.format(schedule))
 
 @manager.command
 def rebuild_aggregates(processes=1):
-    print('Rebuilding incremental aggregates...')
+    logger.info('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
-    print('Finished rebuilding incremental aggregates.')
+    logger.info('Finished rebuilding incremental aggregates.')
 
 @manager.command
 def update_aggregates():
-    print('Updating incremental aggregates...')
+    logger.info('Updating incremental aggregates...')
     db.engine.execute('select update_aggregates()')
-    print('Finished updating incremental aggregates.')
+    logger.info('Finished updating incremental aggregates.')
 
 @manager.command
 def update_all(processes=1):
@@ -149,6 +144,8 @@ def update_all(processes=1):
     processes = int(processes)
     update_functions(processes=processes)
     load_districts()
+    load_pacronyms()
+    load_election_dates()
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
@@ -158,37 +155,14 @@ def update_all(processes=1):
 @manager.command
 def refresh_materialized():
     """Refresh materialized views."""
-    print('Refreshing materialized views...')
+    logger.info('Refreshing materialized views...')
     execute_sql_file('data/refresh_materialized_views.sql')
-    print('Finished refreshing materialized views.')
-
-@manager.command
-def stop_beat():
-    """Kill all celery beat workers.
-    Note: In the future, it would be more elegant to use a process manager like
-    supervisor or forever.
-    """
-    return subprocess.Popen(
-        "ps aux | grep 'cron.py' | awk '{print $2}' | xargs kill -9",
-        shell=True,
-    )
-
-@manager.command
-def start_beat():
-    """Start celery beat workers in the background using subprocess.
-    """
-    # Stop beat workers synchronously
-    stop_beat().wait()
-    return subprocess.Popen(['python', 'cron.py'])
+    logger.info('Finished refreshing materialized views.')
 
 @manager.command
 def cf_startup():
-    """Start celery beat and schema migration on `cf-push`. Services are only
-    started if running on 0th instance.
-    """
-    instance_id = os.getenv('CF_INSTANCE_INDEX')
-    if instance_id == '0':
-        start_beat()
+    """Migrate schemas on `cf push`."""
+    if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 
 if __name__ == '__main__':

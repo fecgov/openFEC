@@ -5,7 +5,8 @@ select
     *,
     to_tsvector(recipient_nm) as recipient_name_text,
     to_tsvector(disb_desc) as disbursement_description_text,
-    disbursement_purpose(disb_tp, disb_desc) as disbursement_purpose_category
+    disbursement_purpose(disb_tp, disb_desc) as disbursement_purpose_category,
+    clean_repeated(recipient_cmte_id, cmte_id) as clean_recipient_cmte_id
 from sched_b
 where rpt_yr >= :START_YEAR_ITEMIZED
 ;
@@ -18,7 +19,7 @@ create index on ofec_sched_b (image_num);
 create index on ofec_sched_b (sched_b_sk);
 create index on ofec_sched_b (recipient_st);
 create index on ofec_sched_b (recipient_city);
-create index on ofec_sched_b (recipient_cmte_id);
+create index on ofec_sched_b (clean_recipient_cmte_id);
 
 -- Create composite indices on sortable columns
 create index on ofec_sched_b(disb_dt, sched_b_sk);
