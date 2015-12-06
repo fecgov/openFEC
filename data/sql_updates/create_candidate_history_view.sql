@@ -2,7 +2,7 @@ drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
 create materialized view ofec_candidate_history_mv_tmp as
 with
     -- Select rows from `cand_valid_fec_yr` that are associated with principal
-    -- or authorizated committees via `cand_cmte_linkage`.
+    -- or authorized committees via `cand_cmte_linkage`
     fec_yr as (
         select
             distinct on (cand_valid_yr_id)
@@ -38,7 +38,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_ici as incumbent_challenge,
     expand_candidate_incumbent(fec_yr.cand_ici) as incumbent_challenge_full,
     fec_yr.cand_status as candidate_status,
-    dsi.cand_inactive_flg as candidate_inactive,
+    inactive.cand_id is null as candidate_inactive,
     fec_yr.cand_office as office,
     expand_office(fec_yr.cand_office) as office_full,
     fec_yr.cand_office_st as state,
@@ -53,7 +53,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
 from fec_yr
 left join cycles using (cand_id)
 left join dimcand dc using (cand_id)
-left join dimcandstatusici dsi on dc.cand_sk = dsi.cand_sk and dsi.election_yr <= fec_yr.fec_election_yr
+left join cand_inactive inactive using (cand_id)
 inner join dimparty dp on fec_yr.cand_pty_affiliation = dp.party_affiliation
 where max_cycle >= :START_YEAR
 ;
