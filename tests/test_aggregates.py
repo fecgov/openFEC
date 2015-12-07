@@ -1,5 +1,8 @@
 import functools
 
+from tests import factories
+from tests.common import ApiBaseTest
+
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
@@ -12,9 +15,6 @@ from webservices.resources.candidate_aggregates import (
     ScheduleAByStateCandidateView,
     TotalsCandidateView,
 )
-
-from tests import factories
-from tests.common import ApiBaseTest
 
 
 class TestAggregates(ApiBaseTest):
@@ -290,9 +290,9 @@ class TestCandidateAggregates(ApiBaseTest):
         }
 
     def test_totals_full(self):
-        """Assert that all two-year totals for the given election period,
-        including the current two-year period and the two preceding periods
-        (since the test candidate is a Senate candidate).
+        """Assert that all two-year totals for the given election period are
+        aggregated by candidate, including the current two-year period and the
+        two preceding periods (since the test candidate is a Senate candidate).
         """
         totals = self.get_totals()
         last_totals = totals[:2]

@@ -1,11 +1,11 @@
 import datetime
 import functools
 
-from webservices.rest import db, api
-from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
-
 from tests import factories
 from tests.common import ApiBaseTest
+
+from webservices.rest import db, api
+from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
 
 
 class TestElectionSearch(ApiBaseTest):
