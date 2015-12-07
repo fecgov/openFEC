@@ -94,6 +94,11 @@ class TestAggregates(ApiBaseTest):
             assert results[0] == serialized
 
     def test_candidate_aggregates_by_committee_full(self):
+        """For each aggregate type, create a two-year aggregate in the target
+        election year and a two-year aggregate in the previous two-year period.
+        Assert that both aggregates are summed when the `election_full` flag is
+        passed.
+        """
         for factory, resource, schema in self.cases:
             aggregates = self.make_aggregates(factory)
             results = self._results(
@@ -159,6 +164,8 @@ class TestCandidateAggregates(ApiBaseTest):
             for each in self.committees
         ]
         db.session.flush()
+        # Create two-year totals for both the target period (2011-2012) and the
+        # previous period (2009-2010) for testing the `election_full` flag
         factories.CandidateCommitteeLinkFactory(
             candidate_id=self.candidate.candidate_id,
             committee_id=self.committees[0].committee_id,
@@ -261,6 +268,9 @@ class TestCandidateAggregates(ApiBaseTest):
         ]
 
     def test_totals(self):
+        """Assert that all two-year totals for the given two-year period are
+        aggregated by candidate.
+        """
         totals = self.get_totals()
         last_totals = totals[:2]
         results = self._results(
@@ -280,6 +290,10 @@ class TestCandidateAggregates(ApiBaseTest):
         }
 
     def test_totals_full(self):
+        """Assert that all two-year totals for the given election period,
+        including the current two-year period and the two preceding periods
+        (since the test candidate is a Senate candidate).
+        """
         totals = self.get_totals()
         last_totals = totals[:2]
         results = self._results(
@@ -298,3 +312,18 @@ class TestCandidateAggregates(ApiBaseTest):
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
             'debts_owed_by_committee': sum(each.last_debts_owed_by_committee for each in last_totals),
         }
+
+    def test_totals_full_off_year(self):
+        """Assert that no results are returned when the `election_full` flag is
+        passed and the target period isn't an election year.
+        """
+        self.get_totals()
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2010,
+                election_full='true',
+            )
+        )
+        assert len(results) == 0
