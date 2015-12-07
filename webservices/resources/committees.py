@@ -6,12 +6,7 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.common.util import filter_query
 from webservices.common.views import ApiResource
-
-
-list_filter_fields = {'committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type'}
-detail_filter_fields = {'designation', 'organization_type', 'committee_type'}
 
 
 def filter_year(model, query, years):
@@ -39,6 +34,18 @@ class CommitteeList(ApiResource):
     schema = schemas.CommitteeSchema
     page_schema = schemas.CommitteePageSchema
 
+    filter_multi_fields = [
+        ('committee_id', models.Committee.committee_id),
+        ('designation', models.Committee.designation),
+        ('organization_type', models.Committee.organization_type),
+        ('state', models.Committee.state),
+        ('party', models.Committee.party),
+        ('committee_type', models.Committee.committee_type),
+    ]
+    filter_range_fields = [
+        (('min_first_file_date', 'max_first_file_date'), models.Committee.first_file_date),
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -52,17 +59,16 @@ class CommitteeList(ApiResource):
         )
 
     def build_query(self, **kwargs):
-
-        committees = models.Committee.query
+        query = super().build_query(**kwargs)
 
         if kwargs.get('candidate_id'):
-            committees = committees.filter(
+            query = query.filter(
                 models.Committee.candidate_ids.overlap(kwargs['candidate_id'])
             )
 
         if kwargs.get('q'):
-            committees = utils.search_text(
-                committees.join(
+            query = utils.search_text(
+                query.join(
                     models.CommitteeSearch,
                     models.Committee.committee_id == models.CommitteeSearch.id,
                 ),
@@ -71,22 +77,15 @@ class CommitteeList(ApiResource):
             ).distinct()
 
         if kwargs.get('name'):
-            committees = committees.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
-
-        committees = filter_query(models.Committee, committees, list_filter_fields, kwargs)
+            query = query.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
 
         if kwargs.get('year'):
-            committees = filter_year(models.Committee, committees, kwargs['year'])
+            query = filter_year(models.Committee, query, kwargs['year'])
 
         if kwargs.get('cycle'):
-            committees = committees.filter(models.Committee.cycles.overlap(kwargs['cycle']))
+            query = query.filter(models.Committee.cycles.overlap(kwargs['cycle']))
 
-        if kwargs.get('min_first_file_date'):
-            committees = committees.filter(models.Committee.first_file_date >= kwargs['min_first_file_date'])
-        if kwargs.get('max_first_file_date'):
-            committees = committees.filter(models.Committee.first_file_date <= kwargs['max_first_file_date'])
-
-        return committees
+        return query
 
 
 @doc(
@@ -103,6 +102,12 @@ class CommitteeView(ApiResource):
     schema = schemas.CommitteeDetailSchema
     page_schema = schemas.CommitteeDetailPageSchema
 
+    filter_multi_fields = [
+        ('designation', models.CommitteeDetail.designation),
+        ('organization_type', models.CommitteeDetail.organization_type),
+        ('committee_type', models.CommitteeDetail.committee_type),
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -115,28 +120,25 @@ class CommitteeView(ApiResource):
         )
 
     def build_query(self, committee_id=None, candidate_id=None, **kwargs):
-
-        committees = models.CommitteeDetail.query
+        query = super().build_query(**kwargs)
 
         if committee_id is not None:
-            committees = committees.filter_by(committee_id=committee_id)
+            query = query.filter_by(committee_id=committee_id)
 
         if candidate_id is not None:
-            committees = models.CommitteeDetail.query.join(
+            query = query.join(
                 models.CandidateCommitteeLink
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
             ).distinct()
 
-        committees = filter_query(models.CommitteeDetail, committees, detail_filter_fields, kwargs)
-
         if kwargs.get('year'):
-            committees = filter_year(models.CommitteeDetail, committees, kwargs['year'])
+            query = filter_year(models.CommitteeDetail, query, kwargs['year'])
 
         if kwargs.get('cycle'):
-            committees = committees.filter(models.CommitteeDetail.cycles.overlap(kwargs['cycle']))
+            query = query.filter(models.CommitteeDetail.cycles.overlap(kwargs['cycle']))
 
-        return committees
+        return query
 
 
 @doc(

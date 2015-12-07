@@ -6,19 +6,19 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.common.util import filter_query
 from webservices.common.views import ApiResource
 
 
-filter_fields = {
-    'candidate_id',
-    'candidate_status',
-    'district',
-    'incumbent_challenge',
-    'office',
-    'party',
-    'state',
-}
+def filter_multi_fields(model):
+    return [
+        ('candidate_id', model.candidate_id),
+        ('candidate_status', model.candidate_status),
+        ('district', model.district),
+        ('incumbent_challenge', model.incumbent_challenge),
+        ('office', model.office),
+        ('party', model.party),
+        ('state', model.state),
+    ]
 
 
 @doc(
@@ -30,6 +30,7 @@ class CandidateList(ApiResource):
     model = models.Candidate
     schema = schemas.CandidateSchema
     page_schema = schemas.CandidatePageSchema
+    filter_multi_fields = filter_multi_fields(models.Candidate)
 
     @property
     def query(self):
@@ -48,12 +49,11 @@ class CandidateList(ApiResource):
         )
 
     def build_query(self, **kwargs):
-
-        candidates = self.query
+        query = super().build_query(**kwargs)
 
         if kwargs.get('q'):
-            candidates = utils.search_text(
-                candidates.join(
+            query = utils.search_text(
+                query.join(
                     models.CandidateSearch,
                     models.Candidate.candidate_id == models.CandidateSearch.id,
                 ),
@@ -61,16 +61,14 @@ class CandidateList(ApiResource):
                 kwargs['q'],
             ).distinct()
 
-        candidates = filter_query(models.Candidate, candidates, filter_fields, kwargs)
-
         if kwargs.get('name'):
-            candidates = candidates.filter(models.Candidate.name.ilike('%{}%'.format(kwargs['name'])))
+            query = query.filter(models.Candidate.name.ilike('%{}%'.format(kwargs['name'])))
 
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs.get('cycle'):
-            candidates = candidates.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
+            query = query.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
 
-        return candidates
+        return query
 
 
 @doc(
@@ -81,13 +79,7 @@ class CandidateSearch(CandidateList):
 
     schema = schemas.CandidateSearchSchema
     page_schema = schemas.CandidateSearchPageSchema
-
-    @property
-    def query(self):
-        # Eagerly load principal committees to avoid extra queries
-        return models.Candidate.query.options(
-            sa.orm.subqueryload(models.Candidate.principal_committees)
-        )
+    query_options = [sa.orm.subqueryload(models.Candidate.principal_committees)]
 
 
 @doc(
@@ -103,6 +95,7 @@ class CandidateView(ApiResource):
     model = models.CandidateDetail
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
+    filter_multi_fields = filter_multi_fields(models.CandidateDetail)
 
     @property
     def args(self):
@@ -116,24 +109,23 @@ class CandidateView(ApiResource):
         )
 
     def build_query(self, candidate_id=None, committee_id=None, **kwargs):
+        query = super().build_query(**kwargs)
+
         if candidate_id is not None:
-            candidates = models.CandidateDetail.query
-            candidates = candidates.filter_by(candidate_id=candidate_id)
+            query = query.filter_by(candidate_id=candidate_id)
 
         if committee_id is not None:
-            candidates = models.CandidateDetail.query.join(
+            query = query.join(
                 models.CandidateCommitteeLink
             ).filter(
                 models.CandidateCommitteeLink.committee_id == committee_id
             ).distinct()
 
-        candidates = filter_query(models.CandidateDetail, candidates, filter_fields, kwargs)
-
         # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs.get('cycle'):
-            candidates = candidates.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
+            query = query.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
 
-        return candidates
+        return query
 
 
 @doc(
