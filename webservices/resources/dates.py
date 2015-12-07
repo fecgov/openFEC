@@ -27,21 +27,21 @@ class DatesResource(ApiResource):
 @doc(description='FEC reporting dates since 1995.')
 class ReportingDatesView(DatesResource):
 
-    model = models.ReportingDates
+    model = models.ReportDate
 
     @property
     def date_column(self):
         return self.model.due_date
 
     filter_multi_fields = [
-        ('due_date', models.ReportingDates.due_date),
-        ('report_year', models.ReportingDates.report_year),
-        ('report_type', models.ReportingDates.report_type),
-        ('create_date', models.ReportingDates.create_date),
-        ('update_date', models.ReportingDates.update_date),
+        ('due_date', models.ReportDate.due_date),
+        ('report_year', models.ReportDate.report_year),
+        ('report_type', models.ReportDate.report_type),
+        ('create_date', models.ReportDate.create_date),
+        ('update_date', models.ReportDate.update_date),
     ]
 
-    query_options = [sa.orm.joinedload(models.ReportingDates.report)]
+    query_options = [sa.orm.joinedload(models.ReportDate.report)]
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reporting_dates)
@@ -58,24 +58,24 @@ class ReportingDatesView(DatesResource):
 @doc(description='FEC election dates since 1995.')
 class ElectionDatesView(DatesResource):
 
-    model = models.ElectionDates
+    model = models.ElectionDate
 
     @property
     def date_column(self):
         return self.model.election_date
 
     filter_multi_fields = [
-        ('election_state', models.ElectionDates.election_state),
-        ('election_district', models.ElectionDates.election_district),
-        ('election_party', models.ElectionDates.election_party),
-        ('office_sought', models.ElectionDates.office_sought),
-        ('election_date', models.ElectionDates.election_date),
-        ('trc_election_type_id', models.ElectionDates.trc_election_type_id),
-        ('trc_election_status_id', models.ElectionDates.trc_election_status_id),
-        ('update_date', models.ElectionDates.update_date),
-        ('create_date', models.ElectionDates.create_date),
-        ('election_year', models.ElectionDates.election_year),
-        ('pg_date', models.ElectionDates.pg_date),
+        ('election_state', models.ElectionDate.election_state),
+        ('election_district', models.ElectionDate.election_district),
+        ('election_party', models.ElectionDate.election_party),
+        ('office_sought', models.ElectionDate.office_sought),
+        ('election_date', models.ElectionDate.election_date),
+        ('trc_election_type_id', models.ElectionDate.trc_election_type_id),
+        ('trc_election_status_id', models.ElectionDate.trc_election_status_id),
+        ('update_date', models.ElectionDate.update_date),
+        ('create_date', models.ElectionDate.create_date),
+        ('election_year', models.ElectionDate.election_year),
+        ('pg_date', models.ElectionDate.pg_date),
     ]
 
     @use_kwargs(args.paging)

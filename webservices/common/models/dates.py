@@ -1,42 +1,40 @@
 import re
 
-from sqlalchemy import ForeignKey
-
 from webservices import decoders
 
 from .base import db
 
-class ReportNames(db.Model):
+
+class ReportType(db.Model):
     __tablename__ = 'dimreporttype'
 
-    # TODO: rename to `report_type` etc.
-    rpt_tp = db.Column(db.String, index=True, primary_key=True)
-    rpt_tp_desc = db.Column(db.String, index=True)
+    report_type = db.Column('rpt_tp', db.String, index=True, primary_key=True)
+    report_type_full = db.Column('rpt_tp_desc', db.String, index=True)
 
 
-class ReportingDates(db.Model):
+class ReportDate(db.Model):
     __tablename__ = 'trc_report_due_date'
 
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True)
-    report_type = db.Column(db.String, ForeignKey(ReportNames.rpt_tp), index=True)
+    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
     due_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
     update_date = db.Column(db.Date, index=True)
 
-    report = db.relationship(
-        'ReportNames',
-        primaryjoin='''and_(
-            foreign(ReportingDates.report_type) == ReportNames.rpt_tp,
-        )'''
-    )
+    report = db.relationship(ReportType)
 
     @property
     def report_type_full(self):
-        return re.sub(r'\{[^)]*\}', '', self.report.rpt_tp_desc).strip()
+        return clean_report_type(self.report.report_type_full)
 
 
-class ElectionDates(db.Model):
+REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')
+def clean_report_type(report_type):
+    return REPORT_TYPE_CLEAN.sub('', report_type).strip()
+
+
+class ElectionDate(db.Model):
     __tablename__ = 'trc_election'
 
     trc_election_id = db.Column(db.BigInteger, primary_key=True)
