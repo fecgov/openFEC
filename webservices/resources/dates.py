@@ -34,11 +34,13 @@ class ReportingDatesView(DatesResource):
         return self.model.due_date
 
     filter_multi_fields = [
-        ('due_date', models.ReportDate.due_date),
         ('report_year', models.ReportDate.report_year),
-        ('report_type', models.ReportDate.report_type),
-        ('create_date', models.ReportDate.create_date),
-        ('update_date', models.ReportDate.update_date),
+        ('report_type', models.ReportDate.report_type)
+    ]
+    filter_range_fields = [
+        (('min_due_date', 'max_due_date'), models.ReportDate.due_date),
+        (('min_create_date', 'max_create_date'), models.ReportDate.create_date),
+        (('min_update_date', 'max_update_date'), models.ReportDate.update_date),
     ]
 
     query_options = [sa.orm.joinedload(models.ReportDate.report)]
@@ -69,13 +71,16 @@ class ElectionDatesView(DatesResource):
         ('election_district', models.ElectionDate.election_district),
         ('election_party', models.ElectionDate.election_party),
         ('office_sought', models.ElectionDate.office_sought),
-        ('election_date', models.ElectionDate.election_date),
         ('trc_election_type_id', models.ElectionDate.trc_election_type_id),
         ('trc_election_status_id', models.ElectionDate.trc_election_status_id),
-        ('update_date', models.ElectionDate.update_date),
-        ('create_date', models.ElectionDate.create_date),
         ('election_year', models.ElectionDate.election_year),
-        ('pg_date', models.ElectionDate.pg_date),
+    ]
+
+    filter_range_fields = [
+        (('min_election_date','max_election_date'), models.ElectionDate.election_date),
+        (('min_update_date','max_update_date'), models.ElectionDate.update_date),
+        (('min_create_date','max_create_date'), models.ElectionDate.create_date),
+        (('min_primary_general_date','max_primary_general_date'), models.ElectionDate.primary_general_date),
     ]
 
     @use_kwargs(args.paging)
