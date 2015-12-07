@@ -1,11 +1,11 @@
 import json
 
+from tests import factories
+from tests.common import ApiBaseTest
+
 from webservices import utils
 from webservices.rest import api
 from webservices.resources.totals import TotalsView
-
-from tests import factories
-from .common import ApiBaseTest
 
 
 shared_fields = {

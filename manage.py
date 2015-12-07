@@ -50,6 +50,17 @@ def execute_sql_folder(path, processes):
             execute_sql_file(path)
 
 @manager.command
+def load_nicknames():
+    import pandas as pd
+    import sqlalchemy as sa
+    try:
+        table = sa.Table('ofec_nicknames', db.metadata, autoload_with=db.engine)
+        db.engine.execute(table.delete())
+    except sa.exc.NoSuchTableError:
+        pass
+    load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames', if_exists='append')
+
+@manager.command
 def load_pacronyms():
     import pandas as pd
     import sqlalchemy as sa
@@ -58,7 +69,7 @@ def load_pacronyms():
         db.engine.execute(table.delete())
     except sa.exc.NoSuchTableError:
         pass
-    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', indexes=('ID NUMBER', ))
+    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', if_exists='append')
 
 def load_table(frame, tablename, if_exists='replace', indexes=()):
     import sqlalchemy as sa
@@ -145,6 +156,7 @@ def update_all(processes=1):
     update_functions(processes=processes)
     load_districts()
     load_pacronyms()
+    load_nicknames()
     load_election_dates()
     update_itemized('a')
     update_itemized('b')
