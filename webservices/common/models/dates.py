@@ -49,7 +49,7 @@ class ElectionDate(db.Model):
     update_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
     election_year = db.Column('election_yr', db.Integer, index=True)
-    pg_date = db.Column(db.Date, index=True)
+    primary_general_date = db.Column('pg_date', db.Date, index=True)
 
     @property
     def election_type_full(self):

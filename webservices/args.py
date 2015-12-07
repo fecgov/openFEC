@@ -280,11 +280,14 @@ itemized = {
 }
 
 reporting_dates = {
-    'due_date': fields.List(fields.Date, description='Date the report is due.'),
+    'min_due_date': fields.Date(description='Date the report is due.'),
+    'max_due_date': fields.Date(description='Date the report is due.'),
     'report_year': fields.List(fields.Int, description='Year of report.'),
     'report_type': fields.List(fields.Str, description='Type of report.'),
-    'create_date': fields.List(fields.Date, description='Date this record was added to the system.'),
-    'update_date': fields.List(fields.Date, description='Date this record was last updated.'),
+    'min_create_date': fields.Date(description='Date this record was added to the system.'),
+    'max_create_date': fields.Date(description='Date this record was added to the system.'),
+    'min_update_date': fields.Date(description='Date this record was last updated.'),
+    'max_update_date': fields.Date(description='Date this record was last updated.'),
     'upcoming': fields.Bool(missing=False, description='Only show future due dates for each type of report.'),
 }
 
@@ -293,13 +296,17 @@ election_dates = {
     'election_district': fields.List(fields.Str, description='House district of the office sought, if applicable.'),
     'election_party': fields.List(fields.Str, description='Party, if applicable.'),
     'office_sought': fields.List(fields.Str(validate=validate.OneOf(['H', 'S', 'P'])), description='House, Senate or presidential office'),
-    'election_date': fields.List(fields.Date, description='Date of election.'),
+    'min_election_date': fields.Date(description='Date of election.'),
+    'max_election_date': fields.Date(description='Date of election.'),
     'trc_election_type_id': fields.List(fields.Str, description='Election type'),
     'trc_election_status_id': fields.List(fields.Str, description=''),
-    'update_date': fields.List(fields.Date, description='Date this record was last updated.'),
-    'create_date': fields.List(fields.Date, description='Date this record was added to the system.'),
+    'min_update_date': fields.Date(description='Date this record was last updated.'),
+    'max_update_date': fields.Date(description='Date this record was last updated.'),
+    'min_create_date': fields.Date(description='Date this record was added to the system.'),
+    'max_create_date': fields.Date(description='Date this record was added to the system.'),
     'election_year': fields.List(fields.Str, description='Year of election.'),
-    'pg_date': fields.List(fields.Date, description='Date'),
+    'min_primary_general_date': fields.Date(description='Date of primary or general election'),
+    'max_primary_general_date': fields.Date(description='Date of primary or general election'),
     'upcoming': fields.Bool(missing=False, description='Only show future due dates for each type of report.'),
 }
 
