@@ -58,7 +58,7 @@ def load_nicknames():
         db.engine.execute(table.delete())
     except sa.exc.NoSuchTableError:
         pass
-    load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames')
+    load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames', if_exists='append')
 
 @manager.command
 def load_pacronyms():
@@ -69,7 +69,7 @@ def load_pacronyms():
         db.engine.execute(table.delete())
     except sa.exc.NoSuchTableError:
         pass
-    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', indexes=('ID NUMBER', ))
+    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', if_exists='append')
 
 def load_table(frame, tablename, if_exists='replace', indexes=()):
     import sqlalchemy as sa
