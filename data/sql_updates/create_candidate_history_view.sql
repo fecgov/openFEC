@@ -135,6 +135,13 @@ create index on ofec_candidate_detail_mv_tmp using gin (election_years);
 drop table if exists dimcand_fulltext;
 drop materialized view if exists ofec_candidate_fulltext_mv_tmp;
 create materialized view ofec_candidate_fulltext_mv_tmp as
+with nicknames as (
+    select
+        candidate_id,
+        string_agg(nickname, ' ') as nicknames
+    from ofec_nicknames
+    group by candidate_id
+)
 select distinct on (candidate_id)
     row_number() over () as idx,
     candidate_id as id,
@@ -143,11 +150,12 @@ select distinct on (candidate_id)
     case
         when name is not null then
             setweight(to_tsvector(name), 'A') ||
+            setweight(to_tsvector(coalesce(nicknames, '')), 'A') ||
             setweight(to_tsvector(candidate_id), 'B')
         else null::tsvector
-    end
-as fulltxt
+    end as fulltxt
 from ofec_candidate_detail_mv_tmp
+left join nicknames using (candidate_id)
 ;
 
 create unique index on ofec_candidate_fulltext_mv_tmp(idx);
