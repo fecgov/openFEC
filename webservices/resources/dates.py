@@ -4,11 +4,10 @@ import sqlalchemy as sa
 from flask_apispec import doc, marshal_with
 
 from webservices import args
-from webservices import utils
 from webservices import schemas
 from webservices.common import models
 from webservices.utils import use_kwargs
-from webservices.common.util import filter_query
+from webservices.common.views import ApiResource
 
 
 def filter_upcoming(query, column, kwargs):
@@ -18,32 +17,31 @@ def filter_upcoming(query, column, kwargs):
 
 
 @doc(tags=['dates'])
-class DatesResource(utils.Resource):
+class DatesResource(ApiResource):
 
-    def get(self, **kwargs):
-        query = self.model.query
-        query = filter_query(self.model, query, self.filter_fields, kwargs)
-        query = filter_upcoming(query, self.date_column, kwargs)
-        return utils.fetch_page(query, kwargs, model=self.model)
+    def build_query(self, *args, **kwargs):
+        query = super().build_query(*args, **kwargs)
+        return filter_upcoming(query, self.date_column, kwargs)
 
 
 @doc(description='FEC reporting dates since 1995.')
 class ReportingDatesView(DatesResource):
 
-    model = models.ReportingDates
+    model = models.ReportDate
+
     @property
     def date_column(self):
         return self.model.due_date
 
-    filter_fields = {
-        'due_date',
-        'report_year',
-        'report_type',
-        'create_date',
-        'update_date',
-    }
-    # TODO: sub-class api resource
-    query_options = [sa.orm.joinedload(models.ReportingDates.report)]
+    filter_multi_fields = [
+        ('due_date', models.ReportDate.due_date),
+        ('report_year', models.ReportDate.report_year),
+        ('report_type', models.ReportDate.report_type),
+        ('create_date', models.ReportDate.create_date),
+        ('update_date', models.ReportDate.update_date),
+    ]
+
+    query_options = [sa.orm.joinedload(models.ReportDate.report)]
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reporting_dates)
@@ -60,24 +58,25 @@ class ReportingDatesView(DatesResource):
 @doc(description='FEC election dates since 1995.')
 class ElectionDatesView(DatesResource):
 
-    model = models.ElectionDates
+    model = models.ElectionDate
+
     @property
     def date_column(self):
         return self.model.election_date
 
-    filter_fields = {
-        'election_state',
-        'election_district',
-        'election_party',
-        'office_sought',
-        'election_date',
-        'trc_election_type_id',
-        'trc_election_status_id',
-        'update_date',
-        'create_date',
-        'election_year',
-        'pg_date',
-    }
+    filter_multi_fields = [
+        ('election_state', models.ElectionDate.election_state),
+        ('election_district', models.ElectionDate.election_district),
+        ('election_party', models.ElectionDate.election_party),
+        ('office_sought', models.ElectionDate.office_sought),
+        ('election_date', models.ElectionDate.election_date),
+        ('trc_election_type_id', models.ElectionDate.trc_election_type_id),
+        ('trc_election_status_id', models.ElectionDate.trc_election_status_id),
+        ('update_date', models.ElectionDate.update_date),
+        ('create_date', models.ElectionDate.create_date),
+        ('election_year', models.ElectionDate.election_year),
+        ('pg_date', models.ElectionDate.pg_date),
+    ]
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reporting_dates)

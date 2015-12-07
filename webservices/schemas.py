@@ -335,11 +335,11 @@ FilingsSchema = make_schema(
 )
 augment_schemas(FilingsSchema)
 
-ReportNameSchema = make_schema(models.ReportNames)
-register_schema(ReportNameSchema)
+ReportTypeSchema = make_schema(models.ReportType)
+register_schema(ReportTypeSchema)
 
 ReportingDatesSchema = make_schema(
-    models.ReportingDates,
+    models.ReportDate,
     fields = {
         'report_type_full': ma.fields.Str(),
         'report_type': ma.fields.Str(),
@@ -350,7 +350,7 @@ ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
 
 ElectionDatesSchema = make_schema(
-    models.ElectionDates,
+    models.ElectionDate,
     fields={'election_type_full': ma.fields.Str()},
     options={'exclude': ('trc_election_id', )},
 )
