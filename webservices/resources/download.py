@@ -8,11 +8,13 @@ from botocore.exceptions import ClientError
 from flask import request
 
 from webservices import utils
+from webservices import exceptions
 from webservices.tasks import download
 from webservices.tasks import utils as task_utils
 
 client = boto3.client('s3')
 
+MAX_RECORDS = 100000
 URL_EXPIRY = 7 * 24 * 60 * 60
 
 class DownloadView(utils.Resource):
@@ -28,6 +30,12 @@ class DownloadView(utils.Resource):
                 'status': 'complete',
                 'url': cached_file,
             }
+        resource = download.call_resource(path, request.query_string)
+        if resource['count'] > MAX_RECORDS:
+            raise exceptions.ApiError(
+                'Cannot request downloads with more than {} records'.format(MAX_RECORDS),
+                status_code=422,
+            )
         download.export_query.delay(path, request.query_string)
         return {'status': 'queued'}
 

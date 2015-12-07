@@ -4,6 +4,7 @@ import codecs
 import unittest
 import subprocess
 
+from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
 import manage
@@ -30,6 +31,7 @@ class BaseTestCase(unittest.TestCase):
         rest.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
         rest.app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
         cls.app = rest.app.test_client()
+        cls.client = TestApp(rest.app)
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
         _reset_schema()
