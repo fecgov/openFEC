@@ -1,6 +1,5 @@
 import http
 
-import furl
 from marshmallow import fields
 from flask_apispec import use_kwargs
 
@@ -43,12 +42,9 @@ class DownloadView(utils.Resource):
 
 def get_cached_file(path, qs, filename=None):
     key = download.get_s3_name(path, qs)
-    obj = task_utils.get_bucket().Object(key=key)
+    obj = task_utils.get_object(key)
     try:
         obj.metadata
-        client = obj.meta.client
-        url = furl.furl(client.meta.endpoint_url)
-        url.path.segments = [obj.bucket_name, obj.key]
         return get_download_url(obj, filename=filename)
     except ClientError:
         return None
