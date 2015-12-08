@@ -66,7 +66,6 @@ class ElectionDatesView(DatesResource):
         ('election_party', models.ElectionDate.election_party),
         ('office_sought', models.ElectionDate.office_sought),
         ('election_type_id', models.ElectionDate.election_type_id),
-        ('election_status_id', models.ElectionDate.election_status_id),
         ('election_year', models.ElectionDate.election_year),
     ]
 

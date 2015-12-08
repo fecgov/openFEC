@@ -298,7 +298,6 @@ election_dates = {
     'min_election_date': fields.Date(description='Date of election.'),
     'max_election_date': fields.Date(description='Date of election.'),
     'election_type_id': fields.List(fields.Str, description='Election type'),
-    'election_status_id': fields.List(fields.Str, description=''),
     'min_update_date': fields.Date(description='Date this record was last updated.'),
     'max_update_date': fields.Date(description='Date this record was last updated.'),
     'min_create_date': fields.Date(description='Date this record was added to the system.'),
