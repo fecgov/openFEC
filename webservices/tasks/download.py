@@ -21,7 +21,7 @@ from webservices.tasks import utils as task_utils
 
 logger = logging.getLogger(__name__)
 
-IGNORE_FIELDS = {'page', 'per_page'}
+IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null', 'sort_nulls_large'}
 
 def call_resource(path, qs, per_page=5000):
     app = task_utils.get_app()
@@ -29,11 +29,13 @@ def call_resource(path, qs, per_page=5000):
     resource = app.view_functions[endpoint].view_class()
     fields, kwargs = parse_kwargs(resource, qs)
     kwargs = utils.extend(arguments, kwargs)
-    kwargs['per_page'] = per_page
+    for field in IGNORE_FIELDS:
+        kwargs.pop(field, None)
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
     count = counts.count_estimate(query, db.session, threshold=5000)
     index_column = utils.get_index_column(model or resource.model)
-    paginator = utils.fetch_seek_paginator(query, kwargs, index_column, count=count)
+    query_kwargs = utils.extend(kwargs, {'per_page': per_page})
+    paginator = utils.fetch_seek_paginator(query, query_kwargs, index_column, count=count)
     return {
         'path': path,
         'qs': qs,
@@ -146,7 +148,7 @@ def make_manifest(resource, path):
 def make_filters(resource):
     lines = []
     for key, value in resource['kwargs'].items():
-        if key in resource['fields'] and key not in IGNORE_FIELDS:
+        if key in resource['fields']:
             value = ', '.join(map(format, value)) if isinstance(value, list) else value
             description = resource['fields'][key].metadata.get('description')
             lines.append(make_filter(key, value, description))
