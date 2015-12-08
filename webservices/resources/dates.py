@@ -54,12 +54,11 @@ class ReportingDatesView(DatesResource):
 @doc(description='FEC election dates since 1995.')
 class ElectionDatesView(DatesResource):
 
+    def build_query(self, *args, **kwargs):
+        query = super().build_query(*args, **kwargs)
+        return query.filter_by(election_status_id=1)
+
     model = models.ElectionDate
-
-    @property
-    def date_column(self):
-        return self.model.election_date.filter_by(election_status_id=1)
-
     filter_multi_fields = [
         ('election_state', models.ElectionDate.election_state),
         ('election_district', models.ElectionDate.election_district),
@@ -81,7 +80,8 @@ class ElectionDatesView(DatesResource):
     @use_kwargs(
         args.make_sort_args(
             default=['-election_date'],
-        )
+        ),
+
     )
     @marshal_with(schemas.ElectionDatesPageSchema())
     def get(self, **kwargs):

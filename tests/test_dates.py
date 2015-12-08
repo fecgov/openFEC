@@ -58,3 +58,12 @@ class TestElectionDates(ApiBaseTest):
         assert election_date.election_type_full is None
         election_date = factories.ElectionDateFactory(election_type_id=None)
         assert election_date.election_type_full is None
+
+    def hide_bad_data(self):
+        factories.ElectionDateFactory(election_status_id=2)
+        factories.ElectionDateFactory(election_status_id=2)
+
+        page = api.url_for(ElectionDatesView)
+        results = self._results(page)
+        assert len(results) == 1
+
