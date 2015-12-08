@@ -84,7 +84,7 @@ class ElectionDatesView(DatesResource):
     ]
 
     @use_kwargs(args.paging)
-    @use_kwargs(args.reporting_dates)
+    @use_kwargs(args.election_dates)
     @use_kwargs(
         args.make_sort_args(
             default=['-election_date'],
