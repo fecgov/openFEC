@@ -44,8 +44,8 @@ class ElectionDate(db.Model):
     office_sought = db.Column(db.String, index=True)
     election_date = db.Column(db.Date, index=True)
     election_notes = db.Column(db.String, index=True)
-    trc_election_type_id = db.Column(db.String, index=True)
-    trc_election_status_id = db.Column(db.String, index=True)
+    election_type_id = db.Column('trc_election_type_id', db.String, index=True)
+    election_status_id = db.Column('trc_election_status_id', db.String, index=True)
     update_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
     election_year = db.Column('election_yr', db.Integer, index=True)
@@ -53,7 +53,7 @@ class ElectionDate(db.Model):
 
     @property
     def election_type_full(self):
-        return decoders.election_types.get(self.trc_election_type_id)
+        return decoders.election_types.get(self.election_type_id)
 
 
 class ElectionClassDate(db.Model):
