@@ -17,6 +17,7 @@ from flask import Blueprint
 from flask.ext import cors
 from flask.ext import restful
 from raven.contrib.flask import Sentry
+import sqlalchemy as sa
 
 from webargs.flaskparser import FlaskParser
 from flask_apispec import doc, marshal_with, FlaskApiSpec
@@ -120,6 +121,7 @@ def add_caching_headers(response):
 
 def search_typeahead_text(model, text):
     query = utils.search_text(model.query, model.fulltxt, text)
+    query = query.order_by(sa.desc(model.receipts))
     query = query.limit(20)
     return {'results': query.all()}
 

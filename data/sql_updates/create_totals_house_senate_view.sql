@@ -1,4 +1,4 @@
-drop materialized view if exists ofec_totals_house_senate_mv_tmp;
+drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
 with last as (
     select distinct on (cmte_sk, two_yr_period_sk) *
