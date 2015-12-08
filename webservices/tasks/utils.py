@@ -13,3 +13,6 @@ def get_bucket():
     )
     s3 = session.resource('s3')
     return s3.Bucket(env.get_credential('FEC_DOWNLOAD_BUCKET'))
+
+def get_object(key):
+    return get_bucket().Object(key=key)

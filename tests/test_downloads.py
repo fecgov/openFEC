@@ -3,6 +3,8 @@ import csv
 import mock
 import hashlib
 
+from botocore.exceptions import ClientError
+
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.common import models
@@ -95,3 +97,24 @@ class TestDownloadResource(ApiBaseTest):
         )
         assert res.status_code == 403
         assert not export.delay.called
+
+    @mock.patch('webservices.resources.download.get_download_url')
+    @mock.patch('webservices.tasks.utils.get_object')
+    def test_get_cached_exists(self, get_object, get_download):
+        mock_object = mock.Mock()
+        get_object.return_value = mock_object
+        get_download.return_value = '/download'
+        res = resource.get_cached_file('/candidate', b'', filename='download.csv')
+        assert res == '/download'
+        get_download.assert_called_once_with(mock_object, filename='download.csv')
+
+    @mock.patch('webservices.tasks.utils.get_object')
+    def test_get_cached_not_exists(self, get_object):
+        mock_object = mock.Mock()
+        def get_metadata():
+            raise ClientError({'Error': {}}, 'test')
+        mock_metadata = mock.PropertyMock(side_effect=get_metadata)
+        type(mock_object).metadata = mock_metadata
+        get_object.return_value = mock_object
+        res = resource.get_cached_file('/candidate', b'')
+        assert res is None
