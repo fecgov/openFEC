@@ -58,7 +58,7 @@ class ElectionDatesView(DatesResource):
 
     @property
     def date_column(self):
-        return self.model.election_date
+        return self.model.election_date.filter_by(election_status_id=1)
 
     filter_multi_fields = [
         ('election_state', models.ElectionDate.election_state),

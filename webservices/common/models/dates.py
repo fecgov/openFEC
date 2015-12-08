@@ -49,15 +49,7 @@ class ElectionDate(db.Model):
     create_date = db.Column(db.Date, index=True)
     election_year = db.Column('election_yr', db.Integer, index=True)
     primary_general_date = db.Column('pg_date', db.Date, index=True)
-    # TODO: we might want to filter out the trc_election_status_id=2 since those are deleted. I want to confirm with the FEC.
     election_status_id = db.Column('trc_election_status_id', db.String, index=True)
-
-    @property
-    def active_election(self):
-        if self.election_status_id == 1:
-            return True
-        else:
-            return False
 
 
     @property
