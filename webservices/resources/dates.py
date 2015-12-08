@@ -10,18 +10,12 @@ from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 
 
-def filter_upcoming(query, column, kwargs):
-    if kwargs['upcoming']:
-        return query.filter(column >= date.today())
-    return query
-
-
 @doc(tags=['dates'])
 class DatesResource(ApiResource):
 
     def build_query(self, *args, **kwargs):
         query = super().build_query(*args, **kwargs)
-        return filter_upcoming(query, self.date_column, kwargs)
+        return query
 
 
 @doc(description='FEC reporting dates since 1995.')

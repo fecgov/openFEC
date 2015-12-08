@@ -35,15 +35,6 @@ class TestReportingDates(ApiBaseTest):
             results = self._results(page)
             assert len(results) > 0
 
-    def test_upcoming(self):
-        factories.ReportTypeFactory(report_type='YE', report_type_full='Year End')
-        factories.ReportDateFactory(report_type='YE', due_date=datetime.datetime(2014, 1, 2))
-        factories.ReportDateFactory(report_type='YE', due_date=datetime.datetime(2017, 1, 3))
-
-        page = api.url_for(ReportingDatesView, upcoming='true')
-        results = self._results(page)
-
-        assert len(results) == 1
 
     def test_clean_report_type(self):
         factories.ReportTypeFactory(
@@ -59,15 +50,6 @@ class TestReportingDates(ApiBaseTest):
 
 
 class TestElectionDates(ApiBaseTest):
-
-    def test_upcoming(self):
-        factories.ElectionDateFactory(election_date=datetime.datetime(2014, 1, 2))
-        factories.ElectionDateFactory(election_date=datetime.datetime(2017, 1, 3))
-
-        page = api.url_for(ElectionDatesView, upcoming='true')
-        results = self._results(page)
-
-        assert len(results) == 1
 
     def test_election_type(self):
         election_date = factories.ElectionDateFactory(election_type_id='PR')
