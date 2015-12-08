@@ -25,8 +25,8 @@ class TestReportingDates(ApiBaseTest):
             ('due_date', '2014-01-02'),
             ('report_year', 2015),
             ('report_type', 'YE'),
-            ('create_date', '2014-03-02'),
-            ('update_date', '2014-04-02'),
+            ('min_create_date', '2014-03-02'),
+            ('max_update_date', '2014-04-02'),
         )
 
         for field, example in filter_fields:
@@ -70,9 +70,9 @@ class TestElectionDates(ApiBaseTest):
         assert len(results) == 1
 
     def test_election_type(self):
-        election_date = factories.ElectionDateFactory(trc_election_type_id='PR')
+        election_date = factories.ElectionDateFactory(election_type_id='PR')
         assert election_date.election_type_full == 'Primary runoff'
-        election_date = factories.ElectionDateFactory(trc_election_type_id='INVALID')
+        election_date = factories.ElectionDateFactory(election_type_id='INVALID')
         assert election_date.election_type_full is None
-        election_date = factories.ElectionDateFactory(trc_election_type_id=None)
+        election_date = factories.ElectionDateFactory(election_type_id=None)
         assert election_date.election_type_full is None
