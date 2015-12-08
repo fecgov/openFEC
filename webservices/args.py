@@ -288,7 +288,6 @@ reporting_dates = {
     'max_create_date': fields.Date(description='Date this record was added to the system.'),
     'min_update_date': fields.Date(description='Date this record was last updated.'),
     'max_update_date': fields.Date(description='Date this record was last updated.'),
-    'upcoming': fields.Bool(missing=False, description='Only show future due dates for each type of report.'),
 }
 
 election_dates = {
@@ -307,7 +306,6 @@ election_dates = {
     'election_year': fields.List(fields.Str, description='Year of election.'),
     'min_primary_general_date': fields.Date(description='Date of primary or general election'),
     'max_primary_general_date': fields.Date(description='Date of primary or general election'),
-    'upcoming': fields.Bool(missing=False, description='Only show future due dates for each type of report.'),
 }
 
 schedule_a = {
