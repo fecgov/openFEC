@@ -21,11 +21,13 @@ from webservices.tasks import utils as task_utils
 
 logger = logging.getLogger(__name__)
 
+IGNORE_FIELDS = {'page', 'per_page'}
+
 def call_resource(path, qs, per_page=5000):
     app = task_utils.get_app()
     endpoint, arguments = app.url_map.bind('').match(path)
     resource = app.view_functions[endpoint].view_class()
-    kwargs = parse_kwargs(resource, qs)
+    fields, kwargs = parse_kwargs(resource, qs)
     kwargs = utils.extend(arguments, kwargs)
     kwargs['per_page'] = per_page
     query, model, schema = unpack(resource.build_query(**kwargs), 3)
@@ -41,15 +43,16 @@ def call_resource(path, qs, per_page=5000):
         'resource': resource,
         'count': count,
         'timestamp': datetime.datetime.utcnow(),
+        'fields': fields,
+        'kwargs': kwargs,
     }
 
 def parse_kwargs(resource, qs):
     annotation = resolve_annotations(resource.get, 'args', parent=resource)
+    fields = utils.extend(*[option['args'] for option in annotation.options])
     with task_utils.get_app().test_request_context(b'?' + qs):
-        kwargs = {}
-        for option in annotation.options:
-            kwargs.update(flaskparser.parser.parse(option['args']))
-    return kwargs
+        kwargs = flaskparser.parser.parse(fields)
+    return fields, kwargs
 
 def iter_paginator(paginator):
     last_index, sort_index = (None, None)
@@ -73,7 +76,7 @@ def unpack(values, size):
     values = values if isinstance(values, tuple) else (values, )
     return values + (None, ) * (size - len(values))
 
-def un_nest(d, parent_key='', sep='_'):
+def un_nest(d, parent_key='', sep='.'):
     items = []
     for key, value in d.items():
         new_key = sep.join([parent_key, key]) if parent_key else key
@@ -85,7 +88,7 @@ def un_nest(d, parent_key='', sep='_'):
             items.append((new_key, value))
     return dict(items)
 
-def create_headers(schema, parent_key='', sep='_'):
+def create_headers(schema, parent_key='', sep='.'):
     items = []
     for name, field in schema._declared_fields.items():
         new_key = sep.join([parent_key, name]) if parent_key else name
@@ -136,8 +139,25 @@ def make_manifest(resource, path):
     with open(os.path.join(path, 'manifest.txt'), 'w') as fp:
         fp.write('Time: {}\n'.format(resource['timestamp']))
         fp.write('Resource: {}\n'.format(resource['path']))
-        fp.write('Filters: {}\n'.format(resource['qs']))
         fp.write('Count: {}\n'.format(resource['count']))
+        fp.write('Filters:\n\n')
+        fp.write(make_filters(resource))
+
+def make_filters(resource):
+    lines = []
+    for key, value in resource['kwargs'].items():
+        if key in resource['fields'] and key not in IGNORE_FIELDS:
+            value = ', '.join(map(format, value)) if isinstance(value, list) else value
+            description = resource['fields'][key].metadata.get('description')
+            lines.append(make_filter(key, value, description))
+    return '\n\n'.join(lines)
+
+def make_filter(key, value, description):
+    lines = []
+    lines.append('{}: {}'.format(key, value))
+    if description:
+        lines.append(description.strip())
+    return '\n'.join(lines)
 
 def make_bundle(resource, query):
     with tempfile.TemporaryDirectory(dir=os.getenv('TMPDIR')) as tmpdir:
