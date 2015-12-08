@@ -351,8 +351,13 @@ augment_schemas(ReportingDatesSchema)
 
 ElectionDatesSchema = make_schema(
     models.ElectionDate,
-    fields={'election_type_full': ma.fields.Str()},
-    options={'exclude': ('trc_election_id', )},
+    fields={
+        'election_type_full': ma.fields.Str(),
+        'active_election': ma.fields.Boolean(),
+    },
+    options={
+        'exclude': ('trc_election_id', 'election_status_id'),
+    },
 )
 ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
