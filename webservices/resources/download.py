@@ -1,3 +1,5 @@
+import http
+
 import furl
 from marshmallow import fields
 from flask_apispec import use_kwargs
@@ -34,7 +36,7 @@ class DownloadView(utils.Resource):
         if resource['count'] > MAX_RECORDS:
             raise exceptions.ApiError(
                 'Cannot request downloads with more than {} records'.format(MAX_RECORDS),
-                status_code=422,
+                status_code=http.client.FORBIDDEN,
             )
         download.export_query.delay(path, request.query_string)
         return {'status': 'queued'}

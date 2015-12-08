@@ -93,5 +93,5 @@ class TestDownloadResource(ApiBaseTest):
             api.url_for(resource.DownloadView, path='candidates'),
             expect_errors=True,
         )
-        assert res.status_code == 422
+        assert res.status_code == 403
         assert not export.delay.called
