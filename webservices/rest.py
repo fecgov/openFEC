@@ -278,6 +278,7 @@ apidoc.register(elections.ElectionList, blueprint='v1')
 apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
+apidoc.register(dates.ElectionDatesView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
