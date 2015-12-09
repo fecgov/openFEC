@@ -1,5 +1,3 @@
-from datetime import date
-
 import sqlalchemy as sa
 from flask_apispec import doc, marshal_with
 
@@ -10,22 +8,10 @@ from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 
 
-@doc(tags=['dates'])
-class DatesResource(ApiResource):
-
-    def build_query(self, *args, **kwargs):
-        query = super().build_query(*args, **kwargs)
-        return query
-
-
-@doc(description='FEC reporting dates since 1995.')
-class ReportingDatesView(DatesResource):
+@doc(tags=['dates'], description='FEC reporting dates since 1995.')
+class ReportingDatesView(ApiResource):
 
     model = models.ReportDate
-
-    @property
-    def date_column(self):
-        return self.model.due_date
 
     filter_multi_fields = [
         ('report_year', models.ReportDate.report_year),
@@ -51,14 +37,11 @@ class ReportingDatesView(DatesResource):
         return super().get(**kwargs)
 
 
-@doc(description='FEC election dates since 1995.')
-class ElectionDatesView(DatesResource):
-
-    def build_query(self, *args, **kwargs):
-        query = super().build_query(*args, **kwargs)
-        return query.filter_by(election_status_id=1)
+@doc(tags=['dates'], description='FEC election dates since 1995.')
+class ElectionDatesView(ApiResource):
 
     model = models.ElectionDate
+
     filter_multi_fields = [
         ('election_state', models.ElectionDate.election_state),
         ('election_district', models.ElectionDate.election_district),
@@ -67,12 +50,11 @@ class ElectionDatesView(DatesResource):
         ('election_type_id', models.ElectionDate.election_type_id),
         ('election_year', models.ElectionDate.election_year),
     ]
-
     filter_range_fields = [
-        (('min_election_date','max_election_date'), models.ElectionDate.election_date),
-        (('min_update_date','max_update_date'), models.ElectionDate.update_date),
-        (('min_create_date','max_create_date'), models.ElectionDate.create_date),
-        (('min_primary_general_date','max_primary_general_date'), models.ElectionDate.primary_general_date),
+        (('min_election_date', 'max_election_date'), models.ElectionDate.election_date),
+        (('min_update_date', 'max_update_date'), models.ElectionDate.update_date),
+        (('min_create_date', 'max_create_date'), models.ElectionDate.create_date),
+        (('min_primary_general_date', 'max_primary_general_date'), models.ElectionDate.primary_general_date),
     ]
 
     @use_kwargs(args.paging)
@@ -81,8 +63,11 @@ class ElectionDatesView(DatesResource):
         args.make_sort_args(
             default=['-election_date'],
         ),
-
     )
     @marshal_with(schemas.ElectionDatesPageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)
+
+    def build_query(self, *args, **kwargs):
+        query = super().build_query(*args, **kwargs)
+        return query.filter_by(election_status_id=1)
