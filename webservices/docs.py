@@ -331,7 +331,12 @@ the expenditure amount, name and id of the candidate, and whether the ad support
 An independent expenditure is an expenditure for a communication "expressly advocating the election or
 defeat of a clearly identified candidate that is not made in cooperation, consultation, or concert with,
 or at the request or suggestion of, a candidate, a candidate’s authorized committee, or their agents, or
-a political party or its agents."
+a political party or its agents.
+
+Aggregates by candidate do not include 24 and 48 hour reports. This ensures we don't double count expenditures
+and the totals are more accurate. You can still find the information from 24 and 48 hour reports in
+`/schedule/schedule_e/`.
+"
 
 '''
 
