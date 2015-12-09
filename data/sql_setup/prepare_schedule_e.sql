@@ -27,6 +27,8 @@ drop table if exists ofec_sched_e_queue_new;
 drop table if exists ofec_sched_e_queue_old;
 create table ofec_sched_e_queue_new as select * from sched_e limit 0;
 create table ofec_sched_e_queue_old as select * from sched_e limit 0;
+alter table ofec_sched_e_queue_new add primary key (sched_e_sk);
+alter table ofec_sched_e_queue_old add primary key (sched_e_sk);
 
 -- Create trigger to maintain Schedule E queues
 create or replace function ofec_sched_e_update_queues() returns trigger as $$
@@ -34,22 +36,18 @@ declare
     start_year int = TG_ARGV[0]::int;
 begin
     if tg_op = 'INSERT' then
-        insert into ofec_sched_e_queue_new
-        values (new.*)
-        ;
+        delete from ofec_sched_e_queue_new where sched_e_sk = new.sched_e_sk;
+        insert into ofec_sched_e_queue_new values (new.*);
         return new;
     elsif tg_op = 'UPDATE' then
-        insert into ofec_sched_e_queue_new
-        values (new.*)
-        ;
-        insert into ofec_sched_e_queue_old
-        values (old.*)
-        ;
+        delete from ofec_sched_e_queue_new where sched_e_sk = new.sched_e_sk;
+        delete from ofec_sched_e_queue_old where sched_e_sk = old.sched_e_sk;
+        insert into ofec_sched_e_queue_new values (new.*);
+        insert into ofec_sched_e_queue_old values (old.*);
         return new;
     elsif tg_op = 'DELETE' then
-        insert into ofec_sched_e_queue_old
-        values (old.*)
-        ;
+        delete from ofec_sched_e_queue_old where sched_e_sk = old.sched_e_sk;
+        insert into ofec_sched_e_queue_old values (old.*);
         return old;
     end if;
 end
