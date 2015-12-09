@@ -35,7 +35,6 @@ class TestReportingDates(ApiBaseTest):
             results = self._results(page)
             assert len(results) > 0
 
-
     def test_clean_report_type(self):
         factories.ReportTypeFactory(
             report_type='Q1',
@@ -59,11 +58,10 @@ class TestElectionDates(ApiBaseTest):
         election_date = factories.ElectionDateFactory(election_type_id=None)
         assert election_date.election_type_full is None
 
-    def hide_bad_data(self):
-        factories.ElectionDateFactory(election_status_id=2)
+    def test_hide_bad_data(self):
+        factories.ElectionDateFactory(election_status_id=1)
         factories.ElectionDateFactory(election_status_id=2)
 
         page = api.url_for(ElectionDatesView)
         results = self._results(page)
         assert len(results) == 1
-

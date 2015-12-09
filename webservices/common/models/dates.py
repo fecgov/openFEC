@@ -37,7 +37,7 @@ def clean_report_type(report_type):
 class ElectionDate(db.Model):
     __tablename__ = 'trc_election'
 
-    trc_election_id = db.Column(db.BigInteger, primary_key=True)
+    trc_election_id = db.Column(db.Integer, primary_key=True)
     election_state = db.Column(db.String, index=True)
     election_district = db.Column(db.Integer, index=True)
     election_party = db.Column(db.String, index=True)
@@ -45,12 +45,11 @@ class ElectionDate(db.Model):
     election_date = db.Column(db.Date, index=True)
     election_notes = db.Column(db.String, index=True)
     election_type_id = db.Column('trc_election_type_id', db.String, index=True)
-    update_date = db.Column(db.Date, index=True)
-    create_date = db.Column(db.Date, index=True)
+    update_date = db.Column(db.DateTime, index=True)
+    create_date = db.Column(db.DateTime, index=True)
     election_year = db.Column('election_yr', db.Integer, index=True)
     primary_general_date = db.Column('pg_date', db.Date, index=True)
-    election_status_id = db.Column('trc_election_status_id', db.String, index=True)
-
+    election_status_id = db.Column('trc_election_status_id', db.Integer, index=True)
 
     @property
     def election_type_full(self):
