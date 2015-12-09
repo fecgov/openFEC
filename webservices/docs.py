@@ -442,7 +442,7 @@ The type of document, for documents other than reports:
     - U Unregistered Committee Notice
 '''
 DATES_TAG = '''
-Reporting dates.
+Regular reporting deadlines and election dates.
 '''
 COMMUNICATION_TAG = '''
 Reports of communication costs by corporations and membership organizations

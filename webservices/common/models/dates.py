@@ -1,39 +1,59 @@
+import re
+
 from webservices import decoders
 
 from .base import db
 
 
-class ReportingDates(db.Model):
+class ReportType(db.Model):
+    __tablename__ = 'dimreporttype'
+
+    report_type = db.Column('rpt_tp', db.String, index=True, primary_key=True)
+    report_type_full = db.Column('rpt_tp_desc', db.String, index=True)
+
+
+class ReportDate(db.Model):
     __tablename__ = 'trc_report_due_date'
 
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True)
-    report_type = db.Column(db.String, index=True)
+    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
     due_date = db.Column(db.Date, index=True)
     create_date = db.Column(db.Date, index=True)
     update_date = db.Column(db.Date, index=True)
 
+    report = db.relationship(ReportType)
 
-class ElectionDates(db.Model):
+    @property
+    def report_type_full(self):
+        return clean_report_type(self.report.report_type_full)
+
+
+REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')
+def clean_report_type(report_type):
+    return REPORT_TYPE_CLEAN.sub('', report_type).strip()
+
+
+class ElectionDate(db.Model):
     __tablename__ = 'trc_election'
 
-    trc_election_id = db.Column(db.BigInteger, primary_key=True)
+    trc_election_id = db.Column(db.Integer, primary_key=True)
     election_state = db.Column(db.String, index=True)
     election_district = db.Column(db.Integer, index=True)
     election_party = db.Column(db.String, index=True)
     office_sought = db.Column(db.String, index=True)
     election_date = db.Column(db.Date, index=True)
     election_notes = db.Column(db.String, index=True)
-    trc_election_type_id = db.Column(db.String, index=True)
-    trc_election_status_id = db.Column(db.String, index=True)
-    update_date = db.Column(db.Date, index=True)
-    create_date = db.Column(db.Date, index=True)
+    election_type_id = db.Column('trc_election_type_id', db.String, index=True)
+    update_date = db.Column(db.DateTime, index=True)
+    create_date = db.Column(db.DateTime, index=True)
     election_year = db.Column('election_yr', db.Integer, index=True)
-    pg_date = db.Column(db.Date, index=True)
+    primary_general_date = db.Column('pg_date', db.Date, index=True)
+    election_status_id = db.Column('trc_election_status_id', db.Integer, index=True)
 
     @property
     def election_type_full(self):
-        return decoders.election_types.get(self.trc_election_type_id)
+        return decoders.election_types.get(self.election_type_id)
 
 
 class ElectionClassDate(db.Model):
