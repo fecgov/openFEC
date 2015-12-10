@@ -3,6 +3,7 @@ import unittest
 
 import sqlalchemy as sa
 from sqlalchemy.ext.automap import automap_base
+from sqlalchemy.orm.session import make_transient
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
@@ -177,9 +178,28 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('select update_aggregates()')
         self.assertEqual(
             models.ScheduleA.query.filter(
-                models.ScheduleA.sched_a_sk == 42
+                models.ScheduleA.sched_a_sk == row.sched_a_sk
             ).count(),
             0,
+        )
+
+        # Test sequential writes
+        make_transient(row)
+        db.session.add(row)
+        db.session.commit()
+
+        db.session.delete(row)
+        db.session.commit()
+
+        make_transient(row)
+        db.session.add(row)
+        db.session.commit()
+        db.session.execute('select update_aggregates()')
+        self.assertEqual(
+            models.ScheduleA.query.filter(
+                models.ScheduleA.sched_a_sk == row.sched_a_sk
+            ).count(),
+            1,
         )
 
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):

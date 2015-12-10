@@ -3,6 +3,7 @@ drop table if exists ofec_sched_e;
 create table ofec_sched_e as
 select
     *,
+    cast(null as timestamp) as timestamp,
     to_tsvector(pye_nm) as payee_name_text
 from sched_e
 ;
@@ -27,8 +28,12 @@ drop table if exists ofec_sched_e_queue_new;
 drop table if exists ofec_sched_e_queue_old;
 create table ofec_sched_e_queue_new as select * from sched_e limit 0;
 create table ofec_sched_e_queue_old as select * from sched_e limit 0;
-alter table ofec_sched_e_queue_new add primary key (sched_e_sk);
-alter table ofec_sched_e_queue_old add primary key (sched_e_sk);
+alter table ofec_sched_e_queue_new add column timestamp timestamp;
+alter table ofec_sched_e_queue_old add column timestamp timestamp;
+create index on ofec_sched_e_queue_new (sched_e_sk);
+create index on ofec_sched_e_queue_old (sched_e_sk);
+create index on ofec_sched_e_queue_new (timestamp);
+create index on ofec_sched_e_queue_old (timestamp);
 
 -- Create trigger to maintain Schedule E queues
 create or replace function ofec_sched_e_update_queues() returns trigger as $$
