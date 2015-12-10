@@ -65,6 +65,14 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
     cycle = 2016
 
 
+# Force linked factories to share sequence counters
+for each in BaseCandidateFactory.__subclasses__():
+    each._meta.counter_reference = BaseCandidateFactory
+
+for each in BaseCommitteeFactory.__subclasses__():
+    each._meta.counter_reference = BaseCommitteeFactory
+
+
 class CandidateCommitteeLinkFactory(BaseFactory):
     class Meta:
         model = models.CandidateCommitteeLink
@@ -73,6 +81,7 @@ class CandidateCommitteeLinkFactory(BaseFactory):
 
 class BaseTotalsFactory(BaseFactory):
     committee_id = factory.LazyAttribute(lambda o: CommitteeFactory().committee_id)
+    cycle = 2016
 
 
 class TotalsHouseSenateFactory(BaseTotalsFactory):
@@ -195,14 +204,19 @@ class ElectioneeringByCandidateFactory(BaseAggregateFactory):
     candidate_id = factory.Sequence(lambda n: str(n))
 
 
-class ReportingDatesFactory(BaseFactory):
+class ReportTypeFactory(BaseFactory):
     class Meta:
-        model = models.ReportingDates
+        model = models.ReportType
 
 
-class ElectionDatesFactory(BaseFactory):
+class ReportDateFactory(BaseFactory):
     class Meta:
-        model = models.ElectionDates
+        model = models.ReportDate
+
+
+class ElectionDateFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionDate
 
 
 class ElectionResultFactory(BaseFactory):
@@ -210,3 +224,4 @@ class ElectionResultFactory(BaseFactory):
         model = models.ElectionResult
     election_yr = 2016
     cand_office_st = 'US'
+    cand_office_district = '00'
