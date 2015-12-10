@@ -53,7 +53,6 @@ class BaseFilings(views.ApiResource):
             ),
         )
 
-    @use_kwargs(Ref('args'))
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)

@@ -5,8 +5,7 @@ from tests.common import ApiBaseTest
 
 from webservices import rest
 from webservices.rest import api
-from webservices.rest import CandidateNameSearch
-from webservices.rest import CommitteeNameSearch
+from webservices.resources.search import CandidateNameSearch, CommitteeNameSearch
 from webservices.resources.candidates import CandidateList
 
 
@@ -84,35 +83,36 @@ class OverallTest(ApiBaseTest):
         for itm in page_two:
             self.assertIn(itm, page_one_and_two)
 
-    # Typeahead name search
     def test_typeahead_candidate_search(self):
-        [
+        rows = [
             factories.CandidateSearchFactory(
                 name='Bartlet {0}'.format(idx),
                 fulltxt=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
+                office_sought='P',
+                receipts=idx,
             )
             for idx in range(30)
         ]
         rest.db.session.flush()
         results = self._results(api.url_for(CandidateNameSearch, q='bartlet'))
-        self.assertEqual(len(results), 20)
-        ids = [r['id'] for r in results if r['id']]
-        self.assertEqual(len(ids), len(set(ids)))
-        for each in results:
-            self.assertIn('bartlet', each['name'].lower())
+        expected = [str(each.id) for each in rows[:-21:-1]]
+        observed = [each['id'] for each in results]
+        assert expected == observed
+        assert all('bartlet' in each['name'].lower() for each in results)
+        assert all(each['office_sought'] == 'P' for each in results)
 
     def test_typeahead_committee_search(self):
-        [
+        rows = [
             factories.CommitteeSearchFactory(
                 name='Bartlet {0}'.format(idx),
                 fulltxt=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
+                receipts=idx,
             )
             for idx in range(30)
         ]
         rest.db.session.flush()
         results = self._results(api.url_for(CommitteeNameSearch, q='bartlet'))
-        self.assertEqual(len(results), 20)
-        ids = [r['id'] for r in results if r['id']]
-        self.assertEqual(len(ids), len(set(ids)))
-        for each in results:
-            self.assertIn('bartlet', each['name'].lower())
+        expected = [str(each.id) for each in rows[:-21:-1]]
+        observed = [each['id'] for each in results]
+        assert expected == observed
+        assert all('bartlet' in each['name'].lower() for each in results)

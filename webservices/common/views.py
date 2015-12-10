@@ -28,7 +28,7 @@ class ApiResource(utils.Resource):
         query = self.build_query(*args, **kwargs)
         return utils.fetch_page(query, kwargs, model=self.model, join_columns=self.join_columns)
 
-    def build_query(self, _apply_options=True, **kwargs):
+    def build_query(self, *args, _apply_options=True, **kwargs):
         query = self.model.query
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
@@ -98,5 +98,5 @@ class ItemizedResource(ApiResource):
     def filter_fulltext(self, query, kwargs):
         for key, column in self.filter_fulltext_fields:
             if kwargs.get(key):
-                query = utils.search_text(query, column, kwargs[key], order=False)
+                query = utils.search_text(query, column, kwargs[key])
         return query

@@ -10,6 +10,7 @@ class CandidateSearch(BaseModel):
     name = db.Column(db.String)
     office_sought = db.Column(db.String)
     fulltxt = db.Column(TSVECTOR)
+    receipts = db.Column(db.Numeric(30, 2))
 
 
 class BaseCandidate(BaseModel):
