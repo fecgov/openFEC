@@ -5,9 +5,12 @@ begin
     ;
     insert into ofec_sched_e (
         select
-            *,
-            to_tsvector(pye_nm) as payee_name_text
-        from ofec_sched_e_queue_new
+            new.*,
+            to_tsvector(new.pye_nm) as payee_name_text
+        from ofec_sched_e_queue_new new
+        left join ofec_sched_e_queue_old old on new.sched_e_sk = old.sched_e_sk and old.timestamp > new.timestamp
+        where old.sched_e_sk is null
+        order by new.sched_e_sk, new.timestamp desc
     );
 end
 $$ language plpgsql;

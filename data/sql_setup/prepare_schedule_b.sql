@@ -3,6 +3,7 @@ drop table if exists ofec_sched_b;
 create table ofec_sched_b as
 select
     *,
+    cast(null as timestamp) as timestamp,
     to_tsvector(recipient_nm) as recipient_name_text,
     to_tsvector(disb_desc) as disbursement_description_text,
     disbursement_purpose(disb_tp, disb_desc) as disbursement_purpose_category,
@@ -48,8 +49,12 @@ drop table if exists ofec_sched_b_queue_new;
 drop table if exists ofec_sched_b_queue_old;
 create table ofec_sched_b_queue_new as select * from sched_b limit 0;
 create table ofec_sched_b_queue_old as select * from sched_b limit 0;
-alter table ofec_sched_b_queue_new add primary key (sched_b_sk);
-alter table ofec_sched_b_queue_old add primary key (sched_b_sk);
+alter table ofec_sched_b_queue_new add column timestamp timestamp;
+alter table ofec_sched_b_queue_old add column timestamp timestamp;
+create index on ofec_sched_b_queue_new (sched_b_sk);
+create index on ofec_sched_b_queue_old (sched_b_sk);
+create index on ofec_sched_b_queue_new (timestamp);
+create index on ofec_sched_b_queue_old (timestamp);
 
 -- Create trigger to maintain Schedule B queues
 create or replace function ofec_sched_b_update_queues() returns trigger as $$
