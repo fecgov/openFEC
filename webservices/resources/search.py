@@ -1,12 +1,13 @@
 import sqlalchemy as sa
 
-from flask_apispec import doc, use_kwargs, marshal_with
+from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.utils import use_kwargs
 
 
 def search_typeahead_text(model, text, order_by):
