@@ -91,5 +91,5 @@ class ItemizedResource(ApiResource):
     def filter_fulltext(self, query, kwargs):
         for key, column in self.filter_fulltext_fields:
             if kwargs.get(key):
-                query = utils.search_text(query, column, kwargs[key], order=False)
+                query = utils.search_text(query, column, kwargs[key])
         return query

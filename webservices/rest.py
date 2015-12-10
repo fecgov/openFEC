@@ -19,17 +19,11 @@ from flask.ext import restful
 from raven.contrib.flask import Sentry
 
 from webargs.flaskparser import FlaskParser
-from flask_apispec import doc, marshal_with, FlaskApiSpec
+from flask_apispec import FlaskApiSpec
 
-from webservices import args
-from webservices import docs
 from webservices import spec
-from webservices import utils
-from webservices import schemas
 from webservices import exceptions
 from webservices.common import util
-from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.models import db
 from webservices.resources import totals
 from webservices.resources import reports
@@ -42,6 +36,7 @@ from webservices.resources import candidates
 from webservices.resources import committees
 from webservices.resources import elections
 from webservices.resources import filings
+from webservices.resources import search
 from webservices.resources import dates
 from webservices.env import env
 
@@ -118,43 +113,6 @@ def add_caching_headers(response):
     return response
 
 
-def search_typeahead_text(model, text):
-    query = utils.search_text(model.query, model.fulltxt, text)
-    query = query.limit(20)
-    return {'results': query.all()}
-
-@doc(
-    tags=['search'],
-    description=docs.NAME_SEARCH,
-)
-class CandidateNameSearch(utils.Resource):
-    """
-    A quick name search (candidate or committee) optimized for response time
-    for typeahead
-    """
-
-    @use_kwargs(args.names)
-    @marshal_with(schemas.CandidateSearchListSchema())
-    def get(self, **kwargs):
-        return search_typeahead_text(models.CandidateSearch, kwargs['q'])
-
-
-@doc(
-    tags=['search'],
-    description=docs.NAME_SEARCH,
-)
-class CommitteeNameSearch(utils.Resource):
-    """
-    A quick name search (candidate or committee) optimized for response time
-    for typeahead
-    """
-
-    @use_kwargs(args.names)
-    @marshal_with(schemas.CommitteeSearchListSchema())
-    def get(self, **kwargs):
-        return search_typeahead_text(models.CommitteeSearch, kwargs['q'])
-
-
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
 api.add_resource(
@@ -184,8 +142,8 @@ api.add_resource(
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
-api.add_resource(CandidateNameSearch, '/names/candidates/')
-api.add_resource(CommitteeNameSearch, '/names/committees/')
+api.add_resource(search.CandidateNameSearch, '/names/candidates/')
+api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
@@ -244,8 +202,8 @@ app.config.update({
 })
 apidoc = FlaskApiSpec(app)
 
-apidoc.register(CandidateNameSearch, blueprint='v1')
-apidoc.register(CommitteeNameSearch, blueprint='v1')
+apidoc.register(search.CandidateNameSearch, blueprint='v1')
+apidoc.register(search.CommitteeNameSearch, blueprint='v1')
 apidoc.register(candidates.CandidateView, blueprint='v1')
 apidoc.register(candidates.CandidateList, blueprint='v1')
 apidoc.register(candidates.CandidateSearch, blueprint='v1')
