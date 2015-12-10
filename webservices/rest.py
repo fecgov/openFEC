@@ -176,6 +176,8 @@ add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
 
+api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidate/<candidate_id>/totals/')
+
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,
     '/communication_costs/by_candidate/',
