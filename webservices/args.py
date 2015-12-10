@@ -55,6 +55,8 @@ class District(fields.Str):
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
 
+election_full = fields.Bool(missing=False, description='Aggregate values over full election period')
+
 paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),
     'per_page': per_page,
@@ -416,11 +418,18 @@ elections = {
         validate=validate.OneOf(['house', 'senate', 'president']),
         description='Office sought, either President, House or Senate.',
     ),
+    'election_full': election_full,
 }
 
 schedule_a_candidate_aggregate = {
     'candidate_id': fields.List(IStr, required=True, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, required=True, description=docs.RECORD_CYCLE),
+    'election_full': election_full,
+}
+
+totals_candidate_aggregate = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'election_full': election_full,
 }
 
 communication_cost_by_candidate = {

@@ -206,3 +206,13 @@ def cycle_param(**kwargs):
     }
     ret.update(kwargs)
     return ret
+
+
+def get_election_duration(column):
+    return sa.case(
+        [
+            (column == 'S', 6),
+            (column == 'P', 4),
+        ],
+        else_=2,
+    )
