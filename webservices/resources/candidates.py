@@ -108,7 +108,7 @@ class CandidateView(utils.Resource):
     @use_kwargs(args.candidate_detail)
     @use_kwargs(
         args.make_sort_args(
-            default=['-expire_date'],
+            default=['name'],
             validator=args.IndexValidator(models.CandidateDetail),
         )
     )
