@@ -73,6 +73,8 @@ def iter_paginator(paginator):
         last_index = last_indexes['last_index']
         if paginator.sort_column:
             sort_index = last_indexes['last_{}'.format(paginator.sort_column[0].key)]
+        db.session.expunge_all()
+        del page
 
 def unpack(values, size):
     values = values if isinstance(values, tuple) else (values, )
