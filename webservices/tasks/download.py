@@ -15,6 +15,7 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
+from webservices.resources import candidates, committees, filings
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -22,11 +23,19 @@ from webservices.tasks import utils as task_utils
 logger = logging.getLogger(__name__)
 
 IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null', 'sort_nulls_large'}
+RESOURCE_WHITELIST = {
+    candidates.CandidateList,
+    committees.CommitteeList,
+    filings.FilingsList,
+}
 
 def call_resource(path, qs, per_page=5000):
     app = task_utils.get_app()
     endpoint, arguments = app.url_map.bind('').match(path)
-    resource = app.view_functions[endpoint].view_class()
+    resource_type = app.view_functions[endpoint].view_class
+    if resource_type not in RESOURCE_WHITELIST:
+        raise ValueError('Downloads on resource {} not supported'.format(resource_type.__name__))
+    resource = resource_type()
     fields, kwargs = parse_kwargs(resource, qs)
     kwargs = utils.extend(arguments, kwargs)
     for field in IGNORE_FIELDS:

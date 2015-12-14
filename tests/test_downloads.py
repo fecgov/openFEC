@@ -3,6 +3,7 @@ import csv
 import mock
 import hashlib
 
+import pytest
 from botocore.exceptions import ClientError
 from marshmallow_pagination import paginators
 
@@ -77,7 +78,7 @@ class TestDownloadTask(ApiBaseTest):
             index_column=models.CandidateHistory.idx,
         )
         iterator = tasks.iter_paginator(paginator)
-        assert records == list(iterator)
+        assert [each.idx for each in records] == [each.idx for each in iterator]
 
 
 class TestDownloadResource(ApiBaseTest):
@@ -98,6 +99,10 @@ class TestDownloadResource(ApiBaseTest):
         res = self.client.post_json(api.url_for(resource.DownloadView, path='candidates', office='S'))
         assert res.json == {'status': 'complete', 'url': '/download'}
         assert not export.delay.called
+
+    def test_download_forbidden(self):
+        with pytest.raises(ValueError):
+            self.client.post_json(api.url_for(resource.DownloadView, path='elections'))
 
     @mock.patch('webservices.resources.download.MAX_RECORDS', 2)
     @mock.patch('webservices.resources.download.get_cached_file')
