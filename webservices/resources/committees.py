@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import exceptions
 from webservices.common import models
 from webservices.utils import use_kwargs
 from webservices.common.util import filter_query
@@ -35,21 +36,29 @@ def filter_year(model, query, years):
 )
 class CommitteeList(utils.Resource):
 
+    aliases = {'receipts': models.CommitteeSearch.receipts}
+
     @use_kwargs(args.paging)
     @use_kwargs(args.committee)
     @use_kwargs(args.committee_list)
     @use_kwargs(
         args.make_sort_args(
             default=['name'],
-            validator=args.IndexValidator(models.Committee),
+            validator=args.IndexValidator(models.Committee, extra=list(aliases.keys())),
         )
     )
     @marshal_with(schemas.CommitteePageSchema())
     def get(self, **kwargs):
         query = self.get_committees(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Committee)
+        return utils.fetch_page(query, kwargs, model=models.Committee, aliases=self.aliases)
 
     def get_committees(self, kwargs):
+
+        if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
+            raise exceptions.ApiError(
+                'Cannot sort on receipts when parameter "q" is not set',
+                status_code=422,
+            )
 
         committees = models.Committee.query
 
