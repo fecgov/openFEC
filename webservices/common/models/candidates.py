@@ -15,6 +15,7 @@ class CandidateSearch(BaseModel):
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
+    load_date = db.Column(db.Date, index=True)
     candidate_status = db.Column(db.String(1), index=True)
     district = db.Column(db.String(2), index=True)
     district_number = db.Column(db.Integer, index=True)
