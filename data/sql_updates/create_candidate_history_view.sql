@@ -27,6 +27,7 @@ with
     )
 select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     row_number() over () as idx,
+    fec_yr.lst_updt_dt as load_date,
     fec_yr.fec_election_yr as two_year_period,
     fec_yr.cand_id as candidate_id,
     fec_yr.cand_name as name,
@@ -60,6 +61,7 @@ where max_cycle >= :START_YEAR
 
 create unique index on ofec_candidate_history_mv_tmp(idx);
 
+create index on ofec_candidate_history_mv_tmp(load_date);
 create index on ofec_candidate_history_mv_tmp(candidate_id);
 create index on ofec_candidate_history_mv_tmp(two_year_period);
 create index on ofec_candidate_history_mv_tmp(office);
@@ -81,6 +83,7 @@ create index on ofec_candidate_detail_mv_tmp(party);
 create index on ofec_candidate_detail_mv_tmp(state);
 create index on ofec_candidate_detail_mv_tmp(office);
 create index on ofec_candidate_detail_mv_tmp(district);
+create index on ofec_candidate_detail_mv_tmp(load_date);
 create index on ofec_candidate_detail_mv_tmp(party_full);
 create index on ofec_candidate_detail_mv_tmp(office_full);
 create index on ofec_candidate_detail_mv_tmp(candidate_id);
