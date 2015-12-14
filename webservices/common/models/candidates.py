@@ -16,8 +16,8 @@ class CandidateSearch(BaseModel):
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
+    load_date = db.Column(db.Date, index=True)
     candidate_status = db.Column(db.String(1), index=True)
-    candidate_status_full = db.Column(db.String(11))
     district = db.Column(db.String(2), index=True)
     district_number = db.Column(db.Integer, index=True)
     election_years = db.Column(ARRAY(db.Integer), index=True)
@@ -62,7 +62,6 @@ class Candidate(BaseConcreteCandidate):
 class CandidateDetail(BaseConcreteCandidate):
     __table_args__ = {'extend_existing': True}
 
-    form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
     address_street_1 = db.Column(db.String(200))
@@ -70,21 +69,16 @@ class CandidateDetail(BaseConcreteCandidate):
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
     active_through = db.Column(db.Integer)
-    load_date = db.Column(db.DateTime)
-    expire_date = db.Column(db.DateTime, index=True)
 
 
 class CandidateHistory(BaseCandidate):
     __tablename__ = 'ofec_candidate_history_mv'
 
-    candidate_id = db.Column(db.String, primary_key=True)
+    candidate_id = db.Column(db.String, primary_key=True, index=True)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True)
-    form_type = db.Column(db.String(3))
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
     address_street_1 = db.Column(db.String(200))
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.String(1))
-    load_date = db.Column(db.DateTime)
-    expire_date = db.Column(db.DateTime, index=True)

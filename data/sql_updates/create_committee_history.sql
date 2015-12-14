@@ -24,7 +24,6 @@ with
 select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     row_number() over () as idx,
     fec_yr.fec_election_yr as cycle,
-    dcp.cmte_sk as committee_key,
     fec_yr.cmte_id as committee_id,
     fec_yr.cmte_nm as name,
     fec_yr.tres_nm as treasurer_name,
@@ -99,7 +98,6 @@ create unique index on ofec_committee_history_mv_tmp(idx);
 
 create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
-create index on ofec_committee_history_mv_tmp(committee_key);
 create index on ofec_committee_history_mv_tmp(designation);
 
 
@@ -120,7 +118,6 @@ create index on ofec_committee_detail_mv_tmp(party_full);
 create index on ofec_committee_detail_mv_tmp(designation);
 create index on ofec_committee_detail_mv_tmp(expire_date);
 create index on ofec_committee_detail_mv_tmp(committee_id);
-create index on ofec_committee_detail_mv_tmp(committee_key);
 create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(last_file_date);
 create index on ofec_committee_detail_mv_tmp(treasurer_name);
