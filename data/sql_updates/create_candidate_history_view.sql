@@ -47,7 +47,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_ici as incumbent_challenge,
     expand_candidate_incumbent(fec_yr.cand_ici) as incumbent_challenge_full,
     fec_yr.cand_status as candidate_status,
-    inactive.cand_id is null as candidate_inactive,
+    inactive.cand_id is not null as candidate_inactive,
     fec_yr.cand_office as office,
     expand_office(fec_yr.cand_office) as office_full,
     fec_yr.cand_office_st as state,
@@ -62,7 +62,9 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
 from fec_yr
 left join cycles using (cand_id)
 left join elections using (cand_id)
-left join cand_inactive inactive using (cand_id)
+left join cand_inactive inactive on
+    fec_yr.cand_id = inactive.cand_id and
+    fec_yr.fec_election_yr < inactive.election_yr
 inner join dimparty dp on fec_yr.cand_pty_affiliation = dp.party_affiliation
 where max_cycle >= :START_YEAR
 ;

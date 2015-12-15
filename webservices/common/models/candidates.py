@@ -67,7 +67,7 @@ class CandidateDetail(BaseConcreteCandidate):
     address_street_1 = db.Column(db.String(200))
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
-    candidate_inactive = db.Column(db.String(1))
+    candidate_inactive = db.Column(db.Boolean)
     active_through = db.Column(db.Integer)
 
 
@@ -81,4 +81,4 @@ class CandidateHistory(BaseCandidate):
     address_street_1 = db.Column(db.String(200))
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
-    candidate_inactive = db.Column(db.String(1))
+    candidate_inactive = db.Column(db.Boolean)
