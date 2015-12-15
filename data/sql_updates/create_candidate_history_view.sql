@@ -14,6 +14,10 @@ with
             link.linkage_type in ('P', 'A')
     ),
     -- Aggregate election data across cycles by candidate
+    years as (
+        select distinct on (cand_id, cand_election_yr) fec_yr.* from fec_yr
+        order by cand_id, cand_election_yr
+    ),
     cycles as (
         select
             cand_id,
@@ -22,7 +26,7 @@ with
             array_agg(cand_election_yr)::int[] as election_years,
             array_agg(cand_office_district)::text[] as election_districts,
             max(fec_election_yr) as max_cycle
-        from fec_yr
+        from years
         group by cand_id
     )
 select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
