@@ -13,14 +13,22 @@ with
             cand.fec_election_yr = link.fec_election_yr and
             link.linkage_type in ('P', 'A')
     ),
-    -- Aggregate election data across cycles by candidate
-    cycles as (
+    elections as (
         select
             cand_id,
             max(cand_election_yr) as active_through,
-            array_agg(fec_election_yr)::int[] as cycles,
             array_agg(cand_election_yr)::int[] as election_years,
-            array_agg(cand_office_district)::text[] as election_districts,
+            array_agg(cand_office_district)::text[] as election_districts
+        from (
+            select distinct on (cand_id, cand_election_yr) fec_yr.* from fec_yr
+            order by cand_id, cand_election_yr
+        ) dedup
+        group by cand_id
+    ),
+    cycles as (
+        select
+            cand_id,
+            array_agg(fec_election_yr)::int[] as cycles,
             max(fec_election_yr) as max_cycle
         from fec_yr
         group by cand_id
@@ -48,12 +56,12 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_pty_affiliation as party,
     clean_party(dp.party_affiliation_desc) as party_full,
     cycles.cycles,
-    cycles.election_years,
-    cycles.election_districts,
-    cycles.active_through
+    elections.election_years,
+    elections.election_districts,
+    elections.active_through
 from fec_yr
 left join cycles using (cand_id)
-left join dimcand dc using (cand_id)
+left join elections using (cand_id)
 left join cand_inactive inactive using (cand_id)
 inner join dimparty dp on fec_yr.cand_pty_affiliation = dp.party_affiliation
 where max_cycle >= :START_YEAR
