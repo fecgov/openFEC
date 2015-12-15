@@ -82,3 +82,10 @@ class CandidateHistory(BaseCandidate):
     address_street_2 = db.Column(db.String(200))
     address_zip = db.Column(db.String(10))
     candidate_inactive = db.Column(db.Boolean)
+
+
+class CandidateElection(BaseModel):
+    __tablename__ = 'ofec_candidate_election_mv'
+
+    candidate_id = db.Column(db.String, primary_key=True, index=True)
+    election_year = db.Column(db.Integer, primary_key=True, index=True)

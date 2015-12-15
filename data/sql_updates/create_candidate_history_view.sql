@@ -102,3 +102,18 @@ create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
 
 create index on ofec_candidate_detail_mv_tmp using gin (cycles);
 create index on ofec_candidate_detail_mv_tmp using gin (election_years);
+
+
+drop materialized view if exists ofec_candidate_election_mv_tmp;
+create materialized view ofec_candidate_election_mv_tmp as
+select
+    row_number() over () as idx,
+    candidate_id,
+    unnest(election_years) as election_year
+from ofec_candidate_detail_mv_tmp
+;
+
+create unique index on ofec_candidate_election_mv_tmp (idx);
+
+create index on ofec_candidate_election_mv_tmp (candidate_id);
+create index on ofec_candidate_election_mv_tmp (election_year);
