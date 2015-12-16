@@ -47,8 +47,8 @@ returns text as $$
     begin
         return case when state > 1 then
             expand_office_description(office_sought) || ' multi-state'
-        else expand_office_description(office_sought) || ' ' || expand_election_type(trc_election_type_id)-- || ' ' ||
-            --array_to_string(election_states, ', ')
+        else expand_office_description(office_sought) || ' ' || expand_election_type(trc_election_type_id) || ' ' ||
+            array_to_string(election_states, ', ')
         end;
     end
 $$ language plpgsql;
