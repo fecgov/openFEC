@@ -106,11 +106,16 @@ create index on ofec_candidate_detail_mv_tmp using gin (election_years);
 
 drop materialized view if exists ofec_candidate_election_mv_tmp;
 create materialized view ofec_candidate_election_mv_tmp as
+with years as (
+    select
+        candidate_id,
+        unnest(election_years) as election_year
+    from ofec_candidate_detail_mv_tmp
+)
 select
     row_number() over () as idx,
-    candidate_id,
-    unnest(election_years) as election_year
-from ofec_candidate_detail_mv_tmp
+    years.*
+from years
 ;
 
 create unique index on ofec_candidate_election_mv_tmp (idx);
