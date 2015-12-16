@@ -56,10 +56,10 @@ $$ language plpgsql;
 create or replace function generate_election_discription(trc_election_type_id text, office_sought text, election_states text[])
 returns text as $$
     begin
-        return case when trc_election_type_id='G' then
-            expand_office(office_sought) || ' ' || 'General ' --|| string_agg(election_state, ', ')
-        else expand_office_description(office_sought) || ' ' --||
-            --expand_election_type(trc_election_type_id) || ' ' || array_to_string(election_states, ', ')
+        return case when trc_election_type_id='G' and election_states is not null then
+            expand_office(office_sought) || ' ' || 'General ' --|| string_agg(election_states, ', ')
+        else expand_office_description(office_sought) || ' ' ||
+            expand_election_type(trc_election_type_id) --|| ' ' || array_to_string(election_states, ', ')
         end;
     end
 $$ language plpgsql;
