@@ -1,8 +1,14 @@
 import re
+import uuid
+
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from webservices import decoders
 
 from .base import db
+
+def uuid_gen():
+    return str(uuid.uuid4())
 
 
 class ReportType(db.Model):
@@ -73,3 +79,16 @@ class ElectionClassDate(db.Model):
     cycle_end_date = db.Column('cycle_end_dt', db.Date)
     election_date = db.Column('election_dt', db.Date)
     senate_class = db.Column(db.Integer, index=True)
+
+
+class CalendarDate(db.Model):
+    __tablename__ = 'ofec_omnibus_dates_mv'
+    event_id = db.Column(db.String)
+    category = db.Column(db.String)
+    summary = db.Column(db.String)
+    description = db.Column(db.Text)
+    states = db.Column(ARRAY(db.String))
+    location = db.Column(db.String)
+    start_date_time = db.Column(db.DateTime)
+    end_date_time = db.Column(db.DateTime)
+    id = db.Column(db.String, primary_key=True, default=uuid_gen)

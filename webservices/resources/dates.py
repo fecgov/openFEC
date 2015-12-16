@@ -71,3 +71,34 @@ class ElectionDatesView(ApiResource):
     def build_query(self, *args, **kwargs):
         query = super().build_query(*args, **kwargs)
         return query.filter_by(election_status_id=1)
+
+
+@doc(tags=['dates'], description='FEC reporting, election and event dates.')
+class CalendarDatesView(ApiResource):
+
+    model = models.CalendarDate
+
+    filter_multi_fields = [
+        ('category', models.CalendarDate.category),
+        ('states', models.CalendarDate.states),
+    ]
+    filter_fields = [
+        ('description', models.CalendarDate.description),
+        ('summary', models.CalendarDate.summary),
+        ('location', models.CalendarDate.location),
+    ]
+    filter_range_fields = [
+        (('min_start_date_time', 'max_start_date_time'), models.ReportDate.due_date),
+        (('min_end_date_time', 'max_end_date_time'), models.ReportDate.create_date),
+    ]
+
+    @use_kwargs(args.paging)
+    @use_kwargs(args.calendar_dates)
+    @use_kwargs(
+        args.make_sort_args(
+            default=['-start_date'],
+        )
+    )
+    @marshal_with(schemas.CalendarDatePageSchema())
+    def get(self, **kwargs):
+        return super().get(**kwargs)
