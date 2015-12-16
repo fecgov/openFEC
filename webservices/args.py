@@ -309,6 +309,18 @@ election_dates = {
     'max_primary_general_date': fields.Date(description='Date of primary or general election'),
 }
 
+calendar_dates = {
+    'category': fields.Str(description='Type of date reporting date, live event, etc.'),
+    'description': fields.Str(description='Brief description of event'),
+    'summary': fields.Str(description='Longer description of event'),
+    'states': fields.List(fields.Str, description='States that an election or reporting period apply to.'),
+    'location': fields.Str(description='The location of an in-person event.'),
+    'min_start_date_time': fields.DateTime(description='The minimum start date and time.'),
+    'min_end_date_time': fields.DateTime(description='The minimum end date and time, it can be null.'),
+    'max_start_date_time': fields.DateTime(description='The maximum start date and time.'),
+    'max_end_date_time': fields.DateTime(description='The maximum end date and time, it can be null.'),
+}
+
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'contributor_id': fields.List(IStr, description='The FEC identifier should be represented here the contributor is registered with the FEC.'),

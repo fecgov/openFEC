@@ -355,6 +355,10 @@ ElectionDatesSchema = make_schema(
 ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
 
+CalendarDateSchema = make_schema(models.CalendarDate, options = {'exclude': ('id',)})
+CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
+augment_schemas(CalendarDateSchema)
+
 class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
     office = ma.fields.Str()

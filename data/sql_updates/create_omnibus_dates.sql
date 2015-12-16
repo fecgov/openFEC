@@ -45,21 +45,21 @@ create or replace function generate_election_title(trc_election_type_id text, of
 returns text as $$
     begin
         return case when state > 1 then
-            expand_office_description(office_sought) || ' multi-state'
+            'Election ' || expand_office_description(office_sought) || ' multi-state'
         else expand_office_description(office_sought) || ' ' || expand_election_type(trc_election_type_id) || ' ' ||
             array_to_string(election_states, ', ')
         end;
     end
 $$ language plpgsql;
 
--- add states
+-- add party
 create or replace function generate_election_discription(trc_election_type_id text, office_sought text, election_states text[])
 returns text as $$
     begin
         return case when trc_election_type_id='G' and election_states is not null then
             expand_office(office_sought) || ' ' || 'General ' || array_to_string(election_states, ', ')
         else expand_office_description(office_sought) || ' ' ||
-            expand_election_type(trc_election_type_id) --|| ' ' || array_to_string(election_states, ', ')
+            expand_election_type(trc_election_type_id) || ' ' || array_to_string(election_states, ', ')
         end;
     end
 $$ language plpgsql;
@@ -71,42 +71,36 @@ drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections as (
     select
-        'election-G' as category,
-        generate_election_title(trc_election_type_id::text, office_sought::text, count(election_state)::int, array_agg(election_state order by election_state)::text[]) as title,
-        generate_election_discription(trc_election_type_id::text, office_sought::text, array_agg(election_state order by election_state)::text[]) as description,
+        'election-' || trc_election_type_id as category,
+        generate_election_title(trc_election_type_id::text, office_sought::text, count(election_state)::int, array_agg(election_state order by election_state)::text[]) as description,
+        generate_election_discription(trc_election_type_id::text, office_sought::text, array_agg(election_state order by election_state)::text[]) as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null as location,
         election_date::timestamp as start_date,
         null::timestamp as end_date
     from trc_election
     where
-        trc_election_type_id = 'G' and
-        trc_election_status_id = 1 and
-        trc_election_type_id is not null and
-        election_state is not null and
-        office_sought is not null
+        trc_election_status_id = 1
     group by
         office_sought,
         election_date,
         trc_election_type_id
+    -- getting rid of this for now by looking for non-existent election type
+    -- I don't understand why I can't just delete the union all and the next select but it errors
     union all
     select
         'election-' || trc_election_type_id as category,
-        expand_office(office_sought) || ' ' || expand_election_type(trc_election_type_id) as title,
+        expand_office(office_sought) || ' ' || expand_election_type(trc_election_type_id) as description,
         expand_office(office_sought) || ' ' ||
             expand_election_type(trc_election_type_id) || ' ' ||
-            election_state as description,
+            election_state as summary,
         array[election_state]::text[] as states,
         null as location,
         election_date::timestamp as start_date,
         null::timestamp as end_date
     from trc_election
     where
-        trc_election_type_id != 'G' and
-        trc_election_type_id is not null and
-        trc_election_status_id = 1 and
-        election_state is not null and
-        office_sought is not null
+        trc_election_type_id = 'xxx'
 ), reports_raw as (
     select * from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
@@ -115,8 +109,8 @@ with elections as (
 ), reports as (
     select
         'report-' || rpt_tp as category,
-        rpt_tp_desc::text as title,  -- TODO: Implement
-        '' as description,     -- TODO: Implement
+        rpt_tp_desc::text as description,  -- TODO: Implement
+        '' as summary,     -- TODO: Implement
         array_agg(election_state)::text[] as states,
         null as location,
         due_date::timestamp as start_date,
@@ -131,8 +125,8 @@ with elections as (
     union all
     select
         'report-' || rpt_tp as category,
-        rpt_tp_desc::text as title,
-        '' as description,
+        rpt_tp_desc::text as description,
+        '' as summary,
         array[election_state]::text[] as states,
         null as location,
         due_date::timestamp as start_date,
@@ -142,7 +136,7 @@ with elections as (
 ), other as (
     select
         category_name as category,
-        event_name::text as title,
+        event_name::text as description,
         description::text,
         null::text[] as states,
         location::text,
@@ -162,10 +156,12 @@ union all
 select * from other
 ;
 
--- approximate table structure
--- title
+-- would like to add organizer contact info in the future, but that is not in the data
+
+-- approximate table structure to try to line up with ical
 -- description
+-- summary
 -- location [nullable]
 -- states [nullable]
--- start_date
--- end_date [nullable]
+-- start_datetime
+-- end_datetime [nullable]
