@@ -41,7 +41,6 @@ returns text as $$
 $$ language plpgsql;
 
 --
--- add states
 create or replace function generate_election_title(trc_election_type_id text, office_sought text, state bigint,  election_states text[])
 returns text as $$
     begin
@@ -54,13 +53,13 @@ returns text as $$
 $$ language plpgsql;
 
 -- add states
-create or replace function generate_election_discription(office_sought text, trc_election_type_id text, election_states text[])
+create or replace function generate_election_discription(trc_election_type_id text, office_sought text, election_states text[])
 returns text as $$
     begin
-        return case when trc_election_type_id 'G' then
-            expand_office(office_sought) || ' ' || 'General ' || string_agg(election_state, ', ')
-        else expand_office_description(office_sought) || ' ' ||
-            expand_election_type(trc_election_type_id)-- || ' ' || array_to_string(election_states, ', ')
+        return case when trc_election_type_id='G' then
+            expand_office(office_sought) || ' ' || 'General ' --|| string_agg(election_state, ', ')
+        else expand_office_description(office_sought) || ' ' --||
+            --expand_election_type(trc_election_type_id) || ' ' || array_to_string(election_states, ', ')
         end;
     end
 $$ language plpgsql;
@@ -74,8 +73,7 @@ with elections as (
     select
         'election-G' as category,
         generate_election_title(trc_election_type_id::text, office_sought::text, count(election_state)::int, array_agg(election_state order by election_state)::text[]) as title,
-        'x' as description,
-        -- generate_election_discription(office_sought::text, trc_election_type_id::text, array_agg(election_state order by election_state)::text[]) as description,
+        generate_election_discription(trc_election_type_id::text, office_sought::text, array_agg(election_state order by election_state)::text[]) as description,
         array_agg(election_state order by election_state)::text[] as states,
         null as location,
         election_date::timestamp as start_date,
