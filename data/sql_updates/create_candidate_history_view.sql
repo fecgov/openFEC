@@ -109,7 +109,7 @@ create materialized view ofec_candidate_election_mv_tmp as
 with years as (
     select
         candidate_id,
-        unnest(election_years) as election_year
+        unnest(election_years) as cand_election_year
     from ofec_candidate_detail_mv_tmp
 )
 select
@@ -121,4 +121,4 @@ from years
 create unique index on ofec_candidate_election_mv_tmp (idx);
 
 create index on ofec_candidate_election_mv_tmp (candidate_id);
-create index on ofec_candidate_election_mv_tmp (election_year);
+create index on ofec_candidate_election_mv_tmp (cand_election_year);

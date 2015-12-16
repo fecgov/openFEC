@@ -191,12 +191,12 @@ class CandidateHistoryView(utils.Resource):
             models.CandidateElection,
             sa.and_(
                 models.CandidateHistory.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateHistory.two_year_period > models.CandidateElection.election_year - election_duration,
-                models.CandidateHistory.two_year_period <= models.CandidateElection.election_year,
+                models.CandidateHistory.two_year_period > models.CandidateElection.cand_election_year - election_duration,
+                models.CandidateHistory.two_year_period <= models.CandidateElection.cand_election_year,
             ),
         ).filter(
-            models.CandidateElection.election_year >= cycle,
-            models.CandidateElection.election_year < cycle + election_duration,
+            models.CandidateElection.cand_election_year >= cycle,
+            models.CandidateElection.cand_election_year < cycle + election_duration,
         ).order_by(
             models.CandidateHistory.candidate_id,
             sa.desc(models.CandidateHistory.two_year_period),

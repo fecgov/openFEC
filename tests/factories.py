@@ -46,6 +46,11 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     candidate_inactive = False
 
 
+class CandidateElectionFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateElection
+
+
 class BaseCommitteeFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
