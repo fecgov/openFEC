@@ -1,4 +1,4 @@
-drop materialized view if exists ofec_totals_house_senate_mv_tmp;
+drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
 with last as (
     select distinct on (cmte_sk, two_yr_period_sk) *
@@ -46,6 +46,7 @@ select
     max(last.rpt_tp_desc) as last_report_type_full,
     max(last.begin_image_num) as last_beginning_image_number,
     max(greatest(last.coh_cop_i, last.coh_cop_ii)) as last_cash_on_hand_end_period,
+    max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
     max(last.rpt_yr) as last_report_year
 from
     dimcmte c

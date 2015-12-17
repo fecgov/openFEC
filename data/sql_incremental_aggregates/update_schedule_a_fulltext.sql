@@ -10,7 +10,8 @@ begin
             to_tsvector(contbr_employer) as contributor_employer_text,
             to_tsvector(contbr_occupation) as contributor_occupation_text,
             is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
-                as is_individual
+                as is_individual,
+            clean_repeated(contbr_id, cmte_id) as clean_contbr_id
         from ofec_sched_a_queue_new
     );
 end

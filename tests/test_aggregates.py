@@ -1,7 +1,11 @@
+import functools
+
+from tests import factories
+from tests.common import ApiBaseTest
+
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
-    ScheduleBByPurposeView,
     ScheduleEByCandidateView,
     CommunicationCostByCandidateView,
     ElectioneeringByCandidateView,
@@ -9,46 +13,75 @@ from webservices.resources.aggregates import (
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
     ScheduleAByStateCandidateView,
+    TotalsCandidateView,
 )
-
-from tests import factories
-from tests.common import ApiBaseTest
 
 
 class TestAggregates(ApiBaseTest):
 
+    cases = [
+        (
+            factories.ScheduleEByCandidateFactory,
+            ScheduleEByCandidateView,
+            schemas.ScheduleEByCandidateSchema,
+        ),
+        (
+            factories.CommunicationCostByCandidateFactory,
+            CommunicationCostByCandidateView,
+            schemas.CommunicationCostByCandidateSchema,
+        ),
+        (
+            factories.ElectioneeringByCandidateFactory,
+            ElectioneeringByCandidateView,
+            schemas.ElectioneeringByCandidateSchema,
+        ),
+    ]
+
     def setUp(self):
         super(TestAggregates, self).setUp()
-        self.committee = factories.CommitteeHistoryFactory(cycle=2012)
+        self.committee = factories.CommitteeHistoryFactory(
+            name='Ritchie for America',
+            cycle=2012,
+        )
+        self.candidate = factories.CandidateDetailFactory(
+            candidate_id='P123',
+            name='Robert Ritchie',
+            election_years=[2012],
+            office='P',
+        )
+        self.candidate_history = factories.CandidateHistoryFactory(
+            candidate_id='P123',
+            name='Robert Ritchie',
+            election_years=[2012],
+            two_year_period=2012,
+            office='P',
+        )
+        factories.CandidateElectionFactory(
+            candidate_id='P123',
+            cand_election_year=2012,
+        )
 
-    def test_aggregates_by_committee(self):
-        params = [
-            (
-                factories.ScheduleBByPurposeFactory,
-                ScheduleBByPurposeView,
-                schemas.ScheduleBByPurposeSchema,
-            ),
-            (
-                factories.ScheduleEByCandidateFactory,
-                ScheduleEByCandidateView,
-                schemas.ScheduleEByCandidateSchema,
-            ),
-            (
-                factories.CommunicationCostByCandidateFactory,
-                CommunicationCostByCandidateView,
-                schemas.CommunicationCostByCandidateSchema,
-            ),
-            (
-                factories.ElectioneeringByCandidateFactory,
-                ElectioneeringByCandidateView,
-                schemas.ElectioneeringByCandidateSchema,
-            ),
-        ]
-        for factory, resource, schema in params:
-            aggregate = factory(
+    def make_aggregates(self, factory):
+        return [
+            factory(
+                candidate_id=self.candidate.candidate_id,
                 committee_id=self.committee.committee_id,
                 cycle=self.committee.cycle,
-            )
+                total=100,
+                count=5,
+            ),
+            factory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committee.committee_id,
+                cycle=self.committee.cycle - 2,
+                total=100,
+                count=5,
+            ),
+        ]
+
+    def test_candidate_aggregates_by_committee(self):
+        for factory, resource, schema in self.cases:
+            aggregates = self.make_aggregates(factory)
             results = self._results(
                 api.url_for(
                     resource,
@@ -56,30 +89,47 @@ class TestAggregates(ApiBaseTest):
                     cycle=2012,
                 )
             )
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0], schema().dump(aggregate).data)
+            assert len(results) == 1
+            serialized = schema().dump(aggregates[0]).data
+            serialized.update({
+                'committee_name': self.committee.name,
+                'candidate_name': self.candidate.name,
+            })
+            assert results[0] == serialized
 
-    def test_aggregates_by_election(self):
-        params = [
-            (factories.CommunicationCostByCandidateFactory, CommunicationCostByCandidateView),
-            (factories.ElectioneeringByCandidateFactory, ElectioneeringByCandidateView),
-        ]
-        candidate = factories.CandidateFactory(
-            election_years=[2012],
-            office='P',
-        )
-        factories.CandidateHistoryFactory(
-            candidate_id=candidate.candidate_id,
-            candidate_key=candidate.candidate_key,
-            two_year_period=2012,
-            election_years=[2012],
-            office='P',
-        )
-        for factory, resource in params:
+    def test_candidate_aggregates_by_committee_full(self):
+        """For each aggregate type, create a two-year aggregate in the target
+        election year and a two-year aggregate in the previous two-year period.
+        Assert that both aggregates are summed when the `election_full` flag is
+        passed.
+        """
+        for factory, resource, schema in self.cases:
+            aggregates = self.make_aggregates(factory)
+            results = self._results(
+                api.url_for(
+                    resource,
+                    candidate_id=self.candidate.candidate_id,
+                    committee_id=self.committee.committee_id,
+                    cycle=2012,
+                    election_full='true',
+                )
+            )
+            assert len(results) == 1
+            serialized = schema().dump(aggregates[0]).data
+            serialized.update({
+                'committee_name': self.committee.name,
+                'candidate_name': self.candidate.name,
+                'total': sum(each.total for each in aggregates),
+                'count': sum(each.count for each in aggregates),
+            })
+            assert results[0] == serialized
+
+    def test_candidate_aggregates_by_election(self):
+        for factory, resource, _ in self.cases:
             [
                 factory(
                     committee_id=self.committee.committee_id,
-                    candidate_id=candidate.candidate_id,
+                    candidate_id=self.candidate.candidate_id,
                     cycle=self.committee.cycle,
                 ),
                 factory(
@@ -93,34 +143,60 @@ class TestAggregates(ApiBaseTest):
                     cycle=2012,
                 )
             )
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0]['candidate']['candidate_id'], candidate.candidate_id)
+            assert len(results) == 1
+            assert results[0]['candidate_id'] == self.candidate.candidate_id
 
 
 class TestCandidateAggregates(ApiBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.candidate = factories.CandidateHistoryFactory(two_year_period=2012)
+        self.candidate = factories.CandidateHistoryFactory(
+            candidate_id='S123',
+            two_year_period=2012,
+        )
         self.committees = [
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
-        factories.CandidateDetailFactory(candidate_key=self.candidate.candidate_key)
+        factories.CandidateDetailFactory(
+            candidate_id=self.candidate.candidate_id,
+            election_years=[2008, 2012],
+        )
         [
-            factories.CommitteeDetailFactory(committee_key=each.committee_key)
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate.candidate_id,
+                cand_election_year=election_year
+            )
+            for election_year in [2008, 2012]
+        ]
+        [
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
         ]
         db.session.flush()
+        # Create two-year totals for both the target period (2011-2012) and the
+        # previous period (2009-2010) for testing the `election_full` flag
         factories.CandidateCommitteeLinkFactory(
-            candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[0].committee_key,
-            election_year=2012,
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[0].committee_id,
+            committee_designation='P',
+            committee_type='S',
+            fec_election_year=2012,
         )
         factories.CandidateCommitteeLinkFactory(
-            candidate_key=self.candidate.candidate_key,
-            committee_key=self.committees[1].committee_key,
-            election_year=2012,
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[1].committee_id,
+            committee_designation='A',
+            committee_type='S',
+            fec_election_year=2012,
+        )
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=self.candidate.candidate_id,
+            committee_id=self.committees[1].committee_id,
+            committee_designation='A',
+            committee_type='S',
+            fec_election_year=2010,
         )
 
     def test_by_size(self):
@@ -187,3 +263,78 @@ class TestCandidateAggregates(ApiBaseTest):
             'state_full': 'New York',
         }
         self.assertEqual(results[0], expected)
+
+    def get_totals(self):
+        factory = functools.partial(
+            factories.TotalsHouseSenateFactory,
+            receipts=100,
+            disbursements=100,
+            last_cash_on_hand_end_period=50,
+            last_debts_owed_by_committee=50,
+        )
+        return [
+            factory(committee_id=self.committees[0].committee_id, cycle=2012),
+            factory(committee_id=self.committees[1].committee_id, cycle=2012),
+            factory(committee_id=self.committees[1].committee_id, cycle=2010),
+        ]
+
+    def test_totals(self):
+        """Assert that all two-year totals for the given two-year period are
+        aggregated by candidate.
+        """
+        totals = self.get_totals()
+        last_totals = totals[:2]
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+            )
+        )
+        assert len(results) == 1
+        assert results[0] == {
+            'cycle': 2012,
+            'receipts': sum(each.receipts for each in last_totals),
+            'disbursements': sum(each.disbursements for each in last_totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
+            'debts_owed_by_committee': sum(each.last_debts_owed_by_committee for each in last_totals),
+        }
+
+    def test_totals_full(self):
+        """Assert that all two-year totals for the given election period are
+        aggregated by candidate, including the current two-year period and the
+        two preceding periods (since the test candidate is a Senate candidate).
+        """
+        totals = self.get_totals()
+        last_totals = totals[:2]
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full='true',
+            )
+        )
+        assert len(results) == 1
+        assert results[0] == {
+            'cycle': 2012,
+            'receipts': sum(each.receipts for each in totals),
+            'disbursements': sum(each.disbursements for each in totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
+            'debts_owed_by_committee': sum(each.last_debts_owed_by_committee for each in last_totals),
+        }
+
+    def test_totals_full_off_year(self):
+        """Assert that no results are returned when the `election_full` flag is
+        passed and the target period isn't an election year.
+        """
+        self.get_totals()
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate.candidate_id,
+                cycle=2010,
+                election_full='true',
+            )
+        )
+        assert len(results) == 0

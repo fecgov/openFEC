@@ -49,7 +49,8 @@ develops. You can view the [change log on GitHub](https://github.com/18F/openFEC
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
-site. Information is tied to the underlying forms by file ID and image ID.
+site. Information is tied to the underlying forms by file ID and image ID. Data is updated
+nightly.
 
 There is a lot of data, but a good place to start is to use search to find
 interesting candidates and committees. Then, you can use their IDs to find report or line
@@ -325,12 +326,17 @@ large result sets are approximate.
 SCHEDULE_E_TAG = '''
 Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
 bought and adds on TV to oppose a federal candidate, each ad purchase would be recorded here with
-the expenditure amount, name and id of the candidate, and weather the ad supported or opposed the candidate.
+the expenditure amount, name and id of the candidate, and whether the ad supported or opposed the candidate.
 
 An independent expenditure is an expenditure for a communication "expressly advocating the election or
 defeat of a clearly identified candidate that is not made in cooperation, consultation, or concert with,
 or at the request or suggestion of, a candidate, a candidate’s authorized committee, or their agents, or
-a political party or its agents."
+a political party or its agents.
+
+Aggregates by candidate do not include 24 and 48 hour reports. This ensures we don't double count expenditures
+and the totals are more accurate. You can still find the information from 24 and 48 hour reports in
+`/schedule/schedule_e/`.
+"
 
 '''
 
@@ -436,7 +442,7 @@ The type of document, for documents other than reports:
     - U Unregistered Committee Notice
 '''
 DATES_TAG = '''
-Reporting dates.
+Regular reporting deadlines and election dates.
 '''
 COMMUNICATION_TAG = '''
 Reports of communication costs by corporations and membership organizations

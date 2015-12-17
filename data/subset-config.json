@@ -1,38 +1,6 @@
 {
   "constraints": {
-    "dimcandproperties": [
-      {
-        "referred_schema": null,
-        "referred_table": "dimcand",
-        "referred_columns": ["cand_sk"],
-        "constrained_columns": ["cand_sk"]
-      }
-    ],
-    "dimcandstatus_ici": [
-      {
-        "referred_schema": null,
-        "referred_table": "dimcand",
-        "referred_columns": ["cand_sk"],
-        "constrained_columns": ["cand_sk"]
-      }
-    ],
-    "dimcandoffice": [
-      {
-        "referred_schema": null,
-        "referred_table": "dimcand",
-        "referred_columns": ["cand_sk"],
-        "constrained_columns": ["cand_sk"]
-      }
-    ],
     "dimcmteproperties": [
-      {
-        "referred_schema": null,
-        "referred_table": "dimcmte",
-        "referred_columns": ["cmte_sk"],
-        "constrained_columns": ["cmte_sk"]
-      }
-    ],
-    "dimcmtetpdsgn": [
       {
         "referred_schema": null,
         "referred_table": "dimcmte",
@@ -72,18 +40,18 @@
         "constrained_columns": ["indv_org_sk"]
       }
     ],
-    "dimlinkages": [
+    "cand_cmte_linkage": [
       {
         "referred_schema": null,
-        "referred_table": "dimcand",
-        "referred_columns": ["cand_sk"],
-        "constrained_columns": ["cand_sk"]
+        "referred_table": "cand_valid_fec_yr",
+        "referred_columns": ["cand_id"],
+        "constrained_columns": ["cand_id"]
       },
       {
         "referred_schema": null,
-        "referred_table": "dimcmte",
-        "referred_columns": ["cmte_sk"],
-        "constrained_columns": ["cmte_sk"]
+        "referred_table": "cmte_valid_fec_yr",
+        "referred_columns": ["cmte_id"],
+        "constrained_columns": ["cmte_id"]
       }
     ],
     "sched_b": [

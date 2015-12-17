@@ -3,9 +3,7 @@ drop materialized view if exists ofec_reports_pacs_parties_mv_tmp;
 create materialized view ofec_reports_pacs_parties_mv_tmp as
 select
     row_number() over () as idx,
-    factpacsandparties_f3x_sk as report_key,
     cmte_id as committee_id,
-    cmte_sk as committee_key,
     two_yr_period_sk as cycle,
     start_date.dw_date as coverage_start_date,
     end_date.dw_date as coverage_end_date,
@@ -128,7 +126,6 @@ create index on ofec_reports_pacs_parties_mv_tmp(expire_date);
 create index on ofec_reports_pacs_parties_mv_tmp(report_type);
 create index on ofec_reports_pacs_parties_mv_tmp(report_year);
 create index on ofec_reports_pacs_parties_mv_tmp(committee_id);
-create index on ofec_reports_pacs_parties_mv_tmp(committee_key);
 create index on ofec_reports_pacs_parties_mv_tmp(coverage_end_date);
 create index on ofec_reports_pacs_parties_mv_tmp(coverage_start_date);
 create index on ofec_reports_pacs_parties_mv_tmp(beginning_image_number);

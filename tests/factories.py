@@ -25,7 +25,6 @@ class CommitteeSearchFactory(BaseFactory):
 
 
 class BaseCandidateFactory(BaseFactory):
-    candidate_key = factory.Sequence(lambda n: n)
     candidate_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
@@ -44,10 +43,15 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateHistory
     two_year_period = 2016
+    candidate_inactive = False
+
+
+class CandidateElectionFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateElection
 
 
 class BaseCommitteeFactory(BaseFactory):
-    committee_key = factory.Sequence(lambda n: n + 1)
     committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
@@ -67,13 +71,23 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
     cycle = 2016
 
 
+# Force linked factories to share sequence counters
+for each in BaseCandidateFactory.__subclasses__():
+    each._meta.counter_reference = BaseCandidateFactory
+
+for each in BaseCommitteeFactory.__subclasses__():
+    each._meta.counter_reference = BaseCommitteeFactory
+
+
 class CandidateCommitteeLinkFactory(BaseFactory):
     class Meta:
         model = models.CandidateCommitteeLink
+    linkage_id = factory.Sequence(lambda n: n)
 
 
 class BaseTotalsFactory(BaseFactory):
     committee_id = factory.LazyAttribute(lambda o: CommitteeFactory().committee_id)
+    cycle = 2016
 
 
 class TotalsHouseSenateFactory(BaseTotalsFactory):
@@ -196,14 +210,19 @@ class ElectioneeringByCandidateFactory(BaseAggregateFactory):
     candidate_id = factory.Sequence(lambda n: str(n))
 
 
-class ReportingDatesFactory(BaseFactory):
+class ReportTypeFactory(BaseFactory):
     class Meta:
-        model = models.ReportingDates
+        model = models.ReportType
 
 
-class ElectionDatesFactory(BaseFactory):
+class ReportDateFactory(BaseFactory):
     class Meta:
-        model = models.ElectionDates
+        model = models.ReportDate
+
+
+class ElectionDateFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionDate
 
 
 class ElectionResultFactory(BaseFactory):
@@ -211,3 +230,4 @@ class ElectionResultFactory(BaseFactory):
         model = models.ElectionResult
     election_yr = 2016
     cand_office_st = 'US'
+    cand_office_district = '00'

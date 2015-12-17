@@ -19,10 +19,8 @@ class PdfMixin(object):
 class CommitteeReports(PdfMixin, BaseModel):
     __abstract__ = True
 
-    report_key = db.Column(db.BigInteger)
     committee_id = db.Column(db.String, index=True)
-    committee_key = db.Column(db.Integer, index=True)
-    committee = utils.related('CommitteeHistory', 'committee_key', 'committee_key', 'report_year', 'cycle')
+    committee = utils.related('CommitteeHistory', 'committee_id', 'committee_id', 'report_year', 'cycle')
     cycle = db.Column(db.Integer, index=True)
 
     beginning_image_number = db.Column(db.BigInteger)
