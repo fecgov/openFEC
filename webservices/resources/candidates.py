@@ -108,7 +108,7 @@ class CandidateView(utils.Resource):
     @use_kwargs(args.candidate_detail)
     @use_kwargs(
         args.make_sort_args(
-            default=['-expire_date'],
+            default=['name'],
             validator=args.IndexValidator(models.CandidateDetail),
         )
     )
@@ -150,6 +150,7 @@ class CandidateView(utils.Resource):
 class CandidateHistoryView(utils.Resource):
 
     @use_kwargs(args.paging)
+    @use_kwargs(args.candidate_history)
     @use_kwargs(
         args.make_sort_args(
             default=['-two_year_period'],
@@ -170,12 +171,35 @@ class CandidateHistoryView(utils.Resource):
         if committee_id:
             query = query.join(
                 models.CandidateCommitteeLink,
-                models.CandidateCommitteeLink.candidate_key == models.CandidateHistory.candidate_key,
+                models.CandidateCommitteeLink.candidate_id == models.CandidateHistory.candidate_id,
             ).filter(
                 models.CandidateCommitteeLink.committee_id == committee_id
             ).distinct()
 
         if cycle:
-            query = query.filter(models.CandidateHistory.two_year_period == cycle)
+            query = (
+                self._filter_elections(query, cycle)
+                if kwargs.get('election_full')
+                else query.filter(models.CandidateHistory.two_year_period == cycle)
+            )
 
         return query
+
+    def _filter_elections(self, query, cycle):
+        election_duration = utils.get_election_duration(sa.func.left(models.CandidateHistory.candidate_id, 1))
+        return query.join(
+            models.CandidateElection,
+            sa.and_(
+                models.CandidateHistory.candidate_id == models.CandidateElection.candidate_id,
+                models.CandidateHistory.two_year_period > models.CandidateElection.cand_election_year - election_duration,
+                models.CandidateHistory.two_year_period <= models.CandidateElection.cand_election_year,
+            ),
+        ).filter(
+            models.CandidateElection.cand_election_year >= cycle,
+            models.CandidateElection.cand_election_year < cycle + election_duration,
+        ).order_by(
+            models.CandidateHistory.candidate_id,
+            sa.desc(models.CandidateHistory.two_year_period),
+        ).distinct(
+            models.CandidateHistory.candidate_id,
+        )

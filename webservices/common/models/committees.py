@@ -9,13 +9,13 @@ class CommitteeSearch(BaseModel):
     id = db.Column(db.String)
     name = db.Column(db.String)
     fulltxt = db.Column(TSVECTOR)
+    receipts = db.Column(db.Numeric(30, 2))
 
 
 class BaseCommittee(BaseModel):
     __abstract__ = True
 
-    committee_key = db.Column(db.Integer, unique=True)
-    committee_id = db.Column(db.String, index=True)
+    committee_id = db.Column(db.String, primary_key=True, index=True)
     cycles = db.Column(ARRAY(db.Integer), index=True)
     designation = db.Column(db.String(1), index=True)
     designation_full = db.Column(db.String(25), index=True)
@@ -34,6 +34,7 @@ class BaseCommittee(BaseModel):
 class BaseConcreteCommittee(BaseCommittee):
     __tablename__ = 'ofec_committee_detail_mv'
 
+    committee_id = db.Column(db.String, primary_key=True, unique=True, index=True)
     candidate_ids = db.Column(ARRAY(db.Text))
 
 
@@ -52,7 +53,7 @@ class CommitteeHistory(BaseCommittee):
     city = db.Column(db.String(50))
     state_full = db.Column(db.String(50))
     zip = db.Column(db.String(9))
-    cycle = db.Column(db.Integer)
+    cycle = db.Column(db.Integer, primary_key=True)
 
 
 class CommitteeDetail(BaseConcreteCommittee):
@@ -66,7 +67,6 @@ class CommitteeDetail(BaseConcreteCommittee):
     website = db.Column(db.String(50))
     form_type = db.Column(db.String(3))
     leadership_pac = db.Column(db.String(50))
-    load_date = db.Column(db.DateTime())
     lobbyist_registrant_pac = db.Column(db.String(1))
     party_type = db.Column(db.String(3))
     party_type_full = db.Column(db.String(15))

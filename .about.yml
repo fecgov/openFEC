@@ -1,9 +1,11 @@
 ---
-name: openfec
+name: betaFEC
+full_name: betaFEC
 type: app
 owner_type: project
-status: active
 stage: beta
+status: active
+description: A new Federal Election Commission (FEC) website that will make campaign finance information more accessible and understandable to all users.
 testable: true
 tasks: https://github.com/18F/openFEC/issues
 links:
@@ -11,9 +13,37 @@ links:
   text: OpenFEC API Documentation
 team:
 - github: arowla
+- github: emileighoutlaw
+- github: jenniferthibault
 - github: jmcarp
+- github: LeahBannon
+  role: product manager
 - github: LindsayYoung
+- github: noahmanger
+- github: onezerojeremy
+milestones:
+- 'June 2014: Project Discovery stage started'
+- 'May 2015: Alpha testing of API and website'
+- 'July 2015: Beta testing of the API'
+- 'October 2015: Public release of beta site'
+partners:
+- Federal Election Commission
+impact: The FEC collects data about how campaigns are financed that affect all 318 million Americans every 2 years.
 services:
 - name: Travis CI
   category: CI
   url: https://travis-ci.org/18F/openFEC
+licenses:
+  betaFEC:
+    name: CC0-1.0
+    url: https://github.com/18F/openfec/blob/master/LICENSE.md
+blog:
+- fec
+links:
+- url: https://beta.fec.gov
+  text: betaFEC
+- url: https://api.open.fec.gov/developers
+  text: betaFEC API Documentation
+contact: 
+- url: mailto:leah.bannon@gsa.gov
+  text: Leah Bannon

@@ -8,6 +8,7 @@ from webservices import docs
 from webservices import utils
 from webservices import filters
 from webservices import schemas
+from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
@@ -223,20 +224,77 @@ class CandidateAggregateResource(AggregateResource):
             ),
         )
 
-    @property
-    def query_options(self):
-        return [
-            sa.orm.joinedload(self.model.candidate),
-            sa.orm.joinedload(self.model.committee),
-        ]
+    label_columns = []
+    group_columns = []
 
-    @property
-    def join_columns(self):
-        return {
-            'committee': (models.CommitteeDetail.name, self.model.committee),
-            'candidate': (models.CandidateDetail.name, self.model.candidate),
-        }
+    def build_query(self, committee_id, **kwargs):
+        query = super().build_query(committee_id, **kwargs)
+        election_full = kwargs.get('election_full')
+        if election_full and not (kwargs.get('candidate_id') or kwargs.get('office')):
+            raise exceptions.ApiError(
+                'Must include "candidate_id" or "office" argument(s)',
+                status_code=422,
+            )
+        cycle_column = (
+            models.CandidateElection.cand_election_year
+            if election_full
+            else self.model.cycle
+        )
+        query = filters.filter_election(query, kwargs, self.model.candidate_id, cycle_column)
+        query = query.filter(
+            cycle_column.in_(kwargs['cycle'])
+            if kwargs.get('cycle')
+            else True
+        )
+        if election_full:
+            query = self.aggregate_cycles(query, cycle_column)
+        return self.join_entity_names(query)
 
+    def aggregate_cycles(self, query, cycle_column):
+        election_duration = utils.get_election_duration(sa.func.left(self.model.candidate_id, 1))
+        query = query.join(
+            models.CandidateElection,
+            sa.and_(
+                self.model.candidate_id == models.CandidateElection.candidate_id,
+                self.model.cycle <= models.CandidateElection.cand_election_year,
+                self.model.cycle > (models.CandidateElection.cand_election_year - election_duration),
+            ),
+        )
+        return query.with_entities(
+            self.model.candidate_id,
+            self.model.committee_id,
+            cycle_column.label('cycle'),
+            sa.func.sum(self.model.total).label('total'),
+            sa.func.sum(self.model.count).label('count'),
+            *self.label_columns
+        ).group_by(
+            self.model.candidate_id,
+            self.model.committee_id,
+            cycle_column,
+            *self.group_columns
+        )
+
+    def join_entity_names(self, query):
+        query = query.subquery()
+        return models.db.session.query(
+            query,
+            models.CandidateHistory.candidate_id.label('candidate_id'),
+            models.CommitteeHistory.committee_id.label('committee_id'),
+            models.CandidateHistory.name.label('candidate_name'),
+            models.CommitteeHistory.name.label('committee_name'),
+        ).outerjoin(
+            models.CandidateHistory,
+            sa.and_(
+                query.c.cand_id == models.CandidateHistory.candidate_id,
+                query.c.cycle == models.CandidateHistory.two_year_period,
+            ),
+        ).outerjoin(
+            models.CommitteeHistory,
+            sa.and_(
+                query.c.cmte_id == models.CommitteeHistory.committee_id,
+                query.c.cycle == models.CommitteeHistory.cycle,
+            ),
+        )
 
 @doc(
     tags=['schedules/schedule_e'],
@@ -251,17 +309,14 @@ class ScheduleEByCandidateView(CandidateAggregateResource):
     schema = schemas.ScheduleEByCandidatePageSchema
     query_args = utils.extend(args.elections, args.schedule_e_by_candidate)
     filter_multi_fields = [
-        ('cycle', models.ScheduleEByCandidate.cycle),
         ('candidate_id', models.ScheduleEByCandidate.candidate_id),
     ]
     filter_match_fields = [
         ('support_oppose', models.ScheduleEByCandidate.support_oppose_indicator),
     ]
 
-    def build_query(self, committee_id, **kwargs):
-        query = super().build_query(committee_id, **kwargs)
-        return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
-
+    label_columns = [models.ScheduleEByCandidate.support_oppose_indicator]
+    group_columns = [models.ScheduleEByCandidate.support_oppose_indicator]
 
 @doc(
     tags=['communication_cost'],
@@ -273,17 +328,14 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
     schema = schemas.CommunicationCostByCandidatePageSchema
     query_args = utils.extend(args.elections, args.communication_cost_by_candidate)
     filter_multi_fields = [
-        ('cycle', models.CommunicationCostByCandidate.cycle),
         ('candidate_id', models.CommunicationCostByCandidate.candidate_id),
     ]
     filter_match_fields = [
         ('support_oppose', models.CommunicationCostByCandidate.support_oppose_indicator),
     ]
 
-    def build_query(self, committee_id, **kwargs):
-        query = super().build_query(committee_id, **kwargs)
-        return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)
-
+    label_columns = [models.CommunicationCostByCandidate.support_oppose_indicator]
+    group_columns = [models.CommunicationCostByCandidate.support_oppose_indicator]
 
 @doc(
     tags=['electioneering'],
@@ -295,10 +347,5 @@ class ElectioneeringByCandidateView(CandidateAggregateResource):
     schema = schemas.ElectioneeringByCandidatePageSchema
     query_args = utils.extend(args.elections, args.electioneering_by_candidate)
     filter_multi_fields = [
-        ('cycle', models.ElectioneeringByCandidate.cycle),
         ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
     ]
-
-    def build_query(self, committee_id, **kwargs):
-        query = super().build_query(committee_id, **kwargs)
-        return filters.filter_election(query, kwargs, self.model.candidate_id, self.model.cycle)

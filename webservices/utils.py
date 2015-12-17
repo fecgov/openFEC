@@ -79,7 +79,7 @@ def extend(*dicts):
     return ret
 
 
-def search_text(query, column, text, order=True):
+def search_text(query, column, text):
     """
 
     :param order: Order results by text similarity, descending; prohibitively
@@ -89,17 +89,7 @@ def search_text(query, column, text, order=True):
         part + ':*'
         for part in re.sub(r'\W', ' ', text).split()
     ])
-    query = query.filter(column.match(vector))
-    if order:
-        query = query.order_by(
-            sa.desc(
-                sa.func.ts_rank_cd(
-                    column,
-                    sa.func.to_tsquery(vector)
-                )
-            )
-        )
-    return query
+    return query.filter(column.match(vector))
 
 
 office_args_required = ['office', 'cycle']
@@ -216,3 +206,13 @@ def cycle_param(**kwargs):
     }
     ret.update(kwargs)
     return ret
+
+
+def get_election_duration(column):
+    return sa.case(
+        [
+            (column == 'S', 6),
+            (column == 'P', 4),
+        ],
+        else_=2,
+    )
