@@ -355,7 +355,7 @@ ElectionDatesSchema = make_schema(
 ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
 
-CalendarDateSchema = make_schema(models.CalendarDate, options = {'exclude': ('id',)})
+CalendarDateSchema = make_schema(models.CalendarDate, options = {'exclude': ('idx',)})
 CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
 augment_schemas(CalendarDateSchema)
 
