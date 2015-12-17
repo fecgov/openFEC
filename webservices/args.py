@@ -168,6 +168,10 @@ candidate_list = {
     'name': fields.Str(description="Candidate's name (full or partial)"),
 }
 
+candidate_history = {
+    'election_full': election_full,
+}
+
 committee = {
     'year': fields.List(fields.Int, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': fields.List(fields.Int, description=docs.COMMITTEE_CYCLE),

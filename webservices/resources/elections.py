@@ -88,7 +88,7 @@ class ElectionList(utils.Resource):
             CandidateHistory.district,
             CandidateHistory.two_year_period,
         ).filter(
-            CandidateHistory.candidate_inactive == None,  # noqa
+            CandidateHistory.candidate_inactive == False,  # noqa
             # TODO(jmcarp) Revert after #1271 is resolved
             sa.or_(
                 CandidateHistory.district == None,  # noqa
@@ -340,7 +340,7 @@ def filter_candidates(query, kwargs):
 def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
-        CandidateHistory.candidate_inactive == None,  # noqa
+        CandidateHistory.candidate_inactive == False,  # noqa
         CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     )
     return query

@@ -56,6 +56,10 @@ class TestAggregates(ApiBaseTest):
             two_year_period=2012,
             office='P',
         )
+        factories.CandidateElectionFactory(
+            candidate_id='P123',
+            cand_election_year=2012,
+        )
 
     def make_aggregates(self, factory):
         return [
@@ -159,6 +163,13 @@ class TestCandidateAggregates(ApiBaseTest):
             candidate_id=self.candidate.candidate_id,
             election_years=[2008, 2012],
         )
+        [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate.candidate_id,
+                cand_election_year=election_year
+            )
+            for election_year in [2008, 2012]
+        ]
         [
             factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
