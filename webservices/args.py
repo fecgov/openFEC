@@ -232,6 +232,10 @@ committee_list = {
     'max_first_file_date': fields.Date(description='Maximum date of the first form filed by the committee.'),
 }
 
+committee_history = {
+    'election_full': election_full,
+}
+
 filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'report_type': fields.List(IStr, description='Report type'),

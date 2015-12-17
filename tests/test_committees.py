@@ -11,6 +11,7 @@ from webservices.rest import db
 from webservices.rest import api
 from webservices.resources.committees import CommitteeList
 from webservices.resources.committees import CommitteeView
+from webservices.resources.committees import CommitteeHistoryView
 from webservices.resources.candidates import CandidateView
 
 
@@ -303,3 +304,57 @@ class CommitteeFormatTest(ApiBaseTest):
                 for each in results
             )
         )
+
+class TestCommitteeHistory(ApiBaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.candidate = factories.CandidateDetailFactory()
+        self.committees = [factories.CommitteeDetailFactory() for _ in range(2)]
+        self.histories = [
+            factories.CommitteeHistoryFactory(committee_id=self.committees[0].committee_id, cycle=2010),
+            factories.CommitteeHistoryFactory(committee_id=self.committees[1].committee_id, cycle=2012),
+        ]
+        db.session.flush()
+        self.links = [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[0].committee_id,
+                fec_election_year=2010,
+                committee_type='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[1].committee_id,
+                fec_election_year=2012,
+                committee_type='P',
+            ),
+        ]
+        self.election = factories.CandidateElectionFactory(
+            candidate_id=self.candidate.candidate_id,
+            cand_election_year=2012,
+        )
+
+    def test_candidate_cycle(self):
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                candidate_id=self.candidate.candidate_id, cycle=2012,
+            )
+        )
+        assert len(results) == 1
+        assert results[0]['cycle'] == 2012
+        assert results[0]['committee_id'] == self.committees[1].committee_id
+
+    def test_election_full(self):
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                candidate_id=self.candidate.candidate_id, cycle=2012, election_full='true',
+            )
+        )
+        assert len(results) == 2
+        assert results[0]['cycle'] == 2010
+        assert results[0]['committee_id'] == self.committees[0].committee_id
+        assert results[1]['cycle'] == 2012
+        assert results[1]['committee_id'] == self.committees[1].committee_id
