@@ -91,4 +91,4 @@ class CalendarDate(db.Model):
     location = db.Column(db.String)
     start_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
-    id = db.Column(db.String, primary_key=True, default=uuid_gen)
+    idx = db.Column(db.String, primary_key=True)
