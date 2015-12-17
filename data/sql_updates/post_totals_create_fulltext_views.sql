@@ -63,7 +63,11 @@ with nicknames as (
     join ofec_committee_totals totals on
         link.cmte_id = totals.committee_id and
         link.fec_election_yr = totals.cycle
-    where cmte_dsgn in ('P', 'A')
+    where
+        cmte_dsgn in ('P', 'A') and (
+            substr(cand_id, 1, 1) = cmte_tp or
+            cmte_tp not in ('P', 'S', 'H')
+        )
     group by cand_id
 )
 select distinct on (candidate_id)
