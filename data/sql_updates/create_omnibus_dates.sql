@@ -1,4 +1,4 @@
-
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 
 -- for running locally
@@ -71,7 +71,7 @@ drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections as (
     select
-        row_number() over () as idx,
+        uuid_generate_v1mc() as idx,
         'election-' || trc_election_type_id as category,
         generate_election_title(trc_election_type_id::text, office_sought::text, count(election_state)::int, array_agg(election_state order by election_state)::text[]) as description,
         generate_election_discription(trc_election_type_id::text, office_sought::text, array_agg(election_state order by election_state)::text[]) as summary,
@@ -90,7 +90,7 @@ with elections as (
     -- I don't understand why I can't just delete the union all and the next select but it errors
     union all
     select
-        row_number() over () as idx,
+        uuid_generate_v1mc() as idx,
         'election-' || trc_election_type_id as category,
         expand_office(office_sought) || ' ' || expand_election_type(trc_election_type_id) as description,
         expand_office(office_sought) || ' ' ||
@@ -110,7 +110,7 @@ with elections as (
     where coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
-        row_number() over () as idx,
+        uuid_generate_v1mc() as idx,
         'report-' || rpt_tp as category,
         rpt_tp_desc::text as description,  -- TODO: Implement
         '' as summary,     -- TODO: Implement
@@ -127,7 +127,7 @@ with elections as (
         office_sought
     union all
     select
-        row_number() over () as idx,
+        uuid_generate_v1mc() as idx,
         'report-' || rpt_tp as category,
         rpt_tp_desc::text as description,
         '' as summary,
@@ -139,7 +139,7 @@ with elections as (
     where trc_election_type_id != 'G'
 ), other as (
     select
-        row_number() over () as idx,
+        uuid_generate_v1mc() as idx,
         category_name as category,
         event_name::text as description,
         description::text,
