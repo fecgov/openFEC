@@ -80,16 +80,15 @@ class CalendarDatesView(ApiResource):
 
     filter_multi_fields = [
         ('category', models.CalendarDate.category),
-        ('states', models.CalendarDate.states),
     ]
-    filter_fields = [
-        ('description', models.CalendarDate.description),
-        ('summary', models.CalendarDate.summary),
+    filter_fulltext_fields = [
+        ('description', models.CalendarDate.description_text),
+        ('summary', models.CalendarDate.summary_text),
         ('location', models.CalendarDate.location),
     ]
     filter_range_fields = [
-        (('min_start_date_time', 'max_start_date_time'), models.ReportDate.due_date),
-        (('min_end_date_time', 'max_end_date_time'), models.ReportDate.create_date),
+        (('min_start_date_time', 'max_start_date_time'), models.CalendarDate.start_date),
+        (('min_end_date_time', 'max_end_date_time'), models.CalendarDate.end_date),
     ]
 
     @use_kwargs(args.paging)
@@ -102,3 +101,10 @@ class CalendarDatesView(ApiResource):
     @marshal_with(schemas.CalendarDatePageSchema())
     def get(self, **kwargs):
         return super().get(**kwargs)
+
+    def build_query(self, *args, **kwargs):
+        # TODO: Generalize if reused
+        query = super().build_query(*args, **kwargs)
+        if kwargs.get('states'):
+            query = query.filter(self.model.states.overlap(kwargs['states']))
+        return query
