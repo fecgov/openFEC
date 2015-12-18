@@ -277,6 +277,15 @@ class CommitteeFormatTest(ApiBaseTest):
         results = self._results(api.url_for(CommitteeList))
         self.assertEqual([each['committee_id'] for each in results], committee_ids[::-1])
 
+    def test_treasurer_filter(self):
+        committees = [
+            factories.CommitteeFactory(treasurer_text=sa.func.to_tsvector('uncle pennybags')),
+            factories.CommitteeFactory(treasurer_text=sa.func.to_tsvector('eve moneypenny')),
+        ]
+        results = self._results(api.url_for(CommitteeList, treasurer_name='moneypenny'))
+        assert len(results) == 1
+        assert results[0]['committee_id'] == committees[1].committee_id
+
     def test_committee_date_filters(self):
         [
             factories.CommitteeFactory(first_file_date=datetime.date(2015, 1, 1)),

@@ -68,6 +68,13 @@ class CommitteeList(utils.Resource):
                 kwargs['q'],
             ).distinct()
 
+        if kwargs.get('treasurer_name'):
+            committees = utils.search_text(
+                committees,
+                models.Committee.treasurer_text,
+                kwargs['treasurer_name'],
+            )
+
         if kwargs.get('name'):
             committees = committees.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
 
