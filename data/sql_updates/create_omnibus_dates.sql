@@ -1,45 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-
--- for running locally
-
-create or replace function expand_office_description(acronym text)
-returns text as $$
-    begin
-        return case acronym
-            when 'P' then 'Presidential'
-            when 'S' then 'Senate'
-            when 'H' then 'House'
-            else ''
-        end;
-    end
-$$ language plpgsql;
-
-
-create or replace function expand_election_type(acronym text)
-returns text as $$
-    begin
-        return case acronym
-            when 'P' then 'Primary'
-            when 'PR' then 'Primary runoff'
-            when 'SP' then 'Special primary'
-            when 'SPR' then 'Special primary runoff'
-            when 'G' then 'General'
-            when 'GR' then 'General runoff'
-            when 'SG' then 'Special general'
-            when 'SGR' then 'Special general runoff'
-            when 'O' then 'Other'
-            when 'C' then 'Convention'
-            when 'SC' then 'Special convention'
-            when 'R' then 'Runoff'
-            when 'SR' then 'Special runoff'
-            when 'S' then 'Special'
-            when 'E' then 'Recount'
-            else ''
-        end;
-    end
-$$ language plpgsql;
-
 --
 create or replace function generate_election_title(trc_election_type_id text, office_sought text, state bigint,  election_states text[])
 returns text as $$
@@ -70,13 +30,14 @@ $$ language plpgsql;
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections as (
+    -- Select all elections, grouping by...
     select
         uuid_generate_v1mc() as idx,
         'election-' || trc_election_type_id as category,
         generate_election_title(trc_election_type_id::text, office_sought::text, count(election_state)::int, array_agg(election_state order by election_state)::text[]) as description,
         generate_election_discription(trc_election_type_id::text, office_sought::text, array_agg(election_state order by election_state)::text[]) as summary,
         array_agg(election_state order by election_state)::text[] as states,
-        null as location,
+        null::text as location,
         election_date::timestamp as start_date,
         null::timestamp as end_date
     from trc_election
@@ -86,23 +47,6 @@ with elections as (
         office_sought,
         election_date,
         trc_election_type_id
-    -- getting rid of this for now by looking for non-existent election type
-    -- I don't understand why I can't just delete the union all and the next select but it errors
-    union all
-    select
-        uuid_generate_v1mc() as idx,
-        'election-' || trc_election_type_id as category,
-        expand_office(office_sought) || ' ' || expand_election_type(trc_election_type_id) as description,
-        expand_office(office_sought) || ' ' ||
-            expand_election_type(trc_election_type_id) || ' ' ||
-            election_state as summary,
-        array[election_state]::text[] as states,
-        null as location,
-        election_date::timestamp as start_date,
-        null::timestamp as end_date
-    from trc_election
-    where
-        trc_election_type_id = 'xxx'
 ), reports_raw as (
     select * from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
@@ -113,9 +57,9 @@ with elections as (
         uuid_generate_v1mc() as idx,
         'report-' || rpt_tp as category,
         rpt_tp_desc::text as description,  -- TODO: Implement
-        '' as summary,     -- TODO: Implement
+        rpt_tp_desc::text || ' ' || office_sought::text as summary,     -- TODO: Implement
         array_agg(election_state)::text[] as states,
-        null as location,
+        null::text as location,
         due_date::timestamp as start_date,
         null::timestamp as end_date
     from reports_raw
@@ -132,7 +76,7 @@ with elections as (
         rpt_tp_desc::text as description,
         '' as summary,
         array[election_state]::text[] as states,
-        null as location,
+        null::text as location,
         due_date::timestamp as start_date,
         null::timestamp as end_date
     from reports_raw
@@ -153,10 +97,21 @@ with elections as (
     where
         category_name not in ('Election Dates', 'Reporting Deadlines', 'Quarterly', 'Monthly', 'Pre and Post-Elections') and
         active = 'Y'
+), combined as (
+    select * from elections
+    union all
+    select * from reports
+    union all
+    select * from other
 )
-select * from elections
-union all
-select * from reports
-union all
-select * from other
+select
+    *,
+    to_tsvector(summary) as summary_text,
+    to_tsvector(description) as description_text
+from combined
 ;
+
+-- TODO: Index sort and filter columns
+
+create index on ofec_omnibus_dates_mv_tmp using gin (summary_text);
+create index on ofec_omnibus_dates_mv_tmp using gin (description_text);
