@@ -1,6 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
---
 create or replace function generate_election_title(trc_election_type_id text, office_sought text, state bigint,  election_states text[])
 returns text as $$
     begin
@@ -13,7 +10,7 @@ returns text as $$
 $$ language plpgsql;
 
 -- add party
-create or replace function generate_election_discription(trc_election_type_id text, office_sought text, election_states text[])
+create or replace function generate_election_description(trc_election_type_id text, office_sought text, election_states text[])
 returns text as $$
     begin
         return case when trc_election_type_id='G' and election_states is not null then
@@ -32,10 +29,9 @@ create materialized view ofec_omnibus_dates_mv_tmp as
 with elections as (
     -- Select all elections, grouping by...
     select
-        uuid_generate_v1mc() as idx,
         'election-' || trc_election_type_id as category,
         generate_election_title(trc_election_type_id::text, office_sought::text, count(election_state)::int, array_agg(election_state order by election_state)::text[]) as description,
-        generate_election_discription(trc_election_type_id::text, office_sought::text, array_agg(election_state order by election_state)::text[]) as summary,
+        generate_election_description(trc_election_type_id::text, office_sought::text, array_agg(election_state order by election_state)::text[]) as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
         election_date::timestamp as start_date,
@@ -54,7 +50,6 @@ with elections as (
     where coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
-        uuid_generate_v1mc() as idx,
         'report-' || rpt_tp as category,
         rpt_tp_desc::text as description,  -- TODO: Implement
         rpt_tp_desc::text || ' ' || office_sought::text as summary,     -- TODO: Implement
@@ -71,7 +66,6 @@ with elections as (
         office_sought
     union all
     select
-        uuid_generate_v1mc() as idx,
         'report-' || rpt_tp as category,
         rpt_tp_desc::text as description,
         '' as summary,
@@ -83,7 +77,6 @@ with elections as (
     where trc_election_type_id != 'G'
 ), other as (
     select
-        uuid_generate_v1mc() as idx,
         category_name as category,
         event_name::text as description,
         description::text,
@@ -105,13 +98,21 @@ with elections as (
     select * from other
 )
 select
-    *,
+    row_number() over () as idx,
+    combined.*,
     to_tsvector(summary) as summary_text,
     to_tsvector(description) as description_text
 from combined
 ;
 
--- TODO: Index sort and filter columns
+create unique index on ofec_omnibus_dates_mv_tmp (idx);
+
+create index on ofec_omnibus_dates_mv_tmp (category);
+create index on ofec_omnibus_dates_mv_tmp (location);
+create index on ofec_omnibus_dates_mv_tmp (start_date);
+create index on ofec_omnibus_dates_mv_tmp (end_date);
+
+create index on ofec_omnibus_dates_mv_tmp using gin (states);
 
 create index on ofec_omnibus_dates_mv_tmp using gin (summary_text);
 create index on ofec_omnibus_dates_mv_tmp using gin (description_text);

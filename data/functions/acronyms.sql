@@ -36,6 +36,17 @@ returns text as $$
     end
 $$ language plpgsql;
 
+create or replace function expand_office_description(acronym text)
+returns text as $$
+    begin
+        return case acronym
+            when 'P' then 'Presidential'
+            when 'S' then 'Senate'
+            when 'H' then 'House'
+        end;
+    end
+$$ language plpgsql;
+
 create or replace function expand_candidate_status(acronym text)
 returns text as $$
     begin
