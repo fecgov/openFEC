@@ -1,8 +1,11 @@
 create or replace function ofec_sched_a_update() returns void as $$
 begin
+    -- Drop all queued deletes
     delete from ofec_sched_a
     where sched_a_sk = any(select sched_a_sk from ofec_sched_a_queue_old)
     ;
+    -- Insert all queued updates, unless a row with the same key exists in the
+    -- delete queue with a later timestamp
     insert into ofec_sched_a(
         select distinct on (sched_a_sk)
             new.*,
