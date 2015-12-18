@@ -20,6 +20,7 @@ class BaseCommittee(BaseModel):
     designation = db.Column(db.String(1), index=True)
     designation_full = db.Column(db.String(25), index=True)
     treasurer_name = db.Column(db.String(100), index=True)
+    treasurer_text = db.Column(TSVECTOR)
     organization_type = db.Column(db.String(1), index=True)
     organization_type_full = db.Column(db.String(100), index=True)
     state = db.Column(db.String(2), index=True)
