@@ -310,7 +310,7 @@ election_dates = {
 }
 
 calendar_dates = {
-    'category': fields.Str(description='Type of date reporting date, live event, etc.'),
+    'category': fields.List(fields.Str, description='Type of date reporting date, live event, etc.'),
     'description': fields.Str(description='Brief description of event'),
     'summary': fields.Str(description='Longer description of event'),
     'states': fields.List(fields.Str, description='States that an election or reporting period apply to.'),
