@@ -1,11 +1,12 @@
 import re
 import uuid
 
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 
 from webservices import decoders
 
 from .base import db
+
 
 def uuid_gen():
     return str(uuid.uuid4())
@@ -86,6 +87,8 @@ class CalendarDate(db.Model):
 
     category = db.Column(db.String)
     summary = db.Column(db.String)
+    # summary_text = db.Column(TSVECTOR)
+    # description_text = db.Column(TSVECTOR)
     description = db.Column(db.Text)
     states = db.Column(ARRAY(db.String))
     location = db.Column(db.String)

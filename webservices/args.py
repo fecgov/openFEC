@@ -315,10 +315,10 @@ calendar_dates = {
     'summary': fields.Str(description='Longer description of event'),
     'states': fields.List(fields.Str, description='States that an election or reporting period apply to.'),
     'location': fields.Str(description='The location of an in-person event.'),
-    'min_start_date_time': fields.DateTime(description='The minimum start date and time.'),
-    'min_end_date_time': fields.DateTime(description='The minimum end date and time, it can be null.'),
-    'max_start_date_time': fields.DateTime(description='The maximum start date and time.'),
-    'max_end_date_time': fields.DateTime(description='The maximum end date and time, it can be null.'),
+    'min_start_date': fields.DateTime(description='The minimum start date and time.'),
+    'min_end_date': fields.DateTime(description='The minimum end date and time, it can be null.'),
+    'max_start_date': fields.DateTime(description='The maximum start date and time.'),
+    'max_end_date': fields.DateTime(description='The maximum end date and time, it can be null.'),
 }
 
 schedule_a = {
