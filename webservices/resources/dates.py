@@ -80,11 +80,11 @@ class CalendarDatesView(ApiResource):
 
     filter_multi_fields = [
         ('category', models.CalendarDate.category),
+        ('location', models.CalendarDate.location),
     ]
     filter_fulltext_fields = [
         ('description', models.CalendarDate.description_text),
         ('summary', models.CalendarDate.summary_text),
-        ('location', models.CalendarDate.location),
     ]
     filter_range_fields = [
         (('min_start_date_time', 'max_start_date_time'), models.CalendarDate.start_date),
