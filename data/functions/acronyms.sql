@@ -10,20 +10,29 @@ returns text as $$
     end
 $$ language plpgsql;
 
-create or replace function expand_election_type(acronym text)
-returns text as $$
-    begin
-        return case acronym
-            when 'P' then 'Primary'
-            when 'G' then 'General'
-            when 'O' then 'Other'
-            when 'C' then 'Convention'
-            when 'R' then 'Runoff'
-            when 'S' then 'Special'
-            when 'E' then 'Recount'
-        end;
-    end
-$$ language plpgsql;
+ create or replace function expand_election_type(acronym text)
+ returns text as $$
+     begin
+         return case acronym
+             when 'P' then 'Primary'
+             when 'PR' then 'Primary runoff'
+             when 'SP' then 'Special primary'
+             when 'SPR' then 'Special primary runoff'
+             when 'G' then 'General'
+             when 'GR' then 'General runoff'
+             when 'SG' then 'Special general'
+             when 'SGR' then 'Special general runoff'
+             when 'O' then 'Other'
+             when 'C' then 'Convention'
+             when 'SC' then 'Special convention'
+             when 'R' then 'Runoff'
+             when 'SR' then 'Special runoff'
+             when 'S' then 'Special'
+             when 'E' then 'Recount'
+             else ''
+         end;
+     end
+ $$ language plpgsql;
 
 create or replace function expand_office(acronym text)
 returns text as $$
