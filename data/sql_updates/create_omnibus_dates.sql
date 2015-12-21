@@ -74,7 +74,7 @@ with elections as (
         due_date::timestamp as start_date,
         null::timestamp as end_date
     from reports_raw
-    where trc_election_type_id != 'G'
+    where coalesce(trc_election_type_id, '') != 'G'
 ), other as (
     select
         category_name as category,
