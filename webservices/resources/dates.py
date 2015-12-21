@@ -105,6 +105,11 @@ class CalendarDatesView(ApiResource):
     def build_query(self, *args, **kwargs):
         # TODO: Generalize if reused
         query = super().build_query(*args, **kwargs)
-        if kwargs.get('states'):
-            query = query.filter(self.model.states.overlap(kwargs['states']))
+        if kwargs.get('state'):
+            query = query.filter(
+                sa.or_(
+                    self.model.states.overlap(kwargs['state']),
+                    self.model.states == None  # noqa
+                )
+            )
         return query
