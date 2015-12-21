@@ -21,9 +21,6 @@ returns text as $$
     end
 $$ language plpgsql;
 
-
-
-
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections as (
