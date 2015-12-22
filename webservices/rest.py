@@ -153,6 +153,7 @@ api.add_resource(elections.ElectionSummary, '/elections/summary/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
+api.add_resource(dates.CalendarDatesExport, '/export/calendar-dates/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(

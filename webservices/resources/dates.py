@@ -1,10 +1,15 @@
+import datetime
+
 import sqlalchemy as sa
+from flask import Response
 from flask_apispec import doc, marshal_with
+from dateutil.relativedelta import relativedelta
 
 from webservices import args
 from webservices import schemas
 from webservices.common import models
 from webservices.utils import use_kwargs
+from webservices.calendar import CalendarSchema
 from webservices.common.views import ApiResource
 
 
@@ -113,3 +118,17 @@ class CalendarDatesView(ApiResource):
                 )
             )
         return query
+
+
+class CalendarDatesExport(CalendarDatesView):
+
+    @use_kwargs(args.calendar_dates)
+    def get(self, **kwargs):
+        query = self.build_query(**kwargs)
+        today = datetime.date.today()
+        query = query.filter(
+            self.model.start_date >= today - relativedelta(years=1),
+            self.model.start_date < today + relativedelta(years=1),
+        )
+        export = CalendarSchema().dump({'events': query}).data
+        return Response(export)
