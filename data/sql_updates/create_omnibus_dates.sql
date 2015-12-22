@@ -8,36 +8,13 @@ returns text as $$
         return case when count(election_states) > 1 then
             expand_election_type(trc_election_type_id) || ' ' ||
             expand_office_description(office_sought) || ' ' ||
-            ' multi-state' || ' ' ||
-        else expand_office_description(office_sought) || ' ' || || ' ' ||
+            ' multi-state'
+        else expand_office_description(office_sought) || ' ' ||
+            expand_office_description(office_sought) || ' ' ||
             array_to_string(election_states, ', ')
         end;
     end
 $$ language plpgsql;
-
-
-create or replace function generate_election_description(trc_election_type_id text, office_sought text, election_states text[], party text)
-returns text as $$
-    begin
-        DECLARE description char;
-        if party is not null then
-            description = party || '' ||
-        end if;
-        if office_sought is not null then
-            description = description || expand_office_description(office_sought) || ' ' ||
-        end if;
-        if trc_election_type_id is not null then
-            description = description || expand_election_type(trc_election_type_id) || ' ' ||
-        end if;
-        if election_states is not null then
-            description = description || 'states: ' || array_to_string(election_states, ', ')
-        end if;
-        return description
-        end;
-    end
-$$ language plpgsql;
-
-
 
 
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
@@ -52,11 +29,14 @@ with elections as (
             array_agg(election_state order by election_state)::text[],
             election_party::text
         ) as description,
-        generate_election_description(
-            trc_election_type_id::text,
-            office_sought::text,
-            array_agg(election_state order by election_state)::text[],
-            election_party::text
+        array_to_string(
+            array[
+                election_party,
+                expand_office_description(office_sought),
+                expand_election_type(trc_election_type_id),
+                -- TODO add a check to see if there are states
+                'states: ' || array_to_string(array_agg(election_state order by election_state)::text[], ', ')
+            ], ' '
         ) as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
@@ -68,6 +48,7 @@ with elections as (
     group by
         office_sought,
         election_date,
+        election_party,
         trc_election_type_id
 ), reports_raw as (
     select * from trc_report_due_date reports
