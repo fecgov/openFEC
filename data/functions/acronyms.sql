@@ -52,6 +52,7 @@ returns text as $$
             when 'P' then 'Presidential'
             when 'S' then 'Senate'
             when 'H' then 'House'
+            else null
         end;
     end
 $$ language plpgsql;
