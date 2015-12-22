@@ -137,14 +137,6 @@ class TestViews(common.IntegrationTestCase):
         ]
         assert len(set(counts)) == 1
 
-    def test_exclude_z_only_filers(self):
-        dcp = sa.Table('dimcandproperties', db.metadata, autoload=True, autoload_with=db.engine)
-        s = sa.select([dcp.c.cand_id]).where(dcp.c.form_tp != 'F2Z').distinct()
-        expected = [each.cand_id for each in db.engine.execute(s).fetchall()]
-        for model in CANDIDATE_MODELS:
-            observed = [each.candidate_id for each in model.query.all()]
-            self.assertFalse(set(observed).difference(expected))
-
     def test_sched_a_fulltext_trigger(self):
         # Test create
         row = self.SchedAFactory(
@@ -287,13 +279,14 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(rows[0].count, 0)
 
     def test_update_aggregate_size_existing(self):
-        existing = models.ScheduleABySize.query.filter_by(
-            size=500,
-            cycle=2016,
-        ).order_by(
-            models.ScheduleABySize.committee_id,
-        ).first()
-        db.session.refresh(existing)
+        def get_existing():
+            return models.ScheduleABySize.query.filter_by(
+                size=500,
+                cycle=2016,
+            ).order_by(
+                models.ScheduleABySize.committee_id,
+            ).first()
+        existing = get_existing()
         total = existing.total
         count = existing.count
         self.SchedAFactory(
@@ -305,7 +298,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.commit()
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        db.session.refresh(existing)
+        existing = get_existing()
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
 

@@ -11,7 +11,6 @@ from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
 from webservices.common.views import ApiResource
-from webservices.resources.candidate_aggregates import get_elections
 
 
 @doc(params={'committee_id': {'description': docs.COMMITTEE_ID}})
@@ -237,7 +236,6 @@ class CandidateAggregateResource(AggregateResource):
 
     def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id=committee_id, **kwargs)
-        elections = get_elections(kwargs).subquery()
         election_full = kwargs.get('election_full')
         if election_full and not (kwargs.get('candidate_id') or kwargs.get('office')):
             raise exceptions.ApiError(
@@ -245,7 +243,7 @@ class CandidateAggregateResource(AggregateResource):
                 status_code=422,
             )
         cycle_column = (
-            elections.c.cand_election_year
+            models.CandidateElection.cand_election_year
             if election_full
             else self.model.cycle
         )
@@ -256,17 +254,17 @@ class CandidateAggregateResource(AggregateResource):
             else True
         )
         if election_full:
-            query = self.aggregate_cycles(query, elections, cycle_column)
+            query = self.aggregate_cycles(query, cycle_column)
         return self.join_entity_names(query)
 
-    def aggregate_cycles(self, query, elections, cycle_column):
+    def aggregate_cycles(self, query, cycle_column):
         election_duration = utils.get_election_duration(sa.func.left(self.model.candidate_id, 1))
         query = query.join(
-            elections,
+            models.CandidateElection,
             sa.and_(
-                self.model.candidate_id == elections.c.candidate_id,
-                self.model.cycle <= elections.c.cand_election_year,
-                self.model.cycle > (elections.c.cand_election_year - election_duration),
+                self.model.candidate_id == models.CandidateElection.candidate_id,
+                self.model.cycle <= models.CandidateElection.cand_election_year,
+                self.model.cycle > (models.CandidateElection.cand_election_year - election_duration),
             ),
         )
         return query.with_entities(

@@ -1,7 +1,4 @@
-import datetime
-
 import sqlalchemy as sa
-from marshmallow.utils import isoformat
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -18,7 +15,6 @@ from webservices.resources.candidates import CandidateHistoryView
 
 fields = dict(
     name='John Hoynes',
-    form_type='F2',
     address_street_1='1600 Pennsylvania Avenue',
     address_city='Washington',
     address_state='DC',
@@ -26,10 +22,9 @@ fields = dict(
     party='DEM',
     party_full='Democratic Party',
     active_through=2014,
-    candidate_inactive='Y',
+    candidate_inactive=True,
     candidate_status='C',
     incumbent_challenge='I',
-    candidate_status_full='Candidate',
     office='H',
     district='08',
     state='VA',
@@ -41,14 +36,7 @@ class CandidateFormatTest(ApiBaseTest):
     """Test/Document expected formats"""
     def test_candidate(self):
         """Compare results to expected fields."""
-        candidate_old = factories.CandidateDetailFactory(
-            load_date=datetime.datetime(2014, 1, 2),
-            **fields
-        )
-        candidate = factories.CandidateDetailFactory(
-            load_date=datetime.datetime(2014, 1, 3),
-            **fields
-        )
+        candidate = factories.CandidateDetailFactory(**fields)
         response = self._response(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
@@ -58,12 +46,7 @@ class CandidateFormatTest(ApiBaseTest):
 
         result = response['results'][0]
         assert result['candidate_id'] == candidate.candidate_id
-        assert result['form_type'] == 'F2'
-        # @todo - check for a value for expire_data
-        assert result['expire_date'] is None
         # # most recent record should be first
-        assert result['load_date'] == isoformat(candidate.load_date)
-        assert result['load_date'] != isoformat(candidate_old.load_date)
         assert result['name'] == candidate.name
         # #address
         assert result['address_city'] == candidate.address_city
@@ -83,7 +66,6 @@ class CandidateFormatTest(ApiBaseTest):
         assert result['candidate_inactive'] == candidate.candidate_inactive
         assert result['candidate_status'] == candidate.candidate_status
         assert result['incumbent_challenge'] == candidate.incumbent_challenge
-        assert result['candidate_status_full'] == candidate.candidate_status_full
 
     def test_candidates_search(self):
         principal_committee = factories.CommitteeFactory(designation='P')

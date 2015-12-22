@@ -93,6 +93,10 @@ class TestElections(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
         [
+            factories.CandidateElectionFactory(candidate_id=self.candidate.candidate_id, cand_election_year=year)
+            for year in [2010, 2012]
+        ]
+        [
             factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
         ]

@@ -168,6 +168,10 @@ candidate_list = {
     'name': fields.Str(description="Candidate's name (full or partial)"),
 }
 
+candidate_history = {
+    'election_full': election_full,
+}
+
 committee = {
     'year': fields.List(fields.Int, description='A year that the committee was active- (After original registration date but before expiration date.)'),
     'cycle': fields.List(fields.Int, description=docs.COMMITTEE_CYCLE),
@@ -226,6 +230,7 @@ committee_list = {
     'party': fields.List(IStr, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
     'min_first_file_date': fields.Date(description='Minimum date of the first form filed by the committee.'),
     'max_first_file_date': fields.Date(description='Maximum date of the first form filed by the committee.'),
+    'treasurer_name': fields.Str(description='Committee treasurer'),
 }
 
 filings = {

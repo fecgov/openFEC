@@ -124,7 +124,10 @@ register_schema(CommitteeSearchSchema)
 register_schema(CommitteeSearchListSchema)
 
 
-make_committee_schema = functools.partial(make_schema, options={'exclude': ('idx', )})
+make_committee_schema = functools.partial(
+    make_schema,
+    options={'exclude': ('idx', 'treasurer_text')},
+)
 
 augment_models(
     make_committee_schema,
