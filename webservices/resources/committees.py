@@ -76,6 +76,13 @@ class CommitteeList(ApiResource):
                 kwargs['q'],
             ).distinct()
 
+        if kwargs.get('treasurer_name'):
+            query = utils.search_text(
+                query,
+                models.Committee.treasurer_text,
+                kwargs['treasurer_name'],
+            )
+
         if kwargs.get('name'):
             query = query.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
 

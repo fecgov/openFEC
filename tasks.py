@@ -12,9 +12,8 @@ DEFAULT_FRACTION = 0.5
 FULL_TABLES = [
     'dimdates',
     'dimparty',
-    'dimyears',
-    'dimoffice',
     'dimreporttype',
+    'cand_inactive',
 ]
 EXCLUDE_TABLES = [
     '*_mv',
@@ -24,6 +23,9 @@ EXCLUDE_TABLES = [
     'sched_e2',
     'pacronyms',
     'ofec_*',
+    'dimcandproperties',
+    'f_rpt_or_form_sub',
+    'f_item_receipt_or_exp',
 ]
 # Include records used in integration tests
 FORCE_INCLUDE = [
