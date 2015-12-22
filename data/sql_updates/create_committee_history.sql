@@ -27,6 +27,7 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     fec_yr.cmte_id as committee_id,
     fec_yr.cmte_nm as name,
     fec_yr.tres_nm as treasurer_name,
+    to_tsvector(fec_yr.tres_nm) as treasurer_text,
     dcp.org_tp as organization_type,
     expand_organization_type(dcp.org_tp) as organization_type_full,
     dcp.expire_date as expire_date,
@@ -109,7 +110,7 @@ order by committee_id, cycle desc
 ;
 
 
-create unique index on ofec_committee_detail_mv_tmp(idx);
+create unique index on ofec_committee_detail_mv_tmp (idx);
 
 create index on ofec_committee_detail_mv_tmp(name);
 create index on ofec_committee_detail_mv_tmp(party);
@@ -129,3 +130,4 @@ create index on ofec_committee_detail_mv_tmp(organization_type_full);
 
 create index on ofec_committee_detail_mv_tmp using gin (cycles);
 create index on ofec_committee_detail_mv_tmp using gin (candidate_ids);
+create index on ofec_committee_detail_mv_tmp using gin (treasurer_text);
