@@ -2,6 +2,7 @@ import datetime
 
 import sqlalchemy as sa
 from flask import Response
+from webargs import fields, validate
 from flask_apispec import doc, marshal_with
 from dateutil.relativedelta import relativedelta
 
@@ -9,8 +10,8 @@ from webservices import args
 from webservices import schemas
 from webservices.common import models
 from webservices.utils import use_kwargs
-from webservices.calendar import CalendarSchema
 from webservices.common.views import ApiResource
+from webservices import calendar
 
 
 @doc(tags=['dates'], description='FEC reporting dates since 1995.')
@@ -122,7 +123,15 @@ class CalendarDatesView(ApiResource):
 
 class CalendarDatesExport(CalendarDatesView):
 
+    renderers = {
+        'csv': (calendar.EventSchema, calendar.render_csv, 'text/csv'),
+        'ics': (calendar.ICalEventSchema, calendar.render_ical, 'text/calendar'),
+    }
+
     @use_kwargs(args.calendar_dates)
+    @use_kwargs({
+        'renderer': fields.Str(missing='ics', validate=validate.OneOf(['ics', 'csv'])),
+    })
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         today = datetime.date.today()
@@ -130,5 +139,9 @@ class CalendarDatesExport(CalendarDatesView):
             self.model.start_date >= today - relativedelta(years=1),
             self.model.start_date < today + relativedelta(years=1),
         )
-        export = CalendarSchema().dump({'events': query}).data
-        return Response(export)
+        schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
+        schema = schema_type(many=True)
+        return Response(
+            renderer(schema.dump(query).data, schema),
+            mimetype=mimetype,
+        )

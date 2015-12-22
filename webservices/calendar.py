@@ -1,5 +1,8 @@
-from icalendar import Calendar, Event
-from marshmallow import Schema, fields, post_dump
+import io
+import csv
+
+from icalendar import Event, Calendar
+from marshmallow import Schema, fields
 
 def format_start_date(row):
     return (
@@ -8,10 +11,25 @@ def format_start_date(row):
         else row.start_date
     )
 
-class EventSchema(Schema):
+def render_ical(rows, schema):
+    calendar = Calendar()
+    for row in rows:
+        event = Event()
+        for key, value in row.items():
+            if value:
+                event.add(key, value)
+        calendar.add_component(event)
+    return calendar.to_ical()
 
-    dtstart = fields.Function(format_start_date)
-    dtend = fields.Raw(attribute='end_date')
+def render_csv(rows, schema):
+    sio = io.StringIO()
+    writer = csv.DictWriter(sio, fieldnames=schema.fields.keys())
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)
+    return sio.getvalue()
+
+class BaseEventSchema(Schema):
 
     summary = fields.String()
     description = fields.String()
@@ -19,21 +37,12 @@ class EventSchema(Schema):
     location = fields.String()
     categories = fields.String(attribute='category')
 
-    @post_dump
-    def to_event(self, data):
-        event = Event()
-        for key, value in data.items():
-            if value:
-                event.add(key, value)
-        return event
+class ICalEventSchema(BaseEventSchema):
 
-class CalendarSchema(Schema):
+    dtstart = fields.Function(format_start_date)
+    dtend = fields.Raw(attribute='end_date')
 
-    events = fields.Nested(EventSchema, many=True)
+class EventSchema(BaseEventSchema):
 
-    @post_dump
-    def to_calendar(self, data):
-        calendar = Calendar()
-        for event in data.get('events', []):
-            calendar.add_component(event)
-        return calendar.to_ical()
+    start_date = fields.DateTime()
+    end_date = fields.DateTime()
