@@ -230,6 +230,7 @@ committee_list = {
     'party': fields.List(IStr, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
     'min_first_file_date': fields.Date(description='Minimum date of the first form filed by the committee.'),
     'max_first_file_date': fields.Date(description='Maximum date of the first form filed by the committee.'),
+    'treasurer_name': fields.Str(description='Committee treasurer'),
 }
 
 filings = {
