@@ -5,7 +5,7 @@ returns text as $$
             when 'I' then 'Incumbent'
             when 'C' then 'Challenger'
             when 'O' then 'Open seat'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
@@ -29,7 +29,7 @@ $$ language plpgsql;
              when 'SR' then 'Special runoff'
              when 'S' then 'Special'
              when 'E' then 'Recount'
-             else ''
+             else null
          end;
      end
  $$ language plpgsql;
@@ -65,7 +65,7 @@ returns text as $$
             when 'F' then 'Future candidate'
             when 'N' then 'Not yet a candidate'
             when 'P' then 'Prior candidate'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
@@ -95,7 +95,7 @@ returns text as $$
             when 'U' then 'Unauthorized'
             when 'B' then 'Lobbyist/Registrant PAC'
             when 'D' then 'Leadership PAC'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
@@ -120,7 +120,7 @@ returns text as $$
             when 'X' then 'Party - Nonqualified'
             when 'Y' then 'Party - Qualified'
             when 'Z' then 'National Party Nonfederal Account'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
