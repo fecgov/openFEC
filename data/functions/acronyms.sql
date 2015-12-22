@@ -29,7 +29,7 @@ $$ language plpgsql;
              when 'SR' then 'Special runoff'
              when 'S' then 'Special'
              when 'E' then 'Recount'
-             else ''
+             else null::text
          end;
      end
  $$ language plpgsql;
@@ -52,7 +52,7 @@ returns text as $$
             when 'P' then 'Presidential'
             when 'S' then 'Senate'
             when 'H' then 'House'
-            else null
+            else null::text
         end;
     end
 $$ language plpgsql;
