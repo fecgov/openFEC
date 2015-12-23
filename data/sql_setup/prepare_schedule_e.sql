@@ -15,6 +15,7 @@ create index on ofec_sched_e_tmp (s_o_cand_id);
 create index on ofec_sched_e_tmp (entity_tp);
 create index on ofec_sched_e_tmp (image_num);
 create index on ofec_sched_e_tmp (rpt_yr);
+create index on ofec_sched_e_tmp (get_cycle(rpt_yr));
 
 -- Create composite indices on sortable columns
 create index on ofec_sched_e_tmp (exp_dt, sched_e_sk);

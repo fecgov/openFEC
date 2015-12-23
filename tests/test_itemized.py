@@ -6,7 +6,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA
+from webservices.common.models import ScheduleA, ScheduleE
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView
@@ -253,3 +253,18 @@ class TestItemized(ApiBaseTest):
         self.assertTrue(all(each['expenditure_amount'] <= 150 for each in results))
         results = self._results(api.url_for(ScheduleEView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))
+
+    def test_filters_sched_e(self):
+        filters = [
+            ('image_number', ScheduleE.image_number, ['123', '456']),
+            ('committee_id', ScheduleE.committee_id, ['C01', 'C02']),
+            ('support_oppose_indicator', ScheduleE.support_oppose_indicator, ['S', 'O']),
+        ]
+        for label, column, values in filters:
+            [
+                factories.ScheduleEFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleEView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
