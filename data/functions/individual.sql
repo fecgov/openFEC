@@ -19,7 +19,7 @@ create or replace function is_inferred_individual(amount numeric, line_number te
 begin
     return (
         amount < 200 and
-        coalesce(line_number, '') in ('11AI', '12', '17', '17A', '18') and
+        coalesce(line_number, '') in ('11A', '12', '17', '17A', '18') and
         not is_earmark(memo_code, memo_text)
     );
 end
