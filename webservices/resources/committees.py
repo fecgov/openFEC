@@ -183,7 +183,10 @@ class CommitteeHistoryView(utils.Resource):
         if candidate_id:
             query = query.join(
                 models.CandidateCommitteeLink,
-                models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
+                sa.and_(
+                    models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
+                    models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistory.cycle,
+                )
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
             ).distinct()
