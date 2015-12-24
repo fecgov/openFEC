@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
 
@@ -31,10 +32,7 @@ class CandidateList(ApiResource):
     schema = schemas.CandidateSchema
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
-
-    @property
-    def query(self):
-        return models.Candidate.query
+    aliases = {'receipts': models.CandidateSearch.receipts}
 
     @property
     def args(self):
@@ -44,12 +42,21 @@ class CandidateList(ApiResource):
             args.candidate_detail,
             args.make_sort_args(
                 default=['name'],
-                validator=args.IndexValidator(self.model)
+                validator=args.IndexValidator(
+                    models.Candidate,
+                    extra=list(self.aliases.keys()),
+                ),
             )
         )
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
+
+        if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
+            raise exceptions.ApiError(
+                'Cannot sort on receipts when parameter "q" is not set',
+                status_code=422,
+            )
 
         if kwargs.get('q'):
             query = utils.search_text(

@@ -21,12 +21,16 @@ class ApiResource(utils.Resource):
     filter_range_fields = []
     query_options = []
     join_columns = {}
+    aliases = {}
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        return utils.fetch_page(query, kwargs, model=self.model, join_columns=self.join_columns)
+        return utils.fetch_page(
+            query, kwargs,
+            model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+        )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
         query = self.model.query

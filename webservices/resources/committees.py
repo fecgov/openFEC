@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import exceptions
 from webservices.common import models
 from webservices.common.views import ApiResource
 
@@ -33,6 +34,7 @@ class CommitteeList(ApiResource):
     model = models.Committee
     schema = schemas.CommitteeSchema
     page_schema = schemas.CommitteePageSchema
+    aliases = {'receipts': models.CommitteeSearch.receipts}
 
     filter_multi_fields = [
         ('committee_id', models.Committee.committee_id),
@@ -54,12 +56,21 @@ class CommitteeList(ApiResource):
             args.committee_list,
             args.make_sort_args(
                 default=['name'],
-                validator=args.IndexValidator(self.model),
+                validator=args.IndexValidator(
+                    models.Committee,
+                    extra=list(self.aliases.keys()),
+                ),
             ),
         )
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
+
+        if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
+            raise exceptions.ApiError(
+                'Cannot sort on receipts when parameter "q" is not set',
+                status_code=422,
+            )
 
         if kwargs.get('candidate_id'):
             query = query.filter(
@@ -182,7 +193,10 @@ class CommitteeHistoryView(ApiResource):
         if candidate_id:
             query = query.join(
                 models.CandidateCommitteeLink,
-                models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
+                sa.and_(
+                    models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
+                    models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistory.cycle,
+                )
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
             ).distinct()
