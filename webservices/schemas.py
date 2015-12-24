@@ -318,6 +318,16 @@ ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
+CommunicationCostSchema = make_schema(
+    models.CommunicationCost,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+    },
+)
+CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
+register_schema(CommunicationCostSchema)
+register_schema(CommunicationCostPageSchema)
 
 FilingsSchema = make_schema(
     models.Filings,
