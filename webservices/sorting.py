@@ -4,7 +4,7 @@ from sqlalchemy.sql.expression import nullsfirst, nullslast
 from webservices.exceptions import ApiError
 
 
-def parse_option(option, model=None, join_columns=None, nulls_large=True):
+def parse_option(option, model=None, aliases=None, join_columns=None, nulls_large=True):
     """Parse sort option to SQLAlchemy order expression.
 
     :param str option: Column name, possibly prefixed with "-"
@@ -14,12 +14,15 @@ def parse_option(option, model=None, join_columns=None, nulls_large=True):
     :param nulls_large: Treat null values as large
     :raises: ApiError if column not found on model
     """
+    aliases = aliases or {}
     join_columns = join_columns or {}
     order = sa.desc if option.startswith('-') else sa.asc
     nulls = nullsfirst if (nulls_large ^ (not option.startswith('-'))) else nullslast
     column = option.lstrip('-')
     relationship = None
-    if column in join_columns:
+    if column in aliases:
+        column = aliases[column]
+    elif column in join_columns:
         column, relationship = join_columns[column]
     elif model:
         try:
@@ -37,7 +40,7 @@ def ensure_list(value):
     return []
 
 
-def sort(query, options, model, join_columns=None, clear=False, hide_null=False, nulls_large=True):
+def sort(query, options, model, aliases=None, join_columns=None, clear=False, hide_null=False, nulls_large=True):
     """Sort query using string-formatted columns.
 
     :param query: Original query
@@ -58,6 +61,7 @@ def sort(query, options, model, join_columns=None, clear=False, hide_null=False,
         column, order, nulls, relationship = parse_option(
             option,
             model=model,
+            aliases=aliases,
             join_columns=join_columns,
             nulls_large=nulls_large,
         )
