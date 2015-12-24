@@ -3,6 +3,7 @@ drop table if exists ofec_sched_e_tmp;
 create table ofec_sched_e_tmp as
 select
     *,
+    coalesce(rpt_tp, '') in ('24', '48') as is_notice,
     to_tsvector(pye_nm) as payee_name_text
 from sched_e
 ;
@@ -16,6 +17,7 @@ create index on ofec_sched_e_tmp (entity_tp);
 create index on ofec_sched_e_tmp (image_num);
 create index on ofec_sched_e_tmp (rpt_yr);
 create index on ofec_sched_e_tmp (get_cycle(rpt_yr));
+create index on ofec_sched_e_tmp (is_notice);
 
 -- Create composite indices on sortable columns
 create index on ofec_sched_e_tmp (exp_dt, sched_e_sk);

@@ -259,6 +259,7 @@ class TestItemized(ApiBaseTest):
             ('image_number', ScheduleE.image_number, ['123', '456']),
             ('committee_id', ScheduleE.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleE.support_oppose_indicator, ['S', 'O']),
+            ('is_notice', ScheduleE.is_notice, [True, False]),
         ]
         for label, column, values in filters:
             [

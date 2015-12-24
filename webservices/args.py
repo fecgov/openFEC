@@ -464,4 +464,5 @@ schedule_e = {
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
     ),
+    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
 }
