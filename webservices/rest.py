@@ -38,6 +38,7 @@ from webservices.resources import elections
 from webservices.resources import filings
 from webservices.resources import search
 from webservices.resources import dates
+from webservices.resources import costs
 from webservices.env import env
 
 
@@ -147,6 +148,7 @@ api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
+api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionList, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
@@ -218,6 +220,7 @@ apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
 apidoc.register(sched_e.ScheduleEView, blueprint='v1')
+apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')

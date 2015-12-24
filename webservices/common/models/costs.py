@@ -1,0 +1,40 @@
+from webservices import utils
+from .base import db
+
+class CommunicationCost(db.Model):
+    __tablename__ = 'ofec_communication_cost_mv'
+
+    form_76_sk = db.Column(db.Integer, primary_key=True)
+    form_type = db.Column('form_tp', db.String, index=True)
+    committee_id = db.Column('org_id', db.String, index=True)
+    communication_type = db.Column('communication_tp', db.String, index=True)
+    communication_type_full = db.Column('communication_tp_desc', db.String)
+    communication_type_full = db.Column('communication_class', db.String, index=True)
+    communication_date = db.Column('communication_dt', db.Date, index=True)
+    support_oppose_indicator = db.Column('s_o_ind', db.String, index=True)
+    candidate_id = db.Column('s_o_cand_id', db.String, index=True)
+    candidate_name = db.Column('s_o_cand_nm', db.String)
+    candidate_prefix = db.Column('s_o_cand_prefix', db.String)
+    candidate_first_name = db.Column('s_o_cand_f_nm', db.String)
+    candidate_middle_name = db.Column('s_o_cand_m_nm', db.String)
+    candidate_last_name = db.Column('s_o_cand_l_nm', db.String)
+    candidate_suffix = db.Column('s_o_cand_suffix', db.String)
+    candidate_state = db.Column('s_o_cand_office_st', db.String, index=True)
+    candidate_district = db.Column('s_o_cand_office_district', db.String, index=True)
+    primary_general_indicator = db.Column('s_o_rpt_pgi', db.String, index=True)
+    communication_cost = db.Column(db.Numeric(30, 2), index=True)
+    amendment_indicator = db.Column('amndt_ind', db.String, index=True)
+    tran_id = db.Column(db.String)
+    receipt_date = db.Column('receipt_dt', db.Date)
+    election_other_full = db.Column('election_other_desc', db.String)
+    transaction_type = db.Column('transaction_tp', db.String)
+    image_number = db.Column('image_num', db.String, index=True)
+    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    link_id = db.Column(db.Integer)
+    transaction_id = db.Column(db.Integer)
+    filing_type = db.Column(db.String)
+    load_date = db.Column(db.DateTime)
+    update_date = db.Column(db.DateTime)
+
+    committee = utils.related_committee('committee_id')
+    candidate = utils.related_candidate('candidate_id')

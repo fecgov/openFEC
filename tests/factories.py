@@ -231,3 +231,9 @@ class ElectionResultFactory(BaseFactory):
     election_yr = 2016
     cand_office_st = 'US'
     cand_office_district = '00'
+
+
+class CommunicationCostFactory(BaseFactory):
+    class Meta:
+        model = models.CommunicationCost
+    form_76_sk = factory.Sequence(lambda n: n)
