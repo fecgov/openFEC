@@ -16,7 +16,7 @@ create index on ofec_communication_cost_mv_tmp (s_o_ind);
 create index on ofec_communication_cost_mv_tmp (s_o_cand_id);
 create index on ofec_communication_cost_mv_tmp (s_o_cand_office_st);
 create index on ofec_communication_cost_mv_tmp (s_o_cand_office_district);
-create index on ofec_communication_cost_mv_tmp (s_o_cand_office_pgi);
+create index on ofec_communication_cost_mv_tmp (s_o_rpt_pgi);
 create index on ofec_communication_cost_mv_tmp (communication_cost);
 create index on ofec_communication_cost_mv_tmp (amndt_ind);
 create index on ofec_communication_cost_mv_tmp (image_num);

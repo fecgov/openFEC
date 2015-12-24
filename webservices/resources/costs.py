@@ -54,3 +54,44 @@ class CommunicationCostView(ApiResource):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+
+@doc(
+    tags=['costs'],
+    description=docs.ELECTIONEERING_COST,
+)
+class ElectioneeringCostView(ApiResource):
+
+    model = models.ElectioneeringCost
+
+    @property
+    def index_column(self):
+        return self.model.form_94_sk
+
+    filter_multi_fields = [
+        ('report_year', models.ElectioneeringCost.report_year),
+        ('committee_id', models.ElectioneeringCost.committee_id),
+        ('candidate_id', models.ElectioneeringCost.candidate_id),
+        ('beginning_image_number', models.ElectioneeringCost.beginning_image_number),
+    ]
+    filter_range_fields = [
+        (('min_date', 'max_date'), models.ElectioneeringCost.receipt_date),
+        (('min_amount', 'max_amount'), models.ElectioneeringCost.disbursement_amount),
+    ]
+    query_options = [
+        sa.orm.joinedload(models.ElectioneeringCost.committee),
+        sa.orm.joinedload(models.ElectioneeringCost.candidate),
+    ]
+
+    @use_kwargs(args.electioneering_cost)
+    @use_kwargs(args.make_seek_args())
+    @use_kwargs(
+        args.make_sort_args(
+            validator=args.IndexValidator(models.ElectioneeringCost),
+            multiple=False,
+        )
+    )
+    @marshal_with(schemas.ElectioneeringCostPageSchema())
+    def get(self, **kwargs):
+        query = self.build_query(**kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
