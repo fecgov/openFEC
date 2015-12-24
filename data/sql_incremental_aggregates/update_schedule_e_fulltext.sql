@@ -6,6 +6,7 @@ begin
     insert into ofec_sched_e (
         select
             *,
+            coalesce(rpt_tp, '') in ('24', '48') as is_notice,
             to_tsvector(pye_nm) as payee_name_text
         from ofec_sched_e_queue_new
     );
