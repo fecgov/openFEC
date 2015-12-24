@@ -409,6 +409,16 @@ communication_cost = {
     ),
 }
 
+electioneering_cost = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+    'min_date': fields.Date(description='Minimum date'),
+    'max_date': fields.Date(description='Maximum date'),
+}
+
 electioneering_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),

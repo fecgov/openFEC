@@ -237,3 +237,9 @@ class CommunicationCostFactory(BaseFactory):
     class Meta:
         model = models.CommunicationCost
     form_76_sk = factory.Sequence(lambda n: n)
+
+
+class ElectioneeringCostFactory(BaseFactory):
+    class Meta:
+        model = models.ElectioneeringCost
+    form_94_sk = factory.Sequence(lambda n: n)
