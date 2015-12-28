@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import exceptions
 from webservices.common import models
 from webservices.utils import use_kwargs
 from webservices.common.util import filter_query
@@ -31,21 +32,29 @@ class CandidateList(utils.Resource):
     def query(self):
         return models.Candidate.query
 
+    aliases = {'receipts': models.CandidateSearch.receipts}
+
     @use_kwargs(args.paging)
     @use_kwargs(args.candidate_list)
     @use_kwargs(args.candidate_detail)
     @use_kwargs(
         args.make_sort_args(
             default=['name'],
-            validator=args.IndexValidator(models.Candidate),
+            validator=args.IndexValidator(models.Candidate, extra=list(aliases.keys())),
         )
     )
     @marshal_with(schemas.CandidatePageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Candidate)
+        return utils.fetch_page(query, kwargs, model=models.Candidate, aliases=self.aliases)
 
     def get_candidates(self, kwargs):
+
+        if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
+            raise exceptions.ApiError(
+                'Cannot sort on receipts when parameter "q" is not set',
+                status_code=422,
+            )
 
         candidates = self.query
 
@@ -87,11 +96,16 @@ class CandidateSearch(CandidateList):
     @use_kwargs(args.paging)
     @use_kwargs(args.candidate_list)
     @use_kwargs(args.candidate_detail)
-    @use_kwargs(args.make_sort_args(validator=args.IndexValidator(models.Candidate)))
+    @use_kwargs(
+        args.make_sort_args(
+            default=['name'],
+            validator=args.IndexValidator(models.Candidate, extra=list(CandidateList.aliases.keys())),
+        )
+    )
     @marshal_with(schemas.CandidateSearchPageSchema())
     def get(self, **kwargs):
         query = self.get_candidates(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Candidate)
+        return utils.fetch_page(query, kwargs, model=models.Candidate, aliases=self.aliases)
 
 
 @doc(
