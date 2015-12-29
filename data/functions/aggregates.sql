@@ -12,16 +12,5 @@ begin
     perform ofec_sched_b_update_aggregate_purpose();
     perform ofec_sched_b_update_aggregate_recipient();
     perform ofec_sched_b_update_aggregate_recipient_id();
-
-    -- Update full-text tables in place
-    perform ofec_sched_a_update();
-    perform ofec_sched_b_update();
-    perform ofec_sched_e_update();
-
-    -- Clear queue tables
-    delete from ofec_sched_a_queue_new;
-    delete from ofec_sched_a_queue_old;
-    delete from ofec_sched_b_queue_new;
-    delete from ofec_sched_b_queue_old;
 end
 $$ language plpgsql;

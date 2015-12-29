@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.expression import UpdateBase
 
@@ -20,6 +21,15 @@ def _create_table_as(element, compiler, **kwargs):
         element.name,
         compiler.process(element.query),
     )
+
+class Analyze(DDLElement):
+
+    def __init__(self, table):
+        self.table = table
+
+@compiles(Analyze)
+def _analyze(element, compiler, **kwargs):
+    return 'analyze {0}'.format(element.table.name)
 
 def load_table(name):
     try:

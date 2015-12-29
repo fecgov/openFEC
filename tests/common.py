@@ -56,7 +56,13 @@ class ApiBaseTest(BaseTestCase):
         super(ApiBaseTest, cls).setUpClass()
         manage.load_districts()
         manage.update_functions()
-        rest.db.create_all()
+        rest.db.metadata.create_all(
+            rest.db.engine,
+            tables=[
+                each.__table__ for each in rest.db.Model._decl_class_registry.values()
+                if hasattr(each, '__table__')
+            ]
+        )
 
     def setUp(self):
         super(ApiBaseTest, self).setUp()
