@@ -5,10 +5,19 @@ from webservices.config import SQL_CONFIG
 
 from . import utils
 
+def get_cycles():
+    return range(
+        SQL_CONFIG['START_YEAR_ITEMIZED'] - 1,
+        SQL_CONFIG['END_YEAR_ITEMIZED'] + 3,
+        2,
+    )
+
 class TableGroup:
 
     parent = None
     base_name = None
+    queue_new = None
+    queue_old = None
     primary = None
 
     columns = []
@@ -26,14 +35,16 @@ class TableGroup:
         pass
 
     @classmethod
+    def timestamp_factory(cls, parent):
+        return [
+            sa.cast(None, sa.DateTime).label('timestamp'),
+        ]
+
+    @classmethod
     def run(cls):
         parent = utils.load_table(cls.parent)
         cls.create_master(parent)
-        cycles = range(
-            SQL_CONFIG['START_YEAR_ITEMIZED'] - 1,
-            SQL_CONFIG['END_YEAR_ITEMIZED'] + 3,
-            2,
-        )
+        cycles = get_cycles()
         for cycle in cycles:
             cls.create_child(parent, cycle)
 
@@ -43,6 +54,7 @@ class TableGroup:
         table = sa.Table(
             name,
             db.metadata,
+            extend_existing=True,
             *([column.copy() for column in parent.columns] + cls.columns)
         )
         db.engine.execute('drop table if exists {0} cascade'.format(name))
@@ -51,22 +63,28 @@ class TableGroup:
     @classmethod
     def create_child(cls, parent, cycle):
         start, stop = cycle - 1, cycle
+        name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
+
         select = sa.select(
-            parent.columns + cls.column_factory(parent)
+            parent.columns + cls.timestamp_factory(parent) + cls.column_factory(parent)
         ).where(
             parent.c.rpt_yr.in_([start, stop]),
         )
-        name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
 
         child = utils.load_table(name)
         if child is not None:
-            child.drop(db.engine)
+            try:
+                child.drop(db.engine)
+            except sa.exc.ProgrammingError:
+                pass
         create = utils.TableAs(name, select)
         db.engine.execute(create)
         child = utils.load_table(name)
+
         cls.create_constraints(child, cycle)
         cls.create_indexes(child)
         cls.update_child(child)
+        db.engine.execute(utils.Analyze(child))
         return child
 
     @classmethod
@@ -98,5 +116,40 @@ class TableGroup:
             index.create(db.engine)
 
     @classmethod
-    def update_children(cls):
-        pass
+    def refresh_children(cls):
+        queue_old = utils.load_table(cls.queue_old)
+        queue_new = utils.load_table(cls.queue_new)
+        cycles = get_cycles()
+        for cycle in cycles:
+            cls.refresh_child(cycle, queue_old, queue_new)
+
+    @classmethod
+    def refresh_child(cls, cycle, queue_old, queue_new):
+        start, stop = cycle - 1, cycle
+        name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
+        child = utils.load_table(name)
+
+        select = sa.select([queue_old.c.get(cls.primary)])
+        delete = sa.delete(child).where(child.c.get(cls.primary).in_(select))
+        db.engine.execute(delete)
+
+        select = sa.select(
+            queue_new.columns + cls.column_factory(queue_new)
+        ).select_from(
+            queue_new.join(
+                queue_old,
+                sa.and_(
+                    queue_new.c.get(cls.primary) == queue_old.c.get(cls.primary),
+                    queue_old.c.timestamp > queue_new.c.timestamp,
+                ),
+                isouter=True,
+            )
+        ).where(
+            queue_new.c.rpt_yr.in_([start, stop])
+        ).where(
+            queue_old.c.get(cls.primary) == None  # noqa
+        ).distinct(
+            queue_new.c.get(cls.primary)
+        )
+        insert = sa.insert(child).from_select(select.columns, select)
+        db.engine.execute(insert)

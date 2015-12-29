@@ -8,6 +8,8 @@ class SchedBGroup(TableGroup):
 
     parent = 'sched_b'
     base_name = 'ofec_sched_b'
+    queue_new = 'ofec_sched_b_queue_new'
+    queue_old = 'ofec_sched_b_queue_old'
     primary = 'sched_b_sk'
 
     columns = [
@@ -21,7 +23,6 @@ class SchedBGroup(TableGroup):
     @classmethod
     def column_factory(cls, parent):
         return [
-            sa.cast(None, sa.DateTime).label('timestamp'),
             sa.func.to_tsvector(parent.c.recipient_nm).label('recipient_name_text'),
             sa.func.to_tsvector(parent.c.disb_desc).label('disbursement_description_text'),
             sa.func.disbursement_purpose(
@@ -51,6 +52,9 @@ class SchedBGroup(TableGroup):
             sa.Index(None, c.cmte_id, c.sched_b_sk),
             sa.Index(None, c.cmte_id, c.disb_dt, c.sched_b_sk),
             sa.Index(None, c.cmte_id, c.disb_amt, c.sched_b_sk),
+
+            sa.Index(None, c.recipient_name_text, postgresql_using='gin'),
+            sa.Index(None, c.disbursement_description_text, postgresql_using='gin'),
         ]
 
     @classmethod

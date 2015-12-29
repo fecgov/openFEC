@@ -8,6 +8,8 @@ class SchedAGroup(TableGroup):
 
     parent = 'sched_a'
     base_name = 'ofec_sched_a'
+    queue_new = 'ofec_sched_a_queue_new'
+    queue_old = 'ofec_sched_a_queue_old'
     primary = 'sched_a_sk'
 
     columns = [
@@ -22,7 +24,6 @@ class SchedAGroup(TableGroup):
     @classmethod
     def column_factory(cls, parent):
         return [
-            sa.cast(None, sa.DateTime).label('timestamp'),
             sa.func.to_tsvector(parent.c.contbr_nm).label('contributor_name_text'),
             sa.func.to_tsvector(parent.c.contbr_employer).label('contributor_employer_text'),
             sa.func.to_tsvector(parent.c.contbr_occupation).label('contributor_occupation_text'),

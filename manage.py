@@ -5,6 +5,8 @@ import logging
 import subprocess
 import multiprocessing
 
+import sqlalchemy as sa
+
 from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
@@ -13,6 +15,7 @@ from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG
 from webservices.common.util import get_full_path
+from webservices import partition
 
 
 manager = Manager(app)
@@ -145,7 +148,22 @@ def rebuild_aggregates(processes=1):
 @manager.command
 def update_aggregates():
     logger.info('Updating incremental aggregates...')
-    db.engine.execute('select update_aggregates()')
+    with db.engine.begin():
+        db.engine.execute(
+            sa.text('select update_aggregates()').execution_options(autocommit=True)
+        )
+
+        partition.SchedAGroup.refresh_children()
+        partition.SchedBGroup.refresh_children()
+
+        db.engine.execute('select ofec_sched_e_update()')
+
+        db.engine.execute('delete from ofec_sched_a_queue_new')
+        db.engine.execute('delete from ofec_sched_a_queue_old')
+        db.engine.execute('delete from ofec_sched_b_queue_new')
+        db.engine.execute('delete from ofec_sched_b_queue_old')
+        db.engine.execute('delete from ofec_sched_e_queue_new')
+        db.engine.execute('delete from ofec_sched_e_queue_old')
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command
@@ -161,6 +179,8 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
+    partition.SchedAGroup.run()
+    partition.SchedBGroup.run()
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
