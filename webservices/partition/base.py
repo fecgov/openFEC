@@ -47,10 +47,19 @@ class TableGroup:
         cycles = get_cycles()
         for cycle in cycles:
             cls.create_child(parent, cycle)
+        cls.rename()
+
+    @classmethod
+    def get_child_name(cls, cycle):
+        return '{base}_{start}_{stop}'.format(
+            base=cls.base_name,
+            start=cycle - 1,
+            stop=cycle,
+        )
 
     @classmethod
     def create_master(cls, parent):
-        name = '{0}_master'.format(cls.base_name)
+        name = '{0}_master_tmp'.format(cls.base_name)
         table = sa.Table(
             name,
             db.metadata,
@@ -63,7 +72,7 @@ class TableGroup:
     @classmethod
     def create_child(cls, parent, cycle):
         start, stop = cycle - 1, cycle
-        name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
+        name = '{base}_{start}_{stop}_tmp'.format(base=cls.base_name, start=start, stop=stop)
 
         select = sa.select(
             parent.columns + cls.timestamp_factory(parent) + cls.column_factory(parent)
@@ -100,7 +109,7 @@ class TableGroup:
             'start': start,
             'stop': stop,
             'child': child.name,
-            'master': '{0}_master'.format(cls.base_name),
+            'master': '{0}_master_tmp'.format(cls.base_name),
             'primary': cls.primary,
         }
         for cmd in cmds:
@@ -114,6 +123,18 @@ class TableGroup:
             except sa.exc.ProgrammingError:
                 pass
             index.create(db.engine)
+
+    @classmethod
+    def rename(cls):
+        cmds = [
+            'drop table if exists {0}_master cascade',
+            'alter table {0}_master_tmp rename to {0}_master',
+        ]
+        for cmd in cmds:
+            db.engine.execute(cmd.format(cls.base_name))
+        for cycle in get_cycles():
+            cmd = 'alter table {0}_tmp rename to {0}'.format(cls.get_child_name(cycle))
+            db.engine.execute(cmd)
 
     @classmethod
     def refresh_children(cls):
