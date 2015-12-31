@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from flask_apispec import doc, Ref
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
@@ -8,7 +8,6 @@ from webservices import schemas
 from webservices.common import views
 from webservices.common import counts
 from webservices.common import models
-from webservices.utils import use_kwargs
 
 
 @doc(

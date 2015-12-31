@@ -1,7 +1,6 @@
 import http
 
 from marshmallow import fields
-from flask_apispec import use_kwargs
 
 import boto3
 from botocore.exceptions import ClientError
@@ -12,6 +11,7 @@ from webservices import utils
 from webservices import exceptions
 from webservices.tasks import download
 from webservices.tasks import utils as task_utils
+from webservices.utils import use_kwargs
 
 client = boto3.client('s3')
 
