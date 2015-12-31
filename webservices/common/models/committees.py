@@ -54,7 +54,7 @@ class CommitteeHistory(BaseCommittee):
     city = db.Column(db.String(50))
     state_full = db.Column(db.String(50))
     zip = db.Column(db.String(9))
-    cycle = db.Column(db.Integer, primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True, index=True)
 
 
 class CommitteeDetail(BaseConcreteCommittee):

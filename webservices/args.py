@@ -233,6 +233,10 @@ committee_list = {
     'treasurer_name': fields.Str(description='Committee treasurer'),
 }
 
+committee_history = {
+    'election_full': election_full,
+}
+
 filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'report_type': fields.List(IStr, description='Report type'),
