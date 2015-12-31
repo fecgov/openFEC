@@ -16,16 +16,25 @@ A unique identifier assigned to each committee or filer registered with the FEC.
 '''
 
 CANDIDATE_CYCLE = '''
-Two-year election cycle in which a candidate runs for office. Calculated from FEC form 2.
+Two-year election cycle in which a candidate runs for office.
+Calculated from FEC form 2. The cycle begins with
+an odd year and is named for its even ending year. This cycle follows
+the traditional house election cycle and subdivides the presidential
+and senate elections into comparable two-year blocks. To see data for
+the entire 4-years of a presidential term or 6-years of a senatorial term,
+you will need the `election_full` flag.
 '''
 
 COMMITTEE_CYCLE = '''
 A two year election cycle that the committee was active- (after original registration
-date but before expiration date in FEC form 1s)
+date but before expiration date in FEC form 1s) The cycle begins with
+an odd year and is named for its even ending year.
 '''
 
 RECORD_CYCLE = '''
-Filter records to only those that were applicable to a given two-year period.
+Filter records to only those that were applicable to a given
+two-year period.The cycle begins with an odd year and is named
+for its even ending year.
 '''
 
 RECORD_YEAR = '''
@@ -34,7 +43,11 @@ Filter records to only those that were applicable to a given year.
 
 # committee uses a different definition for cycle because it is less straight forward
 CYCLE = '''
-Filter records to only those that are applicable to a given two-year period.
+Filter records to only those that are applicable to a given two-year
+period. This cycle follows the traditional house election cycle and
+subdivides the presidential and senate elections into comparable
+two-year blocks. The cycle begins with an odd year and is named for its
+even ending year.
 '''
 
 DESCRIPTION = '''
