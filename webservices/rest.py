@@ -17,6 +17,7 @@ from flask import Blueprint
 from flask.ext import cors
 from flask.ext import restful
 from raven.contrib.flask import Sentry
+import sqlalchemy as sa
 
 from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
@@ -55,6 +56,15 @@ app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
+
+app.config['SQLALCHEMY_REPLICA_TASKS'] = [
+    'webservices.tasks.download.export_query',
+]
+app.config['SQLALCHEMY_FOLLOWERS'] = [
+    sa.create_engine(follower.strip())
+    for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
+    if follower.strip()
+]
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
