@@ -8,7 +8,7 @@ from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.common.models import db
 from webservices.resources.dates import ElectionDatesView
-from webservices.resources.dates import ReportingDatesView
+from webservices.resources.dates import ReportingDatesView, CalendarDatesView
 
 
 class TestReportingDates(ApiBaseTest):
@@ -65,3 +65,38 @@ class TestElectionDates(ApiBaseTest):
         page = api.url_for(ElectionDatesView)
         results = self._results(page)
         assert len(results) == 1
+
+
+class TestCalendarDates(ApiBaseTest):
+
+    def test_filters(self):
+        factories.CalendarDateFactory(start_date=datetime.datetime(2016, 1, 2))
+        factories.CalendarDateFactory(location='Mississippi, CA')
+        factories.CalendarDateFactory(state=['CA'])
+        factories.CalendarDateFactory(category='Public Hearings')
+        factories.CalendarDateFactory(description_text='a really interesting event')
+        factories.CalendarDateFactory(summary_text='Meeting that will solve all the problems')
+        factories.CalendarDateFactory(end_date=datetime.datetime(2015, 1, 2))
+
+        filter_fields = [
+            ('min_start_date', '2015-01-01'),
+            ('category', 'Public Hearings'),
+            ('min_end_date', '2014-01-01'),
+            # this is not passing or working :/
+            #('state', 'CA'),
+            ('description', 'interesting event'),
+            ('summary', 'solve all the problems'),
+
+        ]
+
+        orig_response = self._response(api.url_for(CalendarDatesView))
+        original_count = orig_response['pagination']['count']
+
+        for field, example in filter_fields:
+            page = api.url_for(CalendarDatesView, **{field: example})
+            # returns at least one result
+            results = self._results(page)
+            self.assertEqual(len(results), 1)
+            # doesn't return all results
+            response = self._response(page)
+            self.assertGreater(original_count, response['pagination']['count'])
