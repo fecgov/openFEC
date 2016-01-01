@@ -1,16 +1,39 @@
-
-
-
--- add party
+-- trying to make the names flow together as best as possible
+-- Like
+    -- house general election FL
+    -- democratic convention NH
+-- other things to make it better would be
+    -- add expand party
+    -- not use election when it is a convention
 create or replace function generate_election_title(trc_election_type_id text, office_sought text, election_states text[], party text)
 returns text as $$
     begin
-        return case when count(election_states) > 1 then
-            expand_election_type(trc_election_type_id) || ' ' ||
+        return case
+        -- has party
+        when party is not null and count(election_states) > 1 then
+            party || ' ' ||
             expand_office_description(office_sought) || ' ' ||
+            expand_election_type(trc_election_type_id) || ' election ' ||
             ' multi-state'
-        else expand_office_description(office_sought) || ' ' ||
+        when party is not null and count(election_states) = 0 then
+            party  || ' ' ||
             expand_office_description(office_sought) || ' ' ||
+            expand_election_type(trc_election_type_id) || ' election '
+        when party is not null and count(election_states) > 1 then
+            party  || ' ' ||
+            expand_election_type(trc_election_type_id) || ' ' ||
+            expand_office_description(office_sought) || ' election ' ||
+            array_to_string(election_states, ', ')
+        -- doesn't have party
+        when count(election_states) > 1 then
+            expand_office_description(office_sought) || ' ' ||
+            expand_election_type(trc_election_type_id) || ' election ' ||
+            ' multi-state'
+        when count(election_states) = 0 then
+            expand_office_description(office_sought) || ' ' ||
+            expand_election_type(trc_election_type_id) || ' election '
+        else expand_election_type(trc_election_type_id) || ' ' ||
+            expand_office_description(office_sought) || ' election ' ||
             array_to_string(election_states, ', ')
         end;
     end
@@ -25,7 +48,7 @@ with elections as (
         'election-' || trc_election_type_id as category,
         generate_election_title(
             trc_election_type_id::text,
-            office_sought::text,
+            expand_office_description(office_sought::text),
             array_agg(election_state order by election_state)::text[],
             election_party::text
         ) as description,
@@ -34,9 +57,8 @@ with elections as (
                 election_party,
                 expand_office_description(office_sought),
                 expand_election_type(trc_election_type_id),
-                -- TODO add a check to see if there are states
-                'states: ' || array_to_string(array_agg(election_state order by election_state)::text[], ', ')
-            ], ' '
+                -- TODO add a check to see if there are states and don't put this string when there are no states
+                'election, states: ' || array_to_string(array_agg(election_state order by election_state)::text[], ', ')], ' '
         ) as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
@@ -58,8 +80,8 @@ with elections as (
 ), reports as (
     select
         'report-' || rpt_tp as category,
-        rpt_tp_desc::text as description,  -- TODO: Implement
-        rpt_tp_desc::text || ' ' || office_sought::text as summary,     -- TODO: Implement
+        rpt_tp_desc::text || ' report' as description,
+        rpt_tp_desc::text || ' report ' || expand_office_description(office_sought::text) as summary,  -- TODO: expand using dimreport type
         array_agg(election_state)::text[] as states,
         null::text as location,
         due_date::timestamp as start_date,
@@ -74,8 +96,8 @@ with elections as (
     union all
     select
         'report-' || rpt_tp as category,
-        rpt_tp_desc::text as description,
-        '' as summary,
+        rpt_tp_desc::text || ' report' as description,
+        rpt_tp_desc::text || ' report ' || expand_office_description(office_sought::text) as summary,
         array[election_state]::text[] as states,
         null::text as location,
         due_date::timestamp as start_date,
@@ -86,7 +108,7 @@ with elections as (
     select
         category_name as category,
         event_name::text as description,
-        description::text,
+        description::text as summary,
         null::text[] as states,
         location::text,
         start_date,
