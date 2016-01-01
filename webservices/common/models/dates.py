@@ -84,7 +84,7 @@ class CalendarDate(BaseModel):
     summary = db.Column(db.String)
     description = db.Column(db.Text)
     category = db.Column(db.String, index=True)
-    states = db.Column(ARRAY(db.String), index=True)
+    state = db.Column('states', ARRAY(db.String), index=True)
     location = db.Column(db.String, index=True)
     start_date = db.Column(db.DateTime, index=True)
     end_date = db.Column(db.DateTime, index=True)

@@ -86,15 +86,15 @@ class CalendarDatesView(ApiResource):
 
     filter_multi_fields = [
         ('category', models.CalendarDate.category),
-        ('location', models.CalendarDate.location),
+        ('state', models.CalendarDate.state),
     ]
     filter_fulltext_fields = [
         ('description', models.CalendarDate.description_text),
         ('summary', models.CalendarDate.summary_text),
     ]
     filter_range_fields = [
-        (('min_start_date_time', 'max_start_date_time'), models.CalendarDate.start_date),
-        (('min_end_date_time', 'max_end_date_time'), models.CalendarDate.end_date),
+        (('min_start_date', 'max_start_date'), models.CalendarDate.start_date),
+        (('min_end_date', 'max_end_date'), models.CalendarDate.end_date),
     ]
 
     @use_kwargs(args.paging)
@@ -114,8 +114,8 @@ class CalendarDatesView(ApiResource):
         if kwargs.get('state'):
             query = query.filter(
                 sa.or_(
-                    self.model.states.overlap(kwargs['state']),
-                    self.model.states == None  # noqa
+                    self.model.state.overlap(kwargs['state']),
+                    self.model.state == None  # noqa
                 )
             )
         return query

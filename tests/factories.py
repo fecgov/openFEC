@@ -214,6 +214,11 @@ class ReportDateFactory(BaseFactory):
         model = models.ReportDate
 
 
+class CalendarDateFactory(BaseFactory):
+    class Meta:
+        model = models.CalendarDate
+
+
 class ElectionDateFactory(BaseFactory):
     class Meta:
         model = models.ElectionDate
