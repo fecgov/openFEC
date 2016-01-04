@@ -178,6 +178,7 @@ class CommitteeHistoryView(ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
+            args.committee_history,
             args.make_sort_args(
                 default=['-cycle'],
                 validator=args.IndexValidator(self.model),
@@ -196,12 +197,36 @@ class CommitteeHistoryView(ApiResource):
                 sa.and_(
                     models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
                     models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistory.cycle,
-                )
+                ),
             ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id
+                models.CandidateCommitteeLink.candidate_id == candidate_id,
             ).distinct()
 
         if cycle:
-            query = query.filter(models.CommitteeHistory.cycle == cycle)
+            query = (
+                self._filter_elections(query, candidate_id, cycle)
+                if kwargs.get('election_full') and candidate_id
+                else query.filter(models.CommitteeHistory.cycle == cycle)
+            )
 
         return query
+
+    def _filter_elections(self, query, candidate_id, cycle):
+        election_duration = utils.get_election_duration(models.CandidateCommitteeLink.committee_type)
+        return query.join(
+            models.CandidateElection,
+            sa.and_(
+                models.CandidateCommitteeLink.candidate_id == models.CandidateElection.candidate_id,
+                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.cand_election_year - election_duration,
+                models.CandidateCommitteeLink.fec_election_year <= models.CandidateElection.cand_election_year,
+            ),
+        ).filter(
+            models.CandidateElection.candidate_id == candidate_id,
+            models.CandidateElection.cand_election_year >= cycle,
+            models.CandidateElection.cand_election_year < cycle + election_duration,
+        ).order_by(
+            models.CommitteeHistory.committee_id,
+            sa.desc(models.CommitteeHistory.cycle),
+        ).distinct(
+            models.CommitteeHistory.committee_id,
+        )

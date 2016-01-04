@@ -233,6 +233,10 @@ committee_list = {
     'treasurer_name': fields.Str(description='Committee treasurer'),
 }
 
+committee_history = {
+    'election_full': election_full,
+}
+
 filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'report_type': fields.List(IStr, description='Report type'),
@@ -460,4 +464,9 @@ schedule_e = {
     'last_expenditure_amount': fields.Float(missing=None, description='For paging through schedule E data by expenditure amount.'),
     'last_office_total_ytd': fields.Float(missing=None, description='For paging through total year to date spent on an office'),
     'payee_name': fields.Str(description='Name of the entity that received the payment.'),
+    'support_oppose_indicator': fields.List(
+        IStr(validate=validate.OneOf(['S', 'O'])),
+        description='Support or opposition',
+    ),
+    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
 }
