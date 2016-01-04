@@ -115,18 +115,21 @@ def write_query_to_csv(query, schema, writer):
     """Write each query result subset to a csv."""
     instance = schema()
     updated = False
+    count = 0
     for result in query:
         if not updated:
             updated = True
         result_dict = instance.dump(result, update_fields=not updated).data
         row = un_nest(result_dict)
         writer.writerow(row)
+        count += 1
+    return count
 
 def rows_to_csv(query, schema, csvfile):
     headers = create_headers(schema)
     writer = csv.DictWriter(csvfile, fieldnames=headers)
     writer.writeheader()
-    write_query_to_csv(query, schema, writer)
+    return write_query_to_csv(query, schema, writer)
 
 def get_s3_name(path, qs):
     """
@@ -146,13 +149,13 @@ def upload_s3(key, body):
 
 def make_csv(resource, query, path):
     with open(os.path.join(path, 'data.csv'), 'w') as fp:
-        rows_to_csv(query, resource['schema'], fp)
+        return rows_to_csv(query, resource['schema'], fp)
 
-def make_manifest(resource, path):
+def make_manifest(resource, row_count, path):
     with open(os.path.join(path, 'manifest.txt'), 'w') as fp:
         fp.write('Time: {}\n'.format(resource['timestamp']))
         fp.write('Resource: {}\n'.format(resource['path']))
-        fp.write('Count: {}\n'.format(resource['count']))
+        fp.write('Count: {}\n'.format(row_count))
         fp.write('Filters:\n\n')
         fp.write(make_filters(resource))
 
@@ -174,8 +177,8 @@ def make_filter(key, value, description):
 
 def make_bundle(resource, query):
     with tempfile.TemporaryDirectory(dir=os.getenv('TMPDIR')) as tmpdir:
-        make_csv(resource, query, tmpdir)
-        make_manifest(resource, tmpdir)
+        row_count = make_csv(resource, query, tmpdir)
+        make_manifest(resource, row_count, tmpdir)
         with tempfile.TemporaryFile(mode='w+b', dir=os.getenv('TMPDIR')) as tmpfile:
             archive = zipfile.ZipFile(tmpfile, 'w')
             for path in os.listdir(tmpdir):
