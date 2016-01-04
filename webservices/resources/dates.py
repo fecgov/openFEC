@@ -86,7 +86,6 @@ class CalendarDatesView(ApiResource):
 
     filter_multi_fields = [
         ('category', models.CalendarDate.category),
-        ('state', models.CalendarDate.state),
     ]
     filter_fulltext_fields = [
         ('description', models.CalendarDate.description_text),

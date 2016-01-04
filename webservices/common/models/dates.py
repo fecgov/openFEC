@@ -7,7 +7,6 @@ from webservices import decoders
 from .base import db, BaseModel
 
 
-
 class ReportType(db.Model):
     __tablename__ = 'dimreporttype'
 
