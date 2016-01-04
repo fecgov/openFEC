@@ -129,7 +129,6 @@ with elections as (
 select
     row_number() over () as idx,
     combined.*,
-
     to_tsvector(summary) as summary_text,
     to_tsvector(description) as description_text
 from combined
