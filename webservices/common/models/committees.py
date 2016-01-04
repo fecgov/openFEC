@@ -44,6 +44,7 @@ class Committee(BaseConcreteCommittee):
 
     first_file_date = db.Column(db.Date)
     last_file_date = db.Column(db.Date)
+    last_f1_date = db.Column(db.Date)
 
 
 class CommitteeHistory(BaseCommittee):
