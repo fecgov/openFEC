@@ -327,11 +327,11 @@ calendar_dates = {
         fields.Str,
         description='Type of date reporting date, live event, etc.',
         mapping={
-            'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)],
-            'report-M': ['report-M{}'.format(each) for each in range(2, 13)],
+            'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)] + ['YE'],
+            'report-M': ['report-M{}'.format(each) for each in range(2, 13)] + ['YE'],
             'report-E': [
                 'report-{}'.format(each)
-                for each in ['12P', '12C', '12G', '12R', '12S', '30G', '30R', '30S', '30P', '60D', '30D']
+                for each in ['12C', '12G', '12GR', '12P', '12PR', '12R', '12S', '12SC', '12SG', '12SGR', '12SP', '12SPR', '30D', '30G', '30GR', '30P', '30R', '30S', '30SC', '30SG', '30SGR', '60D']
             ],
         },
     ),
