@@ -357,10 +357,20 @@ augment_schemas(ElectionDatesSchema)
 
 CalendarDateSchema = make_schema(
     models.CalendarDate,
-    options={'exclude': ('idx', 'summary_text', 'description_text')},
+    fields={
+        'summary': ma.fields.Str(),
+        'description': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'idx', 'summary_text', 'description_text',
+            'summary_raw', 'description_raw'
+        )
+    },
 )
 CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
 augment_schemas(CalendarDateSchema)
+
 
 class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
