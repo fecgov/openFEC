@@ -10,12 +10,6 @@ create or replace function generate_election_title(trc_election_type_id text, of
 returns text as $$
     begin
         return case
-        when election_states is null then array_to_string(
-            array[
-                party,
-                expand_office_description(office_sought),
-                expand_election_type(trc_election_type_id)
-            ], ' ')
         when count(election_states) > 1 then array_to_string(
             array[
                 party,
@@ -35,27 +29,6 @@ returns text as $$
 $$ language plpgsql;
 
 
-create or replace function generate_election_summary(trc_election_type_id text, office_sought text, election_states text[], party text)
-returns text as $$
-    begin
-        return case
-        when election_states is null then array_to_string(
-            array[
-                party,
-                expand_office_description(office_sought),
-                expand_election_type(trc_election_type_id)
-            ], ' ')
-        else array_to_string(
-            array[
-                party,
-                expand_election_type(trc_election_type_id),
-                expand_office_description(office_sought),
-                array_to_string(election_states, ', ')
-        ], ' ')
-        end;
-    end
-$$ language plpgsql;
-
 
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
@@ -69,12 +42,12 @@ with elections as (
             array_agg(election_state order by election_state)::text[],
             election_party::text
         ) as description,
-        generate_election_summary(
-            trc_election_type_id::text,
-            expand_office_description(office_sought::text),
-            array_agg(election_state order by election_state)::text[],
-            election_party::text
-        ) as summary,
+        array_to_string(array[
+                election_party::text,
+                expand_election_type(trc_election_type_id::text),
+                expand_office_description(office_sought::text),
+                array_to_string(array_agg(election_state order by election_state)::text[], ', ')
+        ], ' ') as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
         election_date::timestamp as start_date,
