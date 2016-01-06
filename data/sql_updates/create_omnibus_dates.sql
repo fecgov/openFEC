@@ -1,40 +1,57 @@
--- trying to make the names flow together as best as possible
--- Like
-    -- house general election FL
-    -- democratic convention NH
+-- Trying to make the names flow together as best as possible
+-- To keep the titles consice states are abbreviated as multi state if there is more than one
+-- Like:
+    -- House General Election FL
+    -- DEM Convention NH
+    -- General Elecion Multi-state
 -- other things to make it better would be
-    -- add expand party
-    -- not use election when it is a convention
+    -- add expanded party
 create or replace function generate_election_title(trc_election_type_id text, office_sought text, election_states text[], party text)
 returns text as $$
     begin
         return case
-        -- has party
-        when party is not null and count(election_states) > 1 then
-            party || ' ' ||
-            expand_office_description(office_sought) || ' ' ||
-            expand_election_type(trc_election_type_id) || ' election ' ||
-            ' multi-state'
-        when party is not null and count(election_states) = 0 then
-            party  || ' ' ||
-            expand_office_description(office_sought) || ' ' ||
-            expand_election_type(trc_election_type_id) || ' election '
-        when party is not null and count(election_states) > 1 then
-            party  || ' ' ||
-            expand_election_type(trc_election_type_id) || ' ' ||
-            expand_office_description(office_sought) || ' election ' ||
-            array_to_string(election_states, ', ')
-        -- doesn't have party
-        when count(election_states) > 1 then
-            expand_office_description(office_sought) || ' ' ||
-            expand_election_type(trc_election_type_id) || ' election ' ||
-            ' multi-state'
-        when count(election_states) = 0 then
-            expand_office_description(office_sought) || ' ' ||
-            expand_election_type(trc_election_type_id) || ' election '
-        else expand_election_type(trc_election_type_id) || ' ' ||
-            expand_office_description(office_sought) || ' election ' ||
-            array_to_string(election_states, ', ')
+        when election_states is null then array_to_string(
+            array[
+                party,
+                expand_office_description(office_sought),
+                expand_election_type(trc_election_type_id)
+            ], ' ')
+        when count(election_states) > 1 then array_to_string(
+            array[
+                party,
+                expand_office_description(office_sought),
+                expand_election_type(trc_election_type_id),
+                'Multi-state'::text
+            ], ' ')
+        else array_to_string(
+            array[
+                party,
+                expand_election_type(trc_election_type_id),
+                expand_office_description(office_sought),
+                array_to_string(election_states, ', ')
+        ], ' ')
+        end;
+    end
+$$ language plpgsql;
+
+
+create or replace function generate_election_summary(trc_election_type_id text, office_sought text, election_states text[], party text)
+returns text as $$
+    begin
+        return case
+        when election_states is null then array_to_string(
+            array[
+                party,
+                expand_office_description(office_sought),
+                expand_election_type(trc_election_type_id)
+            ], ' ')
+        else array_to_string(
+            array[
+                party,
+                expand_election_type(trc_election_type_id),
+                expand_office_description(office_sought),
+                array_to_string(election_states, ', ')
+        ], ' ')
         end;
     end
 $$ language plpgsql;
@@ -52,13 +69,11 @@ with elections as (
             array_agg(election_state order by election_state)::text[],
             election_party::text
         ) as description,
-        array_to_string(
-            array[
-                election_party,
-                expand_office_description(office_sought),
-                expand_election_type(trc_election_type_id),
-                -- TODO add a check to see if there are states and don't put this string when there are no states
-                'election, states: ' || array_to_string(array_agg(election_state order by election_state)::text[], ', ')], ' '
+        generate_election_summary(
+            trc_election_type_id::text,
+            expand_office_description(office_sought::text),
+            array_agg(election_state order by election_state)::text[],
+            election_party::text
         ) as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
