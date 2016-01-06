@@ -17,6 +17,7 @@ from flask import Blueprint
 from flask.ext import cors
 from flask.ext import restful
 from raven.contrib.flask import Sentry
+import sqlalchemy as sa
 
 from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
@@ -30,6 +31,7 @@ from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
 from webservices.resources import sched_e
+from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
@@ -54,6 +56,15 @@ app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
+
+app.config['SQLALCHEMY_REPLICA_TASKS'] = [
+    'webservices.tasks.download.export_query',
+]
+app.config['SQLALCHEMY_FOLLOWERS'] = [
+    sa.create_engine(follower.strip())
+    for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
+    if follower.strip()
+]
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
@@ -140,7 +151,7 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/',
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
+api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
@@ -196,6 +207,7 @@ api.add_resource(
 )
 api.add_resource(filings.FilingsList, '/filings/')
 
+api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,

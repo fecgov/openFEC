@@ -53,23 +53,27 @@ def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear
 
 
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
+    paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
+    if paginator.sort_column is not None:
+        sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
+    else:
+        sort_index = None
+    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
+
+
+def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    model = index_column.class_
-    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
+    model = index_column.parent.class_
+    sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
     query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
     sort_column = sort_columns[0] if sort_columns else None
-    paginator = paginators.SeekPaginator(
+    return paginators.SeekPaginator(
         query,
         kwargs['per_page'],
         index_column,
         sort_column=sort_column,
         count=count,
     )
-    if sort_column is not None:
-        sort_index = kwargs['last_{0}'.format(sort_column[0].key)]
-    else:
-        sort_index = None
-    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
 
 
 def extend(*dicts):
@@ -196,6 +200,11 @@ def make_report_pdf_url(image_number):
 
 def make_image_pdf_url(image_number):
     return 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number)
+
+
+def get_index_column(model):
+    column = model.__mapper__.primary_key[0]
+    return getattr(model, column.key)
 
 
 def cycle_param(**kwargs):
