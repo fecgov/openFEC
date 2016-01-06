@@ -4,8 +4,6 @@
     -- House General Election FL
     -- DEM Convention NH
     -- General Elecion Multi-state
--- other things to make it better would be
-    -- add expanded party
 create or replace function generate_election_title(trc_election_type_id text, office_sought text, election_states text[], party text)
 returns text as $$
     begin
@@ -29,7 +27,6 @@ returns text as $$
 $$ language plpgsql;
 
 
-
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections as (
@@ -40,10 +37,10 @@ with elections as (
             trc_election_type_id::text,
             expand_office_description(office_sought::text),
             array_agg(election_state order by election_state)::text[],
-            election_party::text
+            dp.party_affiliation_desc::text
         ) as description,
         array_to_string(array[
-                election_party::text,
+                dp.party_affiliation_desc::text,
                 expand_election_type(trc_election_type_id::text),
                 expand_office_description(office_sought::text),
                 array_to_string(array_agg(election_state order by election_state)::text[], ', ')
@@ -53,12 +50,13 @@ with elections as (
         election_date::timestamp as start_date,
         null::timestamp as end_date
     from trc_election
+        join dimparty dp on trc_election.election_party = dp.party_affiliation
     where
         trc_election_status_id = 1
     group by
         office_sought,
         election_date,
-        election_party,
+        dp.party_affiliation_desc,
         trc_election_type_id
 ), reports_raw as (
     select * from trc_report_due_date reports
@@ -67,10 +65,17 @@ with elections as (
     where coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
+        -- Select general elecitons so they don't look like a ton of state elections on the calendar
         'report-' || rpt_tp as category,
         rpt_tp_desc::text || ' report' as description,
-        expand_office_description(office_sought::text) || ' ' || rpt_tp_desc::text || ' '
-            || ' report (' || rpt_tp::text || ') ' as summary,
+        array_to_string(array[
+            expand_office_description(office_sought::text),
+            rpt_tp_desc::text,
+            ' report (',
+            rpt_tp::text,
+            ') ',
+            array_to_string(array_agg(election_state order by election_state)::text[], ', ')
+        ], ' ') as summary,
         array_agg(election_state)::text[] as states,
         null::text as location,
         due_date::timestamp as start_date,
@@ -84,10 +89,17 @@ with elections as (
         office_sought
     union all
     select
+        -- Select all non-general elections
         'report-' || rpt_tp as category,
         rpt_tp_desc::text || ' report' as description,
-        expand_office_description(office_sought::text) || ' ' || rpt_tp_desc::text || ' '
-            || ' report (' || rpt_tp::text || ') ' as summary,
+        array_to_string(array[
+            expand_office_description(office_sought::text),
+            rpt_tp_desc::text,
+            'report (',
+            rpt_tp::text,
+            ') ',
+            array_to_string(array[election_state]::text[], ', ')
+        ], ' ') as summary,
         array[election_state]::text[] as states,
         null::text as location,
         due_date::timestamp as start_date,
@@ -96,6 +108,7 @@ with elections as (
     where coalesce(trc_election_type_id, '') != 'G'
 ), other as (
     select
+        -- Select the events from the calandar that are not created by a formula in a different table
         category_name as category,
         event_name::text as description,
         description::text as summary,
