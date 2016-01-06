@@ -80,8 +80,8 @@ class ElectionClassDate(db.Model):
 class CalendarDate(BaseModel):
     __tablename__ = 'ofec_omnibus_dates_mv'
 
-    summary_raw = db.Column('summary', db.String)
-    description_raw = db.Column('description', db.Text)
+    summary = db.Column(db.String)
+    description = db.Column(db.Text)
     category = db.Column(db.String, index=True)
     state = db.Column('states', ARRAY(db.String), index=True)
     location = db.Column(db.String, index=True)
@@ -90,17 +90,3 @@ class CalendarDate(BaseModel):
 
     summary_text = db.Column(TSVECTOR)
     description_text = db.Column(TSVECTOR)
-
-    @property
-    def summary(self):
-        if self.summary_raw:
-            return ' '.join(self.summary_raw.split())
-        else:
-            return None
-
-    @property
-    def description(self):
-        if self.description_raw:
-            return ' '.join(self.description_raw.split())
-        else:
-            return None
