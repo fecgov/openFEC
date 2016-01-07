@@ -57,10 +57,18 @@ def sort(query, options, model, aliases=None, join_columns=None, clear=False, hi
         query = query.order_by(False)
     options = ensure_list(options)
     columns = []
+    # If the query contains multiple entities (i.e., isn't a simple query on a
+    # model), looking up the sort key on the model may lead to invalid queries.
+    # In this case, use the string name of the sort key.
+    sort_model = (
+        model
+        if len(query._entities) == 1 and hasattr(query._entities[0], 'mapper')
+        else None
+    )
     for option in options:
         column, order, nulls, relationship = parse_option(
             option,
-            model=model,
+            model=sort_model,
             aliases=aliases,
             join_columns=join_columns,
             nulls_large=nulls_large,
