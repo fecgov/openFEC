@@ -380,7 +380,7 @@ schedule_b_by_recipient_id = {
 
 schedule_b = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC'),
+    'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
     'recipient_name': fields.Str(description='Name of recipient'),
     'disbursement_description': fields.Str(description='Description of disbursement'),
     'recipient_city': fields.List(IStr, description='City of recipient'),
