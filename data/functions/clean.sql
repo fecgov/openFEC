@@ -8,6 +8,16 @@ begin
 end
 $$ language plpgsql;
 
+
+-- There are weird explainations in the dimpreport table that appear in curly braces
+create or replace function clean_report(report text)
+returns text as $$
+begin
+	return regexp_replace(report, '\{[^)]*\}', '');
+end
+$$ language plpgsql;
+
+
 -- Compare two values. If equal, return `NULL`, else return the first value.
 create or replace function clean_repeated(first anyelement, second anyelement)
 returns anyelement as $$
