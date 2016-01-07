@@ -24,7 +24,6 @@ with
 select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     row_number() over () as idx,
     fec_yr.fec_election_yr as cycle,
-    dcp.cmte_sk as committee_key,
     fec_yr.cmte_id as committee_id,
     fec_yr.cmte_nm as name,
     fec_yr.tres_nm as treasurer_name,
@@ -99,7 +98,6 @@ create unique index on ofec_committee_history_mv_tmp(idx);
 
 create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
-create index on ofec_committee_history_mv_tmp(committee_key);
 create index on ofec_committee_history_mv_tmp(designation);
 
 
@@ -120,7 +118,6 @@ create index on ofec_committee_detail_mv_tmp(party_full);
 create index on ofec_committee_detail_mv_tmp(designation);
 create index on ofec_committee_detail_mv_tmp(expire_date);
 create index on ofec_committee_detail_mv_tmp(committee_id);
-create index on ofec_committee_detail_mv_tmp(committee_key);
 create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(last_file_date);
 create index on ofec_committee_detail_mv_tmp(treasurer_name);
@@ -132,25 +129,3 @@ create index on ofec_committee_detail_mv_tmp(organization_type_full);
 
 create index on ofec_committee_detail_mv_tmp using gin (cycles);
 create index on ofec_committee_detail_mv_tmp using gin (candidate_ids);
-
-drop table if exists dimcmte_fulltext;
-drop materialized view if exists ofec_committee_fulltext_mv_tmp;
-create materialized view ofec_committee_fulltext_mv_tmp as
-select distinct on (committee_id)
-    row_number() over () as idx,
-    committee_id as id,
-    name,
-    case
-        when name is not null then
-            setweight(to_tsvector(name), 'A') ||
-            setweight(to_tsvector(coalesce(pac."PACRONYM", '')), 'A') ||
-            setweight(to_tsvector(committee_id), 'B')
-        else null::tsvector
-    end
-as fulltxt
-from ofec_committee_detail_mv_tmp cd
-left join pacronyms pac on cd.committee_id = pac."ID NUMBER"
-;
-
-create unique index on ofec_committee_fulltext_mv_tmp(idx);
-create index on ofec_committee_fulltext_mv_tmp using gin(fulltxt);

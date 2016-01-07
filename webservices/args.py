@@ -55,6 +55,8 @@ class District(fields.Str):
     def _deserialize(self, value, attr, data):
         return '{0:0>2}'.format(value)
 
+election_full = fields.Bool(missing=False, description='Aggregate values over full election period')
+
 paging = {
     'page': Natural(missing=1, description='For paginating through results, starting at page 1'),
     'per_page': per_page,
@@ -164,6 +166,10 @@ candidate_list = {
     'q': fields.Str(description='Text to search all fields for'),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'name': fields.Str(description="Candidate's name (full or partial)"),
+}
+
+candidate_history = {
+    'election_full': election_full,
 }
 
 committee = {
@@ -280,12 +286,14 @@ itemized = {
 }
 
 reporting_dates = {
-    'due_date': fields.List(fields.Date, description='Date the filing is done.'),
+    'min_due_date': fields.Date(description='Date the report is due.'),
+    'max_due_date': fields.Date(description='Date the report is due.'),
     'report_year': fields.List(fields.Int, description='Year of report.'),
     'report_type': fields.List(fields.Str, description='Type of report.'),
-    'create_date': fields.List(fields.Date, description='Date this record was added to the system.'),
-    'update_date': fields.List(fields.Date, description='Date this record was last updated.'),
-    'upcoming': fields.Bool(missing=False, description='Only show future due dates for each type of report.'),
+    'min_create_date': fields.Date(description='Date this record was added to the system.'),
+    'max_create_date': fields.Date(description='Date this record was added to the system.'),
+    'min_update_date': fields.Date(description='Date this record was last updated.'),
+    'max_update_date': fields.Date(description='Date this record was last updated.'),
 }
 
 election_dates = {
@@ -293,14 +301,16 @@ election_dates = {
     'election_district': fields.List(fields.Str, description='House district of the office sought, if applicable.'),
     'election_party': fields.List(fields.Str, description='Party, if applicable.'),
     'office_sought': fields.List(fields.Str(validate=validate.OneOf(['H', 'S', 'P'])), description='House, Senate or presidential office'),
-    'election_date': fields.List(fields.Date, description='Date of election.'),
-    'trc_election_type_id': fields.List(fields.Str, description='Election type'),
-    'trc_election_status_id': fields.List(fields.Str, description=''),
-    'update_date': fields.List(fields.Date, description='Date this record was last updated.'),
-    'create_date': fields.List(fields.Date, description='Date this record was added to the system.'),
+    'min_election_date': fields.Date(description='Date of election.'),
+    'max_election_date': fields.Date(description='Date of election.'),
+    'election_type_id': fields.List(fields.Str, description='Election type'),
+    'min_update_date': fields.Date(description='Date this record was last updated.'),
+    'max_update_date': fields.Date(description='Date this record was last updated.'),
+    'min_create_date': fields.Date(description='Date this record was added to the system.'),
+    'max_create_date': fields.Date(description='Date this record was added to the system.'),
     'election_year': fields.List(fields.Str, description='Year of election.'),
-    'pg_date': fields.List(fields.Date, description='Date'),
-    'upcoming': fields.Bool(missing=False, description='Only show future due dates for each type of report.'),
+    'min_primary_general_date': fields.Date(description='Date of primary or general election'),
+    'max_primary_general_date': fields.Date(description='Date of primary or general election'),
 }
 
 schedule_a = {
@@ -412,11 +422,18 @@ elections = {
         validate=validate.OneOf(['house', 'senate', 'president']),
         description='Office sought, either President, House or Senate.',
     ),
+    'election_full': election_full,
 }
 
 schedule_a_candidate_aggregate = {
     'candidate_id': fields.List(IStr, required=True, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, required=True, description=docs.RECORD_CYCLE),
+    'election_full': election_full,
+}
+
+totals_candidate_aggregate = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'election_full': election_full,
 }
 
 communication_cost_by_candidate = {
