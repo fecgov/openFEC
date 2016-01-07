@@ -149,7 +149,7 @@ candidate_detail = {
     'district': fields.List(District),
     'candidate_status': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'F', 'N', 'P'])),
-        description='One letter code explaining if the candidate is:\n\
+        description='One-letter code explaining if the candidate is:\n\
         - C present candidate\n\
         - F future candidate\n\
         - N not yet a candidate\n\
@@ -158,7 +158,7 @@ candidate_detail = {
     ),
     'incumbent_challenge': fields.List(
         IStr(validate=validate.OneOf(['', 'I', 'C', 'O'])),
-        description='One letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'
+        description='One-letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'
     ),
 }
 
@@ -463,7 +463,7 @@ schedule_e = {
     'last_expenditure_date': fields.Date(missing=None, description='When sorting by `expenditure_date`, use the `expenditure_date` of the last result and pass it here as `last_expenditure_date` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_expenditure_amount': fields.Float(missing=None, description='When sorting by `expenditure_amount`, use the `expenditure_amount` of the last result and pass it here as `last_expenditure_amount` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_office_total_ytd': fields.Float(missing=None, description='When sorting by `office_total_ytd`, use the `office_total_ytd` of the last result and pass it here as `last_office_total_ytd` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
-    'payee_name': fields.Str(description='Name of the entity that received the payment.'),
+    'payee_name': fields.Str(description='Name of the entity that received the payment'),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
