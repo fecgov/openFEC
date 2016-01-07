@@ -18,7 +18,6 @@ from webservices.resources.candidates import CandidateHistoryView
 
 fields = dict(
     name='John Hoynes',
-    form_type='F2',
     address_street_1='1600 Pennsylvania Avenue',
     address_city='Washington',
     address_state='DC',
@@ -26,10 +25,9 @@ fields = dict(
     party='DEM',
     party_full='Democratic Party',
     active_through=2014,
-    candidate_inactive='Y',
+    candidate_inactive=True,
     candidate_status='C',
     incumbent_challenge='I',
-    candidate_status_full='Candidate',
     office='H',
     district='08',
     state='VA',
@@ -41,14 +39,7 @@ class CandidateFormatTest(ApiBaseTest):
     """Test/Document expected formats"""
     def test_candidate(self):
         """Compare results to expected fields."""
-        candidate_old = factories.CandidateDetailFactory(
-            load_date=datetime.datetime(2014, 1, 2),
-            **fields
-        )
-        candidate = factories.CandidateDetailFactory(
-            load_date=datetime.datetime(2014, 1, 3),
-            **fields
-        )
+        candidate = factories.CandidateDetailFactory(**fields)
         response = self._response(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
@@ -60,12 +51,6 @@ class CandidateFormatTest(ApiBaseTest):
 
         result = response['results'][0]
         self.assertEqual(result['candidate_id'], candidate.candidate_id)
-        self.assertEqual(result['form_type'], 'F2')
-        # @todo - check for a value for expire_data
-        self.assertEqual(result['expire_date'], None)
-        # # most recent record should be first
-        self.assertEqual(result['load_date'], isoformat(candidate.load_date))
-        self.assertNotEqual(result['load_date'], isoformat(candidate_old.load_date))
         self.assertResultsEqual(result['name'], candidate.name)
         # #address
         self.assertEqual(result['address_city'], candidate.address_city)
@@ -85,7 +70,6 @@ class CandidateFormatTest(ApiBaseTest):
         self.assertResultsEqual(result['candidate_inactive'], candidate.candidate_inactive)
         self.assertResultsEqual(result['candidate_status'], candidate.candidate_status)
         self.assertResultsEqual(result['incumbent_challenge'], candidate.incumbent_challenge)
-        self.assertResultsEqual(result['candidate_status_full'], candidate.candidate_status_full)
 
     def test_candidates_search(self):
         principal_committee = factories.CommitteeFactory(designation='P')
