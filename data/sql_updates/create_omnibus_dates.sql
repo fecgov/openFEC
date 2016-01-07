@@ -71,7 +71,7 @@ with elections as (
         array_to_string(array[
             expand_office_description(office_sought::text),
             rpt_tp_desc::text,
-            ' report (',
+            'report (',
             rpt_tp::text,
             ') ',
             array_to_string(array_agg(election_state order by election_state)::text[], ', ')
