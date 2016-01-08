@@ -2,10 +2,61 @@
 
 ## [Unreleased](https://github.com/18F/openFEC/tree/HEAD)
 
-[Full Changelog](https://github.com/18F/openFEC/compare/house-election-search...HEAD)
+[Full Changelog](https://github.com/18F/openFEC/compare/handle-mismatched-linkages...HEAD)
 
 **Closed issues:**
 
+- download counts:  display, manifest and csv [\#1430](https://github.com/18F/openFEC/issues/1430)
+- Update committee filing dates [\#1428](https://github.com/18F/openFEC/issues/1428)
+- Candidate H6TX25179 missing from election 2016 TX House 25 [\#1408](https://github.com/18F/openFEC/issues/1408)
+- 404 for C00441014 [\#1407](https://github.com/18F/openFEC/issues/1407)
+- Add remaining filters to schedule\_e endpoint [\#1405](https://github.com/18F/openFEC/issues/1405)
+- Some schedule E data on dev doesn't show up on production [\#1392](https://github.com/18F/openFEC/issues/1392)
+- Define filter output in download manifest [\#1391](https://github.com/18F/openFEC/issues/1391)
+- Add remaining date data to the API [\#1385](https://github.com/18F/openFEC/issues/1385)
+- Implement data download bundle [\#1383](https://github.com/18F/openFEC/issues/1383)
+- Estimate times for data downloads [\#1380](https://github.com/18F/openFEC/issues/1380)
+- Double-check that we have all election activity periods data in API [\#1357](https://github.com/18F/openFEC/issues/1357)
+- In order to understand past/current behaviors, analyze existing FEC analytics on the legal system portion of fec.gov [\#1343](https://github.com/18F/openFEC/issues/1343)
+- Create research plan for identifying needs around legal systems [\#1342](https://github.com/18F/openFEC/issues/1342)
+- Load financial reports from FECP [\#1337](https://github.com/18F/openFEC/issues/1337)
+- To help users find the most relevant results, develop a better method of weighting search and typeahead results [\#943](https://github.com/18F/openFEC/issues/943)
+
+**Merged pull requests:**
+
+- Update committee filing dates. [\#1431](https://github.com/18F/openFEC/pull/1431) ([jmcarp](https://github.com/jmcarp))
+- Add support/oppose filter on itemized IEs. [\#1425](https://github.com/18F/openFEC/pull/1425) ([jmcarp](https://github.com/jmcarp))
+- Add icalendar exports. [\#1421](https://github.com/18F/openFEC/pull/1421) ([jmcarp](https://github.com/jmcarp))
+- Add full election flag to committee history view. [\#1411](https://github.com/18F/openFEC/pull/1411) ([jmcarp](https://github.com/jmcarp))
+- \[WIP\] Feature/download utils [\#1363](https://github.com/18F/openFEC/pull/1363) ([jmcarp](https://github.com/jmcarp))
+
+## [handle-mismatched-linkages](https://github.com/18F/openFEC/tree/handle-mismatched-linkages) (2015-12-23)
+[Full Changelog](https://github.com/18F/openFEC/compare/public-beta-20151217...handle-mismatched-linkages)
+
+**Closed issues:**
+
+- Restrict candidate-committee linkages by committee type [\#1406](https://github.com/18F/openFEC/issues/1406)
+- Weight candidate and committee search results page by relevance [\#1396](https://github.com/18F/openFEC/issues/1396)
+- Add "Treasurer" filter to /committees [\#1389](https://github.com/18F/openFEC/issues/1389)
+- In order to simplify contribution, change the bootstrap script to set up a local Cloud Foundry instance [\#1369](https://github.com/18F/openFEC/issues/1369)
+- To help users find relevant committees, provide more emphasis on links to the candidate-committees on the candidate page [\#1168](https://github.com/18F/openFEC/issues/1168)
+
+**Merged pull requests:**
+
+- Condense reporting deadline categories. [\#1419](https://github.com/18F/openFEC/pull/1419) ([jmcarp](https://github.com/jmcarp))
+- Expose full-text filter on committee treasurer name. [\#1417](https://github.com/18F/openFEC/pull/1417) ([jmcarp](https://github.com/jmcarp))
+- Miscellaneous date cleanup. [\#1413](https://github.com/18F/openFEC/pull/1413) ([jmcarp](https://github.com/jmcarp))
+- Ignore linkages with mismatched committee types. [\#1409](https://github.com/18F/openFEC/pull/1409) ([jmcarp](https://github.com/jmcarp))
+- Allow sorting candidates and committees by receipts. [\#1398](https://github.com/18F/openFEC/pull/1398) ([jmcarp](https://github.com/jmcarp))
+- Ensure itemized queues are unique on corresponding primary key. [\#1393](https://github.com/18F/openFEC/pull/1393) ([jmcarp](https://github.com/jmcarp))
+
+## [public-beta-20151217](https://github.com/18F/openFEC/tree/public-beta-20151217) (2015-12-17)
+[Full Changelog](https://github.com/18F/openFEC/compare/house-election-search...public-beta-20151217)
+
+**Closed issues:**
+
+- Round up to next election in candidate summaries [\#1400](https://github.com/18F/openFEC/issues/1400)
+- Restrict data download resources [\#1395](https://github.com/18F/openFEC/issues/1395)
 - Restrict election aggregates to election year [\#1382](https://github.com/18F/openFEC/issues/1382)
 - Discussion: Capping data downloads [\#1378](https://github.com/18F/openFEC/issues/1378)
 - Discussion: Expiring cached data downloads [\#1377](https://github.com/18F/openFEC/issues/1377)
@@ -17,6 +68,7 @@
 
 **Merged pull requests:**
 
+- Release/public beta 20151217 [\#1401](https://github.com/18F/openFEC/pull/1401) ([jmcarp](https://github.com/jmcarp))
 - Ensure unique candidate election years. [\#1399](https://github.com/18F/openFEC/pull/1399) ([jmcarp](https://github.com/jmcarp))
 - Create temporary itemized tables to avoid downtime. [\#1397](https://github.com/18F/openFEC/pull/1397) ([jmcarp](https://github.com/jmcarp))
 - Weight typeahead search by committee receipts. [\#1390](https://github.com/18F/openFEC/pull/1390) ([jmcarp](https://github.com/jmcarp))
@@ -300,6 +352,19 @@
 - Remove contributor type aggregate. [\#1211](https://github.com/18F/openFEC/pull/1211) ([jmcarp](https://github.com/jmcarp))
 - Made committee first file date with the filings table.  [\#1210](https://github.com/18F/openFEC/pull/1210) ([LindsayYoung](https://github.com/LindsayYoung))
 - Use more restrictive join between candidates and committees. [\#1207](https://github.com/18F/openFEC/pull/1207) ([jmcarp](https://github.com/jmcarp))
+- Add sorting on related columns. [\#1206](https://github.com/18F/openFEC/pull/1206) ([jmcarp](https://github.com/jmcarp))
+- Use all filings to get active committee years. [\#1202](https://github.com/18F/openFEC/pull/1202) ([jmcarp](https://github.com/jmcarp))
+- Add web analytics to Swagger-UI. [\#1199](https://github.com/18F/openFEC/pull/1199) ([jmcarp](https://github.com/jmcarp))
+- Exclude inactive candidates from election views. [\#1196](https://github.com/18F/openFEC/pull/1196) ([jmcarp](https://github.com/jmcarp))
+- Fix concurrent refresh; add regression test. [\#1194](https://github.com/18F/openFEC/pull/1194) ([jmcarp](https://github.com/jmcarp))
+- Move generic helpers and Swagger tools to flask-smore. [\#1192](https://github.com/18F/openFEC/pull/1192) ([jmcarp](https://github.com/jmcarp))
+- Generalize and document itemized committee queries. [\#1190](https://github.com/18F/openFEC/pull/1190) ([jmcarp](https://github.com/jmcarp))
+- Add election summary endpoint. [\#1188](https://github.com/18F/openFEC/pull/1188) ([jmcarp](https://github.com/jmcarp))
+- Feature/more zips [\#1186](https://github.com/18F/openFEC/pull/1186) ([LindsayYoung](https://github.com/LindsayYoung))
+- Adding the rate limit information, page limit and link to bulk data. [\#1182](https://github.com/18F/openFEC/pull/1182) ([LindsayYoung](https://github.com/LindsayYoung))
+- Feature/organize models [\#1181](https://github.com/18F/openFEC/pull/1181) ([jmcarp](https://github.com/jmcarp))
+- Include list of election districts in candidate summaries. [\#1179](https://github.com/18F/openFEC/pull/1179) ([jmcarp](https://github.com/jmcarp))
+- Use consistent names for individual contributions. [\#1175](https://github.com/18F/openFEC/pull/1175) ([jmcarp](https://github.com/jmcarp))
 
 ## [public-beta-20150829](https://github.com/18F/openFEC/tree/public-beta-20150829) (2015-09-03)
 [Full Changelog](https://github.com/18F/openFEC/compare/page-cap-redux...public-beta-20150829)
@@ -355,6 +420,30 @@
 - Allow users to use abbreviations in State filter [\#130](https://github.com/18F/openFEC/issues/130)
 - Research compliance professional's search workflow [\#16](https://github.com/18F/openFEC/issues/16)
 
+**Merged pull requests:**
+
+- Fix last cash on hand. [\#1174](https://github.com/18F/openFEC/pull/1174) ([jmcarp](https://github.com/jmcarp))
+- Use base resource class to avoid duplicated code. [\#1173](https://github.com/18F/openFEC/pull/1173) ([jmcarp](https://github.com/jmcarp))
+- Feature/document enhancement [\#1172](https://github.com/18F/openFEC/pull/1172) ([LindsayYoung](https://github.com/LindsayYoung))
+- Build receipts aggregate by contributor committee. [\#1171](https://github.com/18F/openFEC/pull/1171) ([jmcarp](https://github.com/jmcarp))
+- Feature/election search incumbent [\#1165](https://github.com/18F/openFEC/pull/1165) ([jmcarp](https://github.com/jmcarp))
+- Move swagger logic to smore. [\#1164](https://github.com/18F/openFEC/pull/1164) ([jmcarp](https://github.com/jmcarp))
+- Release/public beta 20150829 [\#1163](https://github.com/18F/openFEC/pull/1163) ([jmcarp](https://github.com/jmcarp))
+- Use detailed query statistics. [\#1162](https://github.com/18F/openFEC/pull/1162) ([jmcarp](https://github.com/jmcarp))
+- Unify base resource classes. [\#1151](https://github.com/18F/openFEC/pull/1151) ([jmcarp](https://github.com/jmcarp))
+- Feature/external pagination [\#1150](https://github.com/18F/openFEC/pull/1150) ([jmcarp](https://github.com/jmcarp))
+- Allow filtering receipts on multiple committees. [\#1149](https://github.com/18F/openFEC/pull/1149) ([jmcarp](https://github.com/jmcarp))
+- Include F1 filings in filings endpoint. [\#1148](https://github.com/18F/openFEC/pull/1148) ([jmcarp](https://github.com/jmcarp))
+- Feature/handle duplicate receipts [\#1143](https://github.com/18F/openFEC/pull/1143) ([jmcarp](https://github.com/jmcarp))
+- Add electioneering costs by candidate. [\#1142](https://github.com/18F/openFEC/pull/1142) ([jmcarp](https://github.com/jmcarp))
+- Feature/com cost [\#1140](https://github.com/18F/openFEC/pull/1140) ([jmcarp](https://github.com/jmcarp))
+- Use `tuple\_` expression for row value filters. [\#1139](https://github.com/18F/openFEC/pull/1139) ([jmcarp](https://github.com/jmcarp))
+- Fix filtering on filings view. [\#1136](https://github.com/18F/openFEC/pull/1136) ([jmcarp](https://github.com/jmcarp))
+- Aggregate independent expenditures. [\#1135](https://github.com/18F/openFEC/pull/1135) ([jmcarp](https://github.com/jmcarp))
+- Fix sort by date on seek pagination. [\#1134](https://github.com/18F/openFEC/pull/1134) ([jmcarp](https://github.com/jmcarp))
+- Feature/contibutor variables [\#1133](https://github.com/18F/openFEC/pull/1133) ([LindsayYoung](https://github.com/LindsayYoung))
+- Feature/communicaiton cost [\#1131](https://github.com/18F/openFEC/pull/1131) ([LindsayYoung](https://github.com/LindsayYoung))
+
 ## [page-cap-redux](https://github.com/18F/openFEC/tree/page-cap-redux) (2015-08-14)
 [Full Changelog](https://github.com/18F/openFEC/compare/18f.gov...page-cap-redux)
 
@@ -377,6 +466,22 @@
 
 **Merged pull requests:**
 
+- Index `office\_full`. [\#1129](https://github.com/18F/openFEC/pull/1129) ([jmcarp](https://github.com/jmcarp))
+- Add candidate filings endpoint. [\#1128](https://github.com/18F/openFEC/pull/1128) ([jmcarp](https://github.com/jmcarp))
+- Fix failing tests. [\#1127](https://github.com/18F/openFEC/pull/1127) ([jmcarp](https://github.com/jmcarp))
+- Hide extraneous races from election lookup. [\#1126](https://github.com/18F/openFEC/pull/1126) ([jmcarp](https://github.com/jmcarp))
+- Update test subset. [\#1125](https://github.com/18F/openFEC/pull/1125) ([jmcarp](https://github.com/jmcarp))
+- Handle numeric congressional districts. [\#1124](https://github.com/18F/openFEC/pull/1124) ([jmcarp](https://github.com/jmcarp))
+- Add script to output district count per state. [\#1123](https://github.com/18F/openFEC/pull/1123) ([jmcarp](https://github.com/jmcarp))
+- Revert temporary workaround for missing receipt dates. [\#1122](https://github.com/18F/openFEC/pull/1122) ([jmcarp](https://github.com/jmcarp))
+- Use Flask-CORS for more robust CORS configuration. [\#1121](https://github.com/18F/openFEC/pull/1121) ([jmcarp](https://github.com/jmcarp))
+- Fix error on empty elections. [\#1120](https://github.com/18F/openFEC/pull/1120) ([jmcarp](https://github.com/jmcarp))
+- Feature/fix filings pdfs [\#1119](https://github.com/18F/openFEC/pull/1119) ([jmcarp](https://github.com/jmcarp))
+- Expose control over null order. [\#1118](https://github.com/18F/openFEC/pull/1118) ([jmcarp](https://github.com/jmcarp))
+- Include committee IDs in election view endpoint. [\#1116](https://github.com/18F/openFEC/pull/1116) ([jmcarp](https://github.com/jmcarp))
+- Feature/fix data types [\#1115](https://github.com/18F/openFEC/pull/1115) ([jmcarp](https://github.com/jmcarp))
+- Feature/documention page updates [\#1114](https://github.com/18F/openFEC/pull/1114) ([LindsayYoung](https://github.com/LindsayYoung))
+- Add .about.yml. [\#1111](https://github.com/18F/openFEC/pull/1111) ([jmcarp](https://github.com/jmcarp))
 - Add election search view. [\#1109](https://github.com/18F/openFEC/pull/1109) ([jmcarp](https://github.com/jmcarp))
 - Improve election views. [\#1108](https://github.com/18F/openFEC/pull/1108) ([jmcarp](https://github.com/jmcarp))
 - Join designation by form ID. [\#1107](https://github.com/18F/openFEC/pull/1107) ([jmcarp](https://github.com/jmcarp))
