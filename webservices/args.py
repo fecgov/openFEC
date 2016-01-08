@@ -409,7 +409,7 @@ communication_cost = {
     ),
 }
 
-electioneering_cost = {
+electioneering = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),

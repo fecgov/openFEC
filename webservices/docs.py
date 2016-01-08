@@ -464,7 +464,7 @@ the election or defeat of any Federal candidate.  The costs of such communicatio
 must be reported to the Federal Election Commission under certain circumstances.
 '''
 
-ELECTIONEERING_COST = '''
+ELECTIONEERING = '''
 An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
 * The communication refers to a clearly identified candidate for federal office;
 * The communication is publicly distributed shortly before an election for the office that candidate is seeking; and
