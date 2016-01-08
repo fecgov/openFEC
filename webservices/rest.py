@@ -275,6 +275,7 @@ def swagger_static(filename):
 
 @app.route('/')
 @app.route('/v1/')
+@app.route('/docs')
 @docs.route('/developer/')
 def api_ui_redirect():
     return redirect(url_for('docs.api_ui'), code=http.client.MOVED_PERMANENTLY)
