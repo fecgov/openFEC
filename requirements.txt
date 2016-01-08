@@ -14,7 +14,6 @@ webargs==0.18.0
 slacker==0.8.6
 raven[flask]==5.8.1
 ujson==1.33
-furl==0.4.6
 
 # Marshalling
 flask-apispec==0.2.0
@@ -22,6 +21,10 @@ marshmallow==2.1.0
 marshmallow-sqlalchemy==0.6.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
+# Data export
+boto3==1.2.2
+
 # Task queue
 celery==3.1.19
+celery-once==0.1.4
 redis==2.10.5
