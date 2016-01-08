@@ -48,8 +48,8 @@ group by cmte_id, cycle, size
 
 create unique index on ofec_sched_a_aggregate_size_merged_mv_tmp (idx);
 
-create index on ofec_sched_a_aggregate_size_merged_mv_tmp (cmte_id);
-create index on ofec_sched_a_aggregate_size_merged_mv_tmp (cycle);
-create index on ofec_sched_a_aggregate_size_merged_mv_tmp (size);
-create index on ofec_sched_a_aggregate_size_merged_mv_tmp (total);
-create index on ofec_sched_a_aggregate_size_merged_mv_tmp (count);
+create index on ofec_sched_a_aggregate_size_merged_mv_tmp (cmte_id, idx);
+create index on ofec_sched_a_aggregate_size_merged_mv_tmp (cycle, idx);
+create index on ofec_sched_a_aggregate_size_merged_mv_tmp (size, idx);
+create index on ofec_sched_a_aggregate_size_merged_mv_tmp (total, idx);
+create index on ofec_sched_a_aggregate_size_merged_mv_tmp (count, idx);

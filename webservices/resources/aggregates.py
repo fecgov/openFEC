@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 
-from flask_apispec import doc, marshal_with
-from flask_apispec.utils import Ref
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
@@ -11,28 +10,27 @@ from webservices import schemas
 from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 
 
 @doc(params={'committee_id': {'description': docs.COMMITTEE_ID}})
 class AggregateResource(ApiResource):
 
-    schema = None
     query_args = {}
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            self.query_args,
+            self.sort_args,
+        )
 
     @property
     def sort_args(self):
         return args.make_sort_args(validator=args.IndexValidator(self.model))
 
-    @use_kwargs(args.paging)
-    @use_kwargs(Ref('sort_args'))
-    @use_kwargs(Ref('query_args'))
-    @marshal_with(Ref('schema'))
-    def get(self, committee_id=None, **kwargs):
-        return super().get(committee_id=committee_id, **kwargs)
-
-    def build_query(self, committee_id, **kwargs):
+    def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(**kwargs)
         if committee_id is not None:
             query = query.filter(self.model.committee_id == committee_id)
@@ -46,7 +44,8 @@ class AggregateResource(ApiResource):
 class ScheduleABySizeView(AggregateResource):
 
     model = models.ScheduleABySize
-    schema = schemas.ScheduleABySizePageSchema
+    schema = schemas.ScheduleABySizeSchema
+    page_schema = schemas.ScheduleABySizePageSchema
     query_args = args.schedule_a_by_size
     filter_multi_fields = [
         ('cycle', models.ScheduleABySize.cycle),
@@ -64,14 +63,15 @@ class ScheduleABySizeView(AggregateResource):
 class ScheduleAByStateView(AggregateResource):
 
     model = models.ScheduleAByState
-    schema = schemas.ScheduleAByStatePageSchema
+    schema = schemas.ScheduleAByStateSchema
+    page_schema = schemas.ScheduleAByStatePageSchema
     query_args = args.schedule_a_by_state
     filter_multi_fields = [
         ('cycle', models.ScheduleAByState.cycle),
         ('state', models.ScheduleAByState.state),
     ]
 
-    def build_query(self, committee_id, **kwargs):
+    def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         if kwargs['hide_null']:
             query = query.filter(self.model.state_full != None)  # noqa
@@ -88,7 +88,8 @@ class ScheduleAByStateView(AggregateResource):
 class ScheduleAByZipView(AggregateResource):
 
     model = models.ScheduleAByZip
-    schema = schemas.ScheduleAByZipPageSchema
+    schema = schemas.ScheduleAByZipSchema
+    page_schema = schemas.ScheduleAByZipPageSchema
     query_args = args.schedule_a_by_zip
     filter_multi_fields = [
         ('cycle', models.ScheduleAByZip.cycle),
@@ -106,7 +107,8 @@ class ScheduleAByZipView(AggregateResource):
 class ScheduleAByEmployerView(AggregateResource):
 
     model = models.ScheduleAByEmployer
-    schema = schemas.ScheduleAByEmployerPageSchema
+    schema = schemas.ScheduleAByEmployerSchema
+    page_schema = schemas.ScheduleAByEmployerPageSchema
     query_args = args.schedule_a_by_employer
     filter_multi_fields = [
         ('cycle', models.ScheduleAByEmployer.cycle),
@@ -129,7 +131,8 @@ class ScheduleAByEmployerView(AggregateResource):
 class ScheduleAByOccupationView(AggregateResource):
 
     model = models.ScheduleAByOccupation
-    schema = schemas.ScheduleAByOccupationPageSchema
+    schema = schemas.ScheduleAByOccupationSchema
+    page_schema = schemas.ScheduleAByOccupationPageSchema
     query_args = args.schedule_a_by_occupation
     filter_multi_fields = [
         ('cycle', models.ScheduleAByOccupation.cycle),
@@ -152,7 +155,8 @@ class ScheduleAByOccupationView(AggregateResource):
 class ScheduleAByContributorView(AggregateResource):
 
     model = models.ScheduleAByContributor
-    schema = schemas.ScheduleAByContributorPageSchema
+    schema = schemas.ScheduleAByContributorSchema
+    page_schema = schemas.ScheduleAByContributorPageSchema
     query_args = args.schedule_a_by_contributor
     filter_multi_fields = [
         ('cycle', models.ScheduleAByContributor.cycle),
@@ -170,7 +174,8 @@ class ScheduleAByContributorView(AggregateResource):
 class ScheduleBByRecipientView(AggregateResource):
 
     model = models.ScheduleBByRecipient
-    schema = schemas.ScheduleBByRecipientPageSchema
+    schema = schemas.ScheduleBByRecipientSchema
+    page_schema = schemas.ScheduleBByRecipientPageSchema
     query_args = args.schedule_b_by_recipient
     filter_multi_fields = [
         ('cycle', models.ScheduleBByRecipient.cycle),
@@ -188,7 +193,8 @@ class ScheduleBByRecipientView(AggregateResource):
 class ScheduleBByRecipientIDView(AggregateResource):
 
     model = models.ScheduleBByRecipientID
-    schema = schemas.ScheduleBByRecipientIDPageSchema
+    schema = schemas.ScheduleBByRecipientIDSchema
+    page_schema = schemas.ScheduleBByRecipientIDPageSchema
     query_args = args.schedule_b_by_recipient_id
     filter_multi_fields = [
         ('cycle', models.ScheduleBByRecipientID.cycle),
@@ -206,7 +212,8 @@ class ScheduleBByRecipientIDView(AggregateResource):
 class ScheduleBByPurposeView(AggregateResource):
 
     model = models.ScheduleBByPurpose
-    schema = schemas.ScheduleBByPurposePageSchema
+    schema = schemas.ScheduleBByPurposeSchema
+    page_schema = schemas.ScheduleBByPurposePageSchema
     query_args = args.schedule_b_by_purpose
     filter_multi_fields = [
         ('cycle', models.ScheduleBByPurpose.cycle),
@@ -227,8 +234,8 @@ class CandidateAggregateResource(AggregateResource):
     label_columns = []
     group_columns = []
 
-    def build_query(self, committee_id, **kwargs):
-        query = super().build_query(committee_id, **kwargs)
+    def build_query(self, committee_id=None, **kwargs):
+        query = super().build_query(committee_id=committee_id, **kwargs)
         election_full = kwargs.get('election_full')
         if election_full and not (kwargs.get('candidate_id') or kwargs.get('office')):
             raise exceptions.ApiError(
@@ -306,7 +313,8 @@ class CandidateAggregateResource(AggregateResource):
 class ScheduleEByCandidateView(CandidateAggregateResource):
 
     model = models.ScheduleEByCandidate
-    schema = schemas.ScheduleEByCandidatePageSchema
+    schema = schemas.ScheduleEByCandidateSchema
+    page_schema = schemas.ScheduleEByCandidatePageSchema
     query_args = utils.extend(args.elections, args.schedule_e_by_candidate)
     filter_multi_fields = [
         ('candidate_id', models.ScheduleEByCandidate.candidate_id),
@@ -325,7 +333,8 @@ class ScheduleEByCandidateView(CandidateAggregateResource):
 class CommunicationCostByCandidateView(CandidateAggregateResource):
 
     model = models.CommunicationCostByCandidate
-    schema = schemas.CommunicationCostByCandidatePageSchema
+    schema = schemas.CommunicationCostByCandidateSchema
+    page_schema = schemas.CommunicationCostByCandidatePageSchema
     query_args = utils.extend(args.elections, args.communication_cost_by_candidate)
     filter_multi_fields = [
         ('candidate_id', models.CommunicationCostByCandidate.candidate_id),
@@ -344,7 +353,8 @@ class CommunicationCostByCandidateView(CandidateAggregateResource):
 class ElectioneeringByCandidateView(CandidateAggregateResource):
 
     model = models.ElectioneeringByCandidate
-    schema = schemas.ElectioneeringByCandidatePageSchema
+    schema = schemas.ElectioneeringByCandidateSchema
+    page_schema = schemas.ElectioneeringByCandidatePageSchema
     query_args = utils.extend(args.elections, args.electioneering_by_candidate)
     filter_multi_fields = [
         ('candidate_id', models.ElectioneeringByCandidate.candidate_id),
