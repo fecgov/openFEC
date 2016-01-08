@@ -1,6 +1,7 @@
 from webservices import utils
 from .base import db
 
+
 class CommunicationCost(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
 
@@ -39,8 +40,8 @@ class CommunicationCost(db.Model):
     committee = utils.related_committee('committee_id')
     candidate = utils.related_candidate('candidate_id')
 
-class ElectioneeringCost(db.Model):
-    __tablename__ = 'ofec_electioneering_cost_mv'
+class Electioneering(db.Model):
+    __tablename__ = 'ofec_electioneering_mv'
 
     form_94_sk = db.Column(db.Integer, primary_key=True)
     form_type = db.Column('form_tp', db.String, index=True)

@@ -2,9 +2,9 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import CommunicationCost, ElectioneeringCost
-from webservices.schemas import CommunicationCostSchema, ElectioneeringCostSchema
-from webservices.resources.costs import CommunicationCostView, ElectioneeringCostView
+from webservices.common.models import CommunicationCost, Electioneering
+from webservices.schemas import CommunicationCostSchema, ElectioneeringSchema
+from webservices.resources.costs import CommunicationCostView, ElectioneeringView
 
 
 class TestCommunicationCost(ApiBaseTest):
@@ -30,25 +30,25 @@ class TestCommunicationCost(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
-class TestElectioneeringCost(ApiBaseTest):
+class TestElectioneering(ApiBaseTest):
 
     def test_fields(self):
-        factories.ElectioneeringCostFactory()
-        results = self._results(api.url_for(ElectioneeringCostView))
+        factories.ElectioneeringFactory()
+        results = self._results(api.url_for(ElectioneeringView))
         assert len(results) == 1
-        assert results[0].keys() == ElectioneeringCostSchema().fields.keys()
+        assert results[0].keys() == ElectioneeringSchema().fields.keys()
 
     def test_filters(self):
         filters = [
-            ('report_year', ElectioneeringCost.report_year, [2012, 2014]),
-            ('committee_id', ElectioneeringCost.committee_id, ['C01', 'C02']),
-            ('candidate_id', ElectioneeringCost.candidate_id, ['S01', 'S02']),
+            ('report_year', Electioneering.report_year, [2012, 2014]),
+            ('committee_id', Electioneering.committee_id, ['C01', 'C02']),
+            ('candidate_id', Electioneering.candidate_id, ['S01', 'S02']),
         ]
         for label, column, values in filters:
             [
-                factories.ElectioneeringCostFactory(**{column.key: value})
+                factories.ElectioneeringFactory(**{column.key: value})
                 for value in values
             ]
-            results = self._results(api.url_for(ElectioneeringCostView, **{label: values[0]}))
+            results = self._results(api.url_for(ElectioneeringView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]
