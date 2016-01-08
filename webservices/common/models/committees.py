@@ -20,6 +20,7 @@ class BaseCommittee(BaseModel):
     designation = db.Column(db.String(1), index=True)
     designation_full = db.Column(db.String(25), index=True)
     treasurer_name = db.Column(db.String(100), index=True)
+    treasurer_text = db.Column(TSVECTOR)
     organization_type = db.Column(db.String(1), index=True)
     organization_type_full = db.Column(db.String(100), index=True)
     state = db.Column(db.String(2), index=True)
@@ -43,6 +44,7 @@ class Committee(BaseConcreteCommittee):
 
     first_file_date = db.Column(db.Date)
     last_file_date = db.Column(db.Date)
+    last_f1_date = db.Column(db.Date)
 
 
 class CommitteeHistory(BaseCommittee):
@@ -53,7 +55,7 @@ class CommitteeHistory(BaseCommittee):
     city = db.Column(db.String(50))
     state_full = db.Column(db.String(50))
     zip = db.Column(db.String(9))
-    cycle = db.Column(db.Integer, primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True, index=True)
 
 
 class CommitteeDetail(BaseConcreteCommittee):
