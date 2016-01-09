@@ -17,6 +17,7 @@ class ApiResource(utils.Resource):
     schema = None
     page_schema = None
     index_column = None
+    unique_column = None
     filter_match_fields = []
     filter_multi_fields = []
     filter_range_fields = []
@@ -28,9 +29,11 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(
             query, kwargs,
-            model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+            count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+            index_column=self.index_column,
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
