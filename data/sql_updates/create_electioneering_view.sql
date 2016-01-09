@@ -1,6 +1,6 @@
 drop materialized view if exists ofec_electioneering_mv_tmp;
 create materialized view ofec_electioneering_mv_tmp as
--- there is no unique identifier
+-- Find out if there is a better unique identifier
 select
     electioneering_com_vw.*,
     row_number() over () as idx,

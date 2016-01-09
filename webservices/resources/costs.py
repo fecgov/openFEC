@@ -65,7 +65,7 @@ class ElectioneeringView(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.form_94_sk
+        return self.model.idx
 
     filter_multi_fields = [
         ('report_year', models.Electioneering.report_year),
@@ -74,7 +74,7 @@ class ElectioneeringView(ApiResource):
         ('beginning_image_number', models.Electioneering.beginning_image_number),
     ]
     filter_range_fields = [
-        (('min_date', 'max_date'), models.Electioneering.receipt_date),
+        (('min_date', 'max_date'), models.Electioneering.disbursement_date),
         (('min_amount', 'max_amount'), models.Electioneering.disbursement_amount),
     ]
     query_options = [

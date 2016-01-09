@@ -48,8 +48,7 @@ class Electioneering(db.Model):
     form_type = db.Column('form_tp', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
     candidate_id = db.Column('cand_id', db.String, index=True)
-    candidate_name = db.Column('cand_nm', db.String, index=True)
-    candidate_prefix = db.Column('cand_prefix', db.String, index=True)
+    candidate_name = db.Column('cand_name', db.String, index=True)
     candidate_office = db.Column('cand_office', db.String, index=True)
     candidate_district = db.Column('cand_office_district', db.String, index=True)
     candidate_state = db.Column('cand_office_st', db.String, index=True)
@@ -77,9 +76,9 @@ class Electioneering(db.Model):
     # is this similar to transaction_id?
     sb_link_id = db.Column(db.String, index=True)
     # transaction_id = db.Column(db.Integer)
-    filing_type = db.Column(db.String, index=True)
-    load_date = db.Column(db.DateTime)
-    update_date = db.Column(db.DateTime)
+    # filing_type = db.Column(db.String, index=True)
+    # load_date = db.Column(db.DateTime)
+    # update_date = db.Column(db.DateTime)
     number_of_candidates = db.Column(db.String)
     calculated_candidate_share = db.Column('calculated_cand_share', db.String)
     # difference between communication and public distribution dates?
@@ -87,7 +86,8 @@ class Electioneering(db.Model):
     public_distribion_date = db.Column('pub_distrib_dt', db.DateTime)
     disbursement_date = db.Column('disb_dt', db.DateTime)
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
-    disb_description = db.Column('disb_desc', db.String)
+    #TODO: add tsvector field
+    purpose_description = db.Column('disb_desc', db.String)
     report_year = db.Column('rpt_yr', db.Integer, index=True)
 
     committee = utils.related_committee('committee_id')
