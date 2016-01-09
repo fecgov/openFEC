@@ -101,22 +101,13 @@ class IndexValidator(OptionValidator):
     def _is_excluded(self, value):
         return not value or value in self.exclude
 
-def make_sort_args(default=None, multiple=True, validator=None, default_hide_null=False, default_nulls_large=True):
-    description = 'Provide a field to sort by. Use - for descending order.'
-    if multiple:
-        sort_field = fields.List(
-            fields.Str(validate=validator),
-            missing=default,
-            description=description,
-        )
-    else:
-        sort_field = fields.Str(
+def make_sort_args(default=None, validator=None, default_hide_null=False, default_nulls_large=True):
+    return {
+        'sort': fields.Str(
             missing=default,
             validate=validator,
-            description=description,
-        )
-    return {
-        'sort': sort_field,
+            description='Provide a field to sort by. Use - for descending order.',
+        ),
         'sort_hide_null': fields.Bool(
             missing=default_hide_null,
             description='Hide null values on sorted column(s).'
