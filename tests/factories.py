@@ -242,4 +242,4 @@ class CommunicationCostFactory(BaseFactory):
 class ElectioneeringFactory(BaseFactory):
     class Meta:
         model = models.Electioneering
-    form_94_sk = factory.Sequence(lambda n: n)
+    idx = factory.Sequence(lambda n: n)

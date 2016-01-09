@@ -415,8 +415,8 @@ electioneering = {
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': fields.Date(description='Minimum date'),
-    'max_date': fields.Date(description='Maximum date'),
+    'min_date': fields.Date(description='Minimum disbursement date'),
+    'max_date': fields.Date(description='Maximum disbursement date'),
 }
 
 electioneering_by_candidate = {
