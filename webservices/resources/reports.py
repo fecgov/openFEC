@@ -53,7 +53,7 @@ class ReportsView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
-    @use_kwargs(args.make_sort_args(default=['-coverage_end_date']))
+    @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.build_query(
@@ -61,9 +61,9 @@ class ReportsView(utils.Resource):
             committee_type=committee_type,
             **kwargs
         )
-        validator = args.IndexValidator(reports_class)
-        for key in kwargs['sort']:
-            validator(key)
+        if kwargs['sort']:
+            validator = args.IndexValidator(reports_class)
+            validator(kwargs['sort'])
         page = utils.fetch_page(query, kwargs, model=reports_class)
         return reports_schema().dump(page).data
 

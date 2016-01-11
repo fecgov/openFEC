@@ -177,6 +177,11 @@ class ScheduleAByStateFactory(BaseAggregateFactory):
         model = models.ScheduleAByState
 
 
+class ScheduleAByEmployerFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleAByEmployer
+
+
 class ScheduleAByContributorFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleAByContributor

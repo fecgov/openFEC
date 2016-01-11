@@ -62,7 +62,6 @@ class ScheduleEView(ItemizedResource):
                     'expenditure_amount',
                     'office_total_ytd',
                 ]),
-                multiple=False,
             ),
         )
 
