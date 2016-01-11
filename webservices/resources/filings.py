@@ -47,7 +47,7 @@ class BaseFilings(views.ApiResource):
             args.paging,
             args.filings,
             args.make_sort_args(
-                default=['-receipt_date'],
+                default='-receipt_date',
                 validator=args.IndexValidator(models.Filings),
             ),
         )

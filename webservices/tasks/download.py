@@ -29,6 +29,12 @@ RESOURCE_WHITELIST = {
     filings.FilingsList,
 }
 
+COUNT_NOTE = (
+    '*Note: The record count displayed on the website is an estimate. The record '
+    'count in this manifest is accurate and will equal the rows in the accompanying '
+    'CSV file.'
+)
+
 def call_resource(path, qs, per_page=5000):
     app = task_utils.get_app()
     endpoint, arguments = app.url_map.bind('').match(path)
@@ -155,8 +161,9 @@ def make_manifest(resource, row_count, path):
     with open(os.path.join(path, 'manifest.txt'), 'w') as fp:
         fp.write('Time: {}\n'.format(resource['timestamp']))
         fp.write('Resource: {}\n'.format(resource['path']))
-        fp.write('Count: {}\n'.format(row_count))
+        fp.write('*Count: {}\n'.format(row_count))
         fp.write('Filters:\n\n')
+        fp.write('{}\n\n'.format(COUNT_NOTE))
         fp.write(make_filters(resource))
 
 def make_filters(resource):

@@ -41,7 +41,7 @@ class CandidateList(ApiResource):
             args.candidate_list,
             args.candidate_detail,
             args.make_sort_args(
-                default=['name'],
+                default='name',
                 validator=args.IndexValidator(
                     models.Candidate,
                     extra=list(self.aliases.keys()),
@@ -110,7 +110,7 @@ class CandidateView(ApiResource):
             args.paging,
             args.candidate_detail,
             args.make_sort_args(
-                default=['name'],
+                default='name',
                 validator=args.IndexValidator(self.model),
             ),
         )
@@ -155,7 +155,7 @@ class CandidateHistoryView(ApiResource):
         return utils.extend(
             args.paging,
             args.make_sort_args(
-                default=['-two_year_period'],
+                default='-two_year_period',
                 validator=args.IndexValidator(self.model),
             ),
         )
