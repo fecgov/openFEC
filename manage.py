@@ -11,7 +11,7 @@ from sqlalchemy import text as sqla_text
 
 from webservices.env import env
 from webservices.rest import app, db
-from webservices.config import SQL_CONFIG
+from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 
 
@@ -174,6 +174,7 @@ def refresh_materialized():
 @manager.command
 def cf_startup():
     """Migrate schemas on `cf push`."""
+    check_config()
     if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 
