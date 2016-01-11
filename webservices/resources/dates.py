@@ -99,7 +99,7 @@ class CalendarDatesView(ApiResource):
             args.paging,
             args.calendar_dates,
             args.make_sort_args(
-                default=['-start_date'],
+                default='-start_date',
             ),
         )
 
