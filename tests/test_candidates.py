@@ -1,7 +1,4 @@
-import datetime
-
 import sqlalchemy as sa
-from marshmallow.utils import isoformat
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -25,7 +22,7 @@ fields = dict(
     party='DEM',
     party_full='Democratic Party',
     active_through=2014,
-    candidate_inactive='Y',
+    candidate_inactive=True,
     candidate_status='C',
     incumbent_challenge='I',
     office='H',
@@ -43,33 +40,32 @@ class CandidateFormatTest(ApiBaseTest):
         response = self._response(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )
-        self.assertResultsEqual(
-            response['pagination'],
-            {'count': 1, 'page': 1, 'pages': 1, 'per_page': 20})
+        assert response['pagination'] == {'count': 1, 'page': 1, 'pages': 1, 'per_page': 20}
         # we are showing the full history rather than one result
-        self.assertEqual(len(response['results']), 1)
+        assert len(response['results']) == 1
 
         result = response['results'][0]
-        self.assertEqual(result['candidate_id'], candidate.candidate_id)
-        self.assertResultsEqual(result['name'], candidate.name)
+        assert result['candidate_id'] == candidate.candidate_id
+        # # most recent record should be first
+        assert result['name'] == candidate.name
         # #address
-        self.assertEqual(result['address_city'], candidate.address_city)
-        self.assertEqual(result['address_state'], candidate.address_state)
-        self.assertEqual(result['address_street_1'], candidate.address_street_1)
-        self.assertEqual(result['address_zip'], candidate.address_zip)
+        assert result['address_city'] == candidate.address_city
+        assert result['address_state'] == candidate.address_state
+        assert result['address_street_1'] == candidate.address_street_1
+        assert result['address_zip'] == candidate.address_zip
         # # office
-        self.assertResultsEqual(result['office'], candidate.office)
-        self.assertResultsEqual(result['district'], candidate.district)
-        self.assertResultsEqual(result['state'], candidate.state)
-        self.assertResultsEqual(result['office_full'], candidate.office_full)
+        assert result['office'] == candidate.office
+        assert result['district'] == candidate.district
+        assert result['state'] == candidate.state
+        assert result['office_full'] == candidate.office_full
         # # From party_mapping
-        self.assertResultsEqual(result['party'], candidate.party)
-        self.assertResultsEqual(result['party_full'], candidate.party_full)
+        assert result['party'] == candidate.party
+        assert result['party_full'] == candidate.party_full
         # From status_mapping
-        self.assertResultsEqual(result['active_through'], candidate.active_through)
-        self.assertResultsEqual(result['candidate_inactive'], candidate.candidate_inactive)
-        self.assertResultsEqual(result['candidate_status'], candidate.candidate_status)
-        self.assertResultsEqual(result['incumbent_challenge'], candidate.incumbent_challenge)
+        assert result['active_through'] == candidate.active_through
+        assert result['candidate_inactive'] == candidate.candidate_inactive
+        assert result['candidate_status'] == candidate.candidate_status
+        assert result['incumbent_challenge'] == candidate.incumbent_challenge
 
     def test_candidates_search(self):
         principal_committee = factories.CommitteeFactory(designation='P')

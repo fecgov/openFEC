@@ -187,6 +187,7 @@ class ScheduleE(BaseItemized):
     dissemination_date = db.Column('dissem_dt', db.Date)
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+    is_notice = db.Column(db.Boolean, index=True)
 
     # Auxiliary fields
     payee_name_text = db.Column(TSVECTOR)

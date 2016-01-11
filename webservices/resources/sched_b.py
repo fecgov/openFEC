@@ -1,11 +1,11 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
+from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.views import ItemizedResource
 
 
@@ -16,6 +16,8 @@ from webservices.common.views import ItemizedResource
 class ScheduleBView(ItemizedResource):
 
     model = models.ScheduleB
+    schema = schemas.ScheduleBSchema
+    page_schema = schemas.ScheduleBPageSchema
 
     @property
     def year_column(self):
@@ -41,18 +43,17 @@ class ScheduleBView(ItemizedResource):
         (('min_image_number', 'max_image_number'), models.ScheduleB.image_number),
     ]
 
-    @use_kwargs(args.itemized)
-    @use_kwargs(args.schedule_b)
-    @use_kwargs(args.make_seek_args())
-    @use_kwargs(
-        args.make_sort_args(
-            validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
-            multiple=False,
+    @property
+    def args(self):
+        return utils.extend(
+            args.itemized,
+            args.schedule_b,
+            args.make_seek_args(),
+            args.make_sort_args(
+                validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
+                multiple=False,
+            ),
         )
-    )
-    @marshal_with(schemas.ScheduleBPageSchema())
-    def get(self, **kwargs):
-        return super().get(**kwargs)
 
     def build_query(self, **kwargs):
         query = super(ScheduleBView, self).build_query(**kwargs)
