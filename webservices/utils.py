@@ -44,10 +44,15 @@ def check_cap(kwargs, cap):
             )
 
 
-def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False, count=None, cap=100):
+def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False,
+               count=None, cap=100, index_column=None):
     check_cap(kwargs, cap)
     sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
-    query, _ = sorting.sort(query, sort, model=model, aliases=aliases, join_columns=join_columns, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
+    if sort:
+        query, _ = sorting.sort(
+            query, sort, model=model, aliases=aliases, join_columns=join_columns,
+            clear=clear, hide_null=hide_null, nulls_large=nulls_large, index_column=index_column,
+        )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
@@ -65,8 +70,13 @@ def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, c
     check_cap(kwargs, cap)
     model = index_column.parent.class_
     sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
-    query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
-    sort_column = sort_columns[0] if sort_columns else None
+    if sort:
+        query, sort_column = sorting.sort(
+            query, sort,
+            model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large,
+        )
+    else:
+        sort_column = None
     return paginators.SeekPaginator(
         query,
         kwargs['per_page'],
