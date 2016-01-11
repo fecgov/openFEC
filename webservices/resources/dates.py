@@ -91,6 +91,7 @@ class CalendarDatesView(ApiResource):
     model = models.CalendarDate
     schema = schemas.CalendarDateSchema
     page_schema = schemas.CalendarDatePageSchema
+    cap = 500
 
     @property
     def args(self):
