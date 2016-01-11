@@ -55,7 +55,7 @@ class CommitteeList(ApiResource):
             args.committee,
             args.committee_list,
             args.make_sort_args(
-                default=['name'],
+                default='name',
                 validator=args.IndexValidator(
                     models.Committee,
                     extra=list(self.aliases.keys()),
@@ -132,7 +132,7 @@ class CommitteeView(ApiResource):
             args.paging,
             args.committee,
             args.make_sort_args(
-                default=['name'],
+                default='name',
                 validator=args.IndexValidator(self.model),
             ),
         )
@@ -180,7 +180,7 @@ class CommitteeHistoryView(ApiResource):
             args.paging,
             args.committee_history,
             args.make_sort_args(
-                default=['-cycle'],
+                default='-cycle',
                 validator=args.IndexValidator(self.model),
             ),
         )
