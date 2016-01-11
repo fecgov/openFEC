@@ -124,24 +124,6 @@ The site can be found at [http://localhost:5000](http://localhost:5000)
 We are always trying to improve our documentation, if you have suggestions or run into problems feel free to [file an issue](https://github.com/18F/openFEC/issues).
 
 
-<!-- #### Vagrant
-There is also a Vagrantfile and provisioning shell script available, *it is currently out of date*. This will create an Ubuntu 14.04 virtual machine, provisioned with all the requirements to run the bootstrap script.
-
-From scripts/bootstrap:
-```
-vagrant up
-vagrant ssh
-cp /vagrant/fec_bootstrap.sh fec_bootstrap.sh && ./fec_bootstrap.sh
-```
-
-#### Running the apps using tmuxinator
-Assuming you ran the bootstrap script, you can launch the API and the Web App with a single command:
-
-    $ tmuxinator fec-local
-
-The site can be found at [http://localhost:5000](http://localhost:5000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant).
- -->
-
 ## Deployment
 
 ##### Likely only useful for 18F team members
