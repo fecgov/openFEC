@@ -15,14 +15,8 @@ def _validate_natural(value):
 
 Natural = functools.partial(fields.Int, validate=_validate_natural)
 
-def _validate_per_page(value):
-    _validate_natural(value)
-    if value > 100:
-        raise ValidationError('Must be less than 100')
-
 per_page = Natural(
     missing=20,
-    validate=_validate_per_page,
     description='The number of results returned per page. Defaults to 20.',
 )
 

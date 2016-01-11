@@ -50,7 +50,7 @@ def call_resource(path, qs, per_page=5000):
     count = counts.count_estimate(query, db.session, threshold=5000)
     index_column = utils.get_index_column(model or resource.model)
     query_kwargs = utils.extend(kwargs, {'per_page': per_page})
-    paginator = utils.fetch_seek_paginator(query, query_kwargs, index_column, count=count)
+    paginator = utils.fetch_seek_paginator(query, query_kwargs, index_column, count=count, cap=None)
     return {
         'path': path,
         'qs': qs,
