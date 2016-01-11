@@ -3,6 +3,7 @@ drop table if exists ofec_sched_b_tmp;
 create table ofec_sched_b_tmp as
 select
     *,
+    cast(null as timestamp) as timestamp,
     to_tsvector(recipient_nm) as recipient_name_text,
     to_tsvector(disb_desc) as disbursement_description_text,
     disbursement_purpose(disb_tp, disb_desc) as disbursement_purpose_category,
@@ -48,6 +49,12 @@ drop table if exists ofec_sched_b_queue_new;
 drop table if exists ofec_sched_b_queue_old;
 create table ofec_sched_b_queue_new as select * from sched_b limit 0;
 create table ofec_sched_b_queue_old as select * from sched_b limit 0;
+alter table ofec_sched_b_queue_new add column timestamp timestamp;
+alter table ofec_sched_b_queue_old add column timestamp timestamp;
+create index on ofec_sched_b_queue_new (sched_b_sk);
+create index on ofec_sched_b_queue_old (sched_b_sk);
+create index on ofec_sched_b_queue_new (timestamp);
+create index on ofec_sched_b_queue_old (timestamp);
 
 -- Create trigger to maintain Schedule B queues
 create or replace function ofec_sched_b_update_queues() returns trigger as $$
@@ -56,26 +63,22 @@ declare
 begin
     if tg_op = 'INSERT' then
         if new.rpt_yr >= start_year then
-            insert into ofec_sched_b_queue_new
-            values (new.*)
-            ;
+            delete from ofec_sched_b_queue_new where sched_b_sk = new.sched_b_sk;
+            insert into ofec_sched_b_queue_new values (new.*);
         end if;
         return new;
     elsif tg_op = 'UPDATE' then
         if new.rpt_yr >= start_year then
-            insert into ofec_sched_b_queue_new
-            values (new.*)
-            ;
-            insert into ofec_sched_b_queue_old
-            values (old.*)
-            ;
+            delete from ofec_sched_b_queue_new where sched_b_sk = new.sched_b_sk;
+            delete from ofec_sched_b_queue_old where sched_b_sk = old.sched_b_sk;
+            insert into ofec_sched_b_queue_new values (new.*);
+            insert into ofec_sched_b_queue_old values (old.*);
         end if;
         return new;
     elsif tg_op = 'DELETE' then
         if old.rpt_yr >= start_year then
-            insert into ofec_sched_b_queue_old
-            values (old.*)
-            ;
+            delete from ofec_sched_b_queue_old where sched_b_sk = old.sched_b_sk;
+            insert into ofec_sched_b_queue_old values (old.*);
         end if;
         return old;
     end if;

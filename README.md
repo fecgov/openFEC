@@ -137,9 +137,7 @@ caching, and rate limiting.
 ##### Nightly updates
 
 Incrementally-updated aggregates and materialized views are updated nightly; see
-`cron.py` for details. When the nightly update finishes, logs and error reports are
-emailed to the development team--specifically, to email addresses specified in
-`FEC_EMAIL_RECIPIENTS`.
+`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
 
 ##### Caching
 
