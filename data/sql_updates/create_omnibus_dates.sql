@@ -50,7 +50,7 @@ with elections as (
         election_date::timestamp as start_date,
         null::timestamp as end_date
     from trc_election
-        join dimparty dp on trc_election.election_party = dp.party_affiliation
+        left join dimparty dp on trc_election.election_party = dp.party_affiliation
     where
         trc_election_status_id = 1
     group by
