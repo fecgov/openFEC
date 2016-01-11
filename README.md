@@ -19,20 +19,24 @@ Are you interested in seeing how much money a candidate raised? Or spent? How mu
 betaFEC is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
 
 ## FEC repositories
-We welcome you to explore, make suggestions, and contribute to our code. 
+We welcome you to explore, make suggestions, and contribute to our code.
 
 This repository, [openFEC](https://github.com/18F/openfec), is home to betaFEC’s API.
 
 ### All repositories
 - [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from betaFEC’s feedback widget here, and this is the best place to submit general feedback.
 - [openFEC](https://github.com/18F/openfec): betaFEC’s API
+- [swagger](https://github.com/18F/swagger-ui):this generates our interactive API documentation
 - [openFEC-web-app](https://github.com/18f/openfec-web-app): the betaFEC web app for exploring campaign finance data
 - [fec-style](https://github.com/18F/fec-style): shared styles and user interface components
 - [fec-cms](https://github.com/18F/fec-cms): the content management system (CMS) for betaFEC
+- [proxy](https://github.com/18F/fec-proxy): this is a light weight app that coordinates the paths between the web app and cms
+- [swagger](https://github.com/18F/swagger-ui):this generates our interactive API documentation
+
 
 ## Get involved
-We’re thrilled you want to get involved! 
-- Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
+We’re thrilled you want to get involved!
+- Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit an issue or pull request.
 - [Send us an email](mailto:betafeedback@fec.gov).
 - If you’re a developer, follow the installation instructions in the README.md page of each repository to run the apps on your computer.
 - Check out our StoriesonBoard [FEC story map](https://18f.storiesonboard.com/m/fec) to get a sense of the user needs we'll be addressing in the future.
@@ -40,11 +44,6 @@ We’re thrilled you want to get involved!
 ---
 
 ## Set up
-
-### Installation
-
-#### Bootstrap
-The easiest way to get started with working on openFEC is to run the [bootstrap script](https://raw.githubusercontent.com/18F/openFEC/master/scripts/bootstrap/fec_bootstrap.sh).
 
 Prior to running, ensure you have the following requirements installed:
 <!--requirements-->
@@ -55,41 +54,103 @@ Prior to running, ensure you have the following requirements installed:
 * nodejs
 * npm
 * PostgreSQL
-* tmuxinator
 
 <!--endrequirements-->
 
-Then, simply run:
+## Quick(ish) start
 
-    $ curl https://raw.githubusercontent.com/18F/openFEC/master/scripts/bootstrap/fec_bootstrap.sh | bash
+Clone this repository.
 
-This will clone both openFEC repos, set up virtual environments, and set some environment variables (that you supply) in ~/.fec_vars. It might be a good idea to source that file in your ~/.bashrc or ~/.zshrc.
+Create a python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create up your environment with your preferred set up.
 
-NOTE: This will also sync _*this*_ repo. For bootstrapping, we recommend running the script prior to cloning the repo and letting the script handle that.
+You will need your python3 path to make sure you environment is pointing to the right python version. You can find that out by running:
+```
+which python3
+```
 
-#### Vagrant
-There is also a Vagrantfile and provisioning shell script available. This will create an Ubuntu 14.04 virtual machine, provisioned with all the requirements to run the bootstrap script.
+To use virtualenv and virtualenv wrapper, in your terminal run:
+```
+mkvirtualenv open-fec-api --python </path-to-your-python3>
+```
 
-From scripts/bootstrap, simply:
+Subsequently, you will want to activate the environment every time you run the project with:
+```
+workon open-fec-api
+```
+### Install requirements
 
-    $ vagrant up
-    $ vagrant ssh
-    $ cp /vagrant/fec_bootstrap.sh fec_bootstrap.sh && ./fec_bootstrap.sh
+Use pip to install the requirements for the repo in your python3 environment:
+```
+pip install -r requirements.txt
+```
+#### Git hooks
+This repo includes optional post-merge and post-checkout hooks to ensure that
+dependencies are up to date. If enabled, these hooks will update Python
+dependencies on checking out or merging changes to `requirements.txt`. To
+enable the hooks, run:
+```
+invoke add_hooks
+```
+To disable, run:
+```
+invoke remove_hooks
+```
+
+### Creating a new test database
+To run the API locally you will need a database, we provide a sql dump that has a small sample of data to get you running locally.
+
+To create your own test database, make sure you have postgres and run:
+```
+createdb cfdm_test
+pg_restore --dbname cfdm_test data/subset.dump
+./manage.py update_all
+```
+(Don't worry if there are some user does not exist error messages)
+
+FEC and 18F members can set the sql connection to one of the RDS boxes with:
+```
+export SQLACONN=<psql:address-to-box>
+```
+
+### Run locally
+
+Run:
+```
+./manage.py runserver
+```
+The site can be found at [http://localhost:5000](http://localhost:5000)
+
+
+We are always trying to improve our documentation, if you have suggestions or run into problems feel free to [file an issue](https://github.com/18F/openFEC/issues).
+
+
+<!-- #### Vagrant
+There is also a Vagrantfile and provisioning shell script available, *it is currently out of date*. This will create an Ubuntu 14.04 virtual machine, provisioned with all the requirements to run the bootstrap script.
+
+From scripts/bootstrap:
+```
+vagrant up
+vagrant ssh
+cp /vagrant/fec_bootstrap.sh fec_bootstrap.sh && ./fec_bootstrap.sh
+```
 
 #### Running the apps using tmuxinator
 Assuming you ran the bootstrap script, you can launch the API and the Web App with a single command:
 
     $ tmuxinator fec-local
 
-The site can be found at [http://localhost:3000](http://localhost:3000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant). Remember the username and password you created when running the script.
+The site can be found at [http://localhost:5000](http://localhost:5000) (or [http://localhost:3001](http://localhost:3001) if using Vagrant).
+ -->
 
-#### Deployment
+## Deployment
 
 ##### Likely only useful for 18F team members
 To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
 Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
 
-    $ invoke deploy --space dev
+```
+invoke deploy --space dev
+```
 
 The `deploy` task will use the `FEC_CF_USERNAME` and `FEC_CF_PASSWORD` environment variables to log in.
 If these variables are not provided, you will be prompted for your Cloud Foundry credentials.
@@ -98,8 +159,10 @@ Credentials for Cloud Foundry applications are managed using user-provided servi
 "fec-creds-prod", "fec-creds-stage", and "fec-creds-dev". Services are used to share credentials across
 blue and green versions of blue-green deploys, and between the API and the webapp. To set up a service:
 
-    $ cf target -s dev
-    $ cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
+```
+cf target -s dev
+cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
+```
 
 To stand up a user-provided credential service that supports both the API and the webapp, ensure that
 the following keys are set:
@@ -113,7 +176,9 @@ the following keys are set:
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
-    $ cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+```
+cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+```
 
 ##### Task queue
 
@@ -124,7 +189,9 @@ we connect to redis at `redis://localhost:6379`; if redis is running at a differ
 set the `FEC_REDIS_URL` environment variable. On Cloud Foundry, we use the redis28-swarm
 service. The redis service can be created as follows:
 
-    $ cf create-service redis28-swarm standard fec-redis
+```
+cf create-service redis28-swarm standard fec-redis
+```
 
 ##### Production stack
 
@@ -161,16 +228,18 @@ through Travis CI accordingly.
 
 ###### To create a new feature:
 * Developer creates a feature branch
-
-    $ git flow feature start my-feature
+```
+git flow feature start my-feature
+```
 
 * Reviewer merges feature branch into develop and pushes to origin
 * [auto] Develop is deployed to dev
 
 ###### To create a hotfix:
 * Developer creates a hotfix branch
-
-    $ git flow hotfix start my-hotfix
+```
+git flow hotfix start my-hotfix
+```
 
 * Reviewer merges hotfix branch into develop and master and pushes to origin
 * [auto] Develop is deployed to dev
@@ -179,14 +248,18 @@ through Travis CI accordingly.
 ###### To create a release:
 * Developer creates a release branch and pushes to origin
 
-    $ git flow release start my-release
-    $ git flow release publish my-release
+```
+git flow release start my-release
+git flow release publish my-release
+```
 
 * [auto] Release is deployed to stage
 * Review of staging
 * Developer merges release branch into master and pushes to origin
 
-    $ git flow release finish my-release
+```
+git flow release finish my-release
+```
 
 * [auto] Master is deployed to prod
 
@@ -234,48 +307,40 @@ To update the development instance (e.g. when schemas change or new records are 
 **Important**: Verify that all newly created instances are tagged with the same client
 as the production instance.
 
-#### Testing
+#### Other developer notes
 
-##### Creating a new test database
+Sorting fields include a compound index on on the filed to field and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
 
-    $ createdb cfdm_test
-    $ pg_restore --dbname cfdm_test data/subset.dump
-    $ ./manage.py update_all
+## Testing
 
-##### Running the tests
+Make sure you have [created a new test database](#creating-a-new-test-database)
 
-    $ py.test
+This repo uses [pytest](http://pytest.org/latest/).
+
+Running the tests:
+```
+py.test
+```
 
 ##### The test data subset
 
-This repo includes a small subset of the staging database (built 2015/08/12) at `data/subset.dump`. To use the test subset for local development:
-
-    $ pg_restore --dbname <dest> data/subset.dump
+When adding new tables to the data, you will need to generate a new subset for testing. We use this nifty subsetting tool- [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
 
 To build a new test subset, use the `build_test` invoke task:
 
-    $ invoke build_test <source> <dest>
+```
+invoke build_test <source> <dest>
+```
 
 where both `source` and `dest` are valid PostgreSQL connection strings.
 
 To update the version-controlled test subset after rebuilding, run:
 
-    $ invoke dump <source> data/subset.dump
+```
+invoke dump <source> data/subset.dump
+```
 
 where `source` is the database containing the newly created test subset.
-
-#### Git hooks
-
-This repo includes optional post-merge and post-checkout hooks to ensure that
-dependencies are up to date. If enabled, these hooks will update Python
-dependencies on checking out or merging changes to `requirements.txt`. To
-enable the hooks, run
-
-    $ invoke add_hooks
-
-To disable, run
-
-    $ invoke remove_hooks
 
 
 ## Copyright and licensing
