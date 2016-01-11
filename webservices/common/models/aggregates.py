@@ -1,15 +1,15 @@
 from webservices import utils
 
-from .base import db
+from .base import db, BaseModel
 
 
-class BaseAggregate(db.Model):
+class BaseAggregate(BaseModel):
     __abstract__ = True
 
     committee_id = db.Column('cmte_id', db.String, primary_key=True)
     cycle = db.Column(db.Integer, primary_key=True)
-    total = db.Column(db.Numeric(30, 2))
-    count = db.Column(db.Integer)
+    total = db.Column(db.Numeric(30, 2), index=True)
+    count = db.Column(db.Integer, index=True)
 
 
 class ScheduleABySize(BaseAggregate):

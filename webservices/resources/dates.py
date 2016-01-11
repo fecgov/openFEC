@@ -21,7 +21,7 @@ class ReportingDatesView(ApiResource):
             args.paging,
             args.reporting_dates,
             args.make_sort_args(
-                default=['-due_date'],
+                default='-due_date',
                 validator=args.IndexValidator(self.model),
             ),
         )
@@ -52,7 +52,7 @@ class ElectionDatesView(ApiResource):
             args.paging,
             args.election_dates,
             args.make_sort_args(
-                default=['-election_date'],
+                default='-election_date',
                 validator=args.IndexValidator(self.model),
             ),
         )
