@@ -22,7 +22,7 @@ class CommunicationCostView(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.form_76_sk
+        return self.model.idx
 
     filter_multi_fields = [
         ('image_number', models.CommunicationCost.image_number),
@@ -31,13 +31,9 @@ class CommunicationCostView(ApiResource):
         ('support_oppose_indicator', models.CommunicationCost.support_oppose_indicator),
     ]
     filter_range_fields = [
-        (('min_date', 'max_date'), models.CommunicationCost.communication_date),
-        (('min_amount', 'max_amount'), models.CommunicationCost.communication_cost),
+        (('min_date', 'max_date'), models.CommunicationCost.transaction_date),
+        (('min_amount', 'max_amount'), models.CommunicationCost.transaction_amount),
         (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
-    ]
-    query_options = [
-        sa.orm.joinedload(models.CommunicationCost.committee),
-        sa.orm.joinedload(models.CommunicationCost.candidate),
     ]
 
     @use_kwargs(args.itemized)

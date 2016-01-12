@@ -320,10 +320,7 @@ register_schema(ScheduleEPageSchema)
 
 CommunicationCostSchema = make_schema(
     models.CommunicationCost,
-    fields={
-        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
-    },
+    options={'exclude': ('idx', )},
 )
 CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(CommunicationCostSchema)
@@ -335,6 +332,7 @@ ElectioneeringSchema = make_schema(
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
     },
+    options={'exclude': ('idx', )},
 )
 ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ElectioneeringSchema)
