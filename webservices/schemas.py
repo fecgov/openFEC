@@ -15,6 +15,14 @@ spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
 spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 
+class BaseSchema(ModelSchema):
+
+    def get_attribute(self, attr, obj, default):
+        if '.' in attr:
+            return super().get_attribute(attr, obj, default)
+        return getattr(obj, attr, default)
+
+
 def register_schema(schema, definition_name=None):
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
     spec.definition(definition_name, schema=schema)
@@ -38,7 +46,7 @@ def make_schema(model, class_name=None, fields=None, options=None):
 
     return type(
         class_name,
-        (ModelSchema, ),
+        (BaseSchema, ),
         utils.extend({'Meta': Meta}, fields or {}),
     )
 
@@ -347,6 +355,7 @@ FilingsSchema = make_schema(
         'ending_image_number': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
+    options={'exclude': ('committee', )},
 )
 augment_schemas(FilingsSchema)
 

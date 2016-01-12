@@ -44,6 +44,7 @@ class Committee(BaseConcreteCommittee):
 
     first_file_date = db.Column(db.Date)
     last_file_date = db.Column(db.Date)
+    last_f1_date = db.Column(db.Date)
 
 
 class CommitteeHistory(BaseCommittee):
@@ -54,7 +55,7 @@ class CommitteeHistory(BaseCommittee):
     city = db.Column(db.String(50))
     state_full = db.Column(db.String(50))
     zip = db.Column(db.String(9))
-    cycle = db.Column(db.Integer, primary_key=True)
+    cycle = db.Column(db.Integer, primary_key=True, index=True)
 
 
 class CommitteeDetail(BaseConcreteCommittee):

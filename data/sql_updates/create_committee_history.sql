@@ -9,9 +9,13 @@ with
         from cmte_valid_fec_yr
         group by cmte_id
     ),
-    filings_original as (
-        select committee_id, min(receipt_date) receipt_date from vw_filing_history
-        where report_year >= :START_YEAR
+    dates as (
+        select
+            committee_id as cmte_id,
+            min(receipt_date) as first_file_date,
+            max(receipt_date) as last_file_date,
+            max(receipt_date) filter (where form_type = 'F1') as last_f1_date
+        from vw_filing_history
         group by committee_id
     ),
     candidates as (
@@ -75,8 +79,9 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     dcp.party_cmte_type as party_type,
     dcp.party_cmte_type_desc as party_type_full,
     dcp.qual_dt as qualifying_date,
-    fec_yr.latest_receipt_dt as last_file_date,
-    filings_original.receipt_date as first_file_date,
+    dates.first_file_date,
+    dates.last_file_date,
+    dates.last_f1_date,
     fec_yr.cmte_dsgn as designation,
     expand_committee_designation(fec_yr.cmte_dsgn) as designation_full,
     fec_yr.cmte_tp as committee_type,
@@ -89,7 +94,7 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
 from cmte_valid_fec_yr fec_yr
 left join dimcmteproperties dcp on fec_yr.cmte_id = dcp.cmte_id and fec_yr.fec_election_yr >= dcp.rpt_yr
 left join cycles on fec_yr.cmte_id = cycles.cmte_id
-left join filings_original on fec_yr.cmte_id = filings_original.committee_id
+left join dates on fec_yr.cmte_id = dates.cmte_id
 left join candidates on fec_yr.cmte_id = candidates.cmte_id
 where cycles.max_cycle >= :START_YEAR
 order by fec_yr.cmte_id, fec_yr.fec_election_yr desc, dcp.rpt_yr desc
