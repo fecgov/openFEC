@@ -31,12 +31,11 @@ This repository, [openFEC](https://github.com/18F/openfec), is home to betaFEC�
 - [fec-style](https://github.com/18F/fec-style): shared styles and user interface components
 - [fec-cms](https://github.com/18F/fec-cms): the content management system (CMS) for betaFEC
 - [proxy](https://github.com/18F/fec-proxy): this is a light weight app that coordinates the paths between the web app and cms
-- [swagger](https://github.com/18F/swagger-ui):this generates our interactive API documentation
 
 
 ## Get involved
 We’re thrilled you want to get involved!
-- Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit an issue or pull request.
+- Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
 - [Send us an email](mailto:betafeedback@fec.gov).
 - If you’re a developer, follow the installation instructions in the README.md page of each repository to run the apps on your computer.
 - Check out our StoriesonBoard [FEC story map](https://18f.storiesonboard.com/m/fec) to get a sense of the user needs we'll be addressing in the future.
