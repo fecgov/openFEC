@@ -1,11 +1,10 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
-from webservices.utils import use_kwargs
 
 from webservices.common import counts
 from webservices.common import models
@@ -19,6 +18,19 @@ from webservices.common.views import ApiResource
 class CommunicationCostView(ApiResource):
 
     model = models.CommunicationCost
+    schema = schemas.CommunicationCostSchema
+    page_schema = schemas.CommunicationCostPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.itemized,
+            args.communication_cost,
+            args.make_seek_args(),
+            args.make_sort_args(
+                validator=args.IndexValidator(models.CommunicationCost),
+            ),
+        )
 
     @property
     def index_column(self):
@@ -36,16 +48,6 @@ class CommunicationCostView(ApiResource):
         (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
     ]
 
-    @use_kwargs(args.itemized)
-    @use_kwargs(args.communication_cost)
-    @use_kwargs(args.make_seek_args())
-    @use_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.CommunicationCost),
-            multiple=False,
-        )
-    )
-    @marshal_with(schemas.CommunicationCostPageSchema())
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
@@ -58,6 +60,18 @@ class CommunicationCostView(ApiResource):
 class ElectioneeringView(ApiResource):
 
     model = models.Electioneering
+    schema = schemas.ElectioneeringSchema
+    page_schema = schemas.ElectioneeringPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.electioneering,
+            args.make_seek_args(),
+            args.make_sort_args(
+                validator=args.IndexValidator(models.Electioneering),
+            ),
+        )
 
     @property
     def index_column(self):
@@ -78,15 +92,6 @@ class ElectioneeringView(ApiResource):
         sa.orm.joinedload(models.Electioneering.candidate),
     ]
 
-    @use_kwargs(args.electioneering)
-    @use_kwargs(args.make_seek_args())
-    @use_kwargs(
-        args.make_sort_args(
-            validator=args.IndexValidator(models.Electioneering),
-            multiple=False,
-        )
-    )
-    @marshal_with(schemas.ElectioneeringPageSchema())
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
