@@ -16,12 +16,14 @@ and clean_repeated(recipient_cmte_id, cmte_id) is not null
 group by cmte_id, cycle, clean_repeated(recipient_cmte_id, cmte_id)
 ;
 
+alter table ofec_sched_b_aggregate_recipient_id add column idx serial primary key;
+
 -- Create indices on aggregate
-create index on ofec_sched_b_aggregate_recipient_id (cmte_id);
-create index on ofec_sched_b_aggregate_recipient_id (cycle);
-create index on ofec_sched_b_aggregate_recipient_id (recipient_cmte_id);
-create index on ofec_sched_b_aggregate_recipient_id (total);
-create index on ofec_sched_b_aggregate_recipient_id (count);
+create index on ofec_sched_b_aggregate_recipient_id (cmte_id, idx);
+create index on ofec_sched_b_aggregate_recipient_id (cycle, idx);
+create index on ofec_sched_b_aggregate_recipient_id (recipient_cmte_id, idx);
+create index on ofec_sched_b_aggregate_recipient_id (total, idx);
+create index on ofec_sched_b_aggregate_recipient_id (count, idx);
 
 -- Create update function
 create or replace function ofec_sched_b_update_aggregate_recipient_id() returns void as $$

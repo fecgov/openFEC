@@ -21,5 +21,5 @@ group by committee_id, cycle
 
 create unique index on ofec_totals_ie_only_mv_tmp(idx);
 
-create index on ofec_totals_ie_only_mv_tmp(cycle);
-create index on ofec_totals_ie_only_mv_tmp(committee_id);
+create index on ofec_totals_ie_only_mv_tmp(cycle, idx);
+create index on ofec_totals_ie_only_mv_tmp(committee_id, idx);

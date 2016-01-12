@@ -30,16 +30,6 @@ class TestSort(ApiBaseTest):
         query, columns = sorting.sort(models.Candidate.query, '-district', model=models.Candidate)
         self.assertEqual(query.all(), candidates[::-1])
 
-    def test_multi_column(self):
-        candidates = [
-            factories.CandidateFactory(district='01', party='DEM'),
-            factories.CandidateFactory(district='01', party='REP'),
-            factories.CandidateFactory(district='02', party='DEM'),
-            factories.CandidateFactory(district='02', party='REP'),
-        ]
-        query, columns = sorting.sort(models.Candidate.query, ['district', 'party'], model=models.Candidate)
-        self.assertEqual(query.all(), candidates)
-
     def test_hide_null(self):
         candidates = [
             factories.CandidateFactory(district='01'),

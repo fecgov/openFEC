@@ -14,12 +14,14 @@ and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, occupation
 ;
 
+alter table ofec_sched_a_aggregate_occupation add column idx serial primary key;
+
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_occupation (cmte_id);
-create index on ofec_sched_a_aggregate_occupation (cycle);
-create index on ofec_sched_a_aggregate_occupation (occupation);
-create index on ofec_sched_a_aggregate_occupation (total);
-create index on ofec_sched_a_aggregate_occupation (count);
+create index on ofec_sched_a_aggregate_occupation (cmte_id, idx);
+create index on ofec_sched_a_aggregate_occupation (cycle, idx);
+create index on ofec_sched_a_aggregate_occupation (occupation, idx);
+create index on ofec_sched_a_aggregate_occupation (total, idx);
+create index on ofec_sched_a_aggregate_occupation (count, idx);
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_occupation() returns void as $$

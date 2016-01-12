@@ -17,12 +17,14 @@ and (memo_cd != 'X' or memo_cd is null)
 group by cmte_id, cycle, clean_repeated(contbr_id, cmte_id)
 ;
 
+alter table ofec_sched_a_aggregate_contributor add column idx serial primary key;
+
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_contributor (cmte_id);
-create index on ofec_sched_a_aggregate_contributor (cycle);
-create index on ofec_sched_a_aggregate_contributor (contbr_id);
-create index on ofec_sched_a_aggregate_contributor (total);
-create index on ofec_sched_a_aggregate_contributor (count);
+create index on ofec_sched_a_aggregate_contributor (cmte_id, idx);
+create index on ofec_sched_a_aggregate_contributor (cycle, idx);
+create index on ofec_sched_a_aggregate_contributor (contbr_id, idx);
+create index on ofec_sched_a_aggregate_contributor (total, idx);
+create index on ofec_sched_a_aggregate_contributor (count, idx);
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_contributor() returns void as $$

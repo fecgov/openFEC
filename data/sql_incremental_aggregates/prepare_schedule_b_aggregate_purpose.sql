@@ -35,11 +35,13 @@ and (memo_cd != 'X' or memo_cd is null)
 group by cmte_id, cycle, purpose
 ;
 
-create index on ofec_sched_b_aggregate_purpose (cmte_id);
-create index on ofec_sched_b_aggregate_purpose (cycle);
-create index on ofec_sched_b_aggregate_purpose (purpose);
-create index on ofec_sched_b_aggregate_purpose (total);
-create index on ofec_sched_b_aggregate_purpose (count);
+alter table ofec_sched_b_aggregate_purpose add column idx serial primary key;
+
+create index on ofec_sched_b_aggregate_purpose (cmte_id, idx);
+create index on ofec_sched_b_aggregate_purpose (cycle, idx);
+create index on ofec_sched_b_aggregate_purpose (purpose, idx);
+create index on ofec_sched_b_aggregate_purpose (total, idx);
+create index on ofec_sched_b_aggregate_purpose (count, idx);
 
 -- Create update function
 create or replace function ofec_sched_b_update_aggregate_purpose() returns void as $$

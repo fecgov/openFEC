@@ -1,10 +1,10 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
+from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
 
 
@@ -12,6 +12,19 @@ from webservices.common.views import ApiResource
 class ReportingDatesView(ApiResource):
 
     model = models.ReportDate
+    schema = schemas.ReportingDatesSchema
+    page_schema = schemas.ReportingDatesPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.reporting_dates,
+            args.make_sort_args(
+                default='-due_date',
+                validator=args.IndexValidator(self.model),
+            ),
+        )
 
     filter_multi_fields = [
         ('report_year', models.ReportDate.report_year),
@@ -25,22 +38,24 @@ class ReportingDatesView(ApiResource):
 
     query_options = [sa.orm.joinedload(models.ReportDate.report)]
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.reporting_dates)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-due_date'],
-        )
-    )
-    @marshal_with(schemas.ReportingDatesPageSchema())
-    def get(self, **kwargs):
-        return super().get(**kwargs)
-
 
 @doc(tags=['dates'], description='FEC election dates since 1995.')
 class ElectionDatesView(ApiResource):
 
     model = models.ElectionDate
+    schema = schemas.ElectionDatesSchema
+    page_schema = schemas.ElectionDatesPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.election_dates,
+            args.make_sort_args(
+                default='-election_date',
+                validator=args.IndexValidator(self.model),
+            ),
+        )
 
     filter_multi_fields = [
         ('election_state', models.ElectionDate.election_state),
@@ -56,17 +71,6 @@ class ElectionDatesView(ApiResource):
         (('min_create_date', 'max_create_date'), models.ElectionDate.create_date),
         (('min_primary_general_date', 'max_primary_general_date'), models.ElectionDate.primary_general_date),
     ]
-
-    @use_kwargs(args.paging)
-    @use_kwargs(args.election_dates)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-election_date'],
-        ),
-    )
-    @marshal_with(schemas.ElectionDatesPageSchema())
-    def get(self, **kwargs):
-        return super().get(**kwargs)
 
     def build_query(self, *args, **kwargs):
         query = super().build_query(*args, **kwargs)
