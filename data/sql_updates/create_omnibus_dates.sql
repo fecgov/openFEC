@@ -107,7 +107,7 @@ with elections as (
     from reports_raw
     where coalesce(trc_election_type_id, '') != 'G'
 ), other as (
-    select
+    select distinct on (category_name, event_name, description, location, start_date, end_date)
         -- Select the events from the calandar that are not created by a formula in a different table
         category_name as category,
         event_name::text as description,
