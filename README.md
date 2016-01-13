@@ -30,7 +30,7 @@ This repository, [openFEC](https://github.com/18F/openfec), is home to betaFECâ€
 - [openFEC-web-app](https://github.com/18f/openfec-web-app): the betaFEC web app for exploring campaign finance data
 - [fec-style](https://github.com/18F/fec-style): shared styles and user interface components
 - [fec-cms](https://github.com/18F/fec-cms): the content management system (CMS) for betaFEC
-- [proxy](https://github.com/18F/fec-proxy): this is a light weight app that coordinates the paths between the web app and cms
+- [proxy](https://github.com/18F/fec-proxy): this is a light weight app that coordinates the paths between the web app and CMS
 
 
 ## Get involved
@@ -60,9 +60,9 @@ Prior to running, ensure you have the following requirements installed:
 
 Clone this repository.
 
-Create a python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create up your environment with your preferred set up.
+Create a Python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create up your environment with your preferred set up.
 
-You will need your python3 path to make sure you environment is pointing to the right python version. You can find that out by running:
+You will need your Python 3 path to make sure you environment is pointing to the right Python version. You can find that out by running:
 ```
 which python3
 ```
@@ -290,11 +290,11 @@ as the production instance.
 
 #### Other developer notes
 
-Sorting fields include a compound index on on the filed to field and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
+Sorting fields include a compound index on on the filed to sort and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
 
 ## Testing
 
-Make sure you have [created a new test database](#creating-a-new-test-database)
+Make sure you have [created a new test database](#creating-a-new-test-database).
 
 This repo uses [pytest](http://pytest.org/latest/).
 
