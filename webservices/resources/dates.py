@@ -103,6 +103,9 @@ class CalendarDatesView(ApiResource):
             ),
         )
 
+    filter_match_fields = [
+        ('event_id', models.CalendarDate.event_id),
+    ]
     filter_multi_fields = [
         ('category', models.CalendarDate.category),
     ]

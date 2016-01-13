@@ -336,6 +336,7 @@ calendar_dates = {
     'min_end_date': fields.DateTime(description='The minimum end date and time, it can be null.'),
     'max_start_date': fields.DateTime(description='The maximum start date and time.'),
     'max_end_date': fields.DateTime(description='The maximum end date and time, it can be null.'),
+    'event_id': fields.Int(description='An unique id for an event. Useful for downloading a singe event to your calendar. This id is based on the row number, so this is not a permanent, persistent id.'),
 }
 
 schedule_a = {
