@@ -51,18 +51,18 @@ where report_year >= :START_YEAR
 
 create unique index on ofec_filings_mv_tmp (idx);
 
-create index on ofec_filings_mv_tmp (committee_id);
-create index on ofec_filings_mv_tmp (candidate_id);
-create index on ofec_filings_mv_tmp (beginning_image_number);
-create index on ofec_filings_mv_tmp (receipt_date);
-create index on ofec_filings_mv_tmp (form_type);
-create index on ofec_filings_mv_tmp (primary_general_indicator);
-create index on ofec_filings_mv_tmp (amendment_indicator);
-create index on ofec_filings_mv_tmp (report_type);
-create index on ofec_filings_mv_tmp (report_year);
-create index on ofec_filings_mv_tmp (cycle);
-create index on ofec_filings_mv_tmp (total_receipts);
-create index on ofec_filings_mv_tmp (total_disbursements);
-create index on ofec_filings_mv_tmp (total_independent_expenditures);
-create index on ofec_filings_mv_tmp (coverage_start_date);
-create index on ofec_filings_mv_tmp (coverage_end_date);
+create index on ofec_filings_mv_tmp (committee_id, idx);
+create index on ofec_filings_mv_tmp (candidate_id, idx);
+create index on ofec_filings_mv_tmp (beginning_image_number, idx);
+create index on ofec_filings_mv_tmp (receipt_date, idx);
+create index on ofec_filings_mv_tmp (form_type, idx);
+create index on ofec_filings_mv_tmp (primary_general_indicator, idx);
+create index on ofec_filings_mv_tmp (amendment_indicator, idx);
+create index on ofec_filings_mv_tmp (report_type, idx);
+create index on ofec_filings_mv_tmp (report_year, idx);
+create index on ofec_filings_mv_tmp (cycle, idx);
+create index on ofec_filings_mv_tmp (total_receipts, idx);
+create index on ofec_filings_mv_tmp (total_disbursements, idx);
+create index on ofec_filings_mv_tmp (total_independent_expenditures, idx);
+create index on ofec_filings_mv_tmp (coverage_start_date, idx);
+create index on ofec_filings_mv_tmp (coverage_end_date, idx);

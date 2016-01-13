@@ -1,17 +1,13 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import exceptions
 from webservices.common import models
-from webservices.utils import use_kwargs
-from webservices.common.util import filter_query
-
-
-list_filter_fields = {'committee_id', 'designation', 'organization_type', 'state', 'party', 'committee_type'}
-detail_filter_fields = {'designation', 'organization_type', 'committee_type'}
+from webservices.common.views import ApiResource
 
 
 def filter_year(model, query, years):
@@ -33,34 +29,57 @@ def filter_year(model, query, years):
     tags=['committee'],
     description=docs.COMMITTEE_LIST,
 )
-class CommitteeList(utils.Resource):
+class CommitteeList(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.committee)
-    @use_kwargs(args.committee_list)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['name'],
-            validator=args.IndexValidator(models.Committee),
+    model = models.Committee
+    schema = schemas.CommitteeSchema
+    page_schema = schemas.CommitteePageSchema
+    aliases = {'receipts': models.CommitteeSearch.receipts}
+
+    filter_multi_fields = [
+        ('committee_id', models.Committee.committee_id),
+        ('designation', models.Committee.designation),
+        ('organization_type', models.Committee.organization_type),
+        ('state', models.Committee.state),
+        ('party', models.Committee.party),
+        ('committee_type', models.Committee.committee_type),
+    ]
+    filter_range_fields = [
+        (('min_first_file_date', 'max_first_file_date'), models.Committee.first_file_date),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.committee,
+            args.committee_list,
+            args.make_sort_args(
+                default='name',
+                validator=args.IndexValidator(
+                    models.Committee,
+                    extra=list(self.aliases.keys()),
+                ),
+            ),
         )
-    )
-    @marshal_with(schemas.CommitteePageSchema())
-    def get(self, **kwargs):
-        query = self.get_committees(kwargs)
-        return utils.fetch_page(query, kwargs, model=models.Committee)
 
-    def get_committees(self, kwargs):
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
 
-        committees = models.Committee.query
+        if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
+            raise exceptions.ApiError(
+                'Cannot sort on receipts when parameter "q" is not set',
+                status_code=422,
+            )
 
         if kwargs.get('candidate_id'):
-            committees = committees.filter(
+            query = query.filter(
                 models.Committee.candidate_ids.overlap(kwargs['candidate_id'])
             )
 
         if kwargs.get('q'):
-            committees = utils.search_text(
-                committees.join(
+            query = utils.search_text(
+                query.join(
                     models.CommitteeSearch,
                     models.Committee.committee_id == models.CommitteeSearch.id,
                 ),
@@ -68,23 +87,23 @@ class CommitteeList(utils.Resource):
                 kwargs['q'],
             ).distinct()
 
-        if kwargs.get('name'):
-            committees = committees.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
+        if kwargs.get('treasurer_name'):
+            query = utils.search_text(
+                query,
+                models.Committee.treasurer_text,
+                kwargs['treasurer_name'],
+            )
 
-        committees = filter_query(models.Committee, committees, list_filter_fields, kwargs)
+        if kwargs.get('name'):
+            query = query.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
 
         if kwargs.get('year'):
-            committees = filter_year(models.Committee, committees, kwargs['year'])
+            query = filter_year(models.Committee, query, kwargs['year'])
 
         if kwargs.get('cycle'):
-            committees = committees.filter(models.Committee.cycles.overlap(kwargs['cycle']))
+            query = query.filter(models.Committee.cycles.overlap(kwargs['cycle']))
 
-        if kwargs.get('min_first_file_date'):
-            committees = committees.filter(models.Committee.first_file_date >= kwargs['min_first_file_date'])
-        if kwargs.get('max_first_file_date'):
-            committees = committees.filter(models.Committee.first_file_date <= kwargs['max_first_file_date'])
-
-        return committees
+        return query
 
 
 @doc(
@@ -95,44 +114,49 @@ class CommitteeList(utils.Resource):
         'committee_id': {'description': docs.COMMITTEE_ID},
     },
 )
-class CommitteeView(utils.Resource):
+class CommitteeView(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.committee)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['name'],
-            validator=args.IndexValidator(models.CommitteeDetail),
+    model = models.CommitteeDetail
+    schema = schemas.CommitteeDetailSchema
+    page_schema = schemas.CommitteeDetailPageSchema
+
+    filter_multi_fields = [
+        ('designation', models.CommitteeDetail.designation),
+        ('organization_type', models.CommitteeDetail.organization_type),
+        ('committee_type', models.CommitteeDetail.committee_type),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.committee,
+            args.make_sort_args(
+                default='name',
+                validator=args.IndexValidator(self.model),
+            ),
         )
-    )
-    @marshal_with(schemas.CommitteeDetailPageSchema())
-    def get(self, committee_id=None, candidate_id=None, **kwargs):
-        query = self.get_committee(kwargs, committee_id, candidate_id)
-        return utils.fetch_page(query, kwargs, model=models.CommitteeDetail)
 
-    def get_committee(self, kwargs, committee_id, candidate_id):
-
-        committees = models.CommitteeDetail.query
+    def build_query(self, committee_id=None, candidate_id=None, **kwargs):
+        query = super().build_query(**kwargs)
 
         if committee_id is not None:
-            committees = committees.filter_by(committee_id=committee_id)
+            query = query.filter_by(committee_id=committee_id)
 
         if candidate_id is not None:
-            committees = models.CommitteeDetail.query.join(
+            query = query.join(
                 models.CandidateCommitteeLink
             ).filter(
                 models.CandidateCommitteeLink.candidate_id == candidate_id
             ).distinct()
 
-        committees = filter_query(models.CommitteeDetail, committees, detail_filter_fields, kwargs)
-
         if kwargs.get('year'):
-            committees = filter_year(models.CommitteeDetail, committees, kwargs['year'])
+            query = filter_year(models.CommitteeDetail, query, kwargs['year'])
 
         if kwargs.get('cycle'):
-            committees = committees.filter(models.CommitteeDetail.cycles.overlap(kwargs['cycle']))
+            query = query.filter(models.CommitteeDetail.cycles.overlap(kwargs['cycle']))
 
-        return committees
+        return query
 
 
 @doc(
@@ -144,21 +168,24 @@ class CommitteeView(utils.Resource):
         'cycle': {'description': docs.COMMITTEE_CYCLE},
     },
 )
-class CommitteeHistoryView(utils.Resource):
+class CommitteeHistoryView(ApiResource):
 
-    @use_kwargs(args.paging)
-    @use_kwargs(
-        args.make_sort_args(
-            default=['-cycle'],
-            validator=args.IndexValidator(models.CommitteeHistory),
+    model = models.CommitteeHistory
+    schema = schemas.CommitteeHistorySchema
+    page_schema = schemas.CommitteeHistoryPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.committee_history,
+            args.make_sort_args(
+                default='-cycle',
+                validator=args.IndexValidator(self.model),
+            ),
         )
-    )
-    @marshal_with(schemas.CommitteeHistoryPageSchema())
-    def get(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
-        query = self.get_committee(committee_id, candidate_id, cycle, kwargs)
-        return utils.fetch_page(query, kwargs, model=models.CommitteeHistory)
 
-    def get_committee(self, committee_id, candidate_id, cycle, kwargs):
+    def build_query(self, committee_id=None, candidate_id=None, cycle=None, **kwargs):
         query = models.CommitteeHistory.query
 
         if committee_id:
@@ -167,12 +194,39 @@ class CommitteeHistoryView(utils.Resource):
         if candidate_id:
             query = query.join(
                 models.CandidateCommitteeLink,
-                models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
+                sa.and_(
+                    models.CandidateCommitteeLink.committee_id == models.CommitteeHistory.committee_id,
+                    models.CandidateCommitteeLink.fec_election_year == models.CommitteeHistory.cycle,
+                ),
             ).filter(
-                models.CandidateCommitteeLink.candidate_id == candidate_id
+                models.CandidateCommitteeLink.candidate_id == candidate_id,
             ).distinct()
 
         if cycle:
-            query = query.filter(models.CommitteeHistory.cycle == cycle)
+            query = (
+                self._filter_elections(query, candidate_id, cycle)
+                if kwargs.get('election_full') and candidate_id
+                else query.filter(models.CommitteeHistory.cycle == cycle)
+            )
 
         return query
+
+    def _filter_elections(self, query, candidate_id, cycle):
+        election_duration = utils.get_election_duration(models.CandidateCommitteeLink.committee_type)
+        return query.join(
+            models.CandidateElection,
+            sa.and_(
+                models.CandidateCommitteeLink.candidate_id == models.CandidateElection.candidate_id,
+                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.cand_election_year - election_duration,
+                models.CandidateCommitteeLink.fec_election_year <= models.CandidateElection.cand_election_year,
+            ),
+        ).filter(
+            models.CandidateElection.candidate_id == candidate_id,
+            models.CandidateElection.cand_election_year >= cycle,
+            models.CandidateElection.cand_election_year < cycle + election_duration,
+        ).order_by(
+            models.CommitteeHistory.committee_id,
+            sa.desc(models.CommitteeHistory.cycle),
+        ).distinct(
+            models.CommitteeHistory.committee_id,
+        )

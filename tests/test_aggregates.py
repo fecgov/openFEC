@@ -6,6 +6,7 @@ from tests.common import ApiBaseTest
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
+    ScheduleAByEmployerView,
     ScheduleEByCandidateView,
     CommunicationCostByCandidateView,
     ElectioneeringByCandidateView,
@@ -15,6 +16,24 @@ from webservices.resources.candidate_aggregates import (
     ScheduleAByStateCandidateView,
     TotalsCandidateView,
 )
+
+
+class TestCommitteeAggregates(ApiBaseTest):
+
+    def test_stable_sort(self):
+        rows = [
+            factories.ScheduleAByEmployerFactory(
+                committee_id='C001',
+                employer='omnicorp-{}'.format(idx),
+                total=538,
+            )
+            for idx in range(100)
+        ]
+        employers = []
+        for page in range(2):
+            results = self._results(api.url_for(ScheduleAByEmployerView, sort='-total', per_page=50, page=page + 1))
+            employers.extend(result['employer'] for result in results)
+        assert len(set(employers)) == len(rows)
 
 
 class TestAggregates(ApiBaseTest):
@@ -55,6 +74,10 @@ class TestAggregates(ApiBaseTest):
             election_years=[2012],
             two_year_period=2012,
             office='P',
+        )
+        factories.CandidateElectionFactory(
+            candidate_id='P123',
+            cand_election_year=2012,
         )
 
     def make_aggregates(self, factory):
@@ -159,6 +182,13 @@ class TestCandidateAggregates(ApiBaseTest):
             candidate_id=self.candidate.candidate_id,
             election_years=[2008, 2012],
         )
+        [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate.candidate_id,
+                cand_election_year=election_year
+            )
+            for election_year in [2008, 2012]
+        ]
         [
             factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees
