@@ -78,8 +78,10 @@ class ElectionClassDate(db.Model):
 
 
 class CalendarDate(BaseModel):
+    # DEBUG
     __tablename__ = 'ofec_omnibus_dates_mv'
 
+    event_id = db.Column('idx', db.Integer, primary_key=True)
     summary = db.Column(db.String)
     description = db.Column(db.Text)
     category = db.Column(db.String, index=True)
