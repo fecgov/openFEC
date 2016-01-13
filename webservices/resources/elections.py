@@ -45,7 +45,7 @@ class ElectionList(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.election_search)
-    @use_kwargs(args.make_sort_args(default=['-_office_status']))
+    @use_kwargs(args.make_sort_args(default='-_office_status'))
     @marshal_with(schemas.ElectionSearchPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
@@ -88,7 +88,7 @@ class ElectionList(utils.Resource):
             CandidateHistory.district,
             CandidateHistory.two_year_period,
         ).filter(
-            CandidateHistory.candidate_inactive == None,  # noqa
+            CandidateHistory.candidate_inactive == False,  # noqa
             # TODO(jmcarp) Revert after #1271 is resolved
             sa.or_(
                 CandidateHistory.district == None,  # noqa
@@ -162,7 +162,7 @@ class ElectionView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.elections)
-    @use_kwargs(args.make_sort_args(default=['-total_receipts'], default_nulls_large=False))
+    @use_kwargs(args.make_sort_args(default='-total_receipts', default_nulls_large=False))
     @marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
@@ -340,7 +340,7 @@ def filter_candidates(query, kwargs):
 def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
-        CandidateHistory.candidate_inactive == None,  # noqa
+        CandidateHistory.candidate_inactive == False,  # noqa
         CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     )
     return query

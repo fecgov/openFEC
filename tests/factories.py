@@ -45,6 +45,12 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateHistory
     two_year_period = 2016
+    candidate_inactive = False
+
+
+class CandidateElectionFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateElection
 
 
 class BaseCommitteeFactory(BaseFactory):
@@ -171,6 +177,11 @@ class ScheduleABySizeFactory(BaseAggregateFactory):
 class ScheduleAByStateFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleAByState
+
+
+class ScheduleAByEmployerFactory(BaseAggregateFactory):
+    class Meta:
+        model = models.ScheduleAByEmployer
 
 
 class ScheduleAByContributorFactory(BaseAggregateFactory):

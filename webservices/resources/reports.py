@@ -53,19 +53,27 @@ class ReportsView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
-    @use_kwargs(args.make_sort_args(default=['-coverage_end_date']))
+    @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
-        query, reports_class, reports_schema = self.get_reports(committee_id, committee_type, kwargs)
-        validator = args.IndexValidator(reports_class)
-        for key in kwargs['sort']:
-            validator(key)
+        query, reports_class, reports_schema = self.build_query(
+            committee_id=committee_id,
+            committee_type=committee_type,
+            **kwargs
+        )
+        if kwargs['sort']:
+            validator = args.IndexValidator(reports_class)
+            validator(kwargs['sort'])
         page = utils.fetch_page(query, kwargs, model=reports_class)
         return reports_schema().dump(page).data
 
-    def get_reports(self, committee_id, committee_type, kwargs):
+    def build_query(self, committee_id=None, committee_type=None, **kwargs):
         reports_class, reports_schema = reports_schema_map.get(
-            self._resolve_committee_type(committee_id, committee_type, kwargs),
+            self._resolve_committee_type(
+                committee_id=committee_id,
+                committee_type=committee_type,
+                **kwargs
+            ),
             default_schemas,
         )
 
@@ -98,7 +106,7 @@ class ReportsView(utils.Resource):
 
         return query, reports_class, reports_schema
 
-    def _resolve_committee_type(self, committee_id, committee_type, kwargs):
+    def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
             if kwargs.get('cycle'):

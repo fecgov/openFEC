@@ -14,12 +14,14 @@ and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, state
 ;
 
-create index on ofec_sched_a_aggregate_state (cmte_id);
-create index on ofec_sched_a_aggregate_state (cycle);
-create index on ofec_sched_a_aggregate_state (state);
-create index on ofec_sched_a_aggregate_state (state_full);
-create index on ofec_sched_a_aggregate_state (total);
-create index on ofec_sched_a_aggregate_state (count);
+alter table ofec_sched_a_aggregate_state add column idx serial primary key;
+
+create index on ofec_sched_a_aggregate_state (cmte_id, idx);
+create index on ofec_sched_a_aggregate_state (cycle, idx);
+create index on ofec_sched_a_aggregate_state (state, idx);
+create index on ofec_sched_a_aggregate_state (state_full, idx);
+create index on ofec_sched_a_aggregate_state (total, idx);
+create index on ofec_sched_a_aggregate_state (count, idx);
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_state() returns void as $$
