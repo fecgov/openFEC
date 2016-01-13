@@ -81,31 +81,11 @@ with elections as (
         due_date::timestamp as start_date,
         null::timestamp as end_date
     from reports_raw
-    where trc_election_type_id = 'G'
     group by
         rpt_tp,
         rpt_tp_desc,
         due_date,
         office_sought
-    union all
-    select
-        -- Select all non-general elections
-        'report-' || rpt_tp as category,
-        rpt_tp_desc::text || ' report' as description,
-        array_to_string(array[
-            expand_office_description(office_sought::text),
-            rpt_tp_desc::text,
-            'report (',
-            rpt_tp::text,
-            ') ',
-            array_to_string(array[election_state]::text[], ', ')
-        ], ' ') as summary,
-        array[election_state]::text[] as states,
-        null::text as location,
-        due_date::timestamp as start_date,
-        null::timestamp as end_date
-    from reports_raw
-    where coalesce(trc_election_type_id, '') != 'G'
 ), other as (
     select distinct on (category_name, event_name, description, location, start_date, end_date)
         -- Select the events from the calandar that are not created by a formula in a different table
