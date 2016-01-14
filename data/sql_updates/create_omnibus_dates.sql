@@ -38,13 +38,13 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    ' Report'
+                    'Report'
                 ], ' ')
             else array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    ' Report'
+                    'Report'
                 ], ' ')
         end;
     end
@@ -91,10 +91,18 @@ with elections as (
 ), reports as (
     select
         'report-' || report_type as category,
-        name_reports(office_sought::text, report_type::text, rpt_tp_desc::text) as description,
+        replace(
+            name_reports(office_sought::text, report_type::text, rpt_tp_desc::text),
+            ' {One of 4 valid Report Codes on Form 5, RptCode} ',
+            ''
+        ) as description,
         array_to_string(array[
             expand_office_description(office_sought::text),
-            rpt_tp_desc::text,
+            replace(
+                rpt_tp_desc::text,
+                ' {One of 4 valid Report Codes on Form 5, RptCode} ',
+            ''
+            ),
             'Report (',
             report_type::text,
             ') ',
