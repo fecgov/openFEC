@@ -8,20 +8,44 @@ create or replace function generate_election_title(trc_election_type_id text, of
 returns text as $$
     begin
         return case
-        when count(election_states) > 1 then array_to_string(
+        when array_length(election_states, 1) > 1 then array_to_string(
             array[
                 party,
-                expand_office_description(office_sought),
+                office_sought,
                 expand_election_type(trc_election_type_id),
                 'Multi-state'::text
             ], ' ')
         else array_to_string(
             array[
                 party,
+                office_sought,
                 expand_election_type(trc_election_type_id),
-                expand_office_description(office_sought),
                 array_to_string(election_states, ', ')
         ], ' ')
+        end;
+    end
+$$ language plpgsql;
+
+-- Not all report types are on dimreport, so for the reports to all have
+-- titles, I am adding a case. Ideally, we would want the right mapping,
+-- that is one of the things we have asked for.
+create or replace function name_reports(office_sought text, report_type text, rpt_tp_desc text)
+returns text as $$
+    begin
+        return case
+            when rpt_tp_desc is null then
+                array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    report_type,
+                    ' Report'
+                ], ' ')
+            else array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    rpt_tp_desc,
+                    ' Report'
+                ], ' ')
         end;
     end
 $$ language plpgsql;
@@ -41,14 +65,15 @@ with elections as (
         ) as description,
         array_to_string(array[
                 dp.party_affiliation_desc::text,
-                expand_election_type(trc_election_type_id::text),
                 expand_office_description(office_sought::text),
+                expand_election_type(trc_election_type_id::text),
                 array_to_string(array_agg(election_state order by election_state)::text[], ', ')
         ], ' ') as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
         election_date::timestamp as start_date,
-        null::timestamp as end_date
+        null::timestamp as end_date,
+        null::text as url
     from trc_election
         left join dimparty dp on trc_election.election_party = dp.party_affiliation
     where
@@ -65,24 +90,24 @@ with elections as (
     where coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
-        -- Select general elecitons so they don't look like a ton of state elections on the calendar
-        'report-' || rpt_tp as category,
-        rpt_tp_desc::text || ' report' as description,
+        'report-' || report_type as category,
+        name_reports(office_sought::text, report_type::text, rpt_tp_desc::text) as description,
         array_to_string(array[
             expand_office_description(office_sought::text),
             rpt_tp_desc::text,
-            'report (',
-            rpt_tp::text,
+            'Report (',
+            report_type::text,
             ') ',
             array_to_string(array_agg(election_state order by election_state)::text[], ', ')
         ], ' ') as summary,
         array_agg(election_state)::text[] as states,
         null::text as location,
         due_date::timestamp as start_date,
-        null::timestamp as end_date
+        null::timestamp as end_date,
+        null::text as url
     from reports_raw
     group by
-        rpt_tp,
+        report_type,
         rpt_tp_desc,
         due_date,
         office_sought
@@ -95,7 +120,8 @@ with elections as (
         null::text[] as states,
         location::text,
         start_date,
-        end_date
+        end_date,
+        url
     from cal_event
     join cal_event_category using (cal_event_id)
     join cal_category using (cal_category_id)
