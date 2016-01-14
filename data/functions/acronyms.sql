@@ -14,21 +14,21 @@ $$ language plpgsql;
  returns text as $$
      begin
          return case acronym
-             when 'P' then 'Primary'
-             when 'PR' then 'Primary runoff'
-             when 'SP' then 'Special primary'
-             when 'SPR' then 'Special primary runoff'
-             when 'G' then 'General'
-             when 'GR' then 'General runoff'
-             when 'SG' then 'Special general'
-             when 'SGR' then 'Special general runoff'
+             when 'P' then 'Primary Election'
+             when 'PR' then 'Primary Runoff Election'
+             when 'SP' then 'Special Primary Election'
+             when 'SPR' then 'Special Primary Runoff Election'
+             when 'G' then 'General Election'
+             when 'GR' then 'General Runoff Election'
+             when 'SG' then 'Special General Election'
+             when 'SGR' then 'Special General Runoff Election'
              when 'O' then 'Other'
              when 'C' then 'Convention'
-             when 'SC' then 'Special convention'
-             when 'R' then 'Runoff'
-             when 'SR' then 'Special runoff'
-             when 'S' then 'Special'
-             when 'E' then 'Recount'
+             when 'SC' then 'Special Convention'
+             when 'R' then 'Runoff Election'
+             when 'SR' then 'Special Runoff Election'
+             when 'S' then 'Special Election'
+             when 'E' then 'Recount Election'
              else null
          end;
      end

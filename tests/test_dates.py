@@ -75,7 +75,8 @@ class TestCalendarDates(ApiBaseTest):
 
     def test_filters(self):
         factories.CalendarDateFactory(start_date=datetime.datetime(2016, 1, 2))
-        factories.CalendarDateFactory(location='Mississippi, CA', event_id=123)
+        factories.CalendarDateFactory(location='Mississippi, CA')
+        factories.CalendarDateFactory(event_id=123)
         factories.CalendarDateFactory(state=['CA'])
         factories.CalendarDateFactory(category='Public Hearings')
         factories.CalendarDateFactory(description='a really interesting event')
