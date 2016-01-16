@@ -469,3 +469,22 @@ An electioneering communication is any broadcast, cable or satellite communicati
 - The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office.
 '''
 
+# fields and filters
+#candidates
+CANDIDATE_NAME = 'Name of candidate running for office'
+OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
+OFFICE = 'Federal office candidate runs for: H, S or P'
+STATE = 'US state or territory where a candidate runs for office'
+PARTY = 'Three-letter code for the party under which a candidate ran for office'
+PARTY_FULL = 'Party under which a candidate ran for office'
+YEAR = 'See records pertaining to a particular election year. The list of election years \
+is based on a candidate filing a statement of candidacy (F2) for that year.'
+DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
+Presidential, Senate and House at-large candidates will have District 00.'
+CANDIDATE_STATUS ='One-letter code explaining if the candidate is:\n\
+        - C present candidate\n\
+        - F future candidate\n\
+        - N not yet a candidate\n\
+        - P prior candidate\n\
+'
+INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
