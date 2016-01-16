@@ -133,23 +133,18 @@ names = {
 
 candidate_detail = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
-    'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
-    'state': fields.List(IStr, description='US state or territory where a candidate runs for office'),
-    'party': fields.List(IStr, description='Three-letter code for the party under which a candidate ran for office'),
-    'year': fields.Str(attribute='year', description='See records pertaining to a particular election year. The list of election years is based on a candidate filing a statement of candidacy (F2) for that year.'),
-    'district': fields.List(District),
+    'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
+    'state': fields.List(IStr, description=docs.STATE),
+    'party': fields.List(IStr, description=docs.PARTY),
+    'year': fields.Str(attribute='year', description=docs.YEAR),
+    'district': fields.List(District, description=docs.DISTRICT),
     'candidate_status': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'F', 'N', 'P'])),
-        description='One-letter code explaining if the candidate is:\n\
-        - C present candidate\n\
-        - F future candidate\n\
-        - N not yet a candidate\n\
-        - P prior candidate\n\
-        '
+        description=docs.CANDIDATE_STATUS,
     ),
     'incumbent_challenge': fields.List(
         IStr(validate=validate.OneOf(['', 'I', 'C', 'O'])),
-        description='One-letter code explaining if the candidate is an incumbent, a challenger, or if the seat is open.'
+        description=docs.INCUMBENT_CHALLANGE
     ),
 }
 
