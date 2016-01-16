@@ -144,7 +144,7 @@ candidate_detail = {
     ),
     'incumbent_challenge': fields.List(
         IStr(validate=validate.OneOf(['', 'I', 'C', 'O'])),
-        description=docs.INCUMBENT_CHALLANGE
+        description=docs.INCUMBENT_CHALLENGE,
     ),
 }
 
