@@ -470,6 +470,14 @@ An electioneering communication is any broadcast, cable or satellite communicati
 '''
 
 # fields and filters
+
+# shared
+LOAD_DATE = 'Date the information was loaded into the FEC systems. This can be affected by \
+reseting systems and other factors, refer to receipt_date for the day that the FEC received \
+the paper or electronic document. Keep in mind that paper filings take more time to process \
+and there can be a lag between load_date and receipt_date. This field can be helpful to \
+identify paper records that have been processed recently.'
+
 #candidates
 CANDIDATE_NAME = 'Name of candidate running for office'
 OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
@@ -488,3 +496,5 @@ CANDIDATE_STATUS ='One-letter code explaining if the candidate is:\n\
         - P prior candidate\n\
 '
 INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
+INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
+ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
