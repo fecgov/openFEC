@@ -479,6 +479,7 @@ and there can be a lag between load_date and receipt_date. This field can be hel
 identify paper records that have been processed recently.'
 PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
 PARTY_FULL = 'Party affiliated with a candidate or committee'
+STATE_GENERIC = 'US state or territory'
 
 #candidates
 CANDIDATE_NAME = 'Name of candidate running for office'
@@ -545,3 +546,19 @@ FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
 This is usually a Form 1 committee registration.'
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+
+# schedule A
+CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
+EMPLOYER = 'Employer of contributor as reported on the committee\'s filing'
+OCCUPATION = 'Occupation of contributor as reported on the committee\'s filing'
+
+# schedule B
+RECIPIENT_NAME = 'Name of the entity receiving the disbursement'
+RECIPIENT_ID = 'The FEC identifier should be represented here if the entity receiving \
+the disbursement is registered with the FEC.'
+
+# communication cost and electioneering
+SUPPORT_OPPOSE_INDICATOR = 'Explains if the money was spent in order to support or oppose a candidate or candidates. (Coded S or O for support or oppose.) This indicator applies to independent expenditures and communication costs.'
+
+# schedule B
+PURPOSE = 'Purpose of the expenditure'
