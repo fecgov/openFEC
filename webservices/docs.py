@@ -562,3 +562,23 @@ SUPPORT_OPPOSE_INDICATOR = 'Explains if the money was spent in order to support 
 
 # schedule B
 PURPOSE = 'Purpose of the expenditure'
+
+# dates
+DUE_DATE = 'Date the report is due'
+REPORT_TYPE = 'Type of report'
+REPORT_YEAR = 'Year of report'
+CREATE_DATE = 'Date the record was created'
+UPDATE_DATE = 'Date the record was updated'
+ELECTION_DATE = 'Date of election'
+ELECTION_YEAR = 'Year of election'
+#? TODO: add more categories
+ELECTION_TYPE = 'Election type \n\
+Convention, Primary, General, Special, Runoff etc.'
+SENATE_CLASS = 'Senators run every six years and each state has two senators. General elections \
+are held every 2 years. The Senate elections are staggered so there are three classes of Senators \
+In a given state, only one Senate seat is up for election at a time and every six years, there is \
+not a senate election in a given state. Thus, the Senate is broken up in to three groups called \
+classes. Senators in the same class are up for election at the same time. Sometimes it is a bit \
+less straight forward when, because there are situations in which there is a special election to \
+fill a vacancy in the Senate. In those cases class refers to the seat groupings and not the time \
+of the election.'
