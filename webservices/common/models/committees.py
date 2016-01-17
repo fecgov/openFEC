@@ -53,12 +53,12 @@ class Committee(BaseConcreteCommittee):
 class CommitteeHistory(BaseCommittee):
     __tablename__ = 'ofec_committee_history_mv'
 
-    street_1 = db.Column(db.String(50))
-    street_2 = db.Column(db.String(50))
-    city = db.Column(db.String(50))
-    state_full = db.Column(db.String(50))
-    zip = db.Column(db.String(9))
-    cycle = db.Column(db.Integer, primary_key=True, index=True)
+    street_1 = db.Column(db.String(50), doc='Street address of committee as reported on the Form 1')
+    street_2 = db.Column(db.String(50), doc='Second line of street address of committee as reported on the Form 1')
+    city = db.Column(db.String(50), doc='City of committee as reported on the Form 1')
+    state_full = db.Column(db.String(50), doc='State of committee as reported on the Form 1')
+    zip = db.Column(db.String(9), doc='Zip code of committee as reported on the Form 1')
+    cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.COMMITTEE_CYCLE)
 
 
 class CommitteeDetail(BaseConcreteCommittee):
@@ -80,7 +80,7 @@ class CommitteeDetail(BaseConcreteCommittee):
     street_1 = db.Column(db.String(50), doc='Street address of committee as reported on the Form 1')
     street_2 = db.Column(db.String(50), doc='Second line of street address of committee as reported on the Form 1')
     city = db.Column(db.String(50), doc='City of committee as reported on the Form 1')
-    state_full = db.Column(db.String(50), doc='Street address of committee as reported on the Form 1')
+    state_full = db.Column(db.String(50), doc='State of committee as reported on the Form 1')
     zip = db.Column(db.String(9), doc='Zip code of committee as reported on the Form 1')
     treasurer_city = db.Column(db.String(50), doc='City of committee treasurer as reported on the Form 1')
     treasurer_name_1 = db.Column(db.String(50))
