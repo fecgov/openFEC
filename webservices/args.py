@@ -36,10 +36,12 @@ class Currency(fields.Decimal):
             value = value.lstrip('$').replace(',', '')
         return super()._validated(value)
 
+
 class IStr(fields.Str):
 
     def _deserialize(self, value, attr, data):
         return super()._deserialize(value, attr, data).upper()
+
 
 class District(fields.Str):
 
@@ -62,6 +64,7 @@ paging = {
     'per_page': per_page,
 }
 
+
 class OptionValidator(object):
     """Ensure that value is one of acceptable options.
 
@@ -73,6 +76,7 @@ class OptionValidator(object):
     def __call__(self, value):
         if value.lstrip('-') not in self.values:
             raise ValidationError('Cannot sort on value "{0}"'.format(value), status_code=422)
+
 
 class IndexValidator(OptionValidator):
     """Ensure that value is an indexed column on the specified model.
@@ -159,50 +163,19 @@ candidate_history = {
 }
 
 committee = {
-    'year': fields.List(fields.Int, description='A year that the committee was active— (after original registration date but before expiration date)'),
+    'year': fields.List(fields.Int, description=docs.COMMITTEE_YEAR),
     'cycle': fields.List(fields.Int, description=docs.COMMITTEE_CYCLE),
     'designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
-        description='The one-letter designation code of the organization:\n\
-         - A authorized by a candidate\n\
-         - J joint fundraising committee\n\
-         - P principal campaign committee of a candidate\n\
-         - U unauthorized\n\
-         - B lobbyist/registrant PAC\n\
-         - D leadership PAC\n\
-        ',
+        description=docs.DESIGNATION,
     ),
     'organization_type': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'L', 'M', 'T', 'V', 'W'])),
-        description='The one-letter code for the kind for organization:\n\
-        - C corporation\n\
-        - L labor organization\n\
-        - M membership organization\n\
-        - T trade association\n\
-        - V cooperative\n\
-        - W corporation without capital stock\n\
-        ',
+        description=docs.ORGANIZATION_TYPE,
     ),
     'committee_type': fields.List(
         IStr(validate=validate.OneOf(['', 'C', 'D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y', 'Z'])),
-        description='The one-letter type code of the organization:\n\
-        - C communication cost\n\
-        - D delegate\n\
-        - E electioneering communication\n\
-        - H House\n\
-        - I independent expenditor (person or group)\n\
-        - N PAC - nonqualified\n\
-        - O independent expenditure-only (super PACs)\n\
-        - P presidential\n\
-        - Q PAC - qualified\n\
-        - S Senate\n\
-        - U single candidate independent expenditure\n\
-        - V PAC with non-contribution account, nonqualified\n\
-        - W PAC with non-contribution account, qualified\n\
-        - X party, nonqualified\n\
-        - Y party, qualified\n\
-        - Z national party nonfederal account\n\
-        ',
+        description=docs.COMMITTEE_TYPE,
     ),
 }
 
@@ -210,10 +183,9 @@ committee_list = {
     'q': fields.Str(description='Text to search all fields for'),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'name': fields.Str(description="Candidate's name (full or partial)"),
     'state': fields.List(IStr, description='Two-character US state or territory in which the committee is registered'),
     'name': fields.Str(description="Committee's name (full or partial)"),
-    'party': fields.List(IStr, description='Three-letter code for the party. For example: DEM=Democrat REP=Republican'),
+    'party': fields.List(IStr, description=docs.PARTY),
     'min_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC after this date'),
     'max_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC before this date'),
     'treasurer_name': fields.Str(description='Committee treasurer'),
