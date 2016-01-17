@@ -278,7 +278,7 @@ election_dates = {
 
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'contributor_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
+    'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
     'contributor_name': fields.Str(description='Name of contributor.'),
     'contributor_city': fields.List(IStr, description='City of contributor'),
     'contributor_state': fields.List(IStr, description='State of contributor'),
@@ -313,27 +313,27 @@ schedule_a_by_zip = {
 
 schedule_a_by_employer = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'employer': fields.List(IStr, description='Employer'),
+    'employer': fields.List(IStr, description=docs.EMPLOYER),
 }
 
 schedule_a_by_occupation = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'occupation': fields.List(IStr, description='Occupation'),
+    'occupation': fields.List(IStr, description=docs.OCCUPATION),
 }
 
 schedule_a_by_contributor = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'contributor_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
 }
 
 schedule_b_by_recipient = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'recipient_name': fields.List(fields.Str, description='Recipient name'),
+    'recipient_name': fields.List(fields.Str, description=docs.RECIPIENT_NAME),
 }
 
 schedule_b_by_recipient_id = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'recipient_id': fields.List(IStr, description='Recipient Committee ID'),
+    'recipient_id': fields.List(IStr, description=docs.RECIPIENT_ID),
 }
 
 schedule_b = {
