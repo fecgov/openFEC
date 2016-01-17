@@ -1,5 +1,4 @@
-from webservices import utils
-from webservices import docs
+from webservices import docs, utils
 
 from .base import db, BaseModel
 
