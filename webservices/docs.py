@@ -477,14 +477,14 @@ reseting systems and other factors, refer to receipt_date for the day that the F
 the paper or electronic document. Keep in mind that paper filings take more time to process \
 and there can be a lag between load_date and receipt_date. This field can be helpful to \
 identify paper records that have been processed recently.'
+PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
+PARTY_FULL = 'Party affiliated with a candidate or committee'
 
 #candidates
 CANDIDATE_NAME = 'Name of candidate running for office'
 OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
 OFFICE = 'Federal office candidate runs for: H, S or P'
 STATE = 'US state or territory where a candidate runs for office'
-PARTY = 'Three-letter code for the party under which a candidate ran for office'
-PARTY_FULL = 'Party under which a candidate ran for office'
 YEAR = 'See records pertaining to a particular election year. The list of election years \
 is based on a candidate filing a statement of candidacy (F2) for that year.'
 DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
@@ -498,3 +498,50 @@ CANDIDATE_STATUS ='One-letter code explaining if the candidate is:\n\
 INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
 INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
 ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
+
+# committees
+COMMITTEE_NAME='The name of the committee. If a committee changes it\'s name, \
+    the most recent name will be shown.'
+COMMITTEE_YEAR='A year that the committee was active— (after original registration date \
+    or filing but before expiration date)'
+DESIGNATION = 'The one-letter designation code of the organization:\n\
+         - A authorized by a candidate\n\
+         - J joint fundraising committee\n\
+         - P principal campaign committee of a candidate\n\
+         - U unauthorized\n\
+         - B lobbyist/registrant PAC\n\
+         - D leadership PAC\n\
+'
+ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
+        - C corporation\n\
+        - L labor organization\n\
+        - M membership organization\n\
+        - T trade association\n\
+        - V cooperative\n\
+        - W corporation without capital stock\n\
+'
+COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
+        - C communication cost\n\
+        - D delegate\n\
+        - E electioneering communication\n\
+        - H House\n\
+        - I independent expenditor (person or group)\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - P presidential\n\
+        - Q PAC - qualified\n\
+        - S Senate\n\
+        - U single candidate independent expenditure\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+        - Z national party non-federal account\n\
+'
+TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
+committee, the most recent treasurer will be shown.'
+COMMITTEE_STATE = 'State of the committee\'s address as filed on the Form 1'
+FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
+This is usually a Form 1 committee registration.'
+LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
+LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
