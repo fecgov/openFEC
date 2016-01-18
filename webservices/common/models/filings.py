@@ -1,4 +1,4 @@
-from webservices import utils
+from webservices import docs, utils
 
 from .base import db
 
@@ -6,26 +6,27 @@ from .base import db
 class Filings(db.Model):
     __tablename__ = 'ofec_filings_mv'
 
-    committee_id = db.Column(db.String, index=True)
+    committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')
-    committee_name = db.Column(db.String)
-    candidate_id = db.Column(db.String, index=True)
-    candidate_name = db.Column(db.String)
-    cycle = db.Column(db.Integer)
+    committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
+    candidate_id = db.Column(db.String, index=True, doc=docs.CANDIDATE_ID)
+    candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
+    cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
+    #?
     sub_id = db.Column(db.BigInteger, primary_key=True)
     coverage_start_date = db.Column(db.Date)
     coverage_end_date = db.Column(db.Date)
-    receipt_date = db.Column(db.Date, index=True)
-    election_year = db.Column(db.Integer)
-    form_type = db.Column(db.String, index=True)
-    report_year = db.Column(db.Integer, index=True)
-    report_type = db.Column(db.String, index=True)
-    document_type = db.Column(db.String, index=True)
-    document_type_full = db.Column(db.String)
-    report_type_full = db.Column(db.String)
-    beginning_image_number = db.Column(db.BigInteger, index=True)
-    ending_image_number = db.Column(db.BigInteger)
-    pages = db.Column(db.Integer)
+    receipt_date = db.Column(db.Date, index=True, doc=docs.RECEIPT_DATE)
+    election_year = db.Column(db.Integer, doc=docs.ELECTION_YEAR)
+    form_type = db.Column(db.String, index=True, doc=docs.FORM_TYPE)
+    report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
+    report_type = db.Column(db.String, index=True, doc=docs.REPORT_TYPE)
+    document_type = db.Column(db.String, index=True, doc=docs.DOCUMENT_TYPE)
+    document_type_full = db.Column(db.String, doc=docs.DOCUMENT_TYPE)
+    report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
+    beginning_image_number = db.Column(db.BigInteger, index=True, doc=docs.BEGINNING_IMAGE_NUMBER)
+    ending_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
+    pages = db.Column(db.Integer, doc='Number of pages in the document')
     total_receipts = db.Column(db.Integer)
     total_individual_contributions = db.Column(db.Integer)
     net_donations = db.Column(db.Integer)
@@ -39,11 +40,11 @@ class Filings(db.Model):
     house_personal_funds = db.Column(db.Integer)
     senate_personal_funds = db.Column(db.Integer)
     opposition_personal_funds = db.Column(db.Integer)
-    treasurer_name = db.Column(db.String)
+    treasurer_name = db.Column(db.String, doc=docs.TREASURER_NAME)
     file_number = db.Column(db.BigInteger)
     previous_file_number = db.Column(db.BigInteger)
     primary_general_indicator = db.Column(db.String, index=True)
-    report_type_full = db.Column(db.String)
+    report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String, index=True)
     update_date = db.Column(db.Date)
