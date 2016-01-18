@@ -183,12 +183,12 @@ committee_list = {
     'q': fields.Str(description='Text to search all fields for'),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'state': fields.List(IStr, description='Two-character US state or territory in which the committee is registered'),
-    'name': fields.Str(description="Committee's name (full or partial)"),
+    'state': fields.List(IStr, description=docs.STATE_GENERIC),
+    'name': fields.Str(description=docs.COMMITTEE_NAME),
     'party': fields.List(IStr, description=docs.PARTY),
     'min_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC after this date'),
     'max_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC before this date'),
-    'treasurer_name': fields.Str(description='Committee treasurer'),
+    'treasurer_name': fields.Str(description=docs.TREASURER_NAME),
 }
 
 committee_history = {
@@ -279,15 +279,15 @@ election_dates = {
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
-    'contributor_name': fields.Str(description='Name of contributor.'),
-    'contributor_city': fields.List(IStr, description='City of contributor'),
-    'contributor_state': fields.List(IStr, description='State of contributor'),
-    'contributor_employer': fields.Str(description='Employer of contributor, filers need to make an effort to gather this information'),
-    'contributor_occupation': fields.Str(description='Occupation of contributor, filers need to make an effort to gather this information'),
+    'contributor_name': fields.Str(description=docs.CONTRIBUTOR_NAME),
+    'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
+    'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'contributor_employer': fields.Str(description=docs.CONTRIBUTOR_EMPLOYER),
+    'contributor_occupation': fields.Str(description=docs.CONTRIBUTOR_OCCUPATION),
     'last_contribution_receipt_date': fields.Date(missing=None, description='When sorting by `contribution_receipt_date`, use the `contribution_receipt_date` of the last result and pass it here as `last_contribution_receipt_date` to page through Schedule A data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_contribution_receipt_amount': fields.Float(missing=None, description='When sorting by `contribution_receipt_amount`, use the `contribution_receipt_amount` of the last result and pass it here as `last_contribution_receipt_amount` to page through Schedule A data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_contributor_aggregate_ytd': fields.Float(missing=None, description='When sorting by `contributor_aggregate_ytd`, use the `contributor_aggregate_ytd` of the last result and pass it here as `last_contributor_aggregate_ytd` to page through Schedule A data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
-    'is_individual': fields.Bool(missing=None, description='Restrict to non-earmarked individual contributions'),
+    'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
     'contributor_type': fields.List(
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
         description='Filters individual or committee contributions based on line number'
@@ -368,22 +368,22 @@ electioneering_by_candidate = {
 }
 
 election_search = {
-    'state': fields.List(IStr, description='US state or territory where a candidate runs for office'),
-    'district': fields.List(District),
+    'state': fields.List(IStr, description=docs.STATE),
+    'district': fields.List(District, description=docs.DISTRICT),
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
-    'zip': fields.List(fields.Int),
+    'zip': fields.List(fields.Int, description=docs.ZIP_CODE),
     'office': fields.List(
-        fields.Str(validate=validate.OneOf(['house', 'senate', 'president'])),
+        fields.Str(validate=validate.OneOf(['house', 'senate', 'president']),description=docs.OFFICE),
     ),
 }
 
 elections = {
-    'state': IStr(description='US state or territory where a candidate runs for office.'),
-    'district': District(),
+    'state': IStr(description=docs.STATE),
+    'district': District(description=docs.DISTRICT),
     'cycle': fields.Int(description=docs.CANDIDATE_CYCLE),
     'office': fields.Str(
         validate=validate.OneOf(['house', 'senate', 'president']),
-        description='Office sought, either House, Senate or presidential',
+        description=docs.OFFICE,
     ),
     'election_full': election_full,
 }

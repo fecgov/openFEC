@@ -479,7 +479,12 @@ and there can be a lag between load_date and receipt_date. This field can be hel
 identify paper records that have been processed recently.'
 PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
 PARTY_FULL = 'Party affiliated with a candidate or committee'
+FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1'
+REPORT_TYPE = 'Name of report where the underlying data comes from'
+REPORT_YEAR = 'Year the report was filed'
+RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 STATE_GENERIC = 'US state or territory'
+ZIP_CODE = 'Zip code'
 
 #candidates
 CANDIDATE_NAME = 'Name of candidate running for office'
@@ -551,6 +556,17 @@ LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
 CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
 EMPLOYER = 'Employer of contributor as reported on the committee\'s filing'
 OCCUPATION = 'Occupation of contributor as reported on the committee\'s filing'
+CONTRIBUTOR_NAME = 'Name of contributor'
+CONTRIBUTOR_CITY = 'City of contributor'
+CONTRIBUTOR_STATE = 'State of contributor'
+CONTRIBUTOR_EMPLOYER = 'Employer of contributor, filers need to make an effort to gather this information'
+CONTRIBUTOR_OCCUPATION = 'Occupation of contributor, filers need to make an effort to gather this information'
+CONTRIBUTOR_ZIP = 'Zip code of contributor'
+IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo code is true. \
+Filtering individuals is useful to make sure contributions are not double reported and in creating \
+breakdowns of the amount of money coming from individuals.'
+
+
 
 # schedule B
 RECIPIENT_NAME = 'Name of the entity receiving the disbursement'
@@ -565,8 +581,6 @@ PURPOSE = 'Purpose of the expenditure'
 
 # dates
 DUE_DATE = 'Date the report is due'
-REPORT_TYPE = 'Type of report'
-REPORT_YEAR = 'Year of report'
 CREATE_DATE = 'Date the record was created'
 UPDATE_DATE = 'Date the record was updated'
 ELECTION_DATE = 'Date of election'
@@ -582,3 +596,10 @@ classes. Senators in the same class are up for election at the same time. Someti
 less straight forward when, because there are situations in which there is a special election to \
 fill a vacancy in the Senate. In those cases class refers to the seat groupings and not the time \
 of the election.'
+
+# filings
+DOCUMENT_TYPE = 'Type of form, report or documents'
+ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the electronic or paper \
+report. The last image number corresponds to the image number for the last page of the document.'
+IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
+report.'

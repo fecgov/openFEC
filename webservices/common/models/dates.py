@@ -17,7 +17,7 @@ class ReportDate(db.Model):
 
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
-    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True, doc=docs.REPORT_TYPE)
+    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
     due_date = db.Column(db.Date, index=True, doc=docs.DUE_DATE)
     create_date = db.Column(db.Date, index=True, doc=docs.CREATE_DATE)
     update_date = db.Column(db.Date, index=True, doc=docs.UPDATE_DATE)
@@ -26,7 +26,7 @@ class ReportDate(db.Model):
 
     @property
     def report_type_full(self):
-        return clean_report_type(self.report.report_type_full)
+        return clean_report_type(self.report.report_type_full, doc=docs.REPORT_TYPE)
 
 
 REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')
@@ -44,7 +44,7 @@ class ElectionDate(db.Model):
     office_sought = db.Column(db.String, index=True, doc=docs.OFFICE)
     election_date = db.Column(db.Date, index=True, doc=docs.ELECTION_DATE)
     election_notes = db.Column(db.String, index=True)
-    election_type_id = db.Column('trc_election_type_id', db.String, index=True, doc=docs.election_TYPE)
+    election_type_id = db.Column('trc_election_type_id', db.String, index=True, doc=docs.ELECTION_TYPE)
     update_date = db.Column(db.DateTime, index=True, doc=docs.UPDATE_DATE)
     create_date = db.Column(db.DateTime, index=True, doc=docs.CREATE_DATE)
     election_year = db.Column('election_yr', db.Integer, index=True, doc=docs.ELECTION_YEAR)
@@ -67,7 +67,7 @@ class ElectionClassDate(db.Model):
     state_desc = db.Column(db.String, doc=docs.STATE)
     district = db.Column(db.Integer, index=True, doc=docs.DISTRICT)
     election_year = db.Column('election_yr', db.Integer, index=True, doc=docs.ELECTION_YEAR)
-    open_seat_flag = db.Column('open_seat_flg', db.String, doc='Signifies if the contest has no incumbent running.')
+    open_seat_flag = db.Column('open_seat_flg', db.String, doc='Signifies if the contest has no incumbent running')
     create_date = db.Column(db.Date, doc=docs.CREATE_DATE)
     election_type_id = db.Column(db.String, doc=docs.ELECTION_TYPE)
     #? double check this
