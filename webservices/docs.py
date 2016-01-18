@@ -12,7 +12,8 @@ If a person runs for several offices, that person will have separate candidate I
 '''
 
 COMMITTEE_ID = '''
-A unique identifier assigned to each committee or filer registered with the FEC.
+A unique identifier assigned to each committee or filer registered with the FEC. In general \
+committee id's begin with the letter C which is followed by eight digits.
 '''
 
 CANDIDATE_CYCLE = '''
@@ -603,3 +604,106 @@ ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the el
 report. The last image number corresponds to the image number for the last page of the document.'
 IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
 report.'
+
+
+# Reports and Totals
+
+def add_period(var):
+    return var + ' total for the reporting period'
+
+
+def add_ytd(var):
+    return var + ' total for the year to date'
+
+
+# shared
+CASH_ON_HAND_BEGIN_PERIOD = 'Balance for the committee at the start of the two-year period'
+CASH_ON_HAND_END_PERIOD = 'Ending cash balance on the most recent filing'
+COVERAGE_START_DATE = 'Beginning date of the reporting period'
+COVERAGE_END_DATE = 'Ending date of the reporting period'
+DEBTS_OWED_BY_COMMITTEE = 'Debts owed by the committee'
+DEBTS_OWED_TO_COMMITTEE = 'Debts owed to the committee'
+
+# shared receipts
+RECEIPTS = 'Receipt'
+POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Party committees contributions'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Unitemized individual contributions'
+INDIVIDUAL_CONTRIBUTIONS = 'Individual contributions'
+OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committees contributions'
+OFFSETS_TO_OPERATING_EXPENDITURES = 'Offsets to operating expenditures'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Itemized individual contributions'
+CONTRIBUTIONS = 'Contribution'
+# house senate and presidential
+CANDIDATE_CONTRIBUTION = 'Candidate contributions'
+OTHER_RECEIPTS = 'Other receipts'
+# house senate and PAC party
+NET_CONTRIBUTIONS = 'Net contributions'
+
+# shared disbursements
+DISBURSEMENTS = 'Disbursements'
+REFUNDED_INDIVIDUAL_CONTRIBUTIONS = 'Individual refunds'
+OPERATING_EXPENDITURES = 'Total operating expenditures'
+OTHER_DISBURSEMENTS = 'Other disbursements'
+REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Political party refunds'
+CONTRIBUTION_REFUNDS = 'Total contribution refunds'
+REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
+
+# Presidential
+# receipts
+FEDERAL_FUNDS = 'Federal funds'
+TRANSFERS_FROM_AFFILIATED_COMMITTEE = 'Transfer from affiliated committees'
+LOANS_RECEIVED_FROM_CANDIDATE = 'Loans made by candidate'
+OTHER_LOANS_RECEIVED = 'Other loans'
+LOANS_RECEIVED = 'Total loans received'
+OFFSETS_TO_FUNDRAISING_EXPENDITURES = 'Fund raising offsets'
+OFFSETS_TO_LEGAL_ACCOUNTING = 'Legal and accounting offsets'
+TOTAL_OFFSETS_TO_OPERATING_EXPENDITURES = 'Total offsets'
+
+# disbursements
+TRANSFERS_TO_OTHER_AUTHORIZED_COMMITTEE = 'Transfers to authorized committees'
+REPAYMENTS_LOANS_MADE_BY_CANDIDATE = 'Candidate loan repayments'
+REPAYMENTS_OTHER_LOANS = 'Other loan repayments'
+LOAN_REPAYMENTS_MADE = 'Total loan repayments'
+
+# House Senate
+# receipts
+TRANSFERS_FROM_OTHER_AUTHORIZED_COMMITTEE = 'Transfer from authorized committees'
+LOANS_MADE_BY_CANDIDATE = 'Loans made by candidate'
+ALL_OTHER_LOANS = 'Other loans'
+LOANS = 'Total loans received'
+
+# disbursements
+NET_OPERATING_EXPENDITURES = 'Net operating expenditures'
+TRANSFERS_TO_OTHER_AUTHORIZED_COMMITTEE = 'Transfers to authorized committees'
+LOAN_REPAYMENTS_CANDIDATE_LOANS = 'Candidate loan repayments'
+LOAN_REPAYMENTS_OTHER_LOANS = 'Other loan repayments'
+OTHER_DISBURSEMENTS = 'Other disbursements'
+
+# PAC and Party
+# Receipts
+TRANSFERS_FROM_AFFILIATED_PARTY = 'Transfers from affiliated committees'
+ALL_LOANS_RECEIVED = 'Loans received'
+LOAN_REPAYMENTS_RECEIVED = 'Loan repayments received'
+FED_CANDIDATE_CONTRIBUTION_REFUNDS = 'Candidate refunds'
+OTHER_FED_RECEIPTS = 'Other Receipts'
+TRANSFERS_FROM_NONFED_ACCOUNT = 'Non-federal transfers'
+TRANSFERS_FROM_NONFED_LEVIN = 'Levin funds'
+TRANSFERS_FROM_NONFED_ACCOUNT = 'Total non-federal transfers'
+FED_RECEIPTS = 'Total federal receipts'
+
+# disbursement
+SHARED_FED_OPERATING_EXPENDITURES = 'Federal allocated operating expenditures'
+SHARED_NONFED_OPERATING_EXPENDITURES = 'Non-federal operating expenditures'
+OTHER_FED_OPERATING_EXPENDITURES = 'Other federal operating expenditures'
+NET_OPERATING_EXPENDITURES = 'Net operating expenditures'
+TRANSFERS_TO_AFFILIATED_COMMITTEE = 'Transfers to affiliated committees'
+FED_CANDIDATE_COMMITTEE_CONTRIBUTIONS = 'Contributions to other committees'
+INDEPENDENT_EXPENDITURES = 'Independent expenditures'
+COORDINATED_EXPENDITURES_BY_PARTY_COMMITTEE = 'Coordinated party expenditures'
+LOANS_MADE = 'Loans made'
+LOAN_REPAYMENTS_MADE = 'LOAN REPAYMENTS MADE'
+SHARED_FED_ACTIVITY = 'Allocated federal election activity - federal share'
+ALLOCATED_FEDERAL_ELECTION_LEVIN_SHARE = 'Allocated federal election activity - Levin share'
+NON_ALLOCATED_FED_ELECTION_ACTIVITY = 'Federal election activity - federal only'
+FED_ELECTION_ACTIVITY = 'Total federal election activity'
+FED_DISBURSEMENTS = 'Total federal disbursements'
