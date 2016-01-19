@@ -154,6 +154,7 @@ class CandidateHistoryView(ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
+            args.candidate_history,
             args.make_sort_args(
                 default='-two_year_period',
                 validator=args.IndexValidator(self.model),
