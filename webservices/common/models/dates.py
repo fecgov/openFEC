@@ -26,7 +26,7 @@ class ReportDate(db.Model):
 
     @property
     def report_type_full(self):
-        return clean_report_type(self.report.report_type_full, doc=docs.REPORT_TYPE)
+        return clean_report_type(self.report.report_type_full)
 
 
 REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')
@@ -54,7 +54,7 @@ class ElectionDate(db.Model):
 
     @property
     def election_type_full(self):
-        return decoders.election_types.get(self.election_type_id, doc=docs.ELECTION_TYPE)
+        return decoders.election_types.get(self.election_type_id)
 
 
 class ElectionClassDate(db.Model):
