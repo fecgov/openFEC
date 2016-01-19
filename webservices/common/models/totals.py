@@ -110,5 +110,5 @@ class CommitteeTotalsIEOnly(BaseModel):
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
     coverage_start_date = db.Column(db.DateTime, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.DateTime, doc=docs.COVERAGE_END_DATE)
-    total_independent_contributions = db.Column(db.Integer, doc=make_generic_def('total_independent_contributions'))
-    total_independent_expenditures = db.Column(db.Integer, doc=make_generic_def('total_independent_expenditures'))
+    total_independent_contributions = db.Column(db.Integer, doc=docs.make_generic_def('total_independent_contributions'))
+    total_independent_expenditures = db.Column(db.Integer, doc=docs.make_generic_def('total_independent_expenditures'))
