@@ -74,7 +74,7 @@ out contributor information in schedule_a.
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
 calls an hour. Each call is limited to 100 results per page. You can also discuss the data in the
 [FEC data google group](https://groups.google.com/forum/#!forum/fec-data) or post questions
-to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec).
+to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec). The model definations and schema are available at [/swagger](/swagger/). This is useful for making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
