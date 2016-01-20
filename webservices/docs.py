@@ -469,3 +469,17 @@ An electioneering communication is any broadcast, cable or satellite communicati
 - The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office.
 '''
 
+COMMUNICATION_COST = '''
+52 U.S.C. 30118 allows "communications by a corporation to its stockholders and
+executive or administrative personnel and their families or by a labor organization
+to its members and their families on any subject," including the express advocacy of
+the election or defeat of any Federal candidate.  The costs of such communications
+must be reported to the Federal Election Commission under certain circumstances.
+'''
+
+ELECTIONEERING_COST = '''
+An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
+* The communication refers to a clearly identified candidate for federal office;
+* The communication is publicly distributed shortly before an election for the office that candidate is seeking; and
+* The communication is targeted to the relevant electorate (U.S. House and Senate candidates only).
+'''
