@@ -7,17 +7,15 @@ with disbursements as (
 )
 select
     row_number() over () as idx,
-    f9.filer_cmte_id as cmte_id,
-    f9.cand_id,
-    sum(disb.disb_amt) as total,
-    count(disb.disb_amt) as count,
-    disb.rpt_yr + disb.rpt_yr % 2 as cycle
-from form_94 f9
-join disbursements disb using (link_id)
-where disb.rpt_yr >= :START_YEAR
+    cmte_id,
+    cand_id,
+    sum(calculated_cand_share) as total,
+    count(calculated_cand_share) as count,
+    rpt_yr + rpt_yr % 2 as cycle
+from electioneering_com_vw
 group by
-    f9.filer_cmte_id,
-    f9.cand_id,
+    cmte_id,
+    cand_id,
     cycle
 ;
 
