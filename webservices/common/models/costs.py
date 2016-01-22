@@ -41,39 +41,16 @@ class Electioneering(db.Model):
     candidate_office = db.Column('cand_office', db.String, index=True)
     candidate_district = db.Column('cand_office_district', db.String, index=True)
     candidate_state = db.Column('cand_office_st', db.String, index=True)
-    ### would be nice to add these back
-    # election_type = db.Column('election_tp', db.String, index=True)
-    # election_type_full = db.Column('fec_election_tp_desc', db.String)
-    ### amendments have already been applied
-    # amendment_indicator = db.Column('amndt_ind', db.String, index=True)
-    # back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
-    # back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
-    ### what is the unique identifier for this table?
-    # tran_id = db.Column(db.String)
     beginning_image_number = db.Column('f9_begin_image_num', db.String, index=True)
     sb_image_num = db.Column(db.String, index=True)
-    # ending_image_number = db.Column('end_image_num', db.String)
-    # don't know what this is
-    # form_slot = db.Column(db.String)
-    # need this
-    # receipt_date = db.Column('receipt_dt', db.Date, index=True)
-    # original_sub_id = db.Column('orig_sub_id', db.Integer)
-    # would like this
-    # file_number = db.Column('file_num', db.Integer)
-    sub_id = db.Column(db.Integer)
+    sub_id = db.Column(db.Integer, doc="The identifier for each electioneering record")
     link_id = db.Column(db.Integer)
-    # is this similar to transaction_id?
     sb_link_id = db.Column(db.String, index=True)
-    # transaction_id = db.Column(db.Integer)
-    # filing_type = db.Column(db.String, index=True)
-    # load_date = db.Column(db.DateTime)
-    # update_date = db.Column(db.DateTime)
     number_of_candidates = db.Column(db.String)
-    calculated_candidate_share = db.Column('calculated_cand_share', db.String)
-    # difference between communication and public distribution dates?
-    communicaion_date = db.Column('comm_dt', db.DateTime)
-    public_distribion_date = db.Column('pub_distrib_dt', db.DateTime)
-    disbursement_date = db.Column('disb_dt', db.DateTime)
+    calculated_candidate_share = db.Column('calculated_cand_share', db.String, doc="If an electioneering cost targets several candidates, the total cost is divided by the number of candidates. If it only mentions one candidate the full cost of the communication is listed.")
+    communicaion_date = db.Column('comm_dt', db.DateTime, doc='It is the airing, broadcast, cablecast or other dissemination of the communication')
+    public_distribion_date = db.Column('pub_distrib_dt', db.DateTime, doc='The pubic distribution date is the date that triggers disclosure of the electioneering communication (date reported on page 1 of Form 9)')
+    disbursement_date = db.Column('disb_dt', db.DateTime, doc='Disbursement date includes actual disbursements and execution of contracts creating an obligation to make disbursements (SB date of disbursement)')
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
     #TODO: add tsvector field
     purpose_description = db.Column('disb_desc', db.String)
@@ -81,3 +58,11 @@ class Electioneering(db.Model):
 
     committee = utils.related_committee('committee_id')
     candidate = utils.related_candidate('candidate_id')
+
+    ### would be nice to add these back
+    # election_type
+    # election_type_full
+    # amendment_indicator
+    # file_number
+    # receipt_date
+    # form_number doc='Form number is the file number (or report id)'
