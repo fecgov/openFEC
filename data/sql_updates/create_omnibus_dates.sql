@@ -1,9 +1,9 @@
 -- Trying to make the names flow together as best as possible
--- To keep the titles consice states are abbreviated as multi state if there is more than one
+-- To keep the titles concise states are abbreviated as multi state if there is more than one
 -- Like:
     -- House General Election FL
     -- DEM Convention NH
-    -- General Elecion Multi-state
+    -- General Election Multi-state
 create or replace function generate_election_title(trc_election_type_id text, office_sought text, election_states text[], party text)
 returns text as $$
     begin
@@ -54,7 +54,6 @@ $$ language plpgsql;
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections as (
-    -- Select all elections, grouping by...
     select
         'election-' || trc_election_type_id as category,
         generate_election_title(
@@ -91,10 +90,8 @@ with elections as (
 ), reports as (
     select
         'report-' || report_type as category,
-        replace(
-            name_reports(office_sought::text, report_type::text, rpt_tp_desc::text),
-            ' {One of 4 valid Report Codes on Form 5, RptCode} ',
-            ''
+        clean_report(
+            name_reports(office_sought::text, report_type::text, rpt_tp_desc::text)
         ) as description,
         array_to_string(array[
             expand_office_description(office_sought::text),
@@ -121,7 +118,7 @@ with elections as (
         office_sought
 ), other as (
     select distinct on (category_name, event_name, description, location, start_date, end_date)
-        -- Select the events from the calandar that are not created by a formula in a different table
+        -- Select the events from the calendar that are not created by a formula in a different table
         category_name as category,
         event_name::text as description,
         description::text as summary,
