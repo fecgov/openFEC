@@ -395,6 +395,25 @@ schedule_e_by_candidate = {
     ),
 }
 
+communication_cost = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'support_oppose_indicator': fields.List(
+        IStr(validate=validate.OneOf(['S', 'O'])),
+        description='Support or opposition',
+    ),
+}
+
+electioneering = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+    'min_date': fields.Date(description='Minimum disbursement date'),
+    'max_date': fields.Date(description='Maximum disbursement date'),
+}
+
 electioneering_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
