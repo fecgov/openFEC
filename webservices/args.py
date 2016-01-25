@@ -406,6 +406,7 @@ schedule_b = {
     'disbursement_description': fields.Str(description='Description of disbursement'),
     'recipient_city': fields.List(IStr, description='City of recipient'),
     'recipient_state': fields.List(IStr, description='State of recipient'),
+    'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
     'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, use the `disbursement_date` of the last result and pass it here as `last_disbursement_date` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, use the `disbursement_amount` of the last result and pass it here as `last_disbursement_amount` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
 }
@@ -423,6 +424,25 @@ schedule_e_by_candidate = {
         validate=validate.OneOf(['S', 'O']),
         description='Support or opposition'
     ),
+}
+
+communication_cost = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'support_oppose_indicator': fields.List(
+        IStr(validate=validate.OneOf(['S', 'O'])),
+        description='Support or opposition',
+    ),
+}
+
+electioneering = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+    'min_date': fields.Date(description='Minimum disbursement date'),
+    'max_date': fields.Date(description='Maximum disbursement date'),
 }
 
 electioneering_by_candidate = {
