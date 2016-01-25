@@ -331,12 +331,12 @@ calendar_dates = {
     ),
     'description': fields.Str(description='Brief description of event'),
     'summary': fields.Str(description='Longer description of event'),
-    'state': fields.List(fields.Str, description='Two letter abbreviation of the states that an election or reporting period apply to.'),
-    'min_start_date': fields.DateTime(description='The minimum start date and time.'),
-    'min_end_date': fields.DateTime(description='The minimum end date and time, it can be null.'),
-    'max_start_date': fields.DateTime(description='The maximum start date and time.'),
-    'max_end_date': fields.DateTime(description='The maximum end date and time, it can be null.'),
-    'event_id': fields.Int(description='An unique id for an event. Useful for downloading a singe event to your calendar. This id is based on the row number, so this is not a permanent, persistent id.'),
+    'state': fields.List(fields.Str, description='Two letter abbreviation of the states that an election or reporting period applies to'),
+    'min_start_date': fields.DateTime(description='The minimum start date and time'),
+    'min_end_date': fields.DateTime(description='The minimum end date and time'),
+    'max_start_date': fields.DateTime(description='The maximum start date and time'),
+    'max_end_date': fields.DateTime(description='The maximum end date and time'),
+    'event_id': fields.Int(description='An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'),
 }
 
 schedule_a = {

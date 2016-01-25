@@ -9,11 +9,11 @@ end
 $$ language plpgsql;
 
 
--- There are weird explainations in the dimpreport table that appear in curly braces
+-- These fields include additional descriptions in curly braces that we don't want to show in the dimreporttype table that appear in curly braces. Like: { one of 4 codes }
 create or replace function clean_report(report text)
 returns text as $$
 begin
-	return regexp_replace(report, '\{[^)]*\}', '');
+	return regexp_replace(report, ' {.*}', '');
 end
 $$ language plpgsql;
 
