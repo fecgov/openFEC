@@ -34,10 +34,9 @@ class Electioneering(db.Model):
     __tablename__ = 'ofec_electioneering_mv'
 
     idx = db.Column(db.Integer, primary_key=True)
-    form_type = db.Column('form_tp', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
     candidate_id = db.Column('cand_id', db.String, index=True)
-    candidate_name = db.Column('cand_name', db.String, index=True)
+    candidate_name = db.Column('cand_name', db.String)
     candidate_office = db.Column('cand_office', db.String, index=True)
     candidate_district = db.Column('cand_office_district', db.String, index=True)
     candidate_state = db.Column('cand_office_st', db.String, index=True)
@@ -45,11 +44,11 @@ class Electioneering(db.Model):
     sb_image_num = db.Column(db.String, index=True)
     sub_id = db.Column(db.Integer, doc="The identifier for each electioneering record")
     link_id = db.Column(db.Integer)
-    sb_link_id = db.Column(db.String, index=True)
+    sb_link_id = db.Column(db.String)
     number_of_candidates = db.Column(db.Numeric)
     calculated_candidate_share = db.Column('calculated_cand_share', db.Numeric, doc="If an electioneering cost targets several candidates, the total cost is divided by the number of candidates. If it only mentions one candidate the full cost of the communication is listed.")
     communication_date = db.Column('comm_dt', db.DateTime, doc='It is the airing, broadcast, cablecast or other dissemination of the communication')
-    public_distribtion_date = db.Column('pub_distrib_dt', db.DateTime, doc='The pubic distribution date is the date that triggers disclosure of the electioneering communication (date reported on page 1 of Form 9)')
+    public_distribution_date = db.Column('pub_distrib_dt', db.DateTime, doc='The pubic distribution date is the date that triggers disclosure of the electioneering communication (date reported on page 1 of Form 9)')
     disbursement_date = db.Column('disb_dt', db.DateTime, doc='Disbursement date includes actual disbursements and execution of contracts creating an obligation to make disbursements (SB date of disbursement)')
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
     #TODO: add tsvector field
