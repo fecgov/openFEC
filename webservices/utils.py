@@ -93,17 +93,11 @@ def extend(*dicts):
     return ret
 
 
-def search_text(query, column, text):
-    """
-
-    :param order: Order results by text similarity, descending; prohibitively
-        slow for large collections
-    """
-    vector = ' & '.join([
+def parse_fulltext(text):
+    return ' & '.join([
         part + ':*'
         for part in re.sub(r'\W', ' ', text).split()
     ])
-    return query.filter(column.match(vector))
 
 
 office_args_required = ['office', 'cycle']

@@ -25,6 +25,16 @@ def filter_range(query, kwargs, fields):
             query = query.filter(column <= kwargs[max_key])
     return query
 
+def filter_fulltext(query, kwargs, fields):
+    for key, column in fields:
+        if kwargs.get(key):
+            filters = [
+                column.match(utils.parse_fulltext(value))
+                for value in kwargs[key]
+            ]
+            query = query.filter(sa.or_(*filters))
+    return query
+
 def filter_contributor_type(query, column, kwargs):
     if kwargs.get('contributor_type') == ['individual']:
         return query.filter(column == 'IND')
