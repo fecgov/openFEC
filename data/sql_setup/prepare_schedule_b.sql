@@ -22,6 +22,7 @@ create index on ofec_sched_b_tmp (sched_b_sk);
 create index on ofec_sched_b_tmp (recipient_st);
 create index on ofec_sched_b_tmp (recipient_city);
 create index on ofec_sched_b_tmp (clean_recipient_cmte_id);
+create index on ofec_sched_b_tmp (disbursement_purpose_category);
 
 -- Create composite indices on sortable columns
 create index on ofec_sched_b_tmp (disb_dt, sched_b_sk);

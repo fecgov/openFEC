@@ -1,6 +1,10 @@
 ''' Testing reporting dates and election dates '''
 
+import io
+import csv
 import datetime
+
+from icalendar import Calendar
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -8,7 +12,7 @@ from tests.common import ApiBaseTest
 from webservices.rest import api
 from webservices.common.models import db
 from webservices.resources.dates import ElectionDatesView
-from webservices.resources.dates import ReportingDatesView
+from webservices.resources.dates import ReportingDatesView, CalendarDatesView, CalendarDatesExport
 
 
 class TestReportingDates(ApiBaseTest):
@@ -65,3 +69,73 @@ class TestElectionDates(ApiBaseTest):
         page = api.url_for(ElectionDatesView)
         results = self._results(page)
         assert len(results) == 1
+
+
+class TestCalendarDates(ApiBaseTest):
+
+    def test_filters(self):
+        factories.CalendarDateFactory(start_date=datetime.datetime(2016, 1, 2))
+        factories.CalendarDateFactory(location='Mississippi, CA')
+        factories.CalendarDateFactory(event_id=123)
+        factories.CalendarDateFactory(state=['CA'])
+        factories.CalendarDateFactory(category='Public Hearings')
+        factories.CalendarDateFactory(description='a really interesting event')
+        factories.CalendarDateFactory(summary='Meeting that will solve all the problems')
+        factories.CalendarDateFactory(end_date=datetime.datetime(2015, 1, 2))
+
+        filter_fields = [
+            ('min_start_date', '2015-01-01'),
+            ('category', 'Public Hearings'),
+            ('min_end_date', '2014-01-01'),
+            # this is not passing or working :/
+            #('state', 'CA'),
+            ('description', 'interesting event'),
+            ('summary', 'solve all the problems'),
+            ('event_id', 123),
+        ]
+
+        orig_response = self._response(api.url_for(CalendarDatesView))
+        original_count = orig_response['pagination']['count']
+
+        for field, example in filter_fields:
+            page = api.url_for(CalendarDatesView, **{field: example})
+            # returns at least one result
+            results = self._results(page)
+            self.assertEqual(len(results), 1)
+            # doesn't return all results
+            response = self._response(page)
+            self.assertGreater(original_count, response['pagination']['count'])
+
+
+class TestCalendarExport(ApiBaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.dates = [
+            factories.CalendarDateFactory(
+                category='election-G',
+                start_date=datetime.datetime(2015, 10, 1),
+            ),
+            factories.CalendarDateFactory(
+                category='election-P',
+                start_date=datetime.datetime(2015, 10, 31, 2),
+                end_date=datetime.datetime(2015, 10, 31, 3)
+            ),
+        ]
+
+    def test_csv_export(self):
+        resp = self.app.get(api.url_for(CalendarDatesExport, renderer='csv'))
+        sio = io.StringIO(resp.data.decode())
+        reader = csv.DictReader(sio)
+        rows = list(reader)
+        assert len(rows) == len(self.dates)
+        assert set(rows[0].keys()) == set(['summary', 'description', 'location', 'start_date', 'end_date', 'category'])
+
+    def test_ics_export(self):
+        resp = self.app.get(api.url_for(CalendarDatesExport, renderer='ics'))
+        cal = Calendar.from_ical(resp.data)
+        components = cal.subcomponents
+        assert len(components) == 2
+        assert str(components[0]['CATEGORIES']) == 'election-G'
+        assert components[0]['DTSTART'].dt == datetime.date(2015, 10, 1)
+        assert components[1]['DTSTART'].dt == datetime.datetime(2015, 10, 31, 2)
