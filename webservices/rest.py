@@ -166,6 +166,8 @@ api.add_resource(elections.ElectionList, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
+api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
+api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -256,7 +258,7 @@ apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
-
+apidoc.register(dates.CalendarDatesView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

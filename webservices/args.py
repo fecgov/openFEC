@@ -15,14 +15,8 @@ def _validate_natural(value):
 
 Natural = functools.partial(fields.Int, validate=_validate_natural)
 
-def _validate_per_page(value):
-    _validate_natural(value)
-    if value > 100:
-        raise ValidationError('Must be less than 100')
-
 per_page = Natural(
     missing=20,
-    validate=_validate_per_page,
     description='The number of results returned per page. Defaults to 20.',
 )
 
@@ -307,6 +301,42 @@ election_dates = {
     'election_year': fields.List(fields.Str, description='Year of election'),
     'min_primary_general_date': fields.Date(description='Date of primary or general election'),
     'max_primary_general_date': fields.Date(description='Date of primary or general election'),
+}
+
+class MappedList(fields.List):
+
+    def __init__(self, cls_or_instance, mapping=None, **kwargs):
+        super().__init__(cls_or_instance, **kwargs)
+        self.mapping = mapping or {}
+
+    def _deserialize(self, value, attr, data):
+        ret = super()._deserialize(value, attr, data)
+        return sum(
+            [self.mapping.get(each, [each]) for each in ret],
+            [],
+        )
+
+calendar_dates = {
+    'category': MappedList(
+        fields.Str,
+        description='Type of date reporting date, live event, etc.',
+        mapping={
+            'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)] + ['report-YE'],
+            'report-M': ['report-M{}'.format(each) for each in range(2, 13)] + ['report-YE'],
+            'report-E': [
+                'report-{}'.format(each)
+                for each in ['12C', '12G', '12GR', '12P', '12PR', '12R', '12S', '12SC', '12SG', '12SGR', '12SP', '12SPR', '30D', '30G', '30GR', '30P', '30R', '30S', '30SC', '30SG', '30SGR', '60D']
+            ],
+        },
+    ),
+    'description': fields.Str(description='Brief description of event'),
+    'summary': fields.Str(description='Longer description of event'),
+    'state': fields.List(fields.Str, description='Two letter abbreviation of the states that an election or reporting period applies to'),
+    'min_start_date': fields.DateTime(description='The minimum start date and time'),
+    'min_end_date': fields.DateTime(description='The minimum end date and time'),
+    'max_start_date': fields.DateTime(description='The maximum start date and time'),
+    'max_end_date': fields.DateTime(description='The maximum end date and time'),
+    'event_id': fields.Int(description='An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'),
 }
 
 schedule_a = {
