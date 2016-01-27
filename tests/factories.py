@@ -5,6 +5,8 @@ import sqlalchemy as sa
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
+import sqlalchemy as sa
+
 from webservices.rest import db
 from webservices.common import models
 
@@ -239,6 +241,16 @@ class ReportTypeFactory(BaseFactory):
 class ReportDateFactory(BaseFactory):
     class Meta:
         model = models.ReportDate
+
+
+class CalendarDateFactory(BaseFactory):
+    class Meta:
+        model = models.CalendarDate
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.summary_text = sa.func.to_tsvector(obj.summary)
+        obj.description_text = sa.func.to_tsvector(obj.description)
 
 
 class ElectionDateFactory(BaseFactory):

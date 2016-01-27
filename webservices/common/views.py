@@ -25,6 +25,7 @@ class ApiResource(utils.Resource):
     query_options = []
     join_columns = {}
     aliases = {}
+    cap = 100
 
     @use_kwargs(Ref('args'))
     @marshal_with(Ref('page_schema'))
@@ -34,7 +35,7 @@ class ApiResource(utils.Resource):
         return utils.fetch_page(
             query, kwargs,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
-            index_column=self.index_column,
+            index_column=self.index_column, cap=self.cap,
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
@@ -45,6 +46,12 @@ class ApiResource(utils.Resource):
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         if _apply_options:
             query = query.options(*self.query_options)
+        return query
+
+    def filter_fulltext(self, query, kwargs):
+        for key, column in self.filter_fulltext_fields:
+            if kwargs.get(key):
+                query = utils.search_text(query, column, kwargs[key])
         return query
 
 
@@ -70,7 +77,7 @@ class ItemizedResource(ApiResource):
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
         """Build and compose per-committee subqueries using `UNION ALL`.
