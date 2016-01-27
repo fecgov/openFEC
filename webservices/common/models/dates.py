@@ -1,8 +1,10 @@
 import re
 
+from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+
 from webservices import decoders
 
-from .base import db
+from .base import db, BaseModel
 
 
 class ReportType(db.Model):
@@ -73,3 +75,19 @@ class ElectionClassDate(db.Model):
     cycle_end_date = db.Column('cycle_end_dt', db.Date)
     election_date = db.Column('election_dt', db.Date)
     senate_class = db.Column(db.Integer, index=True)
+
+
+class CalendarDate(BaseModel):
+    __tablename__ = 'ofec_omnibus_dates_mv'
+
+    event_id = db.Column('idx', db.Integer, primary_key=True)
+    summary = db.Column(db.String)
+    description = db.Column(db.Text)
+    category = db.Column(db.String, index=True)
+    state = db.Column('states', ARRAY(db.String), index=True)
+    location = db.Column(db.String, index=True)
+    start_date = db.Column(db.DateTime, index=True)
+    end_date = db.Column(db.DateTime, index=True)
+
+    summary_text = db.Column(TSVECTOR)
+    description_text = db.Column(TSVECTOR)
