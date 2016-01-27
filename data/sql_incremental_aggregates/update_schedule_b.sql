@@ -9,7 +9,8 @@ begin
     insert into ofec_sched_b(
         select distinct on(sched_b_sk)
             new.*,
-            to_tsvector(new.recipient_nm) as recipient_name_text,
+            to_tsvector(new.recipient_nm) || to_tsvector(coalesce(clean_repeated(new.recipient_cmte_id, new.cmte_id), ''))
+                as recipient_name_text,
             to_tsvector(new.disb_desc) as disbursement_description_text,
             disbursement_purpose(new.disb_tp, new.disb_desc) as disbursement_purpose_category,
             clean_repeated(new.recipient_cmte_id, new.cmte_id) as clean_recipient_cmte_id
