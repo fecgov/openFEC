@@ -480,6 +480,12 @@ schedule_a_candidate_aggregate = {
 totals_candidate_aggregate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'election_full': election_full,
+    'state': fields.List(IStr, description='State of candidate'),
+    'party': fields.List(IStr, description='Three-letter party code'),
+    'min_receipts': fields.Int('Minimum aggregated receipts'),
+    'max_receipts': fields.Int('Maximum aggregated receipts'),
+    'min_disbursements': fields.Int('Minimum aggregated disbursements'),
+    'max_disbursements': fields.Int('Maximum aggregated disbursements'),
 }
 
 communication_cost_by_candidate = {

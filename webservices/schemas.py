@@ -456,6 +456,7 @@ class TotalsCandidateSchema(ma.Schema):
     disbursements = ma.fields.Decimal(places=2)
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     debts_owed_by_committee = ma.fields.Decimal(places=2)
+    party = ma.fields.Str()
 
 augment_schemas(
     ScheduleABySizeCandidateSchema,
