@@ -3,6 +3,7 @@ from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
 from webservices.common import models
@@ -178,3 +179,49 @@ class TotalsCandidateView(utils.Resource):
         ).group_by(
             latest.c.cand_id,
         )
+
+class TotalsCandidateHistoryView(utils.Resource):
+
+    def filter_multi_fields(self, model):
+        return [
+            ('party', model.party),
+            ('state', model.state),
+        ]
+
+    def filter_range_fields(self, model):
+        return [
+            (('min_receipts', 'max_receipts'), model.receipts),
+            (('min_disbursements', 'max_disbursements'), model.disbursements),
+        ]
+
+    @use_kwargs(args.paging)
+    @use_kwargs(args.make_sort_args())
+    @use_kwargs(args.totals_candidate_aggregate)
+    @marshal_with(schemas.TotalsCandidatePageSchema())
+    def get(self, office, cycle, **kwargs):
+        query = self.build_query(office, cycle, **kwargs)
+        return utils.fetch_page(query, kwargs)
+
+    def build_query(self, office, cycle, **kwargs):
+        if kwargs.get('election_full'):
+            history = models.CandidateHistoryLatest
+            totals = sa.Table('ofec_candidate_election_aggregate_mv', db.metadata, autoload_with=db.engine)
+        else:
+            history = models.CandidateHistory
+            totals = sa.Table('ofec_candidate_aggregate_mv', db.metadata, autoload_with=db.engine)
+        query = db.session.query(
+            history.__table__,
+            totals,
+        ).join(
+            totals,
+            sa.and_(
+                history.candidate_id == totals.c.cand_id,
+                history.two_year_period == totals.c.cycle,
+            )
+        ).filter(
+            history.office == office,
+            history.two_year_period == cycle,
+        )
+        query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history))
+        query = filters.filter_range(query, kwargs, self.filter_range_fields(totals.c))
+        return query
