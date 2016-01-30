@@ -2,7 +2,7 @@ drop materialized view if exists ofec_communication_cost_mv_tmp;
 create materialized view ofec_communication_cost_mv_tmp as
 select
     *,
-    to_date(transaction_dt::text, 'YYYYMMDD') as _transaction_dt,
+    date_or_null(transaction_dt::text, 'YYYYMMDD') as _transaction_dt,
     row_number() over () as idx
 from communication_costs_vw
 where rpt_yr >= :START_YEAR
