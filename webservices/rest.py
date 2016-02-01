@@ -192,10 +192,8 @@ add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
 
-api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidate/<candidate_id>/totals/')
-
-api.add_resource(candidate_aggregates.TotalsCandidateHistoryView, '/candidates/history/aggregate/<office>/<cycle>/')
-api.add_resource(committees.TotalsCommitteeHistoryView, '/committees/history/aggregate/<cycle>/')
+api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
+api.add_resource(committees.TotalsCommitteeHistoryView, '/committees/totals/')
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,

@@ -97,6 +97,17 @@ class CandidateHistoryLatest(BaseCandidate):
     candidate_inactive = db.Column(db.Boolean)
 
 
+class CandidateTotal(db.Model):
+    __tablename__ = 'ofec_candidate_totals_mv'
+    candidate_id = db.Column(db.String, index=True, primary_key=True)
+    cycle = db.Column(db.Integer, index=True, primary_key=True)
+    is_election = db.Column(db.Boolean, index=True, primary_key=True)
+    receipts = db.Column(db.Numeric(30, 2), index=True)
+    disbursements = db.Column(db.Numeric(30, 2), index=True)
+    cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
+    debts_owed_by_committee = db.Column(db.Numeric(30, 2))
+
+
 class CandidateElection(db.Model):
     __tablename__ = 'ofec_candidate_election_mv'
 
