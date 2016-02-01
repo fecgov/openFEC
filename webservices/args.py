@@ -488,6 +488,13 @@ totals_candidate_aggregate = {
     'max_disbursements': fields.Int('Maximum aggregated disbursements'),
 }
 
+totals_committee_aggregate = {
+    'min_receipts': fields.Int('Minimum aggregated receipts'),
+    'max_receipts': fields.Int('Maximum aggregated receipts'),
+    'min_disbursements': fields.Int('Minimum aggregated disbursements'),
+    'max_disbursements': fields.Int('Maximum aggregated disbursements'),
+}
+
 communication_cost_by_candidate = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
