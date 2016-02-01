@@ -147,6 +147,7 @@ augment_models(
     models.Candidate,
     models.CandidateDetail,
     models.CandidateHistory,
+    models.CandidateTotal,
 )
 
 CandidateSearchSchema = make_schema(
@@ -449,15 +450,6 @@ class ScheduleAByContributorTypeCandidateSchema(ma.Schema):
     total = ma.fields.Decimal(places=2)
     individual = ma.fields.Bool()
 
-class TotalsCandidateSchema(ma.Schema):
-    candidate_id = ma.fields.Str()
-    cycle = ma.fields.Int()
-    receipts = ma.fields.Decimal(places=2)
-    disbursements = ma.fields.Decimal(places=2)
-    cash_on_hand_end_period = ma.fields.Decimal(places=2)
-    debts_owed_by_committee = ma.fields.Decimal(places=2)
-    party = ma.fields.Str()
-
 class TotalsCommitteeSchema(schemas['CommitteeHistorySchema']):
     receipts = ma.fields.Decimal(places=2)
     disbursements = ma.fields.Decimal(places=2)
@@ -469,7 +461,6 @@ augment_schemas(
     ScheduleABySizeCandidateSchema,
     ScheduleAByStateCandidateSchema,
     ScheduleAByContributorTypeCandidateSchema,
-    TotalsCandidateSchema,
     TotalsCommitteeSchema,
 )
 

@@ -477,7 +477,8 @@ schedule_a_candidate_aggregate = {
     'election_full': election_full,
 }
 
-totals_candidate_aggregate = {
+candidate_totals = {
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'election_full': election_full,
     'state': fields.List(IStr, description='State of candidate'),

@@ -6,6 +6,7 @@ from webservices import utils
 from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
+from webservices.common.views import ApiResource
 from webservices.common import models
 from webservices.common.models import (
     CandidateElection, CandidateCommitteeLink,
@@ -116,74 +117,23 @@ class ScheduleAByStateCandidateView(utils.Resource):
         return utils.fetch_page(query, kwargs, cap=0)
 
 
-totals_model_map = {
-    'P': models.CommitteeTotalsPresidential,
-    'S': models.CommitteeTotalsHouseSenate,
-    'H': models.CommitteeTotalsHouseSenate,
-}
+class TotalsCandidateView(ApiResource):
 
-@doc(
-    tags=['schedules/schedule_a'],
-    description='Schedule A receipts aggregated by contributor state.',
-)
-class TotalsCandidateView(utils.Resource):
+    page_schema = schemas.CandidateTotalPageSchema
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.make_sort_args())
-    @use_kwargs(args.totals_candidate_aggregate)
-    @marshal_with(schemas.TotalsCandidatePageSchema())
-    def get(self, candidate_id, **kwargs):
-        totals_model = totals_model_map[candidate_id[0]]
-        kwargs['candidate_id'] = [candidate_id]
-        rows, aggregates = self._get_aggregates(kwargs, totals_model)
-        latest = self._get_latest(rows, totals_model).subquery()
-        aggregates = aggregates.subquery()
-        query = db.session.query(
-            aggregates,
-            latest,
-        ).join(
-            latest,
-            aggregates.c.cand_id == latest.c.cand_id,
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.candidate_totals,
+            args.make_sort_args(),
         )
-        return utils.fetch_page(query, kwargs)
-
-    def _get_aggregates(self, kwargs, totals_model):
-        return candidate_aggregate(
-            totals_model,
-            [
-                sa.func.sum(totals_model.receipts).label('receipts'),
-                sa.func.sum(totals_model.disbursements).label('disbursements'),
-            ],
-            [],
-            kwargs,
-        )
-
-    def _get_latest(self, rows, totals_model):
-        latest = rows.with_entities(
-            CandidateCommitteeLink.candidate_id,
-            CandidateCommitteeLink.committee_id,
-            totals_model.last_cash_on_hand_end_period,
-            totals_model.last_debts_owed_by_committee,
-        ).distinct(
-            CandidateCommitteeLink.candidate_id,
-            CandidateCommitteeLink.committee_id,
-        ).order_by(
-            CandidateCommitteeLink.candidate_id,
-            CandidateCommitteeLink.committee_id,
-            sa.desc(CandidateCommitteeLink.fec_election_year)
-        ).subquery()
-        return db.session.query(
-            latest.c.cand_id,
-            sa.func.sum(latest.c.last_cash_on_hand_end_period).label('cash_on_hand_end_period'),
-            sa.func.sum(latest.c.last_debts_owed_by_committee).label('debts_owed_by_committee'),
-        ).group_by(
-            latest.c.cand_id,
-        )
-
-class TotalsCandidateHistoryView(utils.Resource):
 
     def filter_multi_fields(self, model):
         return [
+            ('candidate_id', model.candidate_id),
+            ('cycle', model.two_year_period),
+            ('office', model.office),
             ('party', model.party),
             ('state', model.state),
         ]
@@ -194,34 +144,24 @@ class TotalsCandidateHistoryView(utils.Resource):
             (('min_disbursements', 'max_disbursements'), model.disbursements),
         ]
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.make_sort_args())
-    @use_kwargs(args.totals_candidate_aggregate)
-    @marshal_with(schemas.TotalsCandidatePageSchema())
-    def get(self, office, cycle, **kwargs):
-        query = self.build_query(office, cycle, **kwargs)
-        return utils.fetch_page(query, kwargs)
-
-    def build_query(self, office, cycle, **kwargs):
-        if kwargs.get('election_full'):
-            history = models.CandidateHistoryLatest
-            totals = sa.Table('ofec_candidate_election_aggregate_mv', db.metadata, autoload_with=db.engine)
-        else:
-            history = models.CandidateHistory
-            totals = sa.Table('ofec_candidate_aggregate_mv', db.metadata, autoload_with=db.engine)
+    def build_query(self, **kwargs):
+        history = (
+            models.CandidateHistoryLatest
+            if kwargs['election_full']
+            else models.CandidateHistory
+        )
         query = db.session.query(
             history.__table__,
-            totals,
+            models.CandidateTotal.__table__,
         ).join(
-            totals,
+            models.CandidateTotal,
             sa.and_(
-                history.candidate_id == totals.c.cand_id,
-                history.two_year_period == totals.c.cycle,
+                history.candidate_id == models.CandidateTotal.candidate_id,
+                history.two_year_period == models.CandidateTotal.cycle,
             )
         ).filter(
-            history.office == office,
-            history.two_year_period == cycle,
+            models.CandidateTotal.is_election == kwargs['election_full'],
         )
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history))
-        query = filters.filter_range(query, kwargs, self.filter_range_fields(totals.c))
+        query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         return query
