@@ -1,25 +1,3 @@
-drop materialized view if exists ofec_omnibus_dates_mv_tmp;
-
--- pre-processing to get the right district-state combos for House members and
--- the election doesn't exist if the status ID is not 1
-drop view if exists tmp_election_vw;
-create view tmp_election_vw as
-    select
-        *,
-        case
-            when office_sought = 'H' and election_district != ' ' then array_to_string(
-                array[
-                    election_state,
-                    election_district
-                ], '-')
-            else election_state
-        end as contest
-    from
-        trc_election
-    where
-        trc_election_status_id = 1
-;
-
 -- Trying to make the names flow together as best as possible
 -- To keep the titles concise states are abbreviated as multi state if there is more than one
 -- Like:
@@ -87,8 +65,24 @@ returns text as $$
 $$ language plpgsql;
 
 
+drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
-with elections as (
+with elections_raw as(
+    select
+        *,
+        case
+            when office_sought = 'H' and election_district != ' ' then array_to_string(
+                array[
+                    election_state,
+                    election_district
+                ], '-')
+            else election_state
+        end as contest
+    from
+        trc_election
+    where
+        trc_election_status_id = 1
+), elections as (
     select
         'election'::text as category,
         generate_election_title(
@@ -108,8 +102,8 @@ with elections as (
         election_date::timestamp as start_date,
         null::timestamp as end_date,
         null::text as url
-    from tmp_election_vw
-        left join dimparty dp on tmp_election_vw.election_party = dp.party_affiliation
+    from elections_raw
+        left join dimparty dp on elections_raw.election_party = dp.party_affiliation
     group by
         contest,
         office_sought,
@@ -119,7 +113,7 @@ with elections as (
 ), reports_raw as (
     select * from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
-    left join tmp_election_vw using (trc_election_id)
+    left join elections_raw using (trc_election_id)
     where coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
