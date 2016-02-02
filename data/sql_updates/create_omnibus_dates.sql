@@ -136,7 +136,8 @@ with elections_raw as(
         null::text as url
     from reports_raw
     group by
-        election_state,
+        -- need to access all the states, but not have them be unique
+        -- election_state,
         report_type,
         rpt_tp_desc,
         due_date,
