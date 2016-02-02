@@ -124,7 +124,7 @@ with elections_raw as(
         array_to_string(array[
             expand_office_description(office_sought::text),
             clean_report(rpt_tp_desc::text),
-            'Report (',
+            'Due, Report (',
             report_type::text,
             ') ',
             array_to_string(array_agg(election_state order by election_state)::text[], ', ')
@@ -136,15 +136,12 @@ with elections_raw as(
         null::text as url
     from reports_raw
     group by
-        -- need to access all the states, but not have them be unique
-        -- election_state,
         report_type,
         rpt_tp_desc,
         due_date,
         office_sought
 ), other as (
     select distinct on (category_name, event_name, description, location, start_date, end_date)
-        -- Select the events from the calendar that are not created by a formula in a different table
         category_name as category,
         event_name::text as description,
         description::text as summary,
