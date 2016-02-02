@@ -567,8 +567,6 @@ IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo c
 Filtering individuals is useful to make sure contributions are not double reported and in creating \
 breakdowns of the amount of money coming from individuals.'
 
-
-
 # schedule B
 RECIPIENT_NAME = 'Name of the entity receiving the disbursement'
 RECIPIENT_ID = 'The FEC identifier should be represented here if the entity receiving \
@@ -606,7 +604,7 @@ IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
 report.'
 
 
-# Reports and Totals that are straight forward
+# Reports and Totals
 
 def add_period(var):
     return var + ' total for the reporting period'
@@ -614,14 +612,6 @@ def add_period(var):
 
 def add_ytd(var):
     return var + ' total for the year to date'
-
-
-def make_generic_def(var):
-    var = var.replace('fed_', 'federal ')
-    var = var.replace('_', ' ')
-    var = var.replace('period', ' for the reporting period')
-    var = var.replace('ytd', ' for the year to date')
-    return var[:1].upper() + var[1:]
 
 # shared
 CASH_ON_HAND_BEGIN_PERIOD = 'Balance for the committee at the start of the two-year period'
@@ -654,3 +644,65 @@ OTHER_DISBURSEMENTS = 'Other disbursements'
 REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Political party refunds'
 CONTRIBUTION_REFUNDS = 'Total contribution refunds'
 REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
+
+
+# Presidential
+# receipts
+FEDERAL_FUNDS = 'Federal funds'
+TRANSFERS_FROM_AFFILIATED_COMMITTEE = 'Transfer from affiliated committees'
+LOANS_RECEIVED_FROM_CANDIDATE = 'Loans made by candidate'
+OTHER_LOANS_RECEIVED = 'Other loans'
+LOANS_RECEIVED = 'Total loans received'
+OFFSETS_TO_FUNDRAISING_EXPENDITURES = 'Fund raising offsets'
+OFFSETS_TO_LEGAL_ACCOUNTING = 'Legal and accounting offsets'
+TOTAL_OFFSETS_TO_OPERATING_EXPENDITURES = 'Total offsets'
+
+# disbursements
+TRANSFERS_TO_OTHER_AUTHORIZED_COMMITTEE = 'Transfers to authorized committees'
+REPAYMENTS_LOANS_MADE_BY_CANDIDATE = 'Candidate loan repayments'
+REPAYMENTS_OTHER_LOANS = 'Other loan repayments'
+LOAN_REPAYMENTS_MADE = 'Total loan repayments'
+
+# House Senate
+# receipts
+TRANSFERS_FROM_OTHER_AUTHORIZED_COMMITTEE = 'Transfer from authorized committees'
+LOANS_MADE_BY_CANDIDATE = 'Loans made by candidate'
+ALL_OTHER_LOANS = 'Other loans'
+LOANS = 'Total loans received'
+
+# disbursements
+NET_OPERATING_EXPENDITURES = 'Net operating expenditures'
+TRANSFERS_TO_OTHER_AUTHORIZED_COMMITTEE = 'Transfers to authorized committees'
+LOAN_REPAYMENTS_CANDIDATE_LOANS = 'Candidate loan repayments'
+LOAN_REPAYMENTS_OTHER_LOANS = 'Other loan repayments'
+OTHER_DISBURSEMENTS = 'Other disbursements'
+
+# PAC and Party
+# Receipts
+TRANSFERS_FROM_AFFILIATED_PARTY = 'Transfers from affiliated committees'
+ALL_LOANS_RECEIVED = 'Loans received'
+LOAN_REPAYMENTS_RECEIVED = 'Loan repayments received'
+FED_CANDIDATE_CONTRIBUTION_REFUNDS = 'Candidate refunds'
+OTHER_FED_RECEIPTS = 'Other Receipts'
+TRANSFERS_FROM_NONFED_ACCOUNT = 'Non-federal transfers'
+TRANSFERS_FROM_NONFED_LEVIN = 'Levin funds'
+TRANSFERS_FROM_NONFED_ACCOUNT = 'Total non-federal transfers'
+FED_RECEIPTS = 'Total federal receipts'
+
+# disbursement
+SHARED_FED_OPERATING_EXPENDITURES = 'Federal allocated operating expenditures'
+SHARED_NONFED_OPERATING_EXPENDITURES = 'Non-federal operating expenditures'
+OTHER_FED_OPERATING_EXPENDITURES = 'Other federal operating expenditures'
+NET_OPERATING_EXPENDITURES = 'Net operating expenditures'
+TRANSFERS_TO_AFFILIATED_COMMITTEE = 'Transfers to affiliated committees'
+FED_CANDIDATE_COMMITTEE_CONTRIBUTIONS = 'Contributions to other federal committees'
+INDEPENDENT_EXPENDITURES = 'Independent expenditures'
+COORDINATED_EXPENDITURES_BY_PARTY_COMMITTEE = 'Coordinated party expenditures'
+LOANS_MADE = 'Loans made'
+LOAN_REPAYMENTS_MADE = 'Loan repayments made'
+SHARED_FED_ACTIVITY = 'Allocated federal election activity - federal share'
+ALLOCATED_FEDERAL_ELECTION_LEVIN_SHARE = 'Allocated federal election activity - Levin share'
+NON_ALLOCATED_FED_ELECTION_ACTIVITY = 'Federal election activity - federal only'
+FED_ELECTION_ACTIVITY = 'Total federal election activity'
+FED_DISBURSEMENTS = 'Total federal disbursements'
+
