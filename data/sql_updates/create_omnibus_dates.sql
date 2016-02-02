@@ -136,6 +136,8 @@ with elections_raw as(
         null::text as url
     from reports_raw
     group by
+    -- states are being problematic
+        -- election_state,
         report_type,
         rpt_tp_desc,
         due_date,
