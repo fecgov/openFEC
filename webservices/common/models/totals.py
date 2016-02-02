@@ -1,20 +1,22 @@
 from .base import db, BaseModel
 
+from webservices import docs
+
 
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String)
-    cycle = db.Column(db.Integer, primary_key=True, index=True)
+    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
     offsets_to_operating_expenditures = db.Column(db.Integer)
     political_party_committee_contributions = db.Column(db.Integer)
     other_disbursements = db.Column(db.Integer)
     other_political_committee_contributions = db.Column(db.Integer)
-    individual_itemized_contributions = db.Column(db.Integer)
-    individual_unitemized_contributions = db.Column(db.Integer)
+    individual_itemized_contributions = db.Column(db.Integer, doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
+    individual_unitemized_contributions = db.Column(db.Integer, doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
     operating_expenditures = db.Column(db.Integer)
-    disbursements = db.Column(db.Integer)
-    contributions = db.Column(db.Integer)
+    disbursements = db.Column(db.Integer, doc=docs.DISBURSEMENTS)
+    contributions = db.Column(db.Integer, doc=docs.CONTRIBUTIONS)
     contribution_refunds = db.Column(db.Integer)
     individual_contributions = db.Column(db.Integer)
     refunded_individual_contributions = db.Column(db.Integer)
