@@ -620,6 +620,8 @@ COVERAGE_START_DATE = 'Beginning date of the reporting period'
 COVERAGE_END_DATE = 'Ending date of the reporting period'
 DEBTS_OWED_BY_COMMITTEE = 'Debts owed by the committee'
 DEBTS_OWED_TO_COMMITTEE = 'Debts owed to the committee'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals who\'s aggregate contributions total over $200 per individual per year.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals who\'s aggregate contributions total $200 or less per individual per year.'
 
 # shared receipts
 RECEIPTS = 'Receipt'
@@ -648,7 +650,7 @@ REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
 
 # Presidential
 # receipts
-FEDERAL_FUNDS = 'Federal funds'
+FEDERAL_FUNDS = 'Federal funds: Public funding of Presidential elections means that qualified Presidential candidates receive federal government funds to pay for the valid expenses of their political campaigns in both the primary and general elections.'
 TRANSFERS_FROM_AFFILIATED_COMMITTEE = 'Transfer from affiliated committees'
 LOANS_RECEIVED_FROM_CANDIDATE = 'Loans made by candidate'
 OTHER_LOANS_RECEIVED = 'Other loans'
