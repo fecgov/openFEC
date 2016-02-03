@@ -33,7 +33,7 @@ def execute_sql_file(path):
     with open(path) as fp:
         cmd = '\n'.join([
             line for line in fp.readlines()
-            if not line.startswith('--')
+            if not line.strip().startswith('--')
         ])
         db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
 

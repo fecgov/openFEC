@@ -226,6 +226,12 @@ class ScheduleBByPurposeView(AggregateResource):
 
 
 class CandidateAggregateResource(AggregateResource):
+
+    # Since candidate aggregates are aggregated on the fly, they don't have a
+    # consistent unique index. We nullify `index_column` to avoiding sorting
+    # on the unique index of the base model.
+    index_column = None
+
     @property
     def sort_args(self):
         return args.make_sort_args(

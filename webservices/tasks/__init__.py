@@ -29,7 +29,7 @@ app.conf.update(
     CELERYBEAT_SCHEDULE={
         'refresh': {
             'task': 'webservices.tasks',
-            'schedule': crontab(minute=0, hour=0),
+            'schedule': crontab(minute=0, hour=9),
         },
     }
 )

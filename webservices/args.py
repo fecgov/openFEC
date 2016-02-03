@@ -15,14 +15,8 @@ def _validate_natural(value):
 
 Natural = functools.partial(fields.Int, validate=_validate_natural)
 
-def _validate_per_page(value):
-    _validate_natural(value)
-    if value > 100:
-        raise ValidationError('Must be less than 100')
-
 per_page = Natural(
     missing=20,
-    validate=_validate_per_page,
     description='The number of results returned per page. Defaults to 20.',
 )
 
@@ -276,6 +270,42 @@ election_dates = {
     'max_primary_general_date': fields.Date(description='Date of primary or general election'),
 }
 
+class MappedList(fields.List):
+
+    def __init__(self, cls_or_instance, mapping=None, **kwargs):
+        super().__init__(cls_or_instance, **kwargs)
+        self.mapping = mapping or {}
+
+    def _deserialize(self, value, attr, data):
+        ret = super()._deserialize(value, attr, data)
+        return sum(
+            [self.mapping.get(each, [each]) for each in ret],
+            [],
+        )
+
+calendar_dates = {
+    'category': MappedList(
+        fields.Str,
+        description='Type of date reporting date, live event, etc.',
+        mapping={
+            'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)] + ['report-YE'],
+            'report-M': ['report-M{}'.format(each) for each in range(2, 13)] + ['report-YE'],
+            'report-E': [
+                'report-{}'.format(each)
+                for each in ['12C', '12G', '12GR', '12P', '12PR', '12R', '12S', '12SC', '12SG', '12SGR', '12SP', '12SPR', '30D', '30G', '30GR', '30P', '30R', '30S', '30SC', '30SG', '30SGR', '60D']
+            ],
+        },
+    ),
+    'description': fields.Str(description='Brief description of event'),
+    'summary': fields.Str(description='Longer description of event'),
+    'state': fields.List(fields.Str, description='Two letter abbreviation of the states that an election or reporting period applies to'),
+    'min_start_date': fields.DateTime(description='The minimum start date and time'),
+    'min_end_date': fields.DateTime(description='The minimum end date and time'),
+    'max_start_date': fields.DateTime(description='The maximum start date and time'),
+    'max_end_date': fields.DateTime(description='The maximum end date and time'),
+    'event_id': fields.Int(description='An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'),
+}
+
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
@@ -343,6 +373,7 @@ schedule_b = {
     'disbursement_description': fields.Str(description='Description of disbursement'),
     'recipient_city': fields.List(IStr, description='City of recipient'),
     'recipient_state': fields.List(IStr, description='State of recipient'),
+    'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
     'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, use the `disbursement_date` of the last result and pass it here as `last_disbursement_date` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, use the `disbursement_amount` of the last result and pass it here as `last_disbursement_amount` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
 }
@@ -360,6 +391,25 @@ schedule_e_by_candidate = {
         validate=validate.OneOf(['S', 'O']),
         description='Support or opposition'
     ),
+}
+
+communication_cost = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'support_oppose_indicator': fields.List(
+        IStr(validate=validate.OneOf(['S', 'O'])),
+        description='Support or opposition',
+    ),
+}
+
+electioneering = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'min_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+    'min_date': fields.Date(description='Minimum disbursement date'),
+    'max_date': fields.Date(description='Maximum disbursement date'),
 }
 
 electioneering_by_candidate = {
