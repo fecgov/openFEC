@@ -81,14 +81,14 @@ class ElectionClassDate(db.Model):
 class CalendarDate(BaseModel):
     __tablename__ = 'ofec_omnibus_dates_mv'
 
-    event_id = db.Column('idx', db.Integer, primary_key=True)
-    summary = db.Column(db.String)
-    description = db.Column(db.Text)
-    category = db.Column(db.String, index=True)
-    state = db.Column('states', ARRAY(db.String), index=True)
-    location = db.Column(db.String, index=True)
-    start_date = db.Column(db.DateTime, index=True)
-    end_date = db.Column(db.DateTime, index=True)
+    event_id = db.Column('idx', db.Integer, primary_key=True, doc=docs.EVENT_ID)
+    summary = db.Column(db.String, doc=docs.SUMMARY)
+    description = db.Column(db.Text, doc=docs.DESCRIPTION)
+    category = db.Column(db.String, index=True, doc=docs.CATEGORY)
+    state = db.Column('states', ARRAY(db.String), index=True, doc=docs.CAL_STATE)
+    location = db.Column(db.String, index=True, doc='Can be state address or room. No entries for reporting and election dates')
+    start_date = db.Column(db.DateTime, index=True, doc='Date the event starts')
+    end_date = db.Column(db.DateTime, index=True, doc='Date the event ends')
 
     summary_text = db.Column(TSVECTOR)
     description_text = db.Column(TSVECTOR)

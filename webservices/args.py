@@ -286,7 +286,7 @@ class MappedList(fields.List):
 calendar_dates = {
     'category': MappedList(
         fields.Str,
-        description='Type of date reporting date, live event, etc.',
+        description=docs.CATEGORY,
         mapping={
             'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)] + ['report-YE'],
             'report-M': ['report-M{}'.format(each) for each in range(2, 13)] + ['report-YE'],
@@ -296,14 +296,14 @@ calendar_dates = {
             ],
         },
     ),
-    'description': fields.Str(description='Brief description of event'),
-    'summary': fields.Str(description='Longer description of event'),
-    'state': fields.List(fields.Str, description='Two letter abbreviation of the states that an election or reporting period applies to'),
+    'description': fields.Str(description=docs.DESCRIPTION),
+    'summary': fields.Str(description=docs.SUMMARY),
+    'state': fields.List(fields.Str, description=docs.CAL_STATE),
     'min_start_date': fields.DateTime(description='The minimum start date and time'),
     'min_end_date': fields.DateTime(description='The minimum end date and time'),
     'max_start_date': fields.DateTime(description='The maximum start date and time'),
     'max_end_date': fields.DateTime(description='The maximum end date and time'),
-    'event_id': fields.Int(description='An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'),
+    'event_id': fields.Int(description=docs.EVENT_ID),
 }
 
 schedule_a = {
