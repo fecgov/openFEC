@@ -620,8 +620,8 @@ COVERAGE_START_DATE = 'Beginning date of the reporting period'
 COVERAGE_END_DATE = 'Ending date of the reporting period'
 DEBTS_OWED_BY_COMMITTEE = 'Debts owed by the committee'
 DEBTS_OWED_TO_COMMITTEE = 'Debts owed to the committee'
-INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals who\'s aggregate contributions total over $200 per individual per year.'
-INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals who\'s aggregate contributions total $200 or less per individual per year.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year.'
 
 # shared receipts
 RECEIPTS = 'Receipt'
@@ -648,14 +648,14 @@ CONTRIBUTION_REFUNDS = 'Total contribution refunds'
 REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
 
 
-# Presidential
+# presidential
 # receipts
-FEDERAL_FUNDS = 'Federal funds: Public funding of Presidential elections means that qualified Presidential candidates receive federal government funds to pay for the valid expenses of their political campaigns in both the primary and general elections.'
-TRANSFERS_FROM_AFFILIATED_COMMITTEE = 'Transfer from affiliated committees'
+FEDERAL_FUNDS = 'Federal funds: Public funding of presidential elections means that qualified presidential candidates receive federal government funds to pay for the valid expenses of their political campaigns in both the primary and general elections.'
+TRANSFERS_FROM_AFFILIATED_COMMITTEE = 'Transfers from affiliated committees'
 LOANS_RECEIVED_FROM_CANDIDATE = 'Loans made by candidate'
 OTHER_LOANS_RECEIVED = 'Other loans'
 LOANS_RECEIVED = 'Total loans received'
-OFFSETS_TO_FUNDRAISING_EXPENDITURES = 'Fund raising offsets'
+OFFSETS_TO_FUNDRAISING_EXPENDITURES = 'Fundraising offsets'
 OFFSETS_TO_LEGAL_ACCOUNTING = 'Legal and accounting offsets'
 TOTAL_OFFSETS_TO_OPERATING_EXPENDITURES = 'Total offsets'
 
@@ -667,7 +667,7 @@ LOAN_REPAYMENTS_MADE = 'Total loan repayments'
 
 # House Senate
 # receipts
-TRANSFERS_FROM_OTHER_AUTHORIZED_COMMITTEE = 'Transfer from authorized committees'
+TRANSFERS_FROM_OTHER_AUTHORIZED_COMMITTEE = 'Transfers from authorized committees'
 LOANS_MADE_BY_CANDIDATE = 'Loans made by candidate'
 ALL_OTHER_LOANS = 'Other loans'
 LOANS = 'Total loans received'
@@ -685,7 +685,7 @@ TRANSFERS_FROM_AFFILIATED_PARTY = 'Transfers from affiliated committees'
 ALL_LOANS_RECEIVED = 'Loans received'
 LOAN_REPAYMENTS_RECEIVED = 'Loan repayments received'
 FED_CANDIDATE_CONTRIBUTION_REFUNDS = 'Candidate refunds'
-OTHER_FED_RECEIPTS = 'Other Receipts'
+OTHER_FED_RECEIPTS = 'Other receipts'
 TRANSFERS_FROM_NONFED_ACCOUNT = 'Non-federal transfers'
 TRANSFERS_FROM_NONFED_LEVIN = 'Levin funds'
 TRANSFERS_FROM_NONFED_ACCOUNT = 'Total non-federal transfers'
