@@ -456,8 +456,14 @@ The type of document, for documents other than reports:
     - U Unregistered Committee Notice
 '''
 DATES_TAG = '''
-Regular reporting deadlines and election dates.
+Reporting deadlines, election dates FEC meetings, events etc.
 '''
+
+CALANDAR_DATES = '''
+Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
+event into one calendar. State filtering is only applicable to the reporting and election resources.
+'''
+
 COMMUNICATION_TAG = '''
 Reports of communication costs by corporations and membership organizations
 from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
@@ -724,3 +730,10 @@ ALLOCATED_FEDERAL_ELECTION_LEVIN_SHARE = 'Allocated federal election activity - 
 NON_ALLOCATED_FED_ELECTION_ACTIVITY = 'Federal election activity - federal only'
 FED_ELECTION_ACTIVITY = 'Total federal election activity'
 FED_DISBURSEMENTS = 'Total federal disbursements'
+
+# calendar
+CATEGORY = 'Type of date reporting date, live event, etc.'
+CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
+DESCRIPTION = 'Brief description of event'
+SUMMARY = 'Longer description of event'
+EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
