@@ -373,7 +373,7 @@ election_search = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
     'zip': fields.List(fields.Int, description=docs.ZIP_CODE),
     'office': fields.List(
-        fields.Str(validate=validate.OneOf(['house', 'senate', 'president']), description=docs.OFFICE),
+        fields.Str(validate=validate.OneOf(['house', 'senate', 'president'])),
     ),
 }
 
