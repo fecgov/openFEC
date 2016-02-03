@@ -3,6 +3,8 @@ import datetime
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
+import sqlalchemy as sa
+
 from webservices.rest import db
 from webservices.common import models
 
@@ -225,6 +227,16 @@ class ReportDateFactory(BaseFactory):
         model = models.ReportDate
 
 
+class CalendarDateFactory(BaseFactory):
+    class Meta:
+        model = models.CalendarDate
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.summary_text = sa.func.to_tsvector(obj.summary)
+        obj.description_text = sa.func.to_tsvector(obj.description)
+
+
 class ElectionDateFactory(BaseFactory):
     class Meta:
         model = models.ElectionDate
@@ -236,3 +248,15 @@ class ElectionResultFactory(BaseFactory):
     election_yr = 2016
     cand_office_st = 'US'
     cand_office_district = '00'
+
+
+class CommunicationCostFactory(BaseFactory):
+    class Meta:
+        model = models.CommunicationCost
+    idx = factory.Sequence(lambda n: n)
+
+
+class ElectioneeringFactory(BaseFactory):
+    class Meta:
+        model = models.Electioneering
+    idx = factory.Sequence(lambda n: n)

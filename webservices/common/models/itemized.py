@@ -129,7 +129,7 @@ class ScheduleB(BaseItemized):
     # Auxiliary fields
     recipient_name_text = db.Column(TSVECTOR)
     disbursement_description_text = db.Column(TSVECTOR)
-    disbursement_purpose_category = db.String()
+    disbursement_purpose_category = db.Column(db.String)
 
 
 class ScheduleE(BaseItemized):

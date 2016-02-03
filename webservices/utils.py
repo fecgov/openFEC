@@ -37,9 +37,9 @@ if os.getenv('PRODUCTION'):
 
 def check_cap(kwargs, cap):
     if cap:
-        if not kwargs.get('per_page'):
+        if not kwargs.get('per_page') or kwargs['per_page'] > cap:
             raise exceptions.ApiError(
-                'Parameter "per_page" must be > 0'.format(cap),
+                'Parameter "per_page" must be between 1 and {}'.format(cap),
                 status_code=422,
             )
 
