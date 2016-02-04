@@ -1,11 +1,19 @@
+import datetime
+
 import sqlalchemy as sa
+
+from flask import Response
 from flask_apispec import doc
+from webargs import fields, validate
+from dateutil.relativedelta import relativedelta
 
 from webservices import args
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.utils import use_kwargs
 from webservices.common.views import ApiResource
+from webservices import calendar
 
 
 @doc(tags=['dates'], description='FEC reporting dates since 1995.')
@@ -21,7 +29,7 @@ class ReportingDatesView(ApiResource):
             args.paging,
             args.reporting_dates,
             args.make_sort_args(
-                default=['-due_date'],
+                default='-due_date',
                 validator=args.IndexValidator(self.model),
             ),
         )
@@ -52,7 +60,7 @@ class ElectionDatesView(ApiResource):
             args.paging,
             args.election_dates,
             args.make_sort_args(
-                default=['-election_date'],
+                default='-election_date',
                 validator=args.IndexValidator(self.model),
             ),
         )
@@ -75,3 +83,75 @@ class ElectionDatesView(ApiResource):
     def build_query(self, *args, **kwargs):
         query = super().build_query(*args, **kwargs)
         return query.filter_by(election_status_id=1)
+
+
+@doc(tags=['dates'], description='FEC reporting, election and event dates.')
+class CalendarDatesView(ApiResource):
+
+    model = models.CalendarDate
+    schema = schemas.CalendarDateSchema
+    page_schema = schemas.CalendarDatePageSchema
+    cap = 500
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.calendar_dates,
+            args.make_sort_args(
+                default='-start_date',
+            ),
+        )
+
+    filter_match_fields = [
+        ('event_id', models.CalendarDate.event_id),
+    ]
+    filter_multi_fields = [
+        ('category', models.CalendarDate.category),
+    ]
+    filter_fulltext_fields = [
+        ('description', models.CalendarDate.description_text),
+        ('summary', models.CalendarDate.summary_text),
+    ]
+    filter_range_fields = [
+        (('min_start_date', 'max_start_date'), models.CalendarDate.start_date),
+        (('min_end_date', 'max_end_date'), models.CalendarDate.end_date),
+    ]
+
+    def build_query(self, *args, **kwargs):
+        # TODO: Generalize if reused
+        query = super().build_query(*args, **kwargs)
+        if kwargs.get('state'):
+            query = query.filter(
+                sa.or_(
+                    self.model.state.overlap(kwargs['state']),
+                    self.model.state == None  # noqa
+                )
+            )
+        return query
+
+
+class CalendarDatesExport(CalendarDatesView):
+
+    renderers = {
+        'csv': (calendar.EventSchema, calendar.render_csv, 'text/csv'),
+        'ics': (calendar.ICalEventSchema, calendar.render_ical, 'text/calendar'),
+    }
+
+    @use_kwargs(args.calendar_dates)
+    @use_kwargs({
+        'renderer': fields.Str(missing='ics', validate=validate.OneOf(['ics', 'csv'])),
+    })
+    def get(self, **kwargs):
+        query = self.build_query(**kwargs)
+        today = datetime.date.today()
+        query = query.filter(
+            self.model.start_date >= today - relativedelta(years=1),
+            self.model.start_date < today + relativedelta(years=1),
+        )
+        schema_type, renderer, mimetype = self.renderers[kwargs['renderer']]
+        schema = schema_type(many=True)
+        return Response(
+            renderer(schema.dump(query).data, schema),
+            mimetype=mimetype,
+        )

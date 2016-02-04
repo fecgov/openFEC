@@ -15,7 +15,7 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.resources import candidates, committees, filings
+from webservices.resources import candidates, committees, filings, sched_e
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -26,6 +26,7 @@ IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null', 'sort_nulls_large
 RESOURCE_WHITELIST = {
     candidates.CandidateList,
     committees.CommitteeList,
+    sched_e.ScheduleEView,
     filings.FilingsList,
 }
 
@@ -50,7 +51,7 @@ def call_resource(path, qs, per_page=5000):
     count = counts.count_estimate(query, db.session, threshold=5000)
     index_column = utils.get_index_column(model or resource.model)
     query_kwargs = utils.extend(kwargs, {'per_page': per_page})
-    paginator = utils.fetch_seek_paginator(query, query_kwargs, index_column, count=count)
+    paginator = utils.fetch_seek_paginator(query, query_kwargs, index_column, count=count, cap=None)
     return {
         'path': path,
         'qs': qs,

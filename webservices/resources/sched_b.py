@@ -32,6 +32,7 @@ class ScheduleBView(ItemizedResource):
         ('recipient_city', models.ScheduleB.recipient_city),
         ('recipient_state', models.ScheduleB.recipient_state),
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
+        ('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
     ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleB.recipient_name_text),
@@ -51,7 +52,6 @@ class ScheduleBView(ItemizedResource):
             args.make_seek_args(),
             args.make_sort_args(
                 validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
-                multiple=False,
             ),
         )
 
