@@ -28,7 +28,7 @@ class TotalsView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.totals)
-    @use_kwargs(args.make_sort_args(default=['-cycle']))
+    @use_kwargs(args.make_sort_args(default='-cycle'))
     @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, totals_class, totals_schema = self.build_query(
@@ -36,9 +36,9 @@ class TotalsView(utils.Resource):
             committee_type=committee_type,
             **kwargs
         )
-        validator = args.IndexValidator(totals_class)
-        for key in kwargs['sort']:
-            validator(key)
+        if kwargs['sort']:
+            validator = args.IndexValidator(totals_class)
+            validator(kwargs['sort'])
         page = utils.fetch_page(query, kwargs, model=totals_class)
         return totals_schema().dump(page).data
 

@@ -326,6 +326,25 @@ ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
+CommunicationCostSchema = make_schema(
+    models.CommunicationCost,
+    options={'exclude': ('idx', )},
+)
+CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
+register_schema(CommunicationCostSchema)
+register_schema(CommunicationCostPageSchema)
+
+ElectioneeringSchema = make_schema(
+    models.Electioneering,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
+    },
+    options={'exclude': ('idx', )},
+)
+ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
+register_schema(ElectioneeringSchema)
+register_schema(ElectioneeringPageSchema)
 
 FilingsSchema = make_schema(
     models.Filings,
@@ -366,6 +385,22 @@ ElectionDatesSchema = make_schema(
 )
 ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
+
+CalendarDateSchema = make_schema(
+    models.CalendarDate,
+    fields={
+        'summary': ma.fields.Str(),
+        'description': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'summary_text', 'description_text',
+        )
+    },
+)
+CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
+augment_schemas(CalendarDateSchema)
+
 
 class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()

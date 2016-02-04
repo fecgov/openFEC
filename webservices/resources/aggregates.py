@@ -30,6 +30,10 @@ class AggregateResource(ApiResource):
     def sort_args(self):
         return args.make_sort_args(validator=args.IndexValidator(self.model))
 
+    @property
+    def index_column(self):
+        return self.model.idx
+
     def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(**kwargs)
         if committee_id is not None:
@@ -118,7 +122,7 @@ class ScheduleAByEmployerView(AggregateResource):
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, count=count)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
 
 
 @doc(
@@ -142,7 +146,7 @@ class ScheduleAByOccupationView(AggregateResource):
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, count=count)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count, index_column=self.index_column)
 
 
 @doc(
@@ -222,6 +226,12 @@ class ScheduleBByPurposeView(AggregateResource):
 
 
 class CandidateAggregateResource(AggregateResource):
+
+    # Since candidate aggregates are aggregated on the fly, they don't have a
+    # consistent unique index. We nullify `index_column` to avoiding sorting
+    # on the unique index of the base model.
+    index_column = None
+
     @property
     def sort_args(self):
         return args.make_sort_args(

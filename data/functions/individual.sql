@@ -10,7 +10,7 @@ $$ language plpgsql immutable;
 
 create or replace function is_coded_individual(receipt_type text) returns bool as $$
 begin
-    return coalesce(receipt_type, '') in ('10', '15', '15E', '15J', '18J');
+    return coalesce(receipt_type, '') in ('10', '15', '15E', '15J', '18J', '30', '30T', '31', '31T', '32');
 end
 $$ language plpgsql immutable;
 
@@ -29,7 +29,7 @@ $$ language plpgsql immutable;
 create or replace function is_earmark(memo_code text, memo_text text) returns bool as $$
 begin
   return (
-      coalesce(memo_code, '') = 'X' and
+      coalesce(memo_code, '') = 'X' or
       coalesce(memo_text, '') ~* 'earmark|earmk|ermk'
   );
 end

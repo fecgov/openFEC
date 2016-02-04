@@ -17,6 +17,7 @@ from flask import Blueprint
 from flask.ext import cors
 from flask.ext import restful
 from raven.contrib.flask import Sentry
+from werkzeug.contrib.fixers import ProxyFix
 import sqlalchemy as sa
 
 from webargs.flaskparser import FlaskParser
@@ -40,6 +41,7 @@ from webservices.resources import elections
 from webservices.resources import filings
 from webservices.resources import search
 from webservices.resources import dates
+from webservices.resources import costs
 from webservices.env import env
 
 
@@ -158,11 +160,15 @@ api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
+api.add_resource(costs.CommunicationCostView, '/communication-costs/')
+api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionList, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
+api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
+api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -196,8 +202,8 @@ api.add_resource(
 )
 api.add_resource(
     aggregates.ElectioneeringByCandidateView,
-    '/electioneering_costs/by_candidate/',
-    '/committee/<string:committee_id>/electioneering_costs/by_candidate/',
+    '/electioneering/by_candidate/',
+    '/committee/<string:committee_id>/electioneering/by_candidate/',
 )
 
 api.add_resource(
@@ -230,6 +236,8 @@ apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
 apidoc.register(sched_e.ScheduleEView, blueprint='v1')
+apidoc.register(costs.CommunicationCostView, blueprint='v1')
+apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')
@@ -251,7 +259,7 @@ apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
-
+apidoc.register(dates.CalendarDatesView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
@@ -304,3 +312,5 @@ initialize_newrelic()
 
 if env.get_credential('SENTRY_DSN'):
     Sentry(app, dsn=env.get_credential('SENTRY_DSN'))
+
+app.wsgi_app = ProxyFix(app.wsgi_app)

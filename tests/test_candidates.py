@@ -164,35 +164,6 @@ class CandidateFormatTest(ApiBaseTest):
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
 
-    def test_candidate_history(self):
-        history_2012 = factories.CandidateHistoryFactory(two_year_period=2012)
-        history_2008 = factories.CandidateHistoryFactory(two_year_period=2008, candidate_id=history_2012.candidate_id)
-        results = self._results(
-            api.url_for(CandidateHistoryView, candidate_id=history_2012.candidate_id)
-        )
-
-        self.assertEqual(results[0]['candidate_id'], history_2012.candidate_id)
-        self.assertEqual(results[1]['candidate_id'], history_2012.candidate_id)
-        self.assertEqual(results[0]['two_year_period'], history_2012.two_year_period)
-        self.assertEqual(results[1]['two_year_period'], history_2008.two_year_period)
-
-    def test_candidate_history_by_year(self):
-        history_2012 = factories.CandidateHistoryFactory(two_year_period=2012)
-        history_2008 = factories.CandidateHistoryFactory(two_year_period=2008, candidate_id=history_2012.candidate_id)
-        results = self._results(
-            api.url_for(CandidateHistoryView, candidate_id=history_2012.candidate_id)
-        )
-
-        results = self._results(
-            api.url_for(
-                CandidateHistoryView,
-                candidate_id=history_2012.candidate_id,
-                cycle=history_2008.two_year_period,
-            )
-        )
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['candidate_id'], history_2012.candidate_id)
-        self.assertEqual(results[0]['two_year_period'], history_2008.two_year_period)
 
     def test_candidate_sort(self):
         candidates = [
@@ -209,17 +180,77 @@ class CandidateFormatTest(ApiBaseTest):
         results = self._results(api.url_for(CandidateSearch, sort='-candidate_status'))
         self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
 
-    def test_candidate_multi_sort(self):
-        candidates = [
-            factories.CandidateFactory(candidate_status='C', party='DFL'),
-            factories.CandidateFactory(candidate_status='P', party='FLP'),
-            factories.CandidateFactory(candidate_status='P', party='REF'),
+class TestCandidateHistory(ApiBaseTest):
+
+    def setUp(self):
+        super().setUp()
+        self.committee = factories.CommitteeDetailFactory()
+        self.candidates = [
+            factories.CandidateDetailFactory(candidate_id='P001'),
+            factories.CandidateDetailFactory(candidate_id='P002'),
         ]
-        candidate_ids = [each.candidate_id for each in candidates]
-        results = self._results(api.url_for(CandidateList, sort=['candidate_status', 'party']))
-        self.assertEqual([each['candidate_id'] for each in results], candidate_ids)
-        results = self._results(api.url_for(CandidateList, sort=['candidate_status', '-party']))
-        self.assertEqual(
-            [each['candidate_id'] for each in results],
-            [candidate_ids[0], candidate_ids[2], candidate_ids[1]],
+        self.histories = [
+            factories.CandidateHistoryFactory(candidate_id=self.candidates[0].candidate_id, two_year_period=2010),
+            factories.CandidateHistoryFactory(candidate_id=self.candidates[1].candidate_id, two_year_period=2012),
+        ]
+        db.session.flush()
+        self.links = [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidates[0].candidate_id,
+                committee_id=self.committee.committee_id,
+                fec_election_year=2010,
+                committee_type='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidates[1].candidate_id,
+                committee_id=self.committee.committee_id,
+                fec_election_year=2012,
+                committee_type='P',
+            ),
+        ]
+        self.elections = [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidates[0].candidate_id,
+                cand_election_year=2012,
+            ),
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidates[1].candidate_id,
+                cand_election_year=2012,
+            ),
+        ]
+
+    def test_history(self):
+        history_2012 = factories.CandidateHistoryFactory(two_year_period=2012)
+        history_2008 = factories.CandidateHistoryFactory(two_year_period=2008, candidate_id=history_2012.candidate_id)
+        results = self._results(
+            api.url_for(CandidateHistoryView, candidate_id=history_2012.candidate_id)
         )
+
+        assert results[0]['candidate_id'] == history_2012.candidate_id
+        assert results[1]['candidate_id'] == history_2012.candidate_id
+        assert results[0]['two_year_period'] == history_2012.two_year_period
+        assert results[1]['two_year_period'] == history_2008.two_year_period
+
+    def test_committee_cycle(self):
+        results = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                committee_id=self.committee.committee_id, cycle=2012,
+            )
+        )
+        assert len(results) == 1
+        assert results[0]['two_year_period'] == 2012
+        assert results[0]['candidate_id'] == self.candidates[1].candidate_id
+
+    def test_election_full(self):
+        results = self._results(
+            api.url_for(
+                CandidateHistoryView,
+                committee_id=self.committee.committee_id, cycle=2012, election_full='true',
+            )
+        )
+        assert len(results) == 2
+        assert results[0]['two_year_period'] == 2010
+        assert results[0]['candidate_id'] == self.candidates[0].candidate_id
+        assert results[1]['two_year_period'] == 2012
+        assert results[1]['candidate_id'] == self.candidates[1].candidate_id

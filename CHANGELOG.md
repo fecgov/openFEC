@@ -2,7 +2,46 @@
 
 ## [Unreleased](https://github.com/18F/openFEC/tree/HEAD)
 
-[Full Changelog](https://github.com/18F/openFEC/compare/handle-mismatched-linkages...HEAD)
+[Full Changelog](https://github.com/18F/openFEC/compare/public-beta-20160106...HEAD)
+
+**Closed issues:**
+
+- Make API filter for candidates who ever raised $5000 [\#1468](https://github.com/18F/openFEC/issues/1468)
+- Move back 18F updates to reduce lag. [\#1448](https://github.com/18F/openFEC/issues/1448)
+- Discussion: Calendar filter logic [\#1442](https://github.com/18F/openFEC/issues/1442)
+- Messy calendar data [\#1441](https://github.com/18F/openFEC/issues/1441)
+- Release data exports [\#1438](https://github.com/18F/openFEC/issues/1438)
+- Update individual function [\#1435](https://github.com/18F/openFEC/issues/1435)
+- Handle itemized receipts from individuals with committee contributor IDs [\#1426](https://github.com/18F/openFEC/issues/1426)
+- Williams totals really high [\#1424](https://github.com/18F/openFEC/issues/1424)
+- Make necessary backend improvements for receipts and disbursement data exports [\#1414](https://github.com/18F/openFEC/issues/1414)
+- Figure out Act Blue data [\#1410](https://github.com/18F/openFEC/issues/1410)
+- Create endpoint for itemized communications costs [\#1404](https://github.com/18F/openFEC/issues/1404)
+- Create end point for itemized electioneering communications [\#1403](https://github.com/18F/openFEC/issues/1403)
+- Ensure stable sort for all views [\#1361](https://github.com/18F/openFEC/issues/1361)
+- Why is actblue in this receipt search return set? [\#1308](https://github.com/18F/openFEC/issues/1308)
+- Snowe records confusing [\#1248](https://github.com/18F/openFEC/issues/1248)
+
+**Merged pull requests:**
+
+- Move to correct category [\#1482](https://github.com/18F/openFEC/pull/1482) ([LindsayYoung](https://github.com/LindsayYoung))
+- Use ProxyFix middleware. [\#1481](https://github.com/18F/openFEC/pull/1481) ([jmcarp](https://github.com/jmcarp))
+- Handle invalid dates in communication costs. [\#1477](https://github.com/18F/openFEC/pull/1477) ([jmcarp](https://github.com/jmcarp))
+- Revert nginx proxy. [\#1465](https://github.com/18F/openFEC/pull/1465) ([jmcarp](https://github.com/jmcarp))
+- Fix type and aggregate. [\#1463](https://github.com/18F/openFEC/pull/1463) ([jmcarp](https://github.com/jmcarp))
+- Looking to update data 4 am eastern, 9 GMT to get fresher data [\#1458](https://github.com/18F/openFEC/pull/1458) ([LindsayYoung](https://github.com/LindsayYoung))
+- Feature/indivual [\#1457](https://github.com/18F/openFEC/pull/1457) ([LindsayYoung](https://github.com/LindsayYoung))
+- Filter on disbursement purpose category. [\#1456](https://github.com/18F/openFEC/pull/1456) ([jmcarp](https://github.com/jmcarp))
+- Nullify index column on candidate aggregates. [\#1452](https://github.com/18F/openFEC/pull/1452) ([jmcarp](https://github.com/jmcarp))
+- Whitelist independent expenditure downloads. [\#1451](https://github.com/18F/openFEC/pull/1451) ([jmcarp](https://github.com/jmcarp))
+- Use election full flag in candidate history view. [\#1450](https://github.com/18F/openFEC/pull/1450) ([jmcarp](https://github.com/jmcarp))
+- Feature/update start up docs [\#1445](https://github.com/18F/openFEC/pull/1445) ([LindsayYoung](https://github.com/LindsayYoung))
+- \[WIP\] Feature/electioneering new table [\#1444](https://github.com/18F/openFEC/pull/1444) ([LindsayYoung](https://github.com/LindsayYoung))
+- Ensure stable sort on aggregate tables. [\#1443](https://github.com/18F/openFEC/pull/1443) ([jmcarp](https://github.com/jmcarp))
+- Feature/dates 2 \[WIP\] [\#1412](https://github.com/18F/openFEC/pull/1412) ([LindsayYoung](https://github.com/LindsayYoung))
+
+## [public-beta-20160106](https://github.com/18F/openFEC/tree/public-beta-20160106) (2016-01-08)
+[Full Changelog](https://github.com/18F/openFEC/compare/handle-mismatched-linkages...public-beta-20160106)
 
 **Closed issues:**
 
@@ -19,11 +58,13 @@
 - Double-check that we have all election activity periods data in API [\#1357](https://github.com/18F/openFEC/issues/1357)
 - In order to understand past/current behaviors, analyze existing FEC analytics on the legal system portion of fec.gov [\#1343](https://github.com/18F/openFEC/issues/1343)
 - Create research plan for identifying needs around legal systems [\#1342](https://github.com/18F/openFEC/issues/1342)
+- Candidate with FEC ID "P60014255" has `cand\_id` of "NULL" [\#1339](https://github.com/18F/openFEC/issues/1339)
 - Load financial reports from FECP [\#1337](https://github.com/18F/openFEC/issues/1337)
 - To help users find the most relevant results, develop a better method of weighting search and typeahead results [\#943](https://github.com/18F/openFEC/issues/943)
 
 **Merged pull requests:**
 
+- Add high-level tests for calendar exports. [\#1440](https://github.com/18F/openFEC/pull/1440) ([jmcarp](https://github.com/jmcarp))
 - Update committee filing dates. [\#1431](https://github.com/18F/openFEC/pull/1431) ([jmcarp](https://github.com/jmcarp))
 - Add support/oppose filter on itemized IEs. [\#1425](https://github.com/18F/openFEC/pull/1425) ([jmcarp](https://github.com/jmcarp))
 - Add icalendar exports. [\#1421](https://github.com/18F/openFEC/pull/1421) ([jmcarp](https://github.com/jmcarp))
