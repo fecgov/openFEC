@@ -6,6 +6,7 @@ from tests.common import ApiBaseTest
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
+    ScheduleAByEmployerView,
     ScheduleEByCandidateView,
     CommunicationCostByCandidateView,
     ElectioneeringByCandidateView,
@@ -15,6 +16,24 @@ from webservices.resources.candidate_aggregates import (
     ScheduleAByStateCandidateView,
     TotalsCandidateView,
 )
+
+
+class TestCommitteeAggregates(ApiBaseTest):
+
+    def test_stable_sort(self):
+        rows = [
+            factories.ScheduleAByEmployerFactory(
+                committee_id='C001',
+                employer='omnicorp-{}'.format(idx),
+                total=538,
+            )
+            for idx in range(100)
+        ]
+        employers = []
+        for page in range(2):
+            results = self._results(api.url_for(ScheduleAByEmployerView, sort='-total', per_page=50, page=page + 1))
+            employers.extend(result['employer'] for result in results)
+        assert len(set(employers)) == len(rows)
 
 
 class TestAggregates(ApiBaseTest):

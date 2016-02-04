@@ -5,7 +5,6 @@ Unique identifier for the electronic or paper report. This number is used to con
 PDF URLs to the original document.
 '''
 
-
 CANDIDATE_ID = '''
 A unique identifier assigned to each candidate registered with the FEC.
 If a person runs for several offices, that person will have separate candidate IDs for each office.
@@ -267,13 +266,40 @@ amount of these small donations by looking up the "unitemized" field in the `/re
 or `/totals` endpoints.
 
 When comparing the totals from reports to line items. the totals will not match unless you
-take out items where `"memoed_subtotal":true`. Memoed items are subtotals of receipts
-that are already accounted for in another schedule a line item.
+only look at items where `"is_individual":true` since the same transaction is in the data
+multiple ways to explain the way it may move though different committees as an earmark.
 
-For the Schedule A aggregates, such as by_occupation and by_state, include only individual
-contributions, i.e. receipts from line numbers 11AI and 17A. Again, "memoed" items are not
-included to avoid double counting.
+For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
+contributions. See below for full methodology.
 
+### Methodology for determining individual contributions
+
+For receipts over $200 use FEC code line_number to identify individuals.
+
+The line numbers that specify individuals that are automatically included:
+
+Line number with description
+    - 10 Contribution to Independent Expenditure-Only Committees (Super PACs), Political Committees with non-contribution accounts (Hybrid PACs) and nonfederal party "soft money" accounts (1991-2002) from a person (individual, partnership, limited liability company, corporation, labor organization, or any other organization or group of persons)
+    - 15 Contribution to political committees (other than Super PACs and Hybrid PACs) from an individual, partnership or limited liability company
+    - 15E Earmarked contributions to political committees (other than Super PACs and Hybrid PACs) from an individual, partnership or limited liability company
+    - 15J Memo - Recipient committee's percentage of contribution from an individual, partnership or limited liability company given to joint fundraising committee
+    - 18J | Memo - Recipient committee's percentage of contribution from a registered committee given to joint fundraising committee
+    - 30, 30T, 31, 31T, 32 Individual party codes
+
+For receipts under $200:
+We check the following codes and see if there is "earmark" (or a variation) in the `memo_text`
+description of the contribution.
+
+Line number with description
+    -11AI The itemized individual contributions from F3 schedule A
+    -12 Nonfederal other receipt - Levin Account (Line 2)
+    -17 Itemized individual contributions from Form 3P
+    -17A Itemized individual contributions from Form 3P
+    -18 Itemized individual contributions from Form 3P
+
+Of those transactions,[under $200, and having "earmark" in the e OR having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
+
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
@@ -469,3 +495,17 @@ An electioneering communication is any broadcast, cable or satellite communicati
 - The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office.
 '''
 
+COMMUNICATION_COST = '''
+52 U.S.C. 30118 allows "communications by a corporation to its stockholders and
+executive or administrative personnel and their families or by a labor organization
+to its members and their families on any subject," including the express advocacy of
+the election or defeat of any Federal candidate.  The costs of such communications
+must be reported to the Federal Election Commission under certain circumstances.
+'''
+
+ELECTIONEERING = '''
+An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
+* The communication refers to a clearly identified candidate for federal office;
+* The communication is publicly distributed shortly before an election for the office that candidate is seeking; and
+* The communication is targeted to the relevant electorate (U.S. House and Senate candidates only).
+'''
