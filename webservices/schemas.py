@@ -150,6 +150,11 @@ augment_models(
     models.CandidateTotal,
 )
 
+class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema']):
+    pass
+
+CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
+
 CandidateSearchSchema = make_schema(
     models.Candidate,
     options={'exclude': ('idx', )},
