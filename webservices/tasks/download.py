@@ -163,17 +163,17 @@ def make_manifest(resource, row_count, path):
         fp.write('Time: {}\n'.format(resource['timestamp']))
         fp.write('Resource: {}\n'.format(resource['path']))
         fp.write('*Count: {}\n'.format(row_count))
-        fp.write('Filters:\n\n')
+        fp.write('Fields:\n\n')
         fp.write('{}\n\n'.format(COUNT_NOTE))
-        fp.write(make_filters(resource))
+        fp.write(make_fields(resource))
 
-def make_filters(resource):
+# trying this out
+def make_fields(resource):
     lines = []
     for key, value in resource['kwargs'].items():
-        if key in resource['fields']:
-            value = ', '.join(map(format, value)) if isinstance(value, list) else value
-            description = resource['fields'][key].metadata.get('description')
-            lines.append(make_filter(key, value, description))
+        value = ', '.join(map(format, value)) if isinstance(value, list) else value
+        description = resource['fields'][key].metadata.get('description')
+        lines.append(make_filter(key, value, description))
     return '\n\n'.join(lines)
 
 def make_filter(key, value, description):
