@@ -119,7 +119,7 @@ class ScheduleAByStateCandidateView(utils.Resource):
 
 class TotalsCandidateView(ApiResource):
 
-    page_schema = schemas.CandidateTotalPageSchema
+    page_schema = schemas.CandidateHistoryTotalPageSchema
 
     @property
     def args(self):
