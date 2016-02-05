@@ -48,11 +48,6 @@ class CommunicationCostView(ApiResource):
         (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
     ]
 
-    def get(self, **kwargs):
-        query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, index_column=self.index_column, count=count)
-
 @doc(
     tags=['electioneering'],
     description=docs.ELECTIONEERING,
@@ -62,6 +57,10 @@ class ElectioneeringView(ApiResource):
     model = models.Electioneering
     schema = schemas.ElectioneeringSchema
     page_schema = schemas.ElectioneeringPageSchema
+
+    filter_fulltext_fields = [
+        ('description', models.Electioneering.purpose_description_text),
+    ]
 
     @property
     def args(self):
@@ -92,8 +91,3 @@ class ElectioneeringView(ApiResource):
         sa.orm.joinedload(models.Electioneering.committee),
         sa.orm.joinedload(models.Electioneering.candidate),
     ]
-
-    def get(self, **kwargs):
-        query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, index_column=self.index_column, count=count)

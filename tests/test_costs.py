@@ -52,3 +52,10 @@ class TestElectioneering(ApiBaseTest):
             results = self._results(api.url_for(ElectioneeringView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]
+
+    def test_filter_fulltext(self):
+        factories.ElectioneeringFactory()
+        factories.ElectioneeringFactory(purpose_description='fitter happier')
+        results = self._results(api.url_for(ElectioneeringView, description='happier'))
+        assert len(results) == 1
+        assert results[0]['purpose_description'] == 'fitter happier'

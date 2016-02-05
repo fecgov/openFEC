@@ -1,3 +1,5 @@
+from sqlalchemy.dialects.postgresql import TSVECTOR
+
 from webservices import utils
 from .base import db
 
@@ -54,12 +56,13 @@ class Electioneering(db.Model):
     public_distribution_date = db.Column('pub_distrib_dt', db.DateTime, doc='The pubic distribution date is the date that triggers disclosure of the electioneering communication (date reported on page 1 of Form 9)')
     disbursement_date = db.Column('disb_dt', db.DateTime, index=True, doc='Disbursement date includes actual disbursements and execution of contracts creating an obligation to make disbursements (SB date of disbursement)')
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
-    #TODO: add tsvector field
     purpose_description = db.Column('disb_desc', db.String)
     report_year = db.Column('rpt_yr', db.Integer, index=True)
 
     committee = utils.related_committee('committee_id')
     candidate = utils.related_candidate('candidate_id')
+
+    purpose_description_text = db.Column(TSVECTOR)
 
     @property
     def pdf_url(self):
