@@ -26,6 +26,7 @@ returns text as $$
     end
 $$ language plpgsql;
 
+
 -- Not all report types are on dimreporttype, so for the reports to all have
 -- titles, I am adding a case. Ideally, we would want the right mapping,
 -- that is one of the things we have asked for.
@@ -60,6 +61,20 @@ returns text as $$
                     expand_office_description(office_sought),
                     rpt_tp_desc
                 ], ' ')
+        end;
+    end
+$$ language plpgsql;
+
+
+--Descriptions and summaries are repetitive, so we are trying to only show the descriptions in some places, That works for most things except court cases, advisory opinions and conferences.
+create or replace function describe_cal_event(event_name text, summary text, description text)
+returns text as $$
+    begin
+        return case
+            when event_name in ('Litigation', 'AOs and Rules', 'Conferences') then
+                summary || description
+            else
+                description
         end;
     end
 $$ language plpgsql;
@@ -136,17 +151,15 @@ with elections_raw as(
         null::text as url
     from reports_raw
     group by
-    -- states are being problematic
-        -- election_state,
         report_type,
         rpt_tp_desc,
         due_date,
         office_sought
 ), other as (
     select distinct on (category_name, event_name, description, location, start_date, end_date)
-        category_name as category,
-        event_name::text as description,
-        description::text as summary,
+        category_name::text as category,
+        event_name::text as summary,
+        describe_cal_event(category_name::text, event_name::text, description::text) as description,
         null::text[] as states,
         location::text,
         start_date,
