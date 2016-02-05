@@ -342,7 +342,7 @@ ElectioneeringSchema = make_schema(
         'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
         'pdf_url': ma.fields.Str(),
     },
-    options={'exclude': ('idx', )},
+    options={'exclude': ('idx', 'purpose_description_text')},
 )
 ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ElectioneeringSchema)

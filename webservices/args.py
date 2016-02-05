@@ -443,6 +443,7 @@ electioneering = {
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': fields.Date(description='Minimum disbursement date'),
     'max_date': fields.Date(description='Maximum disbursement date'),
+    'description': fields.Str('Disbursement description'),
 }
 
 electioneering_by_candidate = {
