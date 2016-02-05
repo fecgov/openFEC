@@ -29,6 +29,9 @@ class CommunicationCost(db.Model):
     file_number = db.Column('file_num', db.Integer)
     report_year = db.Column('rpt_yr', db.Integer, index=True)
 
+    @property
+    def pdf_url(self):
+        return utils.make_report_pdf_url(self.image_number)
 
 class Electioneering(db.Model):
     __tablename__ = 'ofec_electioneering_mv'
@@ -49,7 +52,7 @@ class Electioneering(db.Model):
     calculated_candidate_share = db.Column('calculated_cand_share', db.Numeric, doc="If an electioneering cost targets several candidates, the total cost is divided by the number of candidates. If it only mentions one candidate the full cost of the communication is listed.")
     communication_date = db.Column('comm_dt', db.DateTime, doc='It is the airing, broadcast, cablecast or other dissemination of the communication')
     public_distribution_date = db.Column('pub_distrib_dt', db.DateTime, doc='The pubic distribution date is the date that triggers disclosure of the electioneering communication (date reported on page 1 of Form 9)')
-    disbursement_date = db.Column('disb_dt', db.DateTime, doc='Disbursement date includes actual disbursements and execution of contracts creating an obligation to make disbursements (SB date of disbursement)')
+    disbursement_date = db.Column('disb_dt', db.DateTime, index=True, doc='Disbursement date includes actual disbursements and execution of contracts creating an obligation to make disbursements (SB date of disbursement)')
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
     #TODO: add tsvector field
     purpose_description = db.Column('disb_desc', db.String)
@@ -57,6 +60,10 @@ class Electioneering(db.Model):
 
     committee = utils.related_committee('committee_id')
     candidate = utils.related_candidate('candidate_id')
+
+    @property
+    def pdf_url(self):
+        return utils.make_report_pdf_url(self.beginning_image_number)
 
     ### would be nice to add these back
     # election_type
