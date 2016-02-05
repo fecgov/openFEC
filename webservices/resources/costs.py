@@ -24,9 +24,9 @@ class CommunicationCostView(ApiResource):
     @property
     def args(self):
         return utils.extend(
+            args.paging,
             args.itemized,
             args.communication_cost,
-            args.make_seek_args(),
             args.make_sort_args(
                 validator=args.IndexValidator(models.CommunicationCost),
             ),
@@ -51,7 +51,7 @@ class CommunicationCostView(ApiResource):
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        return utils.fetch_page(query, kwargs, model=self.model, index_column=self.index_column, count=count)
 
 @doc(
     tags=['electioneering'],
@@ -66,6 +66,7 @@ class ElectioneeringView(ApiResource):
     @property
     def args(self):
         return utils.extend(
+            args.paging,
             args.electioneering,
             args.make_seek_args(),
             args.make_sort_args(
@@ -95,4 +96,4 @@ class ElectioneeringView(ApiResource):
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
+        return utils.fetch_page(query, kwargs, model=self.model, index_column=self.index_column, count=count)
