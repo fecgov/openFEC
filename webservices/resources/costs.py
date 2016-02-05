@@ -12,7 +12,7 @@ from webservices.common.views import ApiResource
 
 
 @doc(
-    tags=['costs'],
+    tags=['communication_cost'],
     description=docs.COMMUNICATION_COST,
 )
 class CommunicationCostView(ApiResource):
@@ -54,7 +54,7 @@ class CommunicationCostView(ApiResource):
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
 
 @doc(
-    tags=['costs'],
+    tags=['electioneering'],
     description=docs.ELECTIONEERING,
 )
 class ElectioneeringView(ApiResource):

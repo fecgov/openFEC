@@ -15,3 +15,12 @@ begin
     end;
 end
 $$ language plpgsql;
+
+create or replace function date_or_null(value text, format text)
+returns date as $$
+begin
+    return to_date(value, format);
+exception
+    when others then return null::date;
+end
+$$ language plpgsql immutable;
