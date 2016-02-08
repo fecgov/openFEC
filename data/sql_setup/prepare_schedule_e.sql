@@ -17,6 +17,7 @@ create index on ofec_sched_e_tmp (s_o_cand_id);
 create index on ofec_sched_e_tmp (entity_tp);
 create index on ofec_sched_e_tmp (image_num);
 create index on ofec_sched_e_tmp (rpt_yr);
+create index on ofec_sched_e_tmp (filing_form);
 create index on ofec_sched_e_tmp (get_cycle(rpt_yr));
 create index on ofec_sched_e_tmp (is_notice);
 
