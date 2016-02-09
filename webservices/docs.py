@@ -661,17 +661,25 @@ COVERAGE_START_DATE = 'Beginning date of the reporting period'
 COVERAGE_END_DATE = 'Ending date of the reporting period'
 DEBTS_OWED_BY_COMMITTEE = 'Debts owed by the committee'
 DEBTS_OWED_TO_COMMITTEE = 'Debts owed to the committee'
-INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year.'
-INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Itemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year.'
 
 # shared receipts
-RECEIPTS = 'Receipt'
+RECEIPTS = 'Anything of value (money, goods, services or property) received by a political committee'
+
+# can't tack on period or year without being really confusing
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. Be aware, some filers choose to itemize donations $200 or less.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_PERIOD = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. This amount represents the total of these receipts for the reporting period.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_YTD = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. This amount represents the total of these receipts for the year to date.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Unitemized contributions are made individuals whose aggregate contributions total $200 or less per individual per year. Be aware, some filers choose to itemize donations $200 or less and in that case those donations will appear in the itemized total.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_PERIOD = 'Unitemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the reporting period.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_YTD =  'Itemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the year to date.'
+
+
+
+
 POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Party committees contributions'
-INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Unitemized individual contributions'
 INDIVIDUAL_CONTRIBUTIONS = 'Individual contributions'
 OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committees contributions'
 OFFSETS_TO_OPERATING_EXPENDITURES = 'Offsets to operating expenditures'
-INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Itemized individual contributions'
 CONTRIBUTIONS = 'Contribution'
 # house senate and presidential
 CANDIDATE_CONTRIBUTION = 'Candidate contributions'
