@@ -88,6 +88,7 @@ class CalendarDate(BaseModel):
     location = db.Column(db.String, index=True)
     start_date = db.Column(db.DateTime, index=True)
     end_date = db.Column(db.DateTime, index=True)
+    url = db.Column(db.String)
 
     summary_text = db.Column(TSVECTOR)
     description_text = db.Column(TSVECTOR)

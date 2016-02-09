@@ -113,11 +113,11 @@ class TestCalendarExport(ApiBaseTest):
         super().setUp()
         self.dates = [
             factories.CalendarDateFactory(
-                category='election-G',
+                category='election',
                 start_date=datetime.datetime(2015, 10, 1),
             ),
             factories.CalendarDateFactory(
-                category='election-P',
+                category='Roundtables',
                 start_date=datetime.datetime(2015, 10, 31, 2),
                 end_date=datetime.datetime(2015, 10, 31, 3)
             ),
@@ -136,6 +136,6 @@ class TestCalendarExport(ApiBaseTest):
         cal = Calendar.from_ical(resp.data)
         components = cal.subcomponents
         assert len(components) == 2
-        assert str(components[0]['CATEGORIES']) == 'election-G'
+        assert str(components[0]['CATEGORIES']) == 'election'
         assert components[0]['DTSTART'].dt == datetime.date(2015, 10, 1)
         assert components[1]['DTSTART'].dt == datetime.datetime(2015, 10, 31, 2)
