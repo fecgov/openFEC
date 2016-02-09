@@ -168,7 +168,7 @@ def make_manifest(resource, row_count, path):
         fp.write('Time: {}\n'.format(resource['timestamp']))
         fp.write('Resource: {}\n'.format(resource['path']))
         fp.write('*Count: {}\n'.format(row_count))
-        fp.write('Fields:\n\n')
+        fp.write('Filters:\n\n')
         fp.write('{}\n\n'.format(COUNT_NOTE))
         fp.write(make_filters(resource))
 
