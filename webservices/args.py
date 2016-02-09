@@ -516,6 +516,7 @@ schedule_e = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'filing_form': fields.List(IStr, description='Filing form'),
     'last_expenditure_date': fields.Date(missing=None, description='When sorting by `expenditure_date`, use the `expenditure_date` of the last result and pass it here as `last_expenditure_date` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_expenditure_amount': fields.Float(missing=None, description='When sorting by `expenditure_amount`, use the `expenditure_amount` of the last result and pass it here as `last_expenditure_amount` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_office_total_ytd': fields.Float(missing=None, description='When sorting by `office_total_ytd`, use the `office_total_ytd` of the last result and pass it here as `last_office_total_ytd` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),

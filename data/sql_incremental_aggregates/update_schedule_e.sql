@@ -9,7 +9,7 @@ begin
     insert into ofec_sched_e (
         select
             new.*,
-            coalesce(rpt_tp, '') in ('24', '48') as is_notice,
+            coalesce(new.rpt_tp, '') in ('24', '48') as is_notice,
             to_tsvector(new.pye_nm) as payee_name_text
         from ofec_sched_e_queue_new new
         left join ofec_sched_e_queue_old old on new.sched_e_sk = old.sched_e_sk and old.timestamp > new.timestamp
