@@ -5,7 +5,6 @@ import hashlib
 
 import pytest
 from botocore.exceptions import ClientError
-from marshmallow_pagination import paginators
 
 from webservices import schemas
 from webservices.rest import db, api
@@ -66,19 +65,6 @@ class TestDownloadTask(ApiBaseTest):
         assert reader.fieldnames == tasks.create_headers(schema)
         for record, row in zip(records, reader):
             assert record.candidate_id == row['candidate_id']
-
-    def test_iter_paginator(self):
-        records = [
-            factories.CandidateHistoryFactory()
-            for _ in range(10)
-        ]
-        paginator = paginators.SeekPaginator(
-            models.CandidateHistory.query,
-            per_page=5,
-            index_column=models.CandidateHistory.idx,
-        )
-        iterator = tasks.iter_paginator(paginator)
-        assert [each.idx for each in records] == [each.idx for each in iterator]
 
 
 class TestDownloadResource(ApiBaseTest):
