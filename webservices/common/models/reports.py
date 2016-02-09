@@ -37,7 +37,7 @@ class CommitteeReports(PdfMixin, BaseModel):
     other_disbursements_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_DISBURSEMENTS))
     other_political_committee_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS))
     other_political_committee_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS))
-    political_party_committee_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS))
+    political_party_committee_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS))
     political_party_committee_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS))
     report_type = db.Column(db.String, doc=docs.REPORT_TYPE)
     report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
@@ -60,11 +60,11 @@ class CommitteeReports(PdfMixin, BaseModel):
     offsets_to_operating_expenditures_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OFFSETS_TO_OPERATING_EXPENDITURES))
 
     total_individual_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_CONTRIBUTIONS))
-    total_individual_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.period(docs.INDIVIDUAL_CONTRIBUTIONS))
+    total_individual_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_CONTRIBUTIONS))
     individual_unitemized_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS))
     individual_unitemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS))
     individual_itemized_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))
-    individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))
+    individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
