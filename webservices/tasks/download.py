@@ -8,6 +8,8 @@ import tempfile
 import collections
 
 import marshmallow
+from marshmallow_sqlalchemy.fields import Related
+
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
 from celery_once import QueueOnce
@@ -110,10 +112,13 @@ def un_nest(d, parent_key='', sep='.'):
 
 def create_headers(schema, parent_key='', sep='.'):
     items = []
-    for name, field in schema._declared_fields.items():
+    schema = schema() if isinstance(schema, type) else schema
+    for name, field in schema.fields.items():
         new_key = sep.join([parent_key, name]) if parent_key else name
         if isinstance(field, marshmallow.fields.Nested):
             items.extend(create_headers(field.nested, new_key, sep=sep))
+        elif isinstance(field, Related):
+            items.extend(sep.join([new_key, prop.key]) for prop in field.related_keys)
         else:
             items.append(new_key)
     return items
@@ -165,15 +170,15 @@ def make_manifest(resource, row_count, path):
         fp.write('*Count: {}\n'.format(row_count))
         fp.write('Fields:\n\n')
         fp.write('{}\n\n'.format(COUNT_NOTE))
-        fp.write(make_fields(resource))
+        fp.write(make_filters(resource))
 
-# trying this out
-def make_fields(resource):
+def make_filters(resource):
     lines = []
     for key, value in resource['kwargs'].items():
-        value = ', '.join(map(format, value)) if isinstance(value, list) else value
-        description = resource['fields'][key].metadata.get('description')
-        lines.append(make_filter(key, value, description))
+        if key in resource['fields']:
+            value = ', '.join(map(format, value)) if isinstance(value, list) else value
+            description = resource['fields'][key].metadata.get('description')
+            lines.append(make_filter(key, value, description))
     return '\n\n'.join(lines)
 
 def make_filter(key, value, description):
