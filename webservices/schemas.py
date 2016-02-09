@@ -247,6 +247,19 @@ ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+ScheduleBByRecipientIDSchema = make_schema(
+    models.ScheduleBByRecipientID,
+    fields={
+        'committee_name': ma.fields.Str(),
+        'recipient_name': ma.fields.Str(),
+    },
+    options={
+        'exclude': ('committee', 'recipient')
+    },
+)
+
+augment_schemas(ScheduleBByRecipientIDSchema)
+
 augment_models(
     make_schema,
     models.ScheduleAByZip,
@@ -254,9 +267,7 @@ augment_models(
     models.ScheduleAByState,
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
-    models.ScheduleAByContributor,
     models.ScheduleBByRecipient,
-    models.ScheduleBByRecipientID,
     models.ScheduleBByPurpose,
 )
 
@@ -443,12 +454,6 @@ class ScheduleAByStateCandidateSchema(ma.Schema):
     state = ma.fields.Str()
     state_full = ma.fields.Str()
 
-class ScheduleAByContributorTypeCandidateSchema(ma.Schema):
-    candidate_id = ma.fields.Str()
-    cycle = ma.fields.Int()
-    total = ma.fields.Decimal(places=2)
-    individual = ma.fields.Bool()
-
 class TotalsCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
@@ -460,7 +465,6 @@ class TotalsCandidateSchema(ma.Schema):
 augment_schemas(
     ScheduleABySizeCandidateSchema,
     ScheduleAByStateCandidateSchema,
-    ScheduleAByContributorTypeCandidateSchema,
     TotalsCandidateSchema,
 )
 
