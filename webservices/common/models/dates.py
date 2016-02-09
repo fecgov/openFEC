@@ -89,6 +89,7 @@ class CalendarDate(BaseModel):
     location = db.Column(db.String, index=True, doc='Can be state address or room. No entries for reporting and election dates')
     start_date = db.Column(db.DateTime, index=True, doc='Date the event starts')
     end_date = db.Column(db.DateTime, index=True, doc='Date the event ends')
+    url = db.Column(db.String, doc='A url for that event')
 
     summary_text = db.Column(TSVECTOR)
     description_text = db.Column(TSVECTOR)
