@@ -37,6 +37,7 @@ REQUIRED_TABLES = (
     (
         'ofec_pacronyms',
         'ofec_nicknames',
+        'ofec_zips_districts',
     )
 )
 
