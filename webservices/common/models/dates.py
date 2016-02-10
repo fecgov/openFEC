@@ -83,7 +83,7 @@ class CalendarDate(BaseModel):
 
     event_id = db.Column('idx', db.Integer, primary_key=True, doc=docs.EVENT_ID)
     summary = db.Column(db.String, doc=docs.SUMMARY)
-    description = db.Column(db.Text, doc=docs.DESCRIPTION)
+    description = db.Column(db.Text, doc=docs.CAL_DESCRIPTION)
     category = db.Column(db.String, index=True, doc=docs.CATEGORY)
     state = db.Column('states', ARRAY(db.String), index=True, doc=docs.CAL_STATE)
     location = db.Column(db.String, index=True, doc='Can be state address or room. No entries for reporting and election dates')
