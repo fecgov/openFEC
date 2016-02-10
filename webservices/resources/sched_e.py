@@ -35,6 +35,7 @@ class ScheduleEView(ItemizedResource):
         ('committee_id', models.ScheduleE.committee_id),
         ('candidate_id', models.ScheduleE.candidate_id),
         ('support_oppose_indicator', models.ScheduleE.support_oppose_indicator),
+        ('filing_form', models.ScheduleE.filing_form),
         ('is_notice', models.ScheduleE.is_notice),
     ]
     filter_fulltext_fields = [
