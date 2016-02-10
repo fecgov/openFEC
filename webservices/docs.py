@@ -485,7 +485,7 @@ DATES_TAG = '''
 Reporting deadlines, election dates FEC meetings, events etc.
 '''
 
-CALANDAR_DATES = '''
+CALENDAR_DATES = '''
 Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
 event into one calendar. State filtering is only applicable to the reporting and election resources.
 '''
