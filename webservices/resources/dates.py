@@ -86,7 +86,7 @@ class ElectionDatesView(ApiResource):
         return query.filter_by(election_status_id=1)
 
 
-@doc(tags=['dates'], description=docs.CALANDAR_DATES)
+@doc(tags=['dates'], description=docs.CALENDAR_DATES)
 class CalendarDatesView(ApiResource):
 
     model = models.CalendarDate
