@@ -50,7 +50,7 @@ two-year blocks. The cycle begins with an odd year and is named for its
 ending, even year.
 '''
 
-DESCRIPTION = '''
+API_DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 
 This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
@@ -760,6 +760,6 @@ FED_DISBURSEMENTS = 'Total federal disbursements'
 # calendar
 CATEGORY = 'Type of date reporting date, live event, etc.'
 CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
-DESCRIPTION = 'Brief description of event'
+CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'

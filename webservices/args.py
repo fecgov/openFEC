@@ -296,7 +296,7 @@ calendar_dates = {
             ],
         },
     ),
-    'description': fields.Str(description=docs.DESCRIPTION),
+    'description': fields.Str(description=docs.CAL_DESCRIPTION),
     'summary': fields.Str(description=docs.SUMMARY),
     'state': fields.List(fields.Str, description=docs.CAL_STATE),
     'min_start_date': fields.DateTime(description='The minimum start date and time'),
