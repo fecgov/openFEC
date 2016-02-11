@@ -489,6 +489,10 @@ candidate_totals = {
     'max_receipts': fields.Int('Maximum aggregated receipts'),
     'min_disbursements': fields.Int('Minimum aggregated disbursements'),
     'max_disbursements': fields.Int('Maximum aggregated disbursements'),
+    'min_cash_on_hand_end_period': fields.Int('Minimum cash on hand'),
+    'max_cash_on_hand_end_period': fields.Int('Maximum cash on hand'),
+    'min_debts_owed_by_committee': fields.Int('Minimum debt'),
+    'max_debts_owed_by_committee': fields.Int('Maximum debt'),
 }
 
 totals_committee_aggregate = {
