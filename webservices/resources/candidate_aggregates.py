@@ -142,6 +142,8 @@ class TotalsCandidateView(ApiResource):
         return [
             (('min_receipts', 'max_receipts'), model.receipts),
             (('min_disbursements', 'max_disbursements'), model.disbursements),
+            (('min_cash_on_hand_end_period', 'max_cash_on_hand_end_period'), model.cash_on_hand_end_period),
+            (('min_debts_owed_by_committee', 'max_debts_owed_by_committee'), model.debts_owed_by_committee),
         ]
 
     def build_query(self, **kwargs):
