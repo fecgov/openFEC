@@ -24,6 +24,7 @@ with totals as (
 cycle_totals as (
     select
         link.cand_id as candidate_id,
+        max(election.cand_election_year) as election_year,
         totals.cycle,
         false as is_election,
         sum(totals.receipts) as receipts,
@@ -34,57 +35,54 @@ cycle_totals as (
     join totals on
         link.cmte_id = totals.committee_id and
         link.fec_election_yr = totals.cycle
+    left join ofec_candidate_election_mv_tmp election on
+        link.cand_id = election.candidate_id and
+        totals.cycle <= election.cand_election_year and
+        (election.prev_election_year is null or totals.cycle > election.prev_election_year)
     where
         link.cmte_dsgn in ('P', 'A')
     group by
-        candidate_id,
+        link.cand_id,
         totals.cycle
 ),
 -- Aggregated totals by candidate by election
 election_aggregates as (
     select
-        totals.candidate_id,
-        election.cand_election_year,
+        candidate_id,
+        election_year,
         sum(receipts) as receipts,
         sum(disbursements) as disbursements
-    from cycle_totals totals
-    join ofec_candidate_election_mv_tmp election on
-        totals.candidate_id = election.candidate_id and
-        totals.cycle <= election.cand_election_year and
-        totals.cycle > election.cand_election_year - election_duration(substr(totals.candidate_id, 1, 1))
+    from cycle_totals
     group by
-        totals.candidate_id,
-        election.cand_election_year
+        candidate_id,
+        election_year
 ),
 -- Ending financials by candidate by election
 election_latest as (
-    select distinct on (totals.candidate_id, election.cand_election_year)
-        totals.candidate_id,
-        election.cand_election_year,
-        totals.cash_on_hand_end_period,
-        totals.debts_owed_by_committee
+    select distinct on (candidate_id, election_year)
+        candidate_id,
+        election_year,
+        cash_on_hand_end_period,
+        debts_owed_by_committee
     from cycle_totals totals
-    join ofec_candidate_election_mv_tmp election on
-        totals.candidate_id = election.candidate_id and
-        totals.cycle <= election.cand_election_year and
-        totals.cycle > election.cand_election_year - election_duration(substr(totals.candidate_id, 1, 1))
     order by
-        totals.candidate_id,
-        election.cand_election_year,
-        totals.cycle desc
+        candidate_id,
+        election_year,
+        cycle desc
 ),
 -- Combined totals and ending financials by candidate by election
 election_totals as (
     select
         totals.candidate_id,
-        totals.cand_election_year as cycle,
+        totals.election_year as election_year,
+        totals.election_year as cycle,
         true as is_election,
         totals.receipts,
         totals.disbursements,
         latest.cash_on_hand_end_period,
         latest.debts_owed_by_committee
     from election_aggregates totals
-    join election_latest latest using (candidate_id, cand_election_year)
+    join election_latest latest using (candidate_id, election_year)
 )
 -- Combined cycle and election totals by candidate
 select * from cycle_totals
@@ -95,6 +93,7 @@ select * from election_totals
 create unique index on ofec_candidate_totals_mv_tmp (candidate_id, cycle, is_election);
 
 create index on ofec_candidate_totals_mv_tmp (candidate_id);
+create index on ofec_candidate_totals_mv_tmp (election_year);
 create index on ofec_candidate_totals_mv_tmp (cycle);
 create index on ofec_candidate_totals_mv_tmp (is_election);
 create index on ofec_candidate_totals_mv_tmp (receipts);
