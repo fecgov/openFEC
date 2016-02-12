@@ -100,6 +100,7 @@ class CandidateHistoryLatest(BaseCandidate):
 class CandidateTotal(db.Model):
     __tablename__ = 'ofec_candidate_totals_mv'
     candidate_id = db.Column(db.String, index=True, primary_key=True)
+    election_year = db.Column(db.Integer, index=True, primary_key=True)
     cycle = db.Column(db.Integer, index=True, primary_key=True)
     is_election = db.Column(db.Boolean, index=True, primary_key=True)
     receipts = db.Column(db.Numeric(30, 2), index=True)
@@ -113,3 +114,4 @@ class CandidateElection(db.Model):
 
     candidate_id = db.Column(db.String, primary_key=True, index=True)
     cand_election_year = db.Column(db.Integer, primary_key=True, index=True)
+    prev_election_year = db.Column(db.Integer, index=True)

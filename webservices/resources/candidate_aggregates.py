@@ -129,13 +129,14 @@ class TotalsCandidateView(ApiResource):
             args.make_sort_args(),
         )
 
-    def filter_multi_fields(self, model):
+    def filter_multi_fields(self, history, total):
         return [
-            ('candidate_id', model.candidate_id),
-            ('cycle', model.two_year_period),
-            ('office', model.office),
-            ('party', model.party),
-            ('state', model.state),
+            ('candidate_id', history.candidate_id),
+            ('election_year', total.election_year),
+            ('cycle', total.cycle),
+            ('office', history.office),
+            ('party', history.party),
+            ('state', history.state),
         ]
 
     def filter_range_fields(self, model):
@@ -164,6 +165,6 @@ class TotalsCandidateView(ApiResource):
         ).filter(
             models.CandidateTotal.is_election == kwargs['election_full'],
         )
-        query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history))
+        query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         return query

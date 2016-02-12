@@ -480,6 +480,7 @@ schedule_a_candidate_aggregate = {
 
 candidate_totals = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
     'election_full': election_full,
