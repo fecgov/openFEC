@@ -95,7 +95,7 @@ class IndexValidator(OptionValidator):
     def _is_excluded(self, value):
         return not value or value in self.exclude
 
-def make_sort_args(default=None, validator=None, default_hide_null=False, default_nulls_large=True):
+def make_sort_args(default=None, validator=None, default_hide_null=False):
     return {
         'sort': fields.Str(
             missing=default,
@@ -106,10 +106,6 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
             missing=default_hide_null,
             description='Hide null values on sorted column(s).'
         ),
-        'sort_nulls_large': fields.Bool(
-            missing=default_nulls_large,
-            description='Treat null values as large on sorted column(s)',
-        )
     }
 
 def make_seek_args(field=fields.Int, description=None):
