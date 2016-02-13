@@ -126,6 +126,9 @@ We are always trying to improve our documentation, if you have suggestions or ru
 ## Deployment
 
 ##### Likely only useful for 18F team members
+
+Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot#installation).
+
 To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
 Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
 

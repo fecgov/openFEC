@@ -1,4 +1,5 @@
 import os
+import json
 
 import git
 from invoke import run
@@ -158,14 +159,6 @@ DEPLOY_RULES = (
 )
 
 
-def _detect_apps(blue, green):
-    """Detect old and new apps for blue-green deploy."""
-    status = run('cf app {0}'.format(blue), echo=True, warn=True)
-    if status.ok and 'started' in status.stdout:
-        return (blue, green)
-    return (green, blue)
-
-
 SPACE_URLS = {
     'dev': [('18f.gov', 'fec-dev-api')],
     'stage': [('18f.gov', 'fec-stage-api')],
@@ -197,47 +190,32 @@ def deploy(space=None, branch=None, yes=False):
     )
     run('cf login {0}'.format(' '.join(' '.join(arg) for arg in args)), echo=True)
 
-    old, new = _detect_apps('api-a', 'api-b')
-
     # Set deploy variables
-    run('cf set-env {0} DEPLOY_BRANCH "{1}"'.format(new, branch))
-    run('cf set-env {0} DEPLOY_USER "{1}"'.format(new, os.getenv('USER')))
+    with open('.cfmeta', 'w') as fp:
+        json.dump({'user': os.getenv('USER'), 'branch': branch}, fp)
 
-    # Push
-    push = run('cf push {0} -f manifest_{1}.yml'.format(new, space), echo=True, warn=True)
-    if push.failed:
-        print('Error pushing app {0}'.format(new))
-        run('cf stop {0}'.format(new), echo=True)
-        return
-
-    # Unset deploy variables
-    run('cf unset-env {0} DEPLOY_BRANCH'.format(new))
-    run('cf unset-env {0} DEPLOY_USER'.format(new))
-
-    # Remap
-    for route, host in SPACE_URLS[space]:
-        opts = route
-        if host:
-            opts += ' -n {0}'.format(host)
-        run('cf map-route {0} {1}'.format(new, opts), echo=True)
-        run('cf unmap-route {0} {1}'.format(old, opts), echo=True, warn=True)
-
-    run('cf stop {0}'.format(old), echo=True, warn=True)
+    # Deploy API
+    run('cf zero-downtime-push api -f manifest_{0}.yml'.format(space), echo=True)
 
     # Deploy worker applications
     run('cf push celery-beat -f manifest_{0}.yml'.format(space))
     run('cf push celery-worker -f manifest_{0}.yml'.format(space))
 
+
 @task
 def notify():
+    try:
+        meta = json.load(open('.cfmeta'))
+    except OSError:
+        meta = {}
     slack = Slacker(env.get_credential('FEC_SLACK_TOKEN'))
     slack.chat.post_message(
         env.get_credential('FEC_SLACK_CHANNEL', '#fec'),
         'deploying branch {branch} of app {name} to space {space} by {user}'.format(
             name=env.name,
             space=env.space,
-            user=os.getenv('DEPLOY_USER'),
-            branch=os.getenv('DEPLOY_BRANCH'),
+            user=meta.get('user'),
+            branch=meta.get('branch'),
         ),
         username=env.get_credential('FEC_SLACK_BOT', 'fec-bot'),
     )
