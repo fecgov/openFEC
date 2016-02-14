@@ -63,9 +63,6 @@ class Electioneering(db.Model):
     purpose_description = db.Column('disb_desc', db.String)
     report_year = db.Column('rpt_yr', db.Integer, index=True)
 
-    committee = utils.related_committee('committee_id')
-    candidate = utils.related_candidate('candidate_id')
-
     purpose_description_text = db.Column(TSVECTOR)
 
     @property
