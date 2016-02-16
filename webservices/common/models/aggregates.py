@@ -41,12 +41,6 @@ class ScheduleAByOccupation(BaseAggregate):
     occupation = db.Column(db.String, primary_key=True, doc=docs.OCCUPATION)
 
 
-class ScheduleAByContributor(BaseAggregate):
-    __tablename__ = 'ofec_sched_a_aggregate_contributor'
-    contributor_id = db.Column('contbr_id', db.String, primary_key=True, doc=docs.CONTRIBUTOR_ID)
-    contributor_name = db.Column('contbr_nm', db.String)
-
-
 class ScheduleBByRecipient(BaseAggregate):
     __tablename__ = 'ofec_sched_b_aggregate_recipient'
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True, doc=docs.RECIPIENT_NAME)
@@ -55,7 +49,16 @@ class ScheduleBByRecipient(BaseAggregate):
 class ScheduleBByRecipientID(BaseAggregate):
     __tablename__ = 'ofec_sched_b_aggregate_recipient_id'
     recipient_id = db.Column('recipient_cmte_id', db.String, primary_key=True, doc=docs.RECIPIENT_ID)
-    recipient_name = db.Column('recipient_nm', db.String, doc=docs.RECIPIENT_NAME)
+    committee = utils.related_committee('committee_id')
+    recipient = utils.related('CommitteeHistory', 'recipient_id', 'committee_id', cycle_label='cycle')
+
+    @property
+    def committee_name(self):
+        return self.committee.name
+
+    @property
+    def recipient_name(self):
+        return self.recipient.name
 
 
 class ScheduleBByPurpose(BaseAggregate):
