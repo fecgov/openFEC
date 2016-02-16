@@ -184,13 +184,6 @@ class ScheduleAByEmployerFactory(BaseAggregateFactory):
         model = models.ScheduleAByEmployer
 
 
-class ScheduleAByContributorFactory(BaseAggregateFactory):
-    class Meta:
-        model = models.ScheduleAByContributor
-    contributor_id = factory.Sequence(lambda n: str(n))
-    year = 2015
-
-
 class ScheduleBByPurposeFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleBByPurpose
