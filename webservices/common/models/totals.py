@@ -1,20 +1,22 @@
 from .base import db, BaseModel
 
+from webservices import docs
+
 
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String)
-    cycle = db.Column(db.Integer, primary_key=True, index=True)
+    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
     offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
     political_party_committee_contributions = db.Column(db.Numeric(30, 2))
     other_disbursements = db.Column(db.Numeric(30, 2))
     other_political_committee_contributions = db.Column(db.Numeric(30, 2))
-    individual_itemized_contributions = db.Column(db.Numeric(30, 2))
-    individual_unitemized_contributions = db.Column(db.Numeric(30, 2))
+    individual_itemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
+    individual_unitemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS)
     operating_expenditures = db.Column(db.Numeric(30, 2))
-    disbursements = db.Column(db.Numeric(30, 2))
-    contributions = db.Column(db.Numeric(30, 2))
+    disbursements = db.Column(db.Numeric(30, 2), doc=docs.DISBURSEMENTS)
+    contributions = db.Column(db.Numeric(30, 2), doc=docs.CONTRIBUTIONS)
     contribution_refunds = db.Column(db.Numeric(30, 2))
     individual_contributions = db.Column(db.Numeric(30, 2))
     refunded_individual_contributions = db.Column(db.Numeric(30, 2))
@@ -104,9 +106,9 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
 class CommitteeTotalsIEOnly(BaseModel):
     __tablename__ = 'ofec_totals_ie_only_mv'
 
-    committee_id = db.Column(db.String, index=True)
-    cycle = db.Column(db.Integer, index=True)
-    coverage_start_date = db.Column(db.DateTime)
-    coverage_end_date = db.Column(db.DateTime)
+    committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
+    cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
+    coverage_start_date = db.Column(db.DateTime, doc=docs.COVERAGE_START_DATE)
+    coverage_end_date = db.Column(db.DateTime, doc=docs.COVERAGE_END_DATE)
     total_independent_contributions = db.Column(db.Numeric(30, 2))
     total_independent_expenditures = db.Column(db.Numeric(30, 2))
