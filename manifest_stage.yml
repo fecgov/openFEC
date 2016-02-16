@@ -4,6 +4,7 @@ host: fec-stage-api
 services:
   - fec-creds-stage
   - fec-redis-stage
+  - fec-s3-stage
 env:
   NEW_RELIC_APP_NAME: OpenFEC API (staging)
   NEW_RELIC_ENV: staging
