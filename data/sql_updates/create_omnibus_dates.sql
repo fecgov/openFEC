@@ -139,7 +139,7 @@ with elections_raw as(
         array_to_string(array[
             expand_office_description(office_sought::text),
             clean_report(rpt_tp_desc::text),
-            'Due, Report code:',
+            'Due. Report code:',
             report_type::text,
             array_to_string(array_agg(election_state order by election_state)::text[], ', ')
         ], ' ') as summary,
