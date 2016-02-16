@@ -18,9 +18,10 @@ class CommunicationCost(db.Model):
     candidate_office = db.Column('cand_office', db.String, index=True)
     candidate_party_affiliation = db.Column('cand_pty_affiliation', db.String, index=True)
     party_full = db.Column('pty_desc', db.String)
-    transaction_date = db.Column('_transaction_dt', db.Date, index=True)
+    transaction_date = db.Column('transaction_dt', db.Date, index=True)
     transaction_amount = db.Column('transaction_amt', db.Numeric(30, 2), index=True)
     transaction_type = db.Column('transaction_tp', db.String)
+    receipt_date = db.Column('f7_receipt_dt', db.String)
     purpose = db.Column(db.String)
     communication_type = db.Column('communication_tp', db.String, index=True)
     communication_class = db.Column('communication_class', db.String, index=True)
@@ -62,6 +63,9 @@ class Electioneering(db.Model):
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
     purpose_description = db.Column('disb_desc', db.String)
     report_year = db.Column('rpt_yr', db.Integer, index=True)
+    election_type = db.Column('election_tp', db.String)
+    file_number = db.Column('file_num', db.Integer)
+    amendment_indicator = db.Column('amndt_ind', db.String)
 
     purpose_description_text = db.Column(TSVECTOR)
 
@@ -70,9 +74,5 @@ class Electioneering(db.Model):
         return utils.make_report_pdf_url(self.beginning_image_number)
 
     ### would be nice to add these back
-    # election_type
-    # election_type_full
-    # amendment_indicator
-    # file_number
     # receipt_date
     # form_number doc='Form number is the file number (or report id)'
