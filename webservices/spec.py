@@ -7,7 +7,7 @@ from webservices import __API_VERSION__
 spec = APISpec(
     title='OpenFEC',
     version=__API_VERSION__,
-    info={'description': docs.DESCRIPTION},
+    info={'description': docs.API_DESCRIPTION},
     basePath='/v1',
     produces=['application/json'],
     plugins=['apispec.ext.marshmallow'],

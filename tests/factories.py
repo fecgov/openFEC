@@ -253,3 +253,7 @@ class ElectioneeringFactory(BaseFactory):
     class Meta:
         model = models.Electioneering
     idx = factory.Sequence(lambda n: n)
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.purpose_description_text = sa.func.to_tsvector(obj.purpose_description)
