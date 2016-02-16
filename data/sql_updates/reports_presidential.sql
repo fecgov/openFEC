@@ -1,6 +1,5 @@
-drop view if exists ofec_reports_presidential_vw;
-drop materialized view if exists ofec_reports_presidential_mv_tmp;
-create materialized view ofec_reports_presidential_mv_tmp as
+drop table if exists ofec_reports_presidential_tmp;
+create table ofec_reports_presidential_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
@@ -95,16 +94,19 @@ from
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
-    two_yr_period_sk >= :START_YEAR
+    two_yr_period_sk >= %(START_YEAR)s
 ;
 
-create unique index on ofec_reports_presidential_mv_tmp(idx);
+create unique index on ofec_reports_presidential_tmp(idx);
 
-create index on ofec_reports_presidential_mv_tmp(cycle, idx);
-create index on ofec_reports_presidential_mv_tmp(expire_date, idx);
-create index on ofec_reports_presidential_mv_tmp(report_type, idx);
-create index on ofec_reports_presidential_mv_tmp(report_year, idx);
-create index on ofec_reports_presidential_mv_tmp(committee_id, idx);
-create index on ofec_reports_presidential_mv_tmp(coverage_end_date, idx);
-create index on ofec_reports_presidential_mv_tmp(coverage_start_date, idx);
-create index on ofec_reports_presidential_mv_tmp(beginning_image_number, idx);
+create index on ofec_reports_presidential_tmp(cycle, idx);
+create index on ofec_reports_presidential_tmp(expire_date, idx);
+create index on ofec_reports_presidential_tmp(report_type, idx);
+create index on ofec_reports_presidential_tmp(report_year, idx);
+create index on ofec_reports_presidential_tmp(committee_id, idx);
+create index on ofec_reports_presidential_tmp(coverage_end_date, idx);
+create index on ofec_reports_presidential_tmp(coverage_start_date, idx);
+create index on ofec_reports_presidential_tmp(beginning_image_number, idx);
+
+drop table if exists ofec_reports_presidential;
+alter table ofec_reports_presidential_tmp rename to ofec_reports_presidential;

@@ -1,3 +1,4 @@
+airflow==1.6.2
 cfenv==0.4.0
 invoke==0.10.1
 psycopg2==2.6

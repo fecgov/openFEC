@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_filings_mv_tmp;
-create materialized view ofec_filings_mv_tmp as
+drop table if exists ofec_filings_tmp;
+create table ofec_filings_tmp as
 select
     row_number() over () as idx,
     cand.candidate_id as candidate_id,
@@ -43,26 +43,29 @@ select
     amendment_indicator,
     update_date
 from vw_filing_history fh
-left join ofec_committee_history_mv_tmp com on fh.committee_id = com.committee_id and get_cycle(fh.report_year) = com.cycle
-left join ofec_candidate_history_mv_tmp cand on fh.committee_id = cand.candidate_id and get_cycle(fh.report_year) = cand.two_year_period
+left join ofec_committee_history com on fh.committee_id = com.committee_id and get_cycle(fh.report_year) = com.cycle
+left join ofec_candidate_history cand on fh.committee_id = cand.candidate_id and get_cycle(fh.report_year) = cand.two_year_period
 left join dimreporttype report on fh.report_type = report.rpt_tp
-where report_year >= :START_YEAR
+where report_year >= %(START_YEAR)s
 ;
 
-create unique index on ofec_filings_mv_tmp (idx);
+create unique index on ofec_filings_tmp (idx);
 
-create index on ofec_filings_mv_tmp (committee_id, idx);
-create index on ofec_filings_mv_tmp (candidate_id, idx);
-create index on ofec_filings_mv_tmp (beginning_image_number, idx);
-create index on ofec_filings_mv_tmp (receipt_date, idx);
-create index on ofec_filings_mv_tmp (form_type, idx);
-create index on ofec_filings_mv_tmp (primary_general_indicator, idx);
-create index on ofec_filings_mv_tmp (amendment_indicator, idx);
-create index on ofec_filings_mv_tmp (report_type, idx);
-create index on ofec_filings_mv_tmp (report_year, idx);
-create index on ofec_filings_mv_tmp (cycle, idx);
-create index on ofec_filings_mv_tmp (total_receipts, idx);
-create index on ofec_filings_mv_tmp (total_disbursements, idx);
-create index on ofec_filings_mv_tmp (total_independent_expenditures, idx);
-create index on ofec_filings_mv_tmp (coverage_start_date, idx);
-create index on ofec_filings_mv_tmp (coverage_end_date, idx);
+create index on ofec_filings_tmp (committee_id, idx);
+create index on ofec_filings_tmp (candidate_id, idx);
+create index on ofec_filings_tmp (beginning_image_number, idx);
+create index on ofec_filings_tmp (receipt_date, idx);
+create index on ofec_filings_tmp (form_type, idx);
+create index on ofec_filings_tmp (primary_general_indicator, idx);
+create index on ofec_filings_tmp (amendment_indicator, idx);
+create index on ofec_filings_tmp (report_type, idx);
+create index on ofec_filings_tmp (report_year, idx);
+create index on ofec_filings_tmp (cycle, idx);
+create index on ofec_filings_tmp (total_receipts, idx);
+create index on ofec_filings_tmp (total_disbursements, idx);
+create index on ofec_filings_tmp (total_independent_expenditures, idx);
+create index on ofec_filings_tmp (coverage_start_date, idx);
+create index on ofec_filings_tmp (coverage_end_date, idx);
+
+drop table if exists ofec_filings;
+alter table ofec_filings_tmp rename to ofec_filings;

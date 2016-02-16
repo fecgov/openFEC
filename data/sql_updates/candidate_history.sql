@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
-create materialized view ofec_candidate_history_mv_tmp as
+drop table if exists ofec_candidate_history_tmp;
+create table ofec_candidate_history_tmp as
 with
     -- Select rows from `cand_valid_fec_yr` that are associated with principal
     -- or authorized committees via `cand_cmte_linkage`
@@ -66,59 +66,18 @@ left join cand_inactive inactive on
     fec_yr.cand_id = inactive.cand_id and
     fec_yr.fec_election_yr < inactive.election_yr
 inner join dimparty dp on fec_yr.cand_pty_affiliation = dp.party_affiliation
-where max_cycle >= :START_YEAR
+where max_cycle >= %(START_YEAR)s
 ;
 
-create unique index on ofec_candidate_history_mv_tmp(idx);
+create unique index on ofec_candidate_history_tmp(idx);
 
-create index on ofec_candidate_history_mv_tmp(load_date);
-create index on ofec_candidate_history_mv_tmp(candidate_id);
-create index on ofec_candidate_history_mv_tmp(two_year_period);
-create index on ofec_candidate_history_mv_tmp(office);
-create index on ofec_candidate_history_mv_tmp(state);
-create index on ofec_candidate_history_mv_tmp(district);
-create index on ofec_candidate_history_mv_tmp(district_number);
+create index on ofec_candidate_history_tmp(load_date);
+create index on ofec_candidate_history_tmp(candidate_id);
+create index on ofec_candidate_history_tmp(two_year_period);
+create index on ofec_candidate_history_tmp(office);
+create index on ofec_candidate_history_tmp(state);
+create index on ofec_candidate_history_tmp(district);
+create index on ofec_candidate_history_tmp(district_number);
 
-
-drop materialized view if exists ofec_candidate_detail_mv_tmp;
-create materialized view ofec_candidate_detail_mv_tmp as
-select distinct on (candidate_id) * from ofec_candidate_history_mv_tmp
-order by candidate_id, two_year_period desc
-;
-
-create unique index on ofec_candidate_detail_mv_tmp(idx);
-
-create index on ofec_candidate_detail_mv_tmp(name);
-create index on ofec_candidate_detail_mv_tmp(party);
-create index on ofec_candidate_detail_mv_tmp(state);
-create index on ofec_candidate_detail_mv_tmp(office);
-create index on ofec_candidate_detail_mv_tmp(district);
-create index on ofec_candidate_detail_mv_tmp(load_date);
-create index on ofec_candidate_detail_mv_tmp(party_full);
-create index on ofec_candidate_detail_mv_tmp(office_full);
-create index on ofec_candidate_detail_mv_tmp(candidate_id);
-create index on ofec_candidate_detail_mv_tmp(candidate_status);
-create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
-
-create index on ofec_candidate_detail_mv_tmp using gin (cycles);
-create index on ofec_candidate_detail_mv_tmp using gin (election_years);
-
-
-drop materialized view if exists ofec_candidate_election_mv_tmp;
-create materialized view ofec_candidate_election_mv_tmp as
-with years as (
-    select
-        candidate_id,
-        unnest(election_years) as cand_election_year
-    from ofec_candidate_detail_mv_tmp
-)
-select
-    row_number() over () as idx,
-    years.*
-from years
-;
-
-create unique index on ofec_candidate_election_mv_tmp (idx);
-
-create index on ofec_candidate_election_mv_tmp (candidate_id);
-create index on ofec_candidate_election_mv_tmp (cand_election_year);
+drop table if exists ofec_candidate_history;
+alter table ofec_candidate_history_tmp rename to ofec_candidate_history;

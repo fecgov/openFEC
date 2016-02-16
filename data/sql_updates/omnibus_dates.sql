@@ -80,8 +80,8 @@ returns text as $$
 $$ language plpgsql;
 
 
-drop materialized view if exists ofec_omnibus_dates_mv_tmp;
-create materialized view ofec_omnibus_dates_mv_tmp as
+drop table if exists ofec_omnibus_dates_tmp;
+create table ofec_omnibus_dates_tmp as
 with elections_raw as(
     select
         *,
@@ -186,13 +186,16 @@ select
 from combined
 ;
 
-create unique index on ofec_omnibus_dates_mv_tmp (idx);
+create unique index on ofec_omnibus_dates_tmp (idx);
 
-create index on ofec_omnibus_dates_mv_tmp (category);
-create index on ofec_omnibus_dates_mv_tmp (location);
-create index on ofec_omnibus_dates_mv_tmp (start_date);
-create index on ofec_omnibus_dates_mv_tmp (end_date);
+create index on ofec_omnibus_dates_tmp (category);
+create index on ofec_omnibus_dates_tmp (location);
+create index on ofec_omnibus_dates_tmp (start_date);
+create index on ofec_omnibus_dates_tmp (end_date);
 
-create index on ofec_omnibus_dates_mv_tmp using gin (states);
-create index on ofec_omnibus_dates_mv_tmp using gin (summary_text);
-create index on ofec_omnibus_dates_mv_tmp using gin (description_text);
+create index on ofec_omnibus_dates_tmp using gin (states);
+create index on ofec_omnibus_dates_tmp using gin (summary_text);
+create index on ofec_omnibus_dates_tmp using gin (description_text);
+
+drop table if exists ofec_omnibus_dates;
+alter table ofec_omnibus_dates_tmp rename to ofec_omnibus_dates;

@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_committee_history_mv_tmp cascade;
-create materialized view ofec_committee_history_mv_tmp as
+drop table if exists ofec_committee_history_tmp cascade;
+create table ofec_committee_history_tmp as
 with
     cycles as (
         select
@@ -96,43 +96,15 @@ left join dimcmteproperties dcp on fec_yr.cmte_id = dcp.cmte_id and fec_yr.fec_e
 left join cycles on fec_yr.cmte_id = cycles.cmte_id
 left join dates on fec_yr.cmte_id = dates.cmte_id
 left join candidates on fec_yr.cmte_id = candidates.cmte_id
-where cycles.max_cycle >= :START_YEAR
+where cycles.max_cycle >= %(START_YEAR)s
 order by fec_yr.cmte_id, fec_yr.fec_election_yr desc, dcp.rpt_yr desc
 ;
 
-create unique index on ofec_committee_history_mv_tmp(idx);
+create unique index on ofec_committee_history_tmp(idx);
 
-create index on ofec_committee_history_mv_tmp(cycle);
-create index on ofec_committee_history_mv_tmp(committee_id);
-create index on ofec_committee_history_mv_tmp(designation);
+create index on ofec_committee_history_tmp(cycle);
+create index on ofec_committee_history_tmp(committee_id);
+create index on ofec_committee_history_tmp(designation);
 
-
-drop materialized view if exists ofec_committee_detail_mv_tmp;
-create materialized view ofec_committee_detail_mv_tmp as
-select distinct on (committee_id) *
-from ofec_committee_history_mv_tmp
-order by committee_id, cycle desc
-;
-
-
-create unique index on ofec_committee_detail_mv_tmp (idx);
-
-create index on ofec_committee_detail_mv_tmp(name);
-create index on ofec_committee_detail_mv_tmp(party);
-create index on ofec_committee_detail_mv_tmp(state);
-create index on ofec_committee_detail_mv_tmp(party_full);
-create index on ofec_committee_detail_mv_tmp(designation);
-create index on ofec_committee_detail_mv_tmp(expire_date);
-create index on ofec_committee_detail_mv_tmp(committee_id);
-create index on ofec_committee_detail_mv_tmp(committee_type);
-create index on ofec_committee_detail_mv_tmp(last_file_date);
-create index on ofec_committee_detail_mv_tmp(treasurer_name);
-create index on ofec_committee_detail_mv_tmp(first_file_date);
-create index on ofec_committee_detail_mv_tmp(designation_full);
-create index on ofec_committee_detail_mv_tmp(organization_type);
-create index on ofec_committee_detail_mv_tmp(committee_type_full);
-create index on ofec_committee_detail_mv_tmp(organization_type_full);
-
-create index on ofec_committee_detail_mv_tmp using gin (cycles);
-create index on ofec_committee_detail_mv_tmp using gin (candidate_ids);
-create index on ofec_committee_detail_mv_tmp using gin (treasurer_text);
+drop table if exists ofec_committee_history;
+alter table ofec_committee_history_tmp rename to ofec_committee_history;

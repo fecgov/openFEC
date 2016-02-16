@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_sched_e_aggregate_candidate_mv_tmp;
-create materialized view ofec_sched_e_aggregate_candidate_mv_tmp as
+drop table if exists ofec_sched_e_aggregate_candidate_tmp;
+create table ofec_sched_e_aggregate_candidate_tmp as
 with records as (
     select
         cmte_id,
@@ -28,7 +28,7 @@ select
     cmte_id,
     cand_id,
     support_oppose_indicator,
-    rpt_yr + rpt_yr % 2 as cycle,
+    get_cycle(rpt_yr) as cycle,
     sum(exp_amt) as total,
     count(exp_amt) as count
 from records
@@ -43,11 +43,14 @@ group by
     cycle
 ;
 
-create unique index on ofec_sched_e_aggregate_candidate_mv_tmp (idx);
+create unique index on ofec_sched_e_aggregate_candidate_tmp (idx);
 
-create index on ofec_sched_e_aggregate_candidate_mv_tmp (cmte_id);
-create index on ofec_sched_e_aggregate_candidate_mv_tmp (cand_id);
-create index on ofec_sched_e_aggregate_candidate_mv_tmp (support_oppose_indicator);
-create index on ofec_sched_e_aggregate_candidate_mv_tmp (cycle);
-create index on ofec_sched_e_aggregate_candidate_mv_tmp (total);
-create index on ofec_sched_e_aggregate_candidate_mv_tmp (count);
+create index on ofec_sched_e_aggregate_candidate_tmp (cmte_id);
+create index on ofec_sched_e_aggregate_candidate_tmp (cand_id);
+create index on ofec_sched_e_aggregate_candidate_tmp (support_oppose_indicator);
+create index on ofec_sched_e_aggregate_candidate_tmp (cycle);
+create index on ofec_sched_e_aggregate_candidate_tmp (total);
+create index on ofec_sched_e_aggregate_candidate_tmp (count);
+
+drop table if exists ofec_sched_e_aggregate_candidate;
+alter table ofec_sched_e_aggregate_candidate_tmp rename to ofec_sched_e_aggregate_candidate;

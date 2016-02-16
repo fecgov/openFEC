@@ -1,6 +1,6 @@
 -- See discussion in https://github.com/18F/openFEC-web-app/issues/514
-drop materialized view if exists ofec_election_result_mv_tmp;
-create materialized view ofec_election_result_mv_tmp as
+drop table if exists ofec_election_result_tmp;
+create table ofec_election_result_tmp as
 (
     select fec_election_yr - 4 as election_yr, *
     from cand_valid_fec_yr
@@ -39,9 +39,9 @@ union all
 )
 ;
 
-create unique index on ofec_election_result_mv_tmp (cand_valid_yr_id);
+create unique index on ofec_election_result_tmp (cand_valid_yr_id);
 
-create index on ofec_election_result_mv_tmp (election_yr);
-create index on ofec_election_result_mv_tmp (cand_office);
-create index on ofec_election_result_mv_tmp (cand_office_st);
-create index on ofec_election_result_mv_tmp (cand_office_district);
+create index on ofec_election_result_tmp (election_yr);
+create index on ofec_election_result_tmp (cand_office);
+create index on ofec_election_result_tmp (cand_office_st);
+create index on ofec_election_result_tmp (cand_office_district);

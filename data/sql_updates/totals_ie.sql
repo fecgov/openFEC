@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_totals_ie_only_mv_tmp cascade;
-create materialized view ofec_totals_ie_only_mv_tmp as
+drop table if exists ofec_totals_ie_only_tmp;
+create table ofec_totals_ie_only_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
@@ -14,12 +14,15 @@ from
     left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
     left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
 where
-    two_yr_period_sk >= :START_YEAR
+    two_yr_period_sk >= %(START_YEAR)s
     and ief5.expire_date is null
 group by committee_id, cycle
 ;
 
-create unique index on ofec_totals_ie_only_mv_tmp(idx);
+create unique index on ofec_totals_ie_only_tmp(idx);
 
-create index on ofec_totals_ie_only_mv_tmp(cycle, idx);
-create index on ofec_totals_ie_only_mv_tmp(committee_id, idx);
+create index on ofec_totals_ie_only_tmp(cycle, idx);
+create index on ofec_totals_ie_only_tmp(committee_id, idx);
+
+drop table if exists ofec_totals_ie_only;
+alter table ofec_totals_ie_only_tmp rename to ofec_totals_ie_only;

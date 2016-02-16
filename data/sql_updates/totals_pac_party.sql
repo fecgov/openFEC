@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_totals_pacs_parties_mv_tmp cascade;
-create materialized view ofec_totals_pacs_parties_mv_tmp as
+drop table if exists ofec_totals_pacs_parties_tmp;
+create table ofec_totals_pacs_parties_tmp as
 with last as (
     select distinct on (cmte_sk, two_yr_period_sk) *
     from factpacsandparties_f3x
@@ -71,11 +71,14 @@ from
     left join last using (cmte_sk, two_yr_period_sk)
 where
     pnp.expire_date is null
-    and two_yr_period_sk >= :START_YEAR
+    and two_yr_period_sk >= %(START_YEAR)s
 group by c.cmte_id, pnp.two_yr_period_sk
 ;
 
-create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
+create unique index on ofec_totals_pacs_parties_tmp(idx);
 
-create index on ofec_totals_pacs_parties_mv_tmp(cycle, idx);
-create index on ofec_totals_pacs_parties_mv_tmp(committee_id, idx);
+create index on ofec_totals_pacs_parties_tmp(cycle, idx);
+create index on ofec_totals_pacs_parties_tmp(committee_id, idx);
+
+drop table if exists ofec_totals_pacs_parties;
+alter table ofec_totals_pacs_parties_tmp rename to ofec_totals_pacs_parties;
