@@ -1,4 +1,3 @@
-import sqlalchemy as sa
 from flask_apispec import doc
 
 from webservices import args
@@ -6,7 +5,6 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 
-from webservices.common import counts
 from webservices.common import models
 from webservices.common.views import ApiResource
 
@@ -86,8 +84,4 @@ class ElectioneeringView(ApiResource):
     filter_range_fields = [
         (('min_date', 'max_date'), models.Electioneering.disbursement_date),
         (('min_amount', 'max_amount'), models.Electioneering.disbursement_amount),
-    ]
-    query_options = [
-        sa.orm.joinedload(models.Electioneering.committee),
-        sa.orm.joinedload(models.Electioneering.candidate),
     ]
