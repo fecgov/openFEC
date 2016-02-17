@@ -34,7 +34,7 @@ $$ language plpgsql;
     -- FL House General Election
     -- NH DEM Convention
     -- General Election Multi-state
-create or replace function generate_election_title(trc_election_type_id numeric, office_sought text, contest text[], party text)
+create or replace function generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric)
 returns text as $$
     begin
         return case
@@ -96,7 +96,6 @@ returns text as $$
 $$ language plpgsql;
 
 
-
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections_raw as(
@@ -121,7 +120,8 @@ with elections_raw as(
             trc_election_type_id::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text
+            dp.party_affiliation_desc::text,
+            trc_election_id::numeric
         ) as description,
         array_to_string(array[
                 dp.party_affiliation_desc::text,
