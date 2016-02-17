@@ -72,4 +72,4 @@ class Electioneering(db.Model):
 
     @property
     def pdf_url(self):
-        return utils.make_report_pdf_url(self.beginning_image_number)
+        return utils.make_report_pdf_url(self.sb_image_num)
