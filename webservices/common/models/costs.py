@@ -66,13 +66,10 @@ class Electioneering(db.Model):
     election_type = db.Column('election_tp', db.String)
     file_number = db.Column('file_num', db.Integer)
     amendment_indicator = db.Column('amndt_ind', db.String)
+    receipt_dt = db.Column(db.DateTime)
 
     purpose_description_text = db.Column(TSVECTOR)
 
     @property
     def pdf_url(self):
         return utils.make_report_pdf_url(self.beginning_image_number)
-
-    ### would be nice to add these back
-    # receipt_date
-    # form_number doc='Form number is the file number (or report id)'
