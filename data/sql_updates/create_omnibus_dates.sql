@@ -133,8 +133,11 @@ with elections_raw as(
 ), reports as (
     select
         'report-' || report_type as category,
-        clean_report(
-            name_reports(office_sought::text, report_type::text, rpt_tp_desc::text, array_agg(election_state)::text[])
+        name_reports(
+            office_sought::text,
+            report_type::text,
+            clean_report(rpt_tp_desc::text),
+            array_agg(election_state)::text[]
         ) as description,
         array_to_string(array[
             expand_office_description(office_sought::text),
