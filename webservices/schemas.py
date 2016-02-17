@@ -337,8 +337,8 @@ register_schema(CommunicationCostPageSchema)
 
 ElectioneeringSchema = make_schema(
     models.Electioneering,
-    fields={'pdf_url': ma.fields.Str()},
-    options={'exclude': ('idx', 'purpose_description_text')},
+    fields={'pdf_url': ma.fields.Str(), 'election_type': ma.fields.Str()},
+    options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')},
 )
 ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ElectioneeringSchema)

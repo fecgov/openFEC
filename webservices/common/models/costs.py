@@ -63,12 +63,16 @@ class Electioneering(db.Model):
     disbursement_amount = db.Column('reported_disb_amt', db.Numeric(30, 2), index=True)
     purpose_description = db.Column('disb_desc', db.String)
     report_year = db.Column('rpt_yr', db.Integer, index=True)
-    election_type = db.Column('election_tp', db.String)
     file_number = db.Column('file_num', db.Integer)
     amendment_indicator = db.Column('amndt_ind', db.String)
     receipt_date = db.Column('receipt_dt', db.DateTime)
+    election_type_raw = db.Column('election_tp', db.String)
 
     purpose_description_text = db.Column(TSVECTOR)
+
+    @property
+    def election_type(self):
+        return self.election_type_raw[:1]
 
     @property
     def pdf_url(self):
