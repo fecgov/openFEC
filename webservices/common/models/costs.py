@@ -56,7 +56,7 @@ class Electioneering(db.Model):
     link_id = db.Column(db.Integer)
     sb_link_id = db.Column(db.String)
     number_of_candidates = db.Column(db.Numeric)
-    calculated_candidate_share = db.Column('calculated_cand_share', db.Numeric, doc="If an electioneering cost targets several candidates, the total cost is divided by the number of candidates. If it only mentions one candidate the full cost of the communication is listed.")
+    calculated_candidate_share = db.Column('calculated_cand_share', db.Numeric(30, 2), doc="If an electioneering cost targets several candidates, the total cost is divided by the number of candidates. If it only mentions one candidate the full cost of the communication is listed.")
     communication_date = db.Column('comm_dt', db.DateTime, doc='It is the airing, broadcast, cablecast or other dissemination of the communication')
     public_distribution_date = db.Column('pub_distrib_dt', db.DateTime, doc='The pubic distribution date is the date that triggers disclosure of the electioneering communication (date reported on page 1 of Form 9)')
     disbursement_date = db.Column('disb_dt', db.DateTime, index=True, doc='Disbursement date includes actual disbursements and execution of contracts creating an obligation to make disbursements (SB date of disbursement)')
@@ -66,10 +66,10 @@ class Electioneering(db.Model):
     election_type = db.Column('election_tp', db.String)
     file_number = db.Column('file_num', db.Integer)
     amendment_indicator = db.Column('amndt_ind', db.String)
-    receipt_dt = db.Column(db.DateTime)
+    receipt_date = db.Column('receipt_dt', db.DateTime)
 
     purpose_description_text = db.Column(TSVECTOR)
 
     @property
     def pdf_url(self):
-        return utils.make_report_pdf_url(self.sb_image_num)
+        return utils.make_image_pdf_url(self.sb_image_num)
