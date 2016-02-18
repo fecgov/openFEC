@@ -8,6 +8,8 @@ import tempfile
 import collections
 
 import marshmallow
+from marshmallow_sqlalchemy.fields import Related
+
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
 from celery_once import QueueOnce
@@ -15,7 +17,7 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.resources import candidates, committees, filings, sched_e
+from webservices.resources import candidates, committees, filings, costs, sched_e
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -26,8 +28,10 @@ IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null', 'sort_nulls_large
 RESOURCE_WHITELIST = {
     candidates.CandidateList,
     committees.CommitteeList,
-    sched_e.ScheduleEView,
     filings.FilingsList,
+    costs.CommunicationCostView,
+    costs.ElectioneeringView,
+    sched_e.ScheduleEView,
 }
 
 COUNT_NOTE = (
@@ -110,10 +114,13 @@ def un_nest(d, parent_key='', sep='.'):
 
 def create_headers(schema, parent_key='', sep='.'):
     items = []
-    for name, field in schema._declared_fields.items():
+    schema = schema() if isinstance(schema, type) else schema
+    for name, field in schema.fields.items():
         new_key = sep.join([parent_key, name]) if parent_key else name
         if isinstance(field, marshmallow.fields.Nested):
             items.extend(create_headers(field.nested, new_key, sep=sep))
+        elif isinstance(field, Related):
+            items.extend(sep.join([new_key, prop.key]) for prop in field.related_keys)
         else:
             items.append(new_key)
     return items
