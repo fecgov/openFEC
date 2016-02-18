@@ -3,9 +3,9 @@ create or replace function expand_election_type_caucus_convention_clean(trc_elec
 returns text as $$
     begin
         return case
-            when trc_election_id in (1978, 1987, 2020, 2023, 2032, 2041, 2052, 2065, 2100, 2107, 2144, 2157, 2310, 2313, 2314, 2316, 2321, 2323, 2324, 2325, 2326, 2328, 2330, 2331, 2338, 2339, 2341)
+            when trc_election_id in (1978, 1987, 2020, 2023, 2032, 2041, 2052, 2065, 2100, 2107, 2144, 2157, 2310, 2313, 2314, 2316, 2321, 2323, 2325, 2326, 2328, 2338, 2339, 2341)
                 then 'Caucus'
-            when trc_election_id in (2322, 2329, 2333, 2334, 2335, 2336, 2337, 2340)
+            when trc_election_id in (2322, 2329, 2330, 2331, 2334, 2335, 2336, 2337, 2340)
                 then 'Convention'
             else
                 expand_election_type(trc_election_type_id)
@@ -147,7 +147,8 @@ with elections_raw as(
     select * from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
     left join elections_raw using (trc_election_id)
-    where coalesce(trc_election_status_id, 1) = 1
+    where
+        coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
         'report-' || report_type as category,
@@ -170,6 +171,9 @@ with elections_raw as(
         null::timestamp as end_date,
         null::text as url
     from reports_raw
+    where
+        -- exclude pre-primary presidential reports in even years
+        not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
     group by
         report_type,
         rpt_tp_desc,
