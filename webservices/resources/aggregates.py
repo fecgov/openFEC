@@ -150,25 +150,6 @@ class ScheduleAByOccupationView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
-    description=(
-        'Schedule A receipts aggregated by contributor FEC ID, if applicable. To avoid '
-        'double counting, memoed items are not included.'
-    )
-)
-class ScheduleAByContributorView(AggregateResource):
-
-    model = models.ScheduleAByContributor
-    schema = schemas.ScheduleAByContributorSchema
-    page_schema = schemas.ScheduleAByContributorPageSchema
-    query_args = args.schedule_a_by_contributor
-    filter_multi_fields = [
-        ('cycle', models.ScheduleAByContributor.cycle),
-        ('contributor_id', models.ScheduleAByContributor.contributor_id),
-    ]
-
-
-@doc(
     tags=['schedules/schedule_b'],
     description=(
         'Schedule B receipts aggregated by recipient name. To avoid '
@@ -203,6 +184,10 @@ class ScheduleBByRecipientIDView(AggregateResource):
     filter_multi_fields = [
         ('cycle', models.ScheduleBByRecipientID.cycle),
         ('recipient_id', models.ScheduleBByRecipientID.recipient_id),
+    ]
+    query_options = [
+        sa.orm.joinedload(models.ScheduleBByRecipientID.committee),
+        sa.orm.joinedload(models.ScheduleBByRecipientID.recipient),
     ]
 
 

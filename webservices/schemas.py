@@ -253,6 +253,19 @@ ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+ScheduleBByRecipientIDSchema = make_schema(
+    models.ScheduleBByRecipientID,
+    fields={
+        'committee_name': ma.fields.Str(),
+        'recipient_name': ma.fields.Str(),
+    },
+    options={
+        'exclude': ('committee', 'recipient')
+    },
+)
+
+augment_schemas(ScheduleBByRecipientIDSchema)
+
 augment_models(
     make_schema,
     models.ScheduleAByZip,
@@ -260,9 +273,7 @@ augment_models(
     models.ScheduleAByState,
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
-    models.ScheduleAByContributor,
     models.ScheduleBByRecipient,
-    models.ScheduleBByRecipientID,
     models.ScheduleBByPurpose,
 )
 
@@ -343,12 +354,8 @@ register_schema(CommunicationCostPageSchema)
 
 ElectioneeringSchema = make_schema(
     models.Electioneering,
-    fields={
-        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'candidate': ma.fields.Nested(schemas['CandidateHistorySchema']),
-        'pdf_url': ma.fields.Str(),
-    },
-    options={'exclude': ('idx', 'purpose_description_text')},
+    fields={'pdf_url': ma.fields.Str(), 'election_type': ma.fields.Str()},
+    options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')},
 )
 ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ElectioneeringSchema)
@@ -467,7 +474,6 @@ class TotalsCommitteeSchema(schemas['CommitteeHistorySchema']):
 augment_schemas(
     ScheduleABySizeCandidateSchema,
     ScheduleAByStateCandidateSchema,
-    ScheduleAByContributorTypeCandidateSchema,
     TotalsCommitteeSchema,
 )
 
