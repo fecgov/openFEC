@@ -195,13 +195,6 @@ class ScheduleAByEmployerFactory(BaseAggregateFactory):
         model = models.ScheduleAByEmployer
 
 
-class ScheduleAByContributorFactory(BaseAggregateFactory):
-    class Meta:
-        model = models.ScheduleAByContributor
-    contributor_id = factory.Sequence(lambda n: str(n))
-    year = 2015
-
-
 class ScheduleBByPurposeFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleBByPurpose
@@ -271,6 +264,7 @@ class ElectioneeringFactory(BaseFactory):
     class Meta:
         model = models.Electioneering
     idx = factory.Sequence(lambda n: n)
+    election_type_raw = 'G'
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
