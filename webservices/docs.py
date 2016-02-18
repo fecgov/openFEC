@@ -487,7 +487,13 @@ Reporting deadlines, election dates FEC meetings, events etc.
 
 CALENDAR_DATES = '''
 Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
-event into one calendar. State filtering is only applicable to the reporting and election resources.
+event into one calendar.
+
+State filtering is only applicable to the reporting and election resources.
+
+Presidential pre-primary report due dates are not shown on even years.
+Filers generally opt to file monthly rather than submit over 50 pre-primary election
+reports. All reporting deadlines are available in the /reporting-dates/ for reference.
 '''
 
 COMMUNICATION_TAG = '''
