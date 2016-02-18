@@ -56,13 +56,12 @@ class TestDownloadTask(ApiBaseTest):
             factories.CandidateHistoryFactory()
             for _ in range(5)
         ]
-        query = models.CandidateHistory.query
-        schema = schemas.CandidateHistorySchema
+        query = tasks.query_with_labels(models.CandidateHistory.query, schemas.CandidateHistorySchema)
         sio = io.StringIO()
-        tasks.rows_to_csv(query, schema, sio)
+        tasks.query_to_csv(query, sio)
         sio.seek(0)
         reader = csv.DictReader(sio)
-        assert reader.fieldnames == tasks.create_headers(schema)
+        assert set(reader.fieldnames) == set(schemas.CandidateHistorySchema._declared_fields.keys())
         for record, row in zip(records, reader):
             assert record.candidate_id == row['candidate_id']
 
