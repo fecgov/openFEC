@@ -41,7 +41,13 @@ select
     report_pgi as primary_general_indicator,
     request_type,
     amendment_indicator,
-    update_date
+    update_date,
+    report_pdf_url_or_null(
+        begin_image_numeric,
+        report_year,
+        case when com.committee_id is not null then substr(com.committee_id, 1, 1) end,
+        fh.form_type
+    ) as pdf_url
 from vw_filing_history fh
 left join ofec_committee_history_mv_tmp com on fh.committee_id = com.committee_id and get_cycle(fh.report_year) = com.cycle
 left join ofec_candidate_history_mv_tmp cand on fh.committee_id = cand.candidate_id and get_cycle(fh.report_year) = cand.two_year_period

@@ -224,7 +224,6 @@ register_schema(CommitteeTotalsPageSchema)
 ScheduleASchema = make_schema(
     models.ScheduleA,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
@@ -294,7 +293,6 @@ augment_schemas(ElectioneeringByCandidateSchema)
 ScheduleBSchema = make_schema(
     models.ScheduleB,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
@@ -317,7 +315,6 @@ register_schema(ScheduleBPageSchema)
 ScheduleESchema = make_schema(
     models.ScheduleE,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'expenditure_amount': ma.fields.Decimal(places=2),
@@ -339,7 +336,6 @@ register_schema(ScheduleEPageSchema)
 
 CommunicationCostSchema = make_schema(
     models.CommunicationCost,
-    fields={'pdf_url': ma.fields.Str()},
     options={'exclude': ('idx', )},
 )
 CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
@@ -348,7 +344,7 @@ register_schema(CommunicationCostPageSchema)
 
 ElectioneeringSchema = make_schema(
     models.Electioneering,
-    fields={'pdf_url': ma.fields.Str(), 'election_type': ma.fields.Str()},
+    fields={'election_type': ma.fields.Str()},
     options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')},
 )
 ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
@@ -358,7 +354,6 @@ register_schema(ElectioneeringPageSchema)
 FilingsSchema = make_schema(
     models.Filings,
     fields={
-        'pdf_url': ma.fields.Str(),
         'document_description': ma.fields.Str(),
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
