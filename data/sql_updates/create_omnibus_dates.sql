@@ -147,9 +147,10 @@ with elections_raw as(
     select * from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
     left join elections_raw using (trc_election_id)
-    where coalesce(trc_election_status_id, 1) = 1 and
-    -- exclude pre-primary presidential reports in even years
-        (report_type not in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 0)
+    where
+        coalesce(trc_election_status_id, 1) = 1 and
+        -- exclude pre-primary presidential reports in even years
+        not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 1)
 ), reports as (
     select
         'report-' || report_type as category,
