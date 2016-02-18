@@ -8,6 +8,7 @@ from webargs import fields, validate
 from dateutil.relativedelta import relativedelta
 
 from webservices import args
+from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
@@ -85,7 +86,7 @@ class ElectionDatesView(ApiResource):
         return query.filter_by(election_status_id=1)
 
 
-@doc(tags=['dates'], description='FEC reporting, election and event dates.')
+@doc(tags=['dates'], description=docs.CALENDAR_DATES)
 class CalendarDatesView(ApiResource):
 
     model = models.CalendarDate
