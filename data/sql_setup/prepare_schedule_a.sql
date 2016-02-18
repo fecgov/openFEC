@@ -4,6 +4,7 @@ create table ofec_sched_a_tmp as
 select
     *,
     cast(null as timestamp) as timestamp,
+    image_pdf_url(image_num) as pdf_url,
     to_tsvector(contbr_nm) as contributor_name_text,
     to_tsvector(contbr_employer) as contributor_employer_text,
     to_tsvector(contbr_occupation) as contributor_occupation_text,

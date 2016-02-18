@@ -3,6 +3,7 @@ create materialized view ofec_electioneering_mv_tmp as
 select
     row_number() over () as idx,
     electioneering_com_vw.*,
+    image_pdf_url(sb_image_num) as pdf_url,
     to_tsvector(disb_desc) as purpose_description_text
 from electioneering_com_vw
 where rpt_yr >= :START_YEAR

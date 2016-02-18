@@ -4,6 +4,7 @@ create table ofec_sched_e_tmp as
 select
     *,
     cast(null as timestamp) as timestamp,
+    image_pdf_url(image_num) as pdf_url,
     coalesce(rpt_tp, '') in ('24', '48') as is_notice,
     to_tsvector(pye_nm) as payee_name_text
 from sched_e

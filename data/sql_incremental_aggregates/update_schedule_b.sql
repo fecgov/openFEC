@@ -9,6 +9,7 @@ begin
     insert into ofec_sched_b(
         select distinct on(sched_b_sk)
             new.*,
+            image_pdf_url(new.image_num) as pdf_url,
             to_tsvector(new.recipient_nm) as recipient_name_text,
             to_tsvector(new.disb_desc) as disbursement_description_text,
             disbursement_purpose(new.disb_tp, new.disb_desc) as disbursement_purpose_category,
