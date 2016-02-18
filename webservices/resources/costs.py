@@ -1,4 +1,3 @@
-import sqlalchemy as sa
 from flask_apispec import doc
 
 from webservices import args
@@ -6,13 +5,12 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 
-from webservices.common import counts
 from webservices.common import models
 from webservices.common.views import ApiResource
 
 
 @doc(
-    tags=['costs'],
+    tags=['communication_cost'],
     description=docs.COMMUNICATION_COST,
 )
 class CommunicationCostView(ApiResource):
@@ -24,9 +22,9 @@ class CommunicationCostView(ApiResource):
     @property
     def args(self):
         return utils.extend(
+            args.paging,
             args.itemized,
             args.communication_cost,
-            args.make_seek_args(),
             args.make_sort_args(
                 validator=args.IndexValidator(models.CommunicationCost),
             ),
@@ -48,13 +46,8 @@ class CommunicationCostView(ApiResource):
         (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
     ]
 
-    def get(self, **kwargs):
-        query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-
 @doc(
-    tags=['costs'],
+    tags=['electioneering'],
     description=docs.ELECTIONEERING,
 )
 class ElectioneeringView(ApiResource):
@@ -63,9 +56,14 @@ class ElectioneeringView(ApiResource):
     schema = schemas.ElectioneeringSchema
     page_schema = schemas.ElectioneeringPageSchema
 
+    filter_fulltext_fields = [
+        ('description', models.Electioneering.purpose_description_text),
+    ]
+
     @property
     def args(self):
         return utils.extend(
+            args.paging,
             args.electioneering,
             args.make_seek_args(),
             args.make_sort_args(
@@ -87,12 +85,3 @@ class ElectioneeringView(ApiResource):
         (('min_date', 'max_date'), models.Electioneering.disbursement_date),
         (('min_amount', 'max_amount'), models.Electioneering.disbursement_amount),
     ]
-    query_options = [
-        sa.orm.joinedload(models.Electioneering.committee),
-        sa.orm.joinedload(models.Electioneering.candidate),
-    ]
-
-    def get(self, **kwargs):
-        query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
