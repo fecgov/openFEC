@@ -3,9 +3,9 @@ create or replace function expand_election_type_caucus_convention_clean(trc_elec
 returns text as $$
     begin
         return case
-            when trc_election_id in (1978, 1987, 2020, 2023, 2032, 2041, 2052, 2065, 2100, 2107, 2144, 2157, 2310, 2313, 2314, 2316, 2321, 2323, 2324, 2325, 2326, 2328, 2330, 2331, 2338, 2339, 2341)
+            when trc_election_id in (1978, 1987, 2020, 2023, 2032, 2041, 2052, 2065, 2100, 2107, 2144, 2157, 2310, 2313, 2314, 2316, 2321, 2323, 2325, 2326, 2328, 2338, 2339, 2341)
                 then 'Caucus'
-            when trc_election_id in (2322, 2329, 2333, 2334, 2335, 2336, 2337, 2340)
+            when trc_election_id in (2322, 2329, 2330, 2331, 2334, 2335, 2336, 2337, 2340)
                 then 'Convention'
             else
                 expand_election_type(trc_election_type_id)
