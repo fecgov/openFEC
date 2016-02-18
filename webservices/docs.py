@@ -493,7 +493,7 @@ State filtering is only applicable to the reporting and election resources.
 
 Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
-reports. All reporting deadlines are available in the /reporting-dates/ for reference.
+reports. All reporting deadlines are available at /reporting-dates/ for reference.
 '''
 
 COMMUNICATION_TAG = '''
