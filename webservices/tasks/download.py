@@ -74,9 +74,31 @@ def query_to_csv(query, fp):
     conn = db.engine.raw_connection()
     cursor = conn.cursor()
     select = cursor.mogrify(compiled.string, compiled.params).decode()
-    copy = 'copy ({}) to stdout with csv'.format(select)
+    copy = 'copy ({}) to stdout with csv header'.format(select)
     cursor.copy_expert(copy, fp)
     conn.close()
+
+def query_with_labels(query, schema):
+    """Create a new query that labels columns according to the SQLAlchemy model.
+    Properties that are excluded by `schema` will be ignored.
+
+    :param query: Original SQLAlchemy query
+    :param schema: Optional schema specifying properties to exclude
+    :returns: Query with labeled entities
+    """
+    description = query.column_descriptions[0]
+    mapper = description['expr']
+    model = description['type']
+    exclude = getattr(schema.Meta, 'exclude', ())
+    properties = [
+        mapper.get_property_by_column(column)
+        for column in mapper.columns
+    ]
+    entities = [
+        getattr(model, prop.key).label(prop.key)
+        for prop in properties if prop.key not in exclude
+    ]
+    return query.with_entities(*entities)
 
 def unpack(values, size):
     values = values if isinstance(values, tuple) else (values, )
@@ -131,7 +153,8 @@ def make_bundle(resource):
     with tempfile.TemporaryDirectory(dir=os.getenv('TMPDIR')) as tmpdir:
         csv_path = os.path.join(tmpdir, 'data.csv')
         with open(csv_path, 'w') as fp:
-            query_to_csv(resource['query'], fp)
+            query = query_with_labels(resource['query'], resource['schema'])
+            query_to_csv(query, fp)
         row_count = wc(csv_path)
         make_manifest(resource, row_count, tmpdir)
         with tempfile.TemporaryFile(mode='w+b', dir=os.getenv('TMPDIR')) as tmpfile:
