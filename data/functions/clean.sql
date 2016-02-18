@@ -13,7 +13,7 @@ $$ language plpgsql;
 create or replace function clean_report(report text)
 returns text as $$
 begin
-	return regexp_replace(report, ' {.*}', '');
+    return trim(both from regexp_replace(report, ' {.*}', ''));
 end
 $$ language plpgsql;
 
