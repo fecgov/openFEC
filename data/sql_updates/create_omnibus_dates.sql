@@ -148,9 +148,7 @@ with elections_raw as(
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
     left join elections_raw using (trc_election_id)
     where
-        coalesce(trc_election_status_id, 1) = 1 and
-        -- exclude pre-primary presidential reports in even years
-        not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 1)
+        coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
         'report-' || report_type as category,
@@ -173,6 +171,9 @@ with elections_raw as(
         null::timestamp as end_date,
         null::text as url
     from reports_raw
+    where
+        -- exclude pre-primary presidential reports in even years
+        not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 1 and office_sought = 'P')
     group by
         report_type,
         rpt_tp_desc,
