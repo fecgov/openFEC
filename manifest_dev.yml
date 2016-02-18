@@ -2,7 +2,6 @@
 inherit: manifest_base.yml
 host: fec-dev-api
 services:
-  # Must provide SQLA_CONN, NEW_RELIC_LICENSE_KEY
   - fec-creds-dev
   - fec-redis-dev
 env:

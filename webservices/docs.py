@@ -11,7 +11,8 @@ If a person runs for several offices, that person will have separate candidate I
 '''
 
 COMMITTEE_ID = '''
-A unique identifier assigned to each committee or filer registered with the FEC.
+A unique identifier assigned to each committee or filer registered with the FEC. In general \
+committee id's begin with the letter C which is followed by eight digits.
 '''
 
 CANDIDATE_CYCLE = '''
@@ -49,7 +50,7 @@ two-year blocks. The cycle begins with an odd year and is named for its
 ending, even year.
 '''
 
-DESCRIPTION = '''
+API_DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 
 This site is in [beta](https://18f.gsa.gov/dashboard/stages/#beta), which means
@@ -72,7 +73,7 @@ out contributor information in schedule_a.
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
 calls an hour. Each call is limited to 100 results per page. You can also discuss the data in the
 [FEC data google group](https://groups.google.com/forum/#!forum/fec-data) or post questions
-to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec).
+to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec). The model definations and schema are available at [/swagger](/swagger/). This is useful for making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
@@ -481,8 +482,14 @@ The type of document, for documents other than reports:
     - U Unregistered Committee Notice
 '''
 DATES_TAG = '''
-Regular reporting deadlines and election dates.
+Reporting deadlines, election dates FEC meetings, events etc.
 '''
+
+CALENDAR_DATES = '''
+Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
+event into one calendar. State filtering is only applicable to the reporting and election resources.
+'''
+
 COMMUNICATION_TAG = '''
 Reports of communication costs by corporations and membership organizations
 from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
@@ -503,9 +510,256 @@ the election or defeat of any Federal candidate.  The costs of such communicatio
 must be reported to the Federal Election Commission under certain circumstances.
 '''
 
-ELECTIONEERING = '''
-An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
-* The communication refers to a clearly identified candidate for federal office;
-* The communication is publicly distributed shortly before an election for the office that candidate is seeking; and
-* The communication is targeted to the relevant electorate (U.S. House and Senate candidates only).
-'''
+
+# fields and filters
+
+# shared
+LOAD_DATE = 'Date the information was loaded into the FEC systems. This can be affected by \
+reseting systems and other factors, refer to receipt_date for the day that the FEC received \
+the paper or electronic document. Keep in mind that paper filings take more time to process \
+and there can be a lag between load_date and receipt_date. This field can be helpful to \
+identify paper records that have been processed recently.'
+PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
+PARTY_FULL = 'Party affiliated with a candidate or committee'
+FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1'
+REPORT_TYPE = 'Name of report where the underlying data comes from'
+REPORT_YEAR = 'Year the report was filed'
+RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
+STATE_GENERIC = 'US state or territory'
+ZIP_CODE = 'Zip code'
+
+#candidates
+CANDIDATE_NAME = 'Name of candidate running for office'
+OFFICE_FULL = 'Federal office candidate runs for: House, Senate or presidential'
+OFFICE = 'Federal office candidate runs for: H, S or P'
+STATE = 'US state or territory where a candidate runs for office'
+YEAR = 'See records pertaining to a particular election year. The list of election years \
+is based on a candidate filing a statement of candidacy (F2) for that year.'
+DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
+Presidential, Senate and House at-large candidates will have District 00.'
+CANDIDATE_STATUS ='One-letter code explaining if the candidate is:\n\
+        - C present candidate\n\
+        - F future candidate\n\
+        - N not yet a candidate\n\
+        - P prior candidate\n\
+'
+INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
+INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
+ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
+
+# committees
+COMMITTEE_NAME='The name of the committee. If a committee changes it\'s name, \
+    the most recent name will be shown.'
+COMMITTEE_YEAR='A year that the committee was active— (after original registration date \
+    or filing but before expiration date)'
+DESIGNATION = 'The one-letter designation code of the organization:\n\
+         - A authorized by a candidate\n\
+         - J joint fundraising committee\n\
+         - P principal campaign committee of a candidate\n\
+         - U unauthorized\n\
+         - B lobbyist/registrant PAC\n\
+         - D leadership PAC\n\
+'
+ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
+        - C corporation\n\
+        - L labor organization\n\
+        - M membership organization\n\
+        - T trade association\n\
+        - V cooperative\n\
+        - W corporation without capital stock\n\
+'
+COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
+        - C communication cost\n\
+        - D delegate\n\
+        - E electioneering communication\n\
+        - H House\n\
+        - I independent expenditor (person or group)\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - P presidential\n\
+        - Q PAC - qualified\n\
+        - S Senate\n\
+        - U single candidate independent expenditure\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+        - Z national party non-federal account\n\
+'
+TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
+committee, the most recent treasurer will be shown.'
+COMMITTEE_STATE = 'State of the committee\'s address as filed on the Form 1'
+FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
+This is usually a Form 1 committee registration.'
+LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
+LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+
+# schedule A
+CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
+EMPLOYER = 'Employer of contributor as reported on the committee\'s filing'
+OCCUPATION = 'Occupation of contributor as reported on the committee\'s filing'
+CONTRIBUTOR_NAME = 'Name of contributor'
+CONTRIBUTOR_CITY = 'City of contributor'
+CONTRIBUTOR_STATE = 'State of contributor'
+CONTRIBUTOR_EMPLOYER = 'Employer of contributor, filers need to make an effort to gather this information'
+CONTRIBUTOR_OCCUPATION = 'Occupation of contributor, filers need to make an effort to gather this information'
+CONTRIBUTOR_ZIP = 'Zip code of contributor'
+IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo code is true. \
+Filtering individuals is useful to make sure contributions are not double reported and in creating \
+breakdowns of the amount of money coming from individuals.'
+
+# schedule B
+RECIPIENT_NAME = 'Name of the entity receiving the disbursement'
+RECIPIENT_ID = 'The FEC identifier should be represented here if the entity receiving \
+the disbursement is registered with the FEC.'
+
+# communication cost and electioneering
+SUPPORT_OPPOSE_INDICATOR = 'Explains if the money was spent in order to support or oppose a candidate or candidates. (Coded S or O for support or oppose.) This indicator applies to independent expenditures and communication costs.'
+
+# schedule B
+PURPOSE = 'Purpose of the expenditure'
+
+# dates
+DUE_DATE = 'Date the report is due'
+CREATE_DATE = 'Date the record was created'
+UPDATE_DATE = 'Date the record was updated'
+ELECTION_DATE = 'Date of election'
+ELECTION_YEAR = 'Year of election'
+#? TODO: add more categories
+ELECTION_TYPE = 'Election type \n\
+Convention, Primary, General, Special, Runoff etc.'
+SENATE_CLASS = 'Senators run every six years and each state has two senators. General elections \
+are held every 2 years. The Senate elections are staggered so there are three classes of Senators \
+In a given state, only one Senate seat is up for election at a time and every six years, there is \
+not a senate election in a given state. Thus, the Senate is broken up in to three groups called \
+classes. Senators in the same class are up for election at the same time. Sometimes it is a bit \
+less straight forward when, because there are situations in which there is a special election to \
+fill a vacancy in the Senate. In those cases class refers to the seat groupings and not the time \
+of the election.'
+
+# filings
+DOCUMENT_TYPE = 'Type of form, report or documents'
+ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the electronic or paper \
+report. The last image number corresponds to the image number for the last page of the document.'
+IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
+report.'
+
+
+# Reports and Totals
+
+def add_period(var):
+    return var + ' total for the reporting period'
+
+
+def add_ytd(var):
+    return var + ' total for the year to date'
+
+# shared
+CASH_ON_HAND_BEGIN_PERIOD = 'Balance for the committee at the start of the two-year period'
+CASH_ON_HAND_END_PERIOD = 'Ending cash balance on the most recent filing'
+COVERAGE_START_DATE = 'Beginning date of the reporting period'
+COVERAGE_END_DATE = 'Ending date of the reporting period'
+DEBTS_OWED_BY_COMMITTEE = 'Debts owed by the committee'
+DEBTS_OWED_TO_COMMITTEE = 'Debts owed to the committee'
+
+# shared receipts
+RECEIPTS = 'Anything of value (money, goods, services or property) received by a political committee'
+
+# can't tack on period or year without being really confusing
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. Be aware, some filers choose to itemize donations $200 or less.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_PERIOD = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. This amount represents the total of these receipts for the reporting period.'
+INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_YTD = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. This amount represents the total of these receipts for the year to date.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Unitemized contributions are made individuals whose aggregate contributions total $200 or less per individual per year. Be aware, some filers choose to itemize donations $200 or less and in that case those donations will appear in the itemized total.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_PERIOD = 'Unitemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the reporting period.'
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_YTD =  'Itemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the year to date.'
+
+
+
+
+POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Party committees contributions'
+INDIVIDUAL_CONTRIBUTIONS = 'Individual contributions'
+OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committees contributions'
+OFFSETS_TO_OPERATING_EXPENDITURES = 'Offsets to operating expenditures'
+CONTRIBUTIONS = 'Contribution'
+# house senate and presidential
+CANDIDATE_CONTRIBUTION = 'Candidate contributions'
+OTHER_RECEIPTS = 'Other receipts'
+# house senate and PAC party
+NET_CONTRIBUTIONS = 'Net contributions'
+
+# shared disbursements
+DISBURSEMENTS = 'Disbursements'
+REFUNDED_INDIVIDUAL_CONTRIBUTIONS = 'Individual refunds'
+OPERATING_EXPENDITURES = 'Total operating expenditures'
+OTHER_DISBURSEMENTS = 'Other disbursements'
+REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Political party refunds'
+CONTRIBUTION_REFUNDS = 'Total contribution refunds'
+REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
+
+
+# presidential
+# receipts
+FEDERAL_FUNDS = 'Federal funds: Public funding of presidential elections means that qualified presidential candidates receive federal government funds to pay for the valid expenses of their political campaigns in both the primary and general elections.'
+TRANSFERS_FROM_AFFILIATED_COMMITTEE = 'Transfers from affiliated committees'
+LOANS_RECEIVED_FROM_CANDIDATE = 'Loans made by candidate'
+OTHER_LOANS_RECEIVED = 'Other loans'
+LOANS_RECEIVED = 'Total loans received'
+OFFSETS_TO_FUNDRAISING_EXPENDITURES = 'Fundraising offsets'
+OFFSETS_TO_LEGAL_ACCOUNTING = 'Legal and accounting offsets'
+TOTAL_OFFSETS_TO_OPERATING_EXPENDITURES = 'Total offsets'
+
+# disbursements
+TRANSFERS_TO_OTHER_AUTHORIZED_COMMITTEE = 'Transfers to authorized committees'
+REPAYMENTS_LOANS_MADE_BY_CANDIDATE = 'Candidate loan repayments'
+REPAYMENTS_OTHER_LOANS = 'Other loan repayments'
+LOAN_REPAYMENTS_MADE = 'Total loan repayments'
+
+# House Senate
+# receipts
+TRANSFERS_FROM_OTHER_AUTHORIZED_COMMITTEE = 'Transfers from authorized committees'
+LOANS_MADE_BY_CANDIDATE = 'Loans made by candidate'
+ALL_OTHER_LOANS = 'Other loans'
+LOANS = 'Total loans received'
+
+# disbursements
+NET_OPERATING_EXPENDITURES = 'Net operating expenditures'
+TRANSFERS_TO_OTHER_AUTHORIZED_COMMITTEE = 'Transfers to authorized committees'
+LOAN_REPAYMENTS_CANDIDATE_LOANS = 'Candidate loan repayments'
+LOAN_REPAYMENTS_OTHER_LOANS = 'Other loan repayments'
+OTHER_DISBURSEMENTS = 'Other disbursements'
+
+# PAC and Party
+# Receipts
+TRANSFERS_FROM_AFFILIATED_PARTY = 'Transfers from affiliated committees'
+ALL_LOANS_RECEIVED = 'Loans received'
+LOAN_REPAYMENTS_RECEIVED = 'Loan repayments received'
+FED_CANDIDATE_CONTRIBUTION_REFUNDS = 'Candidate refunds'
+OTHER_FED_RECEIPTS = 'Other receipts'
+TRANSFERS_FROM_NONFED_ACCOUNT = 'Non-federal transfers'
+TRANSFERS_FROM_NONFED_LEVIN = 'Levin funds'
+TRANSFERS_FROM_NONFED_ACCOUNT = 'Total non-federal transfers'
+FED_RECEIPTS = 'Total federal receipts'
+
+# disbursement
+SHARED_FED_OPERATING_EXPENDITURES = 'Federal allocated operating expenditures'
+SHARED_NONFED_OPERATING_EXPENDITURES = 'Non-federal operating expenditures'
+OTHER_FED_OPERATING_EXPENDITURES = 'Other federal operating expenditures'
+NET_OPERATING_EXPENDITURES = 'Net operating expenditures'
+TRANSFERS_TO_AFFILIATED_COMMITTEE = 'Transfers to affiliated committees'
+FED_CANDIDATE_COMMITTEE_CONTRIBUTIONS = 'Contributions to other federal committees'
+INDEPENDENT_EXPENDITURES = 'Independent expenditures'
+COORDINATED_EXPENDITURES_BY_PARTY_COMMITTEE = 'Coordinated party expenditures'
+LOANS_MADE = 'Loans made'
+LOAN_REPAYMENTS_MADE = 'Loan repayments made'
+SHARED_FED_ACTIVITY = 'Allocated federal election activity - federal share'
+ALLOCATED_FEDERAL_ELECTION_LEVIN_SHARE = 'Allocated federal election activity - Levin share'
+NON_ALLOCATED_FED_ELECTION_ACTIVITY = 'Federal election activity - federal only'
+FED_ELECTION_ACTIVITY = 'Total federal election activity'
+FED_DISBURSEMENTS = 'Total federal disbursements'
+
+# calendar
+CATEGORY = 'Type of date reporting date, live event, etc.'
+CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
+CAL_DESCRIPTION = 'Brief description of event'
+SUMMARY = 'Longer description of event'
+EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'

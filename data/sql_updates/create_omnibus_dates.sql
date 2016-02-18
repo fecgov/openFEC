@@ -1,10 +1,40 @@
+-- this is a short term fix to correct a coding error where the code C was used for caucuses and conventions
+create or replace function expand_election_type_caucus_convention_clean(trc_election_type_id text, trc_election_id numeric)
+returns text as $$
+    begin
+        return case
+            when trc_election_id in (1978, 1987, 2020, 2023, 2032, 2041, 2052, 2065, 2100, 2107, 2144, 2157, 2310, 2313, 2314, 2316, 2321, 2323, 2324, 2325, 2326, 2328, 2330, 2331, 2338, 2339, 2341)
+                then 'Caucus'
+            when trc_election_id in (2322, 2329, 2333, 2334, 2335, 2336, 2337, 2340)
+                then 'Convention'
+            else
+                expand_election_type(trc_election_type_id)
+        end;
+    end
+$$ language plpgsql;
+
+
+--Descriptions and summaries are repetitive, so we are trying to only show the descriptions in some places, That works for most things except court cases, advisory opinions and conferences.
+create or replace function describe_cal_event(event_name text, summary text, description text)
+returns text as $$
+    begin
+        return case
+            when event_name in ('Litigation', 'AOs and Rules', 'Conferences') then
+                summary || description
+            else
+                description
+        end;
+    end
+$$ language plpgsql;
+
+
 -- Trying to make the names flow together as best as possible
 -- To keep the titles concise states are abbreviated as multi state if there is more than one
 -- Like:
     -- FL House General Election
     -- NH DEM Convention
     -- General Election Multi-state
-create or replace function generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text)
+create or replace function generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric)
 returns text as $$
     begin
         return case
@@ -12,7 +42,7 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                expand_election_type(trc_election_type_id),
+                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
                 'Multi-state'::text
             ], ' ')
         else array_to_string(
@@ -20,8 +50,8 @@ returns text as $$
                 array_to_string(contest, ', '),
                 party,
                 office_sought,
-                expand_election_type(trc_election_type_id)
-        ], ' ')
+                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric)
+            ], ' ')
         end;
     end
 $$ language plpgsql;
@@ -66,20 +96,6 @@ returns text as $$
 $$ language plpgsql;
 
 
---Descriptions and summaries are repetitive, so we are trying to only show the descriptions in some places, That works for most things except court cases, advisory opinions and conferences.
-create or replace function describe_cal_event(event_name text, summary text, description text)
-returns text as $$
-    begin
-        return case
-            when event_name in ('Litigation', 'AOs and Rules', 'Conferences') then
-                summary || description
-            else
-                description
-        end;
-    end
-$$ language plpgsql;
-
-
 drop materialized view if exists ofec_omnibus_dates_mv_tmp;
 create materialized view ofec_omnibus_dates_mv_tmp as
 with elections_raw as(
@@ -104,12 +120,13 @@ with elections_raw as(
             trc_election_type_id::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text
+            dp.party_affiliation_desc::text,
+            trc_election_id::numeric
         ) as description,
         array_to_string(array[
                 dp.party_affiliation_desc::text,
                 expand_office_description(office_sought::text),
-                expand_election_type(trc_election_type_id::text),
+                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
                 array_to_string(array_agg(contest order by contest)::text[], ', ')
         ], ' ') as summary,
         array_agg(election_state order by election_state)::text[] as states,
@@ -124,7 +141,8 @@ with elections_raw as(
         office_sought,
         election_date,
         dp.party_affiliation_desc,
-        trc_election_type_id
+        trc_election_type_id,
+        trc_election_id
 ), reports_raw as (
     select * from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
@@ -133,15 +151,17 @@ with elections_raw as(
 ), reports as (
     select
         'report-' || report_type as category,
-        clean_report(
-            name_reports(office_sought::text, report_type::text, rpt_tp_desc::text, array_agg(election_state)::text[])
+        name_reports(
+            office_sought::text,
+            report_type::text,
+            clean_report(rpt_tp_desc::text),
+            array_agg(election_state)::text[]
         ) as description,
         array_to_string(array[
             expand_office_description(office_sought::text),
             clean_report(rpt_tp_desc::text),
-            'Due, Report (',
+            'Due. Report code:',
             report_type::text,
-            ') ',
             array_to_string(array_agg(election_state order by election_state)::text[], ', ')
         ], ' ') as summary,
         array_agg(election_state)::text[] as states,
