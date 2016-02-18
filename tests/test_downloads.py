@@ -65,6 +65,12 @@ class TestDownloadTask(ApiBaseTest):
         for record, row in zip(records, reader):
             assert record.candidate_id == row['candidate_id']
 
+    @mock.patch('webservices.tasks.download.upload_s3')
+    def test_views(self, upload_s3):
+        for view in tasks.RESOURCE_WHITELIST:
+            url = api.url_for(view)
+            tasks.export_query(url, b'')
+
 
 class TestDownloadResource(ApiBaseTest):
 
