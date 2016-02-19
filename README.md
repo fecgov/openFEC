@@ -174,6 +174,15 @@ service. The redis service can be created as follows:
 cf create-service redis28-swarm standard fec-redis
 ```
 
+Running redis and celery locally:
+
+```
+redis-server
+celery worker --app webservices.tasks
+```
+
+Note: Both the API and celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).
+
 ##### Production stack
 
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
