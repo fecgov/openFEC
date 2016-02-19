@@ -45,7 +45,7 @@ select
     report_pdf_url_or_null(
         begin_image_numeric,
         report_year,
-        case when com.committee_id is not null then substr(com.committee_id, 1, 1) end,
+        com.committee_type,
         fh.form_type
     ) as pdf_url
 from vw_filing_history fh
