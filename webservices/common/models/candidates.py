@@ -34,6 +34,7 @@ class BaseCandidate(BaseModel):
     party_full = db.Column(db.String(255), doc=docs.PARTY_FULL)
     state = db.Column(db.String(2), index=True, doc=docs.STATE)
     name = db.Column(db.String(100), index=True, doc=docs.CANDIDATE_NAME)
+    five_thousand_flag = db.Column(db.Boolean, index=True, doc=docs.FIVE_THOUSAND_FLAG)
 
 
 class BaseConcreteCandidate(BaseCandidate):
