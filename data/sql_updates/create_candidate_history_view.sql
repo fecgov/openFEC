@@ -32,6 +32,18 @@ with
             max(fec_election_yr) as max_cycle
         from fec_yr
         group by cand_id
+    ),
+    five_thousand as (
+        select
+            distinct on (cand_id)
+            cand_id,
+            case when array_agg(fec_yr.cand_status)::text[] && array['C', 'F', 'P'] then
+                true::boolean
+            else
+                false::boolean
+            end as five_thousand_flag
+        from fec_yr
+        group by cand_id, cand_status
     )
 select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     row_number() over () as idx,
@@ -47,6 +59,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_ici as incumbent_challenge,
     expand_candidate_incumbent(fec_yr.cand_ici) as incumbent_challenge_full,
     fec_yr.cand_status as candidate_status,
+    five_thousand.five_thousand_flag,
     inactive.cand_id is not null as candidate_inactive,
     fec_yr.cand_office as office,
     expand_office(fec_yr.cand_office) as office_full,
@@ -62,6 +75,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
 from fec_yr
 left join cycles using (cand_id)
 left join elections using (cand_id)
+left join five_thousand using (cand_id)
 left join cand_inactive inactive on
     fec_yr.cand_id = inactive.cand_id and
     fec_yr.fec_election_yr < inactive.election_yr
