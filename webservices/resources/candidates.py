@@ -32,6 +32,9 @@ class CandidateList(ApiResource):
     schema = schemas.CandidateSchema
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
+    filter_match_fields = [
+        ('five_thousand_flag', models.Candidate.five_thousand_flag),
+    ]
     aliases = {'receipts': models.CandidateSearch.receipts}
 
     @property
@@ -103,6 +106,9 @@ class CandidateView(ApiResource):
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
+    filter_match_fields = [
+        ('five_thousand_flag', models.Candidate.five_thousand_flag),
+    ]
 
     @property
     def args(self):

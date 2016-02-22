@@ -552,6 +552,7 @@ CANDIDATE_STATUS ='One-letter code explaining if the candidate is:\n\
 INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
 INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
 ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
+FIVE_THOUSAND_FLAG = 'A boolean that describes if a candidate has ever raised $5,000 in their campaign for this particular office. (Candidates have separate candidate IDs for each office.) It is calculated by looking at `candidate_status` over time.'
 
 # committees
 COMMITTEE_NAME='The name of the committee. If a committee changes it\'s name, \

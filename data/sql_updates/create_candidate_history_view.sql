@@ -25,11 +25,13 @@ with
         ) dedup
         group by cand_id
     ),
-    cycles as (
+    aggregates as (
         select
             cand_id,
             array_agg(fec_election_yr)::int[] as cycles,
-            max(fec_election_yr) as max_cycle
+            max(fec_election_yr) as max_cycle,
+            array_agg(cand_status)::text[] && array['C', 'F', 'P']
+                as five_thousand_flag
         from fec_yr
         group by cand_id
     )
@@ -47,6 +49,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_ici as incumbent_challenge,
     expand_candidate_incumbent(fec_yr.cand_ici) as incumbent_challenge_full,
     fec_yr.cand_status as candidate_status,
+    aggregates.five_thousand_flag,
     inactive.cand_id is not null as candidate_inactive,
     fec_yr.cand_office as office,
     expand_office(fec_yr.cand_office) as office_full,
@@ -55,13 +58,13 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_office_district::int as district_number,
     fec_yr.cand_pty_affiliation as party,
     clean_party(dp.party_affiliation_desc) as party_full,
-    cycles.cycles,
+    aggregates.cycles,
     elections.election_years,
     elections.election_districts,
     elections.active_through
 from fec_yr
-left join cycles using (cand_id)
 left join elections using (cand_id)
+left join aggregates using (cand_id)
 left join cand_inactive inactive on
     fec_yr.cand_id = inactive.cand_id and
     fec_yr.fec_election_yr < inactive.election_yr
@@ -74,6 +77,7 @@ create unique index on ofec_candidate_history_mv_tmp(idx);
 create index on ofec_candidate_history_mv_tmp(load_date);
 create index on ofec_candidate_history_mv_tmp(candidate_id);
 create index on ofec_candidate_history_mv_tmp(two_year_period);
+create index on ofec_candidate_history_mv_tmp(five_thousand_flag);
 create index on ofec_candidate_history_mv_tmp(office);
 create index on ofec_candidate_history_mv_tmp(state);
 create index on ofec_candidate_history_mv_tmp(district);
