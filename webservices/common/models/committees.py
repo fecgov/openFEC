@@ -6,7 +6,7 @@ from .base import db, BaseModel
 
 
 class CommitteeSearch(BaseModel):
-    __tablename__ = 'ofec_committee_fulltext_mv'
+    __tablename__ = 'ofec_committee_fulltext'
 
     id = db.Column(db.String)
     name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
@@ -36,7 +36,7 @@ class BaseCommittee(BaseModel):
 
 
 class BaseConcreteCommittee(BaseCommittee):
-    __tablename__ = 'ofec_committee_detail_mv'
+    __tablename__ = 'ofec_committee_detail'
 
     committee_id = db.Column(db.String, primary_key=True, unique=True, index=True, doc=docs.COMMITTEE_ID)
     candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
@@ -51,7 +51,7 @@ class Committee(BaseConcreteCommittee):
 
 
 class CommitteeHistory(BaseCommittee):
-    __tablename__ = 'ofec_committee_history_mv'
+    __tablename__ = 'ofec_committee_history'
 
     street_1 = db.Column(db.String(50), doc='Street address of committee as reported on the Form 1')
     street_2 = db.Column(db.String(50), doc='Second line of street address of committee as reported on the Form 1')

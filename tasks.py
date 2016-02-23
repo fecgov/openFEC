@@ -16,7 +16,6 @@ FULL_TABLES = [
     'cand_inactive',
 ]
 EXCLUDE_TABLES = [
-    '*_mv',
     '*_tmp',
     '*_old',
     'sched_b2',

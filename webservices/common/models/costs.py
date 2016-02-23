@@ -5,7 +5,7 @@ from .base import db
 
 
 class CommunicationCost(db.Model):
-    __tablename__ = 'ofec_communication_cost_mv'
+    __tablename__ = 'ofec_communication_cost'
 
     idx = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
@@ -36,7 +36,7 @@ class CommunicationCost(db.Model):
         return utils.make_report_pdf_url(self.image_number)
 
 class Electioneering(db.Model):
-    __tablename__ = 'ofec_electioneering_mv'
+    __tablename__ = 'ofec_electioneering'
 
     idx = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column('cmte_id', db.String, index=True)

@@ -34,7 +34,7 @@ class CommitteeTotals(BaseModel):
 
 
 class CommitteeTotalsPacParty(CommitteeTotals):
-    __tablename__ = 'ofec_totals_pacs_parties_mv'
+    __tablename__ = 'ofec_totals_pacs_parties'
 
     all_loans_received = db.Column(db.Numeric(30, 2))
     allocated_federal_election_levin_share = db.Column(db.Numeric(30, 2))
@@ -66,7 +66,7 @@ class CommitteeTotalsPacParty(CommitteeTotals):
 
 
 class CommitteeTotalsPresidential(CommitteeTotals):
-    __tablename__ = 'ofec_totals_presidential_mv'
+    __tablename__ = 'ofec_totals_presidential'
 
     candidate_contribution = db.Column(db.Numeric(30, 2))
     exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2))
@@ -87,7 +87,7 @@ class CommitteeTotalsPresidential(CommitteeTotals):
 
 
 class CommitteeTotalsHouseSenate(CommitteeTotals):
-    __tablename__ = 'ofec_totals_house_senate_mv'
+    __tablename__ = 'ofec_totals_house_senate'
 
     all_other_loans = db.Column(db.Numeric(30, 2))
     candidate_contribution = db.Column(db.Numeric(30, 2))
@@ -104,7 +104,7 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
 
 
 class CommitteeTotalsIEOnly(BaseModel):
-    __tablename__ = 'ofec_totals_ie_only_mv'
+    __tablename__ = 'ofec_totals_ie_only'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
