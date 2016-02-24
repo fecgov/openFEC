@@ -43,7 +43,7 @@ class ApiResource(utils.Resource):
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
-        query = self.filter_fulltext(query, kwargs)
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         if _apply_options:
             query = query.options(*self.query_options)
         return query
