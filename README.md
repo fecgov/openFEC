@@ -78,10 +78,12 @@ workon open-fec-api
 ```
 ### Install requirements
 
-Use pip to install the requirements for the repo in your python3 environment:
+Use pip to install the requirements for the repo in your python3 environment. The ``requirements-dev`` will be needed to build your database in a few steps:
 ```
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
+
 #### Git hooks
 This repo includes optional post-merge and post-checkout hooks to ensure that
 dependencies are up to date. If enabled, these hooks will update Python
@@ -112,6 +114,10 @@ export SQLACONN=<psql:address-to-box>
 ```
 
 ### Run locally
+Install your npm packages:
+```
+npm i
+```
 
 Run:
 ```

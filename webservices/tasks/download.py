@@ -21,7 +21,7 @@ from webservices.tasks import utils as task_utils
 
 logger = logging.getLogger(__name__)
 
-IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null', 'sort_nulls_large'}
+IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null'}
 RESOURCE_WHITELIST = {
     candidates.CandidateList,
     committees.CommitteeList,

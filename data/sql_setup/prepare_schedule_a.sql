@@ -5,7 +5,8 @@ select
     *,
     cast(null as timestamp) as timestamp,
     image_pdf_url(image_num) as pdf_url,
-    to_tsvector(contbr_nm) as contributor_name_text,
+    to_tsvector(contbr_nm) || to_tsvector(coalesce(contbr_id, ''))
+        as contributor_name_text,
     to_tsvector(contbr_employer) as contributor_employer_text,
     to_tsvector(contbr_occupation) as contributor_occupation_text,
     is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
