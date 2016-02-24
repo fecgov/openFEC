@@ -2,7 +2,72 @@
 
 ## [Unreleased](https://github.com/18F/openFEC/tree/HEAD)
 
-[Full Changelog](https://github.com/18F/openFEC/compare/public-beta-20160106...HEAD)
+[Full Changelog](https://github.com/18F/openFEC/compare/use-numeric-types...HEAD)
+
+**Closed issues:**
+
+- Format report due date decriptions [\#1508](https://github.com/18F/openFEC/issues/1508)
+- Document sources used for each datatable page [\#1501](https://github.com/18F/openFEC/issues/1501)
+- Missing coverage start date on some reports [\#1488](https://github.com/18F/openFEC/issues/1488)
+- Add PDF\_URL to EC and CC endpoints [\#1486](https://github.com/18F/openFEC/issues/1486)
+- Discussion: Mis-formatted dates in communication costs [\#1479](https://github.com/18F/openFEC/issues/1479)
+- Caucuses and primary conventions should be filterable as "primaries" [\#1455](https://github.com/18F/openFEC/issues/1455)
+- release: Parasaurolophus [\#1447](https://github.com/18F/openFEC/issues/1447)
+- To have confidence in our data, verify logic for contributor aggregates [\#1303](https://github.com/18F/openFEC/issues/1303)
+
+**Merged pull requests:**
+
+- Adding additional decoding for caucuses and conventions [\#1528](https://github.com/18F/openFEC/pull/1528) ([LindsayYoung](https://github.com/LindsayYoung))
+- Feature/update electioneering schema [\#1518](https://github.com/18F/openFEC/pull/1518) ([jmcarp](https://github.com/jmcarp))
+- reformats report code [\#1514](https://github.com/18F/openFEC/pull/1514) ([LindsayYoung](https://github.com/LindsayYoung))
+- Whitelist cost views for export. [\#1506](https://github.com/18F/openFEC/pull/1506) ([jmcarp](https://github.com/jmcarp))
+- Drop contribution aggregate by contributor. [\#1504](https://github.com/18F/openFEC/pull/1504) ([jmcarp](https://github.com/jmcarp))
+- Feature/costs sort pdf [\#1497](https://github.com/18F/openFEC/pull/1497) ([jmcarp](https://github.com/jmcarp))
+- Extending about.yml services [\#1459](https://github.com/18F/openFEC/pull/1459) ([DavidEBest](https://github.com/DavidEBest))
+- Feature/document fields [\#1449](https://github.com/18F/openFEC/pull/1449) ([LindsayYoung](https://github.com/LindsayYoung))
+- Abort deploy on invalid configuration. [\#1446](https://github.com/18F/openFEC/pull/1446) ([jmcarp](https://github.com/jmcarp))
+
+## [use-numeric-types](https://github.com/18F/openFEC/tree/use-numeric-types) (2016-02-09)
+[Full Changelog](https://github.com/18F/openFEC/compare/ie-form-filter...use-numeric-types)
+
+**Closed issues:**
+
+- Bug: Candidate name search on browse page doesn't work if name is "FN LN" only "LN, FN" [\#1494](https://github.com/18F/openFEC/issues/1494)
+- Hide titles on calendar events [\#1493](https://github.com/18F/openFEC/issues/1493)
+- Combine reporting deadline dates for multiple states [\#1474](https://github.com/18F/openFEC/issues/1474)
+- Decide if we want to use data entry for calendar [\#1471](https://github.com/18F/openFEC/issues/1471)
+
+## [ie-form-filter](https://github.com/18F/openFEC/tree/ie-form-filter) (2016-02-08)
+[Full Changelog](https://github.com/18F/openFEC/compare/download-itemized...ie-form-filter)
+
+**Merged pull requests:**
+
+- Filter itemized IEs on filing form. [\#1500](https://github.com/18F/openFEC/pull/1500) ([jmcarp](https://github.com/jmcarp))
+
+## [download-itemized](https://github.com/18F/openFEC/tree/download-itemized) (2016-02-06)
+[Full Changelog](https://github.com/18F/openFEC/compare/fix-refresh-path...download-itemized)
+
+**Closed issues:**
+
+- Make electioneering and communication-costs endpoints sortable by disbursement\_date [\#1485](https://github.com/18F/openFEC/issues/1485)
+- Discussion: Null candidate IDs in Schedule E [\#1478](https://github.com/18F/openFEC/issues/1478)
+- Audit calendar microcopy [\#1475](https://github.com/18F/openFEC/issues/1475)
+
+**Merged pull requests:**
+
+- Use numeric types as needed in financial models. [\#1490](https://github.com/18F/openFEC/pull/1490) ([jmcarp](https://github.com/jmcarp))
+- Handle related fields in data export. [\#1487](https://github.com/18F/openFEC/pull/1487) ([jmcarp](https://github.com/jmcarp))
+
+## [fix-refresh-path](https://github.com/18F/openFEC/tree/fix-refresh-path) (2016-02-05)
+[Full Changelog](https://github.com/18F/openFEC/compare/public-beta-20160203...fix-refresh-path)
+
+**Merged pull requests:**
+
+- Fix path to refresh task in scheduler. [\#1484](https://github.com/18F/openFEC/pull/1484) ([jmcarp](https://github.com/jmcarp))
+- Feature/dates 2 tweaks [\#1464](https://github.com/18F/openFEC/pull/1464) ([LindsayYoung](https://github.com/LindsayYoung))
+
+## [public-beta-20160203](https://github.com/18F/openFEC/tree/public-beta-20160203) (2016-02-04)
+[Full Changelog](https://github.com/18F/openFEC/compare/public-beta-20160106...public-beta-20160203)
 
 **Closed issues:**
 
@@ -24,6 +89,7 @@
 
 **Merged pull requests:**
 
+- Release/public beta 20160203 [\#1483](https://github.com/18F/openFEC/pull/1483) ([jmcarp](https://github.com/jmcarp))
 - Move to correct category [\#1482](https://github.com/18F/openFEC/pull/1482) ([LindsayYoung](https://github.com/LindsayYoung))
 - Use ProxyFix middleware. [\#1481](https://github.com/18F/openFEC/pull/1481) ([jmcarp](https://github.com/jmcarp))
 - Handle invalid dates in communication costs. [\#1477](https://github.com/18F/openFEC/pull/1477) ([jmcarp](https://github.com/jmcarp))

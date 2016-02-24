@@ -49,6 +49,10 @@ class CommitteeList(ApiResource):
     filter_range_fields = [
         (('min_first_file_date', 'max_first_file_date'), models.Committee.first_file_date),
     ]
+    filter_fulltext_fields = [
+        ('q', models.CommitteeSearch.fulltxt),
+        ('treasurer_name', models.Committee.treasurer_text),
+    ]
 
     @property
     def args(self):
@@ -80,21 +84,10 @@ class CommitteeList(ApiResource):
             )
 
         if kwargs.get('q'):
-            query = utils.search_text(
-                query.join(
-                    models.CommitteeSearch,
-                    models.Committee.committee_id == models.CommitteeSearch.id,
-                ),
-                models.CommitteeSearch.fulltxt,
-                kwargs['q'],
+            query = query.join(
+                models.CommitteeSearch,
+                models.Committee.committee_id == models.CommitteeSearch.id,
             ).distinct()
-
-        if kwargs.get('treasurer_name'):
-            query = utils.search_text(
-                query,
-                models.Committee.treasurer_text,
-                kwargs['treasurer_name'],
-            )
 
         if kwargs.get('name'):
             query = query.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))

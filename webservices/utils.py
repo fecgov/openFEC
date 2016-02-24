@@ -47,11 +47,11 @@ def check_cap(kwargs, cap):
 def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False,
                count=None, cap=100, index_column=None):
     check_cap(kwargs, cap)
-    sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
+    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
     if sort:
         query, _ = sorting.sort(
             query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, nulls_large=nulls_large, index_column=index_column,
+            clear=clear, hide_null=hide_null, index_column=index_column,
         )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
@@ -69,11 +69,11 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
 def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
-    sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
+    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
     if sort:
         query, sort_column = sorting.sort(
             query, sort,
-            model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large,
+            model=model, clear=clear, hide_null=hide_null,
         )
     else:
         sort_column = None
@@ -93,17 +93,11 @@ def extend(*dicts):
     return ret
 
 
-def search_text(query, column, text):
-    """
-
-    :param order: Order results by text similarity, descending; prohibitively
-        slow for large collections
-    """
-    vector = ' & '.join([
+def parse_fulltext(text):
+    return ' & '.join([
         part + ':*'
         for part in re.sub(r'\W', ' ', text).split()
     ])
-    return query.filter(column.match(vector))
 
 
 office_args_required = ['office', 'cycle']
