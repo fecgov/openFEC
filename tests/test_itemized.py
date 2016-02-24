@@ -71,10 +71,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext(self):
         names = ['David Koch', 'George Soros']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_name=name,
-                contributor_name_text=sa.func.to_tsvector(name),
-            )
+            factories.ScheduleAFactory(contributor_name=name)
             for name in names
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_name='soros'))
@@ -84,10 +81,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_employer=employer,
-                contributor_employer_text=sa.func.to_tsvector(employer),
-            )
+            factories.ScheduleAFactory(contributor_employer=employer)
             for employer in employers
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_employer='vandelay'))
@@ -97,10 +91,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_occupation=occupation,
-                contributor_occupation_text=sa.func.to_tsvector(occupation),
-            )
+            factories.ScheduleAFactory(contributor_occupation=occupation)
             for occupation in occupations
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_occupation='doctor'))
