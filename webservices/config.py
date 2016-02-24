@@ -24,13 +24,9 @@ REQUIRED_CREDS = (
     'MANDRILL_API_KEY',
     'FEC_EMAIL_SENDER',
     'FEC_EMAIL_RECIPIENTS',
-
-    'FEC_DOWNLOAD_BUCKET',
-    'FEC_DOWNLOAD_ACCESS_KEY',
-    'FEC_DOWNLOAD_SECRET_KEY',
 )
 
-REQUIRED_SERVICES = ('redis28-swarm', )
+REQUIRED_SERVICES = ('redis28-swarm', 's3')
 
 REQUIRED_TABLES = (
     tuple(db.Model.metadata.tables.keys()) +

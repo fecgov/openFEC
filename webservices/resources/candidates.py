@@ -32,6 +32,7 @@ class CandidateList(ApiResource):
     schema = schemas.CandidateSchema
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
+    filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
     aliases = {'receipts': models.CandidateSearch.receipts}
 
     @property
@@ -59,13 +60,9 @@ class CandidateList(ApiResource):
             )
 
         if kwargs.get('q'):
-            query = utils.search_text(
-                query.join(
-                    models.CandidateSearch,
-                    models.Candidate.candidate_id == models.CandidateSearch.id,
-                ),
-                models.CandidateSearch.fulltxt,
-                kwargs['q'],
+            query = query.join(
+                models.CandidateSearch,
+                models.Candidate.candidate_id == models.CandidateSearch.id,
             ).distinct()
 
         if kwargs.get('name'):

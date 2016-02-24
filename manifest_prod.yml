@@ -4,6 +4,7 @@ host: fec-prod-api
 services:
   - fec-creds-prod
   - fec-redis-prod
+  - fec-s3-prod
 env:
   PRODUCTION: True
   NEW_RELIC_APP_NAME: OpenFEC API (production)
