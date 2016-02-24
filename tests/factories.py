@@ -1,5 +1,7 @@
 import datetime
 
+import sqlalchemy as sa
+
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
@@ -143,6 +145,12 @@ class ScheduleAFactory(BaseFactory):
     sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
 
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.contributor_name_text = sa.func.to_tsvector(obj.contributor_name)
+        obj.contributor_employer_text = sa.func.to_tsvector(obj.contributor_employer)
+        obj.contributor_occupation_text = sa.func.to_tsvector(obj.contributor_occupation)
+
 
 class ScheduleBFactory(BaseFactory):
     class Meta:
@@ -151,12 +159,20 @@ class ScheduleBFactory(BaseFactory):
     load_date = datetime.datetime.utcnow()
     report_year = 2016
 
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.disbursement_description_text = sa.func.to_tsvector(obj.disbursement_description)
+
 
 class ScheduleEFactory(BaseFactory):
     class Meta:
         model = models.ScheduleE
     sched_e_sk = factory.Sequence(lambda n: n)
     report_year = 2016
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.payee_name_text = sa.func.to_tsvector(obj.payee_name)
 
 
 class FilingsFactory(BaseFactory):
