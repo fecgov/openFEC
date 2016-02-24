@@ -50,9 +50,20 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     candidate_inactive = False
 
 
+class CandidateHistoryLatestFactory(CandidateHistoryFactory):
+    class Meta:
+        model = models.CandidateHistoryLatest
+
+
 class CandidateElectionFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateElection
+
+
+class CandidateTotalFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateTotal
+    cycle = 2016
 
 
 class BaseCommitteeFactory(BaseFactory):

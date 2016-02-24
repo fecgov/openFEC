@@ -441,9 +441,29 @@ schedule_a_candidate_aggregate = {
     'election_full': election_full,
 }
 
-totals_candidate_aggregate = {
+candidate_totals = {
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
     'election_full': election_full,
+    'state': fields.List(IStr, description='State of candidate'),
+    'party': fields.List(IStr, description='Three-letter party code'),
+    'min_receipts': fields.Int('Minimum aggregated receipts'),
+    'max_receipts': fields.Int('Maximum aggregated receipts'),
+    'min_disbursements': fields.Int('Minimum aggregated disbursements'),
+    'max_disbursements': fields.Int('Maximum aggregated disbursements'),
+    'min_cash_on_hand_end_period': fields.Int('Minimum cash on hand'),
+    'max_cash_on_hand_end_period': fields.Int('Maximum cash on hand'),
+    'min_debts_owed_by_committee': fields.Int('Minimum debt'),
+    'max_debts_owed_by_committee': fields.Int('Maximum debt'),
+}
+
+totals_committee_aggregate = {
+    'min_receipts': fields.Int('Minimum aggregated receipts'),
+    'max_receipts': fields.Int('Maximum aggregated receipts'),
+    'min_disbursements': fields.Int('Minimum aggregated disbursements'),
+    'max_disbursements': fields.Int('Maximum aggregated disbursements'),
 }
 
 communication_cost_by_candidate = {
