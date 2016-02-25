@@ -178,6 +178,7 @@ class TestCandidateAggregates(ApiBaseTest):
         ]
         factories.CandidateHistoryLatestFactory(
             candidate_id=self.candidate.candidate_id,
+            cand_election_year=2012,
             two_year_period=2012,
         )
         factories.CandidateDetailFactory(

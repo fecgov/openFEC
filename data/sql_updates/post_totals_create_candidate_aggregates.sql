@@ -38,7 +38,7 @@ cycle_totals as (
     left join ofec_candidate_election_mv_tmp election on
         link.cand_id = election.candidate_id and
         totals.cycle <= election.cand_election_year and
-        (election.prev_election_year is null or totals.cycle > election.prev_election_year)
+        totals.cycle > election.prev_election_year
     where
         link.cmte_dsgn in ('P', 'A')
     group by
