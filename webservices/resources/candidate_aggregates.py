@@ -137,6 +137,7 @@ class TotalsCandidateView(ApiResource):
             ('office', history.office),
             ('party', history.party),
             ('state', history.state),
+            ('district', history.district),
         ]
 
     def filter_range_fields(self, model):
@@ -146,6 +147,8 @@ class TotalsCandidateView(ApiResource):
             (('min_cash_on_hand_end_period', 'max_cash_on_hand_end_period'), model.cash_on_hand_end_period),
             (('min_debts_owed_by_committee', 'max_debts_owed_by_committee'), model.debts_owed_by_committee),
         ]
+
+    filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
 
     def build_query(self, **kwargs):
         if kwargs['election_full']:
@@ -166,6 +169,12 @@ class TotalsCandidateView(ApiResource):
         ).filter(
             models.CandidateTotal.is_election == kwargs['election_full'],
         )
+        if kwargs.get('q'):
+            query = query.join(
+                models.CandidateSearch,
+                history.candidate_id == models.CandidateSearch.id,
+            )
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         return query
