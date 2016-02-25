@@ -52,6 +52,8 @@ election_aggregates as (
         election_year,
         sum(receipts) as receipts,
         sum(disbursements) as disbursements
+        # if raised over 5,000
+        #
     from cycle_totals
     group by
         candidate_id,
