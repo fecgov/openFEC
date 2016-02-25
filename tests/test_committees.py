@@ -1,7 +1,6 @@
 import datetime
 
 import sqlalchemy as sa
-from marshmallow.utils import isoformat
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -342,6 +341,7 @@ class TestCommitteeHistory(ApiBaseTest):
         self.election = factories.CandidateElectionFactory(
             candidate_id=self.candidate.candidate_id,
             cand_election_year=2012,
+            prev_election_year=2008,
         )
 
     def test_candidate_cycle(self):

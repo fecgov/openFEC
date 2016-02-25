@@ -115,7 +115,10 @@ with years as (
 select distinct on (years.candidate_id, years.cand_election_year)
     years.candidate_id,
     years.cand_election_year,
-    prev.cand_election_year as prev_election_year
+    greatest(
+        prev.cand_election_year,
+        years.cand_election_year - election_duration(substr(years.candidate_id, 1, 1))
+    ) as prev_election_year
 from years
 left join years prev on
     years.candidate_id = prev.candidate_id and
