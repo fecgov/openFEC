@@ -442,6 +442,7 @@ schedule_a_candidate_aggregate = {
 }
 
 candidate_totals = {
+    'q': fields.List(fields.Str),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
