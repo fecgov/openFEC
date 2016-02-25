@@ -137,6 +137,7 @@ class TotalsCandidateView(ApiResource):
             ('office', history.office),
             ('party', history.party),
             ('state', history.state),
+            ('district', history.district),
         ]
 
     def filter_range_fields(self, model):
