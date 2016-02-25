@@ -58,8 +58,7 @@ $$ language plpgsql;
 
 
 -- Not all report types are on dimreporttype, so for the reports to all have
--- titles, I am adding a case. Ideally, we would want the right mapping,
--- that is one of the things we have asked for.
+-- titles, I am adding a case. Ideally, we would want the right mapping.
 create or replace function name_reports(office_sought text, report_type text, rpt_tp_desc text, election_state text[])
 returns text as $$
     begin
@@ -101,6 +100,7 @@ create materialized view ofec_omnibus_dates_mv_tmp as
 with elections_raw as(
     select
         *,
+        -- Create House State-district info when available
         case
             when office_sought = 'H' and election_district != ' ' then array_to_string(
                 array[
@@ -172,7 +172,7 @@ with elections_raw as(
         null::text as url
     from reports_raw
     where
-        -- exclude pre-primary presidential reports in even years
+        -- exclude pre-primary presidential reports in even years, realistically people file monthly.
         not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
     group by
         report_type,
@@ -180,6 +180,7 @@ with elections_raw as(
         due_date,
         office_sought
 ), other as (
+    -- most data comes from cal_event and is imported as is, it does not have state filtering.
     select distinct on (category_name, event_name, description, location, start_date, end_date)
         category_name::text as category,
         event_name::text as summary,
