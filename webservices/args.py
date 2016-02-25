@@ -442,6 +442,7 @@ schedule_a_candidate_aggregate = {
 }
 
 candidate_totals = {
+    'q': fields.List(fields.Str),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
@@ -449,21 +450,21 @@ candidate_totals = {
     'election_full': election_full,
     'state': fields.List(IStr, description='State of candidate'),
     'party': fields.List(IStr, description='Three-letter party code'),
-    'min_receipts': fields.Int('Minimum aggregated receipts'),
-    'max_receipts': fields.Int('Maximum aggregated receipts'),
-    'min_disbursements': fields.Int('Minimum aggregated disbursements'),
-    'max_disbursements': fields.Int('Maximum aggregated disbursements'),
-    'min_cash_on_hand_end_period': fields.Int('Minimum cash on hand'),
-    'max_cash_on_hand_end_period': fields.Int('Maximum cash on hand'),
-    'min_debts_owed_by_committee': fields.Int('Minimum debt'),
-    'max_debts_owed_by_committee': fields.Int('Maximum debt'),
+    'min_receipts': Currency(description='Minimum aggregated receipts'),
+    'max_receipts': Currency(description='Maximum aggregated receipts'),
+    'min_disbursements': Currency(description='Minimum aggregated disbursements'),
+    'max_disbursements': Currency(description='Maximum aggregated disbursements'),
+    'min_cash_on_hand_end_period': Currency(description='Minimum cash on hand'),
+    'max_cash_on_hand_end_period': Currency(description='Maximum cash on hand'),
+    'min_debts_owed_by_committee': Currency(description='Minimum debt'),
+    'max_debts_owed_by_committee': Currency(description='Maximum debt'),
 }
 
 totals_committee_aggregate = {
-    'min_receipts': fields.Int('Minimum aggregated receipts'),
-    'max_receipts': fields.Int('Maximum aggregated receipts'),
-    'min_disbursements': fields.Int('Minimum aggregated disbursements'),
-    'max_disbursements': fields.Int('Maximum aggregated disbursements'),
+    'min_receipts': Currency(description='Minimum aggregated receipts'),
+    'max_receipts': Currency(description='Maximum aggregated receipts'),
+    'min_disbursements': Currency(description='Minimum aggregated disbursements'),
+    'max_disbursements': Currency(description='Maximum aggregated disbursements'),
 }
 
 communication_cost_by_candidate = {
