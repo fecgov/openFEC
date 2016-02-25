@@ -144,7 +144,7 @@ from ofec_candidate_history_mv_tmp cand
 join ofec_candidate_election_mv_tmp election on
     cand.candidate_id = election.candidate_id and
     cand.two_year_period <= election.cand_election_year and
-    (election.prev_election_year is null or cand.two_year_period > election.prev_election_year)
+    cand.two_year_period > election.prev_election_year
 order by
     cand.candidate_id,
     election.cand_election_year,
