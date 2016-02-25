@@ -73,7 +73,8 @@ def parse_kwargs(resource, qs):
 def query_to_csv(query, fp):
     dialect = postgresql.dialect()
     compiled = query.statement.compile(dialect=dialect)
-    conn = db.engine.raw_connection()
+    # Get connection from session to hook into replica load balancing
+    conn = db.session.connection().engine.raw_connection()
     cursor = conn.cursor()
     select = cursor.mogrify(compiled.string, compiled.params).decode()
     copy = 'copy ({}) to stdout with csv header'.format(select)
