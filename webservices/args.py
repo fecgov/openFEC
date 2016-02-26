@@ -449,6 +449,7 @@ candidate_totals = {
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
     'election_full': election_full,
     'state': fields.List(IStr, description='State of candidate'),
+    'district': fields.List(District, description='District of candidate'),
     'party': fields.List(IStr, description='Three-letter party code'),
     'min_receipts': Currency(description='Minimum aggregated receipts'),
     'max_receipts': Currency(description='Maximum aggregated receipts'),
@@ -461,10 +462,10 @@ candidate_totals = {
 }
 
 totals_committee_aggregate = {
-    'min_receipts': fields.Int('Minimum aggregated receipts'),
-    'max_receipts': fields.Int('Maximum aggregated receipts'),
-    'min_disbursements': fields.Int('Minimum aggregated disbursements'),
-    'max_disbursements': fields.Int('Maximum aggregated disbursements'),
+    'min_receipts': Currency(description='Minimum aggregated receipts'),
+    'max_receipts': Currency(description='Maximum aggregated receipts'),
+    'min_disbursements': Currency(description='Minimum aggregated disbursements'),
+    'max_disbursements': Currency(description='Maximum aggregated disbursements'),
 }
 
 communication_cost_by_candidate = {

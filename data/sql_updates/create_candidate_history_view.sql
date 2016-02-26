@@ -115,7 +115,10 @@ with years as (
 select distinct on (years.candidate_id, years.cand_election_year)
     years.candidate_id,
     years.cand_election_year,
-    prev.cand_election_year as prev_election_year
+    greatest(
+        prev.cand_election_year,
+        years.cand_election_year - election_duration(substr(years.candidate_id, 1, 1))
+    ) as prev_election_year
 from years
 left join years prev on
     years.candidate_id = prev.candidate_id and
@@ -141,7 +144,7 @@ from ofec_candidate_history_mv_tmp cand
 join ofec_candidate_election_mv_tmp election on
     cand.candidate_id = election.candidate_id and
     cand.two_year_period <= election.cand_election_year and
-    (election.prev_election_year is null or cand.two_year_period > election.prev_election_year)
+    cand.two_year_period > election.prev_election_year
 order by
     cand.candidate_id,
     election.cand_election_year,

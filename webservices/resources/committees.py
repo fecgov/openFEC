@@ -207,18 +207,18 @@ class CommitteeHistoryView(ApiResource):
         return query
 
     def _filter_elections(self, query, candidate_id, cycle):
-        election_duration = utils.get_election_duration(models.CandidateCommitteeLink.committee_type)
+        """Round up to the next election including `cycle`."""
         return query.join(
             models.CandidateElection,
             sa.and_(
                 models.CandidateCommitteeLink.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.cand_election_year - election_duration,
                 models.CandidateCommitteeLink.fec_election_year <= models.CandidateElection.cand_election_year,
+                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.prev_election_year,
             ),
         ).filter(
             models.CandidateElection.candidate_id == candidate_id,
-            models.CandidateElection.cand_election_year >= cycle,
-            models.CandidateElection.cand_election_year < cycle + election_duration,
+            cycle <= models.CandidateElection.cand_election_year,
+            cycle > models.CandidateElection.prev_election_year,
         ).order_by(
             models.CommitteeHistory.committee_id,
             sa.desc(models.CommitteeHistory.cycle),

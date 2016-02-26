@@ -212,10 +212,12 @@ class TestCandidateHistory(ApiBaseTest):
             factories.CandidateElectionFactory(
                 candidate_id=self.candidates[0].candidate_id,
                 cand_election_year=2012,
+                prev_election_year=2008,
             ),
             factories.CandidateElectionFactory(
                 candidate_id=self.candidates[1].candidate_id,
                 cand_election_year=2012,
+                prev_election_year=2008,
             ),
         ]
 

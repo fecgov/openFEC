@@ -137,6 +137,7 @@ class TotalsCandidateView(ApiResource):
             ('office', history.office),
             ('party', history.party),
             ('state', history.state),
+            ('district', history.district),
         ]
 
     def filter_range_fields(self, model):
@@ -150,11 +151,12 @@ class TotalsCandidateView(ApiResource):
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
 
     def build_query(self, **kwargs):
-        history = (
-            models.CandidateHistoryLatest
-            if kwargs['election_full']
-            else models.CandidateHistory
-        )
+        if kwargs['election_full']:
+            history = models.CandidateHistoryLatest
+            year_column = history.cand_election_year
+        else:
+            history = models.CandidateHistory
+            year_column = history.two_year_period
         query = db.session.query(
             history.__table__,
             models.CandidateTotal.__table__,
@@ -162,7 +164,7 @@ class TotalsCandidateView(ApiResource):
             models.CandidateTotal,
             sa.and_(
                 history.candidate_id == models.CandidateTotal.candidate_id,
-                history.two_year_period == models.CandidateTotal.cycle,
+                year_column == models.CandidateTotal.cycle,
             )
         ).filter(
             models.CandidateTotal.is_election == kwargs['election_full'],
