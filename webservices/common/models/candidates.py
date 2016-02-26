@@ -92,6 +92,7 @@ class CandidateHistoryLatest(BaseCandidate):
 
     candidate_id = db.Column(db.String, primary_key=True, index=True)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True)
+    cand_election_year = db.Column(db.Integer, index=True)
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
     address_street_1 = db.Column(db.String(200))
