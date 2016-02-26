@@ -89,9 +89,6 @@ class CommitteeList(ApiResource):
                 models.Committee.committee_id == models.CommitteeSearch.id,
             ).distinct()
 
-        if kwargs.get('name'):
-            query = query.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
-
         if kwargs.get('year'):
             query = filter_year(models.Committee, query, kwargs['year'])
 

@@ -65,9 +65,6 @@ class CandidateList(ApiResource):
                 models.Candidate.candidate_id == models.CandidateSearch.id,
             ).distinct()
 
-        if kwargs.get('name'):
-            query = query.filter(models.Candidate.name.ilike('%{}%'.format(kwargs['name'])))
-
         if kwargs.get('cycle'):
             query = query.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
         if kwargs.get('election_year'):
