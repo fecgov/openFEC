@@ -127,6 +127,7 @@ names = {
 
 candidate_detail = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
     'state': fields.List(IStr, description=docs.STATE),
     'party': fields.List(IStr, description=docs.PARTY),
