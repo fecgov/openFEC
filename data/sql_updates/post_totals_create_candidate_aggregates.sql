@@ -32,7 +32,7 @@ cycle_totals as (
         sum(totals.receipts) as receipts,
         sum(totals.disbursements) as disbursements,
         sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
-        sum(last_debts_owed_by_committee) as debts_owed_by_committee,
+        sum(last_debts_owed_by_committee) as debts_owed_by_committee
     from ofec_cand_cmte_linkage_mv_tmp link
     join totals on
         link.cmte_id = totals.committee_id and
