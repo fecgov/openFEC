@@ -8,7 +8,8 @@ with totals as (
         receipts,
         disbursements,
         last_cash_on_hand_end_period,
-        last_debts_owed_by_committee
+        last_debts_owed_by_committee,
+        cast('false' as boolean) as federal_funds_flag
     from ofec_totals_house_senate_mv_tmp
     union all
     select
@@ -17,7 +18,8 @@ with totals as (
         receipts,
         disbursements,
         last_cash_on_hand_end_period,
-        last_debts_owed_by_committee
+        last_debts_owed_by_committee,
+        federal_funds_flag
     from ofec_totals_presidential_mv_tmp
 ),
 -- Aggregated totals by candidate by cycle
@@ -30,7 +32,7 @@ cycle_totals as (
         sum(totals.receipts) as receipts,
         sum(totals.disbursements) as disbursements,
         sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
-        sum(last_debts_owed_by_committee) as debts_owed_by_committee
+        sum(last_debts_owed_by_committee) as debts_owed_by_committee,
     from ofec_cand_cmte_linkage_mv_tmp link
     join totals on
         link.cmte_id = totals.committee_id and
@@ -51,9 +53,8 @@ election_aggregates as (
         candidate_id,
         election_year,
         sum(receipts) as receipts,
-        sum(disbursements) as disbursements
-        # if raised over 5,000
-        #
+        sum(disbursements) as disbursements,
+        sum(receipts) >= 5000 as five_thousand_flag
     from cycle_totals
     group by
         candidate_id,
@@ -81,6 +82,7 @@ election_totals as (
         true as is_election,
         totals.receipts,
         totals.disbursements,
+        totals.federal_funds_flag,
         latest.cash_on_hand_end_period,
         latest.debts_owed_by_committee
     from election_aggregates totals
