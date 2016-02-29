@@ -1,31 +1,16 @@
 import os
-import sys
-
-here, _ = os.path.split(__file__)
-sys.path.insert(0, os.path.join(here, os.pardir))
-
 import datetime
 
 from airflow import DAG
 from airflow.operators import PostgresOperator
 
-from webservices.config import SQL_CONFIG
+from webservices.flow import default_args, script_path
 
-os.environ['AIRFLOW_CONN_POSTGRES_DEFAULT'] = os.getenv('SQLA_CONN', 'postgresql:///cfdm_test')
-script_path = os.path.join(here, os.pardir, 'data', 'sql_updates')
-
-default_args = {
-    'owner': 'fec',
-    'start_date': datetime.datetime(2016, 1, 1),
-    'postgres_conn_id': 'POSTGRES_DEFAULT',
-    'parameters': SQL_CONFIG,
-}
-
-dag = DAG(
-    'refresh',
+views_dag = DAG(
+    'refresh.views',
     default_args=default_args,
-    template_searchpath=script_path,
     schedule_interval='0 9 * * *',
+    template_searchpath=script_path,
 )
 
 def script_task(path, dag):
@@ -34,7 +19,7 @@ def script_task(path, dag):
         task_id=name,
         sql=path,
         start_date=datetime.datetime(2016, 1, 1),
-        dag=dag,
+        dag=views_dag,
     )
 
 def split(path):
@@ -43,7 +28,7 @@ def split(path):
     return head, root, ext
 
 tasks = {
-    split(path)[1]: script_task(path, dag)
+    split(path)[1]: script_task(path, views_dag)
     for path in os.listdir(script_path) if path.endswith('.sql')
 }
 
