@@ -224,7 +224,7 @@ def deploy(space=None, branch=None, yes=False):
     run('cf stop {0}'.format(old), echo=True, warn=True)
 
     # Deploy worker applications
-    run('cf push celery-beat -f manifest_{0}.yml'.format(space))
+    run('cf push airflow-scheduler -f manifest_{0}.yml'.format(space))
     run('cf push celery-worker -f manifest_{0}.yml'.format(space))
 
 @task

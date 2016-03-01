@@ -2,7 +2,6 @@ import os
 
 import celery
 from celery import signals
-from celery.schedules import crontab
 
 from raven import Client
 from raven.contrib.celery import register_signal, register_logger_signal
@@ -26,12 +25,6 @@ app.conf.update(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
     ),
-    CELERYBEAT_SCHEDULE={
-        'refresh': {
-            'task': 'webservices.tasks.refresh.refresh',
-            'schedule': crontab(minute=0, hour=9),
-        },
-    }
 )
 
 client = Client(env.get_credential('SENTRY_DSN'))

@@ -11,11 +11,11 @@ env:
 applications:
 - name: api-a
 - name: api-b
-- name: celery-beat
+- name: airflow-scheduler
   instances: 1
   memory: 256M
   no-route: true
-  command: celery beat --app webservices.tasks
+  command: ./bin/airflow-scheduler.sh
   buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.1
 - name: celery-worker
   instances: 1
