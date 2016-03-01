@@ -1,14 +1,16 @@
 import os
+import datetime
+
+from webservices.config import SQL_CONFIG
 
 here, _ = os.path.split(__file__)
 home = os.path.join(here, os.pardir, os.pardir)
 script_path = os.path.join(home, 'data', 'sql_updates')
 
-import datetime
-
-from webservices.config import SQL_CONFIG
-
-os.environ['AIRFLOW_CONN_POSTGRES_DEFAULT'] = os.getenv('SQLA_CONN', 'postgresql:///cfdm_test')
+os.environ['AIRFLOW_CONN_POSTGRES_DEFAULT'] = os.getenv(
+    'AIRFLOW_CONN_POSTGRES_DEFAULT',
+    os.getenv('SQLA_CONN', 'postgresql:///cfdm_test'),
+)
 
 default_args = {
     'owner': 'fec',

@@ -3,13 +3,13 @@ drop table if exists ofec_sched_b_aggregate_recipient_id;
 create table ofec_sched_b_aggregate_recipient_id as
 select
     cmte_id,
-    rpt_yr + rpt_yr % 2 as cycle,
+    get_cycle(rpt_yr) as cycle,
     clean_repeated(recipient_cmte_id, cmte_id) as recipient_cmte_id,
     max(recipient_nm) as recipient_nm,
     sum(disb_amt) as total,
     count(disb_amt) as count
 from sched_b
-where rpt_yr >= :START_YEAR_AGGREGATE
+where rpt_yr >= %(START_YEAR_AGGREGATE)s
 and disb_amt is not null
 and (memo_cd != 'X' or memo_cd is null)
 and clean_repeated(recipient_cmte_id, cmte_id) is not null
@@ -39,7 +39,7 @@ begin
     patch as (
         select
             cmte_id,
-            rpt_yr + rpt_yr % 2 as cycle,
+            get_cycle(rpt_yr) as cycle,
             clean_repeated(recipient_cmte_id, cmte_id) as recipient_cmte_id,
             max(recipient_nm) as recipient_nm,
             sum(disb_amt * multiplier) as total,

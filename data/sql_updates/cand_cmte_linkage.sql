@@ -12,3 +12,6 @@ where
 create index on ofec_cand_cmte_linkage_tmp(cand_id);
 create index on ofec_cand_cmte_linkage_tmp(cmte_id);
 create index on ofec_cand_cmte_linkage_tmp(cand_election_yr);
+
+drop table if exists ofec_cand_cmte_linkage;
+alter table ofec_cand_cmte_linkage_tmp rename to ofec_cand_cmte_linkage;

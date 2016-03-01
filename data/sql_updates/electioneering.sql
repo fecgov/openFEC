@@ -26,3 +26,6 @@ create index on ofec_electioneering_tmp (f9_begin_image_num);
 create index on ofec_electioneering_tmp (sb_image_num);
 
 create index on ofec_electioneering_tmp using gin (purpose_description_text);
+
+drop table if exists ofec_electioneering;
+alter table ofec_electioneering_tmp rename to ofec_electioneering;

@@ -3,14 +3,14 @@ drop table if exists ofec_sched_a_aggregate_zip;
 create table ofec_sched_a_aggregate_zip as
 select
     cmte_id,
-    rpt_yr + rpt_yr % 2 as cycle,
+    get_cycle(rpt_yr) as cycle,
     contbr_zip as zip,
     max(contbr_st) as state,
     expand_state(max(contbr_st)) as state_full,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
 from sched_a
-where rpt_yr >= :START_YEAR_AGGREGATE
+where rpt_yr >= %(START_YEAR_AGGREGATE)s
 and contb_receipt_amt is not null
 and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, zip
@@ -41,7 +41,7 @@ begin
     patch as (
         select
             cmte_id,
-            rpt_yr + rpt_yr % 2 as cycle,
+            get_cycle(rpt_yr) as cycle,
             contbr_zip as zip,
             max(contbr_st) as state,
             expand_state(max(contbr_st)) as state_full,

@@ -3,12 +3,12 @@ drop table if exists ofec_sched_a_aggregate_occupation;
 create table ofec_sched_a_aggregate_occupation as
 select
     cmte_id,
-    rpt_yr + rpt_yr % 2 as cycle,
+    get_cycle(rpt_yr) as cycle,
     contbr_occupation as occupation,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
 from sched_a
-where rpt_yr >= :START_YEAR_AGGREGATE
+where rpt_yr >= %(START_YEAR_AGGREGATE)s
 and contb_receipt_amt is not null
 and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, occupation
@@ -37,7 +37,7 @@ begin
     patch as (
         select
             cmte_id,
-            rpt_yr + rpt_yr % 2 as cycle,
+            get_cycle(rpt_yr) as cycle,
             contbr_occupation as occupation,
             sum(contb_receipt_amt * multiplier) as total,
             sum(multiplier) as count

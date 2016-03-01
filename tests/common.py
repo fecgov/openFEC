@@ -29,6 +29,7 @@ class BaseTestCase(unittest.TestCase):
     def setUpClass(cls):
         rest.app.config['TESTING'] = True
         rest.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
+        os.environ['AIRFLOW_CONN_POSTGRES_DEFAULT'] = TEST_CONN
         rest.app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
         cls.app = rest.app.test_client()
         cls.client = TestApp(rest.app)

@@ -3,13 +3,13 @@ drop table if exists ofec_sched_a_aggregate_contributor;
 create table ofec_sched_a_aggregate_contributor as
 select
     cmte_id,
-    rpt_yr + rpt_yr % 2 as cycle,
+    get_cycle(rpt_yr) as cycle,
     clean_repeated(contbr_id, cmte_id) as contbr_id,
     max(contbr_nm) as contbr_nm,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
 from sched_a
-where rpt_yr >= :START_YEAR_AGGREGATE
+where rpt_yr >= %(START_YEAR_AGGREGATE)s
 and contb_receipt_amt is not null
 and clean_repeated(contbr_id, cmte_id) is not null
 and coalesce(entity_tp, '') != 'IND'
@@ -40,7 +40,7 @@ begin
     patch as (
         select
             cmte_id,
-            rpt_yr + rpt_yr % 2 as cycle,
+            get_cycle(rpt_yr) as cycle,
             clean_repeated(contbr_id, cmte_id) as contbr_id,
             max(contbr_nm) as contbr_nm,
             sum(contb_receipt_amt * multiplier) as total,

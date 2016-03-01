@@ -2,18 +2,21 @@
 
 import glob
 import logging
+import datetime
 import subprocess
 import multiprocessing
 
+from toposort import toposort
+from airflow.models import TaskInstance
 from flask.ext.script import Server
 from flask.ext.script import Manager
-from sqlalchemy import text as sqla_text
 
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
-
+from webservices.flow.views import views_dag
+from webservices.flow.itemized import itemized_dag
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -25,6 +28,22 @@ logging.basicConfig(level=logging.INFO)
 manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
+def task_graph(tasks, edges=None):
+    edges = edges or {}
+    for task in tasks:
+        edges[task] = set(task.upstream_list)
+        task_graph(task.upstream_list, edges=edges)
+    return edges
+
+def run_dag(dag):
+    graph = toposort(task_graph(dag.roots))
+    for tasks in graph:
+        for task in tasks:
+            TaskInstance(
+                task,
+                datetime.datetime.now()
+            ).run(ignore_dependencies=True)
+
 def execute_sql_file(path):
     # This helper is typically used within a multiprocessing pool; create a new database
     # engine for each job.
@@ -35,7 +54,8 @@ def execute_sql_file(path):
             line for line in fp.readlines()
             if not line.strip().startswith('--')
         ])
-        db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
+        db.engine.execute(cmd, **SQL_CONFIG)
+        db.engine.execute('commit')
 
 def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
@@ -119,11 +139,9 @@ def build_district_counts(outname='districts.json'):
     utils.write_district_counts(outname)
 
 @manager.command
-def update_schemas(processes=1):
+def update_schemas():
     logger.info("Starting DB refresh...")
-    processes = int(processes)
-    execute_sql_folder('data/sql_updates/', processes=processes)
-    execute_sql_file('data/rename_temporary_views.sql')
+    run_dag(views_dag)
     logger.info("Finished DB refresh.")
 
 @manager.command
@@ -145,7 +163,7 @@ def rebuild_aggregates(processes=1):
 @manager.command
 def update_aggregates():
     logger.info('Updating incremental aggregates...')
-    db.engine.execute('select update_aggregates()')
+    run_dag(itemized_dag)
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command
@@ -162,14 +180,7 @@ def update_all(processes=1):
     update_itemized('b')
     update_itemized('e')
     rebuild_aggregates(processes=processes)
-    update_schemas(processes=processes)
-
-@manager.command
-def refresh_materialized():
-    """Refresh materialized views."""
-    logger.info('Refreshing materialized views...')
-    execute_sql_file('data/refresh_materialized_views.sql')
-    logger.info('Finished refreshing materialized views.')
+    update_schemas()
 
 @manager.command
 def cf_startup():

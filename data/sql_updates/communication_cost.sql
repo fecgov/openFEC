@@ -26,3 +26,6 @@ create index on ofec_communication_cost_tmp (line_num);
 create index on ofec_communication_cost_tmp (form_tp_cd);
 create index on ofec_communication_cost_tmp (sched_tp_cd);
 create index on ofec_communication_cost_tmp (rpt_yr);
+
+drop table if exists ofec_communication_cost;
+alter table ofec_communication_cost_tmp rename to ofec_communication_cost;

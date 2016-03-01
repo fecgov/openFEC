@@ -45,3 +45,6 @@ create index on ofec_election_result_tmp (election_yr);
 create index on ofec_election_result_tmp (cand_office);
 create index on ofec_election_result_tmp (cand_office_st);
 create index on ofec_election_result_tmp (cand_office_district);
+
+drop table if exists ofec_election_result;
+alter table ofec_election_result_tmp rename to ofec_election_result;
