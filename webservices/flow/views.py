@@ -34,6 +34,7 @@ tasks = {
 
 tasks['candidate_detail'].set_upstream(tasks['candidate_history'])
 tasks['candidate_election'].set_upstream(tasks['candidate_detail'])
+tasks['candidate_history_latest'].set_upstream([tasks['candidate_history'], tasks['candidate_election']])
 
 tasks['committee_detail'].set_upstream(tasks['committee_history'])
 
@@ -49,3 +50,9 @@ tasks['committee_fulltext'].set_upstream([tasks['committee_detail'], tasks['tota
 tasks['candidate_fulltext'].set_upstream([tasks['candidate_detail'], tasks['totals_combined']])
 
 tasks['sched_a_by_size_merged'].set_upstream(tasks['totals_combined'])
+
+tasks['candidate_aggregates'].set_upstream([
+    tasks['totals_house_senate'],
+    tasks['totals_presidential'],
+    tasks['candidate_election'],
+])

@@ -4,9 +4,11 @@ from flask_apispec import doc
 from webservices import args
 from webservices import docs
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices import exceptions
 from webservices.common import models
+from webservices.common.models import db
 from webservices.common.views import ApiResource
 
 
@@ -47,6 +49,10 @@ class CommitteeList(ApiResource):
     filter_range_fields = [
         (('min_first_file_date', 'max_first_file_date'), models.Committee.first_file_date),
     ]
+    filter_fulltext_fields = [
+        ('q', models.CommitteeSearch.fulltxt),
+        ('treasurer_name', models.Committee.treasurer_text),
+    ]
 
     @property
     def args(self):
@@ -78,21 +84,10 @@ class CommitteeList(ApiResource):
             )
 
         if kwargs.get('q'):
-            query = utils.search_text(
-                query.join(
-                    models.CommitteeSearch,
-                    models.Committee.committee_id == models.CommitteeSearch.id,
-                ),
-                models.CommitteeSearch.fulltxt,
-                kwargs['q'],
+            query = query.join(
+                models.CommitteeSearch,
+                models.Committee.committee_id == models.CommitteeSearch.id,
             ).distinct()
-
-        if kwargs.get('treasurer_name'):
-            query = utils.search_text(
-                query,
-                models.Committee.treasurer_text,
-                kwargs['treasurer_name'],
-            )
 
         if kwargs.get('name'):
             query = query.filter(models.Committee.name.ilike('%{}%'.format(kwargs['name'])))
@@ -212,21 +207,65 @@ class CommitteeHistoryView(ApiResource):
         return query
 
     def _filter_elections(self, query, candidate_id, cycle):
-        election_duration = utils.get_election_duration(models.CandidateCommitteeLink.committee_type)
+        """Round up to the next election including `cycle`."""
         return query.join(
             models.CandidateElection,
             sa.and_(
                 models.CandidateCommitteeLink.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.cand_election_year - election_duration,
                 models.CandidateCommitteeLink.fec_election_year <= models.CandidateElection.cand_election_year,
+                models.CandidateCommitteeLink.fec_election_year > models.CandidateElection.prev_election_year,
             ),
         ).filter(
             models.CandidateElection.candidate_id == candidate_id,
-            models.CandidateElection.cand_election_year >= cycle,
-            models.CandidateElection.cand_election_year < cycle + election_duration,
+            cycle <= models.CandidateElection.cand_election_year,
+            cycle > models.CandidateElection.prev_election_year,
         ).order_by(
             models.CommitteeHistory.committee_id,
             sa.desc(models.CommitteeHistory.cycle),
         ).distinct(
             models.CommitteeHistory.committee_id,
         )
+
+class TotalsCommitteeHistoryView(ApiResource):
+
+    page_schema = schemas.TotalsCommitteePageSchema
+
+    def filter_multi_fields(self, model):
+        return [
+            ('party', model.party),
+            ('state', model.state),
+            ('committee_type', model.committee_type),
+            ('designation', model.designation),
+        ]
+
+    def filter_range_fields(self, model):
+        return [
+            (('min_receipts', 'max_receipts'), model.receipts),
+            (('min_disbursements', 'max_disbursements'), model.disbursements),
+        ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.make_sort_args(),
+            args.totals_committee_aggregate,
+        )
+
+    def build_query(self, cycle, **kwargs):
+        totals = sa.Table('ofec_committee_totals', db.metadata, autoload_with=db.engine)
+        query = models.CommitteeHistory.query.with_entities(
+            models.CommitteeHistory.__table__,
+            totals,
+        ).outerjoin(
+            totals,
+            sa.and_(
+                models.CommitteeHistory.committee_id == totals.c.committee_id,
+                models.CommitteeHistory.cycle == totals.c.cycle,
+            )
+        ).filter(
+            models.CommitteeHistory.cycle == cycle,
+        )
+        query = filters.filter_multi(query, kwargs, self.filter_multi_fields(models.CommitteeHistory))
+        query = filters.filter_range(query, kwargs, self.filter_range_fields(totals.c))
+        return query

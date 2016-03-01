@@ -87,8 +87,35 @@ class CandidateHistory(BaseCandidate):
     candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
 
 
-class CandidateElection(BaseModel):
+class CandidateElection(db.Model):
     __tablename__ = 'ofec_candidate_election'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
-    cand_election_year = db.Column(db.Integer, primary_key=True, index=True, doc="Year a candidate runs for federal office.")
+    cand_election_year = db.Column(db.Integer, primary_key=True, index=True, doc='Year a candidate runs for federal office.')
+    prev_election_year = db.Column(db.Integer, index=True)
+
+
+class CandidateHistoryLatest(BaseCandidate):
+    __tablename__ = 'ofec_candidate_history_latest'
+
+    candidate_id = db.Column(db.String, primary_key=True, index=True)
+    two_year_period = db.Column(db.Integer, primary_key=True, index=True)
+    cand_election_year = db.Column(db.Integer, index=True)
+    address_city = db.Column(db.String(100))
+    address_state = db.Column(db.String(2))
+    address_street_1 = db.Column(db.String(200))
+    address_street_2 = db.Column(db.String(200))
+    address_zip = db.Column(db.String(10))
+    candidate_inactive = db.Column(db.Boolean)
+
+
+class CandidateTotal(db.Model):
+    __tablename__ = 'ofec_candidate_totals'
+    candidate_id = db.Column(db.String, index=True, primary_key=True)
+    election_year = db.Column(db.Integer, index=True, primary_key=True)
+    cycle = db.Column(db.Integer, index=True, primary_key=True)
+    is_election = db.Column(db.Boolean, index=True, primary_key=True)
+    receipts = db.Column(db.Numeric(30, 2), index=True)
+    disbursements = db.Column(db.Numeric(30, 2), index=True)
+    cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
+    debts_owed_by_committee = db.Column(db.Numeric(30, 2))

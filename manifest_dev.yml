@@ -4,6 +4,7 @@ host: fec-dev-api
 services:
   - fec-creds-dev
   - fec-redis-dev
+  - fec-s3-dev
 env:
   NEW_RELIC_APP_NAME: OpenFEC API (development)
   NEW_RELIC_ENV: development

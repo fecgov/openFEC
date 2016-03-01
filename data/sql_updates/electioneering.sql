@@ -16,8 +16,6 @@ create index on ofec_electioneering_tmp (cand_id);
 create index on ofec_electioneering_tmp (cand_office);
 create index on ofec_electioneering_tmp (cand_office_st);
 create index on ofec_electioneering_tmp (cand_office_district);
--- These will be added back in
--- create index on ofec_electioneering_tmp (election_tp);
 create index on ofec_electioneering_tmp (disb_dt);
 create index on ofec_electioneering_tmp (reported_disb_amt);
 create index on ofec_electioneering_tmp (calculated_cand_share);

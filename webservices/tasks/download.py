@@ -17,19 +17,21 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.resources import candidates, committees, filings, sched_e
+from webservices.resources import candidates, committees, filings, costs, sched_e
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
 
 logger = logging.getLogger(__name__)
 
-IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null', 'sort_nulls_large'}
+IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null'}
 RESOURCE_WHITELIST = {
     candidates.CandidateList,
     committees.CommitteeList,
-    sched_e.ScheduleEView,
     filings.FilingsList,
+    costs.CommunicationCostView,
+    costs.ElectioneeringView,
+    sched_e.ScheduleEView,
 }
 
 COUNT_NOTE = (

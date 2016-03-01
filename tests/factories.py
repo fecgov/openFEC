@@ -1,5 +1,7 @@
 import datetime
 
+import sqlalchemy as sa
+
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
@@ -48,9 +50,20 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     candidate_inactive = False
 
 
+class CandidateHistoryLatestFactory(CandidateHistoryFactory):
+    class Meta:
+        model = models.CandidateHistoryLatest
+
+
 class CandidateElectionFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateElection
+
+
+class CandidateTotalFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateTotal
+    cycle = 2016
 
 
 class BaseCommitteeFactory(BaseFactory):
@@ -143,6 +156,12 @@ class ScheduleAFactory(BaseFactory):
     sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
 
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.contributor_name_text = sa.func.to_tsvector(obj.contributor_name)
+        obj.contributor_employer_text = sa.func.to_tsvector(obj.contributor_employer)
+        obj.contributor_occupation_text = sa.func.to_tsvector(obj.contributor_occupation)
+
 
 class ScheduleBFactory(BaseFactory):
     class Meta:
@@ -151,12 +170,20 @@ class ScheduleBFactory(BaseFactory):
     load_date = datetime.datetime.utcnow()
     report_year = 2016
 
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.disbursement_description_text = sa.func.to_tsvector(obj.disbursement_description)
+
 
 class ScheduleEFactory(BaseFactory):
     class Meta:
         model = models.ScheduleE
     sched_e_sk = factory.Sequence(lambda n: n)
     report_year = 2016
+
+    @factory.post_generation
+    def update_fulltext(obj, create, extracted, **kwargs):
+        obj.payee_name_text = sa.func.to_tsvector(obj.payee_name)
 
 
 class FilingsFactory(BaseFactory):
@@ -182,13 +209,6 @@ class ScheduleAByStateFactory(BaseAggregateFactory):
 class ScheduleAByEmployerFactory(BaseAggregateFactory):
     class Meta:
         model = models.ScheduleAByEmployer
-
-
-class ScheduleAByContributorFactory(BaseAggregateFactory):
-    class Meta:
-        model = models.ScheduleAByContributor
-    contributor_id = factory.Sequence(lambda n: str(n))
-    year = 2015
 
 
 class ScheduleBByPurposeFactory(BaseAggregateFactory):
@@ -260,6 +280,7 @@ class ElectioneeringFactory(BaseFactory):
     class Meta:
         model = models.Electioneering
     idx = factory.Sequence(lambda n: n)
+    election_type_raw = 'G'
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):

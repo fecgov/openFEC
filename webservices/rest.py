@@ -182,7 +182,6 @@ add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
 add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
 add_aggregate_resource(api, aggregates.ScheduleAByEmployerView, 'a', 'employer')
 add_aggregate_resource(api, aggregates.ScheduleAByOccupationView, 'a', 'occupation')
-add_aggregate_resource(api, aggregates.ScheduleAByContributorView, 'a', 'contributor')
 
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
@@ -193,7 +192,8 @@ add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
 
-api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidate/<candidate_id>/totals/')
+api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
+api.add_resource(committees.TotalsCommitteeHistoryView, '/committees/totals/')
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,
@@ -243,7 +243,6 @@ apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByEmployerView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByOccupationView, blueprint='v1')
-apidoc.register(aggregates.ScheduleAByContributorView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByRecipientView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByPurposeView, blueprint='v1')
