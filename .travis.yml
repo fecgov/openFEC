@@ -27,6 +27,8 @@ before_script:
   - travis_retry pip install -U pip wheel
   - travis_retry pip install -U -r requirements.txt
   - travis_retry pip install -U -r requirements-dev.txt
+  - export AIRFLOW_HOME=$TRAVIS_BUILD_DIR
+  - airflow resetdb --yes
 
 script: py.test
 
