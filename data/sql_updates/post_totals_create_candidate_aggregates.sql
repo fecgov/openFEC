@@ -19,7 +19,7 @@ with totals as (
         disbursements,
         last_cash_on_hand_end_period,
         last_debts_owed_by_committee,
-        federal_funds_flag
+        cast(federal_funds_flag as boolean) as federal_funds_flag
     from ofec_totals_presidential_mv_tmp
 ),
 -- Aggregated totals by candidate by cycle
@@ -31,8 +31,10 @@ cycle_totals as (
         false as is_election,
         sum(totals.receipts) as receipts,
         sum(totals.disbursements) as disbursements,
+        sum(receipts) >= 5000 as five_thousand_flag,
         sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
-        sum(last_debts_owed_by_committee) as debts_owed_by_committee
+        sum(last_debts_owed_by_committee) as debts_owed_by_committee,
+        array_agg(federal_funds_flag)::boolean array @> array[cast('true' as boolean)] as federal_funds_flag
     from ofec_cand_cmte_linkage_mv_tmp link
     join totals on
         link.cmte_id = totals.committee_id and
@@ -45,7 +47,8 @@ cycle_totals as (
         link.cmte_dsgn in ('P', 'A')
     group by
         link.cand_id,
-        totals.cycle
+        totals.cycle,
+        totals.federal_funds_flag
 ),
 -- Aggregated totals by candidate by election
 election_aggregates as (
@@ -54,11 +57,13 @@ election_aggregates as (
         election_year,
         sum(receipts) as receipts,
         sum(disbursements) as disbursements,
-        sum(receipts) >= 5000 as five_thousand_flag
+        sum(receipts) >= 5000 as five_thousand_flag,
+        array_agg(federal_funds_flag) @> array[cast('true' as boolean)] as federal_funds_flag
     from cycle_totals
     group by
         candidate_id,
-        election_year
+        election_year,
+        federal_funds_flag
 ),
 -- Ending financials by candidate by election
 election_latest as (
@@ -66,7 +71,8 @@ election_latest as (
         candidate_id,
         election_year,
         cash_on_hand_end_period,
-        debts_owed_by_committee
+        debts_owed_by_committee,
+        federal_funds_flag
     from cycle_totals totals
     order by
         candidate_id,
@@ -82,9 +88,10 @@ election_totals as (
         true as is_election,
         totals.receipts,
         totals.disbursements,
-        totals.federal_funds_flag,
+        totals.five_thousand_flag,
         latest.cash_on_hand_end_period,
-        latest.debts_owed_by_committee
+        latest.debts_owed_by_committee,
+        totals.federal_funds_flag
     from election_aggregates totals
     join election_latest latest using (candidate_id, election_year)
 )
