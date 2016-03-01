@@ -15,8 +15,7 @@ from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
-from webservices.flow.views import views_dag
-from webservices.flow.itemized import itemized_dag
+from webservices.flow import views, itemized
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -141,7 +140,7 @@ def build_district_counts(outname='districts.json'):
 @manager.command
 def update_schemas():
     logger.info("Starting DB refresh...")
-    run_dag(views_dag)
+    run_dag(views.make_dag())
     logger.info("Finished DB refresh.")
 
 @manager.command
@@ -163,7 +162,7 @@ def rebuild_aggregates(processes=1):
 @manager.command
 def update_aggregates():
     logger.info('Updating incremental aggregates...')
-    run_dag(itemized_dag)
+    run_dag(itemized.make_dag())
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command

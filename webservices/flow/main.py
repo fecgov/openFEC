@@ -3,9 +3,7 @@ from airflow.operators import SubDagOperator
 
 from webservices.flow import default_args, script_path
 
-from webservices.flow.itemized import itemized_dag
-from webservices.flow.views import views_dag
-from webservices.flow.bucket import bucket_dag
+from webservices.flow import itemized, views, bucket
 
 dag = DAG(
     'refresh',
@@ -16,20 +14,20 @@ dag = DAG(
 
 itemized = SubDagOperator(
     task_id='itemized',
-    subdag=itemized_dag,
+    subdag=itemized.make_dag(),
     dag=dag,
 )
 
 views = SubDagOperator(
     task_id='views',
-    subdag=views_dag,
+    subdag=views.make_dag(),
     dag=dag,
 )
 views.set_upstream(itemized)
 
 bucket = SubDagOperator(
     task_id='bucket',
-    subdag=bucket_dag,
+    subdag=bucket.make_dag(),
     dag=dag,
 )
 bucket.set_upstream(views)
