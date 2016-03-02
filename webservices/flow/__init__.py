@@ -1,6 +1,7 @@
 import os
 import datetime
 
+from webservices.env import env
 from webservices.config import SQL_CONFIG
 
 here, _ = os.path.split(__file__)
@@ -14,7 +15,8 @@ os.environ['AIRFLOW_CONN_POSTGRES_DEFAULT'] = os.getenv(
 
 default_args = {
     'owner': 'fec',
-    'start_date': datetime.datetime(2016, 1, 1),
-    'postgres_conn_id': 'POSTGRES_DEFAULT',
     'parameters': SQL_CONFIG,
+    'postgres_conn_id': 'POSTGRES_DEFAULT',
+    'start_date': datetime.datetime(2016, 1, 1),
+    'email': env.get_credential('FEC_EMAIL_RECIPIENTS', '').split(','),
 }

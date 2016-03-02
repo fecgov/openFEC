@@ -22,7 +22,6 @@ app.conf.update(
     ONCE_REDIS_URL=redis_url(),
     ONCE_DEFAULT_TIMEOUT=60 * 60,
     CELERY_IMPORTS=(
-        'webservices.tasks.refresh',
         'webservices.tasks.download',
     ),
 )
