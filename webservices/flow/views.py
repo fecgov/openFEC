@@ -1,17 +1,15 @@
 import os
-import datetime
 
 from airflow import DAG
 from airflow.operators import PostgresOperator
 
-from webservices.flow import default_args, script_path
+from webservices.flow import default_args, script_path, schedule_interval
 
 def script_task(path, dag):
     _, name, _ = split(path)
     return PostgresOperator(
         task_id=name,
         sql=path,
-        start_date=datetime.datetime(2016, 1, 1),
         dag=dag,
     )
 
@@ -25,7 +23,7 @@ def make_dag():
     dag = DAG(
         'refresh.views',
         default_args=default_args,
-        schedule_interval='0 9 * * *',
+        schedule_interval=schedule_interval,
         template_searchpath=script_path,
     )
 

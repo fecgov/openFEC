@@ -13,7 +13,7 @@ applications:
 - name: api-b
 - name: airflow-scheduler
   instances: 1
-  memory: 256M
+  memory: 512M
   no-route: true
   command: ./bin/airflow-scheduler.sh
   buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.1
