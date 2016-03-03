@@ -22,6 +22,13 @@ def filter_multi_fields(model):
     ]
 
 
+def filter_match_fields(model):
+    return[
+        ('federal_funds_flag', model.federal_funds_flag),
+        ('five_thousand_flag', model.five_thousand_flag),
+    ]
+
+
 @doc(
     tags=['candidate'],
     description=docs.CANDIDATE_LIST,
@@ -33,6 +40,7 @@ class CandidateList(ApiResource):
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
+    filter_match_fields = filter_match_fields(models.Candidate)
     aliases = {'receipts': models.CandidateSearch.receipts}
 
     @property
@@ -100,6 +108,7 @@ class CandidateView(ApiResource):
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
+    filter_match_fields = filter_match_fields(models.CandidateDetail)
 
     @property
     def args(self):

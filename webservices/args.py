@@ -140,6 +140,8 @@ candidate_detail = {
         IStr(validate=validate.OneOf(['', 'I', 'C', 'O'])),
         description=docs.INCUMBENT_CHALLENGE,
     ),
+    'federal_funds_flag': fields.Bool(description=docs.FEDERAL_FUNDS_FLAG),
+    'five_thousand_flag': fields.Bool(description=docs.FIVE_THOUSAND_FLAG),
 }
 
 candidate_list = {
