@@ -4,6 +4,7 @@ import io
 import csv
 import datetime
 
+import pytz
 from icalendar import Calendar
 
 from tests import factories
@@ -138,4 +139,4 @@ class TestCalendarExport(ApiBaseTest):
         assert len(components) == 2
         assert str(components[0]['CATEGORIES']) == 'election'
         assert components[0]['DTSTART'].dt == datetime.date(2015, 10, 1)
-        assert components[1]['DTSTART'].dt == datetime.datetime(2015, 10, 31, 2)
+        assert components[1]['DTSTART'].dt == pytz.timezone('US/Eastern').localize(datetime.datetime(2015, 10, 31, 2))
