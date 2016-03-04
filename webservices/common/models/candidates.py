@@ -53,14 +53,6 @@ class BaseCandidate(BaseModel):
             uselist=False,
         )
 
-    # @declared_attr
-    # def federal_funds_flag(self):
-    #     return db.Column(db.Boolean, db.ForeignKey('ofec_candidate_flag.candidate_id'))
-
-    # @declared_attr
-    # def five_thousand_flag(self):
-    #     return db.Column(db.Boolean, db.ForeignKey('ofec_candidate_flag.candidate_id'))
-
 
 class BaseConcreteCandidate(BaseCandidate):
     __tablename__ = 'ofec_candidate_detail_mv'

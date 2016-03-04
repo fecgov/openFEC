@@ -40,7 +40,6 @@ class CandidateList(ApiResource):
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
-    # filter_match_fields = filter_match_fields(models.Candidate)
     aliases = {'receipts': models.CandidateSearch.receipts}
 
     query_options = [
