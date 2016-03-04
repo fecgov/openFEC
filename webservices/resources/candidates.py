@@ -22,11 +22,11 @@ def filter_multi_fields(model):
     ]
 
 
-def filter_match_fields(model):
-    return[
-        ('federal_funds_flag', model.federal_funds_flag),
-        ('five_thousand_flag', model.five_thousand_flag),
-    ]
+# def filter_match_fields(model):
+#     return[
+#         ('federal_funds_flag', models.CandidateFlags.federal_funds_flag),
+#         ('five_thousand_flag', models.CandidateFlags.five_thousand_flag),
+#     ]
 
 
 @doc(
@@ -40,8 +40,12 @@ class CandidateList(ApiResource):
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
-    filter_match_fields = filter_match_fields(models.Candidate)
+    # filter_match_fields = filter_match_fields(models.Candidate)
     aliases = {'receipts': models.CandidateSearch.receipts}
+
+    query_options = [
+        sa.orm.joinedload(models.Candidate.flags),
+    ]
 
     @property
     def args(self):
@@ -65,6 +69,15 @@ class CandidateList(ApiResource):
             raise exceptions.ApiError(
                 'Cannot sort on receipts when parameter "q" is not set',
                 status_code=422,
+            )
+
+        if 'five_thousand_flag' in kwargs:
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.five_thousand_flag == kwargs['five_thousand_flag'])
+            )
+        if 'federal_funds_flag' in kwargs:
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
             )
 
         if kwargs.get('q'):
@@ -108,7 +121,7 @@ class CandidateView(ApiResource):
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
-    filter_match_fields = filter_match_fields(models.CandidateDetail)
+    # filter_match_fields = filter_match_fields(models.CandidateDetail)
 
     @property
     def args(self):
