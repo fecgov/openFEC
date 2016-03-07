@@ -158,7 +158,7 @@ def make_bundle(resource):
         with open(csv_path, 'w') as fp:
             query = query_with_labels(resource['query'], resource['schema'])
             query_to_csv(query, fp)
-        row_count = wc(csv_path)
+        row_count = wc(csv_path) - 1
         make_manifest(resource, row_count, tmpdir)
         with tempfile.TemporaryFile(mode='w+b', dir=os.getenv('TMPDIR')) as tmpfile:
             archive = zipfile.ZipFile(tmpfile, 'w')
