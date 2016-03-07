@@ -116,6 +116,7 @@ class TestCalendarExport(ApiBaseTest):
             factories.CalendarDateFactory(
                 category='election',
                 start_date=datetime.datetime(2015, 10, 1),
+                all_day=True,
             ),
             factories.CalendarDateFactory(
                 category='Roundtables',
@@ -138,5 +139,6 @@ class TestCalendarExport(ApiBaseTest):
         components = cal.subcomponents
         assert len(components) == 2
         assert str(components[0]['CATEGORIES']) == 'election'
+        timezone = pytz.timezone('US/Eastern')
         assert components[0]['DTSTART'].dt == datetime.date(2015, 10, 1)
-        assert components[1]['DTSTART'].dt == pytz.timezone('US/Eastern').localize(datetime.datetime(2015, 10, 31, 2))
+        assert components[1]['DTSTART'].dt == timezone.localize(datetime.datetime(2015, 10, 31, 2))
