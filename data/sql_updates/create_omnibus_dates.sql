@@ -133,6 +133,7 @@ with elections_raw as(
         null::text as location,
         election_date::timestamp as start_date,
         null::timestamp as end_date,
+        true as all_day,
         null::text as url
     from elections_raw
         left join dimparty dp on elections_raw.election_party = dp.party_affiliation
@@ -169,6 +170,7 @@ with elections_raw as(
         null::text as location,
         due_date::timestamp as start_date,
         null::timestamp as end_date,
+        true as all_day,
         null::text as url
     from reports_raw
     where
@@ -188,6 +190,7 @@ with elections_raw as(
         location::text,
         start_date,
         end_date,
+        use_time = 'N' as all_day,
         url
     from cal_event
     join cal_event_category using (cal_event_id)
