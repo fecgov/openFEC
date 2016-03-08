@@ -6,7 +6,7 @@ from .base import db, BaseModel
 
 
 class CandidateSearch(BaseModel):
-    __tablename__ = 'ofec_candidate_fulltext_mv'
+    __tablename__ = 'ofec_candidate_fulltext'
 
     id = db.Column(db.String)
     name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
@@ -37,7 +37,7 @@ class BaseCandidate(BaseModel):
 
 
 class BaseConcreteCandidate(BaseCandidate):
-    __tablename__ = 'ofec_candidate_detail_mv'
+    __tablename__ = 'ofec_candidate_detail'
 
     candidate_id = db.Column(db.String, unique=True, doc=docs.CANDIDATE_ID)
 
@@ -50,13 +50,13 @@ class Candidate(BaseConcreteCandidate):
     # Customize join to restrict to principal committees
     principal_committees = db.relationship(
         'Committee',
-        secondary='ofec_cand_cmte_linkage_mv',
+        secondary='ofec_cand_cmte_linkage',
         secondaryjoin='''and_(
-            Committee.committee_id == ofec_cand_cmte_linkage_mv.c.cmte_id,
-            ofec_cand_cmte_linkage_mv.c.cmte_dsgn == 'P',
+            Committee.committee_id == ofec_cand_cmte_linkage.c.cmte_id,
+            ofec_cand_cmte_linkage.c.cmte_dsgn == 'P',
         )''',
         order_by=(
-            'desc(ofec_cand_cmte_linkage_mv.c.cand_election_yr),'
+            'desc(ofec_cand_cmte_linkage.c.cand_election_yr),'
             'desc(Committee.last_file_date),'
         )
     )
@@ -75,7 +75,7 @@ class CandidateDetail(BaseConcreteCandidate):
 
 
 class CandidateHistory(BaseCandidate):
-    __tablename__ = 'ofec_candidate_history_mv'
+    __tablename__ = 'ofec_candidate_history'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)
@@ -87,8 +87,16 @@ class CandidateHistory(BaseCandidate):
     candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
 
 
+class CandidateElection(db.Model):
+    __tablename__ = 'ofec_candidate_election'
+
+    candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
+    cand_election_year = db.Column(db.Integer, primary_key=True, index=True, doc='Year a candidate runs for federal office.')
+    prev_election_year = db.Column(db.Integer, index=True)
+
+
 class CandidateHistoryLatest(BaseCandidate):
-    __tablename__ = 'ofec_candidate_history_latest_mv'
+    __tablename__ = 'ofec_candidate_history_latest'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True)
@@ -102,7 +110,7 @@ class CandidateHistoryLatest(BaseCandidate):
 
 
 class CandidateTotal(db.Model):
-    __tablename__ = 'ofec_candidate_totals_mv'
+    __tablename__ = 'ofec_candidate_totals'
     candidate_id = db.Column(db.String, index=True, primary_key=True)
     election_year = db.Column(db.Integer, index=True, primary_key=True)
     cycle = db.Column(db.Integer, index=True, primary_key=True)
@@ -111,11 +119,3 @@ class CandidateTotal(db.Model):
     disbursements = db.Column(db.Numeric(30, 2), index=True)
     cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
     debts_owed_by_committee = db.Column(db.Numeric(30, 2))
-
-
-class CandidateElection(db.Model):
-    __tablename__ = 'ofec_candidate_election_mv'
-
-    candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
-    cand_election_year = db.Column(db.Integer, primary_key=True, index=True, doc='Year a candidate runs for federal office.')
-    prev_election_year = db.Column(db.Integer, index=True)

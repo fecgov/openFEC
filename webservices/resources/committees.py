@@ -250,7 +250,7 @@ class TotalsCommitteeHistoryView(ApiResource):
         )
 
     def build_query(self, cycle, **kwargs):
-        totals = sa.Table('ofec_totals_combined_mv', db.metadata, autoload_with=db.engine)
+        totals = sa.Table('ofec_committee_totals', db.metadata, autoload_with=db.engine)
         query = models.CommitteeHistory.query.with_entities(
             models.CommitteeHistory.__table__,
             totals,

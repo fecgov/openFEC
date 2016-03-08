@@ -2,12 +2,12 @@ drop table if exists ofec_sched_b_aggregate_purpose;
 create table ofec_sched_b_aggregate_purpose as
 select
     cmte_id,
-    rpt_yr + rpt_yr % 2 as cycle,
+    get_cycle(rpt_yr) as cycle,
     disbursement_purpose(disb_tp, disb_desc) as purpose,
     sum(disb_amt) as total,
     count(disb_amt) as count
 from sched_b
-where rpt_yr >= :START_YEAR_AGGREGATE
+where rpt_yr >= %(START_YEAR_AGGREGATE)s
 and disb_amt is not null
 and (memo_cd != 'X' or memo_cd is null)
 group by cmte_id, cycle, purpose
@@ -35,7 +35,7 @@ begin
     patch as (
         select
             cmte_id,
-            rpt_yr + rpt_yr % 2 as cycle,
+            get_cycle(rpt_yr) as cycle,
             disbursement_purpose(disb_tp, disb_desc) as purpose,
             sum(disb_amt * multiplier) as total,
             sum(multiplier) as count

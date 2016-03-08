@@ -4,7 +4,7 @@ from .base import db
 
 
 class Filings(db.Model):
-    __tablename__ = 'ofec_filings_mv'
+    __tablename__ = 'ofec_filings'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')

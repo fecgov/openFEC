@@ -10,7 +10,7 @@ select
     disbursement_purpose(disb_tp, disb_desc) as disbursement_purpose_category,
     clean_repeated(recipient_cmte_id, cmte_id) as clean_recipient_cmte_id
 from sched_b
-where rpt_yr >= :START_YEAR_ITEMIZED
+where rpt_yr >= %(START_YEAR_ITEMIZED)s
 ;
 
 alter table ofec_sched_b_tmp add primary key (sched_b_sk);
@@ -89,7 +89,7 @@ $$ language plpgsql;
 
 drop trigger if exists ofec_sched_b_queue_trigger on sched_b;
 create trigger ofec_sched_b_queue_trigger before insert or update or delete
-    on sched_b for each row execute procedure ofec_sched_b_update_queues(:START_YEAR_AGGREGATE)
+    on sched_b for each row execute procedure ofec_sched_b_update_queues(%(START_YEAR_AGGREGATE)s)
 ;
 
 drop table if exists ofec_sched_b;

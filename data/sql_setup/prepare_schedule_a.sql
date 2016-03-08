@@ -12,7 +12,7 @@ select
         as is_individual,
     clean_repeated(contbr_id, cmte_id) as clean_contbr_id
 from sched_a
-where rpt_yr >= :START_YEAR_ITEMIZED
+where rpt_yr >= %(START_YEAR_ITEMIZED)s
 ;
 
 alter table ofec_sched_a_tmp add primary key (sched_a_sk);
@@ -89,7 +89,7 @@ $$ language plpgsql;
 
 drop trigger if exists ofec_sched_a_queue_trigger on sched_a;
 create trigger ofec_sched_a_queue_trigger before insert or update or delete
-    on sched_a for each row execute procedure ofec_sched_a_update_queues(:START_YEAR_AGGREGATE)
+    on sched_a for each row execute procedure ofec_sched_a_update_queues(%(START_YEAR_AGGREGATE)s)
 ;
 
 drop table if exists ofec_sched_a;

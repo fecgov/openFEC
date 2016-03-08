@@ -14,7 +14,7 @@ class BaseAggregate(BaseModel):
 
 
 class ScheduleABySize(BaseAggregate):
-    __tablename__ = 'ofec_sched_a_aggregate_size_merged_mv'
+    __tablename__ = 'ofec_sched_a_aggregate_size_merged'
     size = db.Column(db.Integer, primary_key=True)
 
 
@@ -76,14 +76,14 @@ class BaseSpendingAggregate(BaseAggregate):
 
 
 class ScheduleEByCandidate(BaseSpendingAggregate):
-    __tablename__ = 'ofec_sched_e_aggregate_candidate_mv'
+    __tablename__ = 'ofec_sched_e_aggregate_candidate'
     support_oppose_indicator = db.Column(db.String, primary_key=True, doc=docs.SUPPORT_OPPOSE_INDICATOR)
 
 
 class CommunicationCostByCandidate(BaseSpendingAggregate):
-    __tablename__ = 'ofec_communication_cost_aggregate_candidate_mv'
+    __tablename__ = 'ofec_communication_cost_aggregate_candidate'
     support_oppose_indicator = db.Column(db.String, primary_key=True, doc=docs.SUPPORT_OPPOSE_INDICATOR)
 
 
 class ElectioneeringByCandidate(BaseSpendingAggregate):
-    __tablename__ = 'ofec_electioneering_aggregate_candidate_mv'
+    __tablename__ = 'ofec_electioneering_aggregate_candidate'

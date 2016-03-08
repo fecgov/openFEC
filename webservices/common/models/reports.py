@@ -68,7 +68,7 @@ class CommitteeReports(PdfMixin, BaseModel):
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
-    __tablename__ = 'ofec_reports_house_senate_mv'
+    __tablename__ = 'ofec_reports_house_senate'
 
     aggregate_amount_personal_contributions_general = db.Column(db.Numeric(30, 2))
     aggregate_contributions_personal_funds_primary = db.Column(db.Numeric(30, 2))
@@ -125,7 +125,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
 
 
 class CommitteeReportsPacParty(CommitteeReports):
-    __tablename__ = 'ofec_reports_pacs_parties_mv'
+    __tablename__ = 'ofec_reports_pacs_parties'
 
     all_loans_received_period = db.Column(db.Numeric(30, 2))
     all_loans_received_ytd = db.Column(db.Numeric(30, 2))
@@ -191,7 +191,7 @@ class CommitteeReportsPacParty(CommitteeReports):
 
 
 class CommitteeReportsPresidential(CommitteeReports):
-    __tablename__ = 'ofec_reports_presidential_mv'
+    __tablename__ = 'ofec_reports_presidential'
 
     candidate_contribution_period = db.Column(db.Numeric(30, 2))
     candidate_contribution_ytd = db.Column(db.Numeric(30, 2))
@@ -238,7 +238,7 @@ class CommitteeReportsPresidential(CommitteeReports):
 
 
 class CommitteeReportsIEOnly(PdfMixin, BaseModel):
-    __tablename__ = 'ofec_reports_ie_only_mv'
+    __tablename__ = 'ofec_reports_ie_only'
 
     expire_date = db.Column(db.DateTime)
     beginning_image_number = db.Column(db.BigInteger)
