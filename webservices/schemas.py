@@ -9,6 +9,7 @@ from webservices import utils
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
+from webservices.calendar import format_start_date, format_end_date
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
@@ -379,11 +380,11 @@ register_schema(ReportTypeSchema)
 
 ReportingDatesSchema = make_schema(
     models.ReportDate,
-    fields = {
+    fields={
         'report_type': ma.fields.Str(),
         'report_type_full': ma.fields.Str(),
     },
-    options = {'exclude': ('trc_report_due_date_id', 'report')},
+    options={'exclude': ('trc_report_due_date_id', 'report')},
 )
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
@@ -406,6 +407,8 @@ CalendarDateSchema = make_schema(
     fields={
         'summary': ma.fields.Str(),
         'description': ma.fields.Str(),
+        'start_date': ma.fields.Function(format_start_date),
+        'end_date': ma.fields.Function(format_end_date),
     },
     options={
         'exclude': (
