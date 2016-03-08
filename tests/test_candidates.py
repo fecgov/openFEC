@@ -145,7 +145,6 @@ class CandidateFormatTest(ApiBaseTest):
             ('office', 'H'),
             ('district', ['00', '02']),
             ('state', 'CA'),
-            ('name', 'Obama'),
             ('party', 'DEM'),
             ('cycle', '2006'),
             ('candidate_id', ['BARTLET', 'RITCHIE'])

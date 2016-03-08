@@ -1,8 +1,19 @@
 import io
 import csv
+import datetime
 
+import pytz
 from icalendar import Event, Calendar
 from marshmallow import Schema, fields
+
+timezone = pytz.timezone('US/Eastern')
+
+def localize(value):
+    return (
+        timezone.localize(value)
+        if isinstance(value, datetime.datetime)
+        else value
+    )
 
 def format_start_date(row):
     """Cast start date to appropriate type. If no end date is present, the start
@@ -10,11 +21,14 @@ def format_start_date(row):
 
     See http://www.kanzaki.com/docs/ical/vevent.html for details.
     """
-    return (
+    return localize(
         row.start_date.date()
         if row.start_date and not row.end_date
         else row.start_date
     )
+
+def format_end_date(row):
+    return localize(row.end_date)
 
 def render_ical(rows, schema):
     calendar = Calendar()
@@ -43,7 +57,7 @@ class BaseEventSchema(Schema):
 class ICalEventSchema(BaseEventSchema):
 
     dtstart = fields.Function(format_start_date)
-    dtend = fields.Raw(attribute='end_date')
+    dtend = fields.Function(format_end_date)
     categories = fields.String(attribute='category')
 
 class EventSchema(BaseEventSchema):
