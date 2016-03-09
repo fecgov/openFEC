@@ -60,9 +60,9 @@ Prior to running, ensure you have the following requirements installed:
 
 Clone this repository.
 
-Create a Python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create up your environment with your preferred set up.
+Create a Python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create your environment with your preferred set up.
 
-You will need your Python 3 path to make sure you environment is pointing to the right Python version. You can find that out by running:
+You will need your Python 3 path to make sure your environment is pointing to the right Python version. You can find that out by running:
 ```
 which python3
 ```
