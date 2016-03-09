@@ -195,7 +195,9 @@ def deploy(space=None, branch=None, yes=False):
         json.dump({'user': os.getenv('USER'), 'branch': branch}, fp)
 
     # Deploy API
-    run('cf zero-downtime-push api -f manifest_{0}.yml'.format(space), echo=True)
+    deployed = run('cf app api', echo=True, warn=True)
+    cmd = 'zero-downtime-push' if deployed.ok else 'push'
+    run('cf {0} api -f manifest_{1}.yml'.format(cmd, space), echo=True)
 
     # Deploy worker applications
     run('cf push celery-beat -f manifest_{0}.yml'.format(space))
