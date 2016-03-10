@@ -32,10 +32,7 @@ before_deploy:
   - export PATH=$HOME:$PATH
   - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.15.0"
   - tar xzvf $HOME/cf.tgz -C $HOME
-  - mkdir -p ${HOME}/Godeps/_workspace
-  - export GOPATH=${HOME}/Godeps/_workspace
-  - go get github.com/concourse/autopilot
-  - cf install-plugin -f $GOPATH/bin/autopilot
+  - travis_retry cf install-plugin autopilot -f -r CF-Community
 
 deploy:
   provider: script
