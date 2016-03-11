@@ -4,6 +4,7 @@ create table ofec_sched_b_tmp as
 select
     *,
     cast(null as timestamp) as timestamp,
+    image_pdf_url(image_num) as pdf_url,
     to_tsvector(recipient_nm) || to_tsvector(coalesce(clean_repeated(recipient_cmte_id, cmte_id), ''))
         as recipient_name_text,
     to_tsvector(disb_desc) as disbursement_description_text,

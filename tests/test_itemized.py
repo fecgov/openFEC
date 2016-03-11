@@ -120,22 +120,6 @@ class TestItemized(ApiBaseTest):
         response = self.app.get(api.url_for(ScheduleAView, per_page=999))
         self.assertEqual(response.status_code, 422)
 
-    def test_pdf_url(self):
-        # TODO(jmcarp) Refactor as parameterized tests
-        image_number = 39
-        params = [
-            (factories.ScheduleAFactory, ScheduleAView),
-            (factories.ScheduleBFactory, ScheduleBView),
-        ]
-        for factory, resource in params:
-            factory(image_number=image_number)
-            results = self._results(api.url_for(resource))
-            self.assertEqual(len(results), 1)
-            self.assertEqual(
-                results[0]['pdf_url'],
-                'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number),
-            )
-
     def test_image_number(self):
         image_number = '12345'
         [
