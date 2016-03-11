@@ -47,6 +47,7 @@ class Filings(db.Model):
     request_type = db.Column(db.String)
     amendment_indicator = db.Column(db.String, index=True)
     update_date = db.Column(db.Date)
+    pdf_url = db.Column(db.String)
 
     @property
     def document_description(self):
@@ -55,13 +56,4 @@ class Filings(db.Model):
             self.report_type_full,
             self.document_type_full,
             self.form_type,
-        )
-
-    @property
-    def pdf_url(self):
-        return utils.report_pdf_url(
-            self.report_year,
-            self.beginning_image_number,
-            committee_type=self.committee.committee_type if self.committee else None,
-            form_type=self.form_type,
         )

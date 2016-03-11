@@ -5,7 +5,6 @@ import hashlib
 
 import pytest
 from botocore.exceptions import ClientError
-from marshmallow_pagination import paginators
 
 from webservices import schemas
 from webservices.rest import db, api
@@ -57,28 +56,20 @@ class TestDownloadTask(ApiBaseTest):
             factories.CandidateHistoryFactory()
             for _ in range(5)
         ]
-        query = models.CandidateHistory.query
-        schema = schemas.CandidateHistorySchema
+        query = tasks.query_with_labels(models.CandidateHistory.query, schemas.CandidateHistorySchema)
         sio = io.StringIO()
-        tasks.rows_to_csv(query, schema, sio)
+        tasks.query_to_csv(query, sio)
         sio.seek(0)
         reader = csv.DictReader(sio)
-        assert reader.fieldnames == tasks.create_headers(schema)
+        assert set(reader.fieldnames) == set(schemas.CandidateHistorySchema._declared_fields.keys())
         for record, row in zip(records, reader):
             assert record.candidate_id == row['candidate_id']
 
-    def test_iter_paginator(self):
-        records = [
-            factories.CandidateHistoryFactory()
-            for _ in range(10)
-        ]
-        paginator = paginators.SeekPaginator(
-            models.CandidateHistory.query,
-            per_page=5,
-            index_column=models.CandidateHistory.idx,
-        )
-        iterator = tasks.iter_paginator(paginator)
-        assert [each.idx for each in records] == [each.idx for each in iterator]
+    @mock.patch('webservices.tasks.download.upload_s3')
+    def test_views(self, upload_s3):
+        for view in tasks.RESOURCE_WHITELIST:
+            url = api.url_for(view)
+            tasks.export_query(url, b'')
 
 
 class TestDownloadResource(ApiBaseTest):
