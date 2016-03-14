@@ -1,14 +1,10 @@
-import io
-import csv
 import mock
 import hashlib
 
 import pytest
 from botocore.exceptions import ClientError
 
-from webservices import schemas
 from webservices.rest import db, api
-from webservices.common import models
 from webservices.tasks import download as tasks
 from webservices.resources import download as resource
 
@@ -50,20 +46,6 @@ class TestDownloadTask(ApiBaseTest):
             },
             ExpiresIn=resource.URL_EXPIRY,
         )
-
-    def test_write_csv(self):
-        records = [
-            factories.CandidateHistoryFactory()
-            for _ in range(5)
-        ]
-        query = tasks.query_with_labels(models.CandidateHistory.query, schemas.CandidateHistorySchema)
-        sio = io.StringIO()
-        tasks.query_to_csv(query, sio)
-        sio.seek(0)
-        reader = csv.DictReader(sio)
-        assert set(reader.fieldnames) == set(schemas.CandidateHistorySchema._declared_fields.keys())
-        for record, row in zip(records, reader):
-            assert record.candidate_id == row['candidate_id']
 
     @mock.patch('webservices.tasks.download.upload_s3')
     def test_views(self, upload_s3):

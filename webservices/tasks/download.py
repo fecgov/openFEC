@@ -5,10 +5,9 @@ import zipfile
 import datetime
 import tempfile
 
-from sqlalchemy.dialects import postgresql
-
 from webargs import flaskparser
 from flask_apispec.utils import resolve_annotations
+from postgres_copy import query_entities, copy_to
 from celery_once import QueueOnce
 
 from webservices import utils
@@ -70,17 +69,6 @@ def parse_kwargs(resource, qs):
         kwargs = flaskparser.parser.parse(fields)
     return fields, kwargs
 
-def query_to_csv(query, fp):
-    dialect = postgresql.dialect()
-    compiled = query.statement.compile(dialect=dialect)
-    # Get connection from session to hook into replica load balancing
-    conn = db.session.connection().engine.raw_connection()
-    cursor = conn.cursor()
-    select = cursor.mogrify(compiled.string, compiled.params).decode()
-    copy = 'copy ({}) to stdout with csv header'.format(select)
-    cursor.copy_expert(copy, fp)
-    conn.close()
-
 def query_with_labels(query, schema):
     """Create a new query that labels columns according to the SQLAlchemy model.
     Properties that are excluded by `schema` will be ignored.
@@ -89,17 +77,10 @@ def query_with_labels(query, schema):
     :param schema: Optional schema specifying properties to exclude
     :returns: Query with labeled entities
     """
-    description = query.column_descriptions[0]
-    mapper = description['expr']
-    model = description['type']
     exclude = getattr(schema.Meta, 'exclude', ())
-    properties = [
-        mapper.get_property_by_column(column)
-        for column in mapper.columns
-    ]
     entities = [
-        getattr(model, prop.key).label(prop.key)
-        for prop in properties if prop.key not in exclude
+        entity for entity in query_entities(query)
+        if entity.key not in exclude
     ]
     return query.with_entities(*entities)
 
@@ -157,7 +138,7 @@ def make_bundle(resource):
         csv_path = os.path.join(tmpdir, 'data.csv')
         with open(csv_path, 'w') as fp:
             query = query_with_labels(resource['query'], resource['schema'])
-            query_to_csv(query, fp)
+            copy_to(query, db.session.connection().engine, fp, format='csv', header=True)
         row_count = wc(csv_path) - 1
         make_manifest(resource, row_count, tmpdir)
         with tempfile.TemporaryFile(mode='w+b', dir=os.getenv('TMPDIR')) as tmpfile:
