@@ -194,8 +194,7 @@ class ScheduleBByRecipientIDView(AggregateResource):
 @doc(
     tags=['schedules/schedule_b'],
     description=(
-        'Schedule B receipts aggregated by disbursement purpose category. To avoid double '
-        'counting, memoed items are not included.'
+        docs.SCHEDULE_B_BY_PURPOSE
     )
 )
 class ScheduleBByPurposeView(AggregateResource):
