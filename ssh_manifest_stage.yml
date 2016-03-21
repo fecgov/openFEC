@@ -1,0 +1,32 @@
+---
+path: .
+memory: 512M
+stack: cflinuxfs2
+domain: 18f.gov
+buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
+env:
+  NEW_RELIC_CONFIG_FILE: newrelic.ini
+  NEW_RELIC_LOG: stdout
+  WEB_CONCURRENCY: 4
+  NEW_RELIC_APP_NAME: OpenFEC API (staging)
+  NEW_RELIC_ENV: staging
+  FEC_API_WHITELIST_IPS: "false"
+applications:
+- name: api
+- name: celery-beat
+  instances: 1
+  memory: 256M
+  no-route: true
+  command: celery beat --app webservices.tasks
+  buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.1
+- name: celery-worker
+  instances: 1
+  memory: 512M
+  no-route: true
+  command: celery worker --app webservices.tasks --loglevel INFO --concurrency 2
+  buildpack: https://github.com/cloudfoundry/python-buildpack#v1.5.1
+host: fec-stage-api
+services:
+  - fec-creds-stage
+  - fec-redis-stage
+  - fec-s3-stage
