@@ -26,8 +26,9 @@ manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
 def execute_sql_file(path):
-    # This helper is typically used within a multiprocessing pool; create a new database
-    # engine for each job.
+    """This helper is typically used within a multiprocessing pool; create a new database
+    engine for each job.
+    """
     db.engine.dispose()
     logger.info(('Running {}'.format(path)))
     with open(path) as fp:
@@ -51,6 +52,7 @@ def execute_sql_folder(path, processes):
 
 @manager.command
 def load_nicknames():
+    """For improved search when candidates have a name that doesn't appear on their form"""
     import pandas as pd
     import sqlalchemy as sa
     try:
@@ -62,6 +64,7 @@ def load_nicknames():
 
 @manager.command
 def load_pacronyms():
+    """For improved search of orgnizations that go by acronyms"""
     import pandas as pd
     import sqlalchemy as sa
     try:
@@ -120,6 +123,8 @@ def build_district_counts(outname='districts.json'):
 
 @manager.command
 def update_schemas(processes=1):
+    """This updates the smaller tables and views. It is run on deploy.
+    """
     logger.info("Starting DB refresh...")
     processes = int(processes)
     execute_sql_folder('data/sql_updates/', processes=processes)
@@ -128,22 +133,34 @@ def update_schemas(processes=1):
 
 @manager.command
 def update_functions(processes=1):
+    """This command updates the helper functions. It is run on deploy.
+    """
     execute_sql_folder('data/functions/', processes=processes)
 
 @manager.command
 def update_itemized(schedule):
+    """These are the scripts that create the main schedule tables.
+    Run this when you make a change to code in:
+        data/sql_setup/
+    """
     logger.info('Updating Schedule {0} tables...'.format(schedule))
     execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
     logger.info('Finished Schedule {0} update.'.format(schedule))
 
 @manager.command
 def rebuild_aggregates(processes=1):
+    """These are the functions used to update the aggregates and schedules.
+    Run this when you make a change to code in:
+        data/sql_incremental_aggregates
+    """
     logger.info('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     logger.info('Finished rebuilding incremental aggregates.')
 
 @manager.command
 def update_aggregates():
+    """These are run nightly to recalculate the totals
+    """
     logger.info('Updating incremental aggregates...')
     db.engine.execute('select update_aggregates()')
     logger.info('Finished updating incremental aggregates.')
