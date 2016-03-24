@@ -54,7 +54,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html)
 
 
-2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/python/).
+2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/javascript/).
 
 3. Set up your Python environment— learn how to do this with our [Python Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/python/).
 
