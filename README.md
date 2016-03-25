@@ -60,9 +60,9 @@ Prior to running, ensure you have the following requirements installed:
 
 Clone this repository.
 
-Create a Python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create up your environment with your preferred set up.
+Create a Python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create your environment with your preferred set up.
 
-You will need your Python 3 path to make sure you environment is pointing to the right Python version. You can find that out by running:
+You will need your Python 3 path to make sure your environment is pointing to the right Python version. You can find that out by running:
 ```
 which python3
 ```
@@ -132,6 +132,13 @@ We are always trying to improve our documentation, if you have suggestions or ru
 ## Deployment
 
 ##### Likely only useful for 18F team members
+
+Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
+
+```
+cf install-plugin autopilot -r CF-Community
+```
+
 To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
 Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
 
@@ -179,6 +186,15 @@ service. The redis service can be created as follows:
 ```
 cf create-service redis28-swarm standard fec-redis
 ```
+
+Running redis and celery locally:
+
+```
+redis-server
+celery worker --app webservices.tasks
+```
+
+Note: Both the API and celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).
 
 ##### Production stack
 

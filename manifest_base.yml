@@ -1,6 +1,6 @@
 ---
 path: .
-memory: 512M
+memory: 1G
 stack: cflinuxfs2
 domain: 18f.gov
 buildpack: "https://github.com/ddollar/heroku-buildpack-multi.git"
@@ -9,8 +9,7 @@ env:
   NEW_RELIC_LOG: stdout
   WEB_CONCURRENCY: 4
 applications:
-- name: api-a
-- name: api-b
+- name: api
 - name: celery-beat
   instances: 1
   memory: 256M

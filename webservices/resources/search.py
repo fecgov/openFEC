@@ -18,7 +18,7 @@ from webservices.utils import use_kwargs
 class CandidateNameSearch(utils.Resource):
 
     filter_fulltext_fields = [
-        ('q', models.CandidateSearch.name),
+        ('q', models.CandidateSearch.fulltxt),
     ]
 
     @use_kwargs(args.names)
@@ -38,7 +38,7 @@ class CandidateNameSearch(utils.Resource):
 class CommitteeNameSearch(utils.Resource):
 
     filter_fulltext_fields = [
-        ('q', models.CommitteeSearch.name),
+        ('q', models.CommitteeSearch.fulltxt),
     ]
 
     @use_kwargs(args.names)
