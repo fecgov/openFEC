@@ -29,14 +29,11 @@ class BaseItemized(db.Model):
     transaction_id = db.Column(db.Integer)
     status = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
+    pdf_url = db.Column(db.String)
 
     @hybrid_property
     def memoed_subtotal(self):
         return self.memo_code == 'X'
-
-    @property
-    def pdf_url(self):
-        return utils.make_image_pdf_url(self.image_number)
 
 
 class ScheduleA(BaseItemized):

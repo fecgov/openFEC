@@ -101,6 +101,17 @@ class OverallTest(ApiBaseTest):
         assert all('bartlet' in each['name'].lower() for each in results)
         assert all(each['office_sought'] == 'P' for each in results)
 
+    def test_typeahead_candidate_search_id(self):
+        row = factories.CandidateSearchFactory(
+            name='Bartlet',
+            fulltxt=sa.func.to_tsvector('Bartlet P0123'),
+        )
+        decoy = factories.CandidateSearchFactory()  # noqa
+        rest.db.session.flush()
+        results = self._results(api.url_for(CandidateNameSearch, q='P0123'))
+        assert len(results) == 1
+        assert results[0]['name'] == row.name
+
     def test_typeahead_committee_search(self):
         rows = [
             factories.CommitteeSearchFactory(

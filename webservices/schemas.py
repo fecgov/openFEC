@@ -9,6 +9,7 @@ from webservices import utils
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
+from webservices.calendar import format_start_date, format_end_date
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
@@ -234,7 +235,6 @@ register_schema(CommitteeTotalsPageSchema)
 ScheduleASchema = make_schema(
     models.ScheduleA,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
@@ -304,7 +304,6 @@ augment_schemas(ElectioneeringByCandidateSchema)
 ScheduleBSchema = make_schema(
     models.ScheduleB,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
@@ -327,7 +326,6 @@ register_schema(ScheduleBPageSchema)
 ScheduleESchema = make_schema(
     models.ScheduleE,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'expenditure_amount': ma.fields.Decimal(places=2),
@@ -349,7 +347,6 @@ register_schema(ScheduleEPageSchema)
 
 CommunicationCostSchema = make_schema(
     models.CommunicationCost,
-    fields={'pdf_url': ma.fields.Str()},
     options={'exclude': ('idx', )},
 )
 CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
@@ -358,7 +355,7 @@ register_schema(CommunicationCostPageSchema)
 
 ElectioneeringSchema = make_schema(
     models.Electioneering,
-    fields={'pdf_url': ma.fields.Str(), 'election_type': ma.fields.Str()},
+    fields={'election_type': ma.fields.Str()},
     options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')},
 )
 ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
@@ -368,7 +365,6 @@ register_schema(ElectioneeringPageSchema)
 FilingsSchema = make_schema(
     models.Filings,
     fields={
-        'pdf_url': ma.fields.Str(),
         'document_description': ma.fields.Str(),
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
@@ -383,11 +379,11 @@ register_schema(ReportTypeSchema)
 
 ReportingDatesSchema = make_schema(
     models.ReportDate,
-    fields = {
+    fields={
         'report_type': ma.fields.Str(),
         'report_type_full': ma.fields.Str(),
     },
-    options = {'exclude': ('trc_report_due_date_id', 'report')},
+    options={'exclude': ('trc_report_due_date_id', 'report')},
 )
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
@@ -410,6 +406,8 @@ CalendarDateSchema = make_schema(
     fields={
         'summary': ma.fields.Str(),
         'description': ma.fields.Str(),
+        'start_date': ma.fields.Function(format_start_date),
+        'end_date': ma.fields.Function(format_end_date),
     },
     options={
         'exclude': (

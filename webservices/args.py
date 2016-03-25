@@ -127,6 +127,7 @@ names = {
 
 candidate_detail = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
     'state': fields.List(IStr, description=docs.STATE),
     'party': fields.List(IStr, description=docs.PARTY),
@@ -147,7 +148,6 @@ candidate_detail = {
 candidate_list = {
     'q': fields.List(fields.Str, description='Text to search all fields for'),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'name': fields.Str(description="Candidate's name (full or partial)"),
 }
 
 candidate_history = {
@@ -176,7 +176,6 @@ committee_list = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
-    'name': fields.Str(description=docs.COMMITTEE_NAME),
     'party': fields.List(IStr, description=docs.PARTY),
     'min_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC after this date'),
     'max_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC before this date'),
@@ -451,6 +450,7 @@ candidate_totals = {
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
     'election_full': election_full,
     'state': fields.List(IStr, description='State of candidate'),
+    'district': fields.List(District, description='District of candidate'),
     'party': fields.List(IStr, description='Three-letter party code'),
     'min_receipts': Currency(description='Minimum aggregated receipts'),
     'max_receipts': Currency(description='Maximum aggregated receipts'),

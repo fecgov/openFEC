@@ -1,15 +1,10 @@
-import io
-import csv
 import mock
 import hashlib
 
 import pytest
 from botocore.exceptions import ClientError
-from marshmallow_pagination import paginators
 
-from webservices import schemas
 from webservices.rest import db, api
-from webservices.common import models
 from webservices.tasks import download as tasks
 from webservices.resources import download as resource
 
@@ -52,33 +47,11 @@ class TestDownloadTask(ApiBaseTest):
             ExpiresIn=resource.URL_EXPIRY,
         )
 
-    def test_write_csv(self):
-        records = [
-            factories.CandidateHistoryFactory()
-            for _ in range(5)
-        ]
-        query = models.CandidateHistory.query
-        schema = schemas.CandidateHistorySchema
-        sio = io.StringIO()
-        tasks.rows_to_csv(query, schema, sio)
-        sio.seek(0)
-        reader = csv.DictReader(sio)
-        assert reader.fieldnames == tasks.create_headers(schema)
-        for record, row in zip(records, reader):
-            assert record.candidate_id == row['candidate_id']
-
-    def test_iter_paginator(self):
-        records = [
-            factories.CandidateHistoryFactory()
-            for _ in range(10)
-        ]
-        paginator = paginators.SeekPaginator(
-            models.CandidateHistory.query,
-            per_page=5,
-            index_column=models.CandidateHistory.idx,
-        )
-        iterator = tasks.iter_paginator(paginator)
-        assert [each.idx for each in records] == [each.idx for each in iterator]
+    @mock.patch('webservices.tasks.download.upload_s3')
+    def test_views(self, upload_s3):
+        for view in tasks.RESOURCE_WHITELIST:
+            url = api.url_for(view)
+            tasks.export_query(url, b'')
 
 
 class TestDownloadResource(ApiBaseTest):

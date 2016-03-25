@@ -85,12 +85,10 @@ class CandidateList(ApiResource):
                 models.Candidate.candidate_id == models.CandidateSearch.id,
             ).distinct()
 
-        if kwargs.get('name'):
-            query = query.filter(models.Candidate.name.ilike('%{}%'.format(kwargs['name'])))
-
-        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs.get('cycle'):
             query = query.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
+        if kwargs.get('election_year'):
+            query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
 
         return query
 
@@ -146,9 +144,10 @@ class CandidateView(ApiResource):
                 models.CandidateCommitteeLink.committee_id == committee_id
             ).distinct()
 
-        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs.get('cycle'):
             query = query.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
+        if kwargs.get('election_year'):
+            query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
 
         return query
 
