@@ -109,17 +109,41 @@ export SQLA_CONN=<psql:address-to-box>
 *Reach out to a team member to get the actual addresses.* 
 
 
+#### Set other environment variables
+
+1. Run: 
+```
+export FEC_WEB_DEBUG=true
+```
+This shows error details and more verbose request logging. 
+
+2: Run: 
+```
+export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
+export FEC_WEB_API_URL='http://localhost:5000'
+export FEC_CMS_URL='http://localhost:8000'
+```
+These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
+
+Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match. 
+
+3. Run: 
+```
+export FEC_WEB_USERNAME=<username_of_your_choosing>
+export FEC_WEB_PASSWORD=<password_of_your_choosing>
+```
+Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
+*Note: 18F and FEC team members will have additional environment variables to set up. Please reach out to a team member for detailed information.*
+
+
 #### Run locally
 Follow these steps every time you want to work on this project locally.
 
-Run:
+1. Run:
 ```
 ./manage.py runserver
 ```
-View your local version of the site at [http://localhost:5000](http://localhost:5000).
-
-
-
+2 .View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 ### Deployment (18F and FEC team members only)
 
