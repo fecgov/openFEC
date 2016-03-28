@@ -47,11 +47,11 @@ We are always trying to improve our documentation. If you have suggestions or ru
 1. Ensure you have the following requirements installed:
 
     * Python 3.4 (which includes pip and virtualenv)
-    * Node.js (which includes npm)
+    * The latest long term support (LTS) or stable release of Node.js (which includes npm)
     * PostgreSQL (the latest 9.4 release). 
-         * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/) (or follow your OS package manager)
+         * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/) 
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
-         * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html)
+         * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
 
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/javascript/).
@@ -142,9 +142,7 @@ cf install-plugin autopilot -r CF-Community
 #### Deployment steps
 1. [Log in to Cloud Foundry](https://docs.cloudfoundry.org/cf-cli/getting-started.html). Org should be `fec`. Space can be `dev`, `stage`, or `prod`.
 
-2. Set `FEC_CF_USERNAME` and `FEC_CF_PASSWORD` environment variables to your Cloud Foundry credentials.
-
-3. To deploy to Cloud Foundry, run 
+2. To deploy to Cloud Foundry, run 
 
 ```
 invoke deploy
