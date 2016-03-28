@@ -139,6 +139,16 @@ cf install-plugin autopilot -r CF-Community
 ```
 [Learn more about autopilot](https://github.com/concourse/autopilot).
 
+3. Set environment variables used by the deploy script:
+
+```
+export FEC_CF_USERNAME=<your_cf_username>
+export FEC_CF_PASSWORD=<your_cf_password>
+```
+
+If these variables aren't set, you'll be prompted for your Cloud Foundry credentials when you deploy the app.
+
+
 #### Deployment steps
 1. To deploy to Cloud Foundry, run 
 
