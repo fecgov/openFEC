@@ -25,7 +25,7 @@ All FEC repositories:
 - [openFEC](https://github.com/18F/openfec): betaFEC’s API
 - [swagger-ui](https://github.com/18F/swagger-ui): forked repo that generates our interactive API documentation
 - [openFEC-web-app](https://github.com/18f/openfec-web-app): the web app for exploring campaign finance data
-- [fec-style](https://github.com/18F/fec-style): shared styles and user interface components
+- [fec-style](https://github.com/18F/fec-style): shared styles and user interface components, including this project's feedback tool
 - [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS) 
 - [proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
 
@@ -140,9 +140,7 @@ cf install-plugin autopilot -r CF-Community
 [Learn more about autopilot](https://github.com/concourse/autopilot).
 
 #### Deployment steps
-1. [Log in to Cloud Foundry](https://docs.cloudfoundry.org/cf-cli/getting-started.html). Org should be `fec`. Space can be `dev`, `stage`, or `prod`.
-
-2. To deploy to Cloud Foundry, run 
+1. To deploy to Cloud Foundry, run 
 
 ```
 invoke deploy
