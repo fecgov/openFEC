@@ -32,6 +32,7 @@ class CandidateList(ApiResource):
     schema = schemas.CandidateSchema
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
+    filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
     aliases = {'receipts': models.CandidateSearch.receipts}
 
     @property
@@ -59,21 +60,15 @@ class CandidateList(ApiResource):
             )
 
         if kwargs.get('q'):
-            query = utils.search_text(
-                query.join(
-                    models.CandidateSearch,
-                    models.Candidate.candidate_id == models.CandidateSearch.id,
-                ),
-                models.CandidateSearch.fulltxt,
-                kwargs['q'],
+            query = query.join(
+                models.CandidateSearch,
+                models.Candidate.candidate_id == models.CandidateSearch.id,
             ).distinct()
 
-        if kwargs.get('name'):
-            query = query.filter(models.Candidate.name.ilike('%{}%'.format(kwargs['name'])))
-
-        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs.get('cycle'):
             query = query.filter(models.Candidate.cycles.overlap(kwargs['cycle']))
+        if kwargs.get('election_year'):
+            query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
 
         return query
 
@@ -128,9 +123,10 @@ class CandidateView(ApiResource):
                 models.CandidateCommitteeLink.committee_id == committee_id
             ).distinct()
 
-        # TODO(jmcarp) Reintroduce year filter pending accurate `load_date` and `expire_date` values
         if kwargs.get('cycle'):
             query = query.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
+        if kwargs.get('election_year'):
+            query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
 
         return query
 
@@ -185,17 +181,17 @@ class CandidateHistoryView(ApiResource):
         return query
 
     def _filter_elections(self, query, cycle):
-        election_duration = utils.get_election_duration(sa.func.left(models.CandidateHistory.candidate_id, 1))
+        """Round up to the next election including `cycle`."""
         return query.join(
             models.CandidateElection,
             sa.and_(
                 models.CandidateHistory.candidate_id == models.CandidateElection.candidate_id,
-                models.CandidateHistory.two_year_period > models.CandidateElection.cand_election_year - election_duration,
                 models.CandidateHistory.two_year_period <= models.CandidateElection.cand_election_year,
+                models.CandidateHistory.two_year_period > models.CandidateElection.prev_election_year,
             ),
         ).filter(
-            models.CandidateElection.cand_election_year >= cycle,
-            models.CandidateElection.cand_election_year < cycle + election_duration,
+            cycle <= models.CandidateElection.cand_election_year,
+            cycle > models.CandidateElection.prev_election_year,
         ).order_by(
             models.CandidateHistory.candidate_id,
             sa.desc(models.CandidateHistory.two_year_period),

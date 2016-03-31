@@ -9,7 +9,9 @@ begin
     insert into ofec_sched_a(
         select distinct on (sched_a_sk)
             new.*,
-            to_tsvector(new.contbr_nm) as contributor_name_text,
+            image_pdf_url(new.image_num) as pdf_url,
+            to_tsvector(new.contbr_nm) || to_tsvector(coalesce(new.contbr_id, ''))
+                as contributor_name_text,
             to_tsvector(new.contbr_employer) as contributor_employer_text,
             to_tsvector(new.contbr_occupation) as contributor_occupation_text,
             is_individual(new.contb_receipt_amt, new.receipt_tp, new.line_num, new.memo_cd, new.memo_text)

@@ -15,23 +15,27 @@ env:
     - secure: "cpOgenTtFAeKEdUBcynR1sZFsx7tSqKUytWAQ7oxDQgSbuHNhlazOfyQd9qytyKsc2jFZgfctGajAoZ/LvN71R21MxyQyFQDUg3RTsY9mNjg6GtcPyH+iUdIUxJkhEu/tdJqz5pzuz+hH8FGtTLP4A83N7En/apyAxQaJRL5A1Y="
     - secure: "WXquMki0USRcQ8vVvwKOk3mcUmoMufMLdDfbiIR/IZ9D1JL2Qu7/431BG9UBLDqs8OZXQRQNFrGhZpz6roczbcePZz7Wl5cdj8yd48WunkRpZDG1fIepHqppb3ydi/UfGXBPA6CaMAmjR1ErBchDl88ykQZE0L6mAdx4iyflOAg="
 
-before_install:
-  - travis_retry pip install codecov
-  - travis_retry npm install -g swagger-tools
-  - travis_retry curl -L -o cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.11.3&source=github-rel"
-  - tar xzvf cf.tgz
-  - export PATH=.:$PATH
-
 before_script:
   - psql -c 'create database "cfdm-unit-test";' -U postgres
   - travis_retry pip install -U pip wheel
   - travis_retry pip install -U -r requirements.txt
   - travis_retry pip install -U -r requirements-dev.txt
+  - travis_retry npm install -g swagger-tools
 
 script: py.test
 
 after_success:
-  # Deploy to appropriate Cloud Foundry space on success
-  # See `tasks.deploy` for details
-  - if [[ $TRAVIS_PULL_REQUEST = 'false' ]]; then invoke deploy --branch $TRAVIS_BRANCH --yes; fi;
+  - travis_retry pip install codecov
   - codecov
+
+before_deploy:
+  - export PATH=$HOME:$PATH
+  - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.15.0"
+  - tar xzvf $HOME/cf.tgz -C $HOME
+  - travis_retry cf install-plugin autopilot -f -r CF-Community
+
+deploy:
+  provider: script
+  script: invoke deploy --branch $TRAVIS_BRANCH --yes
+  on:
+    all_branches: true

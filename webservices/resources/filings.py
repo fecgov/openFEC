@@ -1,4 +1,3 @@
-import sqlalchemy as sa
 from flask_apispec import doc
 
 from webservices import args
@@ -38,8 +37,6 @@ class BaseFilings(views.ApiResource):
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
     ]
-
-    query_options = [sa.orm.joinedload(models.Filings.committee)]
 
     @property
     def args(self):

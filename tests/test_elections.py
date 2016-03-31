@@ -184,8 +184,12 @@ class TestElections(ApiBaseTest):
         assert set(each.committee_id for each in self.committees) == set(results[0]['committee_ids'])
 
     def test_elections_full(self):
-        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY', election_full='true'))
-        self.assertEqual(len(results), 1)
+        results = self._results(
+            api.url_for(
+                ElectionView,
+                office='senate', cycle=2012, state='NY', election_full='true',
+            )
+        )
         totals = self.totals
         last_totals = self.totals[:2]
         expected = {
@@ -193,13 +197,14 @@ class TestElections(ApiBaseTest):
             'candidate_name': self.candidate.name,
             'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
             'party_full': self.candidate.party_full,
-            'committee_ids': [each.committee_id for each in self.committees],
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
             'won': False,
         }
-        self.assertEqual(results[0], expected)
+        assert len(results) == 1
+        assert_dicts_subset(results[0], expected)
+        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees)
 
     def test_elections_winner(self):
         [

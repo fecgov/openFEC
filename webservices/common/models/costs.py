@@ -1,6 +1,5 @@
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
-from webservices import utils
 from .base import db
 
 
@@ -34,10 +33,7 @@ class CommunicationCost(db.Model):
     sub_id = db.Column(db.Integer)
     file_number = db.Column('file_num', db.Integer)
     report_year = db.Column('rpt_yr', db.Integer, index=True)
-
-    @property
-    def pdf_url(self):
-        return utils.make_report_pdf_url(self.image_number)
+    pdf_url = db.Column(db.String)
 
 class Electioneering(db.Model):
     __tablename__ = 'ofec_electioneering_mv'
@@ -67,13 +63,10 @@ class Electioneering(db.Model):
     amendment_indicator = db.Column('amndt_ind', db.String)
     receipt_date = db.Column('receipt_dt', db.Date)
     election_type_raw = db.Column('election_tp', db.String)
+    pdf_url = db.Column(db.String)
 
     purpose_description_text = db.Column(TSVECTOR)
 
     @property
     def election_type(self):
         return self.election_type_raw[:1]
-
-    @property
-    def pdf_url(self):
-        return utils.make_image_pdf_url(self.sb_image_num)

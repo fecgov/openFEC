@@ -99,7 +99,7 @@ class IndexValidator(OptionValidator):
     def _is_excluded(self, value):
         return not value or value in self.exclude
 
-def make_sort_args(default=None, validator=None, default_hide_null=False, default_nulls_large=True):
+def make_sort_args(default=None, validator=None, default_hide_null=False):
     return {
         'sort': fields.Str(
             missing=default,
@@ -110,10 +110,6 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
             missing=default_hide_null,
             description='Hide null values on sorted column(s).'
         ),
-        'sort_nulls_large': fields.Bool(
-            missing=default_nulls_large,
-            description='Treat null values as large on sorted column(s)',
-        )
     }
 
 def make_seek_args(field=fields.Int, description=None):
@@ -126,11 +122,12 @@ def make_seek_args(field=fields.Int, description=None):
     }
 
 names = {
-    'q': fields.Str(required=True, description='Name (candidate or committee) to search for'),
+    'q': fields.List(fields.Str, required=True, description='Name (candidate or committee) to search for'),
 }
 
 candidate_detail = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
+    'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
     'state': fields.List(IStr, description=docs.STATE),
     'party': fields.List(IStr, description=docs.PARTY),
@@ -147,9 +144,8 @@ candidate_detail = {
 }
 
 candidate_list = {
-    'q': fields.Str(description='Text to search all fields for'),
+    'q': fields.List(fields.Str, description='Text to search all fields for'),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'name': fields.Str(description="Candidate's name (full or partial)"),
 }
 
 candidate_history = {
@@ -174,15 +170,14 @@ committee = {
 }
 
 committee_list = {
-    'q': fields.Str(description='Text to search all fields for'),
+    'q': fields.List(fields.Str, description='Text to search all fields for'),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
-    'name': fields.Str(description=docs.COMMITTEE_NAME),
     'party': fields.List(IStr, description=docs.PARTY),
     'min_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC after this date'),
     'max_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC before this date'),
-    'treasurer_name': fields.Str(description=docs.TREASURER_NAME),
+    'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
 }
 
 committee_history = {
@@ -309,11 +304,11 @@ calendar_dates = {
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
-    'contributor_name': fields.Str(description=docs.CONTRIBUTOR_NAME),
+    'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
-    'contributor_employer': fields.Str(description=docs.CONTRIBUTOR_EMPLOYER),
-    'contributor_occupation': fields.Str(description=docs.CONTRIBUTOR_OCCUPATION),
+    'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
+    'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
     'last_contribution_receipt_date': fields.Date(missing=None, description='When sorting by `contribution_receipt_date`, use the `contribution_receipt_date` of the last result and pass it here as `last_contribution_receipt_date` to page through Schedule A data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_contribution_receipt_amount': fields.Float(missing=None, description='When sorting by `contribution_receipt_amount`, use the `contribution_receipt_amount` of the last result and pass it here as `last_contribution_receipt_amount` to page through Schedule A data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_contributor_aggregate_ytd': fields.Float(missing=None, description='When sorting by `contributor_aggregate_ytd`, use the `contributor_aggregate_ytd` of the last result and pass it here as `last_contributor_aggregate_ytd` to page through Schedule A data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
@@ -369,8 +364,8 @@ schedule_b_by_recipient_id = {
 schedule_b = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
-    'recipient_name': fields.Str(description='Name of recipient'),
-    'disbursement_description': fields.Str(description='Description of disbursement'),
+    'recipient_name': fields.List(fields.Str, description='Name of recipient'),
+    'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
     'recipient_city': fields.List(IStr, description='City of recipient'),
     'recipient_state': fields.List(IStr, description='State of recipient'),
     'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
@@ -445,9 +440,31 @@ schedule_a_candidate_aggregate = {
     'election_full': election_full,
 }
 
-totals_candidate_aggregate = {
+candidate_totals = {
+    'q': fields.List(fields.Str),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description='Governmental office candidate runs for: House, Senate or presidential'),
     'election_full': election_full,
+    'state': fields.List(IStr, description='State of candidate'),
+    'district': fields.List(District, description='District of candidate'),
+    'party': fields.List(IStr, description='Three-letter party code'),
+    'min_receipts': Currency(description='Minimum aggregated receipts'),
+    'max_receipts': Currency(description='Maximum aggregated receipts'),
+    'min_disbursements': Currency(description='Minimum aggregated disbursements'),
+    'max_disbursements': Currency(description='Maximum aggregated disbursements'),
+    'min_cash_on_hand_end_period': Currency(description='Minimum cash on hand'),
+    'max_cash_on_hand_end_period': Currency(description='Maximum cash on hand'),
+    'min_debts_owed_by_committee': Currency(description='Minimum debt'),
+    'max_debts_owed_by_committee': Currency(description='Maximum debt'),
+}
+
+totals_committee_aggregate = {
+    'min_receipts': Currency(description='Minimum aggregated receipts'),
+    'max_receipts': Currency(description='Maximum aggregated receipts'),
+    'min_disbursements': Currency(description='Minimum aggregated disbursements'),
+    'max_disbursements': Currency(description='Maximum aggregated disbursements'),
 }
 
 communication_cost_by_candidate = {
@@ -473,7 +490,7 @@ schedule_e = {
     'last_expenditure_date': fields.Date(missing=None, description='When sorting by `expenditure_date`, use the `expenditure_date` of the last result and pass it here as `last_expenditure_date` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_expenditure_amount': fields.Float(missing=None, description='When sorting by `expenditure_amount`, use the `expenditure_amount` of the last result and pass it here as `last_expenditure_amount` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_office_total_ytd': fields.Float(missing=None, description='When sorting by `office_total_ytd`, use the `office_total_ytd` of the last result and pass it here as `last_office_total_ytd` to page through Schedule E data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
-    'payee_name': fields.Str(description='Name of the entity that received the payment'),
+    'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',

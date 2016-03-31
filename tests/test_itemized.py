@@ -71,10 +71,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext(self):
         names = ['David Koch', 'George Soros']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_name=name,
-                contributor_name_text=sa.func.to_tsvector(name),
-            )
+            factories.ScheduleAFactory(contributor_name=name)
             for name in names
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_name='soros'))
@@ -84,10 +81,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_employer=employer,
-                contributor_employer_text=sa.func.to_tsvector(employer),
-            )
+            factories.ScheduleAFactory(contributor_employer=employer)
             for employer in employers
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_employer='vandelay'))
@@ -97,10 +91,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_occupation=occupation,
-                contributor_occupation_text=sa.func.to_tsvector(occupation),
-            )
+            factories.ScheduleAFactory(contributor_occupation=occupation)
             for occupation in occupations
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_occupation='doctor'))
@@ -128,22 +119,6 @@ class TestItemized(ApiBaseTest):
     def test_pagination_bad_per_page(self):
         response = self.app.get(api.url_for(ScheduleAView, per_page=999))
         self.assertEqual(response.status_code, 422)
-
-    def test_pdf_url(self):
-        # TODO(jmcarp) Refactor as parameterized tests
-        image_number = 39
-        params = [
-            (factories.ScheduleAFactory, ScheduleAView),
-            (factories.ScheduleBFactory, ScheduleBView),
-        ]
-        for factory, resource in params:
-            factory(image_number=image_number)
-            results = self._results(api.url_for(resource))
-            self.assertEqual(len(results), 1)
-            self.assertEqual(
-                results[0]['pdf_url'],
-                'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number),
-            )
 
     def test_image_number(self):
         image_number = '12345'
