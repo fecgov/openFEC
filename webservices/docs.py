@@ -543,7 +543,7 @@ YEAR = 'See records pertaining to a particular election year. The list of electi
 is based on a candidate filing a statement of candidacy (F2) for that year.'
 DISTRICT = 'Two-digit US House distirict of the office the candidate is running for. \
 Presidential, Senate and House at-large candidates will have District 00.'
-CANDIDATE_STATUS ='One-letter code explaining if the candidate is:\n\
+CANDIDATE_STATUS = 'One-letter code explaining if the candidate is:\n\
         - C present candidate\n\
         - F future candidate\n\
         - N not yet a candidate\n\
@@ -554,9 +554,9 @@ INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challen
 ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
 
 # committees
-COMMITTEE_NAME='The name of the committee. If a committee changes it\'s name, \
+COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
     the most recent name will be shown.'
-COMMITTEE_YEAR='A year that the committee was active— (after original registration date \
+COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
 DESIGNATION = 'The one-letter designation code of the organization:\n\
          - A authorized by a candidate\n\

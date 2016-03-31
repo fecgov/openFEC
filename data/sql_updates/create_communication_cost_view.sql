@@ -1,8 +1,9 @@
 drop materialized view if exists ofec_communication_cost_mv_tmp;
 create materialized view ofec_communication_cost_mv_tmp as
 select
+    row_number() over () as idx,
     *,
-    row_number() over () as idx
+    report_pdf_url(image_num) as pdf_url
 from communication_costs_vw
 where rpt_yr >= :START_YEAR
 ;

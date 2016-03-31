@@ -22,5 +22,7 @@ begin
     delete from ofec_sched_a_queue_old;
     delete from ofec_sched_b_queue_new;
     delete from ofec_sched_b_queue_old;
+    delete from ofec_sched_e_queue_new;
+    delete from ofec_sched_e_queue_old;
 end
 $$ language plpgsql;

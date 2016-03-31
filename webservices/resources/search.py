@@ -5,16 +5,11 @@ from flask_apispec import doc, marshal_with
 from webservices import args
 from webservices import docs
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.common import models
 from webservices.utils import use_kwargs
 
-
-def search_typeahead_text(model, text, order_by):
-    query = utils.search_text(model.query, model.fulltxt, text)
-    query = query.order_by(order_by)
-    query = query.limit(20)
-    return {'results': query.all()}
 
 @doc(
     tags=['search'],
@@ -22,14 +17,18 @@ def search_typeahead_text(model, text, order_by):
 )
 class CandidateNameSearch(utils.Resource):
 
+    filter_fulltext_fields = [
+        ('q', models.CandidateSearch.fulltxt),
+    ]
+
     @use_kwargs(args.names)
     @marshal_with(schemas.CandidateSearchListSchema())
     def get(self, **kwargs):
-        return search_typeahead_text(
-            models.CandidateSearch,
-            kwargs['q'],
-            sa.desc(models.CandidateSearch.receipts),
-        )
+        query = filters.filter_fulltext(models.CandidateSearch.query, kwargs, self.filter_fulltext_fields)
+        query = query.order_by(
+            sa.desc(models.CandidateSearch.receipts)
+        ).limit(20)
+        return {'results': query.all()}
 
 
 @doc(
@@ -38,11 +37,15 @@ class CandidateNameSearch(utils.Resource):
 )
 class CommitteeNameSearch(utils.Resource):
 
+    filter_fulltext_fields = [
+        ('q', models.CommitteeSearch.fulltxt),
+    ]
+
     @use_kwargs(args.names)
     @marshal_with(schemas.CommitteeSearchListSchema())
     def get(self, **kwargs):
-        return search_typeahead_text(
-            models.CommitteeSearch,
-            kwargs['q'],
-            sa.desc(models.CommitteeSearch.receipts),
-        )
+        query = filters.filter_fulltext(models.CommitteeSearch.query, kwargs, self.filter_fulltext_fields)
+        query = query.order_by(
+            sa.desc(models.CommitteeSearch.receipts)
+        ).limit(20)
+        return {'results': query.all()}

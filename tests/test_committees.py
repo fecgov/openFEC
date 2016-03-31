@@ -1,7 +1,6 @@
 import datetime
 
 import sqlalchemy as sa
-from marshmallow.utils import isoformat
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -160,7 +159,6 @@ class CommitteeFormatTest(ApiBaseTest):
         filter_fields = (
             ('committee_id', ['C01', 'C02']),
             ('state', ['CA', 'DC']),
-            ('name', 'Obama'),
             ('committee_type', 'S'),
             ('designation', 'P'),
             ('party', ['REP', 'DEM']),
@@ -342,6 +340,7 @@ class TestCommitteeHistory(ApiBaseTest):
         self.election = factories.CandidateElectionFactory(
             candidate_id=self.candidate.candidate_id,
             cand_election_year=2012,
+            prev_election_year=2008,
         )
 
     def test_candidate_cycle(self):

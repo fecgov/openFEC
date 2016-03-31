@@ -43,7 +43,7 @@ class ApiResource(utils.Resource):
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
-        query = self.filter_fulltext(query, kwargs)
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         if _apply_options:
             query = query.options(*self.query_options)
         return query
@@ -100,8 +100,8 @@ class ItemizedResource(ApiResource):
         """Build a subquery by committee.
         """
         query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
-        sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
-        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null, nulls_large=nulls_large)
+        sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
+        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return page_query, count

@@ -145,7 +145,6 @@ class CandidateFormatTest(ApiBaseTest):
             ('office', 'H'),
             ('district', ['00', '02']),
             ('state', 'CA'),
-            ('name', 'Obama'),
             ('party', 'DEM'),
             ('cycle', '2006'),
             ('candidate_id', ['BARTLET', 'RITCHIE'])
@@ -212,10 +211,12 @@ class TestCandidateHistory(ApiBaseTest):
             factories.CandidateElectionFactory(
                 candidate_id=self.candidates[0].candidate_id,
                 cand_election_year=2012,
+                prev_election_year=2008,
             ),
             factories.CandidateElectionFactory(
                 candidate_id=self.candidates[1].candidate_id,
                 cand_election_year=2012,
+                prev_election_year=2008,
             ),
         ]
 

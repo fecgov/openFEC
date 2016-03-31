@@ -112,13 +112,46 @@ with years as (
         unnest(election_years) as cand_election_year
     from ofec_candidate_detail_mv_tmp
 )
-select
-    row_number() over () as idx,
-    years.*
+select distinct on (years.candidate_id, years.cand_election_year)
+    years.candidate_id,
+    years.cand_election_year,
+    greatest(
+        prev.cand_election_year,
+        years.cand_election_year - election_duration(substr(years.candidate_id, 1, 1))
+    ) as prev_election_year
 from years
+left join years prev on
+    years.candidate_id = prev.candidate_id and
+    prev.cand_election_year < years.cand_election_year
+order by
+    years.candidate_id,
+    years.cand_election_year,
+    prev.cand_election_year desc
 ;
 
-create unique index on ofec_candidate_election_mv_tmp (idx);
+create unique index on ofec_candidate_election_mv_tmp (candidate_id, cand_election_year);
 
 create index on ofec_candidate_election_mv_tmp (candidate_id);
 create index on ofec_candidate_election_mv_tmp (cand_election_year);
+create index on ofec_candidate_election_mv_tmp (prev_election_year);
+
+
+create materialized view ofec_candidate_history_latest_mv_tmp as
+select distinct on (cand.candidate_id, election.cand_election_year)
+    cand.*,
+    election.cand_election_year
+from ofec_candidate_history_mv_tmp cand
+join ofec_candidate_election_mv_tmp election on
+    cand.candidate_id = election.candidate_id and
+    cand.two_year_period <= election.cand_election_year and
+    cand.two_year_period > election.prev_election_year
+order by
+    cand.candidate_id,
+    election.cand_election_year,
+    cand.two_year_period desc
+;
+
+create unique index on ofec_candidate_history_latest_mv_tmp (candidate_id, cand_election_year);
+
+create index on ofec_candidate_history_latest_mv_tmp (candidate_id);
+create index on ofec_candidate_history_latest_mv_tmp (cand_election_year);
