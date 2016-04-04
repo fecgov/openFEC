@@ -11,20 +11,13 @@ from pyelasticsearch import ElasticSearch
 from webservices.env import env
 
 
-@doc(
-    tags=['search'],
-    description=docs.LEGAL_SEARCH
-)
+es_conn = env.get_credential('ES_CONN', 'http://localhost:9200')
+es = ElasticSearch(es_conn)
+print("new ES connection...")
 
-class UniversalSearch(utils.Resource):
-    def __init__(self):
-        es_conn = env.get_credential('ES_CONN')
-        if not es_conn:
-            es_conn = 'http://localhost:9200'
-        self.es = ElasticSearch(es_conn)
-
+class Search(utils.Resource):
     @use_kwargs(args.query)
     def get(self, **kwargs):
         query = kwargs['q']
-        hits = self.es.search('_all: %s' % query, index='docs', size=10)['hits']['hits']
+        hits = es.search('_all: %s' % query, index='docs', size=10)['hits']['hits']
         return {'results': hits}
