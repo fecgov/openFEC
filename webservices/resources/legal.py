@@ -13,7 +13,6 @@ from webservices.env import env
 
 es_conn = env.get_credential('ES_CONN', 'http://localhost:9200')
 es = ElasticSearch(es_conn)
-print("new ES connection...")
 
 class Search(utils.Resource):
     @use_kwargs(args.query)
