@@ -11,7 +11,9 @@ from pyelasticsearch import ElasticSearch
 from webservices.env import env
 
 
-es_conn = env.get_credential('ES_CONN', 'http://localhost:9200')
+es_conn = env.get_service(label='elasticsearch-swarm-1.7.1')
+if not es_conn:
+    es_conn = 'http://localhost:9200'
 es = ElasticSearch(es_conn)
 
 class Search(utils.Resource):
