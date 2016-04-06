@@ -51,6 +51,9 @@ class CandidateList(ApiResource):
         )
 
     def build_query(self, **kwargs):
+        if kwargs.get('name'):
+            kwargs['q'] = kwargs['name']
+
         query = super().build_query(**kwargs)
 
         if {'receipts', '-receipts'}.intersection(kwargs.get('sort', [])) and 'q' not in kwargs:
