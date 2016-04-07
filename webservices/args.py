@@ -125,6 +125,10 @@ names = {
     'q': fields.List(fields.Str, required=True, description='Name (candidate or committee) to search for'),
 }
 
+query = {
+    'q': fields.Str(required=True, description='Text to search legal documents for')
+}
+
 candidate_detail = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
