@@ -200,18 +200,19 @@ To stand up a user-provided credential service that supports both the API and th
 the following keys are set:
 
 * SQLA_CONN
-* FEC_WEB_USERNAME
-* FEC_WEB_PASSWORD
 * FEC_WEB_API_KEY
 * FEC_WEB_API_KEY_PUBLIC
+* FEC_GITHUB_TOKEN
+* SENTRY_DSN
+* SENTRY_PUBLIC_DSN
 * NEW_RELIC_LICENSE_KEY
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
 ```
-cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 ```
-
+*Note: Performing a deploy in this manner will result in a brief period of downtime.*
 
 ### Title here (other dev tasks)
 
@@ -228,6 +229,7 @@ service. The redis service can be created as follows:
 ```
 cf create-service redis28-swarm standard fec-redis
 ```
+
 
 Running redis and celery locally:
 
@@ -388,7 +390,4 @@ invoke dump <source> data/subset.dump
 where `source` is the database containing the newly created test subset.
 
 
-## Copyright and licensing
-This project is in the public domain within the United States, and we waive worldwide copyright and related rights through [CC0 universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/). Read more on our license page.
 
-A few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. Learn more on FEC.gov.
