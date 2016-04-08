@@ -47,8 +47,7 @@ cycle_totals as (
         link.cmte_dsgn in ('P', 'A')
     group by
         link.cand_id,
-        totals.cycle,
-        totals.federal_funds_flag
+        totals.cycle
 ),
 -- Aggregated totals by candidate by election
 election_aggregates as (
@@ -62,8 +61,7 @@ election_aggregates as (
     from cycle_totals
     group by
         candidate_id,
-        election_year,
-        federal_funds_flag
+        election_year
 ),
 -- Ending financials by candidate by election
 election_latest as (
