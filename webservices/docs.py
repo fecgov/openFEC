@@ -102,6 +102,10 @@ particular person or group, using a name to find the `candidate_id` or `committe
 this endpoint can be a helpful first step.
 '''
 
+LEGAL_SEARCH = '''
+Search for legal documents.
+'''
+
 CANDIDATE_LIST = '''
 Fetch basic information about candidates, and use parameters to filter results to the
 candidates you're looking for.

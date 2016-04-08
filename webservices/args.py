@@ -125,6 +125,10 @@ names = {
     'q': fields.List(fields.Str, required=True, description='Name (candidate or committee) to search for'),
 }
 
+query = {
+    'q': fields.Str(required=True, description='Text to search legal documents for')
+}
+
 candidate_detail = {
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
     'election_year': fields.List(fields.Int, description=docs.ELECTION_YEAR),
@@ -143,10 +147,11 @@ candidate_detail = {
     ),
     'federal_funds_flag': fields.Bool(description=docs.FEDERAL_FUNDS_FLAG),
     'five_thousand_flag': fields.Bool(description=docs.FIVE_THOUSAND_FLAG),
+    'name': fields.List(fields.Str, description='Name (candidate or committee) to search for. Alias for \'q\'.'),
 }
 
 candidate_list = {
-    'q': fields.List(fields.Str, description='Text to search all fields for'),
+    'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
 }
 
@@ -172,7 +177,7 @@ committee = {
 }
 
 committee_list = {
-    'q': fields.List(fields.Str, description='Text to search all fields for'),
+    'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
@@ -443,7 +448,7 @@ schedule_a_candidate_aggregate = {
 }
 
 candidate_totals = {
-    'q': fields.List(fields.Str),
+    'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'election_year': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),

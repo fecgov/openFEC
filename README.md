@@ -133,6 +133,20 @@ We are always trying to improve our documentation, if you have suggestions or ru
 
 ##### Likely only useful for 18F team members
 
+##### Create change log
+
+Create a change log for each release. Auto generate it using this [change log generator](https://github.com/skywinder/github-changelog-generator)
+
+Once installed, you will want to run:
+
+```
+github_changelog_generator --since-tag <last public-relase> --t <your-gh-token>
+```
+
+Then, commit the log to the release.
+
+##### Deploy
+
 Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
 
 ```

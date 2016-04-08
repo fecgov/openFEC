@@ -26,7 +26,7 @@ REQUIRED_CREDS = (
     'FEC_EMAIL_RECIPIENTS',
 )
 
-REQUIRED_SERVICES = ('redis28-swarm', 's3')
+REQUIRED_SERVICES = ('redis28-swarm', 's3', 'elasticsearch-swarm-1.7.1')
 
 REQUIRED_TABLES = (
     tuple(db.Model.metadata.tables.keys()) +
