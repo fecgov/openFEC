@@ -12,9 +12,10 @@ from webservices.env import env
 
 
 es_conn = env.get_service(label='elasticsearch-swarm-1.7.1')
-if not es_conn:
-    es_conn = 'http://localhost:9200'
-es = ElasticSearch(es_conn)
+if es_conn:
+    es = ElasticSearch(es_conn.get_url(url='uri'))
+else:
+    es = ElasticSearch('http://localhost:9200')
 
 class Search(utils.Resource):
     @use_kwargs(args.query)
