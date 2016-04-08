@@ -135,7 +135,7 @@ We are always trying to improve our documentation, if you have suggestions or ru
 
 ##### Create change log
 
-Create a change log for each release. Auto generate it using this [change log generatorr](https://github.com/skywinder/github-changelog-generator)
+Create a change log for each release. Auto generate it using this [change log generator](https://github.com/skywinder/github-changelog-generator)
 
 Once installed, you will want to run:
 
