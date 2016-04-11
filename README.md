@@ -204,7 +204,7 @@ Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/
 ```
 cf install-plugin autopilot -r CF-Community
 ```
-    [Learn more about autopilot](https://github.com/concourse/autopilot).
+[Learn more about autopilot](https://github.com/concourse/autopilot).
 
 3. Set environment variables used by the deploy script:
 
