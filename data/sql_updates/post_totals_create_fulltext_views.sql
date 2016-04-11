@@ -1,6 +1,6 @@
 -- Concatenate committee totals
-drop table if exists ofec_committee_totals cascade;
-create table ofec_committee_totals as
+drop table if exists ofec_committee_totals_tmp cascade;
+create table ofec_committee_totals_tmp as
     select committee_id, cycle, receipts from ofec_totals_pacs_parties_mv_tmp
     union all
     select committee_id, cycle, receipts from ofec_totals_house_senate_mv_tmp
@@ -21,7 +21,7 @@ with pacronyms as (
     select
         committee_id,
         sum(receipts) as receipts
-    from ofec_committee_totals
+    from ofec_committee_totals_tmp
     group by committee_id
 )
 select distinct on (committee_id)
@@ -60,7 +60,7 @@ with nicknames as (
         cand_id as candidate_id,
         sum(receipts) as receipts
     from cand_cmte_linkage link
-    join ofec_committee_totals totals on
+    join ofec_committee_totals_tmp totals on
         link.cmte_id = totals.committee_id and
         link.fec_election_yr = totals.cycle
     where
