@@ -7,7 +7,7 @@
 [![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
-[![Code Issues](https://www.quantifiedcode.com/api/v1/project/d3b2c96b3781466081d418fd50762726/badge.svg)](https://www.quantifiedcode.com/app/project/d3b2c96b3781466081d418fd50762726)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/d3b2c96b3781466081d418fd50762726/badge.svg)](https://www.quantifiedcode.com/app/project/d3b2c96b3781466081d418fd50set o762726)
 
 [![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
 
@@ -116,7 +116,7 @@ export FEC_WEB_DEBUG=true
 ```
 This shows error details and more verbose request logging. 
 
-2: Run: 
+2. Run: 
 ```
 export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
 export FEC_WEB_API_URL='http://localhost:5000'
@@ -142,7 +142,7 @@ Follow these steps every time you want to work on this project locally.
 ```
 ./manage.py runserver
 ```
-2 .View your local version of the site at [http://localhost:5000](http://localhost:5000).
+2. View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 #### Task queue
 
