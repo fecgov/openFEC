@@ -120,8 +120,8 @@ export SQLA_CONN=<psql:address-to-box>
 2. Run: 
    ```
    export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
-   export FEC_WEB_API_URL='http://localhost:5000'
-   export FEC_CMS_URL='http://localhost:8000'
+   export FEC_WEB_API_URL=http://localhost:5000
+   export FEC_CMS_URL=http://localhost:8000
    ```
    These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
    
@@ -133,6 +133,7 @@ export SQLA_CONN=<psql:address-to-box>
    export FEC_WEB_PASSWORD=<password_of_your_choosing>
    ```
    Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
+   
    *Note: 18F and FEC team members will have additional environment variables to set up. Please reach out to a team member for detailed information.*
 
 
@@ -140,6 +141,7 @@ export SQLA_CONN=<psql:address-to-box>
 Follow these steps every time you want to work on this project locally.
 
 1. Run:
+
    ```
    ./manage.py runserver
    ```
