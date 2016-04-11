@@ -22,12 +22,6 @@ def filter_multi_fields(model):
     ]
 
 
-# def filter_match_fields(model):
-#     return[
-#         ('federal_funds_flag', models.CandidateFlags.federal_funds_flag),
-#         ('five_thousand_flag', models.CandidateFlags.five_thousand_flag),
-#     ]
-
 
 @doc(
     tags=['candidate'],
@@ -104,7 +98,9 @@ class CandidateSearch(CandidateList):
 
     schema = schemas.CandidateSearchSchema
     page_schema = schemas.CandidateSearchPageSchema
-    query_options = [sa.orm.subqueryload(models.Candidate.principal_committees)]
+    query_options = [
+        sa.orm.subqueryload(models.Candidate.principal_committees),
+    ]
 
 
 @doc(
@@ -121,7 +117,6 @@ class CandidateView(ApiResource):
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
-    # filter_match_fields = filter_match_fields(models.CandidateDetail)
 
     @property
     def args(self):
@@ -169,6 +164,12 @@ class CandidateHistoryView(ApiResource):
     model = models.CandidateHistory
     schema = schemas.CandidateHistorySchema
     page_schema = schemas.CandidateHistoryPageSchema
+
+    query_options = [
+        sa.orm.joinedload(models.CandidateHistory.flags),
+    ]
+
+
 
     @property
     def args(self):
