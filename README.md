@@ -63,7 +63,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 
 #### Install project requirements
 
-Use pip to install the Python dependencies. 
+Use pip to install the Python dependencies:
 ```
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
