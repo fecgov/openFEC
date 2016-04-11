@@ -232,7 +232,7 @@ invoke deploy --space dev
 ```
 This command will explicitly target the `dev` space.
 
-#### Setting up a service:
+#### Setting up a service
 
 On Cloud Foundry, we use the redis28-swarm
 service. The Redis service can be created as follows:
@@ -240,7 +240,7 @@ service. The Redis service can be created as follows:
 cf create-service redis28-swarm standard fec-redis
 ```
 
-#### Setting up credentials:
+#### Setting up credentials
 ```
 cf target -s dev
 cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
@@ -267,7 +267,7 @@ cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api
 ## Git-flow and continuous deployment
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
 
-#### Creating a new feature:
+#### Creating a new feature
 * Developer creates a feature branch
 ```
 git flow feature start my-feature
@@ -276,7 +276,7 @@ git flow feature start my-feature
 * Reviewer merges feature branch into develop and pushes to origin
 * [auto] Develop is deployed to dev
 
-#### Creating a hotfix:
+#### Creating a hotfix
 * Developer creates a hotfix branch
 ```
 git flow hotfix start my-hotfix
@@ -286,7 +286,7 @@ git flow hotfix start my-hotfix
 * [auto] Develop is deployed to dev
 * [auto] Master is deployed to prod
 
-#### Creating a release:
+#### Creating a release
 * Developer creates a release branch and pushes to origin
 
 ```
@@ -305,7 +305,7 @@ git flow release finish my-release
 * [auto] Master is deployed to prod
 
 ## Additional developer notes
-Add a note here. This section covers a few topics we think might help you in developer tasks, after
+This section covers a few topics we think might help you after you've gotten set up.
 
 ### API umbrella
 The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
