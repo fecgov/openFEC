@@ -9,7 +9,7 @@ with totals as (
         disbursements,
         last_cash_on_hand_end_period,
         last_debts_owed_by_committee,
-        cast('false' as boolean) as federal_funds_flag
+        'false' as federal_funds_flag
     from ofec_totals_house_senate_mv_tmp
     union all
     select
