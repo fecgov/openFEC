@@ -111,37 +111,38 @@ export SQLA_CONN=<psql:address-to-box>
 #### Set other environment variables
 
 1. Run: 
-```
-export FEC_WEB_DEBUG=true
-```
-This shows error details and more verbose request logging. 
+
+   ```
+   export FEC_WEB_DEBUG=true
+   ```
+   This shows error details and more verbose request logging. 
 
 2. Run: 
-```
-export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
-export FEC_WEB_API_URL='http://localhost:5000'
-export FEC_CMS_URL='http://localhost:8000'
-```
-These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
-
-Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match. 
+   ```
+   export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
+   export FEC_WEB_API_URL='http://localhost:5000'
+   export FEC_CMS_URL='http://localhost:8000'
+   ```
+   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
+   
+   *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.* 
 
 3. Run: 
-```
-export FEC_WEB_USERNAME=<username_of_your_choosing>
-export FEC_WEB_PASSWORD=<password_of_your_choosing>
-```
-Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
-*Note: 18F and FEC team members will have additional environment variables to set up. Please reach out to a team member for detailed information.*
+   ```
+   export FEC_WEB_USERNAME=<username_of_your_choosing>
+   export FEC_WEB_PASSWORD=<password_of_your_choosing>
+   ```
+   Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
+   *Note: 18F and FEC team members will have additional environment variables to set up. Please reach out to a team member for detailed information.*
 
 
 #### Run locally
 Follow these steps every time you want to work on this project locally.
 
 1. Run:
-```
-./manage.py runserver
-```
+   ```
+   ./manage.py runserver
+   ```
 2. View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 #### Task queue
@@ -171,7 +172,7 @@ py.test
 #### The test data subset
 If you add new tables to the data, you'll need to generate a new subset for testing. We use this nifty subsetting tool: [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
 
-To build a new test subset, use the `build_test` invoke task
+To build a new test subset, use the `build_test` invoke task:
 
 ```
 invoke build_test <source> <dest>
@@ -179,7 +180,7 @@ invoke build_test <source> <dest>
 
 where both `source` and `dest` are valid PostgreSQL connection strings.
 
-To update the version-controlled test subset after rebuilding, run
+To update the version-controlled test subset after rebuilding, run:
 
 ```
 invoke dump <source> data/subset.dump
@@ -201,23 +202,23 @@ Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/
 1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install Cloud Foundry CLI.
 
 2. Install autopilot by running:
-```
-cf install-plugin autopilot -r CF-Community
-```
-[Learn more about autopilot](https://github.com/concourse/autopilot).
+   ```
+   cf install-plugin autopilot -r CF-Community
+   ```
+   [Learn more about autopilot](https://github.com/concourse/autopilot).
 
 3. Set environment variables used by the deploy script:
 
-```
-export FEC_CF_USERNAME=<your_cf_username>
-export FEC_CF_PASSWORD=<your_cf_password>
-```
-
-If these variables aren't set, you'll be prompted for your Cloud Foundry credentials when you deploy the app.
+   ```
+   export FEC_CF_USERNAME=<your_cf_username>
+   export FEC_CF_PASSWORD=<your_cf_password>
+   ```
+   
+   If these variables aren't set, you'll be prompted for your Cloud Foundry credentials when you deploy the app.
 
 
 ### Deployment steps
-1. To deploy to Cloud Foundry, run 
+To deploy to Cloud Foundry, run: 
 
 ```
 invoke deploy
@@ -268,7 +269,7 @@ cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
 
 #### Creating a new feature
-* Developer creates a feature branch
+* Developer creates a feature branch:
 ```
 git flow feature start my-feature
 ```
@@ -277,7 +278,7 @@ git flow feature start my-feature
 * [auto] Develop is deployed to dev
 
 #### Creating a hotfix
-* Developer creates a hotfix branch
+* Developer creates a hotfix branch:
 ```
 git flow hotfix start my-hotfix
 ```
@@ -287,7 +288,7 @@ git flow hotfix start my-hotfix
 * [auto] Master is deployed to prod
 
 #### Creating a release
-* Developer creates a release branch and pushes to origin
+* Developer creates a release branch and pushes to origin:
 
 ```
 git flow release start my-release
