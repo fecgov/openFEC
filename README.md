@@ -188,7 +188,7 @@ invoke dump <source> data/subset.dump
 where `source` is the database containing the newly created test subset.
 
 
-## Deployment (18F and FEC team members only)
+## Deployment (18F and FEC team only)
 
 ### Deployment prerequisites
 If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI and the autopilot plugin.
