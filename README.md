@@ -161,6 +161,34 @@ redis-server
 celery worker --app webservices.tasks
 ```
 
+### Testing
+This repo uses [pytest](http://pytest.org/latest/).
+
+Running the tests:
+```
+py.test
+```
+
+##### The test data subset
+If you add new tables to the data, you'll need to generate a new subset for testing. We use this nifty subsetting tool: [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
+
+To build a new test subset, use the `build_test` invoke task
+
+```
+invoke build_test <source> <dest>
+```
+
+where both `source` and `dest` are valid PostgreSQL connection strings.
+
+To update the version-controlled test subset after rebuilding, run
+
+```
+invoke dump <source> data/subset.dump
+```
+
+where `source` is the database containing the newly created test subset.
+
+
 ### Deployment (18F and FEC team members only)
 
 #### Deployment prerequisites
@@ -237,13 +265,10 @@ cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api
 ```
 *Note: Performing a deploy in this manner will result in a brief period of downtime.*
 
-
-### Other Dev Tasks
-
-###### Git-flow and continuous deployment
+### Git-flow and continuous deployment
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
 
-####### To create a new feature:
+##### Creating a new feature:
 * Developer creates a feature branch
 ```
 git flow feature start my-feature
@@ -252,7 +277,7 @@ git flow feature start my-feature
 * Reviewer merges feature branch into develop and pushes to origin
 * [auto] Develop is deployed to dev
 
-####### To create a hotfix:
+##### Creating a hotfix:
 * Developer creates a hotfix branch
 ```
 git flow hotfix start my-hotfix
@@ -262,7 +287,7 @@ git flow hotfix start my-hotfix
 * [auto] Develop is deployed to dev
 * [auto] Master is deployed to prod
 
-####### To create a release:
+##### Creating a release:
 * Developer creates a release branch and pushes to origin
 
 ```
@@ -280,65 +305,36 @@ git flow release finish my-release
 
 * [auto] Master is deployed to prod
 
-Sorting fields include a compound index on on the filed to sort and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
+### Additional developer notes
+Add a note here. This section covers a few topics we think might help you in developer tasks, after
 
-### Testing
-
-Make sure you have [created a new test database](#creating-a-new-test-database).
-
-This repo uses [pytest](http://pytest.org/latest/).
-
-Running the tests:
-```
-py.test
-```
-
-##### The test data subset
-
-When adding new tables to the data, you will need to generate a new subset for testing. We use this nifty subsetting tool- [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
-
-To build a new test subset, use the `build_test` invoke task:
-
-```
-invoke build_test <source> <dest>
-```
-
-where both `source` and `dest` are valid PostgreSQL connection strings.
-
-To update the version-controlled test subset after rebuilding, run:
-
-```
-invoke dump <source> data/subset.dump
-```
-
-where `source` is the database containing the newly created test subset.
-
-
-##### Other developer notes
-
-###### API umbrella
+#### API umbrella
 The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
 rate limiting, authentication, caching, and HTTPS termination and redirection. Both
 environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
 through the API Umbrella.
 
-###### Caching
+#### Caching
 All API responses are set to expire after one hour (`Cache-Control: public, max-age=3600`).
 In production, the [API Umbrella](https://apiumbrella.io) will check this response header
 and cache responses for the specified interval, such that repeated requests to a given
 endpoint will only reach the Flask application once. This means that responses may be
 stale for up to an hour following the nightly refresh of the materialized views.
 
-###### Data for development and staging environments
+#### Data for development and staging environments
 The production and staging environments use relational database service (RDS) instances that receive streaming updates from the FEC database. The development environment uses a separate RDS instance created from a snapshot of the production instance.
 
-###### Nightly updates
+#### Nightly updates
 Incrementally-updated aggregates and materialized views are updated nightly; see
 `webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
 
-###### Production stack
+#### Production stack
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
 an nginx reverse proxy. Static files are compressed and served directly through nginx;
 dynamic content is routed to the Flask application via `proxy_pass`. The entire application
 is served through the [API Umbrella](https://apiumbrella.io), which handles API keys,
 caching, and rate limiting.
+
+#### Sorting fields
+Sorting fields include a compound index on on the filed to sort and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
+
