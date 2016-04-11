@@ -145,6 +145,22 @@ Follow these steps every time you want to work on this project locally.
 ```
 2 .View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
+##### Task queue
+
+We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](http://redis.io/) as the Celery message broker. 
+
+To work with Celery and Redis locally, install Redis and start a Redis server. By default,
+we connect to Redis at `redis://localhost:6379`; if Redis is running at a different URL,
+set the `FEC_REDIS_URL` environment variable. 
+
+Note: Both the API and Celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).
+Running Redis and Celery locally:
+
+```
+redis-server
+celery worker --app webservices.tasks
+```
+
 ### Deployment (18F and FEC team members only)
 
 #### Deployment prerequisites
@@ -189,8 +205,15 @@ invoke deploy --space dev
 ```
 This command will explicitly target the `dev` space.
 
-##### Setting up a service (optional):
+##### Setting up a service:
 
+On Cloud Foundry, we use the redis28-swarm
+service. The Redis service can be created as follows:
+```
+cf create-service redis28-swarm standard fec-redis
+```
+
+##### Setting up credentials:
 ```
 cf target -s dev
 cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
@@ -214,64 +237,11 @@ cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api
 ```
 *Note: Performing a deploy in this manner will result in a brief period of downtime.*
 
-### Title here (other dev tasks)
 
-
-##### Task queue
-
-Periodic tasks, such as refreshing materialized views and updating incremental
-aggregates, are scheduled using celery. We use redis as the celery message broker. To
-work with celery and redis locally, install redis and start a redis server. By default,
-we connect to redis at `redis://localhost:6379`; if redis is running at a different URL,
-set the `FEC_REDIS_URL` environment variable. On Cloud Foundry, we use the redis28-swarm
-service. The redis service can be created as follows:
-
-```
-cf create-service redis28-swarm standard fec-redis
-```
-
-
-Running redis and celery locally:
-
-```
-redis-server
-celery worker --app webservices.tasks
-```
-
-Note: Both the API and celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).
-
-###### Production stack
-
-The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
-an nginx reverse proxy. Static files are compressed and served directly through nginx;
-dynamic content is routed to the Flask application via `proxy_pass`. The entire application
-is served through the [API Umbrella](https://apiumbrella.io), which handles API keys,
-caching, and rate limiting.
-
-###### Nightly updates
-
-Incrementally-updated aggregates and materialized views are updated nightly; see
-`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
-
-###### Caching
-
-All API responses are set to expire after one hour (`Cache-Control: public, max-age=3600`).
-In production, the [API Umbrella](https://apiumbrella.io) will check this response header
-and cache responses for the specified interval, such that repeated requests to a given
-endpoint will only reach the Flask application once. This means that responses may be
-stale for up to an hour following the nightly refresh of the materialized views.
-
-###### API umbrella
-
-The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
-rate limiting, authentication, caching, and HTTPS termination and redirection. Both
-environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
-through the API Umbrella.
+### Other Dev Tasks
 
 ###### Git-flow and continuous deployment
-
-We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed
-through Travis CI accordingly.
+We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
 
 ####### To create a new feature:
 * Developer creates a feature branch
@@ -310,52 +280,6 @@ git flow release finish my-release
 
 * [auto] Master is deployed to prod
 
-###### Data for development and staging environments
-
-Note: The following can be automated using Boto or the AWS CLI if we continue on with this model and need
-to update snapshots frequently.
-
-The production and staging environments use RDS instances that receive streaming updates from the FEC database.
-The development environment uses a separate RDS instance created from a snapshot of the production instance.
-To update the development instance (e.g. when schemas change or new records are added):
-
-* Create a new snapshot of the production data
-
-        RDS :: Instances :: fec-goldengate-target :: Take DB Snapshot
-
-* Restore the snapshot to a new development RDS
-
-        RDS :: Snapshots :: <snapshot-name> :: Restore Snapshot
-
-    * DB Instance Class: db.m3.medium
-    * Multi-AZ Deployment: No
-    * Storage Type: General Purpose
-    * DB Instance Identifier: fec-goldengate-dev-YYYY-mm-dd
-    * VPC: Not in VPC
-
-* Add the new instance to the FEC security group
-
-        RDS :: Instances :: <instance-name> :: Modify
-
-    * Security Group: fec-open
-    * Apply Immediately
-
-* Configure DNS to point to new instance
-
-        Route 53 :: Hosted Zones :: open.fec.gov :: goldengate-dev.open.fec.gov
-
-    * Value: <instance-endpoint>
-        * Example: fec-goldengate-dev-YYYY-mm-dd...rds.amazonaws.com
-
-* Wait up to `TTL` seconds for DNS records to propagate
-* Verify that new instance is reachable at goldengate-dev.open.fec.gov
-* Delete previous development instance
-
-**Important**: Verify that all newly created instances are tagged with the same client
-as the production instance.
-
-##### Other developer notes
-
 Sorting fields include a compound index on on the filed to sort and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
 
 ### Testing
@@ -390,4 +314,31 @@ invoke dump <source> data/subset.dump
 where `source` is the database containing the newly created test subset.
 
 
+##### Other developer notes
 
+###### API umbrella
+The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
+rate limiting, authentication, caching, and HTTPS termination and redirection. Both
+environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
+through the API Umbrella.
+
+###### Caching
+All API responses are set to expire after one hour (`Cache-Control: public, max-age=3600`).
+In production, the [API Umbrella](https://apiumbrella.io) will check this response header
+and cache responses for the specified interval, such that repeated requests to a given
+endpoint will only reach the Flask application once. This means that responses may be
+stale for up to an hour following the nightly refresh of the materialized views.
+
+###### Data for development and staging environments
+The production and staging environments use relational database service (RDS) instances that receive streaming updates from the FEC database. The development environment uses a separate RDS instance created from a snapshot of the production instance.
+
+###### Nightly updates
+Incrementally-updated aggregates and materialized views are updated nightly; see
+`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
+
+###### Production stack
+The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
+an nginx reverse proxy. Static files are compressed and served directly through nginx;
+dynamic content is routed to the Flask application via `proxy_pass`. The entire application
+is served through the [API Umbrella](https://apiumbrella.io), which handles API keys,
+caching, and rate limiting.
