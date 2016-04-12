@@ -19,6 +19,7 @@ Are you interested in seeing how much money a candidate raised? Or spent? How mu
 
 betaFEC is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
 
+
 ## This repository, [openFEC](https://github.com/18F/openfec), is home to betaFEC’s API
 All FEC repositories:
 - [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from betaFEC’s feedback widget here, and this is the best place to submit general feedback.
@@ -38,6 +39,7 @@ We welcome you to explore, make suggestions, and contribute to our code.
 - Check out our StoriesonBoard [FEC story map](https://18f.storiesonboard.com/m/fec) to get a sense of the user needs we'll be addressing in the future.
 
 ---
+
 
 ## Set up
 We are always trying to improve our documentation. If you have suggestions or run into problems please [file an issue](https://github.com/18F/openFEC/issues)!
@@ -64,11 +66,14 @@ We are always trying to improve our documentation. If you have suggestions or ru
 #### Install project requirements
 
 Use pip to install the Python dependencies:
+
 ```
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
+
 Use npm to install JavaScript dependencies:
+
 ```
 npm install
 ```
@@ -78,10 +83,13 @@ This repo includes optional post-merge and post-checkout hooks to ensure that
 dependencies are up to date. If enabled, these hooks will update Python
 dependencies on checking out or merging changes to `requirements.txt`. To
 enable the hooks, run:
+
 ```
 invoke add_hooks
 ```
+
 To disable, run:
+
 ```
 invoke remove_hooks
 ```
@@ -90,52 +98,60 @@ invoke remove_hooks
 Before you can run this project locally, you'll need an API database and a test database. 
 
 To create your databases, run:
+
 ```
 createdb cfdm_test
 createdb cfdm_unit_test
 ```
+
 Load our sample data into the development database (`cfdm_test`) by running:
+
 ```
 pg_restore --dbname cfdm_test data/subset.dump
 ./manage.py update_all
 ```
+
 Ignore `user does not exist` error messages. Everything will still work!
 
-**Note**: *FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
+*Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
+
 ```
 export SQLA_CONN=<psql:address-to-box>
 ```
-*Reach out to a team member to get the actual addresses.* 
 
+*Reach out to a team member to get the actual addresses.*
 
 #### Set other environment variables
-
-1. Run: 
+1. Run:
 
    ```
    export FEC_WEB_DEBUG=true
    ```
+
    This shows error details and more verbose request logging. 
 
-2. Run: 
+2. Run:
+
    ```
    export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
    export FEC_WEB_API_URL=http://localhost:5000
    export FEC_CMS_URL=http://localhost:8000
    ```
+
    These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
    
    *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.* 
 
 3. Run: 
+
    ```
    export FEC_WEB_USERNAME=<username_of_your_choosing>
    export FEC_WEB_PASSWORD=<password_of_your_choosing>
    ```
+
    Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
    
    *Note: 18F and FEC team members will have additional environment variables to set up. Please reach out to a team member for detailed information.*
-
 
 #### Run locally
 Follow these steps every time you want to work on this project locally.
@@ -145,17 +161,18 @@ Follow these steps every time you want to work on this project locally.
    ```
    ./manage.py runserver
    ```
+
 2. View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 #### Task queue
-
 We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](http://redis.io/) as the Celery message broker. 
 
 To work with Celery and Redis locally, install Redis and start a Redis server. By default,
 we connect to Redis at `redis://localhost:6379`; if Redis is running at a different URL,
 set the `FEC_REDIS_URL` environment variable. 
 
-Note: Both the API and Celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).
+*Note: Both the API and Celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).*
+
 Running Redis and Celery locally:
 
 ```
@@ -163,10 +180,12 @@ redis-server
 celery worker --app webservices.tasks
 ```
 
+
 ## Testing
 This repo uses [pytest](http://pytest.org/latest/).
 
 Running the tests:
+
 ```
 py.test
 ```
@@ -196,17 +215,17 @@ where `source` is the database containing the newly created test subset.
 ### Deployment prerequisites
 If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI and the autopilot plugin.
 
-
-##### Deploy
-
+#### Deploy
 Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
 
 1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install Cloud Foundry CLI.
 
 2. Install autopilot by running:
+
    ```
    cf install-plugin autopilot -r CF-Community
    ```
+
    [Learn more about autopilot](https://github.com/concourse/autopilot).
 
 3. Set environment variables used by the deploy script:
@@ -217,7 +236,6 @@ Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/
    ```
    
    If these variables aren't set, you'll be prompted for your Cloud Foundry credentials when you deploy the app.
-
 
 ### Deployment steps
 To deploy to Cloud Foundry, run: 
@@ -233,12 +251,13 @@ The `deploy` task will detect the appropriate Cloud Foundry space based the curr
 ```
 invoke deploy --space dev
 ```
+
 This command will explicitly target the `dev` space.
 
 #### Setting up a service
-
 On Cloud Foundry, we use the redis28-swarm
 service. The Redis service can be created as follows:
+
 ```
 cf create-service redis28-swarm standard fec-redis
 ```
@@ -265,50 +284,67 @@ Deploys of a single app can be performed manually by targeting the env/space, an
 ```
 cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 ```
+
 *Note: Performing a deploy in this manner will result in a brief period of downtime.*
+
+
+### Create a changelog
+If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).
+
+Once installed, run:
+
+```
+github_changelog_generator --since-tag <last public-relase> --t <your-gh-token>
+```
+
+When this finishes, commit the log to the release.
+
 
 ## Git-flow and continuous deployment
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
 
-#### Creating a new feature
+### Creating a new feature
 * Developer creates a feature branch:
-```
-git flow feature start my-feature
-```
+
+    ```
+    git flow feature start my-feature
+    ```
 
 * Reviewer merges feature branch into develop and pushes to origin
 * [auto] Develop is deployed to dev
 
-#### Creating a hotfix
+### Creating a hotfix
 * Developer creates a hotfix branch:
-```
-git flow hotfix start my-hotfix
-```
+
+    ```
+    git flow hotfix start my-hotfix
+    ```
 
 * Reviewer merges hotfix branch into develop and master and pushes to origin
 * [auto] Develop is deployed to dev
 * [auto] Master is deployed to prod
 
-#### Creating a release
+### Creating a release
 * Developer creates a release branch and pushes to origin:
 
-```
-git flow release start my-release
-git flow release publish my-release
-```
+    ```
+    git flow release start my-release
+    git flow release publish my-release
+    ```
 
 * [auto] Release is deployed to stage
 * Review of staging
-* Developer merges release branch into master and pushes to origin
+* Developer merges release branch into master and pushes to origin:
 
-```
-git flow release finish my-release
-```
+    ```
+    git flow release finish my-release
+    ```
 
 * [auto] Master is deployed to prod
 
+
 ## Additional developer notes
-This section covers a few topics we think might help you after you've gotten set up.
+This section covers a few topics we think might help developers after setup.
 
 ### API umbrella
 The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
@@ -339,4 +375,3 @@ caching, and rate limiting.
 
 ### Sorting fields
 Sorting fields include a compound index on on the filed to sort and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
-
