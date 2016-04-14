@@ -334,7 +334,7 @@ cf delete <one-off-app-name>
 
 One other thing you may want to consider doing is adding explicit log statements or an email notification to whatever command you are running so that you know for sure when the command finishes (or errors out). However, please do not check in these custom modifications.
 
-*Note: In the future, we hope to have a better means of accomplish this.*
+*Note: We hope to have a better way of accomplishing this in the future.*
 
 ### Create a changelog
 If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).
