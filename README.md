@@ -12,17 +12,17 @@
 ![](http://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
 
 ## About this project
-The Federal Election Commission (FEC) releases information to the public about money that’s raised and spent in federal elections — that’s elections for US president, Senate, and House of Representatives.
+The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US president, Senate, and House of Representatives.
 
 Are you interested in seeing how much money a candidate raised? Or spent? How much debt they took on? Who contributed to their campaign? The FEC is the authoritative source for that information.
 
 betaFEC is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
 
 
-## This repository, [openFEC](https://github.com/18F/openfec), is home to betaFEC’s API
+## This repository, [openFEC](https://github.com/18F/openfec), is home to betaFEC's API
 All FEC repositories:
-- [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from betaFEC’s feedback widget here, and this is the best place to submit general feedback.
-- [openFEC](https://github.com/18F/openfec): betaFEC’s API
+- [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from betaFEC's feedback widget here, and this is the best place to submit general feedback.
+- [openFEC](https://github.com/18F/openfec): betaFEC's API
 - [swagger-ui](https://github.com/18F/swagger-ui): forked repo that generates our interactive API documentation
 - [openFEC-web-app](https://github.com/18f/openfec-web-app): the web app for exploring campaign finance data
 - [fec-style](https://github.com/18F/fec-style): shared styles and user interface components, including this project's glossary and feedback tools
