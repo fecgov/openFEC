@@ -128,9 +128,16 @@ ahead of time to prevent surprises.
 
 We currently have automatic deployments take place whenever code is
 merged/pushed to the `develop` (to our `dev` space) or `release/*` (to our
-`stage` space) branches. We have created a separate `feature` space in Cloud
-Foundry that is not auto-deployed to so that we may work on and test specific
-features without clobbering each other.
+`stage` space) branches.
+
+We have also created a separate `feature` space in Cloud Foundry that we only
+manually deploy to as needed. This will enable us to work on and test features
+that may require a long lead time before merging into `develop`. It will also
+enable us to test this work without being clobbered by the frequent
+deployments made when work is merged into `develop`.
+
+When working in the `feature` space, we've agreed to ask in advance to make
+sure no one else is currently utilizing the space for their work.
 
 
 ### Development-related tools
