@@ -286,6 +286,52 @@ cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api
 
 *Note: Performing a deploy in this manner will result in a brief period of downtime.*
 
+#### Running commands remotely
+There may be a time when we need to run a command remotely, e.g., a management command to update database schemas. Cloud Foundry currently doesn't support a way of connecting to an app that is running directly, so we need to deploy a one-off app specifically for running commands instead.
+
+To accomplish this, follow these steps:
+
+1. Make sure you are pointing to the correct target space:
+
+   ```
+   cf target -o fec -s <dev | stage | prod>
+   ```
+
+2. Create a new app manifest for this one-off app (choose whatever file name you wish, ending with the `.yml` extension):
+
+   ```
+   cf create-app-manifest api -p <one-off-app-manifest-filename.yml>
+   ```
+
+3. Open the newly created one-off app manifest file and **add/modify** the following YAML properties to it (be sure to maintain all of the other existing properties):
+
+   ```
+   name: one-off-app-name
+   command: "<your command here, e.g., python manage.py update_all> && sleep infinity"
+   no-route: true
+   ```
+
+*Note: the `&& sleep infinity` part is needed as the end of the command you specify so that Cloud Foundry doesn't attempt to redeploy the app once the command finishes.*
+
+4. Using the same app name you just specified in the custom manifest file, push your application to Cloud Foundry:
+
+   ```
+   cf push <one-off-app-name> -f <one-off-app-manifest-filename.yml>
+   ```
+
+Once the app is pushed, you can also tail the logs to make see when the command finishes:
+
+```
+cf logs <one-off-app-name>
+```
+
+When the command you want to run finishes, be sure to stop and delete the app to free resources in Cloud Foundry:
+
+```
+cf stop <one-off-app-name>
+cf delete <one-off-app-name>
+```
+
 
 ### Create a changelog
 If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).
