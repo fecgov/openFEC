@@ -217,6 +217,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.Search, '/legal/search/')
+api.add_resource(legal.Load, '/legal/load/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
