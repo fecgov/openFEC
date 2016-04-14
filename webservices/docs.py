@@ -102,6 +102,10 @@ particular person or group, using a name to find the `candidate_id` or `committe
 this endpoint can be a helpful first step.
 '''
 
+LEGAL_SEARCH = '''
+Search for legal documents.
+'''
+
 CANDIDATE_LIST = '''
 Fetch basic information about candidates, and use parameters to filter results to the
 candidates you're looking for.
@@ -341,7 +345,7 @@ SCHEDULE_B = SCHEDULE_B_TAG + '''
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
 the `last_indexes` object from `pagination` to the URL of your last request. For
-example, when sorting by `contribution_receipt_date`, you might receive a page of
+example, when sorting by `disbursement_date`, you might receive a page of
 results with the following pagination information:
 
 ```
@@ -359,13 +363,18 @@ pagination: {
 To fetch the next page of results, append "last_index=230906248&amp;last_disbursement_date=2014-07-04"
 to the URL.
 
-Note: because the Schedule A data includes many records, counts for
+Note: because the Schedule B data includes many records, counts for
 large result sets are approximate.
+'''
+
+SCHEDULE_B_BY_PURPOSE = '''
+Schedule B receipts aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
+Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/18F/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
 '''
 
 SCHEDULE_E_TAG = '''
 Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
-bought and adds on TV to oppose a federal candidate, each ad purchase would be recorded here with
+bought ads on TV to oppose a federal candidate, each ad purchase would be recorded here with
 the expenditure amount, name and id of the candidate, and whether the ad supported or opposed the candidate.
 
 An independent expenditure is an expenditure for a communication "expressly advocating the election or
