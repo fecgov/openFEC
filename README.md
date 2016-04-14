@@ -287,11 +287,11 @@ cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api
 *Note: Performing a deploy in this manner will result in a brief period of downtime.*
 
 #### Running commands remotely
-There may be a time when we need to run a command remotely, e.g., a management command to update database schemas. Cloud Foundry currently doesn't support a way of connecting to an app that is running directly, so we need to deploy a one-off app specifically for running commands instead.
+There may be a time when you need to run a command remotely, e.g., a management command to update database schemas. Cloud Foundry currently doesn't support a way of connecting to an app that is running directly, so you need to deploy a one-off app specifically for running commands instead.
 
 To accomplish this, follow these steps:
 
-1. Make sure you are pointing to the correct target space:
+1. Make sure you're pointing to the correct target space:
 
    ```
    cf target -o fec -s <dev | stage | prod>
@@ -311,7 +311,7 @@ To accomplish this, follow these steps:
    no-route: true
    ```
 
-*Note: the `&& sleep infinity` part is needed as the end of the command you specify so that Cloud Foundry doesn't attempt to redeploy the app once the command finishes.*
+   *Note: the* `&& sleep infinity` *part is needed as the end of the command you specify so that Cloud Foundry doesn't attempt to redeploy the app once the command finishes.*
 
 4. Using the same app name you just specified in the custom manifest file, push your application to Cloud Foundry:
 
@@ -332,6 +332,9 @@ cf stop <one-off-app-name>
 cf delete <one-off-app-name>
 ```
 
+One other thing you may want to consider doing is adding explicit log statements or an email notification to whatever command you are running so that you know for sure when the command finishes (or errors out). However, please do not check in these custom modifications.
+
+*Note: In the future, we hope to have a better means of accomplish this.*
 
 ### Create a changelog
 If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).
