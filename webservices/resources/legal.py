@@ -9,7 +9,6 @@ from webservices.utils import use_kwargs
 from webargs import fields
 from pyelasticsearch import ElasticSearch
 from webservices.env import env
-import json
 from flask import request
 
 
