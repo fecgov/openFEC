@@ -43,6 +43,7 @@ from webservices.resources import search
 from webservices.resources import dates
 from webservices.resources import costs
 from webservices.resources import legal
+from webservices.resources import load
 from webservices.env import env
 
 
@@ -217,7 +218,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.Search, '/legal/search/')
-api.add_resource(legal.Load, '/legal/load/')
+api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
