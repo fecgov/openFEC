@@ -26,7 +26,7 @@ We use GitHub issues to track user issues and team tasks. Whenever possible,
 we follow this outline:
  
 1. Goal: a quick blurb explaining the bug or what the issue should accomplish.
-   What is the user need?
+   Optional: What is the user need?
 2. Completion criteria: how we’ll know that this issue has been completed
 3. Tasks to completion:
     - [ ] Use 
@@ -156,11 +156,6 @@ development-related tools:
 - Our current setup with Travis-CI, hound, and Codecov are working fine for
   both teams; we will continue to use them as is until we find they are no
   longer meeting our needs.
-- The project originally made use of some Selenium tests, but these were
-  difficult to maintain and didn't provide much value. The teams have agreed
-  to consider introducing them again or something similar, but with the goals
-  of keeping them light-weight and maintainable; a spider or script of sorts
-  might be produced to help with catching dead links.
 
 
 ### Monitoring
@@ -170,9 +165,6 @@ We currently have several monitoring tools in place:
 - Sentry, for catching more verbose error reports and logs
 - A custom script powered by Mandrill to e-mail us nightly status reports in
   the `dev`, `stage`, and `prod` environments.
-
-In the future, we would also like to find a solution for monitoring the AWS
-RDS boxes we use directly.
 
 
 ### 18F specific team workflow
