@@ -13,6 +13,12 @@ import json
 from flask import request
 
 
+if env.get_credential('WRITE_AUTHORIZED_TOKENS'):
+    write_cred = env.get_credential('WRITE_AUTHORIZED_TOKENS') 
+else:
+    write_cred = '12345, abc, def'
+write_authorized_tokens = [token.strip() for token in write_cred.split(',')]
+
 es_conn = env.get_service(label='elasticsearch-swarm-1.7.1')
 if es_conn:
     es = ElasticSearch(es_conn.get_url(url='uri'))
@@ -29,10 +35,12 @@ class Search(utils.Resource):
 class Load(utils.Resource):
     def post(self, **kwargs):
         data = request.get_json()
-        es.bulk((es.index_op(doc, id=doc['doc_id']) for doc in data['docs']),
-          index='docs',
-          doc_type=data['doc_type'])
+        if data['api_key'] in write_authorized_tokens:
+            es.bulk((es.index_op(doc, id=doc['doc_id']) for doc in data['docs']),
+              index='docs',
+              doc_type=data['doc_type'])
 
-        es.refresh(index='docs')
-
-        return {'success': True}
+            es.refresh(index='docs')
+            return {'success': True}
+        else:
+            return {'success': False, 'message': 'Not authorized'}
