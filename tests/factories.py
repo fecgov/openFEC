@@ -65,10 +65,10 @@ class CandidateTotalFactory(BaseCandidateFactory):
         model = models.CandidateTotal
     cycle = 2016
 
-
-class BaseCommitteeFactory(BaseFactory):
+class CandidateFlagsFactory(BaseFactory):
     class Meta:
         model = models.CandidateFlags
+
     federal_funds_flag = False
     five_thousand_flag = True
 
