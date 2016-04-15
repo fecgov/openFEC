@@ -27,7 +27,7 @@ All FEC repositories:
 - [openFEC-web-app](https://github.com/18f/openfec-web-app): the web app for exploring campaign finance data
 - [fec-style](https://github.com/18F/fec-style): shared styles and user interface components, including this project's glossary and feedback tools
 - [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS) 
-- [proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
+- [fec-proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
 
 
 ## Get involved
