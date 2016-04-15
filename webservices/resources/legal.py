@@ -42,4 +42,6 @@ class Load(utils.Resource):
             es.refresh(index='docs')
             return {'success': True}
         else:
-            return {'success': False, 'message': 'Not authorized'}
+            return {'success': False, 'message': 
+                """Your API token has not been authorized 
+                    to write data to this application."""}
