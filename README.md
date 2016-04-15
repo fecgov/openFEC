@@ -181,6 +181,7 @@ the following keys are set:
 * FEC_WEB_API_KEY
 * FEC_WEB_API_KEY_PUBLIC
 * NEW_RELIC_LICENSE_KEY
+* WRITE_AUTHORIZED_TOKENS
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
