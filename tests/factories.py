@@ -67,6 +67,12 @@ class CandidateTotalFactory(BaseCandidateFactory):
 
 
 class BaseCommitteeFactory(BaseFactory):
+    class Meta:
+        model = models.CandidateFlags
+    federal_funds_flag = False
+    five_thousand_flag = True
+
+class BaseCommitteeFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
 
 
