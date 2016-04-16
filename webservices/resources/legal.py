@@ -23,12 +23,21 @@ class Search(utils.Resource):
         query = {
           "query": { 
             "bool": { 
-              "must": [
-                { "match": { "_all": q}} 
-              ]
-            }
-          }
-        }
+              "must": { 
+                "match": { "_all": q}
+              },    
+              "should": [
+                   {"match": {
+                      "AO_No": q  
+                   }},
+                   {"match_phrase": { 
+                      "_all": {
+                        "query": q,
+                        "slop":  50
+                      }
+                    }
+            }]}}}
+
         hits_returned = min([10, hits_returned])
         hits = es.search(query, index='docs', size=hits_returned, es_from=from_hit)['hits']['hits']
         return {'results': hits}
