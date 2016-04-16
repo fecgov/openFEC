@@ -5,14 +5,7 @@ import os
 
 es = utils.get_elasticsearch_connection()
 
-if env.get_credential('WRITE_AUTHORIZED_TOKENS'):
-    write_cred = env.get_credential('WRITE_AUTHORIZED_TOKENS') 
-else:
-    if 'WRITE_AUTHORIZED_TOKENS' in os.environ:
-        write_cred = os.environ['WRITE_AUTHORIZED_TOKENS']
-    else:
-        write_cred = ''
-
+write_cred = env.get_credential('WRITE_AUTHORIZED_TOKENS', '') 
 write_authorized_tokens = [token.strip() for token in write_cred.split(',')]
 
 class Legal(utils.Resource):
