@@ -19,7 +19,16 @@ else:
 
 class Search(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, **kwargs):
-        query = kwargs['q']
-        hits = es.search('_all: %s' % query, index='docs', size=10)['hits']['hits']
+    def get(self, q, from_hit=0, hits_returned=10, **kwargs):
+        query = {
+          "query": { 
+            "bool": { 
+              "must": [
+                { "match": { "_all": q}} 
+              ]
+            }
+          }
+        }
+        hits_returned = min([10, hits_returned])
+        hits = es.search(query, index='docs', size=hits_returned, es_from=from_hit)['hits']['hits']
         return {'results': hits}
