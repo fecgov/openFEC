@@ -38,7 +38,10 @@ class Search(utils.Resource):
                     }
             }]}}}
 
+        count = es.count(query)
+        
+        query["highlight"] = {"fields": {"text": {}}}
+        query["_source"] = {"exclude": "text"}
         hits_returned = min([10, hits_returned])
         hits = es.search(query, index='docs', size=hits_returned, es_from=from_hit)['hits']['hits']
-        count = es.count(query)
         return {'results': hits, 'count': count['count']}
