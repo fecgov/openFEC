@@ -40,4 +40,5 @@ class Search(utils.Resource):
 
         hits_returned = min([10, hits_returned])
         hits = es.search(query, index='docs', size=hits_returned, es_from=from_hit)['hits']['hits']
-        return {'results': hits}
+        count = es.count(query)
+        return {'results': hits, 'count': count['count']}
