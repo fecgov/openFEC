@@ -21,27 +21,32 @@ class Search(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q, from_hit=0, hits_returned=10, **kwargs):
         query = {
-          "query": { 
-            "bool": { 
-              "must": { 
-                "match": { "_all": q}
-              },    
+          "query": {
+            "bool": {
+              "must": {
+                "match": {"_all": q}
+              },
               "should": [
                    {"match": {
-                      "AO_No": q  
+                      "AO_No": q
                    }},
-                   {"match_phrase": { 
+                   {"match_phrase": {
                       "_all": {
                         "query": q,
                         "slop":  50
                       }
                     }
-            }]}}}
+                    }]
+                }
+            }
+        }
 
         count = es.count(query)
-        
+
         query["highlight"] = {"fields": {"text": {}}}
         query["_source"] = {"exclude": "text"}
         hits_returned = min([10, hits_returned])
-        hits = es.search(query, index='docs', size=hits_returned, es_from=from_hit)['hits']['hits']
+        hits = es.search(query, index='docs', size=hits_returned,
+                         es_from=from_hit)['hits']['hits']
         return {'results': hits, 'count': count['count']}
+
