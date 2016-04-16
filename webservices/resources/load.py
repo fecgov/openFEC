@@ -26,5 +26,6 @@ class Legal(utils.Resource):
             es.refresh(index='docs')
             return {'success': True}
         else:
-            return {'success': False, 'message': 
+            msg = {'success': False, 'message': 
                 "Your API token has not been authorized to write data to this application."}
+            return msg, 401
