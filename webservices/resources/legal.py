@@ -19,7 +19,7 @@ else:
 
 class Search(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q, from_hit=0, hits_returned=10, **kwargs):
+    def get(self, q, from_hit=0, hits_returned=20, **kwargs):
         query = {"query": {"bool": {
                             "must": {"match": {"_all": q}},
                             "should": [{"match": {"AO_No": q}},
@@ -36,7 +36,7 @@ class Search(utils.Resource):
 
         query["highlight"] = {"fields": {"text": {}}}
         query["_source"] = {"exclude": "text"}
-        hits_returned = min([10, hits_returned])
+        hits_returned = min([200, hits_returned])
         hits = es.search(query, index='docs', size=hits_returned,
                          es_from=from_hit)['hits']['hits']
 
