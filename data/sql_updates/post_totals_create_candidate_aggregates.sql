@@ -34,7 +34,7 @@ cycle_totals as (
         sum(receipts) >= 5000 as five_thousand_flag,
         sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
         sum(last_debts_owed_by_committee) as debts_owed_by_committee,
-        array_agg(federal_funds_flag)::boolean array @> array[cast('true' as boolean)] as federal_funds_flag
+        true != any array_agg(federal_funds_flag) as federal_funds_flag
     from ofec_cand_cmte_linkage_mv_tmp link
     join totals on
         link.cmte_id = totals.committee_id and
