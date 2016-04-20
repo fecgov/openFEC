@@ -37,7 +37,7 @@ we follow this outline:
 5. For development issues, include unknown tasks or dependencies that need
    investigation.
 
-In addition, everyone is encourage to open issues for figuring out functional
+In addition, everyone is encouraged to open issues for figuring out functional
 testing or exploring new ideas that require some additional research, e.g.,
 database performance and tuning activities.
 
