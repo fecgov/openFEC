@@ -1,7 +1,7 @@
 ## Welcome
 We're glad you're thinking about contributing to an 18F open source project!
-If you're unsure about anything, ask us — or submit the issue or pull request
-anyway. The worst that can happen is that we’ll politely ask you to change
+If you're unsure about anything, ask us. Or submit the issue or pull request
+anyway; the worst that can happen is that we’ll politely ask you to change
 something.
 
 We love all friendly contributions, and we welcome your ideas about how to
@@ -77,21 +77,21 @@ database performance and tuning activities.
 - When a pull request is ready for review, label it `plz-review!`.
 - Anyone may informally review a pull request and make comments or
   suggestions.
-- Only 18F staff may merge pull requests (please do not merge your own pull
-  requests, ask for someone else to review and do so).
+- Only 18F staff may merge pull requests (don't merge your own pull
+  requests; ask for someone else to review and do so).
 
 
 ## 18F team information and practices
 There are currently two teams at 18F working in the FEC repositories: the data
 team and the legal team. Both teams have agreed to sync their sprint schedules
-and align their development efforts to coincide with combined bi-weekly
+and align their development efforts to coincide with combined biweekly
 releases that ship to production on the Wednesday after a two-week sprint. We
-will also share a calendar in order to keep track of important sprint dates
+also share a calendar to keep track of important sprint dates
 and events.
 
 In addition, we've committed to setting aside some time during each sprint
 when we all work on code reviews of open pull requests together. This will
-help bring new developers up-to-speed on the various code bases and ensure
+help bring new developers up to speed on the various code bases and ensure
 folks are comfortable reviewing code across the teams. As everyone's comfort
 increases we can consider making this activity less structured.
 
@@ -100,16 +100,15 @@ increases we can consider making this activity less structured.
 We have agreed to continue using our development site for demos with folks at
 the FEC. Everyone should feel empowered to demo their work as needed,
 especially as this provides valuable and timely feedback. We have also created
-a new space for us for testing and demoing specific features that is not
-auto-deployed to.
+a new space — which isn't auto-deployed to — for testing and demoing specific features.
 
 While we routinely demo our work on the development site, the FEC folks will
 conduct full reviews of the work slated for a release on our staging site.
 
 
-### Deployment- and release-related information
-The betaFEC project requires a steady release schedule with contents of
-releases planned ahead of time due to project requirements. Since both teams
+### Deployment and release information
+The betaFEC project requires a steady release schedule that is
+planned ahead of time, due to project requirements. Since both teams
 have agreed to synchronize their sprint schedules, this will make it easier
 for us to plan for each release after a sprint is completed.
 
@@ -122,15 +121,14 @@ conflicts, etc.
 
 This release branch will be deployed to our `stage` environment for FEC folks
 to review until we are ready to do a production deployment, which we have
-agreed will be that Wednesday pending any issues found. When the branch is
-created we have agreed to let folks know in the appropriate Slack channels
-ahead of time to prevent surprises.
+agreed will be that Wednesday, pending any issues found. To prevent suprisse, we've agreed to
+let folks know ahead of time in the appropriate Slack channels when the branch is created.
 
 We currently have automatic deployments take place whenever code is
 merged/pushed to the `develop` (to our `dev` space) or `release/*` (to our
 `stage` space) branches.
 
-We have also created a separate `feature` space in Cloud Foundry that we only
+We have also created a separate `feature` space in Cloud Foundry, which we 
 manually deploy to as needed. This will enable us to work on and test features
 that may require a long lead time before merging into `develop`. It will also
 enable us to test this work without being clobbered by the frequent
@@ -140,22 +138,22 @@ When working in the `feature` space, we've agreed to ask in advance to make
 sure no one else is currently utilizing the space for their work.
 
 
-### Development-related tools
+### Development tools
 Both teams have agreed to the following tenents around the use of our
-development-related tools:
+development tools:
 
 - Folks should feel free to branch or fork the code as they see fit; neither
-  workflow has major pros or cons over the other, and if anything forking is
+  workflow has major pros or cons over the other, and, if anything, forking is
   encouraged to ensure that there are no issues for external folks who would
-  like to contribute to the repositories as well.
+  like to contribute to the repositories.
 - We are going to stick with using
   [git-flow](http://danielkummer.github.io/git-flow-cheatsheet/) to manage our
   work in git, mainly because our deployment hooks are tied to its workflow.
   We are leaving ourselves the option to investigate other tools or git
   workflows in the future.
 - Our current setup with Travis-CI, hound, and Codecov are working fine for
-  both teams; we will continue to use them as is until we find they are no
-  longer meeting our needs.
+  both teams; we will continue to use them as is until we find they no
+  longer meet our needs.
 
 
 ### Monitoring
@@ -168,21 +166,21 @@ We currently have several monitoring tools in place:
 
 
 ### 18F specific team workflow
-1. Pull an issue from the current sprint only, please (unless there is an
+1. Please pull an issue from the current sprint only (unless there is an
    *URGENT* issue). Take an unassigned issue or re-assign an issue with the
    label "[stealable](https://github.com/18F/openFEC/labels/stealable)." If a
    non *URGENT* issue comes up, but you want to prioritize it, coordinate with
-   the PM or tech lead on slack.
+   the PM or tech lead on Slack.
 2. Before starting,
    [write the dev issue checklist](https://github.com/18f/openFEC/blob/develop/CONTRIBUTING.md#development-issues-should-include).
 3. While working, submit `[WIP]`
    [pull requests](https://github.com/18f/openFEC/blob/develop/CONTRIBUTING.md#pull-requests)
    liberally.
 4. Time boxing! If you have spent half the time of the estimated size of the
-   issue and you're not sure that you're half-way finished, notify the tech
-   lead or PM in slack. This isn't bad, we just like knowing what's up. :)
-5. Make sure your PR includes significant test coverage. (Follow the above PR
+   issue and you're not sure that you're halfway finished, notify the tech
+   lead or PM in Slack. This isn't bad; we just like knowing what's up. :)
+5. Make sure your pull request includes significant test coverage. (Follow the above pull request
    guidelines.)
-6. Once you're done with your PR, notify the team in slack that your PR is
-   ready for review and don't merge your own pull request.
-7. Do a review of someone else's PR and merge when it is deemed ready.
+6. Once you're done with your pull request, notify the team in Slack that your pull request is
+   ready for review, and don't merge your own pull request.
+7. Do a review of someone else's pull request and merge when it is deemed ready.
