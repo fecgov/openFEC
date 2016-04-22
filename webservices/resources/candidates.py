@@ -183,7 +183,7 @@ class CandidateHistoryView(ApiResource):
         )
 
     def build_query(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
-        query = models.CandidateHistory.query
+        query = super().build_query(**kwargs)
 
         if candidate_id:
             query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
