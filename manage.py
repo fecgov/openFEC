@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
+import os
 import glob
 import logging
 import subprocess
 import multiprocessing
 
+import networkx as nx
 from flask.ext.script import Server
 from flask.ext.script import Manager
 from sqlalchemy import text as sqla_text
 
+from webservices import flow
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
@@ -127,7 +130,10 @@ def update_schemas(processes=1):
     """
     logger.info("Starting DB refresh...")
     processes = int(processes)
-    execute_sql_folder('data/sql_updates/', processes=processes)
+    graph = flow.get_graph()
+    for task in nx.topological_sort(graph):
+        path = os.path.join('data', 'sql_updates', '{}.sql'.format(task))
+        execute_sql_file(path)
     execute_sql_file('data/rename_temporary_views.sql')
     logger.info("Finished DB refresh.")
 
