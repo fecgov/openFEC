@@ -86,7 +86,7 @@ select
     rpt_tp_desc as report_type_full,
     rpt_yr as report_year,
     most_recent_filing_flag,
-    receipt_date
+    receipt_dt as receipt_date
 from
     fec_vsum_f3 c
 where
