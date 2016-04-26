@@ -47,6 +47,7 @@ def get_graph():
         ('committee_detail', 'committee_fulltext'),
         ('totals_combined', 'committee_fulltext'),
     ])
+
     graph.add_edges_from([
         ('candidate_detail', 'candidate_fulltext'),
         ('totals_combined', 'candidate_fulltext'),
