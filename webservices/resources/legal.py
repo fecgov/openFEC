@@ -29,19 +29,18 @@ class Search(utils.Resource):
                                                              }
                                             }]
                                     }
-                            }
+                            },
+                    "highlight": {"fields": {"text": {}}},
+                    "_source": {"exclude": "text"}
                  }
 
-        count = es.count(query)
-
-        query["highlight"] = {"fields": {"text": {}}}
-        query["_source"] = {"exclude": "text"}
         hits_returned = min([200, hits_returned])
-        hits = es.search(query, index='docs', size=hits_returned,
-                         es_from=from_hit)['hits']['hits']
+        results = es.search(query, index='docs', size=hits_returned,
+                         es_from=from_hit)
+        hits = results['hits']['hits']
 
         for hit in hits:
             hit["pdf_url"] = 'http://saos.fec.gov/aodocs/%s.pdf' % hit['_source']['AO_No']
 
-        return {'results': hits, 'count': count['count']}
+        return {'results': hits, 'count': results['hits']['total']}
 
