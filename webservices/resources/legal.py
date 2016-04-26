@@ -41,7 +41,6 @@ class Search(utils.Resource):
                          es_from=from_hit)['hits']['hits']
 
         for hit in hits:
-            print(hit)
             hit["pdf_url"] = 'http://saos.fec.gov/aodocs/%s.pdf' % hit['_source']['AO_No']
 
         return {'results': hits, 'count': count['count']}
