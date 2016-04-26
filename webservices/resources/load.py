@@ -15,7 +15,6 @@ class Legal(utils.Resource):
               index='docs',
               doc_type=data['doc_type'])
 
-            es.refresh(index='docs')
             return {'success': True}
         else:
             msg = {'success': False, 'message':
