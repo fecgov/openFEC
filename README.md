@@ -179,7 +179,6 @@ redis-server
 celery worker --app webservices.tasks
 ```
 
-
 ## Testing
 This repo uses [pytest](http://pytest.org/latest/).
 
@@ -277,6 +276,7 @@ the following keys are set:
 * SENTRY_DSN
 * SENTRY_PUBLIC_DSN
 * NEW_RELIC_LICENSE_KEY
+* WRITE_AUTHORIZED_TOKENS
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
