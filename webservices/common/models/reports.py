@@ -109,10 +109,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
-
-    # new table vars
-    # needs doc
-    most_recent_filing_flag = db.Column(db.String)
+    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
     @property

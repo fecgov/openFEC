@@ -85,7 +85,7 @@ select
     rpt_tp as report_type,
     rpt_tp_desc as report_type_full,
     rpt_yr as report_year,
-    most_recent_filing_flag,
+    most_recent_filing_flag like 'N' as is_amended,
     receipt_dt as receipt_date
 from
     fec_vsum_f3 c
@@ -102,3 +102,4 @@ create index on ofec_reports_house_senate_mv_tmp(committee_id, idx);
 create index on ofec_reports_house_senate_mv_tmp(coverage_end_date, idx);
 create index on ofec_reports_house_senate_mv_tmp(coverage_start_date, idx);
 create index on ofec_reports_house_senate_mv_tmp(beginning_image_number, idx);
+create index on ofec_reports_house_senate_mv_tmp(is_amended, idx);
