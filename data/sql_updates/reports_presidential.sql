@@ -96,7 +96,6 @@ where
 create unique index on ofec_reports_presidential_mv_tmp(idx);
 
 create index on ofec_reports_presidential_mv_tmp(cycle, idx);
-create index on ofec_reports_presidential_mv_tmp(expire_date, idx);
 create index on ofec_reports_presidential_mv_tmp(report_type, idx);
 create index on ofec_reports_presidential_mv_tmp(report_year, idx);
 create index on ofec_reports_presidential_mv_tmp(committee_id, idx);
