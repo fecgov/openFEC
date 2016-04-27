@@ -1,12 +1,11 @@
-drop view if exists ofec_reports_presidential_vw;
 drop materialized view if exists ofec_reports_presidential_mv_tmp;
 create materialized view ofec_reports_presidential_mv_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    two_yr_period_sk as cycle,
-    start_date.dw_date as coverage_start_date,
-    end_date.dw_date as coverage_end_date,
+    cycle,
+    cvg_start_dt as coverage_start_date,
+    cvg_end_dt as coverage_end_date,
     begin_image_num as beginning_image_number,
     cand_contb_per as candidate_contribution_period,
     cand_contb_ytd as candidate_contribution_ytd,
@@ -26,7 +25,7 @@ select
     indv_unitem_contb_ytd as individual_unitemized_contributions_ytd,
     indv_item_contb_per as individual_itemized_contributions_period,
     indv_item_contb_ytd as individual_itemized_contributions_ytd,
-    indv_contb_per as total_individual_contributions_period,
+    ttl_indiv_contb_per as total_individual_contributions_period,
     indv_contb_ytd as total_individual_contributions_ytd,
     items_on_hand_liquidated as items_on_hand_liquidated,
     loans_received_from_cand_per as loans_received_from_candidate_period,
@@ -68,7 +67,7 @@ select
     ttl_contb_ref_ytd as total_contribution_refunds_ytd,
     ttl_contb_per as total_contributions_period,
     ttl_contb_ytd as total_contributions_ytd,
-    greatest(ttl_disb_per, ttl_disb_sum_page_per) as total_disbursements_period,
+    ttl_disb_per as total_disbursements_period,
     ttl_disb_ytd as total_disbursements_ytd,
     ttl_loan_repymts_made_per as total_loan_repayments_made_period,
     ttl_loan_repymts_made_ytd as total_loan_repayments_made_ytd,
@@ -77,7 +76,7 @@ select
     ttl_offsets_to_op_exp_per as total_offsets_to_operating_expenditures_period,
     ttl_offsets_to_op_exp_ytd as total_offsets_to_operating_expenditures_ytd,
     ttl_per as total_period,
-    greatest(ttl_receipts_per, ttl_receipts_sum_page_per) as total_receipts_period,
+    ttl_receipts_per as total_receipts_period,
     ttl_receipts_ytd as total_receipts_ytd,
     ttl_ytd as total_ytd,
     tranf_from_affilated_cmte_per as transfers_from_affiliated_committee_period,
@@ -86,16 +85,12 @@ select
     tranf_to_other_auth_cmte_ytd as transfers_to_other_authorized_committee_ytd,
     rpt_tp as report_type,
     rpt_tp_desc as report_type_full,
-    f3p.expire_date as expire_date,
-    f3p.load_date as load_date
+    most_recent_filing_flag like 'N' as is_amended,
+    receipt_dt as receipt_date
 from
-    dimcmte c
-    inner join factpresidential_f3p f3p using (cmte_sk)
-    inner join dimreporttype rt using (reporttype_sk)
-    left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
-    left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+    fec_vsum_f3p c
 where
-    two_yr_period_sk >= :START_YEAR
+    cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_presidential_mv_tmp(idx);
@@ -108,3 +103,4 @@ create index on ofec_reports_presidential_mv_tmp(committee_id, idx);
 create index on ofec_reports_presidential_mv_tmp(coverage_end_date, idx);
 create index on ofec_reports_presidential_mv_tmp(coverage_start_date, idx);
 create index on ofec_reports_presidential_mv_tmp(beginning_image_number, idx);
+create index on ofec_reports_presidential_mv_tmp(is_amended, idx);
