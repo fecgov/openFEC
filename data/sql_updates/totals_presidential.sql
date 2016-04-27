@@ -1,29 +1,27 @@
 drop materialized view if exists ofec_totals_presidential_mv_tmp cascade;
 create materialized view ofec_totals_presidential_mv_tmp as
 with last as (
-    select distinct on (cmte_sk, two_yr_period_sk) *
-    from factpresidential_f3p
-    inner join dimreporttype rt using (reporttype_sk)
-    left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+    select distinct on (cmte_id, cycle) *
+    from fec_vsum_f3p
     order by
-        cmte_sk,
-        two_yr_period_sk,
-        dw_date desc
+        cmte_id,
+        cycle,
+        cvg_end_dt desc
 )
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    two_yr_period_sk as cycle,
-    min(start_date.dw_date) as coverage_start_date,
-    max(end_date.dw_date) as coverage_end_date,
+    cycle,
+    min(p.cvg_start_dt) as coverage_start_date,
+    max(p.cvg_end_dt) as coverage_end_date,
     sum(p.cand_contb_per) as candidate_contribution,
     sum(p.ttl_contb_ref_per) as contribution_refunds,
     sum(p.ttl_contb_per) as contributions,
-    sum(greatest(p.ttl_disb_per, p.ttl_disb_sum_page_per)) as disbursements,
+    sum(p.ttl_disb_per) as disbursements,
     sum(p.exempt_legal_acctg_disb_per) as exempt_legal_accounting_disbursement,
     sum(p.fed_funds_per) as federal_funds,
     sum(p.fndrsg_disb_per) as fundraising_disbursements,
-    sum(p.indv_contb_per) as individual_contributions,
+    sum(p.ttl_indiv_contb_per) as individual_contributions,
     sum(p.indv_unitem_contb_per) as individual_unitemized_contributions,
     sum(p.indv_item_contb_per) as individual_itemized_contributions,
     sum(p.ttl_loans_received_per) as loans_received,
@@ -39,7 +37,7 @@ select
     sum(p.other_pol_cmte_contb_per) as other_political_committee_contributions,
     sum(p.other_receipts_per) as other_receipts,
     sum(p.pol_pty_cmte_contb_per) as political_party_committee_contributions,
-    sum(greatest(p.ttl_receipts_per, p.ttl_receipts_sum_page_per)) as receipts,
+    sum(p.ttl_receipts_per) as receipts,
     sum(p.ref_indv_contb_per) as refunded_individual_contributions, -- renamed from "refunds_"
     sum(p.ref_other_pol_cmte_contb_per) as refunded_other_political_committee_contributions,
     sum(p.ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
@@ -55,15 +53,12 @@ select
     max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
     max(last.rpt_yr) as last_report_year
 from
-    dimcmte c
-    inner join factpresidential_f3p p using (cmte_sk)
-    left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
-    left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
-    left join last using (cmte_sk, two_yr_period_sk)
+    fec_vsum_f3p p
+    left join last using (cmte_id, cycle)
 where
-    p.expire_date is null
-    and two_yr_period_sk >= :START_YEAR
-group by c.cmte_id, p.two_yr_period_sk
+    p.most_recent_filing_flag like 'X'
+    and cycle >= :START_YEAR
+group by cmte_id, p.cycle
 ;
 
 create unique index on ofec_totals_presidential_mv_tmp(idx);
