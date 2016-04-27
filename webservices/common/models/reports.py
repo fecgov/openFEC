@@ -32,7 +32,6 @@ class CommitteeReports(PdfMixin, BaseModel):
     debts_owed_by_committee = db.Column(db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE)
     debts_owed_to_committee = db.Column(db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE)
     end_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
-    expire_date = db.Column(db.DateTime)
     other_disbursements_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS))
     other_disbursements_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_DISBURSEMENTS))
     other_political_committee_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS))
@@ -110,7 +109,11 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
-    report_form = 'Form 3'
+
+    # new table vars
+    # needs doc
+    most_recent_filing_flag = db.Column(db.String)
+    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
     @property
     def has_pdf(self):
@@ -127,6 +130,8 @@ class CommitteeReportsHouseSenate(CommitteeReports):
 class CommitteeReportsPacParty(CommitteeReports):
     __tablename__ = 'ofec_reports_pacs_parties_mv'
 
+    #  This is going away
+    expire_date = db.Column(db.DateTime)
     all_loans_received_period = db.Column(db.Numeric(30, 2))
     all_loans_received_ytd = db.Column(db.Numeric(30, 2))
     allocated_federal_election_levin_share_period = db.Column(db.Numeric(30, 2))
@@ -193,6 +198,8 @@ class CommitteeReportsPacParty(CommitteeReports):
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
 
+    #  This is going away
+    expire_date = db.Column(db.DateTime)
     candidate_contribution_period = db.Column(db.Numeric(30, 2))
     candidate_contribution_ytd = db.Column(db.Numeric(30, 2))
     exempt_legal_accounting_disbursement_period = db.Column(db.Numeric(30, 2))
