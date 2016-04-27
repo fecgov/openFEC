@@ -15,7 +15,7 @@ reports_schema_map = {
     'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'I': (models.CommitteeReportsIEOnly, schemas.CommitteeReportsIEOnlyPageSchema),
 }
-# We don't have report data for C yet
+# We don't have report data for C and E yet
 default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
 
 
@@ -100,9 +100,8 @@ class ReportsView(utils.Resource):
             elif exclude:
                 query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
-        if kwargs.get('is_amended'):
-            column = reports_class.is_amended
-            query = query.filter(reports_class.is_amended.in_(kwargs['is_amended']))
+        if kwargs.get('is_amended') is not None:
+            query = query.filter(reports_class.is_amended == kwargs['is_amended'])  # noqa
 
         return query, reports_class, reports_schema
 
