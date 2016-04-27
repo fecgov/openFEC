@@ -195,8 +195,6 @@ class CommitteeReportsPacParty(CommitteeReports):
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
 
-    #  This is going away
-    expire_date = db.Column(db.DateTime)
     candidate_contribution_period = db.Column(db.Numeric(30, 2))
     candidate_contribution_ytd = db.Column(db.Numeric(30, 2))
     exempt_legal_accounting_disbursement_period = db.Column(db.Numeric(30, 2))
@@ -239,6 +237,8 @@ class CommitteeReportsPresidential(CommitteeReports):
     net_contributions_cycle_to_date = db.Column(db.Numeric(30, 2))
     net_operating_expenditures_cycle_to_date = db.Column(db.Numeric(30, 2))
     report_form = 'Form 3P'
+    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
+    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
 
 class CommitteeReportsIEOnly(PdfMixin, BaseModel):

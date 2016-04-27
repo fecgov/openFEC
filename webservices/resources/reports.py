@@ -101,7 +101,7 @@ class ReportsView(utils.Resource):
                 query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
         if kwargs.get('is_amended') is not None:
-            query = query.filter(reports_class.is_amended == kwargs['is_amended'])  # noqa
+            query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         return query, reports_class, reports_schema
 
