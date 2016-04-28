@@ -99,7 +99,7 @@ class CandidateSearch(CandidateList):
     schema = schemas.CandidateSearchSchema
     page_schema = schemas.CandidateSearchPageSchema
     query_options = [
-        sa.orm.joinedload(models.Candidate.principal_committees),
+        sa.orm.subqueryload(models.Candidate.principal_committees),
     ]
 
 
