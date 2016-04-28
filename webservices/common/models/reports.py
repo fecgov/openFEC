@@ -127,8 +127,6 @@ class CommitteeReportsHouseSenate(CommitteeReports):
 class CommitteeReportsPacParty(CommitteeReports):
     __tablename__ = 'ofec_reports_pacs_parties_mv'
 
-    #  This is going away
-    expire_date = db.Column(db.DateTime)
     all_loans_received_period = db.Column(db.Numeric(30, 2))
     all_loans_received_ytd = db.Column(db.Numeric(30, 2))
     allocated_federal_election_levin_share_period = db.Column(db.Numeric(30, 2))
@@ -190,6 +188,8 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_to_affiliated_committee_period = db.Column(db.Numeric(30, 2))
     transfers_to_affilitated_committees_ytd = db.Column(db.Numeric(30, 2))
     report_form = 'Form 3X'
+    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
+    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
 
 class CommitteeReportsPresidential(CommitteeReports):

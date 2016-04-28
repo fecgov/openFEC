@@ -53,14 +53,12 @@ select
     other_fed_op_exp_ytd as other_fed_operating_expenditures_ytd,
     other_fed_receipts_per as other_fed_receipts_period,
     other_fed_receipts_ytd as other_fed_receipts_ytd,
-    -- in this case, i and ii are not the same thing
-    -- if they have ii they are refunds and i are contributions
-    --other_pol_cmte_contb_per_ii as refunded_other_political_committee_contributions_period,
-    --other_pol_cmte_contb_ytd_ii as refunded_other_political_committee_contributions_ytd,
-    --other_pol_cmte_contb_per_i as other_political_committee_contributions_period,
+    other_pol_cmte_refund as refunded_other_political_committee_contributions_period,
+    other_pol_cmte_refund_ytd as refunded_other_political_committee_contributions_ytd,
+    other_pol_cmte_contb_per_i as other_political_committee_contributions_period,
     other_pol_cmte_contb_ytd_i as other_political_committee_contributions_ytd,
-    --pol_pty_cmte_contb_per_ii as refunded_political_party_committee_contributions_period,
-    --pol_pty_cmte_contb_ytd_ii as refunded_political_party_committee_contributions_ytd,
+    pol_pty_cmte_refund as refunded_political_party_committee_contributions_period,
+    pol_pty_cmte_refund_ytd as refunded_political_party_committee_contributions_ytd,
     pol_pty_cmte_contb_per_i as political_party_committee_contributions_period,
     pol_pty_cmte_contb_ytd_i as political_party_committee_contributions_ytd,
     rpt_yr as report_year,
@@ -109,8 +107,8 @@ select
     receipt_dt as receipt_date
 from
     fec_vsum_f3x f3x
--- where
---     cycle >= :START_YEAR
+where
+    cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_pacs_parties_mv_tmp(idx);
