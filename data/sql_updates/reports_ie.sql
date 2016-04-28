@@ -28,8 +28,8 @@ select
 from
     fec_vsum_f5 ief5
     -- left join dimelectiontp et using (electiontp_sk)
--- where
---     two_yr_period_sk >= :START_YEAR
+where
+    cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_ie_only_mv_tmp(idx);
