@@ -140,7 +140,11 @@ augment_models(
 
 make_candidate_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', 'principal_committees')},
+    options={'exclude': ('idx', 'principal_committees', 'flags')},
+    fields={
+        'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
+        'five_thousand_flag': ma.fields.Boolean(attribute='flags.five_thousand_flag'),
+    }
 )
 
 augment_models(
