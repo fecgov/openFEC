@@ -107,8 +107,8 @@ select
     receipt_dt as receipt_date
 from
     fec_vsum_f3x f3x
--- where
---     cycle >= :START_YEAR
+where
+    cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_pacs_parties_mv_tmp(idx);
