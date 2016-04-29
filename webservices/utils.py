@@ -7,6 +7,9 @@ import sqlalchemy as sa
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 
+from webservices.env import env
+from pyelasticsearch import ElasticSearch
+
 from flask.ext import restful
 from marshmallow_pagination import paginators
 
@@ -215,3 +218,11 @@ def get_election_duration(column):
         ],
         else_=2,
     )
+
+def get_elasticsearch_connection():
+    es_conn = env.get_service(label='elasticsearch-swarm-1.7.1')
+    if es_conn:
+        es = ElasticSearch(es_conn.get_url(url='uri'))
+    else:
+        es = ElasticSearch('http://localhost:9200')
+    return es
