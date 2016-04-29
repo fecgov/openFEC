@@ -22,7 +22,6 @@ def filter_multi_fields(model):
     ]
 
 
-
 @doc(
     tags=['candidate'],
     description=docs.CANDIDATE_LIST,
@@ -99,6 +98,7 @@ class CandidateSearch(CandidateList):
     schema = schemas.CandidateSearchSchema
     page_schema = schemas.CandidateSearchPageSchema
     query_options = [
+        sa.orm.joinedload(models.Candidate.flags),
         sa.orm.subqueryload(models.Candidate.principal_committees),
     ]
 
@@ -117,6 +117,10 @@ class CandidateView(ApiResource):
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
+
+    query_options = [
+        sa.orm.joinedload(models.CandidateDetail.flags),
+    ]
 
     @property
     def args(self):
@@ -168,8 +172,6 @@ class CandidateHistoryView(ApiResource):
     query_options = [
         sa.orm.joinedload(models.CandidateHistory.flags),
     ]
-
-
 
     @property
     def args(self):
