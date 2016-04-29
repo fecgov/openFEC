@@ -3,11 +3,7 @@ create materialized view ofec_reports_ie_only_mv_tmp as
 select
     row_number() over () as idx,
     indv_org_id as committee_id,
-    -- factindpexpcontb_f5_sk as key,
-    -- form_5_sk as form_key,
     cycle,
-    -- will this stay the same?
-    -- transaction_sk as transaction_id,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
     rpt_yr as report_year,
@@ -19,15 +15,11 @@ select
     begin_image_num as beginning_image_number,
     end_image_num as end_image_number,
     rpt_tp as report_type,
-    -- THIS IS MISSING
-    --election_type_id as election_type,
-    --election_type_desc as election_type_full,
     rpt_tp_desc as report_type_full,
     most_recent_filing_flag like 'N' as is_amended,
     receipt_dt as receipt_date
 from
     fec_vsum_f5 ief5
-    -- left join dimelectiontp et using (electiontp_sk)
 where
     cycle >= :START_YEAR
 ;

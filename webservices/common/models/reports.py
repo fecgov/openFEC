@@ -57,13 +57,14 @@ class CommitteeReports(PdfMixin, BaseModel):
     total_receipts_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.RECEIPTS))
     offsets_to_operating_expenditures_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OFFSETS_TO_OPERATING_EXPENDITURES))
     offsets_to_operating_expenditures_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OFFSETS_TO_OPERATING_EXPENDITURES))
-
     total_individual_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_CONTRIBUTIONS))
     total_individual_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_CONTRIBUTIONS))
     individual_unitemized_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS))
     individual_unitemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS))
     individual_itemized_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))
     individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))
+    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
+    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
@@ -109,8 +110,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
-    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
-    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
+
 
     @property
     def has_pdf(self):
@@ -188,8 +188,6 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_to_affiliated_committee_period = db.Column(db.Numeric(30, 2))
     transfers_to_affilitated_committees_ytd = db.Column(db.Numeric(30, 2))
     report_form = 'Form 3X'
-    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
-    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
 
 class CommitteeReportsPresidential(CommitteeReports):
@@ -237,21 +235,16 @@ class CommitteeReportsPresidential(CommitteeReports):
     net_contributions_cycle_to_date = db.Column(db.Numeric(30, 2))
     net_operating_expenditures_cycle_to_date = db.Column(db.Numeric(30, 2))
     report_form = 'Form 3P'
-    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
-    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
 
 class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     __tablename__ = 'ofec_reports_ie_only_mv'
 
-    expire_date = db.Column(db.DateTime)
     beginning_image_number = db.Column(db.BigInteger)
     committee_id = db.Column(db.String)
     cycle = db.Column(db.Integer)
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
-    election_type = db.Column(db.String)
-    election_type_full = db.Column(db.String)
     report_year = db.Column(db.Integer)
     independent_contributions_period = db.Column(db.Numeric(30, 2))
     independent_expenditures_period = db.Column(db.Numeric(30, 2))
