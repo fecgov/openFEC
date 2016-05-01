@@ -6,7 +6,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA
+from webservices.common.models import ScheduleA, ScheduleE
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView
@@ -71,10 +71,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext(self):
         names = ['David Koch', 'George Soros']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_name=name,
-                contributor_name_text=sa.func.to_tsvector(name),
-            )
+            factories.ScheduleAFactory(contributor_name=name)
             for name in names
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_name='soros'))
@@ -84,10 +81,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_employer=employer,
-                contributor_employer_text=sa.func.to_tsvector(employer),
-            )
+            factories.ScheduleAFactory(contributor_employer=employer)
             for employer in employers
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_employer='vandelay'))
@@ -97,10 +91,7 @@ class TestItemized(ApiBaseTest):
     def test_filter_fulltext_occupation(self):
         occupations = ['Attorney at Law', 'Doctor of Philosophy']
         filings = [
-            factories.ScheduleAFactory(
-                contributor_occupation=occupation,
-                contributor_occupation_text=sa.func.to_tsvector(occupation),
-            )
+            factories.ScheduleAFactory(contributor_occupation=occupation)
             for occupation in occupations
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_occupation='doctor'))
@@ -128,22 +119,6 @@ class TestItemized(ApiBaseTest):
     def test_pagination_bad_per_page(self):
         response = self.app.get(api.url_for(ScheduleAView, per_page=999))
         self.assertEqual(response.status_code, 422)
-
-    def test_pdf_url(self):
-        # TODO(jmcarp) Refactor as parameterized tests
-        image_number = 39
-        params = [
-            (factories.ScheduleAFactory, ScheduleAView),
-            (factories.ScheduleBFactory, ScheduleBView),
-        ]
-        for factory, resource in params:
-            factory(image_number=image_number)
-            results = self._results(api.url_for(resource))
-            self.assertEqual(len(results), 1)
-            self.assertEqual(
-                results[0]['pdf_url'],
-                'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number),
-            )
 
     def test_image_number(self):
         image_number = '12345'
@@ -253,3 +228,19 @@ class TestItemized(ApiBaseTest):
         self.assertTrue(all(each['expenditure_amount'] <= 150 for each in results))
         results = self._results(api.url_for(ScheduleEView, min_amount=100, max_amount=150))
         self.assertTrue(all(100 <= each['expenditure_amount'] <= 150 for each in results))
+
+    def test_filters_sched_e(self):
+        filters = [
+            ('image_number', ScheduleE.image_number, ['123', '456']),
+            ('committee_id', ScheduleE.committee_id, ['C01', 'C02']),
+            ('support_oppose_indicator', ScheduleE.support_oppose_indicator, ['S', 'O']),
+            ('is_notice', ScheduleE.is_notice, [True, False]),
+        ]
+        for label, column, values in filters:
+            [
+                factories.ScheduleEFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleEView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]

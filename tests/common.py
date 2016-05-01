@@ -4,6 +4,7 @@ import codecs
 import unittest
 import subprocess
 
+from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
 import manage
@@ -30,6 +31,7 @@ class BaseTestCase(unittest.TestCase):
         rest.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
         rest.app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
         cls.app = rest.app.test_client()
+        cls.client = TestApp(rest.app)
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
         _reset_schema()
@@ -87,50 +89,10 @@ class ApiBaseTest(BaseTestCase):
         response = self._response(qry)
         return response['results']
 
-    def assertResultsEqual(self, actual, expected, prefix=""):
-        """This method provides some quick debugging info (rather than the
-        cryptic "this 500 attribute dict is different than that one"). prefix
-        is an identifier to see where we are in the tree
-        Inspiration from 18f/hourglass's assertResultsEqual()"""
-        if isinstance(expected, dict) and isinstance(actual, dict):
-            self.assertDictsEqual(actual, expected, prefix)
-        elif isinstance(expected, list) and isinstance(actual, list):
-            self.assertListsEqual(actual, expected, prefix)
-        else:
-            self.assertEqual(actual, expected)
 
-    def assertDictsEqual(self, actual, expected, prefix):
-        """Match keys and values. Recurse"""
-        actual_keys, expected_keys = set(actual.keys()), set(expected.keys())
-        self.assertEqual(
-            actual_keys, expected_keys,
-            prefix + ": Different keys:\n"
-            + ("Unique to actual: %s\n" % (actual_keys - expected_keys))
-            + ("Unique to expected: %s" % (expected_keys - actual_keys)))
-        for key in expected_keys:
-            self.assertResultsEqual(actual[key], expected[key],
-                                    prefix + '.' + key)
-
-    def assertDictsSubset(self, first, second):
-        self.assertResultsEqual(
-            {key: first.get(key) for key in second},
-            second,
-        )
-
-    def assertListsEqual(self, actual, expected, prefix):
-        """Check length, order, and recurse"""
-        self.assertEqual(
-            len(actual), len(expected),
-            prefix + ": Different number of elements "
-            "(actual: %d, expected: %d)" % (len(actual), len(expected)))
-        # Check for out of order. Note we can't use set as we might have an
-        # unhashable type
-        if len(actual) == len(expected) and all(a in expected for a in actual):
-            self.assertEqual(actual, expected,
-                             prefix + ": Sort order is wrong")
-        for i in range(len(expected)):
-            self.assertResultsEqual(actual[i], expected[i],
-                                    prefix + '[%d]' % i)
+def assert_dicts_subset(first, second):
+    expected = {key: first.get(key) for key in second}
+    assert expected == second
 
 
 class IntegrationTestCase(BaseTestCase):

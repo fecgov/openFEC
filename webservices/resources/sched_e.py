@@ -1,12 +1,11 @@
 import sqlalchemy as sa
-from flask_apispec import doc, marshal_with
+from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.utils import use_kwargs
 from webservices.common.views import ItemizedResource
 
 
@@ -17,6 +16,8 @@ from webservices.common.views import ItemizedResource
 class ScheduleEView(ItemizedResource):
 
     model = models.ScheduleE
+    schema = schemas.ScheduleESchema
+    page_schema = schemas.ScheduleEPageSchema
 
     @property
     def year_column(self):
@@ -33,6 +34,9 @@ class ScheduleEView(ItemizedResource):
         ('image_number', models.ScheduleE.image_number),
         ('committee_id', models.ScheduleE.committee_id),
         ('candidate_id', models.ScheduleE.candidate_id),
+        ('support_oppose_indicator', models.ScheduleE.support_oppose_indicator),
+        ('filing_form', models.ScheduleE.filing_form),
+        ('is_notice', models.ScheduleE.is_notice),
     ]
     filter_fulltext_fields = [
         ('payee_name', models.ScheduleE.payee_name_text),
@@ -47,22 +51,20 @@ class ScheduleEView(ItemizedResource):
         sa.orm.joinedload(models.ScheduleE.committee),
     ]
 
-    @use_kwargs(args.itemized)
-    @use_kwargs(args.schedule_e)
-    @use_kwargs(args.make_seek_args())
-    @use_kwargs(
-        args.make_sort_args(
-            validator=args.OptionValidator([
-                'expenditure_date',
-                'expenditure_amount',
-                'office_total_ytd',
-            ]),
-            multiple=False,
+    @property
+    def args(self):
+        return utils.extend(
+            args.itemized,
+            args.schedule_e,
+            args.make_seek_args(),
+            args.make_sort_args(
+                validator=args.OptionValidator([
+                    'expenditure_date',
+                    'expenditure_amount',
+                    'office_total_ytd',
+                ]),
+            ),
         )
-    )
-    @marshal_with(schemas.ScheduleEPageSchema())
-    def get(self, **kwargs):
-        return super(ScheduleEView, self).get(**kwargs)
 
     def filter_election(self, query, kwargs):
         if not kwargs['office']:

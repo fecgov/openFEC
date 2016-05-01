@@ -5,23 +5,31 @@ Flask-Cors==2.1.0
 Flask-Script==2.0.5
 Flask-RESTful==0.3.3
 Flask-SQLAlchemy==2.0
+python-dateutil==2.4.2
+sqlalchemy-postgres-copy==0.1.0
+networkx==1.9.1
 newrelic==2.52.0.40
 SQLAlchemy==1.0.8
 mandrill==1.0.57
+icalendar==3.9.1
 GitPython==1.0.1
 gunicorn==19.3.0
 webargs==0.18.0
 slacker==0.8.6
 raven[flask]==5.8.1
 ujson==1.33
-furl==0.4.6
+pyelasticsearch
 
 # Marshalling
 flask-apispec==0.2.0
-marshmallow==2.1.0
-marshmallow-sqlalchemy==0.6.0
+marshmallow==2.6.0
+marshmallow-sqlalchemy==0.8.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
+
+# Data export
+boto3==1.2.2
 
 # Task queue
 celery==3.1.19
+celery-once==0.1.4
 redis==2.10.5

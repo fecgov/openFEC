@@ -7,6 +7,9 @@ import sqlalchemy as sa
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 
+from webservices.env import env
+from pyelasticsearch import ElasticSearch
+
 from flask.ext import restful
 from marshmallow_pagination import paginators
 
@@ -37,39 +40,53 @@ if os.getenv('PRODUCTION'):
 
 def check_cap(kwargs, cap):
     if cap:
-        if not kwargs.get('per_page'):
+        if not kwargs.get('per_page') or kwargs['per_page'] > cap:
             raise exceptions.ApiError(
-                'Parameter "per_page" must be > 0'.format(cap),
+                'Parameter "per_page" must be between 1 and {}'.format(cap),
                 status_code=422,
             )
 
 
-def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False, count=None, cap=100):
+def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False,
+               count=None, cap=100, index_column=None):
     check_cap(kwargs, cap)
-    sort, hide_null, nulls_large = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_nulls_large')
-    query, _ = sorting.sort(query, sort, model=model, aliases=aliases, join_columns=join_columns, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
+    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
+    if sort:
+        query, _ = sorting.sort(
+            query, sort, model=model, aliases=aliases, join_columns=join_columns,
+            clear=clear, hide_null=hide_null, index_column=index_column,
+        )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
 
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
+    paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
+    if paginator.sort_column is not None:
+        sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
+    else:
+        sort_index = None
+    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
+
+
+def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
-    model = index_column.class_
-    sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
-    query, sort_columns = sorting.sort(query, sort, model=model, clear=clear, hide_null=hide_null, nulls_large=nulls_large)
-    sort_column = sort_columns[0] if sort_columns else None
-    paginator = paginators.SeekPaginator(
+    model = index_column.parent.class_
+    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
+    if sort:
+        query, sort_column = sorting.sort(
+            query, sort,
+            model=model, clear=clear, hide_null=hide_null,
+        )
+    else:
+        sort_column = None
+    return paginators.SeekPaginator(
         query,
         kwargs['per_page'],
         index_column,
         sort_column=sort_column,
         count=count,
     )
-    if sort_column is not None:
-        sort_index = kwargs['last_{0}'.format(sort_column[0].key)]
-    else:
-        sort_index = None
-    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
 
 
 def extend(*dicts):
@@ -79,17 +96,11 @@ def extend(*dicts):
     return ret
 
 
-def search_text(query, column, text):
-    """
-
-    :param order: Order results by text similarity, descending; prohibitively
-        slow for large collections
-    """
-    vector = ' & '.join([
+def parse_fulltext(text):
+    return ' & '.join([
         part + ':*'
         for part in re.sub(r'\W', ' ', text).split()
     ])
-    return query.filter(column.match(vector))
 
 
 office_args_required = ['office', 'cycle']
@@ -177,16 +188,6 @@ def document_description(report_year, report_type=None, document_type=None, form
     return '{0} {1}'.format(clean.strip(), report_year)
 
 
-def report_pdf_url(report_year, beginning_image_number, form_type=None, committee_type=None):
-    if report_year and report_year >= 2000:
-        return make_report_pdf_url(beginning_image_number)
-    if form_type in ['F3X', 'F3P'] and report_year > 1993:
-        return make_report_pdf_url(beginning_image_number)
-    if form_type == 'F3' and committee_type == 'H' and report_year > 1996:
-        return make_report_pdf_url(beginning_image_number)
-    return None
-
-
 def make_report_pdf_url(image_number):
     return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
         str(image_number)[-3:],
@@ -194,8 +195,9 @@ def make_report_pdf_url(image_number):
     )
 
 
-def make_image_pdf_url(image_number):
-    return 'http://docquery.fec.gov/cgi-bin/fecimg/?{0}'.format(image_number)
+def get_index_column(model):
+    column = model.__mapper__.primary_key[0]
+    return getattr(model, column.key)
 
 
 def cycle_param(**kwargs):
@@ -216,3 +218,11 @@ def get_election_duration(column):
         ],
         else_=2,
     )
+
+def get_elasticsearch_connection():
+    es_conn = env.get_service(label='elasticsearch-swarm-1.7.1')
+    if es_conn:
+        es = ElasticSearch(es_conn.get_url(url='uri'))
+    else:
+        es = ElasticSearch('http://localhost:9200')
+    return es

@@ -2,7 +2,7 @@ import datetime
 import functools
 
 from tests import factories
-from tests.common import ApiBaseTest
+from tests.common import ApiBaseTest, assert_dicts_subset
 
 from webservices.rest import db, api
 from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
@@ -29,9 +29,9 @@ class TestElectionSearch(ApiBaseTest):
     def test_search_district(self):
         results = self._results(api.url_for(ElectionList, state='NJ', district='09'))
         self.assertEqual(len(results), 3)
-        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
-        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'})
-        self.assertDictsSubset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
+        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'})
+        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
     def test_search_district_padding(self):
         results_padded = self._results(api.url_for(ElectionList, district='09'))
@@ -46,10 +46,10 @@ class TestElectionSearch(ApiBaseTest):
 
     def test_search_zip(self):
         results = self._results(api.url_for(ElectionList, zip='22902'))
-        self.assertEqual(len(results), 3)
-        self.assertDictsSubset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
-        self.assertDictsSubset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'})
-        self.assertDictsSubset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
+        assert len(results) == 3
+        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'})
+        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
 
     def test_search_incumbent(self):
         [
@@ -63,8 +63,8 @@ class TestElectionSearch(ApiBaseTest):
             )
         ]
         results = self._results(api.url_for(ElectionList, office='senate', state='NJ'))
-        self.assertEqual(len(results), 1)
-        self.assertDictsSubset(results[0], {'incumbent_id': 'S012345', 'incumbent_name': 'Howard Stackhouse'})
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'incumbent_id': 'S012345', 'incumbent_name': 'Howard Stackhouse'})
 
 
 class TestElections(ApiBaseTest):
@@ -175,17 +175,21 @@ class TestElections(ApiBaseTest):
             'candidate_name': self.candidate.name,
             'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
             'party_full': self.candidate.party_full,
-            'committee_ids': [each.committee_id for each in self.committees],
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in totals),
             'won': False,
         }
-        self.assertEqual(results[0], expected)
+        assert_dicts_subset(results[0], expected)
+        assert set(each.committee_id for each in self.committees) == set(results[0]['committee_ids'])
 
     def test_elections_full(self):
-        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY', election_full='true'))
-        self.assertEqual(len(results), 1)
+        results = self._results(
+            api.url_for(
+                ElectionView,
+                office='senate', cycle=2012, state='NY', election_full='true',
+            )
+        )
         totals = self.totals
         last_totals = self.totals[:2]
         expected = {
@@ -193,13 +197,14 @@ class TestElections(ApiBaseTest):
             'candidate_name': self.candidate.name,
             'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
             'party_full': self.candidate.party_full,
-            'committee_ids': [each.committee_id for each in self.committees],
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
             'won': False,
         }
-        self.assertEqual(results[0], expected)
+        assert len(results) == 1
+        assert_dicts_subset(results[0], expected)
+        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees)
 
     def test_elections_winner(self):
         [
@@ -218,7 +223,7 @@ class TestElections(ApiBaseTest):
             'candidate_name': self.candidate.name,
             'won': True,
         }
-        self.assertDictsSubset(results[0], expected)
+        assert_dicts_subset(results[0], expected)
 
     def test_election_summary(self):
         results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY'))

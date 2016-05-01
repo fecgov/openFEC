@@ -1,7 +1,7 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
-from webservices import utils
+from webservices import docs, utils
 
 from .base import db
 
@@ -9,13 +9,13 @@ from .base import db
 class BaseItemized(db.Model):
     __abstract__ = True
 
-    committee_id = db.Column('cmte_id', db.String)
+    committee_id = db.Column('cmte_id', db.String, doc=docs.COMMITTEE_ID)
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')
-    report_year = db.Column('rpt_yr', db.Integer)
-    report_type = db.Column('rpt_tp', db.String)
-    form_type = db.Column('form_tp', db.String)
+    report_year = db.Column('rpt_yr', db.Integer, doc=docs.REPORT_YEAR)
+    report_type = db.Column('rpt_tp', db.String, doc=docs.REPORT_TYPE)
+    form_type = db.Column('form_tp', db.String, doc=docs.FORM_TYPE)
     entity_type = db.Column('entity_tp', db.String)
-    image_number = db.Column('image_num', db.String)
+    image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
     memo_code = db.Column('memo_cd', db.String)
     memo_text = db.Column(db.String)
     filing_type = db.Column(db.String)
@@ -29,14 +29,11 @@ class BaseItemized(db.Model):
     transaction_id = db.Column(db.Integer)
     status = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
+    pdf_url = db.Column(db.String)
 
     @hybrid_property
     def memoed_subtotal(self):
         return self.memo_code == 'X'
-
-    @property
-    def pdf_url(self):
-        return utils.make_image_pdf_url(self.image_number)
 
 
 class ScheduleA(BaseItemized):
@@ -44,7 +41,7 @@ class ScheduleA(BaseItemized):
 
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     is_individual = db.Column(db.Boolean, index=True)
-    contributor_id = db.Column('clean_contbr_id', db.String)
+    contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
     contributor = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
@@ -52,7 +49,7 @@ class ScheduleA(BaseItemized):
             ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
         )'''
     )
-    contributor_name = db.Column('contbr_nm', db.String)
+    contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
     contributor_prefix = db.Column('contbr_prefix', db.String)
     contributor_first_name = db.Column('contbr_f_nm', db.String)
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
@@ -61,28 +58,28 @@ class ScheduleA(BaseItemized):
     # Street address omitted per FEC policy
     # contributor_street_1 = db.Column('contbr_st1', db.String)
     # contributor_street_2 = db.Column('contbr_st2', db.String)
-    contributor_city = db.Column('contbr_city', db.String)
-    contributor_state = db.Column('contbr_st', db.String)
-    contributor_zip = db.Column('contbr_zip', db.String)
-    contributor_employer = db.Column('contbr_employer', db.String)
-    contributor_occupation = db.Column('contbr_occupation', db.String)
+    contributor_city = db.Column('contbr_city', db.String, doc=docs.CONTRIBUTOR_CITY)
+    contributor_state = db.Column('contbr_st', db.String, doc=docs.CONTRIBUTOR_STATE)
+    contributor_zip = db.Column('contbr_zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
+    contributor_employer = db.Column('contbr_employer', db.String, doc=docs.CONTRIBUTOR_EMPLOYER)
+    contributor_occupation = db.Column('contbr_occupation', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
     contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
     contribution_receipt_date = db.Column('contb_receipt_dt', db.Date)
     contribution_receipt_amount = db.Column('contb_receipt_amt', db.Numeric(30, 2))
     receipt_type = db.Column('receipt_tp', db.String)
     receipt_type_full = db.Column('receipt_desc', db.String)
-    election_type = db.Column('election_tp', db.String)
-    election_type_full = db.Column('election_tp_desc', db.String)
+    election_type = db.Column('election_tp', db.String, doc=docs.ELECTION_TYPE)
+    election_type_full = db.Column('election_tp_desc', db.String, doc=docs.ELECTION_TYPE)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
     record_number = db.Column('record_num', db.Integer)
     report_primary_general = db.Column('rpt_pgi', db.String)
-    form_type_full = db.Column('form_tp_cd', db.String)
-    receipt_date = db.Column('receipt_dt', db.Date)
+    form_type_full = db.Column('form_tp_cd', db.String, doc=docs.FORM_TYPE)
+    receipt_date = db.Column('receipt_dt', db.Date, doc=docs.RECEIPT_DATE)
     increased_limit = db.Column(db.String)
-    load_date = db.Column(db.DateTime)
-    update_date = db.Column(db.DateTime)
+    load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
+    update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
 
     # Auxiliary fields
     contributor_name_text = db.Column(TSVECTOR)
@@ -129,7 +126,7 @@ class ScheduleB(BaseItemized):
     # Auxiliary fields
     recipient_name_text = db.Column(TSVECTOR)
     disbursement_description_text = db.Column(TSVECTOR)
-    disbursement_purpose_category = db.String()
+    disbursement_purpose_category = db.Column(db.String)
 
 
 class ScheduleE(BaseItemized):
@@ -137,7 +134,7 @@ class ScheduleE(BaseItemized):
 
     sched_e_sk = db.Column(db.Integer, primary_key=True)
 
-    committee_name = db.Column('cmte_nm', db.String)
+    committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_ID)
     payee_name = db.Column('pye_nm', db.String)
     payee_street_1 = db.Column('pye_st1', db.String)
     payee_street_2 = db.Column('pye_st2', db.String)
@@ -155,17 +152,17 @@ class ScheduleE(BaseItemized):
     support_oppose_indicator = db.Column('s_o_ind', db.String)
     candidate_id = db.Column('s_o_cand_id', db.String)
     candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
-    candidate_name = db.Column('s_o_cand_nm', db.String)
+    candidate_name = db.Column('s_o_cand_nm', db.String, doc=docs.CANDIDATE_NAME)
     candidate_prefix = db.Column('s_0_cand_prefix', db.String)
     candidate_first_name = db.Column('s_0_cand_f_nm', db.String)
     candidate_middle_name = db.Column('s_0_cand_m_nm', db.String)
     candidate_last_name = db.Column('s_0_cand_l_nm', db.String)
     candidate_suffix = db.Column('s_0_cand_suffix', db.String)
-    candidate_office = db.Column('s_o_cand_office', db.String)
-    cand_office_state = db.Column('s_o_cand_office_st', db.String)
-    cand_office_district = db.Column('s_o_cand_office_district', db.String)
-    election_type = db.Column('election_tp', db.String)
-    election_type_full = db.Column('fec_election_tp_desc', db.String)
+    candidate_office = db.Column('s_o_cand_office', db.String, doc=docs.OFFICE)
+    cand_office_state = db.Column('s_o_cand_office_st', db.String, doc=docs.STATE_GENERIC)
+    cand_office_district = db.Column('s_o_cand_office_district', db.String, doc=docs.DISTRICT)
+    election_type = db.Column('election_tp', db.String, doc=docs.ELECTION_TYPE)
+    election_type_full = db.Column('fec_election_tp_desc', db.String, doc=docs.ELECTION_TYPE)
     independent_sign_name = db.Column('indt_sign_nm', db.String)
     independent_sign_date = db.Column('indt_sign_dt', db.Date)
     notary_sign_name = db.Column('notary_sign_nm', db.String)
@@ -185,8 +182,9 @@ class ScheduleE(BaseItemized):
     filer_last_name = db.Column('filer_l_nm', db.String)
     filer_suffix = db.Column(db.String)
     dissemination_date = db.Column('dissem_dt', db.Date)
-    load_date = db.Column(db.DateTime)
-    update_date = db.Column(db.DateTime)
+    load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
+    update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
+    is_notice = db.Column(db.Boolean, index=True)
 
     # Auxiliary fields
     payee_name_text = db.Column(TSVECTOR)

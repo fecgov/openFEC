@@ -17,6 +17,8 @@ from flask import Blueprint
 from flask.ext import cors
 from flask.ext import restful
 from raven.contrib.flask import Sentry
+from werkzeug.contrib.fixers import ProxyFix
+import sqlalchemy as sa
 
 from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
@@ -30,6 +32,7 @@ from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
 from webservices.resources import sched_e
+from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
 from webservices.resources import candidates
@@ -38,6 +41,9 @@ from webservices.resources import elections
 from webservices.resources import filings
 from webservices.resources import search
 from webservices.resources import dates
+from webservices.resources import costs
+from webservices.resources import legal
+from webservices.resources import load
 from webservices.env import env
 
 
@@ -54,6 +60,15 @@ app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
+
+app.config['SQLALCHEMY_REPLICA_TASKS'] = [
+    'webservices.tasks.download.export_query',
+]
+app.config['SQLALCHEMY_FOLLOWERS'] = [
+    sa.create_engine(follower.strip())
+    for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
+    if follower.strip()
+]
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
@@ -140,18 +155,22 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/',
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/')
+api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
+api.add_resource(costs.CommunicationCostView, '/communication-costs/')
+api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionList, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
+api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
+api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -165,7 +184,6 @@ add_aggregate_resource(api, aggregates.ScheduleAByStateView, 'a', 'state')
 add_aggregate_resource(api, aggregates.ScheduleAByZipView, 'a', 'zip')
 add_aggregate_resource(api, aggregates.ScheduleAByEmployerView, 'a', 'employer')
 add_aggregate_resource(api, aggregates.ScheduleAByOccupationView, 'a', 'occupation')
-add_aggregate_resource(api, aggregates.ScheduleAByContributorView, 'a', 'contributor')
 
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientView, 'b', 'recipient')
 add_aggregate_resource(api, aggregates.ScheduleBByRecipientIDView, 'b', 'recipient_id')
@@ -176,7 +194,8 @@ add_aggregate_resource(api, aggregates.ScheduleEByCandidateView, 'e', 'candidate
 api.add_resource(candidate_aggregates.ScheduleABySizeCandidateView, '/schedules/schedule_a/by_size/by_candidate/')
 api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules/schedule_a/by_state/by_candidate/')
 
-api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidate/<candidate_id>/totals/')
+api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
+api.add_resource(committees.TotalsCommitteeHistoryView, '/committees/totals/')
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,
@@ -185,8 +204,8 @@ api.add_resource(
 )
 api.add_resource(
     aggregates.ElectioneeringByCandidateView,
-    '/electioneering_costs/by_candidate/',
-    '/committee/<string:committee_id>/electioneering_costs/by_candidate/',
+    '/electioneering/by_candidate/',
+    '/committee/<string:committee_id>/electioneering/by_candidate/',
 )
 
 api.add_resource(
@@ -196,6 +215,10 @@ api.add_resource(
 )
 api.add_resource(filings.FilingsList, '/filings/')
 
+api.add_resource(download.DownloadView, '/download/<path:path>/')
+
+api.add_resource(legal.Search, '/legal/search/')
+api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
@@ -218,12 +241,13 @@ apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
 apidoc.register(sched_e.ScheduleEView, blueprint='v1')
+apidoc.register(costs.CommunicationCostView, blueprint='v1')
+apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByStateView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByZipView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByEmployerView, blueprint='v1')
 apidoc.register(aggregates.ScheduleAByOccupationView, blueprint='v1')
-apidoc.register(aggregates.ScheduleAByContributorView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByRecipientView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByRecipientIDView, blueprint='v1')
 apidoc.register(aggregates.ScheduleBByPurposeView, blueprint='v1')
@@ -239,7 +263,7 @@ apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
-
+apidoc.register(dates.CalendarDatesView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
@@ -263,6 +287,7 @@ def swagger_static(filename):
 
 @app.route('/')
 @app.route('/v1/')
+@app.route('/docs/')
 @docs.route('/developer/')
 def api_ui_redirect():
     return redirect(url_for('docs.api_ui'), code=http.client.MOVED_PERMANENTLY)
@@ -291,3 +316,5 @@ initialize_newrelic()
 
 if env.get_credential('SENTRY_DSN'):
     Sentry(app, dsn=env.get_credential('SENTRY_DSN'))
+
+app.wsgi_app = ProxyFix(app.wsgi_app)

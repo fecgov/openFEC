@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
+import os
 import glob
 import logging
 import subprocess
 import multiprocessing
 
+import networkx as nx
 import sqlalchemy as sa
-
 from flask.ext.script import Server
 from flask.ext.script import Manager
-from sqlalchemy import text as sqla_text
 
+from webservices import flow
 from webservices.env import env
 from webservices.rest import app, db
-from webservices.config import SQL_CONFIG
+from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices import partition
 
@@ -29,16 +30,17 @@ manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
 def execute_sql_file(path):
-    # This helper is typically used within a multiprocessing pool; create a new database
-    # engine for each job.
+    """This helper is typically used within a multiprocessing pool; create a new database
+    engine for each job.
+    """
     db.engine.dispose()
     logger.info(('Running {}'.format(path)))
     with open(path) as fp:
         cmd = '\n'.join([
             line for line in fp.readlines()
-            if not line.startswith('--')
+            if not line.strip().startswith('--')
         ])
-        db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
+        db.engine.execute(sa.text(cmd), **SQL_CONFIG)
 
 def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
@@ -54,6 +56,7 @@ def execute_sql_folder(path, processes):
 
 @manager.command
 def load_nicknames():
+    """For improved search when candidates have a name that doesn't appear on their form"""
     import pandas as pd
     import sqlalchemy as sa
     try:
@@ -65,6 +68,7 @@ def load_nicknames():
 
 @manager.command
 def load_pacronyms():
+    """For improved search of orgnizations that go by acronyms"""
     import pandas as pd
     import sqlalchemy as sa
     try:
@@ -123,30 +127,47 @@ def build_district_counts(outname='districts.json'):
 
 @manager.command
 def update_schemas(processes=1):
+    """This updates the smaller tables and views. It is run on deploy.
+    """
     logger.info("Starting DB refresh...")
     processes = int(processes)
-    execute_sql_folder('data/sql_updates/', processes=processes)
+    graph = flow.get_graph()
+    for task in nx.topological_sort(graph):
+        path = os.path.join('data', 'sql_updates', '{}.sql'.format(task))
+        execute_sql_file(path)
     execute_sql_file('data/rename_temporary_views.sql')
     logger.info("Finished DB refresh.")
 
 @manager.command
 def update_functions(processes=1):
+    """This command updates the helper functions. It is run on deploy.
+    """
     execute_sql_folder('data/functions/', processes=processes)
 
 @manager.command
 def update_itemized(schedule):
+    """These are the scripts that create the main schedule tables.
+    Run this when you make a change to code in:
+        data/sql_setup/
+    """
     logger.info('Updating Schedule {0} tables...'.format(schedule))
     execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
     logger.info('Finished Schedule {0} update.'.format(schedule))
 
 @manager.command
 def rebuild_aggregates(processes=1):
+    """These are the functions used to update the aggregates and schedules.
+    Run this when you make a change to code in:
+        data/sql_incremental_aggregates
+    """
     logger.info('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     logger.info('Finished rebuilding incremental aggregates.')
 
 @manager.command
 def update_aggregates():
+    """These are run nightly to recalculate the totals
+    """
     logger.info('Updating incremental aggregates...')
     with db.engine.begin():
         db.engine.execute(
@@ -194,6 +215,7 @@ def refresh_materialized():
 @manager.command
 def cf_startup():
     """Migrate schemas on `cf push`."""
+    check_config()
     if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 

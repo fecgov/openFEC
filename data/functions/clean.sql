@@ -8,6 +8,16 @@ begin
 end
 $$ language plpgsql;
 
+
+-- These fields include additional descriptions in curly braces that we don't want to show in the dimreporttype table that appear in curly braces. Like: { one of 4 codes }
+create or replace function clean_report(report text)
+returns text as $$
+begin
+    return trim(both from regexp_replace(report, ' {.*}', ''));
+end
+$$ language plpgsql;
+
+
 -- Compare two values. If equal, return `NULL`, else return the first value.
 create or replace function clean_repeated(first anyelement, second anyelement)
 returns anyelement as $$

@@ -3,8 +3,10 @@ from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import utils
+from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
+from webservices.common.views import ApiResource
 from webservices.common import models
 from webservices.common.models import (
     CandidateElection, CandidateCommitteeLink,
@@ -115,66 +117,64 @@ class ScheduleAByStateCandidateView(utils.Resource):
         return utils.fetch_page(query, kwargs, cap=0)
 
 
-totals_model_map = {
-    'P': models.CommitteeTotalsPresidential,
-    'S': models.CommitteeTotalsHouseSenate,
-    'H': models.CommitteeTotalsHouseSenate,
-}
+class TotalsCandidateView(ApiResource):
 
-@doc(
-    tags=['schedules/schedule_a'],
-    description='Schedule A receipts aggregated by contributor state.',
-)
-class TotalsCandidateView(utils.Resource):
+    page_schema = schemas.CandidateHistoryTotalPageSchema
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.make_sort_args())
-    @use_kwargs(args.totals_candidate_aggregate)
-    @marshal_with(schemas.TotalsCandidatePageSchema())
-    def get(self, candidate_id, **kwargs):
-        totals_model = totals_model_map[candidate_id[0]]
-        kwargs['candidate_id'] = [candidate_id]
-        rows, aggregates = self._get_aggregates(kwargs, totals_model)
-        latest = self._get_latest(rows, totals_model).subquery()
-        aggregates = aggregates.subquery()
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.candidate_totals,
+            args.make_sort_args(),
+        )
+
+    def filter_multi_fields(self, history, total):
+        return [
+            ('candidate_id', history.candidate_id),
+            ('election_year', total.election_year),
+            ('cycle', total.cycle),
+            ('office', history.office),
+            ('party', history.party),
+            ('state', history.state),
+            ('district', history.district),
+        ]
+
+    def filter_range_fields(self, model):
+        return [
+            (('min_receipts', 'max_receipts'), model.receipts),
+            (('min_disbursements', 'max_disbursements'), model.disbursements),
+            (('min_cash_on_hand_end_period', 'max_cash_on_hand_end_period'), model.cash_on_hand_end_period),
+            (('min_debts_owed_by_committee', 'max_debts_owed_by_committee'), model.debts_owed_by_committee),
+        ]
+
+    filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
+
+    def build_query(self, **kwargs):
+        if kwargs['election_full']:
+            history = models.CandidateHistoryLatest
+            year_column = history.cand_election_year
+        else:
+            history = models.CandidateHistory
+            year_column = history.two_year_period
         query = db.session.query(
-            aggregates,
-            latest,
+            history.__table__,
+            models.CandidateTotal.__table__,
         ).join(
-            latest,
-            aggregates.c.cand_id == latest.c.cand_id,
+            models.CandidateTotal,
+            sa.and_(
+                history.candidate_id == models.CandidateTotal.candidate_id,
+                year_column == models.CandidateTotal.cycle,
+            )
+        ).filter(
+            models.CandidateTotal.is_election == kwargs['election_full'],
         )
-        return utils.fetch_page(query, kwargs)
-
-    def _get_aggregates(self, kwargs, totals_model):
-        return candidate_aggregate(
-            totals_model,
-            [
-                sa.func.sum(totals_model.receipts).label('receipts'),
-                sa.func.sum(totals_model.disbursements).label('disbursements'),
-            ],
-            [],
-            kwargs,
-        )
-
-    def _get_latest(self, rows, totals_model):
-        latest = rows.with_entities(
-            CandidateCommitteeLink.candidate_id,
-            CandidateCommitteeLink.committee_id,
-            totals_model.last_cash_on_hand_end_period,
-            totals_model.last_debts_owed_by_committee,
-        ).distinct(
-            CandidateCommitteeLink.candidate_id,
-            CandidateCommitteeLink.committee_id,
-        ).order_by(
-            CandidateCommitteeLink.candidate_id,
-            CandidateCommitteeLink.committee_id,
-            sa.desc(CandidateCommitteeLink.fec_election_year)
-        ).subquery()
-        return db.session.query(
-            latest.c.cand_id,
-            sa.func.sum(latest.c.last_cash_on_hand_end_period).label('cash_on_hand_end_period'),
-            sa.func.sum(latest.c.last_debts_owed_by_committee).label('debts_owed_by_committee'),
-        ).group_by(
-            latest.c.cand_id,
-        )
+        if kwargs.get('q'):
+            query = query.join(
+                models.CandidateSearch,
+                history.candidate_id == models.CandidateSearch.id,
+            )
+        query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
+        query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+        return query

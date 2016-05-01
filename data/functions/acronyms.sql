@@ -5,10 +5,36 @@ returns text as $$
             when 'I' then 'Incumbent'
             when 'C' then 'Challenger'
             when 'O' then 'Open seat'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
+
+ create or replace function expand_election_type(acronym text)
+ returns text as $$
+     begin
+         return case acronym
+             when 'P' then 'Primary Election'
+             when 'PR' then 'Primary Runoff Election'
+             when 'SP' then 'Special Primary Election'
+             when 'SPR' then 'Special Primary Runoff Election'
+             when 'G' then 'General Election'
+             when 'GR' then 'General Runoff Election'
+             when 'SG' then 'Special General Election'
+             when 'SGR' then 'Special General Runoff Election'
+             when 'O' then 'Other'
+             when 'C' then 'Caucus or Convention'
+             when 'CAU' then 'Caucus'
+             when 'CON' then 'Convention'
+             when 'SC' then 'Special Convention'
+             when 'R' then 'Runoff Election'
+             when 'SR' then 'Special Runoff Election'
+             when 'S' then 'Special Election'
+             when 'E' then 'Recount Election'
+             else null
+         end;
+     end
+ $$ language plpgsql;
 
 create or replace function expand_office(acronym text)
 returns text as $$
@@ -17,7 +43,18 @@ returns text as $$
             when 'P' then 'President'
             when 'S' then 'Senate'
             when 'H' then 'House'
-            else 'Unknown'
+        end;
+    end
+$$ language plpgsql;
+
+create or replace function expand_office_description(acronym text)
+returns text as $$
+    begin
+        return case acronym
+            when 'P' then 'Presidential Election'
+            when 'S' then 'Senate Election'
+            when 'H' then 'House Election'
+            else null
         end;
     end
 $$ language plpgsql;
@@ -30,7 +67,7 @@ returns text as $$
             when 'F' then 'Future candidate'
             when 'N' then 'Not yet a candidate'
             when 'P' then 'Prior candidate'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
@@ -60,7 +97,7 @@ returns text as $$
             when 'U' then 'Unauthorized'
             when 'B' then 'Lobbyist/Registrant PAC'
             when 'D' then 'Leadership PAC'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
@@ -85,7 +122,7 @@ returns text as $$
             when 'X' then 'Party - Nonqualified'
             when 'Y' then 'Party - Qualified'
             when 'Z' then 'National Party Nonfederal Account'
-            else 'Unknown'
+            else null
         end;
     end
 $$ language plpgsql;
