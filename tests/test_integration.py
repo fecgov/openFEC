@@ -299,13 +299,14 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(rows[0].count, 0)
 
     def test_update_aggregate_size_existing(self):
-        existing = models.ScheduleABySize.query.filter_by(
-            size=500,
-            cycle=2016,
-        ).order_by(
-            models.ScheduleABySize.committee_id,
-        ).first()
-        db.session.refresh(existing)
+        def get_existing():
+            return models.ScheduleABySize.query.filter_by(
+                size=500,
+                cycle=2016,
+            ).order_by(
+                models.ScheduleABySize.committee_id,
+            ).first()
+        existing = get_existing()
         total = existing.total
         count = existing.count
         self.SchedAFactory(
@@ -317,7 +318,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.commit()
         manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        db.session.refresh(existing)
+        existing = get_existing()
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
 

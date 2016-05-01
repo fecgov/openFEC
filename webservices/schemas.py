@@ -9,10 +9,19 @@ from webservices import utils
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
+from webservices.calendar import format_start_date, format_end_date
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
 spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
+
+
+class BaseSchema(ModelSchema):
+
+    def get_attribute(self, attr, obj, default):
+        if '.' in attr:
+            return super().get_attribute(attr, obj, default)
+        return getattr(obj, attr, default)
 
 
 def register_schema(schema, definition_name=None):
@@ -38,7 +47,7 @@ def make_schema(model, class_name=None, fields=None, options=None):
 
     return type(
         class_name,
-        (ModelSchema, ),
+        (BaseSchema, ),
         utils.extend({'Meta': Meta}, fields or {}),
     )
 
@@ -131,7 +140,11 @@ augment_models(
 
 make_candidate_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', 'principal_committees')},
+    options={'exclude': ('idx', 'principal_committees', 'flags')},
+    fields={
+        'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
+        'five_thousand_flag': ma.fields.Boolean(attribute='flags.five_thousand_flag'),
+    }
 )
 
 augment_models(
@@ -139,12 +152,22 @@ augment_models(
     models.Candidate,
     models.CandidateDetail,
     models.CandidateHistory,
+    models.CandidateTotal,
 )
+
+class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema']):
+    pass
+
+CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
-    options={'exclude': ('idx', )},
-    fields={'principal_committees': ma.fields.Nested(schemas['CommitteeSchema'], many=True)},
+    options={'exclude': ('idx', 'flags')},
+    fields={
+        'principal_committees': ma.fields.Nested(schemas['CommitteeSchema'], many=True),
+        'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
+        'five_thousand_flag': ma.fields.Boolean(attribute='flags.five_thousand_flag'),
+    },
 )
 CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
 register_schema(CandidateSearchSchema)
@@ -216,7 +239,6 @@ register_schema(CommitteeTotalsPageSchema)
 ScheduleASchema = make_schema(
     models.ScheduleA,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'contributor': ma.fields.Nested(schemas['CommitteeHistorySchema']),
@@ -239,6 +261,19 @@ ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+ScheduleBByRecipientIDSchema = make_schema(
+    models.ScheduleBByRecipientID,
+    fields={
+        'committee_name': ma.fields.Str(),
+        'recipient_name': ma.fields.Str(),
+    },
+    options={
+        'exclude': ('committee', 'recipient')
+    },
+)
+
+augment_schemas(ScheduleBByRecipientIDSchema)
+
 augment_models(
     make_schema,
     models.ScheduleAByZip,
@@ -246,9 +281,7 @@ augment_models(
     models.ScheduleAByState,
     models.ScheduleAByEmployer,
     models.ScheduleAByOccupation,
-    models.ScheduleAByContributor,
     models.ScheduleBByRecipient,
-    models.ScheduleBByRecipientID,
     models.ScheduleBByPurpose,
 )
 
@@ -275,7 +308,6 @@ augment_schemas(ElectioneeringByCandidateSchema)
 ScheduleBSchema = make_schema(
     models.ScheduleB,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'recipient_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
@@ -298,7 +330,6 @@ register_schema(ScheduleBPageSchema)
 ScheduleESchema = make_schema(
     models.ScheduleE,
     fields={
-        'pdf_url': ma.fields.Str(),
         'memoed_subtotal': ma.fields.Boolean(),
         'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'expenditure_amount': ma.fields.Decimal(places=2),
@@ -318,16 +349,32 @@ ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
+CommunicationCostSchema = make_schema(
+    models.CommunicationCost,
+    options={'exclude': ('idx', )},
+)
+CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
+register_schema(CommunicationCostSchema)
+register_schema(CommunicationCostPageSchema)
+
+ElectioneeringSchema = make_schema(
+    models.Electioneering,
+    fields={'election_type': ma.fields.Str()},
+    options={'exclude': ('idx', 'purpose_description_text', 'election_type_raw')},
+)
+ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=paging_schemas.SeekPageSchema)
+register_schema(ElectioneeringSchema)
+register_schema(ElectioneeringPageSchema)
 
 FilingsSchema = make_schema(
     models.Filings,
     fields={
-        'pdf_url': ma.fields.Str(),
         'document_description': ma.fields.Str(),
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
+    options={'exclude': ('committee', )},
 )
 augment_schemas(FilingsSchema)
 
@@ -336,11 +383,11 @@ register_schema(ReportTypeSchema)
 
 ReportingDatesSchema = make_schema(
     models.ReportDate,
-    fields = {
+    fields={
         'report_type': ma.fields.Str(),
         'report_type_full': ma.fields.Str(),
     },
-    options = {'exclude': ('trc_report_due_date_id', 'report')},
+    options={'exclude': ('trc_report_due_date_id', 'report')},
 )
 ReportingDatesPageSchema = make_page_schema(ReportingDatesSchema)
 augment_schemas(ReportingDatesSchema)
@@ -357,6 +404,24 @@ ElectionDatesSchema = make_schema(
 )
 ElectionDatesPageSchema = make_page_schema(ElectionDatesSchema)
 augment_schemas(ElectionDatesSchema)
+
+CalendarDateSchema = make_schema(
+    models.CalendarDate,
+    fields={
+        'summary': ma.fields.Str(),
+        'description': ma.fields.Str(),
+        'start_date': ma.fields.Function(format_start_date),
+        'end_date': ma.fields.Function(format_end_date),
+    },
+    options={
+        'exclude': (
+            'summary_text', 'description_text',
+        )
+    },
+)
+CalendarDatePageSchema = make_page_schema(CalendarDateSchema)
+augment_schemas(CalendarDateSchema)
+
 
 class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
@@ -405,19 +470,17 @@ class ScheduleAByContributorTypeCandidateSchema(ma.Schema):
     total = ma.fields.Decimal(places=2)
     individual = ma.fields.Bool()
 
-class TotalsCandidateSchema(ma.Schema):
-    candidate_id = ma.fields.Str()
-    cycle = ma.fields.Int()
+class TotalsCommitteeSchema(schemas['CommitteeHistorySchema']):
     receipts = ma.fields.Decimal(places=2)
     disbursements = ma.fields.Decimal(places=2)
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     debts_owed_by_committee = ma.fields.Decimal(places=2)
+    independent_expenditures = ma.fields.Decimal(places=2)
 
 augment_schemas(
     ScheduleABySizeCandidateSchema,
     ScheduleAByStateCandidateSchema,
-    ScheduleAByContributorTypeCandidateSchema,
-    TotalsCandidateSchema,
+    TotalsCommitteeSchema,
 )
 
 # Copy schemas generated by helper methods to module namespace

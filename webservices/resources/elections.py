@@ -45,7 +45,7 @@ class ElectionList(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.election_search)
-    @use_kwargs(args.make_sort_args(default=['-_office_status']))
+    @use_kwargs(args.make_sort_args(default='-_office_status'))
     @marshal_with(schemas.ElectionSearchPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
@@ -162,7 +162,7 @@ class ElectionView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.elections)
-    @use_kwargs(args.make_sort_args(default=['-total_receipts'], default_nulls_large=False))
+    @use_kwargs(args.make_sort_args(default='-total_receipts'))
     @marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)

@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from flask_apispec import Ref, marshal_with
 
 from webservices import utils
 from webservices import filters
@@ -6,28 +7,51 @@ from webservices import sorting
 from webservices import exceptions
 from webservices.common import counts
 from webservices.common import models
+from webservices.utils import use_kwargs
 
 
 class ApiResource(utils.Resource):
 
+    args = {}
     model = None
+    schema = None
+    page_schema = None
+    index_column = None
+    unique_column = None
     filter_match_fields = []
     filter_multi_fields = []
     filter_range_fields = []
+    filter_fulltext_fields = []
     query_options = []
     join_columns = {}
+    aliases = {}
+    cap = 100
 
-    def get(self, **kwargs):
-        query = self.build_query(**kwargs)
-        return utils.fetch_page(query, kwargs, join_columns=self.join_columns)
+    @use_kwargs(Ref('args'))
+    @marshal_with(Ref('page_schema'))
+    def get(self, *args, **kwargs):
+        query = self.build_query(*args, **kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(
+            query, kwargs,
+            count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+            index_column=self.index_column, cap=self.cap,
+        )
 
-    def build_query(self, _apply_options=True, **kwargs):
+    def build_query(self, *args, _apply_options=True, **kwargs):
         query = self.model.query
         query = filters.filter_match(query, kwargs, self.filter_match_fields)
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields)
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
+        query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         if _apply_options:
             query = query.options(*self.query_options)
+        return query
+
+    def filter_fulltext(self, query, kwargs):
+        for key, column in self.filter_fulltext_fields:
+            if kwargs.get(key):
+                query = utils.search_text(query, column, kwargs[key])
         return query
 
 
@@ -35,7 +59,6 @@ class ItemizedResource(ApiResource):
 
     year_column = None
     index_column = None
-    filter_fulltext_fields = []
 
     def get(self, **kwargs):
         """Get itemized resources. If multiple values are passed for `committee_id`,
@@ -54,12 +77,7 @@ class ItemizedResource(ApiResource):
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
-
-    def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
-        query = self.filter_fulltext(query, kwargs)
-        return query
+        return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
         """Build and compose per-committee subqueries using `UNION ALL`.
@@ -82,14 +100,8 @@ class ItemizedResource(ApiResource):
         """Build a subquery by committee.
         """
         query = self.build_query(_apply_options=False, **utils.extend(kwargs, {'committee_id': [committee_id]}))
-        sort, hide_null, nulls_large = kwargs['sort'], kwargs['sort_hide_null'], kwargs['sort_nulls_large']
-        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null, nulls_large=nulls_large)
+        sort, hide_null = kwargs['sort'], kwargs['sort_hide_null']
+        query, _ = sorting.sort(query, sort, model=self.model, hide_null=hide_null)
         page_query = utils.fetch_seek_page(query, kwargs, self.index_column, count=-1, eager=False).results
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return page_query, count
-
-    def filter_fulltext(self, query, kwargs):
-        for key, column in self.filter_fulltext_fields:
-            if kwargs.get(key):
-                query = utils.search_text(query, column, kwargs[key])
-        return query

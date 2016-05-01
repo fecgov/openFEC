@@ -2,9 +2,9 @@
 inherit: manifest_base.yml
 host: fec-stage-api
 services:
-  # Must provide SQLA_CONN, NEW_RELIC_LICENSE_KEY
   - fec-creds-stage
   - fec-redis-stage
+  - fec-s3-stage
 env:
   NEW_RELIC_APP_NAME: OpenFEC API (staging)
   NEW_RELIC_ENV: staging

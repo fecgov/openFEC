@@ -16,14 +16,16 @@ and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, zip
 ;
 
+alter table ofec_sched_a_aggregate_zip add column idx serial primary key;
+
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_zip (cmte_id);
-create index on ofec_sched_a_aggregate_zip (cycle);
-create index on ofec_sched_a_aggregate_zip (zip);
-create index on ofec_sched_a_aggregate_zip (state);
-create index on ofec_sched_a_aggregate_zip (state_full);
-create index on ofec_sched_a_aggregate_zip (total);
-create index on ofec_sched_a_aggregate_zip (count);
+create index on ofec_sched_a_aggregate_zip (cmte_id, idx);
+create index on ofec_sched_a_aggregate_zip (cycle, idx);
+create index on ofec_sched_a_aggregate_zip (zip, idx);
+create index on ofec_sched_a_aggregate_zip (state, idx);
+create index on ofec_sched_a_aggregate_zip (state_full, idx);
+create index on ofec_sched_a_aggregate_zip (total, idx);
+create index on ofec_sched_a_aggregate_zip (count, idx);
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_zip() returns void as $$

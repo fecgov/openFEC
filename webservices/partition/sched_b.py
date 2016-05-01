@@ -14,6 +14,7 @@ class SchedBGroup(TableGroup):
 
     columns = [
         sa.Column('timestamp', sa.DateTime),
+        sa.Column('pdf_url', sa.Text),
         sa.Column('recipient_name_text', TSVECTOR),
         sa.Column('disbursement_description_text', TSVECTOR),
         sa.Column('disbursement_purpose_category', sa.String),
@@ -23,6 +24,7 @@ class SchedBGroup(TableGroup):
     @classmethod
     def column_factory(cls, parent):
         return [
+            sa.func.image_pdf_url(parent.c.image_num).label('pdf_url'),
             sa.func.to_tsvector(parent.c.recipient_nm).label('recipient_name_text'),
             sa.func.to_tsvector(parent.c.disb_desc).label('disbursement_description_text'),
             sa.func.disbursement_purpose(

@@ -41,7 +41,13 @@ select
     report_pgi as primary_general_indicator,
     request_type,
     amendment_indicator,
-    update_date
+    update_date,
+    report_pdf_url_or_null(
+        begin_image_numeric,
+        report_year,
+        com.committee_type,
+        fh.form_type
+    ) as pdf_url
 from vw_filing_history fh
 left join ofec_committee_history_mv_tmp com on fh.committee_id = com.committee_id and get_cycle(fh.report_year) = com.cycle
 left join ofec_candidate_history_mv_tmp cand on fh.committee_id = cand.candidate_id and get_cycle(fh.report_year) = cand.two_year_period
@@ -51,18 +57,18 @@ where report_year >= :START_YEAR
 
 create unique index on ofec_filings_mv_tmp (idx);
 
-create index on ofec_filings_mv_tmp (committee_id);
-create index on ofec_filings_mv_tmp (candidate_id);
-create index on ofec_filings_mv_tmp (beginning_image_number);
-create index on ofec_filings_mv_tmp (receipt_date);
-create index on ofec_filings_mv_tmp (form_type);
-create index on ofec_filings_mv_tmp (primary_general_indicator);
-create index on ofec_filings_mv_tmp (amendment_indicator);
-create index on ofec_filings_mv_tmp (report_type);
-create index on ofec_filings_mv_tmp (report_year);
-create index on ofec_filings_mv_tmp (cycle);
-create index on ofec_filings_mv_tmp (total_receipts);
-create index on ofec_filings_mv_tmp (total_disbursements);
-create index on ofec_filings_mv_tmp (total_independent_expenditures);
-create index on ofec_filings_mv_tmp (coverage_start_date);
-create index on ofec_filings_mv_tmp (coverage_end_date);
+create index on ofec_filings_mv_tmp (committee_id, idx);
+create index on ofec_filings_mv_tmp (candidate_id, idx);
+create index on ofec_filings_mv_tmp (beginning_image_number, idx);
+create index on ofec_filings_mv_tmp (receipt_date, idx);
+create index on ofec_filings_mv_tmp (form_type, idx);
+create index on ofec_filings_mv_tmp (primary_general_indicator, idx);
+create index on ofec_filings_mv_tmp (amendment_indicator, idx);
+create index on ofec_filings_mv_tmp (report_type, idx);
+create index on ofec_filings_mv_tmp (report_year, idx);
+create index on ofec_filings_mv_tmp (cycle, idx);
+create index on ofec_filings_mv_tmp (total_receipts, idx);
+create index on ofec_filings_mv_tmp (total_disbursements, idx);
+create index on ofec_filings_mv_tmp (total_independent_expenditures, idx);
+create index on ofec_filings_mv_tmp (coverage_start_date, idx);
+create index on ofec_filings_mv_tmp (coverage_end_date, idx);

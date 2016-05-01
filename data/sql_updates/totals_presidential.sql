@@ -22,6 +22,7 @@ select
     sum(greatest(p.ttl_disb_per, p.ttl_disb_sum_page_per)) as disbursements,
     sum(p.exempt_legal_acctg_disb_per) as exempt_legal_accounting_disbursement,
     sum(p.fed_funds_per) as federal_funds,
+    sum(p.fed_funds_per) > 0 as federal_funds_flag,
     sum(p.fndrsg_disb_per) as fundraising_disbursements,
     sum(p.indv_contb_per) as individual_contributions,
     sum(p.indv_unitem_contb_per) as individual_unitemized_contributions,
@@ -68,5 +69,5 @@ group by c.cmte_id, p.two_yr_period_sk
 
 create unique index on ofec_totals_presidential_mv_tmp(idx);
 
-create index on ofec_totals_presidential_mv_tmp(cycle);
-create index on ofec_totals_presidential_mv_tmp(committee_id);
+create index on ofec_totals_presidential_mv_tmp(cycle, idx);
+create index on ofec_totals_presidential_mv_tmp(committee_id, idx);
