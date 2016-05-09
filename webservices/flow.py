@@ -33,6 +33,11 @@ def get_graph():
     ])
 
     graph.add_edges_from([
+        ('candidate_history', 'candidate_flags'),
+        ('candidate_aggregates', 'candidate_flags'),
+    ])
+
+    graph.add_edges_from([
         ('totals_house_senate', 'totals_combined'),
         ('totals_presidential', 'totals_combined'),
         ('totals_pac_party', 'totals_combined'),
@@ -42,6 +47,7 @@ def get_graph():
         ('committee_detail', 'committee_fulltext'),
         ('totals_combined', 'committee_fulltext'),
     ])
+
     graph.add_edges_from([
         ('candidate_detail', 'candidate_fulltext'),
         ('totals_combined', 'candidate_fulltext'),

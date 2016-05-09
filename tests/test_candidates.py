@@ -94,6 +94,7 @@ class CandidateFormatTest(ApiBaseTest):
 
     def test_fields(self):
         candidate = factories.CandidateDetailFactory()
+        flags = factories.CandidateFlagsFactory(candidate_id=candidate.candidate_id)
         response = self._results(
             api.url_for(CandidateView, candidate_id=candidate.candidate_id)
         )

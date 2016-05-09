@@ -1,4 +1,4 @@
-drop materialized view if exists ofec_cand_cmte_linkage_mv_tmp;
+drop materialized view if exists ofec_cand_cmte_linkage_mv_tmp cascade;
 create materialized view ofec_cand_cmte_linkage_mv_tmp as
 select
     row_number() over () as idx,
