@@ -44,14 +44,14 @@ returns text as $$
                 office_sought,
                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
                 'Multi-state'::text,
-                'held today'
+                'Held Today'
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
             array[
                 party,
                 office_sought,
                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
-                'held today'
+                'Held Today'
             ], ' ')
         else array_to_string(
             array[
@@ -59,7 +59,7 @@ returns text as $$
                 party,
                 office_sought,
                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
-                'held today'
+                'Held Today'
             ], ' ')
         end;
     end
@@ -77,14 +77,14 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'report multi-state due today'
+                    'Report Multi-state Due Today'
                 ], ' ')
             when rpt_tp_desc is null and array_length(election_state, 1) = 0 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'due today'
+                    'Report Due Today'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
@@ -92,19 +92,19 @@ returns text as $$
                     array_to_string(election_state, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
-                    'due today'
+                    'Report Due Today'
                 ], ' ')
             when array_length(election_state, 1) > 3 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'report multi-state due today'
+                    'Report Multi-state Due Today'
                 ], ' ')
             when array_length(election_state, 1) = 0 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'due today'
+                    'Report Due Today'
                 ], ' ')
             else
                 array_to_string(
@@ -112,7 +112,7 @@ returns text as $$
                     array_to_string(election_state, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'due today'
+                    'Report Due Today'
                 ], ' ')
         end;
     end
@@ -152,7 +152,7 @@ with elections_raw as(
                 expand_office_description(office_sought::text),
                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
                 array_to_string(array_agg(contest order by contest)::text[], ', '),
-                'held today'
+                'Held Today'
         ], ' ') as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
@@ -188,7 +188,7 @@ with elections_raw as(
             expand_office_description(office_sought::text),
             clean_report(rpt_tp_desc::text),
             array_to_string(array_agg(election_state order by election_state)::text[], ', '),
-            'due today'
+            'Due Today'
         ], ' ') as summary,
         array_agg(election_state)::text[] as states,
         null::text as location,
