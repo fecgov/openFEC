@@ -20,7 +20,7 @@ returns text as $$
     begin
         return case
             when event_name in ('Litigation', 'AOs and Rules', 'Conferences') then
-                summary || description
+                summary || ' ' || description
             else
                 description
         end;
@@ -43,7 +43,8 @@ returns text as $$
                 party,
                 office_sought,
                  expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
-                'Multi-state'::text
+                'Multi-state'::text,
+                ' due today'
             ], ' ')
         else array_to_string(
             array[
@@ -68,27 +69,29 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Multi-state'
+                    'Report Multi-state due today'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
                 array[
                     array_to_string(election_state, ', '),
                     expand_office_description(office_sought),
-                    report_type
-                ], ' ')
+                    report_type,
+                    'due today'
+                ], ' '
             when array_length(election_state, 1) > 1 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Multi-state'
+                    'Report Multi-state due today'
                 ], ' ')
             else
                 array_to_string(
                 array[
                     array_to_string(election_state, ', '),
                     expand_office_description(office_sought),
-                    rpt_tp_desc
+                    rpt_tp_desc,
+                    'due today'
                 ], ' ')
         end;
     end
@@ -162,9 +165,8 @@ with elections_raw as(
         array_to_string(array[
             expand_office_description(office_sought::text),
             clean_report(rpt_tp_desc::text),
-            'Due. Report code:',
-            report_type::text,
-            array_to_string(array_agg(election_state order by election_state)::text[], ', ')
+            'due today',
+            array_to_strding(array_agg(election_state order by election_state)::text[], ', ')
         ], ' ') as summary,
         array_agg(election_state)::text[] as states,
         null::text as location,
