@@ -1,4 +1,6 @@
+import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import docs
 
@@ -13,6 +15,14 @@ class CandidateSearch(BaseModel):
     office_sought = db.Column(db.String, doc=docs.OFFICE)
     fulltxt = db.Column(TSVECTOR)
     receipts = db.Column(db.Numeric(30, 2))
+
+
+class CandidateFlags(db.Model):
+    __tablename__ = 'ofec_candidate_flag'
+
+    candidate_id = db.Column(db.String, index=True, primary_key=True, doc=docs.CANDIDATE_ID)
+    federal_funds_flag = db.Column(db.Boolean, index=True, doc=docs.FEDERAL_FUNDS_FLAG)
+    five_thousand_flag = db.Column(db.Boolean, index=True, doc=docs.FIVE_THOUSAND_FLAG)
 
 
 class BaseCandidate(BaseModel):
@@ -34,6 +44,14 @@ class BaseCandidate(BaseModel):
     party_full = db.Column(db.String(255), doc=docs.PARTY_FULL)
     state = db.Column(db.String(2), index=True, doc=docs.STATE)
     name = db.Column(db.String(100), index=True, doc=docs.CANDIDATE_NAME)
+
+    @declared_attr
+    def flags(self):
+        return sa.orm.relationship(
+            CandidateFlags,
+            primaryjoin=sa.orm.foreign(CandidateFlags.candidate_id) == self.candidate_id,
+            uselist=False,
+        )
 
 
 class BaseConcreteCandidate(BaseCandidate):

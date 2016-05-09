@@ -140,7 +140,11 @@ augment_models(
 
 make_candidate_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', 'principal_committees')},
+    options={'exclude': ('idx', 'principal_committees', 'flags')},
+    fields={
+        'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
+        'five_thousand_flag': ma.fields.Boolean(attribute='flags.five_thousand_flag'),
+    }
 )
 
 augment_models(
@@ -158,8 +162,12 @@ CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
-    options={'exclude': ('idx', )},
-    fields={'principal_committees': ma.fields.Nested(schemas['CommitteeSchema'], many=True)},
+    options={'exclude': ('idx', 'flags')},
+    fields={
+        'principal_committees': ma.fields.Nested(schemas['CommitteeSchema'], many=True),
+        'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
+        'five_thousand_flag': ma.fields.Boolean(attribute='flags.five_thousand_flag'),
+    },
 )
 CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)
 register_schema(CandidateSearchSchema)

@@ -35,6 +35,10 @@ class CandidateList(ApiResource):
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
     aliases = {'receipts': models.CandidateSearch.receipts}
 
+    query_options = [
+        sa.orm.joinedload(models.Candidate.flags),
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -62,6 +66,15 @@ class CandidateList(ApiResource):
                 status_code=422,
             )
 
+        if 'five_thousand_flag' in kwargs:
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.five_thousand_flag == kwargs['five_thousand_flag'])
+            )
+        if 'federal_funds_flag' in kwargs:
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
+            )
+
         if kwargs.get('q'):
             query = query.join(
                 models.CandidateSearch,
@@ -84,7 +97,10 @@ class CandidateSearch(CandidateList):
 
     schema = schemas.CandidateSearchSchema
     page_schema = schemas.CandidateSearchPageSchema
-    query_options = [sa.orm.subqueryload(models.Candidate.principal_committees)]
+    query_options = [
+        sa.orm.joinedload(models.Candidate.flags),
+        sa.orm.subqueryload(models.Candidate.principal_committees),
+    ]
 
 
 @doc(
@@ -101,6 +117,10 @@ class CandidateView(ApiResource):
     schema = schemas.CandidateDetailSchema
     page_schema = schemas.CandidateDetailPageSchema
     filter_multi_fields = filter_multi_fields(models.CandidateDetail)
+
+    query_options = [
+        sa.orm.joinedload(models.CandidateDetail.flags),
+    ]
 
     @property
     def args(self):
@@ -149,6 +169,10 @@ class CandidateHistoryView(ApiResource):
     schema = schemas.CandidateHistorySchema
     page_schema = schemas.CandidateHistoryPageSchema
 
+    query_options = [
+        sa.orm.joinedload(models.CandidateHistory.flags),
+    ]
+
     @property
     def args(self):
         return utils.extend(
@@ -161,7 +185,7 @@ class CandidateHistoryView(ApiResource):
         )
 
     def build_query(self, candidate_id=None, committee_id=None, cycle=None, **kwargs):
-        query = models.CandidateHistory.query
+        query = super().build_query(**kwargs)
 
         if candidate_id:
             query = query.filter(models.CandidateHistory.candidate_id == candidate_id)
