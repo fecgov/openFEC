@@ -38,20 +38,28 @@ create or replace function generate_election_title(trc_election_type_id text, of
 returns text as $$
     begin
         return case
-        when array_length(contest, 1) > 1 then array_to_string(
+        when array_length(contest, 1) > 3 then array_to_string(
             array[
                 party,
                 office_sought,
-                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
                 'Multi-state'::text,
-                ' due today'
+                'held today'
+            ], ' ')
+        when array_length(contest, 1) = 0 then array_to_string(
+            array[
+                party,
+                office_sought,
+                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                'held today'
             ], ' ')
         else array_to_string(
             array[
-                array_to_string(contest, ', '),
+                array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
-                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric)
+                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                'held today'
             ], ' ')
         end;
     end
@@ -64,31 +72,44 @@ create or replace function name_reports(office_sought text, report_type text, rp
 returns text as $$
     begin
         return case
-            when rpt_tp_desc is null and array_length(election_state, 1) > 1 then
+            when rpt_tp_desc is null and array_length(election_state, 1) > 3 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Multi-state due today'
+                    'report multi-state due today'
+                ], ' ')
+            when pt_tp_desc is null and array_length(election_state, 1) = 0 then
+                array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    report_type,
+                    'due today'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
                 array[
-                    array_to_string(election_state, ', '),
+                    array_to_string(election_state, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
                     'due today'
                 ], ' '
-            when array_length(election_state, 1) > 1 then array_to_string(
+            when array_length(election_state, 1) > 3 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Multi-state due today'
+                    'report multi-state due today'
+                ], ' ')
+            when array_length(election_state, 1) = 0 then array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    rpt_tp_desc,
+                    'due today'
                 ], ' ')
             else
                 array_to_string(
                 array[
-                    array_to_string(election_state, ', '),
+                    array_to_string(election_state, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     'due today'
@@ -129,8 +150,9 @@ with elections_raw as(
         array_to_string(array[
                 dp.party_affiliation_desc::text,
                 expand_office_description(office_sought::text),
-                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
-                array_to_string(array_agg(contest order by contest)::text[], ', ')
+                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                array_to_string(array_agg(contest order by contest)::text[], ', '),
+                'held today'
         ], ' ') as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
@@ -165,8 +187,8 @@ with elections_raw as(
         array_to_string(array[
             expand_office_description(office_sought::text),
             clean_report(rpt_tp_desc::text),
-            'due today',
-            array_to_strding(array_agg(election_state order by election_state)::text[], ', ')
+            array_to_string(array_agg(election_state order by election_state)::text[], ', '),
+            'due today'
         ], ' ') as summary,
         array_agg(election_state)::text[] as states,
         null::text as location,
