@@ -55,7 +55,7 @@ returns text as $$
             ], ' ')
         else array_to_string(
             array[
-                array_to_string(contest, ', '),
+                array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
@@ -89,7 +89,7 @@ returns text as $$
             when rpt_tp_desc is null then
                 array_to_string(
                 array[
-                    array_to_string(election_state, ', '),
+                    array_to_string(election_state, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
                     'due today'
@@ -109,7 +109,7 @@ returns text as $$
             else
                 array_to_string(
                 array[
-                    array_to_string(election_state, ', '),
+                    array_to_string(election_state, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     'due today'
