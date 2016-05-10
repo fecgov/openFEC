@@ -31,19 +31,19 @@ $$ language plpgsql;
 -- Trying to make the names flow together as best as possible
 -- To keep the titles concise states are abbreviated as multi state if there is more than one
 -- Like:
-    -- FL House General Election
-    -- NH DEM Convention
+    -- FL: House General Election
+    -- NH, DE: DEM Convention
     -- General Election Multi-state
-create or replace function generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric)
+create or replace function generate_election_description(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric)
 returns text as $$
     begin
         return case
-        when array_length(contest, 1) > 3 then array_to_string(
+        when array_length(contest, 1) < 3 and array_length(contest, 1) >= 1 then array_to_string(
             array[
                 party,
                 office_sought,
                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
-                'Multi-state'::text,
+                'Multi-state',
                 'Held Today'
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
@@ -66,13 +66,52 @@ returns text as $$
 $$ language plpgsql;
 
 
--- Not all report types are on dimreporttype, so for the reports to all have
--- titles, I am adding a case. Ideally, we would want the right mapping.
-create or replace function name_reports(office_sought text, report_type text, rpt_tp_desc text, election_state text[])
+-- Trying to make the names flow together as best as possible
+-- Like:
+    -- FL: House General Election Held Today
+    -- NH, DE: DEM Convention Held Today
+    -- General Election Held today States: NY, CA, FL, LA
+create or replace function generate_election_summary(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric)
 returns text as $$
     begin
         return case
-            when rpt_tp_desc is null and array_length(election_state, 1) > 3 then
+        when array_length(contest, 1) < 3 and array_length(contest, 1) >= 1 then array_to_string(
+            array[
+                party,
+                office_sought,
+                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                'Held Today',
+                'States:',
+                array_to_string(contest, ', ')
+            ], ' ')
+        when array_length(contest, 1) = 0 then array_to_string(
+            array[
+                party,
+                office_sought,
+                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                'Held Today'
+            ], ' ')
+        else array_to_string(
+            array[
+                array_to_string(contest, ', ') || ':',
+                party,
+                office_sought,
+                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                'Held Today'
+            ], ' ')
+        end;
+    end
+$$ language plpgsql;
+
+
+
+-- Not all report types are on dimreporttype, so for the reports to all have
+-- titles, I am adding a case. Ideally, we would want the right mapping.
+create or replace function generate_report_description(office_sought text, report_type text, rpt_tp_desc text, election_state text[])
+returns text as $$
+    begin
+        return case
+            when rpt_tp_desc is null and array_length(election_state, 1) < 3 and array_length(election_state, 1) >= 1 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
@@ -94,11 +133,69 @@ returns text as $$
                     report_type,
                     'Report Due Today'
                 ], ' ')
-            when array_length(election_state, 1) > 3 then array_to_string(
+            when array_length(election_state, 1) < 3 and array_length(election_state, 1) >= 1 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     'Report Multi-state Due Today'
+                ], ' ')
+            when array_length(election_state, 1) = 0 then array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    rpt_tp_desc,
+                    'Report Due Today'
+                ], ' ')
+            else
+                array_to_string(
+                array[
+                    array_to_string(election_state, ', ') || ':',
+                    expand_office_description(office_sought),
+                    rpt_tp_desc,
+                    'Report Due Today'
+                ], ' ')
+        end;
+    end
+$$ language plpgsql;
+
+
+
+-- Not all report types are on dimreporttype, so for the reports to all have
+-- titles, I am adding a case. Ideally, we would want the right mapping.
+create or replace function generate_report_summary(office_sought text, report_type text, rpt_tp_desc text, election_state text[])
+returns text as $$
+    begin
+        return case
+            when rpt_tp_desc is null and array_length(election_state, 1) < 3 and array_length(election_state, 1) >= 1 then
+                array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    report_type,
+                    'Due Today',
+                    'States:',
+                    array_to_string(election_state, ', ')
+                ], ' ')
+            when rpt_tp_desc is null and array_length(election_state, 1) < 1 then
+                array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    report_type,
+                    'Report Due Today'
+                ], ' ')
+            when rpt_tp_desc is null then
+                array_to_string(
+                array[
+                    array_to_string(election_state, ', ') || ':',
+                    expand_office_description(office_sought),
+                    report_type,
+                    'Report Due Today'
+                ], ' ')
+            when array_length(election_state, 1) < 3 and array_length(election_state, 1) >= 1 then array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    rpt_tp_desc,
+                    'Report Due Today',
+                    'States:',
+                    array_to_string(election_state, ', ')
                 ], ' ')
             when array_length(election_state, 1) = 0 then array_to_string(
                 array[
@@ -140,20 +237,20 @@ with elections_raw as(
 ), elections as (
     select
         'election'::text as category,
-        generate_election_title(
+        generate_election_description(
             trc_election_type_id::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
             dp.party_affiliation_desc::text,
             trc_election_id::numeric
         ) as description,
-        array_to_string(array[
-                dp.party_affiliation_desc::text,
-                expand_office_description(office_sought::text),
-                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
-                array_to_string(array_agg(contest order by contest)::text[], ', '),
-                'Held Today'
-        ], ' ') as summary,
+        generate_election_summary(
+            trc_election_type_id::text,
+            expand_office_description(office_sought::text),
+            array_agg(contest order by contest)::text[],
+            dp.party_affiliation_desc::text,
+            trc_election_id::numeric
+        ) as summary,
         array_agg(election_state order by election_state)::text[] as states,
         null::text as location,
         election_date::timestamp as start_date,
@@ -178,18 +275,18 @@ with elections_raw as(
 ), reports as (
     select
         'report-' || report_type as category,
-        name_reports(
+        generate_report_description(
             office_sought::text,
             report_type::text,
             clean_report(rpt_tp_desc::text),
             array_agg(election_state)::text[]
         ) as description,
-        array_to_string(array[
-            expand_office_description(office_sought::text),
+        generate_report_summary(
+            office_sought::text,
+            report_type::text,
             clean_report(rpt_tp_desc::text),
-            array_to_string(array_agg(election_state order by election_state)::text[], ', '),
-            'Due Today'
-        ], ' ') as summary,
+            array_agg(election_state)::text[]
+        ) as summary,
         array_agg(election_state)::text[] as states,
         null::text as location,
         due_date::timestamp as start_date,
