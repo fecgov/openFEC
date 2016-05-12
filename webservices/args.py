@@ -128,7 +128,8 @@ names = {
 query = {
     'q': fields.Str(required=True, description='Text to search legal documents for.'),
     'from_hit': fields.Int(required=False, description='Get results starting from this index.'),
-    'hits_returned': fields.Int(required=False, description='Number of results to return (max 10).')
+    'hits_returned': fields.Int(required=False, description='Number of results to return (max 10).'),
+    'type': fields.Str(required=False, description='Document type to refine search by')
 }
 
 candidate_detail = {
