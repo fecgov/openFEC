@@ -31,7 +31,6 @@ class Search(utils.Resource):
             es_results = es.search(query, index='docs', size=hits_returned,
                              es_from=from_hit)
             hits = es_results['hits']['hits']
-            print(hits)
             for hit in hits:
                 highlights = []
                 for key in hit['highlight']:
