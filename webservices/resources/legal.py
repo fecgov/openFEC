@@ -23,15 +23,20 @@ class Search(utils.Resource):
                                                                  }
                                                 }]
                      }},
-                "highlight": {"fields": {"text": {}}},
+                "highlight": {"fields": [{"text": {}},
+                    {"name": {}}, {"number": {}}]},
                 "_source": {"exclude": "text"}}
 
             hits_returned = min([200, hits_returned])
             es_results = es.search(query, index='docs', size=hits_returned,
                              es_from=from_hit)
             hits = es_results['hits']['hits']
+            print(hits)
             for hit in hits:
-                hit['_source']['highlights'] = hit['highlight']['text']
+                highlights = []
+                for key in hit['highlight']:
+                    highlights.extend(hit['highlight'][key])
+                hit['_source']['highlights'] = highlights
             count = es_results['hits']['total']
             total_count += count
             formatted_hits = [h['_source'] for h in hits]
