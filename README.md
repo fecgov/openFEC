@@ -191,22 +191,25 @@ py.test
 #### The test data subset
 If you add new tables to the data, you'll need to generate a new subset for testing. We use this nifty subsetting tool: [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
 
-To build a new test subset, use the `build_test` invoke task:
+To build a new test subset, first delete and recreate the test database:
 
 ```
-invoke build_test <source> <dest>
+dropdb cfdm_test
+createdb cfdm_test
 ```
 
-where both `source` and `dest` are valid PostgreSQL connection strings.
+Now use the `build_test` invoke task to populate the new database with the new subset:
 
+```
+invoke build_test <source> postgresql://:@/cfdm_test
+```
+
+where `source` is a valid PostgreSQL connection string.
 To update the version-controlled test subset after rebuilding, run:
 
 ```
-invoke dump <source> data/subset.dump
+invoke dump postgresql://:@/cfdm_test data/subset.dump
 ```
-
-where `source` is the database containing the newly created test subset.
-
 
 ## Deployment (18F and FEC team only)
 
