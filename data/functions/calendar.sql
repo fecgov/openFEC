@@ -178,8 +178,7 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Due Today',
-                    'States:',
+                    'Due Today. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
             when rpt_tp_desc is null and array_length(report_contest, 1) < 1 then
@@ -222,7 +221,3 @@ returns text as $$
         end;
     end
 $$ language plpgsql;
-
-
-
-
