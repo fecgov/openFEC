@@ -1,3 +1,5 @@
+-- Helper functions for omnibus dates
+
 -- this is a short term fix to correct a coding error where the code C was used for caucuses and conventions
 create or replace function expand_election_type_caucus_convention_clean(trc_election_type_id text, trc_election_id numeric)
 returns text as $$
@@ -38,7 +40,7 @@ create or replace function generate_election_description(trc_election_type_id te
 returns text as $$
     begin
         return case
-        when array_length(contest, 1) > 3 then array_to_string(
+        when array_length(contest, 1) >= 3 then array_to_string(
             array[
                 party,
                 office_sought,
@@ -75,16 +77,16 @@ create or replace function generate_election_summary(trc_election_type_id text, 
 returns text as $$
     begin
         return case
-        when array_length(contest, 1) > 3 then array_to_string(
+        when array_length(contest, 1) >= 3 then array_to_string(
             array[
                 party,
                 office_sought,
                 expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
                 'Held Today',
-                'Contests:',
+                'States:',
                 array_to_string(contest, ', ')
             ], ' ')
-        when array_length(contest, 1) = 0 then array_to_string(
+        when contest[0] is null then array_to_string(
             array[
                 party,
                 office_sought,
@@ -111,14 +113,14 @@ create or replace function generate_report_description(office_sought text, repor
 returns text as $$
     begin
         return case
-            when rpt_tp_desc is null and array_length(contest, 1) > 3 then
+            when rpt_tp_desc is null and array_length(contest, 1) >= 3 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
                     report_type,
                     'Report Multi-state Due Today'
                 ], ' ')
-            when rpt_tp_desc is null and array_length(contest, 1) = 0 then
+            when rpt_tp_desc is null and contest[0] is null then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
@@ -139,11 +141,17 @@ returns text as $$
                     rpt_tp_desc,
                     'Report Multi-state Due Today'
                 ], ' ')
-            when array_length(contest, 1) = 0 then array_to_string(
+            when contest[0] is null then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     'Report Due Today'
+                ], ' ')
+            when array_length(contest, 1) >= 3 then array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    rpt_tp_desc,
+                    'Report Multi-state Due Today'
                 ], ' ')
             else
                 array_to_string(
@@ -193,15 +201,15 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today',
-                    'States:',
+                    'Report Due Today. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
-            when array_length(report_contest, 1) = 0 then array_to_string(
+            when array_length(report_contest, 1) >= 3 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today'
+                    'Report Due Today. States:',
+                    array_to_string(report_contest, ', ')
                 ], ' ')
             else
                 array_to_string(
