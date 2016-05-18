@@ -44,7 +44,6 @@ with elections_raw as(
     from elections_raw
         left join dimparty dp on elections_raw.election_party = dp.party_affiliation
     group by
-        contest,
         office_sought,
         election_date,
         dp.party_affiliation_desc,
