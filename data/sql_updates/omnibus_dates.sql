@@ -35,7 +35,7 @@ with elections_raw as(
             dp.party_affiliation_desc::text,
             trc_election_id::numeric
         ) as summary,
-        array_agg(election_state order by election_state)::text[] as states,
+        array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
         election_date::timestamp as start_date,
         null::timestamp as end_date,
@@ -82,7 +82,7 @@ with elections_raw as(
             clean_report(rpt_tp_desc::text),
             array_agg(report_contest order by report_contest)::text[]
         ) as summary,
-        array_agg(election_state)::text[] as states,
+        array_remove(array_agg(election_state)::text[], null) as states,
         null::text as location,
         due_date::timestamp as start_date,
         null::timestamp as end_date,
@@ -103,7 +103,7 @@ with elections_raw as(
         category_name::text as category,
         event_name::text as summary,
         describe_cal_event(category_name::text, event_name::text, description::text) as description,
-        null::text[] as states,
+        array_remove(null::text[], null) as states,
         location::text,
         start_date,
         end_date,

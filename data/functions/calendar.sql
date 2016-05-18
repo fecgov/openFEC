@@ -86,7 +86,7 @@ returns text as $$
                 'States:',
                 array_to_string(contest, ', ')
             ], ' ')
-        when contest[0] is null then array_to_string(
+        when array_length(contest, 1) = 0 then array_to_string(
             array[
                 party,
                 office_sought,
@@ -120,7 +120,7 @@ returns text as $$
                     report_type,
                     'Report Multi-state Due Today'
                 ], ' ')
-            when rpt_tp_desc is null and contest[0] is null then
+            when rpt_tp_desc is null and array_length(contest, 1) = 0 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
@@ -141,7 +141,7 @@ returns text as $$
                     rpt_tp_desc,
                     'Report Multi-state Due Today'
                 ], ' ')
-            when contest[0] is null then array_to_string(
+            when array_length(contest, 1) = 0 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
@@ -173,37 +173,44 @@ create or replace function generate_report_summary(office_sought text, report_ty
 returns text as $$
     begin
         return case
-            when rpt_tp_desc is null and array_length(report_contest, 1) < 3 and array_length(report_contest, 1) >= 1 then
-                array_to_string(
-                array[
-                    expand_office_description(office_sought),
-                    report_type,
-                    'Due Today. States:',
-                    array_to_string(report_contest, ', ')
-                ], ' ')
-            when rpt_tp_desc is null and array_length(report_contest, 1) < 1 then
+            -- this is looking for empty state lists, 1 doesn't make sense to me but working
+            when rpt_tp_desc is null and array_length(report_contest, 1) = 1 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
                     report_type,
                     'Report Due Today'
                 ], ' ')
-            when rpt_tp_desc is null then
+            when rpt_tp_desc is null and array_length(report_contest, 1) < 3 and array_length(report_contest, 1) >= 1 then
                 array_to_string(
                 array[
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Due Today'
+                    'Due Today'
                 ], ' ')
-            when array_length(report_contest, 1) < 3 and array_length(report_contest, 1) >= 1 then array_to_string(
+            when rpt_tp_desc is null then
+                array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    report_type,
+                    'Report Due Today',
+                    array_to_string(report_contest, ', ') || ':'
+                ], ' ')
+            when array_length(report_contest, 1) = 1 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today. States:',
-                    array_to_string(report_contest, ', ')
+                    'Report Due Today'
                 ], ' ')
-            when array_length(report_contest, 1) >= 3 then array_to_string(
+            when array_length(report_contest, 1) <= 3 and array_length(report_contest, 1) > 1 then array_to_string(
+                array[
+                    array_to_string(report_contest, ', ') || ':',
+                    expand_office_description(office_sought),
+                    rpt_tp_desc,
+                    'Report Due Today'
+                ], ' ')
+            when array_length(report_contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
@@ -213,10 +220,10 @@ returns text as $$
             else
                 array_to_string(
                 array[
-                    array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today'
+                    'Report Due Today. States:',
+                    array_to_string(report_contest, ', ')
                 ], ' ')
         end;
     end
