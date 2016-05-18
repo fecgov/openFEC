@@ -36,7 +36,7 @@ $$ language plpgsql;
     -- FL: House General Election Held Today
     -- NH, DE: DEM Convention Held Today
     -- General Election Multi-state Held Today
-create or replace function generate_election_description(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric)
+create or replace function generate_election_description(election_type text, office_sought text, contest text[], party text)
 returns text as $$
     begin
         return case
@@ -44,7 +44,7 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                election_type,
                 'Multi-state',
                 'Held Today'
             ], ' ')
@@ -52,7 +52,7 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                election_type,
                 'Held Today'
             ], ' ')
         else array_to_string(
@@ -60,7 +60,7 @@ returns text as $$
                 array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
-                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                election_type,
                 'Held Today'
             ], ' ')
         end;
@@ -73,7 +73,7 @@ $$ language plpgsql;
     -- FL: House General Election Held Today
     -- NH, DE: DEM Convention Held Today
     -- General Election Held today States: NY, CA, FL, LA
-create or replace function generate_election_summary(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric)
+create or replace function generate_election_summary(election_type text, office_sought text, contest text[], party text)
 returns text as $$
     begin
         return case
@@ -81,7 +81,7 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                election_type,
                 'Held Today',
                 'States:',
                 array_to_string(contest, ', ')
@@ -90,7 +90,7 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                election_type,
                 'Held Today'
             ], ' ')
         else array_to_string(
@@ -98,7 +98,7 @@ returns text as $$
                 array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
-                expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric),
+                election_type,
                 'Held Today'
             ], ' ')
         end;
@@ -113,19 +113,19 @@ create or replace function generate_report_description(office_sought text, repor
 returns text as $$
     begin
         return case
-            when rpt_tp_desc is null and array_length(contest, 1) >= 3 then
-                array_to_string(
-                array[
-                    expand_office_description(office_sought),
-                    report_type,
-                    'Report Multi-state Due Today'
-                ], ' ')
             when rpt_tp_desc is null and array_length(contest, 1) = 0 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
                     report_type,
                     'Report Due Today'
+                ], ' ')
+            when rpt_tp_desc is null and array_length(contest, 1) > 4 then
+                array_to_string(
+                array[
+                    expand_office_description(office_sought),
+                    report_type,
+                    'Report Multi-state Due Today'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
@@ -135,19 +135,13 @@ returns text as $$
                     report_type,
                     'Report Due Today'
                 ], ' ')
-            when array_length(contest, 1) < 3 and array_length(contest, 1) >= 1 then array_to_string(
-                array[
-                    expand_office_description(office_sought),
-                    rpt_tp_desc,
-                    'Report Multi-state Due Today'
-                ], ' ')
             when array_length(contest, 1) = 0 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     'Report Due Today'
                 ], ' ')
-            when array_length(contest, 1) >= 3 then array_to_string(
+            when array_length(contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
@@ -173,8 +167,7 @@ create or replace function generate_report_summary(office_sought text, report_ty
 returns text as $$
     begin
         return case
-            -- this is looking for empty state lists, 1 doesn't make sense to me but working
-            when rpt_tp_desc is null and array_length(report_contest, 1) = 1 then
+            when rpt_tp_desc is null and array_length(report_contest, 1) = 0 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
@@ -194,8 +187,8 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Due Today',
-                    array_to_string(report_contest, ', ') || ':'
+                    'Report Due Today. States:',
+                    array_to_string(report_contest, ', ')
                 ], ' ')
             when array_length(report_contest, 1) = 1 then array_to_string(
                 array[
@@ -203,7 +196,7 @@ returns text as $$
                     rpt_tp_desc,
                     'Report Due Today'
                 ], ' ')
-            when array_length(report_contest, 1) <= 3 and array_length(report_contest, 1) > 1 then array_to_string(
+            when array_length(report_contest, 1) <= 3 then array_to_string(
                 array[
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
@@ -220,10 +213,10 @@ returns text as $$
             else
                 array_to_string(
                 array[
+                    array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today. States:',
-                    array_to_string(report_contest, ', ')
+                    'Report Due Today'
                 ], ' ')
         end;
     end

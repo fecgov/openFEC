@@ -13,7 +13,9 @@ with elections_raw as(
                     election_district
                 ], '-')
             else election_state
-        end as contest
+        end as contest,
+        -- check and correct bad codes
+        expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric) as election_type
     from
         trc_election
     where
@@ -22,18 +24,16 @@ with elections_raw as(
     select
         'election'::text as category,
         generate_election_description(
-            trc_election_type_id::text,
+            election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text,
-            trc_election_id::numeric
+            dp.party_affiliation_desc::text
         ) as description,
         generate_election_summary(
-            trc_election_type_id::text,
+            election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text,
-            trc_election_id::numeric
+            dp.party_affiliation_desc::text
         ) as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
@@ -48,11 +48,10 @@ with elections_raw as(
         office_sought,
         election_date,
         dp.party_affiliation_desc,
-        trc_election_type_id,
-        trc_election_id
+        election_type
 ), reports_raw as (
     select
-        *,
+         *,
         -- Create House State-district info when available
         case
             when office_sought = 'H' and election_district != ' ' then array_to_string(
