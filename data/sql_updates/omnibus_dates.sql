@@ -18,8 +18,8 @@ with elections_raw as(
         expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric) as election_type
     from
         trc_election
-    where
-        trc_election_status_id = 1
+    -- where
+    --     trc_election_status_id = 1
 ), elections as (
     select
         'election'::text as category,
@@ -95,13 +95,46 @@ with elections_raw as(
         rpt_tp_desc,
         due_date,
         office_sought
+), reporting_periods_raw as (
+    select
+        *,
+        elections_raw.contest as rp_contest,
+        elections_raw.election_state as e_state
+    from
+        trc_election_dates
+    left join elections_raw using (trc_election_id)
+), start_24hr as(
+    select
+        'IE Periods'::text as category,
+        generate_electioneering_text(
+            trc_election_id::text,
+            ie_48hour_end::date,
+            array_agg(rp_contest order by rp_contest)::text[]
+        ) as summary,
+        generate_electioneering_text(
+            trc_election_id::text,
+            ie_48hour_end::date,
+            array_agg(rp_contest order by rp_contest)::text[]
+        ) as description,
+        array_remove(array_agg(e_state order by e_state)::text[], null) as states,
+        null::text as location,
+        f48hour_start::timestamp as start_date,
+        null::timestamp as end_date,
+        true as all_day,
+        -- re create these links later
+        null::text as url
+    from reporting_periods_raw
+    group by
+        f48hour_start,
+        ie_48hour_end,
+        trc_election_id
 ), other as (
     -- most data comes from cal_event and is imported as is, it does not have state filtering.
     select distinct on (category_name, event_name, description, location, start_date, end_date)
         category_name::text as category,
         event_name::text as summary,
         describe_cal_event(category_name::text, event_name::text, description::text) as description,
-        array_remove(null::text[], null) as states,
+        null::text[] as states,
         location::text,
         start_date,
         end_date,
@@ -111,12 +144,15 @@ with elections_raw as(
     join cal_event_category using (cal_event_id)
     join cal_category using (cal_category_id)
     where
+        -- when sucessful add 'IE Periods'
         category_name not in ('Election Dates', 'Reporting Deadlines', 'Quarterly', 'Monthly', 'Pre and Post-Elections') and
         active = 'Y'
 ), combined as (
     select * from elections
     union all
     select * from reports
+    union all
+    select * from start_24hr
     union all
     select * from other
 )
