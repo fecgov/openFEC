@@ -415,7 +415,7 @@ CalendarDateSchema = make_schema(
     },
     options={
         'exclude': (
-            'summary_text', 'description_text',
+            'summary_text', 'description_text', 'idx'
         )
     },
 )
