@@ -166,14 +166,14 @@ with elections_raw as(
         -- duplicate state problem for some reason
         array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
         null::text as location,
-        cc_start::timestamp as start_date,
+        ec_start::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
         -- re create these links later
         null::text as url
     from reporting_periods_raw
     group by
-        cc_start,
+        ec_start,
         ec_end,
         rp_office,
         rp_election_type,
