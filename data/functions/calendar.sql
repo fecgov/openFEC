@@ -228,7 +228,7 @@ returns text as $$
                 array[
                     '24-Hour Report Period of Independent Expenditures begins for the',
                     rp_election_text,
-                     ', if needed. Ends on',
+                     '(if necessary). Ends on',
                     to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
             else
@@ -241,6 +241,7 @@ returns text as $$
         end;
     end
 $$ language plpgsql;
+
 
 -- Electioneering Communications Period begins for the xx. Ends on Election Day, xx.
 create or replace function generate_electioneering_text(rp_election_text text, ec_end date)
