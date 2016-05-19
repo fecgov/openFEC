@@ -45,15 +45,15 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                'Multi-state',
-                'Held Today'
+                '(for Multiple States)',
+                'is Held Today'
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
             array[
                 party,
                 office_sought,
                 election_type,
-                'Held Today'
+                'is Held Today'
             ], ' ')
         else array_to_string(
             array[
@@ -61,7 +61,7 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                'Held Today'
+                'is Held Today'
             ], ' ')
         end;
     end
@@ -82,7 +82,7 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                'Held Today',
+                'is Held Today',
                 'States:',
                 array_to_string(contest, ', ')
             ], ' ')
@@ -91,7 +91,7 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                'Held Today'
+                'is Held Today'
             ], ' ')
         else array_to_string(
             array[
@@ -99,7 +99,7 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                'Held Today'
+                'is Held Today'
             ], ' ')
         end;
     end
@@ -118,14 +118,14 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Due Today'
+                    'Report (for Multiple States) is Due Today'
                 ], ' ')
             when rpt_tp_desc is null and array_length(contest, 1) > 4 then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Multi-state Due Today'
+                    'Report is Due Today'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
@@ -133,19 +133,19 @@ returns text as $$
                     array_to_string(contest, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Due Today'
+                    'Report is Due Today'
                 ], ' ')
             when array_length(contest, 1) = 0 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today'
+                    'Report is Due Today'
                 ], ' ')
             when array_length(contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Multi-state Due Today'
+                    'Report (for Multiple States) is Due Today'
                 ], ' ')
             else
                 array_to_string(
@@ -153,7 +153,7 @@ returns text as $$
                     array_to_string(contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today'
+                    'Report is Due Today'
                 ], ' ')
         end;
     end
@@ -172,7 +172,7 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Due Today'
+                    'Report is Due Today'
                 ], ' ')
             when rpt_tp_desc is null and array_length(report_contest, 1) < 3 and array_length(report_contest, 1) >= 1 then
                 array_to_string(
@@ -180,34 +180,34 @@ returns text as $$
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
-                    'Due Today'
+                    'Report is Due Today'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
                 array[
                     expand_office_description(office_sought),
                     report_type,
-                    'Report Due Today. States:',
+                    'Report is Due Today. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
             when array_length(report_contest, 1) = 1 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today'
+                    'Report is Due Today'
                 ], ' ')
             when array_length(report_contest, 1) <= 3 then array_to_string(
                 array[
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today'
+                    'Report is Due Today'
                 ], ' ')
             when array_length(report_contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today. States:',
+                    'Report is Due Today. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
             else
@@ -216,7 +216,7 @@ returns text as $$
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
-                    'Report Due Today'
+                    'Report is Due Today'
                 ], ' ')
         end;
     end
