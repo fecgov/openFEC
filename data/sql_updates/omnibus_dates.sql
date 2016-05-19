@@ -29,13 +29,13 @@ with elections_raw as(
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
             party::text
-        ) as description,
+        ) || "Held Today." as description,
         generate_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
             party::text
-        ) as summary,
+        ) || "Held Today." as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
         election_date::timestamp as start_date,
@@ -109,7 +109,7 @@ with elections_raw as(
 ), start_24hr as(
     select
         'IE Periods'::text as category,
-        generate_electioneering_text(
+        generate_24hr_text(
             generate_election_summary(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
@@ -118,7 +118,7 @@ with elections_raw as(
             )::text,
             ie_48hour_end::date
         ) as summary,
-        generate_electioneering_text(
+        generate_24hr_text(
             generate_election_description(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
