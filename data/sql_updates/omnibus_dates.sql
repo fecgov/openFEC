@@ -116,9 +116,45 @@ with elections_raw as(
                 array_agg(rp_contest order by rp_contest)::text[],
                 rp_party::text
             )::text,
-            ie_48hour_end::date
+            ie_24hour_end::date
         ) as summary,
         generate_24hr_text(
+            generate_election_description(
+                rp_election_type::text,
+                expand_office_description(rp_office::text),
+                array_agg(rp_contest order by rp_contest)::text[],
+                rp_party::text
+            )::text,
+            ie_24hour_end::date
+        ) as description,
+        -- duplicate state problem for some reason
+        array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
+        null::text as location,
+        ie_24hour_start::timestamp as start_date,
+        null::timestamp as end_date,
+        true as all_day,
+        -- re create these links later
+        null::text as url
+    from reporting_periods_raw
+    group by
+        ie_24hour_start,
+        ie_24hour_end,
+        rp_office,
+        rp_election_type,
+        rp_party
+), start_48hr as(
+    select
+        'IE Periods'::text as category,
+        generate_48hr_text(
+            generate_election_summary(
+                rp_election_type::text,
+                expand_office_description(rp_office::text),
+                array_agg(rp_contest order by rp_contest)::text[],
+                rp_party::text
+            )::text,
+            ie_48hour_end::date
+        ) as summary,
+        generate_48hr_text(
             generate_election_description(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
@@ -130,14 +166,14 @@ with elections_raw as(
         -- duplicate state problem for some reason
         array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
         null::text as location,
-        f48hour_start::timestamp as start_date,
+        ie_48hour_start::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
         -- re create these links later
         null::text as url
     from reporting_periods_raw
     group by
-        f48hour_start,
+        ie_48hour_start,
         ie_48hour_end,
         rp_office,
         rp_election_type,

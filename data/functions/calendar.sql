@@ -219,7 +219,7 @@ $$ language plpgsql;
 
 
 -- 24-Hour Report Period of Independent Expenditures begins for the xx. Ends on xx.
-create or replace function generate_24hr_text(rp_election_text text, ie_48hour_end date)
+create or replace function generate_24hr_text(rp_election_text text, ie_24hour_end date)
 returns text as $$
     begin
         return case
@@ -229,12 +229,37 @@ returns text as $$
                     '24-Hour Report Period of Independent Expenditures begins for the',
                     rp_election_text,
                      '(if necessary). Ends on',
-                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+                    to_char(ie_24hour_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
             else
                 array_to_string(
                 array[
                     '24-Hour Report Period of Independent Expenditures begins for the',
+                    rp_election_text || '. Ends on',
+                    to_char(ie_24hour_end, 'Day, Mon DD, YYYY') || '.'
+            ], ' ')
+        end;
+    end
+$$ language plpgsql;
+
+
+-- 48-Hour Report Period of Independent Expenditures begins for the xx. Ends on xx.
+create or replace function generate_48hr_text(rp_election_text text, ie_48hour_end date)
+returns text as $$
+    begin
+        return case
+            when
+                rp_election_text like '%Runoff%' then array_to_string(
+                array[
+                    '48-Hour Report Period of Independent Expenditures begins for the',
+                    rp_election_text,
+                     '(if necessary). Ends on',
+                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+            ], ' ')
+            else
+                array_to_string(
+                array[
+                    '48-Hour Report Period of Independent Expenditures begins for the',
                     rp_election_text || '. Ends on',
                     to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
