@@ -106,7 +106,7 @@ with elections_raw as(
     from
         trc_election_dates
     left join elections_raw using (trc_election_id)
-), start_24hr as(
+), ie_24hr as(
     select
         'IE Periods'::text as category,
         generate_24hr_text(
@@ -127,7 +127,6 @@ with elections_raw as(
             )::text,
             ie_24hour_end::date
         ) as description,
-        -- duplicate state problem for some reason
         array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
         null::text as location,
         ie_24hour_start::timestamp as start_date,
@@ -142,7 +141,7 @@ with elections_raw as(
         rp_office,
         rp_election_type,
         rp_party
-), start_48hr as(
+), ie_48hr as(
     select
         'IE Periods'::text as category,
         generate_48hr_text(
@@ -163,7 +162,6 @@ with elections_raw as(
             )::text,
             ie_48hour_end::date
         ) as description,
-        -- duplicate state problem for some reason
         array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
         null::text as location,
         ie_48hour_start::timestamp as start_date,
@@ -199,7 +197,6 @@ with elections_raw as(
             )::text,
             ec_end::date
         ) as description,
-        -- duplicate state problem for some reason
         array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
         null::text as location,
         ec_start::timestamp as start_date,
@@ -238,7 +235,9 @@ with elections_raw as(
     union all
     select * from reports
     union all
-    select * from start_24hr
+    select * from ie_24hr
+    union all
+    select * from ie_48hr
     union all
     select * from electioneering
     union all
