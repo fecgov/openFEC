@@ -36,6 +36,7 @@ $$ language plpgsql;
     -- FL: House General Election Held Today
     -- NH, DE: DEM Convention Held Today
     -- General Election Multi-state Held Today
+-- used for elections and as a part of the elections in IE descriptions
 create or replace function generate_election_description(election_type text, office_sought text, contest text[], party text)
 returns text as $$
     begin
@@ -45,23 +46,20 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                'Multi-state',
-                'Held Today'
+                'Multi-state'
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
             array[
                 party,
                 office_sought,
-                election_type,
-                'Held Today'
+                election_type
             ], ' ')
         else array_to_string(
             array[
                 array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
-                election_type,
-                'Held Today'
+                election_type
             ], ' ')
         end;
     end
@@ -82,7 +80,6 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                'Held Today',
                 'States:',
                 array_to_string(contest, ', ')
             ], ' ')
@@ -90,16 +87,14 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                election_type,
-                'Held Today'
+                election_type
             ], ' ')
         else array_to_string(
             array[
                 array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
-                election_type,
-                'Held Today'
+                election_type
             ], ' ')
         end;
     end
@@ -222,6 +217,30 @@ returns text as $$
     end
 $$ language plpgsql;
 
+
+-- 24-Hour Report Period of Independent Expenditures begins for the xx. Ends on xx.
+create or replace function generate_24hr_text(rp_election_text text, ie_48hour_end date)
+returns text as $$
+    begin
+        return case
+            when
+                rp_election_text like '%Runoff%' then array_to_string(
+                array[
+                    '24-Hour Report Period of Independent Expenditures begins for the',
+                    rp_election_text,
+                     ', if needed. Ends on',
+                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+            ], ' ')
+            else
+                array_to_string(
+                array[
+                    '24-Hour Report Period of Independent Expenditures begins for the',
+                    rp_election_text|| '. Ends on',
+                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+            ], ' ')
+        end;
+    end
+$$ language plpgsql;
 
 -- Electioneering Communications Period begins for the xx. Ends on Election Day, xx.
 create or replace function generate_electioneering_text(rp_election_text text, ie_48hour_end date)
