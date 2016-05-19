@@ -46,13 +46,13 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
-                '(for Multiple States)',
+                '(for Multiple States)'
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
             array[
                 party,
                 office_sought,
-                election_type,
+                election_type
             ], ' ')
         else array_to_string(
             array[
@@ -235,7 +235,7 @@ returns text as $$
                 array_to_string(
                 array[
                     '24-Hour Report Period of Independent Expenditures begins for the',
-                    rp_election_text|| '. Ends on',
+                    rp_election_text || '. Ends on',
                     to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
         end;
@@ -243,7 +243,7 @@ returns text as $$
 $$ language plpgsql;
 
 -- Electioneering Communications Period begins for the xx. Ends on Election Day, xx.
-create or replace function generate_electioneering_text(rp_election_text text, ie_48hour_end date)
+create or replace function generate_electioneering_text(rp_election_text text, ec_end date)
 returns text as $$
     begin
         return case
@@ -253,14 +253,14 @@ returns text as $$
                     'Electioneering Communications Period begins for the',
                     rp_election_text,
                      ', if needed. Ends on Election Day-',
-                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+                    to_char(ec_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
             else
                 array_to_string(
                 array[
                     'Electioneering Communications Period begins for the',
-                    rp_election_text|| '. Ends on Election Day-',
-                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+                    rp_election_text || '. Ends on Election Day-',
+                    to_char(ec_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
         end;
     end

@@ -29,13 +29,13 @@ with elections_raw as(
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
             party::text
-        ) || "Held Today." as description,
+        ) || ' is Held Today.' as description,
         generate_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
             party::text
-        ) || "Held Today." as summary,
+        ) || ' is Held Today.' as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
         election_date::timestamp as start_date,
@@ -142,6 +142,42 @@ with elections_raw as(
         rp_office,
         rp_election_type,
         rp_party
+), electioneering as(
+    select
+        'EC Periods'::text as category,
+        generate_electioneering_text(
+            generate_election_summary(
+                rp_election_type::text,
+                expand_office_description(rp_office::text),
+                array_agg(rp_contest order by rp_contest)::text[],
+                rp_party::text
+            )::text,
+            ec_end::date
+        ) as summary,
+        generate_electioneering_text(
+            generate_election_description(
+                rp_election_type::text,
+                expand_office_description(rp_office::text),
+                array_agg(rp_contest order by rp_contest)::text[],
+                rp_party::text
+            )::text,
+            ec_end::date
+        ) as description,
+        -- duplicate state problem for some reason
+        array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
+        null::text as location,
+        cc_start::timestamp as start_date,
+        null::timestamp as end_date,
+        true as all_day,
+        -- re create these links later
+        null::text as url
+    from reporting_periods_raw
+    group by
+        cc_start,
+        ec_end,
+        rp_office,
+        rp_election_type,
+        rp_party
 ), other as (
     -- most data comes from cal_event and is imported as is, it does not have state filtering.
     select distinct on (category_name, event_name, description, location, start_date, end_date)
@@ -158,8 +194,8 @@ with elections_raw as(
     join cal_event_category using (cal_event_id)
     join cal_category using (cal_category_id)
     where
-        -- when successful add 'IE Periods'
-        category_name not in ('Election Dates', 'Reporting Deadlines', 'Quarterly', 'Monthly', 'Pre and Post-Elections') and
+        -- when successful add 'IE Periods' and 'EC Periods'
+        category_name not in ('Election Dates', 'Reporting Deadlines', 'Quarterly', 'Monthly', 'Pre and Post-Elections', 'IE Periods', 'EC Periods') and
         active = 'Y'
 ), combined as (
     select * from elections
@@ -167,6 +203,8 @@ with elections_raw as(
     select * from reports
     union all
     select * from start_24hr
+    union all
+    select * from electioneering
     union all
     select * from other
 )
