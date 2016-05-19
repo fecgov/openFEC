@@ -87,6 +87,9 @@ with elections_raw as(
         true as all_day,
         null::text as url
     from reports_raw
+    where
+        -- exclude pre-primary presidential reports in even years, realistically people file monthly.
+        not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
     group by
         report_type,
         rpt_tp_desc,
@@ -103,9 +106,6 @@ with elections_raw as(
     from
         trc_election_dates
     left join elections_raw using (trc_election_id)
-    where
-        -- exclude pre-primary presidential reports in even years, realistically people file monthly.
-        not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
 ), start_24hr as(
     select
         'IE Periods'::text as category,
