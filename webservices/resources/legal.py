@@ -33,8 +33,9 @@ class Search(utils.Resource):
             hits = es_results['hits']['hits']
             for hit in hits:
                 highlights = []
-                for key in hit['highlight']:
-                    highlights.extend(hit['highlight'][key])
+                if 'highlight' in hit:
+                    for key in hit['highlight']:
+                        highlights.extend(hit['highlight'][key])
                 hit['_source']['highlights'] = highlights
             count = es_results['hits']['total']
             total_count += count
