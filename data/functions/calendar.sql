@@ -224,33 +224,24 @@ $$ language plpgsql;
 
 
 -- Electioneering Communications Period begins for the xx. Ends on Election Day, xx.
-create or replace function generate_electioneering_text(trc_election_id text, ie_48hour_end date, rp_contest text[])
+create or replace function generate_electioneering_text(rp_election_text text, ie_48hour_end date)
 returns text as $$
     begin
         return case
             when
-                array_length(rp_contest, 1) > 4 then array_to_string(
+                rp_election_text like '%Runoff%' then array_to_string(
                 array[
-                    "xxx Electioneering Communications Period begins for the ",
-                    trc_election_id,
-                    "in",
-                    array_to_string(rp_contest, ', ') || '. Ends on Election Day,',
-                    to_char(ie_48hour_end, 'Month Day, YYY')
-            ], ' ')
-            when
-                array_length(rp_contest, 1) = 0 then array_to_string(
-                array[
-                    "xxx Electioneering Communications Period begins for the ",
-                    trc_election_id|| '. Ends on Election Day,',
-                    to_char(ie_48hour_end, 'Month Day, YYY')
+                    'Electioneering Communications Period begins for the',
+                    rp_election_text,
+                     ', if needed. Ends on Election Day-',
+                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
             else
                 array_to_string(
                 array[
-                    array_to_string(rp_contest, ', ') || ':',
-                    "xxx Electioneering Communications Period begins for the ",
-                    trc_election_id || '. Ends on Election Day,',
-                    to_char(ie_48hour_end, 'Month Day, YYY')
+                    'Electioneering Communications Period begins for the',
+                    rp_election_text|| '. Ends on Election Day-',
+                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
         end;
     end

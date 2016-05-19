@@ -15,11 +15,12 @@ with elections_raw as(
             else election_state
         end as contest,
         -- check and correct bad codes
-        expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric) as election_type
-    from
-        trc_election
-    -- where
-    --     trc_election_status_id = 1
+        expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric) as election_type,
+        dp.party_affiliation_desc as party
+    from trc_election
+    left join dimparty dp on trc_election.election_party = dp.party_affiliation
+    where
+        trc_election_status_id = 1
 ), elections as (
     select
         'election'::text as category,
@@ -27,13 +28,13 @@ with elections_raw as(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text
+            party::text
         ) as description,
         generate_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text
+            party::text
         ) as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
@@ -42,11 +43,10 @@ with elections_raw as(
         true as all_day,
         null::text as url
     from elections_raw
-        left join dimparty dp on elections_raw.election_party = dp.party_affiliation
     group by
         office_sought,
         election_date,
-        dp.party_affiliation_desc,
+        party,
         election_type
 ), reports_raw as (
     select
@@ -99,7 +99,10 @@ with elections_raw as(
     select
         *,
         elections_raw.contest as rp_contest,
-        elections_raw.election_state as e_state
+        elections_raw.election_state as rp_state,
+        elections_raw.election_type as rp_election_type,
+        elections_raw.office_sought as rp_office,
+        elections_raw.party as rp_party
     from
         trc_election_dates
     left join elections_raw using (trc_election_id)
@@ -107,16 +110,25 @@ with elections_raw as(
     select
         'IE Periods'::text as category,
         generate_electioneering_text(
-            trc_election_id::text,
-            ie_48hour_end::date,
-            array_agg(rp_contest order by rp_contest)::text[]
+            generate_election_summary(
+                rp_election_type::text,
+                expand_office_description(rp_office::text),
+                array_agg(rp_contest order by rp_contest)::text[],
+                rp_party::text
+            )::text,
+            ie_48hour_end::date
         ) as summary,
         generate_electioneering_text(
-            trc_election_id::text,
-            ie_48hour_end::date,
-            array_agg(rp_contest order by rp_contest)::text[]
+            generate_election_description(
+                rp_election_type::text,
+                expand_office_description(rp_office::text),
+                array_agg(rp_contest order by rp_contest)::text[],
+                rp_party::text
+            )::text,
+            ie_48hour_end::date
         ) as description,
-        array_remove(array_agg(e_state order by e_state)::text[], null) as states,
+        -- duplicate state problem for some reason
+        array_remove(array_agg(rp_state order by rp_state)::text[], null) as states,
         null::text as location,
         f48hour_start::timestamp as start_date,
         null::timestamp as end_date,
@@ -127,7 +139,9 @@ with elections_raw as(
     group by
         f48hour_start,
         ie_48hour_end,
-        trc_election_id
+        rp_office,
+        rp_election_type,
+        rp_party
 ), other as (
     -- most data comes from cal_event and is imported as is, it does not have state filtering.
     select distinct on (category_name, event_name, description, location, start_date, end_date)
@@ -144,7 +158,7 @@ with elections_raw as(
     join cal_event_category using (cal_event_id)
     join cal_category using (cal_category_id)
     where
-        -- when sucessful add 'IE Periods'
+        -- when successful add 'IE Periods'
         category_name not in ('Election Dates', 'Reporting Deadlines', 'Quarterly', 'Monthly', 'Pre and Post-Elections') and
         active = 'Y'
 ), combined as (
