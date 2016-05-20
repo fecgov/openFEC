@@ -27,13 +27,13 @@ with elections_raw as(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text
+            rp.pty_desc::text
         ) as description,
         generate_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            dp.party_affiliation_desc::text
+            rp.pty_desc::text
         ) as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
@@ -42,11 +42,11 @@ with elections_raw as(
         true as all_day,
         null::text as url
     from elections_raw
-        left join dimparty dp on elections_raw.election_party = dp.party_affiliation
+        left join ref_pty rp on elections_raw.election_party = rp.pty_cd
     group by
         office_sought,
         election_date,
-        dp.party_affiliation_desc,
+        rp.pty_desc,
         election_type
 ), reports_raw as (
     select
