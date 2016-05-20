@@ -229,14 +229,14 @@ returns text as $$
                     '24-Hour Report Period of Independent Expenditures begins for the',
                     rp_election_text,
                      '(if necessary). Ends on',
-                    to_char(ie_24hour_end, 'Day, Mon DD, YYYY') || '.'
+                    to_char(ie_24hour_end, 'Mon DD, YYYY') || '.'
             ], ' ')
             else
                 array_to_string(
                 array[
                     '24-Hour Report Period of Independent Expenditures begins for the',
                     rp_election_text || '. Ends on',
-                    to_char(ie_24hour_end, 'Day, Mon DD, YYYY') || '.'
+                    to_char(ie_24hour_end, 'Mon DD, YYYY') || '.'
             ], ' ')
         end;
     end
@@ -254,14 +254,14 @@ returns text as $$
                     '48-Hour Report Period of Independent Expenditures begins for the',
                     rp_election_text,
                      '(if necessary). Ends on',
-                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+                    to_char(ie_48hour_end, 'Mon DD, YYYY') || '.'
             ], ' ')
             else
                 array_to_string(
                 array[
                     '48-Hour Report Period of Independent Expenditures begins for the',
                     rp_election_text || '. Ends on',
-                    to_char(ie_48hour_end, 'Day, Mon DD, YYYY') || '.'
+                    to_char(ie_48hour_end, 'Mon DD, YYYY') || '.'
             ], ' ')
         end;
     end
