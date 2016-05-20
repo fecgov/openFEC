@@ -16,9 +16,10 @@ with elections_raw as(
         end as contest,
         -- check and correct bad codes
         expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric) as election_type,
-        dp.party_affiliation_desc as party
+        initcap(rp.pty_desc) as party
     from trc_election
-    left join dimparty dp on trc_election.election_party = dp.party_affiliation
+    --- switch this table
+    left join ref_pty rp on trc_election.election_party = rp.pty_cd
     where
         trc_election_status_id = 1
 ), elections as (
