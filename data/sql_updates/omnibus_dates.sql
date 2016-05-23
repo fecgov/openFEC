@@ -63,7 +63,7 @@ with elections_raw as(
         end as report_contest
     from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
-    left join elections_raw using (trc_election_id)
+    right join elections_raw using (trc_election_id)
     where
         coalesce(trc_election_status_id, 1) = 1
 ), reports as (
@@ -106,7 +106,7 @@ with elections_raw as(
         elections_raw.party as rp_party
     from
         trc_election_dates
-    left join elections_raw using (trc_election_id)
+    right join elections_raw using (trc_election_id)
 ), ie_24hr as(
     select
         'IE Periods'::text as category,
