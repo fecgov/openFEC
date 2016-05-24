@@ -16,7 +16,7 @@ env:
     - secure: "qpKjTwlaNDdbFFO5oqDJ9PsVFsxowYbh0z4whQSjip7F2JWpUOT4ympPoeNikmVSevuxQkCCYsT8AnrSWyhR5I9Lg4xEoOezO+gRfY/sVawX3Obnwv46dUsvxaoStCTIwpmTxqyLZaRn7VkgPrnW+rEn9sIardgTm9RLuTa3JmA=" # FEC_CF_PASSWORD
 
 before_script:
-  - psql -c 'create database "cfdm-unit-test";' -U postgres
+  - psql -c 'create database "cfdm_unit_test";' -U postgres
   - travis_retry pip install -U pip wheel
   - travis_retry pip install -U -r requirements.txt
   - travis_retry pip install -U -r requirements-dev.txt
