@@ -27,13 +27,13 @@ with elections_raw as(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            rp.pty_desc::text
+            initcap(rp.pty_desc)::text
         ) as description,
         generate_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            rp.pty_desc::text
+            initcap(rp.pty_desc)::text
         ) as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
