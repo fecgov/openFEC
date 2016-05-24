@@ -37,7 +37,7 @@ $$ language plpgsql;
     -- NH, DE: DEM Convention Held Today
     -- General Election Multi-state Held Today
 -- used for elections and as a part of the elections in IE descriptions
-create or replace function generate_election_description(election_type text, office_sought text, contest text[], party text)
+create or replace function generate_election_description(election_type text, office_sought text, contest text[], party text, election_notes text)
 returns text as $$
     begin
         return case
@@ -46,20 +46,23 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
+                election_notes,
                 '(for Multiple States)'
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
             array[
                 party,
                 office_sought,
-                election_type
+                election_type,
+                election_notes
             ], ' ')
         else array_to_string(
             array[
                 array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
-                election_type
+                election_type,
+                election_notes
             ], ' ')
         end;
     end
@@ -71,7 +74,7 @@ $$ language plpgsql;
     -- FL: House General Election Held Today
     -- NH, DE: DEM Convention Held Today
     -- General Election Held today States: NY, CA, FL, LA
-create or replace function generate_election_summary(election_type text, office_sought text, contest text[], party text)
+create or replace function generate_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text)
 returns text as $$
     begin
         return case
@@ -80,6 +83,7 @@ returns text as $$
                 party,
                 office_sought,
                 election_type,
+                election_notes,
                 'States:',
                 array_to_string(contest, ', ')
             ], ' ')
@@ -87,14 +91,16 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                election_type
+                election_type,
+                election_notes
             ], ' ')
         else array_to_string(
             array[
                 array_to_string(contest, ', ') || ':',
                 party,
                 office_sought,
-                election_type
+                election_type,
+                election_notes
             ], ' ')
         end;
     end
