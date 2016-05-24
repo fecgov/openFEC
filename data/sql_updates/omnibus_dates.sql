@@ -29,13 +29,15 @@ with elections_raw as(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            party::text
+            party::text,
+            election_notes::text
         ) || ' is Held Today.' as description,
         generate_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
-            party::text
+            party::text,
+            election_notes::text
         ) || ' is Held Today.' as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
@@ -48,7 +50,8 @@ with elections_raw as(
         office_sought,
         election_date,
         party,
-        election_type
+        election_type,
+        election_notes
 ), reports_raw as (
     select
          *,
@@ -103,7 +106,8 @@ with elections_raw as(
         elections_raw.election_state as rp_state,
         elections_raw.election_type as rp_election_type,
         elections_raw.office_sought as rp_office,
-        elections_raw.party as rp_party
+        elections_raw.party as rp_party,
+        elections_raw.election_notes as rp_election_notes
     from
         trc_election_dates
     right join elections_raw using (trc_election_id)
@@ -115,7 +119,8 @@ with elections_raw as(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
-                rp_party::text
+                rp_party::text,
+                rp_election_notes::text
             )::text,
             ie_24hour_end::date
         ) as summary,
@@ -124,7 +129,8 @@ with elections_raw as(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
-                rp_party::text
+                rp_party::text,
+                rp_election_notes::text
             )::text,
             ie_24hour_end::date
         ) as description,
@@ -141,7 +147,8 @@ with elections_raw as(
         ie_24hour_end,
         rp_office,
         rp_election_type,
-        rp_party
+        rp_party,
+        rp_election_notes
 ), ie_48hr as(
     select
         'IE Periods'::text as category,
@@ -150,7 +157,8 @@ with elections_raw as(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
-                rp_party::text
+                rp_party::text,
+                rp_election_notes::text
             )::text,
             ie_48hour_end::date
         ) as summary,
@@ -159,7 +167,8 @@ with elections_raw as(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
-                rp_party::text
+                rp_party::text,
+                rp_election_notes::text
             )::text,
             ie_48hour_end::date
         ) as description,
@@ -176,7 +185,8 @@ with elections_raw as(
         ie_48hour_end,
         rp_office,
         rp_election_type,
-        rp_party
+        rp_party,
+        rp_election_notes
 ), electioneering as(
     select
         'EC Periods'::text as category,
@@ -185,7 +195,8 @@ with elections_raw as(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
-                rp_party::text
+                rp_party::text,
+                rp_election_notes::text
             )::text,
             ec_end::date
         ) as summary,
@@ -194,7 +205,8 @@ with elections_raw as(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
-                rp_party::text
+                rp_party::text,
+                rp_election_notes::text
             )::text,
             ec_end::date
         ) as description,
@@ -211,7 +223,8 @@ with elections_raw as(
         ec_end,
         rp_office,
         rp_election_type,
-        rp_party
+        rp_party,
+        rp_election_notes
 ), other as (
     -- most data comes from cal_event and is imported as is, it does not have state filtering.
     select distinct on (category_name, event_name, description, location, start_date, end_date)
