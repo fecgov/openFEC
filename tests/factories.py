@@ -65,6 +65,12 @@ class CandidateTotalFactory(BaseCandidateFactory):
         model = models.CandidateTotal
     cycle = 2016
 
+class CandidateFlagsFactory(BaseFactory):
+    class Meta:
+        model = models.CandidateFlags
+
+    federal_funds_flag = False
+    has_raised_funds = True
 
 class BaseCommitteeFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
