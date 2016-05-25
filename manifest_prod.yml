@@ -5,6 +5,7 @@ services:
   - fec-creds-prod
   - fec-redis-prod
   - fec-s3-prod
+  - fec-search-prod
 env:
   PRODUCTION: True
   NEW_RELIC_APP_NAME: OpenFEC API (production)
