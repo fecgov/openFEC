@@ -73,7 +73,7 @@ out contributor information in schedule_a.
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
 calls an hour. Each call is limited to 100 results per page. You can also discuss the data in the
 [FEC data google group](https://groups.google.com/forum/#!forum/fec-data) or post questions
-to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec). The model definations and schema are available at [/swagger](/swagger/). This is useful for making wrappers and exploring the data.
+to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec). The model definitions and schema are available at [/swagger](/swagger/). This is useful for making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
@@ -446,7 +446,7 @@ Unitemized contributions are included in the `0` category.
 '''
 
 API_KEY_DESCRIPTION = '''
-API key for https://api.data.gov. Get one at http://api.data.gov/signup.
+API key for https://api.data.gov. Get one at https://api.data.gov/signup.
 '''
 SEARCH_TAG = '''
 Search for candidates or committees by name.
@@ -561,6 +561,8 @@ CANDIDATE_STATUS = 'One-letter code explaining if the candidate is:\n\
 INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
 INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
 ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
+HAS_RAISED_FUNDS = 'A boolean that describes if a candidate\'s committee has ever received any receipts for their campaign for this particular office. (Candidates have separate candidate IDs for each office.)'
+FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has accepted federal funds. The flag will be false for House and Senate candidates.'
 
 # committees
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
