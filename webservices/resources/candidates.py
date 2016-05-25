@@ -66,9 +66,9 @@ class CandidateList(ApiResource):
                 status_code=422,
             )
 
-        if 'five_thousand_flag' in kwargs:
+        if 'has_raised_funds' in kwargs:
             query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.five_thousand_flag == kwargs['five_thousand_flag'])
+                models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
             )
         if 'federal_funds_flag' in kwargs:
             query = query.filter(
@@ -150,6 +150,14 @@ class CandidateView(ApiResource):
             query = query.filter(models.CandidateDetail.cycles.overlap(kwargs['cycle']))
         if kwargs.get('election_year'):
             query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
+        if 'has_raised_funds' in kwargs:
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
+            )
+        if 'federal_funds_flag' in kwargs:
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
+            )
 
         return query
 
