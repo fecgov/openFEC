@@ -149,7 +149,7 @@ candidate_detail = {
         description=docs.INCUMBENT_CHALLENGE,
     ),
     'federal_funds_flag': fields.Bool(description=docs.FEDERAL_FUNDS_FLAG),
-    'five_thousand_flag': fields.Bool(description=docs.FIVE_THOUSAND_FLAG),
+    'has_raised_funds': fields.Bool(description=docs.HAS_RAISED_FUNDS),
     'name': fields.List(fields.Str, description='Name (candidate or committee) to search for. Alias for \'q\'.'),
 }
 

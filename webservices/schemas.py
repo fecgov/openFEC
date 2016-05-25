@@ -143,7 +143,7 @@ make_candidate_schema = functools.partial(
     options={'exclude': ('idx', 'principal_committees', 'flags')},
     fields={
         'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
-        'five_thousand_flag': ma.fields.Boolean(attribute='flags.five_thousand_flag'),
+        'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
     }
 )
 
@@ -166,7 +166,7 @@ CandidateSearchSchema = make_schema(
     fields={
         'principal_committees': ma.fields.Nested(schemas['CommitteeSchema'], many=True),
         'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
-        'five_thousand_flag': ma.fields.Boolean(attribute='flags.five_thousand_flag'),
+        'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
     },
 )
 CandidateSearchPageSchema = make_page_schema(CandidateSearchSchema)

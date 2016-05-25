@@ -31,7 +31,7 @@ cycle_totals as (
         false as is_election,
         sum(totals.receipts) as receipts,
         sum(totals.disbursements) as disbursements,
-        sum(receipts) >= 5000 as five_thousand_flag,
+        sum(receipts) > 0 as has_raised_funds,
         sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
         sum(last_debts_owed_by_committee) as debts_owed_by_committee,
         array_agg(federal_funds_flag)::boolean array @> array[true] as federal_funds_flag
@@ -56,7 +56,7 @@ election_aggregates as (
         election_year,
         sum(receipts) as receipts,
         sum(disbursements) as disbursements,
-        sum(receipts) >= 5000 as five_thousand_flag,
+        sum(receipts) > 0 as has_raised_funds,
         array_agg(federal_funds_flag) @> array[cast('true' as boolean)] as federal_funds_flag
     from cycle_totals
     group by
@@ -86,7 +86,7 @@ election_totals as (
         true as is_election,
         totals.receipts,
         totals.disbursements,
-        totals.five_thousand_flag,
+        totals.has_raised_funds,
         latest.cash_on_hand_end_period,
         latest.debts_owed_by_committee,
         totals.federal_funds_flag
