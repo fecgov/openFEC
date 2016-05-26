@@ -93,7 +93,7 @@ with elections_raw as(
     from reports_raw
     where
         -- exclude pre-primary presidential reports in even years, realistically people file monthly.
-        not (report_type in ('12C', '12P') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
+        not (report_type in ('12C', '12P', '12CAU', '12CON') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
     group by
         report_type,
         rpt_tp_desc,
