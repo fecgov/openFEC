@@ -22,7 +22,7 @@ class CandidateFlags(db.Model):
 
     candidate_id = db.Column(db.String, index=True, primary_key=True, doc=docs.CANDIDATE_ID)
     federal_funds_flag = db.Column(db.Boolean, index=True, doc=docs.FEDERAL_FUNDS_FLAG)
-    five_thousand_flag = db.Column(db.Boolean, index=True, doc=docs.FIVE_THOUSAND_FLAG)
+    has_raised_funds = db.Column(db.Boolean, index=True, doc=docs.HAS_RAISED_FUNDS)
 
 
 class BaseCandidate(BaseModel):

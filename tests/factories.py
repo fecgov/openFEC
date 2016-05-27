@@ -70,7 +70,7 @@ class CandidateFlagsFactory(BaseFactory):
         model = models.CandidateFlags
 
     federal_funds_flag = False
-    five_thousand_flag = True
+    has_raised_funds = True
 
 class BaseCommitteeFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
