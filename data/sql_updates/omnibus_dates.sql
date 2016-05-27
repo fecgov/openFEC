@@ -25,14 +25,14 @@ with elections_raw as(
 ), elections as (
     select
         'election'::text as category,
-        generate_election_description(
+        create_election_description(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
             party::text,
             election_notes::text
         ) || ' is Held Today.' as description,
-        generate_election_summary(
+        create_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
@@ -66,23 +66,25 @@ with elections_raw as(
         end as report_contest
     from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
-    right join elections_raw using (trc_election_id)
+    inner join elections_raw using (trc_election_id)
     where
         coalesce(trc_election_status_id, 1) = 1
 ), reports as (
     select
         'report-' || report_type as category,
-        generate_report_description(
+        create_report_description(
             office_sought::text,
             report_type::text,
             clean_report(rpt_tp_desc::text),
-            array_agg(report_contest order by report_contest)::text[]
+            array_agg(report_contest order by report_contest)::text[],
+            election_notes
         ) as description,
-        generate_report_summary(
+        create_report_summary(
             office_sought::text,
             report_type::text,
             clean_report(rpt_tp_desc::text),
-            array_agg(report_contest order by report_contest)::text[]
+            array_agg(report_contest order by report_contest)::text[],
+            election_notes
         ) as summary,
         array_remove(array_agg(election_state)::text[], null) as states,
         null::text as location,
@@ -93,12 +95,13 @@ with elections_raw as(
     from reports_raw
     where
         -- exclude pre-primary presidential reports in even years, realistically people file monthly.
-        not (report_type in ('12C', '12P', '12CAU', '12CON') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
+        (report_type not in ('12C', '12P', '12CAU', '12CON') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
     group by
         report_type,
         rpt_tp_desc,
         due_date,
-        office_sought
+        office_sought,
+        election_notes
 ), reporting_periods_raw as (
     select
         *,
@@ -110,12 +113,12 @@ with elections_raw as(
         elections_raw.election_notes as rp_election_notes
     from
         trc_election_dates
-    right join elections_raw using (trc_election_id)
+    inner join elections_raw using (trc_election_id)
 ), ie_24hr as(
     select
         'IE Periods'::text as category,
-        generate_24hr_text(
-            generate_election_summary(
+        create_24hr_text(
+            create_election_summary(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
@@ -124,8 +127,8 @@ with elections_raw as(
             )::text,
             ie_24hour_end::date
         ) as summary,
-        generate_24hr_text(
-            generate_election_description(
+        create_24hr_text(
+            create_election_description(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
@@ -139,7 +142,7 @@ with elections_raw as(
         ie_24hour_start::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
-        -- re create these links later
+        -- re-create these links later
         null::text as url
     from reporting_periods_raw
     group by
@@ -152,8 +155,8 @@ with elections_raw as(
 ), ie_48hr as(
     select
         'IE Periods'::text as category,
-        generate_48hr_text(
-            generate_election_summary(
+        create_48hr_text(
+            create_election_summary(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
@@ -162,8 +165,8 @@ with elections_raw as(
             )::text,
             ie_48hour_end::date
         ) as summary,
-        generate_48hr_text(
-            generate_election_description(
+        create_48hr_text(
+            create_election_description(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
@@ -190,8 +193,8 @@ with elections_raw as(
 ), electioneering as(
     select
         'EC Periods'::text as category,
-        generate_electioneering_text(
-            generate_election_summary(
+        create_electioneering_text(
+            create_election_summary(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
@@ -200,8 +203,8 @@ with elections_raw as(
             )::text,
             ec_end::date
         ) as summary,
-        generate_electioneering_text(
-            generate_election_description(
+        create_electioneering_text(
+            create_election_description(
                 rp_election_type::text,
                 expand_office_description(rp_office::text),
                 array_agg(rp_contest order by rp_contest)::text[],
