@@ -110,6 +110,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
+    report_form = 'Form3'
 
     @property
     def has_pdf(self):
@@ -250,3 +251,5 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     report_type = db.Column(db.String)
     report_type_full = db.Column(db.String)
     report_form = 'Form 5'
+    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
+    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
