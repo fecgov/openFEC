@@ -102,7 +102,7 @@ class TestViews(common.IntegrationTestCase):
 
     def _check_financial_model(self, model):
         count = model.query.filter(
-            model.election_cycle < manage.SQL_CONFIG['START_YEAR']
+            model.cycle < manage.SQL_CONFIG['START_YEAR']
         ).count()
         self.assertEqual(count, 0)
 
@@ -335,6 +335,7 @@ class TestViews(common.IntegrationTestCase):
             receipt_tp='15J',
         )
         # Create a committee and committee report
+        # dimcmte not used by house and senate totals anymore
         dc = sa.Table('dimcmte', db.metadata, autoload=True, autoload_with=db.engine)
         ins = dc.insert().values(
             cmte_sk=7,
@@ -342,15 +343,13 @@ class TestViews(common.IntegrationTestCase):
             load_date=datetime.datetime.now(),
         )
         db.session.execute(ins)
-        rep = sa.Table('facthousesenate_f3', db.metadata, autoload=True, autoload_with=db.engine)
+        #
+        rep = sa.Table('fec_vsum_f3', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
-            cmte_sk=7,
             indv_unitem_contb_per=20,
-            facthousesenate_f3_sk=3,
             cycle=2016,
-            load_date=datetime.datetime.now(),
         )
-        db.session.execute(ins)
+        db.session.execute(rep)
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
