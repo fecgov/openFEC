@@ -89,7 +89,7 @@ select
 from
     fec_vsum_f3 c
 where
-    two_yr_period_sk >= :START_YEAR
+    cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_house_senate_mv_tmp(idx);
