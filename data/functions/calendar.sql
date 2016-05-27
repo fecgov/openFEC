@@ -37,7 +37,7 @@ $$ language plpgsql;
     -- NH, DE: DEM Convention Held Today
     -- General Election Multi-state Held Today
 -- used for elections and as a part of the elections in IE descriptions
-create or replace function generate_election_description(election_type text, office_sought text, contest text[], party text, election_notes text)
+create or replace function create_election_description(election_type text, office_sought text, contest text[], party text, election_notes text)
 returns text as $$
     begin
         return case
@@ -74,7 +74,7 @@ $$ language plpgsql;
     -- FL: House General Election Held Today
     -- NH, DE: DEM Convention Held Today
     -- General Election Held today States: NY, CA, FL, LA
-create or replace function generate_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text)
+create or replace function create_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text)
 returns text as $$
     begin
         return case
@@ -110,7 +110,7 @@ $$ language plpgsql;
 
 -- Not all report types are on dimreporttype, so for the reports to all have
 -- titles, I am adding a case. Ideally, we would want the right mapping.
-create or replace function generate_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[])
+create or replace function create_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[], election_notes text)
 returns text as $$
     begin
         return case
@@ -119,6 +119,7 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
+                    election_notes,
                     'Report (for Multiple States) is Due Today'
                 ], ' ')
             when rpt_tp_desc is null and array_length(contest, 1) > 4 then
@@ -126,6 +127,7 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
             when rpt_tp_desc is null then
@@ -134,18 +136,21 @@ returns text as $$
                     array_to_string(contest, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
             when array_length(contest, 1) = 0 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
             when array_length(contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
+                    election_notes,
                     'Report (for Multiple States) is Due Today'
                 ], ' ')
             else
@@ -154,6 +159,7 @@ returns text as $$
                     array_to_string(contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
         end;
@@ -164,7 +170,7 @@ $$ language plpgsql;
 
 -- Not all report types are on dimreporttype, so for the reports to all have
 -- titles, I am adding a case. Ideally, we would want the right mapping.
-create or replace function generate_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[])
+create or replace function create_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[], election_notes text)
 returns text as $$
     begin
         return case
@@ -173,6 +179,7 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
             when rpt_tp_desc is null and array_length(report_contest, 1) < 3 and array_length(report_contest, 1) >= 1 then
@@ -181,6 +188,7 @@ returns text as $$
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     report_type,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
             when rpt_tp_desc is null then
@@ -188,6 +196,7 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     report_type,
+                    election_notes,
                     'Report is Due Today. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
@@ -195,6 +204,7 @@ returns text as $$
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
             when array_length(report_contest, 1) <= 3 then array_to_string(
@@ -202,12 +212,14 @@ returns text as $$
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
             when array_length(report_contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
+                    election_notes,
                     'Report is Due Today. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
@@ -217,6 +229,7 @@ returns text as $$
                     array_to_string(report_contest, ', ') || ':',
                     expand_office_description(office_sought),
                     rpt_tp_desc,
+                    election_notes,
                     'Report is Due Today'
                 ], ' ')
         end;
@@ -225,7 +238,7 @@ $$ language plpgsql;
 
 
 -- 24-Hour Report Period of Independent Expenditures begins for the xx. Ends on xx.
-create or replace function generate_24hr_text(rp_election_text text, ie_24hour_end date)
+create or replace function create_24hr_text(rp_election_text text, ie_24hour_end date)
 returns text as $$
     begin
         return case
@@ -250,7 +263,7 @@ $$ language plpgsql;
 
 
 -- 48-Hour Report Period of Independent Expenditures begins for the xx. Ends on xx.
-create or replace function generate_48hr_text(rp_election_text text, ie_48hour_end date)
+create or replace function create_48hr_text(rp_election_text text, ie_48hour_end date)
 returns text as $$
     begin
         return case
@@ -275,7 +288,7 @@ $$ language plpgsql;
 
 
 -- Electioneering Communications Period begins for the xx. Ends on Election Day, xx.
-create or replace function generate_electioneering_text(rp_election_text text, ec_end date)
+create or replace function create_electioneering_text(rp_election_text text, ec_end date)
 returns text as $$
     begin
         return case
