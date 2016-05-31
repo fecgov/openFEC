@@ -1,17 +1,17 @@
 drop materialized view if exists ofec_totals_presidential_mv_tmp cascade;
 create materialized view ofec_totals_presidential_mv_tmp as
 with last as (
-    select distinct on (cmte_id, cycle) *
+    select distinct on (cmte_id, election_cycle) *
     from fec_vsum_f3p
     order by
         cmte_id,
-        cycle,
+        election_cycle,
         cvg_end_dt desc
 )
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    cycle,
+    election_cycle as cycle,
     min(p.cvg_start_dt) as coverage_start_date,
     max(p.cvg_end_dt) as coverage_end_date,
     sum(p.cand_contb_per) as candidate_contribution,
@@ -55,11 +55,13 @@ select
     max(last.rpt_yr) as last_report_year
 from
     fec_vsum_f3p p
-    left join last using (cmte_id, cycle)
+    left join last using (cmte_id, election_cycle)
 where
     p.most_recent_filing_flag like 'X'
-    and cycle >= :START_YEAR
-group by cmte_id, p.cycle
+    and election_cycle >= :START_YEAR
+group by
+    cmte_id,
+    p.election_cycle
 ;
 
 create unique index on ofec_totals_presidential_mv_tmp(idx);
