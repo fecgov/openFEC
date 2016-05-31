@@ -13,7 +13,9 @@ from
 where
     election_cycle >= :START_YEAR
     and most_recent_filing_flag like 'X'
-group by indv_org_id, cycle
+group by
+    indv_org_id,
+    election_cycle
 ;
 
 create unique index on ofec_totals_ie_only_mv_tmp(idx);

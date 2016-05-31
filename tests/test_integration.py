@@ -102,7 +102,7 @@ class TestViews(common.IntegrationTestCase):
 
     def _check_financial_model(self, model):
         count = model.query.filter(
-            model.cycle < manage.SQL_CONFIG['START_YEAR']
+            model.election_cycle < manage.SQL_CONFIG['START_YEAR']
         ).count()
         self.assertEqual(count, 0)
 
