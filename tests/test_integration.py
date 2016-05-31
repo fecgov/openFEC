@@ -347,7 +347,7 @@ class TestViews(common.IntegrationTestCase):
             cmte_sk=7,
             indv_unitem_contb_per=20,
             facthousesenate_f3_sk=3,
-            two_yr_period_sk=2016,
+            cycle=2016,
             load_date=datetime.datetime.now(),
         )
         db.session.execute(ins)

@@ -3,7 +3,7 @@ create materialized view ofec_reports_presidential_mv_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    cycle,
+    rpt_yr + rpt_yr % 2 as cycle,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
     begin_image_num as beginning_image_number,
@@ -88,9 +88,9 @@ select
     most_recent_filing_flag like 'N' as is_amended,
     receipt_dt as receipt_date
 from
-    fec_vsum_f3p c
+    fec_vsum_f3p
 where
-    cycle >= :START_YEAR
+    rpt_yr + rpt_yr % 2 >= :START_YEAR
 ;
 
 create unique index on ofec_reports_presidential_mv_tmp(idx);
