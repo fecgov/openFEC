@@ -3,7 +3,7 @@ create materialized view ofec_reports_presidential_mv_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    rpt_yr + rpt_yr % 2 as cycle,
+    election_cycle as cycle,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
     begin_image_num as beginning_image_number,
@@ -90,7 +90,7 @@ select
 from
     fec_vsum_f3p
 where
-    rpt_yr + rpt_yr % 2 >= :START_YEAR
+    election_cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_presidential_mv_tmp(idx);

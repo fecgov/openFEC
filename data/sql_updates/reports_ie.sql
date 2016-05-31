@@ -3,7 +3,7 @@ create materialized view ofec_reports_ie_only_mv_tmp as
 select
     row_number() over () as idx,
     indv_org_id as committee_id,
-    cycle,
+    election_cycle as cycle,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
     rpt_yr as report_year,
@@ -19,9 +19,9 @@ select
     most_recent_filing_flag like 'N' as is_amended,
     receipt_dt as receipt_date
 from
-    fec_vsum_f5 ief5
+    fec_vsum_f5
 where
-    cycle >= :START_YEAR
+    election_cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_ie_only_mv_tmp(idx);

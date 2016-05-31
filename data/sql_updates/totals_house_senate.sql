@@ -1,17 +1,17 @@
 drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
 with last as (
-    select distinct on (cmte_id, cycle) *
+    select distinct on (cmte_id, election_cycle) *
     from fec_vsum_f3
     order by
         cmte_id,
-        cycle,
+        election_cycle,
         cvg_end_dt desc
 )
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    cycle,
+    election_cycle as cycle,
     min(hs.cvg_start_dt) as coverage_start_date,
     max(hs.cvg_end_dt) as coverage_end_date,
     sum(hs.all_other_loans_per) as all_other_loans,
@@ -48,11 +48,13 @@ select
     max(last.rpt_yr) as last_report_year
 from
     fec_vsum_f3 hs
-    left join last using (cmte_id, cycle)
+    left join last using (cmte_id, election_cycle)
 where
     hs.most_recent_filing_flag like 'X'
-    and cycle >= :START_YEAR
-group by cmte_id, cycle
+    and hs.election_cycle >= :START_YEAR
+group by
+    cmte_id,
+    election_cycle
 ;
 
 create unique index on ofec_totals_house_senate_mv_tmp(idx);

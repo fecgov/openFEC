@@ -3,7 +3,7 @@ create materialized view ofec_reports_pacs_parties_mv_tmp as
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    cycle,
+    election_cycle as cycle,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
     all_loans_received_per as all_loans_received_period,
@@ -106,9 +106,9 @@ select
     most_recent_filing_flag like 'N' as is_amended,
     receipt_dt as receipt_date
 from
-    fec_vsum_f3x f3x
+    fec_vsum_f3x
 where
-    cycle >= :START_YEAR
+    election_cycle >= :START_YEAR
 ;
 
 create unique index on ofec_reports_pacs_parties_mv_tmp(idx);

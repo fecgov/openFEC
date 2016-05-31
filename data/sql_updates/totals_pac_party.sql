@@ -1,27 +1,25 @@
 drop materialized view if exists ofec_totals_pacs_parties_mv_tmp cascade;
 create materialized view ofec_totals_pacs_parties_mv_tmp as
 with last as (
-    select distinct on (cmte_sk, two_yr_period_sk) *
-    from factpacsandparties_f3x
-    inner join dimreporttype rt using (reporttype_sk)
-    left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
+    select distinct on (cmte_id, election_cycle) *
+    from fec_vsum_f3x
     order by
-        cmte_sk,
-        two_yr_period_sk,
-        dw_date desc
+        cmte_id,
+        election_cycle,
+        cvg_end_dt desc
 )
 select
     row_number() over () as idx,
     cmte_id as committee_id,
-    two_yr_period_sk as cycle,
-    min(start_date.dw_date) as coverage_start_date,
-    max(end_date.dw_date) as coverage_end_date,
+    election_cycle as cycle,
+    min(pnp.cvg_start_dt) as coverage_start_date,
+    max(pnp.cvg_end_dt) as coverage_end_date,
     sum(pnp.all_loans_received_per) as all_loans_received,
     sum(pnp.shared_fed_actvy_nonfed_per) as allocated_federal_election_levin_share,
-    sum(greatest(pnp.ttl_contb_ref_per_i, pnp.ttl_contb_ref_per_ii)) as contribution_refunds,
+    sum(pnp.ttl_contb_refund) as contribution_refunds,
     sum(pnp.ttl_contb_per) as contributions,
     sum(pnp.coord_exp_by_pty_cmte_per) as coordinated_expenditures_by_party_committee,
-    sum(greatest(pnp.ttl_disb_sum_page_per, pnp.ttl_disb_per)) as disbursements,
+    sum(pnp.ttl_disb) as disbursements,
     sum(pnp.fed_cand_cmte_contb_per) as fed_candidate_committee_contributions,
     sum(pnp.fed_cand_contb_ref_per) as fed_candidate_contribution_refunds,
     sum(pnp.ttl_fed_disb_per) as fed_disbursements,
@@ -40,16 +38,16 @@ select
     sum(pnp.net_op_exp_per) as net_operating_expenditures,
     sum(pnp.non_alloc_fed_elect_actvy_per) as non_allocated_fed_election_activity,
     sum(pnp.ttl_nonfed_tranf_per) as nonfed_transfers,
-    sum(greatest(pnp.offsets_to_op_exp_per_i, pnp.offsets_to_op_exp_per_ii)) as offsets_to_operating_expenditures,
+    sum(pnp.ttl_op_exp_per) as offsets_to_operating_expenditures,
     sum(pnp.ttl_op_exp_per) as operating_expenditures,
     sum(pnp.other_disb_per) as other_disbursements,
     sum(pnp.other_fed_op_exp_per) as other_fed_operating_expenditures,
     sum(pnp.other_fed_receipts_per) as other_fed_receipts,
     sum(pnp.other_pol_cmte_contb_per_i) as other_political_committee_contributions,
-    sum(pnp.other_pol_cmte_contb_per_ii) as refunded_other_political_committee_contributions,
+    sum(pnp.other_pol_cmte_refund) as refunded_other_political_committee_contributions,
     sum(pnp.pol_pty_cmte_contb_per_i) as political_party_committee_contributions,
-    sum(pnp.pol_pty_cmte_contb_per_ii) as refunded_political_party_committee_contributions,
-    sum(greatest(pnp.ttl_receipts_sum_page_per, pnp.ttl_receipts_per)) as receipts,
+    sum(pnp.pol_pty_cmte_refund) as refunded_political_party_committee_contributions,
+    sum(pnp.ttl_receipts) as receipts,
     sum(pnp.shared_fed_actvy_fed_shr_per) as shared_fed_activity,
     sum(pnp.shared_fed_actvy_nonfed_per) as shared_fed_activity_nonfed,
     sum(pnp.shared_fed_op_exp_per) as shared_fed_operating_expenditures,
@@ -64,15 +62,14 @@ select
     max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
     max(last.rpt_yr) as last_report_year
 from
-    dimcmte c
-    inner join factpacsandparties_f3x pnp using (cmte_sk)
-    left join dimdates start_date on cvg_start_dt_sk = start_date.date_sk and cvg_start_dt_sk != 1
-    left join dimdates end_date on cvg_end_dt_sk = end_date.date_sk and cvg_end_dt_sk != 1
-    left join last using (cmte_sk, two_yr_period_sk)
+    fec_vsum_f3x pnp
+    left join last using (cmte_id, election_cycle)
 where
-    pnp.expire_date is null
-    and two_yr_period_sk >= :START_YEAR
-group by c.cmte_id, pnp.two_yr_period_sk
+    pnp.most_recent_filing_flag like 'X'
+    and election_cycle >= :START_YEAR
+group by
+    cmte_id,
+    pnp.election_cycle
 ;
 
 create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
