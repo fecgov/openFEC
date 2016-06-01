@@ -335,21 +335,14 @@ class TestViews(common.IntegrationTestCase):
             receipt_tp='15J',
         )
         # Create a committee and committee report
-        # dimcmte not used by house and senate totals anymore
-        dc = sa.Table('dimcmte', db.metadata, autoload=True, autoload_with=db.engine)
-        ins = dc.insert().values(
-            cmte_sk=7,
-            cmte_id=existing.committee_id,
-            load_date=datetime.datetime.now(),
-        )
-        db.session.execute(ins)
-        #
         rep = sa.Table('fec_vsum_f3', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
             indv_unitem_contb_per=20,
-            cycle=2016,
+            cmte_id=existing.committee_id,
+            election_cycle=2016,
+            sub_id=9,
         )
-        db.session.execute(rep)
+        db.session.execute(ins)
         db.session.flush()
         db.session.execute('select update_aggregates()')
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
