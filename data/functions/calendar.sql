@@ -47,7 +47,7 @@ returns text as $$
                 office_sought,
                 election_type,
                 election_notes,
-                '(for Multiple States)'
+                'in multiple states'
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
             array[
@@ -58,7 +58,7 @@ returns text as $$
             ], ' ')
         else array_to_string(
             array[
-                array_to_string(contest, ', ') || ':',
+                array_to_string(contest, ', '),
                 party,
                 office_sought,
                 election_type,
@@ -71,9 +71,9 @@ $$ language plpgsql;
 
 -- Trying to make the names flow together as best as possible
 -- Like:
-    -- FL: House General Election Held Today
-    -- NH, DE: DEM Convention Held Today
-    -- General Election Held today States: NY, CA, FL, LA
+    -- FL: House General Election
+    -- NH, DE: Democratic Convention
+    -- General Election in NY, CA, FL, LA
 create or replace function create_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text)
 returns text as $$
     begin
@@ -84,7 +84,7 @@ returns text as $$
                 office_sought,
                 election_type,
                 election_notes,
-                'States:',
+                'in',
                 array_to_string(contest, ', ')
             ], ' ')
         when array_length(contest, 1) = 0 then array_to_string(
@@ -94,9 +94,16 @@ returns text as $$
                 election_type,
                 election_notes
             ], ' ')
+         when array_length(contest, 1) = 1 then array_to_string(
+                contest[0],
+                party,
+                office_sought,
+                election_type,
+                election_notes
+            ], ' ')
         else array_to_string(
             array[
-                array_to_string(contest, ', ') || ':',
+                array_to_string(contest, ', '),
                 party,
                 office_sought,
                 election_type,
@@ -120,7 +127,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     report_type,
                     election_notes,
-                    'Report (for Multiple States) is Due Today'
+                    'Report in Multiple States is Due Today'
                 ], ' ')
             when rpt_tp_desc is null and array_length(contest, 1) > 4 then
                 array_to_string(
@@ -307,6 +314,20 @@ returns text as $$
                     rp_election_text || '. Ends on Election Day-',
                     to_char(ec_end, 'Day, Mon DD, YYYY') || '.'
             ], ' ')
+        end;
+    end
+$$ language plpgsql;
+
+
+create or replace function add_reporting_states(election_state text[], report_type text)
+returns text[] as $$
+    begin
+        return case
+            when
+                report_type in ('M10', 'M11', 'M12', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M7S', 'M8', 'M9', 'MSA', 'MSY', 'MY', 'MYS', 'Q1', 'Q2', 'Q2S', 'Q3', 'QMS', 'QSA', 'QYE', 'QYS') then
+                array['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY']
+            else
+                array_remove(election_state::text[], null)
         end;
     end
 $$ language plpgsql;

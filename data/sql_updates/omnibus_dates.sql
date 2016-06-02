@@ -31,14 +31,14 @@ with elections_raw as(
             array_agg(contest order by contest)::text[],
             party::text,
             election_notes::text
-        ) || ' is Held Today.' as description,
+        ) as description,
         create_election_summary(
             election_type::text,
             expand_office_description(office_sought::text),
             array_agg(contest order by contest)::text[],
             party::text,
             election_notes::text
-        ) || ' is Held Today.' as summary,
+        ) as summary,
         array_remove(array_agg(election_state order by election_state)::text[], null) as states,
         null::text as location,
         election_date::timestamp as start_date,
@@ -66,7 +66,7 @@ with elections_raw as(
         end as report_contest
     from trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
-    inner join elections_raw using (trc_election_id)
+    left join elections_raw using (trc_election_id)
     where
         coalesce(trc_election_status_id, 1) = 1
 ), reports as (
@@ -86,7 +86,11 @@ with elections_raw as(
             array_agg(report_contest order by report_contest)::text[],
             election_notes
         ) as summary,
-        array_remove(array_agg(election_state)::text[], null) as states,
+        add_reporting_states(
+            array_agg(election_state)::text[],
+            report_type::text
+        ) as states,
+        -- array_remove(array_agg(election_state)::text[], null) as states,
         null::text as location,
         due_date::timestamp as start_date,
         null::timestamp as end_date,
@@ -95,7 +99,7 @@ with elections_raw as(
     from reports_raw
     where
         -- exclude pre-primary presidential reports in even years, realistically people file monthly.
-        (report_type not in ('12C', '12P', '12CAU', '12CON') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
+        not (report_type in ('12C', '12P', '12CAU', '12CON', '30CAU') and extract(year from due_date)::numeric % 2 = 0 and office_sought = 'P')
     group by
         report_type,
         rpt_tp_desc,
