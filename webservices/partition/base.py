@@ -19,6 +19,7 @@ class TableGroup:
     queue_new = None
     queue_old = None
     primary = None
+    date_column = None
 
     columns = []
 
@@ -77,7 +78,7 @@ class TableGroup:
         select = sa.select(
             parent.columns + cls.timestamp_factory(parent) + cls.column_factory(parent)
         ).where(
-            parent.c.rpt_yr.in_([start, stop]),
+            sa.func.get_transaction_year(parent.c[cls.date_column], parent.c.rpt_yr).in_([start, stop]),
         )
 
         child = utils.load_table(name)
@@ -102,7 +103,7 @@ class TableGroup:
         cmds = [
             'alter table {child} alter column {primary} set not null',
             'alter table {child} alter column load_date set not null',
-            'alter table {child} add constraint check_rpt_yr check (rpt_yr in ({start}, {stop}))',
+            'alter table {child} add constraint check_transaction_two_year_period check (transaction_two_year_period in ({start}, {stop}))',
             'alter table {child} inherit {master}'
         ]
         params = {
