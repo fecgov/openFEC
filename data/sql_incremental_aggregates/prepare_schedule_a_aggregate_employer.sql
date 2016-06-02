@@ -7,7 +7,7 @@ select
     contbr_employer as employer,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
-from sched_a
+from fec_vsum_sched_a
 where rpt_yr >= :START_YEAR_AGGREGATE
 and contb_receipt_amt is not null
 and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
