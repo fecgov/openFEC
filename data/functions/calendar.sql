@@ -6,14 +6,41 @@ returns text as $$
     begin
         return case
             when trc_election_id in (1978, 1987, 2020, 2023, 2032, 2041, 2052, 2065, 2100, 2107, 2144, 2157, 2310, 2313, 2314, 2316, 2321, 2323, 2325, 2326, 2328, 2338, 2339, 2341)
-                then 'Caucus'
+                then 'CAU'
             when trc_election_id in (2322, 2329, 2330, 2331, 2334, 2335, 2336, 2337, 2340)
-                then 'Convention'
+                then 'CON'
             else
-                expand_election_type(trc_election_type_id)
+                trc_election_type_id
         end;
     end
 $$ language plpgsql;
+
+-- because we can't just add an s to pluralize caucus
+ create or replace function expand_election_type_plurals(acronym text)
+ returns text as $$
+     begin
+         return case acronym
+             when 'P' then 'Primary Elections'
+             when 'PR' then 'Primary Runoff Elections'
+             when 'SP' then 'Special Primary Elections'
+             when 'SPR' then 'Special Primary Runoff Elections'
+             when 'G' then 'General Elections'
+             when 'GR' then 'General Runoff Elections'
+             when 'SG' then 'Special General Elections'
+             when 'SGR' then 'Special General Runoff Elections'
+             when 'O' then 'Other'
+             when 'C' then 'Caucuses or Conventions'
+             when 'CAU' then 'Caucuses'
+             when 'CON' then 'Conventions'
+             when 'SC' then 'Special Conventions'
+             when 'R' then 'Runoff Elections'
+             when 'SR' then 'Special Runoff Elections'
+             when 'S' then 'Special Elections'
+             when 'E' then 'Recount Elections'
+             else null
+         end;
+     end
+ $$ language plpgsql;
 
 
 --Descriptions and summaries are repetitive, so we are trying to only show the descriptions in some places, That works for most things except court cases, advisory opinions and conferences.
@@ -45,7 +72,7 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                election_type,
+                expand_election_type_plurals(election_type),
                 election_notes,
                 'in multiple states'
             ], ' ')
@@ -53,7 +80,15 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                election_type,
+                expand_election_type(election_type),
+                election_notes
+            ], ' ')
+        when array_length(contest, 1) = 1 then  array_to_string(
+            array[
+                array_to_string(contest, ', '),
+                party,
+                office_sought,
+                expand_election_type(election_type),
                 election_notes
             ], ' ')
         else array_to_string(
@@ -61,7 +96,7 @@ returns text as $$
                 array_to_string(contest, ', '),
                 party,
                 office_sought,
-                election_type,
+                expand_election_type_plurals(election_type),
                 election_notes
             ], ' ')
         end;
@@ -82,7 +117,7 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                election_type,
+                expand_election_type_plurals(election_type),
                 election_notes,
                 'in',
                 array_to_string(contest, ', ')
@@ -91,14 +126,15 @@ returns text as $$
             array[
                 party,
                 office_sought,
-                election_type,
+                expand_election_type(election_type),
                 election_notes
             ], ' ')
          when array_length(contest, 1) = 1 then array_to_string(
+            array[
                 contest[0],
                 party,
                 office_sought,
-                election_type,
+                expand_election_type(election_type),
                 election_notes
             ], ' ')
         else array_to_string(
@@ -106,7 +142,7 @@ returns text as $$
                 array_to_string(contest, ', '),
                 party,
                 office_sought,
-                election_type,
+                expand_election_type_plurals(election_type),
                 election_notes
             ], ' ')
         end;
