@@ -13,21 +13,19 @@ class BaseItemized(db.Model):
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')
     report_year = db.Column('rpt_yr', db.Integer, doc=docs.REPORT_YEAR)
     report_type = db.Column('rpt_tp', db.String, doc=docs.REPORT_TYPE)
-    form_type = db.Column('form_tp', db.String, doc=docs.FORM_TYPE)
+    #form_type = db.Column('form_tp', db.String, doc=docs.FORM_TYPE)
     entity_type = db.Column('entity_tp', db.String)
     image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
     memo_code = db.Column('memo_cd', db.String)
     memo_text = db.Column(db.String)
-    filing_type = db.Column(db.String)
+
     filing_form = db.Column(db.String)
     link_id = db.Column(db.Integer)
     sub_id = db.Column(db.Integer)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
-    amendment_indicator = db.Column('amndt_ind', db.String)
+    #amendment_indicator = db.Column('amndt_ind', db.String)
     line_number = db.Column('line_num', db.String)
     tran_id = db.Column(db.String)
-    transaction_id = db.Column(db.Integer)
-    status = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
     pdf_url = db.Column(db.String)
 
@@ -38,8 +36,8 @@ class BaseItemized(db.Model):
 
 class ScheduleA(BaseItemized):
     __tablename__ = 'ofec_sched_a'
-
-    sched_a_sk = db.Column(db.Integer, primary_key=True)
+    sub_id = db.Column(db.Integer, primary_key=True)
+    #sched_a_sk = db.Column(db.Integer, primary_key=True)
     is_individual = db.Column(db.Boolean, index=True)
     contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
     contributor = db.relationship(
@@ -51,9 +49,9 @@ class ScheduleA(BaseItemized):
     )
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
     contributor_prefix = db.Column('contbr_prefix', db.String)
-    contributor_first_name = db.Column('contbr_f_nm', db.String)
+    contributor_first_name = db.Column('contbr_nm_first', db.String)
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
-    contributor_last_name = db.Column('contbr_l_nm', db.String)
+    contributor_last_name = db.Column('contbr_nm_last', db.String)
     contributor_suffix = db.Column('contbr_suffix', db.String)
     # Street address omitted per FEC policy
     # contributor_street_1 = db.Column('contbr_st1', db.String)
@@ -73,13 +71,13 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
-    record_number = db.Column('record_num', db.Integer)
-    report_primary_general = db.Column('rpt_pgi', db.String)
-    form_type_full = db.Column('form_tp_cd', db.String, doc=docs.FORM_TYPE)
-    receipt_date = db.Column('receipt_dt', db.Date, doc=docs.RECEIPT_DATE)
+    #record_number = db.Column('record_num', db.Integer)
+    #report_primary_general = db.Column('rpt_pgi', db.String)
+    #form_type_full = db.Column('form_tp_cd', db.String, doc=docs.FORM_TYPE)
+    #receipt_date = db.Column('receipt_dt', db.Date, doc=docs.RECEIPT_DATE)
     increased_limit = db.Column(db.String)
-    load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
-    update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
+    #load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
+    #update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
 
     # Auxiliary fields
     contributor_name_text = db.Column(TSVECTOR)
@@ -103,6 +101,8 @@ class ScheduleB(BaseItemized):
     # Street address omitted per FEC policy
     # recipient_street_1 = db.Column('recipient_st1', db.String)
     # recipient_street_2 = db.Column('recipient_st2', db.String)
+    status = db.Column(db.String)
+    filing_type = db.Column(db.String)
     recipient_city = db.Column(db.String)
     recipient_state = db.Column('recipient_st', db.String)
     recipient_zip = db.Column(db.String)
@@ -122,6 +122,7 @@ class ScheduleB(BaseItemized):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+    transaction_id = db.Column(db.Integer)
 
     # Auxiliary fields
     recipient_name_text = db.Column(TSVECTOR)
