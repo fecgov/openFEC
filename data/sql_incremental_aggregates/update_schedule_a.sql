@@ -2,12 +2,12 @@ create or replace function ofec_sched_a_update() returns void as $$
 begin
     -- Drop all queued deletes
     delete from ofec_sched_a
-    where sched_a_sk = any(select sched_a_sk from ofec_sched_a_queue_old)
+    where sub_id = any(select sub_id from ofec_sched_a_queue_old)
     ;
     -- Insert all queued updates, unless a row with the same key exists in the
     -- delete queue with a later timestamp
     insert into ofec_sched_a(
-        select distinct on (sched_a_sk)
+        select distinct on (sub_id)
             new.*,
             image_pdf_url(new.image_num) as pdf_url,
             to_tsvector(new.contbr_nm) || to_tsvector(coalesce(new.contbr_id, ''))
@@ -18,9 +18,9 @@ begin
                 as is_individual,
             clean_repeated(new.contbr_id, new.cmte_id) as clean_contbr_id
         from ofec_sched_a_queue_new new
-        left join ofec_sched_a_queue_old old on new.sched_a_sk = old.sched_a_sk and old.timestamp > new.timestamp
-        where old.sched_a_sk is null
-        order by new.sched_a_sk, new.timestamp desc
+        left join ofec_sched_a_queue_old old on new.sub_id = old.sub_id and old.timestamp > new.timestamp
+        where old.sub_id is null
+        order by new.sub_id, new.timestamp desc
     );
 end
 $$ language plpgsql;
