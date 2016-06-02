@@ -11,6 +11,7 @@ class SchedBGroup(TableGroup):
     queue_new = 'ofec_sched_b_queue_new'
     queue_old = 'ofec_sched_b_queue_old'
     primary = 'sched_b_sk'
+    date_column = 'disb_dt'
 
     columns = [
         sa.Column('timestamp', sa.DateTime),
@@ -19,6 +20,7 @@ class SchedBGroup(TableGroup):
         sa.Column('disbursement_description_text', TSVECTOR),
         sa.Column('disbursement_purpose_category', sa.String),
         sa.Column('clean_recipient_cmte_id', sa.String),
+        sa.Column('transaction_two_year_period', sa.Numeric(4, 0)),
     ]
 
     @classmethod
@@ -35,6 +37,7 @@ class SchedBGroup(TableGroup):
                 parent.c.recipient_cmte_id,
                 parent.c.cmte_id,
             ).label('clean_recipient_cmte_id'),
+            sa.cast(sa.func.get_transaction_year(parent.c[cls.date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
         ]
 
     @classmethod
@@ -47,13 +50,14 @@ class SchedBGroup(TableGroup):
             sa.Index(None, c.recipient_st),
             sa.Index(None, c.recipient_city),
             sa.Index(None, c.clean_recipient_cmte_id),
+            sa.Index(None, c.transaction_two_year_period),
 
-            sa.Index(None, c.disb_dt, c.sched_b_sk),
-            sa.Index(None, c.disb_amt, c.sched_b_sk),
+            sa.Index(None, c.disb_dt, c[cls.primary]),
+            sa.Index(None, c.disb_amt, c[cls.primary]),
 
-            sa.Index(None, c.cmte_id, c.sched_b_sk),
-            sa.Index(None, c.cmte_id, c.disb_dt, c.sched_b_sk),
-            sa.Index(None, c.cmte_id, c.disb_amt, c.sched_b_sk),
+            sa.Index(None, c.cmte_id, c[cls.primary]),
+            sa.Index(None, c.cmte_id, c.disb_dt, c[cls.primary]),
+            sa.Index(None, c.cmte_id, c.disb_amt, c[cls.primary]),
 
             sa.Index(None, c.recipient_name_text, postgresql_using='gin'),
             sa.Index(None, c.disbursement_description_text, postgresql_using='gin'),

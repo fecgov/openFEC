@@ -11,6 +11,7 @@ class SchedAGroup(TableGroup):
     queue_new = 'ofec_sched_a_queue_new'
     queue_old = 'ofec_sched_a_queue_old'
     primary = 'sched_a_sk'
+    date_column = 'contb_receipt_dt'
 
     columns = [
         sa.Column('timestamp', sa.DateTime),
@@ -20,6 +21,7 @@ class SchedAGroup(TableGroup):
         sa.Column('contributor_occupation_text', TSVECTOR),
         sa.Column('is_individual', sa.Boolean),
         sa.Column('clean_contbr_id', sa.String),
+        sa.Column('transaction_two_year_period', sa.Numeric(4, 0)),
     ]
 
     @classmethod
@@ -40,6 +42,7 @@ class SchedAGroup(TableGroup):
                 parent.c.contbr_id,
                 parent.c.cmte_id,
             ).label('clean_contbr_id'),
+            sa.cast(sa.func.get_transaction_year(parent.c[cls.date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
         ]
 
     @classmethod
@@ -54,15 +57,16 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c.contbr_city),
             sa.Index(None, c.is_individual),
             sa.Index(None, c.clean_contbr_id),
+            sa.Index(None, c.transaction_two_year_period),
 
-            sa.Index(None, c.contb_receipt_amt, child.c.sched_a_sk),
-            sa.Index(None, c.contb_receipt_dt, child.c.sched_a_sk),
-            sa.Index(None, c.contb_aggregate_ytd, child.c.sched_a_sk),
+            sa.Index(None, c.contb_receipt_amt, child.c[cls.primary]),
+            sa.Index(None, c.contb_receipt_dt, child.c[cls.primary]),
+            sa.Index(None, c.contb_aggregate_ytd, child.c[cls.primary]),
 
-            sa.Index(None, c.cmte_id, c.sched_a_sk),
-            sa.Index(None, c.cmte_id, c.contb_receipt_amt, c.sched_a_sk),
-            sa.Index(None, c.cmte_id, c.contb_receipt_dt, c.sched_a_sk),
-            sa.Index(None, c.cmte_id, c.contb_aggregate_ytd, c.sched_a_sk),
+            sa.Index(None, c.cmte_id, c[cls.primary]),
+            sa.Index(None, c.cmte_id, c.contb_receipt_amt, c[cls.primary]),
+            sa.Index(None, c.cmte_id, c.contb_receipt_dt, c[cls.primary]),
+            sa.Index(None, c.cmte_id, c.contb_aggregate_ytd, c[cls.primary]),
 
             sa.Index(None, c.contributor_name_text, postgresql_using='gin'),
             sa.Index(None, c.contributor_employer_text, postgresql_using='gin'),
