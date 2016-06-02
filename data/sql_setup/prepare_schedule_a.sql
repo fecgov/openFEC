@@ -12,32 +12,32 @@ select
     is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
         as is_individual,
     clean_repeated(contbr_id, cmte_id) as clean_contbr_id
-from sched_a
+from fec_vsum_sched_a
 where rpt_yr >= :START_YEAR_ITEMIZED
 ;
 
-alter table ofec_sched_a_tmp add primary key (sched_a_sk);
+alter table ofec_sched_a_tmp add primary key (sub_id);
 
 -- Create simple indices on filtered columns
 create index on ofec_sched_a_tmp (rpt_yr);
 create index on ofec_sched_a_tmp (entity_tp);
 create index on ofec_sched_a_tmp (image_num);
-create index on ofec_sched_a_tmp (sched_a_sk);
+create index on ofec_sched_a_tmp (sub_id);
 create index on ofec_sched_a_tmp (contbr_st);
 create index on ofec_sched_a_tmp (contbr_city);
 create index on ofec_sched_a_tmp (is_individual);
 create index on ofec_sched_a_tmp (clean_contbr_id);
 
 -- Create composite indices on sortable columns
-create index on ofec_sched_a_tmp (contb_receipt_dt, sched_a_sk);
-create index on ofec_sched_a_tmp (contb_receipt_amt, sched_a_sk);
-create index on ofec_sched_a_tmp (contb_aggregate_ytd, sched_a_sk);
+create index on ofec_sched_a_tmp (contb_receipt_dt, sub_id);
+create index on ofec_sched_a_tmp (contb_receipt_amt, sub_id);
+create index on ofec_sched_a_tmp (contb_aggregate_ytd, sub_id);
 
 -- Create composite indices on `cmte_id`; else filtering by committee can be very slow
-create index on ofec_sched_a_tmp (cmte_id, sched_a_sk);
-create index on ofec_sched_a_tmp (cmte_id, contb_receipt_dt, sched_a_sk);
-create index on ofec_sched_a_tmp (cmte_id, contb_receipt_amt, sched_a_sk);
-create index on ofec_sched_a_tmp (cmte_id, contb_aggregate_ytd, sched_a_sk);
+create index on ofec_sched_a_tmp (cmte_id, sub_id);
+create index on ofec_sched_a_tmp (cmte_id, contb_receipt_dt, sub_id);
+create index on ofec_sched_a_tmp (cmte_id, contb_receipt_amt, sub_id);
+create index on ofec_sched_a_tmp (cmte_id, contb_aggregate_ytd, sub_id);
 
 -- Create indices on filtered fulltext columns
 create index on ofec_sched_a_tmp using gin (contributor_name_text);
@@ -53,12 +53,12 @@ analyze ofec_sched_a_tmp;
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;
 drop table if exists ofec_sched_a_queue_old;
-create table ofec_sched_a_queue_new as select * from sched_a limit 0;
-create table ofec_sched_a_queue_old as select * from sched_a limit 0;
+create table ofec_sched_a_queue_new as select * from fec_vsum_sched_a limit 0;
+create table ofec_sched_a_queue_old as select * from fec_vsum_sched_a limit 0;
 alter table ofec_sched_a_queue_new add column timestamp timestamp;
 alter table ofec_sched_a_queue_old add column timestamp timestamp;
-create index on ofec_sched_a_queue_new (sched_a_sk);
-create index on ofec_sched_a_queue_old (sched_a_sk);
+create index on ofec_sched_a_queue_new (sub_id);
+create index on ofec_sched_a_queue_old (sub_id);
 create index on ofec_sched_a_queue_new (timestamp);
 create index on ofec_sched_a_queue_old (timestamp);
 
@@ -88,9 +88,9 @@ begin
 end
 $$ language plpgsql;
 
-drop trigger if exists ofec_sched_a_queue_trigger on sched_a;
+drop trigger if exists ofec_sched_a_queue_trigger on fec_vsum_sched_a;
 create trigger ofec_sched_a_queue_trigger before insert or update or delete
-    on sched_a for each row execute procedure ofec_sched_a_update_queues(:START_YEAR_AGGREGATE)
+    on fec_vsum_sched_a for each row execute procedure ofec_sched_a_update_queues(:START_YEAR_AGGREGATE)
 ;
 
 drop table if exists ofec_sched_a;
