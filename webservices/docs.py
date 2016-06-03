@@ -541,7 +541,6 @@ PARTY = 'Three-letter code for the party affiliated with a candidate or committe
 PARTY_FULL = 'Party affiliated with a candidate or committee'
 FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1'
 REPORT_TYPE = 'Name of report where the underlying data comes from'
-REPORT_YEAR = 'Year the report was filed'
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 STATE_GENERIC = 'US state or territory'
 ZIP_CODE = 'Zip code'
