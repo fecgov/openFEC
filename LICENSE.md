@@ -1,11 +1,10 @@
 As a work of the United States Government, this project is in the public domain within the United States.
 
-Additionally, we waive copyright and related rights in the work worldwide through the CC0 1.0 Universal public domain dedication.
-
+## Restrictions on FEC data
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. [Learn more on FEC.gov.](http://www.fec.gov/pages/brochures/saleuse.shtml)
 
 ## CC0 1.0 universal summary
-What follows is a human-readable summary of the Legal Code. [Read the full text](https://creativecommons.org/publicdomain/zero/1.0/legalcode).
+We waive copyright and related rights in the work worldwide through the [CC0 universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/).
 
 ### No copyright
 The person who associated a work with this deed has dedicated the work to the public domain by waiving all of his or her rights to the work worldwide under copyright law, including all related and neighboring rights, to the extent allowed by law.

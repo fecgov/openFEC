@@ -7,166 +7,263 @@
 [![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
-[![Code Issues](https://www.quantifiedcode.com/api/v1/project/d3b2c96b3781466081d418fd50762726/badge.svg)](https://www.quantifiedcode.com/app/project/d3b2c96b3781466081d418fd50762726)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/d3b2c96b3781466081d418fd50762726/badge.svg)](https://www.quantifiedcode.com/app/project/d3b2c96b3781466081d418fd50set o762726)
 
-[![Valid Swagger](http://online.swagger.io/validator/?url=https://api.open.fec.gov/swagger)](https://api.open.fec.gov/swagger)
+![](http://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
 
-## Campaign finance for everyone
-The Federal Election Commission (FEC) releases information to the public about money that’s raised and spent in federal elections — that’s elections for US president, Senate, and House of Representatives.
+## About this project
+The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US president, Senate, and House of Representatives.
 
 Are you interested in seeing how much money a candidate raised? Or spent? How much debt they took on? Who contributed to their campaign? The FEC is the authoritative source for that information.
 
 betaFEC is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
 
-## FEC repositories
-We welcome you to explore, make suggestions, and contribute to our code.
 
-This repository, [openFEC](https://github.com/18F/openfec), is home to betaFEC’s API.
-
-### All repositories
-- [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from betaFEC’s feedback widget here, and this is the best place to submit general feedback.
-- [openFEC](https://github.com/18F/openfec): betaFEC’s API
-- [swagger](https://github.com/18F/swagger-ui):this generates our interactive API documentation
-- [openFEC-web-app](https://github.com/18f/openfec-web-app): the betaFEC web app for exploring campaign finance data
-- [fec-style](https://github.com/18F/fec-style): shared styles and user interface components
-- [fec-cms](https://github.com/18F/fec-cms): the content management system (CMS) for betaFEC
-- [proxy](https://github.com/18F/fec-proxy): this is a light weight app that coordinates the paths between the web app and CMS
+## This repository, [openFEC](https://github.com/18F/openfec), is home to betaFEC's API
+All FEC repositories:
+- [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from betaFEC's feedback widget here, and this is the best place to submit general feedback.
+- [openFEC](https://github.com/18F/openfec): betaFEC's API
+- [swagger-ui](https://github.com/18F/swagger-ui): forked repo that generates our interactive API documentation
+- [openFEC-web-app](https://github.com/18f/openfec-web-app): the web app for exploring campaign finance data
+- [fec-style](https://github.com/18F/fec-style): shared styles and user interface components, including this project's glossary and feedback tools
+- [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS) 
+- [fec-proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
 
 
 ## Get involved
-We’re thrilled you want to get involved!
+We welcome you to explore, make suggestions, and contribute to our code. 
 - Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
-- [Send us an email](mailto:betafeedback@fec.gov).
-- If you’re a developer, follow the installation instructions in the README.md page of each repository to run the apps on your computer.
+- If you'd rather send us an email, [we're thrilled to hear from you](mailto:betafeedback@fec.gov)!
+- Follow our Set up instructions to run the apps on your computer.
 - Check out our StoriesonBoard [FEC story map](https://18f.storiesonboard.com/m/fec) to get a sense of the user needs we'll be addressing in the future.
 
 ---
 
+
 ## Set up
+We are always trying to improve our documentation. If you have suggestions or run into problems please [file an issue](https://github.com/18F/openFEC/issues)!
 
-Prior to running, ensure you have the following requirements installed:
-<!--requirements-->
-* virtualenv
-* virtualenvwrapper
-* python3.4
-* pip
-* nodejs
-* npm
-* PostgreSQL
+### Project prerequisites
+1. Ensure you have the following requirements installed:
 
-<!--endrequirements-->
+    * Python 3.4 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
+    * The latest long term support (LTS) or stable release of Node.js (which includes npm)
+    * PostgreSQL (the latest 9.4 release). 
+         * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/) 
+         * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
+         * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
 
-## Quick(ish) start
 
-Clone this repository.
+2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/javascript/).
 
-Create a Python environment for your project. We use virtualenv and virtualenv wrapper, but feel free to create your environment with your preferred set up.
+3. Set up your Python environment— learn how to do this with our [Python Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/python/).
 
-You will need your Python 3 path to make sure your environment is pointing to the right Python version. You can find that out by running:
-```
-which python3
-```
+4. Clone this repository.
 
-To use virtualenv and virtualenv wrapper, in your terminal run:
-```
-mkvirtualenv open-fec-api --python </path-to-your-python3>
-```
+### Project dependencies
 
-Subsequently, you will want to activate the environment every time you run the project with:
-```
-workon open-fec-api
-```
-### Install requirements
+#### Install project requirements
 
-Use pip to install the requirements for the repo in your python3 environment. The ``requirements-dev`` will be needed to build your database in a few steps:
+Use pip to install the Python dependencies:
+
 ```
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-#### Git hooks
+Use npm to install JavaScript dependencies:
+
+```
+npm install
+```
+
+##### Git hooks
 This repo includes optional post-merge and post-checkout hooks to ensure that
 dependencies are up to date. If enabled, these hooks will update Python
 dependencies on checking out or merging changes to `requirements.txt`. To
 enable the hooks, run:
+
 ```
 invoke add_hooks
 ```
+
 To disable, run:
+
 ```
 invoke remove_hooks
 ```
 
-### Creating a new test database
-To run the API locally you will need a database, we provide a sql dump that has a small sample of data to get you running locally.
+#### Create local databases
+Before you can run this project locally, you'll need an API database and a test database. 
 
-To create your own test database, make sure you have postgres and run:
+To create your databases, run:
+
 ```
 createdb cfdm_test
+createdb cfdm_unit_test
+```
+
+Load our sample data into the development database (`cfdm_test`) by running:
+
+```
 pg_restore --dbname cfdm_test data/subset.dump
 ./manage.py update_all
 ```
-(Don't worry if there are some user does not exist error messages)
 
-FEC and 18F members can set the sql connection to one of the RDS boxes with:
-```
-export SQLACONN=<psql:address-to-box>
-```
+Ignore `user does not exist` error messages. Everything will still work!
 
-### Run locally
-Install your npm packages:
-```
-npm i
-```
-
-Run:
-```
-./manage.py runserver
-```
-The site can be found at [http://localhost:5000](http://localhost:5000)
-
-
-We are always trying to improve our documentation, if you have suggestions or run into problems feel free to [file an issue](https://github.com/18F/openFEC/issues).
-
-
-## Deployment
-
-##### Likely only useful for 18F team members
-
-##### Create change log
-
-Create a change log for each release. Auto generate it using this [change log generator](https://github.com/skywinder/github-changelog-generator)
-
-Once installed, you will want to run:
+*Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
 
 ```
-github_changelog_generator --since-tag <last public-relase> --t <your-gh-token>
+export SQLA_CONN=<psql:address-to-box>
 ```
 
-Then, commit the log to the release.
+*Reach out to a team member to get the actual addresses.*
 
-##### Deploy
+#### Set other environment variables
+1. Run:
 
+   ```
+   export FEC_WEB_DEBUG=true
+   ```
+
+   This shows error details and more verbose request logging. 
+
+2. Run:
+
+   ```
+   export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
+   export FEC_WEB_API_URL=http://localhost:5000
+   export FEC_CMS_URL=http://localhost:8000
+   ```
+
+   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
+   
+   *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.* 
+
+3. Run: 
+
+   ```
+   export FEC_WEB_USERNAME=<username_of_your_choosing>
+   export FEC_WEB_PASSWORD=<password_of_your_choosing>
+   ```
+
+   Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
+   
+   *Note: 18F and FEC team members will have additional environment variables to set up. Please reach out to a team member for detailed information.*
+
+#### Run locally
+Follow these steps every time you want to work on this project locally.
+
+1. Run:
+
+   ```
+   ./manage.py runserver
+   ```
+
+2. View your local version of the site at [http://localhost:5000](http://localhost:5000).
+
+#### Task queue
+We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](http://redis.io/) as the Celery message broker. 
+
+To work with Celery and Redis locally, install Redis and start a Redis server. By default,
+we connect to Redis at `redis://localhost:6379`; if Redis is running at a different URL,
+set the `FEC_REDIS_URL` environment variable. 
+
+*Note: Both the API and Celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).*
+
+Running Redis and Celery locally:
+
+```
+redis-server
+celery worker --app webservices.tasks
+```
+
+## Testing
+This repo uses [pytest](http://pytest.org/latest/).
+
+Running the tests:
+
+```
+py.test
+```
+
+#### The test data subset
+If you add new tables to the data, you'll need to generate a new subset for testing. We use this nifty subsetting tool: [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
+
+To build a new test subset, first delete and recreate the test database:
+
+```
+dropdb cfdm_test
+createdb cfdm_test
+```
+
+Now use the `build_test` invoke task to populate the new database with the new subset:
+
+```
+invoke build_test <source> postgresql://:@/cfdm_test
+```
+
+where `source` is a valid PostgreSQL connection string.
+To update the version-controlled test subset after rebuilding, run:
+
+```
+invoke dump postgresql://:@/cfdm_test data/subset.dump
+```
+
+## Deployment (18F and FEC team only)
+
+### Deployment prerequisites
+If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI and the autopilot plugin.
+
+#### Deploy
 Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) and the [autopilot plugin](https://github.com/concourse/autopilot):
 
+1. Read [Cloud Foundry documentation](https://docs.cloudfoundry.org/devguide/cf-cli/install-go-cli.html) to install Cloud Foundry CLI.
+
+2. Install autopilot by running:
+
+   ```
+   cf install-plugin autopilot -r CF-Community
+   ```
+
+   [Learn more about autopilot](https://github.com/concourse/autopilot).
+
+3. Set environment variables used by the deploy script:
+
+   ```
+   export FEC_CF_USERNAME=<your_cf_username>
+   export FEC_CF_PASSWORD=<your_cf_password>
+   ```
+   
+   If these variables aren't set, you'll be prompted for your Cloud Foundry credentials when you deploy the app.
+
+### Deployment steps
+To deploy to Cloud Foundry, run: 
+
 ```
-cf install-plugin autopilot -r CF-Community
+invoke deploy
 ```
 
-To deploy to Cloud Foundry, run `invoke deploy`. The `deploy` task will attempt to detect the appropriate
-Cloud Foundry space based the current branch; to override, pass the optional `--space` flag:
+[Learn more about Invoke](http://www.pyinvoke.org/).
+
+The `deploy` task will detect the appropriate Cloud Foundry space based the current branch. You can override this with the optional `--space` flag. For example:
 
 ```
 invoke deploy --space dev
 ```
 
-The `deploy` task will use the `FEC_CF_USERNAME` and `FEC_CF_PASSWORD` environment variables to log in.
-If these variables are not provided, you will be prompted for your Cloud Foundry credentials.
+This command will explicitly target the `dev` space.
 
-Credentials for Cloud Foundry applications are managed using user-provided services labeled as
-"fec-creds-prod", "fec-creds-stage", and "fec-creds-dev". Services are used to share credentials across
-blue and green versions of blue-green deploys, and between the API and the webapp. To set up a service:
+#### Setting up a service
+On Cloud Foundry, we use the redis28-swarm
+service. The Redis service can be created as follows:
 
+```
+cf create-service redis28-swarm standard fec-redis
+```
+
+#### Setting up credentials
 ```
 cf target -s dev
 cf cups fec-creds-dev -p '{"SQLA_CONN": "..."}'
@@ -176,191 +273,156 @@ To stand up a user-provided credential service that supports both the API and th
 the following keys are set:
 
 * SQLA_CONN
-* FEC_WEB_USERNAME
-* FEC_WEB_PASSWORD
 * FEC_WEB_API_KEY
 * FEC_WEB_API_KEY_PUBLIC
+* FEC_GITHUB_TOKEN
+* SENTRY_DSN
+* SENTRY_PUBLIC_DSN
 * NEW_RELIC_LICENSE_KEY
+* WRITE_AUTHORIZED_TOKENS
 
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
 ```
-cf target [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
+cf target -o [dev|stage|prod] && cf push -f manifest_<[dev|stage|prod]>.yml [api|web]
 ```
 
-##### Task queue
+*Note: Performing a deploy in this manner will result in a brief period of downtime.*
 
-Periodic tasks, such as refreshing materialized views and updating incremental
-aggregates, are scheduled using celery. We use redis as the celery message broker. To
-work with celery and redis locally, install redis and start a redis server. By default,
-we connect to redis at `redis://localhost:6379`; if redis is running at a different URL,
-set the `FEC_REDIS_URL` environment variable. On Cloud Foundry, we use the redis28-swarm
-service. The redis service can be created as follows:
+#### Running commands remotely
+There may be a time when you need to run a command remotely, e.g., a management command to update database schemas. Cloud Foundry currently doesn't support a way of connecting to an app that is running directly, so you need to deploy a one-off app specifically for running commands instead.
+
+To accomplish this, follow these steps:
+
+1. Make sure you're pointing to the correct target space:
+
+   ```
+   cf target -o fec -s <dev | stage | prod>
+   ```
+
+2. Create a new app manifest for this one-off app (choose whatever file name you wish, ending with the `.yml` extension):
+
+   ```
+   cf create-app-manifest api -p <one-off-app-manifest-filename.yml>
+   ```
+
+3. Open the newly created one-off app manifest file and **add/modify** the following YAML properties to it (be sure to maintain all of the other existing properties):
+
+   ```
+   name: one-off-app-name
+   command: "<your command here, e.g., python manage.py update_all> && sleep infinity"
+   no-route: true
+   ```
+
+   *Note: the* `&& sleep infinity` *part is needed as the end of the command you specify so that Cloud Foundry doesn't attempt to redeploy the app once the command finishes.*
+
+4. Using the same app name you just specified in the custom manifest file, push your application to Cloud Foundry:
+
+   ```
+   cf push <one-off-app-name> -f <one-off-app-manifest-filename.yml>
+   ```
+
+Once the app is pushed, you can also tail the logs to make see when the command finishes:
 
 ```
-cf create-service redis28-swarm standard fec-redis
+cf logs <one-off-app-name>
 ```
 
-Running redis and celery locally:
+When the command you want to run finishes, be sure to stop and delete the app to free resources in Cloud Foundry:
 
 ```
-redis-server
-celery worker --app webservices.tasks
+cf stop <one-off-app-name>
+cf delete <one-off-app-name>
 ```
 
-Note: Both the API and celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).
+One other thing you may want to consider doing is adding explicit log statements or an email notification to whatever command you are running so that you know for sure when the command finishes (or errors out). However, please do not check in these custom modifications.
 
-##### Production stack
+*Note: We hope to have a better way of accomplishing this in the future.*
 
-The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
-an nginx reverse proxy. Static files are compressed and served directly through nginx;
-dynamic content is routed to the Flask application via `proxy_pass`. The entire application
-is served through the [API Umbrella](https://apiumbrella.io), which handles API keys,
-caching, and rate limiting.
+### Create a changelog
+If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).
 
-##### Nightly updates
+Once installed, run:
 
-Incrementally-updated aggregates and materialized views are updated nightly; see
-`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
+```
+github_changelog_generator --since-tag <last public-relase> --t <your-gh-token>
+```
 
-##### Caching
+When this finishes, commit the log to the release.
 
+
+## Git-flow and continuous deployment
+We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
+
+### Creating a new feature
+* Developer creates a feature branch:
+
+    ```
+    git flow feature start my-feature
+    ```
+
+* Reviewer merges feature branch into develop and pushes to origin
+* [auto] Develop is deployed to dev
+
+### Creating a hotfix
+* Developer creates a hotfix branch:
+
+    ```
+    git flow hotfix start my-hotfix
+    ```
+
+* Reviewer merges hotfix branch into develop and master and pushes to origin
+* [auto] Develop is deployed to dev
+* [auto] Master is deployed to prod
+
+### Creating a release
+* Developer creates a release branch and pushes to origin:
+
+    ```
+    git flow release start my-release
+    git flow release publish my-release
+    ```
+
+* [auto] Release is deployed to stage
+* Review of staging
+* Developer merges release branch into master and pushes to origin:
+
+    ```
+    git flow release finish my-release
+    ```
+
+* [auto] Master is deployed to prod
+
+
+## Additional developer notes
+This section covers a few topics we think might help developers after setup.
+
+### API umbrella
+The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
+rate limiting, authentication, caching, and HTTPS termination and redirection. Both
+environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
+through the API Umbrella.
+
+### Caching
 All API responses are set to expire after one hour (`Cache-Control: public, max-age=3600`).
 In production, the [API Umbrella](https://apiumbrella.io) will check this response header
 and cache responses for the specified interval, such that repeated requests to a given
 endpoint will only reach the Flask application once. This means that responses may be
 stale for up to an hour following the nightly refresh of the materialized views.
 
-##### API umbrella
+### Data for development and staging environments
+The production and staging environments use relational database service (RDS) instances that receive streaming updates from the FEC database. The development environment uses a separate RDS instance created from a snapshot of the production instance.
 
-The staging and production environments use the [API Umbrella](https://apiumbrella.io) for
-rate limiting, authentication, caching, and HTTPS termination and redirection. Both
-environments use the `FEC_API_WHITELIST_IPS` flag to reject requests that are not routed
-through the API Umbrella.
+### Nightly updates
+Incrementally-updated aggregates and materialized views are updated nightly; see
+`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
 
-##### Git-flow and continuous deployment
+### Production stack
+The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
+an nginx reverse proxy. Static files are compressed and served directly through nginx;
+dynamic content is routed to the Flask application via `proxy_pass`. The entire application
+is served through the [API Umbrella](https://apiumbrella.io), which handles API keys,
+caching, and rate limiting.
 
-We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed
-through Travis CI accordingly.
-
-###### To create a new feature:
-* Developer creates a feature branch
-```
-git flow feature start my-feature
-```
-
-* Reviewer merges feature branch into develop and pushes to origin
-* [auto] Develop is deployed to dev
-
-###### To create a hotfix:
-* Developer creates a hotfix branch
-```
-git flow hotfix start my-hotfix
-```
-
-* Reviewer merges hotfix branch into develop and master and pushes to origin
-* [auto] Develop is deployed to dev
-* [auto] Master is deployed to prod
-
-###### To create a release:
-* Developer creates a release branch and pushes to origin
-
-```
-git flow release start my-release
-git flow release publish my-release
-```
-
-* [auto] Release is deployed to stage
-* Review of staging
-* Developer merges release branch into master and pushes to origin
-
-```
-git flow release finish my-release
-```
-
-* [auto] Master is deployed to prod
-
-##### Data for development and staging environments
-
-Note: The following can be automated using Boto or the AWS CLI if we continue on with this model and need
-to update snapshots frequently.
-
-The production and staging environments use RDS instances that receive streaming updates from the FEC database.
-The development environment uses a separate RDS instance created from a snapshot of the production instance.
-To update the development instance (e.g. when schemas change or new records are added):
-
-* Create a new snapshot of the production data
-
-        RDS :: Instances :: fec-goldengate-target :: Take DB Snapshot
-
-* Restore the snapshot to a new development RDS
-
-        RDS :: Snapshots :: <snapshot-name> :: Restore Snapshot
-
-    * DB Instance Class: db.m3.medium
-    * Multi-AZ Deployment: No
-    * Storage Type: General Purpose
-    * DB Instance Identifier: fec-goldengate-dev-YYYY-mm-dd
-    * VPC: Not in VPC
-
-* Add the new instance to the FEC security group
-
-        RDS :: Instances :: <instance-name> :: Modify
-
-    * Security Group: fec-open
-    * Apply Immediately
-
-* Configure DNS to point to new instance
-
-        Route 53 :: Hosted Zones :: open.fec.gov :: goldengate-dev.open.fec.gov
-
-    * Value: <instance-endpoint>
-        * Example: fec-goldengate-dev-YYYY-mm-dd...rds.amazonaws.com
-
-* Wait up to `TTL` seconds for DNS records to propagate
-* Verify that new instance is reachable at goldengate-dev.open.fec.gov
-* Delete previous development instance
-
-**Important**: Verify that all newly created instances are tagged with the same client
-as the production instance.
-
-#### Other developer notes
-
+### Sorting fields
 Sorting fields include a compound index on on the filed to sort and a unique field. Because in cases where there were large amounts of data that had the same value that was being evaluated for sort, the was not a stable sort view for results and the results users received were inconsistent, some records given more than once, others given multiple times.
-
-## Testing
-
-Make sure you have [created a new test database](#creating-a-new-test-database).
-
-This repo uses [pytest](http://pytest.org/latest/).
-
-Running the tests:
-```
-py.test
-```
-
-##### The test data subset
-
-When adding new tables to the data, you will need to generate a new subset for testing. We use this nifty subsetting tool- [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
-
-To build a new test subset, use the `build_test` invoke task:
-
-```
-invoke build_test <source> <dest>
-```
-
-where both `source` and `dest` are valid PostgreSQL connection strings.
-
-To update the version-controlled test subset after rebuilding, run:
-
-```
-invoke dump <source> data/subset.dump
-```
-
-where `source` is the database containing the newly created test subset.
-
-
-## Copyright and licensing
-This project is in the public domain within the United States, and we waive worldwide copyright and related rights through [CC0 universal public domain dedication](https://creativecommons.org/publicdomain/zero/1.0/). Read more on our license page.
-
-A few restrictions limit the way you can use FEC data. For example, you can’t use contributor lists for commercial purposes or to solicit donations. Learn more on FEC.gov.
