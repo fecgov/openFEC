@@ -498,11 +498,14 @@ CALENDAR_DATES = '''
 Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
 event into one calendar.
 
-State filtering is only applicable to the reporting and election resources.
+State filtering now applies to elections, reports and reporting periods.
 
 Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
 reports. All reporting deadlines are available at /reporting-dates/ for reference.
+
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+that creates the calendar.
 '''
 
 COMMUNICATION_TAG = '''
