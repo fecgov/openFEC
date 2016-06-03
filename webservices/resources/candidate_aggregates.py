@@ -174,6 +174,20 @@ class TotalsCandidateView(ApiResource):
                 models.CandidateSearch,
                 history.candidate_id == models.CandidateSearch.id,
             )
+        #The .filter methods may be able to moved to the filters methods, will investigate
+        if kwargs.get('has_raised_funds') or kwargs.get('federal_funds_flag'):
+            query = query.join(
+                models.Candidate,
+                history.candidate_id == models.Candidate.candidate_id,
+            )
+        if kwargs.get('has_raised_funds'):
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
+            )
+        if kwargs.get('federal_funds_flag'):
+            query = query.filter(
+                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
+            )
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
