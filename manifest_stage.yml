@@ -5,6 +5,7 @@ services:
   - fec-creds-stage
   - fec-redis-stage
   - fec-s3-stage
+  - fec-search-stage
 env:
   NEW_RELIC_APP_NAME: OpenFEC API (staging)
   NEW_RELIC_ENV: staging

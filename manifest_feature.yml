@@ -1,0 +1,11 @@
+---
+inherit: manifest_base.yml
+host: fec-feature-api
+services:
+  - fec-creds-feature
+  - fec-redis-feature
+  - fec-s3-feature
+  - fec-search-feature
+env:
+  NEW_RELIC_APP_NAME: OpenFEC API (feature)
+  NEW_RELIC_ENV: feature
