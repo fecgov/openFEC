@@ -40,7 +40,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(
             response['pagination']['last_indexes'],
             {
-                'last_index': receipts[0].sched_a_sk,
+                'last_index': receipts[0].sub_id,
                 'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
             }
         )
@@ -106,14 +106,14 @@ class TestItemized(ApiBaseTest):
         page1 = self._results(api.url_for(ScheduleAView))
         self.assertEqual(len(page1), 20)
         self.assertEqual(
-            [each['sched_a_sk'] for each in page1],
-            [each.sched_a_sk for each in filings[:20]],
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in filings[:20]],
         )
-        page2 = self._results(api.url_for(ScheduleAView, last_index=page1[-1]['sched_a_sk']))
+        page2 = self._results(api.url_for(ScheduleAView, last_index=page1[-1]['sub_id']))
         self.assertEqual(len(page2), 10)
         self.assertEqual(
-            [each['sched_a_sk'] for each in page2],
-            [each.sched_a_sk for each in filings[20:]],
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[20:]],
         )
 
     def test_pagination_bad_per_page(self):
