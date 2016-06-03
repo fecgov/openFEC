@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "swagger-tools": "^0.10.1",
     "swagger-ui": "git+https://github.com/18F/swagger-ui.git"
   },
   "engines": {
