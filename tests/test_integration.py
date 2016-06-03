@@ -24,8 +24,6 @@ def make_factory():
         class Meta:
             sqlalchemy_session = db.session
             model = automap.classes.fec_vsum_sched_a
-        #load_date = datetime.datetime.utcnow()
-        #sched_a_sk = factory.Sequence(lambda n: n)
         filing_form = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016

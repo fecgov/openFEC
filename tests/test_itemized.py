@@ -105,7 +105,6 @@ class TestItemized(ApiBaseTest):
         ]
         page1 = self._results(api.url_for(ScheduleAView))
         self.assertEqual(len(page1), 20)
-        #TODO: The int cast could be problematic here...why did this pass before?
         self.assertEqual(
             [int(each['sub_id']) for each in page1],
             [each.sub_id for each in filings[:20]],
