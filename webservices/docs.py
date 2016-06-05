@@ -58,7 +58,7 @@ we’re actively working on it and adding new features. The official site for Fe
 Election Commission (FEC) data is still the
 [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml). While we plan to
 version big changes that are not backwards compatible, expect things to change as the API
-develops. You can view the [change log on GitHub](https://github.com/18F/openFEC/blob/master/CHANGELOG.md).
+develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
