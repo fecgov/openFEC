@@ -7,7 +7,7 @@ from . import utils
 
 def get_cycles():
     return range(
-        SQL_CONFIG['START_YEAR_ITEMIZED'] - 1,
+        SQL_CONFIG['START_YEAR'] - 1,
         SQL_CONFIG['END_YEAR_ITEMIZED'] + 3,
         2,
     )
@@ -19,7 +19,7 @@ class TableGroup:
     queue_new = None
     queue_old = None
     primary = None
-    date_column = None
+    transaction_date_column = None
 
     columns = []
 
@@ -78,7 +78,7 @@ class TableGroup:
         select = sa.select(
             parent.columns + cls.timestamp_factory(parent) + cls.column_factory(parent)
         ).where(
-            sa.func.get_transaction_year(parent.c[cls.date_column], parent.c.rpt_yr).in_([start, stop]),
+            sa.func.get_transaction_year(parent.c[cls.transaction_date_column], parent.c.rpt_yr).in_([start, stop]),
         )
 
         child = utils.load_table(name)
