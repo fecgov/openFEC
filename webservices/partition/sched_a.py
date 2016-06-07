@@ -11,7 +11,7 @@ class SchedAGroup(TableGroup):
     queue_new = 'ofec_sched_a_queue_new'
     queue_old = 'ofec_sched_a_queue_old'
     primary = 'sched_a_sk'
-    date_column = 'contb_receipt_dt'
+    transaction_date_column = 'contb_receipt_dt'
 
     columns = [
         sa.Column('timestamp', sa.DateTime),
@@ -42,7 +42,7 @@ class SchedAGroup(TableGroup):
                 parent.c.contbr_id,
                 parent.c.cmte_id,
             ).label('clean_contbr_id'),
-            sa.cast(sa.func.get_transaction_year(parent.c[cls.date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
+            sa.cast(sa.func.get_transaction_year(parent.c[cls.transaction_date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
         ]
 
     @classmethod

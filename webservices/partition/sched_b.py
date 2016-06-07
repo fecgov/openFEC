@@ -11,7 +11,7 @@ class SchedBGroup(TableGroup):
     queue_new = 'ofec_sched_b_queue_new'
     queue_old = 'ofec_sched_b_queue_old'
     primary = 'sched_b_sk'
-    date_column = 'disb_dt'
+    transaction_date_column = 'disb_dt'
 
     columns = [
         sa.Column('timestamp', sa.DateTime),
@@ -37,7 +37,7 @@ class SchedBGroup(TableGroup):
                 parent.c.recipient_cmte_id,
                 parent.c.cmte_id,
             ).label('clean_recipient_cmte_id'),
-            sa.cast(sa.func.get_transaction_year(parent.c[cls.date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
+            sa.cast(sa.func.get_transaction_year(parent.c[cls.transaction_date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
         ]
 
     @classmethod
