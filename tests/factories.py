@@ -170,8 +170,7 @@ class ScheduleAFactory(BaseFactory):
 class ScheduleBFactory(BaseFactory):
     class Meta:
         model = models.ScheduleB
-    sched_b_sk = factory.Sequence(lambda n: n)
-    load_date = datetime.datetime.utcnow()
+    sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
 
     @factory.post_generation

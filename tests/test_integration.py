@@ -31,9 +31,9 @@ def make_factory():
     class SchedBFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.sched_b
-        sched_b_sk = factory.Sequence(lambda n: n)
-        load_date = datetime.datetime.utcnow()
+            model = automap.classes.fec_vsum_sched_b
+        filing_form = '11'
+        sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
 
     return SchedAFactory, SchedBFactory
@@ -75,6 +75,7 @@ class TestViews(common.IntegrationTestCase):
 
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():
+            print(model)
             if not hasattr(model, '__table__'):
                 continue
             self.assertGreater(model.query.count(), 0)
@@ -362,6 +363,7 @@ class TestViews(common.IntegrationTestCase):
             cmte_id='C12345',
             disb_amt=538,
             disb_desc='CAMPAIGN BUTTONS',
+            filing_form='11'
         )
         db.session.commit()
         db.session.execute('select update_aggregates()')
@@ -369,6 +371,8 @@ class TestViews(common.IntegrationTestCase):
             cycle=2016,
             committee_id='C12345',
             purpose='MATERIALS',
+            # TODO: These can't be null, but maybe initialize to the correct form(s)
+            #filing_form='11'
         ).all()
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0].total, 538)
