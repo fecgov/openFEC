@@ -7,15 +7,16 @@ import subprocess
 import multiprocessing
 
 import networkx as nx
+import sqlalchemy as sa
 from flask.ext.script import Server
 from flask.ext.script import Manager
-from sqlalchemy import text as sqla_text
 
 from webservices import flow
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
+from webservices import partition
 
 
 manager = Manager(app)
@@ -39,7 +40,7 @@ def execute_sql_file(path):
             line for line in fp.readlines()
             if not line.strip().startswith('--')
         ])
-        db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
+        db.engine.execute(sa.text(cmd), **SQL_CONFIG)
 
 def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
@@ -168,7 +169,22 @@ def update_aggregates():
     """These are run nightly to recalculate the totals
     """
     logger.info('Updating incremental aggregates...')
-    db.engine.execute('select update_aggregates()')
+    with db.engine.begin():
+        db.engine.execute(
+            sa.text('select update_aggregates()').execution_options(autocommit=True)
+        )
+
+        partition.SchedAGroup.refresh_children()
+        partition.SchedBGroup.refresh_children()
+
+        db.engine.execute('select ofec_sched_e_update()')
+
+        db.engine.execute('delete from ofec_sched_a_queue_new')
+        db.engine.execute('delete from ofec_sched_a_queue_old')
+        db.engine.execute('delete from ofec_sched_b_queue_new')
+        db.engine.execute('delete from ofec_sched_b_queue_old')
+        db.engine.execute('delete from ofec_sched_e_queue_new')
+        db.engine.execute('delete from ofec_sched_e_queue_old')
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command
@@ -184,6 +200,8 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
+    partition.SchedAGroup.run()
+    partition.SchedBGroup.run()
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
