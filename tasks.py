@@ -4,7 +4,7 @@ import json
 import git
 from invoke import run
 from invoke import task
-from slacker import Slacker
+# from slacker import Slacker
 
 from webservices.env import env
 
@@ -204,6 +204,7 @@ def deploy(space=None, branch=None, yes=False):
     run('cf push celery-worker -f manifest_{0}.yml'.format(space))
 
 
+# this will not be called because the slack integrations are off
 @task
 def notify():
     try:
