@@ -29,7 +29,7 @@ $$ language plpgsql immutable;
 create or replace function is_earmark(memo_code text, memo_text text) returns bool as $$
 begin
   return (
-      coalesce(memo_code, '') = 'X' or
+      coalesce(memo_code, '') = 'X' and
       coalesce(memo_text, '') ~* 'earmark|earmk|ermk'
   );
 end
