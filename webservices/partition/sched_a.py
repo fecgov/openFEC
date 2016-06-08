@@ -21,7 +21,7 @@ class SchedAGroup(TableGroup):
         sa.Column('contributor_occupation_text', TSVECTOR),
         sa.Column('is_individual', sa.Boolean),
         sa.Column('clean_contbr_id', sa.String),
-        sa.Column('transaction_two_year_period', sa.Numeric(4, 0)),
+        sa.Column('transaction_year', sa.SmallInteger),
     ]
 
     @classmethod
@@ -42,7 +42,10 @@ class SchedAGroup(TableGroup):
                 parent.c.contbr_id,
                 parent.c.cmte_id,
             ).label('clean_contbr_id'),
-            sa.cast(sa.func.get_transaction_year(parent.c[cls.transaction_date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
+            sa.func.get_transaction_year(
+                parent.c[cls.transaction_date_column],
+                parent.c.rpt_yr
+            ).label('transaction_year'),
         ]
 
     @classmethod
@@ -57,7 +60,7 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c.contbr_city),
             sa.Index(None, c.is_individual),
             sa.Index(None, c.clean_contbr_id),
-            sa.Index(None, c.transaction_two_year_period),
+            sa.Index(None, c.transaction_year),
 
             sa.Index(None, c.contb_receipt_amt, child.c[cls.primary]),
             sa.Index(None, c.contb_receipt_dt, child.c[cls.primary]),
