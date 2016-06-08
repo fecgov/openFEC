@@ -153,7 +153,7 @@ class ScheduleB(BaseItemized):
 class ScheduleE(BaseItemized):
     __tablename__ = 'ofec_sched_e'
 
-    sched_e_sk = db.Column(db.Integer, primary_key=True)
+    sub_id = db.Column(db.Integer, primary_key=True)
 
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_ID)
     payee_name = db.Column('pye_nm', db.String)
@@ -174,11 +174,11 @@ class ScheduleE(BaseItemized):
     candidate_id = db.Column('s_o_cand_id', db.String)
     candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
     candidate_name = db.Column('s_o_cand_nm', db.String, doc=docs.CANDIDATE_NAME)
-    candidate_prefix = db.Column('s_0_cand_prefix', db.String)
-    candidate_first_name = db.Column('s_0_cand_f_nm', db.String)
-    candidate_middle_name = db.Column('s_0_cand_m_nm', db.String)
-    candidate_last_name = db.Column('s_0_cand_l_nm', db.String)
-    candidate_suffix = db.Column('s_0_cand_suffix', db.String)
+    candidate_prefix = db.Column('s_o_cand_prefix', db.String)
+    candidate_first_name = db.Column('s_o_cand_nm_first', db.String)
+    candidate_middle_name = db.Column('s_o_cand_m_nm', db.String)
+    candidate_last_name = db.Column('s_o_cand_nm_last', db.String)
+    candidate_suffix = db.Column('s_o_cand_suffix', db.String)
     candidate_office = db.Column('s_o_cand_office', db.String, doc=docs.OFFICE)
     cand_office_state = db.Column('s_o_cand_office_st', db.String, doc=docs.STATE_GENERIC)
     cand_office_district = db.Column('s_o_cand_office_district', db.String, doc=docs.DISTRICT)
@@ -192,9 +192,8 @@ class ScheduleE(BaseItemized):
 
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
-    receipt_date = db.Column('receipt_dt', db.Date)
-    record_number = db.Column('record_num', db.Integer)
-    report_primary_general = db.Column('rpt_pgi', db.String)
+    #record_number = db.Column('record_num', db.Integer)
+    #report_primary_general = db.Column('rpt_pgi', db.String)
     office_total_ytd = db.Column('cal_ytd_ofc_sought', db.Float)
     category_code = db.Column('catg_cd', db.String)
     category_code_full = db.Column('catg_cd_desc', db.String)
@@ -204,8 +203,6 @@ class ScheduleE(BaseItemized):
     filer_last_name = db.Column('filer_l_nm', db.String)
     filer_suffix = db.Column(db.String)
     dissemination_date = db.Column('dissem_dt', db.Date)
-    load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
-    update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
     is_notice = db.Column(db.Boolean, index=True)
 
     # Auxiliary fields
