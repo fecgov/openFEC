@@ -147,7 +147,7 @@ class TestViews(common.IntegrationTestCase):
             sub_id=7,
         )
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sched_a_sk == row.sched_a_sk
         ).one()
@@ -157,7 +157,7 @@ class TestViews(common.IntegrationTestCase):
         row.contbr_nm = 'Shelly Adelson'
         db.session.add(row)
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sched_a_sk == row.sched_a_sk
         ).one()
@@ -167,7 +167,7 @@ class TestViews(common.IntegrationTestCase):
         # Test delete
         db.session.delete(row)
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         self.assertEqual(
             models.ScheduleA.query.filter(
                 models.ScheduleA.sched_a_sk == row.sched_a_sk
@@ -186,7 +186,7 @@ class TestViews(common.IntegrationTestCase):
         make_transient(row)
         db.session.add(row)
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         self.assertEqual(
             models.ScheduleA.query.filter(
                 models.ScheduleA.sched_a_sk == row.sched_a_sk
@@ -202,8 +202,8 @@ class TestViews(common.IntegrationTestCase):
             'receipt_tp': '15J',
             item_key: value,
         })
-        db.session.flush()
-        db.session.execute('select update_aggregates()')
+        db.session.commit()
+        manage.update_aggregates()
         rows = total_model.query.filter_by(**{
             'cycle': 2016,
             'committee_id': 'C12345',
@@ -215,7 +215,7 @@ class TestViews(common.IntegrationTestCase):
         filing.contb_receipt_amt = 53
         db.session.add(filing)
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 53)
         self.assertEqual(rows[0].count, 1)
@@ -234,8 +234,8 @@ class TestViews(common.IntegrationTestCase):
             'receipt_tp': '15J',
             item_key: getattr(existing, total_key),
         })
-        db.session.flush()
-        db.session.execute('select update_aggregates()')
+        db.session.commit()
+        manage.update_aggregates()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
@@ -266,7 +266,7 @@ class TestViews(common.IntegrationTestCase):
             receipt_tp='15J',
         )
         db.session.flush()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total)
         self.assertEqual(existing.count, count)
@@ -274,16 +274,16 @@ class TestViews(common.IntegrationTestCase):
     def test_update_aggregate_size_create(self):
         filing = self.SchedAFactory(
             rpt_yr=2015,
-            cmte_id='C12345',
+            cmte_id='C6789',
             contb_receipt_amt=538,
             receipt_tp='15J',
         )
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         rows = models.ScheduleABySize.query.filter_by(
             cycle=2016,
-            committee_id='C12345',
+            committee_id='C6789',
             size=500,
         ).all()
         self.assertEqual(len(rows), 1)
@@ -292,7 +292,7 @@ class TestViews(common.IntegrationTestCase):
         filing.contb_receipt_amt = 53
         db.session.add(filing)
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
@@ -316,7 +316,7 @@ class TestViews(common.IntegrationTestCase):
             receipt_tp='15J',
         )
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         existing = get_existing()
         self.assertEqual(existing.total, total + 538)
@@ -351,8 +351,8 @@ class TestViews(common.IntegrationTestCase):
             load_date=datetime.datetime.now(),
         )
         db.session.execute(ins)
-        db.session.flush()
-        db.session.execute('select update_aggregates()')
+        db.session.commit()
+        manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(existing)
@@ -368,7 +368,7 @@ class TestViews(common.IntegrationTestCase):
             disb_desc='CAMPAIGN BUTTONS',
         )
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         rows = models.ScheduleBByPurpose.query.filter_by(
             cycle=2016,
             committee_id='C12345',
@@ -380,14 +380,14 @@ class TestViews(common.IntegrationTestCase):
         filing.disbursement_description = 'BUMPER STICKERS'
         db.session.add(filing)
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 538)
         self.assertEqual(rows[0].count, 1)
         filing.disb_desc = 'HANGING OUT'
         db.session.add(filing)
         db.session.commit()
-        db.session.execute('select update_aggregates()')
+        manage.update_aggregates()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
@@ -405,8 +405,8 @@ class TestViews(common.IntegrationTestCase):
             disb_amt=538,
             disb_tp='24K',
         )
-        db.session.flush()
-        db.session.execute('select update_aggregates()')
+        db.session.commit()
+        manage.update_aggregates()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
