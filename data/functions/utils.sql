@@ -21,9 +21,11 @@ $$ language plpgsql immutable;
 -- Returns:
 --   The calculated year to use as the transaction date of a record.
 create or replace function get_transaction_year(transaction_date date, report_year numeric)
-returns integer as $$
+returns smallint as $$
+declare
+    transaction_year numeric = coalesce(extract(year from transaction_date), report_year);
 begin
-    return coalesce(extract(year from transaction_date), report_year) + (coalesce(cast(extract(year from transaction_date) as numeric(4, 0)), report_year) % 2);
+    return get_cycle(transaction_year);
 end
 $$ language plpgsql immutable;
 

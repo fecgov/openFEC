@@ -20,7 +20,7 @@ class SchedBGroup(TableGroup):
         sa.Column('disbursement_description_text', TSVECTOR),
         sa.Column('disbursement_purpose_category', sa.String),
         sa.Column('clean_recipient_cmte_id', sa.String),
-        sa.Column('transaction_two_year_period', sa.Numeric(4, 0)),
+        sa.Column('transaction_year', sa.SmallInteger),
     ]
 
     @classmethod
@@ -37,7 +37,10 @@ class SchedBGroup(TableGroup):
                 parent.c.recipient_cmte_id,
                 parent.c.cmte_id,
             ).label('clean_recipient_cmte_id'),
-            sa.cast(sa.func.get_transaction_year(parent.c[cls.transaction_date_column], parent.c.rpt_yr), sa.Numeric(4, 0)).label('transaction_two_year_period'),
+            sa.func.get_transaction_year(
+                parent.c[cls.transaction_date_column],
+                parent.c.rpt_yr
+            ).label('transaction_year'),
         ]
 
     @classmethod
@@ -50,7 +53,7 @@ class SchedBGroup(TableGroup):
             sa.Index(None, c.recipient_st),
             sa.Index(None, c.recipient_city),
             sa.Index(None, c.clean_recipient_cmte_id),
-            sa.Index(None, c.transaction_two_year_period),
+            sa.Index(None, c.transaction_year),
 
             sa.Index(None, c.disb_dt, c[cls.primary]),
             sa.Index(None, c.disb_amt, c[cls.primary]),
