@@ -468,6 +468,8 @@ candidate_totals = {
     'max_cash_on_hand_end_period': Currency(description='Maximum cash on hand'),
     'min_debts_owed_by_committee': Currency(description='Minimum debt'),
     'max_debts_owed_by_committee': Currency(description='Maximum debt'),
+    'federal_funds_flag': fields.Bool(description=docs.FEDERAL_FUNDS_FLAG),
+    'has_raised_funds': fields.Bool(description=docs.HAS_RAISED_FUNDS),
 }
 
 totals_committee_aggregate = {
