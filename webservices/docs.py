@@ -277,7 +277,7 @@ multiple ways to explain the way it may move though different committees as an e
 For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
 contributions. See below for full methodology.
 
-### Methodology for determining individual contributions
+### Methodology for determining unique, individual contributions
 
 For receipts over $200 use FEC code line_number to identify individuals.
 
@@ -302,7 +302,7 @@ Line number with description
     -17A Itemized individual contributions from Form 3P
     -18 Itemized individual contributions from Form 3P
 
-Of those transactions,[under $200, and having "earmark" in the e OR having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
+Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
 This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
 '''
