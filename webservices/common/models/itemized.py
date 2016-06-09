@@ -37,7 +37,7 @@ class BaseItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __tablename__ = 'ofec_sched_a'
+    __tablename__ = 'ofec_sched_a_master'
 
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     is_individual = db.Column(db.Boolean, index=True)
@@ -88,7 +88,7 @@ class ScheduleA(BaseItemized):
 
 
 class ScheduleB(BaseItemized):
-    __tablename__ = 'ofec_sched_b'
+    __tablename__ = 'ofec_sched_b_master'
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     recipient_committee_id = db.Column('clean_recipient_cmte_id', db.String)
