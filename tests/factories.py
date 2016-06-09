@@ -181,7 +181,7 @@ class ScheduleBFactory(BaseFactory):
 class ScheduleEFactory(BaseFactory):
     class Meta:
         model = models.ScheduleE
-    sched_e_sk = factory.Sequence(lambda n: n)
+    sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
 
     @factory.post_generation

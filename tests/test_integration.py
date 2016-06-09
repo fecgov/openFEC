@@ -75,7 +75,7 @@ class TestViews(common.IntegrationTestCase):
 
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():
-            print(model)
+            #print(model)
             if not hasattr(model, '__table__'):
                 continue
             self.assertGreater(model.query.count(), 0)
