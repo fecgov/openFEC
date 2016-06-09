@@ -34,6 +34,9 @@ class ScheduleBView(ItemizedResource):
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
         ('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
     ]
+    filter_match_fields = [
+        ('transaction_year', models.ScheduleB.transaction_year),
+    ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleB.recipient_name_text),
         ('disbursement_description', models.ScheduleB.disbursement_description_text),

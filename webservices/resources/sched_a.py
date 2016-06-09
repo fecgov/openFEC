@@ -22,7 +22,7 @@ class ScheduleAView(ItemizedResource):
 
     @property
     def year_column(self):
-        return self.model.report_year
+        return self.model.transaction_year
     @property
     def index_column(self):
         return self.model.sched_a_sk
@@ -39,6 +39,7 @@ class ScheduleAView(ItemizedResource):
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
+        ('transaction_year', models.ScheduleA.transaction_year),
     ]
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleA.contribution_receipt_date),

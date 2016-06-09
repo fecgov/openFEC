@@ -247,6 +247,16 @@ Year that the record applies to. Sometimes records are amended in subsequent
 years so this can differ from underlying form's receipt date.
 '''
 
+TRANSACTION_YEAR = '''
+This is a derived field for storing the year a transaction took place in the
+Itemized Schedule A and Schedule B tables. In cases where we have the date of
+the transaction (contb_receipt_dt in Schedule A, disb_dt in Schedule B), we
+make use of the year in that date and adjust it to fit within the appropriate
+cycle that it belongs to. If we do not have the date, we fall back to using the
+report year (rpt_yr in both tables) instead, making the same cycle adjustment
+as necessary. This defaults to the most current cycle.
+'''
+
 TOTALS = '''
 This endpoint provides information about a committee's Form 3, Form 3X, or Form 3P financial reports,
 which are aggregated by two-year period. We refer to two-year periods as a `cycle`.
