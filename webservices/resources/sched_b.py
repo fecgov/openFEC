@@ -21,7 +21,7 @@ class ScheduleBView(ItemizedResource):
 
     @property
     def year_column(self):
-        return self.model.report_year
+        return self.model.transaction_year
     @property
     def index_column(self):
         return self.model.sched_b_sk
