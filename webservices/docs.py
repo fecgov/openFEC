@@ -319,7 +319,7 @@ This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/func
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
 
-The data is divided in two-year periods, called `transaction_year` this is derrived from
+The data is divided in two-year periods, called `transaction_year`, which is derived from
 the `contribution_receipt_date`. If no value is supplied, the results will default to the 
 most recent two-year period that is named after the ending, even-numbered year.
 
@@ -356,7 +356,7 @@ reported as part of forms F3, F3X and F3P.
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
 
-The data is divided in two-year periods, called `transaction_year` this is derrived from
+The data is divided in two-year periods, called `transaction_year`, which is derived from
 the `disbursement_date`. If no value is supplied, the results will default to the 
 most recent two-year period that is named after the ending, even-numbered year.
 
