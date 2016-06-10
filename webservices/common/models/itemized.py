@@ -80,6 +80,7 @@ class ScheduleA(BaseItemized):
     increased_limit = db.Column(db.String)
     load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
     update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
+    transaction_year = db.Column(db.SmallInteger, doc=docs.TRANSACTION_YEAR)
 
     # Auxiliary fields
     contributor_name_text = db.Column(TSVECTOR)
@@ -122,6 +123,7 @@ class ScheduleB(BaseItemized):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+    transaction_year = db.Column(db.SmallInteger, doc=docs.TRANSACTION_YEAR)
 
     # Auxiliary fields
     recipient_name_text = db.Column(TSVECTOR)
