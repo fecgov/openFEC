@@ -13,7 +13,7 @@ def get_cycle_start(year):
 SQL_CONFIG = {
     'START_YEAR': get_cycle_start(1980),
     'START_YEAR_AGGREGATE': get_cycle_start(2008),
-    'START_YEAR_ITEMIZED': get_cycle_start(2012),
+    'END_YEAR_ITEMIZED': get_cycle_start(2016),
 }
 
 REQUIRED_CREDS = (
