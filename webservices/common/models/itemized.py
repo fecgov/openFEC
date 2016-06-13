@@ -42,7 +42,7 @@ class BaseItemized(db.Model):
 
 class ScheduleA(BaseItemized):
     __tablename__ = 'ofec_sched_a'
-    action_cd = db.Column('action_cd', db.String)
+    amendment_indicator = db.Column('action_cd', db.String)
     action_cd_desc = db.Column('action_cd_desc', db.String)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     #back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
@@ -100,7 +100,7 @@ class ScheduleA(BaseItemized):
 
 class ScheduleB(BaseItemized):
     __tablename__ = 'ofec_sched_b'
-    action_cd = db.Column('action_cd', db.String)
+    amendment_indicator = db.Column('action_cd', db.String)
     action_cd_desc = db.Column('action_cd_desc', db.String)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
