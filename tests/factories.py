@@ -157,11 +157,11 @@ class ReportsIEOnlyFactory(BaseFactory):
 class ScheduleAFactory(BaseFactory):
     class Meta:
         model = models.ScheduleA
-        load_date = datetime.datetime.utcnow()
-        sched_a_sk = factory.Sequence(lambda n: n)
-        sub_id = factory.Sequence(lambda n: n)
-        report_year = 2016
-        transaction_year=2016
+    load_date = datetime.datetime.utcnow()
+    sched_a_sk = factory.Sequence(lambda n: n)
+    sub_id = factory.Sequence(lambda n: n)
+    report_year = 2016
+    transaction_year = 2016
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
@@ -176,6 +176,7 @@ class ScheduleBFactory(BaseFactory):
     sched_b_sk = factory.Sequence(lambda n: n)
     load_date = datetime.datetime.utcnow()
     report_year = 2016
+    transaction_year = 2016
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
