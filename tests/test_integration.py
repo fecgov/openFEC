@@ -77,7 +77,6 @@ class TestViews(common.IntegrationTestCase):
 
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():
-            #Added this stupid print statement to see which models are empty
             print(model)
             if not hasattr(model, '__table__'):
                 continue
