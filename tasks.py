@@ -182,7 +182,7 @@ def deploy(space=None, branch=None, yes=False):
 
     # Log in if necessary
     if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
-        run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
+        run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD" --a https://api.cloud.gov', echo=True)
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
