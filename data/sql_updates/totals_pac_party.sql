@@ -65,7 +65,7 @@ from
     fec_vsum_f3x pnp
     left join last using (cmte_id, election_cycle)
 where
-    pnp.most_recent_filing_flag like 'X'
+    pnp.most_recent_filing_flag like 'Y'
     and election_cycle >= :START_YEAR
 group by
     cmte_id,

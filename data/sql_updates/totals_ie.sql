@@ -12,7 +12,7 @@ from
     fec_vsum_f5
 where
     election_cycle >= :START_YEAR
-    and most_recent_filing_flag like 'X'
+    and most_recent_filing_flag like 'Y'
 group by
     indv_org_id,
     election_cycle
