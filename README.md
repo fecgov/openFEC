@@ -151,7 +151,7 @@ export SQLA_CONN=<psql:address-to-box>
 
    Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
    
-   *Note: 18F team members should not set these environment variables locally. These are stored in a CF service. 18F and FEC team members will also have additional environment variables to set up. Please reach out to a team member for detailed information.*
+   *Note: 18F team members should not set these environment variables. 18F and FEC team members will also have additional environment variables to set up. Please reach out to a team member for detailed information.*
 
 #### Run locally
 Follow these steps every time you want to work on this project locally.
