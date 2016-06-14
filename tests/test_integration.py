@@ -78,7 +78,7 @@ class TestViews(common.IntegrationTestCase):
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():
             #Added this stupid print statement to see which models are empty
-            #print(model)
+            print(model)
             if not hasattr(model, '__table__'):
                 continue
             self.assertGreater(model.query.count(), 0)
@@ -344,7 +344,7 @@ class TestViews(common.IntegrationTestCase):
             cmte_id=existing.committee_id,
             election_cycle=2016,
             sub_id=9,
-            most_recent_filing_flag='X'
+            most_recent_filing_flag='Y'
         )
         db.session.execute(ins)
         db.session.commit()
