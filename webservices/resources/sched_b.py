@@ -21,7 +21,7 @@ class ScheduleBView(ItemizedResource):
 
     @property
     def year_column(self):
-        return self.model.transaction_year
+        return self.model.two_year_transaction_period
     @property
     def index_column(self):
         return self.model.sched_b_sk
@@ -35,7 +35,7 @@ class ScheduleBView(ItemizedResource):
         ('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
     ]
     filter_match_fields = [
-        ('transaction_year', models.ScheduleB.transaction_year),
+        ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
     ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleB.recipient_name_text),
