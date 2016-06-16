@@ -106,7 +106,7 @@ class TableGroup:
         cmds = [
             'alter table {child} alter column {primary} set not null',
             'alter table {child} alter column load_date set not null',
-            'alter table {child} add constraint check_transaction_year check (transaction_year in ({start}, {stop}))',
+            'alter table {child} add constraint check_two_year_transaction_period check (two_year_transaction_period in ({start}, {stop}))',  # noqa
             'alter table {child} inherit {master}'
         ]
         params = {

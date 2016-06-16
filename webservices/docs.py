@@ -247,14 +247,14 @@ Year that the record applies to. Sometimes records are amended in subsequent
 years so this can differ from underlying form's receipt date.
 '''
 
-TRANSACTION_YEAR = '''
+TWO_YEAR_TRANSACTION_PERIOD = '''
 This is a two-year period that is derived from the year a transaction took place in the
-Itemized Schedule A and Schedule B tables. In cases where we have the date of the transaction 
-(contribution_receipt_date in schedules/schedule_a, disbursement_date in schedules/schedule_b) 
-the transaction_year is named after the ending, even-numbered year. If we do not have the date 
-of the transation, we fall back to using the report year (report_year in both tables) instead, 
-making the same cycle adjustment as necessary. If no transaction year is specified, the results 
-default to the most current cycle.
+Itemized Schedule A and Schedule B tables. In cases where we have the date of the transaction
+(contribution_receipt_date in schedules/schedule_a, disbursement_date in schedules/schedule_b)
+the two_year_transaction_period is named after the ending, even-numbered year. If we do not
+have the date  of the transation, we fall back to using the report year (report_year in both
+tables) instead,  making the same cycle adjustment as necessary. If no transaction year is
+specified, the results default to the most current cycle.
 '''
 
 TOTALS = '''
@@ -319,9 +319,10 @@ This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/func
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
 
-The data is divided in two-year periods, called `transaction_year`, which is derived from
-the `contribution_receipt_date`. If no value is supplied, the results will default to the 
-most recent two-year period that is named after the ending, even-numbered year.
+The data is divided in two-year periods, called `two_year_transaction_period`, which
+is derived from the `contribution_receipt_date`. If no value is supplied, the results
+will default to the most recent two-year period that is named after the ending,
+even-numbered year.
 
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -356,9 +357,10 @@ reported as part of forms F3, F3X and F3P.
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
 
-The data is divided in two-year periods, called `transaction_year`, which is derived from
-the `disbursement_date`. If no value is supplied, the results will default to the 
-most recent two-year period that is named after the ending, even-numbered year.
+The data is divided in two-year periods, called `two_year_transaction_period`, which
+is derived from the `disbursement_date`. If no value is supplied, the results will
+default to the most recent two-year period that is named after the ending,
+even-numbered year.
 
 
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
