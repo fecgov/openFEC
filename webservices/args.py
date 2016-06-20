@@ -523,7 +523,7 @@ schedule_e = {
 
 rad_analyst = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'anlyst_id': fields.List(IStr, description='ID of RAD analyst'),
+    'analyst_id': fields.List(IStr, description='ID of RAD analyst'),
     'rad_branch': fields.List(IStr, description='Branch of RAD analyst (Authorized or Party/Non Pary)'),
     'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
     'name': fields.Str(description='Name of RAD analyst'),

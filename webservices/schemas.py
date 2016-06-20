@@ -483,12 +483,11 @@ augment_schemas(
     TotalsCommitteeSchema,
 )
 
-class RadAnalystSchema(ma.Schema):
-    make_schema(
-        models.RadAnalyst,
-        options={'exclude': ('idx', 'name')},
-    )
-RadAnalystPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas.SeekPageSchema)
+RadAnalystSchema = make_schema(
+    models.RadAnalyst,
+    options={'exclude': ('idx', 'name_txt')},
+)
+RadAnalystPageSchema = make_page_schema(RadAnalystSchema)
 register_schema(RadAnalystSchema)
 register_schema(RadAnalystPageSchema)
 
