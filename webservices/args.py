@@ -520,3 +520,11 @@ schedule_e = {
     ),
     'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
 }
+
+rad_analyst = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'anlyst_id': fields.List(IStr, description='ID of RAD analyst'),
+    'rad_branch': fields.List(IStr, description='Branch of RAD analyst (Authorized or Party/Non Pary)'),
+    'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
+    'name': fields.Str(description='Name of RAD analyst'),
+}
