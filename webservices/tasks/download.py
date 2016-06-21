@@ -108,7 +108,7 @@ def upload_s3(key, body):
 
 def make_manifest(resource, row_count, path):
     with open(os.path.join(path, 'manifest.txt'), 'w') as fp:
-        fp.write('Time: {}\n'.format(resource['timestamp']))
+        fp.write('Time: {} (UTC)\n'.format(resource['timestamp']))
         fp.write('Resource: {}\n'.format(resource['path']))
         fp.write('*Count: {}\n'.format(row_count))
         fp.write('Filters:\n\n')
