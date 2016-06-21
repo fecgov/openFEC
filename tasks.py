@@ -180,6 +180,10 @@ def deploy(space=None, branch=None, yes=False):
     if space is None:
         return
 
+    # Set api
+    api = 'https://api.cloud.gov'
+    run('cf api {0}'.format(api), echo=True)
+
     # Log in if necessary
     if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
         run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
