@@ -293,3 +293,9 @@ class ElectioneeringFactory(BaseFactory):
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
         obj.purpose_description_text = sa.func.to_tsvector(obj.purpose_description)
+
+
+class RadAnalystFactory(BaseFactory):
+    class Meta:
+        model = models.RadAnalyst
+    idx = factory.Sequence(lambda n: n)
