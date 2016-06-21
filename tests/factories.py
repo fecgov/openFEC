@@ -5,8 +5,6 @@ import sqlalchemy as sa
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
-import sqlalchemy as sa
-
 from webservices.rest import db
 from webservices.common import models
 
