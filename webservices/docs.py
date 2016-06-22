@@ -556,12 +556,12 @@ Look up RAD analyst with telephone extension by committee_id.
 RAD_ANALYST = '''
 Use this endpoint to look up the RAD Analyst for a committee.
 
-The ultimate mission of the Reports Analysis Division (RAD) is to ensure that
+The mission of the Reports Analysis Division (RAD) is to ensure that
 campaigns and political committees file timely and accurate reports that fully disclose
 their financial activities.  RAD is responsible for reviewing statements and financial
-reports filed by political committees participating in Federal elections, providing
+reports filed by political committees participating in federal elections, providing
 assistance and guidance to the committees to properly file their reports, and for taking
-appropriate action to ensure compliance with the FECA.
+appropriate action to ensure compliance with the Federal Election Campaign Act (FECA).
 '''
 
 
