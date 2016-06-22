@@ -46,6 +46,7 @@ class CommunicationCostView(ApiResource):
         (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
     ]
 
+
 @doc(
     tags=['electioneering'],
     description=docs.ELECTIONEERING,
