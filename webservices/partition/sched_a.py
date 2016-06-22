@@ -28,7 +28,9 @@ class SchedAGroup(TableGroup):
     def column_factory(cls, parent):
         return [
             sa.func.image_pdf_url(parent.c.image_num).label('pdf_url'),
-            sa.func.to_tsvector(parent.c.contbr_nm).label('contributor_name_text'),
+            sa.func.to_tsvector(
+                sa.func.concat(parent.c.contbr_nm, ' ', parent.c.contbr_id),
+            ).label('contributor_name_text'),
             sa.func.to_tsvector(parent.c.contbr_employer).label('contributor_employer_text'),
             sa.func.to_tsvector(parent.c.contbr_occupation).label('contributor_occupation_text'),
             sa.func.is_individual(

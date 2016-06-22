@@ -27,7 +27,9 @@ class SchedBGroup(TableGroup):
     def column_factory(cls, parent):
         return [
             sa.func.image_pdf_url(parent.c.image_num).label('pdf_url'),
-            sa.func.to_tsvector(parent.c.recipient_nm).label('recipient_name_text'),
+            sa.func.to_tsvector(
+                sa.func.concat(parent.c.recipient_nm, ' ', parent.c.recipient_cmte_id),
+            ).label('recipient_name_text'),
             sa.func.to_tsvector(parent.c.disb_desc).label('disbursement_description_text'),
             sa.func.disbursement_purpose(
                 parent.c.disb_tp,
