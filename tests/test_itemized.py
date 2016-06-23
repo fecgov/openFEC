@@ -29,13 +29,21 @@ class TestItemized(ApiBaseTest):
 
     def test_sorting(self):
         receipts = [
-            factories.ScheduleAFactory(report_year=2014, contribution_receipt_date=datetime.date(2014, 1, 1)),
-            factories.ScheduleAFactory(report_year=2012, contribution_receipt_date=datetime.date(2012, 1, 1)),
+            factories.ScheduleAFactory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                transaction_year=2016
+            ),
+            factories.ScheduleAFactory(
+                report_year=2015,
+                contribution_receipt_date=datetime.date(2015, 1, 1),
+                transaction_year=2016
+            ),
         ]
         response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
-            [2012, 2014]
+            [2015, 2016]
         )
         self.assertEqual(
             response['pagination']['last_indexes'],
@@ -44,6 +52,40 @@ class TestItemized(ApiBaseTest):
                 'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
             }
         )
+
+    def test_transaction_year_default_supplied_automatically(self):
+        receipts = [
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                transaction_year=2014
+            ),
+            factories.ScheduleAFactory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                transaction_year=2016
+            ),
+        ]
+
+        response = self._response(api.url_for(ScheduleAView))
+        self.assertEqual(len(response['results']), 1)
+
+    def test_transaction_year_limits_results_per_cycle(self):
+        receipts = [
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                transaction_year=2014
+            ),
+            factories.ScheduleAFactory(
+                report_year=2012,
+                contribution_receipt_date=datetime.date(2012, 1, 1),
+                transaction_year=2012
+            ),
+        ]
+
+        response = self._response(api.url_for(ScheduleAView, transaction_year=2014))
+        self.assertEqual(len(response['results']), 1)
 
     def test_sorting_bad_column(self):
         response = self.app.get(api.url_for(ScheduleAView, sort='bad_column'))

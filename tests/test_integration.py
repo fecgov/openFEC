@@ -271,7 +271,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(existing.total, total)
         self.assertEqual(existing.count, count)
 
-    def test_update_aggregate_size_create(self):
+    def test_update_aggregate_asize_create(self):
         filing = self.SchedAFactory(
             rpt_yr=2015,
             cmte_id='C6789',
@@ -298,7 +298,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
 
-    def test_update_aggregate_size_existing(self):
+    def test_update_aggregate_asize_existing(self):
         def get_existing():
             return models.ScheduleABySize.query.filter_by(
                 size=500,

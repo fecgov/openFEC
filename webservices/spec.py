@@ -64,5 +64,9 @@ spec = APISpec(
             'name': 'electioneering',
             'description': docs.ELECTIONEERING,
         },
+        {
+            'name': 'filer_resources',
+            'description': docs.FILER_RESOURCES
+        }
     ]
 )

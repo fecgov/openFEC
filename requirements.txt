@@ -1,10 +1,10 @@
 cfenv==0.4.0
 invoke==0.10.1
 psycopg2==2.6
-Flask==0.10.1
+Flask==0.11
 Flask-Cors==2.1.0
 Flask-Script==2.0.5
-Flask-RESTful==0.3.3
+Flask-RESTful==0.3.5
 Flask-SQLAlchemy==2.0
 python-dateutil==2.4.2
 sqlalchemy-postgres-copy==0.1.0

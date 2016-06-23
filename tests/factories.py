@@ -5,8 +5,6 @@ import sqlalchemy as sa
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
 
-import sqlalchemy as sa
-
 from webservices.rest import db
 from webservices.common import models
 
@@ -161,6 +159,7 @@ class ScheduleAFactory(BaseFactory):
     sched_a_sk = factory.Sequence(lambda n: n)
     sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
+    transaction_year = 2016
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
@@ -175,6 +174,7 @@ class ScheduleBFactory(BaseFactory):
     sched_b_sk = factory.Sequence(lambda n: n)
     load_date = datetime.datetime.utcnow()
     report_year = 2016
+    transaction_year = 2016
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
@@ -291,3 +291,9 @@ class ElectioneeringFactory(BaseFactory):
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
         obj.purpose_description_text = sa.func.to_tsvector(obj.purpose_description)
+
+
+class RadAnalystFactory(BaseFactory):
+    class Meta:
+        model = models.RadAnalyst
+    idx = factory.Sequence(lambda n: n)
