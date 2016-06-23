@@ -21,19 +21,22 @@ create index on ofec_sched_b_queue_old (two_year_transaction_period);
 create or replace function ofec_sched_b_update_queues() returns trigger as $$
 declare
     start_year int = TG_ARGV[0]::int;
+    timestamp timestamp = current_timestamp;
     two_year_transaction_period_new smallint;
     two_year_transaction_period_old smallint;
 begin
-    two_year_transaction_period_new = get_transaction_year(new.disb_dt, new.rpt_yr);
-    two_year_transaction_period_old = get_transaction_year(old.disb_dt, old.rpt_yr);
-
     if tg_op = 'INSERT' then
+        two_year_transaction_period_new = get_transaction_year(new.disb_dt, new.rpt_yr);
+
         if two_year_transaction_period_new >= start_year then
             delete from ofec_sched_b_queue_new where sched_b_sk = new.sched_b_sk;
-            insert into ofec_sched_b_queue_new values (new.*);
+            insert into ofec_sched_b_queue_new values (new.*, timestamp, two_year_transaction_period_new);
         end if;
         return new;
     elsif tg_op = 'UPDATE' then
+        two_year_transaction_period_new = get_transaction_year(new.disb_dt, new.rpt_yr);
+        two_year_transaction_period_old = get_transaction_year(old.disb_dt, old.rpt_yr);
+
         if two_year_transaction_period_new >= start_year then
             delete from ofec_sched_b_queue_new where sched_b_sk = new.sched_b_sk;
             delete from ofec_sched_b_queue_old where sched_b_sk = old.sched_b_sk;
@@ -42,6 +45,8 @@ begin
         end if;
         return new;
     elsif tg_op = 'DELETE' then
+        two_year_transaction_period_old = get_transaction_year(old.disb_dt, old.rpt_yr);
+
         if two_year_transaction_period_old >= start_year then
             delete from ofec_sched_b_queue_old where sched_b_sk = old.sched_b_sk;
             insert into ofec_sched_b_queue_old values (old.*, timestamp, two_year_transaction_period_old);
