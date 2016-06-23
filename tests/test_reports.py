@@ -79,8 +79,8 @@ class TestReports(ApiBaseTest):
 
         for category, factory in params:
             reports = [
-                factory(expire_date=None),
-                factory(expire_date=datetime.date(2014, 1, 1)),
+                factory(is_amended=False),
+                factory(is_amended=True),
             ]
 
             results = self._results(api.url_for(ReportsView, committee_type=category))
