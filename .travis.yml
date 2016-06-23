@@ -34,6 +34,7 @@ before_deploy:
   - tar xzvf $HOME/cf.tgz -C $HOME
   - travis_retry cf install-plugin autopilot -f -r CF-Community
   - npm install
+  - sh /bin/run_build.sh
 
 deploy:
   provider: script
