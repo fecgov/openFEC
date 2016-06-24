@@ -34,10 +34,6 @@ before_deploy:
   - tar xzvf $HOME/cf.tgz -C $HOME
   - travis_retry cf install-plugin autopilot -f -r CF-Community
   - npm install
-  - cd node_modules/swagger-ui
-  - npm install
-  - gulp
-  - cd ../..
 
 deploy:
   provider: script
