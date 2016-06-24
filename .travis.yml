@@ -21,9 +21,6 @@ before_script:
   - travis_retry pip install -U -r requirements.txt
   - travis_retry pip install -U -r requirements-dev.txt
   - travis_retry npm install -g swagger-tools
-  - . $HOME/.nvm/nvm.sh
-  - nvm install v5.5.0
-  - nvm use v5.5.0
 
 script: py.test
 
@@ -38,7 +35,8 @@ before_deploy:
   - travis_retry cf install-plugin autopilot -f -r CF-Community
   - npm install
   - cd node_modules/swagger-ui
-  - npm run build
+  - npm install
+  - gulp
 
 deploy:
   provider: script
