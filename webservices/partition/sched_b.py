@@ -20,14 +20,16 @@ class SchedBGroup(TableGroup):
         sa.Column('disbursement_description_text', TSVECTOR),
         sa.Column('disbursement_purpose_category', sa.String),
         sa.Column('clean_recipient_cmte_id', sa.String),
-        sa.Column('transaction_year', sa.SmallInteger),
+        sa.Column('two_year_transaction_period', sa.SmallInteger),
     ]
 
     @classmethod
     def column_factory(cls, parent):
         return [
             sa.func.image_pdf_url(parent.c.image_num).label('pdf_url'),
-            sa.func.to_tsvector(parent.c.recipient_nm).label('recipient_name_text'),
+            sa.func.to_tsvector(
+                sa.func.concat(parent.c.recipient_nm, ' ', parent.c.recipient_cmte_id),
+            ).label('recipient_name_text'),
             sa.func.to_tsvector(parent.c.disb_desc).label('disbursement_description_text'),
             sa.func.disbursement_purpose(
                 parent.c.disb_tp,
@@ -40,7 +42,7 @@ class SchedBGroup(TableGroup):
             sa.func.get_transaction_year(
                 parent.c[cls.transaction_date_column],
                 parent.c.rpt_yr
-            ).label('transaction_year'),
+            ).label('two_year_transaction_period'),
         ]
 
     @classmethod
@@ -53,7 +55,7 @@ class SchedBGroup(TableGroup):
             sa.Index(None, c.recipient_st),
             sa.Index(None, c.recipient_city),
             sa.Index(None, c.clean_recipient_cmte_id),
-            sa.Index(None, c.transaction_year),
+            sa.Index(None, c.two_year_transaction_period),
 
             sa.Index(None, c.disb_dt, c[cls.primary]),
             sa.Index(None, c.disb_amt, c[cls.primary]),

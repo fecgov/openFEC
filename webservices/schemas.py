@@ -250,7 +250,6 @@ ScheduleASchema = make_schema(
     },
     options={
         'exclude': (
-            'memo_code',
             'contributor_name_text',
             'contributor_employer_text',
             'contributor_occupation_text',
@@ -317,7 +316,6 @@ ScheduleBSchema = make_schema(
     },
     options={
         'exclude': (
-            'memo_code',
             'recipient_name_text',
             'disbursement_description_text'
         ),

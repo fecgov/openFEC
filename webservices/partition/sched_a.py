@@ -21,14 +21,16 @@ class SchedAGroup(TableGroup):
         sa.Column('contributor_occupation_text', TSVECTOR),
         sa.Column('is_individual', sa.Boolean),
         sa.Column('clean_contbr_id', sa.String),
-        sa.Column('transaction_year', sa.SmallInteger),
+        sa.Column('two_year_transaction_period', sa.SmallInteger),
     ]
 
     @classmethod
     def column_factory(cls, parent):
         return [
             sa.func.image_pdf_url(parent.c.image_num).label('pdf_url'),
-            sa.func.to_tsvector(parent.c.contbr_nm).label('contributor_name_text'),
+            sa.func.to_tsvector(
+                sa.func.concat(parent.c.contbr_nm, ' ', parent.c.contbr_id),
+            ).label('contributor_name_text'),
             sa.func.to_tsvector(parent.c.contbr_employer).label('contributor_employer_text'),
             sa.func.to_tsvector(parent.c.contbr_occupation).label('contributor_occupation_text'),
             sa.func.is_individual(
@@ -45,7 +47,7 @@ class SchedAGroup(TableGroup):
             sa.func.get_transaction_year(
                 parent.c[cls.transaction_date_column],
                 parent.c.rpt_yr
-            ).label('transaction_year'),
+            ).label('two_year_transaction_period'),
         ]
 
     @classmethod
@@ -60,7 +62,7 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c.contbr_city),
             sa.Index(None, c.is_individual),
             sa.Index(None, c.clean_contbr_id),
-            sa.Index(None, c.transaction_year),
+            sa.Index(None, c.two_year_transaction_period),
 
             sa.Index(None, c.contb_receipt_amt, child.c[cls.primary]),
             sa.Index(None, c.contb_receipt_dt, child.c[cls.primary]),
