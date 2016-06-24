@@ -159,7 +159,7 @@ class ScheduleAFactory(BaseFactory):
     sched_a_sk = factory.Sequence(lambda n: n)
     sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
-    transaction_year = 2016
+    two_year_transaction_period = 2016
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):
@@ -174,7 +174,7 @@ class ScheduleBFactory(BaseFactory):
     sched_b_sk = factory.Sequence(lambda n: n)
     load_date = datetime.datetime.utcnow()
     report_year = 2016
-    transaction_year = 2016
+    two_year_transaction_period = 2016
 
     @factory.post_generation
     def update_fulltext(obj, create, extracted, **kwargs):

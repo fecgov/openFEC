@@ -106,7 +106,7 @@ class TableGroup:
         cmds = [
             'alter table {child} alter column {primary} set not null',
             'alter table {child} alter column load_date set not null',
-            'alter table {child} add constraint check_transaction_year check (transaction_year in ({start}, {stop}))',
+            'alter table {child} add constraint check_two_year_transaction_period check (two_year_transaction_period in ({start}, {stop}))',  # noqa
             'alter table {child} inherit {master}'
         ]
         params = {
@@ -158,8 +158,19 @@ class TableGroup:
         delete = sa.delete(child).where(child.c.get(cls.primary).in_(select))
         db.engine.execute(delete)
 
+        # The queue tables already have the two_year_transaction_period column
+        # set in them so that we can insert the records into the proper child
+        # table. Because of this, we need to exclude the function call in the
+        # column factory normally used when populating the child tables during
+        # normal partitioning. Otherwise, an error is thrown due more values
+        # being specified than there are columns to accept them.
+        columns = [
+            column for column in cls.column_factory(queue_new)
+            if column.name != 'two_year_transaction_period'
+        ]
+
         select = sa.select(
-            queue_new.columns + cls.column_factory(queue_new)
+            queue_new.columns + columns
         ).select_from(
             queue_new.join(
                 queue_old,
@@ -170,7 +181,7 @@ class TableGroup:
                 isouter=True,
             )
         ).where(
-            queue_new.c.rpt_yr.in_([start, stop])
+            queue_new.c.two_year_transaction_period.in_([start, stop])
         ).where(
             queue_old.c.get(cls.primary) == None  # noqa
         ).distinct(

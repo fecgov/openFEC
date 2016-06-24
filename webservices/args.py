@@ -328,8 +328,8 @@ schedule_a = {
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
         description='Filters individual or committee contributions based on line number'
     ),
-    'transaction_year': fields.Int(
-        description=docs.TRANSACTION_YEAR,
+    'two_year_transaction_period': fields.Int(
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
         required=True,
         missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
@@ -387,8 +387,8 @@ schedule_b = {
     'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
     'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, use the `disbursement_date` of the last result and pass it here as `last_disbursement_date` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, use the `disbursement_amount` of the last result and pass it here as `last_disbursement_amount` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
-    'transaction_year': fields.Int(
-        description=docs.TRANSACTION_YEAR,
+    'two_year_transaction_period': fields.Int(
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
         required=True,
         missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
