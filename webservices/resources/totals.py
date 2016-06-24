@@ -16,7 +16,7 @@ totals_schema_map = {
     'S': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
     'I': (models.CommitteeTotalsIEOnly, schemas.CommitteeTotalsIEOnlyPageSchema),
 }
-default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
+default_schemas = (models.CommitteeTotalsParty, schemas.CommitteeTotalsPartyPageSchema)
 
 
 @doc(
@@ -73,4 +73,6 @@ class TotalsView(utils.Resource):
             committee = query.first_or_404()
             return committee.committee_type
         elif committee_type is not None:
-            return reports_type_map.get(committee_type)
+            #just a hack now for testing, this will definitely be the last piece to wire in
+            return 'X'
+            #return reports_type_map.get(committee_type)
