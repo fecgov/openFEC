@@ -5,31 +5,44 @@ create table ofec_sched_a_queue_new as select * from sched_a limit 0;
 create table ofec_sched_a_queue_old as select * from sched_a limit 0;
 alter table ofec_sched_a_queue_new add column timestamp timestamp;
 alter table ofec_sched_a_queue_old add column timestamp timestamp;
+alter table ofec_sched_a_queue_new add column two_year_transaction_period smallint;
+alter table ofec_sched_a_queue_old add column two_year_transaction_period smallint;
 create index on ofec_sched_a_queue_new (sched_a_sk);
 create index on ofec_sched_a_queue_old (sched_a_sk);
 create index on ofec_sched_a_queue_new (timestamp);
 create index on ofec_sched_a_queue_old (timestamp);
+create index on ofec_sched_a_queue_new (two_year_transaction_period);
+create index on ofec_sched_a_queue_old (two_year_transaction_period);
 
 -- Create trigger to maintain Schedule A queues
 create or replace function ofec_sched_a_update_queues() returns trigger as $$
 declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
+    two_year_transaction_period_new smallint;
+    two_year_transaction_period_old smallint;
 begin
     if tg_op = 'INSERT' then
-        if new.rpt_yr >= start_year then
-            insert into ofec_sched_a_queue_new values (new.*, timestamp);
+        two_year_transaction_period_new = get_transaction_year(new.contb_receipt_dt, new.rpt_yr);
+
+        if two_year_transaction_period_new >= start_year then
+            insert into ofec_sched_a_queue_new values (new.*, timestamp, two_year_transaction_period_new);
         end if;
         return new;
     elsif tg_op = 'UPDATE' then
-        if new.rpt_yr >= start_year then
-            insert into ofec_sched_a_queue_new values (new.*, timestamp);
-            insert into ofec_sched_a_queue_old values (old.*, timestamp);
+        two_year_transaction_period_new = get_transaction_year(new.contb_receipt_dt, new.rpt_yr);
+        two_year_transaction_period_old = get_transaction_year(old.contb_receipt_dt, old.rpt_yr);
+
+        if two_year_transaction_period_new >= start_year then
+            insert into ofec_sched_a_queue_new values (new.*, timestamp, two_year_transaction_period_new);
+            insert into ofec_sched_a_queue_old values (old.*, timestamp, two_year_transaction_period_old);
         end if;
         return new;
     elsif tg_op = 'DELETE' then
-        if old.rpt_yr >= start_year then
-            insert into ofec_sched_a_queue_old values (old.*, timestamp);
+        two_year_transaction_period_old = get_transaction_year(old.contb_receipt_dt, old.rpt_yr);
+
+        if two_year_transaction_period_old >= start_year then
+            insert into ofec_sched_a_queue_old values (old.*, timestamp, two_year_transaction_period_old);
         end if;
         return old;
     end if;
