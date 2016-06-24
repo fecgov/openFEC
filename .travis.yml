@@ -35,7 +35,6 @@ before_deploy:
   - travis_retry cf install-plugin autopilot -f -r CF-Community
   - npm install
   - cd node_modules/swagger-ui
-  - npm install
   - gulp
 
 deploy:
