@@ -1,5 +1,5 @@
 cfenv==0.4.0
-invoke==0.10.1
+invoke==0.13.0
 psycopg2==2.6
 Flask==0.11
 Flask-Cors==2.1.0
