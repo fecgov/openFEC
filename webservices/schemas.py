@@ -217,9 +217,10 @@ augment_models(
     make_totals_schema,
     models.CommitteeTotalsPresidential,
     models.CommitteeTotalsHouseSenate,
-    #models.CommitteeTotalsPacParty,
+    models.CommitteeTotalsPacParty,
     models.CommitteeTotalsIEOnly,
-    models.CommitteeTotalsParty
+    models.CommitteeTotalsParty,
+    models.CommitteeTotalsPac
 )
 
 register_schema(CommitteeReportsSchema)
@@ -228,9 +229,11 @@ register_schema(CommitteeReportsPageSchema)
 totals_schemas = (
     schemas['CommitteeTotalsPresidentialSchema'],
     schemas['CommitteeTotalsHouseSenateSchema'],
-    #schemas['CommitteeTotalsPacPartySchema'],
+    schemas['CommitteeTotalsPacPartySchema'],
     schemas['CommitteeTotalsIEOnlySchema'],
-    schemas['CommitteeTotalsPartySchema']
+    schemas['CommitteeTotalsPartySchema'],
+    schemas['CommitteeTotalsPacSchema']
+
 )
 CommitteeTotalsSchema = type('CommitteeTotalsSchema', totals_schemas, {})
 CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
