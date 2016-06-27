@@ -33,10 +33,8 @@ class CommitteeTotals(BaseModel):
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
 
 
-class CommitteeTotalsPacParty(CommitteeTotals):
+class CommitteeTotalsPacPartyBase(CommitteeTotals):
     __abstract__ = True
-
-    #__tablename__ = 'ofec_totals_pacs_parties_mv'
 
     all_loans_received = db.Column(db.Numeric(30, 2))
     allocated_federal_election_levin_share = db.Column(db.Numeric(30, 2))
@@ -88,12 +86,20 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
 
 
-class CommitteeTotalsParty(CommitteeTotalsPacParty):
+class CommitteeTotalsParty(CommitteeTotalsPacPartyBase):
     __tablename__ = 'ofec_totals_parties_mv'
 
+    committee_name = db.Column(db.String)
 
-class CommitteeTotalsPac(CommitteeTotalsPacParty):
+
+class CommitteeTotalsPac(CommitteeTotalsPacPartyBase):
     __tablename__ = 'ofec_totals_pacs_mv'
+
+    committee_name = db.Column(db.String)
+
+
+class CommitteeTotalsPacParty(CommitteeTotalsPacPartyBase):
+    __tablename__ = 'ofec_totals_pacs_parties_mv'
 
 
 class CommitteeTotalsHouseSenate(CommitteeTotals):
