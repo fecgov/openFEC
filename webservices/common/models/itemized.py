@@ -16,7 +16,7 @@ class BaseItemized(db.Model):
     form_type = db.Column('form_tp', db.String, doc=docs.FORM_TYPE)
     entity_type = db.Column('entity_tp', db.String)
     image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
-    memo_code = db.Column('memo_cd', db.String)
+    memo_code = db.Column('memo_cd', db.String, doc=docs.MEMO_CODE)
     memo_text = db.Column(db.String)
     filing_type = db.Column(db.String)
     filing_form = db.Column(db.String)
