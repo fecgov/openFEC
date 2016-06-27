@@ -271,7 +271,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(existing.total, total)
         self.assertEqual(existing.count, count)
 
-    def test_update_aggregate_asize_create(self):
+    def test_update_aggregate_size_create(self):
         filing = self.SchedAFactory(
             rpt_yr=2015,
             cmte_id='C6789',
