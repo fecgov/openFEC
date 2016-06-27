@@ -338,7 +338,6 @@ ScheduleESchema = make_schema(
     },
     options={
         'exclude': (
-            'memo_code',
             'payee_name_text',
         ),
     }
