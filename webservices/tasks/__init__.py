@@ -29,8 +29,13 @@ app.conf.update(
     CELERYBEAT_SCHEDULE={
         'refresh': {
             'task': 'webservices.tasks.refresh.refresh',
-            'schedule': crontab(minute=0, hour=9),
+            'schedule': crontab(minute=0, hour=9, day_of_week='sun-fri'),
         },
+        'refresh_all': {
+            'task': 'webservices.tasks.refresh.refresh_all',
+            'schedule': crontab(minute='*', hour='*', day_of_week='mon'),
+            # 'schedule': crontab(minute=0, hour=9, day_of_week='sat'),
+        }
     }
 )
 

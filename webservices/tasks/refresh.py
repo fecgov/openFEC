@@ -24,3 +24,21 @@ def refresh():
         mail.send_mail(buffer)
     except Exception as error:
         logger.exception(error)
+
+
+@app.task
+def refresh_all():
+    """Comprehensive updates to ensure that all tables and data are up to date.
+    As with regular updates, email logs are also sent.
+    """
+    buffer = io.StringIO()
+    with mail.CaptureLogs(manage.logger, buffer):
+        try:
+            manage.update_all()
+            download.clear_bucket()
+        except Exception as error:
+            manage.logger.exception(error)
+    try:
+        mail.send_mail(buffer)
+    except Exception as error:
+        logger.exception(error)
