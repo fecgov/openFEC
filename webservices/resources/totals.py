@@ -64,6 +64,8 @@ class TotalsView(utils.Resource):
             query = totals_class.query.filter_by(committee_id=committee_id)
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
+        if kwargs.get('type'):
+            query = query.filter(totals_class.committee_type.in_(kwargs['type']))
         return query, totals_class, totals_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
