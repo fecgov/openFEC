@@ -90,12 +90,14 @@ class CommitteeTotalsParty(CommitteeTotalsPacPartyBase):
     __tablename__ = 'ofec_totals_parties_mv'
 
     committee_name = db.Column(db.String)
+    committee_type = db.Column(db.String)
 
 
 class CommitteeTotalsPac(CommitteeTotalsPacPartyBase):
     __tablename__ = 'ofec_totals_pacs_mv'
 
     committee_name = db.Column(db.String)
+    committee_type = db.Column(db.String)
 
 
 class CommitteeTotalsPacParty(CommitteeTotalsPacPartyBase):
