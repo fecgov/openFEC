@@ -58,7 +58,7 @@ we’re actively working on it and adding new features. The official site for Fe
 Election Commission (FEC) data is still the
 [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml). While we plan to
 version big changes that are not backwards compatible, expect things to change as the API
-develops. You can view the [change log on GitHub](https://github.com/18F/openFEC/blob/master/CHANGELOG.md).
+develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
@@ -247,6 +247,16 @@ Year that the record applies to. Sometimes records are amended in subsequent
 years so this can differ from underlying form's receipt date.
 '''
 
+TWO_YEAR_TRANSACTION_PERIOD = '''
+This is a two-year period that is derived from the year a transaction took place in the
+Itemized Schedule A and Schedule B tables. In cases where we have the date of the transaction
+(contribution_receipt_date in schedules/schedule_a, disbursement_date in schedules/schedule_b)
+the two_year_transaction_period is named after the ending, even-numbered year. If we do not
+have the date  of the transation, we fall back to using the report year (report_year in both
+tables) instead,  making the same cycle adjustment as necessary. If no transaction year is
+specified, the results default to the most current cycle.
+'''
+
 TOTALS = '''
 This endpoint provides information about a committee's Form 3, Form 3X, or Form 3P financial reports,
 which are aggregated by two-year period. We refer to two-year periods as a `cycle`.
@@ -277,7 +287,7 @@ multiple ways to explain the way it may move though different committees as an e
 For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
 contributions. See below for full methodology.
 
-### Methodology for determining individual contributions
+### Methodology for determining unique, individual contributions
 
 For receipts over $200 use FEC code line_number to identify individuals.
 
@@ -302,12 +312,17 @@ Line number with description
     -17A Itemized individual contributions from Form 3P
     -18 Itemized individual contributions from Form 3P
 
-Of those transactions,[under $200, and having "earmark" in the e OR having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
+Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
 This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
+
+The data is divided in two-year periods, called `two_year_transaction_period`, which
+is derived from the `contribution_receipt_date`. If no value is supplied, the results
+will default to the most recent two-year period that is named after the ending,
+even-numbered year.
 
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -341,6 +356,12 @@ reported as part of forms F3, F3X and F3P.
 '''
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
+
+The data is divided in two-year periods, called `two_year_transaction_period`, which
+is derived from the `disbursement_date`. If no value is supplied, the results will
+default to the most recent two-year period that is named after the ending,
+even-numbered year.
+
 
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -612,6 +633,9 @@ FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
 This is usually a Form 1 committee registration.'
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+
+# schedules
+MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
 
 # schedule A
 CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'

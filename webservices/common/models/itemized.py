@@ -16,7 +16,7 @@ class BaseItemized(db.Model):
     form_type = db.Column('form_tp', db.String, doc=docs.FORM_TYPE)
     entity_type = db.Column('entity_tp', db.String)
     image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
-    memo_code = db.Column('memo_cd', db.String)
+    memo_code = db.Column('memo_cd', db.String, doc=docs.MEMO_CODE)
     memo_text = db.Column(db.String)
     filing_type = db.Column(db.String)
     filing_form = db.Column(db.String)
@@ -37,7 +37,7 @@ class BaseItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __tablename__ = 'ofec_sched_a'
+    __tablename__ = 'ofec_sched_a_master'
 
     sched_a_sk = db.Column(db.Integer, primary_key=True)
     is_individual = db.Column(db.Boolean, index=True)
@@ -80,6 +80,7 @@ class ScheduleA(BaseItemized):
     increased_limit = db.Column(db.String)
     load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
     update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
+    two_year_transaction_period = db.Column(db.SmallInteger, doc=docs.TWO_YEAR_TRANSACTION_PERIOD)
 
     # Auxiliary fields
     contributor_name_text = db.Column(TSVECTOR)
@@ -88,7 +89,7 @@ class ScheduleA(BaseItemized):
 
 
 class ScheduleB(BaseItemized):
-    __tablename__ = 'ofec_sched_b'
+    __tablename__ = 'ofec_sched_b_master'
 
     sched_b_sk = db.Column(db.Integer, primary_key=True)
     recipient_committee_id = db.Column('clean_recipient_cmte_id', db.String)
@@ -122,6 +123,7 @@ class ScheduleB(BaseItemized):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
     load_date = db.Column(db.DateTime)
     update_date = db.Column(db.DateTime)
+    two_year_transaction_period = db.Column(db.SmallInteger, doc=docs.TWO_YEAR_TRANSACTION_PERIOD)
 
     # Auxiliary fields
     recipient_name_text = db.Column(TSVECTOR)

@@ -50,8 +50,8 @@ components:
 - https://github.com/18F/openFEC/blob/develop/requirements.txt
 - https://github.com/18F/openFEC-web-app/blob/develop/package.json
 - https://github.com/18F/openFEC-web-app/blob/develop/requirements.txt
-diagram: [tbd]
-network-architecture: [tbd]
+diagram: https://github.com/18F/FEC/wiki/FEC-system-diagram
+network-architecture: https://github.com/18F/FEC/wiki/FEC-system-diagram
 environments:
 - Cloud Foundry
 - Amazon Web Services East / West
