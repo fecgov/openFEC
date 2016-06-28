@@ -28,7 +28,7 @@ default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPar
         'committee_id': {'description': docs.COMMITTEE_ID},
         'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
-            'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
+            'enum': ['presidential', 'pac-party', 'pac', 'party', 'house-senate', 'ie-only'],
         },
     },
 )
