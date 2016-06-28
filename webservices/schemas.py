@@ -208,7 +208,7 @@ make_totals_schema = functools.partial(
     fields={
         'pdf_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
-        'committee_type': ma.fields.Str(attribute='committee.committee_type'),
+        #'committee_type': ma.fields.Str(attribute='committee.committee_type'),
         'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
         'last_beginning_image_number': ma.fields.Str(),
     },
