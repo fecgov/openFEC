@@ -663,6 +663,9 @@ This is usually a Form 1 committee registration.'
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
 
+# schedules
+MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
+
 # schedule A
 CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
 EMPLOYER = 'Employer of contributor as reported on the committee\'s filing'
