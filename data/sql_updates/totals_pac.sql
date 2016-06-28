@@ -14,7 +14,8 @@ select
     row_number() over () as idx,
     cmte_id as committee_id,
     election_cycle as cycle,
-    pnp.cmte_nm as committee_name,
+    comm_dets.name as committee_name,
+    --pnp.cmte_nm as committee_name,
     comm_dets.committee_type as committee_type,
     min(pnp.cvg_start_dt) as coverage_start_date,
     max(pnp.cvg_end_dt) as coverage_end_date,
@@ -78,7 +79,7 @@ where
     or comm_dets.committee_type like 'W')
 group by
     cmte_id,
-    pnp.cmte_nm,
+    comm_dets.name,
     comm_dets.committee_type,
     pnp.election_cycle
 ;
