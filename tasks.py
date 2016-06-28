@@ -180,15 +180,16 @@ def deploy(space=None, branch=None, yes=False):
     if space is None:
         return
 
-    # Log in
-    args = (
-        ('--a', 'https://api.cloud.gov'),
-        ('--u', '$FEC_CF_USERNAME'),
-        ('--p', '$FEC_CF_PASSWORD'),
-        ('--o', 'fec'),
-        ('--s', space),
-    )
-    run('cf login {0}'.format(' '.join(' '.join(arg) for arg in args)), echo=True)
+    # Set api
+    api = 'https://api.cloud.gov'
+    run('cf api {0}'.format(api), echo=True)
+
+    # Log in if necessary
+    if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
+        run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
+
+    # Target space
+    run('cf target -o fec -s {0}'.format(space), echo=True)
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:

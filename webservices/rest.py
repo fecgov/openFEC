@@ -14,8 +14,9 @@ from flask import render_template
 from flask import Flask
 from flask import Blueprint
 
-from flask.ext import cors
-from flask.ext import restful
+import flask_cors as cors
+import flask_restful as restful
+
 from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
 import sqlalchemy as sa

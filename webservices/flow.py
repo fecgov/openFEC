@@ -59,6 +59,7 @@ def get_graph():
         ('totals_house_senate', 'candidate_aggregates'),
         ('totals_presidential', 'candidate_aggregates'),
         ('candidate_election', 'candidate_aggregates'),
+        ('cand_cmte_linkage', 'candidate_aggregates'),
     ])
 
     return graph

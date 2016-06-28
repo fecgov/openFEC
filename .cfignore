@@ -1,7 +1,6 @@
 cache
 node_modules
 
-data/bin/set_env_vars.real.sh
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
@@ -59,8 +58,4 @@ docs/_build/
 target/
 
 # PG dumps, DDL, etc.
-data/*dump*
-data/ddl/
-data/tuning
-
-documentation/notebooks/
+data/subset.dump
