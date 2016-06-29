@@ -197,13 +197,13 @@ def update_all(processes=1):
     load_pacronyms()
     load_nicknames()
     load_election_dates()
+    update_schemas(processes=processes)
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
     partition.SchedAGroup.run()
     partition.SchedBGroup.run()
     rebuild_aggregates(processes=processes)
-    update_schemas(processes=processes)
 
 @manager.command
 def refresh_materialized():
