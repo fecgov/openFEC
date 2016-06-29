@@ -68,7 +68,7 @@ def load_nicknames():
 
 @manager.command
 def load_pacronyms():
-    """For improved search of orgnizations that go by acronyms"""
+    """For improved search of organizations that go by acronyms"""
     import pandas as pd
     import sqlalchemy as sa
     try:
