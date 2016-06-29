@@ -11,3 +11,4 @@ from .links import *  # noqa
 from .reports import *  # noqa
 from .totals import *  # noqa
 from .costs import *  # noqa
+from .rad_analyst import *  # noqa

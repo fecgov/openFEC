@@ -41,7 +41,8 @@ class BaseItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __tablename__ = 'ofec_sched_a'
+
+    __tablename__ = 'ofec_sched_a_master'
     amendment_indicator = db.Column('action_cd', db.String)
     action_cd_desc = db.Column('action_cd_desc', db.String)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
@@ -89,8 +90,7 @@ class ScheduleA(BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
 
-
-
+    transaction_year = db.Column(db.SmallInteger, doc=docs.TRANSACTION_YEAR)
 
     # Auxiliary fields
     contributor_name_text = db.Column(TSVECTOR)
@@ -99,12 +99,12 @@ class ScheduleA(BaseItemized):
 
 
 class ScheduleB(BaseItemized):
-    __tablename__ = 'ofec_sched_b'
+
+    __tablename__ = 'ofec_sched_b_master'
     amendment_indicator = db.Column('action_cd', db.String)
     action_cd_desc = db.Column('action_cd_desc', db.String)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
-
     recipient_committee_id = db.Column('clean_recipient_cmte_id', db.String)
     recipient_committee = db.relationship(
         'CommitteeHistory',
@@ -136,8 +136,12 @@ class ScheduleB(BaseItemized):
     #receipt_date = db.Column('receipt_dt', db.Date)
     beneficiary_committee_name = db.Column('benef_cmte_nm', db.String)
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
+
     transaction_id = db.Column('tran_id', db.Integer)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
+    transaction_year = db.Column(db.SmallInteger, doc=docs.TRANSACTION_YEAR)
+
+
 
     # Auxiliary fields
     recipient_name_text = db.Column(TSVECTOR)

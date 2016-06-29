@@ -13,7 +13,7 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.resources import candidates, committees, filings, costs, sched_e
+from webservices.resources import candidates, committees, filings, costs, sched_a, sched_b, sched_e
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -27,6 +27,8 @@ RESOURCE_WHITELIST = {
     filings.FilingsList,
     costs.CommunicationCostView,
     costs.ElectioneeringView,
+    sched_a.ScheduleAView,
+    sched_b.ScheduleBView,
     sched_e.ScheduleEView,
 }
 
