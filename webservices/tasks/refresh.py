@@ -27,14 +27,15 @@ def refresh():
 
 
 @app.task
-def refresh_all():
-    """Comprehensive updates to ensure that all tables and data are up to date.
+def refresh_and_rebuild():
+    """Comprehensive schedule updates to ensure that data is up to date.
     As with regular updates, email logs are also sent.
     """
     buffer = io.StringIO()
     with mail.CaptureLogs(manage.logger, buffer):
         try:
-            manage.update_all()
+            manage.rebuild_aggregates()
+            manage.refresh_materialized()
             download.clear_bucket()
         except Exception as error:
             manage.logger.exception(error)
