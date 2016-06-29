@@ -24,7 +24,7 @@ class ScheduleBView(ItemizedResource):
         return self.model.two_year_transaction_period
     @property
     def index_column(self):
-        return self.model.sched_b_sk
+        return self.model.sub_id
 
     filter_multi_fields = [
         ('image_number', models.ScheduleB.image_number),

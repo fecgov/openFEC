@@ -25,7 +25,7 @@ class ScheduleAView(ItemizedResource):
         return self.model.two_year_transaction_period
     @property
     def index_column(self):
-        return self.model.sched_a_sk
+        return self.model.sub_id
     @property
     def amount_column(self):
         return self.model.contribution_receipt_amount
