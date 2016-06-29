@@ -95,7 +95,7 @@ with elections_raw as(
         due_date::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
-        null::text as url
+        create_reporting_link(due_date::timestamp) as url
     from reports_raw
     where
         -- exclude pre-primary presidential reports in even years, realistically people file monthly.
