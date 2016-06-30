@@ -231,7 +231,7 @@ reports = {
 
 totals = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE)
+    'pac_party_type': fields.List(fields.Str, description=docs.PAC_PARTY_TYPE)
 }
 
 
