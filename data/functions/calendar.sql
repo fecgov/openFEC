@@ -360,10 +360,25 @@ returns text[] as $$
     begin
         return case
             when
-                report_type in ('M10', 'M11', 'M12', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M7S', 'M8', 'M9', 'MSA', 'MSY', 'MY', 'MYS', 'Q1', 'Q2', 'Q2S', 'Q3', 'QMS', 'QSA', 'QYE', 'QYS') then
+            report_type in ('M10', 'M11', 'M12', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M7S', 'M8', 'M9', 'MSA', 'MSY', 'MY', 'MYS', 'Q1', 'Q2', 'Q2S', 'Q3', 'QMS', 'QSA', 'QYE', 'QYS') then
                 array['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY']
             else
                 array_remove(election_state::text[], null)
         end;
     end
 $$ language plpgsql;
+
+
+create or replace function create_reporting_link(due_date timestamp)
+returns text as $$
+    begin
+        return case
+            when extract (year from due_date) > 2010 and
+            extract (year from due_date) <= extract (year from current_date) then
+                'http://www.fec.gov/info/report_dates_' || extract (year from due_date::timestamp) || '.shtml'
+            else
+                null::text
+        end;
+    end
+$$ language plpgsql;
+
