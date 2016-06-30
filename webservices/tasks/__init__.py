@@ -31,7 +31,7 @@ app.conf.update(
             'task': 'webservices.tasks.refresh.refresh',
             'schedule': crontab(minute=0, hour=9, day_of_week='sun-fri'),
         },
-        'refresh_all': {
+        'refresh_and_rebuild': {
             'task': 'webservices.tasks.refresh.refresh_and_rebuild',
             'schedule': crontab(minute=0, hour=9, day_of_week='sat'),
         }
