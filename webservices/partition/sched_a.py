@@ -57,7 +57,7 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c.rpt_yr),
             sa.Index(None, c.entity_tp),
             sa.Index(None, c.image_num),
-            sa.Index(None, c.sub_id),
+            sa.Index(None, c[cls.primary]),
             sa.Index(None, c.contbr_st),
             sa.Index(None, c.contbr_city),
             sa.Index(None, c.is_individual),
