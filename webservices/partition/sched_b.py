@@ -51,7 +51,7 @@ class SchedBGroup(TableGroup):
         return [
             sa.Index(None, c.rpt_yr),
             sa.Index(None, c.image_num),
-            sa.Index(None, c.sub_id),
+            sa.Index(None, c[cls.primary]),
             sa.Index(None, c.recipient_st),
             sa.Index(None, c.recipient_city),
             sa.Index(None, c.clean_recipient_cmte_id),
