@@ -15,8 +15,6 @@ class BaseItemized(db.Model):
     report_type = db.Column('rpt_tp', db.String, doc=docs.REPORT_TYPE)
     election_type = db.Column('election_tp', db.String, doc=docs.ELECTION_TYPE)
     election_type_full = db.Column('election_tp_desc', db.String)
-
-
     image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
     filing_form = db.Column(db.String)
     link_id = db.Column(db.Integer)
@@ -129,10 +127,6 @@ class ScheduleB(BaseItemized):
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_tp_year', db.String)
-    #These are deprecated
-    #record_number = db.Column('record_num', db.Integer)
-    #report_primary_general = db.Column('rpt_pgi', db.String)
-    #receipt_date = db.Column('receipt_dt', db.Date)
     beneficiary_committee_name = db.Column('benef_cmte_nm', db.String)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
