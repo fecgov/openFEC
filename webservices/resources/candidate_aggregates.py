@@ -166,6 +166,12 @@ class TotalsCandidateView(ApiResource):
                 history.candidate_id == models.CandidateTotal.candidate_id,
                 year_column == models.CandidateTotal.cycle,
             )
+        ).join(
+            models.Candidate,
+            history.candidate_id == models.Candidate.candidate_id,
+        ).join(
+            models.CandidateFlags,
+            history.candidate_id == models.CandidateFlags.candidate_id,
         ).filter(
             models.CandidateTotal.is_election == kwargs['election_full'],
         )
@@ -175,11 +181,13 @@ class TotalsCandidateView(ApiResource):
                 history.candidate_id == models.CandidateSearch.id,
             )
         #The .filter methods may be able to moved to the filters methods, will investigate
+        """
         if kwargs.get('has_raised_funds') or kwargs.get('federal_funds_flag'):
             query = query.join(
                 models.Candidate,
                 history.candidate_id == models.Candidate.candidate_id,
             )
+        """
         if kwargs.get('has_raised_funds'):
             query = query.filter(
                 models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])

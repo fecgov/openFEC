@@ -152,7 +152,7 @@ augment_models(
     models.Candidate,
     models.CandidateDetail,
     models.CandidateHistory,
-    models.CandidateTotal,
+    models.CandidateTotal
 )
 
 class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema']):
