@@ -24,6 +24,8 @@ reports_type_map = {
     'presidential': 'P',
     'ie-only': 'I',
     'pac-party': None,
+    'pac': 'O',
+    'party': 'XY'
 }
 
 
