@@ -140,7 +140,7 @@ augment_models(
 
 make_candidate_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', 'principal_committees', 'flags')},
+    options={'exclude': ('idx', 'principal_committees')},
     fields={
         'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
         'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
@@ -151,11 +151,17 @@ augment_models(
     make_candidate_schema,
     models.Candidate,
     models.CandidateDetail,
-    models.CandidateHistory,
-    models.CandidateTotal
-)
 
-class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema']):
+)
+#built these schemas without make_candidate_schema, as it was filtering out the flags
+augment_models(
+    make_schema,
+    models.CandidateHistory,
+    models.CandidateTotal,
+    models.CandidateFlags
+
+)
+class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema'],schemas['CandidateFlagsSchema']):
     pass
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
