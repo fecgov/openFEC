@@ -318,17 +318,10 @@ This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/func
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
-
-<<<<<<< HEAD
-The data is divided in two-year periods, called `transaction_year`, which is derived from
-the `contribution_receipt_date`. If no value is supplied, the results will default to the
-most recent two-year period that is named after the ending, even-numbered year.
-=======
 The data is divided in two-year periods, called `two_year_transaction_period`, which
 is derived from the `contribution_receipt_date`. If no value is supplied, the results
 will default to the most recent two-year period that is named after the ending,
 even-numbered year.
->>>>>>> release/public-beta-20160622
 
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -362,18 +355,10 @@ reported as part of forms F3, F3X and F3P.
 '''
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
-
-<<<<<<< HEAD
-The data is divided in two-year periods, called `transaction_year`, which is derived from
-the `disbursement_date`. If no value is supplied, the results will default to the
-most recent two-year period that is named after the ending, even-numbered year.
-=======
 The data is divided in two-year periods, called `two_year_transaction_period`, which
 is derived from the `disbursement_date`. If no value is supplied, the results will
 default to the most recent two-year period that is named after the ending,
 even-numbered year.
->>>>>>> release/public-beta-20160622
-
 
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
