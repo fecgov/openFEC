@@ -15,6 +15,8 @@ totals_schema_map = {
     'H': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
     'S': (models.CommitteeTotalsHouseSenate, schemas.CommitteeTotalsHouseSenatePageSchema),
     'I': (models.CommitteeTotalsIEOnly, schemas.CommitteeTotalsIEOnlyPageSchema),
+    'O': (models.CommitteeTotalsPac, schemas.CommitteeTotalsPacPageSchema),
+    'XY': (models.CommitteeTotalsParty, schemas.CommitteeTotalsPartyPageSchema)
 }
 default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
 
@@ -26,7 +28,7 @@ default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPar
         'committee_id': {'description': docs.COMMITTEE_ID},
         'committee_type': {
             'description': 'House, Senate, presidential, independent expenditure only',
-            'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
+            'enum': ['presidential', 'pac-party', 'pac', 'party', 'house-senate', 'ie-only'],
         },
     },
 )
@@ -74,3 +76,4 @@ class TotalsView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
+

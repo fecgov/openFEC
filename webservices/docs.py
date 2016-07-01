@@ -655,6 +655,16 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - Y party, qualified\n\
         - Z national party non-federal account\n\
 '
+PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - Q PAC - qualified\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+'
+
 TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
 committee, the most recent treasurer will be shown.'
 COMMITTEE_STATE = 'State of the committee\'s address as filed on the Form 1'
