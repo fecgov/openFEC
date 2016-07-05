@@ -55,7 +55,7 @@ select
     max(last.rpt_yr) as last_report_year
 from
     fec_vsum_f3p p
-    left join last using (cmte_id, election_cycle)
+    inner join last using (cmte_id, election_cycle)
 where
     p.most_recent_filing_flag like 'Y'
     and election_cycle >= :START_YEAR
