@@ -161,11 +161,9 @@ class TotalsCandidateView(ApiResource):
         if kwargs['election_full']:
             history = models.CandidateHistoryLatest
             year_column = history.cand_election_year
-            #sa.orm.joinedload(history.flags)
         else:
             history = models.CandidateHistory
             year_column = history.two_year_period
-            #sa.orm.joinedload(history.flags)
         query = db.session.query(
             history.__table__,
             models.CandidateTotal.__table__,
@@ -192,12 +190,6 @@ class TotalsCandidateView(ApiResource):
             )
         #The .filter methods may be able to moved to the filters methods, will investigate
 
-        """if kwargs.get('has_raised_funds') or kwargs.get('federal_funds_flag'):
-            query = query.join(
-                models.Candidate,
-                history.candidate_id == models.Candidate.candidate_id,
-            )
-        """
         if kwargs.get('has_raised_funds'):
             query = query.filter(
                 models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
@@ -209,8 +201,6 @@ class TotalsCandidateView(ApiResource):
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
-        queryString = self.compile_query(query)
-        print(queryString)
         return query
 
     """
@@ -218,7 +208,7 @@ class TotalsCandidateView(ApiResource):
         why totals were missing the flags.  They were missing from the sql select statement.
         Referenced from here:
         http://stackoverflow.com/questions/4617291/how-do-i-get-a-raw-compiled-sql-query-from-a-sqlalchemy-expression
-    """
+
     def compile_query(self,query):
         dialect = query.session.bind.dialect
         statement = query.statement
@@ -231,4 +221,5 @@ class TotalsCandidateView(ApiResource):
                 v = v.encode(enc)
             params[k] = sqlescape(v)
         return (comp.string.encode(enc) % params).decode(enc)
+    """
 
