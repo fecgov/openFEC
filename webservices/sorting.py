@@ -1,9 +1,12 @@
 import sqlalchemy as sa
 
 from webservices.exceptions import ApiError
+from webservices.common import models
+#from util import get_class_by_tablename
+from webservices.common.util import get_class_by_tablename
 
 
-def parse_option(option, model=None, aliases=None, join_columns=None):
+def parse_option(option, model=None, aliases=None, join_columns=None, query=None):
     """Parse sort option to SQLAlchemy order expression.
 
     :param str option: Column name, possibly prefixed with "-"
@@ -26,6 +29,15 @@ def parse_option(option, model=None, aliases=None, join_columns=None):
             column = getattr(model, column)
         except AttributeError:
             raise ApiError('Field "{0}" not found'.format(column))
+    else:
+        for entity in query._entities:
+            print(entity)
+            if entity._label_name == column:
+                single_model = get_class_by_tablename(entity.namespace)
+                column = getattr(single_model, column)
+                return column, order, relationship
+
+
     return column, order, relationship
 
 
@@ -56,6 +68,7 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         model=sort_model,
         aliases=aliases,
         join_columns=join_columns,
+        query=query
     )
     query = query.order_by(order(column))
     if relationship:
