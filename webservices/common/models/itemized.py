@@ -75,6 +75,7 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     increased_limit = db.Column(db.String)
+    load_date = db.Column('pg_date', db.DateTime)
     two_year_transaction_period = db.Column(db.SmallInteger, doc=docs.TWO_YEAR_TRANSACTION_PERIOD)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
@@ -112,7 +113,7 @@ class ScheduleB(BaseItemized):
     recipient_zip = db.Column(db.String)
     disbursement_type = db.Column('disb_tp', db.String)
     disbursement_description = db.Column('disb_desc', db.String)
-    disbursement_date = db.Column('disb_dt', db.TIMESTAMP(timezone=False))
+    disbursement_date = db.Column('disb_dt', db.Date)
     disbursement_amount = db.Column('disb_amt', db.Numeric(30, 2))
     election_type = db.Column('election_tp', db.String)
     election_type_full = db.Column('election_tp_desc', db.String)
@@ -130,6 +131,8 @@ class ScheduleB(BaseItemized):
     beneficiary_committee_name = db.Column('benef_cmte_nm', db.String)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
+    load_date = db.Column('pg_date', db.DateTime)
+
 
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
     transaction_id = db.Column('tran_id', db.Integer)
