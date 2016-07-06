@@ -33,9 +33,12 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
         for entity in query._entities:
             if entity._label_name == column:
                 single_model = get_class_by_tablename(entity.namespace)
+                if not single_model:
+                    break
                 column = getattr(single_model, column)
-                return column, order, relationship
-        raise ApiError('No mapped entity found containing this column')
+                break
+        return column, order, relationship
+        #raise ApiError('No mapped entity found containing this column')
 
 
     return column, order, relationship
