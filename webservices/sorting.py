@@ -31,11 +31,11 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
             raise ApiError('Field "{0}" not found'.format(column))
     else:
         for entity in query._entities:
-            print(entity)
             if entity._label_name == column:
                 single_model = get_class_by_tablename(entity.namespace)
                 column = getattr(single_model, column)
                 return column, order, relationship
+        raise ApiError('No mapped entity found containing this column')
 
 
     return column, order, relationship
