@@ -1,8 +1,6 @@
 import sqlalchemy as sa
 
 from webservices.exceptions import ApiError
-from webservices.common import models
-#from util import get_class_by_tablename
 from webservices.common.util import get_class_by_tablename
 
 
