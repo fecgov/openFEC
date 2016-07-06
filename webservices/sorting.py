@@ -36,9 +36,6 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
                 column = getattr(single_model, column)
                 break
         return column, order, relationship
-        #raise ApiError('No mapped entity found containing this column')
-
-
     return column, order, relationship
 
 
