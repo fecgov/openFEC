@@ -24,6 +24,8 @@ reports_type_map = {
     'presidential': 'P',
     'ie-only': 'I',
     'pac-party': None,
+    'pac': 'O',
+    'party': 'XY'
 }
 
 
@@ -101,8 +103,7 @@ class ReportsView(utils.Resource):
                 query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
 
         if kwargs.get('is_amended') is not None:
-            column = reports_class.expire_date
-            query = query.filter(column != None if kwargs['is_amended'] else column == None)  # noqa
+            query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         return query, reports_class, reports_schema
 

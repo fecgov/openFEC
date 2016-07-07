@@ -199,7 +199,7 @@ filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'report_type': fields.List(IStr, description='Report type'),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
-    'beginning_image_number': fields.List(fields.Int, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
@@ -223,7 +223,7 @@ filings = {
 reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'beginning_image_number': fields.List(fields.Int, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
     'is_amended': fields.Bool(description='Report has been amended'),
 }
@@ -519,4 +519,11 @@ schedule_e = {
         description='Support or opposition',
     ),
     'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+}
+
+rad_analyst = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'analyst_id': fields.List(IStr, description='ID of RAD analyst'),
+    'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
+    'name': fields.List(fields.Str, description='Name of RAD analyst'),
 }

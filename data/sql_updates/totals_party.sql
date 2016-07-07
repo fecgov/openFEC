@@ -1,8 +1,10 @@
-drop materialized view if exists ofec_totals_pacs_parties_mv_tmp cascade;
-create materialized view ofec_totals_pacs_parties_mv_tmp as
+drop materialized view if exists ofec_totals_parties_mv_tmp cascade;
+create materialized view ofec_totals_parties_mv_tmp as
+
 with last as (
     select distinct on (cmte_id, election_cycle) *
     from fec_vsum_f3x
+    inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
     order by
         cmte_id,
         election_cycle,
@@ -12,6 +14,8 @@ select
     row_number() over () as idx,
     cmte_id as committee_id,
     election_cycle as cycle,
+    comm_dets.name as committee_name,
+    comm_dets.committee_type as committee_type,
     min(pnp.cvg_start_dt) as coverage_start_date,
     max(pnp.cvg_end_dt) as coverage_end_date,
     sum(pnp.all_loans_received_per) as all_loans_received,
@@ -63,16 +67,22 @@ select
     max(last.rpt_yr) as last_report_year
 from
     fec_vsum_f3x pnp
-    inner join last using (cmte_id, election_cycle)
+    inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
+    left join last using (cmte_id, election_cycle)
 where
     pnp.most_recent_filing_flag like 'Y'
     and election_cycle >= :START_YEAR
+    and (comm_dets.committee_type like 'X' or comm_dets.committee_type like 'Y')
 group by
     cmte_id,
+    comm_dets.name,
+    comm_dets.committee_type,
     pnp.election_cycle
 ;
 
-create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
+create unique index on ofec_totals_parties_mv_tmp(idx);
 
-create index on ofec_totals_pacs_parties_mv_tmp(cycle, idx);
-create index on ofec_totals_pacs_parties_mv_tmp(committee_id, idx);
+create index on ofec_totals_parties_mv_tmp(cycle, idx);
+create index on ofec_totals_parties_mv_tmp(committee_id, idx);
+create index on ofec_totals_parties_mv_tmp(receipts, idx);
+create index on ofec_totals_parties_mv_tmp(disbursements, idx);
