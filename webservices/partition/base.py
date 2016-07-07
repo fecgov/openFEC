@@ -2,6 +2,7 @@ import sqlalchemy as sa
 
 from webservices.rest import db
 from webservices.config import SQL_CONFIG
+from sqlalchemy import Date, cast
 
 from . import utils
 
@@ -74,7 +75,6 @@ class TableGroup:
     def create_child(cls, parent, cycle):
         start, stop = cycle - 1, cycle
         name = '{base}_{start}_{stop}_tmp'.format(base=cls.base_name, start=start, stop=stop)
-
         select = sa.select(
             parent.columns + cls.timestamp_factory(parent) + cls.column_factory(parent)
         ).where(
@@ -105,8 +105,8 @@ class TableGroup:
         start, stop = cycle - 1, cycle
         cmds = [
             'alter table {child} alter column {primary} set not null',
-            'alter table {child} alter column load_date set not null',
-            'alter table {child} add constraint check_two_year_transaction_period check (two_year_transaction_period in ({start}, {stop}))',  # noqa
+            'alter table {child} add constraint check_two_year_transaction_period check (two_year_transaction_period in ({start}, {stop}))',  # noqa <-- ? jcc
+            'alter table {child} alter column filing_form  set not null',
             'alter table {child} inherit {master}'
         ]
         params = {

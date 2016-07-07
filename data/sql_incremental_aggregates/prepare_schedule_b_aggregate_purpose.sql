@@ -6,7 +6,7 @@ select
     disbursement_purpose(disb_tp, disb_desc) as purpose,
     sum(disb_amt) as total,
     count(disb_amt) as count
-from sched_b
+from fec_vsum_sched_b
 where rpt_yr >= :START_YEAR_AGGREGATE
 and disb_amt is not null
 and (memo_cd != 'X' or memo_cd is null)
