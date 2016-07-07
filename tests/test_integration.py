@@ -77,10 +77,10 @@ class TestViews(common.IntegrationTestCase):
 
     def test_update_schemas(self):
         for model in db.Model._decl_class_registry.values():
+            print(model)
             if not hasattr(model, '__table__'):
                 continue
             self.assertGreater(model.query.count(), 0)
-
     def test_refresh_materialized(self):
         db.session.execute('select refresh_materialized()')
 
@@ -327,6 +327,7 @@ class TestViews(common.IntegrationTestCase):
             size=0,
             cycle=2016,
         ).first()
+        print(existing.committee_id)
         total = existing.total
         self.SchedAFactory(
             rpt_yr=2015,
@@ -334,21 +335,15 @@ class TestViews(common.IntegrationTestCase):
             contb_receipt_amt=75,
             receipt_tp='15J',
         )
+
         # Create a committee and committee report
-        dc = sa.Table('dimcmte', db.metadata, autoload=True, autoload_with=db.engine)
-        ins = dc.insert().values(
-            cmte_sk=7,
-            cmte_id=existing.committee_id,
-            load_date=datetime.datetime.now(),
-        )
-        db.session.execute(ins)
-        rep = sa.Table('facthousesenate_f3', db.metadata, autoload=True, autoload_with=db.engine)
+        rep = sa.Table('fec_vsum_f3', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
-            cmte_sk=7,
             indv_unitem_contb_per=20,
-            facthousesenate_f3_sk=3,
-            two_yr_period_sk=2016,
-            load_date=datetime.datetime.now(),
+            cmte_id=existing.committee_id,
+            election_cycle=2016,
+            sub_id=9,
+            most_recent_filing_flag='Y'
         )
         db.session.execute(ins)
         db.session.commit()

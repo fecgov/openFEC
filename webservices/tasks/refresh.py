@@ -24,3 +24,22 @@ def refresh():
         mail.send_mail(buffer)
     except Exception as error:
         logger.exception(error)
+
+
+@app.task
+def refresh_and_rebuild():
+    """Comprehensive schedule updates to ensure that data is up to date.
+    As with regular updates, email logs are also sent.
+    """
+    buffer = io.StringIO()
+    with mail.CaptureLogs(manage.logger, buffer):
+        try:
+            manage.rebuild_aggregates()
+            manage.refresh_materialized()
+            download.clear_bucket()
+        except Exception as error:
+            manage.logger.exception(error)
+    try:
+        mail.send_mail(buffer)
+    except Exception as error:
+        logger.exception(error)

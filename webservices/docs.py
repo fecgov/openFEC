@@ -318,7 +318,6 @@ This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/func
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
-
 The data is divided in two-year periods, called `two_year_transaction_period`, which
 is derived from the `contribution_receipt_date`. If no value is supplied, the results
 will default to the most recent two-year period that is named after the ending,
@@ -356,12 +355,10 @@ reported as part of forms F3, F3X and F3P.
 '''
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
-
 The data is divided in two-year periods, called `two_year_transaction_period`, which
 is derived from the `disbursement_date`. If no value is supplied, the results will
 default to the most recent two-year period that is named after the ending,
 even-numbered year.
-
 
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -549,6 +546,23 @@ the election or defeat of any Federal candidate.  The costs of such communicatio
 must be reported to the Federal Election Commission under certain circumstances.
 '''
 
+FILER_RESOURCES = '''
+Useful tools for those who file with the FEC.
+
+Look up RAD analyst with telephone extension by committee_id.
+'''
+
+RAD_ANALYST = '''
+Use this endpoint to look up the RAD Analyst for a committee.
+
+The mission of the Reports Analysis Division (RAD) is to ensure that
+campaigns and political committees file timely and accurate reports that fully disclose
+their financial activities.  RAD is responsible for reviewing statements and financial
+reports filed by political committees participating in federal elections, providing
+assistance and guidance to the committees to properly file their reports, and for taking
+appropriate action to ensure compliance with the Federal Election Campaign Act (FECA).
+'''
+
 
 # fields and filters
 
@@ -626,6 +640,16 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - Y party, qualified\n\
         - Z national party non-federal account\n\
 '
+PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - Q PAC - qualified\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+'
+
 TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
 committee, the most recent treasurer will be shown.'
 COMMITTEE_STATE = 'State of the committee\'s address as filed on the Form 1'

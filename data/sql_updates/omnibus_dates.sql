@@ -95,7 +95,7 @@ with elections_raw as(
         due_date::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
-        null::text as url
+        create_reporting_link(due_date::timestamp) as url
     from reports_raw
     where
         -- exclude pre-primary presidential reports in even years, realistically people file monthly.
@@ -146,8 +146,7 @@ with elections_raw as(
         ie_24hour_start::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
-        -- re-create these links later
-        null::text as url
+        create_reporting_link(ie_24hour_start::timestamp) as url
     from reporting_periods_raw
     group by
         ie_24hour_start,
@@ -184,8 +183,7 @@ with elections_raw as(
         ie_48hour_start::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
-        -- re create these links later
-        null::text as url
+        create_reporting_link(ie_48hour_start::timestamp) as url
     from reporting_periods_raw
     group by
         ie_48hour_start,
@@ -222,8 +220,7 @@ with elections_raw as(
         ec_start::timestamp as start_date,
         null::timestamp as end_date,
         true as all_day,
-        -- re create these links later
-        null::text as url
+        create_reporting_link(ec_start::timestamp) as url
     from reporting_periods_raw
     group by
         ec_start,
