@@ -155,8 +155,6 @@ class ReportsIEOnlyFactory(BaseFactory):
 class ScheduleAFactory(BaseFactory):
     class Meta:
         model = models.ScheduleA
-    load_date = datetime.datetime.utcnow()
-    sched_a_sk = factory.Sequence(lambda n: n)
     sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
     two_year_transaction_period = 2016
@@ -171,8 +169,7 @@ class ScheduleAFactory(BaseFactory):
 class ScheduleBFactory(BaseFactory):
     class Meta:
         model = models.ScheduleB
-    sched_b_sk = factory.Sequence(lambda n: n)
-    load_date = datetime.datetime.utcnow()
+    sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
     two_year_transaction_period = 2016
 

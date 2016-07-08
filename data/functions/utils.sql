@@ -5,6 +5,15 @@ begin
 end
 $$ language plpgsql immutable;
 
+create or replace function get_transaction_year(transaction_date timestamp, report_year numeric)
+returns smallint as $$
+declare
+    dah_date date = date(transaction_date);
+begin
+    return get_transaction_year(dah_date, report_year);
+end
+$$ language plpgsql immutable;
+
 -- Figures out the appropriate year to use for the transaction of a Schedule A
 -- or Schedule B record.  This function is used to fill in the value of the
 -- "transaction_two_year_period" column for the openFEC Schedule A and B tables
