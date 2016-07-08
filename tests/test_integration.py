@@ -24,18 +24,17 @@ def make_factory():
     class SchedAFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.sched_a
-        load_date = datetime.datetime.utcnow()
-        sched_a_sk = factory.Sequence(lambda n: n)
+            model = automap.classes.fec_vsum_sched_a
+        filing_form = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
 
     class SchedBFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.sched_b
-        sched_b_sk = factory.Sequence(lambda n: n)
-        load_date = datetime.datetime.utcnow()
+            model = automap.classes.fec_vsum_sched_b
+        filing_form = '11'
+        sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
 
     return SchedAFactory, SchedBFactory
@@ -143,13 +142,11 @@ class TestViews(common.IntegrationTestCase):
         row = self.SchedAFactory(
             rpt_yr=2014,
             contbr_nm='Sheldon Adelson',
-            load_date=datetime.datetime.now(),
-            sub_id=7,
         )
         db.session.commit()
         manage.update_aggregates()
         search = models.ScheduleA.query.filter(
-            models.ScheduleA.sched_a_sk == row.sched_a_sk
+            models.ScheduleA.sub_id == row.sub_id
         ).one()
         self.assertEqual(search.contributor_name_text, "'adelson':2 'sheldon':1")
 
@@ -159,7 +156,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.commit()
         manage.update_aggregates()
         search = models.ScheduleA.query.filter(
-            models.ScheduleA.sched_a_sk == row.sched_a_sk
+            models.ScheduleA.sub_id == row.sub_id
         ).one()
         db.session.refresh(search)
         self.assertEqual(search.contributor_name_text, "'adelson':2 'shelli':1")
@@ -170,7 +167,7 @@ class TestViews(common.IntegrationTestCase):
         manage.update_aggregates()
         self.assertEqual(
             models.ScheduleA.query.filter(
-                models.ScheduleA.sched_a_sk == row.sched_a_sk
+                models.ScheduleA.sub_id == row.sub_id
             ).count(),
             0,
         )
@@ -189,7 +186,7 @@ class TestViews(common.IntegrationTestCase):
         manage.update_aggregates()
         self.assertEqual(
             models.ScheduleA.query.filter(
-                models.ScheduleA.sched_a_sk == row.sched_a_sk
+                models.ScheduleA.sub_id == row.sub_id
             ).count(),
             1,
         )
@@ -361,6 +358,7 @@ class TestViews(common.IntegrationTestCase):
             cmte_id='C12345',
             disb_amt=538,
             disb_desc='CAMPAIGN BUTTONS',
+            filing_form='11'
         )
         db.session.commit()
         manage.update_aggregates()
