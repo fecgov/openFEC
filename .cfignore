@@ -1,4 +1,5 @@
 cache
+node_modules/
 
 .DS_Store
 
@@ -58,3 +59,6 @@ target/
 
 # PG dumps, DDL, etc.
 data/subset.dump
+
+# DO include the swagger-ui dist dir
+!/static/swagger-ui/dist/
