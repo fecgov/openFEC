@@ -5,7 +5,7 @@ select
     *,
     report_pdf_url(image_num) as pdf_url
 from nml_form_76
-where extract(year from communication_dt) >= :START_YEAR
+where extract(year from communication_dt)::integer >= :START_YEAR
 ;
 
 create unique index on ofec_communication_cost_mv_tmp (idx);
