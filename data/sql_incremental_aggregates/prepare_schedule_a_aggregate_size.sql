@@ -11,8 +11,8 @@ end
 $$ language plpgsql;
 
 -- Create initial aggregate
-drop table if exists ofec_sched_a_aggregate_size cascade;
-create table ofec_sched_a_aggregate_size as
+drop table if exists ofec_sched_a_aggregate_size_tmp cascade;
+create table ofec_sched_a_aggregate_size_tmp as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
@@ -27,11 +27,15 @@ group by cmte_id, cycle, size
 ;
 
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_size (cmte_id);
-create index on ofec_sched_a_aggregate_size (cycle);
-create index on ofec_sched_a_aggregate_size (size);
-create index on ofec_sched_a_aggregate_size (total);
-create index on ofec_sched_a_aggregate_size (count);
+create index on ofec_sched_a_aggregate_size_tmp (cmte_id);
+create index on ofec_sched_a_aggregate_size_tmp (cycle);
+create index on ofec_sched_a_aggregate_size_tmp (size);
+create index on ofec_sched_a_aggregate_size_tmp (total);
+create index on ofec_sched_a_aggregate_size_tmp (count);
+
+-- Remove previous aggregate and rename new aggregate
+drop table if exists ofec_sched_a_aggregate_size cascade;
+alter table ofec_sched_a_aggregate_size_tmp rename to ofec_sched_a_aggregate_size;
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_size() returns void as $$
