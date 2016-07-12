@@ -1,10 +1,4 @@
 import sqlalchemy as sa
-"""
-For debugging
-vvvvvvvvvvvvv
-"""
-from sqlalchemy.sql import compiler
-from psycopg2.extensions import adapt as sqlescape
 
 from flask_apispec import doc, marshal_with
 
@@ -203,23 +197,4 @@ class TotalsCandidateView(ApiResource):
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         return query
 
-    """
-        Helper method that prints out what the actual SQL query is, I had problems figuring out
-        why totals were missing the flags.  They were missing from the sql select statement.
-        Referenced from here:
-        http://stackoverflow.com/questions/4617291/how-do-i-get-a-raw-compiled-sql-query-from-a-sqlalchemy-expression
-
-    def compile_query(self,query):
-        dialect = query.session.bind.dialect
-        statement = query.statement
-        comp = compiler.SQLCompiler(dialect, statement)
-        comp.compile()
-        enc = dialect.encoding
-        params = {}
-        for k, v in comp.params.items():
-            if isinstance(v, unicode):
-                v = v.encode(enc)
-            params[k] = sqlescape(v)
-        return (comp.string.encode(enc) % params).decode(enc)
-    """
 
