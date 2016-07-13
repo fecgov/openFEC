@@ -208,6 +208,9 @@ class TestCandidateAggregates(ApiBaseTest):
             is_election=False,
             receipts=75,
         )
+        factories.CandidateFlagsFactory(
+            candidate_id = self.candidate.candidate_id
+        )
         db.session.flush()
         # Create two-year totals for both the target period (2011-2012) and the
         # previous period (2009-2010) for testing the `election_full` flag
@@ -310,6 +313,7 @@ class TestCandidateAggregates(ApiBaseTest):
         assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
 
     def test_totals_full(self):
+        print(self.candidate.candidate_id)
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
