@@ -34,7 +34,10 @@ create index on ofec_sched_a_aggregate_size_tmp (total);
 create index on ofec_sched_a_aggregate_size_tmp (count);
 
 -- Remove previous aggregate and rename new aggregate
-drop table if exists ofec_sched_a_aggregate_size cascade;
+-- ofec_sched_a_aggregate_size_old is removed when the dependent materialized
+-- view (ofec_sched_a_aggregate_size_merged_mv) is recreated to prevent
+-- missing data impacting the API during a refresh/rebuild.
+alter table ofec_sched_a_aggregate_size rename to ofec_sched_a_aggregate_size_old;
 alter table ofec_sched_a_aggregate_size_tmp rename to ofec_sched_a_aggregate_size;
 
 -- Create update function
