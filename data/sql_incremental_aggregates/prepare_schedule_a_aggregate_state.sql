@@ -8,7 +8,9 @@ select
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
 from fec_vsum_sched_a
-where rpt_yr >= :START_YEAR_AGGREGATE
+where
+    rpt_yr >= :START_YEAR_AGGREGATE and
+    is_unitemized(memo_text::text) = false
 and contb_receipt_amt is not null
 and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, state
