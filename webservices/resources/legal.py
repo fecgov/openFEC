@@ -18,6 +18,7 @@ class Search(utils.Resource):
             query = {"query": {"bool": {
                      "must": [{"match": {"_all": q}}, {"term": {"_type": type}}],
                                "should": [{"match": {"no": q}},
+                                          {"match": {"category": "Final Opinion"}},
                                                {"match_phrase": {"_all": {"query": q,
                                                                           "slop": 50}
                                                                  }
