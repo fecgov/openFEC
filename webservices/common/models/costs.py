@@ -37,7 +37,9 @@ class CommunicationCost(db.Model):
     report_year = db.Column('rpt_yr', db.Integer, index=True)
     pdf_url = db.Column(db.String)
     """
-    candidate_id = db.Column('s_o_cand_id', db.String, index=True)
+    candidate_id = db.Column('cand_id', db.String, index=True)
+    committee_id = db.Column('cmte_id', db.String, index=True)
+
     #Deprecated
     #committee_name = db.Column('cmte_nm', db.String)
     candidate_name = db.Column('s_o_cand_nm', db.String)
@@ -56,7 +58,7 @@ class CommunicationCost(db.Model):
     transaction_amount = db.Column('communication_cost', db.Numeric(30, 2), index=True)
     transaction_type = db.Column('transaction_tp', db.String)
     receipt_date = db.Column('receipt_dt', db.String)
-    purpose = db.Column(db.String)
+    #purpose = db.Column(db.String)
     communication_type = db.Column('communication_tp', db.String, index=True)
     communication_type_full = db.Column('communication_tp_desc', db.String)
     communication_class = db.Column('communication_class', db.String, index=True)
@@ -69,6 +71,8 @@ class CommunicationCost(db.Model):
     #schedule_type_code = db.Column('form_tp', db.String, index=True)
     tran_id = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
+    image_number = db.Column('image_num', db.String, index=True)
+
     #deprecated as per usual
     #report_year = db.Column('rpt_yr', db.Integer, index=True)
     #pdf_url = db.Column(db.String)
