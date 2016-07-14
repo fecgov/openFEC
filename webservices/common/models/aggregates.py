@@ -68,8 +68,6 @@ class ScheduleBByPurpose(BaseAggregate):
 
 class BaseSpendingAggregate(BaseAggregate):
     __abstract__ = True
-    # It seems this base could be used by model/costs.py?
-    # Or perhaps factor this up into that class? Slight DRY violation
     committee_id = db.Column('cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
     committee = utils.related_committee('committee_id')
     candidate_id = db.Column('cand_id', db.String, primary_key=True, doc=docs.CANDIDATE_ID)
