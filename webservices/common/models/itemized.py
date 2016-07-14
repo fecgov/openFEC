@@ -59,6 +59,8 @@ class ScheduleA(BaseItemized):
     contributor_occupation = db.Column('contbr_occupation', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
     contributor_occupation_text = db.Column(TSVECTOR)
     contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
+    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
+    is_individual = db.Column(db.Boolean, index=True)
 
     # Primary transaction info
     receipt_type = db.Column('receipt_tp', db.String)
@@ -82,7 +84,6 @@ class ScheduleA(BaseItemized):
     amendment_indicator_desc = db.Column('action_cd_desc', db.String)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
-    is_individual = db.Column(db.Boolean, index=True)
     increased_limit = db.Column(db.String)
     load_date = db.Column('pg_date', db.DateTime)
     transaction_id = db.Column('tran_id', db.Integer)
