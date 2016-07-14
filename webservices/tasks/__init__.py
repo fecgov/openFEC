@@ -10,6 +10,21 @@ from raven.contrib.celery import register_signal, register_logger_signal
 from webservices.env import env
 from webservices.tasks import utils
 
+
+# Feature and dev are sharing the same RDS box so we only want dev to update
+schedule = {}
+if not os.getenv('FEATURE'):
+    schedule = {
+        'refresh': {
+            'task': 'webservices.tasks.refresh.refresh',
+            'schedule': crontab(minute=0, hour=9, day_of_week='sun-fri'),
+        },
+        'refresh_and_rebuild': {
+            'task': 'webservices.tasks.refresh.refresh_and_rebuild',
+            'schedule': crontab(minute=0, hour=9, day_of_week='sat'),
+        }
+    }
+
 def redis_url():
     redis = env.get_service(label='redis28-swarm')
     if redis:
@@ -26,16 +41,7 @@ app.conf.update(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
     ),
-    CELERYBEAT_SCHEDULE={
-        'refresh': {
-            'task': 'webservices.tasks.refresh.refresh',
-            'schedule': crontab(minute=0, hour=9, day_of_week='sun-fri'),
-        },
-        'refresh_and_rebuild': {
-            'task': 'webservices.tasks.refresh.refresh_and_rebuild',
-            'schedule': crontab(minute=0, hour=9, day_of_week='sat'),
-        }
-    }
+    CELERYBEAT_SCHEDULE=schedule,
 )
 
 client = Client(env.get_credential('SENTRY_DSN'))
