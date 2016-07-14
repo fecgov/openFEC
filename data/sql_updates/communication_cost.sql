@@ -3,6 +3,8 @@ create materialized view ofec_communication_cost_mv_tmp as
 select
     row_number() over () as idx,
     *,
+    s_o_cand_id as cand_id,
+    org_id as cmte_id,
     report_pdf_url(image_num) as pdf_url
 from nml_form_76
 where extract(year from communication_dt)::integer >= :START_YEAR
@@ -10,8 +12,8 @@ where extract(year from communication_dt)::integer >= :START_YEAR
 
 create unique index on ofec_communication_cost_mv_tmp (idx);
 
-create index on ofec_communication_cost_mv_tmp (org_id);
-create index on ofec_communication_cost_mv_tmp (s_o_cand_id);
+create index on ofec_communication_cost_mv_tmp (cmte_id);
+create index on ofec_communication_cost_mv_tmp (cand_id);
 create index on ofec_communication_cost_mv_tmp (s_o_cand_office_st);
 create index on ofec_communication_cost_mv_tmp (s_o_cand_office_district);
 create index on ofec_communication_cost_mv_tmp (s_o_cand_office);

@@ -2,9 +2,9 @@ drop materialized view if exists ofec_communication_cost_aggregate_candidate_mv_
 create materialized view ofec_communication_cost_aggregate_candidate_mv_tmp as
 select
     row_number() over () as idx,
-    org_id,
-    s_o_cand_id,
-    s_o_cand_id as support_oppose_indicator,
+    s_o_ind as support_oppose_indicator,
+    org_id as cmte_id,
+    s_o_cand_id as cand_id,
     sum(communication_cost) as total,
     count(communication_cost) as count,
     extract(year from communication_dt)::integer + extract(year from communication_dt)::integer % 2 as cycle
@@ -20,8 +20,8 @@ group by
 
 create unique index on ofec_communication_cost_aggregate_candidate_mv_tmp (idx);
 
-create index on ofec_communication_cost_aggregate_candidate_mv_tmp (org_id);
-create index on ofec_communication_cost_aggregate_candidate_mv_tmp (s_o_cand_id);
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (cmte_id);
+create index on ofec_communication_cost_aggregate_candidate_mv_tmp (cand_id);
 create index on ofec_communication_cost_aggregate_candidate_mv_tmp (support_oppose_indicator);
 create index on ofec_communication_cost_aggregate_candidate_mv_tmp (cycle);
 create index on ofec_communication_cost_aggregate_candidate_mv_tmp (total);
