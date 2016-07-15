@@ -58,8 +58,11 @@ class ScheduleBView(ItemizedResource):
             ),
         )
 
-    def build_query(self, **kwargs):
+    def build_query(self, sub_id=None, **kwargs):
         query = super(ScheduleBView, self).build_query(**kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
+        if kwargs.get('sub_id'):
+            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         return query
+
