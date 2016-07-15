@@ -32,7 +32,7 @@ def refresh_and_rebuild():
     As with regular updates, email logs are also sent.
     """
     buffer = io.StringIO()
-    itemized_schedules = ['a', 'b']
+    itemized_schedules = ['a', 'b', 'e']
 
     with mail.CaptureLogs(manage.logger, buffer):
         try:
