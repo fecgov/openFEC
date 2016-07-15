@@ -29,6 +29,34 @@ logging.basicConfig(level=logging.INFO)
 manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
+def get_projected_weekly_itemized_totals(schedules):
+    """Calculates the weekly total of itemized records that should have been
+    processed at the point when the weekly aggregate rebuild takes place.
+    """
+
+    projected_weekly_totals = {}
+
+    for schedule in schedules:
+        cmd = 'select get_projected_weekly_itemized_total(\'{0}\');'.format(schedule)
+        result = db.engine.execute(cmd)
+        projected_weekly_totals[schedule] = result.scalar()
+
+    return projected_weekly_totals
+
+def get_actual_weekly_itemized_totals(schedules):
+    """Retrieves the actual weekly total of itemized records that have been
+    processed at the time of the weekly aggregate rebuild.
+    """
+
+    actual_weekly_totals = {}
+
+    for schedule in schedules:
+        cmd = 'select count(*) from ofec_sched_{0}_master where pg_date > current_date - interval \'7 days\';'.format(schedule)
+        result = db.engine.execute(cmd)
+        actual_weekly_totals[schedule] = result.scalar()
+
+    return actual_weekly_totals
+
 def execute_sql_file(path):
     """This helper is typically used within a multiprocessing pool; create a new database
     engine for each job.
