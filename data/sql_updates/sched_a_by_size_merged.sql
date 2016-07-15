@@ -1,5 +1,11 @@
+-- Drop original table referenced in the creation of this view.
+-- This is done here in order to prevent missing data impacting the API during
+-- a refresh/rebuild.
+drop table if exists ofec_sched_a_aggregate_size_old cascade;
+
 -- Merge aggregated Schedule A receipts with committee totals views
 drop materialized view if exists ofec_sched_a_aggregate_size_merged_mv_tmp;
+
 create materialized view ofec_sched_a_aggregate_size_merged_mv_tmp as
 with grouped as (
     select
