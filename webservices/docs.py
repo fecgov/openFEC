@@ -348,6 +348,10 @@ Note: because the Schedule A data includes many records, counts for
 large result sets are approximate.
 '''
 
+SUB_ID = '''
+A unique database identifier for itemized receipts or disbursements.
+'''
+
 SCHEDULE_B_TAG = '''
 Schedule B filings describe itemized disbursements. This data
 explains how committees and other filers spend their money. These figures are
