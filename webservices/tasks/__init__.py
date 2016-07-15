@@ -13,7 +13,7 @@ from webservices.tasks import utils
 
 # Feature and dev are sharing the same RDS box so we only want dev to update
 schedule = {}
-if env.app('space_name') != 'feature':
+if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     schedule = {
         'refresh': {
             'task': 'webservices.tasks.refresh.refresh',
