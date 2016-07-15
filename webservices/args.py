@@ -314,7 +314,6 @@ calendar_dates = {
 
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'sub_id': fields.List(IStr, description=docs.SUB_ID),
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
     'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
@@ -380,7 +379,6 @@ schedule_b_by_recipient_id = {
 
 schedule_b = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'sub_id': fields.List(IStr, description=docs.SUB_ID),
     'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
     'recipient_name': fields.List(fields.Str, description='Name of recipient'),
     'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
