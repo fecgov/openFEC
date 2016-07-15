@@ -47,7 +47,7 @@ def refresh_and_rebuild():
             for schedule in itemized_schedules:
                 manage.logger.info(
                     'Schedule {0} weekly totals: Projected = {1} / Actual = {2}'.format(
-                        schedule,
+                        schedule.upper(),
                         projected_weekly_totals[schedule],
                         actual_weekly_totals[schedule]
                     )
