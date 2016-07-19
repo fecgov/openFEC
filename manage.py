@@ -203,14 +203,14 @@ def update_aggregates():
         )
 
         partition.SchedAGroup.refresh_children()
-        partition.SchedBGroup.refresh_children()
-
-        db.engine.execute('select ofec_sched_e_update()')
-
         db.engine.execute('delete from ofec_sched_a_queue_new')
         db.engine.execute('delete from ofec_sched_a_queue_old')
+
+        partition.SchedBGroup.refresh_children()
         db.engine.execute('delete from ofec_sched_b_queue_new')
         db.engine.execute('delete from ofec_sched_b_queue_old')
+
+        db.engine.execute('select ofec_sched_e_update()')
         db.engine.execute('delete from ofec_sched_e_queue_new')
         db.engine.execute('delete from ofec_sched_e_queue_old')
     logger.info('Finished updating incremental aggregates.')
