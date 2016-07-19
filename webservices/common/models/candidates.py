@@ -62,6 +62,7 @@ class BaseConcreteCandidate(BaseCandidate):
 
 class Candidate(BaseConcreteCandidate):
     __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_candidate_detail_mv'
 
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
@@ -82,6 +83,7 @@ class Candidate(BaseConcreteCandidate):
 
 class CandidateDetail(BaseConcreteCandidate):
     __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_candidate_detail_mv'
 
     address_city = db.Column(db.String(100), doc='City of candidate\'s address, as reported on their Form 2.')
     address_state = db.Column(db.String(2), doc='State of candidate\'s address, as reported on their Form 2.')
