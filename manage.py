@@ -8,8 +8,8 @@ import multiprocessing
 
 import networkx as nx
 import sqlalchemy as sa
-from flask.ext.script import Server
-from flask.ext.script import Manager
+from flask_script import Server
+from flask_script import Manager
 
 from webservices import flow
 from webservices.env import env
