@@ -34,3 +34,7 @@ boto3==1.2.2
 celery==3.1.19
 celery-once==0.1.4
 redis==2.10.5
+
+# weekly updates
+pandas==0.16.2
+xlrd==0.9.4
