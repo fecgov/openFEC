@@ -10,6 +10,10 @@ from webservices import args
 from webservices import rest
 from webservices import sorting
 from webservices.resources import candidate_aggregates
+from webservices.resources import elections
+from webservices.rest import db
+
+from sqlalchemy.dialects import postgresql
 
 from webservices.common import models
 
@@ -68,6 +72,51 @@ class TestSort(ApiBaseTest):
         query, columns = sorting.sort(tcv.build_query(election_full=False), 'disbursements', model=None, hide_null=True)
         self.assertEqual(len(query.all()), len(candidates) - 1)
         self.assertTrue(candidates[1].candidate_id in query.all()[0])
+
+    def test_hide_null_election(self):
+        candidates = [
+            factories.CandidateFactory(candidate_id='C1234'),
+            factories.CandidateFactory(candidate_id='C5678'),
+        ]
+        cmteFacorty = [
+            factories.CommitteeDetailFactory(committee_id='H1234')
+        ]
+        db.session.flush()
+        candidateHistory = [
+            factories.CandidateHistoryFactory(candidate_id='C1234', two_year_period=2016, state='MO', candidate_inactive=False, district='00', office='S'),
+            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, state='KS', candidate_inactive=False, district='00', office='S')
+        ]
+        candidateCmteLinks = [
+            factories.CandidateCommitteeLinkFactory(committee_id='H1234', candidate_id='C1234', fec_election_year=2016,committee_designation='P'),
+            factories.CandidateCommitteeLinkFactory(committee_id='H1234', candidate_id='C5678', fec_election_year=2016,committee_designation='P')
+        ]
+        cmteTotalsFactory = [
+            factories.CommitteeTotalsHouseSenateFactory(committee_id='H1234', cycle=2016),
+            factories.CommitteeTotalsHouseSenateFactory(committee_id='H1234', cycle=2016, disbursements='9999.99'),
+        ]
+        electionResults = [
+            factories.ElectionResultFactory(cand_id='C1234', election_yr=2016, cand_office='S', cand_office_st='MO', cand_office_district='00' ),
+            factories.ElectionResultFactory(cand_id='C5678', election_yr=2016, cand_office='S', cand_office_st='KS',
+                                            cand_office_district='00')
+
+        ]
+        db.session.flush()
+        arg_map = {}
+        arg_map['office'] = 'senate'
+        arg_map['cycle'] = 2016
+        arg_map['state'] = 'MO'
+        arg_map['district'] = '00'
+
+        electionView = elections.ElectionView()
+        query, columns = sorting.sort(electionView._get_records(arg_map), 'total_disbursements', model=None)
+        print(str(query.statement.compile(dialect=postgresql.dialect())))
+        self.assertEqual(len(query.all()), len(candidates))
+        query, columns = sorting.sort(electionView._get_records(arg_map), 'total_disbursements', model=None, hide_null=True)
+        self.assertEqual(len(query.all()), len(candidates) - 1)
+        self.assertTrue(candidates[1].candidate_id in query.all()[0])
+
+
+
 
 
 
