@@ -32,6 +32,7 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
             if entity._label_name == column:
                 single_model = get_class_by_tablename(entity.namespace)
                 if not single_model:
+                    column = entity.column
                     break
                 column = getattr(single_model, column)
                 break
