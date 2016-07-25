@@ -1,5 +1,6 @@
-drop table if exists ofec_sched_a_aggregate_state;
-create table ofec_sched_a_aggregate_state as
+-- Create initial aggregate
+drop table if exists ofec_sched_a_aggregate_state_tmp;
+create table ofec_sched_a_aggregate_state_tmp as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
@@ -16,14 +17,19 @@ and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
 group by cmte_id, cycle, state
 ;
 
-alter table ofec_sched_a_aggregate_state add column idx serial primary key;
+alter table ofec_sched_a_aggregate_state_tmp add column idx serial primary key;
 
-create index on ofec_sched_a_aggregate_state (cmte_id, idx);
-create index on ofec_sched_a_aggregate_state (cycle, idx);
-create index on ofec_sched_a_aggregate_state (state, idx);
-create index on ofec_sched_a_aggregate_state (state_full, idx);
-create index on ofec_sched_a_aggregate_state (total, idx);
-create index on ofec_sched_a_aggregate_state (count, idx);
+-- Create indices on aggregate
+create index on ofec_sched_a_aggregate_state_tmp (cmte_id, idx);
+create index on ofec_sched_a_aggregate_state_tmp (cycle, idx);
+create index on ofec_sched_a_aggregate_state_tmp (state, idx);
+create index on ofec_sched_a_aggregate_state_tmp (state_full, idx);
+create index on ofec_sched_a_aggregate_state_tmp (total, idx);
+create index on ofec_sched_a_aggregate_state_tmp (count, idx);
+
+-- Remove previous aggregate and rename new aggregate
+drop table if exists ofec_sched_a_aggregate_state;
+alter table ofec_sched_a_aggregate_state_tmp rename to ofec_sched_a_aggregate_state;
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_state() returns void as $$

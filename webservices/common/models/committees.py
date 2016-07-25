@@ -17,22 +17,22 @@ class CommitteeSearch(BaseModel):
 class BaseCommittee(BaseModel):
     __abstract__ = True
 
+    name = db.Column(db.String(100), index=True, doc=docs.COMMITTEE_NAME)
     committee_id = db.Column(db.String, primary_key=True, index=True, doc=docs.COMMITTEE_ID)
     cycles = db.Column(ARRAY(db.Integer), index=True, doc=docs.COMMITTEE_CYCLE)
-    designation = db.Column(db.String(1), index=True, doc=docs.DESIGNATION)
-    designation_full = db.Column(db.String(25), index=True, doc=docs.DESIGNATION)
     treasurer_name = db.Column(db.String(100), index=True, doc=docs.TREASURER_NAME)
     treasurer_text = db.Column(TSVECTOR)
-    organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
-    organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
-    state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
     committee_type = db.Column(db.String(1), index=True, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String(50), index=True, doc=docs.COMMITTEE_TYPE)
-    # ? how to explain
-    expire_date = db.Column(db.DateTime())
+    designation = db.Column(db.String(1), index=True, doc=docs.DESIGNATION)
+    designation_full = db.Column(db.String(25), index=True, doc=docs.DESIGNATION)
+    organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
+    organization_type_full = db.Column(db.String(100), index=True, doc=docs.ORGANIZATION_TYPE)
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(50), doc=docs.PARTY)
-    name = db.Column(db.String(100), index=True, doc=docs.COMMITTEE_NAME)
+    state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
+    # ? how to explain
+    expire_date = db.Column(db.DateTime())
 
 
 class BaseConcreteCommittee(BaseCommittee):
