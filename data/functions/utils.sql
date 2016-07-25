@@ -48,3 +48,27 @@ begin
     end;
 end
 $$ language plpgsql;
+
+-- Returns a projected weekly total of all itemized records that have been
+-- added and are scheduled to be added or removed the day of as well.
+
+-- Params:
+--   schedule:      the itemized schedule table to calculate the totals for.
+
+-- Returns:
+--   The calculated projected weekly total of records processed fort the given
+--   itemized schedule table.
+create or replace function get_projected_weekly_itemized_total(schedule text)
+returns integer as $$
+declare
+    weekly_total integer;
+begin
+    execute 'select
+        (select count(*) from ofec_sched_' || schedule || '_master where pg_date > current_date - interval ''7 days'') +
+        (select count(*) from ofec_sched_' || schedule || '_queue_new) -
+        (select count(*) from ofec_sched_' || schedule || '_queue_old)'
+    into weekly_total;
+
+    return weekly_total;
+end
+$$ language plpgsql;
