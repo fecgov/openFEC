@@ -22,7 +22,8 @@ begin
     return (
         amount < 200 and
         coalesce(line_number, '') in ('11AI', '12', '17', '17A', '18') and
-        not is_earmark(memo_code, memo_text)
+        not is_earmark(memo_code, memo_text) and
+        is_not_committee(contbr_id, cmte_id)
     );
 end
 $$ language plpgsql immutable;
@@ -40,11 +41,20 @@ $$ language plpgsql immutable;
 
 
 -- unitemized contributions should not be included in the state breakdowns
-create or replace function is_unitemized(memo_text text)
-    returns bool as $$
+create or replace function is_unitemized(memo_text text) returns bool as $$
 begin
   return (coalesce(memo_text, '') ~* 'UNITEM');
 end
 $$ language plpgsql immutable;
 
 
+--- Need to add a check for committees that are individuals
+-- there are a lot of data errors, this makes sure that we are not marking committees as individuals because it is an obvious error
+create or replace function is_not_committee(contbr_id text, cmte_id text) returns bool as $$
+begin
+    return(
+        contbr_id = null or
+        cmte_id = contbr_id
+    );
+end
+$$ language plpgsql immutable;
