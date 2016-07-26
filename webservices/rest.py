@@ -269,7 +269,9 @@ apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
+apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
+
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
