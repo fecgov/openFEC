@@ -10,7 +10,7 @@ from webservices.common.views import ItemizedResource
 
 
 @doc(
-    tags=['schedules/schedule_e'],
+    tags=['independent expenditures'],
     description=docs.SCHEDULE_E,
 )
 class ScheduleEView(ItemizedResource):
