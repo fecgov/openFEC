@@ -345,7 +345,7 @@ To fetch the next page of results, append "last_index=230880619&last_contributio
 to the URL.
 
 Note: because the Schedule A data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 SUB_ID = '''
@@ -386,7 +386,7 @@ To fetch the next page of results, append "last_index=230906248&amp;last_disburs
 to the URL.
 
 Note: because the Schedule B data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 SCHEDULE_B_BY_PURPOSE = '''
@@ -436,7 +436,7 @@ To fetch the next page of results, append
 "&last_index=3023037&last_expenditure_amount=-17348.5" to the URL.
 
 Note: because the Schedule E data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 SIZE_DESCRIPTION = '''
@@ -482,7 +482,7 @@ FILINGS = '''
 All official records and reports filed by or delivered to the FEC.
 
 Note: because the filings data includes many records, counts for large
-result sets are approximate.
+result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 DOC_TYPE = '''
@@ -607,7 +607,8 @@ FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has ac
 
 # committees
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
-    the most recent name will be shown.'
+    the most recent name will be shown. Committee names are not unique. Use committee_id \
+    for looking up records.'
 COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
 DESIGNATION = 'The one-letter designation code of the organization:\n\
