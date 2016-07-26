@@ -17,12 +17,8 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     schedule = {
         'refresh': {
             'task': 'webservices.tasks.refresh.refresh',
-            'schedule': crontab(minute=0, hour=9, day_of_week='sun-fri'),
+            'schedule': crontab(minute=0, hour=9),
         },
-        'refresh_and_rebuild': {
-            'task': 'webservices.tasks.refresh.refresh_and_rebuild',
-            'schedule': crontab(minute=0, hour=9, day_of_week='sat'),
-        }
     }
 
 def redis_url():
