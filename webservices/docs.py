@@ -73,7 +73,7 @@ out contributor information in schedule_a.
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
 calls an hour. Each call is limited to 100 results per page. You can email questions or comments to
 [18f-fec@gsa.gov](18f-fec@gsa.gov). You can also ask questions and discuss the data in the
-[FEC data google group](https://groups.google.com/forum/#!forum/fec-data). API changes will also
+[FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). API changes will also
 be added to this group in advance of the change.
 
 The model definitions and schema are available at [/swagger](/swagger/). This is useful for
@@ -521,8 +521,8 @@ Reporting deadlines, election dates FEC meetings, events etc.
 '''
 
 CALENDAR_DATES = '''
-Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
-event into one calendar.
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+events into one calendar.
 
 State filtering now applies to elections, reports and reporting periods.
 
@@ -535,10 +535,10 @@ that creates the calendar.
 '''
 
 CALENDAR_EXPORT = '''
-Returns csv or ics for downloading directly into calendar applications like google, outlook or other applications.
+Returns CSV or ICS for downloading directly into calendar applications like Google, Outlook or other applications.
 
-Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
-event into one calendar.
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+events into one calendar.
 
 State filtering now applies to elections, reports and reporting periods.
 
