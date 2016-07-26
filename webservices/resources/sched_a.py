@@ -11,7 +11,7 @@ from webservices.common.views import ItemizedResource
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description=docs.SCHEDULE_A,
 )
 class ScheduleAView(ItemizedResource):
