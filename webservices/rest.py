@@ -273,7 +273,6 @@ apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 
 
-
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
 docs = Blueprint(
