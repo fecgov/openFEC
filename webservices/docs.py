@@ -530,6 +530,23 @@ This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_
 that creates the calendar.
 '''
 
+CALENDAR_EXPORT = '''
+Returns csv or ics for downloading directly into calendar applications like google, outlook or other applications.
+
+Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
+event into one calendar.
+
+State filtering now applies to elections, reports and reporting periods.
+
+Presidential pre-primary report due dates are not shown on even years.
+Filers generally opt to file monthly rather than submit over 50 pre-primary election
+reports. All reporting deadlines are available at /reporting-dates/ for reference.
+
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+that creates the calendar.
+
+'''
+
 COMMUNICATION_TAG = '''
 Reports of communication costs by corporations and membership organizations
 from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
