@@ -7,6 +7,7 @@ class CommunicationCost(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
+    idx = db.Column(db.Integer)
     candidate_id = db.Column('cand_id', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
     pdf_url = db.Column(db.String)
@@ -18,7 +19,7 @@ class CommunicationCost(db.Model):
     state_full = db.Column('s_o_cand_office_st_desc', db.String)
     candidate_office_district = db.Column('s_o_cand_office_district', db.String, index=True)
     candidate_office = db.Column('s_o_cand_office', db.String, index=True)
-    candidate_office_full =db.Column('s_o_cand_office_desc')
+    candidate_office_full =db.Column('s_o_cand_office_desc', db.String)
     transaction_date = db.Column('communication_dt', db.Date, index=True)
     transaction_amount = db.Column('communication_cost', db.Numeric(30, 2), index=True)
     transaction_type = db.Column('transaction_tp', db.String)
