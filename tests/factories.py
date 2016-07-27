@@ -89,6 +89,11 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
         model = models.CommitteeHistory
     cycle = 2016
 
+class CommitteeTotalsHouseSenateFactory(BaseCommitteeFactory):
+    class Meta:
+        model = models.CommitteeTotalsHouseSenate
+    cycle = 2016
+
 
 # Force linked factories to share sequence counters
 for each in BaseCandidateFactory.__subclasses__():

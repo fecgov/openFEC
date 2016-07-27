@@ -10,7 +10,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from webservices.env import env
 from pyelasticsearch import ElasticSearch
 
-from flask.ext import restful
+import flask_restful as restful
 from marshmallow_pagination import paginators
 
 from webargs import fields
