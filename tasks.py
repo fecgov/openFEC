@@ -85,7 +85,7 @@ def build_test(source, dest, fraction=DEFAULT_FRACTION, log=True):
 
 
 @task
-def dump(source, dest):
+def dump(ctx, source, dest):
     cmd = 'pg_dump {source} --format c --no-acl --no-owner -f {dest}'.format(**locals())
     for table in EXCLUDE_TABLES:
         cmd += ' --exclude-table {0}'.format(table)
@@ -93,13 +93,13 @@ def dump(source, dest):
 
 
 @task
-def add_hooks():
+def add_hooks(ctx):
     run('ln -s ../../bin/post-merge .git/hooks/post-merge')
     run('ln -s ../../bin/post-checkout .git/hooks/post-checkout')
 
 
 @task
-def remove_hooks():
+def remove_hooks(ctx):
     run('rm .git/hooks/post-merge')
     run('rm .git/hooks/post-checkout')
 
@@ -207,7 +207,7 @@ def deploy(space=None, branch=None, yes=False):
 
 # this will not be called because the slack integrations are off
 @task
-def notify():
+def notify(ctx):
     try:
         meta = json.load(open('.cfmeta'))
     except OSError:
