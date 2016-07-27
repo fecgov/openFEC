@@ -7,7 +7,6 @@ class CommunicationCost(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
-    idx = db.Column(db.Integer)
     candidate_id = db.Column('cand_id', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
     pdf_url = db.Column(db.String)
