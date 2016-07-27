@@ -10,8 +10,6 @@ class CommunicationCost(db.Model):
     candidate_id = db.Column('cand_id', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
     pdf_url = db.Column(db.String)
-    #Deprecated
-    #committee_name = db.Column('cmte_nm', db.String)
     candidate_name = db.Column('s_o_cand_nm', db.String)
     candidate_last_name = db.Column('s_o_cand_l_nm', db.String)
     candidate_middle_name = db.Column('s_o_cand_m_nm', db.String)
@@ -20,32 +18,27 @@ class CommunicationCost(db.Model):
     state_full = db.Column('s_o_cand_office_st_desc', db.String)
     candidate_office_district = db.Column('s_o_cand_office_district', db.String, index=True)
     candidate_office = db.Column('s_o_cand_office', db.String, index=True)
-    #candidate_office_full =db.Column('s_o_cand_office_desc')
-    #These two rows deprecated
-    #candidate_party_affiliation = db.Column('cand_pty_affiliation', db.String, index=True)
-    #party_full = db.Column('pty_desc', db.String)
+    candidate_office_full =db.Column('s_o_cand_office_desc')
     transaction_date = db.Column('communication_dt', db.Date, index=True)
     transaction_amount = db.Column('communication_cost', db.Numeric(30, 2), index=True)
     transaction_type = db.Column('transaction_tp', db.String)
-    #receipt_date = db.Column('receipt_dt', db.String)
-    #purpose = db.Column(db.String)
     communication_type = db.Column('communication_tp', db.String, index=True)
     communication_type_full = db.Column('communication_tp_desc', db.String)
     communication_class = db.Column('communication_class', db.String, index=True)
     communication_class_full = db.Column('communication_class_desc', db.String, index=True)
     support_oppose_indicator = db.Column('s_o_ind', db.String, index=True)
-    #line_number = db.Column('line_num', db.String, index=True)
+
+    #new columns added from ware house transition
+    primary_general_indicator = db.Column('s_o_rpt_pgi', db.String)
+    primary_general_indicator_description = db.Column('s_o_rpt_pgi_desc', db.String)
+    report_type = db.Column('rpt_tp', db.String)
+
     form_type_code = db.Column('filing_form', db.String, index=True)
-    #form_type_code_full = db.Column('form_tp_desc', db.String)
-    #This seems to be deprecated
-    #schedule_type_code = db.Column('form_tp', db.String, index=True)
+    schedule_type_code = db.Column('schedule_type', db.String, index=True)
+    schedule_type_code_description = db.Column('schedule_type_desc', db.String)
     tran_id = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
     image_number = db.Column('image_num', db.String, index=True)
-
-    #deprecated as per usual
-    #report_year = db.Column('rpt_yr', db.Integer, index=True)
-    #pdf_url = db.Column(db.String)
 
 
 class Electioneering(db.Model):
