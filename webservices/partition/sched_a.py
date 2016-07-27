@@ -55,6 +55,7 @@ class SchedAGroup(TableGroup):
         c = child.c
         return [
             sa.Index(None, c.rpt_yr),
+            sa.Index(None, c.pg_date),
             sa.Index(None, c.entity_tp),
             sa.Index(None, c.image_num),
             sa.Index(None, c[cls.primary]),

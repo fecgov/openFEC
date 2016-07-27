@@ -2,7 +2,6 @@ import os
 import json
 
 import git
-from invoke import run
 from invoke import task
 # from slacker import Slacker
 
@@ -37,25 +36,25 @@ FORCE_INCLUDE = [
 
 
 @task
-def fetch_schemas(source, dest):
+def fetch_schemas(ctx, source, dest):
     cmd = 'pg_dump {0} --format c --schema-only --no-acl --no-owner'.format(source)
     for table in (FULL_TABLES + EXCLUDE_TABLES):
         cmd += ' --exclude-table {0}'.format(table)
     cmd += ' | pg_restore --dbname {0} --no-acl --no-owner'.format(dest)
-    run(cmd, echo=True)
+    ctx.run(cmd, echo=True)
 
 
 @task
-def fetch_full(source, dest):
+def fetch_full(ctx, source, dest):
     cmd = 'pg_dump {0} --format c --no-acl --no-owner'.format(source)
     for table in FULL_TABLES:
         cmd += ' --table {0}'.format(table)
     cmd += ' | pg_restore --dbname {0} --no-acl --no-owner'.format(dest)
-    run(cmd, echo=True)
+    ctx.run(cmd, echo=True)
 
 
 @task
-def fetch_subset(source, dest, fraction=DEFAULT_FRACTION, log=True):
+def fetch_subset(ctx, source, dest, fraction=DEFAULT_FRACTION, log=True):
     cmd = 'rdbms-subsetter {source} {dest} {fraction}'.format(**locals())
     if log:
         cmd += ' --logarithmic'
@@ -65,23 +64,23 @@ def fetch_subset(source, dest, fraction=DEFAULT_FRACTION, log=True):
         cmd += ' --force {0}:{1}'.format(table, key)
     cmd += ' --config data/subset-config.json'
     cmd += ' --yes'
-    run(cmd, echo=True)
+    ctx.run(cmd, echo=True)
 
 
 @task
-def clear_triggers(dest):
+def clear_triggers(ctx, dest):
     """Clear all triggers in database `dest`.
     """
     cmd = 'psql -f data/functions/strip_triggers.sql {dest}'.format(**locals())
-    run(cmd, echo=True)
+    ctx.run(cmd, echo=True)
 
 
 @task
-def build_test(source, dest, fraction=DEFAULT_FRACTION, log=True):
-    fetch_full(source, dest)
-    fetch_schemas(source, dest)
-    clear_triggers(dest)
-    fetch_subset(source, dest, fraction=fraction, log=log)
+def build_test(ctx, source, dest, fraction=DEFAULT_FRACTION, log=True):
+    fetch_full(ctx, source, dest)
+    fetch_schemas(ctx, source, dest)
+    clear_triggers(ctx, dest)
+    fetch_subset(ctx, source, dest, fraction=fraction, log=log)
 
 
 @task
@@ -89,19 +88,20 @@ def dump(ctx, source, dest):
     cmd = 'pg_dump {source} --format c --no-acl --no-owner -f {dest}'.format(**locals())
     for table in EXCLUDE_TABLES:
         cmd += ' --exclude-table {0}'.format(table)
-    run(cmd, echo=True)
+    ctx.run(cmd, echo=True)
 
 
 @task
 def add_hooks(ctx):
-    run('ln -s ../../bin/post-merge .git/hooks/post-merge')
-    run('ln -s ../../bin/post-checkout .git/hooks/post-checkout')
+
+    ctx.run('ln -s ../../bin/post-merge .git/hooks/post-merge')
+    ctx.run('ln -s ../../bin/post-checkout .git/hooks/post-checkout')
 
 
 @task
 def remove_hooks(ctx):
-    run('rm .git/hooks/post-merge')
-    run('rm .git/hooks/post-checkout')
+    ctx.run('rm .git/hooks/post-merge')
+    ctx.run('rm .git/hooks/post-checkout')
 
 
 def _detect_prod(repo, branch):
@@ -167,7 +167,7 @@ SPACE_URLS = {
 
 
 @task
-def deploy(space=None, branch=None, yes=False):
+def deploy(ctx, space=None, branch=None, yes=False):
     """Deploy app to Cloud Foundry. Log in using credentials stored in
     `FEC_CF_USERNAME` and `FEC_CF_PASSWORD`; push to either `space` or the space
     detected from the name and tags of the current branch. Note: Must pass `space`
@@ -182,27 +182,27 @@ def deploy(space=None, branch=None, yes=False):
 
     # Set api
     api = 'https://api.cloud.gov'
-    run('cf api {0}'.format(api), echo=True)
+    ctx.run('cf api {0}'.format(api), echo=True)
 
     # Log in if necessary
     if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
-        run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
+        ctx.run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
 
     # Target space
-    run('cf target -o fec -s {0}'.format(space), echo=True)
+    ctx.run('cf target -o fec -s {0}'.format(space), echo=True)
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
         json.dump({'user': os.getenv('USER'), 'branch': branch}, fp)
 
     # Deploy API
-    deployed = run('cf app api', echo=True, warn=True)
+    deployed = ctx.run('cf app api', echo=True, warn=True)
     cmd = 'zero-downtime-push' if deployed.ok else 'push'
-    run('cf {0} api -f manifest_{1}.yml'.format(cmd, space), echo=True)
+    ctx.run('cf {0} api -f manifest_{1}.yml'.format(cmd, space), echo=True)
 
     # Deploy worker applications
-    run('cf push celery-beat -f manifest_{0}.yml'.format(space))
-    run('cf push celery-worker -f manifest_{0}.yml'.format(space))
+    ctx.run('cf push celery-beat -f manifest_{0}.yml'.format(space))
+    ctx.run('cf push celery-worker -f manifest_{0}.yml'.format(space))
 
 
 # this will not be called because the slack integrations are off

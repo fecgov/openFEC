@@ -62,6 +62,7 @@ app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 app.config['SQLALCHEMY_REPLICA_TASKS'] = [
     'webservices.tasks.download.export_query',
@@ -161,8 +162,8 @@ api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', 
 api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
-api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/')
-api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/')
+api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')
+api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/', '/schedules/schedule_b/<string:sub_id>/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
@@ -260,6 +261,7 @@ apidoc.register(aggregates.CommunicationCostByCandidateView, blueprint='v1')
 apidoc.register(aggregates.ElectioneeringByCandidateView, blueprint='v1')
 apidoc.register(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
 apidoc.register(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
+apidoc.register(candidate_aggregates.TotalsCandidateView, blueprint='v1')
 apidoc.register(filings.FilingsView, blueprint='v1')
 apidoc.register(filings.FilingsList, blueprint='v1')
 apidoc.register(elections.ElectionList, blueprint='v1')
@@ -270,12 +272,13 @@ apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 
+
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
 docs = Blueprint(
     'docs',
     __name__,
-    static_folder=os.path.join(here, os.pardir, 'node_modules', 'swagger-ui', 'dist'),
+    static_folder=os.path.join(here, os.pardir, 'static', 'swagger-ui', 'dist'),
     static_url_path='/docs/static',
 )
 
