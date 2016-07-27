@@ -131,15 +131,35 @@ class TableGroup:
 
     @classmethod
     def rename(cls):
+        # Rename master table
         cmds = [
             'drop table if exists {0}_master cascade',
             'alter table {0}_master_tmp rename to {0}_master',
         ]
+
         for cmd in cmds:
             db.engine.execute(cmd.format(cls.base_name))
+
+        # Rename child tables
         for cycle in get_cycles():
-            cmd = 'alter table {0}_tmp rename to {0}'.format(cls.get_child_name(cycle))
+            child_name = cls.get_child_name(cycle)
+            cmd = 'alter table {0}_tmp rename to {0}'.format(child_name)
             db.engine.execute(cmd)
+            child = utils.load_table(child_name)
+
+            # Rename child table primary key
+            cmd = 'alter index {0} rename to {1}'.format(
+                child.primary_key.name,
+                child.primary_key.name.replace('_tmp', '')
+            )
+            db.engine.execute(cmd)
+
+            # Rename child table indexes
+            for index in child.indexes:
+                cmd = 'alter index {0} rename to {1}'.format(
+                    index.name, index.name.replace('_tmp', '')
+                )
+                db.engine.execute(cmd)
 
     @classmethod
     def refresh_children(cls):
