@@ -32,7 +32,7 @@ class CommunicationCostView(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.idx
+        return self.model.sub_id
 
     filter_multi_fields = [
         ('image_number', models.CommunicationCost.image_number),
