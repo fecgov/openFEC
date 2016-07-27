@@ -6,7 +6,7 @@ select
     s_o_cand_id as cand_id,
     org_id as cmte_id,
     report_pdf_url(image_num) as pdf_url
-from nml_form_76
+from fec_vsum_f76
 where extract(year from communication_dt)::integer >= :START_YEAR
 ;
 
@@ -26,7 +26,7 @@ create index on ofec_communication_cost_mv_tmp (communication_cost);
 create index on ofec_communication_cost_mv_tmp (communication_tp);
 create index on ofec_communication_cost_mv_tmp (communication_class);
 create index on ofec_communication_cost_mv_tmp (image_num);
-create index on ofec_communication_cost_mv_tmp (form_tp);
+create index on ofec_communication_cost_mv_tmp (filing_form);
 --create index on ofec_communication_cost_mv_tmp (line_num);
 --create index on ofec_communication_cost_mv_tmp (sched_tp_cd);
 --create index on ofec_communication_cost_mv_tmp (rpt_yr);
