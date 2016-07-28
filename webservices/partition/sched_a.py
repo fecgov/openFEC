@@ -6,11 +6,11 @@ from webservices.partition.base import TableGroup
 
 class SchedAGroup(TableGroup):
 
-    parent = 'sched_a'
+    parent = 'fec_vsum_sched_a'
     base_name = 'ofec_sched_a'
     queue_new = 'ofec_sched_a_queue_new'
     queue_old = 'ofec_sched_a_queue_old'
-    primary = 'sched_a_sk'
+    primary = 'sub_id'
     transaction_date_column = 'contb_receipt_dt'
 
     columns = [
@@ -55,9 +55,10 @@ class SchedAGroup(TableGroup):
         c = child.c
         return [
             sa.Index(None, c.rpt_yr),
+            sa.Index(None, c.pg_date),
             sa.Index(None, c.entity_tp),
             sa.Index(None, c.image_num),
-            sa.Index(None, c.sched_a_sk),
+            sa.Index(None, c[cls.primary]),
             sa.Index(None, c.contbr_st),
             sa.Index(None, c.contbr_city),
             sa.Index(None, c.is_individual),

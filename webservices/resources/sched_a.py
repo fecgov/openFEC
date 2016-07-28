@@ -25,7 +25,7 @@ class ScheduleAView(ItemizedResource):
         return self.model.two_year_transaction_period
     @property
     def index_column(self):
-        return self.model.sched_a_sk
+        return self.model.sub_id
     @property
     def amount_column(self):
         return self.model.contribution_receipt_amount
@@ -74,4 +74,7 @@ class ScheduleAView(ItemizedResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
+        if kwargs.get('sub_id'):
+            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         return query
+

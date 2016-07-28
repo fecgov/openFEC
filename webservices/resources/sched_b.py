@@ -24,7 +24,7 @@ class ScheduleBView(ItemizedResource):
         return self.model.two_year_transaction_period
     @property
     def index_column(self):
-        return self.model.sched_b_sk
+        return self.model.sub_id
 
     filter_multi_fields = [
         ('image_number', models.ScheduleB.image_number),
@@ -62,4 +62,7 @@ class ScheduleBView(ItemizedResource):
         query = super(ScheduleBView, self).build_query(**kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
+        if kwargs.get('sub_id'):
+            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         return query
+
