@@ -19,7 +19,8 @@ def refresh():
             manage.update_aggregates()
             manage.refresh_materialized()
             download.clear_bucket()
-            manage.load_legal_docs()
+            manage.index_advisory_opinions()
+            manage.index_regulations()
         except Exception as error:
             manage.logger.exception(error)
     try:
