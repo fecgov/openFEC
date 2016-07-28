@@ -19,6 +19,7 @@ def refresh():
             manage.update_aggregates()
             manage.refresh_materialized()
             download.clear_bucket()
+            manage.load_legal_docs()
         except Exception as error:
             manage.logger.exception(error)
     try:

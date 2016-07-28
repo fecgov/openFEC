@@ -16,7 +16,7 @@ from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
-from webservices import partition
+from webservices import partition, utils
 
 
 manager = Manager(app)
@@ -246,6 +246,57 @@ def cf_startup():
     check_config()
     if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
+
+@manager.command
+def remove_legal_docs():
+    es = utils.get_elasticsearch_connection()
+    es.delete_index('docs')
+
+@manager.command
+def load_legal_docs():
+
+    print('loading docs...')
+    legal_loaded = db.engine.execute("""SELECT EXISTS (
+                               SELECT 1
+                               FROM   information_schema.tables
+                               WHERE  table_name = 'ao'
+                            );""").fetchone()[0]
+
+    if legal_loaded:
+        count = db.engine.execute('select count(*) from AO').fetchone()[0]
+        print('AO count: %d' % count)
+        count = db.engine.execute('select count(*) from DOCUMENT').fetchone()[0]
+        print('DOC count: %d' % count)
+
+        es = utils.get_elasticsearch_connection()
+
+        result = db.engine.execute("""select DOCUMENT_ID, OCRTEXT, DESCRIPTION,
+                                CATEGORY, DOCUMENT.AO_ID, NAME, SUMMARY,
+                                TAGS, AO_NO FROM DOCUMENT INNER JOIN
+                                AO on AO.AO_ID = DOCUMENT.AO_ID""")
+
+        docs_loaded = 0
+        for row in result:
+            pdf_url = 'http://saos.fec.gov/aodocs/%s.pdf' % row[8]
+            doc = {"doc_id": row[0],
+                   "text": row[1],
+                   "description": row[2],
+                   "category": row[3],
+                   "id": row[4],
+                   "name": row[5],
+                   "summary": row[6],
+                   "tags": row[7],
+                   "no": row[8],
+                   "url": pdf_url}
+
+            es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
+            docs_loaded += 1
+
+            if docs_loaded % 500 == 0:
+                print("%d docs loaded" % docs_loaded)
+        print("%d docs loaded" % docs_loaded)
+    else:
+        print('Legal tables were not found, cannot load data.')
 
 if __name__ == '__main__':
     manager.run()
