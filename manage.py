@@ -229,8 +229,12 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
+    logger.info('Partitioning Schedule A...')
     partition.SchedAGroup.run()
+    logger.info('Finished partitioning Schedule A.')
+    logger.info('Partitioning Schedule B...')
     partition.SchedBGroup.run()
+    logger.info('Finished partitioning Schedule B.')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
