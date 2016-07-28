@@ -10,13 +10,14 @@ import networkx as nx
 import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
+import requests
 
 from webservices import flow
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
-from webservices import partition
+from webservices import partition, utils
 
 
 manager = Manager(app)
@@ -246,6 +247,104 @@ def cf_startup():
     check_config()
     if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
+
+def get_sections(reg):
+    sections = {}
+    for node in reg['children'][0]['children']:
+        sections[tuple(node['label'])] = {'text': get_text(node),
+                                          'title': node['title']}
+    return sections
+
+
+def get_text(node):
+    text = ''
+    if "text" in node:
+        text = node["text"]
+    for child in node["children"]:
+        text += ' ' + get_text(child)
+    return text
+
+@manager.command
+def remove_legal_docs():
+    es = utils.get_elasticsearch_connection()
+    es.delete_index('docs')
+
+@manager.command
+def index_regulations():
+    eregs_api = env.get_credential('FEC_EREGS_API', '')
+
+    if(eregs_api):
+        reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
+        es = utils.get_elasticsearch_connection()
+        reg_count = 0
+        for reg in reg_versions:
+            url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'],
+                                          reg['version'])
+            regulation = requests.get(url).json()
+            sections = get_sections(regulation)
+
+            print("Loading part %s" % reg['regulation'])
+            for section_label in sections:
+                doc_id = '%s_%s' % (section_label[0], section_label[1])
+                section_formatted = '%s-%s' % (section_label[0], section_label[1])
+                reg_url = '/regulations/{0}/{1}#{0}'.format(section_formatted,
+                                                            reg['version'])
+                no = '%s.%s' % (section_label[0], section_label[1])
+                name = sections[section_label]['title'].split(no)[1].strip()
+                doc = {"doc_id": doc_id, "name": name,
+                       "text": sections[section_label]['text'], 'url': reg_url,
+                       "no": no}
+
+                es.index('docs', 'regulations', doc, id=doc['doc_id'])
+            reg_count += 1
+        print("%d regulation parts indexed." % reg_count)
+    else:
+        print("Regs could not be indexed, environment variable not set.")
+
+@manager.command
+def index_advisory_opinions():
+    print('Indexing advisory opinions...')
+    legal_loaded = db.engine.execute("""SELECT EXISTS (
+                               SELECT 1
+                               FROM   information_schema.tables
+                               WHERE  table_name = 'ao'
+                            );""").fetchone()[0]
+
+    if legal_loaded:
+        count = db.engine.execute('select count(*) from AO').fetchone()[0]
+        print('AO count: %d' % count)
+        count = db.engine.execute('select count(*) from DOCUMENT').fetchone()[0]
+        print('DOC count: %d' % count)
+
+        es = utils.get_elasticsearch_connection()
+
+        result = db.engine.execute("""select DOCUMENT_ID, OCRTEXT, DESCRIPTION,
+                                CATEGORY, DOCUMENT.AO_ID, NAME, SUMMARY,
+                                TAGS, AO_NO FROM DOCUMENT INNER JOIN
+                                AO on AO.AO_ID = DOCUMENT.AO_ID""")
+
+        docs_loaded = 0
+        for row in result:
+            pdf_url = 'http://saos.fec.gov/aodocs/%s.pdf' % row[8]
+            doc = {"doc_id": row[0],
+                   "text": row[1],
+                   "description": row[2],
+                   "category": row[3],
+                   "id": row[4],
+                   "name": row[5],
+                   "summary": row[6],
+                   "tags": row[7],
+                   "no": row[8],
+                   "url": pdf_url}
+
+            es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
+            docs_loaded += 1
+
+            if docs_loaded % 500 == 0:
+                print("%d docs loaded" % docs_loaded)
+        print("%d docs loaded" % docs_loaded)
+    else:
+        print('Legal tables were not found, cannot load data.')
 
 if __name__ == '__main__':
     manager.run()
