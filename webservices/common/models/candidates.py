@@ -28,22 +28,22 @@ class CandidateFlags(db.Model):
 class BaseCandidate(BaseModel):
     __abstract__ = True
 
-    load_date = db.Column(db.Date, index=True, doc=docs.LOAD_DATE)
-    candidate_status = db.Column(db.String(1), index=True, doc=docs.CANDIDATE_STATUS)
-    # ? difference between district and district_number
-    district = db.Column(db.String(2), index=True, doc=docs.DISTRICT)
-    district_number = db.Column(db.Integer, index=True, doc=docs.CANDIDATE_STATUS)
-    election_years = db.Column(ARRAY(db.Integer), index=True, doc='Years in which a candidate ran for office.')
-    election_districts = db.Column(ARRAY(db.String), index=True, doc=docs.DISTRICT)
-    cycles = db.Column(ARRAY(db.Integer), index=True, doc=docs.CANDIDATE_CYCLE)
-    incumbent_challenge = db.Column(db.String(1), index=True, doc=docs.INCUMBENT_CHALLENGE)
-    incumbent_challenge_full = db.Column(db.String(10), doc=docs.INCUMBENT_CHALLENGE_FULL)
+    name = db.Column(db.String(100), index=True, doc=docs.CANDIDATE_NAME)
     office = db.Column(db.String(1), index=True, doc=docs.OFFICE)
     office_full = db.Column(db.String(9), doc=docs.OFFICE_FULL)
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(255), doc=docs.PARTY_FULL)
     state = db.Column(db.String(2), index=True, doc=docs.STATE)
-    name = db.Column(db.String(100), index=True, doc=docs.CANDIDATE_NAME)
+    district = db.Column(db.String(2), index=True, doc=docs.DISTRICT)
+    # ? difference between district and district_number
+    district_number = db.Column(db.Integer, index=True, doc=docs.CANDIDATE_STATUS)
+    election_districts = db.Column(ARRAY(db.String), index=True, doc=docs.DISTRICT)
+    election_years = db.Column(ARRAY(db.Integer), index=True, doc='Years in which a candidate ran for office.')
+    cycles = db.Column(ARRAY(db.Integer), index=True, doc=docs.CANDIDATE_CYCLE)
+    candidate_status = db.Column(db.String(1), index=True, doc=docs.CANDIDATE_STATUS)
+    incumbent_challenge = db.Column(db.String(1), index=True, doc=docs.INCUMBENT_CHALLENGE)
+    incumbent_challenge_full = db.Column(db.String(10), doc=docs.INCUMBENT_CHALLENGE_FULL)
+    load_date = db.Column(db.Date, index=True, doc=docs.LOAD_DATE)
 
     @declared_attr
     def flags(self):

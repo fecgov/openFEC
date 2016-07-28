@@ -6,11 +6,11 @@ from webservices.partition.base import TableGroup
 
 class SchedBGroup(TableGroup):
 
-    parent = 'sched_b'
+    parent = 'fec_vsum_sched_b'
     base_name = 'ofec_sched_b'
     queue_new = 'ofec_sched_b_queue_new'
     queue_old = 'ofec_sched_b_queue_old'
-    primary = 'sched_b_sk'
+    primary = 'sub_id'
     transaction_date_column = 'disb_dt'
 
     columns = [
@@ -50,8 +50,9 @@ class SchedBGroup(TableGroup):
         c = child.c
         return [
             sa.Index(None, c.rpt_yr),
+            sa.Index(None, c.pg_date),
             sa.Index(None, c.image_num),
-            sa.Index(None, c.sched_b_sk),
+            sa.Index(None, c[cls.primary]),
             sa.Index(None, c.recipient_st),
             sa.Index(None, c.recipient_city),
             sa.Index(None, c.clean_recipient_cmte_id),

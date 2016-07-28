@@ -1,6 +1,6 @@
 -- Create initial aggregate
-drop table if exists ofec_sched_b_aggregate_recipient_id;
-create table ofec_sched_b_aggregate_recipient_id as
+drop table if exists ofec_sched_b_aggregate_recipient_id_tmp;
+create table ofec_sched_b_aggregate_recipient_id_tmp as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
@@ -8,7 +8,7 @@ select
     max(recipient_nm) as recipient_nm,
     sum(disb_amt) as total,
     count(disb_amt) as count
-from sched_b
+from fec_vsum_sched_b
 where rpt_yr >= :START_YEAR_AGGREGATE
 and disb_amt is not null
 and (memo_cd != 'X' or memo_cd is null)
@@ -16,14 +16,18 @@ and clean_repeated(recipient_cmte_id, cmte_id) is not null
 group by cmte_id, cycle, clean_repeated(recipient_cmte_id, cmte_id)
 ;
 
-alter table ofec_sched_b_aggregate_recipient_id add column idx serial primary key;
+alter table ofec_sched_b_aggregate_recipient_id_tmp add column idx serial primary key;
 
 -- Create indices on aggregate
-create index on ofec_sched_b_aggregate_recipient_id (cmte_id, idx);
-create index on ofec_sched_b_aggregate_recipient_id (cycle, idx);
-create index on ofec_sched_b_aggregate_recipient_id (recipient_cmte_id, idx);
-create index on ofec_sched_b_aggregate_recipient_id (total, idx);
-create index on ofec_sched_b_aggregate_recipient_id (count, idx);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (cmte_id, idx);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (cycle, idx);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (recipient_cmte_id, idx);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (total, idx);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (count, idx);
+
+-- Remove previous aggregate and rename new aggregate
+drop table if exists ofec_sched_b_aggregate_recipient_id;
+alter table ofec_sched_b_aggregate_recipient_id_tmp rename to ofec_sched_b_aggregate_recipient_id;
 
 -- Create update function
 create or replace function ofec_sched_b_update_aggregate_recipient_id() returns void as $$
