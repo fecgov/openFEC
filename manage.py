@@ -5,6 +5,7 @@ import glob
 import logging
 import subprocess
 import multiprocessing
+import re
 
 import networkx as nx
 import sqlalchemy as sa
@@ -17,6 +18,7 @@ from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
+from webservices.tasks.utils import get_bucket, get_object
 from webservices import partition, utils
 
 
@@ -324,8 +326,10 @@ def index_advisory_opinions():
                                 AO on AO.AO_ID = DOCUMENT.AO_ID""")
 
         docs_loaded = 0
+        bucket_name = env.get_credential('bucket')
         for row in result:
-            pdf_url = 'http://saos.fec.gov/aodocs/%s.pdf' % row[8]
+            key = "legal/aos/%s.pdf" % row[0]
+            pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
             doc = {"doc_id": row[0],
                    "text": row[1],
                    "description": row[2],
@@ -346,5 +350,38 @@ def index_advisory_opinions():
     else:
         print('Legal tables were not found, cannot load data.')
 
+@manager.command
+def delete_advisory_opinions_from_s3():
+    for obj in get_bucket().objects.filter(Prefix="legal/aos"):
+        obj.delete()
+
+@manager.command
+def load_advisory_opinions_into_s3():
+    docs_in_db = set([str(r[0]) for r in db.engine.execute(
+                     "select document_id from document").fetchall()])
+
+    bucket = get_bucket()
+    docs_in_s3 = set([re.match("legal/aos/([0-9]+)\.pdf", obj.key).group(1)
+                      for obj in bucket.objects.filter(Prefix="legal/aos")])
+
+    new_docs = docs_in_db.difference(docs_in_s3)
+
+    if new_docs:
+        query = "select document_id, fileimage from document \
+                where document_id in (%s)" % ','.join(new_docs)
+
+        result = db.engine.connect().execution_options(stream_results=True)\
+                .execute(query)
+
+        bucket_name = env.get_credential('bucket')
+        for i, (document_id, fileimage) in enumerate(result):
+            key = "legal/aos/%s.pdf" % document_id
+            bucket.put_object(Key=key, Body=bytes(fileimage),
+                              ContentType='application/pdf', ACL='public-read')
+            url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
+            print("pdf written to %s" % url)
+            print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
+    else:
+        print("No new advisory opinions found.")
 if __name__ == '__main__':
     manager.run()
