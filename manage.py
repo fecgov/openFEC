@@ -304,11 +304,15 @@ def index_regulations():
         print("Regs could not be indexed, environment variable not set.")
 
 def legal_loaded():
-    return db.engine.execute("""SELECT EXISTS (
+    legal_loaded = db.engine.execute("""SELECT EXISTS (
                                SELECT 1
                                FROM   information_schema.tables
                                WHERE  table_name = 'ao'
                             );""").fetchone()[0]
+    if not legal_loaded:
+        print('Advisory opinion tables not found.')
+
+    return legal_loaded
 
 @manager.command
 def index_advisory_opinions():
@@ -349,8 +353,6 @@ def index_advisory_opinions():
             if docs_loaded % 500 == 0:
                 print("%d docs loaded" % docs_loaded)
         print("%d docs loaded" % docs_loaded)
-    else:
-        print('Legal tables were not found, cannot load data.')
 
 @manager.command
 def delete_advisory_opinions_from_s3():
