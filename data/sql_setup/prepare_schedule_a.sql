@@ -26,24 +26,31 @@ begin
         two_year_transaction_period_new = get_transaction_year(new.contb_receipt_dt, new.rpt_yr);
 
         if two_year_transaction_period_new >= start_year then
+            delete from ofec_sched_a_queue_new where sub_id = new.sub_id;
             insert into ofec_sched_a_queue_new values (new.*, timestamp, two_year_transaction_period_new);
         end if;
+
         return new;
     elsif tg_op = 'UPDATE' then
         two_year_transaction_period_new = get_transaction_year(new.contb_receipt_dt, new.rpt_yr);
         two_year_transaction_period_old = get_transaction_year(old.contb_receipt_dt, old.rpt_yr);
 
         if two_year_transaction_period_new >= start_year then
+            delete from ofec_sched_a_queue_new where sub_id = new.sub_id;
+            delete from ofec_sched_a_queue_old where sub_id = old.sub_id;
             insert into ofec_sched_a_queue_new values (new.*, timestamp, two_year_transaction_period_new);
             insert into ofec_sched_a_queue_old values (old.*, timestamp, two_year_transaction_period_old);
         end if;
+
         return new;
     elsif tg_op = 'DELETE' then
         two_year_transaction_period_old = get_transaction_year(old.contb_receipt_dt, old.rpt_yr);
 
         if two_year_transaction_period_old >= start_year then
+            delete from ofec_sched_a_queue_old where sub_id = old.sub_id;
             insert into ofec_sched_a_queue_old values (old.*, timestamp, two_year_transaction_period_old);
         end if;
+
         return old;
     end if;
 end
