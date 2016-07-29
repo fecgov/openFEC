@@ -303,16 +303,18 @@ def index_regulations():
     else:
         print("Regs could not be indexed, environment variable not set.")
 
-@manager.command
-def index_advisory_opinions():
-    print('Indexing advisory opinions...')
-    legal_loaded = db.engine.execute("""SELECT EXISTS (
+def legal_loaded():
+    return db.engine.execute("""SELECT EXISTS (
                                SELECT 1
                                FROM   information_schema.tables
                                WHERE  table_name = 'ao'
                             );""").fetchone()[0]
 
-    if legal_loaded:
+@manager.command
+def index_advisory_opinions():
+    print('Indexing advisory opinions...')
+
+    if legal_loaded():
         count = db.engine.execute('select count(*) from AO').fetchone()[0]
         print('AO count: %d' % count)
         count = db.engine.execute('select count(*) from DOCUMENT').fetchone()[0]
@@ -357,31 +359,33 @@ def delete_advisory_opinions_from_s3():
 
 @manager.command
 def load_advisory_opinions_into_s3():
-    docs_in_db = set([str(r[0]) for r in db.engine.execute(
-                     "select document_id from document").fetchall()])
+    if legal_loaded():
+        docs_in_db = set([str(r[0]) for r in db.engine.execute(
+                         "select document_id from document").fetchall()])
 
-    bucket = get_bucket()
-    docs_in_s3 = set([re.match("legal/aos/([0-9]+)\.pdf", obj.key).group(1)
-                      for obj in bucket.objects.filter(Prefix="legal/aos")])
+        bucket = get_bucket()
+        docs_in_s3 = set([re.match("legal/aos/([0-9]+)\.pdf", obj.key).group(1)
+                          for obj in bucket.objects.filter(Prefix="legal/aos")])
 
-    new_docs = docs_in_db.difference(docs_in_s3)
+        new_docs = docs_in_db.difference(docs_in_s3)
 
-    if new_docs:
-        query = "select document_id, fileimage from document \
-                where document_id in (%s)" % ','.join(new_docs)
+        if new_docs:
+            query = "select document_id, fileimage from document \
+                    where document_id in (%s)" % ','.join(new_docs)
 
-        result = db.engine.connect().execution_options(stream_results=True)\
-                .execute(query)
+            result = db.engine.connect().execution_options(stream_results=True)\
+                    .execute(query)
 
-        bucket_name = env.get_credential('bucket')
-        for i, (document_id, fileimage) in enumerate(result):
-            key = "legal/aos/%s.pdf" % document_id
-            bucket.put_object(Key=key, Body=bytes(fileimage),
-                              ContentType='application/pdf', ACL='public-read')
-            url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
-            print("pdf written to %s" % url)
-            print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
-    else:
-        print("No new advisory opinions found.")
+            bucket_name = env.get_credential('bucket')
+            for i, (document_id, fileimage) in enumerate(result):
+                key = "legal/aos/%s.pdf" % document_id
+                bucket.put_object(Key=key, Body=bytes(fileimage),
+                                  ContentType='application/pdf', ACL='public-read')
+                url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
+                print("pdf written to %s" % url)
+                print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
+        else:
+            print("No new advisory opinions found.")
+
 if __name__ == '__main__':
     manager.run()
