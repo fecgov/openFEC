@@ -59,10 +59,7 @@ class ScheduleABySizeView(AggregateResource):
 
 @doc(
     tags=['schedules/schedule_a'],
-    description=(
-        'Schedule A receipts aggregated by contributor state. To avoid double counting, '
-        'memoed items are not included.'
-    )
+    description=(docs.STATE_AGGREGATE)
 )
 class ScheduleAByStateView(AggregateResource):
 
