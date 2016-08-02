@@ -226,6 +226,7 @@ reports = {
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
     'is_amended': fields.Bool(description='Report has been amended'),
+    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID)
 }
 
 
