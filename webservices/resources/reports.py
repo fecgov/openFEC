@@ -1,10 +1,12 @@
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 from flask_apispec import doc, marshal_with
 
 from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import filters
 from webservices.common import models
 from webservices.utils import use_kwargs
 
@@ -53,6 +55,12 @@ def parse_types(types):
 )
 class ReportsView(utils.Resource):
 
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.CommitteeReports.receipt_date),
+        (('min_disbursements_amount', 'max_disbursements_amount'), models.CommitteeReports.total_disbursements_period),
+        (('min_receipts_amount', 'max_receipts_amount'), models.CommitteeReports.total_receipts_period),
+    ]
+
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
     @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
@@ -79,7 +87,6 @@ class ReportsView(utils.Resource):
         )
 
         query = reports_class.query
-
         # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
@@ -104,6 +111,8 @@ class ReportsView(utils.Resource):
 
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
+
+        query = filters.filter_range(query, kwargs, self.filter_range_fields)
 
         return query, reports_class, reports_schema
 
