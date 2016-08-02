@@ -49,11 +49,11 @@ class CommitteeReports(PdfMixin, BaseModel):
     refunded_other_political_committee_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS))
     refunded_political_party_committee_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS))
     refunded_political_party_committee_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS))
-    total_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.CONTRIBUTIONS))
+    total_contributions_period = db.Column('total_contributions_period', db.Numeric(30, 2), doc=docs.add_period(docs.CONTRIBUTIONS))
     total_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.CONTRIBUTIONS))
-    total_disbursements_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.DISBURSEMENTS))
+    total_disbursements_period = db.Column('total_disbursements_period', db.Numeric(30, 2), doc=docs.add_period(docs.DISBURSEMENTS))
     total_disbursements_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.DISBURSEMENTS))
-    total_receipts_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.RECEIPTS))
+    total_receipts_period = db.Column('total_receipts_period',db.Numeric(30, 2), doc=docs.add_period(docs.RECEIPTS))
     total_receipts_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.RECEIPTS))
     offsets_to_operating_expenditures_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OFFSETS_TO_OPERATING_EXPENDITURES))
     offsets_to_operating_expenditures_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OFFSETS_TO_OPERATING_EXPENDITURES))
@@ -64,7 +64,7 @@ class CommitteeReports(PdfMixin, BaseModel):
     individual_itemized_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))
     individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
-    receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
+    receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
