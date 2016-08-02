@@ -34,3 +34,7 @@ create index on ofec_reports_ie_only_mv_tmp(coverage_end_date, idx);
 create index on ofec_reports_ie_only_mv_tmp(coverage_start_date, idx);
 create index on ofec_reports_ie_only_mv_tmp(beginning_image_number, idx);
 create index on ofec_reports_ie_only_mv_tmp(is_amended, idx);
+create index on ofec_reports_ie_only_mv_tmp(receipt_date, idx);
+create index on ofec_reports_ie_only_mv_tmp(independent_expenditures_period, idx);
+
+
