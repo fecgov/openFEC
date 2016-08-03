@@ -62,6 +62,7 @@ app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 app.config['SQLALCHEMY_REPLICA_TASKS'] = [
     'webservices.tasks.download.export_query',
@@ -260,6 +261,7 @@ apidoc.register(aggregates.CommunicationCostByCandidateView, blueprint='v1')
 apidoc.register(aggregates.ElectioneeringByCandidateView, blueprint='v1')
 apidoc.register(candidate_aggregates.ScheduleABySizeCandidateView, blueprint='v1')
 apidoc.register(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v1')
+apidoc.register(candidate_aggregates.TotalsCandidateView, blueprint='v1')
 apidoc.register(filings.FilingsView, blueprint='v1')
 apidoc.register(filings.FilingsList, blueprint='v1')
 apidoc.register(elections.ElectionList, blueprint='v1')
@@ -269,6 +271,7 @@ apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
+
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

@@ -19,6 +19,9 @@ def refresh():
             manage.update_aggregates()
             manage.refresh_materialized()
             download.clear_bucket()
+            manage.index_advisory_opinions()
+            manage.index_regulations()
+            manage.load_advisory_opinions_into_s3()
         except Exception as error:
             manage.logger.exception(error)
     try:

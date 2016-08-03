@@ -1,6 +1,8 @@
 import boto3
-
+import logging
 from webservices.env import env
+
+logging.getLogger('boto3').setLevel(logging.CRITICAL)
 
 def get_app():
     from webservices.rest import app
