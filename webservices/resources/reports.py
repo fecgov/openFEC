@@ -65,9 +65,9 @@ class ReportsView(utils.Resource):
     @use_kwargs(args.reports)
     @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
-    def get(self, committee_type=None, **kwargs):
+    def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.build_query(
-            #committee_id=kwargs.get('committee_id'),
+            committee_id=committee_id,
             committee_type=committee_type,
             **kwargs
         )
@@ -77,31 +77,29 @@ class ReportsView(utils.Resource):
         page = utils.fetch_page(query, kwargs, model=reports_class)
         return reports_schema().dump(page).data
 
-    def build_query(self, committee_type=None, **kwargs):
+    def build_query(self, committee_id=None, committee_type=None, **kwargs):
         reports_class, reports_schema = reports_schema_map.get(
             self._resolve_committee_type(
+                committee_id=committee_id,
                 committee_type=committee_type,
                 **kwargs
             ),
             default_schemas,
         )
-
         query = reports_class.query
         # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
-
-        #if committee_id is not None:
-        #    query = query.filter_by(committee_id=committee_id)
-
+        if committee_id is not None:
+            query = query.filter_by(committee_id=committee_id)
         if kwargs.get('year'):
             query = query.filter(reports_class.report_year.in_(kwargs['year']))
         if kwargs.get('cycle'):
             query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
         if kwargs.get('beginning_image_number'):
             query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-        if kwargs.get('committee_id'):
-            query = query.filter(reports_class.committee_id.in_(kwargs['committee_id']))
+        if kwargs.get('committee_ids'):
+            query = query.filter(reports_class.committee_id.in_(kwargs['committee_ids']))
         if kwargs.get('report_type'):
             include, exclude = parse_types(kwargs['report_type'])
             if include:
@@ -112,11 +110,11 @@ class ReportsView(utils.Resource):
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
-        query = filters.filter_range(query, kwargs, self.filter_range_fields)
+        #query = filters.filter_range(query, kwargs, self.filter_range_fields)
 
         return query, reports_class, reports_schema
 
-    def _resolve_committee_type(self, committee_type=None, **kwargs):
+    def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         #This could be a potential pit fall, is there a better way to get
         #committee type?  Was the reason this was done this way as a committee
         #type can change over time?  Also take strong note
@@ -125,8 +123,14 @@ class ReportsView(utils.Resource):
         #That's a slight violation of RESTful design, it would make more sense to
         #only return a valid response if the committee type queried for actually matches the
         #committees current type.
-        if kwargs.get('committee_id') is not None and len(kwargs.get('committee_id')) > 0:
-            query = models.CommitteeHistory.query.filter_by(committee_id=kwargs.get('committee_id')[0])
+        #if kwargs.get('committee_id') is not None and len(kwargs.get('committee_id')) > 0:
+        if committee_id is not None or kwargs.get('committee_ids'):
+            comm_id = (
+                committee_id
+                if committee_id is not None
+                else kwargs.get('committee_ids')[0]
+            )
+            query = models.CommitteeHistory.query.filter_by(committee_id=comm_id)
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
