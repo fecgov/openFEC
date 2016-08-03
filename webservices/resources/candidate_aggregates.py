@@ -117,7 +117,10 @@ class ScheduleAByStateCandidateView(utils.Resource):
         )
         return utils.fetch_page(query, kwargs, cap=0)
 
-
+@doc(
+    tags=['candidate'],
+    description='Aggregated candidate receipts and disbursements grouped by cycle.',
+)
 class TotalsCandidateView(ApiResource):
 
     page_schema = schemas.CandidateHistoryTotalPageSchema
@@ -183,7 +186,6 @@ class TotalsCandidateView(ApiResource):
                 history.candidate_id == models.CandidateSearch.id,
             )
         #The .filter methods may be able to moved to the filters methods, will investigate
-
         if kwargs.get('has_raised_funds'):
             query = query.filter(
                 models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])

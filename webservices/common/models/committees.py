@@ -44,6 +44,7 @@ class BaseConcreteCommittee(BaseCommittee):
 
 class Committee(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_committee_detail_mv'
 
     first_file_date = db.Column(db.Date, doc=docs.FIRST_FILE_DATE)
     last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
@@ -63,6 +64,7 @@ class CommitteeHistory(BaseCommittee):
 
 class CommitteeDetail(BaseConcreteCommittee):
     __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_committee_detail_mv'
 
     first_file_date = db.Column(db.Date, doc=docs.FIRST_FILE_DATE)
     last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
