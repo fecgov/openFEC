@@ -11,7 +11,7 @@ $$ language plpgsql immutable;
 -- checks line numbers to determine if a transactions is from an individual
 create or replace function is_coded_individual(receipt_type text) returns bool as $$
 begin
-    return coalesce(receipt_type, '') in ('10', '15', '15E', '15J', '18J', '30', '30T', '31', '31T', '32');
+    return coalesce(receipt_type, '') in ('10', '15', '15E', '15J', '30', '30T', '31', '31T', '32');
 end
 $$ language plpgsql immutable;
 
