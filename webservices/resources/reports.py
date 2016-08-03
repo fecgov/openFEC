@@ -59,6 +59,17 @@ class ReportsView(utils.Resource):
         (('min_receipt_date', 'max_receipt_date'), models.CommitteeReports.receipt_date),
         (('min_disbursements_amount', 'max_disbursements_amount'), models.CommitteeReports.total_disbursements_period),
         (('min_receipts_amount', 'max_receipts_amount'), models.CommitteeReports.total_receipts_period),
+        (('min_cash_on_hand_end_period_amount', 'max_cash_on_hand_end_period_amount'),
+         models.CommitteeReports.cash_on_hand_end_period),
+        (('min_debts_owed_amount', 'max_debts_owed_amount'), models.CommitteeReports.debts_owed_by_committee),
+        (('min_independent_expenditures', 'max_independent_expenditures'),
+         models.CommitteeReportsPacParty.independent_expenditures_period),
+        (('min_party_coordinated_expenditures', 'max_party_coordinated_expenditures'),
+         models.CommitteeReportsPacParty.coordinated_expenditures_by_party_committee_period),
+        (('min_total_contributions', 'max_total_contributions'),
+         models.CommitteeReportsIEOnly.independent_contributions_period),
+
+
     ]
 
     @use_kwargs(args.paging)
@@ -110,7 +121,7 @@ class ReportsView(utils.Resource):
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
-        #query = filters.filter_range(query, kwargs, self.filter_range_fields)
+        query = filters.filter_range(query, kwargs, self.filter_range_fields)
 
         return query, reports_class, reports_schema
 
