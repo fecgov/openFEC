@@ -231,6 +231,8 @@ reports = {
     'max_disbursements_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_receipts_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_receipts_amount': Currency(description='Filter for all amounts less than a value.'),
+    'min_cash_on_hand_amount': Currency(description='Filter for all amounts greater than a value.'),
+    'max_cash_on_hand_amount': Currency(description='Filter for all amounts less than a value.'),
 
 }
 
