@@ -1,8 +1,8 @@
-create or replace function is_individual(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text) returns bool as $$
+create or replace function is_individual(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text, contbr_id text, cmte_id text) returns bool as $$
 begin
     return (
         is_coded_individual(receipt_type) or
-        is_inferred_individual(amount, line_number, memo_code, memo_text)
+        is_inferred_individual(amount, line_number, memo_code, memo_text, contbr_id, cmte_id)
     );
 end
 $$ language plpgsql immutable;
@@ -17,7 +17,7 @@ $$ language plpgsql immutable;
 
 
 -- looking for individual donations by line number, or if it is under $200 looking at memo text and memo code in is_earmark()
-create or replace function is_inferred_individual(amount numeric, line_number text, memo_code text, memo_text text) returns bool as $$
+create or replace function is_inferred_individual(amount numeric, line_number text, memo_code text, memo_text text, contbr_id text, cmte_id text) returns bool as $$
 begin
     return (
         amount < 200 and
