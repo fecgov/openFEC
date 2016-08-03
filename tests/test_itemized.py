@@ -223,6 +223,8 @@ class TestItemized(ApiBaseTest):
             ScheduleA.line_number,
             ScheduleA.memo_code,
             ScheduleA.memo_text,
+            ScheduleA.contributor_id,
+            ScheduleA.committee_id,
         )
 
         rows = ScheduleA.query.all()
