@@ -42,7 +42,7 @@ class AggregateResource(ApiResource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description=docs.SIZE_DESCRIPTION,
 )
 class ScheduleABySizeView(AggregateResource):
@@ -58,7 +58,7 @@ class ScheduleABySizeView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description=(
         'Schedule A receipts aggregated by contributor state. To avoid double counting, '
         'memoed items are not included.'
@@ -83,7 +83,7 @@ class ScheduleAByStateView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description=(
         'Schedule A receipts aggregated by contributor zip code. To avoid double '
         'counting, memoed items are not included.'
@@ -102,7 +102,7 @@ class ScheduleAByZipView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description=(
         'Schedule A receipts aggregated by contributor employer name. To avoid double '
         'counting, memoed items are not included.'
@@ -126,7 +126,7 @@ class ScheduleAByEmployerView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description=(
         'Schedule A receipts aggregated by contributor occupation. To avoid double '
         'counting, memoed items are not included.'
@@ -150,7 +150,7 @@ class ScheduleAByOccupationView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_b'],
+    tags=['disbursements'],
     description=(
         'Schedule B receipts aggregated by recipient name. To avoid '
         'double counting, memoed items are not included.'
@@ -169,7 +169,7 @@ class ScheduleBByRecipientView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_b'],
+    tags=['disbursements'],
     description=(
         'Schedule B receipts aggregated by recipient committee ID, if applicable. To avoid '
         'double counting, memoed items are not included.'
@@ -192,7 +192,7 @@ class ScheduleBByRecipientIDView(AggregateResource):
 
 
 @doc(
-    tags=['schedules/schedule_b'],
+    tags=['disbursements'],
     description=(
         docs.SCHEDULE_B_BY_PURPOSE
     )
@@ -298,7 +298,7 @@ class CandidateAggregateResource(AggregateResource):
         )
 
 @doc(
-    tags=['schedules/schedule_e'],
+    tags=['independent expenditures'],
     description=(
         'Schedule E receipts aggregated by recipient candidate. To avoid double '
         'counting, memoed items are not included.'
@@ -321,7 +321,7 @@ class ScheduleEByCandidateView(CandidateAggregateResource):
     group_columns = [models.ScheduleEByCandidate.support_oppose_indicator]
 
 @doc(
-    tags=['communication_cost'],
+    tags=['communication cost'],
     description='Communication cost aggregated by candidate ID and committee ID.',
 )
 class CommunicationCostByCandidateView(CandidateAggregateResource):
