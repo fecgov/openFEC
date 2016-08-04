@@ -107,7 +107,7 @@ class ReportsView(utils.Resource):
             if kwargs.get('type'):
                 query = reports_class.query.join(reports_class.committee).\
                     options(sa.orm.contains_eager(reports_class.committee)).\
-                    filter(models.CommitteeHistory.committee_type==kwargs.get('type'))
+                    filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
             else:
                 query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
         if committee_id is not None:
