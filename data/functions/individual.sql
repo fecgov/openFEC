@@ -1,9 +1,16 @@
+-- This function gets used to sort unique, individual contributions for aggregates and filtering.
+-- It checks line numbers first to determine the transaction type,
+-- then it looks at contribution under 200 dollars removing earmarks.
+-- Finally, it looks for mistakes where a donation with committee id is listed
+-- as an individual when it shouldn't be.
 create or replace function is_individual(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text, contbr_id text, cmte_id text) returns bool as $$
 begin
     return (
-        is_coded_individual(receipt_type) or
-        is_inferred_individual(amount, line_number, memo_code, memo_text, contbr_id, cmte_id) and
-        (is_not_committee(contbr_id, cmte_id) or line_number in ('15E', '15J'))
+        (
+            is_coded_individual(receipt_type) or
+            is_inferred_individual(amount, line_number, memo_code, memo_text, contbr_id, cmte_id)
+        ) and
+        is_not_committee(contbr_id, cmte_id, line_number)
     );
 end
 $$ language plpgsql immutable;
@@ -48,13 +55,18 @@ end
 $$ language plpgsql immutable;
 
 
---- Need to add a check for committees that are individuals
--- there are a lot of data errors, this makes sure that we are not marking committees as individuals because it is an obvious error
-create or replace function is_not_committee(contbr_id text, cmte_id text) returns bool as $$
+-- There are a lot of data errors, this makes sure that we are not marking committees as individuals
+-- when there is an obvious error. For example, marking the DNC as an individual, or putting your own
+-- committee id in as the contributor id.
+-- Some line numbers are expected to have committee ids so we white-list those.
+create or replace function is_not_committee(contbr_id text, cmte_id text, line_number text) returns bool as $$
 begin
     return(
-        contbr_id = null or
-        cmte_id = contbr_id
+        (
+            coalesce(contbr_id, '') != '' or
+            (coalesce(contbr_id, '') != '' and contbr_id = cmte_id)
+        ) or
+        (not coalesce(line_number, '') in ('15E', '15J'))
     );
 end
 $$ language plpgsql immutable;
