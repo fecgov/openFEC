@@ -59,6 +59,7 @@ class CommitteeHistory(BaseCommittee):
     city = db.Column(db.String(50), doc='City of committee as reported on the Form 1')
     state_full = db.Column(db.String(50), doc='State of committee as reported on the Form 1')
     zip = db.Column(db.String(9), doc='Zip code of committee as reported on the Form 1')
+    candidate_ids = db.Column(ARRAY(db.Text), doc=docs.CANDIDATE_ID)
     cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.COMMITTEE_CYCLE)
 
 

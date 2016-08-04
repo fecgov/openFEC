@@ -103,13 +103,17 @@ class ReportsView(utils.Resource):
         )
         query = reports_class.query
         # Eagerly load committees if applicable
+
         if hasattr(reports_class, 'committee'):
+            query = reports_class.query.join(reports_class.committee). \
+                options(sa.orm.contains_eager(reports_class.committee))
             if kwargs.get('type'):
-                query = reports_class.query.join(reports_class.committee).\
-                    options(sa.orm.contains_eager(reports_class.committee)).\
+                query = query.\
                     filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
-            else:
-                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+
+            if kwargs.get('auth_committee_candidate_id'):
+                query = query.\
+                    filter(models.CommitteeHistory.candidate_ids.overlap(kwargs.get('auth_committee_candidate_id')))
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
         if kwargs.get('year'):
@@ -131,7 +135,6 @@ class ReportsView(utils.Resource):
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, self.filter_range_fields)
-
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
