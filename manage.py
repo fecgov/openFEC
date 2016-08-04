@@ -213,9 +213,6 @@ def update_aggregates():
         db.engine.execute('delete from ofec_sched_b_queue_new')
         db.engine.execute('delete from ofec_sched_b_queue_old')
 
-        db.engine.execute('select ofec_sched_e_update()')
-        db.engine.execute('delete from ofec_sched_e_queue_new')
-        db.engine.execute('delete from ofec_sched_e_queue_old')
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command
