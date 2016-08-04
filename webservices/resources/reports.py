@@ -68,9 +68,13 @@ class ReportsView(utils.Resource):
          models.CommitteeReportsPacParty.coordinated_expenditures_by_party_committee_period),
         (('min_total_contributions', 'max_total_contributions'),
          models.CommitteeReportsIEOnly.independent_contributions_period),
-
-
     ]
+
+    filter_match = [
+        ('type', models.CommitteeHistory.committee_type)
+    ]
+
+
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
@@ -100,7 +104,12 @@ class ReportsView(utils.Resource):
         query = reports_class.query
         # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
-            query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+            if kwargs.get('type'):
+                query = reports_class.query.join(reports_class.committee).\
+                    options(sa.orm.contains_eager(reports_class.committee)).\
+                    filter(models.CommitteeHistory.committee_type==kwargs.get('type'))
+            else:
+                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
         if kwargs.get('year'):
@@ -126,14 +135,6 @@ class ReportsView(utils.Resource):
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
-        #This could be a potential pit fall, is there a better way to get
-        #committee type?  Was the reason this was done this way as a committee
-        #type can change over time?  Also take strong note
-        #that this logic could return a committee type that is different than the type
-        #the user originally queried for from the path parameter in the endpoint
-        #That's a slight violation of RESTful design, it would make more sense to
-        #only return a valid response if the committee type queried for actually matches the
-        #committees current type.
         #if kwargs.get('committee_id') is not None and len(kwargs.get('committee_id')) > 0:
         if committee_id is not None or kwargs.get('committee_ids'):
             comm_id = (
