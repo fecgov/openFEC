@@ -103,17 +103,26 @@ class ReportsView(utils.Resource):
         )
         query = reports_class.query
         # Eagerly load committees if applicable
-
+        """
         if hasattr(reports_class, 'committee'):
-            query = reports_class.query.join(reports_class.committee). \
-                options(sa.orm.contains_eager(reports_class.committee))
+            if kwargs.get('type'):
+                query = reports_class.query.join(reports_class.committee). \
+                    options(sa.orm.contains_eager(reports_class.committee)). \
+                    filter(models.CommitteeHistory.committee_type == kwargs.get('type'))
+            else:
+                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+        """
+        if hasattr(reports_class, 'committee'):
+            query = reports_class.query.join(reports_class.committee).options(sa.orm.joinedload(reports_class.committee))
             if kwargs.get('type'):
                 query = query.\
                     filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
-
             if kwargs.get('auth_committee_candidate_id'):
                 query = query.\
                     filter(models.CommitteeHistory.candidate_ids.overlap(kwargs.get('auth_committee_candidate_id')))
+            else:
+                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
         if kwargs.get('year'):
