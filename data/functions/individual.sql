@@ -2,7 +2,8 @@ create or replace function is_individual(amount numeric, receipt_type text, line
 begin
     return (
         is_coded_individual(receipt_type) or
-        is_inferred_individual(amount, line_number, memo_code, memo_text, contbr_id, cmte_id)
+        is_inferred_individual(amount, line_number, memo_code, memo_text, contbr_id, cmte_id) and
+        (is_not_committee(contbr_id, cmte_id) or line_number in ('15E', '15J'))
     );
 end
 $$ language plpgsql immutable;
@@ -22,8 +23,7 @@ begin
     return (
         amount < 200 and
         coalesce(line_number, '') in ('11AI', '12', '17', '17A', '18') and
-        not is_earmark(memo_code, memo_text) and
-        is_not_committee(contbr_id, cmte_id)
+        not is_earmark(memo_code, memo_text)
     );
 end
 $$ language plpgsql immutable;
