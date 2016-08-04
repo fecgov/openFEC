@@ -233,7 +233,7 @@ reports = {
     'max_receipts_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_cash_on_hand_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_cash_on_hand_amount': Currency(description='Filter for all amounts less than a value.'),
-
+    'type': fields.Str(description=docs.COMMITTEE_TYPE)
 }
 
 
