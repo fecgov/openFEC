@@ -240,7 +240,7 @@ reports = {
     'min_total_contributions': Currency(description=docs.MIN_FILTER),
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
     'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
-    'auth_committee_candidate_id': fields.List(fields.Str, description=docs.CANDIDATE_ID),
+    'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
 }
 
 
