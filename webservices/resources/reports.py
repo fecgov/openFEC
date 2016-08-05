@@ -108,9 +108,9 @@ class ReportsView(utils.Resource):
             if kwargs.get('type'):
                 query = query.\
                     filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
-            if kwargs.get('auth_committee_candidate_id'):
+            if kwargs.get('candidate_id'):
                 query = query.\
-                    filter(models.CommitteeHistory.candidate_ids.overlap(kwargs.get('auth_committee_candidate_id')))
+                    filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
             else:
                 query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
@@ -136,7 +136,9 @@ class ReportsView(utils.Resource):
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
-        if committee_id is not None:
+        if kwargs.get('candidate_id') and len(kwargs.get('candidate_id')):
+            return kwargs.get('candidate_id').upper()[:1]
+        elif committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
