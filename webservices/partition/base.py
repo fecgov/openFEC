@@ -171,51 +171,69 @@ class TableGroup:
         queue_old = utils.load_table(cls.queue_old)
         queue_new = utils.load_table(cls.queue_new)
         cycles = get_cycles()
+        success = []
+
         for cycle in cycles:
-            cls.refresh_child(cycle, queue_old, queue_new)
+            success.append(cls.refresh_child(cycle, queue_old, queue_new))
+
+        return all(success)
 
     @classmethod
     def refresh_child(cls, cycle, queue_old, queue_new):
         start, stop = cycle - 1, cycle
         name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
         child = utils.load_table(name)
+        success = True
 
-        logger.info('Processing {queue}...'.format(queue=cls.queue_old))
-        select = sa.select([queue_old.c.get(cls.primary)])
-        delete = sa.delete(child).where(child.c.get(cls.primary).in_(select))
-        db.engine.execute(delete)
-        logger.info('Finished processing {queue}.'.format(queue=cls.queue_old))
+        connection = db.engine.connect()
+        transaction = connection.begin()
 
-        # The queue tables already have the two_year_transaction_period column
-        # set in them so that we can insert the records into the proper child
-        # table. Because of this, we need to exclude the function call in the
-        # column factory normally used when populating the child tables during
-        # normal partitioning. Otherwise, an error is thrown due more values
-        # being specified than there are columns to accept them.
-        columns = [
-            column for column in cls.column_factory(queue_new)
-            if column.name != 'two_year_transaction_period'
-        ]
+        logger.info('Processing {name}...'.format(name=name))
 
-        logger.info('Processing {queue}...'.format(queue=cls.queue_new))
-        select = sa.select(
-            queue_new.columns + columns
-        ).select_from(
-            queue_new.join(
-                queue_old,
-                sa.and_(
-                    queue_new.c.get(cls.primary) == queue_old.c.get(cls.primary),
-                    queue_old.c.timestamp > queue_new.c.timestamp,
-                ),
-                isouter=True,
+        try:
+            select = sa.select([queue_old.c.get(cls.primary)])
+            delete = sa.delete(child).where(child.c.get(cls.primary).in_(select))
+            connection.execute(delete)
+
+            # The queue tables already have the two_year_transaction_period column
+            # set in them so that we can insert the records into the proper child
+            # table. Because of this, we need to exclude the function call in the
+            # column factory normally used when populating the child tables during
+            # normal partitioning. Otherwise, an error is thrown due more values
+            # being specified than there are columns to accept them.
+            columns = [
+                column for column in cls.column_factory(queue_new)
+                if column.name != 'two_year_transaction_period'
+            ]
+
+            select = sa.select(
+                queue_new.columns + columns
+            ).select_from(
+                queue_new.join(
+                    queue_old,
+                    sa.and_(
+                        queue_new.c.get(cls.primary) == queue_old.c.get(cls.primary),
+                        queue_old.c.timestamp > queue_new.c.timestamp,
+                    ),
+                    isouter=True,
+                )
+            ).where(
+                queue_new.c.two_year_transaction_period.in_([start, stop])
+            ).where(
+                queue_old.c.get(cls.primary) == None  # noqa
+            ).distinct(
+                queue_new.c.get(cls.primary)
             )
-        ).where(
-            queue_new.c.two_year_transaction_period.in_([start, stop])
-        ).where(
-            queue_old.c.get(cls.primary) == None  # noqa
-        ).distinct(
-            queue_new.c.get(cls.primary)
-        )
-        insert = sa.insert(child).from_select(select.columns, select)
-        db.engine.execute(insert)
-        logger.info('Finished processing {queue}.'.format(queue=cls.queue_new))
+            insert = sa.insert(child).from_select(select.columns, select)
+            connection.execute(insert)
+            transaction.commit()
+            logger.info('Finished processing {name}.'.format(name=name))
+        except Exception as e:
+            transaction.rollback()
+            logger.error(
+                'Refreshing {name} failed: {error}'.format(name=name, error=e)
+            )
+            success = False
+
+        connection.close()
+        return success

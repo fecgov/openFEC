@@ -208,20 +208,26 @@ def update_aggregates():
         )
 
         logger.info('Updating Schedule A aggregates...')
-        partition.SchedAGroup.refresh_children()
+        success = partition.SchedAGroup.refresh_children()
         logger.info('Finished updating Schedule A aggregates.')
 
-        db.engine.execute('delete from ofec_sched_a_queue_new')
-        db.engine.execute('delete from ofec_sched_a_queue_old')
-        logger.info('Cleared Schedule A queues.')
+        if success:
+            db.engine.execute('delete from ofec_sched_a_queue_new')
+            db.engine.execute('delete from ofec_sched_a_queue_old')
+            logger.info('Cleared Schedule A queues.')
+        else:
+            logger.warn('Schedule A queues not cleared.')
 
         logger.info('Updating Schedule B aggregates...')
-        partition.SchedBGroup.refresh_children()
+        success = partition.SchedBGroup.refresh_children()
         logger.info('Finished updating Schedule B aggregates')
 
-        db.engine.execute('delete from ofec_sched_b_queue_new')
-        db.engine.execute('delete from ofec_sched_b_queue_old')
-        logger.info('Cleared Schedule B queues.')
+        if success:
+            db.engine.execute('delete from ofec_sched_b_queue_new')
+            db.engine.execute('delete from ofec_sched_b_queue_old')
+            logger.info('Cleared Schedule B queues.')
+        else:
+            logger.warn('Schedule B queues not cleared.')
 
     logger.info('Finished updating incremental aggregates.')
 
