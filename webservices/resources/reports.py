@@ -1,5 +1,4 @@
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 from flask_apispec import doc, marshal_with
 
 from webservices import args
@@ -103,15 +102,7 @@ class ReportsView(utils.Resource):
         )
         query = reports_class.query
         # Eagerly load committees if applicable
-        """
-        if hasattr(reports_class, 'committee'):
-            if kwargs.get('type'):
-                query = reports_class.query.join(reports_class.committee). \
-                    options(sa.orm.contains_eager(reports_class.committee)). \
-                    filter(models.CommitteeHistory.committee_type == kwargs.get('type'))
-            else:
-                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
-        """
+
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.join(reports_class.committee).options(sa.orm.joinedload(reports_class.committee))
             if kwargs.get('type'):
@@ -131,8 +122,6 @@ class ReportsView(utils.Resource):
             query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
         if kwargs.get('beginning_image_number'):
             query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-        if kwargs.get('committee_ids'):
-            query = query.filter(reports_class.committee_id.in_(kwargs['committee_ids']))
         if kwargs.get('report_type'):
             include, exclude = parse_types(kwargs['report_type'])
             if include:
@@ -147,14 +136,8 @@ class ReportsView(utils.Resource):
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
-        #if kwargs.get('committee_id') is not None and len(kwargs.get('committee_id')) > 0:
-        if committee_id is not None or kwargs.get('committee_ids'):
-            comm_id = (
-                committee_id
-                if committee_id is not None
-                else kwargs.get('committee_ids')[0]
-            )
-            query = models.CommitteeHistory.query.filter_by(committee_id=comm_id)
+        if committee_id is not None:
+            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
@@ -162,3 +145,6 @@ class ReportsView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
+
+
+
