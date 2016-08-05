@@ -51,7 +51,7 @@ class CommitteeReports(PdfMixin, BaseModel):
     refunded_political_party_committee_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS))
     total_contributions_period = db.Column('total_contributions_period', db.Numeric(30, 2), doc=docs.add_period(docs.CONTRIBUTIONS))
     total_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.CONTRIBUTIONS))
-    total_disbursements_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.DISBURSEMENTS))
+    total_disbursements_period = db.Column('total_disbursements_period', db.Numeric(30, 2), doc=docs.add_period(docs.DISBURSEMENTS))
     total_disbursements_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.DISBURSEMENTS))
     total_receipts_period = db.Column('total_receipts_period', db.Numeric(30, 2), doc=docs.add_period(docs.RECEIPTS))
     total_receipts_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.RECEIPTS))
