@@ -66,7 +66,7 @@ begin
             coalesce(contbr_id, '') != '' or
             (coalesce(contbr_id, '') != '' and contbr_id = cmte_id)
         ) or
-        (not coalesce(line_number, '') in ('15E', '15J'))
+        (not coalesce(line_number, '') in ('15E', '15J', '17'))
     );
 end
 $$ language plpgsql immutable;
