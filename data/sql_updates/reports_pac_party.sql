@@ -121,3 +121,6 @@ create index on ofec_reports_pacs_parties_mv_tmp(coverage_end_date, idx);
 create index on ofec_reports_pacs_parties_mv_tmp(coverage_start_date, idx);
 create index on ofec_reports_pacs_parties_mv_tmp(beginning_image_number, idx);
 create index on ofec_reports_pacs_parties_mv_tmp(is_amended, idx);
+create index on ofec_reports_pacs_parties_mv_tmp(total_receipts_period, idx);
+create index on ofec_reports_pacs_parties_mv_tmp(total_disbursements_period, idx);
+create index on ofec_reports_pacs_parties_mv_tmp(receipt_date, idx);
