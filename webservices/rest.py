@@ -175,6 +175,7 @@ api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
 api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
+api.add_resource(filings.EFilingsView, '/efile/filings/')
 
 
 def add_aggregate_resource(api, view, schedule, label):
@@ -272,6 +273,7 @@ apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
+apidoc.register(filings.EFilingsView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
