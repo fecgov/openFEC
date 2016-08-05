@@ -202,16 +202,26 @@ def update_aggregates():
     logger.info('Updating incremental aggregates...')
     with db.engine.begin():
         db.engine.execute(
-            sa.text('select update_aggregates()').execution_options(autocommit=True)
+            sa.text('select update_aggregates()').execution_options(
+                autocommit=True
+            )
         )
 
+        logger.info('Updated Schedule A aggregates...')
         partition.SchedAGroup.refresh_children()
+        logger.info('Finished updating Schedule A aggregates.')
+
         db.engine.execute('delete from ofec_sched_a_queue_new')
         db.engine.execute('delete from ofec_sched_a_queue_old')
+        logger.info('Cleared Schedule A queues.')
 
+        logger.info('Updated Schedule B aggregates...')
         partition.SchedBGroup.refresh_children()
+        logger.info('Finished updating Schedule B aggregates')
+
         db.engine.execute('delete from ofec_sched_b_queue_new')
         db.engine.execute('delete from ofec_sched_b_queue_old')
+        logger.info('Cleared Schedule B queues.')
 
         db.engine.execute('select ofec_sched_e_update()')
         db.engine.execute('delete from ofec_sched_e_queue_new')

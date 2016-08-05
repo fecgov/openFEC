@@ -1,9 +1,14 @@
+import logging
+
 import sqlalchemy as sa
 
 from webservices.rest import db
 from webservices.config import SQL_CONFIG
 
 from . import utils
+
+logger = logging.getLogger('partitioner.base')
+logging.basicConfig(level=logging.INFO)
 
 def get_cycles():
     return range(
@@ -175,9 +180,11 @@ class TableGroup:
         name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
         child = utils.load_table(name)
 
+        logger.info('Processing {queue}...'.format(queue=cls.queue_old))
         select = sa.select([queue_old.c.get(cls.primary)])
         delete = sa.delete(child).where(child.c.get(cls.primary).in_(select))
         db.engine.execute(delete)
+        logger.info('Finished processing {queue}.'.format(queue=cls.queue_old))
 
         # The queue tables already have the two_year_transaction_period column
         # set in them so that we can insert the records into the proper child
@@ -190,6 +197,7 @@ class TableGroup:
             if column.name != 'two_year_transaction_period'
         ]
 
+        logger.info('Processing {queue}...'.format(queue=cls.queue_new))
         select = sa.select(
             queue_new.columns + columns
         ).select_from(
@@ -210,3 +218,4 @@ class TableGroup:
         )
         insert = sa.insert(child).from_select(select.columns, select)
         db.engine.execute(insert)
+        logger.info('Finished processing {queue}.'.format(queue=cls.queue_new))
