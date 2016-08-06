@@ -70,7 +70,7 @@ spec = APISpec(
         },
         {
             'name': 'efiling',
-            'description': '',# TODO: ADD DOCS
+            'description': docs.EFILING_TAG,
         }
     ]
 )

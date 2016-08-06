@@ -856,3 +856,16 @@ CAL_STATE = 'The state field only applies to election dates and reporting deadli
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
+
+
+# efiling
+EFILING_TAG = '''
+Efiling endpoints provide real-time campaign finance data for electronic filers.
+
+These endpoints are perfect for watching filings roll in when you want to know the latest information. Efiling endpoints
+only contain the most recent two years worth of data and don't contain the processed and coded data that
+you can find on the other endpoints. Those endpoints are better for in-depth analysis.
+'''
+
+EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
+FILE_NUMBER = "Filing ID number"
