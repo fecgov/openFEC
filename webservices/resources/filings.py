@@ -80,8 +80,7 @@ class FilingsList(BaseFilings):
 
 @doc(
     tags=['efiling'],
-    # TODO: update docs
-    description=docs.FILINGS,
+    description=docs.EFILE_FILES,
 )
 class EFilingsView(views.ApiResource):
 
