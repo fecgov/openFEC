@@ -67,6 +67,11 @@ spec = APISpec(
         {
             'name': 'filer resources',
             'description': docs.FILER_RESOURCES
+        },
+        {
+            'name': 'efilings',
+            'description': docs.FILINGS
         }
+
     ]
 )
