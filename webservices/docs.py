@@ -856,3 +856,6 @@ CAL_STATE = 'The state field only applies to election dates and reporting deadli
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
+
+MIN_FILTER = 'Filter for all amounts greater than a value.'
+MAX_FILTER = 'Filter for all amounts less than a value.'
