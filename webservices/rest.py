@@ -218,6 +218,12 @@ api.add_resource(
     '/committee/<committee_id>/filings/',
     '/candidate/<candidate_id>/filings/',
 )
+
+api.add_resource(
+    filings.EFilingSummaryView,
+    '/efilings/summary/'
+)
+
 api.add_resource(filings.FilingsList, '/filings/')
 
 api.add_resource(download.DownloadView, '/download/<path:path>/')
@@ -272,6 +278,7 @@ apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
+apidoc.register(filings.EFilingSummaryView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
