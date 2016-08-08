@@ -76,3 +76,30 @@ class FilingsList(BaseFilings):
     @property
     def args(self):
         return utils.extend(super().args, args.entities)
+
+@doc(
+    tags=['efilings'],
+    description=docs.FILINGS,
+)
+class EFilingSummaryView(views.ApiResource):
+    model = models.BaseFiling
+    schema = schemas.EFilingSchema
+    page_schema = schemas.EFilingPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.filings,
+        )
+
+
+    def get(self, **kwargs):
+        query = self.build_query(**kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=models.BaseFiling, count=count)
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        print(query)
+        return query
