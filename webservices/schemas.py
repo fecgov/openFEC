@@ -1,3 +1,4 @@
+
 import re
 import functools
 
@@ -10,6 +11,7 @@ from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
+
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
@@ -94,6 +96,17 @@ class BaseSearchSchema(ma.Schema):
     id = ma.fields.Str()
     name = ma.fields.Str()
 
+class EFilingSchema(ma.Schema):
+    repid = ma.fields.Str()
+    summary_lines = ma.fields.Method("parse_summary_rows")
+    def parse_summary_rows(self, obj):
+        line_list = []
+        if obj.summary_lines:
+            #Great News!  This is working, now just need to tie in some excel parsing here
+            #to map out actual columns from excel spreadsheet.
+            for row in obj.summary_lines:
+                line_list.append({"line_number": row.line_number, "column_a": row.column_a})
+            return line_list
 
 class CandidateSearchSchema(BaseSearchSchema):
     office_sought = ma.fields.Str()
@@ -124,10 +137,23 @@ register_schema(CandidateSearchListSchema)
 register_schema(CommitteeSearchSchema)
 register_schema(CommitteeSearchListSchema)
 
+make_efiling_schema = functools.partial(
+    make_schema,
+    options={'exclude': ('idx', )},
+    fields={
+
+    }
+)
+
 
 make_committee_schema = functools.partial(
     make_schema,
     options={'exclude': ('idx', 'treasurer_text')},
+)
+
+augment_models(
+    make_efiling_schema,
+    models.BaseFiling
 )
 
 augment_models(
@@ -147,6 +173,7 @@ make_candidate_schema = functools.partial(
     }
 )
 
+
 augment_models(
     make_candidate_schema,
     models.Candidate,
@@ -165,6 +192,8 @@ class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['Ca
     pass
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
+
+EFilingPageSchema = make_page_schema(EFilingSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
@@ -259,6 +288,7 @@ ScheduleASchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'uppername': ma.fields.Function(lambda obj: obj.contributor_state.lower()),
     },
     options={
         'exclude': (
