@@ -171,27 +171,24 @@ class TableGroup:
         queue_old = utils.load_table(cls.queue_old)
         queue_new = utils.load_table(cls.queue_new)
         cycles = get_cycles()
-        success = []
 
         for cycle in cycles:
-            success.append(cls.refresh_child(cycle, queue_old, queue_new))
-
-        return all(success)
+            cls.refresh_child(cycle, queue_old, queue_new)
 
     @classmethod
     def refresh_child(cls, cycle, queue_old, queue_new):
         start, stop = cycle - 1, cycle
         name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
         child = utils.load_table(name)
-        success = True
-
         connection = db.engine.connect()
         transaction = connection.begin()
 
         logger.info('Processing {name}...'.format(name=name))
 
         try:
-            select = sa.select([queue_old.c.get(cls.primary)])
+            select = sa.select([queue_old.c.get(cls.primary)]).where(
+                queue_old.c.two_year_transaction_period.in_([start, stop])
+            )
             delete = sa.delete(child).where(child.c.get(cls.primary).in_(select))
             connection.execute(delete)
 
@@ -226,6 +223,11 @@ class TableGroup:
             )
             insert = sa.insert(child).from_select(select.columns, select)
             connection.execute(insert)
+
+            # Clear the processed records out of the queues.
+            cls.clear_queue(queue_old, cycle, connection)
+            cls.clear_queue(queue_new, cycle, connection)
+
             transaction.commit()
             logger.info('Finished processing {name}.'.format(name=name))
         except Exception as e:
@@ -233,7 +235,14 @@ class TableGroup:
             logger.error(
                 'Refreshing {name} failed: {error}'.format(name=name, error=e)
             )
-            success = False
 
         connection.close()
-        return success
+
+    @classmethod
+    def clear_queue(cls, queue, cycle, connection):
+        start, stop = cycle - 1, cycle
+
+        delete = sa.delete(queue).where(
+                queue.c.two_year_transaction_period.in_([start, stop])
+            )
+        connection.execute(delete)
