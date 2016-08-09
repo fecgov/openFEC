@@ -19,7 +19,7 @@ from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices.tasks.utils import get_bucket, get_object
-from webservices import partition, utils
+from webservices import partition, utils, efile_parser
 
 
 manager = Manager(app)
@@ -391,6 +391,10 @@ def load_advisory_opinions_into_s3():
                 print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
         else:
             print("No new advisory opinions found.")
+@manager.command
+def test_util():
+    efile_parser.parse_f3psummary_column_b()
+
 
 if __name__ == '__main__':
     manager.run()
