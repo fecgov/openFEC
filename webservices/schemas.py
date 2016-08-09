@@ -6,7 +6,7 @@ import marshmallow as ma
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_pagination import schemas as paging_schemas
 
-from webservices import utils
+from webservices import utils, efile_parser, decoders
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
@@ -99,14 +99,25 @@ class BaseSearchSchema(ma.Schema):
 class EFilingSchema(ma.Schema):
     repid = ma.fields.Str()
     summary_lines = ma.fields.Method("parse_summary_rows")
+
     def parse_summary_rows(self, obj):
-        line_list = []
+        line_list = {}
+        #df = efile_parser.get_dataframe()
+        #column_a = efile_parser.parse_f3psummary_column_a(df)
+        #column_b = efile_parser.parse_f3psummary_column_b(df)
+        column_a = decoders.col_a
+        column_b = decoders.col_b
+        keys = zip(column_a, column_b)
+        keys = list(keys)
         if obj.summary_lines:
-            #Great News!  This is working, now just need to tie in some excel parsing here
-            #to map out actual columns from excel spreadsheet.
             for row in obj.summary_lines:
-                line_list.append({"line_number": row.line_number, "column_a": row.column_a})
+                line_list[keys[int(row.line_number - 1)][0]] = row.column_a
+                line_list[keys[int(row.line_number - 1)][1]] = row.column_b
+                #line_list.append({keys[int(row.line_number - 1)][0]: row.column_a, keys[int(row.line_number - 1)][1]: row.column_b})
+                #line_list.append((keys[int(row.line_number - 1)][0], row.column_a))
+                #line_list.append((keys[int(row.line_number - 1)][1], row.column_b))
             return line_list
+
 
 class CandidateSearchSchema(BaseSearchSchema):
     office_sought = ma.fields.Str()
