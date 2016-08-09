@@ -1,3 +1,7 @@
+from .efile_parser import get_dataframe
+from .efile_parser import parse_f3psummary_column_a
+from .efile_parser import parse_f3psummary_column_b
+
 election_types = {
     'GR': 'General runoff',
     'SG': 'Special election general',
@@ -24,3 +28,8 @@ form_types = {
     'F99': 'Miscellaneous document',
     'F6': '48-hour notice of contribution/loans received',
 }
+
+df = get_dataframe()
+col_a = parse_f3psummary_column_a(df)
+col_b = parse_f3psummary_column_b(df)
+
