@@ -4,19 +4,31 @@ from webservices.utils import use_kwargs
 
 es = utils.get_elasticsearch_connection()
 
+class AdvisoryOpinion(utils.Resource):
+    # @use_kwargs(args.ao_no)
+    def get(self, ao_no):
+        query = {"query": {"bool": {"must": [{"term": {"no": ao_no}},
+                          {"term": {"_type": "advisory_opinions"}}]}},
+                          "_source": {"exclude": "text"}}
+
+        es_results = es.search(query)
+
+        results = {"docs": [r["_source"] for r in es_results["hits"]["hits"]]}
+        return results
+
 class Search(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q, from_hit=0, hits_returned=20, type='all', **kwargs):
-        if type == 'all':
+    def get(self, q=None, from_hit=0, hits_returned=20, _type='all', **kwargs):
+        if _type == 'all':
             types = ['advisory_opinions', 'regulations']
         else:
-            types = [type]
+            types = [_type]
 
         results = {}
         total_count = 0
-        for type in types:
+        for _type in types:
             query = {"query": {"bool": {
-                     "must": [{"match": {"_all": q}}, {"term": {"_type": type}}],
+                     "must": [{"match": {"_all": q}}, {"term": {"_type": _type}}],
                                "should": [{"match": {"no": q}},
                                           {"match": {"category": "Final Opinion"}},
                                                {"match_phrase": {"_all": {"query": q,
@@ -42,8 +54,8 @@ class Search(utils.Resource):
             total_count += count
             formatted_hits = [h['_source'] for h in hits]
 
-            results[type] = formatted_hits
-            results['total_%s' % type] = count
+            results[_type] = formatted_hits
+            results['total_%s' % _type] = count
 
         results['total_all'] = total_count
         return results
