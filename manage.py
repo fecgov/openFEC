@@ -231,22 +231,24 @@ def update_aggregates():
     """These are run nightly to recalculate the totals
     """
     logger.info('Updating incremental aggregates...')
-    with db.engine.begin():
-        db.engine.execute(
+
+    with db.engine.begin() as connection:
+        connection.execute(
             sa.text('select update_aggregates()').execution_options(
                 autocommit=True
             )
         )
+        logger.info('Finished updating Schedule E and support aggregates.')
 
-        logger.info('Updating Schedule A aggregates...')
-        partition.SchedAGroup.refresh_children()
-        logger.info('Finished updating Schedule A aggregates.')
-        check_itemized_queues('a')
+    logger.info('Updating Schedule A...')
+    partition.SchedAGroup.refresh_children()
+    logger.info('Finished updating Schedule A.')
+    check_itemized_queues('a')
 
-        logger.info('Updating Schedule B aggregates...')
-        partition.SchedBGroup.refresh_children()
-        logger.info('Finished updating Schedule B aggregates.')
-        check_itemized_queues('b')
+    logger.info('Updating Schedule B...')
+    partition.SchedBGroup.refresh_children()
+    logger.info('Finished updating Schedule B.')
+    check_itemized_queues('b')
 
     logger.info('Finished updating incremental aggregates.')
 
