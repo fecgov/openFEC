@@ -67,6 +67,18 @@ def make_page_schema(schema, page_type=paging_schemas.OffsetPageSchema, class_na
         {'Meta': Meta},
     )
 
+def extract_columns(obj, column_a, column_b):
+    line_list = {}
+    keys = zip(column_a, column_b)
+    keys = list(keys)
+    print(len(keys))
+
+    if obj.summary_lines:
+        for row in obj.summary_lines:
+            line_list[keys[int(row.line_number - 1)][0]] = row.column_a
+            line_list[keys[int(row.line_number - 1)][1]] = row.column_b
+        return line_list
+
 
 schemas = {}
 
@@ -96,27 +108,51 @@ class BaseSearchSchema(ma.Schema):
     id = ma.fields.Str()
     name = ma.fields.Str()
 
-class EFilingSchema(ma.Schema):
+class BaseFilingSchema(ma.Schema):
     repid = ma.fields.Str()
     summary_lines = ma.fields.Method("parse_summary_rows")
+    candidate_name = ma.fields.Str()
+    committee_id = ma.fields.Str()
 
+class EFilingF3PSchema(BaseFilingSchema):
     def parse_summary_rows(self, obj):
         line_list = {}
-        #df = efile_parser.get_dataframe()
-        #column_a = efile_parser.parse_f3psummary_column_a(df)
-        #column_b = efile_parser.parse_f3psummary_column_b(df)
-        column_a = decoders.col_a
-        column_b = decoders.col_b
-        keys = zip(column_a, column_b)
+        state_map = {}
+        keys = zip(decoders.f3p_col_a, decoders.f3p_col_b)
+
         keys = list(keys)
         if obj.summary_lines:
             for row in obj.summary_lines:
-                line_list[keys[int(row.line_number - 1)][0]] = row.column_a
-                line_list[keys[int(row.line_number - 1)][1]] = row.column_b
-                #line_list.append({keys[int(row.line_number - 1)][0]: row.column_a, keys[int(row.line_number - 1)][1]: row.column_b})
-                #line_list.append((keys[int(row.line_number - 1)][0], row.column_a))
-                #line_list.append((keys[int(row.line_number - 1)][1], row.column_b))
+                if row.line_number >= 33:
+                    state_map[keys[int(row.line_number - 1)][0]] = row.column_a
+                    state_map[keys[int(row.line_number - 1)][1]] = row.column_b
+                else:
+                    line_list[keys[int(row.line_number - 1)][0]] = row.column_a
+                    line_list[keys[int(row.line_number - 1)][1]] = row.column_b
+            line_list["state_allocations"] = state_map
             return line_list
+
+class EFilingF3Schema(BaseFilingSchema):
+
+
+    def parse_summary_rows(self, obj):
+        print("in f3")
+        line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b)
+        return line_list
+
+class EFilingF3XSchema(BaseFilingSchema):
+    committee_name = ma.fields.Str()
+
+
+    def parse_summary_rows(self, obj):
+        print("in f3x")
+        print(len(decoders.f3x_col_a))
+        print(decoders.f3x_col_a)
+        print(len(decoders.f3x_col_b))
+        print("leaving")
+
+        line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b)
+        return line_list
 
 
 class CandidateSearchSchema(BaseSearchSchema):
@@ -164,7 +200,9 @@ make_committee_schema = functools.partial(
 
 augment_models(
     make_efiling_schema,
-    models.BaseFiling
+    models.BaseF3PFiling,
+    models.BaseF3XFiling,
+    models.BaseF3Filing,
 )
 
 augment_models(
@@ -204,7 +242,9 @@ class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['Ca
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
 
-EFilingPageSchema = make_page_schema(EFilingSchema)
+EFilingF3PPageSchema = make_page_schema(EFilingF3PSchema)
+EFilingF3PageSchema = make_page_schema(EFilingF3Schema)
+EFilingF3XPageSchema = make_page_schema(EFilingF3XSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
