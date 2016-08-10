@@ -14,9 +14,24 @@ class BaseFilingSummary(db.Model):
     column_b = db.Column('colb', db.Float)
 
 class BaseFiling(db.Model):
-    __tablename__ = 'real_efile_f3p'
+    __abstract__ = True
     repid = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column('comid',db.Integer, index=True, doc=docs.COMMITTEE_ID)
+    from_date = db.Column(db.Date)
+    through_date = db.Column(db.Date)
+    rpt_pgi = db.Column('rptpgi', db.String, doc=docs.ELECTION_TYPE)
+    rpt_code = db.Column('rptcode', db.String)
+    image_number = db.Column('imageno', db.Integer)
+    street_address_one = db.Column('str1', db.String)
+    street_address_two = db.Column('str2', db.String)
+    city = db.Column(db.String)
+    state = db.Column(db.String)
+    zip = db.Column(db.String)
+
+class BaseF3PFiling(BaseFiling):
+    __tablename__ = 'real_efile_f3p'
+    repid = db.Column(db.Integer, primary_key=True)
+
     candidate_name = db.Column('c_name', db.String, index=True, doc=docs.CANDIDATE_NAME)
     street_address_one = db.Column('c_str1', db.String)
     street_address_two = db.Column('c_str2', db.String)
@@ -30,12 +45,43 @@ class BaseFiling(db.Model):
     summary_lines = db.relationship(
         'BaseFilingSummary',
         primaryjoin='''and_(
-            BaseFiling.repid == BaseFilingSummary.repid,
-        )''',
+                BaseF3PFiling.repid == BaseFilingSummary.repid,
+            )''',
         foreign_keys=repid,
         uselist=True,
     )
 
+class BaseF3Filing(BaseFiling):
+    __tablename__ = 'real_efile_f3'
+    repid = db.Column(db.Integer, primary_key=True)
+
+
+    summary_lines = db.relationship(
+        'BaseFilingSummary',
+        primaryjoin='''and_(
+                BaseF3Filing.repid == BaseFilingSummary.repid,
+            )''',
+        foreign_keys=repid,
+        uselist=True,
+    )
+
+class BaseF3XFiling(BaseFiling):
+    __tablename__ = 'real_efile_f3x'
+    repid = db.Column(db.Integer, primary_key=True)
+
+    committee_name = db.Column('com_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
+
+
+
+
+    summary_lines = db.relationship(
+        'BaseFilingSummary',
+        primaryjoin='''and_(
+                BaseF3XFiling.repid == BaseFilingSummary.repid,
+            )''',
+        foreign_keys=repid,
+        uselist=True,
+    )
 
 
 
