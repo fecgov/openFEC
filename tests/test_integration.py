@@ -201,7 +201,16 @@ class TestViews(common.IntegrationTestCase):
             'select count(*) from ofec_sched_a_queue_old'
         ).scalar()
 
+    def _clear_sched_a_queues(self):
+        db.session.execute('delete from ofec_sched_a_queue_new')
+        db.session.commit()
+        db.session.execute('delete from ofec_sched_a_queue_old')
+        db.session.commit()
+
     def test_sched_a_queue_transactions_success(self):
+        # Make sure queues are clear before starting
+        self._clear_sched_a_queues()
+
         # Test create
         row = self.SchedAFactory(
             rpt_yr=2014,
@@ -261,6 +270,9 @@ class TestViews(common.IntegrationTestCase):
         )
 
     def test_sched_a_queue_transactions_failure(self):
+        # Make sure queues are clear before starting
+        self._clear_sched_a_queues()
+
         row = self.SchedAFactory(
             rpt_yr=2014,
             contbr_nm='Sheldon Adelson',
