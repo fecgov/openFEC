@@ -261,6 +261,7 @@ class TestViews(common.IntegrationTestCase):
         )
 
         # Test failed insert/update rollback.
+        make_transient(row)
         row.contbr_nm = 'Sheldon Adelson'
         db.session.add(row)
         db.session.commit()
