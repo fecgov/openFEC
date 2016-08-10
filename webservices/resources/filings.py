@@ -8,6 +8,18 @@ from webservices.common import views
 from webservices.common import counts
 from webservices.common import models
 
+reports_schema_map = {
+    'P': (models.BaseF3PFiling, schemas.EFilingF3PSchema, schemas.EFilingF3PPageSchema),
+    'H': (models.BaseF3Filing, schemas.EFilingF3Schema, schemas.EFilingF3PageSchema),
+    'S': (models.BaseF3Filing, schemas.EFilingF3Schema, schemas.EFilingF3PageSchema),
+    'X': (models.BaseF3XFiling, schemas.EFilingF3XSchema, schemas.EFilingF3XPageSchema),
+}
+
+form_type_map = {
+    'f3p-summary': 'P',
+    'f3x-summary': 'X',
+    'f3-summary': 'H',
+}
 
 @doc(
     tags=['filings'],
@@ -82,24 +94,29 @@ class FilingsList(BaseFilings):
     description=docs.FILINGS,
 )
 class EFilingSummaryView(views.ApiResource):
-    model = models.BaseFiling
-    schema = schemas.EFilingSchema
-    page_schema = schemas.EFilingPageSchema
+
+    model = models.BaseF3PFiling
+    schema = schemas.EFilingF3PSchema
+    page_schema = schemas.EFilingF3PPageSchema
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
             args.filings,
+            args.efilings
         )
 
 
-    def get(self, **kwargs):
+    def get(self, form_type=None, **kwargs):
+        if form_type:
+            self.model, self.schema, self.page_schema = \
+                reports_schema_map.get(form_type_map.get(form_type))
         query = self.build_query(**kwargs)
+
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=models.BaseFiling, count=count)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
-        print(query)
         return query
