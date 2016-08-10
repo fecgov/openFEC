@@ -262,7 +262,9 @@ class TestViews(common.IntegrationTestCase):
 
         # Test failed insert/update rollback.
         make_transient(row)
-        row.contbr_nm = 'Sheldon Adelson'
+        db.session.add(row)
+        db.session.commit()
+        row.contbr_nm = 'Shelly Adelson'
         db.session.add(row)
         db.session.commit()
         new_queue_count = self._get_sched_a_queue_new_count()
@@ -280,7 +282,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(new_queue_count, 1)
         self.assertEqual(old_queue_count, 0)
         self.assertEqual(search.sub_id, row.sub_id)
-        self.assertEqual(search.contbr_nm, 'Shelly Adelson')
+        self.assertEqual(search.contbr_nm, 'Sheldon Adelson')
 
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.SchedAFactory(**{
