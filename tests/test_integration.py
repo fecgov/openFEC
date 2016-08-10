@@ -191,6 +191,96 @@ class TestViews(common.IntegrationTestCase):
             1,
         )
 
+    def _get_sched_a_queue_new_count(self):
+        return db.session.execute(
+            'select count(*) from ofec_sched_a_queue_new'
+        ).first()[0]
+
+    def _get_sched_a_queue_old_count(self):
+        return db.session.execute(
+            'select count(*) from ofec_sched_a_queue_old'
+        ).first()[0]
+
+    def test_sched_a_queue_transactions(self):
+        # Test create
+        row = self.SchedAFactory(
+            rpt_yr=2014,
+            contbr_nm='Sheldon Adelson',
+        )
+        db.session.commit()
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 1)
+        self.assertEqual(old_queue_count, 0)
+        manage.update_aggregates()
+        search = models.ScheduleA.query.filter(
+            models.ScheduleA.sub_id == row.sub_id
+        ).one()
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 0)
+        self.assertEqual(old_queue_count, 0)
+        self.assertEqual(search.sub_id, row.sub_id)
+
+        # Test update
+        row.contbr_nm = 'Shelly Adelson'
+        db.session.add(row)
+        db.session.commit()
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 1)
+        self.assertEqual(old_queue_count, 1)
+        manage.update_aggregates()
+        search = models.ScheduleA.query.filter(
+            models.ScheduleA.sub_id == row.sub_id
+        ).one()
+        db.session.refresh(search)
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 0)
+        self.assertEqual(old_queue_count, 0)
+        self.assertEqual(search.sub_id, row.sub_id)
+
+        # Test delete
+        db.session.delete(row)
+        db.session.commit()
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 0)
+        self.assertEqual(old_queue_count, 1)
+        manage.update_aggregates()
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 0)
+        self.assertEqual(old_queue_count, 0)
+        self.assertEqual(
+            models.ScheduleA.query.filter(
+                models.ScheduleA.sub_id == row.sub_id
+            ).count(),
+            0,
+        )
+
+        # Test failed insert/update rollback.
+        row.contbr_nm = 'Sheldon Adelson'
+        db.session.add(row)
+        db.session.commit()
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 1)
+        self.assertEqual(old_queue_count, 1)
+        db.session.execute('delete from ofec_sched_a_queue_old')
+        manage.update_aggregates()
+        search = models.ScheduleA.query.filter(
+            models.ScheduleA.sub_id == row.sub_id
+        ).one()
+        db.session.refresh(search)
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 1)
+        self.assertEqual(old_queue_count, 0)
+        self.assertEqual(search.sub_id, row.sub_id)
+        self.assertEqual(search.contbr_nm, 'Shelly Adelson')
+
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.SchedAFactory(**{
             'rpt_yr': 2015,
