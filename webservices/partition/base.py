@@ -183,8 +183,6 @@ class TableGroup:
         connection = db.engine.connect()
         transaction = connection.begin()
 
-        logger.info('Processing {name}...'.format(name=name))
-
         try:
             select = sa.select([queue_old.c.get(cls.primary)]).where(
                 queue_old.c.two_year_transaction_period.in_([start, stop])
@@ -229,7 +227,7 @@ class TableGroup:
             cls.clear_queue(queue_new, cycle, connection)
 
             transaction.commit()
-            logger.info('Finished processing {name}.'.format(name=name))
+            logger.info('Successfully refreshed {name}.'.format(name=name))
         except Exception as e:
             transaction.rollback()
             logger.error(
