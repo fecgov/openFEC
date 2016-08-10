@@ -41,12 +41,12 @@ def check_itemized_queues(schedule):
         'select count(*) from ofec_sched_{schedule}_queue_new'.format(
             schedule=schedule
         )
-    ).first()[0]
+    ).scalar()
     remaining_old_queue = db.engine.execute(
         'select count(*) from ofec_sched_{schedule}_queue_new'.format(
             schedule=schedule
         )
-    ).first()[0]
+    ).scalar()
 
     if remaining_new_queue == remaining_old_queue == 0:
         logger.info(

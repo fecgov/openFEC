@@ -194,12 +194,12 @@ class TestViews(common.IntegrationTestCase):
     def _get_sched_a_queue_new_count(self):
         return db.session.execute(
             'select count(*) from ofec_sched_a_queue_new'
-        ).first()[0]
+        ).scalar()
 
     def _get_sched_a_queue_old_count(self):
         return db.session.execute(
             'select count(*) from ofec_sched_a_queue_old'
-        ).first()[0]
+        ).scalar()
 
     def test_sched_a_queue_transactions_success(self):
         # Test create

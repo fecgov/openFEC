@@ -178,7 +178,9 @@ class TableGroup:
     @classmethod
     def refresh_child(cls, cycle, queue_old, queue_new):
         start, stop = cycle - 1, cycle
-        name = '{base}_{start}_{stop}'.format(base=cls.base_name, start=start, stop=stop)
+        name = '{base}_{start}_{stop}'.format(
+            base=cls.base_name, start=start, stop=stop
+        )
         child = utils.load_table(name)
         connection = db.engine.connect()
         transaction = connection.begin()
@@ -187,15 +189,18 @@ class TableGroup:
             select = sa.select([queue_old.c.get(cls.primary)]).where(
                 queue_old.c.two_year_transaction_period.in_([start, stop])
             )
-            delete = sa.delete(child).where(child.c.get(cls.primary).in_(select))
+            delete = sa.delete(child).where(
+                child.c.get(cls.primary).in_(select)
+            )
             connection.execute(delete)
 
-            # The queue tables already have the two_year_transaction_period column
-            # set in them so that we can insert the records into the proper child
-            # table. Because of this, we need to exclude the function call in the
-            # column factory normally used when populating the child tables during
-            # normal partitioning. Otherwise, an error is thrown due more values
-            # being specified than there are columns to accept them.
+            # The queue tables already have the two_year_transaction_period
+            # column set in them so that we can insert the records into the
+            # proper child table. Because of this, we need to exclude the
+            # function call in the column factory normally used when
+            # populating the child tables during normal partitioning.
+            # Otherwise, an error is thrown due more values being specified
+            # than there are columns to accept them.
             columns = [
                 column for column in cls.column_factory(queue_new)
                 if column.name != 'two_year_transaction_period'
