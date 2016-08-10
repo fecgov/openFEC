@@ -260,6 +260,38 @@ class TestViews(common.IntegrationTestCase):
             0,
         )
 
+    def test_sched_a_queue_transactions_failure(self):
+        row = self.SchedAFactory(
+            rpt_yr=2014,
+            contbr_nm='Sheldon Adelson',
+        )
+        db.session.commit()
+        manage.update_aggregates()
+
+        # Test insert/update failure
+        row.contbr_nm = 'Shelley Adelson'
+        db.session.add(row)
+        db.session.commit()
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 1)
+        self.assertEqual(old_queue_count, 1)
+        db.session.execute('delete from ofec_sched_a_queue_old')
+        db.session.commit()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(old_queue_count, 0)
+        manage.update_aggregates()
+        search = models.ScheduleA.query.filter(
+            models.ScheduleA.sub_id == row.sub_id
+        ).one()
+        db.session.refresh(search)
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 1)
+        self.assertEqual(old_queue_count, 0)
+        self.assertEqual(search.sub_id, row.sub_id)
+        self.assertEqual(search.contributor_name, 'Sheldon Adelson')
+
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.SchedAFactory(**{
             'rpt_yr': 2015,

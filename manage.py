@@ -43,7 +43,7 @@ def check_itemized_queues(schedule):
         )
     ).scalar()
     remaining_old_queue = db.engine.execute(
-        'select count(*) from ofec_sched_{schedule}_queue_new'.format(
+        'select count(*) from ofec_sched_{schedule}_queue_old'.format(
             schedule=schedule
         )
     ).scalar()
