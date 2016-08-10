@@ -194,7 +194,9 @@ committee_list = {
 committee_history = {
     'election_full': election_full,
 }
+efilings = {
 
+}
 filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'report_type': fields.List(IStr, description='Report type'),
