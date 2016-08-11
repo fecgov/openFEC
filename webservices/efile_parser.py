@@ -3,11 +3,11 @@ import pandas as pd
 
 
 def parse_f3psummary_column_a(dataframe=None):
-    return dataframe['fecp column name (column a value)'].unique()
+    return list(dataframe['fecp column name (column a value)'])
 
 
 def parse_f3psummary_column_b(dataframe=None):
-    return dataframe['fecp column name (column b value)'].unique()
+    return list(dataframe['fecp column name (column b value)'])
 
 def get_dataframe(sheetname=None):
     dataframe = pd.read_excel(
