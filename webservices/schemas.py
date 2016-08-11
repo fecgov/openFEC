@@ -24,6 +24,16 @@ class BaseSchema(ModelSchema):
         if '.' in attr:
             return super().get_attribute(attr, obj, default)
         return getattr(obj, attr, default)
+"""
+    This seems like a heavy handed way to attach new behavior to the schemas, as it
+    is creating htis method on all schemas
+"""
+class BaseEfileSchema(ModelSchema):
+    summary_lines = ma.fields.Method("parse_summary_rows")
+
+    def parse_summary_rows(self, obj):
+        line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b)
+        return line_list
 
 
 def register_schema(schema, definition_name=None):
@@ -49,7 +59,7 @@ def make_schema(model, class_name=None, fields=None, options=None):
 
     return type(
         class_name,
-        (BaseSchema, ),
+        (BaseEfileSchema, ),
         utils.extend({'Meta': Meta}, fields or {}),
     )
 
@@ -71,8 +81,6 @@ def extract_columns(obj, column_a, column_b):
     line_list = {}
     keys = zip(column_a, column_b)
     keys = list(keys)
-    print(len(keys))
-
     if obj.summary_lines:
         for row in obj.summary_lines:
             line_list[keys[int(row.line_number - 1)][0]] = row.column_a
@@ -113,6 +121,10 @@ class BaseFilingSchema(ma.Schema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     candidate_name = ma.fields.Str()
     committee_id = ma.fields.Str()
+    from_date = ma.fields.Str()
+    through_date = ma.fields.Str()
+    city = ma.fields.Str()
+    state= ma.fields.Str()
 
 class EFilingF3PSchema(BaseFilingSchema):
     def parse_summary_rows(self, obj):
@@ -136,21 +148,14 @@ class EFilingF3Schema(BaseFilingSchema):
 
 
     def parse_summary_rows(self, obj):
-        print("in f3")
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b)
         return line_list
 
 class EFilingF3XSchema(BaseFilingSchema):
-    committee_name = ma.fields.Str()
+    #committee_name = ma.fields.Str()
 
 
     def parse_summary_rows(self, obj):
-        print("in f3x")
-        print(len(decoders.f3x_col_a))
-        print(decoders.f3x_col_a)
-        print(len(decoders.f3x_col_b))
-        print("leaving")
-
         line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b)
         return line_list
 
@@ -177,12 +182,6 @@ class CommitteeSearchListSchema(ApiSchema):
         ref='#/definitions/CommitteeSearch',
         many=True,
     )
-
-
-register_schema(CandidateSearchSchema)
-register_schema(CandidateSearchListSchema)
-register_schema(CommitteeSearchSchema)
-register_schema(CommitteeSearchListSchema)
 
 make_efiling_schema = functools.partial(
     make_schema,
@@ -242,9 +241,9 @@ class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['Ca
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
 
-EFilingF3PPageSchema = make_page_schema(EFilingF3PSchema)
-EFilingF3PageSchema = make_page_schema(EFilingF3Schema)
-EFilingF3XPageSchema = make_page_schema(EFilingF3XSchema)
+#FilingF3PPageSchema = make_page_schema(EFilingF3PSchema)
+#FilingF3PageSchema = make_page_schema(EFilingF3Schema)
+#EFilingF3XPageSchema = make_page_schema(EFilingF3XSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,

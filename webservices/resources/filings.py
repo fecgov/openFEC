@@ -9,10 +9,10 @@ from webservices.common import counts
 from webservices.common import models
 
 reports_schema_map = {
-    'P': (models.BaseF3PFiling, schemas.EFilingF3PSchema, schemas.EFilingF3PPageSchema),
-    'H': (models.BaseF3Filing, schemas.EFilingF3Schema, schemas.EFilingF3PageSchema),
-    'S': (models.BaseF3Filing, schemas.EFilingF3Schema, schemas.EFilingF3PageSchema),
-    'X': (models.BaseF3XFiling, schemas.EFilingF3XSchema, schemas.EFilingF3XPageSchema),
+    'P': (models.BaseF3PFiling, schemas.BaseF3PFilingSchema, schemas.BaseF3PFilingPageSchema),
+    'H': (models.BaseF3Filing, schemas.BaseF3FilingSchema, schemas.BaseF3FilingPageSchema),
+    'S': (models.BaseF3Filing, schemas.BaseF3FilingSchema, schemas.BaseF3FilingPageSchema),
+    'X': (models.BaseF3XFiling, schemas.BaseF3XFilingSchema, schemas.BaseF3XFilingPageSchema),
 }
 
 form_type_map = {
@@ -96,8 +96,8 @@ class FilingsList(BaseFilings):
 class EFilingSummaryView(views.ApiResource):
 
     model = models.BaseF3PFiling
-    schema = schemas.EFilingF3PSchema
-    page_schema = schemas.EFilingF3PPageSchema
+    schema = schemas.BaseF3FilingSchema
+    page_schema = schemas.BaseF3FilingSchema
 
     @property
     def args(self):
@@ -109,6 +109,7 @@ class EFilingSummaryView(views.ApiResource):
 
 
     def get(self, form_type=None, **kwargs):
+
         if form_type:
             self.model, self.schema, self.page_schema = \
                 reports_schema_map.get(form_type_map.get(form_type))
