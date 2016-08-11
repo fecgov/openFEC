@@ -393,7 +393,8 @@ def load_advisory_opinions_into_s3():
             print("No new advisory opinions found.")
 @manager.command
 def test_util():
-    efile_parser.parse_f3psummary_column_b()
+    df = efile_parser.get_dataframe(6)
+    efile_parser.parse_f3psummary_column_b(df)
 
 
 if __name__ == '__main__':
