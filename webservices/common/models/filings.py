@@ -66,17 +66,19 @@ class EFilings(db.Model):
     form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
     committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
+    # this will be a date time
     receipt_date = db.Column('filed_date', db.Date, index=True, doc=docs.RECEIPT_DATE)
     # add docs, confirm this is the receipt time
-    filing_timestamp = db.Column('create_dt', db.DateTime)
+    load_timestamp = db.Column('create_dt', db.DateTime, doc="This is the load date and will be deprecated when we have the receipt date time")
     coverage_start_date = db.Column('from_date', db.Date, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column('through_date', db.Date, doc=docs.COVERAGE_END_DATE)
     beginning_image_number = db.Column('starting', db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
     ending_image_number = db.Column('ending', db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
     report_type = db.Column('rptcode', db.String, doc=docs.REPORT_TYPE)
     # double check amendment interpretation
-    amended_by = db.Column('superceded', db.BigInteger, )
-    amends_file = db.Column('previd', db.BigInteger, )
+    amended_by = db.Column('superceded', db.BigInteger, doc=docs.AMENDED_BY)
+    amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
+    amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
 
     @property
     def is_amended(self):
@@ -84,15 +86,6 @@ class EFilings(db.Model):
             return True
         return False
 
-# TODO: add index on committee id and filed_date
 
-# things we are not using
-    #  timestamp -- this seems redundant with filed date and it is a date and not a timestamp
-    #  md5 -- is this for id purposes or verification purposes?
-    #  used -- ? There is no data in here
-    #  ef -- ? X for all of the records
-    #  filed --? W or X
-    #  rptnum -- ? random, small numbers
-    #  exclude_ind --? no info
-    #  notes -- ? noting
-    #  version -- this is the efiling version and I don't think we need this
+# TODO: add index on committee id and filed_date
+    #  version -- this is the efiling version and I don't think we need this - let's document in API for now, see if there are objections
