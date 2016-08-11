@@ -28,12 +28,41 @@ class BaseSchema(ModelSchema):
     This seems like a heavy handed way to attach new behavior to the schemas, as it
     is creating htis method on all schemas
 """
-class BaseEfileSchema(ModelSchema):
+class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
 
+class EFilingF3PSchema(BaseEfileSchema):
+    def parse_summary_rows(self, obj):
+        line_list = {}
+        state_map = {}
+        keys = zip(decoders.f3p_col_a, decoders.f3p_col_b)
+
+        keys = list(keys)
+        if obj.summary_lines:
+            for row in obj.summary_lines:
+                if row.line_number >= 33:
+                    state_map[keys[int(row.line_number - 1)][0]] = row.column_a
+                    state_map[keys[int(row.line_number - 1)][1]] = row.column_b
+                else:
+                    line_list[keys[int(row.line_number - 1)][0]] = row.column_a
+                    line_list[keys[int(row.line_number - 1)][1]] = row.column_b
+            line_list["state_allocations"] = state_map
+            return line_list
+
+class EFilingF3Schema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b)
         return line_list
+
+class EFilingF3XSchema(BaseEfileSchema):
+    def parse_summary_rows(self, obj):
+        line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b)
+        return line_list
+
+schema_map = {}
+schema_map["EFilingF3X"] = EFilingF3XSchema
+schema_map["EFilingF3"] = EFilingF3Schema
+schema_map["EFilingF3P"] = EFilingF3PSchema
 
 
 def register_schema(schema, definition_name=None):
@@ -43,7 +72,7 @@ def register_schema(schema, definition_name=None):
 
 def make_schema(model, class_name=None, fields=None, options=None):
     class_name = class_name or '{0}Schema'.format(model.__name__)
-
+    print(class_name)
     Meta = type(
         'Meta',
         (object, ),
@@ -56,10 +85,16 @@ def make_schema(model, class_name=None, fields=None, options=None):
             options or {},
         )
     )
+    mapped_schema = (
+        BaseSchema
+        if not schema_map.get(class_name)
+        else schema_map.get(class_name)
+
+    )
 
     return type(
         class_name,
-        (BaseEfileSchema, ),
+        (mapped_schema, ),
         utils.extend({'Meta': Meta}, fields or {}),
     )
 
@@ -111,54 +146,9 @@ class ApiSchema(ma.Schema):
         ret.update(data)
         return ret
 
-
 class BaseSearchSchema(ma.Schema):
     id = ma.fields.Str()
     name = ma.fields.Str()
-
-class BaseFilingSchema(ma.Schema):
-    repid = ma.fields.Str()
-    summary_lines = ma.fields.Method("parse_summary_rows")
-    candidate_name = ma.fields.Str()
-    committee_id = ma.fields.Str()
-    from_date = ma.fields.Str()
-    through_date = ma.fields.Str()
-    city = ma.fields.Str()
-    state= ma.fields.Str()
-
-class EFilingF3PSchema(BaseFilingSchema):
-    def parse_summary_rows(self, obj):
-        line_list = {}
-        state_map = {}
-        keys = zip(decoders.f3p_col_a, decoders.f3p_col_b)
-
-        keys = list(keys)
-        if obj.summary_lines:
-            for row in obj.summary_lines:
-                if row.line_number >= 33:
-                    state_map[keys[int(row.line_number - 1)][0]] = row.column_a
-                    state_map[keys[int(row.line_number - 1)][1]] = row.column_b
-                else:
-                    line_list[keys[int(row.line_number - 1)][0]] = row.column_a
-                    line_list[keys[int(row.line_number - 1)][1]] = row.column_b
-            line_list["state_allocations"] = state_map
-            return line_list
-
-class EFilingF3Schema(BaseFilingSchema):
-
-
-    def parse_summary_rows(self, obj):
-        line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b)
-        return line_list
-
-class EFilingF3XSchema(BaseFilingSchema):
-    #committee_name = ma.fields.Str()
-
-
-    def parse_summary_rows(self, obj):
-        line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b)
-        return line_list
-
 
 class CandidateSearchSchema(BaseSearchSchema):
     office_sought = ma.fields.Str()
