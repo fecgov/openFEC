@@ -45,19 +45,19 @@ spec = APISpec(
             'description': docs.FILINGS,
         },
         {
-            'name': 'schedules/schedule_a',
+            'name': 'receipts',
             'description': docs.SCHEDULE_A_TAG,
         },
         {
-            'name': 'schedules/schedule_b',
+            'name': 'disbursements',
             'description': docs.SCHEDULE_B_TAG,
         },
         {
-            'name': 'schedules/schedule_e',
+            'name': 'independent expenditures',
             'description': docs.SCHEDULE_E_TAG,
         },
         {
-            'name': 'communication_cost',
+            'name': 'communication cost',
             'description': docs.COMMUNICATION_TAG,
         },
         {
@@ -65,7 +65,7 @@ spec = APISpec(
             'description': docs.ELECTIONEERING,
         },
         {
-            'name': 'filer_resources',
+            'name': 'filer resources',
             'description': docs.FILER_RESOURCES
         }
     ]

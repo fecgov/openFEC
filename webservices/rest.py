@@ -223,6 +223,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.Search, '/legal/search/')
+api.add_resource(legal.AdvisoryOpinion, '/legal/advisory_opinion/<ao_no>')
 api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
@@ -270,6 +271,7 @@ apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
+apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 
 
