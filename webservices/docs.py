@@ -857,7 +857,6 @@ CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
 
-
 # efiling
 EFILING_TAG = '''
 Efiling endpoints provide real-time campaign finance data for electronic filers.
@@ -881,3 +880,6 @@ for the most recent version of the report.
 AMENDMENT_NUMBER = '''
 Number of times the report has been amended.
 '''
+
+MIN_FILTER = 'Filter for all amounts greater than a value.'
+MAX_FILTER = 'Filter for all amounts less than a value.'
