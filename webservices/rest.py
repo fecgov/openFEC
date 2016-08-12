@@ -221,9 +221,9 @@ api.add_resource(
 
 api.add_resource(
     filings.EFilingSummaryView,
-    '/efilings/presidential/<string:form_type>/',
-    '/efilings/pac-party/<string:form_type>/',
-    '/efilings/house-senate/<string:form_type>/',
+    '/efilings/presidential/<string:form>/',
+    '/efilings/pac-party/<string:form>/',
+    '/efilings/house-senate/<string:form>/',
 
 
 )
