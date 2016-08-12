@@ -60,9 +60,9 @@ class EFilingF3XSchema(BaseEfileSchema):
         return line_list
 
 schema_map = {}
-schema_map["EFilingF3X"] = EFilingF3XSchema
-schema_map["EFilingF3"] = EFilingF3Schema
-schema_map["EFilingF3P"] = EFilingF3PSchema
+schema_map["BaseF3XFiling"] = EFilingF3XSchema
+schema_map["BaseF3Filing"] = EFilingF3Schema
+schema_map["BaseF3PFiling"] = EFilingF3PSchema
 
 
 def register_schema(schema, definition_name=None):
@@ -72,7 +72,6 @@ def register_schema(schema, definition_name=None):
 
 def make_schema(model, class_name=None, fields=None, options=None):
     class_name = class_name or '{0}Schema'.format(model.__name__)
-    print(class_name)
     Meta = type(
         'Meta',
         (object, ),
@@ -87,11 +86,10 @@ def make_schema(model, class_name=None, fields=None, options=None):
     )
     mapped_schema = (
         BaseSchema
-        if not schema_map.get(class_name)
-        else schema_map.get(class_name)
+        if not schema_map.get(model.__name__)
+        else schema_map.get(model.__name__)
 
     )
-
     return type(
         class_name,
         (mapped_schema, ),
@@ -173,6 +171,11 @@ class CommitteeSearchListSchema(ApiSchema):
         many=True,
     )
 
+register_schema(CandidateSearchSchema)
+register_schema(CandidateSearchListSchema)
+register_schema(CommitteeSearchSchema)
+register_schema(CommitteeSearchListSchema)
+
 make_efiling_schema = functools.partial(
     make_schema,
     options={'exclude': ('idx', )},
@@ -231,9 +234,6 @@ class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['Ca
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
 
-#FilingF3PPageSchema = make_page_schema(EFilingF3PSchema)
-#FilingF3PageSchema = make_page_schema(EFilingF3Schema)
-#EFilingF3XPageSchema = make_page_schema(EFilingF3XSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
@@ -328,7 +328,6 @@ ScheduleASchema = make_schema(
         'image_number': ma.fields.Str(),
         'original_sub_id': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
-        'uppername': ma.fields.Function(lambda obj: obj.contributor_state.lower()),
     },
     options={
         'exclude': (
