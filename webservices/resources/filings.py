@@ -108,11 +108,11 @@ class EFilingSummaryView(views.ApiResource):
         )
 
 
-    def get(self, form_type=None, **kwargs):
+    def get(self, form=None, **kwargs):
 
-        if form_type:
+        if form:
             self.model, self.schema, self.page_schema = \
-                reports_schema_map.get(form_type_map.get(form_type))
+                reports_schema_map.get(form_type_map.get(form))
         query = self.build_query(**kwargs)
 
         count = counts.count_estimate(query, models.db.session, threshold=5000)
