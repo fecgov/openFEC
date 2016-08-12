@@ -62,3 +62,6 @@ data/subset.dump
 
 # DO include the swagger-ui dist dir
 !/static/swagger-ui/dist/
+
+# Celery artifacts
+celerybeat-schedule
