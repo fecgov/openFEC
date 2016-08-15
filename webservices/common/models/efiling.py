@@ -16,10 +16,10 @@ class BaseFiling(db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
-    from_date = db.Column(db.Date)
-    through_date = db.Column(db.Date)
+    coverage_start_date = db.Column('from_date', db.Date)
+    coverage_end_date = db.Column('through_date', db.Date)
     rpt_pgi = db.Column('rptpgi', db.String, doc=docs.ELECTION_TYPE)
-    rpt_code = db.Column('rptcode', db.String)
+    report_type = db.Column('rptcode', db.String)
     image_number = db.Column('imageno', db.Integer)
     street_address_one = db.Column('str1', db.String)
     street_address_two = db.Column('str2', db.String)
