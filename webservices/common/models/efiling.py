@@ -3,20 +3,19 @@ from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import docs
-
 from .base import db, BaseModel
 
 class BaseFilingSummary(db.Model):
     __tablename__ = 'real_efile_summary'
-    repid = db.Column(db.Integer, primary_key=True)
+    file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     line_number = db.Column('lineno', db.Integer, primary_key=True)
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
 class BaseFiling(db.Model):
     __abstract__ = True
-    repid = db.Column(db.Integer, primary_key=True)
-    committee_id = db.Column('comid',db.Integer, index=True, doc=docs.COMMITTEE_ID)
+    file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
+    committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
     from_date = db.Column(db.Date)
     through_date = db.Column(db.Date)
     rpt_pgi = db.Column('rptpgi', db.String, doc=docs.ELECTION_TYPE)
@@ -32,9 +31,10 @@ class BaseFiling(db.Model):
     create_date = db.Column('create_dt', db.Date)
     sign_date = db.Column(db.Date)
 
+
 class BaseF3PFiling(BaseFiling):
     __tablename__ = 'real_efile_f3p'
-    repid = db.Column(db.Integer, primary_key=True)
+    file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
 
     treasurer_last_name = db.Column('lname', db.String)
     treasurer_middle_name = db.Column('mname', db.String)
@@ -62,15 +62,15 @@ class BaseF3PFiling(BaseFiling):
     summary_lines = db.relationship(
         'BaseFilingSummary',
         primaryjoin='''and_(
-                BaseF3PFiling.repid == BaseFilingSummary.repid,
+                BaseF3PFiling.file_number == BaseFilingSummary.file_number,
             )''',
-        foreign_keys=repid,
+        foreign_keys=file_number,
         uselist=True,
     )
 
 class BaseF3Filing(BaseFiling):
     __tablename__ = 'real_efile_f3'
-    repid = db.Column(db.Integer, primary_key=True)
+    file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     candidate_last_name = db.Column('can_lname', db.String)
     candidate_first_name = db.Column('can_fname', db.String)
     candidate_middle_name = db.Column('can_mname', db.String)
@@ -87,15 +87,15 @@ class BaseF3Filing(BaseFiling):
     summary_lines = db.relationship(
         'BaseFilingSummary',
         primaryjoin='''and_(
-                BaseF3Filing.repid == BaseFilingSummary.repid,
+                BaseF3Filing.file_number == BaseFilingSummary.file_number,
             )''',
-        foreign_keys=repid,
+        foreign_keys=file_number,
         uselist=True,
     )
 
 class BaseF3XFiling(BaseFiling):
     __tablename__ = 'real_efile_f3x'
-    repid = db.Column(db.Integer, primary_key=True)
+    file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
 
     committee_name = db.Column('com_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
     sign_date = db.Column('date_signed', db.Date)
@@ -103,13 +103,12 @@ class BaseF3XFiling(BaseFiling):
     qual = db.Column(db.String)
 
 
-
     summary_lines = db.relationship(
         'BaseFilingSummary',
         primaryjoin='''and_(
-                BaseF3XFiling.repid == BaseFilingSummary.repid,
+                BaseF3XFiling.file_number == BaseFilingSummary.file_number,
             )''',
-        foreign_keys=repid,
+        foreign_keys=file_number,
         uselist=True,
     )
 
