@@ -1,6 +1,4 @@
-from .efile_parser import get_dataframe
-from .efile_parser import parse_f3psummary_column_a
-from .efile_parser import parse_f3psummary_column_b
+from .efile_parser import *
 
 election_types = {
     'GR': 'General runoff',
@@ -32,12 +30,14 @@ form_types = {
 df = get_dataframe(5)
 f3p_col_a = parse_f3psummary_column_a(df)
 f3p_col_b = parse_f3psummary_column_b(df)
+f3p_description = parse_f3psummary_column_description(df)
 
 df = get_dataframe(4)
 f3_col_a = parse_f3psummary_column_a(df)
 f3_col_b = parse_f3psummary_column_b(df)
+f3_description = parse_f3psummary_column_description(df)
 
 df = get_dataframe(6)
 f3x_col_a = parse_f3psummary_column_a(df)
 f3x_col_b = parse_f3psummary_column_b(df)
-
+f3x_description = parse_f3psummary_column_description(df)

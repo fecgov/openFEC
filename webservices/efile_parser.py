@@ -9,6 +9,9 @@ def parse_f3psummary_column_a(dataframe=None):
 def parse_f3psummary_column_b(dataframe=None):
     return list(dataframe['fecp column name (column b value)'])
 
+def parse_f3psummary_column_description(dataframe=None):
+    return list(dataframe['description'])
+
 def get_dataframe(sheetname=None):
     dataframe = pd.read_excel(
         # /Users/jonathancarmack/Documents/repos/openFEC
