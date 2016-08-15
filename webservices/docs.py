@@ -874,7 +874,7 @@ if a report is amended multiple times, the first report and the first amendment 
 report in the ameded_by field and the final report will have no id in the amended_by field.
 '''
 AMENDS_FILE = '''
-For amendments, this file_number is the file_number of the previous report that is being amended. See ameded_by
+For amendments, this file_number is the file_number of the previous report that is being amended. See amended_by
 for the most recent version of the report.
 '''
 AMENDMENT_NUMBER = '''
