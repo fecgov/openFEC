@@ -39,7 +39,10 @@ class EFilingF3PSchema(BaseEfileSchema):
         line_list = {}
         state_map = {}
         keys = zip(decoders.f3p_col_a, decoders.f3p_col_b)
+        per = re.compile('(.+?(?=per))')
+        ytd = re.compile('(.+?(?=ytd))')
 
+        descriptions = decoders.f3p_description
         keys = list(keys)
         if obj.summary_lines:
             for row in obj.summary_lines:
@@ -47,19 +50,26 @@ class EFilingF3PSchema(BaseEfileSchema):
                     state_map[keys[int(row.line_number - 1)][0]] = row.column_a
                     state_map[keys[int(row.line_number - 1)][1]] = row.column_b
                 else:
-                    line_list[keys[int(row.line_number - 1)][0]] = row.column_a
-                    line_list[keys[int(row.line_number - 1)][1]] = row.column_b
+                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_', keys[int(row.line_number - 1)][0]).replace(' ', '_')
+                    replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
+                                       str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+                    line_list[replace_a] = row.column_a
+                    line_list[replace_b] = row.column_b
             line_list["state_allocations"] = state_map
             return line_list
 
 class EFilingF3Schema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
-        line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b)
+        descriptions = decoders.f3_description
+
+        line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
         return line_list
 
 class EFilingF3XSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
-        line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b)
+        descriptions = decoders.f3x_description
+
+        line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b, descriptions)
         return line_list
 
 schema_map = {}
@@ -113,14 +123,20 @@ def make_page_schema(schema, page_type=paging_schemas.OffsetPageSchema, class_na
         {'Meta': Meta},
     )
 
-def extract_columns(obj, column_a, column_b):
+def extract_columns(obj, column_a, column_b, descriptions):
     line_list = {}
     keys = zip(column_a, column_b)
     keys = list(keys)
+    per = re.compile('(.+?(?=per))')
+    ytd = re.compile('(.+?(?=ytd))')
     if obj.summary_lines:
         for row in obj.summary_lines:
-            line_list[keys[int(row.line_number - 1)][0]] = row.column_a
-            line_list[keys[int(row.line_number - 1)][1]] = row.column_b
+            replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
+                               str(keys[int(row.line_number - 1)][0])).replace(' ', '_')
+            replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
+                               str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+            line_list[replace_a] = row.column_a
+            line_list[replace_b] = row.column_b
         return line_list
 
 
