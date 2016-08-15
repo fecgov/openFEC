@@ -110,7 +110,11 @@ class EFilingSummaryView(views.ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            args.efilings
+            args.efilings,
+            args.make_sort_args(
+                default='-create_date',
+                validator=args.IndexValidator(self.model),
+            ),
         )
 
 
