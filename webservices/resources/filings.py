@@ -89,8 +89,8 @@ class EFilingsView(views.ApiResource):
     page_schema = schemas.EFilingsPageSchema
 
     filter_multi_fields = [
-        ('file_number', models.Filings.file_number),
-        ('committee_id', models.Filings.committee_id),
+        ('file_number', models.EFilings.file_number),
+        ('committee_id', models.EFilings.committee_id),
     ]
 
     @property
