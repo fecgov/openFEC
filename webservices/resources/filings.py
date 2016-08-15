@@ -99,11 +99,17 @@ class EFilingSummaryView(views.ApiResource):
     schema = schemas.BaseF3FilingSchema
     page_schema = schemas.BaseF3FilingSchema
 
+    filter_multi_fields = [
+        ('file_number', models.BaseFiling.file_number),
+        ('committee_id', models.BaseFiling.committee_id),
+    ]
+    filter_range_fields = [
+        (('min_create_date', 'max_create_date' ), models.BaseFiling.create_date),
+    ]
     @property
     def args(self):
         return utils.extend(
             args.paging,
-            args.filings,
             args.efilings
         )
 
