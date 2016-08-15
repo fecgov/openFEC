@@ -11,7 +11,8 @@ from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
-
+from marshmallow import pre_dump
+from sqlalchemy import func
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
@@ -24,12 +25,14 @@ class BaseSchema(ModelSchema):
         if '.' in attr:
             return super().get_attribute(attr, obj, default)
         return getattr(obj, attr, default)
-"""
-    This seems like a heavy handed way to attach new behavior to the schemas, as it
-    is creating htis method on all schemas
-"""
+
 class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
+
+    @pre_dump
+    def parse_date(self, obj):
+        obj.create_date  = obj.create_date.date()
+        return obj
 
 class EFilingF3PSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
