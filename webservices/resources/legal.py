@@ -11,7 +11,7 @@ class AdvisoryOpinion(utils.Resource):
                           {"term": {"_type": "advisory_opinions"}}]}},
                           "_source": {"exclude": "text"}}
 
-        es_results = es.search(query)
+        es_results = es.search(query, size=200)
 
         results = {"docs": [r["_source"] for r in es_results["hits"]["hits"]]}
         return results
