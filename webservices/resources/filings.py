@@ -76,3 +76,40 @@ class FilingsList(BaseFilings):
     @property
     def args(self):
         return utils.extend(super().args, args.entities)
+
+
+@doc(
+    tags=['efiling'],
+    description=docs.EFILE_FILES,
+)
+class EFilingsView(views.ApiResource):
+
+    model = models.EFilings
+    schema = schemas.EFilingsSchema
+    page_schema = schemas.EFilingsPageSchema
+
+    filter_multi_fields = [
+        ('file_number', models.EFilings.file_number),
+        ('committee_id', models.EFilings.committee_id),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.efilings,
+            args.make_sort_args(
+                default='-receipt_date',
+                # TODO: add indexes and turn on validation
+                # validator=args.IndexValidator(models.EFilings),
+            ),
+        )
+
+    def get(self, **kwargs):
+        query = self.build_query(**kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=models.EFilings, count=count)
+
+    @property
+    def index_column(self):
+        return self.model.file_number
