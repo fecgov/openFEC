@@ -387,6 +387,17 @@ FilingsSchema = make_schema(
 )
 augment_schemas(FilingsSchema)
 
+EFilingsSchema = make_schema(
+    models.EFilings,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'ending_image_number': ma.fields.Str(),
+        'pdf_url': ma.fields.Str(),
+        'is_amended': ma.fields.Boolean(),
+    },
+)
+augment_schemas(EFilingsSchema)
+
 ReportTypeSchema = make_schema(models.ReportType)
 register_schema(ReportTypeSchema)
 

@@ -219,6 +219,12 @@ filings = {
         '''
     ),
 }
+
+efilings = {
+    'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+}
+
 reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
