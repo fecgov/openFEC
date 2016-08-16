@@ -396,6 +396,7 @@ EFilingsSchema = make_schema(
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
     },
+    options={'exclude': ('report',)},
 )
 augment_schemas(EFilingsSchema)
 
