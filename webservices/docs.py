@@ -857,5 +857,29 @@ CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
 
+# efiling
+EFILING_TAG = '''
+Efiling endpoints provide real-time campaign finance data for electronic filers.
+
+These endpoints are perfect for watching filings roll in when you want to know the latest information. Efiling endpoints
+only contain the most recent two years worth of data and don't contain the processed and coded data that
+you can find on the other endpoints. Those endpoints are better for in-depth analysis.
+'''
+
+EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
+FILE_NUMBER = 'Filing ID number'
+AMENDED_BY = '''
+If this report has been amended, this field gives the file_number of the report that should be used. For example,
+if a report is amended multiple times, the first report and the first amendment will have the file_number of the final amended
+report in the ameded_by field and the final report will have no id in the amended_by field.
+'''
+AMENDS_FILE = '''
+For amendments, this file_number is the file_number of the previous report that is being amended. See amended_by
+for the most recent version of the report.
+'''
+AMENDMENT_NUMBER = '''
+Number of times the report has been amended.
+'''
+
 MIN_FILTER = 'Filter for all amounts greater than a value.'
 MAX_FILTER = 'Filter for all amounts less than a value.'
