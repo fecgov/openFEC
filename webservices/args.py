@@ -194,12 +194,7 @@ committee_list = {
 committee_history = {
     'election_full': election_full,
 }
-efilings = {
-    'file_number': fields.List(fields.Int),
-    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'min_create_date': fields.Date(description='Selects all items created after this date'),
-    'max_create_date': fields.Date(description='Selects all items created before this date'),
-}
+
 filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'report_type': fields.List(IStr, description='Report type'),
@@ -228,6 +223,8 @@ filings = {
 efilings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'min_create_date': fields.Date(description='Selects all items created after this date'),
+    'max_create_date': fields.Date(description='Selects all items created before this date'),
 }
 
 reports = {
