@@ -1,4 +1,6 @@
 from webservices import docs, utils
+from webservices.common.models.dates import ReportType
+from webservices.common.models.dates import clean_report_type
 
 from .base import db
 
@@ -63,7 +65,7 @@ class EFilings(db.Model):
     __tablename__ = 'real_efile_reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
-    form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
+    form_type = db.Column('form', db.String, db.ForeignKey(ReportType.report_type), doc=docs.FORM_TYPE)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
     committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
     # this will be a date time
@@ -80,11 +82,25 @@ class EFilings(db.Model):
     amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
     amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
 
+    report = db.relationship(ReportType)
+
+
+    @property
+    def document_description(self):
+        return clean_report_type(self.report.report_type_full)
+
+
     @property
     def is_amended(self):
         if self.superceded is not None:
             return True
         return False
+
+
+    @property
+    def pdf_url(self):
+        image_number = str(self.beginning_image_number)
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{2}.pdf'.format(image_number[-3:], image_number, image_number)
 
 
 # TODO: add index on committee id and filed_date
