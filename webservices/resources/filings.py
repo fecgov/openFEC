@@ -111,7 +111,7 @@ class EFilingSummaryView(views.ApiResource):
             default='-create_date',
             validator=args.IndexValidator(self.model),
         ),
-        """
+    """
     @property
     def args(self):
         return utils.extend(
