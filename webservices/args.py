@@ -195,7 +195,6 @@ committee_history = {
     'election_full': election_full,
 }
 efilings = {
-    #TODO: add doc strings
     'file_number': fields.List(fields.Int),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'min_create_date': fields.Date(description='Selects all items created after this date'),
