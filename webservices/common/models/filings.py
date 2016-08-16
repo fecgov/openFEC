@@ -104,7 +104,7 @@ class EFilings(db.Model):
     @property
     def pdf_url(self):
         image_number = str(self.beginning_image_number)
-        return 'http://docquery.fec.gov/pdf/{0}/{1}/{2}.pdf'.format(image_number[-3:], image_number, image_number)
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
 
 
 # TODO: add index on committee id and filed_date
