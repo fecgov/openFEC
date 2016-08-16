@@ -12,7 +12,7 @@ class Filings(db.Model):
     candidate_id = db.Column(db.String, index=True, doc=docs.CANDIDATE_ID)
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
     cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
-    sub_id = db.Column(db.BigInteger, primary_key=True)
+    sub_id = db.Column(db.BigInteger, index=True, primary_key=True)
     coverage_start_date = db.Column(db.Date, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.Date, doc=docs.COVERAGE_END_DATE)
     receipt_date = db.Column(db.Date, index=True, doc=docs.RECEIPT_DATE)
@@ -57,3 +57,35 @@ class Filings(db.Model):
             self.document_type_full,
             self.form_type,
         )
+
+
+class EFilings(db.Model):
+    __tablename__ = 'real_efile_reps'
+
+    file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
+    form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
+    committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
+    committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
+    # this will be a date time
+    receipt_date = db.Column('filed_date', db.Date, index=True, doc=docs.RECEIPT_DATE)
+    # add docs, confirm this is the receipt time
+    load_timestamp = db.Column('create_dt', db.DateTime, doc="This is the load date and will be deprecated when we have the receipt date time")
+    coverage_start_date = db.Column('from_date', db.Date, doc=docs.COVERAGE_START_DATE)
+    coverage_end_date = db.Column('through_date', db.Date, doc=docs.COVERAGE_END_DATE)
+    beginning_image_number = db.Column('starting', db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
+    ending_image_number = db.Column('ending', db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
+    report_type = db.Column('rptcode', db.String, doc=docs.REPORT_TYPE)
+    # double check amendment interpretation
+    amended_by = db.Column('superceded', db.BigInteger, doc=docs.AMENDED_BY)
+    amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
+    amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
+
+    @property
+    def is_amended(self):
+        if self.superceded is not None:
+            return True
+        return False
+
+
+# TODO: add index on committee id and filed_date
+    #  version -- this is the efiling version and I don't think we need this - let's document in API for now, see if there are objections
