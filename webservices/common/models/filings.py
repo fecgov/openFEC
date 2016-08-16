@@ -70,8 +70,6 @@ class EFilings(db.Model):
     form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
     committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
-    # this will be a date time
-    receipt_date = db.Column('filed_date', db.Date, index=True, doc=docs.RECEIPT_DATE)
     # add docs, confirm this is the receipt time
     load_timestamp = db.Column('create_dt', db.DateTime, doc="This is the load date and will be deprecated when we have the receipt date time")
     coverage_start_date = db.Column('from_date', db.Date, doc=docs.COVERAGE_START_DATE)
