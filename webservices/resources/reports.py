@@ -79,6 +79,66 @@ class ReportsView(utils.Resource):
     @use_kwargs(args.reports)
     @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
+    def get(self, committee_type=None, **kwargs):
+        committee_id = kwargs.get('committee_id')
+        query, reports_class, reports_schema = self.build_query(
+            committee_type=committee_type,
+            **kwargs
+        )
+        if kwargs['sort']:
+            validator = args.IndexValidator(reports_class)
+            validator(kwargs['sort'])
+        page = utils.fetch_page(query, kwargs, model=reports_class)
+        return reports_schema().dump(page).data
+
+    def build_query(self, committee_type=None, **kwargs):
+        #For this endpoint we now enforce the enpoint specified to map the right model.
+        reports_class, reports_schema = reports_schema_map.get(
+            reports_type_map.get(committee_type),
+            default_schemas,
+        )
+        query = reports_class.query
+        # Eagerly load committees if applicable
+        if hasattr(reports_class, 'committee'):
+            query = reports_class.query.join(reports_class.committee).options(sa.orm.joinedload(reports_class.committee))
+            if kwargs.get('type'):
+                query = query.\
+                    filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
+            if kwargs.get('candidate_id'):
+                query = query.\
+                    filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
+            else:
+                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+
+        if kwargs.get('committee_id'):
+            query = query.filter(reports_class.committee_id.in_(kwargs['committee_id']))
+        if kwargs.get('year'):
+            query = query.filter(reports_class.report_year.in_(kwargs['year']))
+        if kwargs.get('cycle'):
+            query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
+        if kwargs.get('beginning_image_number'):
+            query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
+        if kwargs.get('report_type'):
+            include, exclude = parse_types(kwargs['report_type'])
+            if include:
+                query = query.filter(reports_class.report_type.in_(include))
+            elif exclude:
+                query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
+
+        if kwargs.get('is_amended') is not None:
+            query = query.filter(reports_class.is_amended == kwargs['is_amended'])
+
+        query = filters.filter_range(query, kwargs, self.filter_range_fields)
+        return query, reports_class, reports_schema
+
+
+class CommitteeReportView(utils.Resource):
+
+
+    @use_kwargs(args.paging)
+    @use_kwargs(args.reports)
+    @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
+    @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.build_query(
             committee_id=committee_id,
@@ -104,15 +164,7 @@ class ReportsView(utils.Resource):
         # Eagerly load committees if applicable
 
         if hasattr(reports_class, 'committee'):
-            query = reports_class.query.join(reports_class.committee).options(sa.orm.joinedload(reports_class.committee))
-            if kwargs.get('type'):
-                query = query.\
-                    filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
-            if kwargs.get('candidate_id'):
-                query = query.\
-                    filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
-            else:
-                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+            query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
@@ -132,13 +184,10 @@ class ReportsView(utils.Resource):
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
-        query = filters.filter_range(query, kwargs, self.filter_range_fields)
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
-        if kwargs.get('candidate_id') and len(kwargs.get('candidate_id')):
-            return kwargs.get('candidate_id').upper()[:1]
-        elif committee_id is not None:
+        if committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
@@ -147,6 +196,7 @@ class ReportsView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
+
 
 
 
