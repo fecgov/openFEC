@@ -6,12 +6,15 @@ import logging
 import subprocess
 import multiprocessing
 import re
+from zipfile import ZipFile
+from io import BytesIO
 
 import networkx as nx
 import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 import requests
+from xml.etree import ElementTree as ET
 
 from webservices import flow
 from webservices.env import env
@@ -366,6 +369,91 @@ def index_advisory_opinions():
             if docs_loaded % 500 == 0:
                 print("%d docs loaded" % docs_loaded)
         print("%d docs loaded" % docs_loaded)
+
+def get_xml_tree_from_url(url):
+    r = requests.get(url, stream=True)
+
+    with open('temp.zip', 'wb') as f:
+        for chunk in r:
+            f.write(chunk)
+    zip_file = ZipFile('temp.zip')
+
+    with zip_file.open(zip_file.namelist()[0]) as title,\
+     open('title.xml', 'wb') as title_xml:
+        title_xml.write(title.read())
+
+    return ET.parse('title.xml')
+
+def get_title_52_statutes():
+    es = utils.get_elasticsearch_connection()
+
+    title_parsed = get_xml_tree_from_url('http://uscode.house.gov/download/' +
+                    'releasepoints/us/pl/114/219/xml_usc52@114-219.zip')
+    tag_name = '{{http://xml.house.gov/schemas/uslm/1.0}}{0}'
+    for subtitle in title_parsed.iter(tag_name.format('subtitle')):
+        if subtitle.attrib['identifier'] == '/us/usc/t52/stIII':
+            for subchapter in subtitle.iter(tag_name.format('subchapter')):
+                match = re.match("/us/usc/t52/stIII/ch([0-9]+)/sch([IVX]+)",
+                                    subchapter.attrib['identifier'])
+                chapter = match.group(1)
+                subchapter_no = match.group(2)
+                for section in subchapter.iter(tag_name.format('section')):
+                    text = ''
+                    for child in section.iter():
+                        if child.text:
+                            text += ' %s ' % child.text
+                    heading = section.find(tag_name.format('heading')).text.strip()
+                    section_no = re.match('/us/usc/t52/s([0-9]+)',
+                             section.attrib['identifier']).group(1)
+                    pdf_url = 'https://www.gpo.gov/fdsys/pkg/USCODE-2014-' +\
+                              'title52/pdf/USCODE-2014-title52-subtitleIII-' +\
+                              'chap%s-subchap%s-sec%s.pdf'\
+                              % (chapter, subchapter_no, section_no)
+                    doc = {"doc_id": section.attrib['identifier'],
+                           "text": text,
+                           "name": heading,
+                           "no": section_no,
+                           "chapter": chapter,
+                           "subchapter": subchapter_no,
+                           "url": pdf_url}
+                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+
+def get_title_26_statutes():
+    es = utils.get_elasticsearch_connection()
+
+    title_parsed = get_xml_tree_from_url('http://uscode.house.gov/download/' +
+                    'releasepoints/us/pl/114/219/xml_usc26@114-219.zip')
+    tag_name = '{{http://xml.house.gov/schemas/uslm/1.0}}{0}'
+    for subtitle in title_parsed.iter(tag_name.format('subtitle')):
+        if subtitle.attrib['identifier'] == '/us/usc/t26/stH':
+            for chapter in subtitle.iter(tag_name.format('chapter')):
+                match = re.match("/us/usc/t26/stH/ch([0-9]+)",
+                                    chapter.attrib['identifier'])
+                chapter_no = match.group(1)
+                for section in chapter.iter(tag_name.format('section')):
+                    text = ''
+                    for child in section.iter():
+                        if child.text:
+                            text += ' %s ' % child.text
+                    heading = section.find(tag_name.format('heading')).text.strip()
+                    section_no = re.match('/us/usc/t26/s([0-9]+)',
+                             section.attrib['identifier']).group(1)
+                    pdf_url = 'https://www.gpo.gov/fdsys/pkg/USCODE-2014-' +\
+                              'title26/pdf/USCODE-2014-title26-subtitleH-' +\
+                              'chap%s-sec%s.pdf'\
+                              % (chapter_no, section_no)
+                    doc = {"doc_id": section.attrib['identifier'],
+                           "text": text,
+                           "name": heading,
+                           "no": section_no,
+                           "chapter": chapter_no,
+                           "url": pdf_url}
+                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+
+@manager.command
+def index_statutes():
+    get_title_26_statutes()
+    get_title_52_statutes()
 
 @manager.command
 def delete_advisory_opinions_from_s3():

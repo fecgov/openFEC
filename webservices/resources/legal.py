@@ -20,7 +20,7 @@ class Search(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q, from_hit=0, hits_returned=20, _type='all', **kwargs):
         if _type == 'all':
-            types = ['advisory_opinions', 'regulations']
+            types = ['advisory_opinions', 'regulations', 'statutes']
         else:
             types = [_type]
 
