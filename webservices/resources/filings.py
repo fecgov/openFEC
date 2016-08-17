@@ -100,8 +100,7 @@ class EFilingsView(views.ApiResource):
             args.efilings,
             args.make_sort_args(
                 default='-receipt_date',
-                # TODO: add indexes and turn on validation
-                # validator=args.IndexValidator(models.EFilings),
+                validator=args.IndexValidator(models.EFilings),
             ),
         )
 
