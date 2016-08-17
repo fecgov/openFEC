@@ -28,11 +28,12 @@ class BaseSchema(ModelSchema):
 
 class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
-
+    """
     @pre_dump
     def parse_date(self, obj):
         obj.create_date  = obj.create_date.date()
         return obj
+    """
 
 class EFilingF3PSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
