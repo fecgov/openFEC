@@ -40,20 +40,7 @@ def parse_types(types):
         include = [each for each in include if each not in exclude]
     return include, exclude
 
-
-@doc(
-    tags=['financial'],
-    description=docs.REPORTS,
-    params={
-        'committee_id': {'description': docs.COMMITTEE_ID},
-        'committee_type': {
-            'description': 'House, Senate, presidential, independent expenditure only',
-            'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
-        },
-    },
-)
-class ReportsView(utils.Resource):
-
+def get_range_filters():
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.CommitteeReports.receipt_date),
         (('min_disbursements_amount', 'max_disbursements_amount'), models.CommitteeReports.total_disbursements_period),
@@ -68,11 +55,24 @@ class ReportsView(utils.Resource):
         (('min_total_contributions', 'max_total_contributions'),
          models.CommitteeReportsIEOnly.independent_contributions_period),
     ]
+    return filter_range_fields
+@doc(
+    tags=['financial'],
+    description=docs.REPORTS,
+    params={
+        'committee_id': {'description': docs.COMMITTEE_ID},
+        'committee_type': {
+            'description': 'House, Senate, presidential, independent expenditure only',
+            'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
+        },
+    },
+)
+class ReportsView(utils.Resource):
+
 
     filter_match = [
         ('type', models.CommitteeHistory.committee_type)
     ]
-
 
 
     @use_kwargs(args.paging)
@@ -128,7 +128,7 @@ class ReportsView(utils.Resource):
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
-        query = filters.filter_range(query, kwargs, self.filter_range_fields)
+        query = filters.filter_range(query, kwargs, get_range_filters())
         return query, reports_class, reports_schema
 
 
@@ -183,6 +183,8 @@ class CommitteeReportView(utils.Resource):
 
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
+
+        query = filters.filter_range(query, kwargs, get_range_filters())
 
         return query, reports_class, reports_schema
 
