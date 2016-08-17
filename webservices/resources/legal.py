@@ -18,17 +18,17 @@ class AdvisoryOpinion(utils.Resource):
 
 class Search(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q, from_hit=0, hits_returned=20, _type='all', **kwargs):
-        if _type == 'all':
+    def get(self, q, from_hit=0, hits_returned=20, type='all', **kwargs):
+        if type == 'all':
             types = ['advisory_opinions', 'regulations', 'statutes']
         else:
-            types = [_type]
+            types = [type]
 
         results = {}
         total_count = 0
-        for _type in types:
+        for type in types:
             query = {"query": {"bool": {
-                     "must": [{"match": {"_all": q}}, {"term": {"_type": _type}}],
+                     "must": [{"match": {"_all": q}}, {"term": {"_type": type}}],
                                "should": [{"match": {"no": q}},
                                                {"match_phrase": {"_all": {"query": q,
                                                                           "slop": 50}
@@ -53,8 +53,8 @@ class Search(utils.Resource):
             total_count += count
             formatted_hits = [h['_source'] for h in hits]
 
-            results[_type] = formatted_hits
-            results['total_%s' % _type] = count
+            results[type] = formatted_hits
+            results['total_%s' % type] = count
 
         results['total_all'] = total_count
         return results

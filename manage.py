@@ -413,6 +413,7 @@ def get_title_52_statutes():
                            "text": text,
                            "name": heading,
                            "no": section_no,
+                           "title": "52",
                            "chapter": chapter,
                            "subchapter": subchapter_no,
                            "url": pdf_url}
@@ -446,6 +447,7 @@ def get_title_26_statutes():
                            "text": text,
                            "name": heading,
                            "no": section_no,
+                           "title": "26",
                            "chapter": chapter_no,
                            "url": pdf_url}
                     es.index('docs', 'statutes', doc, id=doc['doc_id'])
