@@ -5,6 +5,7 @@ from webservices import args
 from webservices import docs
 from webservices import utils
 from webservices import schemas
+from webservices import filters
 from webservices.common import models
 from webservices.utils import use_kwargs
 
@@ -53,6 +54,27 @@ def parse_types(types):
 )
 class ReportsView(utils.Resource):
 
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.CommitteeReports.receipt_date),
+        (('min_disbursements_amount', 'max_disbursements_amount'), models.CommitteeReports.total_disbursements_period),
+        (('min_receipts_amount', 'max_receipts_amount'), models.CommitteeReports.total_receipts_period),
+        (('min_cash_on_hand_end_period_amount', 'max_cash_on_hand_end_period_amount'),
+         models.CommitteeReports.cash_on_hand_end_period),
+        (('min_debts_owed_amount', 'max_debts_owed_amount'), models.CommitteeReports.debts_owed_by_committee),
+        (('min_independent_expenditures', 'max_independent_expenditures'),
+         models.CommitteeReportsPacParty.independent_expenditures_period),
+        (('min_party_coordinated_expenditures', 'max_party_coordinated_expenditures'),
+         models.CommitteeReportsPacParty.coordinated_expenditures_by_party_committee_period),
+        (('min_total_contributions', 'max_total_contributions'),
+         models.CommitteeReportsIEOnly.independent_contributions_period),
+    ]
+
+    filter_match = [
+        ('type', models.CommitteeHistory.committee_type)
+    ]
+
+
+
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
     @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
@@ -78,23 +100,28 @@ class ReportsView(utils.Resource):
             ),
             default_schemas,
         )
-
         query = reports_class.query
-
         # Eagerly load committees if applicable
+
         if hasattr(reports_class, 'committee'):
-            query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+            query = reports_class.query.join(reports_class.committee).options(sa.orm.joinedload(reports_class.committee))
+            if kwargs.get('type'):
+                query = query.\
+                    filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
+            if kwargs.get('candidate_id'):
+                query = query.\
+                    filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
+            else:
+                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
-
         if kwargs.get('year'):
             query = query.filter(reports_class.report_year.in_(kwargs['year']))
         if kwargs.get('cycle'):
             query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
         if kwargs.get('beginning_image_number'):
             query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-
         if kwargs.get('report_type'):
             include, exclude = parse_types(kwargs['report_type'])
             if include:
@@ -105,10 +132,13 @@ class ReportsView(utils.Resource):
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
+        query = filters.filter_range(query, kwargs, self.filter_range_fields)
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
-        if committee_id is not None:
+        if kwargs.get('candidate_id') and len(kwargs.get('candidate_id')):
+            return kwargs.get('candidate_id').upper()[:1]
+        elif committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
@@ -117,3 +147,6 @@ class ReportsView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
+
+
+

@@ -205,17 +205,16 @@ def update_aggregates():
             sa.text('select update_aggregates()').execution_options(autocommit=True)
         )
 
+        logger.info('Starting schedule A...')
         partition.SchedAGroup.refresh_children()
         db.engine.execute('delete from ofec_sched_a_queue_new')
         db.engine.execute('delete from ofec_sched_a_queue_old')
 
+        logger.info('Starting schedule B...')
         partition.SchedBGroup.refresh_children()
         db.engine.execute('delete from ofec_sched_b_queue_new')
         db.engine.execute('delete from ofec_sched_b_queue_old')
 
-        db.engine.execute('select ofec_sched_e_update()')
-        db.engine.execute('delete from ofec_sched_e_queue_new')
-        db.engine.execute('delete from ofec_sched_e_queue_old')
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command
@@ -231,8 +230,12 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
+    logger.info('Partitioning Schedule A...')
     partition.SchedAGroup.run()
+    logger.info('Finished partitioning Schedule A.')
+    logger.info('Partitioning Schedule B...')
     partition.SchedBGroup.run()
+    logger.info('Finished partitioning Schedule B.')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
@@ -270,6 +273,15 @@ def get_text(node):
 def remove_legal_docs():
     es = utils.get_elasticsearch_connection()
     es.delete_index('docs')
+    es.create_index('docs', {"mappings": {
+                             "_default_": {
+                                "properties": {
+                                        "no": {
+                                            "type": "string",
+                                            "index": "not_analyzed"
+                                        }
+                                    }
+                                }}})
 
 @manager.command
 def index_regulations():
@@ -328,7 +340,7 @@ def index_advisory_opinions():
 
         result = db.engine.execute("""select DOCUMENT_ID, OCRTEXT, DESCRIPTION,
                                 CATEGORY, DOCUMENT.AO_ID, NAME, SUMMARY,
-                                TAGS, AO_NO FROM DOCUMENT INNER JOIN
+                                TAGS, AO_NO, DOCUMENT_DATE FROM DOCUMENT INNER JOIN
                                 AO on AO.AO_ID = DOCUMENT.AO_ID""")
 
         docs_loaded = 0
@@ -345,6 +357,7 @@ def index_advisory_opinions():
                    "summary": row[6],
                    "tags": row[7],
                    "no": row[8],
+                   "date": row[9],
                    "url": pdf_url}
 
             es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])

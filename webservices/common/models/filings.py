@@ -1,4 +1,8 @@
+import datetime
+
 from webservices import docs, utils
+from webservices.common.models.dates import ReportType
+from webservices.common.models.dates import clean_report_type
 
 from .base import db
 
@@ -12,7 +16,7 @@ class Filings(db.Model):
     candidate_id = db.Column(db.String, index=True, doc=docs.CANDIDATE_ID)
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
     cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
-    sub_id = db.Column(db.BigInteger, primary_key=True)
+    sub_id = db.Column(db.BigInteger, index=True, primary_key=True)
     coverage_start_date = db.Column(db.Date, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.Date, doc=docs.COVERAGE_END_DATE)
     receipt_date = db.Column(db.Date, index=True, doc=docs.RECEIPT_DATE)
@@ -57,3 +61,48 @@ class Filings(db.Model):
             self.document_type_full,
             self.form_type,
         )
+
+
+class EFilings(db.Model):
+    __tablename__ = 'real_efile_reps'
+
+    file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
+    form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
+    committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
+    committee_name = db.Column('com_name', db.String, doc=docs.COMMITTEE_NAME)
+    receipt_date = db.Column('timestamp', db.DateTime, doc="This is the date and time the filing was received by the FEC")
+    load_timestamp = db.Column('create_dt', db.DateTime, doc="This is the load date and time for the record")
+    coverage_start_date = db.Column('from_date', db.Date, doc=docs.COVERAGE_START_DATE)
+    coverage_end_date = db.Column('through_date', db.Date, doc=docs.COVERAGE_END_DATE)
+    beginning_image_number = db.Column('starting', db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
+    ending_image_number = db.Column('ending', db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
+    report_type = db.Column('rptcode', db.String, db.ForeignKey(ReportType.report_type), doc=docs.REPORT_TYPE)
+    amended_by = db.Column('superceded', db.BigInteger, doc=docs.AMENDED_BY)
+    amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
+    amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
+
+    report = db.relationship(ReportType)
+
+    @property
+    def document_description(self):
+        return utils.document_description(
+            self.coverage_end_date.year,
+            clean_report_type(self.report.report_type_full),
+            None,
+            self.form_type,
+        )
+
+    @property
+    def is_amended(self):
+        if self.superceded is not None:
+            return True
+        return False
+
+    @property
+    def pdf_url(self):
+        image_number = str(self.beginning_image_number)
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
+
+
+# TODO: add index on committee id and filed_date
+    #  version -- this is the efiling version and I don't think we need this - let's document in API for now, see if there are objections
