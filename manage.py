@@ -243,12 +243,10 @@ def update_aggregates():
     logger.info('Updating Schedule A...')
     partition.SchedAGroup.refresh_children()
     logger.info('Finished updating Schedule A.')
-    check_itemized_queues('a')
 
     logger.info('Updating Schedule B...')
     partition.SchedBGroup.refresh_children()
     logger.info('Finished updating Schedule B.')
-    check_itemized_queues('b')
 
     logger.info('Finished updating incremental aggregates.')
 
