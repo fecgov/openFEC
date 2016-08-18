@@ -160,7 +160,7 @@ api.add_resource(
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
 api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
-api.add_resource(reports.CommitteeReportView, '/committee/<string:committee_id>/reports/')
+api.add_resource(reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')

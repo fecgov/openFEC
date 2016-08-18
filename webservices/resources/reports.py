@@ -132,7 +132,7 @@ class ReportsView(utils.Resource):
         return query, reports_class, reports_schema
 
 
-class CommitteeReportView(utils.Resource):
+class CommitteeReportsView(utils.Resource):
 
 
     @use_kwargs(args.paging)
