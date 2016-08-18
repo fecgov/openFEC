@@ -186,11 +186,11 @@ class TableGroup:
         transaction = connection.begin()
 
         try:
-            select = sa.select([queue_old.c.get(cls.primary)]).where(
+            delete_select = sa.select([queue_old.c.get(cls.primary)]).where(
                 queue_old.c.two_year_transaction_period.in_([start, stop])
             )
             delete = sa.delete(child).where(
-                child.c.get(cls.primary).in_(select)
+                child.c.get(cls.primary).in_(delete_select)
             )
             connection.execute(delete)
 
@@ -206,7 +206,7 @@ class TableGroup:
                 if column.name != 'two_year_transaction_period'
             ]
 
-            select = sa.select(
+            insert_select = sa.select(
                 queue_new.columns + columns
             ).select_from(
                 queue_new.join(
@@ -224,12 +224,17 @@ class TableGroup:
             ).distinct(
                 queue_new.c.get(cls.primary)
             )
-            insert = sa.insert(child).from_select(select.columns, select)
+            insert = sa.insert(child).from_select(
+                insert_select.columns,
+                insert_select
+            )
             connection.execute(insert)
 
             # Clear the processed records out of the queues.
-            cls.clear_queue(queue_old, cycle, connection)
-            cls.clear_queue(queue_new, cycle, connection)
+            cls.clear_queue(queue_old, delete_select, connection)
+            cls.clear_queue(queue_new, insert_select.with_only_columns(
+                [queue_new.c.get(cls.primary)]
+            ), connection)
 
             transaction.commit()
             logger.info('Successfully refreshed {name}.'.format(name=name))
@@ -242,10 +247,8 @@ class TableGroup:
         connection.close()
 
     @classmethod
-    def clear_queue(cls, queue, cycle, connection):
-        start, stop = cycle - 1, cycle
-
+    def clear_queue(cls, queue, record_ids, connection):
         delete = sa.delete(queue).where(
-                queue.c.two_year_transaction_period.in_([start, stop])
-            )
+            queue.c.get(cls.primary).in_(record_ids)
+        )
         connection.execute(delete)
