@@ -2,6 +2,8 @@ from webservices import docs, utils
 
 from .base import db
 
+from sqlalchemy.ext.hybrid import hybrid_property
+
 
 class Filings(db.Model):
     __tablename__ = 'ofec_filings_mv'
@@ -144,6 +146,22 @@ class BaseF3PFiling(BaseFiling):
     general_election = db.Column('act_gen', db.String)
     sub_total_sum = db.Column('sub', db.String)
 
+    @hybrid_property
+    def treasurer_name(self):
+        name = name_generator(self.treasurer_first_name,
+                              ' ',
+                              self.treasurer_middle_name,
+                              ' ',
+                              self.treasurer_last_name
+                              )
+
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
+
     summary_lines = db.relationship(
         'BaseFilingSummary',
         primaryjoin='''and_(
@@ -152,6 +170,21 @@ class BaseF3PFiling(BaseFiling):
         foreign_keys=file_number,
         uselist=True,
     )
+
+def name_generator(*args):
+    name = ''
+    for field in args:
+        temp_name = (
+            field
+            if field
+            else ''
+        )
+        name += temp_name
+
+    ret_name = ''
+    for string in name.split(' '):
+        ret_name += string.lower().capitalize() + ' '
+    return ret_name.strip()
 
 class BaseF3Filing(BaseFiling):
     __tablename__ = 'real_efile_f3'
@@ -168,6 +201,22 @@ class BaseF3Filing(BaseFiling):
     runoff_election = db.Column('act_run', db.String)
     district = db.Column('eld', db.Integer)
     amended_address = db.Column('amend_addr', db.String)
+
+    @hybrid_property
+    def candidate_name(self):
+        name = name_generator(
+                              self.candidate_first_name,
+                              '',
+                              self.candidate_middle_name,
+                              '',
+                              self.candidate_last_name
+                              )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
     summary_lines = db.relationship(
         'BaseFilingSummary',

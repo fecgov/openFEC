@@ -36,6 +36,12 @@ class BaseEfileSchema(BaseSchema):
     """
 
 class EFilingF3PSchema(BaseEfileSchema):
+    treasurer_name = ma.fields.Str()
+    @pre_dump
+    def parse_date(self, obj):
+        #obj.create_date = obj.create_date.date()
+        return obj
+
     def parse_summary_rows(self, obj):
         line_list = {}
         state_map = {}
@@ -60,6 +66,8 @@ class EFilingF3PSchema(BaseEfileSchema):
             return line_list
 
 class EFilingF3Schema(BaseEfileSchema):
+    candidate_name = ma.fields.Str()
+
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3_description
 
