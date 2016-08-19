@@ -11,7 +11,7 @@ from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
-from marshmallow import pre_dump
+from marshmallow import pre_dump, post_dump
 from sqlalchemy import func
 
 
@@ -34,13 +34,16 @@ class BaseEfileSchema(BaseSchema):
         obj.create_date  = obj.create_date.date()
         return obj
     """
+    @post_dump
+    def parse_date(self, obj):
+        if obj.get('summary_lines'):
+            for key, value in obj.get('summary_lines').items():
+                obj[key] = value
+        obj.pop('summary_lines')
+
 
 class EFilingF3PSchema(BaseEfileSchema):
     treasurer_name = ma.fields.Str()
-    @pre_dump
-    def parse_date(self, obj):
-        #obj.create_date = obj.create_date.date()
-        return obj
 
     def parse_summary_rows(self, obj):
         line_list = {}
