@@ -1,6 +1,9 @@
-from mock import patch, MagicMock
 import unittest
-from webservices.load_legal_docs import *
+from mock import patch
+from webservices.load_legal_docs import (index_statutes, index_regulations,
+    index_advisory_opinions, delete_advisory_opinions_from_s3,
+    load_advisory_opinions_into_s3, remove_legal_docs, get_xml_tree_from_url,
+    get_title_26_statutes, get_title_52_statutes)
 from zipfile import ZipFile
 
 class ElasticSearchMock:
@@ -137,7 +140,7 @@ class IndexStatutesTest(unittest.TestCase):
             'url': 'https://www.gpo.gov/fdsys/pkg/USCODE-2014-title26/' +
             'pdf/USCODE-2014-title26-subtitleH-chap1-sec123.pdf'}))
     @patch('webservices.load_legal_docs.requests.get', mock_xml(
-            """<?xml version="1.0" encoding="UTF-8"?>
+        """<?xml version="1.0" encoding="UTF-8"?>
             <uscDoc xmlns="http://xml.house.gov/schemas/uslm/1.0">
             <subtitle identifier="/us/usc/t26/stH">
             <chapter identifier="/us/usc/t26/stH/ch1">
@@ -157,7 +160,7 @@ class IndexStatutesTest(unittest.TestCase):
                 'USCODE-2014-title52-subtitleIII-chap1-subchapI-sec123.pdf',
             'title': '52', 'name': 'title', 'no': '123'}))
     @patch('webservices.load_legal_docs.requests.get', mock_xml(
-            """<?xml version="1.0" encoding="UTF-8"?>
+        """<?xml version="1.0" encoding="UTF-8"?>
             <uscDoc xmlns="http://xml.house.gov/schemas/uslm/1.0">
             <subtitle identifier="/us/usc/t52/stIII">
             <subchapter identifier="/us/usc/t52/stIII/ch1/schI">

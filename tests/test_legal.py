@@ -26,9 +26,9 @@ def es_search(q, index, size, es_from):
                                     '_source': {}}], 'total': 3}}
 
 
-@patch('webservices.rest.legal.es.search', side_effect=es_advisory_opinion)
+@patch('webservices.rest.legal.es.search', es_advisory_opinion)
 class AdvisoryOpinionTest(unittest.TestCase):
-    def test_advisory_opinion_search(self, es_search):
+    def test_advisory_opinion_search(self):
         app = rest.app.test_client()
         response = app.get('/v1/legal/advisory_opinion/1993-02?api_key=1234')
         assert response.status_code == 200
