@@ -17,7 +17,8 @@ from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
-    index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3)
+    index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
+    delete_advisory_opinions_from_s3)
 
 
 manager = Manager(app)
@@ -34,6 +35,7 @@ manager.command(index_statutes)
 manager.command(index_regulations)
 manager.command(index_advisory_opinions)
 manager.command(load_advisory_opinions_into_s3)
+manager.command(delete_advisory_opinions_from_s3)
 
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
