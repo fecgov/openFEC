@@ -80,7 +80,6 @@ def legal_loaded():
                                FROM   information_schema.tables
                                WHERE  table_name = 'ao'
                             );""").fetchone()[0]
-    print(legal_loaded)
     if not legal_loaded:
         print('Advisory opinion tables not found.')
 
@@ -243,7 +242,6 @@ def load_advisory_opinions_into_s3():
             bucket_name = env.get_credential('bucket')
             for i, (document_id, fileimage) in enumerate(result):
                 key = "legal/aos/%s.pdf" % document_id
-                print(fileimage)
                 bucket.put_object(Key=key, Body=bytes(fileimage),
                                   ContentType='application/pdf', ACL='public-read')
                 url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)

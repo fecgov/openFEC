@@ -128,7 +128,7 @@ class IndexStatutesTest(unittest.TestCase):
     @patch('webservices.load_legal_docs.requests.get', mock_xml('<test></test>'))
     def test_get_xml_tree_from_url(self):
         etree = get_xml_tree_from_url('anything.com')
-        self.assertEquals(etree.getroot().tag, 'test')
+        assert etree.getroot().tag == 'test'
 
     @patch('webservices.utils.get_elasticsearch_connection',
             get_es_with_doc({'name': 'title',
