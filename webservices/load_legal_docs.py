@@ -2,9 +2,10 @@
 
 import re
 from zipfile import ZipFile
+from tempfile import NamedTemporaryFile
+from xml.etree import ElementTree as ET
 
 import requests
-from xml.etree import ElementTree as ET
 
 from webservices.rest import db
 from webservices.env import env
@@ -79,6 +80,7 @@ def legal_loaded():
                                FROM   information_schema.tables
                                WHERE  table_name = 'ao'
                             );""").fetchone()[0]
+    print(legal_loaded)
     if not legal_loaded:
         print('Advisory opinion tables not found.')
 
@@ -101,7 +103,11 @@ def index_advisory_opinions():
                                 TAGS, AO_NO, DOCUMENT_DATE FROM DOCUMENT INNER JOIN
                                 AO on AO.AO_ID = DOCUMENT.AO_ID""")
 
-        docs_loaded = 0
+        loading_doc = 0
+
+        if loading_doc % 500 == 0:
+            print("%d docs loaded" % loading_doc)
+
         bucket_name = env.get_credential('bucket')
         for row in result:
             key = "legal/aos/%s.pdf" % row[0]
@@ -119,25 +125,23 @@ def index_advisory_opinions():
                    "url": pdf_url}
 
             es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
-            docs_loaded += 1
-
-            if docs_loaded % 500 == 0:
-                print("%d docs loaded" % docs_loaded)
-        print("%d docs loaded" % docs_loaded)
+            loading_doc += 1
+        print("%d docs loaded" % loading_doc)
 
 def get_xml_tree_from_url(url):
     r = requests.get(url, stream=True)
 
-    with open('temp.zip', 'wb') as f:
+    with NamedTemporaryFile('wb+') as f:
         for chunk in r:
             f.write(chunk)
-    zip_file = ZipFile('temp.zip')
+        f.seek(0)
+        zip_file = ZipFile(f.name)
 
-    with zip_file.open(zip_file.namelist()[0]) as title,\
-     open('title.xml', 'wb') as title_xml:
-        title_xml.write(title.read())
-
-    return ET.parse('title.xml')
+        with zip_file.open(zip_file.namelist()[0]) as title,\
+         NamedTemporaryFile('wb+') as title_xml:
+            title_xml.write(title.read())
+            title_xml.seek(0)
+            return ET.parse(title_xml.name)
 
 def get_title_52_statutes():
     es = utils.get_elasticsearch_connection()
@@ -239,6 +243,7 @@ def load_advisory_opinions_into_s3():
             bucket_name = env.get_credential('bucket')
             for i, (document_id, fileimage) in enumerate(result):
                 key = "legal/aos/%s.pdf" % document_id
+                print(fileimage)
                 bucket.put_object(Key=key, Body=bytes(fileimage),
                                   ContentType='application/pdf', ACL='public-read')
                 url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
