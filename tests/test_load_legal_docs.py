@@ -5,6 +5,7 @@ from webservices.load_legal_docs import (index_statutes, index_regulations,
     load_advisory_opinions_into_s3, remove_legal_docs, get_xml_tree_from_url,
     get_title_26_statutes, get_title_52_statutes)
 from zipfile import ZipFile
+from tempfile import NamedTemporaryFile
 
 class ElasticSearchMock:
     def __init__(self, dictToIndex):
@@ -29,13 +30,13 @@ def get_es_with_doc(doc):
 
 def mock_xml(xml):
     def request_zip(url, stream=False):
-        with open('test_xml.xml', 'w') as f:
+        with NamedTemporaryFile('w+') as f:
             f.write(xml)
-
-        with ZipFile('xml_test.zip', 'w') as z:
-            z.write('test_xml.xml')
-
-        return open('xml_test.zip', 'rb')
+            f.seek(0)
+            with NamedTemporaryFile('w+') as n:
+                with ZipFile(n.name, 'w') as z:
+                    z.write(f.name)
+                    return open(n.name, 'rb')
 
     return request_zip
 
@@ -194,14 +195,16 @@ class IndexRegulationsTest(unittest.TestCase):
 
 class IndexAdvisoryOpinionsTest(unittest.TestCase):
     @patch('webservices.load_legal_docs.db', Db())
+    @patch('webservices.load_legal_docs.env.get_credential',
+        lambda cred: cred + '123')
     @patch('webservices.utils.get_elasticsearch_connection',
-            side_effect=get_es_with_doc({'category': 'category123',
+            get_es_with_doc({'category': 'category123',
             'summary': 'summaryABC', 'no': 'no123', 'date': 'date123',
             'tags': 'tags123', 'name': 'name4U', 'text': 'textAB',
             'description': 'description123',
-            'url': 'https://None.s3.amazonaws.com/legal/aos/123.pdf',
+            'url': 'https://bucket123.s3.amazonaws.com/legal/aos/123.pdf',
             'doc_id': 123, 'id': 'id123'}))
-    def test_advisory_opinion_load(self, es_mock):
+    def test_advisory_opinion_load(self):
         index_advisory_opinions()
 
     @patch('webservices.load_legal_docs.db', Db(False))
@@ -212,12 +215,16 @@ class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
     @patch('webservices.load_legal_docs.db', Db())
     @patch('webservices.load_legal_docs.get_bucket',
      get_bucket_mock([obj('legal/aos/2.pdf')]))
+    @patch('webservices.load_legal_docs.env.get_credential',
+        lambda cred: cred + '123')
     def test_load_advisory_opinions_into_s3(self):
         load_advisory_opinions_into_s3()
 
     @patch('webservices.load_legal_docs.db', Db())
     @patch('webservices.load_legal_docs.get_bucket',
      get_bucket_mock([obj('legal/aos/1.pdf'), obj('legal/aos/2.pdf')]))
+    @patch('webservices.load_legal_docs.env.get_credential',
+        lambda cred: cred + '123')
     def test_load_advisory_opinions_into_s3_already_loaded(self):
         load_advisory_opinions_into_s3()
 

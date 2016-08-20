@@ -136,11 +136,11 @@ def get_xml_tree_from_url(url):
         f.seek(0)
         zip_file = ZipFile(f.name)
 
-    with zip_file.open(zip_file.namelist()[0]) as title,\
-     NamedTemporaryFile('wb+') as title_xml:
-        title_xml.write(title.read())
-        title_xml.seek(0)
-        return ET.parse(title_xml.name)
+        with zip_file.open(zip_file.namelist()[0]) as title,\
+         NamedTemporaryFile('wb+') as title_xml:
+            title_xml.write(title.read())
+            title_xml.seek(0)
+            return ET.parse(title_xml.name)
 
 def get_title_52_statutes():
     es = utils.get_elasticsearch_connection()
