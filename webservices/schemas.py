@@ -56,7 +56,7 @@ class EFilingF3PSchema(BaseEfileSchema):
         keys = list(keys)
         if obj.summary_lines:
             for row in obj.summary_lines:
-                if row.line_number >= 33:
+                if row.line_number >= 33 and row.line_number < 87:
                     state_map[keys[int(row.line_number - 1)][0]] = row.column_a
                     state_map[keys[int(row.line_number - 1)][1]] = row.column_b
                 else:
