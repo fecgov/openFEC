@@ -32,6 +32,37 @@ logging.basicConfig(level=logging.INFO)
 manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 
+def check_itemized_queues(schedule):
+    """Checks to see if the queues associated with an itemized schedule have
+    been successfully cleared out and sends the information to the logs.
+    """
+
+    remaining_new_queue = db.engine.execute(
+        'select count(*) from ofec_sched_{schedule}_queue_new'.format(
+            schedule=schedule
+        )
+    ).scalar()
+    remaining_old_queue = db.engine.execute(
+        'select count(*) from ofec_sched_{schedule}_queue_old'.format(
+            schedule=schedule
+        )
+    ).scalar()
+
+    if remaining_new_queue == remaining_old_queue == 0:
+        logger.info(
+            'Successfully emptied Schedule {schedule} queues.'.format(
+                schedule=schedule.upper()
+            )
+        )
+    else:
+        logger.warn(
+            'Schedule {schedule} queues not empty ({new} new / {old} old left).'.format(
+                schedule=schedule.upper(),
+                new=remaining_new_queue,
+                old=remaining_old_queue
+            )
+        )
+
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
     processed at the point when the weekly aggregate rebuild takes place.
@@ -200,20 +231,22 @@ def update_aggregates():
     """These are run nightly to recalculate the totals
     """
     logger.info('Updating incremental aggregates...')
-    with db.engine.begin():
-        db.engine.execute(
-            sa.text('select update_aggregates()').execution_options(autocommit=True)
+
+    with db.engine.begin() as connection:
+        connection.execute(
+            sa.text('select update_aggregates()').execution_options(
+                autocommit=True
+            )
         )
+        logger.info('Finished updating Schedule E and support aggregates.')
 
-        logger.info('Starting schedule A...')
-        partition.SchedAGroup.refresh_children()
-        db.engine.execute('delete from ofec_sched_a_queue_new')
-        db.engine.execute('delete from ofec_sched_a_queue_old')
+    logger.info('Updating Schedule A...')
+    partition.SchedAGroup.refresh_children()
+    logger.info('Finished updating Schedule A.')
 
-        logger.info('Starting schedule B...')
-        partition.SchedBGroup.refresh_children()
-        db.engine.execute('delete from ofec_sched_b_queue_new')
-        db.engine.execute('delete from ofec_sched_b_queue_old')
+    logger.info('Updating Schedule B...')
+    partition.SchedBGroup.refresh_children()
+    logger.info('Finished updating Schedule B.')
 
     logger.info('Finished updating incremental aggregates.')
 
