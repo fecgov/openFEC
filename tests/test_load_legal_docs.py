@@ -14,6 +14,7 @@ class ElasticSearchMock:
         pass
 
     def index(self, index, doc_type, doc, id):
+        print(doc)
         assert self.dictToIndex == doc
 
     def delete_index(self, index):
@@ -138,8 +139,8 @@ class IndexStatutesTest(unittest.TestCase):
             get_es_with_doc({'name': 'title',
             'chapter': '1', 'title': '26', 'no': '123',
             'text': '   title  content ', 'doc_id': '/us/usc/t26/s123',
-            'url': 'https://www.gpo.gov/fdsys/pkg/USCODE-2014-title26/' +
-            'pdf/USCODE-2014-title26-subtitleH-chap1-sec123.pdf'}))
+            'url': 'http://api.fdsys.gov/link?collection=uscode&title=26&' +
+                    'year=mostrecent&section=123'}))
     @patch('webservices.load_legal_docs.requests.get', mock_xml(
         """<?xml version="1.0" encoding="UTF-8"?>
             <uscDoc xmlns="http://xml.house.gov/schemas/uslm/1.0">
@@ -157,8 +158,8 @@ class IndexStatutesTest(unittest.TestCase):
             get_es_with_doc({'subchapter': 'I',
             'doc_id': '/us/usc/t52/s123', 'chapter': '1',
             'text': '   title  content ',
-            'url': 'https://www.gpo.gov/fdsys/pkg/USCODE-2014-title52/pdf/' +
-                'USCODE-2014-title52-subtitleIII-chap1-subchapI-sec123.pdf',
+            'url': 'http://api.fdsys.gov/link?collection=uscode&title=52&' +
+                   'year=mostrecent&section=123',
             'title': '52', 'name': 'title', 'no': '123'}))
     @patch('webservices.load_legal_docs.requests.get', mock_xml(
         """<?xml version="1.0" encoding="UTF-8"?>
