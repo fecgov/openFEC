@@ -299,6 +299,22 @@ class BaseFiling(db.Model):
         return name.strip()
 
 
+def name_generator(*args):
+    name = ''
+    fields = []
+    for field in args:
+        field = (
+            field.strip()
+            if field
+            else ''
+        )
+        fields.append(field)
+
+    fields[0] = fields[0] + ','
+    for field in fields:
+        name += field + ' '
+    return name.strip()
+
 class BaseF3PFiling(BaseFiling):
     __tablename__ = 'real_efile_f3p'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
@@ -328,12 +344,13 @@ class BaseF3PFiling(BaseFiling):
 
     @hybrid_property
     def treasurer_name(self):
-        name = self.name_generator(self.treasurer_last_name,
+        name = name_generator(self.treasurer_last_name,
                               self.prefix,
                               self.treasurer_first_name,
                               self.treasurer_middle_name,
                               self.suffix
                               )
+        print(name)
 
         name = (
             name
@@ -371,7 +388,7 @@ class BaseF3Filing(BaseFiling):
 
     @hybrid_property
     def candidate_name(self):
-        name = self.name_generator(
+        name = name_generator(
                               self.candidate_last_name,
                               self.candidate_prefix,
                               self.candidate_first_name,
