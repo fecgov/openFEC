@@ -16,9 +16,9 @@ reports_schema_map = {
 }
 
 form_type_map = {
-    'f3p-summary': 'P',
-    'f3x-summary': 'X',
-    'f3-summary': 'H',
+    'presidential': 'P',
+    'pac-party': 'X',
+    'house-senate': 'H',
 }
 
 @doc(
@@ -123,10 +123,10 @@ class EFilingSummaryView(views.ApiResource):
         )
 
 
-    def get(self, form_type=None, **kwargs):
-        if form_type:
+    def get(self, committee_type=None, **kwargs):
+        if committee_type:
             self.model, self.schema, self.page_schema = \
-                reports_schema_map.get(form_type_map.get(form_type))
+                reports_schema_map.get(form_type_map.get(committee_type))
         query = self.build_query(**kwargs)
 
         count = counts.count_estimate(query, models.db.session, threshold=5000)

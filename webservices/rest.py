@@ -222,11 +222,7 @@ api.add_resource(
 
 api.add_resource(
     filings.EFilingSummaryView,
-    '/efile/presidential/<string:form_type>/',
-    '/efile/pac-party/<string:form_type>/',
-    '/efile/house-senate/<string:form_type>/',
-
-
+    '/efile/reports/<string:committee_type>/',
 )
 
 api.add_resource(filings.FilingsList, '/filings/')
