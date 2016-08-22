@@ -163,10 +163,9 @@ def get_title_52_statutes():
                     heading = section.find(tag_name.format('heading')).text.strip()
                     section_no = re.match('/us/usc/t52/s([0-9]+)',
                              section.attrib['identifier']).group(1)
-                    pdf_url = 'https://www.gpo.gov/fdsys/pkg/USCODE-2014-' +\
-                              'title52/pdf/USCODE-2014-title52-subtitleIII-' +\
-                              'chap%s-subchap%s-sec%s.pdf'\
-                              % (chapter, subchapter_no, section_no)
+                    pdf_url = 'http://api.fdsys.gov/link?collection=uscode&' +\
+                              'title=52&year=mostrecent&section=%s'\
+                              % section_no
                     doc = {"doc_id": section.attrib['identifier'],
                            "text": text,
                            "name": heading,
@@ -197,10 +196,9 @@ def get_title_26_statutes():
                     heading = section.find(tag_name.format('heading')).text.strip()
                     section_no = re.match('/us/usc/t26/s([0-9]+)',
                              section.attrib['identifier']).group(1)
-                    pdf_url = 'https://www.gpo.gov/fdsys/pkg/USCODE-2014-' +\
-                              'title26/pdf/USCODE-2014-title26-subtitleH-' +\
-                              'chap%s-sec%s.pdf'\
-                              % (chapter_no, section_no)
+                    pdf_url = 'http://api.fdsys.gov/link?collection=uscode&' +\
+                              'title=26&year=mostrecent&section=%s'\
+                              % section_no
                     doc = {"doc_id": section.attrib['identifier'],
                            "text": text,
                            "name": heading,
