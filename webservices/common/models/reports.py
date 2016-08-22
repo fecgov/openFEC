@@ -282,22 +282,6 @@ class BaseFiling(db.Model):
     create_date = db.Column('create_dt', db.Date)
     sign_date = db.Column(db.Date)
 
-    def name_generator(*args):
-        name = ''
-        fields = []
-        for field in args:
-            field = (
-                field.strip()
-                if field
-                else ''
-            )
-            fields.append(field)
-
-        fields[0] = fields[0] + ','
-        for field in fields:
-            name += field + ' '
-        return name.strip()
-
 
 def name_generator(*args):
     name = ''
@@ -350,8 +334,6 @@ class BaseF3PFiling(BaseFiling):
                               self.treasurer_middle_name,
                               self.suffix
                               )
-        print(name)
-
         name = (
             name
             if name

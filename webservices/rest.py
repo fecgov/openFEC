@@ -221,7 +221,7 @@ api.add_resource(
 )
 
 api.add_resource(
-    filings.EFilingSummaryView,
+    reports.EFilingSummaryView,
     '/efile/reports/<string:committee_type>/',
 )
 
@@ -250,6 +250,7 @@ apidoc.register(committees.CommitteeView, blueprint='v1')
 apidoc.register(committees.CommitteeList, blueprint='v1')
 apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
+apidoc.register(reports.EFilingSummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
@@ -280,7 +281,6 @@ apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
-apidoc.register(filings.EFilingSummaryView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 
 

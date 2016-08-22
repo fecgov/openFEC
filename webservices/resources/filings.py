@@ -8,18 +8,6 @@ from webservices.common import views
 from webservices.common import counts
 from webservices.common import models
 
-reports_schema_map = {
-    'P': (models.BaseF3PFiling, schemas.BaseF3PFilingSchema, schemas.BaseF3PFilingPageSchema),
-    'H': (models.BaseF3Filing, schemas.BaseF3FilingSchema, schemas.BaseF3FilingPageSchema),
-    'S': (models.BaseF3Filing, schemas.BaseF3FilingSchema, schemas.BaseF3FilingPageSchema),
-    'X': (models.BaseF3XFiling, schemas.BaseF3XFilingSchema, schemas.BaseF3XFilingPageSchema),
-}
-
-form_type_map = {
-    'presidential': 'P',
-    'pac-party': 'X',
-    'house-senate': 'H',
-}
 
 @doc(
     tags=['filings'],
@@ -88,54 +76,6 @@ class FilingsList(BaseFilings):
     @property
     def args(self):
         return utils.extend(super().args, args.entities)
-
-
-@doc(
-    tags=['efiling'],
-    description=docs.EFILE_FILES,
-)
-class EFilingSummaryView(views.ApiResource):
-
-    model = models.BaseF3PFiling
-    schema = schemas.BaseF3FilingSchema
-    page_schema = schemas.BaseF3FilingSchema
-
-    filter_multi_fields = [
-        ('file_number', models.BaseFiling.file_number),
-        ('committee_id', models.BaseFiling.committee_id),
-    ]
-    filter_range_fields = [
-        (('min_create_date', 'max_create_date' ), models.BaseFiling.create_date),
-    ]
-    """
-        args.make_sort_args(
-            default='-create_date',
-            validator=args.IndexValidator(self.model),
-        ),
-    """
-
-    @property
-    def args(self):
-        return utils.extend(
-            args.paging,
-            args.efilings
-
-        )
-
-
-    def get(self, committee_type=None, **kwargs):
-        if committee_type:
-            self.model, self.schema, self.page_schema = \
-                reports_schema_map.get(form_type_map.get(committee_type))
-        query = self.build_query(**kwargs)
-
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, count=count)
-
-
-    def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
-        return query
 
 
 @doc(
