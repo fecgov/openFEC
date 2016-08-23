@@ -17,6 +17,29 @@ class PdfMixin(object):
     def has_pdf(self):
         return self.report_year and self.report_year >= 1993
 
+class TreasurerMixin(object):
+
+    treasurer_last_name = db.Column('lname', db.String)
+    treasurer_middle_name = db.Column('mname', db.String)
+    treasurer_first_name = db.Column('fname', db.String)
+    prefix = db.Column(db.String)
+    suffix = db.Column(db.String)
+
+    @hybrid_property
+    def treasurer_name(self):
+        name = name_generator(self.treasurer_last_name,
+                              self.prefix,
+                              self.treasurer_first_name,
+                              self.treasurer_middle_name,
+                              self.suffix
+                              )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
+
 
 class CommitteeReports(PdfMixin, BaseModel):
     __abstract__ = True
@@ -27,15 +50,15 @@ class CommitteeReports(PdfMixin, BaseModel):
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
 
     beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
-    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD)
-    cash_on_hand_end_period = db.Column('cash_on_hand_end_period', db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD)
-    coverage_end_date = db.Column(db.DateTime, index=True, doc=docs.COVERAGE_END_DATE)
-    coverage_start_date = db.Column(db.DateTime, index=True, doc=docs.COVERAGE_START_DATE)
-    debts_owed_by_committee = db.Column('debts_owed_by_committee', db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE)
-    debts_owed_to_committee = db.Column(db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE)
+    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD)#P
+    cash_on_hand_end_period = db.Column('cash_on_hand_end_period', db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD)#P
+    coverage_end_date = db.Column(db.DateTime, index=True, doc=docs.COVERAGE_END_DATE)#P
+    coverage_start_date = db.Column(db.DateTime, index=True, doc=docs.COVERAGE_START_DATE)#P
+    debts_owed_by_committee = db.Column('debts_owed_by_committee', db.Numeric(30, 2), doc=docs.DEBTS_OWED_BY_COMMITTEE)#P
+    debts_owed_to_committee = db.Column(db.Numeric(30, 2), doc=docs.DEBTS_OWED_TO_COMMITTEE)#P
     end_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
-    other_disbursements_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS))#P
-    other_disbursements_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_DISBURSEMENTS))#P
+    other_disbursements_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_DISBURSEMENTS))#PX
+    other_disbursements_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_DISBURSEMENTS))#PX
     other_political_committee_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS))#P
     other_political_committee_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS))#P
     political_party_committee_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS))#P
@@ -72,46 +95,46 @@ class CommitteeReports(PdfMixin, BaseModel):
 class CommitteeReportsHouseSenate(CommitteeReports):
     __tablename__ = 'ofec_reports_house_senate_mv'
 
-    aggregate_amount_personal_contributions_general = db.Column(db.Numeric(30, 2))
-    aggregate_contributions_personal_funds_primary = db.Column(db.Numeric(30, 2))
-    all_other_loans_period = db.Column(db.Numeric(30, 2))
-    all_other_loans_ytd = db.Column(db.Numeric(30, 2))
-    candidate_contribution_period = db.Column(db.Numeric(30, 2))
-    candidate_contribution_ytd = db.Column(db.Numeric(30, 2))
-    gross_receipt_authorized_committee_general = db.Column(db.Numeric(30, 2))
-    gross_receipt_authorized_committee_primary = db.Column(db.Numeric(30, 2))
-    gross_receipt_minus_personal_contribution_general = db.Column(db.Numeric(30, 2))
-    gross_receipt_minus_personal_contributions_primary = db.Column(db.Numeric(30, 2))
-    loan_repayments_candidate_loans_period = db.Column(db.Numeric(30, 2))
-    loan_repayments_candidate_loans_ytd = db.Column(db.Numeric(30, 2))
-    loan_repayments_other_loans_period = db.Column(db.Numeric(30, 2))
-    loan_repayments_other_loans_ytd = db.Column(db.Numeric(30, 2))
-    loans_made_by_candidate_period = db.Column(db.Numeric(30, 2))
-    loans_made_by_candidate_ytd = db.Column(db.Numeric(30, 2))
-    net_contributions_ytd = db.Column(db.Numeric(30, 2))
-    net_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    net_contributions_period = db.Column(db.Numeric(30, 2), index=True)
-    net_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    other_receipts_period = db.Column(db.Numeric(30, 2))
-    other_receipts_ytd = db.Column(db.Numeric(30, 2))
-    refunds_total_contributions_col_total_ytd = db.Column(db.Numeric(30, 2))
-    subtotal_period = db.Column(db.Numeric(30, 2))
-    total_contribution_refunds_col_total_period = db.Column(db.Numeric(30, 2))
-    total_contributions_column_total_period = db.Column(db.Numeric(30, 2))
-    total_loan_repayments_made_period = db.Column(db.Numeric(30, 2))
-    total_loan_repayments_made_ytd = db.Column(db.Numeric(30, 2))
-    total_loans_received_period = db.Column(db.Numeric(30, 2))
-    total_loans_received_ytd = db.Column(db.Numeric(30, 2))
-    total_offsets_to_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    total_offsets_to_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    total_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    total_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    transfers_from_other_authorized_committee_period = db.Column(db.Numeric(30, 2))
-    transfers_from_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
-    transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))
-    transfers_to_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))
+    aggregate_amount_personal_contributions_general = db.Column(db.Numeric(30, 2))#missing
+    aggregate_contributions_personal_funds_primary = db.Column(db.Numeric(30, 2))#missing
+    all_other_loans_period = db.Column(db.Numeric(30, 2))#mapped
+    all_other_loans_ytd = db.Column(db.Numeric(30, 2))#mapped
+    candidate_contribution_period = db.Column(db.Numeric(30, 2))#mapped
+    candidate_contribution_ytd = db.Column(db.Numeric(30, 2))#mapped
+    gross_receipt_authorized_committee_general = db.Column(db.Numeric(30, 2))#missing
+    gross_receipt_authorized_committee_primary = db.Column(db.Numeric(30, 2))#missing
+    gross_receipt_minus_personal_contribution_general = db.Column(db.Numeric(30, 2))#missing
+    gross_receipt_minus_personal_contributions_primary = db.Column(db.Numeric(30, 2))#missing
+    loan_repayments_candidate_loans_period = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_candidate_loans_ytd = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_other_loans_period = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_other_loans_ytd = db.Column(db.Numeric(30, 2))#mapped
+    loans_made_by_candidate_period = db.Column(db.Numeric(30, 2))#mapped
+    loans_made_by_candidate_ytd = db.Column(db.Numeric(30, 2))#mapped
+    net_contributions_ytd = db.Column(db.Numeric(30, 2))#mapped
+    net_contributions_period = db.Column(db.Numeric(30, 2), index=True)#mapped
+    net_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    net_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    other_receipts_period = db.Column(db.Numeric(30, 2))#mapped
+    other_receipts_ytd = db.Column(db.Numeric(30, 2))#mapped
+    refunds_total_contributions_col_total_ytd = db.Column(db.Numeric(30, 2))#mapped, but maybe needs to be renamed?
+    subtotal_period = db.Column(db.Numeric(30, 2))#mapped
+    total_contribution_refunds_col_total_period = db.Column(db.Numeric(30, 2))#mapped, but rename to match column above
+    total_contributions_column_total_period = db.Column(db.Numeric(30, 2))#missing
+    total_loan_repayments_made_period = db.Column(db.Numeric(30, 2))#mapped
+    total_loan_repayments_made_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_loans_received_period = db.Column(db.Numeric(30, 2))#mapped
+    total_loans_received_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_offsets_to_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    total_offsets_to_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    total_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    transfers_from_other_authorized_committee_period = db.Column(db.Numeric(30, 2))#mapped
+    transfers_from_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))#mapped
+    transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))#mapped
+    transfers_to_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))#mapped
     report_form = 'Form3'
 
     @property
@@ -129,66 +152,66 @@ class CommitteeReportsHouseSenate(CommitteeReports):
 class CommitteeReportsPacParty(CommitteeReports):
     __tablename__ = 'ofec_reports_pacs_parties_mv'
 
-    all_loans_received_period = db.Column(db.Numeric(30, 2))
-    all_loans_received_ytd = db.Column(db.Numeric(30, 2))
-    allocated_federal_election_levin_share_period = db.Column(db.Numeric(30, 2))
-    calendar_ytd = db.Column(db.Integer)
-    cash_on_hand_beginning_calendar_ytd = db.Column(db.Numeric(30, 2))
-    cash_on_hand_close_ytd = db.Column(db.Numeric(30, 2))
-    coordinated_expenditures_by_party_committee_period = db.Column('coordinated_expenditures_by_party_committee_period', db.Numeric(30, 2))
-    coordinated_expenditures_by_party_committee_ytd = db.Column(db.Numeric(30, 2))
-    fed_candidate_committee_contribution_refunds_ytd = db.Column(db.Numeric(30, 2))
-    fed_candidate_committee_contributions_period = db.Column(db.Numeric(30, 2))
-    fed_candidate_committee_contributions_ytd = db.Column(db.Numeric(30, 2))
-    fed_candidate_contribution_refunds_period = db.Column(db.Numeric(30, 2))
-    independent_expenditures_period = db.Column('independent_expenditures_period', db.Numeric(30, 2))
-    independent_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    loan_repayments_made_period = db.Column(db.Numeric(30, 2))
-    loan_repayments_made_ytd = db.Column(db.Numeric(30, 2))
-    loan_repayments_received_period = db.Column(db.Numeric(30, 2))
-    loan_repayments_received_ytd = db.Column(db.Numeric(30, 2))
-    loans_made_period = db.Column(db.Numeric(30, 2))
-    loans_made_ytd = db.Column(db.Numeric(30, 2))
-    net_contributions_period = db.Column(db.Numeric(30, 2), index=True)
-    net_contributions_ytd = db.Column(db.Numeric(30, 2))
-    net_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    net_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    non_allocated_fed_election_activity_period = db.Column(db.Numeric(30, 2))
-    non_allocated_fed_election_activity_ytd = db.Column(db.Numeric(30, 2))
-    nonfed_share_allocated_disbursements_period = db.Column(db.Numeric(30, 2))
-    other_fed_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    other_fed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    other_fed_receipts_period = db.Column(db.Numeric(30, 2))
-    other_fed_receipts_ytd = db.Column(db.Numeric(30, 2))
-    shared_fed_activity_nonfed_ytd = db.Column(db.Numeric(30, 2))
-    shared_fed_activity_period = db.Column(db.Numeric(30, 2))
-    shared_fed_activity_ytd = db.Column(db.Numeric(30, 2))
-    shared_fed_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    shared_fed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    shared_nonfed_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    shared_nonfed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    subtotal_summary_page_period = db.Column(db.Numeric(30, 2))
-    subtotal_summary_ytd = db.Column(db.Numeric(30, 2))
-    total_fed_disbursements_period = db.Column(db.Numeric(30, 2))
-    total_fed_disbursements_ytd = db.Column(db.Numeric(30, 2))
-    total_fed_election_activity_period = db.Column(db.Numeric(30, 2))
-    total_fed_election_activity_ytd = db.Column(db.Numeric(30, 2))
-    total_fed_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    total_fed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    total_fed_receipts_period = db.Column(db.Numeric(30, 2))
-    total_fed_receipts_ytd = db.Column(db.Numeric(30, 2))
-    total_nonfed_transfers_period = db.Column(db.Numeric(30, 2))
-    total_nonfed_transfers_ytd = db.Column(db.Numeric(30, 2))
-    total_operating_expenditures_period = db.Column(db.Numeric(30, 2))
-    total_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))
-    transfers_from_affiliated_party_period = db.Column(db.Numeric(30, 2))
-    transfers_from_affiliated_party_ytd = db.Column(db.Numeric(30, 2))
-    transfers_from_nonfed_account_period = db.Column(db.Numeric(30, 2))
-    transfers_from_nonfed_account_ytd = db.Column(db.Numeric(30, 2))
-    transfers_from_nonfed_levin_period = db.Column(db.Numeric(30, 2))
-    transfers_from_nonfed_levin_ytd = db.Column(db.Numeric(30, 2))
-    transfers_to_affiliated_committee_period = db.Column(db.Numeric(30, 2))
-    transfers_to_affilitated_committees_ytd = db.Column(db.Numeric(30, 2))
+    all_loans_received_period = db.Column(db.Numeric(30, 2))#mapped
+    all_loans_received_ytd = db.Column(db.Numeric(30, 2))#mapped
+    allocated_federal_election_levin_share_period = db.Column(db.Numeric(30, 2))#missing
+    calendar_ytd = db.Column(db.Integer)#missing
+    cash_on_hand_beginning_calendar_ytd = db.Column(db.Numeric(30, 2))#mapped, but it's period not ytd
+    cash_on_hand_close_ytd = db.Column(db.Numeric(30, 2))#mapped
+    coordinated_expenditures_by_party_committee_period = db.Column('coordinated_expenditures_by_party_committee_period', db.Numeric(30, 2))#mapped
+    coordinated_expenditures_by_party_committee_ytd = db.Column(db.Numeric(30, 2))#mapped
+    fed_candidate_committee_contribution_refunds_ytd = db.Column(db.Numeric(30, 2))#mapped, should this match line 164
+    fed_candidate_committee_contributions_period = db.Column(db.Numeric(30, 2))#mapped
+    fed_candidate_committee_contributions_ytd = db.Column(db.Numeric(30, 2))#mapped
+    fed_candidate_contribution_refunds_period = db.Column(db.Numeric(30, 2))#mapped
+    independent_expenditures_period = db.Column('independent_expenditures_period', db.Numeric(30, 2))#mapped
+    independent_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_made_period = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_made_ytd = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_received_period = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_received_ytd = db.Column(db.Numeric(30, 2))#mapped
+    loans_made_period = db.Column(db.Numeric(30, 2))#mapped
+    loans_made_ytd = db.Column(db.Numeric(30, 2))#mapped
+    net_contributions_period = db.Column(db.Numeric(30, 2), index=True)#mapped
+    net_contributions_ytd = db.Column(db.Numeric(30, 2))#mapped
+    net_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    net_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    non_allocated_fed_election_activity_period = db.Column(db.Numeric(30, 2))#mapped
+    non_allocated_fed_election_activity_ytd = db.Column(db.Numeric(30, 2))#mapped
+    nonfed_share_allocated_disbursements_period = db.Column(db.Numeric(30, 2))#missing!
+    other_fed_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    other_fed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    other_fed_receipts_period = db.Column(db.Numeric(30, 2))#mapped
+    other_fed_receipts_ytd = db.Column(db.Numeric(30, 2))#mapped
+    shared_fed_activity_nonfed_ytd = db.Column(db.Numeric(30, 2))#mapped
+    shared_fed_activity_period = db.Column(db.Numeric(30, 2))#mapped
+    shared_fed_activity_ytd = db.Column(db.Numeric(30, 2))#mapped
+    shared_fed_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    shared_fed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    shared_nonfed_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    shared_nonfed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    subtotal_summary_page_period = db.Column(db.Numeric(30, 2))#check this one in the json
+    subtotal_summary_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_disbursements_period = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_disbursements_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_election_activity_period = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_election_activity_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_receipts_period = db.Column(db.Numeric(30, 2))#mapped
+    total_fed_receipts_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_nonfed_transfers_period = db.Column(db.Numeric(30, 2))#mapped
+    total_nonfed_transfers_ytd = db.Column(db.Numeric(30, 2))#mapped
+    total_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    total_operating_expenditures_ytd = db.Column(db.Numeric(30, 2))#mapped
+    transfers_from_affiliated_party_period = db.Column(db.Numeric(30, 2))#this should be committee not party
+    transfers_from_affiliated_party_ytd = db.Column(db.Numeric(30, 2))#ditto
+    transfers_from_nonfed_account_period = db.Column(db.Numeric(30, 2))#mapped
+    transfers_from_nonfed_account_ytd = db.Column(db.Numeric(30, 2))#mapped
+    transfers_from_nonfed_levin_period = db.Column(db.Numeric(30, 2))#mapped
+    transfers_from_nonfed_levin_ytd = db.Column(db.Numeric(30, 2))#mapped
+    transfers_to_affiliated_committee_period = db.Column(db.Numeric(30, 2))#mapped
+    transfers_to_affilitated_committees_ytd = db.Column(db.Numeric(30, 2))#mapped
     report_form = 'Form 3X'
 
 
@@ -271,7 +294,7 @@ class BaseFiling(db.Model):
     coverage_end_date = db.Column('through_date', db.Date)
     rpt_pgi = db.Column('rptpgi', db.String, doc=docs.ELECTION_TYPE)
     report_type = db.Column('rptcode', db.String)
-    image_number = db.Column('imageno', db.Integer)
+    beginning_image_number = db.Column('imageno', db.Integer)
     street_1 = db.Column('str1', db.String)
     street_2 = db.Column('str2', db.String)
     city = db.Column(db.String)
@@ -293,21 +316,17 @@ def name_generator(*args):
             else ''
         )
         fields.append(field)
-
+    if fields.count('') == len(fields):
+        return None
     fields[0] = fields[0] + ','
+
     for field in fields:
         name += field + ' '
     return name.strip()
 
-class BaseF3PFiling(BaseFiling):
+class BaseF3PFiling(TreasurerMixin, BaseFiling):
     __tablename__ = 'real_efile_f3p'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
-
-    treasurer_last_name = db.Column('lname', db.String)
-    treasurer_middle_name = db.Column('mname', db.String)
-    treasurer_first_name = db.Column('fname', db.String)
-    prefix = db.Column(db.String)
-    suffix = db.Column(db.String)
     committee_name = db.Column('c_name', db.String, index=True, doc=docs.CANDIDATE_NAME)
     street_1 = db.Column('c_str1', db.String)
     street_2 = db.Column('c_str2', db.String)
@@ -321,27 +340,12 @@ class BaseF3PFiling(BaseFiling):
     debts_owed_to_committee = db.Column('debts_to', db.Float)
     debts_owed_by_committee = db.Column('debts_by', db.Float)
     expenditure_subject_to_limits = db.Column('expe', db.Float)
-    #net_contributions_cycle_to_date
     net_contributions_cycle_to_date = db.Column('net_con', db.Float)
     net_operating_expenditures_to_date = db.Column('net_op', db.Float)
     primary_election = db.Column('act_pri', db.String)
     general_election = db.Column('act_gen', db.String)
     subtotal_summary_period = db.Column('sub', db.String)
-
-    @hybrid_property
-    def treasurer_name(self):
-        name = name_generator(self.treasurer_last_name,
-                              self.prefix,
-                              self.treasurer_first_name,
-                              self.treasurer_middle_name,
-                              self.suffix
-                              )
-        name = (
-            name
-            if name
-            else None
-        )
-        return name
+    report_form = 'Form 3P'
 
     summary_lines = db.relationship(
         'BaseFilingSummary',
@@ -354,14 +358,16 @@ class BaseF3PFiling(BaseFiling):
 
 
 
-class BaseF3Filing(BaseFiling):
+class BaseF3Filing(TreasurerMixin, BaseFiling):
     __tablename__ = 'real_efile_f3'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
+    candidate_id = db.Column('canid', db.String)
     candidate_last_name = db.Column('can_lname', db.String)
     candidate_first_name = db.Column('can_fname', db.String)
     candidate_middle_name = db.Column('can_mname', db.String)
     candidate_prefix = db.Column('can_prefix', db.String)
     candidate_suffix = db.Column('can_suffix', db.String)
+    cash_on_hand_beginning_period = db.Column('cash_hand', db.Integer)
     f3z1 = db.Column(db.Integer)
     primary_election = db.Column('act_pri', db.String)
     general_election = db.Column('act_gen', db.String)

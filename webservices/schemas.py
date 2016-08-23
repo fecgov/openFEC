@@ -39,7 +39,24 @@ class BaseEfileSchema(BaseSchema):
         if obj.get('summary_lines'):
             for key, value in obj.get('summary_lines').items():
                 obj[key] = value
-        obj.pop('summary_lines')
+            obj.pop('summary_lines')
+
+
+def extract_columns(obj, column_a, column_b, descriptions):
+    line_list = {}
+    keys = zip(column_a, column_b)
+    keys = list(keys)
+    per = re.compile('(.+?(?=per))')
+    ytd = re.compile('(.+?(?=ytd))')
+    if obj.summary_lines:
+        for row in obj.summary_lines:
+            replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
+                               str(keys[int(row.line_number - 1)][0])).replace(' ', '_')
+            replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
+                               str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+            line_list[replace_a] = row.column_a
+            line_list[replace_b] = row.column_b
+        return line_list
 
 
 class EFilingF3PSchema(BaseEfileSchema):
@@ -70,17 +87,27 @@ class EFilingF3PSchema(BaseEfileSchema):
 
 class EFilingF3Schema(BaseEfileSchema):
     candidate_name = ma.fields.Str()
+    treasurer_name = ma.fields.Str()
 
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3_description
-
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
+        cash = max(line_list.get('coh_cop_i'), line_list.get('coh_cop_ii'))
+        line_list["cash_on_hand_end_period"] = cash
+        line_list.pop('coh_cop_ii')  # maybe  a api exception if i and ii are different?
+        line_list.pop('coh_cop_i')
+        cash = max(obj.cash_on_hand_beginning_period, line_list.get('coh_bop'))
+        line_list.pop('coh_bop')
+        line_list["cash_on_hand_beginning_period"] = cash
+        cash = max(line_list.get('total_disbursements_per_i'), line_list.get('total_disbursements_per_ii'))
+        line_list["total_disbursements_period"] = cash
+        line_list.pop('total_disbursements_per_i')
+        line_list.pop('total_disbursements_per_ii')
         return line_list
 
 class EFilingF3XSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3x_description
-
         line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b, descriptions)
         return line_list
 
@@ -134,22 +161,6 @@ def make_page_schema(schema, page_type=paging_schemas.OffsetPageSchema, class_na
         (page_type, ApiSchema),
         {'Meta': Meta},
     )
-
-def extract_columns(obj, column_a, column_b, descriptions):
-    line_list = {}
-    keys = zip(column_a, column_b)
-    keys = list(keys)
-    per = re.compile('(.+?(?=per))')
-    ytd = re.compile('(.+?(?=ytd))')
-    if obj.summary_lines:
-        for row in obj.summary_lines:
-            replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
-                               str(keys[int(row.line_number - 1)][0])).replace(' ', '_')
-            replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
-                               str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
-            line_list[replace_a] = row.column_a
-            line_list[replace_b] = row.column_b
-        return line_list
 
 
 schemas = {}
