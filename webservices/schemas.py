@@ -28,14 +28,9 @@ class BaseSchema(ModelSchema):
 
 class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
-    """
-    @pre_dump
-    def parse_date(self, obj):
-        obj.create_date  = obj.create_date.date()
-        return obj
-    """
+
     @post_dump
-    def parse_date(self, obj):
+    def extract_summary_rows(self, obj):
         if obj.get('summary_lines'):
             for key, value in obj.get('summary_lines').items():
                 obj[key] = value
@@ -92,23 +87,31 @@ class EFilingF3Schema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3_description
         line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
+        #final bit of data cleaning before json marshalling
         cash = max(line_list.get('coh_cop_i'), line_list.get('coh_cop_ii'))
         line_list["cash_on_hand_end_period"] = cash
         line_list.pop('coh_cop_ii')  # maybe  a api exception if i and ii are different?
         line_list.pop('coh_cop_i')
         cash = max(obj.cash_on_hand_beginning_period, line_list.get('coh_bop'))
+        obj.cash_on_hand_beginning_period = None
         line_list.pop('coh_bop')
         line_list["cash_on_hand_beginning_period"] = cash
         cash = max(line_list.get('total_disbursements_per_i'), line_list.get('total_disbursements_per_ii'))
         line_list["total_disbursements_period"] = cash
         line_list.pop('total_disbursements_per_i')
         line_list.pop('total_disbursements_per_ii')
+        cash = max(line_list.get('total_receipts_per_i'), line_list.get('ttl_receipts_ii'))
+        line_list["total_receipts_period"] = cash
+        line_list.pop('total_receipts_per_i')
+        line_list.pop('ttl_receipts_ii')
         return line_list
 
 class EFilingF3XSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         descriptions = decoders.f3x_description
         line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b, descriptions)
+        line_list['cash_on_hand_beginning_calendar_ytd'] = line_list.pop('coh_begin_calendar_yr')
+        line_list['cash_on_hand_beginning_period'] = line_list.pop('coh_bop')
         return line_list
 
 schema_map = {}
