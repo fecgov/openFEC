@@ -33,6 +33,9 @@ class BaseEfileSchema(BaseSchema):
     def extract_summary_rows(self, obj):
         if obj.get('summary_lines'):
             for key, value in obj.get('summary_lines').items():
+                #may be a way to pull these out using pandas?
+                if key == 'nan':
+                    continue
                 obj[key] = value
             obj.pop('summary_lines')
 
@@ -78,6 +81,10 @@ class EFilingF3PSchema(BaseEfileSchema):
                     line_list[replace_a] = row.column_a
                     line_list[replace_b] = row.column_b
             line_list["state_allocations"] = state_map
+            cash = max(line_list.get('total_disbursements_per'), obj.total_disbursements)
+            line_list['total_disbursements_per'] = cash
+            cash = max(line_list.get('total_receipts_per'), obj.total_receipts)
+            line_list['total_receipts_per'] = cash
             return line_list
 
 class EFilingF3Schema(BaseEfileSchema):
@@ -223,7 +230,7 @@ register_schema(CommitteeSearchListSchema)
 
 make_efiling_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', )},
+    options={'exclude': ('idx', 'total_disbursements', 'total_receipts' )},
     fields={
 
     }

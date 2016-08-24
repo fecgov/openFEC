@@ -223,8 +223,8 @@ filings = {
 efilings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    'min_create_date': fields.DateTime(description='Selects all items created after this date'),
-    'max_create_date': fields.DateTime(description='Selects all items created before this date'),
+    'min_receipt_date': fields.DateTime(description='Selects all items created after this date'),
+    'max_receipt_date': fields.DateTime(description='Selects all items created before this date'),
 }
 
 reports = {

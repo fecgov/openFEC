@@ -181,7 +181,7 @@ class EFilingSummaryView(views.ApiResource):
         ('committee_id', models.BaseFiling.committee_id),
     ]
     filter_range_fields = [
-        (('min_create_date', 'max_create_date' ), models.BaseFiling.create_date),
+        (('min_receipt_date', 'max_receipt_date' ), models.BaseFiling.receipt_date),
     ]
     """
         args.make_sort_args(
