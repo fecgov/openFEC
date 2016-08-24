@@ -515,7 +515,9 @@ EFilingsSchema = make_schema(
         'ending_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
+        'document_description': ma.fields.Str(),
     },
+    options={'exclude': ('report',)},
 )
 augment_schemas(EFilingsSchema)
 
