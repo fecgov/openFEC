@@ -471,6 +471,14 @@ The total all contributions in the following ranges:
 Unitemized contributions are included in the `0` category.
 '''
 
+STATE_AGGREGATE = '''
+Schedule A individual receipts aggregated by contributor state.
+This is an aggregate of only individual contributions. To avoid double counting,
+memoed items are not included. Transactions $200 and under do not have to be
+itemized, if those contributions are not itemized, they will not be included in the
+state totals.
+'''
+
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at https://api.data.gov/signup.
 '''
