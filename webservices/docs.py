@@ -71,9 +71,13 @@ item details with the other endpoints. If you are interested in individual donor
 out contributor information in schedule_a.
 
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
-calls an hour. Each call is limited to 100 results per page. You can also discuss the data in the
-[FEC data google group](https://groups.google.com/forum/#!forum/fec-data) or post questions
-to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec). The model definitions and schema are available at [/swagger](/swagger/). This is useful for making wrappers and exploring the data.
+calls an hour. Each call is limited to 100 results per page. You can email questions or comments to
+[18f-fec@gsa.gov](18f-fec@gsa.gov). You can also ask questions and discuss the data in the
+[FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). API changes will also
+be added to this group in advance of the change.
+
+The model definitions and schema are available at [/swagger](/swagger/). This is useful for
+making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
@@ -345,7 +349,7 @@ To fetch the next page of results, append "last_index=230880619&last_contributio
 to the URL.
 
 Note: because the Schedule A data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 SUB_ID = '''
@@ -386,7 +390,7 @@ To fetch the next page of results, append "last_index=230906248&amp;last_disburs
 to the URL.
 
 Note: because the Schedule B data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 SCHEDULE_B_BY_PURPOSE = '''
@@ -436,7 +440,7 @@ To fetch the next page of results, append
 "&last_index=3023037&last_expenditure_amount=-17348.5" to the URL.
 
 Note: because the Schedule E data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 SIZE_DESCRIPTION = '''
@@ -467,6 +471,14 @@ The total all contributions in the following ranges:
 Unitemized contributions are included in the `0` category.
 '''
 
+STATE_AGGREGATE = '''
+Schedule A individual receipts aggregated by contributor state.
+This is an aggregate of only individual contributions. To avoid double counting,
+memoed items are not included. Transactions $200 and under do not have to be
+itemized, if those contributions are not itemized, they will not be included in the
+state totals.
+'''
+
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at https://api.data.gov/signup.
 '''
@@ -482,7 +494,7 @@ FILINGS = '''
 All official records and reports filed by or delivered to the FEC.
 
 Note: because the filings data includes many records, counts for large
-result sets are approximate.
+result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 DOC_TYPE = '''
@@ -517,8 +529,8 @@ Reporting deadlines, election dates FEC meetings, events etc.
 '''
 
 CALENDAR_DATES = '''
-Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
-event into one calendar.
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+events into one calendar.
 
 State filtering now applies to elections, reports and reporting periods.
 
@@ -528,6 +540,23 @@ reports. All reporting deadlines are available at /reporting-dates/ for referenc
 
 This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
 that creates the calendar.
+'''
+
+CALENDAR_EXPORT = '''
+Returns CSV or ICS for downloading directly into calendar applications like Google, Outlook or other applications.
+
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+events into one calendar.
+
+State filtering now applies to elections, reports and reporting periods.
+
+Presidential pre-primary report due dates are not shown on even years.
+Filers generally opt to file monthly rather than submit over 50 pre-primary election
+reports. All reporting deadlines are available at /reporting-dates/ for reference.
+
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+that creates the calendar.
+
 '''
 
 COMMUNICATION_TAG = '''
@@ -607,7 +636,8 @@ FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has ac
 
 # committees
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
-    the most recent name will be shown.'
+    the most recent name will be shown. Committee names are not unique. Use committee_id \
+    for looking up records.'
 COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
 DESIGNATION = 'The one-letter designation code of the organization:\n\
@@ -834,3 +864,30 @@ CAL_STATE = 'The state field only applies to election dates and reporting deadli
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
+
+# efiling
+EFILING_TAG = '''
+Efiling endpoints provide real-time campaign finance data for electronic filers.
+
+These endpoints are perfect for watching filings roll in when you want to know the latest information. Efiling endpoints
+only contain the most recent two years worth of data and don't contain the processed and coded data that
+you can find on the other endpoints. Those endpoints are better for in-depth analysis.
+'''
+
+EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
+FILE_NUMBER = 'Filing ID number'
+AMENDED_BY = '''
+If this report has been amended, this field gives the file_number of the report that should be used. For example,
+if a report is amended multiple times, the first report and the first amendment will have the file_number of the final amended
+report in the ameded_by field and the final report will have no id in the amended_by field.
+'''
+AMENDS_FILE = '''
+For amendments, this file_number is the file_number of the previous report that is being amended. See amended_by
+for the most recent version of the report.
+'''
+AMENDMENT_NUMBER = '''
+Number of times the report has been amended.
+'''
+
+MIN_FILTER = 'Filter for all amounts greater than a value.'
+MAX_FILTER = 'Filter for all amounts less than a value.'

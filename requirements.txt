@@ -1,6 +1,6 @@
 cfenv==0.4.0
 invoke==0.13.0
-psycopg2==2.6
+psycopg2==2.6.2
 Flask==0.11
 Flask-Cors==2.1.0
 Flask-Script==2.0.5
@@ -10,7 +10,7 @@ python-dateutil==2.4.2
 sqlalchemy-postgres-copy==0.1.0
 networkx==1.9.1
 newrelic==2.52.0.40
-SQLAlchemy==1.0.8
+SQLAlchemy==1.0.14
 mandrill==1.0.57
 icalendar==3.9.1
 GitPython==1.0.1
@@ -19,7 +19,7 @@ webargs==0.18.0
 slacker==0.8.6
 raven[flask]==5.8.1
 ujson==1.33
-pyelasticsearch
+pyelasticsearch==1.4
 requests==2.10.0
 
 # Marshalling
@@ -32,6 +32,6 @@ git+https://github.com/jmcarp/marshmallow-pagination@master
 boto3==1.2.2
 
 # Task queue
-celery==3.1.19
+celery==3.1.23
 celery-once==0.1.4
 redis==2.10.5

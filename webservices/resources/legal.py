@@ -1,14 +1,32 @@
+from webargs import fields
+
 from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
 
 es = utils.get_elasticsearch_connection()
 
+class AdvisoryOpinion(utils.Resource):
+    @property
+    def args(self):
+        return {"ao_no": fields.Str(required=True, description='Advisory opinion number to fetch.')}
+
+    def get(self, ao_no, **kwargs):
+        query = {"query": {"bool": {"must": [{"term": {"no": ao_no}},
+                          {"term": {"_type": "advisory_opinions"}}]}},
+                          "_source": {"exclude": "text"}}
+
+        es_results = es.search(query, size=200)
+
+        results = {"docs": [r["_source"] for r in es_results["hits"]["hits"]]}
+        return results
+
+
 class Search(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q, from_hit=0, hits_returned=20, type='all', **kwargs):
         if type == 'all':
-            types = ['advisory_opinions', 'regulations']
+            types = ['advisory_opinions', 'regulations', 'statutes']
         else:
             types = [type]
 
@@ -18,7 +36,6 @@ class Search(utils.Resource):
             query = {"query": {"bool": {
                      "must": [{"match": {"_all": q}}, {"term": {"_type": type}}],
                                "should": [{"match": {"no": q}},
-                                          {"match": {"category": "Final Opinion"}},
                                                {"match_phrase": {"_all": {"query": q,
                                                                           "slop": 50}
                                                                  }
