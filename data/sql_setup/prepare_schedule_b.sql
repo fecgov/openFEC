@@ -1,5 +1,6 @@
 -- Create index for join on electioneering costs
-create index on fec_vsum_sched_b (link_id);
+drop index if exists fec_vsum_sched_b_link_id_idx;
+create index fec_vsum_sched_b_link_id_idx on fec_vsum_sched_b (link_id);
 
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
@@ -32,6 +33,7 @@ begin
             delete from ofec_sched_b_queue_new where sub_id = new.sub_id;
             insert into ofec_sched_b_queue_new values (new.*, timestamp, two_year_transaction_period_new);
         end if;
+
         return new;
     elsif tg_op = 'UPDATE' then
         two_year_transaction_period_new = get_transaction_year(new.disb_dt, new.rpt_yr);
@@ -43,6 +45,7 @@ begin
             insert into ofec_sched_b_queue_new values (new.*, timestamp, two_year_transaction_period_new);
             insert into ofec_sched_b_queue_old values (old.*, timestamp, two_year_transaction_period_old);
         end if;
+
         return new;
     elsif tg_op = 'DELETE' then
         two_year_transaction_period_old = get_transaction_year(old.disb_dt, old.rpt_yr);
@@ -51,6 +54,7 @@ begin
             delete from ofec_sched_b_queue_old where sub_id = old.sub_id;
             insert into ofec_sched_b_queue_old values (old.*, timestamp, two_year_transaction_period_old);
         end if;
+
         return old;
     end if;
 end

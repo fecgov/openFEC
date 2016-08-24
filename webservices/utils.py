@@ -6,6 +6,8 @@ import six
 import sqlalchemy as sa
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.dialects import postgresql
+
 
 from webservices.env import env
 from pyelasticsearch import ElasticSearch
@@ -226,3 +228,6 @@ def get_elasticsearch_connection():
     else:
         es = ElasticSearch('http://localhost:9200')
     return es
+
+def print_literal_query_string(query):
+    print(str(query.statement.compile(dialect=postgresql.dialect())))
