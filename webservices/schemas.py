@@ -52,9 +52,15 @@ def extract_columns(obj, column_a, column_b, descriptions):
                                str(keys[int(row.line_number - 1)][0])).replace(' ', '_')
             replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
                                str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+            replace_a = make_period_string(replace_a)
             line_list[replace_a] = row.column_a
             line_list[replace_b] = row.column_b
         return line_list
+
+def make_period_string(per_string=None):
+    if per_string[-4:] == '_per':
+        per_string += 'iod'
+    return per_string
 
 
 class EFilingF3PSchema(BaseEfileSchema):
@@ -78,6 +84,7 @@ class EFilingF3PSchema(BaseEfileSchema):
                     replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_', keys[int(row.line_number - 1)][0]).replace(' ', '_')
                     replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
                                        str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+                    replace_a = make_period_string(replace_a)
                     line_list[replace_a] = row.column_a
                     line_list[replace_b] = row.column_b
             line_list["state_allocations"] = state_map
