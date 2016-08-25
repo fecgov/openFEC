@@ -249,6 +249,31 @@ reports = {
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
     'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
+    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID)
+}
+
+committee_reports = {
+    'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
+    'is_amended': fields.Bool(description='Report has been amended'),
+    'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
+    'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
+    'min_receipts_amount': Currency(description=docs.MIN_FILTER),
+    'max_receipts_amount': Currency(description=docs.MAX_FILTER),
+    'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
+    'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
+    'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
+    'max_debts_owed_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_independent_expenditures': Currency(description=docs.MIN_FILTER),
+    'max_independent_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_party_coordinated_expenditures': Currency(description=docs.MIN_FILTER),
+    'max_party_coordinated_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_total_contributions': Currency(description=docs.MIN_FILTER),
+    'max_total_contributions': Currency(description=docs.MAX_FILTER),
+    'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
 }
 
 
