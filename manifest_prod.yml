@@ -1,6 +1,7 @@
 ---
 inherit: manifest_base.yml
 host: fec-prod-api
+instances: 2
 services:
   - fec-creds-prod
   - fec-redis-prod

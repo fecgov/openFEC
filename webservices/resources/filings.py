@@ -92,6 +92,9 @@ class EFilingsView(views.ApiResource):
         ('file_number', models.EFilings.file_number),
         ('committee_id', models.EFilings.committee_id),
     ]
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.EFilings.receipt_date),
+    ]
 
     @property
     def args(self):
@@ -100,8 +103,7 @@ class EFilingsView(views.ApiResource):
             args.efilings,
             args.make_sort_args(
                 default='-receipt_date',
-                # TODO: add indexes and turn on validation
-                # validator=args.IndexValidator(models.EFilings),
+                validator=args.IndexValidator(models.EFilings),
             ),
         )
 
