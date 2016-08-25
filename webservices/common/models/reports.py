@@ -362,6 +362,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
 class BaseF3Filing(TreasurerMixin, BaseFiling):
     __tablename__ = 'real_efile_f3'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
+    committee_name = db.Column('com_name', db.String, index=True, doc=docs.CANDIDATE_NAME)
     candidate_id = db.Column('canid', db.String)
     candidate_last_name = db.Column('can_lname', db.String)
     candidate_first_name = db.Column('can_fname', db.String)
