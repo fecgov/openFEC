@@ -328,7 +328,7 @@ def name_generator(*args):
 class BaseF3PFiling(TreasurerMixin, BaseFiling):
     __tablename__ = 'real_efile_f3p'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
-    committee_name = db.Column('c_name', db.String, index=True, doc=docs.CANDIDATE_NAME)
+    committee_name = db.Column('c_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
     street_1 = db.Column('c_str1', db.String)
     street_2 = db.Column('c_str2', db.String)
     city = db.Column('c_city', db.String)
@@ -362,7 +362,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
 class BaseF3Filing(TreasurerMixin, BaseFiling):
     __tablename__ = 'real_efile_f3'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
-    committee_name = db.Column('com_name', db.String, index=True, doc=docs.CANDIDATE_NAME)
+    committee_name = db.Column('com_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
     candidate_id = db.Column('canid', db.String)
     candidate_last_name = db.Column('can_lname', db.String)
     candidate_first_name = db.Column('can_fname', db.String)
