@@ -56,6 +56,7 @@ def get_range_filters():
          models.CommitteeReportsIEOnly.independent_contributions_period),
     ]
     return filter_range_fields
+
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -132,6 +133,13 @@ class ReportsView(utils.Resource):
         return query, reports_class, reports_schema
 
 
+@doc(
+    tags=['financial'],
+    description=docs.REPORTS,
+    params={
+        'committee_id': {'description': docs.COMMITTEE_ID},
+    },
+)
 class CommitteeReportsView(utils.Resource):
 
 
