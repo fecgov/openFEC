@@ -4,6 +4,7 @@ import re
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
 from xml.etree import ElementTree as ET
+from datetime import datetime
 
 import requests
 
@@ -11,6 +12,16 @@ from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
+
+# sigh. This is a mess because slate uses a library also called utils.
+import importlib
+importlib.invalidate_caches()
+import sys
+from distutils.sysconfig import get_python_lib
+sys.path = [get_python_lib() + '/slate'] + sys.path
+print(sys.path)
+import slate
+sys.path = sys.path[1:]
 
 def get_sections(reg):
     sections = {}
@@ -247,3 +258,56 @@ def load_advisory_opinions_into_s3():
                 print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
         else:
             print("No new advisory opinions found.")
+
+def get_mur_pdf(mur_no):
+    response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
+                            % mur_no, stream=True)
+
+    with NamedTemporaryFile('wb+') as pdf:
+        for chunk in response:
+            pdf.write(chunk)
+
+        pdf.seek(0)
+        # key = 'legal/murs/%s.pdf' % mur_no
+        #bucket.put_object(Key=key, Body=pdf,
+        #                  ContentType='application/pdf', ACL='public-read')
+
+        pdf.seek(0)
+        pdf_text = ' '.join(slate.PDF(pdf))
+        print(pdf_text)
+        return pdf_text
+
+def load_archived_murs():
+    table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
+    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)
+    for row in rows[1:5]:
+        data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
+        mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
+        text = get_mur_pdf(mur_no)
+        if data[1]:
+            open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
+        if data[2]:
+            close_date = datetime.strptime(data[2], '%m/%d/%Y').isoformat()
+        parties = re.findall("(.*?)<br>", data[3])
+        complainants = []
+        respondents = []
+        for party in parties:
+            print(party)
+            match = re.match("\(([RC])\) - (.*)", party)
+            if match.group(1) == 'C':
+                complainants.append(match.group(2))
+            if match.group(1) == 'R':
+                respondents.append(match.group(2))
+
+        subject = data[4]
+        citations = re.findall("(.*?)<br>", data[5])
+        doc = {
+            'no': mur_no,
+            'text': text,
+            'open_date': open_date,
+            'close_date': close_date,
+            'complainants': complainants,
+            'respondents': respondents,
+            'subject': subject,
+            'citations': citations
+        }
