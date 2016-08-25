@@ -18,7 +18,7 @@ from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
     index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
-    delete_advisory_opinions_from_s3)
+    delete_advisory_opinions_from_s3, load_archived_murs)
 
 
 manager = Manager(app)
@@ -36,6 +36,7 @@ manager.command(index_regulations)
 manager.command(index_advisory_opinions)
 manager.command(load_advisory_opinions_into_s3)
 manager.command(delete_advisory_opinions_from_s3)
+manager.command(load_archived_murs)
 
 def check_itemized_queues(schedule):
     """Checks to see if the queues associated with an itemized schedule have
