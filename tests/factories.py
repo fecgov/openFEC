@@ -1,5 +1,3 @@
-import datetime
-
 import sqlalchemy as sa
 
 import factory
