@@ -168,7 +168,14 @@ class ReportsView(utils.Resource):
 
 @doc(
     tags=['efiling'],
-    description=docs.EFILE_FILES,
+    description=docs.EFILE_REPORTS,
+    params={
+        'committee_type': {
+            'description': 'presidential, pac-party, or house-senate',
+            # we don't have IE only going y
+            'enum': ['presidential', 'pac-party', 'house-senate'],
+        }
+    }
 )
 class EFilingSummaryView(views.ApiResource):
 
