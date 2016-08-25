@@ -6,7 +6,9 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices import filters
+from webservices.common import counts
 from webservices.common import models
+from webservices.common import views
 from webservices.utils import use_kwargs
 
 
@@ -15,6 +17,13 @@ reports_schema_map = {
     'H': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
     'I': (models.CommitteeReportsIEOnly, schemas.CommitteeReportsIEOnlyPageSchema),
+}
+
+efile_reports_schema_map = {
+    'P': (models.BaseF3PFiling, schemas.BaseF3PFilingSchema, schemas.BaseF3PFilingPageSchema),
+    'H': (models.BaseF3Filing, schemas.BaseF3FilingSchema, schemas.BaseF3FilingPageSchema),
+    'S': (models.BaseF3Filing, schemas.BaseF3FilingSchema, schemas.BaseF3FilingPageSchema),
+    'X': (models.BaseF3XFiling, schemas.BaseF3XFilingSchema, schemas.BaseF3XFilingPageSchema),
 }
 # We don't have report data for C and E yet
 default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
@@ -27,6 +36,13 @@ reports_type_map = {
     'pac-party': None,
     'pac': 'O',
     'party': 'XY'
+}
+
+
+form_type_map = {
+    'presidential': 'P',
+    'pac-party': 'X',
+    'house-senate': 'H',
 }
 
 
@@ -147,6 +163,63 @@ class ReportsView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
+
+
+
+@doc(
+    tags=['efiling'],
+    description=docs.EFILE_REPORTS,
+    params={
+        'committee_type': {
+            'description': 'presidential, pac-party, or house-senate',
+            # we don't have IE only going y
+            'enum': ['presidential', 'pac-party', 'house-senate'],
+        }
+    }
+)
+class EFilingSummaryView(views.ApiResource):
+
+    model = models.BaseF3PFiling
+    schema = schemas.BaseF3FilingSchema
+    page_schema = schemas.BaseF3FilingSchema
+
+    filter_multi_fields = [
+        ('file_number', models.BaseFiling.file_number),
+        ('committee_id', models.BaseFiling.committee_id),
+    ]
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date' ), models.BaseFiling.receipt_date),
+    ]
+    """
+        args.make_sort_args(
+            default='-create_date',
+            validator=args.IndexValidator(self.model),
+        ),
+    """
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.efilings
+
+        )
+
+
+    def get(self, committee_type=None, **kwargs):
+        if committee_type:
+            self.model, self.schema, self.page_schema = \
+                efile_reports_schema_map.get(form_type_map.get(committee_type))
+        query = self.build_query(**kwargs)
+
+        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        return utils.fetch_page(query, kwargs, model=self.model, count=count)
+
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        return query
+
 
 
 

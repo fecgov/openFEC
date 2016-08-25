@@ -219,6 +219,12 @@ api.add_resource(
     '/committee/<committee_id>/filings/',
     '/candidate/<candidate_id>/filings/',
 )
+
+api.add_resource(
+    reports.EFilingSummaryView,
+    '/efile/reports/<string:committee_type>/',
+)
+
 api.add_resource(filings.FilingsList, '/filings/')
 
 api.add_resource(download.DownloadView, '/download/<path:path>/')
@@ -244,6 +250,7 @@ apidoc.register(committees.CommitteeView, blueprint='v1')
 apidoc.register(committees.CommitteeList, blueprint='v1')
 apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
+apidoc.register(reports.EFilingSummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
