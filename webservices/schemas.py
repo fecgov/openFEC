@@ -1,3 +1,4 @@
+
 import re
 import functools
 
@@ -5,11 +6,13 @@ import marshmallow as ma
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_pagination import schemas as paging_schemas
 
-from webservices import utils
+from webservices import utils, efile_parser, decoders
 from webservices.spec import spec
 from webservices.common import models
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
+from marshmallow import pre_dump, post_dump
+from sqlalchemy import func
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
@@ -23,6 +26,118 @@ class BaseSchema(ModelSchema):
             return super().get_attribute(attr, obj, default)
         return getattr(obj, attr, default)
 
+class BaseEfileSchema(BaseSchema):
+    summary_lines = ma.fields.Method("parse_summary_rows")
+
+    @post_dump
+    def extract_summary_rows(self, obj):
+        if obj.get('summary_lines'):
+            for key, value in obj.get('summary_lines').items():
+                #may be a way to pull these out using pandas?
+                if key == 'nan':
+                    continue
+                obj[key] = value
+            obj.pop('summary_lines')
+
+
+def extract_columns(obj, column_a, column_b, descriptions):
+    line_list = {}
+    keys = zip(column_a, column_b)
+    keys = list(keys)
+    per = re.compile('(.+?(?=per))')
+    ytd = re.compile('(.+?(?=ytd))')
+    if obj.summary_lines:
+        for row in obj.summary_lines:
+            replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
+                               str(keys[int(row.line_number - 1)][0])).replace(' ', '_')
+            replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
+                               str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+            replace_a = make_period_string(replace_a)
+            line_list[replace_a] = row.column_a
+            line_list[replace_b] = row.column_b
+        return line_list
+
+def make_period_string(per_string=None):
+    if per_string[-4:] == '_per':
+        per_string += 'iod'
+    return per_string
+
+
+class EFilingF3PSchema(BaseEfileSchema):
+    treasurer_name = ma.fields.Str()
+
+    def parse_summary_rows(self, obj):
+        line_list = {}
+        state_map = {}
+        keys = zip(decoders.f3p_col_a, decoders.f3p_col_b)
+        per = re.compile('(.+?(?=per))')
+        ytd = re.compile('(.+?(?=ytd))')
+
+        descriptions = decoders.f3p_description
+        keys = list(keys)
+        if obj.summary_lines:
+            for row in obj.summary_lines:
+                if row.line_number >= 33 and row.line_number < 87:
+                    state_map[keys[int(row.line_number - 1)][0]] = row.column_a
+                    state_map[keys[int(row.line_number - 1)][1]] = row.column_b
+                else:
+                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_', keys[int(row.line_number - 1)][0]).replace(' ', '_')
+                    replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
+                                       str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
+                    replace_a = make_period_string(replace_a)
+                    line_list[replace_a] = row.column_a
+                    line_list[replace_b] = row.column_b
+            line_list["state_allocations"] = state_map
+            if not line_list.get('total_disbursements_per'):
+                line_list['total_disbursements_per'] = float("-inf")
+
+            cash = max(line_list.get('total_disbursements_per'), obj.total_disbursements)
+            line_list['total_disbursements_per'] = cash
+            if not line_list.get('total_receipts_per'):
+                line_list['total_receipts_per'] = float("-inf")
+            cash = max(line_list.get('total_receipts_per'), obj.total_receipts)
+            line_list['total_receipts_per'] = cash
+            return line_list
+
+class EFilingF3Schema(BaseEfileSchema):
+    candidate_name = ma.fields.Str()
+    treasurer_name = ma.fields.Str()
+
+    def parse_summary_rows(self, obj):
+        descriptions = decoders.f3_description
+        line_list = extract_columns(obj, decoders.f3_col_a, decoders.f3_col_b, descriptions)
+        #final bit of data cleaning before json marshalling
+        cash = max(line_list.get('coh_cop_i'), line_list.get('coh_cop_ii'))
+        line_list["cash_on_hand_end_period"] = cash
+        line_list.pop('coh_cop_ii')  # maybe  a api exception if i and ii are different?
+        line_list.pop('coh_cop_i')
+        cash = max(obj.cash_on_hand_beginning_period, line_list.get('coh_bop'))
+        obj.cash_on_hand_beginning_period = None
+        line_list.pop('coh_bop')
+        line_list["cash_on_hand_beginning_period"] = cash
+        cash = max(line_list.get('total_disbursements_per_i'), line_list.get('total_disbursements_per_ii'))
+        line_list["total_disbursements_period"] = cash
+        line_list.pop('total_disbursements_per_i')
+        line_list.pop('total_disbursements_per_ii')
+        cash = max(line_list.get('total_receipts_per_i'), line_list.get('ttl_receipts_ii'))
+        line_list["total_receipts_period"] = cash
+        line_list.pop('total_receipts_per_i')
+        line_list.pop('ttl_receipts_ii')
+        return line_list
+
+class EFilingF3XSchema(BaseEfileSchema):
+    def parse_summary_rows(self, obj):
+        descriptions = decoders.f3x_description
+        line_list = extract_columns(obj, decoders.f3x_col_a, decoders.f3x_col_b, descriptions)
+        line_list['cash_on_hand_beginning_calendar_ytd'] = line_list.pop('coh_begin_calendar_yr')
+        line_list['cash_on_hand_beginning_period'] = line_list.pop('coh_bop')
+        return line_list
+
+schema_map = {}
+schema_map["BaseF3XFiling"] = EFilingF3XSchema
+schema_map["BaseF3Filing"] = EFilingF3Schema
+schema_map["BaseF3PFiling"] = EFilingF3PSchema
+
 
 def register_schema(schema, definition_name=None):
     definition_name = definition_name or re.sub(r'Schema$', '', schema.__name__)
@@ -31,7 +146,6 @@ def register_schema(schema, definition_name=None):
 
 def make_schema(model, class_name=None, fields=None, options=None):
     class_name = class_name or '{0}Schema'.format(model.__name__)
-
     Meta = type(
         'Meta',
         (object, ),
@@ -44,10 +158,15 @@ def make_schema(model, class_name=None, fields=None, options=None):
             options or {},
         )
     )
+    mapped_schema = (
+        BaseSchema
+        if not schema_map.get(model.__name__)
+        else schema_map.get(model.__name__)
 
+    )
     return type(
         class_name,
-        (BaseSchema, ),
+        (mapped_schema, ),
         utils.extend({'Meta': Meta}, fields or {}),
     )
 
@@ -89,11 +208,9 @@ class ApiSchema(ma.Schema):
         ret.update(data)
         return ret
 
-
 class BaseSearchSchema(ma.Schema):
     id = ma.fields.Str()
     name = ma.fields.Str()
-
 
 class CandidateSearchSchema(BaseSearchSchema):
     office_sought = ma.fields.Str()
@@ -118,16 +235,30 @@ class CommitteeSearchListSchema(ApiSchema):
         many=True,
     )
 
-
 register_schema(CandidateSearchSchema)
 register_schema(CandidateSearchListSchema)
 register_schema(CommitteeSearchSchema)
 register_schema(CommitteeSearchListSchema)
 
+make_efiling_schema = functools.partial(
+    make_schema,
+    options={'exclude': ('idx', 'total_disbursements', 'total_receipts' )},
+    fields={
+
+    }
+)
+
 
 make_committee_schema = functools.partial(
     make_schema,
     options={'exclude': ('idx', 'treasurer_text')},
+)
+
+augment_models(
+    make_efiling_schema,
+    models.BaseF3PFiling,
+    models.BaseF3XFiling,
+    models.BaseF3Filing,
 )
 
 augment_models(
@@ -147,6 +278,7 @@ make_candidate_schema = functools.partial(
     }
 )
 
+
 augment_models(
     make_candidate_schema,
     models.Candidate,
@@ -165,6 +297,7 @@ class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['Ca
     pass
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
+
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
@@ -394,7 +527,9 @@ EFilingsSchema = make_schema(
         'ending_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
+        'document_description': ma.fields.Str(),
     },
+    options={'exclude': ('report',)},
 )
 augment_schemas(EFilingsSchema)
 
