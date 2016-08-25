@@ -872,6 +872,9 @@ Efiling endpoints provide real-time campaign finance data for electronic filers.
 These endpoints are perfect for watching filings roll in when you want to know the latest information. Efiling endpoints
 only contain the most recent two years worth of data and don't contain the processed and coded data that
 you can find on the other endpoints. Those endpoints are better for in-depth analysis.
+
+Senate candidates and committees are required to file by paper. Other committees who raise and spend less than $50,000
+in a calendar can choose whether to file electronically or by paper.
 '''
 
 EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
@@ -887,6 +890,16 @@ for the most recent version of the report.
 '''
 AMENDMENT_NUMBER = '''
 Number of times the report has been amended.
+'''
+EFILE_REPORTS = '''
+Key financial data reported periodically by committees as they are reported. This feed includes summary
+information from the the House F3 reports, the presidential F3p reports and the PAC and party
+F3x reports.
+
+Generally, committees file reports on a quarterly or monthly basis, but
+some must also submit a report 12 days before primary elections. Therefore, during the primary
+season, the period covered by this file may be different for different committees. These totals
+also incorporate any changes made by committees, if any report covering the period is amended.
 '''
 
 MIN_FILTER = 'Filter for all amounts greater than a value.'
