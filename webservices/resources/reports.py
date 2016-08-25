@@ -160,7 +160,7 @@ class CommitteeReportsView(utils.Resource):
 
 
     @use_kwargs(args.paging)
-    @use_kwargs(args.reports)
+    @use_kwargs(args.committee_reports)
     @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
