@@ -282,7 +282,7 @@ def load_archived_murs():
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-    for row in rows:
+    for row in rows[1:]:
         data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
         mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
         text, pdf_key = process_mur_pdf(mur_no, bucket)
