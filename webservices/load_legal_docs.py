@@ -2,7 +2,7 @@
 
 import re
 from zipfile import ZipFile
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryFile
 from xml.etree import ElementTree as ET
 from datetime import datetime
 
@@ -259,31 +259,34 @@ def load_advisory_opinions_into_s3():
         else:
             print("No new advisory opinions found.")
 
-def get_mur_pdf(mur_no):
+def process_mur_pdf(mur_no, bucket):
     response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
                             % mur_no, stream=True)
 
-    with NamedTemporaryFile('wb+') as pdf:
+    with TemporaryFile('wb+') as pdf:
         for chunk in response:
             pdf.write(chunk)
 
         pdf.seek(0)
-        # key = 'legal/murs/%s.pdf' % mur_no
-        #bucket.put_object(Key=key, Body=pdf,
-        #                  ContentType='application/pdf', ACL='public-read')
+        key = 'legal/murs/%s.pdf' % mur_no
+        bucket.put_object(Key=key, Body=pdf,
+                          ContentType='application/pdf', ACL='public-read')
 
         pdf.seek(0)
         pdf_text = ' '.join(slate.PDF(pdf))
-        print(pdf_text)
-        return pdf_text
+        return pdf_text, key
 
 def load_archived_murs():
+    es = utils.get_elasticsearch_connection()
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)
-    for row in rows[1:5]:
+    bucket = get_bucket()
+    bucket_name = env.get_credential('bucket')
+    for row in rows:
         data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
         mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
-        text = get_mur_pdf(mur_no)
+        text, pdf_key = process_mur_pdf(mur_no, bucket)
+        pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
         if data[1]:
             open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
         if data[2]:
@@ -292,7 +295,6 @@ def load_archived_murs():
         complainants = []
         respondents = []
         for party in parties:
-            print(party)
             match = re.match("\(([RC])\) - (.*)", party)
             if match.group(1) == 'C':
                 complainants.append(match.group(2))
@@ -302,6 +304,7 @@ def load_archived_murs():
         subject = data[4]
         citations = re.findall("(.*?)<br>", data[5])
         doc = {
+            'doc_id': mur_no,
             'no': mur_no,
             'text': text,
             'open_date': open_date,
@@ -309,5 +312,8 @@ def load_archived_murs():
             'complainants': complainants,
             'respondents': respondents,
             'subject': subject,
-            'citations': citations
+            'citations': citations,
+            'url': pdf_url
         }
+        print(pdf_url)
+        es.index('docs', 'murs', doc, id=doc['doc_id'])
