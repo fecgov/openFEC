@@ -63,6 +63,7 @@ class ScheduleAView(ItemizedResource):
             args.schedule_a,
             args.make_seek_args(),
             args.make_sort_args(
+                default='contribution_receipt_date',
                 validator=args.OptionValidator([
                     'contribution_receipt_date',
                     'contribution_receipt_amount',
