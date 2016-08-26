@@ -35,3 +35,7 @@ boto3==1.2.2
 celery==3.1.23
 celery-once==0.1.4
 redis==2.10.5
+
+#efiling
+pandas==0.16.2
+xlrd==0.9.4
