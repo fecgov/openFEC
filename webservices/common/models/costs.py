@@ -26,7 +26,7 @@ class CommunicationCost(db.Model):
     communication_type = db.Column('communication_tp', db.String, index=True)
     communication_type_full = db.Column('communication_tp_desc', db.String)
     communication_class = db.Column('communication_class', db.String, index=True)
-    communication_class_full = db.Column('communication_class_desc', db.String, index=True)
+    purpose = db.Column('communication_class_desc', db.String, index=True)
     support_oppose_indicator = db.Column('s_o_ind', db.String, index=True)
 
     #new columns added from ware house transition
