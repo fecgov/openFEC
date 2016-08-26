@@ -493,7 +493,6 @@ register_schema(ScheduleEPageSchema)
 
 CommunicationCostSchema = make_schema(
     models.CommunicationCost,
-    options={'exclude': ('idx', )},
 )
 CommunicationCostPageSchema = make_page_schema(CommunicationCostSchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(CommunicationCostSchema)
