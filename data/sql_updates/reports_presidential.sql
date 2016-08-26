@@ -16,7 +16,7 @@ select
     end_image_num as end_image_number,
     exempt_legal_acctg_disb_per as exempt_legal_accounting_disbursement_period,
     exempt_legal_acctg_disb_ytd as exempt_legal_accounting_disbursement_ytd,
-    exp_subject_limits as expentiture_subject_to_limits,
+    exp_subject_limits as expenditure_subject_to_limits,
     fed_funds_per as federal_funds_period,
     fed_funds_ytd as federal_funds_ytd,
     fndrsg_disb_per as fundraising_disbursements_period,
@@ -103,3 +103,6 @@ create index on ofec_reports_presidential_mv_tmp(coverage_end_date, idx);
 create index on ofec_reports_presidential_mv_tmp(coverage_start_date, idx);
 create index on ofec_reports_presidential_mv_tmp(beginning_image_number, idx);
 create index on ofec_reports_presidential_mv_tmp(is_amended, idx);
+create index on ofec_reports_presidential_mv_tmp(total_receipts_period, idx);
+create index on ofec_reports_presidential_mv_tmp(total_disbursements_period, idx);
+create index on ofec_reports_presidential_mv_tmp(receipt_date, idx);

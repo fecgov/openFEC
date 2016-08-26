@@ -159,7 +159,8 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
-api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
+api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
+api.add_resource(reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')
@@ -175,6 +176,7 @@ api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
 api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
+api.add_resource(filings.EFilingsView, '/efile/filings/')
 
 
 def add_aggregate_resource(api, view, schedule, label):
@@ -218,11 +220,18 @@ api.add_resource(
     '/committee/<committee_id>/filings/',
     '/candidate/<candidate_id>/filings/',
 )
+
+api.add_resource(
+    reports.EFilingSummaryView,
+    '/efile/reports/<string:committee_type>/',
+)
+
 api.add_resource(filings.FilingsList, '/filings/')
 
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.Search, '/legal/search/')
+api.add_resource(legal.AdvisoryOpinion, '/legal/advisory_opinion/<ao_no>')
 api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
@@ -242,6 +251,8 @@ apidoc.register(committees.CommitteeView, blueprint='v1')
 apidoc.register(committees.CommitteeList, blueprint='v1')
 apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
+apidoc.register(reports.CommitteeReportsView, blueprint='v1')
+apidoc.register(reports.EFilingSummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
@@ -270,7 +281,9 @@ apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
+apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
+apidoc.register(filings.EFilingsView, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
