@@ -93,6 +93,7 @@ def dump(ctx, source, dest):
 
 @task
 def add_hooks(ctx):
+
     ctx.run('ln -s ../../bin/post-merge .git/hooks/post-merge')
     ctx.run('ln -s ../../bin/post-checkout .git/hooks/post-checkout')
 

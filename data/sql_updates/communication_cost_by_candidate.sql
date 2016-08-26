@@ -2,18 +2,18 @@ drop materialized view if exists ofec_communication_cost_aggregate_candidate_mv_
 create materialized view ofec_communication_cost_aggregate_candidate_mv_tmp as
 select
     row_number() over () as idx,
-    cmte_id,
-    cand_id,
-    support_oppose_ind as support_oppose_indicator,
-    sum(transaction_amt) as total,
-    count(transaction_amt) as count,
-    rpt_yr + rpt_yr % 2 as cycle
-from communication_costs_vw
-where rpt_yr >= :START_YEAR
-and cand_id is not null
+    s_o_ind as support_oppose_indicator,
+    org_id as cmte_id,
+    s_o_cand_id as cand_id,
+    sum(communication_cost) as total,
+    count(communication_cost) as count,
+    extract(year from communication_dt)::integer + extract(year from communication_dt)::integer % 2 as cycle
+from fec_vsum_f76
+where extract(year from communication_dt) >= :START_YEAR
+and s_o_cand_id is not null
 group by
-    cmte_id,
-    cand_id,
+    org_id,
+    s_o_cand_id,
     support_oppose_indicator,
     cycle
 ;
