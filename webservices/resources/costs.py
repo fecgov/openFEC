@@ -10,7 +10,7 @@ from webservices.common.views import ApiResource
 
 
 @doc(
-    tags=['communication_cost'],
+    tags=['communication cost'],
     description=docs.COMMUNICATION_COST,
 )
 class CommunicationCostView(ApiResource):

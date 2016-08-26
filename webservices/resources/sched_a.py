@@ -11,7 +11,7 @@ from webservices.common.views import ItemizedResource
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description=docs.SCHEDULE_A,
 )
 class ScheduleAView(ItemizedResource):
@@ -63,6 +63,7 @@ class ScheduleAView(ItemizedResource):
             args.schedule_a,
             args.make_seek_args(),
             args.make_sort_args(
+                default='contribution_receipt_date',
                 validator=args.OptionValidator([
                     'contribution_receipt_date',
                     'contribution_receipt_amount',
