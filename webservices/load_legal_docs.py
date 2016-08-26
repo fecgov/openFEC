@@ -307,6 +307,7 @@ def load_archived_murs():
             'doc_id': mur_no,
             'no': mur_no,
             'text': text,
+            'mur_type': 'archived',
             'open_date': open_date,
             'close_date': close_date,
             'complainants': complainants,
