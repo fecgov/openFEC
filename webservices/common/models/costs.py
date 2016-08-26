@@ -7,6 +7,7 @@ class CommunicationCost(db.Model):
     __tablename__ = 'ofec_communication_cost_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.Integer, index=True)
     candidate_id = db.Column('cand_id', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
     pdf_url = db.Column(db.String)
@@ -29,13 +30,17 @@ class CommunicationCost(db.Model):
     support_oppose_indicator = db.Column('s_o_ind', db.String, index=True)
 
     #new columns added from ware house transition
+    action_code = db.Column('action_cd', db.String)
+    action_code_full = db.Column('action_cd_desc', db.String)
     primary_general_indicator = db.Column('s_o_rpt_pgi', db.String)
     primary_general_indicator_description = db.Column('s_o_rpt_pgi_desc', db.String)
     report_type = db.Column('rpt_tp', db.String)
+    report_year = db.Column('rpt_yr', db.Integer)
+    cycle = db.Column('election_cycle', db.Integer, index=True)
 
     form_type_code = db.Column('filing_form', db.String, index=True)
-    schedule_type_code = db.Column('schedule_type', db.String, index=True)
-    schedule_type_code_description = db.Column('schedule_type_desc', db.String)
+    schedule_type = db.Column(db.String, index=True)
+    schedule_type_full = db.Column('schedule_type_desc', db.String)
     tran_id = db.Column(db.String)
     file_number = db.Column('file_num', db.Integer)
     image_number = db.Column('image_num', db.String, index=True)
