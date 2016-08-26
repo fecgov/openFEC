@@ -9,7 +9,7 @@ from webservices.common.views import ApiResource
 
 
 @doc(
-    tags=['filer_resources'],
+    tags=['filer resources'],
     description=docs.RAD_ANALYST,
 )
 class RadAnalystView(ApiResource):

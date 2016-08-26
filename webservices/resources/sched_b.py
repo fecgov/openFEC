@@ -10,7 +10,7 @@ from webservices.common.views import ItemizedResource
 
 
 @doc(
-    tags=['schedules/schedule_b'],
+    tags=['disbursements'],
     description=docs.SCHEDULE_B,
 )
 class ScheduleBView(ItemizedResource):
@@ -54,6 +54,7 @@ class ScheduleBView(ItemizedResource):
             args.schedule_b,
             args.make_seek_args(),
             args.make_sort_args(
+                default='-disbursement_date',
                 validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
             ),
         )

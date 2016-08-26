@@ -75,7 +75,7 @@ def join_elections(query, kwargs):
     )
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description='Schedule A receipts aggregated by contribution size.',
 )
 class ScheduleABySizeCandidateView(utils.Resource):
@@ -95,7 +95,7 @@ class ScheduleABySizeCandidateView(utils.Resource):
 
 
 @doc(
-    tags=['schedules/schedule_a'],
+    tags=['receipts'],
     description='Schedule A receipts aggregated by contributor state.',
 )
 class ScheduleAByStateCandidateView(utils.Resource):

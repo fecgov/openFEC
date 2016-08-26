@@ -188,19 +188,6 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3'))
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
 
-    def test_memoed(self):
-        params = [
-            (factories.ScheduleAFactory, ScheduleAView),
-            (factories.ScheduleBFactory, ScheduleBView),
-        ]
-        for factory, resource in params:
-            [
-                factory(),
-                factory(memo_code='X'),
-            ]
-            results = self._results(api.url_for(resource))
-            self.assertFalse(results[0]['memoed_subtotal'])
-            self.assertTrue(results[1]['memoed_subtotal'])
 
     def test_filter_individual_sched_a(self):
         individuals = [
@@ -223,6 +210,8 @@ class TestItemized(ApiBaseTest):
             ScheduleA.line_number,
             ScheduleA.memo_code,
             ScheduleA.memo_text,
+            ScheduleA.contributor_id,
+            ScheduleA.committee_id,
         )
 
         rows = ScheduleA.query.all()
