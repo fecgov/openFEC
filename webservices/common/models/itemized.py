@@ -153,6 +153,11 @@ class ScheduleB(BaseItemized):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
 
 
+class ScheduleC(BaseItemized):
+    __tablename__ = 'fec_vsum_sched_c'
+    sub_id = db.Column(db.Integer, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    
 class ScheduleE(BaseItemized):
     __tablename__ = 'ofec_sched_e'
 
