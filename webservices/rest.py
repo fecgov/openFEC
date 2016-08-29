@@ -32,6 +32,7 @@ from webservices.resources import totals
 from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
+from webservices.resources import sched_c
 from webservices.resources import sched_e
 from webservices.resources import download
 from webservices.resources import aggregates
@@ -165,6 +166,7 @@ api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/', '/schedules/schedule_b/<string:sub_id>/')
+api.add_resource(sched_c.ScheduleCView, '/schedules/schedule_c', '/schedules/schedule_c/<string:sub_id>/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
