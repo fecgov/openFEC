@@ -447,6 +447,14 @@ schedule_b_by_purpose = {
     'purpose': fields.List(fields.Str, description='Disbursement purpose category'),
 }
 
+schedule_c = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_name': fields.List(fields.Str, description='Name of candidate'),
+    'loaner_name': fields.List(fields.Str, description='Name of loaner'),
+    'last_incurred_date': fields.Float(missing=None),
+    'last_original_loan_amount': fields.Float(missing=None)
+}
+
 schedule_e_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
