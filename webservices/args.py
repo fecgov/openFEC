@@ -456,7 +456,9 @@ schedule_c = {
     'last_incurred_date': fields.Float(missing=None),
     'last_original_loan_amount': fields.Float(missing=None),
     'last_candidate_id': fields.Str(missing=None),
-    'last_loan_source_name': fields.Str(missing=None)
+    'last_loan_source_name': fields.Str(missing=None),
+    'min_payment_to_date': fields.Int(description='Minimum payment to date'),
+    'max_payment_to_date': fields.Int(description='Maximum payment to date'),
 
 }
 
