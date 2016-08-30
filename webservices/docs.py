@@ -398,6 +398,14 @@ Schedule B receipts aggregated by disbursement purpose category. To avoid double
 Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/18F/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
 '''
 
+SCHEDULE_C_TAG = '''
+Schdule C tag stuff
+'''
+
+SCHEDULE_C = SCHEDULE_C_TAG + '''
+Schedule C stuff
+'''
+
 SCHEDULE_E_TAG = '''
 Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
 bought ads on TV to oppose a federal candidate, each ad purchase would be recorded here with
