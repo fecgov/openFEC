@@ -63,21 +63,17 @@ class ScheduleCView(ItemizedResource):
 
     """
     ""
-            args.make_sort_args(
-                default='incurred_date',
-                validator=args.OptionValidator([
-                    'contribution_receipt_date',
-                    'contribution_receipt_amount',
-                    'contributor_aggregate_ytd',
-                ]),
-            )
+
     """
     @property
     def args(self):
         return utils.extend(
             args.itemized,
-            args.schedule_a,
+            args.schedule_c,
             args.make_seek_args(),
+            args.make_sort_args(
+                default='incurred_date',
+            )
         )
 
     def build_query(self, **kwargs):
