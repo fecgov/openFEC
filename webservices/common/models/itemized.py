@@ -1,5 +1,6 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
+import sqlalchemy as sa
 
 from webservices import docs, utils
 
@@ -172,6 +173,7 @@ class ScheduleC(BaseItemized):
     loan_source_city = db.Column('loan_src_city', db.String)
     loan_source_state = db.Column('loan_src_st', db.String)
     loan_source_zip = db.Column('loan_src_zip', db.Integer)
+    loan_source_name = db.Column('loan_src_nm', db.String)
     entity_type = db.Column('entity_tp', db.String)
     entity_type_full = db.Column('entity_tp_desc', db.String)
     election_type = db.Column('election_tp', db.String)
@@ -208,6 +210,9 @@ class ScheduleC(BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     cycle = db.Column('election_cycle', db.Integer)
 
+    @hybrid_property
+    def pdf_url(self):
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(self.image_number[-3:], self.image_number)
 
 class ScheduleE(BaseItemized):
     __tablename__ = 'ofec_sched_e'
