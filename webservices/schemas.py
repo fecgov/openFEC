@@ -408,6 +408,9 @@ register_schema(ScheduleAPageSchema)
 
 ScheduleCSchema = make_schema(
     models.ScheduleC,
+    options={
+        'exclude':('pdf_url',)
+    },
 )
 ScheduleCPageSchema = make_page_schema(
     ScheduleCSchema,

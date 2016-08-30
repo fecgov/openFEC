@@ -21,7 +21,6 @@ class BaseItemized(db.Model):
     line_number = db.Column('line_num', db.String)
     transaction_id = db.Column('tran_id', db.String)
     file_number = db.Column('file_num', db.Integer)
-    pdf_url = db.Column(db.String)
 
     @hybrid_property
     def memoed_subtotal(self):
@@ -92,6 +91,9 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
 
+    pdf_url = db.Column(db.String)
+
+
 
 class ScheduleB(BaseItemized):
     __tablename__ = 'ofec_sched_b_master'
@@ -152,12 +154,16 @@ class ScheduleB(BaseItemized):
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
 
+    pdf_url = db.Column(db.String)
+
+
 
 class ScheduleC(BaseItemized):
     __tablename__ = 'fec_vsum_sched_c'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
-    
+    incurred_date = db.Column('incurred_dt', db.DateTime)
+
 class ScheduleE(BaseItemized):
     __tablename__ = 'ofec_sched_e'
 
@@ -225,5 +231,8 @@ class ScheduleE(BaseItemized):
     receipt_date = db.Column('receipt_dt', db.Date)
     load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
     update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
+
+    pdf_url = db.Column(db.String)
+
 
 

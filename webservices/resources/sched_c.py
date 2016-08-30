@@ -61,25 +61,28 @@ class ScheduleCView(ItemizedResource):
     ]
     """
 
-    @property
-    def args(self):
-        return utils.extend(
-            args.itemized,
-            args.schedule_a,
-            args.make_seek_args(),
+    """
+    ""
             args.make_sort_args(
-                default='contribution_receipt_date',
+                default='incurred_date',
                 validator=args.OptionValidator([
                     'contribution_receipt_date',
                     'contribution_receipt_amount',
                     'contributor_aggregate_ytd',
                 ]),
             )
+    """
+    @property
+    def args(self):
+        return utils.extend(
+            args.itemized,
+            args.schedule_a,
+            args.make_seek_args(),
         )
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
-        query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
+        #query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         return query
