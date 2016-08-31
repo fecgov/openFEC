@@ -367,7 +367,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
     debts_owed_by_committee = db.Column('debts_by', db.Float)
     expenditure_subject_to_limits = db.Column('expe', db.Float)
     net_contributions_cycle_to_date = db.Column('net_con', db.Float)
-    net_operating_expenditures_to_date = db.Column('net_op', db.Float)
+    net_operating_expenditures_cycle_to_date = db.Column('net_op', db.Float)
     primary_election = db.Column('act_pri', db.String)
     general_election = db.Column('act_gen', db.String)
     subtotal_summary_period = db.Column('sub', db.String)
