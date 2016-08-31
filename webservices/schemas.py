@@ -20,6 +20,9 @@ spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 
 class BaseSchema(ModelSchema):
+    report_year = ma.fields.Int()
+    pdf_url = ma.fields.Str()
+    document_description = ma.fields.Str()
 
     def get_attribute(self, attr, obj, default):
         if '.' in attr:
@@ -244,7 +247,8 @@ make_efiling_schema = functools.partial(
     make_schema,
     options={'exclude': ('idx', 'total_disbursements', 'total_receipts' )},
     fields={
-
+        'pdf_url': ma.fields.Str(),
+        'report_year': ma.fields.Int(),
     }
 )
 
