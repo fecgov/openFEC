@@ -292,7 +292,9 @@ def get_subject_tree(html, tree=[]):
     if end_list or empty:
         pass
     elif list_item or root:
-        tree.append({'subject': re.sub('\s+', ' ', (list_item or root).group(1)).strip()})
+        subject = re.sub('\s+', ' ', (list_item or root).group(1))\
+                    .strip().lower().capitalize()
+        tree.append({'subject': subject})
         tail = (list_item or root).group(2).strip()
         if tail:
             get_subject_tree(tail, tree)
@@ -335,13 +337,13 @@ def load_archived_murs():
     es = utils.get_elasticsearch_connection()
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)
-    # bucket = get_bucket()
+    bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-    for row in rows[1:800]:
+    for row in rows[1:5]:
         data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
         mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
-        # text, pdf_key, pdf_size, pdf_pages = process_mur_pdf(mur_no, bucket)
-        text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
+        text, pdf_key, pdf_size, pdf_pages = process_mur_pdf(mur_no, bucket)
+        # text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
         pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
         if data[1]:
             open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
@@ -353,9 +355,9 @@ def load_archived_murs():
         for party in parties:
             match = re.match("\(([RC])\) - (.*)", party)
             if match.group(1) == 'C':
-                complainants.append(match.group(2))
+                complainants.append(match.group(2).title())
             if match.group(1) == 'R':
-                respondents.append(match.group(2))
+                respondents.append(match.group(2).title())
 
         subject = get_subject_tree(data[4])
         print(subject)
