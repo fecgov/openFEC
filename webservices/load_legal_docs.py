@@ -2,9 +2,10 @@
 
 import re
 from zipfile import ZipFile
-from tempfile import NamedTemporaryFile, TemporaryFile
+from tempfile import NamedTemporaryFile
 from xml.etree import ElementTree as ET
 from datetime import datetime
+from os.path import getsize
 
 import requests
 
@@ -19,7 +20,6 @@ importlib.invalidate_caches()
 import sys
 from distutils.sysconfig import get_python_lib
 sys.path = [get_python_lib() + '/slate'] + sys.path
-print(sys.path)
 import slate
 sys.path = sys.path[1:]
 
@@ -263,9 +263,11 @@ def process_mur_pdf(mur_no, bucket):
     response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
                             % mur_no, stream=True)
 
-    with TemporaryFile('wb+') as pdf:
+    with NamedTemporaryFile('wb+') as pdf:
         for chunk in response:
             pdf.write(chunk)
+
+        pdf_size = getsize(pdf.name)
 
         pdf.seek(0)
         key = 'legal/murs/%s.pdf' % mur_no
@@ -273,19 +275,73 @@ def process_mur_pdf(mur_no, bucket):
                           ContentType='application/pdf', ACL='public-read')
 
         pdf.seek(0)
-        pdf_text = ' '.join(slate.PDF(pdf))
-        return pdf_text, key
+        pdf_doc = slate.PDF(pdf)
+        pdf_pages = len(pdf_doc)
+        pdf_text = ' '.join(pdf_doc)
+        return pdf_text, key, pdf_size, pdf_pages
+
+def get_subject_tree(html, tree=[]):
+    print(html)
+    print('*' * 25)
+    root = re.match("([A-Za-z\-/\s',\(\)]+)(?:<br>)?(.*)", html, re.S)
+    list_item = re.match("<li>(.*?)</li>(.*)", html, re.S)
+    unordered_list = re.match("<ul\s+class='no-top-margin'>(.*)", html, re.S)
+    end_list = re.match("</ul>(.*)", html, re.S)
+    empty = re.match("\s*<br>\s*", html)
+
+    if end_list or empty:
+        pass
+    elif list_item or root:
+        tree.append({'subject': re.sub('\s+', ' ', (list_item or root).group(1)).strip()})
+        tail = (list_item or root).group(2).strip()
+        if tail:
+            get_subject_tree(tail, tree)
+    elif unordered_list:
+        tree[-1]['children'] = get_subject_tree(unordered_list.group(1).strip(), [])
+    else:
+        print(html)
+        raise "Could not parse subject."
+    return tree
+
+def get_citations(data):
+    citation_texts = re.findall("(.*?)<br>", data)
+
+    us_codes = []
+    regulations = []
+
+    for citation_text in citation_texts:
+        us_code_match = re.match("([0-9]+) U\.S\.C\. ([0-9]+)", citation_text)
+        regulation_match = re.match("([0-9]+) C\.F\.R\. ([0-9]+)(?:\.([0-9]+))?", citation_text)
+
+        if us_code_match:
+            url = 'http://api.fdsys.gov/link?collection=uscode&' +\
+                  'title=%s&year=mostrecent&section=%s'\
+                  % (us_code_match.group(1), us_code_match.group(2))
+            us_codes.append({"text": citation_text, "url": url})
+        if regulation_match:
+            url = 'http://api.fdsys.gov/link?collection=cfr&titlenum=%s\
+                  &partnum=%s&year=mostrecent'\
+                  % (regulation_match.group(1), regulation_match.group(2))
+            if regulation_match.group(3):
+                url += '&sectionnum=%s' % regulation_match.group(3)
+            regulations.append({"text": citation_text, "url": url})
+
+        if not us_code_match and not regulation_match:
+            print(citation_text)
+            raise "Could not parse citation"
+    return {"us_code": us_codes, "regulations": regulations}
 
 def load_archived_murs():
     es = utils.get_elasticsearch_connection()
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)
-    bucket = get_bucket()
+    # bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-    for row in rows[1:]:
+    for row in rows[1:800]:
         data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
         mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
-        text, pdf_key = process_mur_pdf(mur_no, bucket)
+        # text, pdf_key, pdf_size, pdf_pages = process_mur_pdf(mur_no, bucket)
+        text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
         pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
         if data[1]:
             open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
@@ -301,13 +357,16 @@ def load_archived_murs():
             if match.group(1) == 'R':
                 respondents.append(match.group(2))
 
-        subject = data[4]
-        citations = re.findall("(.*?)<br>", data[5])
+        subject = get_subject_tree(data[4])
+        print(subject)
+        citations = get_citations(data[5])
         doc = {
             'doc_id': mur_no,
             'no': mur_no,
             'text': text,
             'mur_type': 'archived',
+            'pdf_size': pdf_size,
+            'pdf_pages': pdf_pages,
             'open_date': open_date,
             'close_date': close_date,
             'complainants': complainants,
@@ -316,5 +375,4 @@ def load_archived_murs():
             'citations': citations,
             'url': pdf_url
         }
-        print(pdf_url)
         es.index('docs', 'murs', doc, id=doc['doc_id'])
