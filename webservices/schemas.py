@@ -28,6 +28,9 @@ class BaseSchema(ModelSchema):
 
 class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
+    report_year = ma.fields.Int()
+    pdf_url = ma.fields.Str()
+    document_description = ma.fields.Str()
 
     @post_dump
     def extract_summary_rows(self, obj):
@@ -244,7 +247,8 @@ make_efiling_schema = functools.partial(
     make_schema,
     options={'exclude': ('idx', 'total_disbursements', 'total_receipts' )},
     fields={
-
+        'pdf_url': ma.fields.Str(),
+        'report_year': ma.fields.Int(),
     }
 )
 
@@ -318,6 +322,7 @@ make_reports_schema = functools.partial(
     fields={
         'pdf_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
+        'document_description': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
         'committee_name': ma.fields.Str(attribute='committee.name'),
         'beginning_image_number': ma.fields.Str(),
