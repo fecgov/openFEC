@@ -223,6 +223,7 @@ filings = {
 efilings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'report_id': fields.Int(),
     'min_receipt_date': fields.DateTime(description='Selects all items received by FEC after this date or datetime'),
     'max_receipt_date': fields.DateTime(description='Selects all items received by FEC before this date or datetime'),
 }
@@ -237,6 +238,8 @@ reports = {
     'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
     'min_receipts_amount': Currency(description=docs.MIN_FILTER),
     'max_receipts_amount': Currency(description=docs.MAX_FILTER),
+    'min_receipt_date': fields.DateTime(description='Selects all items received by FEC after this date or datetime'),
+    'max_receipt_date': fields.DateTime(description='Selects all items received by FEC before this date or datetime'),
     'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
     'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
     'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
