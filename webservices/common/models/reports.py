@@ -100,7 +100,7 @@ class CommitteeReports(PdfMixin, BaseModel):
     def document_description(self):
         return utils.document_description(
             self.coverage_end_date.year,
-            clean_report_type(self.report.report_type_full),
+            clean_report_type(str(self.report_type_full)),
             None,
             None,
         )
@@ -161,12 +161,6 @@ class CommitteeReportsHouseSenate(CommitteeReports):
                 committee.committee_type == 'S' and self.report_year >= 2000
             )
         )
-
-    @declared_attr
-    def report(self):
-        return db.relationship(ReportType,
-                               primaryjoin="and_(CommitteeReportsHouseSenate.report_type==ReportType.report_type)",
-                               foreign_keys=self.report_type, )
 
 
 class CommitteeReportsPacParty(CommitteeReports):
@@ -234,12 +228,6 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_to_affilitated_committees_ytd = db.Column(db.Numeric(30, 2))#mapped
     report_form = 'Form 3X'
 
-    @declared_attr
-    def report(self):
-        return db.relationship(ReportType,
-                               primaryjoin="and_(CommitteeReportsPacParty.report_type==ReportType.report_type)",
-                               foreign_keys=self.report_type, )
-
 
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
@@ -287,11 +275,6 @@ class CommitteeReportsPresidential(CommitteeReports):
     net_operating_expenditures_cycle_to_date = db.Column(db.Numeric(30, 2))#mapped
     report_form = 'Form 3P'#do we want this for the efile tables?
 
-    @declared_attr
-    def report(self):
-        return db.relationship(ReportType,
-                               primaryjoin="and_(CommitteeReportsPresidential.report_type==ReportType.report_type)",
-                               foreign_keys=self.report_type, )
 
 class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     __tablename__ = 'ofec_reports_ie_only_mv'
@@ -309,12 +292,6 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     report_form = 'Form 5'
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
-
-    @declared_attr
-    def report(self):
-        return db.relationship(ReportType,
-                               primaryjoin="and_(CommitteeReportsIEOnly.report_type==ReportType.report_type)",
-                               foreign_keys=self.report_type, )
 
 
 class BaseFilingSummary(db.Model):
