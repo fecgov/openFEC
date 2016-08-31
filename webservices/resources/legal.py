@@ -1,5 +1,6 @@
 import re
 
+from elasticsearch_dsl import Search, Q
 from webargs import fields
 
 from webservices import args
@@ -14,13 +15,13 @@ class AdvisoryOpinion(utils.Resource):
         return {"ao_no": fields.Str(required=True, description='Advisory opinion number to fetch.')}
 
     def get(self, ao_no, **kwargs):
-        query = {"query": {"bool": {"must": [{"term": {"no": ao_no}},
-                          {"term": {"_type": "advisory_opinions"}}]}},
-                          "_source": {"exclude": "text"}}
+        es_results = Search().using(es) \
+          .query('bool', must=[Q('term', no=ao_no), Q('term', _type='advisory_opinions')]) \
+          .source(exclude='text') \
+          .extra(size=200) \
+          .execute()
 
-        es_results = es.search(query, size=200)
-
-        results = {"docs": [r["_source"] for r in es_results["hits"]["hits"]]}
+        results = {"docs": [hit.to_dict() for hit in es_results]}
         return results
 
 
@@ -63,7 +64,7 @@ def parse_query_string(query):
     return dict(terms=terms, phrases=phrases)
 
 
-class Search(utils.Resource):
+class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q, from_hit=0, hits_returned=20, type='all', **kwargs):
         if type == 'all':

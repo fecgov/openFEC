@@ -2,6 +2,7 @@ from webservices import rest
 import json
 import codecs
 import unittest
+import mock
 from mock import patch
 
 from webservices.resources.legal import es, parse_query_string
@@ -9,9 +10,9 @@ from webservices.resources.legal import es, parse_query_string
 # TODO: integrate more with API Schema so that __API_VERSION__ is returned
 # self.assertEqual(result['api_version'], __API_VERSION__)
 
-def es_advisory_opinion(query, size):
-    return {'hits': {'hits': [{'_source': {'text': 'abc'}},
-            {'_source': {'no': '123'}}]}}
+def es_advisory_opinion(*args, **kwargs):
+    return {'hits': {'hits': [{'_source': {'text': 'abc'}, '_type': 'advisory_opinions'},
+           {'_source': {'no': '123'}, '_type': 'advisory_opinions'}]}}
 
 def es_search(q, index, size, es_from):
     _type = q["query"]["bool"]["must"][0]["term"]["_type"]
@@ -28,14 +29,31 @@ def es_search(q, index, size, es_from):
                                     '_source': {}}], 'total': 3}}
 
 
-@patch('webservices.rest.legal.es.search', es_advisory_opinion)
 class AdvisoryOpinionTest(unittest.TestCase):
+    @patch('webservices.rest.legal.es.search', es_advisory_opinion)
     def test_advisory_opinion_search(self):
         app = rest.app.test_client()
         response = app.get('/v1/legal/advisory_opinion/1993-02?api_key=1234')
         assert response.status_code == 200
         result = json.loads(codecs.decode(response.data))
         assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
+
+    @patch.object(es, 'search')
+    def test_query_dsl(self, es_search):
+        app = rest.app.test_client()
+        response = app.get('/v1/legal/advisory_opinion/1993-02?api_key=1234')
+        assert response.status_code == 200
+
+        # This is mostly copy/pasted from the code to test
+        # elasticsearch_dsl. This is not a very meaningful test but helped to
+        # ensure we're using the dsl correctly.
+        expected_query = {"query": {"bool": {"must": [{"term": {"no": "1993-02"}},
+                          {"term": {"_type": "advisory_opinions"}}]}},
+                          "_source": {"exclude": "text"}, "size": 200}
+        es_search.assert_called_with(body=expected_query,
+                                     doc_type=mock.ANY,
+                                     index=mock.ANY)
+        result = json.loads(codecs.decode(response.data))
 
 @patch('webservices.rest.legal.es.search', es_search)
 class SearchTest(unittest.TestCase):

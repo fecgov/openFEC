@@ -21,6 +21,7 @@ raven[flask]==5.8.1
 ujson==1.33
 pyelasticsearch==1.4
 requests==2.10.0
+elasticsearch-dsl==2.1.0
 
 # Marshalling
 flask-apispec==0.2.0
