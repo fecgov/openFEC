@@ -79,38 +79,37 @@ class UniversalSearch(utils.Resource):
         results = {}
         total_count = 0
         for type in types:
-            query = {"query": {"bool": {
-                     "must": [
-                         {"term": {"_type": type}},
-                         ],
-                     "should": [
-                         {"match": {"no": q}},
-                         {"match_phrase": {"_all": {"query": q, "slop": 50}}},
-                         ]
-                     }},
-                "highlight": {"fields": [{"text": {}},
-                    {"name": {}}, {"number": {}}]},
-                "_source": {"exclude": "text"}}
-
+            must_query = [Q('term', _type=type)]
             if len(terms):
-                query['query']['bool']['must'].append({"match": {"_all": ' '.join(terms)}})
+                must_query.append(Q('match', _all=' '.join(terms)))
 
             for phrase in phrases:
-                query['query']['bool']['must'].append({"match_phrase": {"text": phrase}})
+                must_query.append(Q('match_phrase', text=phrase))
+
+            query = Search().using(es) \
+                .query(Q('bool',
+                         must=must_query,
+                         should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
+                .highlight('text', 'name', 'number') \
+                .source(exclude='text') \
+                .extra(size=hits_returned, from_=from_hit) \
+                .index('docs')
 
             hits_returned = min([200, hits_returned])
-            es_results = es.search(query, index='docs', size=hits_returned,
-                             es_from=from_hit)
-            hits = es_results['hits']['hits']
-            for hit in hits:
-                highlights = []
-                if 'highlight' in hit:
-                    for key in hit['highlight']:
-                        highlights.extend(hit['highlight'][key])
-                hit['_source']['highlights'] = highlights
-            count = es_results['hits']['total']
+            es_results = query.execute()
+
+            formatted_hits = []
+            for hit in es_results:
+                formatted_hit = hit.to_dict()
+                formatted_hit['highlights'] = []
+                formatted_hits.append(formatted_hit)
+
+                if 'highlight' in hit.meta:
+                    for key in hit.meta.highlight:
+                        formatted_hit['highlights'].extend(hit.meta.highlight[key])
+
+            count = es_results.hits.total
             total_count += count
-            formatted_hits = [h['_source'] for h in hits]
 
             results[type] = formatted_hits
             results['total_%s' % type] = count
