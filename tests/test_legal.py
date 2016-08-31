@@ -14,19 +14,19 @@ def es_advisory_opinion(*args, **kwargs):
     return {'hits': {'hits': [{'_source': {'text': 'abc'}, '_type': 'advisory_opinions'},
            {'_source': {'no': '123'}, '_type': 'advisory_opinions'}]}}
 
-def es_search(q, index, size, es_from):
-    _type = q["query"]["bool"]["must"][0]["term"]["_type"]
+def es_search(**kwargs):
+    _type = kwargs["body"]["query"]["bool"]["must"][0]["term"]["_type"]
     if _type == 'regulations':
         return {'hits': {'hits': [{'highlight': {'text': ['a', 'b']},
-                                    '_source': {}}], 'total': 1}}
+                                   '_source': {}, '_type': 'regulations'}], 'total': 1}}
     if _type == 'advisory_opinions':
         return {'hits': {'hits': [{'highlight': {'text': ['a', 'b']},
-                                    '_source': {}},
+                                    '_source': {}, '_type': 'advisory_opinions'},
                                   {'highlight': {'text': ['c', 'd']},
-                                    '_source': {}}], 'total': 2}}
+                                    '_source': {}, '_type': 'advisory_opinions'}], 'total': 2}}
     if _type == 'statutes':
         return {'hits': {'hits': [{'highlight': {'text': ['e']},
-                                    '_source': {}}], 'total': 3}}
+                                    '_source': {}, '_type': 'statutes'}], 'total': 3}}
 
 
 class AdvisoryOpinionTest(unittest.TestCase):
@@ -55,11 +55,11 @@ class AdvisoryOpinionTest(unittest.TestCase):
                                      index=mock.ANY)
         result = json.loads(codecs.decode(response.data))
 
-@patch('webservices.rest.legal.es.search', es_search)
 class SearchTest(unittest.TestCase):
     def setUp(self):
         self.app = rest.app.test_client()
 
+    @patch('webservices.rest.legal.es.search', es_search)
     def test_default_search(self):
         response = self.app.get('/v1/legal/search/?q=president&api_key=1234')
         assert response.status_code == 200
@@ -72,6 +72,7 @@ class SearchTest(unittest.TestCase):
             'advisory_opinions': [{'highlights': ['a', 'b']},
               {'highlights': ['c', 'd']}], 'total_all': 6}
 
+    @patch('webservices.rest.legal.es.search', es_search)
     def test_type_search(self):
         response = self.app.get('/v1/legal/search/' +
                                 '?q=president&type=advisory_opinions')
@@ -81,6 +82,36 @@ class SearchTest(unittest.TestCase):
             'total_advisory_opinions': 2,
             'advisory_opinions': [{'highlights': ['a', 'b']},
               {'highlights': ['c', 'd']}], 'total_all': 2}
+
+    @patch.object(es, 'search')
+    def test_query_dsl(self, es_search):
+        response = self.app.get('/v1/legal/search/' +
+                                '?q=president&type=advisory_opinions')
+        assert response.status_code == 200
+
+        # This is mostly copy/pasted from the code to test
+        # elasticsearch_dsl. This is not a very meaningful test but helped to
+        # ensure we're using the dsl correctly.
+        expected_query = {"query": {"bool": {
+                 "must": [
+                     {"term": {"_type": "advisory_opinions"}},
+                     {"match": {"_all": "president"}},
+                     ],
+                 "should": [
+                     {"match": {"no": "president"}},
+                     {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
+                     ]
+                 }},
+            "highlight": {"fields": {"text": {},
+                "name": {}, "number": {}}},
+            "_source": {"exclude": "text"},
+            "from": 0,
+            "size": 20}
+
+        es_search.assert_called_with(body=expected_query,
+                                     index=mock.ANY,
+                                     doc_type=mock.ANY)
+
 
 
 class LegalPhraseParseTests(unittest.TestCase):
@@ -117,7 +148,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
         assert response.status_code == 200
         assert es_search.call_count == 1
 
-        (query,), _ = es_search.call_args
+        _, args = es_search.call_args
+        query = args['body']
         assert query['query']['bool']['must'], "Expected query to have path `query.bool.must`"
 
         # Get the first `match_phrase` in the `must` clause
@@ -137,7 +169,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
         assert response.status_code == 200
         assert es_search.call_count == 1
 
-        (query,), _ = es_search.call_args
+        _, args = es_search.call_args
+        query = args['body']
         assert query['query']['bool']['must'], "Expected query to have path `query.bool.must`"
 
         # Get the first `match_phrase` in the `must` clause
@@ -158,7 +191,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
         assert response.status_code == 200
         assert es_search.call_count == 1
 
-        (query,), _ = es_search.call_args
+        _, args = es_search.call_args
+        query = args['body']
         assert query['query']['bool']['must'], "Expected query to have path `query.bool.must`"
 
         # Get all the `match_phrase`s in the `must` clause
