@@ -20,9 +20,6 @@ spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
 
 class BaseSchema(ModelSchema):
-    report_year = ma.fields.Int()
-    pdf_url = ma.fields.Str()
-    document_description = ma.fields.Str()
 
     def get_attribute(self, attr, obj, default):
         if '.' in attr:
@@ -31,6 +28,9 @@ class BaseSchema(ModelSchema):
 
 class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
+    report_year = ma.fields.Int()
+    pdf_url = ma.fields.Str()
+    document_description = ma.fields.Str()
 
     @post_dump
     def extract_summary_rows(self, obj):
