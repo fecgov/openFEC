@@ -4,6 +4,11 @@ from .base import db, BaseModel
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from webservices.common.models.dates import ReportType
+from sqlalchemy.ext.declarative import declared_attr
+
+from webservices.common.models.dates import clean_report_type
+
 
 class PdfMixin(object):
 
@@ -90,6 +95,15 @@ class CommitteeReports(PdfMixin, BaseModel):
     individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))#P
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
+
+    @property
+    def document_description(self):
+        return utils.document_description(
+            self.coverage_end_date.year,
+            clean_report_type(str(self.report_type_full)),
+            None,
+            None,
+        )
 
 
 class CommitteeReportsHouseSenate(CommitteeReports):
@@ -279,6 +293,7 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
 
+
 class BaseFilingSummary(db.Model):
     __tablename__ = 'real_efile_summary'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
@@ -286,7 +301,7 @@ class BaseFilingSummary(db.Model):
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
-class BaseFiling(db.Model):
+class BaseFiling(PdfMixin,db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -302,9 +317,19 @@ class BaseFiling(db.Model):
     zip = db.Column(db.String)
     election_date = db.Column('el_date', db.Date)
     election_state = db.Column('el_state', db.String)
-    #create_date = db.Column('create_dt', db.Date)
     receipt_date = db.Column('create_dt', db.Date)
     sign_date = db.Column(db.Date)
+    @property
+    def document_description(self):
+        return utils.document_description(
+            self.coverage_end_date.year,
+            clean_report_type(self.report.report_type_full),
+            None,
+            None,
+        )
+    @property
+    def report_year(self):
+        return self.coverage_end_date.year
 
 
 def name_generator(*args):
@@ -342,7 +367,7 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
     debts_owed_by_committee = db.Column('debts_by', db.Float)
     expenditure_subject_to_limits = db.Column('expe', db.Float)
     net_contributions_cycle_to_date = db.Column('net_con', db.Float)
-    net_operating_expenditures_to_date = db.Column('net_op', db.Float)
+    net_operating_expenditures_cycle_to_date = db.Column('net_op', db.Float)
     primary_election = db.Column('act_pri', db.String)
     general_election = db.Column('act_gen', db.String)
     subtotal_summary_period = db.Column('sub', db.String)
@@ -356,6 +381,12 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
         foreign_keys=file_number,
         uselist=True,
     )
+
+    @declared_attr
+    def report(self):
+        return db.relationship(ReportType,
+                               primaryjoin="and_(BaseF3PFiling.report_type==ReportType.report_type)",
+                               foreign_keys=self.report_type,)
 
 
 
@@ -403,6 +434,12 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
         uselist=True,
     )
 
+    @declared_attr
+    def report(self):
+        return db.relationship(ReportType,
+                               primaryjoin="and_(BaseF3Filing.report_type==ReportType.report_type)",
+                               foreign_keys=self.report_type, )
+
 class BaseF3XFiling(BaseFiling):
     __tablename__ = 'real_efile_f3x'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
@@ -410,7 +447,7 @@ class BaseF3XFiling(BaseFiling):
     committee_name = db.Column('com_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
     sign_date = db.Column('date_signed', db.Date)
     amend_address = db.Column('amend_addr', db.String)
-    qual = db.Column(db.String)
+    qualified_multicandidate_committee = db.Column('qual', db.String)
 
 
     summary_lines = db.relationship(
@@ -421,3 +458,9 @@ class BaseF3XFiling(BaseFiling):
         foreign_keys=file_number,
         uselist=True,
     )
+
+    @declared_attr
+    def report(self):
+        return db.relationship(ReportType,
+                               primaryjoin="and_(BaseF3XFiling.report_type==ReportType.report_type)",
+                               foreign_keys=self.report_type, )

@@ -247,18 +247,16 @@ class EFilingSummaryView(views.ApiResource):
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date' ), models.BaseFiling.receipt_date),
     ]
-    """
-        args.make_sort_args(
-            default='-create_date',
-            validator=args.IndexValidator(self.model),
-        ),
-    """
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
-            args.efilings
+            args.efilings,
+            args.make_sort_args(
+                default='-receipt_date',
+                validator=args.IndexValidator(self.model),
+            ),
 
         )
 
