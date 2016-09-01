@@ -8,6 +8,7 @@ import multiprocessing
 
 import networkx as nx
 import sqlalchemy as sa
+from sqlalchemy import create_engine
 from flask_script import Server
 from flask_script import Manager
 
@@ -442,7 +443,13 @@ def load_advisory_opinions_into_s3():
             print("No new advisory opinions found.")
 @manager.command
 def test_util():
+    #con = db.engine.raw_connection()
+    table = 'efile_guide'
     df = efile_parser.get_dataframe(6)
+    df = df.fillna(value="N/A")
+    print(df)
+    #engine = create_engine('postgresql://:@/cfdm_test')
+    df.to_sql(name=table, con=db.engine, if_exists='replace')
     efile_parser.parse_f3psummary_column_b(df)
 
 if __name__ == '__main__':
