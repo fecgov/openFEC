@@ -3,9 +3,11 @@ from mock import patch
 from webservices.load_legal_docs import (index_statutes, index_regulations,
     index_advisory_opinions, delete_advisory_opinions_from_s3,
     load_advisory_opinions_into_s3, remove_legal_docs, get_xml_tree_from_url,
-    get_title_26_statutes, get_title_52_statutes, load_archived_murs)
+    get_title_26_statutes, get_title_52_statutes, load_archived_murs,
+    delete_murs_from_s3)
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
+import json
 
 class ElasticSearchMock:
     def __init__(self, dictToIndex):
@@ -124,7 +126,7 @@ class S3Objects:
         self.objects = objects
 
     def filter(self, Prefix):
-        return self.objects
+        return [o for o in self.objects if o.key.startswith(Prefix)]
 
 class BucketMock:
     def __init__(self, existing_pdfs, key):
@@ -253,40 +255,17 @@ class RemoveLegalDocsTest(unittest.TestCase):
 
 class LoadArchivedMursTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
-    get_es_with_doc({'respondents': ['Randolph Requester', 'Rob Requester'],
-    'open_date': '1980-05-21T00:00:00', 'pdf_pages': 2, 'text': 'page1 page2',
-    'no': '1', 'close_date': '1983-11-03T00:00:00',
-    'url': 'https://bucket123.s3.amazonaws.com/legal/murs/1.pdf',
-    'mur_type': 'archived', 'citations':
-    {'us_code': [{'text': '2 U.S.C. 104',
-    'url': 'http://api.fdsys.gov/link?collection=uscode&title=2&year=mostrecent&section=104'}],
-    'regulations': [{'text': '11 C.F.R. 104.5',
-    'url': 'http://api.fdsys.gov/link?collection=cfr&titlenum=11&partnum=104&year=mostrecent&sectionnum=5'},
-    {'text': '11 C.F.R. 114', 'url': 'http://api.fdsys.gov/link?collection=cfr&titlenum=11&partnum=114&year=mostrecent'}]},
-    'subject': [{'text': 'Root1', 'children': [{'text': 'Childa'},
-    {'text': 'Childb', 'children': [{'text': 'Grandchilda'},
-    {'text': 'Grandchildb'}]}, {'text': 'Childc', 'children': [{'text': 'Grandchildc'}]}]},
-    {'text': 'Root2'}], 'complainants': ['Carl Complainer'], 'doc_id': '1', 'pdf_size': 0}))
+        get_es_with_doc(json.load(open('tests/data/archived_mur_response.json'))))
     @patch('webservices.load_legal_docs.get_bucket',
-    get_bucket_mock([obj('legal/murs/1.pdf')], 'legal/murs/1.pdf'))
+        get_bucket_mock([obj('legal/murs/2.pdf')], 'legal/murs/1.pdf'))
     @patch('webservices.load_legal_docs.requests.get',
-    mock_archived_murs_get_request("""<tr class="test">header</tr>
-    <tr class="rowOdd">
-    <td><a href="/disclosure_data/mur/1.pdf"></a></td>
-    <td>5/21/1980</td><td>11/3/1983</td>
-    <td>(R) - Randolph Requester <br>(C) - CARL COMPLAINER<br>(R) - Rob Requester<br>
-    </td>
-    <td>
-        root1<ul class='no-top-margin'><li>childA</li><li>childB</li>
-        <ul \n class='no-top-margin'><li>grandchildA</li><li>grandchildB</li></ul>
-        <li>childC</li><ul class='no-top-margin'><ul class='no-top-margin'>
-        <li>grandchildC</li></ul></ul></ul> root2<br>
-        <br>
-    </td>
-    <td>2 U.S.C. 104<br>11 C.F.R. 104.5<br>11 C.F.R. 114<br></td>
-    </tr>"""))
-    @patch('webservices.load_legal_docs.slate.PDF',
-        lambda t: ['page1', 'page2'])
+        mock_archived_murs_get_request(open('tests/data/archived_mur_data.html').read()))
+    @patch('webservices.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
     @patch('webservices.load_legal_docs.env.get_credential', lambda e: 'bucket123')
     def test_load_archived_murs(self):
         load_archived_murs()
+
+    @patch('webservices.load_legal_docs.get_bucket',
+    get_bucket_mock([obj('legal/murs/2.pdf')], 'legal/murs/1.pdf'))
+    def test_delete_murs_from_s3(self):
+        delete_murs_from_s3()
