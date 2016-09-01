@@ -16,8 +16,8 @@
                                     "children": [{"text": "Grandchilda"}, {"text": "Grandchildb"}]},
                                 {"text": "Childc",
                                     "children": [{"text": "Grandchildc"}]}]},
-              {"text": "Root2"}], 
+              {"text": "Root2"}],
   "complainants": ["Carl Complainer"],
   "doc_id": "1",
-  "pdf_size": 0,
+  "pdf_size": 6,
   "name": "GRADISON FOR CONGRESS COMMITTEE"}
