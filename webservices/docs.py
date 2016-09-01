@@ -232,6 +232,11 @@ for independent expenditors; or the summary and detailed summary pages of the FE
 and [Form 3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
+WIP_TAG = '''
+DISCLAIMER: The field labels contained within this resource are subject to change.  We are attempting to succinctly
+label these fields while conveying clear meaning to ensure accessibility for all users.
+'''
+
 REPORTS = '''
 Each report represents the summary information from FEC Form 3, Form 3X and Form 3P.
 These reports have key statistics that illuminate the financial status of a given committee.
@@ -246,6 +251,9 @@ Several different reporting structures exist, depending on the type of organizat
 submits financial information. To see an example of these reporting requirements,
 look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 3P.
 '''
+
+REPORTS += WIP_TAG
+
 REPORT_YEAR = '''
 Year that the record applies to. Sometimes records are amended in subsequent
 years so this can differ from underlying form's receipt date.
@@ -876,6 +884,7 @@ you can find on the other endpoints. Those endpoints are better for in-depth ana
 Senate candidates and committees are required to file by paper. Other committees who raise and spend less than $50,000
 in a calendar can choose whether to file electronically or by paper.
 '''
+EFILING_TAG += WIP_TAG
 
 EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
 FILE_NUMBER = 'Filing ID number'
@@ -901,6 +910,7 @@ some must also submit a report 12 days before primary elections. Therefore, duri
 season, the period covered by this file may be different for different committees. These totals
 also incorporate any changes made by committees, if any report covering the period is amended.
 '''
+EFILE_REPORTS += WIP_TAG
 
 MIN_FILTER = 'Filter for all amounts greater than a value.'
 MAX_FILTER = 'Filter for all amounts less than a value.'
