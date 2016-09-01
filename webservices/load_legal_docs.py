@@ -269,16 +269,15 @@ def process_mur_pdf(mur_no, pdf_key, bucket):
         for chunk in response:
             pdf.write(chunk)
 
+        pdf.seek(0)
+        pdf_doc = slate.PDF(pdf)
+        pdf_pages = len(pdf_doc)
+        pdf_text = ' '.join(pdf_doc)
         pdf_size = getsize(pdf.name)
 
         pdf.seek(0)
         bucket.put_object(Key=pdf_key, Body=pdf,
                           ContentType='application/pdf', ACL='public-read')
-
-        pdf.seek(0)
-        pdf_doc = slate.PDF(pdf)
-        pdf_pages = len(pdf_doc)
-        pdf_text = ' '.join(pdf_doc)
         return pdf_text, pdf_size, pdf_pages
 
 def get_subject_tree(html, tree=[]):
