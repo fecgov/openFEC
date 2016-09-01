@@ -6,6 +6,8 @@ from tempfile import NamedTemporaryFile
 from xml.etree import ElementTree as ET
 from datetime import datetime
 from os.path import getsize
+from random import shuffle
+import csv
 
 import requests
 
@@ -259,7 +261,7 @@ def load_advisory_opinions_into_s3():
         else:
             print("No new advisory opinions found.")
 
-def process_mur_pdf(mur_no, bucket):
+def process_mur_pdf(mur_no, pdf_key, bucket):
     response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
                             % mur_no, stream=True)
 
@@ -270,15 +272,14 @@ def process_mur_pdf(mur_no, bucket):
         pdf_size = getsize(pdf.name)
 
         pdf.seek(0)
-        key = 'legal/murs/%s.pdf' % mur_no
-        bucket.put_object(Key=key, Body=pdf,
+        bucket.put_object(Key=pdf_key, Body=pdf,
                           ContentType='application/pdf', ACL='public-read')
 
         pdf.seek(0)
         pdf_doc = slate.PDF(pdf)
         pdf_pages = len(pdf_doc)
         pdf_text = ' '.join(pdf_doc)
-        return pdf_text, key, pdf_size, pdf_pages
+        return pdf_text, pdf_size, pdf_pages
 
 def get_subject_tree(html, tree=[]):
     # get next token
@@ -351,16 +352,38 @@ def get_citations(data):
             raise "Could not parse citation"
     return {"us_code": us_codes, "regulations": regulations}
 
+def delete_murs_from_s3():
+    bucket = get_bucket()
+    for obj in bucket.objects.filter(Prefix="legal/murs"):
+        obj.delete()
+
+def get_mur_names():
+    mur_names = {}
+    with open('data/archived_mur_names.csv') as csvfile:
+        for row in csv.reader(csvfile):
+            if row[0] == 'MUR':
+                mur_names[row[1]] = row[2]
+    return mur_names
+
 def load_archived_murs():
     es = utils.get_elasticsearch_connection()
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
-    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)
+    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-    for row in rows[1:]:
+    mur_names = get_mur_names()
+    shuffle(rows)
+    count = 0
+    for row in rows:
+        count += 1
+        print('processing %d of %d' % (count, len(rows)))
         data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
         mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
-        text, pdf_key, pdf_size, pdf_pages = process_mur_pdf(mur_no, bucket)
+        pdf_key = 'legal/murs/%s.pdf' % mur_no
+        if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
+            print('already processed %s' % pdf_key)
+            continue
+        text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
         # text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
         pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
         if data[1]:
@@ -383,6 +406,7 @@ def load_archived_murs():
         doc = {
             'doc_id': mur_no,
             'no': mur_no,
+            'name': mur_names[mur_no],
             'text': text,
             'mur_type': 'archived',
             'pdf_size': pdf_size,
