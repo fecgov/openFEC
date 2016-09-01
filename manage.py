@@ -443,14 +443,17 @@ def load_advisory_opinions_into_s3():
             print("No new advisory opinions found.")
 @manager.command
 def test_util():
-    #con = db.engine.raw_connection()
-    table = 'efile_guide'
-    df = efile_parser.get_dataframe(6)
-    df = df.fillna(value="N/A")
-    print(df)
-    #engine = create_engine('postgresql://:@/cfdm_test')
-    df.to_sql(name=table, con=db.engine, if_exists='replace')
-    efile_parser.parse_f3psummary_column_b(df)
+    sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
+    for i in range(4,6):
+        table = sheet_map.get(i)
+        df = efile_parser.get_dataframe(i)
+        df = df.fillna(value="N/A")
+        df = df.rename(columns={'fecp column name (column a value)': 'fecp_col_a',
+                                'fecp column name (column b value)': 'fecp_col_b',
+                                })
+        load_table(df, table, 'replace')
+
+
 
 if __name__ == '__main__':
     manager.run()
