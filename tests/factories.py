@@ -279,7 +279,7 @@ class ElectionResultFactory(BaseFactory):
 class CommunicationCostFactory(BaseFactory):
     class Meta:
         model = models.CommunicationCost
-    idx = factory.Sequence(lambda n: n)
+    sub_id = factory.Sequence(lambda n: n)
 
 
 class ElectioneeringFactory(BaseFactory):
