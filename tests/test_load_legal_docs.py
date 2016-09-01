@@ -255,7 +255,7 @@ class RemoveLegalDocsTest(unittest.TestCase):
 
 class LoadArchivedMursTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
-        get_es_with_doc(json.load(open('tests/data/archived_mur_response.json'))))
+        get_es_with_doc(json.load(open('tests/data/archived_mur_doc.json'))))
     @patch('webservices.load_legal_docs.get_bucket',
         get_bucket_mock([obj('legal/murs/2.pdf')], 'legal/murs/1.pdf'))
     @patch('webservices.load_legal_docs.requests.get',
