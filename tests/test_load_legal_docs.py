@@ -3,7 +3,7 @@ from mock import patch
 from webservices.load_legal_docs import (index_statutes, index_regulations,
     index_advisory_opinions, delete_advisory_opinions_from_s3,
     load_advisory_opinions_into_s3, remove_legal_docs, get_xml_tree_from_url,
-    get_title_26_statutes, get_title_52_statutes)
+    get_title_26_statutes, get_title_52_statutes, load_archived_murs)
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
 
@@ -40,6 +40,14 @@ def mock_xml(xml):
                     return open(n.name, 'rb')
 
     return request_zip
+
+def mock_archived_murs_get_request(html):
+    def request_murs_data(url, stream=False):
+        if stream:
+            return [b'ABC', b'def']
+        else:
+            return RequestResult(html)
+    return request_murs_data
 
 class Engine:
     def __init__(self, legal_loaded):
@@ -88,6 +96,7 @@ def get_credential_mock(var, default):
 class RequestResult:
     def __init__(self, result):
         self.result = result
+        self.text = result
 
     def json(self):
         return self.result
@@ -118,15 +127,16 @@ class S3Objects:
         return self.objects
 
 class BucketMock:
-    def __init__(self, existing_pdfs):
+    def __init__(self, existing_pdfs, key):
         self.objects = S3Objects(existing_pdfs)
+        self.key = key
 
     def put_object(self, Key, Body, ContentType, ACL):
-        assert Key == 'legal/aos/1.pdf'
+        assert Key == self.key
 
-def get_bucket_mock(existing_pdfs):
+def get_bucket_mock(existing_pdfs, key):
     def get_bucket():
-        return BucketMock(existing_pdfs)
+        return BucketMock(existing_pdfs, key)
     return get_bucket
 
 class IndexStatutesTest(unittest.TestCase):
@@ -215,7 +225,7 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
 class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
     @patch('webservices.load_legal_docs.db', Db())
     @patch('webservices.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/2.pdf')]))
+     get_bucket_mock([obj('legal/aos/2.pdf')], 'legal/aos/1.pdf'))
     @patch('webservices.load_legal_docs.env.get_credential',
         lambda cred: cred + '123')
     def test_load_advisory_opinions_into_s3(self):
@@ -223,14 +233,15 @@ class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
 
     @patch('webservices.load_legal_docs.db', Db())
     @patch('webservices.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/1.pdf'), obj('legal/aos/2.pdf')]))
+     get_bucket_mock([obj('legal/aos/1.pdf'), obj('legal/aos/2.pdf')],
+     'legal/aos/1.pdf'))
     @patch('webservices.load_legal_docs.env.get_credential',
         lambda cred: cred + '123')
     def test_load_advisory_opinions_into_s3_already_loaded(self):
         load_advisory_opinions_into_s3()
 
     @patch('webservices.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/2.pdf')]))
+     get_bucket_mock([obj('legal/aos/2.pdf')], 'legal/aos/1.pdf'))
     def test_delete_advisory_opinions_from_s3(self):
         delete_advisory_opinions_from_s3()
 
@@ -239,3 +250,43 @@ class RemoveLegalDocsTest(unittest.TestCase):
     get_es_with_doc({}))
     def test_remove_legal_docs(self):
         remove_legal_docs()
+
+class LoadArchivedMursTest(unittest.TestCase):
+    @patch('webservices.utils.get_elasticsearch_connection',
+    get_es_with_doc({'respondents': ['Randolph Requester', 'Rob Requester'],
+    'open_date': '1980-05-21T00:00:00', 'pdf_pages': 2, 'text': 'page1 page2',
+    'no': '1', 'close_date': '1983-11-03T00:00:00',
+    'url': 'https://bucket123.s3.amazonaws.com/legal/murs/1.pdf',
+    'mur_type': 'archived', 'citations':
+    {'us_code': [{'text': '2 U.S.C. 104',
+    'url': 'http://api.fdsys.gov/link?collection=uscode&title=2&year=mostrecent&section=104'}],
+    'regulations': [{'text': '11 C.F.R. 104.5',
+    'url': 'http://api.fdsys.gov/link?collection=cfr&titlenum=11&partnum=104&year=mostrecent&sectionnum=5'},
+    {'text': '11 C.F.R. 114', 'url': 'http://api.fdsys.gov/link?collection=cfr&titlenum=11&partnum=114&year=mostrecent'}]},
+    'subject': [{'text': 'Root1', 'children': [{'text': 'Childa'},
+    {'text': 'Childb', 'children': [{'text': 'Grandchilda'},
+    {'text': 'Grandchildb'}]}, {'text': 'Childc', 'children': [{'text': 'Grandchildc'}]}]},
+    {'text': 'Root2'}], 'complainants': ['Carl Complainer'], 'doc_id': '1', 'pdf_size': 0}))
+    @patch('webservices.load_legal_docs.get_bucket',
+    get_bucket_mock([obj('legal/murs/1.pdf')], 'legal/murs/1.pdf'))
+    @patch('webservices.load_legal_docs.requests.get',
+    mock_archived_murs_get_request("""<tr class="test">header</tr>
+    <tr class="rowOdd">
+    <td><a href="/disclosure_data/mur/1.pdf"></a></td>
+    <td>5/21/1980</td><td>11/3/1983</td>
+    <td>(R) - Randolph Requester <br>(C) - CARL COMPLAINER<br>(R) - Rob Requester<br>
+    </td>
+    <td>
+        root1<ul class='no-top-margin'><li>childA</li><li>childB</li>
+        <ul \n class='no-top-margin'><li>grandchildA</li><li>grandchildB</li></ul>
+        <li>childC</li><ul class='no-top-margin'><ul class='no-top-margin'>
+        <li>grandchildC</li></ul></ul></ul> root2<br>
+        <br>
+    </td>
+    <td>2 U.S.C. 104<br>11 C.F.R. 104.5<br>11 C.F.R. 114<br></td>
+    </tr>"""))
+    @patch('webservices.load_legal_docs.slate.PDF',
+        lambda t: ['page1', 'page2'])
+    @patch('webservices.load_legal_docs.env.get_credential', lambda e: 'bucket123')
+    def test_load_archived_murs(self):
+        load_archived_murs()
