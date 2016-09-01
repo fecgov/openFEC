@@ -19,7 +19,7 @@ class BaseItemized(db.Model):
     filing_form = db.Column(db.String)
     link_id = db.Column(db.Integer)
     line_number = db.Column('line_num', db.String)
-    tran_id = db.Column(db.String)
+    transaction_id = db.Column('tran_id', db.String)
     file_number = db.Column('file_num', db.Integer)
     pdf_url = db.Column(db.String)
 
@@ -86,7 +86,7 @@ class ScheduleA(BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     increased_limit = db.Column(db.String)
     load_date = db.Column('pg_date', db.DateTime)
-    transaction_id = db.Column('tran_id', db.Integer)
+    # transaction_id = db.Column('tran_id', db.Integer)
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
@@ -145,7 +145,7 @@ class ScheduleB(BaseItemized):
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     load_date = db.Column('pg_date', db.DateTime)
-    transaction_id = db.Column('tran_id', db.Integer)
+    # transaction_id = db.Column('tran_id', db.Integer)
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
@@ -202,6 +202,7 @@ class ScheduleE(BaseItemized):
     election_type_full = db.Column('fec_election_tp_desc', db.String, doc=docs.ELECTION_TYPE)
 
     # Transaction meta info
+    # transaction_id = db.Column('tran_id', db.Integer)
     independent_sign_name = db.Column('indt_sign_nm', db.String)
     independent_sign_date = db.Column('indt_sign_dt', db.Date)
     notary_sign_name = db.Column('notary_sign_nm', db.String)

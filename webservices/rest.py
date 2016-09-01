@@ -159,7 +159,8 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
-api.add_resource(reports.ReportsView, '/committee/<string:committee_id>/reports/', '/reports/<string:committee_type>/')
+api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
+api.add_resource(reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')
@@ -219,6 +220,12 @@ api.add_resource(
     '/committee/<committee_id>/filings/',
     '/candidate/<candidate_id>/filings/',
 )
+
+api.add_resource(
+    reports.EFilingSummaryView,
+    '/efile/reports/<string:committee_type>/',
+)
+
 api.add_resource(filings.FilingsList, '/filings/')
 
 api.add_resource(download.DownloadView, '/download/<path:path>/')
@@ -244,6 +251,8 @@ apidoc.register(committees.CommitteeView, blueprint='v1')
 apidoc.register(committees.CommitteeList, blueprint='v1')
 apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
+apidoc.register(reports.CommitteeReportsView, blueprint='v1')
+apidoc.register(reports.EFilingSummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
