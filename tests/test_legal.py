@@ -133,8 +133,10 @@ class SearchTest(unittest.TestCase):
                      {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
                      ]
                  }},
-            "highlight": {"fields": {"text": {},
-                "name": {}, "number": {}}},
+            "highlight": {"fields": {
+                "text": {"highlight_query": {"bool": {"must": [{"match_phrase": {"text": "electronic filing"}}]}}},
+                "name": {},
+                "number": {}}},
             "_source": {"exclude": "text"},
             "from": 0,
             "size": 20}

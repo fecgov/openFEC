@@ -75,27 +75,36 @@ class UniversalSearch(utils.Resource):
         parsed_query = parse_query_string(q)
         terms = parsed_query.get('terms')
         phrases = parsed_query.get('phrases')
+        hits_returned = min([200, hits_returned])
 
         results = {}
         total_count = 0
         for type in types:
             must_query = [Q('term', _type=type)]
+            text_highlight_query = None
+
             if len(terms):
                 must_query.append(Q('match', _all=' '.join(terms)))
 
-            for phrase in phrases:
-                must_query.append(Q('match_phrase', text=phrase))
+            if len(phrases):
+                phrase_queries = [Q('match_phrase', text=phrase) for phrase in phrases]
+                must_query.extend(phrase_queries)
+                text_highlight_query = Q('bool', must=phrase_queries)
 
             query = Search().using(es) \
                 .query(Q('bool',
                          must=must_query,
                          should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
-                .highlight('text', 'name', 'number') \
+                .highlight('name', 'number') \
                 .source(exclude='text') \
                 .extra(size=hits_returned, from_=from_hit) \
                 .index('docs')
 
-            hits_returned = min([200, hits_returned])
+            if text_highlight_query:
+                query = query.highlight('text', highlight_query=text_highlight_query.to_dict())
+            else:
+                query = query.highlight('text')
+
             es_results = query.execute()
 
             formatted_hits = []
