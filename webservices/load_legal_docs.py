@@ -281,28 +281,46 @@ def process_mur_pdf(mur_no, bucket):
         return pdf_text, key, pdf_size, pdf_pages
 
 def get_subject_tree(html, tree=[]):
-    print(html)
-    print('*' * 25)
-    root = re.match("([A-Za-z\-/\s',\(\)]+)(?:<br>)?(.*)", html, re.S)
+    # get next token
+    root = re.match("([^<]+)(?:<br>)?(.*)", html, re.S)
     list_item = re.match("<li>(.*?)</li>(.*)", html, re.S)
     unordered_list = re.match("<ul\s+class='no-top-margin'>(.*)", html, re.S)
     end_list = re.match("</ul>(.*)", html, re.S)
     empty = re.match("\s*<br>\s*", html)
 
-    if end_list or empty:
+    if empty:
         pass
+    elif end_list:
+        # reduce
+        sub_tree = []
+        node = tree.pop()
+        while node != 'ul_start':
+            sub_tree.append(node)
+            node = tree.pop()
+
+        sub_tree.reverse()
+        if tree[-1] != 'ul_start':
+            tree[-1]['children'] = sub_tree
+        else:
+            tree.extend(sub_tree)
+    elif unordered_list:
+        # shift
+        tree.append('ul_start')
     elif list_item or root:
+        # shift
         subject = re.sub('\s+', ' ', (list_item or root).group(1))\
                     .strip().lower().capitalize()
-        tree.append({'subject': subject})
-        tail = (list_item or root).group(2).strip()
-        if tail:
-            get_subject_tree(tail, tree)
-    elif unordered_list:
-        tree[-1]['children'] = get_subject_tree(unordered_list.group(1).strip(), [])
+        tree.append({'text': subject})
     else:
         print(html)
-        raise "Could not parse subject."
+        raise "Could not parse next token."
+
+    if not empty:
+        tail = (root or list_item or unordered_list or end_list)
+        if tail:
+            html = tail.groups()[-1].strip()
+            if html:
+                get_subject_tree(html, tree)
     return tree
 
 def get_citations(data):
@@ -321,8 +339,8 @@ def get_citations(data):
                   % (us_code_match.group(1), us_code_match.group(2))
             us_codes.append({"text": citation_text, "url": url})
         if regulation_match:
-            url = 'http://api.fdsys.gov/link?collection=cfr&titlenum=%s\
-                  &partnum=%s&year=mostrecent'\
+            url = 'http://api.fdsys.gov/link?collection=cfr' +\
+                  '&titlenum=%s&partnum=%s&year=mostrecent'\
                   % (regulation_match.group(1), regulation_match.group(2))
             if regulation_match.group(3):
                 url += '&sectionnum=%s' % regulation_match.group(3)
@@ -339,7 +357,7 @@ def load_archived_murs():
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
-    for row in rows[1:5]:
+    for row in rows[1:]:
         data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
         mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
         text, pdf_key, pdf_size, pdf_pages = process_mur_pdf(mur_no, bucket)
@@ -354,13 +372,13 @@ def load_archived_murs():
         respondents = []
         for party in parties:
             match = re.match("\(([RC])\) - (.*)", party)
+            name = match.group(2).strip().title()
             if match.group(1) == 'C':
-                complainants.append(match.group(2).title())
+                complainants.append(name)
             if match.group(1) == 'R':
-                respondents.append(match.group(2).title())
+                respondents.append(name)
 
         subject = get_subject_tree(data[4])
-        print(subject)
         citations = get_citations(data[5])
         doc = {
             'doc_id': mur_no,
