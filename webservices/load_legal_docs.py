@@ -270,7 +270,11 @@ def process_mur_pdf(mur_no, pdf_key, bucket):
             pdf.write(chunk)
 
         pdf.seek(0)
-        pdf_doc = slate.PDF(pdf)
+        try:
+            pdf_doc = slate.PDF(pdf)
+        except:
+            print('Could not parse pdf: %s' % pdf_key)
+            pdf_doc = []
         pdf_pages = len(pdf_doc)
         pdf_text = ' '.join(pdf_doc)
         pdf_size = getsize(pdf.name)
