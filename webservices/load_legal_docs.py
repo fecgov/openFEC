@@ -406,10 +406,12 @@ def load_archived_murs():
 
         subject = get_subject_tree(data[4])
         citations = get_citations(data[5])
+        mur_digits = re.match("([0-9]+)", mur_no).group(1)
+        name = mur_names[mur_digits] if mur_digits in mur_names else ''
         doc = {
             'doc_id': mur_no,
             'no': mur_no,
-            'name': mur_names[mur_no],
+            'name': name,
             'text': text,
             'mur_type': 'archived',
             'pdf_size': pdf_size,
