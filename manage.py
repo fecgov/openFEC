@@ -442,11 +442,19 @@ def load_advisory_opinions_into_s3():
         else:
             print("No new advisory opinions found.")
 @manager.command
-def test_util():
+def load_efile_sheets():
+    import pandas as pd
     sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
     for i in range(4,6):
         table = sheet_map.get(i)
-        df = efile_parser.get_dataframe(i)
+        df = pd.read_excel(
+            # /Users/jonathancarmack/Documents/repos/openFEC
+            io="data/real_efile_to_form_line_numbers.xlsx",
+            #index_col="summary line number",
+            sheetname=i,
+            skiprows=7,
+
+        )
         df = df.fillna(value="N/A")
         df = df.rename(columns={'fecp column name (column a value)': 'fecp_col_a',
                                 'fecp column name (column b value)': 'fecp_col_b',
