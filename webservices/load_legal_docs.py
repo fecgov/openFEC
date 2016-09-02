@@ -428,4 +428,4 @@ def load_archived_murs():
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
 
     with Pool(processes=1, maxtasksperchild=1) as pool:
-        pool.map(process_mur, murs)
+        pool.map(process_mur, murs, chunksize=1)
