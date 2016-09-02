@@ -380,7 +380,7 @@ def process_mur(mur):
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
         print('already processed %s' % pdf_key)
-        # return
+        return
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
     # text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
     pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
@@ -423,7 +423,7 @@ def process_mur(mur):
 
 def load_archived_murs():
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
-    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:20]
+    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     shuffle(rows)
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
 
