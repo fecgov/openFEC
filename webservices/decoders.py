@@ -1,4 +1,8 @@
 from .efile_parser import *
+import json
+
+
+
 
 election_types = {
     'GR': 'General runoff',
@@ -27,17 +31,37 @@ form_types = {
     'F6': '48-hour notice of contribution/loans received',
 }
 
-df = get_dataframe(5)
-f3p_col_a = parse_f3psummary_column_a(df)
-f3p_col_b = parse_f3psummary_column_b(df)
-f3p_description = parse_f3psummary_column_description(df)
+def dumper(f3p_col_a, f3p_col_b, f3p_description, dumped):
+    for row in dumped:
+        description, col_a, col_b = row
+        f3p_col_a.append(col_a)
+        f3p_col_b.append(col_b)
+        f3p_description.append(description)
 
-df = get_dataframe(4)
-f3_col_a = parse_f3psummary_column_a(df)
-f3_col_b = parse_f3psummary_column_b(df)
-f3_description = parse_f3psummary_column_description(df)
 
-df = get_dataframe(6)
-f3x_col_a = parse_f3psummary_column_a(df)
-f3x_col_b = parse_f3psummary_column_b(df)
-f3x_description = parse_f3psummary_column_description(df)
+fp = open("data/" + "efile_guide_f3p", 'r')
+dumped = json.load(fp)
+f3p_col_a = []
+f3p_col_b = []
+f3p_description = []
+dumper(f3p_col_a, f3p_col_b, f3p_description, dumped)
+
+f3_col_a = []
+f3_col_b = []
+f3_description = []
+fp = open("data/" + "efile_guide_f3", 'r')
+dumped = json.load(fp)
+dumper(f3_col_a, f3_col_b, f3_description, dumped)
+
+fp = open("data/" + "efile_guide_f3x", 'r')
+dumped = json.load(fp)
+f3x_col_a = []
+f3x_col_b = []
+f3x_description = []
+dumper(f3x_col_a, f3x_col_b, f3x_description, dumped)
+
+
+
+
+
+
