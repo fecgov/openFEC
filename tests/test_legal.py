@@ -103,8 +103,7 @@ class SearchTest(unittest.TestCase):
                      {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
                      ]
                  }},
-            "highlight": {"fields": {"text": {},
-                "name": {}, "number": {}}},
+            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}}},
             "_source": {"exclude": "text"},
             "from": 0,
             "size": 20}
@@ -126,17 +125,15 @@ class SearchTest(unittest.TestCase):
         expected_query = {"query": {"bool": {
                  "must": [
                      {"term": {"_type": "advisory_opinions"}},
-                     {"match_phrase": {"text": "electronic filing"}},
+                     {"match_phrase": {"_all": "electronic filing"}},
                      ],
                  "should": [
                      {"match": {"no": '"electronic filing"'}},
                      {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
                      ]
                  }},
-            "highlight": {"fields": {
-                "text": {"highlight_query": {"bool": {"must": [{"match_phrase": {"text": "electronic filing"}}]}}},
-                "name": {},
-                "number": {}}},
+            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}},
+                          "highlight_query": {"bool": {"must": [{"match_phrase": {"_all": "electronic filing"}}]}}},
             "_source": {"exclude": "text"},
             "from": 0,
             "size": 20}
@@ -188,7 +185,7 @@ class LegalPhraseSearchTests(unittest.TestCase):
         # Get the first `match_phrase` in the `must` clause
         must_clause = query['query']['bool']['must']
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {'match_phrase': {'text': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         # No `match` clause for terms
         match = next((q for q in must_clause if 'match' in q), None)
@@ -209,7 +206,7 @@ class LegalPhraseSearchTests(unittest.TestCase):
         # Get the first `match_phrase` in the `must` clause
         must_clause = query['query']['bool']['must']
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {'match_phrase': {'text': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         match = next((q for q in must_clause if 'match' in q), None)
         assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
@@ -232,8 +229,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
         must_clause = query['query']['bool']['must']
         match_phrases = [q for q in must_clause if 'match_phrase' in q]
         assert len(match_phrases) == 2
-        assert match_phrases[0] == {'match_phrase': {'text': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
-        assert match_phrases[1] == {'match_phrase': {'text': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrases[0] == {'match_phrase': {'_all': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrases[1] == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         match = next((q for q in must_clause if 'match' in q), None)
         assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
