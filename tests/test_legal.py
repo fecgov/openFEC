@@ -4,6 +4,7 @@ import codecs
 import unittest
 import mock
 from mock import patch
+from elasticsearch_dsl import Q
 
 from webservices.resources.legal import es, parse_query_string
 
@@ -114,7 +115,8 @@ class SearchTest(unittest.TestCase):
                      {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
                      ]
                  }},
-            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}}},
+            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}},
+                          "highlight_query": {"match": {"_all": "president"}}},
             "_source": {"exclude": "text"},
             "from": 0,
             "size": 20}
@@ -153,6 +155,18 @@ class SearchTest(unittest.TestCase):
                                      index=mock.ANY,
                                      doc_type=mock.ANY)
 
+    @patch.object(es, 'search')
+    def test_query_dsl_phrase_search_highlight(self, es_search):
+        response = self.app.get('/v1/legal/search/', query_string={
+                                'q': '"electronic filing" 2016 "vice president"',
+                                'type': 'advisory_opinions'})
+        assert response.status_code == 200
+        expected_highlight_query = Q('match_phrase', _all="electronic filing") & \
+                                   Q('match_phrase', _all="vice president") & \
+                                   Q('match', _all="2016")
+        _, args = es_search.call_args
+        query = args['body']
+        assert get_path(query, 'highlight.highlight_query') == expected_highlight_query.to_dict()
 
 
 class LegalPhraseParseTests(unittest.TestCase):
