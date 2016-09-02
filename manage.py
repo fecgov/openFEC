@@ -2,13 +2,14 @@
 
 import os
 import glob
+import collections
+import json
 import logging
 import subprocess
 import multiprocessing
 
 import networkx as nx
 import sqlalchemy as sa
-from sqlalchemy import create_engine
 from flask_script import Server
 from flask_script import Manager
 
@@ -19,6 +20,7 @@ from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices.tasks.utils import get_bucket, get_object
 from webservices import partition, utils, efile_parser
+
 from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
     index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
     delete_advisory_opinions_from_s3)
@@ -445,7 +447,7 @@ def load_advisory_opinions_into_s3():
 def load_efile_sheets():
     import pandas as pd
     sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
-    for i in range(4,6):
+    for i in range(4,7):
         table = sheet_map.get(i)
         df = pd.read_excel(
             # /Users/jonathancarmack/Documents/repos/openFEC
@@ -459,7 +461,10 @@ def load_efile_sheets():
         df = df.rename(columns={'fecp column name (column a value)': 'fecp_col_a',
                                 'fecp column name (column b value)': 'fecp_col_b',
                                 })
-        load_table(df, table, 'replace')
+        form_column = table.split('_')[2] + " line number"
+        columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
+        df.drop(columns_to_drop, axis=1, inplace=True)
+        df.to_json(path_or_buf="data/" + table, orient='values')
 
 
 
