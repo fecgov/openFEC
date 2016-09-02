@@ -8,6 +8,7 @@ from datetime import datetime
 from os.path import getsize
 from random import shuffle
 import csv
+from concurrent.futures import ProcessPoolExecutor
 
 import requests
 
@@ -368,60 +369,63 @@ def get_mur_names():
                 mur_names[row[1]] = row[2]
     return mur_names
 
-def load_archived_murs():
+def process_mur(mur):
+    print("processing mur %d of %d" % (mur[0], mur[1]))
     es = utils.get_elasticsearch_connection()
-    table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
-    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
     mur_names = get_mur_names()
-    shuffle(rows)
-    count = 0
-    for row in rows:
-        count += 1
-        print('processing %d of %d' % (count, len(rows)))
-        data = re.findall("<td[^>]*>(.*?)</td>", row, re.S)
-        mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
-        pdf_key = 'legal/murs/%s.pdf' % mur_no
-        if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
-            print('already processed %s' % pdf_key)
-            continue
-        text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
-        # text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
-        pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
-        if data[1]:
-            open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
-        if data[2]:
-            close_date = datetime.strptime(data[2], '%m/%d/%Y').isoformat()
-        parties = re.findall("(.*?)<br>", data[3])
-        complainants = []
-        respondents = []
-        for party in parties:
-            match = re.match("\(([RC])\) - (.*)", party)
-            name = match.group(2).strip().title()
-            if match.group(1) == 'C':
-                complainants.append(name)
-            if match.group(1) == 'R':
-                respondents.append(name)
+    data = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
+    mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
+    pdf_key = 'legal/murs/%s.pdf' % mur_no
+    if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
+        print('already processed %s' % pdf_key)
+        return
+    text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
+    # text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
+    pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+    if data[1]:
+        open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
+    if data[2]:
+        close_date = datetime.strptime(data[2], '%m/%d/%Y').isoformat()
+    parties = re.findall("(.*?)<br>", data[3])
+    complainants = []
+    respondents = []
+    for party in parties:
+        match = re.match("\(([RC])\) - (.*)", party)
+        name = match.group(2).strip().title()
+        if match.group(1) == 'C':
+            complainants.append(name)
+        if match.group(1) == 'R':
+            respondents.append(name)
 
-        subject = get_subject_tree(data[4])
-        citations = get_citations(data[5])
-        mur_digits = re.match("([0-9]+)", mur_no).group(1)
-        name = mur_names[mur_digits] if mur_digits in mur_names else ''
-        doc = {
-            'doc_id': mur_no,
-            'no': mur_no,
-            'name': name,
-            'text': text,
-            'mur_type': 'archived',
-            'pdf_size': pdf_size,
-            'pdf_pages': pdf_pages,
-            'open_date': open_date,
-            'close_date': close_date,
-            'complainants': complainants,
-            'respondents': respondents,
-            'subject': subject,
-            'citations': citations,
-            'url': pdf_url
-        }
-        es.index('docs', 'murs', doc, id=doc['doc_id'])
+    subject = get_subject_tree(data[4])
+    citations = get_citations(data[5])
+    mur_digits = re.match("([0-9]+)", mur_no).group(1)
+    name = mur_names[mur_digits] if mur_digits in mur_names else ''
+    doc = {
+        'doc_id': mur_no,
+        'no': mur_no,
+        'name': name,
+        'text': text,
+        'mur_type': 'archived',
+        'pdf_size': pdf_size,
+        'pdf_pages': pdf_pages,
+        'open_date': open_date,
+        'close_date': close_date,
+        'complainants': complainants,
+        'respondents': respondents,
+        'subject': subject,
+        'citations': citations,
+        'url': pdf_url
+    }
+    es.index('docs', 'murs', doc, id=doc['doc_id'])
+
+def load_archived_murs():
+    table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
+    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+    shuffle(rows)
+    murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
+
+    with ProcessPoolExecutor() as executor:
+        executor.map(process_mur, murs)
