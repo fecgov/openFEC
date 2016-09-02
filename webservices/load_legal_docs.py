@@ -427,5 +427,5 @@ def load_archived_murs():
     shuffle(rows)
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
 
-    with Pool(maxtasksperchild=1) as pool:
+    with Pool(processes=1, maxtasksperchild=1) as pool:
         pool.map(process_mur, murs)
