@@ -81,15 +81,17 @@ class UniversalSearch(utils.Resource):
         total_count = 0
         for type in types:
             must_query = [Q('term', _type=type)]
-            text_highlight_query = None
+            text_highlight_query = Q()
 
             if len(terms):
-                must_query.append(Q('match', _all=' '.join(terms)))
+                term_query = Q('match', _all=' '.join(terms))
+                must_query.append(term_query)
+                text_highlight_query = text_highlight_query & term_query
 
             if len(phrases):
                 phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
                 must_query.extend(phrase_queries)
-                text_highlight_query = Q('bool', must=phrase_queries)
+                text_highlight_query = text_highlight_query & Q('bool', must=phrase_queries)
 
             query = Search().using(es) \
                 .query(Q('bool',
