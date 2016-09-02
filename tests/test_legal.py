@@ -10,6 +10,17 @@ from webservices.resources.legal import es, parse_query_string
 # TODO: integrate more with API Schema so that __API_VERSION__ is returned
 # self.assertEqual(result['api_version'], __API_VERSION__)
 
+def get_path(obj, path):
+    parts = path.split('.')
+    first = parts[0]
+    assert first in obj
+
+    if len(parts) == 1:
+        return obj[first]
+    else:
+        return get_path(obj[first], '.'.join(parts[1:]))
+
+
 def es_advisory_opinion(*args, **kwargs):
     return {'hits': {'hits': [{'_source': {'text': 'abc'}, '_type': 'advisory_opinions'},
            {'_source': {'no': '123'}, '_type': 'advisory_opinions'}]}}
@@ -179,11 +190,9 @@ class LegalPhraseSearchTests(unittest.TestCase):
         assert es_search.call_count == 1
 
         _, args = es_search.call_args
-        query = args['body']
-        assert query['query']['bool']['must'], "Expected query to have path `query.bool.must`"
+        must_clause = get_path(args, 'body.query.bool.must')
 
         # Get the first `match_phrase` in the `must` clause
-        must_clause = query['query']['bool']['must']
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
         assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
@@ -200,11 +209,9 @@ class LegalPhraseSearchTests(unittest.TestCase):
         assert es_search.call_count == 1
 
         _, args = es_search.call_args
-        query = args['body']
-        assert query['query']['bool']['must'], "Expected query to have path `query.bool.must`"
+        must_clause = get_path(args, 'body.query.bool.must')
 
         # Get the first `match_phrase` in the `must` clause
-        must_clause = query['query']['bool']['must']
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
         assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
@@ -222,11 +229,9 @@ class LegalPhraseSearchTests(unittest.TestCase):
         assert es_search.call_count == 1
 
         _, args = es_search.call_args
-        query = args['body']
-        assert query['query']['bool']['must'], "Expected query to have path `query.bool.must`"
+        must_clause = get_path(args, 'body.query.bool.must')
 
         # Get all the `match_phrase`s in the `must` clause
-        must_clause = query['query']['bool']['must']
         match_phrases = [q for q in must_clause if 'match_phrase' in q]
         assert len(match_phrases) == 2
         assert match_phrases[0] == {'match_phrase': {'_all': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
