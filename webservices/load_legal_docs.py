@@ -361,6 +361,10 @@ def delete_murs_from_s3():
     for obj in bucket.objects.filter(Prefix="legal/murs"):
         obj.delete()
 
+def delete_murs_from_es():
+    es = utils.get_elasticsearch_connection()
+    es.delete_all('docs', 'murs')
+
 def get_mur_names():
     mur_names = {}
     with open('data/archived_mur_names.csv') as csvfile:
@@ -377,6 +381,7 @@ def process_mur(mur):
     mur_names = get_mur_names()
     data = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
     mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
+    print("processing mur %s" % mur_no)
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
         print('already processed %s' % pdf_key)
@@ -404,7 +409,7 @@ def process_mur(mur):
     mur_digits = re.match("([0-9]+)", mur_no).group(1)
     name = mur_names[mur_digits] if mur_digits in mur_names else ''
     doc = {
-        'doc_id': mur_no,
+        'doc_id': 'mur_%s' % mur_no,
         'no': mur_no,
         'name': name,
         'text': text,
@@ -424,8 +429,13 @@ def process_mur(mur):
 def load_archived_murs():
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+    bucket = get_bucket()
+    murs_completed = set([re.match("legal/murs/([0-9_A-Z]+).pdf", o.key).group(1)
+                        for o in bucket.objects.filter(Prefix="legal/murs")])
+    rows = [r for r in rows
+            if re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', r, re.M).group(1)
+            not in murs_completed]
     shuffle(rows)
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
-
     with Pool(processes=1, maxtasksperchild=1) as pool:
         pool.map(process_mur, murs, chunksize=1)
