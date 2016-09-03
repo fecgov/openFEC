@@ -389,6 +389,7 @@ def process_mur(mur):
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
     # text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
     pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+    open_date, close_date = ('', '')
     if data[1]:
         open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
     if data[2]:
