@@ -1,8 +1,9 @@
 {"respondents": ["Randolph Requester", "Rob Requester"],
   "open_date": "1980-05-21T00:00:00",
-  "pdf_pages": 2,
-  "text": "page1 page2",
-  "no": "1", "close_date": "1983-11-03T00:00:00",
+  "pdf_pages": 0,
+  "text": "",
+  "no": "1",
+  "close_date": "1983-11-03T00:00:00",
   "url": "https://bucket123.s3.amazonaws.com/legal/murs/1.pdf",
   "mur_type": "archived",
   "citations":
