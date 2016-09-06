@@ -318,7 +318,7 @@ def get_subject_tree(html, tree=[]):
         tree.append({'text': subject})
     else:
         print(html)
-        raise "Could not parse next token."
+        raise Exception("Could not parse next token.")
 
     if not empty:
         tail = (root or list_item or unordered_list or end_list)
@@ -353,7 +353,7 @@ def get_citations(data):
 
         if not us_code_match and not regulation_match:
             print(citation_text)
-            raise "Could not parse citation"
+            raise Exception("Could not parse citation")
     return {"us_code": us_codes, "regulations": regulations}
 
 def delete_murs_from_s3():
