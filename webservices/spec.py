@@ -57,6 +57,10 @@ spec = APISpec(
             'description': docs.SCHEDULE_E_TAG,
         },
         {
+            'name': 'party-coordinated expenditures',
+            'description': docs.SCHEDULE_F_TAG,
+        },
+        {
             'name': 'communication cost',
             'description': docs.COMMUNICATION_TAG,
         },
