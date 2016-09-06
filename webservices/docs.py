@@ -451,6 +451,11 @@ Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
+SCHEDULE_F_TAG = '''
+'''
+SCHEDULE_F = SCHEDULE_F_TAG + '''
+'''
+
 SIZE_DESCRIPTION = '''
 This endpoint aggregates Schedule A donations based on size:
 

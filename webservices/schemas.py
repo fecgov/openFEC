@@ -448,6 +448,19 @@ make_aggregate_schema = functools.partial(
 ScheduleEByCandidateSchema = make_aggregate_schema(models.ScheduleEByCandidate)
 augment_schemas(ScheduleEByCandidateSchema)
 
+ScheduleFSchema = make_schema(
+    models.ScheduleF,
+    fields={
+        'pdf_url': ma.fields.Str(),
+    },
+    options={
+
+    },
+)
+ScheduleFPageSchema = make_page_schema(
+    ScheduleFSchema
+)
+
 CommunicationCostByCandidateSchema = make_aggregate_schema(models.CommunicationCostByCandidate)
 augment_schemas(CommunicationCostByCandidateSchema)
 
