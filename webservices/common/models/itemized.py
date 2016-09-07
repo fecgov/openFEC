@@ -29,6 +29,8 @@ class ScheduleA(BaseItemized):
     __tablename__ = 'ofec_sched_a_master'
 
     # Contributor info
+    entity_type = db.Column('entity_tp', db.String)
+    entity_type_desc = db.Column('entity_tp_desc', db.String)
     contributor_prefix = db.Column('contbr_prefix', db.String)
     contributor = db.relationship(
         'CommitteeHistory',
