@@ -399,11 +399,12 @@ Purpose is a combination of transaction codes, category codes and disbursement d
 '''
 
 SCHEDULE_C_TAG = '''
-Schdule C tag stuff
+Schedule C shows all loans, endorsements and loan guarantees a committee
+receives or makes.
 '''
 
 SCHEDULE_C = SCHEDULE_C_TAG + '''
-Schedule C stuff
+The committee continues to report the loan until it is repaid.
 '''
 
 SCHEDULE_E_TAG = '''
