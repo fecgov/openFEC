@@ -9,6 +9,8 @@ from os.path import getsize
 from random import shuffle
 import csv
 from multiprocessing import Pool
+import logging
+from urllib.parse import urlencode
 
 import requests
 
@@ -25,6 +27,8 @@ from distutils.sysconfig import get_python_lib
 sys.path = [get_python_lib() + '/slate'] + sys.path
 import slate
 sys.path = sys.path[1:]
+
+logger = logging.getLogger('manager')
 
 def get_sections(reg):
     sections = {}
@@ -274,7 +278,7 @@ def process_mur_pdf(mur_no, pdf_key, bucket):
         try:
             pdf_doc = slate.PDF(pdf)
         except:
-            print('Could not parse pdf: %s' % pdf_key)
+            logger.error('Could not parse pdf: %s' % pdf_key)
             pdf_doc = []
         pdf_pages = len(pdf_doc)
         pdf_text = ' '.join(pdf_doc)
@@ -286,6 +290,13 @@ def process_mur_pdf(mur_no, pdf_key, bucket):
         return pdf_text, pdf_size, pdf_pages
 
 def get_subject_tree(html, tree=[]):
+    """This is a standard shift-reduce parser for extracting the tree of subject
+    topics from the html. Using a html parser (eg., beautifulsoup4) would not have
+    solved this problem, since the parse tree we want is _not_ represented in
+    the hierarchy of html elements. Depending on the tag, the algorithm either shifts
+    (adds the tag to a list) or reduces (collapses everything until the most recent ul
+    into a child of the previous element). It stops when it encounters the empty tag."""
+
     # get next token
     root = re.match("([^<]+)(?:<br>)?(.*)", html, re.S)
     list_item = re.match("<li>(.*?)</li>(.*)", html, re.S)
@@ -335,20 +346,20 @@ def get_citations(data):
     regulations = []
 
     for citation_text in citation_texts:
-        us_code_match = re.match("([0-9]+) U\.S\.C\. ([0-9]+)", citation_text)
-        regulation_match = re.match("([0-9]+) C\.F\.R\. ([0-9]+)(?:\.([0-9]+))?", citation_text)
+        us_code_match = re.match("(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9]+)", citation_text)
+        regulation_match = re.match("(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", citation_text)
 
         if us_code_match:
-            url = 'http://api.fdsys.gov/link?collection=uscode&' +\
-                  'title=%s&year=mostrecent&section=%s'\
-                  % (us_code_match.group(1), us_code_match.group(2))
+            url = 'http://api.fdsys.gov/link?' +\
+                  urlencode([('collection', 'uscode'), ('title', us_code_match.group('title')),
+                    ('year', 'mostrecent'), ('section', us_code_match.group('section'))])
             us_codes.append({"text": citation_text, "url": url})
         if regulation_match:
-            url = 'http://api.fdsys.gov/link?collection=cfr' +\
-                  '&titlenum=%s&partnum=%s&year=mostrecent'\
-                  % (regulation_match.group(1), regulation_match.group(2))
+            url = 'http://api.fdsys.gov/link?' +\
+                  urlencode([('collection', 'cfr'), ('titlenum', regulation_match.group('title')),
+                        ('partnum', regulation_match.group('part')), ('year', 'mostrecent')])
             if regulation_match.group(3):
-                url += '&sectionnum=%s' % regulation_match.group(3)
+                url += '&' + urlencode([('sectionnum', regulation_match.group('section'))])
             regulations.append({"text": citation_text, "url": url})
 
         if not us_code_match and not regulation_match:
@@ -379,22 +390,22 @@ def process_mur(mur):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
     mur_names = get_mur_names()
-    data = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
-    mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", data[0]).group(1)
+    (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
+        = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
+    mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
     print("processing mur %s" % mur_no)
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
         print('already processed %s' % pdf_key)
         return
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
-    # text, pdf_key, pdf_size, pdf_pages = ([None] * 4)
     pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
     open_date, close_date = (None, None)
-    if data[1]:
-        open_date = datetime.strptime(data[1], '%m/%d/%Y').isoformat()
-    if data[2]:
-        close_date = datetime.strptime(data[2], '%m/%d/%Y').isoformat()
-    parties = re.findall("(.*?)<br>", data[3])
+    if open_date_td:
+        open_date = datetime.strptime(open_date_td, '%m/%d/%Y').isoformat()
+    if close_date_td:
+        close_date = datetime.strptime(close_date_td, '%m/%d/%Y').isoformat()
+    parties = re.findall("(.*?)<br>", parties_td)
     complainants = []
     respondents = []
     for party in parties:
@@ -405,8 +416,8 @@ def process_mur(mur):
         if match.group(1) == 'R':
             respondents.append(name)
 
-    subject = get_subject_tree(data[4])
-    citations = get_citations(data[5])
+    subject = get_subject_tree(subject_td)
+    citations = get_citations(citations_td)
     mur_digits = re.match("([0-9]+)", mur_no).group(1)
     name = mur_names[mur_digits] if mur_digits in mur_names else ''
     doc = {
