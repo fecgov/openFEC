@@ -4,6 +4,8 @@ from sqlalchemy.dialects.postgresql import TSVECTOR
 from webservices import docs, utils
 
 from .base import db
+from .reports import PdfMixin
+
 
 
 class BaseItemized(db.Model):
@@ -231,7 +233,7 @@ class ScheduleE(BaseItemized):
     pdf_url = db.Column(db.String)
 
 
-class ScheduleF(BaseItemized):
+class ScheduleF(PdfMixin,BaseItemized):
     __tablename__ = 'fec_vsum_sched_f'
 
     sub_id = db.Column(db.Integer, primary_key=True)
@@ -294,6 +296,11 @@ class ScheduleF(BaseItemized):
     load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
 
+    @property
+    def pdf_url(self):
+        if self.has_pdf:
+            return utils.make_schedule_pdf_url(self.image_number)
+        return None
 
 
 
