@@ -31,6 +31,7 @@ class BaseEfileSchema(BaseSchema):
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
     document_description = ma.fields.Str()
+    beginning_image_number = ma.fields.Str()
 
     @post_dump
     def extract_summary_rows(self, obj):
