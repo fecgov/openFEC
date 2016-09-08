@@ -31,8 +31,8 @@ def get_text(node):
 
 def remove_legal_docs():
     es = utils.get_elasticsearch_connection()
-    es.delete_index('docs')
-    es.create_index('docs', {"mappings": {
+    es.indices.delete('docs')
+    es.indices.create('docs', {"mappings": {
                              "_default_": {
                                 "properties": {
                                         "no": {
@@ -68,7 +68,7 @@ def index_regulations():
                        "text": sections[section_label]['text'], 'url': reg_url,
                        "no": no}
 
-                es.index('docs', 'regulations', doc, id=doc['doc_id'])
+                es.create('docs', 'regulations', doc, id=doc['doc_id'])
             reg_count += 1
         print("%d regulation parts indexed." % reg_count)
     else:
@@ -123,7 +123,7 @@ def index_advisory_opinions():
                    "date": row[9],
                    "url": pdf_url}
 
-            es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
+            es.create('docs', 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
         print("%d docs loaded" % loading_doc)
 
@@ -174,7 +174,7 @@ def get_title_52_statutes():
                            "chapter": chapter,
                            "subchapter": subchapter_no,
                            "url": pdf_url}
-                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.create('docs', 'statutes', doc, id=doc['doc_id'])
 
 def get_title_26_statutes():
     es = utils.get_elasticsearch_connection()
@@ -206,7 +206,7 @@ def get_title_26_statutes():
                            "title": "26",
                            "chapter": chapter_no,
                            "url": pdf_url}
-                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.create('docs', 'statutes', doc, id=doc['doc_id'])
 
 
 def index_statutes():
