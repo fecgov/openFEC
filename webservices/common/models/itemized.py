@@ -5,6 +5,7 @@ import sqlalchemy as sa
 from webservices import docs, utils
 
 from .base import db
+from .reports import PdfMixin
 
 
 class BaseItemized(db.Model):
@@ -158,7 +159,7 @@ class ScheduleB(BaseItemized):
     pdf_url = db.Column(db.String)
 
 
-class ScheduleC(BaseItemized):
+class ScheduleC(PdfMixin,BaseItemized):
     __tablename__ = 'fec_vsum_sched_c'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -210,9 +211,12 @@ class ScheduleC(BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     cycle = db.Column('election_cycle', db.Integer)
 
-    @hybrid_property
+    @property
     def pdf_url(self):
-        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(self.image_number[-3:], self.image_number)
+        if self.has_pdf:
+            return utils.make_schedule_pdf_url(self.image_number)
+        return None
+
 
 class ScheduleE(BaseItemized):
     __tablename__ = 'ofec_sched_e'
