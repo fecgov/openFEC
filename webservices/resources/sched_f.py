@@ -5,23 +5,19 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
-from webservices.common.views import ItemizedResource
+from webservices.common.views import ApiResource
 
 
 @doc(
     tags=['party-coordinated expenditures'],
     description=docs.SCHEDULE_F,
 )
-class ScheduleFView(ItemizedResource):
+class ScheduleFView(ApiResource):
 
     model = models.ScheduleF
     schema = schemas.ScheduleFSchema
     page_schema = schemas.ScheduleFPageSchema
-    """
-    @property
-    def year_column(self):
-        return self.model.two_year_transaction_period
-    """
+
     @property
     def index_column(self):
         return self.model.sub_id
@@ -31,24 +27,7 @@ class ScheduleFView(ItemizedResource):
         ('committee_id', models.ScheduleF.committee_id),
         ('candidate_id', models.ScheduleF.candidate_id),
     ]
-    """
-    filter_fulltext_fields = [
-        ('loaner_name', models.ScheduleF.loan_source_name),
-    ]
-    """
 
-    """
-    filter_match_fields = [
-        ('is_individual', models.ScheduleA.is_individual),
-        ('two_year_transaction_period', models.ScheduleA.two_year_transaction_period),
-    ]
-
-
-    query_options = [
-        sa.orm.joinedload(models.ScheduleA.committee),
-        sa.orm.joinedload(models.ScheduleA.contributor),
-    ]
-    """
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleF.expenditure_date),
         (('min_amount', 'max_amount'), models.ScheduleF.expenditure_amount),
@@ -60,7 +39,7 @@ class ScheduleFView(ItemizedResource):
         return utils.extend(
             args.itemized,
             args.schedule_f,
-            args.make_seek_args(),
+            args.paging,
             args.make_sort_args(
                 default='expenditure_date',
             )
