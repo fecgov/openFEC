@@ -409,7 +409,10 @@ register_schema(ScheduleAPageSchema)
 ScheduleCSchema = make_schema(
     models.ScheduleC,
     fields={
+        'sub_id': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+
     },
     options={
     },
