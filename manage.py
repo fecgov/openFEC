@@ -5,6 +5,7 @@ import glob
 import logging
 import subprocess
 import multiprocessing
+import re
 
 import networkx as nx
 import sqlalchemy as sa
