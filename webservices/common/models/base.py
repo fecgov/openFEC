@@ -16,18 +16,31 @@ class RoutingSession(SignallingSession):
         return self.app.config['SQLALCHEMY_FOLLOWERS']
 
     @property
-    def replica_tasks(self):
-        return self.app.config['SQLALCHEMY_REPLICA_TASKS']
+    def follower_tasks(self):
+        return self.app.config['SQLALCHEMY_FOLLOWER_TASKS']
+
+    @property
+    def restrict_follower_traffic_to_tasks(self):
+        return self.app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS']
+
+    @property
+    def use_follower(self):
+        # Check for read operations and configured followers.
+        use_follower = (not self._flushing and self.followers)
+
+        # Optionally restrict traffic to followers for only supported tasks.
+        if use_follower and self.restrict_follower_traffic_to_tasks:
+            use_follower = (
+                celery.current_task and
+                celery.current_task.name in self.replica_tasks
+            )
+
+        return use_follower
 
     def get_bind(self, mapper=None, clause=None):
-        use_follower = (
-            not self._flushing and
-            celery.current_task and
-            celery.current_task.name in self.replica_tasks and
-            self.followers
-        )
-        if use_follower:
+        if self.use_follower:
             return random.choice(self.followers)
+
         return super().get_bind(mapper=mapper, clause=clause)
 
 
