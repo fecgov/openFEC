@@ -461,9 +461,6 @@ schedule_e_by_candidate = {
 
 schedule_f = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'last_expenditure_date': fields.Date(missing=None),
-    'last_expenditure_amount': fields.Float(missing=None),
-    'last_designated_committee_name': fields.Str(),
 }
 
 communication_cost = {

@@ -452,7 +452,10 @@ augment_schemas(ScheduleEByCandidateSchema)
 ScheduleFSchema = make_schema(
     models.ScheduleF,
     fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'subordinate_committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
         'pdf_url': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
     },
     options={
 

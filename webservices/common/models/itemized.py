@@ -244,13 +244,26 @@ class ScheduleF(PdfMixin,BaseItemized):
     entity_type_desc = db.Column('entity_tp_desc', db.String)
     designated_committee_id = db.Column('desg_cmte_id', db.String)
     designated_committee_name = db.Column('desg_cmte_nm', db.String)
+    subordinate_committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleF.subordinate_committee_id) == CommitteeHistory.committee_id,
+            ScheduleF.report_year + ScheduleF.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
+
     subordinate_committee_id = db.Column('subord_cmte_id', db.String)
+    """
+    These are included here as well if subordinate is not null, but I
+    think keeping it as a nested json object is best at least for consistency
+    across the api
     subordinate_committee_name = db.Column('subord_cmte_nm', db.String)
     subordinate_committee_street1 = db.Column('subord_cmte_st1', db.String)
     subordinate_committee_street2 = db.Column('subord_cmte_st2', db.String)
     subordinate_committee_city = db.Column('subord_cmte_city', db.String)
     subordinate_committee_state = db.Column('subord_cmte_st', db.String)
     subordinate_committee_zip = db.Column('subord_cmte_zip', db.Integer)
+    """
     payee_name = db.Column('pye_nm', db.String)
     payee_last_name = db.Column('payee_l_nm', db.String)
     payee_middle_name = db.Column('payee_m_nm', db.String)
