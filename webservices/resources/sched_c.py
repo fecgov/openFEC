@@ -60,3 +60,28 @@ class ScheduleCView(ApiResource):
             query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         return query
 
+
+@doc(
+    tags=['loans'],
+    description=docs.SCHEDULE_C,
+)
+class ScheduleCViewBySubId(ApiResource):
+    model = models.ScheduleC
+    schema = schemas.ScheduleCSchema
+    page_schema = schemas.ScheduleCPageSchema
+
+    @property
+    def index_column(self):
+        return self.model.sub_id
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
+        return query
+
+    @property
+    def args(self):
+        return utils.extend(
+            #needed to attach a page, trivial since length is one, but can't build this view without a pageschema
+            args.paging,
+        )
