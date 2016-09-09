@@ -461,8 +461,12 @@ large result sets are approximate; you will want to page through the records unt
 '''
 
 SCHEDULE_F_TAG = '''
+Schedule F shows all special expenditures a national or state party committee makes in connection with
+the general election campaigns of federal candidates
 '''
 SCHEDULE_F = SCHEDULE_F_TAG + '''
+These coordinated party expenditures do not count against the contribution limits but are subject to other limits,
+these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political Party Committees.
 '''
 
 SIZE_DESCRIPTION = '''
