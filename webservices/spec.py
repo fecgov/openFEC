@@ -53,6 +53,11 @@ spec = APISpec(
             'description': docs.SCHEDULE_B_TAG,
         },
         {
+            'name': 'loans',
+            'description': docs.SCHEDULE_C_TAG,
+
+        },
+        {
             'name': 'independent expenditures',
             'description': docs.SCHEDULE_E_TAG,
         },
