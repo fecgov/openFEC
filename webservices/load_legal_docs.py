@@ -32,9 +32,10 @@ logger = logging.getLogger('manager')
 
 def get_sections(reg):
     sections = {}
-    for node in reg['children'][0]['children']:
-        sections[tuple(node['label'])] = {'text': get_text(node),
-                                          'title': node['title']}
+    for subpart in reg['children']:
+        for node in subpart['children']:
+            sections[tuple(node['label'])] = {'text': get_text(node),
+                                              'title': node['title']}
     return sections
 
 
