@@ -11,13 +11,12 @@ import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 
-from webservices import flow, partition
+from webservices import efile_parser, flow, partition, utils
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices.tasks.utils import get_bucket, get_object
-from webservices import partition, utils, efile_parser
 from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
     index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
     delete_advisory_opinions_from_s3, load_archived_murs, delete_murs_from_s3,
