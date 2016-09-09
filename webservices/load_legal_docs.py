@@ -50,8 +50,8 @@ def get_text(node):
 
 def remove_legal_docs():
     es = utils.get_elasticsearch_connection()
-    es.delete_index('docs')
-    es.create_index('docs', {"mappings": {
+    es.indices.delete('docs')
+    es.indices.create('docs', {"mappings": {
                              "_default_": {
                                 "properties": {
                                         "no": {
@@ -375,7 +375,7 @@ def delete_murs_from_s3():
 
 def delete_murs_from_es():
     es = utils.get_elasticsearch_connection()
-    es.delete_all('docs', 'murs')
+    es.transport.perform_request('DELETE', '/docs/murs')
 
 def get_mur_names():
     mur_names = {}
