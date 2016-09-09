@@ -407,10 +407,25 @@ ScheduleASchema = make_schema(
         ),
     }
 )
+
 ScheduleAPageSchema = make_page_schema(ScheduleASchema, page_type=paging_schemas.SeekPageSchema)
 register_schema(ScheduleASchema)
 register_schema(ScheduleAPageSchema)
 
+ScheduleCSchema = make_schema(
+    models.ScheduleC,
+    fields={
+        'sub_id': ma.fields.Str(),
+        'pdf_url': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+
+    },
+    options={
+    },
+)
+ScheduleCPageSchema = make_page_schema(
+    ScheduleCSchema,
+)
 ScheduleBByRecipientIDSchema = make_schema(
     models.ScheduleBByRecipientID,
     fields={

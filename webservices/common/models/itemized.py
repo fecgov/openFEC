@@ -7,7 +7,6 @@ from .base import db
 from .reports import PdfMixin
 
 
-
 class BaseItemized(db.Model):
     __abstract__ = True
 
@@ -90,10 +89,6 @@ class ScheduleA(BaseItemized):
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
-
-    election_type = db.Column('election_tp', db.String, doc=docs.ELECTION_TYPE)
-    election_type_full = db.Column('election_tp_desc', db.String)
-
     pdf_url = db.Column(db.String)
 
 
@@ -160,6 +155,63 @@ class ScheduleB(BaseItemized):
     pdf_url = db.Column(db.String)
 
 
+class ScheduleC(PdfMixin,BaseItemized):
+    __tablename__ = 'fec_vsum_sched_c'
+    sub_id = db.Column(db.Integer, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    incurred_date = db.Column('incurred_dt', db.DateTime)
+    loan_source_prefix = db.Column('loan_src_prefix', db.String)
+    loan_source_first_name = db.Column('loan_src_f_nm', db.String)
+    loan_source_middle_name = db.Column('loan_src_m_nm', db.String)
+    loan_source_last_name = db.Column('loan_src_l_nm', db.String)
+    loan_source_suffix = db.Column('loan_src_suffix', db.String)
+    loan_source_street_1 = db.Column('loan_src_st1', db.String)
+    loan_source_street_2 = db.Column('loan_src_st2', db.String)
+    loan_source_city = db.Column('loan_src_city', db.String)
+    loan_source_state = db.Column('loan_src_st', db.String)
+    loan_source_zip = db.Column('loan_src_zip', db.Integer)
+    loan_source_name = db.Column('loan_src_nm', db.String)
+    entity_type = db.Column('entity_tp', db.String)
+    entity_type_full = db.Column('entity_tp_desc', db.String)
+    election_type = db.Column('election_tp', db.String)
+    fec_election_type_full = db.Column('fec_election_tp_desc', db.String)
+    fec_election_type_year = db.Column('fec_election_tp_year', db.String)
+    election_type_full = db.Column('election_tp_desc', db.String)
+    original_loan_amount = db.Column('orig_loan_amt', db.Float)
+    payment_to_date = db.Column('pymt_to_dt', db.Float)
+    loan_balance = db.Column('loan_bal', db.Float)
+    #terms short for anything?
+    due_date_terms = db.Column('due_dt_terms', db.String)
+    interest_rate_terms = db.Column(db.String)
+    secured_ind = db.Column(db.String)
+    schedule_a_line_number = db.Column('sched_a_line_num', db.Integer)
+    personally_funded = db.Column('pers_fund_yes_no', db.String)
+    memo_code = db.Column('memo_cd', db.String)
+    memo_text = db.Column(db.String)
+    fec_committee_id = db.Column('fec_cmte_id', db.String)
+    candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
+    candidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_first_name = db.Column('cand_nm_first', db.String)
+    candidate_last_name = db.Column('cand_nm_last', db.String)
+    candidate_middle_name = db.Column('cand_m_nm', db.String)
+    candidate_prefix = db.Column('cand_prefix', db.String)
+    candidate_suffix = db.Column('cand_suffix', db.String)
+    candidate_office = db.Column('cand_office', db.String)
+    candidate_office_full = db.Column('cand_office_desc', db.String)
+    candidate_office_state = db.Column('cand_office_st', db.String)
+    candidate_office_state_full = db.Column('cand_office_state_desc', db.String)
+    candidate_office_district = db.Column('cand_office_district', db.String, doc=docs.DISTRICT)
+    action_code = db.Column('action_cd', db.String)
+    action_code_full = db.Column('action_cd_desc', db.String)
+    schedule_type = db.Column(db.String)
+    schedule_type_full = db.Column('schedule_type_desc', db.String)
+    cycle = db.Column('election_cycle', db.Integer)
+
+    @property
+    def pdf_url(self):
+        if self.has_pdf:
+            return utils.make_schedule_pdf_url(self.image_number)
+        return None
 
 
 class ScheduleE(BaseItemized):
@@ -314,16 +366,5 @@ class ScheduleF(PdfMixin,BaseItemized):
         if self.has_pdf:
             return utils.make_schedule_pdf_url(self.image_number)
         return None
-
-
-
-
-
-
-
-
-
-
-
 
 
