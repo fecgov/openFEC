@@ -374,7 +374,7 @@ def delete_murs_from_s3():
 
 def delete_murs_from_es():
     es = utils.get_elasticsearch_connection()
-    es.delete_all('docs', 'murs')
+    es.transport.perform_request('DELETE', '/docs/murs')
 
 def get_mur_names():
     mur_names = {}
@@ -436,7 +436,7 @@ def process_mur(mur):
         'citations': citations,
         'url': pdf_url
     }
-    es.index('docs', 'murs', doc, id=doc['doc_id'])
+    es.create('docs', 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs():
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
