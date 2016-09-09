@@ -10,25 +10,32 @@ from tempfile import NamedTemporaryFile
 import json
 
 class ElasticSearchMock:
+    class ElasticSearchIndicesMock:
+        def delete(self, index):
+            assert index == 'docs'
+
+        def create(self, index, mappings):
+            assert index == 'docs'
+            assert mappings
+
+
+    class ElasticSearchTransportMock:
+        def perform_request(self, method, url):
+            assert method == 'DELETE'
+            assert url == '/docs/murs'
+
+
     def __init__(self, dictToIndex):
         self.dictToIndex = dictToIndex
+        self.indices = ElasticSearchMock.ElasticSearchIndicesMock()
+        self.transport = ElasticSearchMock.ElasticSearchTransportMock()
+
     def search():
         pass
 
     def index(self, index, doc_type, doc, id):
-        print(doc)
         assert self.dictToIndex == doc
 
-    def delete_index(self, index):
-        assert index == 'docs'
-
-    def create_index(self, index, mappings):
-        assert index == 'docs'
-        assert mappings
-
-    def delete_all(self, index, doc_type):
-        assert index == 'docs'
-        assert doc_type == 'murs'
 
 def get_es_with_doc(doc):
     def get_es():
