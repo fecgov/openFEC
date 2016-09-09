@@ -14,8 +14,6 @@ class BaseItemized(db.Model):
     committee_id = db.Column('cmte_id', db.String, doc=docs.COMMITTEE_ID)
     report_year = db.Column('rpt_yr', db.Integer, doc=docs.REPORT_YEAR)
     report_type = db.Column('rpt_tp', db.String, doc=docs.REPORT_TYPE)
-    election_type = db.Column('election_tp', db.String, doc=docs.ELECTION_TYPE)
-    election_type_full = db.Column('election_tp_desc', db.String)
     image_number = db.Column('image_num', db.String, doc=docs.IMAGE_NUMBER)
     filing_form = db.Column(db.String)
     link_id = db.Column(db.Integer)
@@ -91,7 +89,6 @@ class ScheduleA(BaseItemized):
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
-
     pdf_url = db.Column(db.String)
 
 
@@ -287,5 +284,87 @@ class ScheduleE(BaseItemized):
 
     pdf_url = db.Column(db.String)
 
+
+class ScheduleF(PdfMixin,BaseItemized):
+    __tablename__ = 'fec_vsum_sched_f'
+
+    sub_id = db.Column(db.Integer, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    committee_designated_coordinated_expenditure_indicator = db.Column('cmte_desg_coord_exp_ind', db.String)
+    committee_name = db.Column('cmte_nm', db.String)
+    entity_type = db.Column('entity_tp', db.String)
+    entity_type_desc = db.Column('entity_tp_desc', db.String)
+    designated_committee_id = db.Column('desg_cmte_id', db.String)
+    designated_committee_name = db.Column('desg_cmte_nm', db.String)
+    subordinate_committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleF.subordinate_committee_id) == CommitteeHistory.committee_id,
+            ScheduleF.report_year + ScheduleF.report_year % 2 == CommitteeHistory.cycle,
+        )'''
+    )
+
+    subordinate_committee_id = db.Column('subord_cmte_id', db.String)
+    """
+    These are included here as well if subordinate is not null, but I
+    think keeping it as a nested json object is best at least for consistency
+    across the api
+    subordinate_committee_name = db.Column('subord_cmte_nm', db.String)
+    subordinate_committee_street1 = db.Column('subord_cmte_st1', db.String)
+    subordinate_committee_street2 = db.Column('subord_cmte_st2', db.String)
+    subordinate_committee_city = db.Column('subord_cmte_city', db.String)
+    subordinate_committee_state = db.Column('subord_cmte_st', db.String)
+    subordinate_committee_zip = db.Column('subord_cmte_zip', db.Integer)
+    """
+    payee_name = db.Column('pye_nm', db.String)
+    payee_last_name = db.Column('payee_l_nm', db.String)
+    payee_middle_name = db.Column('payee_m_nm', db.String)
+    payee_first_name = db.Column('payee_f_nm', db.String)
+    aggregate_general_election_expenditure = db.Column('aggregate_gen_election_exp', db.String)
+    expenditure_type = db.Column('exp_tp', db.String)
+    expenditure_type_full = db.Column('exp_tp_desc', db.String)
+    expenditure_purpose_full = db.Column('exp_purpose_desc', db.String)
+    expenditure_date = db.Column('exp_dt', db.DateTime)
+    expenditure_amount = db.Column('exp_amt', db.Integer)
+    candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
+    canidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_prefix = db.Column('cand_prefix', db.String)
+    candidate_first_name = db.Column('cand_nm_first', db.String)
+    candidate_middle_name = db.Column('cand_m_nm', db.String)
+    candidate_last_name = db.Column('cand_nm_last', db.String)
+    candidate_suffix = db.Column('cand_suffix', db.String)
+    candidate_office = db.Column('cand_office', db.String)
+    candidate_office_full = db.Column('cand_office_desc', db.String)
+    candidate_office_state = db.Column('cand_office_st', db.String)
+    candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
+    candidate_office_district = db.Column('cand_office_district', db.String)
+    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
+    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
+    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
+    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
+    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
+    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+    action_code = db.Column('action_cd', db.String)
+    action_code_full = db.Column('action_cd_desc', db.String)
+    back_reference_transaction_id = db.Column('back_ref_tran_id', db.Integer)
+    back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
+    memo_code = db.Column('memo_cd', db.String)
+    memo_code_full = db.Column('memo_cd_desc', db.String)
+    memo_text = db.Column(db.String)
+    unlimited_spending_flag = db.Column('unlimited_spending_flg', db.String)
+    unlimited_spending_flag_full = db.Column('unlimited_spending_flg_desc', db.String)
+    catolog_code = db.Column('catg_cd', db.String)
+    catolog_code_full = db.Column('catg_cd_desc', db.String)
+    schedule_type = db.Column(db.String)
+    schedule_type_full = db.Column('schedule_type_desc', db.String)
+    load_date = db.Column('pg_date', db.DateTime)
+    election_cycle = db.Column(db.Integer)
+
+    @property
+    def pdf_url(self):
+        if self.has_pdf:
+            return utils.make_schedule_pdf_url(self.image_number)
+        return None
 
 
