@@ -5,11 +5,13 @@ import glob
 import logging
 import subprocess
 import multiprocessing
+import re
 
 import networkx as nx
 import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
+import requests
 
 from webservices import flow, partition
 from webservices.env import env
@@ -298,9 +300,10 @@ def cf_startup():
 
 def get_sections(reg):
     sections = {}
-    for node in reg['children'][0]['children']:
-        sections[tuple(node['label'])] = {'text': get_text(node),
-                                          'title': node['title']}
+    for subpart in reg['children']:
+        for node in subpart['children']:
+            sections[tuple(node['label'])] = {'text': get_text(node),
+                                              'title': node['title']}
     return sections
 
 
