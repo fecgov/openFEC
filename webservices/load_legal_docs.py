@@ -86,7 +86,7 @@ def index_regulations():
                        "text": sections[section_label]['text'], 'url': reg_url,
                        "no": no}
 
-                es.create('docs', 'regulations', doc, id=doc['doc_id'])
+                es.index('docs', 'regulations', doc, id=doc['doc_id'])
             reg_count += 1
         print("%d regulation parts indexed." % reg_count)
     else:
@@ -141,7 +141,7 @@ def index_advisory_opinions():
                    "date": row[9],
                    "url": pdf_url}
 
-            es.create('docs', 'advisory_opinions', doc, id=doc['doc_id'])
+            es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
         print("%d docs loaded" % loading_doc)
 
@@ -192,7 +192,7 @@ def get_title_52_statutes():
                            "chapter": chapter,
                            "subchapter": subchapter_no,
                            "url": pdf_url}
-                    es.create('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
 
 def get_title_26_statutes():
     es = utils.get_elasticsearch_connection()
@@ -224,7 +224,7 @@ def get_title_26_statutes():
                            "title": "26",
                            "chapter": chapter_no,
                            "url": pdf_url}
-                    es.create('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
 
 
 def index_statutes():
@@ -436,7 +436,7 @@ def process_mur(mur):
         'citations': citations,
         'url': pdf_url
     }
-    es.create('docs', 'murs', doc, id=doc['doc_id'])
+    es.index('docs', 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs():
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
