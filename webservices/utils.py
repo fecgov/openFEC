@@ -10,7 +10,7 @@ from sqlalchemy.dialects import postgresql
 
 
 from webservices.env import env
-from pyelasticsearch import ElasticSearch
+from elasticsearch import Elasticsearch
 
 import flask_restful as restful
 from marshmallow_pagination import paginators
@@ -197,6 +197,10 @@ def make_report_pdf_url(image_number):
     )
 
 
+def make_schedule_pdf_url(image_number):
+    return 'http://docquery.fec.gov/cgi-bin/fecimg/?' + image_number
+
+
 def get_index_column(model):
     column = model.__mapper__.primary_key[0]
     return getattr(model, column.key)
@@ -224,9 +228,9 @@ def get_election_duration(column):
 def get_elasticsearch_connection():
     es_conn = env.get_service(label='elasticsearch-swarm-1.7.1')
     if es_conn:
-        es = ElasticSearch(es_conn.get_url(url='uri'))
+        es = Elasticsearch([es_conn.get_url(url='uri')])
     else:
-        es = ElasticSearch('http://localhost:9200')
+        es = Elasticsearch(['http://localhost:9200'])
     return es
 
 def print_literal_query_string(query):
