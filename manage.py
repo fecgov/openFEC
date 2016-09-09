@@ -352,7 +352,7 @@ def index_regulations():
                        "text": sections[section_label]['text'], 'url': reg_url,
                        "no": no}
 
-                es.create('docs', 'regulations', doc, id=doc['doc_id'])
+                es.index('docs', 'regulations', doc, id=doc['doc_id'])
             reg_count += 1
         print("%d regulation parts indexed." % reg_count)
     else:
@@ -403,7 +403,7 @@ def index_advisory_opinions():
                    "date": row[9],
                    "url": pdf_url}
 
-            es.create('docs', 'advisory_opinions', doc, id=doc['doc_id'])
+            es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
             docs_loaded += 1
 
             if docs_loaded % 500 == 0:
