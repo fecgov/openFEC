@@ -40,6 +40,10 @@ def es_search(**kwargs):
         return {'hits': {'hits': [{'highlight': {'text': ['e']},
                                     '_source': {}, '_type': 'statutes'}], 'total': 3}}
 
+    if _type == 'murs':
+        return {'hits': {'hits': [{'highlight': {'text': ['f']},
+                                    '_source': {}}], 'total': 4}}
+
 
 class AdvisoryOpinionTest(unittest.TestCase):
     @patch('webservices.rest.legal.es.search', es_advisory_opinion)
@@ -80,9 +84,10 @@ class SearchTest(unittest.TestCase):
             'regulations': [{'highlights': ['a', 'b']}],
             'total_advisory_opinions': 2,
             'statutes': [{'highlights': ['e']}], 'total_statutes': 3,
-            'total_regulations': 1,
+            'total_regulations': 1, 'total_murs': 4,
+            'murs': [{'highlights': ['f']}],
             'advisory_opinions': [{'highlights': ['a', 'b']},
-              {'highlights': ['c', 'd']}], 'total_all': 6}
+              {'highlights': ['c', 'd']}], 'total_all': 10}
 
     @patch('webservices.rest.legal.es.search', es_search)
     def test_type_search(self):
