@@ -68,7 +68,7 @@ class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q, from_hit=0, hits_returned=20, type='all', **kwargs):
         if type == 'all':
-            types = ['advisory_opinions', 'regulations', 'statutes']
+            types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
             types = [type]
 
