@@ -22,7 +22,8 @@ from webservices.tasks.utils import get_bucket, get_object
 from webservices import partition, utils, efile_parser
 from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
     index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
-    delete_advisory_opinions_from_s3)
+    delete_advisory_opinions_from_s3, load_archived_murs, delete_murs_from_s3,
+    delete_murs_from_es)
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -39,6 +40,9 @@ manager.command(index_regulations)
 manager.command(index_advisory_opinions)
 manager.command(load_advisory_opinions_into_s3)
 manager.command(delete_advisory_opinions_from_s3)
+manager.command(load_archived_murs)
+manager.command(delete_murs_from_s3)
+manager.command(delete_murs_from_es)
 
 def check_itemized_queues(schedule):
     """Checks to see if the queues associated with an itemized schedule have
