@@ -50,3 +50,28 @@ class ScheduleFView(ApiResource):
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         return query
+
+
+@doc(
+    tags=['party-coordinated expenditures'],
+    description=docs.SCHEDULE_F,
+)
+class ScheduleFViewBySubId(ApiResource):
+    model = models.ScheduleF
+    schema = schemas.ScheduleFSchema
+    page_schema = schemas.ScheduleFPageSchema
+
+    @property
+    def index_column(self):
+        return self.model.sub_id
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
+        return query
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+        )
