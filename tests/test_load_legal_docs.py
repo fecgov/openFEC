@@ -33,8 +33,7 @@ class ElasticSearchMock:
     def search():
         pass
 
-    def create(self, index, doc_type, doc, id):
-        print(doc)
+    def index(self, index, doc_type, doc, id):
         assert self.dictToIndex == doc
 
 
