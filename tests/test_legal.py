@@ -42,7 +42,7 @@ def es_search(**kwargs):
 
     if _type == 'murs':
         return {'hits': {'hits': [{'highlight': {'text': ['f']},
-                                    '_source': {}}], 'total': 4}}
+                                    '_source': {}, '_type': 'murs'}], 'total': 4}}
 
 
 class AdvisoryOpinionTest(unittest.TestCase):
