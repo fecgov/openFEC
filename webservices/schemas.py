@@ -421,6 +421,9 @@ ScheduleCSchema = make_schema(
 
     },
     options={
+        'exclude': (
+            'loan_name',
+        )
     },
 )
 ScheduleCPageSchema = make_page_schema(
