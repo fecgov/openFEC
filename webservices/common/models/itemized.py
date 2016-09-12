@@ -171,6 +171,7 @@ class ScheduleC(PdfMixin,BaseItemized):
     loan_source_state = db.Column('loan_src_st', db.String)
     loan_source_zip = db.Column('loan_src_zip', db.Integer)
     loan_source_name = db.Column('loan_src_nm', db.String)
+    loan_name = db.Column(TSVECTOR)
     entity_type = db.Column('entity_tp', db.String)
     entity_type_full = db.Column('entity_tp_desc', db.String)
     election_type = db.Column('election_tp', db.String)

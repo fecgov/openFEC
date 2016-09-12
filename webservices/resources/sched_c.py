@@ -28,13 +28,11 @@ class ScheduleCView(ApiResource):
         ('image_number', models.ScheduleC.image_number),
         ('committee_id', models.ScheduleC.committee_id),
     ]
-    """
-    Features to be added
+
     filter_fulltext_fields = [
-        ('loaner_name', models.ScheduleC.loan_source_name),
-        ('candidate_name', models.ScheduleC.candidate_name)
+        ('loaner_name', models.ScheduleC.loan_name),
+        #('candidate_name', models.ScheduleC.candidate_name)
     ]
-    """
 
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleC.incurred_date),
