@@ -380,7 +380,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
     ```
 
 * Reviewer merges feature branch into `develop` via GitHub
-* [auto] Develop is deployed to dev
+* [auto] `develop` is deployed to `dev`
 
 ### Creating a hotfix
 * Developer creates a hotfix branch:
