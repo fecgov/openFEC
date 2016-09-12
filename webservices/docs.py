@@ -406,6 +406,15 @@ Schedule B receipts aggregated by disbursement purpose category. To avoid double
 Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/18F/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
 '''
 
+SCHEDULE_C_TAG = '''
+Schedule C shows all loans, endorsements and loan guarantees a committee
+receives or makes.
+'''
+
+SCHEDULE_C = SCHEDULE_C_TAG + '''
+The committee continues to report the loan until it is repaid.
+'''
+
 SCHEDULE_E_TAG = '''
 Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
 bought ads on TV to oppose a federal candidate, each ad purchase would be recorded here with
@@ -449,6 +458,15 @@ To fetch the next page of results, append
 
 Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
+'''
+
+SCHEDULE_F_TAG = '''
+Schedule F shows all special expenditures a national or state party committee makes in connection with
+the general election campaigns of federal candidates
+'''
+SCHEDULE_F = SCHEDULE_F_TAG + '''
+These coordinated party expenditures do not count against the contribution limits but are subject to other limits,
+these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political Party Committees.
 '''
 
 SIZE_DESCRIPTION = '''
