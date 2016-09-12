@@ -372,10 +372,11 @@ When this finishes, commit the log to the release.
 We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
 
 ### Creating a new feature
-* Developer creates a feature branch:
+* Developer creates a feature branch and pushes to `origin`:
 
     ```
     git flow feature start my-feature
+    git push origin feature/my-feature
     ```
 
 * Reviewer merges feature branch into `develop` via GitHub
