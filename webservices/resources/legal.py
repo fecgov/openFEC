@@ -1,5 +1,6 @@
 import re
 
+from elasticsearch_dsl import Search, Q
 from webargs import fields
 
 from webservices import args
@@ -14,13 +15,13 @@ class AdvisoryOpinion(utils.Resource):
         return {"ao_no": fields.Str(required=True, description='Advisory opinion number to fetch.')}
 
     def get(self, ao_no, **kwargs):
-        query = {"query": {"bool": {"must": [{"term": {"no": ao_no}},
-                          {"term": {"_type": "advisory_opinions"}}]}},
-                          "_source": {"exclude": "text"}}
+        es_results = Search().using(es) \
+          .query('bool', must=[Q('term', no=ao_no), Q('term', _type='advisory_opinions')]) \
+          .source(exclude='text') \
+          .extra(size=200) \
+          .execute()
 
-        es_results = es.search(query, size=200)
-
-        results = {"docs": [r["_source"] for r in es_results["hits"]["hits"]]}
+        results = {"docs": [hit.to_dict() for hit in es_results]}
         return results
 
 
@@ -63,53 +64,61 @@ def parse_query_string(query):
     return dict(terms=terms, phrases=phrases)
 
 
-class Search(utils.Resource):
+class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q, from_hit=0, hits_returned=20, type='all', **kwargs):
         if type == 'all':
-            types = ['advisory_opinions', 'regulations', 'statutes']
+            types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
             types = [type]
 
         parsed_query = parse_query_string(q)
         terms = parsed_query.get('terms')
         phrases = parsed_query.get('phrases')
+        hits_returned = min([200, hits_returned])
 
         results = {}
         total_count = 0
         for type in types:
-            query = {"query": {"bool": {
-                     "must": [
-                         {"term": {"_type": type}},
-                         ],
-                     "should": [
-                         {"match": {"no": q}},
-                         {"match_phrase": {"_all": {"query": q, "slop": 50}}},
-                         ]
-                     }},
-                "highlight": {"fields": [{"text": {}},
-                    {"name": {}}, {"number": {}}]},
-                "_source": {"exclude": "text"}}
+            must_query = [Q('term', _type=type)]
+            text_highlight_query = Q()
 
             if len(terms):
-                query['query']['bool']['must'].append({"match": {"_all": ' '.join(terms)}})
+                term_query = Q('match', _all=' '.join(terms))
+                must_query.append(term_query)
+                text_highlight_query = text_highlight_query & term_query
 
-            for phrase in phrases:
-                query['query']['bool']['must'].append({"match_phrase": {"text": phrase}})
+            if len(phrases):
+                phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
+                must_query.extend(phrase_queries)
+                text_highlight_query = text_highlight_query & Q('bool', must=phrase_queries)
 
-            hits_returned = min([200, hits_returned])
-            es_results = es.search(query, index='docs', size=hits_returned,
-                             es_from=from_hit)
-            hits = es_results['hits']['hits']
-            for hit in hits:
-                highlights = []
-                if 'highlight' in hit:
-                    for key in hit['highlight']:
-                        highlights.extend(hit['highlight'][key])
-                hit['_source']['highlights'] = highlights
-            count = es_results['hits']['total']
+            query = Search().using(es) \
+                .query(Q('bool',
+                         must=must_query,
+                         should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
+                .highlight('description', 'name', 'no', 'summary', 'text') \
+                .source(exclude='text') \
+                .extra(size=hits_returned, from_=from_hit) \
+                .index('docs')
+
+            if text_highlight_query:
+                query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
+
+            es_results = query.execute()
+
+            formatted_hits = []
+            for hit in es_results:
+                formatted_hit = hit.to_dict()
+                formatted_hit['highlights'] = []
+                formatted_hits.append(formatted_hit)
+
+                if 'highlight' in hit.meta:
+                    for key in hit.meta.highlight:
+                        formatted_hit['highlights'].extend(hit.meta.highlight[key])
+
+            count = es_results.hits.total
             total_count += count
-            formatted_hits = [h['_source'] for h in hits]
 
             results[type] = formatted_hits
             results['total_%s' % type] = count
