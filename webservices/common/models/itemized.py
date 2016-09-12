@@ -214,6 +214,61 @@ class ScheduleC(PdfMixin,BaseItemized):
         return None
 
 
+class ScheduleD(PdfMixin,BaseItemized):
+    sub_id = db.Column(db.Integer, primary_key=True)
+    original_sub_id = db.Column('orig_sub_id', db.Integer)
+    committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
+    creditor_debtor_id = db.Column('cred_dbtr_id', db.String)
+    creditor_debtor_name = db.Column('cred_dbtr_nm', db.String)
+    creditor_debtor_last_name = db.Column('cred_dbtr_l_nm', db.String)
+    creditor_debtor_first_name = db.Column('cred_dbtr_f_nm', db.String)
+    creditor_debtor_middle_name = db.Column('cred_dbtr_m_nm', db.String)
+    creditor_debtor_prefix = db.Column('cred_dbtr_prefix', db.String)
+    creditor_debtor_suffix = db.Column('cred_dbtr_suffix', db.String)
+    creditor_debtor_street1 = db.Column('cred_dbtr_st1', db.String)
+    creditor_debtor_street2 = db.Column('cred_dbtr_st2', db.String)
+    creditor_debtor_city = db.Column('cred_dbtr_city', db.String)
+    creditor_debtor_state = db.Column('cred_dbtr_st', db.String)
+    entity_type = db.Column('entity_tp', db.String)
+    nature_debt_purpose = db.Column(db.String)
+    outstanding_balance_beginning_of_period = db.Column('outstg_bal_bop', db.Float)
+    outstanding_balance_close_of_period = db.Column('outstg_bal_cop', db.Float)
+    amount_incurred_period = db.Column('amt_incurred_per', db.Float)
+    payment_period = db.Column('pymt_per', db.Float)
+    candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
+    canidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_prefix = db.Column('cand_prefix', db.String)
+    candidate_first_name = db.Column('cand_nm_first', db.String)
+    candidate_middle_name = db.Column('cand_m_nm', db.String)
+    candidate_last_name = db.Column('cand_nm_last', db.String)
+    candidate_suffix = db.Column('cand_suffix', db.String)
+    candidate_office = db.Column('cand_office', db.String)
+    candidate_office_full = db.Column('cand_office_desc', db.String)
+    candidate_office_state = db.Column('cand_office_st', db.String)
+    candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
+    candidate_office_district = db.Column('cand_office_district', db.String)
+    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
+    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
+    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
+    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
+    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
+    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+    action_code = db.Column('action_cd', db.String)
+    action_code_full = db.Column('action_cd_desc', db.String)
+    schedule_type = db.Column(db.String)
+    schedule_type_full = db.Column('schedule_type_desc', db.String)
+    load_date = db.Column('pg_date', db.DateTime)
+    election_cycle = db.Column(db.Integer)
+
+    @property
+    def pdf_url(self):
+        if self.has_pdf:
+            return utils.make_schedule_pdf_url(self.image_number)
+        return None
+
+
+
 class ScheduleE(BaseItemized):
     __tablename__ = 'ofec_sched_e'
 
