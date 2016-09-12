@@ -215,6 +215,8 @@ class ScheduleC(PdfMixin,BaseItemized):
 
 
 class ScheduleD(PdfMixin,BaseItemized):
+    __tablename__ = 'fec_vsum_sched_d'
+
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
@@ -230,20 +232,16 @@ class ScheduleD(PdfMixin,BaseItemized):
     creditor_debtor_city = db.Column('cred_dbtr_city', db.String)
     creditor_debtor_state = db.Column('cred_dbtr_st', db.String)
     entity_type = db.Column('entity_tp', db.String)
-    nature_debt_purpose = db.Column(db.String)
+    nature_of_debt = db.Column('nature_debt_purpose', db.String)
     outstanding_balance_beginning_of_period = db.Column('outstg_bal_bop', db.Float)
     outstanding_balance_close_of_period = db.Column('outstg_bal_cop', db.Float)
     amount_incurred_period = db.Column('amt_incurred_per', db.Float)
     payment_period = db.Column('pymt_per', db.Float)
     candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
     canidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
-    candidate_prefix = db.Column('cand_prefix', db.String)
     candidate_first_name = db.Column('cand_nm_first', db.String)
-    candidate_middle_name = db.Column('cand_m_nm', db.String)
     candidate_last_name = db.Column('cand_nm_last', db.String)
-    candidate_suffix = db.Column('cand_suffix', db.String)
     candidate_office = db.Column('cand_office', db.String)
-    candidate_office_full = db.Column('cand_office_desc', db.String)
     candidate_office_state = db.Column('cand_office_st', db.String)
     candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
     candidate_office_district = db.Column('cand_office_district', db.String)
