@@ -48,7 +48,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 
     * Python 3.4 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
-    * PostgreSQL (the latest 9.4 release). 
+    * PostgreSQL (the latest 9.5 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/) 
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
@@ -64,14 +64,14 @@ We are always trying to improve our documentation. If you have suggestions or ru
 
 #### Install project requirements
 
-Use pip to install the Python dependencies:
+Use `pip` to install the Python dependencies:
 
 ```
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-Use npm to install JavaScript dependencies:
+Use `npm` to install JavaScript dependencies:
 
 ```
 npm install -g swagger-tools
@@ -119,7 +119,15 @@ Ignore `user does not exist` error messages. Everything will still work!
 export SQLA_CONN=<psql:address-to-box>
 ```
 
-*Reach out to a team member to get the actual addresses.*
+*Note: An additional setting for connecting to and utilizing mirrors/replica boxes can also be set with:*
+
+```
+export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-box-2>,...]
+```
+
+*Note: This is a comma separated (with no spaces) string that contains one or more connection strings to any replicas/mirrors that are setup.*
+
+*Reach out to a team member to get the actual addresses for all of these connections.*
 
 #### Set other environment variables
 1. Run:
@@ -152,6 +160,14 @@ export SQLA_CONN=<psql:address-to-box>
    Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
    
    *Note: 18F team members should not set these environment variables. 18F and FEC team members will also have additional environment variables to set up. Please reach out to a team member for detailed information.*
+
+4. If you are using database replicas/mirrors you can also restrict connections to them to be asynchronous tasks only by running:
+
+   ```
+   export SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS=True
+   ```
+
+   *Note: The value of this environment variable must be able to be evaluated as `True` in Python in order for this to be enabled.*
 
 #### Run locally
 Follow these steps every time you want to work on this project locally.
@@ -362,7 +378,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
     git flow feature start my-feature
     ```
 
-* Reviewer merges feature branch into develop and pushes to origin
+* Reviewer merges feature branch into `develop` via GitHub
 * [auto] Develop is deployed to dev
 
 ### Creating a hotfix
@@ -372,27 +388,41 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
     git flow hotfix start my-hotfix
     ```
 
-* Reviewer merges hotfix branch into develop and master and pushes to origin
-* [auto] Develop is deployed to dev
-* [auto] Master is deployed to prod
+* Reviewer merges hotfix branch into `develop` and `master` and pushes to `origin`:
+
+    ```
+    git flow hotfix finish my-hotfix
+    git checkout master
+    git push origin master --follow-tags
+    git checkout develop
+    git push origin develop
+    ```
+
+* `develop` is deployed to `dev`
+* `master` is deployed to `prod`
 
 ### Creating a release
-* Developer creates a release branch and pushes to origin:
+* Developer creates a release branch and pushes to `origin`:
 
     ```
     git flow release start my-release
-    git flow release publish my-release
+    git push origin release/my-release
     ```
 
-* [auto] Release is deployed to stage
+* [auto] `release/my-release` is deployed to `stage`
 * Review of staging
-* Developer merges release branch into master and pushes to origin:
+* Developer merges release branch into `master` (and backmerges into `develop`) and pushes to origin:
 
     ```
     git flow release finish my-release
+    git checkout master
+    git push origin master --follow-tags
+    git checkout develop
+    git push origin develop
     ```
 
-* [auto] Master is deployed to prod
+* `master` is deployed to `prod`
+* `develop` is deployed to `dev`
 
 
 ## Additional developer notes
