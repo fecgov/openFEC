@@ -416,11 +416,12 @@ The committee continues to report the loan until it is repaid.
 '''
 
 SCHEDULE_D_TAG = '''
-Schedule D Tag
+Schedule D shows debts and obligations owed to or by the committee that are
+required to be disclosed.
 '''
 
 SCHEDULE_D = SCHEDULE_D_TAG + '''
-Schedule D stufff
+
 '''
 
 
