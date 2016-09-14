@@ -30,8 +30,8 @@ class ScheduleCView(ApiResource):
     ]
 
     filter_fulltext_fields = [
-        ('loaner_name', models.ScheduleC.loan_name),
-        #('candidate_name', models.ScheduleC.candidate_name)
+        ('loaner_name', models.ScheduleC.loan_source_name_text),
+        ('candidate_name', models.ScheduleC.candidate_name_text),
     ]
 
     filter_range_fields = [
