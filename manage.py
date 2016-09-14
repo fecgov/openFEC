@@ -464,7 +464,7 @@ def load_efile_sheets():
         form_column = table.split('_')[2] + " line number"
         columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
         df.drop(columns_to_drop, axis=1, inplace=True)
-        df.to_json(path_or_buf="data/" + table, orient='values')
+        df.to_json(path_or_buf="data/" + table + ".json", orient='values')
 
 
 

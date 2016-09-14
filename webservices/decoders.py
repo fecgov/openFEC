@@ -39,7 +39,7 @@ def dumper(f3p_col_a, f3p_col_b, f3p_description, dumped):
         f3p_description.append(description)
 
 
-fp = open("data/" + "efile_guide_f3p", 'r')
+fp = open("data/" + "efile_guide_f3p.json", 'r')
 dumped = json.load(fp)
 f3p_col_a = []
 f3p_col_b = []
@@ -49,11 +49,11 @@ dumper(f3p_col_a, f3p_col_b, f3p_description, dumped)
 f3_col_a = []
 f3_col_b = []
 f3_description = []
-fp = open("data/" + "efile_guide_f3", 'r')
+fp = open("data/" + "efile_guide_f3.json", 'r')
 dumped = json.load(fp)
 dumper(f3_col_a, f3_col_b, f3_description, dumped)
 
-fp = open("data/" + "efile_guide_f3x", 'r')
+fp = open("data/" + "efile_guide_f3x.json", 'r')
 dumped = json.load(fp)
 f3x_col_a = []
 f3x_col_b = []
