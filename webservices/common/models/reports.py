@@ -309,7 +309,7 @@ class BaseFiling(PdfMixin,db.Model):
     coverage_end_date = db.Column('through_date', db.Date)
     rpt_pgi = db.Column('rptpgi', db.String, doc=docs.ELECTION_TYPE)
     report_type = db.Column('rptcode', db.String)
-    beginning_image_number = db.Column('imageno', db.Integer)
+    beginning_image_number = db.Column('imageno', db.BigInteger)
     street_1 = db.Column('str1', db.String)
     street_2 = db.Column('str2', db.String)
     city = db.Column(db.String)
