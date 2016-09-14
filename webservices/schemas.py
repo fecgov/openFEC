@@ -422,7 +422,8 @@ ScheduleCSchema = make_schema(
     },
     options={
         'exclude': (
-            'loan_name',
+            'loan_source_name_text',
+            'candidate_name_text',
         )
     },
 )
