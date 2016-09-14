@@ -32,7 +32,9 @@ from webservices.resources import totals
 from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
+from webservices.resources import sched_c
 from webservices.resources import sched_e
+from webservices.resources import sched_f
 from webservices.resources import download
 from webservices.resources import aggregates
 from webservices.resources import candidate_aggregates
@@ -165,7 +167,11 @@ api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
 api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/schedule_a/<string:sub_id>/')
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/', '/schedules/schedule_b/<string:sub_id>/')
+api.add_resource(sched_c.ScheduleCView, '/schedules/schedule_c/')
+api.add_resource(sched_c.ScheduleCViewBySubId, '/schedules/schedule_c/<string:sub_id>/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
+api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/schedule_f/<string:sub_id>/')
+api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
@@ -230,7 +236,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
-api.add_resource(legal.Search, '/legal/search/')
+api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.AdvisoryOpinion, '/legal/advisory_opinion/<ao_no>')
 api.add_resource(load.Legal, '/load/legal/')
 
@@ -256,7 +262,11 @@ apidoc.register(reports.EFilingSummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
+apidoc.register(sched_c.ScheduleCView, blueprint='v1')
+apidoc.register(sched_c.ScheduleCViewBySubId, blueprint='v1')
 apidoc.register(sched_e.ScheduleEView, blueprint='v1')
+apidoc.register(sched_f.ScheduleFView, blueprint='v1')
+apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
