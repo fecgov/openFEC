@@ -164,10 +164,8 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 4. If you are using database replicas/mirrors you can also restrict connections to them to be asynchronous tasks only by running:
 
    ```
-   export SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS=True
+   export SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS=enabled
    ```
-
-   *Note: The value of this environment variable must be able to be evaluated as `True` in Python in order for this to be enabled.*
 
 #### Run locally
 Follow these steps every time you want to work on this project locally.
