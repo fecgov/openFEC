@@ -10,7 +10,7 @@ from webservices.common.views import ItemizedResource
 
 
 @doc(
-    tags=['schedules/schedule_e'],
+    tags=['independent expenditures'],
     description=docs.SCHEDULE_E,
 )
 class ScheduleEView(ItemizedResource):
@@ -58,6 +58,7 @@ class ScheduleEView(ItemizedResource):
             args.schedule_e,
             args.make_seek_args(),
             args.make_sort_args(
+                default='-expenditure_date',
                 validator=args.OptionValidator([
                     'expenditure_date',
                     'expenditure_amount',

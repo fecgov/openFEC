@@ -132,6 +132,7 @@ class CalendarDatesView(ApiResource):
         return query
 
 
+@doc(tags=['dates'], description=docs.CALENDAR_EXPORT)
 class CalendarDatesExport(CalendarDatesView):
 
     renderers = {

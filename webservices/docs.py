@@ -58,7 +58,7 @@ we’re actively working on it and adding new features. The official site for Fe
 Election Commission (FEC) data is still the
 [Campaign Finance Disclosure Portal](http://fec.gov/pindex.shtml). While we plan to
 version big changes that are not backwards compatible, expect things to change as the API
-develops. You can view the [change log on GitHub](https://github.com/18F/openFEC/blob/master/CHANGELOG.md).
+develops.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
 FEC data. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
@@ -70,10 +70,13 @@ interesting candidates and committees. Then, you can use their IDs to find repor
 item details with the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
-Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
-calls an hour. Each call is limited to 100 results per page. You can also discuss the data in the
-[FEC data google group](https://groups.google.com/forum/#!forum/fec-data) or post questions
-to the [Open Data Stack Exchange](https://opendata.stackexchange.com/questions/ask?tags=fec). The model definitions and schema are available at [/swagger](/swagger/). This is useful for making wrappers and exploring the data.
+Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 120 requests per minute. Each call is limited to 100 results per page. You can email questions or comments to
+[18f-fec@gsa.gov](18f-fec@gsa.gov). You can also ask questions and discuss the data in the
+[FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). API changes will also
+be added to this group in advance of the change.
+
+The model definitions and schema are available at [/swagger](/swagger/). This is useful for
+making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
@@ -228,6 +231,11 @@ for independent expenditors; or the summary and detailed summary pages of the FE
 and [Form 3P](http://www.fec.gov/pdf/forms/fecfrm3p.pdf), for presidential committees.
 '''
 
+WIP_TAG = '''
+DISCLAIMER: The field labels contained within this resource are subject to change.  We are attempting to succinctly
+label these fields while conveying clear meaning to ensure accessibility for all users.
+'''
+
 REPORTS = '''
 Each report represents the summary information from FEC Form 3, Form 3X and Form 3P.
 These reports have key statistics that illuminate the financial status of a given committee.
@@ -242,9 +250,22 @@ Several different reporting structures exist, depending on the type of organizat
 submits financial information. To see an example of these reporting requirements,
 look at the summary and detailed summary pages of FEC Form 3, Form 3X, and Form 3P.
 '''
+
+REPORTS += WIP_TAG
+
 REPORT_YEAR = '''
 Year that the record applies to. Sometimes records are amended in subsequent
 years so this can differ from underlying form's receipt date.
+'''
+
+TWO_YEAR_TRANSACTION_PERIOD = '''
+This is a two-year period that is derived from the year a transaction took place in the
+Itemized Schedule A and Schedule B tables. In cases where we have the date of the transaction
+(contribution_receipt_date in schedules/schedule_a, disbursement_date in schedules/schedule_b)
+the two_year_transaction_period is named after the ending, even-numbered year. If we do not
+have the date  of the transation, we fall back to using the report year (report_year in both
+tables) instead,  making the same cycle adjustment as necessary. If no transaction year is
+specified, the results default to the most current cycle.
 '''
 
 TOTALS = '''
@@ -277,7 +298,7 @@ multiple ways to explain the way it may move though different committees as an e
 For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
 contributions. See below for full methodology.
 
-### Methodology for determining individual contributions
+### Methodology for determining unique, individual contributions
 
 For receipts over $200 use FEC code line_number to identify individuals.
 
@@ -302,12 +323,16 @@ Line number with description
     -17A Itemized individual contributions from Form 3P
     -18 Itemized individual contributions from Form 3P
 
-Of those transactions,[under $200, and having "earmark" in the e OR having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
+Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
 This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
+The data is divided in two-year periods, called `two_year_transaction_period`, which
+is derived from the `contribution_receipt_date`. If no value is supplied, the results
+will default to the most recent two-year period that is named after the ending,
+even-numbered year.
 
 Due to the large quantity of Schedule A filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -331,7 +356,11 @@ To fetch the next page of results, append "last_index=230880619&last_contributio
 to the URL.
 
 Note: because the Schedule A data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
+'''
+
+SUB_ID = '''
+A unique database identifier for itemized receipts or disbursements.
 '''
 
 SCHEDULE_B_TAG = '''
@@ -341,6 +370,10 @@ reported as part of forms F3, F3X and F3P.
 '''
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
+The data is divided in two-year periods, called `two_year_transaction_period`, which
+is derived from the `disbursement_date`. If no value is supplied, the results will
+default to the most recent two-year period that is named after the ending,
+even-numbered year.
 
 Due to the large quantity of Schedule B filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
@@ -364,12 +397,21 @@ To fetch the next page of results, append "last_index=230906248&amp;last_disburs
 to the URL.
 
 Note: because the Schedule B data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 SCHEDULE_B_BY_PURPOSE = '''
 Schedule B receipts aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
 Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/18F/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
+'''
+
+SCHEDULE_C_TAG = '''
+Schedule C shows all loans, endorsements and loan guarantees a committee
+receives or makes.
+'''
+
+SCHEDULE_C = SCHEDULE_C_TAG + '''
+The committee continues to report the loan until it is repaid.
 '''
 
 SCHEDULE_E_TAG = '''
@@ -414,7 +456,16 @@ To fetch the next page of results, append
 "&last_index=3023037&last_expenditure_amount=-17348.5" to the URL.
 
 Note: because the Schedule E data includes many records, counts for
-large result sets are approximate.
+large result sets are approximate; you will want to page through the records until no records are returned.
+'''
+
+SCHEDULE_F_TAG = '''
+Schedule F shows all special expenditures a national or state party committee makes in connection with
+the general election campaigns of federal candidates
+'''
+SCHEDULE_F = SCHEDULE_F_TAG + '''
+These coordinated party expenditures do not count against the contribution limits but are subject to other limits,
+these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political Party Committees.
 '''
 
 SIZE_DESCRIPTION = '''
@@ -445,6 +496,14 @@ The total all contributions in the following ranges:
 Unitemized contributions are included in the `0` category.
 '''
 
+STATE_AGGREGATE = '''
+Schedule A individual receipts aggregated by contributor state.
+This is an aggregate of only individual contributions. To avoid double counting,
+memoed items are not included. Transactions $200 and under do not have to be
+itemized, if those contributions are not itemized, they will not be included in the
+state totals.
+'''
+
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at https://api.data.gov/signup.
 '''
@@ -460,7 +519,7 @@ FILINGS = '''
 All official records and reports filed by or delivered to the FEC.
 
 Note: because the filings data includes many records, counts for large
-result sets are approximate.
+result sets are approximate; you will want to page through the records until no records are returned.
 '''
 
 DOC_TYPE = '''
@@ -495,14 +554,34 @@ Reporting deadlines, election dates FEC meetings, events etc.
 '''
 
 CALENDAR_DATES = '''
-Combines the election and reporting dates with commission meetings, conferences, outreach, AOs, Rules, Litigation dates and other
-event into one calendar.
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+events into one calendar.
 
-State filtering is only applicable to the reporting and election resources.
+State filtering now applies to elections, reports and reporting periods.
 
 Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
 reports. All reporting deadlines are available at /reporting-dates/ for reference.
+
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+that creates the calendar.
+'''
+
+CALENDAR_EXPORT = '''
+Returns CSV or ICS for downloading directly into calendar applications like Google, Outlook or other applications.
+
+Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
+events into one calendar.
+
+State filtering now applies to elections, reports and reporting periods.
+
+Presidential pre-primary report due dates are not shown on even years.
+Filers generally opt to file monthly rather than submit over 50 pre-primary election
+reports. All reporting deadlines are available at /reporting-dates/ for reference.
+
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+that creates the calendar.
+
 '''
 
 COMMUNICATION_TAG = '''
@@ -525,6 +604,23 @@ the election or defeat of any Federal candidate.  The costs of such communicatio
 must be reported to the Federal Election Commission under certain circumstances.
 '''
 
+FILER_RESOURCES = '''
+Useful tools for those who file with the FEC.
+
+Look up RAD analyst with telephone extension by committee_id.
+'''
+
+RAD_ANALYST = '''
+Use this endpoint to look up the RAD Analyst for a committee.
+
+The mission of the Reports Analysis Division (RAD) is to ensure that
+campaigns and political committees file timely and accurate reports that fully disclose
+their financial activities.  RAD is responsible for reviewing statements and financial
+reports filed by political committees participating in federal elections, providing
+assistance and guidance to the committees to properly file their reports, and for taking
+appropriate action to ensure compliance with the Federal Election Campaign Act (FECA).
+'''
+
 
 # fields and filters
 
@@ -538,7 +634,6 @@ PARTY = 'Three-letter code for the party affiliated with a candidate or committe
 PARTY_FULL = 'Party affiliated with a candidate or committee'
 FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1'
 REPORT_TYPE = 'Name of report where the underlying data comes from'
-REPORT_YEAR = 'Year the report was filed'
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 STATE_GENERIC = 'US state or territory'
 ZIP_CODE = 'Zip code'
@@ -566,7 +661,8 @@ FEDERAL_FUNDS_FLAG = 'A boolean the describes if a presidential candidate has ac
 
 # committees
 COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
-    the most recent name will be shown.'
+    the most recent name will be shown. Committee names are not unique. Use committee_id \
+    for looking up records.'
 COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
 DESIGNATION = 'The one-letter designation code of the organization:\n\
@@ -603,6 +699,16 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - Y party, qualified\n\
         - Z national party non-federal account\n\
 '
+PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
+        - Q PAC - qualified\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
+'
+
 TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
 committee, the most recent treasurer will be shown.'
 COMMITTEE_STATE = 'State of the committee\'s address as filed on the Form 1'
@@ -610,6 +716,9 @@ FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
 This is usually a Form 1 committee registration.'
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+
+# schedules
+MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
 
 # schedule A
 CONTRIBUTOR_ID = 'The FEC identifier should be represented here if the contributor is registered with the FEC.'
@@ -780,3 +889,45 @@ CAL_STATE = 'The state field only applies to election dates and reporting deadli
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
+
+# efiling
+EFILING_TAG = '''
+Efiling endpoints provide real-time campaign finance data for electronic filers.
+
+These endpoints are perfect for watching filings roll in when you want to know the latest information. Efiling endpoints
+only contain the most recent two years worth of data and don't contain the processed and coded data that
+you can find on the other endpoints. Those endpoints are better for in-depth analysis.
+
+Senate candidates and committees are required to file by paper. Other committees who raise and spend less than $50,000
+in a calendar can choose whether to file electronically or by paper.
+'''
+EFILING_TAG += WIP_TAG
+
+EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
+FILE_NUMBER = 'Filing ID number'
+AMENDED_BY = '''
+If this report has been amended, this field gives the file_number of the report that should be used. For example,
+if a report is amended multiple times, the first report and the first amendment will have the file_number of the final amended
+report in the ameded_by field and the final report will have no id in the amended_by field.
+'''
+AMENDS_FILE = '''
+For amendments, this file_number is the file_number of the previous report that is being amended. See amended_by
+for the most recent version of the report.
+'''
+AMENDMENT_NUMBER = '''
+Number of times the report has been amended.
+'''
+EFILE_REPORTS = '''
+Key financial data reported periodically by committees as they are reported. This feed includes summary
+information from the the House F3 reports, the presidential F3p reports and the PAC and party
+F3x reports.
+
+Generally, committees file reports on a quarterly or monthly basis, but
+some must also submit a report 12 days before primary elections. Therefore, during the primary
+season, the period covered by this file may be different for different committees. These totals
+also incorporate any changes made by committees, if any report covering the period is amended.
+'''
+EFILE_REPORTS += WIP_TAG
+
+MIN_FILTER = 'Filter for all amounts greater than a value.'
+MAX_FILTER = 'Filter for all amounts less than a value.'

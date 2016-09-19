@@ -45,24 +45,42 @@ spec = APISpec(
             'description': docs.FILINGS,
         },
         {
-            'name': 'schedules/schedule_a',
+            'name': 'receipts',
             'description': docs.SCHEDULE_A_TAG,
         },
         {
-            'name': 'schedules/schedule_b',
+            'name': 'disbursements',
             'description': docs.SCHEDULE_B_TAG,
         },
         {
-            'name': 'schedules/schedule_e',
+            'name': 'loans',
+            'description': docs.SCHEDULE_C_TAG,
+
+        },
+        {
+            'name': 'independent expenditures',
             'description': docs.SCHEDULE_E_TAG,
         },
         {
-            'name': 'communication_cost',
+            'name': 'party-coordinated expenditures',
+            'description': docs.SCHEDULE_F_TAG,
+        },
+        {
+            'name': 'communication cost',
             'description': docs.COMMUNICATION_TAG,
         },
         {
             'name': 'electioneering',
             'description': docs.ELECTIONEERING,
         },
+        {
+            'name': 'filer resources',
+            'description': docs.FILER_RESOURCES,
+        },
+        {
+            'name': 'efiling',
+            'description': docs.EFILING_TAG,
+        }
+
     ]
 )

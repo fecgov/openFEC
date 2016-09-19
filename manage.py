@@ -7,16 +7,20 @@ import subprocess
 import multiprocessing
 
 import networkx as nx
-from flask.ext.script import Server
-from flask.ext.script import Manager
-from sqlalchemy import text as sqla_text
+import sqlalchemy as sa
+from flask_script import Server
+from flask_script import Manager
 
-from webservices import flow
+from webservices import efile_parser, flow, partition, utils
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
-
+from webservices.tasks.utils import get_bucket, get_object
+from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
+    index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
+    delete_advisory_opinions_from_s3, load_archived_murs, delete_murs_from_s3,
+    delete_murs_from_es)
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -27,6 +31,74 @@ logging.basicConfig(level=logging.INFO)
 # --no-debug flag to `runserver`.
 manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
+manager.command(remove_legal_docs)
+manager.command(index_statutes)
+manager.command(index_regulations)
+manager.command(index_advisory_opinions)
+manager.command(load_advisory_opinions_into_s3)
+manager.command(delete_advisory_opinions_from_s3)
+manager.command(load_archived_murs)
+manager.command(delete_murs_from_s3)
+manager.command(delete_murs_from_es)
+
+def check_itemized_queues(schedule):
+    """Checks to see if the queues associated with an itemized schedule have
+    been successfully cleared out and sends the information to the logs.
+    """
+
+    remaining_new_queue = db.engine.execute(
+        'select count(*) from ofec_sched_{schedule}_queue_new'.format(
+            schedule=schedule
+        )
+    ).scalar()
+    remaining_old_queue = db.engine.execute(
+        'select count(*) from ofec_sched_{schedule}_queue_old'.format(
+            schedule=schedule
+        )
+    ).scalar()
+
+    if remaining_new_queue == remaining_old_queue == 0:
+        logger.info(
+            'Successfully emptied Schedule {schedule} queues.'.format(
+                schedule=schedule.upper()
+            )
+        )
+    else:
+        logger.warn(
+            'Schedule {schedule} queues not empty ({new} new / {old} old left).'.format(
+                schedule=schedule.upper(),
+                new=remaining_new_queue,
+                old=remaining_old_queue
+            )
+        )
+
+def get_projected_weekly_itemized_totals(schedules):
+    """Calculates the weekly total of itemized records that should have been
+    processed at the point when the weekly aggregate rebuild takes place.
+    """
+
+    projected_weekly_totals = {}
+
+    for schedule in schedules:
+        cmd = 'select get_projected_weekly_itemized_total(\'{0}\');'.format(schedule)
+        result = db.engine.execute(cmd)
+        projected_weekly_totals[schedule] = result.scalar()
+
+    return projected_weekly_totals
+
+def get_actual_weekly_itemized_totals(schedules):
+    """Retrieves the actual weekly total of itemized records that have been
+    processed at the time of the weekly aggregate rebuild.
+    """
+
+    actual_weekly_totals = {}
+
+    for schedule in schedules:
+        cmd = 'select count(*) from ofec_sched_{0}_master where pg_date > current_date - interval \'7 days\';'.format(schedule)
+        result = db.engine.execute(cmd)
+        actual_weekly_totals[schedule] = result.scalar()
+
+    return actual_weekly_totals
 
 def execute_sql_file(path):
     """This helper is typically used within a multiprocessing pool; create a new database
@@ -39,7 +111,7 @@ def execute_sql_file(path):
             line for line in fp.readlines()
             if not line.strip().startswith('--')
         ])
-        db.engine.execute(sqla_text(cmd), **SQL_CONFIG)
+        db.engine.execute(sa.text(cmd), **SQL_CONFIG)
 
 def execute_sql_folder(path, processes):
     sql_dir = get_full_path(path)
@@ -67,7 +139,7 @@ def load_nicknames():
 
 @manager.command
 def load_pacronyms():
-    """For improved search of orgnizations that go by acronyms"""
+    """For improved search of organizations that go by acronyms"""
     import pandas as pd
     import sqlalchemy as sa
     try:
@@ -168,7 +240,23 @@ def update_aggregates():
     """These are run nightly to recalculate the totals
     """
     logger.info('Updating incremental aggregates...')
-    db.engine.execute('select update_aggregates()')
+
+    with db.engine.begin() as connection:
+        connection.execute(
+            sa.text('select update_aggregates()').execution_options(
+                autocommit=True
+            )
+        )
+        logger.info('Finished updating Schedule E and support aggregates.')
+
+    logger.info('Updating Schedule A...')
+    partition.SchedAGroup.refresh_children()
+    logger.info('Finished updating Schedule A.')
+
+    logger.info('Updating Schedule B...')
+    partition.SchedBGroup.refresh_children()
+    logger.info('Finished updating Schedule B.')
+
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command
@@ -184,6 +272,12 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
+    logger.info('Partitioning Schedule A...')
+    partition.SchedAGroup.run()
+    logger.info('Finished partitioning Schedule A.')
+    logger.info('Partitioning Schedule B...')
+    partition.SchedBGroup.run()
+    logger.info('Finished partitioning Schedule B.')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
@@ -200,6 +294,11 @@ def cf_startup():
     check_config()
     if env.index == '0':
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
+
+@manager.command
+def test_util():
+    df = efile_parser.get_dataframe(6)
+    efile_parser.parse_f3psummary_column_b(df)
 
 if __name__ == '__main__':
     manager.run()
