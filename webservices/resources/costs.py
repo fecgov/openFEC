@@ -10,7 +10,7 @@ from webservices.common.views import ApiResource
 
 
 @doc(
-    tags=['communication_cost'],
+    tags=['communication cost'],
     description=docs.COMMUNICATION_COST,
 )
 class CommunicationCostView(ApiResource):
@@ -32,7 +32,7 @@ class CommunicationCostView(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.idx
+        return self.model.sub_id
 
     filter_multi_fields = [
         ('image_number', models.CommunicationCost.image_number),
@@ -45,6 +45,7 @@ class CommunicationCostView(ApiResource):
         (('min_amount', 'max_amount'), models.CommunicationCost.transaction_amount),
         (('min_image_number', 'max_image_number'), models.CommunicationCost.image_number),
     ]
+
 
 @doc(
     tags=['electioneering'],

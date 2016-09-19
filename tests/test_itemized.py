@@ -29,13 +29,21 @@ class TestItemized(ApiBaseTest):
 
     def test_sorting(self):
         receipts = [
-            factories.ScheduleAFactory(report_year=2014, contribution_receipt_date=datetime.date(2014, 1, 1)),
-            factories.ScheduleAFactory(report_year=2012, contribution_receipt_date=datetime.date(2012, 1, 1)),
+            factories.ScheduleAFactory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016
+            ),
+            factories.ScheduleAFactory(
+                report_year=2015,
+                contribution_receipt_date=datetime.date(2015, 1, 1),
+                two_year_transaction_period=2016
+            ),
         ]
         response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
-            [2012, 2014]
+            [2015, 2016]
         )
         self.assertEqual(
             response['pagination']['last_indexes'],
@@ -44,6 +52,42 @@ class TestItemized(ApiBaseTest):
                 'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
             }
         )
+
+    def test_two_year_transaction_period_default_supplied_automatically(self):
+        receipts = [
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                two_year_transaction_period=2014
+            ),
+            factories.ScheduleAFactory(
+                report_year=2016,
+                contribution_receipt_date=datetime.date(2016, 1, 1),
+                two_year_transaction_period=2016
+            ),
+        ]
+
+        response = self._response(api.url_for(ScheduleAView))
+        self.assertEqual(len(response['results']), 1)
+
+    def test_two_year_transaction_period_limits_results_per_cycle(self):
+        receipts = [
+            factories.ScheduleAFactory(
+                report_year=2014,
+                contribution_receipt_date=datetime.date(2014, 1, 1),
+                two_year_transaction_period=2014
+            ),
+            factories.ScheduleAFactory(
+                report_year=2012,
+                contribution_receipt_date=datetime.date(2012, 1, 1),
+                two_year_transaction_period=2012
+            ),
+        ]
+
+        response = self._response(
+            api.url_for(ScheduleAView, two_year_transaction_period=2014)
+        )
+        self.assertEqual(len(response['results']), 1)
 
     def test_sorting_bad_column(self):
         response = self.app.get(api.url_for(ScheduleAView, sort='bad_column'))
@@ -144,19 +188,6 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3'))
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
 
-    def test_memoed(self):
-        params = [
-            (factories.ScheduleAFactory, ScheduleAView),
-            (factories.ScheduleBFactory, ScheduleBView),
-        ]
-        for factory, resource in params:
-            [
-                factory(),
-                factory(memo_code='X'),
-            ]
-            results = self._results(api.url_for(resource))
-            self.assertFalse(results[0]['memoed_subtotal'])
-            self.assertTrue(results[1]['memoed_subtotal'])
 
     def test_filter_individual_sched_a(self):
         individuals = [
@@ -179,6 +210,8 @@ class TestItemized(ApiBaseTest):
             ScheduleA.line_number,
             ScheduleA.memo_code,
             ScheduleA.memo_text,
+            ScheduleA.contributor_id,
+            ScheduleA.committee_id,
         )
 
         rows = ScheduleA.query.all()

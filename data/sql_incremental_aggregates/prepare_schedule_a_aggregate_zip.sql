@@ -1,6 +1,6 @@
 -- Create initial aggregate
-drop table if exists ofec_sched_a_aggregate_zip;
-create table ofec_sched_a_aggregate_zip as
+drop table if exists ofec_sched_a_aggregate_zip_tmp;
+create table ofec_sched_a_aggregate_zip_tmp as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
@@ -12,20 +12,24 @@ select
 from fec_vsum_sched_a
 where rpt_yr >= :START_YEAR_AGGREGATE
 and contb_receipt_amt is not null
-and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
+and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
 group by cmte_id, cycle, zip
 ;
 
-alter table ofec_sched_a_aggregate_zip add column idx serial primary key;
+alter table ofec_sched_a_aggregate_zip_tmp add column idx serial primary key;
 
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_zip (cmte_id, idx);
-create index on ofec_sched_a_aggregate_zip (cycle, idx);
-create index on ofec_sched_a_aggregate_zip (zip, idx);
-create index on ofec_sched_a_aggregate_zip (state, idx);
-create index on ofec_sched_a_aggregate_zip (state_full, idx);
-create index on ofec_sched_a_aggregate_zip (total, idx);
-create index on ofec_sched_a_aggregate_zip (count, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (cmte_id, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (cycle, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (zip, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (state, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (state_full, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (total, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (count, idx);
+
+-- Remove previous aggregate and rename new aggregate
+drop table if exists ofec_sched_a_aggregate_zip;
+alter table ofec_sched_a_aggregate_zip_tmp rename to ofec_sched_a_aggregate_zip;
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_zip() returns void as $$
@@ -53,7 +57,7 @@ begin
             select * from old
         ) t
         where contb_receipt_amt is not null
-        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
+        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
         group by cmte_id, cycle, zip
     ),
     inc as (
