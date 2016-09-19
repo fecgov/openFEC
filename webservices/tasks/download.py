@@ -26,7 +26,6 @@ logger = logging.getLogger(__name__)
 IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null'}
 RESOURCE_WHITELIST = {
     candidates.CandidateList,
-    candidate_aggregates.TotalsCandidateView,
     committees.CommitteeList,
     costs.CommunicationCostView,
     costs.ElectioneeringView,
