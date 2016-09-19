@@ -298,7 +298,6 @@ augment_models(
     models.CandidateFlags
 
 )
-
 class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema'],schemas['CandidateFlagsSchema']):
     pass
 
