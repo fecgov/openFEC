@@ -10,7 +10,7 @@ from webservices.common.views import ItemizedResource
 
 
 @doc(
-    tags=['schedules/schedule_b'],
+    tags=['disbursements'],
     description=docs.SCHEDULE_B,
 )
 class ScheduleBView(ItemizedResource):
@@ -21,7 +21,7 @@ class ScheduleBView(ItemizedResource):
 
     @property
     def year_column(self):
-        return self.model.report_year
+        return self.model.two_year_transaction_period
     @property
     def index_column(self):
         return self.model.sub_id
@@ -33,6 +33,9 @@ class ScheduleBView(ItemizedResource):
         ('recipient_state', models.ScheduleB.recipient_state),
         ('recipient_committee_id', models.ScheduleB.recipient_committee_id),
         ('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
+    ]
+    filter_match_fields = [
+        ('two_year_transaction_period', models.ScheduleB.two_year_transaction_period),
     ]
     filter_fulltext_fields = [
         ('recipient_name', models.ScheduleB.recipient_name_text),
@@ -51,6 +54,7 @@ class ScheduleBView(ItemizedResource):
             args.schedule_b,
             args.make_seek_args(),
             args.make_sort_args(
+                default='-disbursement_date',
                 validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
             ),
         )
@@ -59,4 +63,7 @@ class ScheduleBView(ItemizedResource):
         query = super(ScheduleBView, self).build_query(**kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
+        if kwargs.get('sub_id'):
+            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         return query
+

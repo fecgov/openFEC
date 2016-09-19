@@ -6,6 +6,7 @@ from webargs import fields, validate, ValidationError
 from marshmallow.compat import text_type
 
 from webservices import docs
+from webservices.config import SQL_CONFIG
 from webservices.common.models import db
 
 
@@ -198,7 +199,7 @@ filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'report_type': fields.List(IStr, description='Report type'),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
-    'beginning_image_number': fields.List(fields.Int, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
@@ -219,12 +220,62 @@ filings = {
     ),
 }
 
+efilings = {
+    'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'min_receipt_date': fields.DateTime(description='Selects all items received by FEC after this date or datetime'),
+    'max_receipt_date': fields.DateTime(description='Selects all items received by FEC before this date or datetime'),
+}
+
 reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
-    'beginning_image_number': fields.List(fields.Int, description=docs.BEGINNING_IMAGE_NUMBER),
+    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
     'is_amended': fields.Bool(description='Report has been amended'),
+    'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
+    'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
+    'min_receipts_amount': Currency(description=docs.MIN_FILTER),
+    'max_receipts_amount': Currency(description=docs.MAX_FILTER),
+    'min_receipt_date': fields.DateTime(description='Selects all items received by FEC after this date or datetime'),
+    'max_receipt_date': fields.DateTime(description='Selects all items received by FEC before this date or datetime'),
+    'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
+    'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
+    'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
+    'max_debts_owed_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_independent_expenditures': Currency(description=docs.MIN_FILTER),
+    'max_independent_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_party_coordinated_expenditures': Currency(description=docs.MIN_FILTER),
+    'max_party_coordinated_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_total_contributions': Currency(description=docs.MIN_FILTER),
+    'max_total_contributions': Currency(description=docs.MAX_FILTER),
+    'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
+    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID)
+}
+
+committee_reports = {
+    'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
+    'is_amended': fields.Bool(description='Report has been amended'),
+    'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
+    'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
+    'min_receipts_amount': Currency(description=docs.MIN_FILTER),
+    'max_receipts_amount': Currency(description=docs.MAX_FILTER),
+    'min_cash_on_hand_end_period_amount': Currency(description=docs.MIN_FILTER),
+    'max_cash_on_hand_end_period_amount': Currency(description=docs.MAX_FILTER),
+    'min_debts_owed_amount': Currency(description=docs.MIN_FILTER),
+    'max_debts_owed_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_independent_expenditures': Currency(description=docs.MIN_FILTER),
+    'max_independent_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_party_coordinated_expenditures': Currency(description=docs.MIN_FILTER),
+    'max_party_coordinated_expenditures': Currency(description=docs.MAX_FILTER),
+    'min_total_contributions': Currency(description=docs.MIN_FILTER),
+    'max_total_contributions': Currency(description=docs.MAX_FILTER),
+    'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
+    'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
 }
 
 
@@ -327,6 +378,11 @@ schedule_a = {
         fields.Str(validate=validate.OneOf(['individual', 'committee'])),
         description='Filters individual or committee contributions based on line number'
     ),
+    'two_year_transaction_period': fields.Int(
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
+        required=True,
+        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+    ),
 }
 
 schedule_a_by_size = {
@@ -381,11 +437,25 @@ schedule_b = {
     'disbursement_purpose_category': fields.List(IStr, description='Disbursement purpose category'),
     'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, use the `disbursement_date` of the last result and pass it here as `last_disbursement_date` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, use the `disbursement_amount` of the last result and pass it here as `last_disbursement_amount` to page through Schedule B data. You’ll also need to pass the index of that last result to `last_index` to get the next page.'),
+    'two_year_transaction_period': fields.Int(
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
+        required=True,
+        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+    ),
 }
 
 schedule_b_by_purpose = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'purpose': fields.List(fields.Str, description='Disbursement purpose category'),
+}
+
+schedule_c = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    #'candidate_name': fields.List(fields.Str, description='Name of candidate'),
+    #'loaner_name': fields.List(fields.Str, description='Name of loaner'),
+    'min_payment_to_date': fields.Int(description='Minimum payment to date'),
+    'max_payment_to_date': fields.Int(description='Maximum payment to date'),
+
 }
 
 schedule_e_by_candidate = {
@@ -396,6 +466,10 @@ schedule_e_by_candidate = {
         validate=validate.OneOf(['S', 'O']),
         description='Support or opposition'
     ),
+}
+
+schedule_f = {
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
 }
 
 communication_cost = {
@@ -508,4 +582,11 @@ schedule_e = {
         description='Support or opposition',
     ),
     'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+}
+
+rad_analyst = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'analyst_id': fields.List(IStr, description='ID of RAD analyst'),
+    'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
+    'name': fields.List(fields.Str, description='Name of RAD analyst'),
 }

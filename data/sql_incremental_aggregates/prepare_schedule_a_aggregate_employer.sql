@@ -1,6 +1,6 @@
 -- Create initial aggregate
-drop table if exists ofec_sched_a_aggregate_employer;
-create table ofec_sched_a_aggregate_employer as
+drop table if exists ofec_sched_a_aggregate_employer_tmp;
+create table ofec_sched_a_aggregate_employer_tmp as
 select
     cmte_id,
     rpt_yr + rpt_yr % 2 as cycle,
@@ -10,18 +10,22 @@ select
 from fec_vsum_sched_a
 where rpt_yr >= :START_YEAR_AGGREGATE
 and contb_receipt_amt is not null
-and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
+and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
 group by cmte_id, cycle, employer
 ;
 
-alter table ofec_sched_a_aggregate_employer add column idx serial primary key;
+alter table ofec_sched_a_aggregate_employer_tmp add column idx serial primary key;
 
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_employer (cmte_id, idx);
-create index on ofec_sched_a_aggregate_employer (cycle, idx);
-create index on ofec_sched_a_aggregate_employer (employer, idx);
-create index on ofec_sched_a_aggregate_employer (total, idx);
-create index on ofec_sched_a_aggregate_employer (count, idx);
+create index on ofec_sched_a_aggregate_employer_tmp (cmte_id, idx);
+create index on ofec_sched_a_aggregate_employer_tmp (cycle, idx);
+create index on ofec_sched_a_aggregate_employer_tmp (employer, idx);
+create index on ofec_sched_a_aggregate_employer_tmp (total, idx);
+create index on ofec_sched_a_aggregate_employer_tmp (count, idx);
+
+-- Remove previous aggregate and rename new aggregate
+drop table if exists ofec_sched_a_aggregate_employer;
+alter table ofec_sched_a_aggregate_employer_tmp rename to ofec_sched_a_aggregate_employer;
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_employer() returns void as $$
@@ -47,7 +51,7 @@ begin
             select * from old
         ) t
         where contb_receipt_amt is not null
-        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text)
+        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
         group by cmte_id, cycle, employer
     ),
     inc as (

@@ -1,3 +1,4 @@
+import elasticsearch
 from webservices.env import env
 from flask import request
 from webservices import utils
@@ -11,7 +12,7 @@ class Legal(utils.Resource):
     def post(self, **kwargs):
         data = request.get_json()
         if data['api_key'] in write_authorized_tokens:
-            es.bulk((es.index_op(doc, id=doc['doc_id']) for doc in data['docs']),
+            elasticsearch.helpers.bulk(es, (dict(_op_type='index', _source=doc, id=doc['doc_id']) for doc in data['docs']),
               index='docs',
               doc_type=data['doc_type'])
 

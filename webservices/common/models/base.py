@@ -1,8 +1,8 @@
 import random
 
 import celery
-from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.sqlalchemy import SignallingSession
+from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SignallingSession
 
 
 class RoutingSession(SignallingSession):
