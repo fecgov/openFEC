@@ -290,7 +290,6 @@ augment_models(
     models.CandidateDetail,
 
 )
-
 #built these schemas without make_candidate_schema, as it was filtering out the flags
 augment_models(
     make_schema,
@@ -300,21 +299,10 @@ augment_models(
 
 )
 
-candidate_history_total_schemas = (
-    schemas['CandidateHistorySchema'],
-    schemas['CandidateTotalSchema'],
-    schemas['CandidateFlagsSchema'],
-)
-
-CandidateHistoryTotalSchema = type(
-    'CandidateHistoryTotalSchema',
-    candidate_history_total_schemas,
-    {}
-)
+class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema'],schemas['CandidateFlagsSchema']):
+    pass
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
-register_schema(CandidateHistoryTotalSchema)
-register_schema(CandidateHistoryTotalPageSchema)
 
 
 CandidateSearchSchema = make_schema(
