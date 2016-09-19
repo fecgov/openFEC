@@ -122,7 +122,7 @@ class ScheduleAByStateCandidateView(utils.Resource):
     description='Aggregated candidate receipts and disbursements grouped by cycle.',
 )
 class TotalsCandidateView(ApiResource):
-    schema = schemas.CandidateHistoryTotalSchema
+
     page_schema = schemas.CandidateHistoryTotalPageSchema
 
     @property
