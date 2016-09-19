@@ -247,6 +247,10 @@ class ScheduleE(BaseItemized):
     category_code_full = db.Column('catg_cd_desc', db.String)
     support_oppose_indicator = db.Column('s_o_ind', db.String)
 
+    memo_code = db.Column('memo_cd', db.String)
+    memo_code_full = db.Column('memo_cd_desc', db.String)
+    memo_text = db.Column(db.String)
+
     # Candidate info
     candidate_id = db.Column('s_o_cand_id', db.String)
     candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
@@ -259,6 +263,15 @@ class ScheduleE(BaseItemized):
     candidate_office = db.Column('s_o_cand_office', db.String, doc=docs.OFFICE)
     cand_office_state = db.Column('s_o_cand_office_st', db.String, doc=docs.STATE_GENERIC)
     cand_office_district = db.Column('s_o_cand_office_district', db.String, doc=docs.DISTRICT)
+    #Conduit info
+    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
+    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
+    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
+    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
+    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
+    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+
     election_type = db.Column('election_tp', db.String, doc=docs.ELECTION_TYPE)
     election_type_full = db.Column('fec_election_tp_desc', db.String, doc=docs.ELECTION_TYPE)
 
@@ -273,30 +286,19 @@ class ScheduleE(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
 
-    record_number = db.Column('record_num', db.Integer)
-    report_primary_general = db.Column('rpt_pgi', db.String)
-
     filer_prefix = db.Column(db.String)
     filer_first_name = db.Column('filer_f_nm', db.String)
     filer_middle_name = db.Column('filer_m_nm', db.String)
     filer_last_name = db.Column('filer_l_nm', db.String)
     filer_suffix = db.Column(db.String)
-    receipt_date = db.Column('receipt_dt', db.Date)
-    load_date = db.Column(db.DateTime, doc=docs.LOAD_DATE)
-    update_date = db.Column(db.DateTime, doc=docs.UPDATE_DATE)
 
-    # record_number = db.Column('record_num', db.Integer)
-    # report_primary_general = db.Column('rpt_pgi', db.String)
-    # receipt_date = db.Column('receipt_dt', db.Date)
-    beneficiary_committee_name = db.Column('benef_cmte_nm', db.String)
-    semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
     transaction_id = db.Column('tran_id', db.Integer)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
 
+    action_code = db.Column('action_cd', db.String)
+    action_code_full = db.Column('action_cd_desc', db.String)
+
     # Auxiliary fields
-    recipient_name_text = db.Column(TSVECTOR)
-    disbursement_description_text = db.Column(TSVECTOR)
-    disbursement_purpose_category = db.Column(db.String)
     schedule_type = db.Column('schedule_type', db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
 
