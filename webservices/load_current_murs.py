@@ -1,8 +1,8 @@
 import logging
 import re
 from collections import defaultdict
+from urllib.parse import urlencode
 
-import furl
 from webservices import utils
 from webservices.env import env
 from webservices.rest import db
@@ -50,7 +50,7 @@ MUR_VIOLATIONS = """
     ;
 """
 
-STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+[a-z]+(-1)?)')
+STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
 
 def load_current_murs():
@@ -118,16 +118,16 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
     citations = []
     if statutory_citation:
         for match in STATUTE_REGEX.finditer(statutory_citation):
-            url = furl.furl('https://api.fdsys.gov/link')
             title, section = reclassify_statutory_citation(match.group('section'))
-            url.args.update({
-                'collection': 'uscode',
-                'year': 'mostrecent',
-                'link-type': 'html',
-                'title': title,
-                'section': section
-            })
-            citations.append(url.tostr())
+            url = 'https://api.fdsys.gov/link?' +\
+                urlencode([
+                    ('collection', 'uscode'),
+                    ('year', 'mostrecent'),
+                    ('link-type', 'html'),
+                    ('title', title),
+                    ('section', section)
+                ])
+            citations.append(url)
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
                 statutory_citation, entity_id, case_id)
@@ -137,16 +137,16 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
         for match in REGULATION_REGEX.finditer(regulatory_citation):
-            url = furl.furl('https://api.fdsys.gov/link')
-            url.args.update({
-                'collection': 'cfr',
-                'year': 'mostrecent',
-                'titlenum': '11',
-                'partnum': match.group('part')
-            })
+            url = 'https://api.fdsys.gov/link?' +\
+                urlencode([
+                    ('collection', 'cfr'),
+                    ('year', 'mostrecent'),
+                    ('titlenum', '11'),
+                    ('partnum', match.group('part'))
+                ])
             if match.group('section'):
-                url.args['sectionnum'] = match.group('section')
-            citations.append(url.tostr())
+                url += '&' + urlencode([('sectionnum', match.group('section'))])
+            citations.append(url)
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                 regulatory_citation, entity_id, case_id)
