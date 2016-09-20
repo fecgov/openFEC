@@ -1,5 +1,6 @@
 import logging
 import re
+from collections import defaultdict
 
 import furl
 from webservices import utils
@@ -42,23 +43,15 @@ MUR_DOCUMENTS = """
 """
 # TODO: Check if document order matters
 
-MUR_STATUTORY_CITATIONS = """
-    SELECT DISTINCT statutory_citation AS citation
+MUR_VIOLATIONS = """
+    SELECT entity_id, stage, statutory_citation, regulatory_citation
     FROM fecmur.violations
     WHERE case_id = %s
-    AND statutory_citation IS NOT NULL
-"""
-
-MUR_REGULATORY_CITATIONS = """
-    SELECT DISTINCT regulatory_citation AS citation
-    FROM fecmur.violations
-    WHERE case_id = %s
-    AND regulatory_citation IS NOT NULL
     ;
 """
 
-REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
 STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+[a-z]+)')
+REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
 
 def load_current_murs():
     es = utils.get_elasticsearch_connection()
@@ -67,20 +60,20 @@ def load_current_murs():
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_MURS)
         for row in rs:
+            case_id = row['case_id']
             mur = {
                 'doc_id': 'mur_%s' % row['case_no'],
                 'no': row['case_no'],
                 'name': row['name'],
                 'mur_type': 'current',
             }
-            mur['subject'] = ",".join(get_subjects(row['case_id']))
-            mur['citations'] = {
-                'us_code': get_statutory_citations(row['case_id']),
-                'regulations': get_regulatory_citations(row['case_id'])
-            }
-            participants = get_participants(row['case_id'])
-            mur['participants'] = [v for v in participants.values()]
-            mur['text'], mur['documents'] = get_documents(row['case_id'], bucket, bucket_name)
+            mur['subject'] = ",".join(get_subjects(case_id))
+
+            participants = get_participants(case_id)
+            mur['participants'] = list(participants.values())
+            assign_citations(participants, case_id)
+
+            mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
             # TODO pdf_pages, open_date, close_date, url
             es.index('docs', 'murs', mur, id=mur['doc_id'])
 
@@ -91,7 +84,8 @@ def get_participants(case_id):
         for row in rs:
             participants[row['entity_id']] = {
                 'name': row['name'],
-                'role': row['role']
+                'role': row['role'],
+                'citations': defaultdict(list)
             }
     return participants
 
@@ -107,45 +101,42 @@ def get_subjects(case_id):
             subjects.append(subject_str)
     return subjects
 
-def get_statutory_citations(case_id):
-    citations = {}
-    citation_texts = []
-    with db.engine.connect() as citation_conn:
-        mur_citation_rs = citation_conn.execute(MUR_STATUTORY_CITATIONS, case_id)
-        for citation_row in mur_citation_rs:
-            citation_texts.append(citation_row['citation'])
-        for citation_text in citation_texts:
-            for match in STATUTE_REGEX.finditer(citation_text):
-                url = furl.furl('http://api.fdsys.gov/link')
-                url.args.update({
-                    'collection': 'uscode',
-                    'year': 'mostrecent',
-                    'title': '2',
-                    'section': match.group('section')
-                })
-                citations[match.group()] = url.tostr()
-    return as_citation_list(citations)
+def assign_citations(participants, case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_VIOLATIONS, case_id)
+        for row in rs:
+            if row['entity_id'] not in participants:
+                logger.warn("Entity %s from violations not found in particpants for case %s", row['entity_id'], case_id)
+                continue
+            participants[row['entity_id']]['citations'][row['stage']].append(
+                parse_citations(row['statutory_citation'], row['regulatory_citation']))
 
-def get_regulatory_citations(case_id):
-    citations = {}
-    citation_texts = []
-    with db.engine.connect() as citation_conn:
-        mur_citation_rs = citation_conn.execute(MUR_REGULATORY_CITATIONS, case_id)
-        for citation_row in mur_citation_rs:
-            citation_texts.append(citation_row['citation'])
-        for citation_text in citation_texts:
-            for match in REGULATION_REGEX.finditer(citation_text):
-                url = furl.furl('http://api.fdsys.gov/link')
-                url.args.update({
-                    'collection': 'cfr',
-                    'year': 'mostrecent',
-                    'titlenum': '11',
-                    'partnum': match.group('part')
-                })
-                if match.group('section'):
-                    url.args['sectionnum'] = match.group('section')
-                citations[match.group()] = url.tostr()
-    return as_citation_list(citations)
+def parse_citations(statutory_citation, regulatory_citation):
+    citations = []
+    if statutory_citation:
+        for match in STATUTE_REGEX.finditer(statutory_citation):
+            url = furl.furl('https://api.fdsys.gov/link')
+            url.args.update({
+                'collection': 'uscode',
+                'year': 'mostrecent',
+                'link-type': 'html',
+                'title': '2',
+                'section': match.group('section')
+            })
+        citations.append(url.tostr())
+    if regulatory_citation:
+        for match in REGULATION_REGEX.finditer(regulatory_citation):
+            url = furl.furl('https://api.fdsys.gov/link')
+            url.args.update({
+                'collection': 'cfr',
+                'year': 'mostrecent',
+                'titlenum': '11',
+                'partnum': match.group('part')
+            })
+            if match.group('section'):
+                url.args['sectionnum'] = match.group('section')
+            citations.append(url.tostr())
+    return citations
 
 def get_documents(case_id, bucket, bucket_name):
     documents = []
