@@ -50,7 +50,7 @@ MUR_VIOLATIONS = """
     ;
 """
 
-STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+[a-z]+)')
+STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+[a-z]+(-1)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
 
 def load_current_murs():
@@ -70,8 +70,8 @@ def load_current_murs():
             mur['subject'] = ",".join(get_subjects(case_id))
 
             participants = get_participants(case_id)
-            mur['participants'] = list(participants.values())
             assign_citations(participants, case_id)
+            mur['participants'] = list(participants.values())
 
             mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
             # TODO pdf_pages, open_date, close_date, url
@@ -105,25 +105,36 @@ def assign_citations(participants, case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_VIOLATIONS, case_id)
         for row in rs:
-            if row['entity_id'] not in participants:
-                logger.warn("Entity %s from violations not found in particpants for case %s", row['entity_id'], case_id)
+            entity_id = row['entity_id']
+            if entity_id not in participants:
+                logger.warn("Entity %s from violations not found in participants for case %s", entity_id, case_id)
                 continue
-            participants[row['entity_id']]['citations'][row['stage']].append(
-                parse_citations(row['statutory_citation'], row['regulatory_citation']))
+            participants[entity_id]['citations'][row['stage']].extend(
+                parse_statutory_citations(row['statutory_citation'], case_id, entity_id))
+            participants[entity_id]['citations'][row['stage']].extend(
+                parse_regulatory_citations(row['regulatory_citation'], case_id, entity_id))
 
-def parse_citations(statutory_citation, regulatory_citation):
+def parse_statutory_citations(statutory_citation, case_id, entity_id):
     citations = []
     if statutory_citation:
         for match in STATUTE_REGEX.finditer(statutory_citation):
             url = furl.furl('https://api.fdsys.gov/link')
+            title, section = reclassify_statutory_citation(match.group('section'))
             url.args.update({
                 'collection': 'uscode',
                 'year': 'mostrecent',
                 'link-type': 'html',
-                'title': '2',
-                'section': match.group('section')
+                'title': title,
+                'section': section
             })
-        citations.append(url.tostr())
+            citations.append(url.tostr())
+        if not citations:
+            logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
+                statutory_citation, entity_id, case_id)
+    return citations
+
+def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
+    citations = []
     if regulatory_citation:
         for match in REGULATION_REGEX.finditer(regulatory_citation):
             url = furl.furl('https://api.fdsys.gov/link')
@@ -136,7 +147,51 @@ def parse_citations(statutory_citation, regulatory_citation):
             if match.group('section'):
                 url.args['sectionnum'] = match.group('section')
             citations.append(url.tostr())
+        if not citations:
+            logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
+                regulatory_citation, entity_id, case_id)
     return citations
+
+def reclassify_statutory_citation(section):
+    """
+    Source: http://uscode.house.gov/editorialreclassification/t52/Reclassifications_Title_52.html
+    """
+    reclassifications = {
+        '431': '30101',
+        '432': '30102',
+        '433': '30103',
+        '434': '30104',
+        '437': '30105',
+        '437c': '30106',
+        '437d': '30107',
+        '437f': '30108',
+        '437g': '30109',
+        '437h': '30110',
+        '438': '30111',
+        '438a': '30112',
+        '439': '30113',
+        '439a': '30114',
+        '439c': '30115',
+        '441a': '30116',
+        '441a-1': '30117',
+        '441b': '30118',
+        '441c': '30119',
+        '441d': '30120',
+        '441e': '30121',
+        '441f': '30122',
+        '441g': '30123',
+        '441h': '30124',
+        '441i': '30125',
+        '441k': '30126',
+        '451': '30141',
+        '452': '30142',
+        '453': '30143',
+        '454': '30144',
+        '455': '30145',
+        '457': '30146',
+    }
+
+    return 52, reclassifications.get(section, section)
 
 def get_documents(case_id, bucket, bucket_name):
     documents = []
@@ -159,7 +214,3 @@ def get_documents(case_id, bucket, bucket_name):
             document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
     return document_text, documents
-
-def as_citation_list(citation_dict):
-    return [{'text': citation_text, 'url': citation_url}
-            for citation_text, citation_url in citation_dict.items()]
