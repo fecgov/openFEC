@@ -467,6 +467,12 @@ schedule_e_by_candidate = {
         description='Support or opposition'
     ),
 }
+#These arguments will evolve with updated filtering needs
+schedule_d = {
+    'min_payment_period': fields.Float(),
+    'max_payment_period': fields.Float(),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+}
 
 schedule_f = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
