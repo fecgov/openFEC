@@ -272,7 +272,6 @@ apidoc.register(sched_f.ScheduleFView, blueprint='v1')
 apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
 apidoc.register(sched_d.ScheduleDView, blueprint='v1')
 apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
-
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')

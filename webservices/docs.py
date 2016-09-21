@@ -424,8 +424,6 @@ SCHEDULE_D = SCHEDULE_D_TAG + '''
 
 '''
 
-
-
 SCHEDULE_E_TAG = '''
 Schedule E covers the line item expenditures for independent expenditures. For example, if a super PAC
 bought ads on TV to oppose a federal candidate, each ad purchase would be recorded here with
