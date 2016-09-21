@@ -1,3 +1,4 @@
+import re
 import subprocess
 from mock import patch
 
@@ -74,9 +75,10 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert doc_type == 'murs'
         assert mur == expected_mur
 
+    @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.load_current_murs.get_bucket')
     @patch('webservices.load_current_murs.get_elasticsearch_connection')
-    def test_complete_mur(self, get_es_conn, get_bucket):
+    def test_complete_mur(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
         mur_subject = 'Fraudulent misrepresentation'
         expected_mur = {
@@ -102,7 +104,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             self.create_participant(case_id, entity_id, role, name)
         for document_id, document in enumerate(documents):
             category, ocrtext = document
-            self.create_document(case_id, document_id, ocrtext)
+            self.create_document(case_id, document_id, category, ocrtext)
 
         manage.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
@@ -112,8 +114,15 @@ class TestLoadCurrentMURs(BaseTestCase):
         for key in expected_mur:
             assert mur[key] == expected_mur[key]
 
-        test_participants = [(p['role'], p['name']) for p in mur['participants']]
-        assert participants == test_participants
+        assert participants == [(p['role'], p['name'])
+                                for p in mur['participants']]
+
+        assert mur['text'].strip() == "Some text Different text"
+
+        assert [(d[0], len(d[1])) for d in documents] == [
+            (d['category'], d['length']) for d in mur['documents']]
+        for d in mur['documents']:
+            assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
 
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
@@ -137,10 +146,10 @@ class TestLoadCurrentMURs(BaseTestCase):
             "INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id) "
             "VALUES (%s, %s, %s, %s)", entity_id, entity_id, case_id, role_id)
 
-    def create_document(self, case_id, document_id, ocrtext):
+    def create_document(self, case_id, document_id, category, ocrtext):
         self.connection.execute(
-            "INSERT INTO fecmur.document (document_id, case_id, ocrtext, fileimage) "
-            "VALUES (%s, %s, %s, '')", document_id, case_id, ocrtext)
+            "INSERT INTO fecmur.document (document_id, doc_order_id, case_id, category, ocrtext, fileimage) "
+            "VALUES (%s, %s, %s, %s, %s, %s)", document_id, document_id, case_id, category, ocrtext, ocrtext)
 
     def clear_test_data(self):
         tables = [
