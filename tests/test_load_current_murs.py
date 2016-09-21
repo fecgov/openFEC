@@ -55,6 +55,7 @@ class TestLoadCurrentMURs(BaseTestCase):
     @patch('webservices.load_current_murs.get_bucket')
     @patch('webservices.load_current_murs.get_elasticsearch_connection')
     def test_simple_mur(self, get_es_conn, get_bucket):
+        mur_subject = 'Fraudulent misrepresentation'
         expected_mur = {
             'no': '1',
             'name': 'Simple MUR',
@@ -62,10 +63,10 @@ class TestLoadCurrentMURs(BaseTestCase):
             'text': '',
             'doc_id': 'mur_1',
             'participants': [],
-            'subject': 'Fraudulent misrepresentation',
+            'subject': [mur_subject],
             'documents': []
         }
-        self.create_mur(1, expected_mur['no'], expected_mur['name'], expected_mur['subject'])
+        self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
         manage.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
@@ -77,12 +78,13 @@ class TestLoadCurrentMURs(BaseTestCase):
     @patch('webservices.load_current_murs.get_elasticsearch_connection')
     def test_complete_mur(self, get_es_conn, get_bucket):
         case_id = 1
+        mur_subject = 'Fraudulent misrepresentation'
         expected_mur = {
             'no': '1',
             'name': 'MUR with participants',
             'mur_type': 'current',
             'doc_id': 'mur_1',
-            'subject': 'Fraudulent misrepresentation',
+            'subject': [mur_subject],
         }
         participants = [
             ("Complainant", "Gollum"),
@@ -94,7 +96,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             ('Another Category', 'Different text'),
         ]
 
-        self.create_mur(case_id, expected_mur['no'], expected_mur['name'], expected_mur['subject'])
+        self.create_mur(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
         for entity_id, participant in enumerate(participants):
             role, name = participant
             self.create_participant(case_id, entity_id, role, name)
