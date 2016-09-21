@@ -3,9 +3,9 @@ import re
 from collections import defaultdict
 from urllib.parse import urlencode
 
-from webservices import utils
 from webservices.env import env
 from webservices.rest import db
+from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
 
 def load_current_murs():
-    es = utils.get_elasticsearch_connection()
+    es = get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
     with db.engine.connect() as conn:
