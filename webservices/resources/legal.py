@@ -9,14 +9,17 @@ from webservices.utils import use_kwargs
 
 es = utils.get_elasticsearch_connection()
 
-class AdvisoryOpinion(utils.Resource):
+class GetLegalDocument(utils.Resource):
     @property
     def args(self):
-        return {"ao_no": fields.Str(required=True, description='Advisory opinion number to fetch.')}
+        return {"no": fields.Str(required=True, description='Document number to fetch.'),
+                "doc_type": fields.Str(required=True, description='Document type to fetch.')}
 
-    def get(self, ao_no, **kwargs):
+    def get(self, doc_type, no, **kwargs):
+        print(no)
+        print(doc_type)
         es_results = Search().using(es) \
-          .query('bool', must=[Q('term', no=ao_no), Q('term', _type='advisory_opinions')]) \
+          .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
           .source(exclude='text') \
           .extra(size=200) \
           .execute()
