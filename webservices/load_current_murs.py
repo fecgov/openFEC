@@ -206,7 +206,7 @@ def get_documents(case_id, bucket, bucket_name):
                 'length': row['length'],
                 'document_date': row['document_date'],
             }
-            document_text += ' ' + row['ocrtext']
+            document_text += row['ocrtext'] + ' '
             pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
