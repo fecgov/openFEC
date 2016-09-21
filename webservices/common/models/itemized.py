@@ -266,7 +266,6 @@ class ScheduleD(PdfMixin,BaseItemized):
         return None
 
 
-
 class ScheduleE(BaseItemized):
     __tablename__ = 'ofec_sched_e'
 
