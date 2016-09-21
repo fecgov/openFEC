@@ -237,7 +237,8 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.UniversalSearch, '/legal/search/')
-api.add_resource(legal.AdvisoryOpinion, '/legal/advisory_opinion/<ao_no>')
+print('*' * 50)
+api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
