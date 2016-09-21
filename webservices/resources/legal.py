@@ -16,8 +16,6 @@ class GetLegalDocument(utils.Resource):
                 "doc_type": fields.Str(required=True, description='Document type to fetch.')}
 
     def get(self, doc_type, no, **kwargs):
-        print(no)
-        print(doc_type)
         es_results = Search().using(es) \
           .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
           .source(exclude='text') \
