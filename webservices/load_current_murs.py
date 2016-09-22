@@ -14,7 +14,6 @@ ALL_MURS = """
     SELECT case_id, case_no, name
     FROM fecmur.case
     WHERE case_type = 'MUR'
-    LIMIT 2
 """
 
 MUR_SUBJECTS = """
