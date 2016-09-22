@@ -124,6 +124,55 @@ class TestLoadCurrentMURs(BaseTestCase):
         for d in mur['documents']:
             assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
 
+    @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
+    @patch('webservices.load_current_murs.get_bucket')
+    @patch('webservices.load_current_murs.get_elasticsearch_connection')
+    def mur_with_citations(self, get_es_conn, get_bucket, get_credential):
+        case_id = 1
+        mur_subject = 'Fraudulent misrepresentation'
+        expected_mur = {
+            'no': '1',
+            'name': 'MUR with participants',
+            'mur_type': 'current',
+            'doc_id': 'mur_1',
+            'subject': [mur_subject],
+        }
+        participants = [
+            ("Complainant", "Gollum"),
+            ("Respondent", "Bilbo Baggins", "RTB", "345", ""),
+            ("Respondent", "Thorin Oakenshield", "Closed", "123", "456")
+        ]
+        documents = [
+            ('A Category', 'Some text'),
+            ('Another Category', 'Different text'),
+        ]
+
+        self.create_mur(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
+        for entity_id, participant in enumerate(participants):
+            role, name, stage, statutory_citation, regulatory_citation = participant
+            self.create_participant(case_id, entity_id, role, name, stage, statutory_citation, regulatory_citation)
+        for document_id, document in enumerate(documents):
+            category, ocrtext = document
+            self.create_document(case_id, document_id, category, ocrtext)
+
+        manage.load_current_murs()
+        index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
+
+        assert index == 'docs'
+        assert doc_type == 'murs'
+        for key in expected_mur:
+            assert mur[key] == expected_mur[key]
+
+        assert participants == [(p['role'], p['name'])
+                                for p in mur['participants']]
+
+        assert mur['text'].strip() == "Some text Different text"
+
+        assert [(d[0], len(d[1])) for d in documents] == [
+            (d['category'], d['length']) for d in mur['documents']]
+        for d in mur['documents']:
+            assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
+
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
             "SELECT subject_id FROM fecmur.subject "
@@ -135,7 +184,8 @@ class TestLoadCurrentMURs(BaseTestCase):
             "INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id) "
             "VALUES (%s, %s, -1)", case_id, subject_id)
 
-    def create_participant(self, case_id, entity_id, role, name):
+    def create_participant(self, case_id, entity_id, role, name,
+            stage=None, statutory_citation=None, regulatory_citation=None):
         role_id = self.connection.execute(
             "SELECT role_id FROM fecmur.role "
             " WHERE description = %s ", role).scalar()
@@ -145,6 +195,13 @@ class TestLoadCurrentMURs(BaseTestCase):
         self.connection.execute(
             "INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id) "
             "VALUES (%s, %s, %s, %s)", entity_id, entity_id, case_id, role_id)
+        if stage:
+            self.create_citation(case_id, entity_id, stage, statutory_citation, regulatory_citation)
+
+    def create_citation(self, case_id, entity_id, stage, statutory_citation, regulatory_citation):
+        self.connection.execute(
+            "INSERT INTO fecmur.violations (case_id, entity_id, stage, statutory_citation, regulatory_citation) "
+            "VALUES (%s, %s, %s, %s, %s)", case_id, entity_id, stage, statutory_citation, regulatory_citation)
 
     def create_document(self, case_id, document_id, category, ocrtext):
         self.connection.execute(
@@ -153,6 +210,7 @@ class TestLoadCurrentMURs(BaseTestCase):
 
     def clear_test_data(self):
         tables = [
+            "violations",
             "document",
             "players",
             "entity",
