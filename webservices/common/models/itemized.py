@@ -219,9 +219,6 @@ class ScheduleE(BaseItemized):
 
     sched_e_sk = db.Column(db.Integer, primary_key=True)
 
-    # Committe info
-    committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_ID)
-
     # Payee info
     payee_prefix = db.Column(db.String)
     payee_name = db.Column('pye_nm', db.String)
