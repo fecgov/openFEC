@@ -2,6 +2,8 @@
 import re
 import functools
 
+from collections import namedtuple
+
 import marshmallow as ma
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_pagination import schemas as paging_schemas
@@ -18,6 +20,19 @@ from sqlalchemy import func
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
 spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
+# A namedtuple used to help capture any additional columns that should be
+# included with exported data:
+# field: the field object definining the relationship on a model, e.g.,
+#   models.ScheduleA.committee (an object)
+# column: the column object found in the related model, e.g.,
+#   models.CommitteeHistory.name (an object)
+# label: the label to use for the column in the query that will appear in the
+# header row of the output, e.g.,
+#   'committee_name' (a string)
+
+# Usage:  Define a custom attribute in a schema's Meta options object called
+# 'relationships' and set to a list of one or more relationships.
+Relationship = namedtuple('Relationship', ['field', 'column', 'label', ])
 
 class BaseSchema(ModelSchema):
 
@@ -405,6 +420,13 @@ ScheduleASchema = make_schema(
             'contributor_employer_text',
             'contributor_occupation_text',
         ),
+        'relationships': [
+            Relationship(
+                models.ScheduleA.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+            ),
+        ],
     }
 )
 
@@ -501,6 +523,13 @@ ScheduleBSchema = make_schema(
             'recipient_name_text',
             'disbursement_description_text'
         ),
+        'relationships': [
+            Relationship(
+                models.ScheduleB.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+            ),
+        ],
     }
 )
 ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas.SeekPageSchema)
@@ -522,6 +551,13 @@ ScheduleESchema = make_schema(
         'exclude': (
             'payee_name_text',
         ),
+        'relationships': [
+            Relationship(
+                models.ScheduleE.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+            ),
+        ],
     }
 )
 ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas.SeekPageSchema)
