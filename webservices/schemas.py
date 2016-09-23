@@ -468,6 +468,21 @@ make_aggregate_schema = functools.partial(
 ScheduleEByCandidateSchema = make_aggregate_schema(models.ScheduleEByCandidate)
 augment_schemas(ScheduleEByCandidateSchema)
 
+ScheduleDSchema = make_schema(
+    models.ScheduleD,
+    fields={
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'pdf_url': ma.fields.Str(),
+        'sub_id': ma.fields.Str(),
+    },
+    options={
+
+    },
+)
+ScheduleDPageSchema = make_page_schema(
+    ScheduleDSchema
+)
+
 ScheduleFSchema = make_schema(
     models.ScheduleF,
     fields={
