@@ -66,7 +66,7 @@ def load_current_murs():
                 'name': row['name'],
                 'mur_type': 'current',
             }
-            mur['subject'] = get_subjects(case_id)
+            mur['subject'] = {"text": get_subjects(case_id)}
 
             participants = get_participants(case_id)
             assign_citations(participants, case_id)
