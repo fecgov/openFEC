@@ -95,9 +95,9 @@ invoke remove_hooks
 ```
 
 #### Create local databases
-Before you can run this project locally, you'll need an API database and a test database. 
+Before you can run this project locally, you'll need a development database and a test database.
 
-To create your databases, run:
+To create these databases, run:
 
 ```
 createdb cfdm_test
@@ -182,6 +182,12 @@ celery worker --app webservices.tasks
 
 ## Testing
 This repo uses [pytest](http://pytest.org/latest/).
+
+If the test database server is *not* the default local Postgres instance, indicate it using:
+
+```
+export SQLA_TEST_CONN=<psql:address-to-box>
+```
 
 Running the tests:
 
