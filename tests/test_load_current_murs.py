@@ -64,7 +64,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'text': '',
             'doc_id': 'mur_1',
             'participants': [],
-            'subject': [mur_subject],
+            'subject': {"text": [mur_subject]},
             'documents': []
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
@@ -86,7 +86,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'name': 'MUR with participants',
             'mur_type': 'current',
             'doc_id': 'mur_1',
-            'subject': [mur_subject],
+            'subject': {"text": [mur_subject]},
         }
         participants = [
             ("Complainant", "Gollum"),
@@ -135,7 +135,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'name': 'MUR with participants',
             'mur_type': 'current',
             'doc_id': 'mur_1',
-            'subject': [mur_subject],
+            'subject': {"text": [mur_subject]},
         }
         participants = [
             ("Complainant", "Gollum"),
