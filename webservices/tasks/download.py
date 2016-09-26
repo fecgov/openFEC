@@ -95,7 +95,13 @@ def query_with_labels(query, schema, sort_columns=False):
     ]
 
     for relationship in relationships:
-        entities.append(relationship.column.label(relationship.label))
+        if relationship.position == -1:
+            entities.append(relationship.column.label(relationship.label))
+        else:
+            entities.insert(
+                relationship.position,
+                relationship.column.label(relationship.label)
+            )
 
         if relationship.field not in joins:
             joins.append(relationship.field)
@@ -165,8 +171,7 @@ def make_bundle(resource):
         with open(csv_path, 'w') as fp:
             query = query_with_labels(
                 resource['query'],
-                resource['schema'],
-                sort_columns=True
+                resource['schema']
             )
             copy_to(
                 query,
