@@ -19,8 +19,6 @@ begin
 
     perform ofec_sched_e_notice_update();
     delete from ofec_nml_24_queue_old;
-    --in case of inner join failing, keep this one in queue until related rows
-    -- are addded in disclousre.nml_form_24 (not likely to happen)
-    delete from ofec_nml_24_queue_new where sub_id in (select sub_id from ofec_sched_e_notice);
+    delete from ofec_nml_24_queue_new where sub_id in (select link_id from ofec_sched_e_notice);
 end
 $$ language plpgsql;
