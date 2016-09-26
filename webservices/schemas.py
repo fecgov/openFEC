@@ -29,10 +29,25 @@ spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 # label: the label to use for the column in the query that will appear in the
 # header row of the output, e.g.,
 #   'committee_name' (a string)
+# position: the spot within the list of columns that this should be inserted
+# at; defaults to -1 (end of the list), e.g.,
+#   1 (an integer, in this case the second spot in a list)
 
 # Usage:  Define a custom attribute in a schema's Meta options object called
 # 'relationships' and set to a list of one or more relationships.
-Relationship = namedtuple('Relationship', ['field', 'column', 'label', ])
+#
+# Note:  There is no clean way to provide default values for a namedtuple at
+# the moment. This wrapper is modeled after the following post:
+# https://ceasarjames.wordpress.com/2012/03/19/how-to-use-default-arguments-with-namedtuple/
+class Relationship(namedtuple('Relationship', 'field column label position')):
+    def __new__(cls, field, column, label, position=-1):
+        return super(Relationship, cls).__new__(
+            cls,
+            field,
+            column,
+            label,
+            position
+        )
 
 class BaseSchema(ModelSchema):
 
@@ -425,6 +440,7 @@ ScheduleASchema = make_schema(
                 models.ScheduleA.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
+                1
             ),
         ],
     }
@@ -528,6 +544,7 @@ ScheduleBSchema = make_schema(
                 models.ScheduleB.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
+                1
             ),
         ],
     }
@@ -556,6 +573,7 @@ ScheduleESchema = make_schema(
                 models.ScheduleE.committee,
                 models.CommitteeHistory.name,
                 'committee_name',
+                1
             ),
         ],
     }
