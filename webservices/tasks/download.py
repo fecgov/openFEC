@@ -71,7 +71,7 @@ def parse_kwargs(resource, qs):
         kwargs = flaskparser.parser.parse(fields)
     return fields, kwargs
 
-def query_with_labels(query, schema, sorted=False):
+def query_with_labels(query, schema, sort_columns=False):
     """Create a new query that labels columns according to the SQLAlchemy
     model.  Properties that are excluded by `schema` will be ignored.
 
@@ -83,7 +83,7 @@ def query_with_labels(query, schema, sorted=False):
 
     :param query: Original SQLAlchemy query
     :param schema: Optional schema specifying properties to exclude
-    :param sorted: Optional flag to sort the column labels by name
+    :param sort_columns: Optional flag to sort the column labels by name
     :returns: Query with labeled entities
     """
     exclude = getattr(schema.Meta, 'exclude', ())
@@ -100,7 +100,7 @@ def query_with_labels(query, schema, sorted=False):
         if relationship.field not in joins:
             joins.append(relationship.field)
 
-    if sorted:
+    if sort_columns:
         entities.sort(key=lambda x: x.name)
 
     if joins:
@@ -166,7 +166,7 @@ def make_bundle(resource):
             query = query_with_labels(
                 resource['query'],
                 resource['schema'],
-                sorted=True
+                sort_columns=True
             )
             copy_to(
                 query,
