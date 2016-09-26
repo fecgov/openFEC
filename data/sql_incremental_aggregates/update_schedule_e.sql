@@ -24,20 +24,19 @@ create or replace function ofec_sched_e_notice_update() returns void as $$
 begin
     -- Drop all queued deletes
     delete from ofec_sched_e_notice
-    where sub_id = any(select sub_id from ofec_nml_24_queue_old)
+    where link_id = any(select sub_id from ofec_nml_24_queue_old)
     ;
     -- Insert all queued updates, unless a row with the same key exists in the
     -- delete queue with a later timestamp
     insert into ofec_sched_e_notice (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,pye_st1, pye_st2, pye_city, pye_st,
-    pye_zip, entity_tp, entity_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first,
-    s_o_cand_nm_last, s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
-    s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, memo_cd, memo_cd_desc, s_o_ind, s_o_ind_desc, election_tp,
-    fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, memo_text, conduit_cmte_id, conduit_cmte_nm,
-    conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
-    tran_id, filing_form, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, pg_date,
-    rpt_tp, rpt_yr, election_cycle)
-        select se.cmte_id,
-        --se.cmte_nm,
+        pye_zip, entity_tp, entity_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first,
+        s_o_cand_nm_last, s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
+        s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, memo_cd, memo_cd_desc, s_o_ind, s_o_ind_desc, election_tp,
+        fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, memo_text, conduit_cmte_id, conduit_cmte_nm,
+        conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
+        tran_id, filing_form, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, pg_date,
+        rpt_tp, rpt_yr, election_cycle)
+    select se.cmte_id,
         se.pye_nm,
         se.payee_l_nm as pye_l_nm,
         se.payee_f_nm as pye_f_nm,
@@ -102,8 +101,7 @@ begin
         f24.rpt_tp,
         f24.rpt_yr,
         f24.rpt_yr + mod(f24.rpt_yr, 2::numeric) AS cycle
-        --left join here to catch (possible?) edge case of "notice" missing but itemized items existing
-       from ofec_nml_24_queue_new f24, disclosure.nml_sched_e se
-       where se.link_id = f24.sub_id and f24.delete_ind is null and se.delete_ind is null and se.amndt_ind::text <> 'D'::text;
+    from ofec_nml_24_queue_new f24, disclosure.nml_sched_e se
+    where se.link_id = f24.sub_id and f24.delete_ind is null and se.delete_ind is null and se.amndt_ind::text <> 'D'::text;
 end
 $$ language plpgsql;
