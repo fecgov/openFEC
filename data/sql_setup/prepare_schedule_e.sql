@@ -78,13 +78,6 @@ select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suff
     to_tsvector(pye_nm)
 from fec_f57_notice_vw;
 
-
-
-
-
-
-
-
 alter table ofec_sched_e_tmp add primary key (sub_id);
 
 -- Create simple indices on filtered columns
@@ -113,15 +106,20 @@ drop table if exists ofec_sched_e_queue_new;
 drop table if exists ofec_sched_e_queue_old;
 drop table if exists ofec_nml_24_queue_new;
 drop table if exists ofec_nml_24_queue_old;
-drop table if exists ofec_nml_sched_e_new;
-drop table if exists ofec_nml_sched_e_old;
+drop table if exists ofec_f57_queue_old;
+drop table if exists ofec_f57_queue_new;
+--drop table if exists ofec_nml_sched_e_new;
+--drop table if exists ofec_nml_sched_e_old;
 
 create table ofec_nml_24_queue_new as select * from disclosure.nml_form_24 limit 0;
 create table ofec_nml_24_queue_old as select * from disclosure.nml_form_24 limit 0;
-create table ofec_nml_sched_e_queue_new as select * from disclosure.nml_sched_e limit 0;
-create table ofec_nml_sched_e_queue_old as select * from disclosure.nml_sched_e limit 0;
+create table ofec_f57_queue_old as select * from disclosure.nml_form_57 limit 0;
+create table ofec_f57_queue_new as select * from disclosure.nml_form_57 limit 0;
+--create table ofec_nml_sched_e_queue_new as select * from disclosure.nml_sched_e limit 0;
+--create table ofec_nml_sched_e_queue_old as select * from disclosure.nml_sched_e limit 0;
 create table ofec_sched_e_queue_new as select * from fec_vsum_sched_e limit 0;
 create table ofec_sched_e_queue_old as select * from fec_vsum_sched_e limit 0;
+
 alter table ofec_sched_e_queue_new add column timestamp timestamp;
 alter table ofec_sched_e_queue_old add column timestamp timestamp;
 create index on ofec_sched_e_queue_new (sub_id);
@@ -152,28 +150,7 @@ begin
 end
 $$ language plpgsql;
 
-create or replace function ofec_sched_e_nml_update_queues_from_notice() returns trigger as $$
-begin
-
-    if tg_op = 'INSERT' then
-        delete from ofec_nml_sched_e_queue_new where sub_id = new.sub_id;
-        insert into ofec_nml_sched_e_queue_new values (new.*);
-        return new;
-    elsif tg_op = 'UPDATE' then
-        delete from ofec_nml_sched_e_queue_new where sub_id = new.sub_id;
-        delete from ofec_nml_sched_e_queue_old where sub_id = old.sub_id;
-        insert into ofec_nml_sched_e_queue_new values (new.*);
-        insert into ofec_nml_sched_e_queue_old values (old.*);
-        return new;
-    elsif tg_op = 'DELETE' then
-        delete from ofec_nml_sched_e_queue_old where sub_id = old.sub_id;
-        insert into ofec_nml_sched_e_queue_old values (old.*);
-        return old;
-    end if;
-end
-$$ language plpgsql;
-
-create or replace function ofec_nml_24_update_queues_from_notice() returns trigger as $$
+create or replace function ofec_sched_e_update_notice_queues() returns trigger as $$
 begin
 
     if tg_op = 'INSERT' then
@@ -194,19 +171,40 @@ begin
 end
 $$ language plpgsql;
 
-drop trigger if exists ofec_sched_e_queue_trigger on fec_vsum_sched_e;
+create or replace function ofec_f57_update_notice_queues() returns trigger as $$
+begin
+
+    if tg_op = 'INSERT' then
+        delete from ofec_f57_queue_new where sub_id = new.sub_id;
+        insert into ofec_f57_queue_new values (new.*);
+        return new;
+    elsif tg_op = 'UPDATE' then
+        delete from ofec_f57_queue_new where sub_id = new.sub_id;
+        delete from ofec_f57_queue_old where sub_id = old.sub_id;
+        insert into ofec_f57_queue_new values (new.*);
+        insert into ofec_f57_queue_old values (old.*);
+        return new;
+    elsif tg_op = 'DELETE' then
+        delete from ofec_f57_queue_old where sub_id = old.sub_id;
+        insert into ofec_f57_queue_old values (old.*);
+        return old;
+    end if;
+end
+$$ language plpgsql;
+
+drop trigger if exists ofec_sched_e_queue_trigger on sched_e;
 create trigger ofec_sched_e_queue_trigger before insert or update or delete
-    on fec_vsum_sched_e for each row execute procedure ofec_sched_e_update_queues(:START_YEAR_AGGREGATE)
+    on sched_e for each row execute procedure ofec_sched_e_update_queues(:START_YEAR_AGGREGATE)
 ;
 
 drop trigger if exists nml_form_24_trigger on disclosure.nml_form_24;
 create trigger nml_form_24_trigger before insert or update or delete
-    on disclosure.nml_form_24 for each row execute procedure ofec_nml_24_update_queues_from_notice()
+    on disclosure.nml_form_24 for each row execute procedure ofec_sched_e_update_notice_queues()
 ;
 
-drop trigger if exists nml_sched_e_notice_trigger on disclosure.nml_sched_e;
-create trigger nml_sched_e_notice_trigger before insert or update or delete
-    on disclosure.nml_sched_e for each row execute procedure ofec_sched_e_nml_update_queues_from_notice()
+drop trigger if exists ofec_f57_trigger on disclosure.nml_form_57;
+create trigger ofec_f57_trigger before insert or update or delete
+    on disclosure.nml_form_57 for each row execute procedure ofec_f57_update_notice_queues()
 ;
 
 drop table if exists ofec_sched_e;
