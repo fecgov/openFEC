@@ -115,6 +115,8 @@ create table ofec_nml_24_queue_new as select * from disclosure.nml_form_24 limit
 create table ofec_nml_24_queue_old as select * from disclosure.nml_form_24 limit 0;
 create table ofec_f57_queue_old as select * from disclosure.nml_form_57 limit 0;
 create table ofec_f57_queue_new as select * from disclosure.nml_form_57 limit 0;
+create table fec_vsum_f57_queue_new as select * from fec_vsum_f57 limit 0;
+create table fec_vsum_f57_queue_old as select * from fec_vsum_f57 limit 0;
 --create table ofec_nml_sched_e_queue_new as select * from disclosure.nml_sched_e limit 0;
 --create table ofec_nml_sched_e_queue_old as select * from disclosure.nml_sched_e limit 0;
 create table ofec_sched_e_queue_new as select * from fec_vsum_sched_e limit 0;
@@ -192,6 +194,27 @@ begin
 end
 $$ language plpgsql;
 
+create or replace function fec_vsum_f57_update_queues() returns trigger as $$
+begin
+
+    if tg_op = 'INSERT' then
+        delete from fec_vsum_f57_queue_new where sub_id = new.sub_id;
+        insert into fec_vsum_f57_queue_new values (new.*);
+        return new;
+    elsif tg_op = 'UPDATE' then
+        delete from fec_vsum_f57_queue_new where sub_id = new.sub_id;
+        delete from fec_vsum_f57_queue_old where sub_id = old.sub_id;
+        insert into fec_vsum_f57_queue_new values (new.*);
+        insert into fec_vsum_f57_queue_old values (old.*);
+        return new;
+    elsif tg_op = 'DELETE' then
+        delete from fec_vsum_f57_queue_old where sub_id = old.sub_id;
+        insert into fec_vsum_f57_queue_old values (old.*);
+        return old;
+    end if;
+end
+$$ language plpgsql;
+
 drop trigger if exists ofec_sched_e_queue_trigger on sched_e;
 create trigger ofec_sched_e_queue_trigger before insert or update or delete
     on sched_e for each row execute procedure ofec_sched_e_update_queues(:START_YEAR_AGGREGATE)
@@ -207,6 +230,10 @@ create trigger ofec_f57_trigger before insert or update or delete
     on disclosure.nml_form_57 for each row execute procedure ofec_f57_update_notice_queues()
 ;
 
+drop trigger if exists fec_vsum_f57_trigger on fec_vsum_f57;
+create trigger fec_vsum_f57_trigger before insert or update or delete
+    on fec_vsum_f57 for each row execute procedure fec_vsum_f57_update_queues()
+;
 drop table if exists ofec_sched_e;
 alter table ofec_sched_e_tmp rename to ofec_sched_e;
 
