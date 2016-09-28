@@ -52,23 +52,30 @@ class TestDownloadTask(ApiBaseTest):
     def test_views(self, upload_s3):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
-        factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
-        [
-            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
-            factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
-        ]
+        factories.CommitteeHistoryFactory(
+            committee_id=committee_id,
+            committee_type='H'
+        )
         filing = factories.FilingsFactory(committee_id=committee_id)
+        efiling = factories.EFilingsFactory(
+            committee_id=committee_id,
+            receipt_date=datetime.datetime(2012, 1, 1)
+        )
+        basef3pfiling = factories.BaseF3PFilingFactory(
+            committee_id=committee_id,
+            receipt_date=datetime.date(2012, 1, 1)
+        )
 
         db.session.commit()
 
         for view in tasks.RESOURCE_WHITELIST:
-            if view.endpoint in ['reportsview',]:
-                url = api.url_for(view, committee_type=committee.committee_type)
+            if view.endpoint in ['reportsview', 'efilingsummaryview',]:
+                url = api.url_for(
+                    view,
+                    committee_type=committee.committee_type
+                )
             elif view.endpoint in ['filingsview', 'committeereportsview',]:
                 url = api.url_for(view, committee_id=committee.committee_id)
-            elif view.endpoint in ['efilingsview', 'efilingsummaryview',]:
-                # TODO: Figure out what's wrong and fix.
-                continue
             else:
                 url = api.url_for(view)
             tasks.export_query(url, b'')

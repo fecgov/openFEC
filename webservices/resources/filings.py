@@ -45,7 +45,7 @@ class BaseFilings(views.ApiResource):
             args.filings,
             args.make_sort_args(
                 default='-receipt_date',
-                validator=args.IndexValidator(models.Filings),
+                validator=args.IndexValidator(self.model)
             ),
         )
 
@@ -103,7 +103,7 @@ class EFilingsView(views.ApiResource):
             args.efilings,
             args.make_sort_args(
                 default='-receipt_date',
-                validator=args.IndexValidator(models.EFilings),
+                validator=args.IndexValidator(self.model)
             ),
         )
 
