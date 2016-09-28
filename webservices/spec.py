@@ -58,6 +58,11 @@ spec = APISpec(
 
         },
         {
+            'name': 'debts',
+            'description': docs.SCHEDULE_D_TAG,
+
+        },
+        {
             'name': 'independent expenditures',
             'description': docs.SCHEDULE_E_TAG,
         },
@@ -81,6 +86,5 @@ spec = APISpec(
             'name': 'efiling',
             'description': docs.EFILING_TAG,
         }
-
     ]
 )
