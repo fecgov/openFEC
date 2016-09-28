@@ -250,11 +250,12 @@ begin
         f57.amndt_ind AS action_cd,
         f57.amndt_ind_desc AS action_cd_desc,
             CASE
-                WHEN "substring"(f57.sub_id::character varying::text, 1, 1) = '4'::text THEN se.tran_id
+                WHEN "substring"(f57.sub_id::character varying::text, 1, 1) = '4'::text THEN f57.tran_id
                 ELSE NULL::character varying
             END AS tran_id,
-        'F24' AS filing_form,
-        'SE' AS schedule_type,
+
+        'F5' as filing_form,
+        'SE-F57' AS schedule_type,
         f57.form_tp_desc AS schedule_type_desc,
         f57.image_num,
         f57.file_num,
@@ -266,7 +267,7 @@ begin
         f5.rpt_yr,
         f5.rpt_yr + mod(f5.rpt_yr, 2::numeric) AS cycle,
         cast(null as timestamp) as TIMESTAMP,
-        image_pdf_url(se.image_num) as pdf_url,
+        image_pdf_url(f57.image_num) as pdf_url,
         True,
         to_tsvector(f57.pye_nm)
     from ofec_f57_queue_new f57, disclosure.nml_form_5 f5
