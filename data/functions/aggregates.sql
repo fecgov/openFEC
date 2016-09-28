@@ -20,5 +20,15 @@ begin
     perform ofec_sched_e_notice_update();
     delete from ofec_nml_24_queue_old;
     delete from ofec_nml_24_queue_new where sub_id in (select link_id from ofec_sched_e_notice);
+
+    delete from ofec_f57_queue_old;
+    delete from ofec_f57_queue_new where sub_id in (select sub_id from ofec_sched_e_notice);
+    delete from ofec_f57_queue_new where sub_id in (select new.sub_id from ofec_f57_queue_new new, disclosure.nml_form_5 f5
+        where new.link_id = f5.sub_id and (f5.rpt_tp <> '48' or f5.rpt_tp <> '24'));
+    delete from ofec_f57_queue_old where sub_id in (select new.sub_id from ofec_f57_queue_new new, disclosure.nml_form_5 f5
+        where new.link_id = f5.sub_id and (f5.rpt_tp <> '48' or f5.rpt_tp <> '24'));
+
+    delete from fec_vsum_f57_queue_new;
+    delete from fec_vsum_f57_queue_old;
 end
 $$ language plpgsql;
