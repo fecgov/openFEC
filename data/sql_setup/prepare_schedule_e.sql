@@ -74,11 +74,12 @@ select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suff
     fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
     conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
     tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form, cast(null as timestamp) as pg_date,
-    rpt_tp, rpt_yr, cycle, cast(null as timestamp) as TIMESTAMP, image_pdf_url(image_num) as pdf_url, False,
+    rpt_tp, rpt_yr, cycle, cast(null as timestamp) as TIMESTAMP, image_pdf_url(image_num) as pdf_url, True,
     to_tsvector(pye_nm)
 from fec_f57_notice_vw;
 
 alter table ofec_sched_e_tmp add primary key (sub_id);
+
 
 -- Create simple indices on filtered columns
 create index on ofec_sched_e_tmp (cmte_id);
@@ -101,6 +102,25 @@ create index on ofec_sched_e_tmp using gin (payee_name_text);
 -- Analyze tables
 analyze ofec_sched_e_tmp;
 
+-- Create simple indices on filtered columns
+create index on ofec_sched_e_notice_tmp (cmte_id);
+create index on ofec_sched_e_notice_tmp (s_o_cand_id);
+create index on ofec_sched_e_notice_tmp (entity_tp);
+create index on ofec_sched_e_notice_tmp (image_num);
+create index on ofec_sched_e_notice_tmp (rpt_yr);
+create index on ofec_sched_e_notice_tmp (filing_form);
+create index on ofec_sched_e_notice_tmp (get_cycle(rpt_yr));
+create index on ofec_sched_e_notice_tmp (is_notice);
+
+-- Create composite indices on sortable columns
+create index on ofec_sched_e_notice_tmp (exp_dt, sub_id);
+create index on ofec_sched_e_notice_tmp (exp_amt, sub_id);
+create index on ofec_sched_e_notice_tmp (cal_ytd_ofc_sought, sub_id);
+
+alter table ofec_sched_e_notice_tmp add primary key (sub_id);
+
+analyze ofec_sched_e_notice_tmp;
+
 -- Create queue tables to hold changes to Schedule E
 drop table if exists ofec_sched_e_queue_new;
 drop table if exists ofec_sched_e_queue_old;
@@ -108,6 +128,8 @@ drop table if exists ofec_nml_24_queue_new;
 drop table if exists ofec_nml_24_queue_old;
 drop table if exists ofec_f57_queue_old;
 drop table if exists ofec_f57_queue_new;
+drop table if exists fec_vsum_f57_queue_new;
+drop table if exists fec_vsum_f57_queue_old;
 --drop table if exists ofec_nml_sched_e_new;
 --drop table if exists ofec_nml_sched_e_old;
 
@@ -217,7 +239,7 @@ $$ language plpgsql;
 
 drop trigger if exists ofec_sched_e_queue_trigger on sched_e;
 create trigger ofec_sched_e_queue_trigger before insert or update or delete
-    on sched_e for each row execute procedure ofec_sched_e_update_queues(:START_YEAR_AGGREGATE)
+    on sched_e for each row execute procedure ofec_sched_e_update_queues()
 ;
 
 drop trigger if exists nml_form_24_trigger on disclosure.nml_form_24;
