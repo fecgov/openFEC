@@ -1,4 +1,3 @@
-from .efile_parser import *
 import json
 
 
