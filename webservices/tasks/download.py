@@ -79,20 +79,50 @@ def parse_kwargs(resource, qs):
         kwargs = flaskparser.parser.parse(fields)
     return fields, kwargs
 
-def query_with_labels(query, schema):
-    """Create a new query that labels columns according to the SQLAlchemy model.
-    Properties that are excluded by `schema` will be ignored.
+def query_with_labels(query, schema, sort_columns=False):
+    """Create a new query that labels columns according to the SQLAlchemy
+    model.  Properties that are excluded by `schema` will be ignored.
+
+    Furthermore, if a "relationships" attribute is set on the schema (via the
+    Meta options object), those relationships will be followed to include the
+    specified nested fields in the output.  By default, only the fields
+    defined on the model mapped directly to columns in the corresponding table
+    will be included.
 
     :param query: Original SQLAlchemy query
     :param schema: Optional schema specifying properties to exclude
+    :param sort_columns: Optional flag to sort the column labels by name
     :returns: Query with labeled entities
     """
     exclude = getattr(schema.Meta, 'exclude', ())
+    relationships = getattr(schema.Meta, 'relationships', [])
+    joins = []
     entities = [
         entity for entity in query_entities(query)
         if entity.key not in exclude
     ]
-    return query.with_entities(*entities)
+
+    for relationship in relationships:
+        if relationship.position == -1:
+            entities.append(relationship.column.label(relationship.label))
+        else:
+            entities.insert(
+                relationship.position,
+                relationship.column.label(relationship.label)
+            )
+
+        if relationship.field not in joins:
+            joins.append(relationship.field)
+
+    if sort_columns:
+        entities.sort(key=lambda x: x.name)
+
+    if joins:
+        query = query.join(*joins).with_entities(*entities)
+    else:
+        query = query.with_entities(*entities)
+
+    return query
 
 def unpack(values, size):
     values = values if isinstance(values, tuple) else (values, )
@@ -147,8 +177,17 @@ def make_bundle(resource):
     with tempfile.TemporaryDirectory(dir=os.getenv('TMPDIR')) as tmpdir:
         csv_path = os.path.join(tmpdir, 'data.csv')
         with open(csv_path, 'w') as fp:
-            query = query_with_labels(resource['query'], resource['schema'])
-            copy_to(query, db.session.connection().engine, fp, format='csv', header=True)
+            query = query_with_labels(
+                resource['query'],
+                resource['schema']
+            )
+            copy_to(
+                query,
+                db.session.connection().engine,
+                fp,
+                format='csv',
+                header=True
+            )
         row_count = wc(csv_path) - 1
         make_manifest(resource, row_count, tmpdir)
         with tempfile.TemporaryFile(mode='w+b', dir=os.getenv('TMPDIR')) as tmpfile:
