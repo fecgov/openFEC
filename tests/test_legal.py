@@ -26,6 +26,10 @@ def es_advisory_opinion(*args, **kwargs):
     return {'hits': {'hits': [{'_source': {'text': 'abc'}, '_type': 'advisory_opinions'},
            {'_source': {'no': '123'}, '_type': 'advisory_opinions'}]}}
 
+def es_mur(*args, **kwargs):
+    return {'hits': {'hits': [{'_source': {'text': 'abc'}, '_type': 'murs'},
+           {'_source': {'no': '123'}, '_type': 'murs'}]}}
+
 def es_search(**kwargs):
     _type = kwargs["body"]["query"]["bool"]["must"][0]["term"]["_type"]
     if _type == 'regulations':
@@ -45,11 +49,19 @@ def es_search(**kwargs):
                                     '_source': {}, '_type': 'murs'}], 'total': 4}}
 
 
-class AdvisoryOpinionTest(unittest.TestCase):
+class CanonicalPageTest(unittest.TestCase):
     @patch('webservices.rest.legal.es.search', es_advisory_opinion)
     def test_advisory_opinion_search(self):
         app = rest.app.test_client()
-        response = app.get('/v1/legal/advisory_opinion/1993-02?api_key=1234')
+        response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
+        assert response.status_code == 200
+        result = json.loads(codecs.decode(response.data))
+        assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
+
+    @patch('webservices.rest.legal.es.search', es_mur)
+    def test_mur_search(self):
+        app = rest.app.test_client()
+        response = app.get('/v1/legal/docs/murs/1?api_key=1234')
         assert response.status_code == 200
         result = json.loads(codecs.decode(response.data))
         assert result == {'docs': [{'text': 'abc'}, {'no': '123'}]}
@@ -57,7 +69,7 @@ class AdvisoryOpinionTest(unittest.TestCase):
     @patch.object(es, 'search')
     def test_query_dsl(self, es_search):
         app = rest.app.test_client()
-        response = app.get('/v1/legal/advisory_opinion/1993-02?api_key=1234')
+        response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
         assert response.status_code == 200
 
         # This is mostly copy/pasted from the dict-based query. This is not a
