@@ -97,7 +97,7 @@ begin
 end
 $$ language plpgsql;
 
-create or replace function ofec_sched_e_notice_update() returns void as $$
+create or replace function ofec_sched_e_notice_update_from_f24() returns void as $$
 begin
     -- Drop all queued deletes
     delete from ofec_sched_e_notice
@@ -187,7 +187,7 @@ begin
 end
 $$ language plpgsql;
 
-create or replace function ofec_sched_e_notice_update() returns void as $$
+create or replace function ofec_sched_e_f57_notice_update() returns void as $$
 begin
     -- Drop all queued deletes
     delete from ofec_sched_e_notice
