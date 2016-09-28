@@ -13,7 +13,10 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.resources import candidates, committees, filings, costs, sched_a, sched_b, sched_e
+from webservices.resources import (
+    candidates, candidate_aggregates, committees, costs, filings, reports,
+    sched_a, sched_b, sched_e
+)
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -24,9 +27,14 @@ IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null'}
 RESOURCE_WHITELIST = {
     candidates.CandidateList,
     committees.CommitteeList,
-    filings.FilingsList,
     costs.CommunicationCostView,
     costs.ElectioneeringView,
+    filings.EFilingsView,
+    filings.FilingsList,
+    filings.FilingsView,
+    reports.ReportsView,
+    reports.CommitteeReportsView,
+    reports.EFilingSummaryView,
     sched_a.ScheduleAView,
     sched_b.ScheduleBView,
     sched_e.ScheduleEView,
