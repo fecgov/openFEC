@@ -193,9 +193,25 @@ class ScheduleEFactory(BaseFactory):
 
 
 class FilingsFactory(BaseFactory):
+    sub_id = factory.Sequence(lambda n: n)
+
     class Meta:
         model = models.Filings
 
+
+class EFilingsFactory(BaseFactory):
+    file_number = factory.Sequence(lambda n: n)
+
+    class Meta:
+        model = models.EFilings
+
+
+class BaseFilingFactory(BaseFactory):
+    file_number = factory.Sequence(lambda n: n)
+
+class BaseF3PFilingFactory(BaseFilingFactory):
+    class Meta:
+        model = models.BaseF3PFiling
 
 class BaseAggregateFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: str(n))
