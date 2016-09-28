@@ -198,7 +198,8 @@ def make_report_pdf_url(image_number):
 
 
 def make_schedule_pdf_url(image_number):
-    return 'http://docquery.fec.gov/cgi-bin/fecimg/?' + image_number
+    if image_number:
+        return 'http://docquery.fec.gov/cgi-bin/fecimg/?' + image_number
 
 
 def get_index_column(model):

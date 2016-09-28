@@ -33,6 +33,7 @@ from webservices.resources import reports
 from webservices.resources import sched_a
 from webservices.resources import sched_b
 from webservices.resources import sched_c
+from webservices.resources import sched_d
 from webservices.resources import sched_e
 from webservices.resources import sched_f
 from webservices.resources import download
@@ -169,6 +170,8 @@ api.add_resource(sched_a.ScheduleAView, '/schedules/schedule_a/', '/schedules/sc
 api.add_resource(sched_b.ScheduleBView, '/schedules/schedule_b/', '/schedules/schedule_b/<string:sub_id>/')
 api.add_resource(sched_c.ScheduleCView, '/schedules/schedule_c')
 api.add_resource(sched_c.ScheduleCViewBySubId, '/schedules/schedule_c/<string:sub_id>/')
+api.add_resource(sched_d.ScheduleDView, '/schedules/schedule_d/')
+api.add_resource(sched_d.ScheduleDViewBySubId, '/schedules/schedule_d/<string:sub_id>/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
 api.add_resource(sched_e.ScheduleENoticeView, '/schedules/schedule_e/notice')
 api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f', '/schedules/schedule_f/<string:sub_id>/')
@@ -238,7 +241,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.UniversalSearch, '/legal/search/')
-api.add_resource(legal.AdvisoryOpinion, '/legal/advisory_opinion/<ao_no>')
+api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
@@ -269,6 +272,8 @@ apidoc.register(sched_e.ScheduleEView, blueprint='v1')
 apidoc.register(sched_e.ScheduleENoticeView, blueprint='v1')
 apidoc.register(sched_f.ScheduleFView, blueprint='v1')
 apidoc.register(sched_f.ScheduleFViewBySubId, blueprint='v1')
+apidoc.register(sched_d.ScheduleDView, blueprint='v1')
+apidoc.register(sched_d.ScheduleDViewBySubId, blueprint='v1')
 apidoc.register(costs.CommunicationCostView, blueprint='v1')
 apidoc.register(costs.ElectioneeringView, blueprint='v1')
 apidoc.register(aggregates.ScheduleABySizeView, blueprint='v1')
