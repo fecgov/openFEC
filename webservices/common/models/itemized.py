@@ -304,6 +304,98 @@ class ScheduleE(BaseItemized):
 
     pdf_url = db.Column(db.String)
 
+class ScheduleENotice(BaseItemized):
+    __tablename__ = 'ofec_sched_e_notice'
+    is_notice = True
+
+    sub_id = db.Column(db.Integer, primary_key=True)
+
+    # Committe info
+    committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_ID)
+
+    # Payee info
+    payee_prefix = db.Column(db.String)
+    payee_name = db.Column('pye_nm', db.String)
+    payee_name_text = db.Column(TSVECTOR)
+    payee_first_name = db.Column('payee_f_nm', db.String)
+    payee_middle_name = db.Column('payee_m_nm', db.String)
+    payee_last_name = db.Column('payee_l_nm', db.String)
+    payee_suffix = db.Column(db.String)
+    payee_street_1 = db.Column('pye_st1', db.String)
+    payee_street_2 = db.Column('pye_st2', db.String)
+    payee_city = db.Column('pye_city', db.String)
+    payee_state = db.Column('pye_st', db.String)
+    payee_zip = db.Column('pye_zip', db.String)
+
+    # Primary transaction info
+    is_notice = db.Column(db.Boolean, index=True)
+    expenditure_description = db.Column('exp_desc', db.String)
+    expenditure_date = db.Column('exp_dt', db.Date)
+    #dissemination_date = db.Column('dissem_dt', db.Date)
+    expenditure_amount = db.Column('exp_amt', db.Float)
+    office_total_ytd = db.Column('cal_ytd_ofc_sought', db.Float)
+    category_code = db.Column('catg_cd', db.String)
+    category_code_full = db.Column('catg_cd_desc', db.String)
+    support_oppose_indicator = db.Column('s_o_ind', db.String)
+
+    memo_code = db.Column('memo_cd', db.String)
+    memo_code_full = db.Column('memo_cd_desc', db.String)
+    memo_text = db.Column(db.String)
+
+    # Candidate info
+    candidate_id = db.Column('s_o_cand_id', db.String)
+    candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
+    candidate_name = db.Column('s_o_cand_nm', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_prefix = db.Column('s_o_cand_prefix', db.String)
+    candidate_first_name = db.Column('s_o_cand_nm_first', db.String)
+    candidate_middle_name = db.Column('s_o_cand_m_nm', db.String)
+    candidate_last_name = db.Column('s_o_cand_nm_last', db.String)
+    candidate_suffix = db.Column('s_o_cand_suffix', db.String)
+    candidate_office = db.Column('s_o_cand_office', db.String, doc=docs.OFFICE)
+    cand_office_state = db.Column('s_o_cand_office_st', db.String, doc=docs.STATE_GENERIC)
+    cand_office_district = db.Column('s_o_cand_office_district', db.String, doc=docs.DISTRICT)
+    # Conduit info
+    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
+    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
+    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
+    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
+    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
+    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+
+    election_type = db.Column('election_tp', db.String, doc=docs.ELECTION_TYPE)
+    election_type_full = db.Column('fec_election_tp_desc', db.String, doc=docs.ELECTION_TYPE)
+
+    # Transaction meta info
+    # transaction_id = db.Column('tran_id', db.Integer)
+    independent_sign_name = db.Column('indt_sign_nm', db.String)
+    independent_sign_date = db.Column('indt_sign_dt', db.Date)
+    notary_sign_name = db.Column('notary_sign_nm', db.String)
+    notary_sign_date = db.Column('notary_sign_dt', db.Date)
+    notary_commission_expiration_date = db.Column('notary_commission_exprtn_dt', db.Date)
+
+    back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
+    back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
+
+    filer_prefix = db.Column(db.String)
+    filer_first_name = db.Column('filer_f_nm', db.String)
+    filer_middle_name = db.Column('filer_m_nm', db.String)
+    filer_last_name = db.Column('filer_l_nm', db.String)
+    filer_suffix = db.Column(db.String)
+
+    transaction_id = db.Column('tran_id', db.Integer)
+    original_sub_id = db.Column('orig_sub_id', db.Integer)
+
+    action_code = db.Column('action_cd', db.String)
+    action_code_full = db.Column('action_cd_desc', db.String)
+
+    # Auxiliary fields
+    schedule_type = db.Column('schedule_type', db.String)
+    schedule_type_full = db.Column('schedule_type_desc', db.String)
+
+    pdf_url = db.Column(db.String)
+
+
 
 class ScheduleF(PdfMixin,BaseItemized):
     __tablename__ = 'fec_vsum_sched_f'
