@@ -15,7 +15,7 @@ from webservices.common import counts
 from webservices.common.models import db
 from webservices.resources import (
     aggregates, candidates, candidate_aggregates, committees, costs, filings,
-    reports, sched_a, sched_b, sched_e
+    reports, sched_a, sched_b, sched_d, sched_e, sched_f
 )
 
 from webservices.tasks import app
@@ -45,7 +45,9 @@ RESOURCE_WHITELIST = {
     reports.EFilingSummaryView,
     sched_a.ScheduleAView,
     sched_b.ScheduleBView,
+    sched_d.ScheduleDView,
     sched_e.ScheduleEView,
+    sched_f.ScheduleFView
 }
 
 COUNT_NOTE = (
