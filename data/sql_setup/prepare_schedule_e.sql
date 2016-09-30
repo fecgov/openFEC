@@ -31,10 +31,7 @@ select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suff
     to_tsvector(pye_nm)
 from fec_vsum_f57;
 
-drop table if exists ofec_sched_e_notice_tmp;
-create table ofec_sched_e_notice_tmp(like ofec_sched_e_tmp);
-
-insert into ofec_sched_e_notice_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
+insert into ofec_sched_e_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
                               pye_st1, pye_st2, pye_city, pye_st, pye_zip, entity_tp, entity_tp_desc, exp_desc,
                               catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first, s_o_cand_nm_last,
                               s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
@@ -56,7 +53,7 @@ select cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_
     to_tsvector(pye_nm)
 from fec_sched_e_notice_vw;
 
-insert into ofec_sched_e_notice_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
+insert into ofec_sched_e_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
                               pye_st1, pye_st2, pye_city, pye_st, pye_zip, entity_tp, entity_tp_desc, exp_desc,
                               catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first, s_o_cand_nm_last,
                               s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
@@ -101,25 +98,6 @@ create index on ofec_sched_e_tmp using gin (payee_name_text);
 
 -- Analyze tables
 analyze ofec_sched_e_tmp;
-
--- Create simple indices on filtered columns
-create index on ofec_sched_e_notice_tmp (cmte_id);
-create index on ofec_sched_e_notice_tmp (s_o_cand_id);
-create index on ofec_sched_e_notice_tmp (entity_tp);
-create index on ofec_sched_e_notice_tmp (image_num);
-create index on ofec_sched_e_notice_tmp (rpt_yr);
-create index on ofec_sched_e_notice_tmp (filing_form);
-create index on ofec_sched_e_notice_tmp (get_cycle(rpt_yr));
-create index on ofec_sched_e_notice_tmp (is_notice);
-
--- Create composite indices on sortable columns
-create index on ofec_sched_e_notice_tmp (exp_dt, sub_id);
-create index on ofec_sched_e_notice_tmp (exp_amt, sub_id);
-create index on ofec_sched_e_notice_tmp (cal_ytd_ofc_sought, sub_id);
-
-alter table ofec_sched_e_notice_tmp add primary key (sub_id);
-
-analyze ofec_sched_e_notice_tmp;
 
 -- Create queue tables to hold changes to Schedule E
 drop table if exists ofec_sched_e_queue_new;
@@ -237,14 +215,14 @@ begin
 end
 $$ language plpgsql;
 
-drop trigger if exists ofec_sched_e_queue_trigger on sched_e;
+drop trigger if exists ofec_sched_e_queue_trigger on fec_vsum_sched_e;
 create trigger ofec_sched_e_queue_trigger before insert or update or delete
     on sched_e for each row execute procedure ofec_sched_e_update_queues()
 ;
 
-drop trigger if exists nml_form_24_trigger on disclosure.nml_form_24;
+drop trigger if exists nml_form_24_trigger on disclosure.nml_sched_e;
 create trigger nml_form_24_trigger before insert or update or delete
-    on disclosure.nml_form_24 for each row execute procedure ofec_sched_e_update_notice_queues()
+    on disclosure.nml_sched_e for each row execute procedure ofec_sched_e_update_notice_queues()
 ;
 
 drop trigger if exists ofec_f57_trigger on disclosure.nml_form_57;
@@ -258,6 +236,3 @@ create trigger fec_vsum_f57_trigger before insert or update or delete
 ;
 drop table if exists ofec_sched_e;
 alter table ofec_sched_e_tmp rename to ofec_sched_e;
-
-drop table if exists ofec_sched_e_notice;
-alter table ofec_sched_e_notice_tmp rename to ofec_sched_e_notice;
