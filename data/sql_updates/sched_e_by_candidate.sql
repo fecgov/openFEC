@@ -9,18 +9,18 @@ with records as (
         rpt_tp,
         memo_cd,
         exp_amt
-    from sched_e
+    from fec_vsum_sched_e
     union all
     select
         filer_cmte_id as cmte_id,
         s_o_cand_id as cand_id,
-        s_o_in as support_oppose_indicator,
+        s_o_ind as support_oppose_indicator,
         rpt_yr,
         rpt_tp,
         null as memo_cd,
         exp_amt
-    from form_57
-    join form_5
+    from fec_vsum_f57
+    join fec_vsum_f5
         on (form_5.sub_id = form_57.link_id)
 )
 select
