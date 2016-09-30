@@ -18,11 +18,17 @@ begin
     delete from ofec_sched_e_queue_old;
 
     perform ofec_sched_e_notice_update();
+    perform ofec_sched_e_update_from_f57();
+    perform ofec_sched_e_update_notice_queues();
+    perform fec_vsum_f57_update_queues();
+    --after some sched_e discussion, best to do the deletes this way, ensure no records
+    --are cleared until they are ready to be (with the drawback that some records will sit
+    --in the queues for a day
     delete from ofec_nml_24_queue_old;
-    delete from ofec_nml_24_queue_new where sub_id in (select link_id from ofec_sched_e_notice);
+    delete from ofec_nml_24_queue_new where sub_id in (select sub_id from ofec_sched_e);
 
     delete from ofec_f57_queue_old;
-    delete from ofec_f57_queue_new where sub_id in (select sub_id from ofec_sched_e_notice);
+    delete from ofec_f57_queue_new where sub_id in (select sub_id from ofec_sched_e);
     delete from ofec_f57_queue_new where sub_id in (select new.sub_id from ofec_f57_queue_new new, disclosure.nml_form_5 f5
         where new.link_id = f5.sub_id and (f5.rpt_tp <> '48' or f5.rpt_tp <> '24'));
     delete from ofec_f57_queue_old where sub_id in (select new.sub_id from ofec_f57_queue_new new, disclosure.nml_form_5 f5
