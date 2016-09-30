@@ -100,12 +100,12 @@ $$ language plpgsql;
 create or replace function ofec_sched_e_notice_update_from_f24() returns void as $$
 begin
     -- Drop all queued deletes
-    delete from ofec_sched_e_notice
+    delete from ofec_sched_e
     where link_id = any(select sub_id from ofec_nml_24_queue_old)
     ;
     -- Insert all queued updates, unless a row with the same key exists in the
     -- delete queue with a later timestamp
-    insert into ofec_sched_e_notice (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,pye_st1, pye_st2, pye_city, pye_st,
+    insert into ofec_sched_e (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,pye_st1, pye_st2, pye_city, pye_st,
         pye_zip, entity_tp, entity_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first,
         s_o_cand_nm_last, s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
         s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, memo_cd, memo_cd_desc, s_o_ind, s_o_ind_desc, election_tp,
@@ -190,12 +190,12 @@ $$ language plpgsql;
 create or replace function ofec_sched_e_f57_notice_update() returns void as $$
 begin
     -- Drop all queued deletes
-    delete from ofec_sched_e_notice
+    delete from ofec_sched_e
     where sub_id = any(select sub_id from ofec_f57_queue_old)
     ;
     -- Insert all queued updates, unless a row with the same key exists in the
     -- delete queue with a later timestamp
-    insert into ofec_sched_e_notice (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,pye_st1, pye_st2, pye_city, pye_st,
+    insert into ofec_sched_e (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,pye_st1, pye_st2, pye_city, pye_st,
         pye_zip, entity_tp, entity_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first,
         s_o_cand_nm_last, s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
         s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, s_o_ind, s_o_ind_desc, election_tp,
