@@ -12,6 +12,9 @@ from multiprocessing import Pool
 import logging
 from urllib.parse import urlencode
 
+import elasticsearch
+from elasticsearch_dsl import Search, Q
+from elasticsearch_dsl.result import Result
 import requests
 
 from webservices.rest import db
@@ -380,7 +383,7 @@ def map_pre2012_citation(title, section, archived_mur_citation_map={}):
         if len(archived_mur_citation_map):
             return archived_mur_citation_map
 
-        print('loading archived_mur_citation_map')
+        logger.info('Loading archived_mur_citation_map.csv')
         with open('data/archived_mur_citation_map.csv') as csvfile:
             for row in csv.reader(csvfile):
                 title, section = row[1].split(':', 2)
@@ -389,8 +392,11 @@ def map_pre2012_citation(title, section, archived_mur_citation_map={}):
 
     citations_map = _load_citation_map(archived_mur_citation_map)
 
-    # Fall back to title, section if no mapping exists
+    # Fallback to title, section if no mapping exists
     citation = citations_map.get('%s:%s' % (title, section), (title, section))
+    if (title, section) != citation:
+        logger.info('Mapping archived MUR statute citation %s ->  %s' % ((title, section), citation))
+
     return citation
 
 
@@ -403,8 +409,11 @@ def delete_murs_from_es():
     es = utils.get_elasticsearch_connection()
     es.transport.perform_request('DELETE', '/docs/murs')
 
-def get_mur_names():
-    mur_names = {}
+def get_mur_names(mur_names={}):
+    # Cache the mur names
+    if len(mur_names):
+        return mur_names
+
     with open('data/archived_mur_names.csv') as csvfile:
         for row in csv.reader(csvfile):
             if row[0] == 'MUR':
@@ -480,3 +489,31 @@ def load_archived_murs():
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
     with Pool(processes=1, maxtasksperchild=1) as pool:
         pool.map(process_mur, murs, chunksize=1)
+
+def remap_archived_murs_citations():
+    """Re-map citations for archived MURs. To extract the MUR
+    information from the archived PDFs, use load_archived_murs"""
+
+    es = utils.get_elasticsearch_connection()
+
+    # Fetch archived murs from ES
+    query = Search() \
+            .query(Q('term', mur_type='archived') &  Q('term', _type='murs')) \
+            .source(include='citations')
+    archived_murs = elasticsearch.helpers.scan(es, query.to_dict(), scroll='1m', index='docs', doc_type='murs', size=500)
+
+    # Re-map the citations
+    update_murs = (dict(_op_type='update', _id=mur.meta.id, doc=mur.to_dict()) for mur in remap_citations(archived_murs))
+
+    # Save MURs to ES
+    count, _ = elasticsearch.helpers.bulk(es, update_murs, index='docs', doc_type='murs', chunk_size=100, request_timeout=30)
+    logger.info("Re-mapped %d archived MURs" % count)
+
+
+def remap_citations(archived_murs):
+    for mur in archived_murs:
+        mur = Result(mur)
+
+        # Include regulations and us_code citations in the re-map
+        mur.citations = get_citations(map(lambda c: c['text'], list(mur.citations['regulations']) + list(mur.citations['us_code'])))
+        yield mur
