@@ -24,13 +24,13 @@ class TestGetCitations(unittest.TestCase):
     @mock.patch.object(load_legal_docs, 'map_pre2012_citation')
     def test_get_citations_statute(self, map_pre2012_citation):
         map_pre2012_citation.return_value = ('99', '31999')
-        citation_text = ''.join([
-            '2 U.S.C. 23<br>',
-            '2 U.S.C. 23a<br>',
-            '2 U.S.C. 23a-1<br>',
-            '4 U.S.C. 23a-1(a)(i)<br>',
-            '4 U.S.C. 24ff<br>',
-        ])
+        citation_text = [
+            '2 U.S.C. 23',
+            '2 U.S.C. 23a',
+            '2 U.S.C. 23a-1',
+            '4 U.S.C. 23a-1(a)(i)',
+            '4 U.S.C. 24ff',
+        ]
 
         expected_calls = [
             mock.call('2', '23'),
@@ -58,9 +58,9 @@ class TestGetCitations(unittest.TestCase):
         assert query == dict(collection=['uscode'], year=['mostrecent'], title=['99'], section=['31999'])
 
     def test_get_citations_regulation(self):
-        citation_text = ''.join([
-            '11 C.F.R. 23.421<br>',
-        ])
+        citation_text = [
+            '11 C.F.R. 23.421',
+        ]
 
         citations = load_legal_docs.get_citations(citation_text)
         regulations = citations['regulations']
@@ -73,9 +73,9 @@ class TestGetCitations(unittest.TestCase):
 
 
     def test_get_citations_regulation_no_section(self):
-        citation_text = ''.join([
-            '11 C.F.R. 19<br>',
-        ])
+        citation_text = [
+            '11 C.F.R. 19',
+        ]
 
         citations = load_legal_docs.get_citations(citation_text)
         regulations = citations['regulations']
