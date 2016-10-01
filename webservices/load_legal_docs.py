@@ -345,9 +345,7 @@ def get_subject_tree(html, tree=None):
                 get_subject_tree(html, tree)
     return tree
 
-def get_citations(data):
-    citation_texts = re.findall("(.*?)<br>", data)
-
+def get_citations(citation_texts):
     us_codes = []
     regulations = []
 
@@ -446,7 +444,8 @@ def process_mur(mur):
             respondents.append(name)
 
     subject = get_subject_tree(subject_td)
-    citations = get_citations(citations_td)
+    citations = get_citations(re.findall("(.*?)<br>", citations_td))
+
     mur_digits = re.match("([0-9]+)", mur_no).group(1)
     name = mur_names[mur_digits] if mur_digits in mur_names else ''
     doc = {
