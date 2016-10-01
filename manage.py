@@ -19,12 +19,18 @@ from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices.tasks.utils import get_bucket, get_object
-
-
-from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
-    index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
-    delete_advisory_opinions_from_s3, load_archived_murs, delete_murs_from_s3,
-    delete_murs_from_es)
+from webservices.load_legal_docs import (
+    delete_advisory_opinions_from_s3,
+    delete_murs_from_es,
+    delete_murs_from_s3,
+    index_advisory_opinions,
+    index_regulations,
+    index_statutes,
+    load_advisory_opinions_into_s3,
+    load_archived_murs,
+    remap_archived_murs_citations,
+    remove_legal_docs,
+    )
 from webservices.load_current_murs import load_current_murs
 
 manager = Manager(app)
@@ -36,16 +42,17 @@ logging.basicConfig(level=logging.INFO)
 # --no-debug flag to `runserver`.
 manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
-manager.command(remove_legal_docs)
-manager.command(index_statutes)
-manager.command(index_regulations)
-manager.command(index_advisory_opinions)
-manager.command(load_advisory_opinions_into_s3)
 manager.command(delete_advisory_opinions_from_s3)
-manager.command(load_current_murs)
-manager.command(load_archived_murs)
-manager.command(delete_murs_from_s3)
 manager.command(delete_murs_from_es)
+manager.command(delete_murs_from_s3)
+manager.command(index_advisory_opinions)
+manager.command(index_regulations)
+manager.command(index_statutes)
+manager.command(load_advisory_opinions_into_s3)
+manager.command(load_archived_murs)
+manager.command(load_current_murs)
+manager.command(remap_archived_murs_citations)
+manager.command(remove_legal_docs)
 
 def check_itemized_queues(schedule):
     """Checks to see if the queues associated with an itemized schedule have
