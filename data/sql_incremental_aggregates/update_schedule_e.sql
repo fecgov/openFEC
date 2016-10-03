@@ -101,7 +101,7 @@ create or replace function ofec_sched_e_notice_update_from_f24() returns void as
 begin
     -- Drop all queued deletes
     delete from ofec_sched_e
-    where link_id = any(select sub_id from ofec_nml_24_queue_old)
+    where sub_id = any(select sub_id from ofec_nml_24_queue_old)
     ;
     -- Insert all queued updates, unless a row with the same key exists in the
     -- delete queue with a later timestamp
