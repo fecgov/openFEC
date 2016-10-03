@@ -12,16 +12,16 @@ with records as (
     from fec_vsum_sched_e
     union all
     select
-        filer_cmte_id as cmte_id,
-        s_o_cand_id as cand_id,
-        s_o_ind as support_oppose_indicator,
-        rpt_yr,
-        rpt_tp,
+        f57.filer_cmte_id as cmte_id,
+        f57.s_o_cand_id as cand_id,
+        f57.s_o_ind as support_oppose_indicator,
+        f5.rpt_yr,
+        f5.rpt_tp,
         null as memo_cd,
         exp_amt
-    from fec_vsum_f57
-    join fec_vsum_f5
-        on (form_5.sub_id = form_57.link_id)
+    from fec_vsum_f57 f57
+    join fec_vsum_f5 f5
+        on (f5.sub_id = f57.link_id)
 )
 select
     row_number() over () as idx,

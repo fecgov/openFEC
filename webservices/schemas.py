@@ -543,29 +543,6 @@ ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas
 register_schema(ScheduleESchema)
 register_schema(ScheduleEPageSchema)
 
-ScheduleENoticeSchema = make_schema(
-    models.ScheduleENotice,
-    fields={
-        'memoed_subtotal': ma.fields.Boolean(),
-        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
-        'expenditure_amount': ma.fields.Decimal(places=2),
-        'office_total_ytd': ma.fields.Decimal(places=2),
-        'image_number': ma.fields.Str(),
-        'original_sub_id': ma.fields.Str(),
-        'sub_id': ma.fields.Str(),
-    },
-    options={
-        'exclude': (
-            'payee_name_text',
-            'original_sub_id',
-            'dissemination_date'
-        ),
-    }
-)
-ScheduleENoticePageSchema = make_page_schema(ScheduleENoticeSchema, page_type=paging_schemas.SeekPageSchema)
-register_schema(ScheduleENoticeSchema)
-register_schema(ScheduleENoticePageSchema)
-
 CommunicationCostSchema = make_schema(
     models.CommunicationCost,
 )

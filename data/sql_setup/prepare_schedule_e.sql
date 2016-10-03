@@ -111,14 +111,12 @@ drop table if exists fec_vsum_f57_queue_old;
 --drop table if exists ofec_nml_sched_e_new;
 --drop table if exists ofec_nml_sched_e_old;
 
-create table ofec_nml_24_queue_new as select * from disclosure.nml_form_24 limit 0;
-create table ofec_nml_24_queue_old as select * from disclosure.nml_form_24 limit 0;
+create table ofec_nml_24_queue_new as select * from disclosure.nml_sched_e limit 0;
+create table ofec_nml_24_queue_old as select * from disclosure.nml_sched_e limit 0;
 create table ofec_f57_queue_old as select * from disclosure.nml_form_57 limit 0;
 create table ofec_f57_queue_new as select * from disclosure.nml_form_57 limit 0;
 create table fec_vsum_f57_queue_new as select * from fec_vsum_f57 limit 0;
 create table fec_vsum_f57_queue_old as select * from fec_vsum_f57 limit 0;
---create table ofec_nml_sched_e_queue_new as select * from disclosure.nml_sched_e limit 0;
---create table ofec_nml_sched_e_queue_old as select * from disclosure.nml_sched_e limit 0;
 create table ofec_sched_e_queue_new as select * from fec_vsum_sched_e limit 0;
 create table ofec_sched_e_queue_old as select * from fec_vsum_sched_e limit 0;
 
@@ -217,7 +215,7 @@ $$ language plpgsql;
 
 drop trigger if exists ofec_sched_e_queue_trigger on fec_vsum_sched_e;
 create trigger ofec_sched_e_queue_trigger before insert or update or delete
-    on sched_e for each row execute procedure ofec_sched_e_update_queues()
+    on fec_vsum_sched_e for each row execute procedure ofec_sched_e_update_queues()
 ;
 
 drop trigger if exists nml_form_24_trigger on disclosure.nml_sched_e;
