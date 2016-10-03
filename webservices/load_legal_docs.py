@@ -361,7 +361,7 @@ def get_citations(citation_texts):
             title, section = map_pre2012_citation(us_code_match.group('title'), us_code_match.group('section'))
             citation_text = '%s U.S.C. %s%s' % (title, section, us_code_match.group('paragraphs'))
             url = 'http://api.fdsys.gov/link?' +\
-                  urlencode([('collection', 'uscode'), ('title', title),
+                  urlencode([('collection', 'uscode'), ('link-type', 'html'), ('title', title),
                     ('year', 'mostrecent'), ('section', section)])
             us_codes.append({"text": citation_text, "url": url})
         elif regulation_match:

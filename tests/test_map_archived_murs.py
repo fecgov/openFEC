@@ -29,8 +29,8 @@ class TestRemapCitations(unittest.TestCase):
 
         mur1 = self.mur_factory(
             us_code_citations=[
-                dict(text="2 U.S.C. 431", url="http://api.fdsys.gov/link?collection=uscode&title=2&year=mostrecent&section=431"),
-                dict(text="2 U.S.C. 432", url="http://api.fdsys.gov/link?collection=uscode&title=2&year=mostrecent&section=432"),
+                dict(text="2 U.S.C. 431", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=2&year=mostrecent&section=431"),
+                dict(text="2 U.S.C. 432", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=2&year=mostrecent&section=432"),
             ],
             regulations_citations=regulations_citations,
             id='mur1'
@@ -38,8 +38,8 @@ class TestRemapCitations(unittest.TestCase):
         expected_mur1 = self.mur_factory(
             us_code_citations=[
                 # re-mapped citations
-                dict(text="52 U.S.C. 30101", url="http://api.fdsys.gov/link?collection=uscode&title=52&year=mostrecent&section=30101"),
-                dict(text="52 U.S.C. 30102", url="http://api.fdsys.gov/link?collection=uscode&title=52&year=mostrecent&section=30102"),
+                dict(text="52 U.S.C. 30101", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=52&year=mostrecent&section=30101"),
+                dict(text="52 U.S.C. 30102", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=52&year=mostrecent&section=30102"),
             ],
             regulations_citations=regulations_citations,
             id='mur1'
@@ -48,8 +48,8 @@ class TestRemapCitations(unittest.TestCase):
 
         mur2 = self.mur_factory(
             us_code_citations=[
-                dict(text="2 U.S.C. 433", url="http://api.fdsys.gov/link?collection=uscode&title=2&year=mostrecent&section=433"),
-                dict(text="2 U.S.C. 434", url="http://api.fdsys.gov/link?collection=uscode&title=2&year=mostrecent&section=434"),
+                dict(text="2 U.S.C. 433", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=2&year=mostrecent&section=433"),
+                dict(text="2 U.S.C. 434", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=2&year=mostrecent&section=434"),
             ],
             regulations_citations=regulations_citations,
             id='mur2'
@@ -57,8 +57,8 @@ class TestRemapCitations(unittest.TestCase):
         expected_mur2 = self.mur_factory(
             us_code_citations=[
                 # re-mapped citations
-                dict(text="52 U.S.C. 30103", url="http://api.fdsys.gov/link?collection=uscode&title=52&year=mostrecent&section=30103"),
-                dict(text="52 U.S.C. 30104", url="http://api.fdsys.gov/link?collection=uscode&title=52&year=mostrecent&section=30104"),
+                dict(text="52 U.S.C. 30103", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=52&year=mostrecent&section=30103"),
+                dict(text="52 U.S.C. 30104", url="http://api.fdsys.gov/link?collection=uscode&link-type=html&title=52&year=mostrecent&section=30104"),
             ],
             regulations_citations=regulations_citations,
             id='mur2'
@@ -132,7 +132,13 @@ class TestGetCitations(unittest.TestCase):
         parsed_url = urllib.parse.urlparse(us_code[0]['url'])
         query = urllib.parse.parse_qs(parsed_url.query)
 
-        assert query == dict(collection=['uscode'], year=['mostrecent'], title=['99'], section=['31999'])
+        assert query == dict([
+            ('collection', ['uscode']),
+            ('link-type', ['html']),
+            ('year', ['mostrecent']),
+            ('title', ['99']),
+            ('section', ['31999']),
+        ])
 
     def test_get_citations_regulation(self):
         citation_text = [
