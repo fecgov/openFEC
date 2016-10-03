@@ -182,7 +182,7 @@ begin
         image_pdf_url(se.image_num) as pdf_url,
         True,
         to_tsvector(se.pye_nm)
-    from ofec_nml_24_queue_new f24, disclosure.nml_sched_e se
+    from disclosure.nml_form_24 f24, ofec_nml_24_queue_new se
     where se.link_id = f24.sub_id and f24.delete_ind is null and se.delete_ind is null and se.amndt_ind::text <> 'D'::text;
 end
 $$ language plpgsql;
