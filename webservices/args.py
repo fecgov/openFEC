@@ -70,7 +70,10 @@ class OptionValidator(object):
 
     def __call__(self, value):
         if value.lstrip('-') not in self.values:
-            raise ValidationError('Cannot sort on value "{0}"'.format(value), status_code=422)
+            raise ValidationError(
+                'Cannot sort on value "{0}"'.format(value),
+                status_code=422
+            )
 
 
 class IndexValidator(OptionValidator):
@@ -87,10 +90,12 @@ class IndexValidator(OptionValidator):
     @property
     def values(self):
         inspector = sa.inspect(db.engine)
+
         column_map = {
             column.key: label
             for label, column in self.model.__mapper__.columns.items()
         }
+
         return [
             column_map[column['column_names'][0]]
             for column in inspector.get_indexes(self.model.__tablename__)
@@ -466,6 +471,12 @@ schedule_e_by_candidate = {
         validate=validate.OneOf(['S', 'O']),
         description='Support or opposition'
     ),
+}
+#These arguments will evolve with updated filtering needs
+schedule_d = {
+    'min_payment_period': fields.Float(),
+    'max_payment_period': fields.Float(),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
 }
 
 schedule_f = {
