@@ -271,9 +271,6 @@ class ScheduleE(BaseItemized):
 
     sub_id = db.Column(db.String, primary_key=True)
 
-    # Committe info
-    committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_ID)
-
     # Payee info
     payee_prefix = db.Column(db.String)
     payee_name = db.Column('pye_nm', db.String)

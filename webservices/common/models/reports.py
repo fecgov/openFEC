@@ -317,7 +317,7 @@ class BaseFiling(PdfMixin,db.Model):
     zip = db.Column(db.String)
     election_date = db.Column('el_date', db.Date)
     election_state = db.Column('el_state', db.String)
-    receipt_date = db.Column('create_dt', db.Date)
+    receipt_date = db.Column('create_dt', db.Date, index=True)
     sign_date = db.Column(db.Date)
     @property
     def document_description(self):
