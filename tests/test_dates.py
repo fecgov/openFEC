@@ -109,19 +109,20 @@ class TestCalendarDates(ApiBaseTest):
 
 
 class TestCalendarExport(ApiBaseTest):
-
+    today = datetime.datetime.now()
     def setUp(self):
         super().setUp()
+
         self.dates = [
             factories.CalendarDateFactory(
                 category='election',
-                start_date=datetime.datetime(2015, 10, 1),
+                start_date=datetime.datetime(self.today.year, 10, 1),
                 all_day=True,
             ),
             factories.CalendarDateFactory(
                 category='Roundtables',
-                start_date=datetime.datetime(2015, 10, 31, 2),
-                end_date=datetime.datetime(2015, 10, 31, 3)
+                start_date=datetime.datetime(self.today.year, 10, 31, 2),
+                end_date=datetime.datetime(self.today.year, 10, 31, 3)
             ),
         ]
 
@@ -140,5 +141,5 @@ class TestCalendarExport(ApiBaseTest):
         assert len(components) == 2
         assert str(components[0]['CATEGORIES']) == 'election'
         timezone = pytz.timezone('US/Eastern')
-        assert components[0]['DTSTART'].dt == datetime.date(2015, 10, 1)
-        assert components[1]['DTSTART'].dt == timezone.localize(datetime.datetime(2015, 10, 31, 2))
+        assert components[0]['DTSTART'].dt == datetime.date(self.today.year, 10, 1)
+        assert components[1]['DTSTART'].dt == timezone.localize(datetime.datetime(self.today.year, 10, 31, 2))
