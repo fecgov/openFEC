@@ -2,6 +2,8 @@
 
 import os
 import glob
+import collections
+import json
 import logging
 import subprocess
 import multiprocessing
@@ -11,12 +13,14 @@ import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 
-from webservices import efile_parser, flow, partition, utils
+from webservices import flow, partition, utils
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 from webservices.tasks.utils import get_bucket, get_object
+
+
 from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
     index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
     delete_advisory_opinions_from_s3, load_archived_murs, delete_murs_from_s3,
@@ -298,9 +302,30 @@ def cf_startup():
         subprocess.Popen(['python', 'manage.py', 'update_schemas'])
 
 @manager.command
-def test_util():
-    df = efile_parser.get_dataframe(6)
-    efile_parser.parse_f3psummary_column_b(df)
+def load_efile_sheets():
+    """Run this management command if there are changes to incoming efiling data structures. It will make the json mapping from the spreadsheets you provide it."""
+    import pandas as pd
+    sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
+    for i in range(4,7):
+        table = sheet_map.get(i)
+        df = pd.read_excel(
+            # /Users/jonathancarmack/Documents/repos/openFEC
+            io="data/real_efile_to_form_line_numbers.xlsx",
+            #index_col="summary line number",
+            sheetname=i,
+            skiprows=7,
+
+        )
+        df = df.fillna(value="N/A")
+        df = df.rename(columns={'fecp column name (column a value)': 'fecp_col_a',
+                                'fecp column name (column b value)': 'fecp_col_b',
+                                })
+        form_column = table.split('_')[2] + " line number"
+        columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
+        df.drop(columns_to_drop, axis=1, inplace=True)
+        df.to_json(path_or_buf="data/" + table + ".json", orient='values')
+
+
 
 if __name__ == '__main__':
     manager.run()
