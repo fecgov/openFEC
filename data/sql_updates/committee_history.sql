@@ -102,6 +102,7 @@ order by fec_yr.cmte_id, fec_yr.fec_election_yr desc, dcp.rpt_yr desc
 
 create unique index on ofec_committee_history_mv_tmp(idx);
 
+create index on ofec_committee_history_mv_tmp(name);
 create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
 create index on ofec_committee_history_mv_tmp(designation);
