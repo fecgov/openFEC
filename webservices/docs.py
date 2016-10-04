@@ -431,13 +431,11 @@ the expenditure amount, name and id of the candidate, and whether the ad support
 An independent expenditure is an expenditure for a communication "expressly advocating the election or
 defeat of a clearly identified candidate that is not made in cooperation, consultation, or concert with,
 or at the request or suggestion of, a candidate, a candidate’s authorized committee, or their agents, or
-a political party or its agents.
+a political party or its agents."
 
 Aggregates by candidate do not include 24 and 48 hour reports. This ensures we don't double count expenditures
-and the totals are more accurate. You can find the information from 24 and 48 hour reports in
-`/schedule/schedule_e/notice`.
-"
-
+and the totals are more accurate. You can still find the information from 24 and 48 hour reports in
+`/schedule/schedule_e/`.
 '''
 
 SCHEDULE_E = SCHEDULE_E_TAG + '''
@@ -466,11 +464,6 @@ To fetch the next page of results, append
 
 Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
-'''
-
-SCHEDULE_E_NOTICE = '''
-This resource contains all 24 and 48 hour reports for independent expenditures.  Please
-note this resource contains both new and amended reports.
 '''
 
 SCHEDULE_F_TAG = '''
