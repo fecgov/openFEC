@@ -301,6 +301,7 @@ def cf_startup():
 
 @manager.command
 def load_efile_sheets():
+    """Run this management command if there are changes to incoming efiling data structures. It will make the json mapping from the spreadsheets you provide it."""
     import pandas as pd
     sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
     for i in range(4,7):
