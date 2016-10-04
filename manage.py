@@ -25,6 +25,7 @@ from webservices.load_legal_docs import (remove_legal_docs, index_statutes,
     index_regulations, index_advisory_opinions, load_advisory_opinions_into_s3,
     delete_advisory_opinions_from_s3, load_archived_murs, delete_murs_from_s3,
     delete_murs_from_es)
+from webservices.load_current_murs import load_current_murs
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -41,6 +42,7 @@ manager.command(index_regulations)
 manager.command(index_advisory_opinions)
 manager.command(load_advisory_opinions_into_s3)
 manager.command(delete_advisory_opinions_from_s3)
+manager.command(load_current_murs)
 manager.command(load_archived_murs)
 manager.command(delete_murs_from_s3)
 manager.command(delete_murs_from_es)
