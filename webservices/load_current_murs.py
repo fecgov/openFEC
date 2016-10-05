@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.rest import db
-from webservices.utils import get_elasticsearch_connection
+from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
 
 logger = logging.getLogger(__name__)
@@ -136,15 +136,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
         for match in REGULATION_REGEX.finditer(regulatory_citation):
-            url = 'https://api.fdsys.gov/link?' +\
-                urlencode([
-                    ('collection', 'cfr'),
-                    ('year', 'mostrecent'),
-                    ('titlenum', '11'),
-                    ('partnum', match.group('part'))
-                ])
-            if match.group('section'):
-                url += '&' + urlencode([('sectionnum', match.group('section'))])
+            url = create_eregs_link(match.group('part'), match.group('section'))
             citations.append(url)
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
