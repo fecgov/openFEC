@@ -128,6 +128,7 @@ create index on ofec_sched_e_queue_new (timestamp);
 create index on ofec_sched_e_queue_old (timestamp);
 
 -- Create trigger to maintain Schedule E queues
+-- insert and delete tested for correctness
 create or replace function ofec_sched_e_update_queues() returns trigger as $$
 declare
     start_year int = TG_ARGV[0]::int;
@@ -149,7 +150,7 @@ begin
     end if;
 end
 $$ language plpgsql;
-
+--insert and delete tested for correctness
 create or replace function ofec_sched_e_update_notice_queues() returns trigger as $$
 begin
 
@@ -171,6 +172,7 @@ begin
 end
 $$ language plpgsql;
 
+-- insert and delete tested for correctness
 create or replace function ofec_f57_update_notice_queues() returns trigger as $$
 begin
 
@@ -192,6 +194,7 @@ begin
 end
 $$ language plpgsql;
 
+-- insert and delete tested for correctness
 create or replace function fec_vsum_f57_update_queues() returns trigger as $$
 begin
 
