@@ -11,9 +11,9 @@ from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
     ("110", 1, 2,
-        ["https://api.fdsys.gov/link?collection=cfr&year=mostrecent&titlenum=11&partnum=110"]),
+        ["/regulations/110/CURRENT"]),
     ("110.21", 1, 2,
-        ["https://api.fdsys.gov/link?collection=cfr&year=mostrecent&titlenum=11&partnum=110&sectionnum=21"]),
+        ["/regulations/110-21/CURRENT"]),
 ])
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
@@ -175,7 +175,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert thorin['role'] == 'Respondent'
         assert len(thorin['citations']['Closed']) == 2
         assert re.search(r'api.fdsys.gov.*collection=uscode.*section=123', thorin['citations']['Closed'][0])
-        assert re.search(r'api.fdsys.gov.*collection=cfr.*partnum=456', thorin['citations']['Closed'][1])
+        assert thorin['citations']['Closed'][1] == '/regulations/456/CURRENT'
 
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
