@@ -357,15 +357,11 @@ def get_citations(data):
                   urlencode([('collection', 'uscode'), ('title', us_code_match.group('title')),
                     ('year', 'mostrecent'), ('section', us_code_match.group('section'))])
             us_codes.append({"text": citation_text, "url": url})
-        if regulation_match:
-            url = 'http://api.fdsys.gov/link?' +\
-                  urlencode([('collection', 'cfr'), ('titlenum', regulation_match.group('title')),
-                        ('partnum', regulation_match.group('part')), ('year', 'mostrecent')])
-            if regulation_match.group(3):
-                url += '&' + urlencode([('sectionnum', regulation_match.group('section'))])
+        elif regulation_match:
+            url = utils.create_eregs_link(regulation_match.group('part'), regulation_match.group('section'))
             regulations.append({"text": citation_text, "url": url})
 
-        if not us_code_match and not regulation_match:
+        else:
             print(citation_text)
             raise Exception("Could not parse citation")
     return {"us_code": us_codes, "regulations": regulations}
