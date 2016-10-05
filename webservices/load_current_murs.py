@@ -49,20 +49,10 @@ MUR_VIOLATIONS = """
     ;
 """
 
-CLOSE_DATE = """
-    SELECT event_date
+OPEN_AND_CLOSE_DATES = """
+    SELECT min(event_date), max(event_date)
     FROM fecmur.calendar
-    WHERE case_id = %s
-    ORDER BY event_date DESC
-    LIMIT 1;
-"""
-
-OPEN_DATE = """
-    SELECT event_date
-    FROM fecmur.calendar
-    WHERE case_id = %s
-    ORDER BY event_date ASC
-    LIMIT 1;
+    WHERE case_id = %s;
 """
 
 DISPOSITION_DATA = """
@@ -118,11 +108,8 @@ def load_current_murs():
 
 def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:
-        rs = conn.execute(OPEN_DATE, case_id)
-        open_date = rs.fetchone()[0]
-
-        rs = conn.execute(CLOSE_DATE, case_id)
-        close_date = rs.fetchone()[0]
+        rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
+        open_date, close_date = rs.fetchone()
     return open_date, close_date
 
 def get_disposition(case_id):
