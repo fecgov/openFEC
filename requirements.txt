@@ -10,7 +10,7 @@ python-dateutil==2.4.2
 sqlalchemy-postgres-copy==0.1.0
 networkx==1.9.1
 newrelic==2.52.0.40
-SQLAlchemy==1.0.14
+SQLAlchemy==1.0.15
 mandrill==1.0.57
 icalendar==3.9.1
 GitPython==1.0.1
@@ -38,6 +38,3 @@ celery==3.1.23
 celery-once==0.1.4
 redis==2.10.5
 
-#efiling
-pandas==0.16.2
-xlrd==0.9.4
