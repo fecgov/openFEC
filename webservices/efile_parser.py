@@ -16,7 +16,7 @@ def get_dataframe(sheetname=None):
     dataframe = pd.read_excel(
         # /Users/jonathancarmack/Documents/repos/openFEC
         io="data/real_efile_to_form_line_numbers.xlsx",
-        index_col="summary line number",
+        #index_col="summary line number",
         sheetname=sheetname,
         skiprows=7,
 
