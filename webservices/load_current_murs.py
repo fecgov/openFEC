@@ -119,17 +119,18 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
         for match in STATUTE_REGEX.finditer(statutory_citation):
             title, section = reclassify_statutory_citation(match.group('section'))
             url = 'https://api.fdsys.gov/link?' +\
-                urlencode([
-                    ('collection', 'uscode'),
-                    ('year', 'mostrecent'),
-                    ('link-type', 'html'),
-                    ('title', title),
-                    ('section', section)
-                ])
-            citations.append(url)
+                    urlencode([
+                        ('collection', 'uscode'),
+                        ('year', 'mostrecent'),
+                        ('link-type', 'html'),
+                        ('title', title),
+                        ('section', section)
+                    ])
+            text = '%s U.S.C. %s' % (title, section)
+            citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
-                statutory_citation, entity_id, case_id)
+                    statutory_citation, entity_id, case_id)
     return citations
 
 def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
@@ -137,10 +138,13 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     if regulatory_citation:
         for match in REGULATION_REGEX.finditer(regulatory_citation):
             url = create_eregs_link(match.group('part'), match.group('section'))
-            citations.append(url)
+            text = '11 C.F.R. %s' % match.group('part')
+            if match.group('section'):
+                text += '.%s' % match.group('section')
+            citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
-                regulatory_citation, entity_id, case_id)
+                    regulatory_citation, entity_id, case_id)
     return citations
 
 def reclassify_statutory_citation(section):
@@ -201,7 +205,7 @@ def get_documents(case_id, bucket, bucket_name):
             pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                              ContentType='application/pdf', ACL='public-read')
+                    ContentType='application/pdf', ACL='public-read')
             document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
     return document_text, documents
