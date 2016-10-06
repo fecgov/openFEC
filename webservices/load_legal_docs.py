@@ -444,7 +444,8 @@ def load_archived_murs():
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     bucket = get_bucket()
     murs_completed = set([re.match("legal/murs/([0-9_A-Z]+).pdf", o.key).group(1)
-                        for o in bucket.objects.filter(Prefix="legal/murs")])
+                        for o in bucket.objects.filter(Prefix="legal/murs")
+                        if re.match("legal/murs/([0-9_A-Z]+).pdf", o.key)])
     rows = [r for r in rows
             if re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', r, re.M).group(1)
             not in murs_completed]
