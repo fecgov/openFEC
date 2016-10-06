@@ -1,23 +1,56 @@
 
 import re
 import functools
+import json
+
+from collections import namedtuple
 
 import marshmallow as ma
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_pagination import schemas as paging_schemas
 
-from webservices import utils, efile_parser, decoders
+from webservices import utils, decoders
 from webservices.spec import spec
 from webservices.common import models
+from webservices.common.models import db
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
 from marshmallow import pre_dump, post_dump
 from sqlalchemy import func
+import sqlalchemy as sa
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
 spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 
+# A namedtuple used to help capture any additional columns that should be
+# included with exported data:
+# field: the field object definining the relationship on a model, e.g.,
+#   models.ScheduleA.committee (an object)
+# column: the column object found in the related model, e.g.,
+#   models.CommitteeHistory.name (an object)
+# label: the label to use for the column in the query that will appear in the
+# header row of the output, e.g.,
+#   'committee_name' (a string)
+# position: the spot within the list of columns that this should be inserted
+# at; defaults to -1 (end of the list), e.g.,
+#   1 (an integer, in this case the second spot in a list)
+
+# Usage:  Define a custom attribute in a schema's Meta options object called
+# 'relationships' and set to a list of one or more relationships.
+#
+# Note:  There is no clean way to provide default values for a namedtuple at
+# the moment. This wrapper is modeled after the following post:
+# https://ceasarjames.wordpress.com/2012/03/19/how-to-use-default-arguments-with-namedtuple/
+class Relationship(namedtuple('Relationship', 'field column label position')):
+    def __new__(cls, field, column, label, position=-1):
+        return super(Relationship, cls).__new__(
+            cls,
+            field,
+            column,
+            label,
+            position
+        )
 
 class BaseSchema(ModelSchema):
 
@@ -73,6 +106,7 @@ class EFilingF3PSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         line_list = {}
         state_map = {}
+
         keys = zip(decoders.f3p_col_a, decoders.f3p_col_b)
         per = re.compile('(.+?(?=per))')
         ytd = re.compile('(.+?(?=ytd))')
@@ -80,6 +114,7 @@ class EFilingF3PSchema(BaseEfileSchema):
         descriptions = decoders.f3p_description
         keys = list(keys)
         if obj.summary_lines:
+
             for row in obj.summary_lines:
                 if row.line_number >= 33 and row.line_number < 87:
                     state_map[keys[int(row.line_number - 1)][0]] = row.column_a
@@ -405,6 +440,14 @@ ScheduleASchema = make_schema(
             'contributor_employer_text',
             'contributor_occupation_text',
         ),
+        'relationships': [
+            Relationship(
+                models.ScheduleA.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
     }
 )
 
@@ -520,6 +563,14 @@ ScheduleBSchema = make_schema(
             'recipient_name_text',
             'disbursement_description_text'
         ),
+        'relationships': [
+            Relationship(
+                models.ScheduleB.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
     }
 )
 ScheduleBPageSchema = make_page_schema(ScheduleBSchema, page_type=paging_schemas.SeekPageSchema)
@@ -541,6 +592,14 @@ ScheduleESchema = make_schema(
         'exclude': (
             'payee_name_text',
         ),
+        'relationships': [
+            Relationship(
+                models.ScheduleE.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
     }
 )
 ScheduleEPageSchema = make_page_schema(ScheduleESchema, page_type=paging_schemas.SeekPageSchema)
