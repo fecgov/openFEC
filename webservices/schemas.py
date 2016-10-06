@@ -63,6 +63,7 @@ class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
+    csv_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
 

@@ -105,7 +105,9 @@ class CommitteeReports(PdfMixin, BaseModel):
             None,
         )
 
-
+    @property
+    def csv_url(self):
+        reu
 class CommitteeReportsHouseSenate(CommitteeReports):
     __tablename__ = 'ofec_reports_house_senate_mv'
 
@@ -319,6 +321,9 @@ class BaseFiling(PdfMixin,db.Model):
     election_state = db.Column('el_state', db.String)
     receipt_date = db.Column('create_dt', db.Date, index=True)
     sign_date = db.Column(db.Date)
+    @property
+    def csv_url(self):
+        return utils.make_csv_url(self.file_number)
     @property
     def document_description(self):
         return utils.document_description(
