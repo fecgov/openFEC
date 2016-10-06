@@ -2,7 +2,7 @@ import mock
 import unittest
 import urllib
 
-from webservices import load_legal_docs
+from webservices import load_legal_docs, reclassify_statutory_citation
 
 
 class TestRemapCitations(unittest.TestCase):
@@ -88,19 +88,19 @@ class TestRemapCitations(unittest.TestCase):
 
 class TestGetCitations(unittest.TestCase):
 
-    def test_map_pre2012_citation(self):
+    def test_reclassify_pre2012_citation(self):
         # spot check a few cases from the csv
-        assert load_legal_docs.map_pre2012_citation('2', '431') == ('52', '30101')
-        assert load_legal_docs.map_pre2012_citation('2', '437g') == ('52', '30109')
-        assert load_legal_docs.map_pre2012_citation('42', '1973aa-1a') == ('52', '10503')
+        assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '431') == ('52', '30101')
+        assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '437g') == ('52', '30109')
+        assert reclassify_statutory_citation.reclassify_pre2012_citation('42', '1973aa-1a') == ('52', '10503')
 
         # and a fallback
-        assert load_legal_docs.map_pre2012_citation('99', '12345') == ('99', '12345')
+        assert reclassify_statutory_citation.reclassify_pre2012_citation('99', '12345') == ('99', '12345')
 
 
-    @mock.patch.object(load_legal_docs, 'map_pre2012_citation')
-    def test_get_citations_statute(self, map_pre2012_citation):
-        map_pre2012_citation.return_value = ('99', '31999')
+    @mock.patch.object(reclassify_statutory_citation, 'reclassify_pre2012_citation')
+    def test_get_citations_statute(self, reclassify_pre2012_citation):
+        reclassify_pre2012_citation.return_value = ('99', '31999')
         citation_text = [
             '2 U.S.C. 23',
             '2 U.S.C. 23a',
@@ -121,7 +121,7 @@ class TestGetCitations(unittest.TestCase):
         us_code = citations['us_code']
 
         assert len(us_code) == len(expected_calls)
-        assert map_pre2012_citation.call_args_list == expected_calls
+        assert reclassify_pre2012_citation.call_args_list == expected_calls
 
         assert us_code[0]['text'] == '99 U.S.C. 31999'
         assert us_code[1]['text'] == '99 U.S.C. 31999'
