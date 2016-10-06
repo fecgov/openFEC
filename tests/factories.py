@@ -184,7 +184,7 @@ class ScheduleBFactory(BaseFactory):
 class ScheduleEFactory(BaseFactory):
     class Meta:
         model = models.ScheduleE
-    sched_e_sk = factory.Sequence(lambda n: n)
+    sub_id = factory.Sequence(lambda n: n)
     report_year = 2016
 
     @factory.post_generation
@@ -193,9 +193,25 @@ class ScheduleEFactory(BaseFactory):
 
 
 class FilingsFactory(BaseFactory):
+    sub_id = factory.Sequence(lambda n: n)
+
     class Meta:
         model = models.Filings
 
+
+class EFilingsFactory(BaseFactory):
+    file_number = factory.Sequence(lambda n: n)
+
+    class Meta:
+        model = models.EFilings
+
+
+class BaseFilingFactory(BaseFactory):
+    file_number = factory.Sequence(lambda n: n)
+
+class BaseF3PFilingFactory(BaseFilingFactory):
+    class Meta:
+        model = models.BaseF3PFiling
 
 class BaseAggregateFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: str(n))

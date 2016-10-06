@@ -66,8 +66,10 @@ app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-
-app.config['SQLALCHEMY_REPLICA_TASKS'] = [
+app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
+    env.get_credential('SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS', '')
+)
+app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
 app.config['SQLALCHEMY_FOLLOWERS'] = [
@@ -240,7 +242,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.UniversalSearch, '/legal/search/')
-api.add_resource(legal.AdvisoryOpinion, '/legal/advisory_opinion/<ao_no>')
+api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
