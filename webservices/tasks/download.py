@@ -14,8 +14,8 @@ from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
 from webservices.resources import (
-    candidates, candidate_aggregates, committees, costs, filings, reports,
-    sched_a, sched_b, sched_e
+    aggregates, candidates, candidate_aggregates, committees, costs, filings,
+    reports, sched_a, sched_b, sched_d, sched_e, sched_f
 )
 
 from webservices.tasks import app
@@ -25,6 +25,14 @@ logger = logging.getLogger(__name__)
 
 IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null'}
 RESOURCE_WHITELIST = {
+    aggregates.ScheduleABySizeView,
+    aggregates.ScheduleAByStateView,
+    aggregates.ScheduleAByZipView,
+    aggregates.ScheduleAByEmployerView,
+    aggregates.ScheduleAByOccupationView,
+    aggregates.ScheduleBByRecipientView,
+    aggregates.ScheduleBByRecipientIDView,
+    aggregates.ScheduleBByPurposeView,
     candidates.CandidateList,
     committees.CommitteeList,
     costs.CommunicationCostView,
@@ -37,7 +45,9 @@ RESOURCE_WHITELIST = {
     reports.EFilingSummaryView,
     sched_a.ScheduleAView,
     sched_b.ScheduleBView,
+    sched_d.ScheduleDView,
     sched_e.ScheduleEView,
+    sched_f.ScheduleFView
 }
 
 COUNT_NOTE = (
