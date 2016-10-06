@@ -60,7 +60,6 @@ DISPOSITION_DATA = """
     fecmur.settlement.final_amount, fecmur.entity.name, violations.statutory_citation,
     violations.regulatory_citation
     from fecmur.calendar
-    inner join fecmur.case on fecmur.calendar.case_id = fecmur.case.case_id
     inner join fecmur.event on fecmur.calendar.event_id = fecmur.event.event_id
     inner join fecmur.entity on fecmur.entity.entity_id = fecmur.calendar.entity_id
     left join (select * from fecmur.relatedobjects where relation_id=1) AS relatedobjects
@@ -120,7 +119,7 @@ def get_disposition(case_id):
             citations = parse_statutory_citations(row[3], case_id, row[2])
             citations.extend(parse_regulatory_citations(row[4], case_id, row[2]))
             disposition_data.append({'disposition': row[0], 'penalty': row[1],
-                'respondant': row[2], 'citations': citations})
+                'respondent': row[2], 'citations': citations})
 
         rs = conn.execute(DISPOSITION_TEXT, case_id)
         disposition_text = []
