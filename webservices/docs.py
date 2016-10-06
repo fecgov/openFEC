@@ -829,6 +829,10 @@ REFUNDED_POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Political party refunds'
 CONTRIBUTION_REFUNDS = 'Total contribution refunds'
 REFUNDED_OTHER_POLITICAL_COMMITTEE_CONTRIBUTIONS = 'Other committee refunds'
 
+#loans
+LOAN_SOURCE = "Source of the loan (i.e., bank loan, brokerage account, credit card, home equity line of credit," \
+              "other line of credit, or personal funds of the candidate"
+
 
 # presidential
 # receipts
