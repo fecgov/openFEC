@@ -19,7 +19,7 @@ import requests
 
 from webservices.rest import db
 from webservices.env import env
-from webservices import utils
+from webservices import reclassify_statutory_citation, utils
 from webservices.tasks.utils import get_bucket
 
 # sigh. This is a mess because slate uses a library also called utils.
@@ -358,7 +358,7 @@ def get_citations(citation_texts):
             "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", citation_text)
 
         if us_code_match:
-            title, section = map_pre2012_citation(us_code_match.group('title'), us_code_match.group('section'))
+            title, section = reclassify_statutory_citation.reclassify_pre2012_citation(us_code_match.group('title'), us_code_match.group('section'))
             citation_text = '%s U.S.C. %s%s' % (title, section, us_code_match.group('paragraphs'))
             url = 'http://api.fdsys.gov/link?' +\
                   urlencode([('collection', 'uscode'), ('link-type', 'html'), ('title', title),
@@ -372,33 +372,6 @@ def get_citations(citation_texts):
             print(citation_text)
             raise Exception("Could not parse citation")
     return {"us_code": us_codes, "regulations": regulations}
-
-def map_pre2012_citation(title, section, archived_mur_citation_map={}):
-    """Archived MURs have citations referring to old USC Titles that were
-    remapped in 2012. We link to the current laws based on the original
-    citations."""
-
-    def _load_citation_map(archived_mur_citation_map):
-        # Cache the map
-        if len(archived_mur_citation_map):
-            return archived_mur_citation_map
-
-        logger.info('Loading archived_mur_citation_map.csv')
-        with open('data/archived_mur_citation_map.csv') as csvfile:
-            for row in csv.reader(csvfile):
-                title, section = row[1].split(':', 2)
-                archived_mur_citation_map[row[0]] = (title, section)
-        return archived_mur_citation_map
-
-    citations_map = _load_citation_map(archived_mur_citation_map)
-
-    # Fallback to title, section if no mapping exists
-    citation = citations_map.get('%s:%s' % (title, section), (title, section))
-    if (title, section) != citation:
-        logger.info('Mapping archived MUR statute citation %s ->  %s' % ((title, section), citation))
-
-    return citation
-
 
 def delete_murs_from_s3():
     bucket = get_bucket()
