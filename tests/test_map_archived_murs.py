@@ -25,7 +25,7 @@ class TestRemapCitations(unittest.TestCase):
 
 
         # Should be unchanged
-        regulations_citations = [dict(text="11 C.F.R. 6.1", url="http://api.fdsys.gov/link?collection=cfr&titlenum=11&partnum=6&year=mostrecent&sectionnum=1")]
+        regulations_citations = [dict(text="11 C.F.R. 6.1", url="/regulations/6-1/CURRENT")]
 
         mur1 = self.mur_factory(
             us_code_citations=[
@@ -149,10 +149,7 @@ class TestGetCitations(unittest.TestCase):
         regulations = citations['regulations']
         assert len(regulations) == 1
 
-        parsed_url = urllib.parse.urlparse(regulations[0]['url'])
-        query = urllib.parse.parse_qs(parsed_url.query)
-
-        assert query == dict(collection=['cfr'], year=['mostrecent'], titlenum=['11'], partnum=['23'], sectionnum=['421'])
+        assert regulations[0]['url'] == '/regulations/23-421/CURRENT'
 
 
     def test_get_citations_regulation_no_section(self):
@@ -164,7 +161,4 @@ class TestGetCitations(unittest.TestCase):
         regulations = citations['regulations']
         assert len(regulations) == 1
 
-        parsed_url = urllib.parse.urlparse(regulations[0]['url'])
-        query = urllib.parse.parse_qs(parsed_url.query)
-
-        assert query == dict(collection=['cfr'], year=['mostrecent'], titlenum=['11'], partnum=['19'])
+        assert regulations[0]['url'] == '/regulations/19/CURRENT'
