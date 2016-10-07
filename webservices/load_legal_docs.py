@@ -51,15 +51,18 @@ def get_text(node):
 def remove_legal_docs():
     es = utils.get_elasticsearch_connection()
     es.indices.delete('docs')
-    es.indices.create('docs', {"mappings": {
-                             "_default_": {
-                                "properties": {
-                                        "no": {
-                                            "type": "string",
-                                            "index": "not_analyzed"
-                                        }
-                                    }
-                                }}})
+    es.indices.create('docs', {
+        "mappings": {
+            "_default_": {
+                "properties": {
+                    "no": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    }
+                }
+            }
+        }
+    })
 
 
 def index_regulations():
@@ -350,22 +353,19 @@ def get_citations(data):
 
     for citation_text in citation_texts:
         us_code_match = re.match("(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9]+)", citation_text)
-        regulation_match = re.match("(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", citation_text)
+        regulation_match = re.match(
+            "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", citation_text)
 
         if us_code_match:
             url = 'http://api.fdsys.gov/link?' +\
                   urlencode([('collection', 'uscode'), ('title', us_code_match.group('title')),
                     ('year', 'mostrecent'), ('section', us_code_match.group('section'))])
             us_codes.append({"text": citation_text, "url": url})
-        if regulation_match:
-            url = 'http://api.fdsys.gov/link?' +\
-                  urlencode([('collection', 'cfr'), ('titlenum', regulation_match.group('title')),
-                        ('partnum', regulation_match.group('part')), ('year', 'mostrecent')])
-            if regulation_match.group(3):
-                url += '&' + urlencode([('sectionnum', regulation_match.group('section'))])
+        elif regulation_match:
+            url = utils.create_eregs_link(regulation_match.group('part'), regulation_match.group('section'))
             regulations.append({"text": citation_text, "url": url})
 
-        if not us_code_match and not regulation_match:
+        else:
             print(citation_text)
             raise Exception("Could not parse citation")
     return {"us_code": us_codes, "regulations": regulations}
