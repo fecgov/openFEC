@@ -17,9 +17,9 @@ env:
 
 before_script:
   - psql -c 'create database "cfdm_unit_test";' -U postgres
-  - travis_retry pip install -U pip wheel
-  - travis_retry pip install -U -r requirements.txt
-  - travis_retry pip install -U -r requirements-dev.txt
+  - travis_retry pip install -U pip setuptools wheel
+  - travis_retry pip install -r requirements.txt
+  - travis_retry pip install -r requirements-dev.txt
   - travis_retry npm install -g swagger-tools
 
 script: py.test
