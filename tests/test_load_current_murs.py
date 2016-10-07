@@ -11,20 +11,22 @@ from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
     ("110", 1, 2,
-        ["https://api.fdsys.gov/link?collection=cfr&year=mostrecent&titlenum=11&partnum=110"]),
+        [{"text": "11 C.F.R. 110", "url": "/regulations/110/CURRENT"}]),
     ("110.21", 1, 2,
-        ["https://api.fdsys.gov/link?collection=cfr&year=mostrecent&titlenum=11&partnum=110&sectionnum=21"]),
+        [{"text": "11 C.F.R. 110.21", "url": "/regulations/110-21/CURRENT"}]),
 ])
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
 
 def test_parse_statutory_citations_with_reclassifications():
-    assert parse_statutory_citations("431", 1, 2) == [
-        "https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101"]
+    assert parse_statutory_citations("431", 1, 2) == [{
+        "text": "52 U.S.C. 30101",
+        "url": "https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101"}]
 
 def test_parse_statutory_citations_no_reclassifications():
-    assert parse_statutory_citations("30101", 1, 2) == [
-        "https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101"]
+    assert parse_statutory_citations("30101", 1, 2) == [{
+        "text": "52 U.S.C. 30101",
+        "url": "https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101"}]
 
 def assert_es_index_call(call_args, expected_mur):
     index, doc_type, mur = call_args[0]
@@ -168,14 +170,22 @@ class TestLoadCurrentMURs(BaseTestCase):
                  if p['name'] == 'Bilbo Baggins'][0]
         assert bilbo['role'] == 'Respondent'
         assert len(bilbo['citations']['RTB']) == 1
-        assert re.search(r'api.fdsys.gov.*collection=uscode.*section=345', bilbo['citations']['RTB'][0])
+        assert bilbo['citations']['RTB'] == [{
+            'text': '52 U.S.C. 345',
+            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=345'
+        }]
 
         thorin = [p for p in mur['participants']
                  if p['name'] == 'Thorin Oakenshield'][0]
         assert thorin['role'] == 'Respondent'
         assert len(thorin['citations']['Closed']) == 2
-        assert re.search(r'api.fdsys.gov.*collection=uscode.*section=123', thorin['citations']['Closed'][0])
-        assert re.search(r'api.fdsys.gov.*collection=cfr.*partnum=456', thorin['citations']['Closed'][1])
+        assert thorin['citations']['Closed'] == [{
+            'text': '52 U.S.C. 123',
+            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=123'
+        }, {
+            'text': '11 C.F.R. 456',
+            'url': '/regulations/456/CURRENT'
+        }]
 
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
