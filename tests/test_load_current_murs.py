@@ -180,7 +180,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         amount_received, settlement_type, pg_date)
 
         stage = 'Closed'
-        statutory_citation = '345'
+        statutory_citation = '431'
         regulatory_citation = '456'
         self.create_violation(case_id, entity_id, stage, statutory_citation, regulatory_citation)
 
@@ -195,8 +195,8 @@ class TestLoadCurrentMURs(BaseTestCase):
 
         expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
             'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
-            'citations': [{'text': '52 U.S.C. 345',
-            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=345'},
+            'citations': [{'text': '52 U.S.C. 30101',
+            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'},
             {'text': '11 C.F.R. 456',
             'url': '/regulations/456/CURRENT'}]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
