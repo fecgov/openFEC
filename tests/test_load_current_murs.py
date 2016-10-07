@@ -13,9 +13,9 @@ from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
     ("110", 1, 2,
-        [{'text': '11 C.F.R. 110', 'url': 'https://api.fdsys.gov/link?collection=cfr&year=mostrecent&titlenum=11&partnum=110'}]),
+        [{'text': '11 C.F.R. 110', 'url': '/regulations/110/CURRENT'}]),
     ("110.21", 1, 2,
-        [{'text': '11 C.F.R. 110.21', 'url': 'https://api.fdsys.gov/link?collection=cfr&year=mostrecent&titlenum=11&partnum=110&sectionnum=21'}]),
+        [{'text': '11 C.F.R. 110.21', 'url': '/regulations/110-21/CURRENT'}]),
 ])
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
@@ -197,7 +197,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'citations': [{'text': '52 U.S.C. 345',
             'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=345'},
             {'text': '11 C.F.R. 456',
-            'url': 'https://api.fdsys.gov/link?collection=cfr&year=mostrecent&titlenum=11&partnum=456'}]}],
+            'url': '/regulations/456/CURRENT'}]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
             'text': '', 'subject': {'text': ['Fraudulent misrepresentation']},
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
