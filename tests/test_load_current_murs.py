@@ -1,6 +1,8 @@
 import re
 import subprocess
 from mock import patch
+from datetime import datetime
+from decimal import Decimal
 
 import pytest
 
@@ -11,22 +13,20 @@ from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
     ("110", 1, 2,
-        [{"text": "11 C.F.R. 110", "url": "/regulations/110/CURRENT"}]),
+        [{'text': '11 C.F.R. 110', 'url': '/regulations/110/CURRENT'}]),
     ("110.21", 1, 2,
-        [{"text": "11 C.F.R. 110.21", "url": "/regulations/110-21/CURRENT"}]),
+        [{'text': '11 C.F.R. 110.21', 'url': '/regulations/110-21/CURRENT'}]),
 ])
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
 
 def test_parse_statutory_citations_with_reclassifications():
-    assert parse_statutory_citations("431", 1, 2) == [{
-        "text": "52 U.S.C. 30101",
-        "url": "https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101"}]
+    assert parse_statutory_citations("431", 1, 2) == [{'text': '52 U.S.C. 30101',
+    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]
 
 def test_parse_statutory_citations_no_reclassifications():
-    assert parse_statutory_citations("30101", 1, 2) == [{
-        "text": "52 U.S.C. 30101",
-        "url": "https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101"}]
+    assert parse_statutory_citations("30101", 1, 2) == [{'text': '52 U.S.C. 30101',
+    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]
 
 def assert_es_index_call(call_args, expected_mur):
     index, doc_type, mur = call_args[0]
@@ -67,7 +67,10 @@ class TestLoadCurrentMURs(BaseTestCase):
             'doc_id': 'mur_1',
             'participants': [],
             'subject': {"text": [mur_subject]},
-            'documents': []
+            'documents': [],
+            'disposition': {'data': [], 'text': []},
+            'close_date': None,
+            'open_date': None
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
         manage.load_current_murs()
@@ -129,63 +132,79 @@ class TestLoadCurrentMURs(BaseTestCase):
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.load_current_murs.get_bucket')
     @patch('webservices.load_current_murs.get_elasticsearch_connection')
-    def test_mur_with_citations(self, get_es_conn, get_bucket, get_credential):
+    def test_mur_with_disposition(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
+        case_no = '1'
+        name = 'Open Elections LLC'
         mur_subject = 'Fraudulent misrepresentation'
-        expected_mur = {
-            'no': '1',
-            'name': 'MUR with participants',
-            'mur_type': 'current',
-            'doc_id': 'mur_1',
-            'subject': {"text": [mur_subject]},
-        }
-        participants = [
-            ("Complainant", "Gollum"),
-            ("Respondent", "Bilbo Baggins", "RTB", "345", ""),
-            ("Respondent", "Thorin Oakenshield", "Closed", "123", "456")
-        ]
+        case_type = 'mur'
+        sol_earliest= '2012-01-01'
+        pg_date = '2016-10-08'
+        self.create_mur(case_id, case_no, name, mur_subject)
 
-        self.create_mur(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
-        for entity_id, participant in enumerate(participants):
-            if len(participant) == 5:
-                role, name, stage, statutory_citation, regulatory_citation = participant
-                self.create_participant(case_id, entity_id, role, name, stage, statutory_citation, regulatory_citation)
-            else:
-                role, name = participant
-                self.create_participant(case_id, entity_id, role, name)
+        entity_id = 1
+        event_date = '2005-01-01'
+        event_id = 1
+        self.create_calendar_event(entity_id, event_date, event_id, case_id)
+
+        entity_id = 1
+        event_date = '2008-01-01'
+        event_id = 2
+        self.create_calendar_event(entity_id, event_date, event_id, case_id)
+
+        parent_event = 0
+        event_name = 'Conciliation-PPC'
+        path = ''
+        is_key_date = 0
+        check_primary_respondent = 0
+        pg_date = '2016-01-01'
+        self.create_event(event_id, parent_event, event_name, path, is_key_date,
+        check_primary_respondent, pg_date)
+
+        first_name = "Commander"
+        last_name = "Data"
+        middle_name, prefix, suffix, type = ('', '', '', '')
+        self.create_entity(entity_id, first_name, last_name, middle_name, prefix, suffix, type, name, pg_date)
+
+        master_key = 1
+        detail_key = 1
+        relation_id = 1
+        self.create_relatedobjects(master_key, detail_key, relation_id)
+
+        settlement_id = 1
+        initial_amount = 0
+        final_amount = 50000
+        amount_received, settlement_type = (0, '')
+        self.create_settlement(settlement_id, case_id, initial_amount, final_amount,
+        amount_received, settlement_type, pg_date)
+
+        stage = 'Closed'
+        statutory_citation = '345'
+        regulatory_citation = '456'
+        self.create_violation(case_id, entity_id, stage, statutory_citation, regulatory_citation)
+
+        commission_id = 1
+        agenda_date = event_date
+        vote_date = event_date
+        action = 'Conciliation Reached.'
+        self.create_commission(commission_id, agenda_date, vote_date, action, case_id, pg_date)
 
         manage.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
-        assert index == 'docs'
-        assert doc_type == 'murs'
-        for key in expected_mur:
-            assert mur[key] == expected_mur[key]
+        expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
+            'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
+            'citations': [{'text': '52 U.S.C. 345',
+            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=345'},
+            {'text': '11 C.F.R. 456',
+            'url': '/regulations/456/CURRENT'}]}],
+            'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
+            'text': '', 'subject': {'text': ['Fraudulent misrepresentation']},
+            'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
+            'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
+            'close_date': datetime(2008, 1, 1, 0, 0)}
 
-        gollum = [p for p in mur['participants']
-                  if p['name'] == 'Gollum'][0]
-        assert gollum['role'] == 'Complainant'
-
-        bilbo = [p for p in mur['participants']
-                 if p['name'] == 'Bilbo Baggins'][0]
-        assert bilbo['role'] == 'Respondent'
-        assert len(bilbo['citations']['RTB']) == 1
-        assert bilbo['citations']['RTB'] == [{
-            'text': '52 U.S.C. 345',
-            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=345'
-        }]
-
-        thorin = [p for p in mur['participants']
-                 if p['name'] == 'Thorin Oakenshield'][0]
-        assert thorin['role'] == 'Respondent'
-        assert len(thorin['citations']['Closed']) == 2
-        assert thorin['citations']['Closed'] == [{
-            'text': '52 U.S.C. 123',
-            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=123'
-        }, {
-            'text': '11 C.F.R. 456',
-            'url': '/regulations/456/CURRENT'
-        }]
+        assert mur == expected_mur
 
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
@@ -210,9 +229,9 @@ class TestLoadCurrentMURs(BaseTestCase):
             "INSERT INTO fecmur.players (player_id, entity_id, case_id, role_id) "
             "VALUES (%s, %s, %s, %s)", entity_id, entity_id, case_id, role_id)
         if stage:
-            self.create_citation(case_id, entity_id, stage, statutory_citation, regulatory_citation)
+            self.create_violation(case_id, entity_id, stage, statutory_citation, regulatory_citation)
 
-    def create_citation(self, case_id, entity_id, stage, statutory_citation, regulatory_citation):
+    def create_violation(self, case_id, entity_id, stage, statutory_citation, regulatory_citation):
         self.connection.execute(
             "INSERT INTO fecmur.violations (case_id, entity_id, stage, statutory_citation, regulatory_citation) "
             "VALUES (%s, %s, %s, %s, %s)", case_id, entity_id, stage, statutory_citation, regulatory_citation)
@@ -222,6 +241,43 @@ class TestLoadCurrentMURs(BaseTestCase):
             "INSERT INTO fecmur.document (document_id, doc_order_id, case_id, category, ocrtext, fileimage) "
             "VALUES (%s, %s, %s, %s, %s, %s)", document_id, document_id, case_id, category, ocrtext, ocrtext)
 
+    def create_calendar_event(self, entity_id, event_date, event_id, case_id):
+        self.connection.execute(
+            "INSERT INTO fecmur.calendar (entity_id, event_date, event_id, case_id) "
+            "VALUES (%s, %s, %s, %s)", entity_id, event_date, event_id, case_id)
+
+    def create_entity(self, entity_id, first_name, last_name, middle_name, prefix, suffix, type, name, pg_date):
+        self.connection.execute(
+            "INSERT INTO fecmur.entity (entity_id, first_name, last_name, middle_name, "
+            "prefix, suffix, type, name, pg_date) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", entity_id, first_name,
+            last_name, middle_name, prefix, suffix, type, name, pg_date)
+
+    def create_event(self, event_id, parent_event, event_name, path, is_key_date, check_primary_respondent, pg_date):
+        self.connection.execute(
+            "INSERT INTO fecmur.event (event_id, parent_event, event_name, path, is_key_date, "
+            "check_primary_respondent, pg_date) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)", event_id, parent_event,
+            event_name, path, is_key_date, check_primary_respondent, pg_date)
+
+    def create_relatedobjects(self, master_key, detail_key, relation_id):
+        self.connection.execute(
+            "INSERT INTO fecmur.relatedobjects (master_key, detail_key, relation_id) "
+            "VALUES (%s, %s, %s)", master_key, detail_key, relation_id)
+
+    def create_settlement(self, settlement_id, case_id, initial_amount, final_amount,
+      amount_received, settlement_type, pg_date):
+        self.connection.execute(
+            "INSERT INTO fecmur.settlement (settlement_id, case_id, initial_amount, "
+            "final_amount, amount_received, settlement_type, pg_date) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)", settlement_id, case_id, initial_amount, final_amount,
+            amount_received, settlement_type, pg_date)
+
+    def create_commission(self, commission_id, agenda_date, vote_date, action, case_id, pg_date):
+        self.connection.execute(
+            "INSERT INTO fecmur.commission (commission_id, agenda_date, vote_date, action, case_id, pg_date) "
+            "VALUES (%s, %s, %s, %s, %s, %s)", commission_id, agenda_date, vote_date, action, case_id, pg_date)
+
     def clear_test_data(self):
         tables = [
             "violations",
@@ -230,6 +286,10 @@ class TestLoadCurrentMURs(BaseTestCase):
             "entity",
             "case_subject",
             "case",
+            "calendar",
+            "settlement",
+            "event",
+            "commission"
         ]
         for table in tables:
             self.connection.execute("DELETE FROM fecmur.{}".format(table))
