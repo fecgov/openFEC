@@ -2,7 +2,7 @@ import mock
 import unittest
 import urllib
 
-from webservices import load_legal_docs, reclassify_statutory_citation
+from webservices.legal_docs import load_legal_docs, reclassify_statutory_citation
 
 
 class TestRemapCitations(unittest.TestCase):

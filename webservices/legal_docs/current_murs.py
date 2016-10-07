@@ -7,7 +7,8 @@ from webservices.env import env
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
-from webservices.reclassify_statutory_citation import reclassify_pre2012_citation
+
+from .reclassify_statutory_citation import reclassify_pre2012_citation
 
 logger = logging.getLogger(__name__)
 

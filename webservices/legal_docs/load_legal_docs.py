@@ -19,8 +19,10 @@ import requests
 
 from webservices.rest import db
 from webservices.env import env
-from webservices import reclassify_statutory_citation, utils
+from webservices import utils
 from webservices.tasks.utils import get_bucket
+
+from . import reclassify_statutory_citation
 
 # sigh. This is a mess because slate uses a library also called utils.
 import importlib
