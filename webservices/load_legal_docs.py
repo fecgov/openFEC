@@ -290,7 +290,7 @@ def process_mur_pdf(mur_no, pdf_key, bucket):
                           ContentType='application/pdf', ACL='public-read')
         return pdf_text, pdf_size, pdf_pages
 
-def get_subject_tree(html, tree=[]):
+def get_subject_tree(html, tree=None):
     """This is a standard shift-reduce parser for extracting the tree of subject
     topics from the html. Using a html parser (eg., beautifulsoup4) would not have
     solved this problem, since the parse tree we want is _not_ represented in
@@ -298,6 +298,8 @@ def get_subject_tree(html, tree=[]):
     (adds the tag to a list) or reduces (collapses everything until the most recent ul
     into a child of the previous element). It stops when it encounters the empty tag."""
 
+    if tree is None:
+        tree = []
     # get next token
     root = re.match("([^<]+)(?:<br>)?(.*)", html, re.S)
     list_item = re.match("<li>(.*?)</li>(.*)", html, re.S)
