@@ -116,15 +116,15 @@ def get_disposition(case_id):
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
         disposition_data = []
         for row in rs:
-            citations = parse_statutory_citations(row[3], case_id, row[2])
-            citations.extend(parse_regulatory_citations(row[4], case_id, row[2]))
-            disposition_data.append({'disposition': row[0], 'penalty': row[1],
-                'respondent': row[2], 'citations': citations})
+            citations = parse_statutory_citations(row['statutory_citation'], case_id, row['name'])
+            citations.extend(parse_regulatory_citations(row['regulatory_citation'], case_id, row['name']))
+            disposition_data.append({'disposition': row['event_name'], 'penalty': row['final_amount'],
+                'respondent': row['name'], 'citations': citations})
 
         rs = conn.execute(DISPOSITION_TEXT, case_id)
         disposition_text = []
         for row in rs:
-            disposition_text.append({'vote_date': row[0], 'text': row[1]})
+            disposition_text.append({'vote_date': row['vote_date'], 'text': row['action']})
         return {'text': disposition_text, 'data': disposition_data}
 
 def get_participants(case_id):
