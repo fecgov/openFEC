@@ -49,6 +49,34 @@ MUR_VIOLATIONS = """
     ;
 """
 
+OPEN_AND_CLOSE_DATES = """
+    SELECT min(event_date), max(event_date)
+    FROM fecmur.calendar
+    WHERE case_id = %s;
+"""
+
+DISPOSITION_DATA = """
+    SELECT fecmur.event.event_name,
+    fecmur.settlement.final_amount, fecmur.entity.name, violations.statutory_citation,
+    violations.regulatory_citation
+    from fecmur.calendar
+    inner join fecmur.event on fecmur.calendar.event_id = fecmur.event.event_id
+    inner join fecmur.entity on fecmur.entity.entity_id = fecmur.calendar.entity_id
+    left join (select * from fecmur.relatedobjects where relation_id=1) AS relatedobjects
+    on relatedobjects.detail_key = fecmur.calendar.entity_id
+    left join fecmur.settlement on fecmur.settlement.settlement_id = relatedobjects.master_key
+    left join (select * from fecmur.violations where stage='Closed' and case_id={0})
+    as violations on violations.entity_id = fecmur.calendar.entity_id
+    where fecmur.calendar.case_id={0} and event_name not in ('Complaint/Referral', 'Disposition')
+    ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
+"""
+
+DISPOSITION_TEXT = """
+SELECT vote_date, action from fecmur.commission
+WHERE case_id = %s
+ORDER BY vote_date desc;
+"""
+
 STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
 
@@ -69,12 +97,35 @@ def load_current_murs():
             mur['subject'] = {"text": get_subjects(case_id)}
 
             participants = get_participants(case_id)
-            assign_citations(participants, case_id)
             mur['participants'] = list(participants.values())
-
+            mur['disposition'] = get_disposition(case_id)
             mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
             # TODO pdf_pages, open_date, close_date, url
+            mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
+
             es.index('docs', 'murs', mur, id=mur['doc_id'])
+
+def get_open_and_close_dates(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
+        open_date, close_date = rs.fetchone()
+    return open_date, close_date
+
+def get_disposition(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(DISPOSITION_DATA.format(case_id))
+        disposition_data = []
+        for row in rs:
+            citations = parse_statutory_citations(row['statutory_citation'], case_id, row['name'])
+            citations.extend(parse_regulatory_citations(row['regulatory_citation'], case_id, row['name']))
+            disposition_data.append({'disposition': row['event_name'], 'penalty': row['final_amount'],
+                'respondent': row['name'], 'citations': citations})
+
+        rs = conn.execute(DISPOSITION_TEXT, case_id)
+        disposition_text = []
+        for row in rs:
+            disposition_text.append({'vote_date': row['vote_date'], 'text': row['action']})
+        return {'text': disposition_text, 'data': disposition_data}
 
 def get_participants(case_id):
     participants = {}
@@ -119,13 +170,13 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
         for match in STATUTE_REGEX.finditer(statutory_citation):
             title, section = reclassify_statutory_citation(match.group('section'))
             url = 'https://api.fdsys.gov/link?' +\
-                    urlencode([
-                        ('collection', 'uscode'),
-                        ('year', 'mostrecent'),
-                        ('link-type', 'html'),
-                        ('title', title),
-                        ('section', section)
-                    ])
+                urlencode([
+                    ('collection', 'uscode'),
+                    ('year', 'mostrecent'),
+                    ('link-type', 'html'),
+                    ('title', title),
+                    ('section', section)
+                ])
             text = '%s U.S.C. %s' % (title, section)
             citations.append({'text': text, 'url': url})
         if not citations:
