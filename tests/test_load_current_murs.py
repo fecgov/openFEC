@@ -70,7 +70,8 @@ class TestLoadCurrentMURs(BaseTestCase):
             'documents': [],
             'disposition': {'data': [], 'text': []},
             'close_date': None,
-            'open_date': None
+            'open_date': None,
+            'url': '/legal/matter-under-review/1/'
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
         manage.load_current_murs()
@@ -202,7 +203,8 @@ class TestLoadCurrentMURs(BaseTestCase):
             'text': '', 'subject': {'text': ['Fraudulent misrepresentation']},
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
-            'close_date': datetime(2008, 1, 1, 0, 0)}
+            'close_date': datetime(2008, 1, 1, 0, 0),
+            'url': '/legal/matter-under-review/1/'}
 
         assert mur == expected_mur
 
