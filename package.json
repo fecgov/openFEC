@@ -1,6 +1,6 @@
 {
   "dependencies": {
-     "swagger-ui": "git+https://github.com/18F/swagger-ui.git"
+    "swagger-ui": "git+https://github.com/18F/swagger-ui.git"
   },
   "scripts": {
     "build": "mkdir -p static/swagger-ui && cp -R node_modules/swagger-ui/dist static/swagger-ui/"
