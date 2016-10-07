@@ -456,8 +456,8 @@ schedule_b_by_purpose = {
 
 schedule_c = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
-    #'candidate_name': fields.List(fields.Str, description='Name of candidate'),
-    #'loaner_name': fields.List(fields.Str, description='Name of loaner'),
+    'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
+    'loaner_name': fields.List(fields.Str, description=docs.LOAN_SOURCE),
     'min_payment_to_date': fields.Int(description='Minimum payment to date'),
     'max_payment_to_date': fields.Int(description='Maximum payment to date'),
 

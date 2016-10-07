@@ -242,3 +242,9 @@ def get_elasticsearch_connection():
 
 def print_literal_query_string(query):
     print(str(query.statement.compile(dialect=postgresql.dialect())))
+
+def create_eregs_link(part, section):
+    url_part_section = part
+    if section:
+        url_part_section += '-' + section
+    return '/regulations/{}/CURRENT'.format(url_part_section)

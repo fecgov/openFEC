@@ -9,7 +9,7 @@ import marshmallow as ma
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_pagination import schemas as paging_schemas
 
-from webservices import utils, efile_parser, decoders
+from webservices import utils, decoders
 from webservices.spec import spec
 from webservices.common import models
 from webservices.common.models import db
@@ -465,6 +465,10 @@ ScheduleCSchema = make_schema(
 
     },
     options={
+        'exclude': (
+            'loan_source_name_text',
+            'candidate_name_text',
+        )
     },
 )
 ScheduleCPageSchema = make_page_schema(
