@@ -102,7 +102,7 @@ def load_current_murs():
             mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
             # TODO pdf_pages, open_date, close_date, url
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
-
+            mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
             es.index('docs', 'murs', mur, id=mur['doc_id'])
 
 def get_open_and_close_dates(case_id):
