@@ -16,7 +16,7 @@ def reclassify_pre2012_citation(title, section, archived_mur_citation_map={}):
             return archived_mur_citation_map
 
         logger.info('Loading archived_mur_citation_map.csv')
-        with open('data/archived_mur_citation_map.csv') as csvfile:
+        with open('data/mur_citation_map.csv') as csvfile:
             for row in csv.reader(csvfile):
                 title, section = row[1].split(':', 2)
                 archived_mur_citation_map[row[0]] = (title, section)
