@@ -24,7 +24,7 @@ class ScheduleEView(ItemizedResource):
         return self.model.report_year
     @property
     def index_column(self):
-        return self.model.sched_e_sk
+        return self.model.sub_id
     @property
     def amount_column(self):
         return self.model.expenditure_amount

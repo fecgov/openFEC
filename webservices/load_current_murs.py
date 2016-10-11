@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.rest import db
-from webservices.utils import get_elasticsearch_connection
+from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
 
 logger = logging.getLogger(__name__)
@@ -49,6 +49,34 @@ MUR_VIOLATIONS = """
     ;
 """
 
+OPEN_AND_CLOSE_DATES = """
+    SELECT min(event_date), max(event_date)
+    FROM fecmur.calendar
+    WHERE case_id = %s;
+"""
+
+DISPOSITION_DATA = """
+    SELECT fecmur.event.event_name,
+    fecmur.settlement.final_amount, fecmur.entity.name, violations.statutory_citation,
+    violations.regulatory_citation
+    from fecmur.calendar
+    inner join fecmur.event on fecmur.calendar.event_id = fecmur.event.event_id
+    inner join fecmur.entity on fecmur.entity.entity_id = fecmur.calendar.entity_id
+    left join (select * from fecmur.relatedobjects where relation_id=1) AS relatedobjects
+    on relatedobjects.detail_key = fecmur.calendar.entity_id
+    left join fecmur.settlement on fecmur.settlement.settlement_id = relatedobjects.master_key
+    left join (select * from fecmur.violations where stage='Closed' and case_id={0})
+    as violations on violations.entity_id = fecmur.calendar.entity_id
+    where fecmur.calendar.case_id={0} and event_name not in ('Complaint/Referral', 'Disposition')
+    ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
+"""
+
+DISPOSITION_TEXT = """
+SELECT vote_date, action from fecmur.commission
+WHERE case_id = %s
+ORDER BY vote_date desc;
+"""
+
 STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
 
@@ -69,12 +97,34 @@ def load_current_murs():
             mur['subject'] = {"text": get_subjects(case_id)}
 
             participants = get_participants(case_id)
-            assign_citations(participants, case_id)
             mur['participants'] = list(participants.values())
-
+            mur['disposition'] = get_disposition(case_id)
             mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
-            # TODO pdf_pages, open_date, close_date, url
+            mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
+            mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
             es.index('docs', 'murs', mur, id=mur['doc_id'])
+
+def get_open_and_close_dates(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
+        open_date, close_date = rs.fetchone()
+    return open_date, close_date
+
+def get_disposition(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(DISPOSITION_DATA.format(case_id))
+        disposition_data = []
+        for row in rs:
+            citations = parse_statutory_citations(row['statutory_citation'], case_id, row['name'])
+            citations.extend(parse_regulatory_citations(row['regulatory_citation'], case_id, row['name']))
+            disposition_data.append({'disposition': row['event_name'], 'penalty': row['final_amount'],
+                'respondent': row['name'], 'citations': citations})
+
+        rs = conn.execute(DISPOSITION_TEXT, case_id)
+        disposition_text = []
+        for row in rs:
+            disposition_text.append({'vote_date': row['vote_date'], 'text': row['action']})
+        return {'text': disposition_text, 'data': disposition_data}
 
 def get_participants(case_id):
     participants = {}
@@ -126,29 +176,25 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
                     ('title', title),
                     ('section', section)
                 ])
-            citations.append(url)
+            text = '%s U.S.C. %s' % (title, section)
+            citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
-                statutory_citation, entity_id, case_id)
+                    statutory_citation, entity_id, case_id)
     return citations
 
 def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
         for match in REGULATION_REGEX.finditer(regulatory_citation):
-            url = 'https://api.fdsys.gov/link?' +\
-                urlencode([
-                    ('collection', 'cfr'),
-                    ('year', 'mostrecent'),
-                    ('titlenum', '11'),
-                    ('partnum', match.group('part'))
-                ])
+            url = create_eregs_link(match.group('part'), match.group('section'))
+            text = '11 C.F.R. %s' % match.group('part')
             if match.group('section'):
-                url += '&' + urlencode([('sectionnum', match.group('section'))])
-            citations.append(url)
+                text += '.%s' % match.group('section')
+            citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
-                regulatory_citation, entity_id, case_id)
+                    regulatory_citation, entity_id, case_id)
     return citations
 
 def reclassify_statutory_citation(section):
@@ -209,7 +255,7 @@ def get_documents(case_id, bucket, bucket_name):
             pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                              ContentType='application/pdf', ACL='public-read')
+                    ContentType='application/pdf', ACL='public-read')
             document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
     return document_text, documents

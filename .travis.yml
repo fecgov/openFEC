@@ -12,14 +12,14 @@ addons:
 
 env:
   global:
-    - secure: "L0e1dTMLeUQGTrDfmWkTOUvg/zpQ1b8yidnZvI/nGVKW9OY1r4VqKc+tPLWtb9/e8D+jBUKmomjYR1TYL8xmm1DxWThx5AESr4FG6kndsUrDAxlG7PRZECumoG4FehsbPVKr5OP+ZC+GZY6V/6NdvijNKxvSae9zda3yCaGu7EE=" # FEC_CF_USERNAME
-    - secure: "qpKjTwlaNDdbFFO5oqDJ9PsVFsxowYbh0z4whQSjip7F2JWpUOT4ympPoeNikmVSevuxQkCCYsT8AnrSWyhR5I9Lg4xEoOezO+gRfY/sVawX3Obnwv46dUsvxaoStCTIwpmTxqyLZaRn7VkgPrnW+rEn9sIardgTm9RLuTa3JmA=" # FEC_CF_PASSWORD
+    - secure: "g91vh8dURMJLmPkHOsy71zzXAFh8f0dO2S37ZTTJmndLZpvFeAqF/FmG3qdfEbFMOyoinME0e6FvDQDcHU7EjyTWTghLC0yoBZZwrMiLgL+jw1Ca+uzH/zs8X12ymZYVM6Iu3E+5hmQt1TIbC6A3/1nN1S+Zf6Z2x4IJcpANPjw=" # FEC_CF_USERNAME
+    - secure: "gvnJY3O6nFnYJ8QB7xl2IAWQ/2d2eM4YP8dZXJLP/Ce/W2O2kGvhgKsj0gN2vElE5vXoVkwuUcGzMQVoBHTbfHoxwWc+XBmj6pD1Kx4UInaNDTbO8CYfw2VQruaU0IHW+tuMbIEz6VUcg7xWBYEp38/LH6hY192/AS0auFUX9I0=" # FEC_CF_PASSWORD
 
 before_script:
   - psql -c 'create database "cfdm_unit_test";' -U postgres
-  - travis_retry pip install -U pip wheel
-  - travis_retry pip install -U -r requirements.txt
-  - travis_retry pip install -U -r requirements-dev.txt
+  - travis_retry pip install -U pip setuptools wheel
+  - travis_retry pip install -r requirements.txt
+  - travis_retry pip install -r requirements-dev.txt
   - travis_retry npm install -g swagger-tools
 
 script: py.test
