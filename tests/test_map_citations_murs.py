@@ -92,7 +92,7 @@ class TestGetCitations(unittest.TestCase):
         # spot check a few cases from the csv
         assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '431') == ('52', '30101')
         assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '437g') == ('52', '30109')
-        assert reclassify_statutory_citation.reclassify_pre2012_citation('42', '1973aa-1a') == ('52', '10503')
+        assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '441a-1') == ('52', '30117')
 
         # and a fallback
         assert reclassify_statutory_citation.reclassify_pre2012_citation('99', '12345') == ('99', '12345')
