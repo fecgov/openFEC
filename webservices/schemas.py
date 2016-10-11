@@ -1,6 +1,7 @@
 
 import re
 import functools
+import json
 
 from collections import namedtuple
 
@@ -8,13 +9,15 @@ import marshmallow as ma
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_pagination import schemas as paging_schemas
 
-from webservices import utils, efile_parser, decoders
+from webservices import utils, decoders
 from webservices.spec import spec
 from webservices.common import models
+from webservices.common.models import db
 from webservices import __API_VERSION__
 from webservices.calendar import format_start_date, format_end_date
 from marshmallow import pre_dump, post_dump
 from sqlalchemy import func
+import sqlalchemy as sa
 
 
 spec.definition('OffsetInfo', schema=paging_schemas.OffsetInfoSchema)
@@ -103,6 +106,7 @@ class EFilingF3PSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
         line_list = {}
         state_map = {}
+
         keys = zip(decoders.f3p_col_a, decoders.f3p_col_b)
         per = re.compile('(.+?(?=per))')
         ytd = re.compile('(.+?(?=ytd))')
@@ -110,6 +114,7 @@ class EFilingF3PSchema(BaseEfileSchema):
         descriptions = decoders.f3p_description
         keys = list(keys)
         if obj.summary_lines:
+
             for row in obj.summary_lines:
                 if row.line_number >= 33 and row.line_number < 87:
                     state_map[keys[int(row.line_number - 1)][0]] = row.column_a
@@ -459,6 +464,10 @@ ScheduleCSchema = make_schema(
 
     },
     options={
+        'exclude': (
+            'loan_source_name_text',
+            'candidate_name_text',
+        )
     },
 )
 ScheduleCPageSchema = make_page_schema(
