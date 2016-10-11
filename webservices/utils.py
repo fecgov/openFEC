@@ -203,9 +203,9 @@ def make_schedule_pdf_url(image_number):
 
 def make_csv_url(rep_id):
     file_number = str(rep_id)
-    if rep_id < 100:
+    if rep_id > -1 and rep_id < 100:
         return 'http://docquery.fec.gov/csv/000/{0}.csv'.format(file_number)
-    else:
+    elif rep_id >= 100:
         return 'http://docquery.fec.gov/csv/{0}/{1}.csv'.format(file_number[-3:], file_number)
 
 def get_index_column(model):
