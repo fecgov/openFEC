@@ -8,6 +8,8 @@ from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
 
+from .reclassify_statutory_citation import reclassify_pre2012_citation
+
 logger = logging.getLogger(__name__)
 
 ALL_MURS = """
@@ -167,7 +169,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
     citations = []
     if statutory_citation:
         for match in STATUTE_REGEX.finditer(statutory_citation):
-            title, section = reclassify_statutory_citation(match.group('section'))
+            title, section = reclassify_pre2012_citation('2', match.group('section'))
             url = 'https://api.fdsys.gov/link?' +\
                 urlencode([
                     ('collection', 'uscode'),
@@ -196,47 +198,6 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)
     return citations
-
-def reclassify_statutory_citation(section):
-    """
-    Source: http://uscode.house.gov/editorialreclassification/t52/Reclassifications_Title_52.html
-    """
-    reclassifications = {
-        '431': '30101',
-        '432': '30102',
-        '433': '30103',
-        '434': '30104',
-        '437': '30105',
-        '437c': '30106',
-        '437d': '30107',
-        '437f': '30108',
-        '437g': '30109',
-        '437h': '30110',
-        '438': '30111',
-        '438a': '30112',
-        '439': '30113',
-        '439a': '30114',
-        '439c': '30115',
-        '441a': '30116',
-        '441a-1': '30117',
-        '441b': '30118',
-        '441c': '30119',
-        '441d': '30120',
-        '441e': '30121',
-        '441f': '30122',
-        '441g': '30123',
-        '441h': '30124',
-        '441i': '30125',
-        '441k': '30126',
-        '451': '30141',
-        '452': '30142',
-        '453': '30143',
-        '454': '30144',
-        '455': '30145',
-        '457': '30146',
-    }
-
-    return 52, reclassifications.get(section, section)
 
 def get_documents(case_id, bucket, bucket_name):
     documents = []
