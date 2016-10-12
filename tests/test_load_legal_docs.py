@@ -1,13 +1,30 @@
 import unittest
 from mock import patch
-from webservices.load_legal_docs import (index_statutes, index_regulations,
-    index_advisory_opinions, delete_advisory_opinions_from_s3,
-    load_advisory_opinions_into_s3, remove_legal_docs, get_xml_tree_from_url,
-    get_title_26_statutes, get_title_52_statutes, load_archived_murs,
-    delete_murs_from_s3, delete_murs_from_es)
+from webservices.load_legal_docs import (
+    delete_advisory_opinions_from_s3,
+    delete_murs_from_es,
+    delete_murs_from_s3,
+    get_subject_tree,
+    get_title_26_statutes,
+    get_title_52_statutes,
+    get_xml_tree_from_url,
+    index_advisory_opinions,
+    index_regulations,
+    index_statutes,
+    load_advisory_opinions_into_s3,
+    load_archived_murs,
+    remove_legal_docs
+)
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
 import json
+
+def test_get_subject_tree():
+    assert get_subject_tree("foo") == [{"text": "Foo"}]
+    assert get_subject_tree("<li>foo</li>") == [{"text": "Foo"}]
+    assert get_subject_tree(
+        "foo<ul class='no-top-margin'><li>bar</li><li>baz</li></ul>") == [
+            {"text": "Foo", "children": [{"text": "Bar"}, {"text": "Baz"}]}]
 
 class ElasticSearchMock:
     class ElasticSearchIndicesMock:
@@ -18,12 +35,10 @@ class ElasticSearchMock:
             assert index == 'docs'
             assert mappings
 
-
     class ElasticSearchTransportMock:
         def perform_request(self, method, url):
             assert method == 'DELETE'
             assert url == '/docs/murs'
-
 
     def __init__(self, dictToIndex):
         self.dictToIndex = dictToIndex
