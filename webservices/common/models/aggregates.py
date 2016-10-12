@@ -6,6 +6,7 @@ from .base import db, BaseModel
 class BaseAggregate(BaseModel):
     __abstract__ = True
 
+    committee = utils.related_committee_history('committee_id', cycle_label='cycle')
     committee_id = db.Column('cmte_id', db.String, primary_key=True, doc=docs.COMMITTEE_ID)
     cycle = db.Column(db.Integer, primary_key=True, doc=docs.RECORD_CYCLE)
     #? not sure how to document this
