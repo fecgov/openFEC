@@ -1,3 +1,13 @@
+create or replace function fix_party_spelling(branch text)
+returns text as $$
+    begin
+        return case branch
+            when 'Party/Non Pary' then 'Party/Non Party'
+            else branch
+        end;
+    end
+$$ language plpgsql;
+
 drop materialized view if exists ofec_rad_mv_tmp;
 create materialized view ofec_rad_mv_tmp as
 select
@@ -6,7 +16,7 @@ select
     -- I am not sure we want to filter on this, if the name is different here it will behave differently than the other committee searches by name
     cmte_nm as committee_name,
     anlyst_id as analyst_id,
-    rad_branch,
+    fix_party_spelling(rad_branch) as rad_branch,
     firstname as first_name,
     lastname as last_name,
     to_tsvector(firstname || ' ' || lastname) as name_txt,

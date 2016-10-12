@@ -241,6 +241,24 @@ def augment_models(factory, *models, namespace=schemas):
         schema = factory(model)
         augment_schemas(schema, namespace=namespace)
 
+def augment_itemized_aggregate_models(factory, committee_model, *models, namespace=schemas):
+    for model in models:
+        schema = factory(
+            model,
+            options={
+                'exclude': ('committee',),
+                'relationships': [
+                    Relationship(
+                        model.committee,
+                        committee_model.name,
+                        'committee_name',
+                        1
+                    ),
+                ],
+            }
+        )
+        augment_schemas(schema, namespace=namespace)
+
 class ApiSchema(ma.Schema):
     def _postprocess(self, data, many, obj):
         ret = {'api_version': __API_VERSION__}
@@ -486,8 +504,9 @@ ScheduleBByRecipientIDSchema = make_schema(
 
 augment_schemas(ScheduleBByRecipientIDSchema)
 
-augment_models(
+augment_itemized_aggregate_models(
     make_schema,
+    models.CommitteeHistory,
     models.ScheduleAByZip,
     models.ScheduleABySize,
     models.ScheduleAByState,
