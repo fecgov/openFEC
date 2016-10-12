@@ -246,6 +246,7 @@ def augment_itemized_aggregate_models(factory, committee_model, *models, namespa
         schema = factory(
             model,
             options={
+                'exclude': ('committee',),
                 'relationships': [
                     Relationship(
                         model.committee,
