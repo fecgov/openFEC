@@ -22,6 +22,15 @@ class PdfMixin(object):
     def has_pdf(self):
         return self.report_year and self.report_year >= 1993
 
+class CsvMixin(object):
+
+    @property
+    def csv_url(self):
+        if self.file_number:
+            return utils.make_csv_url(self.file_number)
+        else:
+            return
+
 class TreasurerMixin(object):
 
     treasurer_last_name = db.Column('lname', db.String)
@@ -46,7 +55,7 @@ class TreasurerMixin(object):
         return name
 
 
-class CommitteeReports(PdfMixin, BaseModel):
+class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     __abstract__ = True
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -54,6 +63,7 @@ class CommitteeReports(PdfMixin, BaseModel):
 
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
 
+    file_number = db.Column(db.Integer)
     beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD)#P
     cash_on_hand_end_period = db.Column('cash_on_hand_end_period', db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD)#P
@@ -104,8 +114,11 @@ class CommitteeReports(PdfMixin, BaseModel):
             None,
             None,
         )
-
-
+    '''
+    @property
+    def csv_url(self):
+        reu
+    '''
 class CommitteeReportsHouseSenate(CommitteeReports):
     __tablename__ = 'ofec_reports_house_senate_mv'
 
@@ -319,6 +332,9 @@ class BaseFiling(PdfMixin,db.Model):
     election_state = db.Column('el_state', db.String)
     receipt_date = db.Column('create_dt', db.Date, index=True)
     sign_date = db.Column(db.Date)
+    @property
+    def csv_url(self):
+        return utils.make_csv_url(self.file_number)
     @property
     def document_description(self):
         return utils.document_description(
