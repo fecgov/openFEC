@@ -202,6 +202,13 @@ def make_schedule_pdf_url(image_number):
         return 'http://docquery.fec.gov/cgi-bin/fecimg/?' + image_number
 
 
+def make_csv_url(file_num):
+    file_number = str(file_num)
+    if file_num > -1 and file_num < 100:
+        return 'http://docquery.fec.gov/csv/000/{0}.csv'.format(file_number)
+    elif file_num >= 100:
+        return 'http://docquery.fec.gov/csv/{0}/{1}.csv'.format(file_number[-3:], file_number)
+
 def get_index_column(model):
     column = model.__mapper__.primary_key[0]
     return getattr(model, column.key)
