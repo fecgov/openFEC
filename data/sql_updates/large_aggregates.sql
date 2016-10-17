@@ -3,8 +3,8 @@ create materialized view big_totals_vw_tmp as
 -- candidates
 with cand as (
     select
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
+        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         ttl_receipts_per as ttl_receipts,
         pol_pty_cmte_contb_per as pty_cmte_contb,
         other_pol_cmte_contb_per as oth_cmte_contb,
@@ -20,8 +20,8 @@ with cand as (
         rpt_yr = 2016 or rpt_yr = 2015
     union all
     select
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
+        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         ttl_receipts_per as ttl_receipts,
         pol_pty_cmte_contb_per as pty_cmte_contb,
         other_pol_cmte_contb_per as oth_cmte_contb,
@@ -65,8 +65,8 @@ cand_totals as (
 -- PACs
 pac_totals as (select
     'pac'::text as type,
-    extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
-    extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
+    extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+    extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
     sum(coalesce(ttl_receipts, 0) -
         (
             coalesce(pol_pty_cmte_contb_per_i,0) +
@@ -105,10 +105,10 @@ group by
     year
 ),
 -- Parties
-parties as (select
+party_totals as (select
     'party'::text as type,
-    extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
-    extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
+    extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+    extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
     sum(coalesce(ttl_receipts, 0) -
         (
             coalesce(pol_pty_cmte_contb_per_i,0) +
@@ -153,7 +153,7 @@ combined as (
     union all
     select * from pac_totals
     union all
-    select * from pac_totals
+    select * from party_totals
 )
 
 select
