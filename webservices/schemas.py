@@ -63,6 +63,7 @@ class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
+    csv_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
 
@@ -241,6 +242,24 @@ def augment_models(factory, *models, namespace=schemas):
         schema = factory(model)
         augment_schemas(schema, namespace=namespace)
 
+def augment_itemized_aggregate_models(factory, committee_model, *models, namespace=schemas):
+    for model in models:
+        schema = factory(
+            model,
+            options={
+                'exclude': ('committee',),
+                'relationships': [
+                    Relationship(
+                        model.committee,
+                        committee_model.name,
+                        'committee_name',
+                        1
+                    ),
+                ],
+            }
+        )
+        augment_schemas(schema, namespace=namespace)
+
 class ApiSchema(ma.Schema):
     def _postprocess(self, data, many, obj):
         ret = {'api_version': __API_VERSION__}
@@ -357,6 +376,7 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
         'document_description': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
@@ -486,8 +506,9 @@ ScheduleBByRecipientIDSchema = make_schema(
 
 augment_schemas(ScheduleBByRecipientIDSchema)
 
-augment_models(
+augment_itemized_aggregate_models(
     make_schema,
+    models.CommitteeHistory,
     models.ScheduleAByZip,
     models.ScheduleABySize,
     models.ScheduleAByState,
@@ -628,6 +649,7 @@ FilingsSchema = make_schema(
         'document_description': ma.fields.Str(),
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
     options={'exclude': ('committee', )},
@@ -640,6 +662,7 @@ EFilingsSchema = make_schema(
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
     },

@@ -8,7 +8,7 @@ import pytest
 
 import manage
 from webservices import rest
-from webservices.load_current_murs import parse_regulatory_citations, parse_statutory_citations
+from webservices.legal_docs.current_murs import parse_regulatory_citations, parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
@@ -25,8 +25,8 @@ def test_parse_statutory_citations_with_reclassifications():
     'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]
 
 def test_parse_statutory_citations_no_reclassifications():
-    assert parse_statutory_citations("30101", 1, 2) == [{'text': '52 U.S.C. 30101',
-    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]
+    assert parse_statutory_citations("9999", 1, 2) == [{'text': '2 U.S.C. 9999',
+	'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]
 
 def assert_es_index_call(call_args, expected_mur):
     index, doc_type, mur = call_args[0]
@@ -55,8 +55,8 @@ class TestLoadCurrentMURs(BaseTestCase):
         self.connection.close()
         rest.db.session.remove()
 
-    @patch('webservices.load_current_murs.get_bucket')
-    @patch('webservices.load_current_murs.get_elasticsearch_connection')
+    @patch('webservices.legal_docs.current_murs.get_bucket')
+    @patch('webservices.legal_docs.current_murs.get_elasticsearch_connection')
     def test_simple_mur(self, get_es_conn, get_bucket):
         mur_subject = 'Fraudulent misrepresentation'
         expected_mur = {
@@ -74,7 +74,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'url': '/legal/matter-under-review/1/'
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
-        manage.load_current_murs()
+        manage.legal_docs.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
         assert index == 'docs'
@@ -82,8 +82,8 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert mur == expected_mur
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.load_current_murs.get_bucket')
-    @patch('webservices.load_current_murs.get_elasticsearch_connection')
+    @patch('webservices.legal_docs.current_murs.get_bucket')
+    @patch('webservices.legal_docs.current_murs.get_elasticsearch_connection')
     def test_mur_with_participants_and_documents(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
         mur_subject = 'Fraudulent misrepresentation'
@@ -112,7 +112,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             category, ocrtext = document
             self.create_document(case_id, document_id, category, ocrtext)
 
-        manage.load_current_murs()
+        manage.legal_docs.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
         assert index == 'docs'
@@ -131,8 +131,8 @@ class TestLoadCurrentMURs(BaseTestCase):
             assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.load_current_murs.get_bucket')
-    @patch('webservices.load_current_murs.get_elasticsearch_connection')
+    @patch('webservices.legal_docs.current_murs.get_bucket')
+    @patch('webservices.legal_docs.current_murs.get_elasticsearch_connection')
     def test_mur_with_disposition(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
         case_no = '1'
@@ -180,7 +180,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         amount_received, settlement_type, pg_date)
 
         stage = 'Closed'
-        statutory_citation = '345'
+        statutory_citation = '431'
         regulatory_citation = '456'
         self.create_violation(case_id, entity_id, stage, statutory_citation, regulatory_citation)
 
@@ -190,13 +190,13 @@ class TestLoadCurrentMURs(BaseTestCase):
         action = 'Conciliation Reached.'
         self.create_commission(commission_id, agenda_date, vote_date, action, case_id, pg_date)
 
-        manage.load_current_murs()
+        manage.legal_docs.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
         expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
             'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
-            'citations': [{'text': '52 U.S.C. 345',
-            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=345'},
+            'citations': [{'text': '52 U.S.C. 30101',
+            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'},
             {'text': '11 C.F.R. 456',
             'url': '/regulations/456/CURRENT'}]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
