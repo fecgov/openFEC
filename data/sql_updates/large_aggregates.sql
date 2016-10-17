@@ -63,7 +63,7 @@ with cand_totals as (
         year
 ),
 -- PACs
-wiht pac_totals as (select
+with pac_totals as (select
     'pac' as type,
     extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
     extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
