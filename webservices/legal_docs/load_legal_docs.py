@@ -12,12 +12,17 @@ from multiprocessing import Pool
 import logging
 from urllib.parse import urlencode
 
+import elasticsearch
+from elasticsearch_dsl import Search, Q
+from elasticsearch_dsl.result import Result
 import requests
 
 from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
+
+from . import reclassify_statutory_citation
 
 # sigh. This is a mess because slate uses a library also called utils.
 import importlib
@@ -345,21 +350,21 @@ def get_subject_tree(html, tree=None):
                 get_subject_tree(html, tree)
     return tree
 
-def get_citations(data):
-    citation_texts = re.findall("(.*?)<br>", data)
-
+def get_citations(citation_texts):
     us_codes = []
     regulations = []
 
     for citation_text in citation_texts:
-        us_code_match = re.match("(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9]+)", citation_text)
+        us_code_match = re.match("(?P<title>[0-9]+) U\.S\.C\. (?P<section>[0-9a-z-]+)(?P<paragraphs>.*)", citation_text)
         regulation_match = re.match(
             "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", citation_text)
 
         if us_code_match:
+            title, section = reclassify_statutory_citation.reclassify_pre2012_citation(us_code_match.group('title'), us_code_match.group('section'))
+            citation_text = '%s U.S.C. %s%s' % (title, section, us_code_match.group('paragraphs'))
             url = 'http://api.fdsys.gov/link?' +\
-                  urlencode([('collection', 'uscode'), ('title', us_code_match.group('title')),
-                    ('year', 'mostrecent'), ('section', us_code_match.group('section'))])
+                  urlencode([('collection', 'uscode'), ('link-type', 'html'), ('title', title),
+                    ('year', 'mostrecent'), ('section', section)])
             us_codes.append({"text": citation_text, "url": url})
         elif regulation_match:
             url = utils.create_eregs_link(regulation_match.group('part'), regulation_match.group('section'))
@@ -379,8 +384,11 @@ def delete_murs_from_es():
     es = utils.get_elasticsearch_connection()
     es.transport.perform_request('DELETE', '/docs/murs')
 
-def get_mur_names():
-    mur_names = {}
+def get_mur_names(mur_names={}):
+    # Cache the mur names
+    if len(mur_names):
+        return mur_names
+
     with open('data/archived_mur_names.csv') as csvfile:
         for row in csv.reader(csvfile):
             if row[0] == 'MUR':
@@ -420,7 +428,8 @@ def process_mur(mur):
             respondents.append(name)
 
     subject = get_subject_tree(subject_td)
-    citations = get_citations(citations_td)
+    citations = get_citations(re.findall("(.*?)<br>", citations_td))
+
     mur_digits = re.match("([0-9]+)", mur_no).group(1)
     name = mur_names[mur_digits] if mur_digits in mur_names else ''
     doc = {
@@ -455,3 +464,31 @@ def load_archived_murs():
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
     with Pool(processes=1, maxtasksperchild=1) as pool:
         pool.map(process_mur, murs, chunksize=1)
+
+def remap_archived_murs_citations():
+    """Re-map citations for archived MURs. To extract the MUR
+    information from the archived PDFs, use load_archived_murs"""
+
+    es = utils.get_elasticsearch_connection()
+
+    # Fetch archived murs from ES
+    query = Search() \
+            .query(Q('term', mur_type='archived') &  Q('term', _type='murs')) \
+            .source(include='citations')
+    archived_murs = elasticsearch.helpers.scan(es, query.to_dict(), scroll='1m', index='docs', doc_type='murs', size=500)
+
+    # Re-map the citations
+    update_murs = (dict(_op_type='update', _id=mur.meta.id, doc=mur.to_dict()) for mur in remap_citations(archived_murs))
+
+    # Save MURs to ES
+    count, _ = elasticsearch.helpers.bulk(es, update_murs, index='docs', doc_type='murs', chunk_size=100, request_timeout=30)
+    logger.info("Re-mapped %d archived MURs" % count)
+
+
+def remap_citations(archived_murs):
+    for mur in archived_murs:
+        mur = Result(mur)
+
+        # Include regulations and us_code citations in the re-map
+        mur.citations = get_citations(map(lambda c: c['text'], list(mur.citations['regulations']) + list(mur.citations['us_code'])))
+        yield mur

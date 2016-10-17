@@ -3,11 +3,12 @@ import datetime
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
+from webservices.common.models.reports import CsvMixin
 
 from .base import db
 
 
-class Filings(db.Model):
+class Filings(db.Model, CsvMixin):
     __tablename__ = 'ofec_filings_mv'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -63,7 +64,7 @@ class Filings(db.Model):
         )
 
 
-class EFilings(db.Model):
+class EFilings(db.Model, CsvMixin):
     __tablename__ = 'real_efile_reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
