@@ -35,7 +35,7 @@ with cand as (
     where
         rpt_yr = 2016 or rpt_yr = 2015
 ),
-with cand_totals as (
+cand_totals as (
     select
         'candidate' as type,
         month,
@@ -63,7 +63,7 @@ with cand_totals as (
         year
 ),
 -- PACs
-with pac_totals as (select
+pac_totals as (select
     'pac' as type,
     extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
     extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
@@ -105,7 +105,7 @@ group by
     year
 ),
 -- Parties
-with parties as (select
+parties as (select
     'party' as type,
     extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
     extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
@@ -132,6 +132,7 @@ with parties as (select
             coalesce(other_disb_per,0)
         )
     ) as adjusted_total_disbursements
+
 from fec_vsum_f3x
 left join
     -- ofec_committee_detail_mv_tmp using (cmte_id)
