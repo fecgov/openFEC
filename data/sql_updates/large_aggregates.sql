@@ -37,7 +37,7 @@ with cand as (
 ),
 cand_totals as (
     select
-        'candidate' as type,
+        'candidate'::text as type,
         month,
         year,
         sum(coalesce(cand.ttl_receipts,0) -
@@ -64,7 +64,7 @@ cand_totals as (
 ),
 -- PACs
 pac_totals as (select
-    'pac' as type,
+    'pac'::text as type,
     extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
     extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
     sum(coalesce(ttl_receipts, 0) -
@@ -106,7 +106,7 @@ group by
 ),
 -- Parties
 parties as (select
-    'party' as type,
+    'party'::text as type,
     extract(month from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as month,
     extract(year from to_date(cast(cvg_end_dt as text), 'YYYYMMDD')) as year,
     sum(coalesce(ttl_receipts, 0) -
@@ -132,7 +132,6 @@ parties as (select
             coalesce(other_disb_per,0)
         )
     ) as adjusted_total_disbursements
-
 from fec_vsum_f3x
 left join
     -- ofec_committee_detail_mv_tmp using (cmte_id)
@@ -156,6 +155,7 @@ combined as (
     union all
     select * from pac_totals
 )
+
 select
     row_number() over () as idx,
     combined.*
