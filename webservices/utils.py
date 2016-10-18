@@ -4,6 +4,9 @@ import functools
 
 import six
 import sqlalchemy as sa
+
+from collections import defaultdict
+
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects import postgresql
@@ -38,6 +41,9 @@ API_KEY_ARG = fields.Str(
 )
 if os.getenv('PRODUCTION'):
     Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
+
+fec_url_map = {'9': 'http://docquery.fec.gov/dcdev/posted/{0}.fec'}
+fec_url_map = defaultdict(lambda : 'http://docquery.fec.gov/paper/posted/{0}.fec', fec_url_map)
 
 
 def check_cap(kwargs, cap):
@@ -208,6 +214,16 @@ def make_csv_url(file_num):
         return 'http://docquery.fec.gov/csv/000/{0}.csv'.format(file_number)
     elif file_num >= 100:
         return 'http://docquery.fec.gov/csv/{0}/{1}.csv'.format(file_number[-3:], file_number)
+
+def make_fec_url(image_number, file_num):
+    image_number = str(image_number)
+    file_num = str(file_num)
+    indicator = -1
+    if len(image_number) == 18:
+        indicator = image_number[8]
+    elif len(image_number) == 11:
+        indicator = image_number[2]
+    return fec_url_map[indicator].format(file_num)
 
 def get_index_column(model):
     column = model.__mapper__.primary_key[0]
