@@ -68,7 +68,7 @@ def get_graph():
     graph.add_edges_from([
         ('committee_detail', 'large_aggregates'),
         ('reports_ie', 'large_aggregates'),
-        ('comunicaiton_cost', 'large_aggregates'),
+        ('communication_cost', 'large_aggregates'),
     ])
 
     return graph

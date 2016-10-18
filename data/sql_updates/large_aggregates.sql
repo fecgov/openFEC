@@ -1,5 +1,5 @@
-drop materialized view if exists big_totals_vw_tmp;
-create materialized view big_totals_vw_tmp as
+drop table if exists big_totals_tmp;
+create table big_totals_tmp as
 -- candidates
 with cand as (
     select
@@ -229,4 +229,6 @@ select
 from combined
 ;
 
-create unique index on big_totals_vw_tmp (idx);
+alter table big_totals_tmp rename to big_totals;
+
+create unique index on big_totals (idx);
