@@ -1,5 +1,5 @@
-drop table if exists big_totals_tmp;
-create table big_totals_tmp as
+drop table if exists large_aggregates_tmp;
+create table large_aggregates_tmp as
 -- candidates
 with cand as (
     select
@@ -98,8 +98,6 @@ pac_totals as (
         rpt_yr = 2016 or rpt_yr = 2015
         and ofec_committee_detail_mv_tmp.committee_type in ('N', 'Q', 'O', 'V', 'W')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
-        -- see if this might make things quicker
-        --and (vs.ttl_receipts > 0 or vs.ttl_disb > 0 or vs.debts_owed_by_cmte > 0 or vs.coh_cop >0)
     group by
         month,
         year
@@ -138,13 +136,10 @@ party_totals as (
         ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
         rpt_yr = 2016 or rpt_yr = 2015
-        -- confirm no Z
         and ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
         -- do we have this ?
         -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
-        -- see if this might make things quicker
-        -- and (vs.ttl_receipts > 0 or vs.ttl_disb > 0 or vs.debts_owed_by_cmte > 0 or vs.coh_cop >0)
     group by
         month,
         year
@@ -184,7 +179,7 @@ electioneering as (
         extract(month from to_date(cast(disb_dt as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(disb_dt as text), 'YYYY-MM-DD')) as year,
         null::float as receipts,
-        sum(calculated_cand_share) as disbursements
+        sum(calculated_cand_share) as adjusted_total_disbursements
     from electioneering_com_vw
     where
         rpt_yr = 2016 or rpt_yr = 2015
@@ -207,7 +202,6 @@ other as(
         union all
         select * from electioneering
     ) conglomerate
-    --
     group by
         month,
         year
@@ -223,11 +217,18 @@ combined as (
 )
 select
     row_number() over () as idx,
+    year::numeric + (year::numeric % 2) as cycle,
+    to_date((year::text || month::text || '01'), 'YYYYMMDD') as date,
     combined.*
 from combined
 ;
 
-drop table if exists big_totals;
-alter table big_totals_tmp rename to big_totals;
+drop table if exists reciepts_chart;
+create table reciepts_chart as (select type, month, year, adjusted_total_reciepts, sum(adjusted_total_reciepts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates);
+drop table if exists disbursements_chart;
+create table disbursements_chart as (select type, month, year, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates);
 
-create unique index on big_totals (idx);
+drop table if exists large_aggregates;
+alter table large_aggregates_tmp rename to large_aggregates;
+
+create unique index on large_aggregates (idx);
