@@ -152,28 +152,28 @@ party_totals as (
         year
 ),
 -- other
--- Independent expenditors
+-- Independent expenditure only
 ie as (
     select
         extract(month from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as year,
         sum(independent_expenditures_period) as receipts,
         sum(independent_contributions_period) as disbursements
-    from ofec_reports_ie_only_mv--tmp
+    from ofec_reports_ie_only_mv_tmp
     where
         cycle = 2016
     group by
         month,
         year
 ),
--- communicaiton cost
+-- communication cost
 communicaiton as (
     select
         extract(month from to_date(cast(communication_dt as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(communication_dt as text), 'YYYY-MM-DD')) as year,
         null::float as receipts,
         sum(communication_cost) as disbursements
-    from ofec_communication_cost_mv--_tmp
+    from ofec_communication_cost_mv_tmp
     where
         rpt_yr = 2016 or rpt_yr = 2015
     group by
