@@ -93,12 +93,11 @@ pac_totals as (
         ) as adjusted_total_disbursements
     from fec_vsum_f3x
     left join
-        -- ofec_committee_detail_mv_tmp using (cmte_id)
-        ofec_committee_detail_mv on committee_id = cmte_id
+        ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
         rpt_yr = 2016 or rpt_yr = 2015
-        and ofec_committee_detail_mv.committee_type in ('N', 'Q', 'O', 'V', 'W')
-        and ofec_committee_detail_mv.designation <> 'J'
+        and ofec_committee_detail_mv_tmp.committee_type in ('N', 'Q', 'O', 'V', 'W')
+        and ofec_committee_detail_mv_tmp.designation <> 'J'
         -- see if this might make things quicker
         --and (vs.ttl_receipts > 0 or vs.ttl_disb > 0 or vs.debts_owed_by_cmte > 0 or vs.coh_cop >0)
     group by
@@ -136,13 +135,12 @@ party_totals as (
         ) as adjusted_total_disbursements
     from fec_vsum_f3x
     left join
-        -- ofec_committee_detail_mv_tmp using (cmte_id)
-        ofec_committee_detail_mv on committee_id = cmte_id
+        ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
         rpt_yr = 2016 or rpt_yr = 2015
         -- confirm no Z
-        and ofec_committee_detail_mv.committee_type in ('X', 'Y')
-        and ofec_committee_detail_mv.designation <> 'J'
+        and ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
+        and ofec_committee_detail_mv_tmp.designation <> 'J'
         -- do we have this ?
         -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
         -- see if this might make things quicker
