@@ -229,6 +229,7 @@ select
 from combined
 ;
 
+drop table if exists big_totals;
 alter table big_totals_tmp rename to big_totals;
 
 create unique index on big_totals (idx);
