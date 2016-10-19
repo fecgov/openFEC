@@ -12,6 +12,7 @@ class EntityReceiptsTotals(db.Model):
     type = db.Column(db.String, doc="Candidate, PAC, party or other")
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
+    date = db.Column(db.Date, doc="The cumulative total for this month. The first day of the month is used to represent the whole month.")
     receipts = db.Column('adjusted_total_receipts', db.Float, doc="Total adjusted receipts for that entity type")
 
 
@@ -24,4 +25,5 @@ class EntityDisbursementsTotals(db.Model):
     type = db.Column(db.String, doc="Candidate, PAC, party or other")
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
+    date = db.Column(db.Date, doc="The cumulative total for this month. The first day of the month is used to represent the whole month.")
     disbursements = db.Column('adjusted_total_disbursements', db.Float, doc="Total adjusted disbursements for that entity type")
