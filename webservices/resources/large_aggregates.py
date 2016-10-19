@@ -10,7 +10,7 @@ from webservices.common.views import ApiResource
 
 @doc(
     tags=['financial'],
-    description="PLACE HOLDER WRITE THIS LATER",
+    description=docs.ENTITY_RECEIPTS_TOTLAS,
 )
 class EntityReceiptsTotalsView(ApiResource):
 
@@ -36,7 +36,7 @@ class EntityReceiptsTotalsView(ApiResource):
 
 @doc(
     tags=['financial'],
-    description="PLACE HOLDER WRITE THIS LATER",
+    description=docs.ENTITY_DISBURSEMENTS_TOTLAS,
 )
 class EntityDisbursementsTotalsView(ApiResource):
 

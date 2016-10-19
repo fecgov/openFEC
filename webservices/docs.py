@@ -942,3 +942,14 @@ EFILE_REPORTS += WIP_TAG
 
 MIN_FILTER = 'Filter for all amounts greater than a value.'
 MAX_FILTER = 'Filter for all amounts less than a value.'
+
+ENTITY_RECEIPTS_TOTLAS = '''
+Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
+
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+'''
+ENTITY_DISBURSEMENTS_TOTLAS ='''
+Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
+
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+'''
