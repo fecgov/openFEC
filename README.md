@@ -26,12 +26,12 @@ All FEC repositories:
 - [swagger-ui](https://github.com/18F/swagger-ui): forked repo that generates our interactive API documentation
 - [openFEC-web-app](https://github.com/18f/openfec-web-app): the web app for exploring campaign finance data
 - [fec-style](https://github.com/18F/fec-style): shared styles and user interface components, including this project's glossary and feedback tools
-- [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS) 
+- [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS)
 - [fec-proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
 
 
 ## Get involved
-We welcome you to explore, make suggestions, and contribute to our code. 
+We welcome you to explore, make suggestions, and contribute to our code.
 - Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
 - If you'd rather send us an email, [we're thrilled to hear from you](mailto:betafeedback@fec.gov)!
 - Follow our Set up instructions to run the apps on your computer.
@@ -49,10 +49,10 @@ We are always trying to improve our documentation. If you have suggestions or ru
     * Python 3.4 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
     * PostgreSQL (the latest 9.5 release).
-         * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/) 
+         * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-
+    * Elastic Search 1.7 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/_installation.html)
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/javascript/).
 
@@ -113,6 +113,13 @@ pg_restore --dbname cfdm_test data/subset.dump
 
 Ignore `user does not exist` error messages. Everything will still work!
 
+Next you'll need to load some documents into elastic search in order to create the search index.
+To load statutes into elasticsearch, run:
+
+```
+python manage.py index_statutes
+```
+
 *Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
 
 ```
@@ -136,7 +143,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
    export FEC_WEB_DEBUG=true
    ```
 
-   This shows error details and more verbose request logging. 
+   This shows error details and more verbose request logging.
 
 2. Run:
 
@@ -147,8 +154,8 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
    ```
 
    These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
-   
-   *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.* 
+
+   *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.*
 
 3. If you do not login to CloudFoundry with SSO (single sign-on), run:
 
@@ -158,7 +165,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
    ```
 
    Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
-   
+
    *Note: 18F team members should not set these environment variables. 18F and FEC team members will also have additional environment variables to set up. Please reach out to a team member for detailed information.*
 
 4. If you are using database replicas/mirrors you can also restrict connections to them to be asynchronous tasks only by running:
@@ -170,20 +177,28 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 #### Run locally
 Follow these steps every time you want to work on this project locally.
 
-1. Run:
+1. If you are using the legal search portion of the site, you will need Elastic Search running.
+Navigate to the installation folder (eg., `elasticsearch-1.7.5`) and run:
+
+```
+cd bin
+./elasticsearch
+```
+
+2. Start the web server:
 
    ```
    ./manage.py runserver
    ```
 
-2. View your local version of the site at [http://localhost:5000](http://localhost:5000).
+3. View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 #### Task queue
-We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](http://redis.io/) as the Celery message broker. 
+We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](http://redis.io/) as the Celery message broker.
 
 To work with Celery and Redis locally, install Redis and start a Redis server. By default,
 we connect to Redis at `redis://localhost:6379`; if Redis is running at a different URL,
-set the `FEC_REDIS_URL` environment variable. 
+set the `FEC_REDIS_URL` environment variable.
 
 *Note: Both the API and Celery worker must have access to the relevant environment variables and services (PostgreSQL, S3).*
 
@@ -256,11 +271,11 @@ Before deploying, install the [Cloud Foundry CLI](https://docs.cloudfoundry.org/
    export FEC_CF_USERNAME=<your_cf_username>
    export FEC_CF_PASSWORD=<your_cf_password>
    ```
-   
+
    If these variables aren't set, you'll be prompted for your Cloud Foundry credentials when you deploy the app.
 
 ### Deployment steps
-To deploy to Cloud Foundry, run: 
+To deploy to Cloud Foundry, run:
 
 ```
 invoke deploy
