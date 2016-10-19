@@ -1,3 +1,6 @@
+import calendar
+from datetime import date, datetime, timedelta
+
 from .base import db
 
 from webservices import docs
@@ -12,8 +15,17 @@ class EntityReceiptsTotals(db.Model):
     type = db.Column(db.String, doc="Candidate, PAC, party or other")
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
-    date = db.Column(db.Date, doc="The cumulative total for this month. The first day of the month is used to represent the whole month.")
     receipts = db.Column('adjusted_total_receipts', db.Float, doc="Total adjusted receipts for that entity type")
+
+    @property
+    def date(self):
+        end_day = calendar.monthrange(int(self.year), int(self.month))[1]
+        formatted_date = datetime(int(self.year), int(self.month), int(end_day))
+        if formatted_date >= datetime.now():
+            formatted_date = date.today() - timedelta(1)
+        return formatted_date
+
+
 
 
 class EntityDisbursementsTotals(db.Model):
@@ -25,5 +37,12 @@ class EntityDisbursementsTotals(db.Model):
     type = db.Column(db.String, doc="Candidate, PAC, party or other")
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
-    date = db.Column(db.Date, doc="The cumulative total for this month. The first day of the month is used to represent the whole month.")
     disbursements = db.Column('adjusted_total_disbursements', db.Float, doc="Total adjusted disbursements for that entity type")
+
+    @property
+    def date(self):
+        end_day = calendar.monthrange(int(self.year), int(self.month))[1]
+        formatted_date = datetime(int(self.year), int(self.month), int(end_day))
+        if formatted_date >= datetime.now():
+            formatted_date = date.today() - timedelta(1)
+        return formatted_date

@@ -206,18 +206,17 @@ combined as (
 select
     row_number() over () as idx,
     year::numeric + (year::numeric % 2) as cycle,
-    to_date((year::text || '01' || month::text ), 'YYYYDDMM') as date,
     combined.*
 from combined
 ;
 
 -- creates cumulative table per cycle from the data receipts in the large aggregates
 drop table if exists entity_receipts_chart;
-create table entity_receipts_chart as (select idx, type, month, year, cycle, date, adjusted_total_receipts, sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+create table entity_receipts_chart as (select idx, type, month, year, cycle, adjusted_total_receipts, sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
 
 -- creates cumulative table per cycle from the data disbursements in the large aggregates
 drop table if exists entity_disbursements_chart;
-create table entity_disbursements_chart as (select idx, type, month, year, cycle, date, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+create table entity_disbursements_chart as (select idx, type, month, year, cycle, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
 
 -- don't need this after making the charts
 drop table if exists large_aggregates_tmp;
