@@ -12,7 +12,7 @@ class EntityReceiptsTotals(db.Model):
     type = db.Column(db.String, doc="Candidate, PAC, party or other")
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
-    Receipts = db.Column('adjusted_total_receipts', db.Float, doc="Total adjusted receipts for that entity type")
+    receipts = db.Column('adjusted_total_receipts', db.Float, doc="Total adjusted receipts for that entity type")
 
 
 class EntityDisbursementsTotals(db.Model):
