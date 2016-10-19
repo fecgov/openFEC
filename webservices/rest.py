@@ -189,7 +189,7 @@ api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
 api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
-api.add_resource(large_aggregates.EntityRecieptsTotalsView, '/totals/entity-receipts/')
+api.add_resource(large_aggregates.EntityReceiptsTotalsView, '/totals/entity-receipts/')
 api.add_resource(large_aggregates.EntityDisbursementsTotalsView, '/totals/entity-disbursements/')
 
 
@@ -304,7 +304,7 @@ apidoc.register(dates.CalendarDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
-apidoc.register(large_aggregates.EntityRecieptsTotalsView, blueprint='v1')
+apidoc.register(large_aggregates.EntityReceiptsTotalsView, blueprint='v1')
 # apidoc.register(large_aggregates.EntityDisbursementsTotalsView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
