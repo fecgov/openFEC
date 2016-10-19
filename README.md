@@ -113,6 +113,13 @@ pg_restore --dbname cfdm_test data/subset.dump
 
 Ignore `user does not exist` error messages. Everything will still work!
 
+Next you'll need to load some documents into elastic search in order to create the search index.
+To load statutes into elasticsearch, run:
+
+```
+python manage.py index_statutes
+```
+
 *Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
 
 ```
