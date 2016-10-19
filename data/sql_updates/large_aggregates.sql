@@ -48,7 +48,7 @@ cand_totals as (
                 coalesce(cand.ttl_loan_repymts,0) +
                 coalesce(cand.ttl_contb_ref,0)
             )
-        ) as adjusted_total_reciepts,
+        ) as adjusted_total_receipts,
         sum(coalesce(cand.ttl_disb, 0) -
             (
                 coalesce(cand.tranf_to_other_auth_cmte,0) +
@@ -78,7 +78,7 @@ pac_totals as (
                 coalesce(loan_repymts_received_per,0) +
                 coalesce(ttl_contb_refund,0)
             )
-        ) as adjusted_total_reciepts,
+        ) as adjusted_total_receipts,
         sum(coalesce(ttl_disb,0) -
             (
                 coalesce(shared_nonfed_op_exp_per,0) +
@@ -118,7 +118,7 @@ party_totals as (
                 coalesce(loan_repymts_received_per,0) +
                 coalesce(ttl_contb_refund,0)
             )
-        ) as adjusted_total_reciepts,
+        ) as adjusted_total_receipts,
         sum(coalesce(ttl_disb,0) -
             (
                 coalesce(shared_nonfed_op_exp_per,0) +
@@ -224,8 +224,8 @@ from combined
 ;
 
 -- creates cumulative table per cycle from the data receipts in the large aggregates
-drop table if exists entity_reciepts_chart;
-create table entity_reciepts_chart as (select idx, type, month, year, cycle, adjusted_total_reciepts, sum(adjusted_total_reciepts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+drop table if exists entity_receipts_chart;
+create table entity_receipts_chart as (select idx, type, month, year, cycle, adjusted_total_receipts, sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
 
 -- creates cumulative table per cycle from the data disbursements in the large aggregates
 drop table if exists entity_disbursements_chart;
@@ -234,8 +234,8 @@ create table entity_disbursements_chart as (select idx, type, month, year, cycle
 -- don't need this after making the charts
 drop table if exists large_aggregates_tmp;
 
-create unique index on entity_reciepts_chart (idx);
-create index on entity_reciepts_chart (cycle);
+create unique index on entity_receipts_chart (idx);
+create index on entity_receipts_chart (cycle);
 
 create unique index on entity_disbursements_chart (idx);
 create index on entity_disbursements_chart (cycle);

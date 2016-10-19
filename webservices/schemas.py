@@ -1,4 +1,3 @@
-
 import re
 import functools
 import json
@@ -783,13 +782,13 @@ RadAnalystPageSchema = make_page_schema(RadAnalystSchema)
 register_schema(RadAnalystSchema)
 register_schema(RadAnalystPageSchema)
 
-EntityRecieptsTotalsSchema = make_schema(
-    models.EntityRecieptsTotals,
+EntityReceiptsTotalsSchema = make_schema(
+    models.EntityReceiptsTotals,
     options={'exclude': ('idx',)},
 )
-EntityRecieptsTotalsPageSchema = make_page_schema(EntityRecieptsTotalsSchema)
-register_schema(EntityRecieptsTotalsSchema)
-register_schema(EntityRecieptsTotalsPageSchema)
+EntityReceiptsTotalsPageSchema = make_page_schema(EntityReceiptsTotalsSchema)
+register_schema(EntityReceiptsTotalsSchema)
+register_schema(EntityReceiptsTotalsPageSchema)
 
 EntityDisbursementsTotalsSchema = make_schema(
     models.EntityDisbursementsTotals,

@@ -12,11 +12,11 @@ from webservices.common.views import ApiResource
     tags=['financial'],
     description="PLACE HOLDER WRITE THIS LATER",
 )
-class EntityRecieptsTotalsView(ApiResource):
+class EntityReceiptsTotalsView(ApiResource):
 
-    model = models.EntityRecieptsTotals
-    schema = schemas.EntityRecieptsTotalsSchema
-    page_schema = schemas.EntityRecieptsTotalsPageSchema
+    model = models.EntityReceiptsTotals
+    schema = schemas.EntityReceiptsTotalsSchema
+    page_schema = schemas.EntityReceiptsTotalsPageSchema
 
     filter_match_fields = [
         ('cycle', model.cycle),
