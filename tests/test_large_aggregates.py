@@ -37,7 +37,3 @@ class TestEntityDisbursementsTotals(ApiBaseTest):
             # returns one result
             results = self._results(page)
             self.assertEqual(len(results), 1)
-
-
-
-
