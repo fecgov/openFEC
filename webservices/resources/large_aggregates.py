@@ -36,8 +36,25 @@ class EntityRecieptsTotalsView(ApiResource):
 
 @doc(
     tags=['financial'],
-    description="PLACE HOLDER WRITE THIS LATER"
+    description="PLACE HOLDER WRITE THIS LATER",
 )
 class EntityDisbursementsTotalsView(ApiResource):
 
-    pass
+    model = models.EntityDisbursementsTotals
+    schema = schemas.EntityDisbursementsTotalsSchema
+    page_schema = schemas.EntityDisbursementsTotalsPageSchema
+
+    filter_match_fields = [
+        ('cycle', model.cycle),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.large_aggregates,
+        )
+
+    @property
+    def index_column(self):
+        return self.model.idx
