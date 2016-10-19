@@ -784,7 +784,8 @@ register_schema(RadAnalystPageSchema)
 
 EntityReceiptsTotalsSchema = make_schema(
     models.EntityReceiptsTotals,
-    options={'exclude': ('idx',)},
+    options={'exclude': ('idx','month', 'year')},
+    fields={'date': ma.fields.Date(doc='The cumulative total for this month.')},
 )
 EntityReceiptsTotalsPageSchema = make_page_schema(EntityReceiptsTotalsSchema)
 register_schema(EntityReceiptsTotalsSchema)
@@ -792,7 +793,8 @@ register_schema(EntityReceiptsTotalsPageSchema)
 
 EntityDisbursementsTotalsSchema = make_schema(
     models.EntityDisbursementsTotals,
-    options={'exclude': ('idx',)},
+    options={'exclude': ('idx','month', 'year')},
+    fields={'date': ma.fields.Date(doc='The cumulative total for this month.')},
 )
 EntityDisbursementsTotalsPageSchema = make_page_schema(EntityDisbursementsTotalsSchema)
 register_schema(EntityDisbursementsTotalsSchema)
