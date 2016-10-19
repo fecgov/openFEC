@@ -115,11 +115,7 @@ class ReportsView(utils.Resource):
         )
         query = reports_class.query
         if hasattr(reports_class, 'committee'):
-            #if committee_type == 'blah':
-            #    query = reports_class.query.join(reports_class.committee).options(
-            #        sa.orm.joinedload(reports_class.committee))
             query = reports_class.query.outerjoin(reports_class.committee).options(sa.orm.contains_eager(reports_class.committee))
-            #query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
         if kwargs.get('committee_id'):
             query = query.filter(reports_class.committee_id.in_(kwargs['committee_id']))
@@ -143,7 +139,6 @@ class ReportsView(utils.Resource):
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
-        print(query)
 
         return query, reports_class, reports_schema
 
