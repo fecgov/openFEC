@@ -9,8 +9,8 @@ class TestEntityReceiptsTotals(ApiBaseTest):
 
     def test_basic_receipts_test(self):
         [
-            factories.EntityReceiptsTotalsFactory(cycle=2000, receipts=50000, type='party'),
-            factories.EntityReceiptsTotalsFactory(cycle=2020, receipts=90000, type='candidate')
+            factories.EntityReceiptsTotalsFactory(cycle=2000, receipts=50000, month=3, year=1999, type='party'),
+            factories.EntityReceiptsTotalsFactory(cycle=2020, receipts=90000, month=3, year=1999, type='candidate')
         ]
 
         filter_fields = (('cycle', int(2020)), ('cycle', int(2000)))
@@ -26,8 +26,8 @@ class TestEntityDisbursementsTotals(ApiBaseTest):
 
     def test_basic_disbursements_test(self):
         [
-            factories.EntityDisbursementsTotalsFactory(cycle=2000, disbursements=50000, type='party'),
-            factories.EntityDisbursementsTotalsFactory(cycle=2020, disbursements=90000, type='candidate')
+            factories.EntityDisbursementsTotalsFactory(cycle=2000, disbursements=50000, type='party', month=3, year=1999),
+            factories.EntityDisbursementsTotalsFactory(cycle=2020, disbursements=90000, type='candidate', month=3, year=1999)
         ]
 
         filter_fields = (('cycle', int(2020)), ('cycle', int(2000)))
