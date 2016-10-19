@@ -16,8 +16,6 @@ with cand as (
         ttl_contb_ref_per as ttl_contb_ref,
         other_disb_per
     from fec_vsum_f3p
-    -- where
-    --     rpt_yr = 2016 or rpt_yr = 2015
     union all
     select
         extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
@@ -32,8 +30,6 @@ with cand as (
         ttl_contb_ref_col_ttl_per as ttl_contb_ref,
         other_disb_per
     from fec_vsum_f3
-    -- where
-    --     rpt_yr = 2016 or rpt_yr = 2015
 ),
 cand_totals as (
     select
@@ -97,7 +93,6 @@ pac_totals as (
     where
         ofec_committee_detail_mv_tmp.committee_type in ('N', 'Q', 'O', 'V', 'W')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
-        -- and rpt_yr = 2016 or rpt_yr = 2015
     group by
         month,
         year
@@ -137,7 +132,6 @@ party_totals as (
     where
         ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
-        -- and rpt_yr = 2016 or rpt_yr = 2015
         -- do we have this ?
         -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
     group by
@@ -153,8 +147,6 @@ ie as (
         sum(independent_expenditures_period) as receipts,
         sum(independent_contributions_period) as disbursements
     from ofec_reports_ie_only_mv_tmp
-    -- where
-    --     cycle = 2016
     group by
         month,
         year
@@ -167,8 +159,6 @@ communicaiton as (
         null::float as receipts,
         sum(communication_cost) as disbursements
     from ofec_communication_cost_mv_tmp
-    -- where
-    --     rpt_yr = 2016 or rpt_yr = 2015
     group by
         month,
         year
@@ -181,8 +171,6 @@ electioneering as (
         null::float as receipts,
         sum(calculated_cand_share) as adjusted_total_disbursements
     from electioneering_com_vw
-    -- where
-    --     rpt_yr = 2016 or rpt_yr = 2015
     group by
         month,
         year
@@ -218,18 +206,18 @@ combined as (
 select
     row_number() over () as idx,
     year::numeric + (year::numeric % 2) as cycle,
-    to_date((year::text || month::text || '01'), 'YYYYMMDD') as date,
+    to_date((year::text || '01' || month::text ), 'YYYYDDMM') as date,
     combined.*
 from combined
 ;
 
 -- creates cumulative table per cycle from the data receipts in the large aggregates
 drop table if exists entity_receipts_chart;
-create table entity_receipts_chart as (select idx, type, month, year, cycle, adjusted_total_receipts, sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+create table entity_receipts_chart as (select idx, type, month, year, cycle, date, adjusted_total_receipts, sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
 
 -- creates cumulative table per cycle from the data disbursements in the large aggregates
 drop table if exists entity_disbursements_chart;
-create table entity_disbursements_chart as (select idx, type, month, year, cycle, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+create table entity_disbursements_chart as (select idx, type, month, year, cycle, date, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
 
 -- don't need this after making the charts
 drop table if exists large_aggregates_tmp;
