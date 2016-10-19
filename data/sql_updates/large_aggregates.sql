@@ -223,17 +223,19 @@ select
 from combined
 ;
 
-drop table if exists large_aggregates;
-alter table large_aggregates_tmp rename to large_aggregates;
-
 -- creates cumulative table per cycle from the data receipts in the large aggregates
 drop table if exists entity_reciepts_chart;
-create table entity_reciepts_chart as (select idx, type, month, year, cycle, adjusted_total_reciepts, sum(adjusted_total_reciepts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates);
+create table entity_reciepts_chart as (select idx, type, month, year, cycle, adjusted_total_reciepts, sum(adjusted_total_reciepts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
 
 -- creates cumulative table per cycle from the data disbursements in the large aggregates
 drop table if exists entity_disbursements_chart;
-create table entity_disbursements_chart as (select idx, type, month, year, cycle, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates);
+create table entity_disbursements_chart as (select idx, type, month, year, cycle, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
 
-create unique index on large_aggregates (idx);
+-- don't need this after making the charts
+drop table if exists large_aggregates_tmp;
+
 create unique index on entity_reciepts_chart (idx);
-create unique index on entity_reciepts_chart (idx);
+create index on entity_reciepts_chart (cycle);
+
+create unique index on entity_disbursements_chart (idx);
+create index on entity_disbursements_chart (cycle);

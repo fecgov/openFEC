@@ -10,7 +10,7 @@ from webservices.common.views import ApiResource
 
 @doc(
     tags=['financial'],
-    description="PLACE HOLDER WRITE THIS LATER"
+    description="PLACE HOLDER WRITE THIS LATER",
 )
 class EntityRecieptsTotalsView(ApiResource):
 
@@ -18,19 +18,21 @@ class EntityRecieptsTotalsView(ApiResource):
     schema = schemas.EntityRecieptsTotalsSchema
     page_schema = schemas.EntityRecieptsTotalsPageSchema
 
-    filter_fields = [('cycle', model.cycle)]
+    filter_match_fields = [
+        ('cycle', model.cycle),
+    ]
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
             args.large_aggregates,
-            args.make_sort_args(),
         )
 
     @property
     def index_column(self):
         return self.model.idx
+
 
 @doc(
     tags=['financial'],
