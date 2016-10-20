@@ -15,6 +15,7 @@ class ReportType(db.Model):
 
 class ReportDate(db.Model):
     __tablename__ = 'trc_report_due_date'
+    __table_args__ = ({"schema": "disclosure"})
 
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
