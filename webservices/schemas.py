@@ -62,7 +62,7 @@ class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
-    csv_url = ma.fields.Str()
+    #csv_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
 
@@ -375,7 +375,7 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
-        'csv_url': ma.fields.Str(),
+        #'csv_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
         'document_description': ma.fields.Str(),
         'committee_type': ma.fields.Str(attribute='committee.committee_type'),
@@ -648,7 +648,7 @@ FilingsSchema = make_schema(
         'document_description': ma.fields.Str(),
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
-        'csv_url': ma.fields.Str(),
+        #'csv_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
     options={'exclude': ('committee', )},
@@ -661,7 +661,7 @@ EFilingsSchema = make_schema(
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
-        'csv_url': ma.fields.Str(),
+        #'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
     },
