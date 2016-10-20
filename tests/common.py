@@ -22,6 +22,7 @@ def _reset_schema():
     rest.db.engine.execute('drop schema if exists public cascade;')
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('create schema public;')
+    rest.db.engine.execute('create schema disclosure')
 
 
 class BaseTestCase(unittest.TestCase):
