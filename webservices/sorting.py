@@ -3,6 +3,15 @@ import sqlalchemy as sa
 from webservices.exceptions import ApiError
 from webservices.common.util import get_class_by_tablename
 
+ITEMIZED_MODELS = (
+    'ScheduleA',
+    'ScheduleB',
+    'ScheduleC',
+    'ScheduleD',
+    'ScheduleE',
+    'ScheduleF'
+)
+
 
 def parse_option(option, model=None, aliases=None, join_columns=None, query=None):
     """Parse sort option to SQLAlchemy order expression.
@@ -69,11 +78,17 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         join_columns=join_columns,
         query=query
     )
-    query = query.order_by(order(column))
+
+    if model.__name__ in ITEMIZED_MODELS:
+        query = query.order_by(order(column), order(model.sub_id))
+    else:
+        query = query.order_by(order(column))
+
     if relationship:
         query = query.join(relationship)
     if hide_null:
         query = query.filter(column != None)  # noqa
     if index_column:
         query = query.order_by(order(index_column))
+
     return query, (column, order)
