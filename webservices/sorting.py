@@ -79,7 +79,7 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         query=query
     )
 
-    if model.__name__ in ITEMIZED_MODELS:
+    if model and model.__name__ in ITEMIZED_MODELS:
         query = query.order_by(order(column), order(model.sub_id))
     else:
         query = query.order_by(order(column))
