@@ -12,12 +12,11 @@ class ReportType(db.Model):
     report_type = db.Column('rpt_tp', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
 
-class ClientMixin(object):
-    __table_args__ = {"schema": "client_schema_name"}
+class DisclosureMixin(object):
+    __table_args__ = {"schema": "disclosure"}
 
 class ReportDate(db.Model):
     __tablename__ = 'trc_report_due_date'
-    __table_args__ = ({"schema": "disclosure"})
 
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
@@ -31,6 +30,9 @@ class ReportDate(db.Model):
     @property
     def report_type_full(self):
         return clean_report_type(self.report.report_type_full)
+
+class ReportDateDisclosure(DisclosureMixin, ReportDate):
+    pass
 
 
 REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')
