@@ -22,7 +22,12 @@ def _reset_schema():
     rest.db.engine.execute('drop schema if exists public cascade;')
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('create schema public;')
-    rest.db.engine.execute('create schema disclosure')
+    rest.db.engine.execute('create schema disclosure;')
+
+def _reset_schema_for_integration():
+    rest.db.engine.execute('drop schema if exists public cascade;')
+    rest.db.engine.execute('drop schema if exists disclosure cascade;')
+    rest.db.engine.execute('create schema public;')
 
 
 class BaseTestCase(unittest.TestCase):
@@ -100,10 +105,17 @@ def assert_dicts_subset(first, second):
 class IntegrationTestCase(BaseTestCase):
     """Base test case for tests that depend on the test data subset.
     """
-
     @classmethod
     def setUpClass(cls):
-        super(IntegrationTestCase, cls).setUpClass()
+        #super(IntegrationTestCase, cls).setUpClass()
+        rest.app.config['TESTING'] = True
+        rest.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
+        rest.app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
+        cls.app = rest.app.test_client()
+        cls.client = TestApp(rest.app)
+        cls.app_context = rest.app.app_context()
+        cls.app_context.push()
+        _reset_schema_for_integration()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
                 ['pg_restore', './data/subset.dump', '--dbname', TEST_CONN, '--no-acl', '--no-owner'],

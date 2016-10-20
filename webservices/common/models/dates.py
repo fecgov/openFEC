@@ -12,6 +12,8 @@ class ReportType(db.Model):
     report_type = db.Column('rpt_tp', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
 
+class ClientMixin(object):
+    __table_args__ = {"schema": "client_schema_name"}
 
 class ReportDate(db.Model):
     __tablename__ = 'trc_report_due_date'
