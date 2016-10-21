@@ -24,6 +24,7 @@ def _reset_schema():
     rest.db.engine.execute('create schema public;')
     rest.db.engine.execute('create schema disclosure;')
 
+
 def _reset_schema_for_integration():
     rest.db.engine.execute('drop schema if exists public cascade;')
     rest.db.engine.execute('drop schema if exists disclosure cascade;')

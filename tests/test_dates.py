@@ -37,7 +37,6 @@ class TestReportingDates(ApiBaseTest):
         for field, example in filter_fields:
             page = api.url_for(ReportingDatesView, **{field: example})
             # returns at least one result
-            print("hi")
             results = self._results(page)
             assert len(results) > 0
 
