@@ -13,6 +13,10 @@ class ReportType(db.Model):
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
 
 
+class DisclosureMixin(object):
+    __table__args = {"schema": "disclosure"}
+
+
 class ReportDate(db.Model):
     __tablename__ = 'trc_report_due_date'
 
@@ -28,6 +32,10 @@ class ReportDate(db.Model):
     @property
     def report_type_full(self):
         return clean_report_type(self.report.report_type_full)
+
+
+class ReportDateDisclosure(DisclosureMixin, ReportDate):
+    pass
 
 
 REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')
