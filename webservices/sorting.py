@@ -6,10 +6,7 @@ from webservices.common.util import get_class_by_tablename
 ITEMIZED_MODELS = (
     'ScheduleA',
     'ScheduleB',
-    'ScheduleC',
-    'ScheduleD',
     'ScheduleE',
-    'ScheduleF'
 )
 
 
