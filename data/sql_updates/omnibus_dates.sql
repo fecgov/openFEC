@@ -64,7 +64,7 @@ with elections_raw as(
                 ], '-')
             else elections_raw.election_state
         end as report_contest
-    from trc_report_due_date reports
+    from disclosure.trc_report_due_date reports
     left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
     left join elections_raw using (trc_election_id)
     where
