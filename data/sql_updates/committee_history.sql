@@ -6,7 +6,7 @@ with
             cmte_id,
             array_agg(fec_election_yr)::int[] as cycles,
             max(fec_election_yr) as max_cycle
-        from cmte_valid_fec_yr
+        from disclosure.cmte_valid_fec_yr
         group by cmte_id
     ),
     dates as (
@@ -22,7 +22,7 @@ with
         select
             cmte_id,
             array_agg(distinct cand_id)::text[] as candidate_ids
-        from cand_cmte_linkage
+        from disclosure.cand_cmte_linkage
         group by cmte_id
     )
 select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
@@ -91,7 +91,7 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     fec_yr.cmte_pty_affiliation_desc as party_full,
     cycles.cycles,
     coalesce(candidates.candidate_ids, '{}'::text[]) as candidate_ids
-from cmte_valid_fec_yr fec_yr
+from disclosure.cmte_valid_fec_yr fec_yr
 left join dimcmteproperties dcp on fec_yr.cmte_id = dcp.cmte_id and fec_yr.fec_election_yr >= dcp.rpt_yr
 left join cycles on fec_yr.cmte_id = cycles.cmte_id
 left join dates on fec_yr.cmte_id = dates.cmte_id
