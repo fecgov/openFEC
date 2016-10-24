@@ -114,20 +114,15 @@ class ReportsView(utils.Resource):
             default_schemas,
         )
         query = reports_class.query
-        # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
-            query = reports_class.query.join(reports_class.committee).options(sa.orm.joinedload(reports_class.committee))
-            if kwargs.get('type'):
-                query = query.\
-                    filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
-            if kwargs.get('candidate_id'):
-                query = query.\
-                    filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
-            else:
-                query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
+            query = reports_class.query.outerjoin(reports_class.committee).options(sa.orm.contains_eager(reports_class.committee))
 
         if kwargs.get('committee_id'):
             query = query.filter(reports_class.committee_id.in_(kwargs['committee_id']))
+        if kwargs.get('candidate_id'):
+            query = query.filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
+        if kwargs.get('type'):
+            query = query.filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
         if kwargs.get('year'):
             query = query.filter(reports_class.report_year.in_(kwargs['year']))
         if kwargs.get('cycle'):
@@ -140,11 +135,11 @@ class ReportsView(utils.Resource):
                 query = query.filter(reports_class.report_type.in_(include))
             elif exclude:
                 query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
-
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
+
         return query, reports_class, reports_schema
 
 
