@@ -217,6 +217,8 @@ def make_csv_url(file_num):
 
 def make_fec_url(image_number, file_num):
     image_number = str(image_number)
+    if file_num < 0:
+        return
     file_num = str(file_num)
     indicator = -1
     if len(image_number) == 18:
