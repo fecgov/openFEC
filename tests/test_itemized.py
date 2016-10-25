@@ -160,6 +160,87 @@ class TestItemized(ApiBaseTest):
             [each.sub_id for each in filings[20:]],
         )
 
+    def test_pagination_with_null_sort_column_values(self):
+        filings = [
+            factories.ScheduleAFactory(contribution_receipt_date=None)
+            for _ in range(5)
+        ]
+        filings = filings + [
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2016, 1, 1)
+            )
+            for _ in range(25)
+        ]
+        page1 = self._results(api.url_for(
+            ScheduleAView,
+            sort='contribution_receipt_date'
+        ))
+        self.assertEqual(len(page1), 20)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in filings[5:25]],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page1],
+            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[5:25]]
+        )
+        page2 = self._results(
+            api.url_for(
+                ScheduleAView,
+                last_index=page1[-1]['sub_id'],
+                sort='contribution_receipt_date'
+        ))
+        self.assertEqual(len(page2), 5)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[25:]],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page2],
+            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[25:]]
+        )
+
+    def test_pagination_with_null_sort_column_values_reversed(self):
+        filings = [
+            factories.ScheduleAFactory(contribution_receipt_date=None)
+            for _ in range(5)
+        ]
+        filings = filings + [
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2016, 1, 1)
+            )
+            for _ in range(25)
+        ]
+        page1 = self._results(api.url_for(
+            ScheduleAView,
+            sort='-contribution_receipt_date',
+            sort_reverse_nulls='true'
+        ))
+        self.assertEqual(len(page1), 20)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in filings[:9:-1]],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page1],
+            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[:9:-1]]
+        )
+        page2 = self._results(api.url_for(
+            ScheduleAView,
+            last_index=page1[-1]['sub_id'],
+            sort='-contribution_receipt_date',
+            sort_reverse_nulls='true'
+        ))
+        self.assertEqual(len(page2), 10)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[9::-1]],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page2],
+            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[9::-1]]
+        )
+
     def test_pagination_with_null_sort_column_parameter(self):
         response = self.app.get(
             api.url_for(

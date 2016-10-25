@@ -105,7 +105,7 @@ class IndexValidator(OptionValidator):
     def _is_excluded(self, value):
         return not value or value in self.exclude
 
-def make_sort_args(default=None, validator=None, default_hide_null=False):
+def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=False):
     return {
         'sort': fields.Str(
             missing=default,
@@ -115,6 +115,10 @@ def make_sort_args(default=None, validator=None, default_hide_null=False):
         'sort_hide_null': fields.Bool(
             missing=default_hide_null,
             description='Hide null values on sorted column(s).'
+        ),
+        'sort_reverse_nulls': fields.Bool(
+            missing=default_reverse_nulls,
+            description='Toggle where null values on sorted column(s) appear in results. Ignored if sort_hide_null is true.'
         ),
     }
 
