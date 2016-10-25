@@ -15,7 +15,7 @@ class EntityReceiptsTotals(db.Model):
     type = db.Column(db.String, doc="Candidate, PAC, party or other")
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
-    receipts = db.Column('adjusted_total_receipts', db.Float, doc="Total adjusted receipts for that entity type")
+    receipts = db.Column('sum', db.Float, doc="Total adjusted receipts for that entity type")
 
     @property
     def date(self):
@@ -37,7 +37,7 @@ class EntityDisbursementsTotals(db.Model):
     type = db.Column(db.String, doc="Candidate, PAC, party or other")
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
-    disbursements = db.Column('adjusted_total_disbursements', db.Float, doc="Total adjusted disbursements for that entity type")
+    disbursements = db.Column('sum', db.Float, doc="Total adjusted disbursements for that entity type")
 
     @property
     def date(self):
