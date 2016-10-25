@@ -2,8 +2,11 @@ import re
 
 from webservices import decoders, docs
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
+from sqlalchemy.ext.declarative import declared_attr
 
 from .base import db, BaseModel
+
+#Base = declarative_base()
 
 
 class ReportType(db.Model):
@@ -14,28 +17,31 @@ class ReportType(db.Model):
 
 
 class DisclosureMixin(object):
-    __table__args = {"schema": "disclosure"}
+    __table_args__ = {"schema": "disclosure"}
 
 
-class ReportDate(db.Model):
-    __tablename__ = 'trc_report_due_date'
-
+class DateMixin(object):
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
-    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
     due_date = db.Column(db.Date, index=True, doc=docs.DUE_DATE)
     create_date = db.Column(db.Date, index=True, doc=docs.CREATE_DATE)
     update_date = db.Column(db.Date, index=True, doc=docs.UPDATE_DATE)
-
-    report = db.relationship(ReportType)
 
     @property
     def report_type_full(self):
         return clean_report_type(self.report.report_type_full)
 
 
-class ReportDateDisclosure(DisclosureMixin, ReportDate):
-    pass
+class ReportDateForTest(db.Model, DateMixin):
+    __tablename__ = 'trc_report_due_date'
+    report = db.relationship(ReportType)
+    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
+
+
+class ReportDate(db.Model, DateMixin, DisclosureMixin):
+    __tablename__ = 'trc_report_due_date'
+    report = db.relationship(ReportType)
+    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
 
 
 REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')

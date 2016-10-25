@@ -673,7 +673,7 @@ ReportTypeSchema = make_schema(models.ReportType)
 register_schema(ReportTypeSchema)
 
 ReportingDatesSchema = make_schema(
-    models.ReportDateDisclosure,
+    models.ReportDate,
     fields={
         'report_type': ma.fields.Str(),
         'report_type_full': ma.fields.Str(),
