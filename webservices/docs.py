@@ -352,7 +352,8 @@ pagination: {
 }
 ```
 
-To fetch the next page of results, append `last_index=230880619` to the URL.
+To fetch the next page of results, append `last_index=230880619` to the URL. You do not
+need to worry about or use any of the other `last_<x>` columns, just `last_index`.
 
 Note: because the Schedule A data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
@@ -392,7 +393,8 @@ pagination: {
 }
 ```
 
-To fetch the next page of results, append `last_index=230906248` to the URL.
+To fetch the next page of results, append `last_index=230906248` to the URL. You do not
+need to worry about or use any of the other `last_<x>` columns, just `last_index`.
 
 Note: because the Schedule B data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
@@ -457,7 +459,8 @@ results with the following pagination information:
 }
 ```
 
-To fetch the next page of results, append `last_index=3023037` to the URL.
+To fetch the next page of results, append `last_index=3023037` to the URL. You do not
+need to worry about or use any of the other `last_<x>` columns, just `last_index`.
 
 Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.

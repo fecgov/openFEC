@@ -46,8 +46,10 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
     return column, order, relationship
 
 
+
+
 def sort(query, key, model, aliases=None, join_columns=None, clear=False,
-         hide_null=False, index_column=None):
+         hide_null=False, index_column=None, reverse_nulls=False):
     """Sort query using string-formatted columns.
 
     :param query: Original query
@@ -57,6 +59,9 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         for sorting on related columns
     :param clear: Clear existing sort conditions
     :param hide_null: Exclude null values on sorted column(s)
+    :param index_column:
+    :param reverse_nulls: Swap order of null values on sorted column(s) in results;
+        Ignored if hide_null is True
     """
     if clear:
         query = query.order_by(False)
@@ -76,10 +81,16 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         query=query
     )
 
-    if model and model.__name__ in ITEMIZED_MODELS:
-        query = query.order_by(order(column), order(model.sub_id))
+    if not hide_null and reverse_nulls:
+        null_order = sa.sql.expression.nullslast if order == sa.desc else sa.sql.expression.nullsfirst
+        sort_column = null_order(order(column))
     else:
-        query = query.order_by(order(column))
+        sort_column = order(column)
+
+    if model and model.__name__ in ITEMIZED_MODELS:
+        query = query.order_by(sort_column, order(model.sub_id))
+    else:
+        query = query.order_by(sort_column)
 
     if relationship:
         query = query.join(relationship)
