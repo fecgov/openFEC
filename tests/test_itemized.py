@@ -160,6 +160,16 @@ class TestItemized(ApiBaseTest):
             [each.sub_id for each in filings[20:]],
         )
 
+    def test_pagination_with_null_sort_column_parameter(self):
+        response = self.app.get(
+            api.url_for(
+                ScheduleAView,
+                sort='contribution_receipt_date',
+                last_contribution_receipt_date='null'
+            )
+        )
+        self.assertEqual(response.status_code, 422)
+
     def test_pagination_bad_per_page(self):
         response = self.app.get(api.url_for(ScheduleAView, per_page=999))
         self.assertEqual(response.status_code, 422)
