@@ -53,6 +53,7 @@ class Filings(db.Model, CsvMixin):
     amendment_indicator = db.Column(db.String, index=True)
     update_date = db.Column(db.Date)
     pdf_url = db.Column(db.String)
+    means_filed = db.Column(db.String)
 
     @property
     def document_description(self):
