@@ -47,6 +47,16 @@ begin
 end
 $$ language plpgsql immutable;
 
+create or replace function means_filed(image_number text) returns text as $$
+begin
+    return case
+        when is_electronic(image_number) then 'e-file'
+        else 'paper'
+    end;
+end
+$$ language plpgsql immutable;
+
+
 create or replace function is_electronic(image_number text) returns boolean as $$
 begin
     return case
