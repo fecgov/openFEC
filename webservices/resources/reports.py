@@ -73,6 +73,12 @@ def get_range_filters():
     ]
     return filter_range_fields
 
+def get_match_filters():
+    filter_match = [
+        ('filer_type', models.CommitteeReports.means_filed)
+    ]
+    return filter_match
+
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -84,11 +90,6 @@ def get_range_filters():
     },
 )
 class ReportsView(utils.Resource):
-
-
-    filter_match = [
-        ('type', models.CommitteeHistory.committee_type)
-    ]
 
 
     @use_kwargs(args.paging)
@@ -125,7 +126,8 @@ class ReportsView(utils.Resource):
                     filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
             else:
                 query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
-
+        if kwargs.get('filer_type'):
+            query = query.filter(reports_class.means_filed == kwargs['filer_type'])
         if kwargs.get('committee_id'):
             query = query.filter(reports_class.committee_id.in_(kwargs['committee_id']))
         if kwargs.get('year'):
@@ -145,6 +147,8 @@ class ReportsView(utils.Resource):
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
+        #currently doesn't work, whyyyyy
+        #query = filters.filter_match(query, kwargs, get_match_filters())
         return query, reports_class, reports_schema
 
 
@@ -191,6 +195,8 @@ class CommitteeReportsView(utils.Resource):
 
         if committee_id is not None:
             query = query.filter_by(committee_id=committee_id)
+        if kwargs.get('filer_type'):
+            query = query.filter(reports_class.means_filed == kwargs['filer_type'])
         if kwargs.get('year'):
             query = query.filter(reports_class.report_year.in_(kwargs['year']))
         if kwargs.get('cycle'):
