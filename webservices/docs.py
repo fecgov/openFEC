@@ -352,8 +352,8 @@ pagination: {
 }
 ```
 
-To fetch the next page of results, append "last_index=230880619&last_contribution_receipt_date=2014-01-01"
-to the URL.
+To fetch the next page of results, append `last_index=230880619` to the URL. You do not
+need to worry about or use any of the other `last_<x>` columns, just `last_index`.
 
 Note: because the Schedule A data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
@@ -393,8 +393,8 @@ pagination: {
 }
 ```
 
-To fetch the next page of results, append "last_index=230906248&amp;last_disbursement_date=2014-07-04"
-to the URL.
+To fetch the next page of results, append `last_index=230906248` to the URL. You do not
+need to worry about or use any of the other `last_<x>` columns, just `last_index`.
 
 Note: because the Schedule B data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
@@ -459,8 +459,8 @@ results with the following pagination information:
 }
 ```
 
-To fetch the next page of results, append
-"&last_index=3023037&last_expenditure_amount=-17348.5" to the URL.
+To fetch the next page of results, append `last_index=3023037` to the URL. You do not
+need to worry about or use any of the other `last_<x>` columns, just `last_index`.
 
 Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
@@ -942,3 +942,14 @@ EFILE_REPORTS += WIP_TAG
 
 MIN_FILTER = 'Filter for all amounts greater than a value.'
 MAX_FILTER = 'Filter for all amounts less than a value.'
+
+ENTITY_RECEIPTS_TOTLAS = '''
+Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
+
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+'''
+ENTITY_DISBURSEMENTS_TOTLAS ='''
+Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
+
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+'''

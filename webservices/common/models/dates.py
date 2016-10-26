@@ -2,7 +2,6 @@ import re
 
 from webservices import decoders, docs
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
-
 from .base import db, BaseModel
 
 
@@ -13,21 +12,29 @@ class ReportType(db.Model):
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
 
 
-class ReportDate(db.Model):
-    __tablename__ = 'trc_report_due_date'
+"""
+Keep this here as a reference as to a strategy for doing this if needed
+class DisclosureMixin(object):
+    __table_args__ = {"schema": "disclosure"}
+"""
 
+
+class DateMixin(object):
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
-    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
     due_date = db.Column(db.Date, index=True, doc=docs.DUE_DATE)
     create_date = db.Column(db.Date, index=True, doc=docs.CREATE_DATE)
     update_date = db.Column(db.Date, index=True, doc=docs.UPDATE_DATE)
 
-    report = db.relationship(ReportType)
-
     @property
     def report_type_full(self):
         return clean_report_type(self.report.report_type_full)
+
+
+class ReportDate(db.Model, DateMixin):
+    __tablename__ = 'trc_report_due_date'
+    report = db.relationship(ReportType)
+    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
 
 
 REPORT_TYPE_CLEAN = re.compile(r'{[^)]*}')

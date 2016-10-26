@@ -131,6 +131,8 @@ class CandidateTotal(db.Model):
     disbursements = db.Column(db.Numeric(30, 2), index=True)
     cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
     debts_owed_by_committee = db.Column(db.Numeric(30, 2))
+    coverage_start_date = db.Column(db.Date, doc=docs.COVERAGE_START_DATE)
+    coverage_end_date = db.Column(db.Date, doc=docs.COVERAGE_END_DATE)
 
 
 class CandidateElection(db.Model):

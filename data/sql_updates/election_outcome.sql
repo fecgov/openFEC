@@ -3,7 +3,7 @@ drop materialized view if exists ofec_election_result_mv_tmp;
 create materialized view ofec_election_result_mv_tmp as
 (
     select fec_election_yr - 4 as election_yr, *
-    from cand_valid_fec_yr
+    from disclosure.cand_valid_fec_yr
     where
         cand_ici = 'I' and
         cand_office = 'P' and
@@ -14,7 +14,7 @@ union all
 (
     select distinct on (cand_office_st, cand_election_yr)
         cand_election_yr - 6 as election_yr, *
-    from cand_valid_fec_yr
+    from disclosure.cand_valid_fec_yr
     where
         cand_ici = 'I' and
         cand_office = 'S'
@@ -27,7 +27,7 @@ union all
 (
     select distinct on (cand_office_st, cand_office_district, cand_election_yr)
         cand_election_yr - 2 as election_yr, *
-    from cand_valid_fec_yr
+    from disclosure.cand_valid_fec_yr
     where
         cand_ici = 'I' and
         cand_office = 'H'
