@@ -2,11 +2,7 @@ import re
 
 from webservices import decoders, docs
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
-from sqlalchemy.ext.declarative import declared_attr
-
 from .base import db, BaseModel
-
-#Base = declarative_base()
 
 
 class ReportType(db.Model):
@@ -16,8 +12,11 @@ class ReportType(db.Model):
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
 
 
+"""
+Keep this here as a reference as to a strategy for doing this if needed
 class DisclosureMixin(object):
     __table_args__ = {"schema": "disclosure"}
+"""
 
 
 class DateMixin(object):
@@ -32,13 +31,7 @@ class DateMixin(object):
         return clean_report_type(self.report.report_type_full)
 
 
-class ReportDateForTest(db.Model, DateMixin):
-    __tablename__ = 'trc_report_due_date'
-    report = db.relationship(ReportType)
-    report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
-
-
-class ReportDate(db.Model, DateMixin, DisclosureMixin):
+class ReportDate(db.Model, DateMixin):
     __tablename__ = 'trc_report_due_date'
     report = db.relationship(ReportType)
     report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
