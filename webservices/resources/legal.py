@@ -103,6 +103,9 @@ class UniversalSearch(utils.Resource):
                 .extra(size=hits_returned, from_=from_hit) \
                 .index('docs')
 
+            if type == 'advisory_opinions':
+                query = query.query("match", category="Final Opinion")
+
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
 

@@ -65,4 +65,10 @@ def get_graph():
         ('cand_cmte_linkage', 'candidate_aggregates'),
     ])
 
+    graph.add_edges_from([
+        ('committee_detail', 'large_aggregates'),
+        ('reports_ie', 'large_aggregates'),
+        ('communication_cost', 'large_aggregates'),
+    ])
+
     return graph

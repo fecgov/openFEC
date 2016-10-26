@@ -116,7 +116,7 @@ class SearchTest(unittest.TestCase):
     def test_query_dsl(self, es_search):
         response = self.app.get('/v1/legal/search/', query_string={
                                 'q': 'president',
-                                'type': 'advisory_opinions'})
+                                'type': 'statutes'})
         assert response.status_code == 200
 
         # This is mostly copy/pasted from the dict-based query. This is not a
@@ -124,7 +124,7 @@ class SearchTest(unittest.TestCase):
         # elasitcsearch_dsl correctly.
         expected_query = {"query": {"bool": {
                  "must": [
-                     {"term": {"_type": "advisory_opinions"}},
+                     {"term": {"_type": "statutes"}},
                      {"match": {"_all": "president"}},
                      ],
                  "should": [
@@ -146,7 +146,7 @@ class SearchTest(unittest.TestCase):
     def test_query_dsl_phrase_search(self, es_search):
         response = self.app.get('/v1/legal/search/', query_string={
                                 'q': '"electronic filing"',
-                                'type': 'advisory_opinions'})
+                                'type': 'statutes'})
         assert response.status_code == 200
 
         # This is mostly copy/pasted from the dict-based query. This is not a
@@ -154,7 +154,7 @@ class SearchTest(unittest.TestCase):
         # elasitcsearch_dsl correctly.
         expected_query = {"query": {"bool": {
                  "must": [
-                     {"term": {"_type": "advisory_opinions"}},
+                     {"term": {"_type": "statutes"}},
                      {"match_phrase": {"_all": "electronic filing"}},
                      ],
                  "should": [
@@ -184,6 +184,38 @@ class SearchTest(unittest.TestCase):
         _, args = es_search.call_args
         query = args['body']
         assert get_path(query, 'highlight.highlight_query') == expected_highlight_query.to_dict()
+
+    @patch.object(es, 'search')
+    def test_query_dsl_with_ao_category_filter(self, es_search):
+        response = self.app.get('/v1/legal/search/', query_string={
+                                'q': 'president',
+                                'type': 'advisory_opinions'})
+        assert response.status_code == 200
+
+        # This is mostly copy/pasted from the dict-based query. This is not a
+        # very meaningful test but helped to ensure we're using the
+        # elasitcsearch_dsl correctly.
+        expected_query = {"query": {"bool": {
+                 "must": [
+                     {"term": {"_type": "advisory_opinions"}},
+                     {"match": {"_all": "president"}},
+                     {'match': {'category': 'Final Opinion'}}
+                     ],
+                 "should": [
+                     {"match": {"no": "president"}},
+                     {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
+                     ]
+                 }},
+            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}},
+                          "highlight_query": {"match": {"_all": "president"}}},
+            "_source": {"exclude": "text"},
+            "from": 0,
+            "size": 20}
+
+        es_search.assert_called_with(body=expected_query,
+                                     index=mock.ANY,
+                                     doc_type=mock.ANY)
+
 
 
 class LegalPhraseParseTests(unittest.TestCase):
@@ -215,7 +247,7 @@ class LegalPhraseSearchTests(unittest.TestCase):
     @patch.object(es, 'search')
     def test_with_only_phrase(self, es_search):
         es_search.return_value = {'hits': {'hits': [], 'total': 0}}
-        response = self.app.get('/v1/legal/search/', query_string=dict(q='"electronic filing"', type='advisory_opinions'))
+        response = self.app.get('/v1/legal/search/', query_string=dict(q='"electronic filing"', type='statutes'))
 
         assert response.status_code == 200
         assert es_search.call_count == 1
@@ -234,7 +266,7 @@ class LegalPhraseSearchTests(unittest.TestCase):
     @patch.object(es, 'search')
     def test_with_terms_and_phrase(self, es_search):
         es_search.return_value = {'hits': {'hits': [], 'total': 0}}
-        response = self.app.get('/v1/legal/search/', query_string=dict(q='required "electronic filing" 2016', type='advisory_opinions'))
+        response = self.app.get('/v1/legal/search/', query_string=dict(q='required "electronic filing" 2016', type='statutes'))
 
         assert response.status_code == 200
         assert es_search.call_count == 1
@@ -254,7 +286,7 @@ class LegalPhraseSearchTests(unittest.TestCase):
         es_search.return_value = {'hits': {'hits': [], 'total': 0}}
         response = self.app.get('/v1/legal/search/', query_string=dict(
             q='"vice president" required "electronic filing" 2016',
-            type='advisory_opinions'))
+            type='statutes'))
 
         assert response.status_code == 200
         assert es_search.call_count == 1

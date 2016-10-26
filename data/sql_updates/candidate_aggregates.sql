@@ -9,6 +9,8 @@ with totals as (
         disbursements,
         last_cash_on_hand_end_period,
         last_debts_owed_by_committee,
+        coverage_start_date,
+        coverage_end_date,
         false as federal_funds_flag
     from ofec_totals_house_senate_mv_tmp
     union all
@@ -19,6 +21,8 @@ with totals as (
         disbursements,
         last_cash_on_hand_end_period,
         last_debts_owed_by_committee,
+        coverage_start_date,
+        coverage_end_date,
         cast(federal_funds_flag as boolean) as federal_funds_flag
     from ofec_totals_presidential_mv_tmp
 ),
@@ -34,6 +38,8 @@ cycle_totals as (
         sum(receipts) > 0 as has_raised_funds,
         sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
         sum(last_debts_owed_by_committee) as debts_owed_by_committee,
+        min(coverage_start_date) as coverage_start_date,
+        max(coverage_end_date) as coverage_end_date,
         array_agg(federal_funds_flag)::boolean array @> array[true] as federal_funds_flag
     from ofec_cand_cmte_linkage_mv_tmp link
     join totals on
@@ -57,6 +63,8 @@ election_aggregates as (
         sum(receipts) as receipts,
         sum(disbursements) as disbursements,
         sum(receipts) > 0 as has_raised_funds,
+        min(coverage_start_date) as coverage_start_date,
+        max(coverage_end_date) as coverage_end_date,
         array_agg(federal_funds_flag) @> array[cast('true' as boolean)] as federal_funds_flag
     from cycle_totals
     group by
@@ -89,6 +97,8 @@ election_totals as (
         totals.has_raised_funds,
         latest.cash_on_hand_end_period,
         latest.debts_owed_by_committee,
+        totals.coverage_start_date,
+        totals.coverage_end_date,
         totals.federal_funds_flag
     from election_aggregates totals
     join election_latest latest using (candidate_id, election_year)

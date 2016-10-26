@@ -10,7 +10,7 @@ with nicknames as (
     select
         cand_id as candidate_id,
         sum(receipts) as receipts
-    from cand_cmte_linkage link
+    from disclosure.cand_cmte_linkage link
     join ofec_totals_combined_mv_tmp totals on
         link.cmte_id = totals.committee_id and
         link.fec_election_yr = totals.cycle

@@ -22,6 +22,20 @@ class PdfMixin(object):
     def has_pdf(self):
         return self.report_year and self.report_year >= 1993
 
+
+class CsvFecMixin(object):
+
+    @property
+    def csv_url(self):
+        if self.file_number:
+            return utils.make_csv_url(self.file_number)
+
+    @property
+    def fec_url(self):
+        if self.file_number:
+            return utils.make_fec_url(self.beginning_image_number, self.file_number)
+
+
 class TreasurerMixin(object):
 
     treasurer_last_name = db.Column('lname', db.String)
@@ -46,14 +60,14 @@ class TreasurerMixin(object):
         return name
 
 
-class CommitteeReports(PdfMixin, BaseModel):
+class CommitteeReports(PdfMixin, CsvFecMixin, BaseModel):
     __abstract__ = True
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     committee = utils.related('CommitteeHistory', 'committee_id', 'committee_id', 'report_year', 'cycle')
 
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
-
+    file_number = db.Column(db.Integer)
     beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD)#P
     cash_on_hand_end_period = db.Column('cash_on_hand_end_period', db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD)#P
@@ -301,7 +315,7 @@ class BaseFilingSummary(db.Model):
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
-class BaseFiling(PdfMixin,db.Model):
+class BaseFiling(PdfMixin, CsvFecMixin, db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)

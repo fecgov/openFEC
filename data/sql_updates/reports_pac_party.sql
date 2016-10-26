@@ -104,7 +104,8 @@ select
     rpt_tp as report_type,
     rpt_tp_desc as report_type_full,
     most_recent_filing_flag like 'N' as is_amended,
-    receipt_dt as receipt_date
+    receipt_dt as receipt_date,
+    file_num as file_number
 from
     fec_vsum_f3x
 where

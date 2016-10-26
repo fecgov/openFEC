@@ -2,13 +2,13 @@ drop materialized view if exists ofec_candidate_history_mv_tmp cascade;
 create materialized view ofec_candidate_history_mv_tmp as
 with
     -- Select rows from `cand_valid_fec_yr` that are associated with principal
-    -- or authorized committees via `cand_cmte_linkage`
+    -- or authorized committees via `disclosure.cand_cmte_linkage`
     fec_yr as (
         select
             distinct on (cand_valid_yr_id)
             cand.*
-        from cand_valid_fec_yr cand
-        join cand_cmte_linkage link on
+        from disclosure.cand_valid_fec_yr cand
+        join disclosure.cand_cmte_linkage link on
             cand.cand_id = link.cand_id and
             cand.fec_election_yr = link.fec_election_yr and
             link.linkage_type in ('P', 'A')
