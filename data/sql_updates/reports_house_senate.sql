@@ -88,7 +88,7 @@ select
     receipt_dt as receipt_date,
     file_num as file_number,
     means_filed(begin_image_num) as means_filed,
-    report_fec_url(begin_image_num, file_num) as fec_url
+    report_fec_url(begin_image_num::text, file_num::integer) as fec_url
 from
     fec_vsum_f3
 where
