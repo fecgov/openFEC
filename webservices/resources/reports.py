@@ -122,6 +122,8 @@ class ReportsView(utils.Resource):
             query = query.filter(reports_class.committee_id.in_(kwargs['committee_id']))
         if kwargs.get('candidate_id'):
             query = query.filter(models.CommitteeHistory.candidate_ids.overlap([kwargs.get('candidate_id')]))
+        if kwargs.get('filer_type'):
+            query = query.filter(reports_class.means_filed == kwargs['filer_type'])
         if kwargs.get('type'):
             query = query.filter(models.CommitteeHistory.committee_type.in_(kwargs.get('type')))
         if kwargs.get('year'):
