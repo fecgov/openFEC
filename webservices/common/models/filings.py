@@ -3,12 +3,12 @@ import datetime
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
-from webservices.common.models.reports import CsvFecMixin
+from webservices.common.models.reports import CsvMixin, FecMixin
 
 from .base import db
 
 
-class Filings(db.Model, CsvFecMixin):
+class Filings(db.Model, CsvMixin):
     __tablename__ = 'ofec_filings_mv'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -53,6 +53,7 @@ class Filings(db.Model, CsvFecMixin):
     amendment_indicator = db.Column(db.String, index=True)
     update_date = db.Column(db.Date)
     pdf_url = db.Column(db.String)
+    fec_url = db.Column(db.String)
     means_filed = db.Column(db.String)
 
     @property
@@ -65,7 +66,7 @@ class Filings(db.Model, CsvFecMixin):
         )
 
 
-class EFilings(db.Model, CsvFecMixin):
+class EFilings(db.Model, CsvMixin, FecMixin):
     __tablename__ = 'real_efile_reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
@@ -82,6 +83,8 @@ class EFilings(db.Model, CsvFecMixin):
     amended_by = db.Column('superceded', db.BigInteger, doc=docs.AMENDED_BY)
     amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
     amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
+    means_filed = 'e-file'
+    #fec_url = db.String(db.String)
 
     report = db.relationship(ReportType)
 
