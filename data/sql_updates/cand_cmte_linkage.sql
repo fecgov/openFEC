@@ -3,7 +3,7 @@ create materialized view ofec_cand_cmte_linkage_mv_tmp as
 select
     row_number() over () as idx,
     *
-from cand_cmte_linkage
+from disclosure.cand_cmte_linkage
 where
     substr(cand_id, 1, 1) = cmte_tp or
     cmte_tp not in ('P', 'S', 'H')

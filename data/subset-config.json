@@ -43,13 +43,13 @@
     "cand_cmte_linkage": [
       {
         "referred_schema": null,
-        "referred_table": "cand_valid_fec_yr",
+        "referred_table": "disclosure.cand_valid_fec_yr",
         "referred_columns": ["cand_id"],
         "constrained_columns": ["cand_id"]
       },
       {
         "referred_schema": null,
-        "referred_table": "cmte_valid_fec_yr",
+        "referred_table": "disclosure.cmte_valid_fec_yr",
         "referred_columns": ["cmte_id"],
         "constrained_columns": ["cmte_id"]
       }
