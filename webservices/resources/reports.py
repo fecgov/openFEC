@@ -87,6 +87,10 @@ def get_match_filters():
             'description': 'House, Senate, presidential, independent expenditure only',
             'enum': ['presidential', 'pac-party', 'house-senate', 'ie-only'],
         },
+        'filer_type': {
+            'description': 'E-filer or paper',
+            'enum': ['e-file', 'paper'],
+        },
     },
 )
 class ReportsView(utils.Resource):
