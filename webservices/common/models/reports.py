@@ -23,12 +23,17 @@ class PdfMixin(object):
         return self.report_year and self.report_year >= 1993
 
 
-class CsvMixin(object):
+class CsvFecMixin(object):
 
     @property
     def csv_url(self):
         if self.file_number:
             return utils.make_csv_url(self.file_number)
+
+    @property
+    def fec_url(self):
+        if self.file_number:
+            return utils.make_fec_url(self.beginning_image_number, self.file_number)
 
 
 class TreasurerMixin(object):
@@ -55,7 +60,7 @@ class TreasurerMixin(object):
         return name
 
 
-class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
+class CommitteeReports(PdfMixin, CsvFecMixin, BaseModel):
     __abstract__ = True
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -311,7 +316,7 @@ class BaseFilingSummary(db.Model):
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
-class BaseFiling(PdfMixin, CsvMixin, db.Model):
+class BaseFiling(PdfMixin, CsvFecMixin, db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)

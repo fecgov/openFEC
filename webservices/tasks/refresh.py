@@ -22,7 +22,8 @@ def refresh():
             download.clear_bucket()
             legal_docs.index_advisory_opinions()
             legal_docs.load_advisory_opinions_into_s3()
-            legal_docs.load_current_murs()
+            # TODO: needs to work with celery
+            # legal_docs.load_current_murs()
         except Exception as error:
             manage.logger.exception(error)
     try:

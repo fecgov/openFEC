@@ -16,6 +16,7 @@ with cand as (
         ttl_contb_ref_per as ttl_contb_ref,
         other_disb_per
     from fec_vsum_f3p
+    where most_recent_filing_flag like 'Y'
     union all
     select
         extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
@@ -30,6 +31,7 @@ with cand as (
         ttl_contb_ref_col_ttl_per as ttl_contb_ref,
         other_disb_per
     from fec_vsum_f3
+    where most_recent_filing_flag like 'Y'
 ),
 cand_totals as (
     select
@@ -91,7 +93,8 @@ pac_totals as (
     left join
         ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
-        ofec_committee_detail_mv_tmp.committee_type in ('N', 'Q', 'O', 'V', 'W')
+        most_recent_filing_flag like 'Y'
+        and ofec_committee_detail_mv_tmp.committee_type in ('N', 'Q', 'O', 'V', 'W')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
     group by
         month,
@@ -130,7 +133,8 @@ party_totals as (
     left join
         ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
-        ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
+        most_recent_filing_flag like 'Y'
+        and ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
         -- do we have this ?
         -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
@@ -142,11 +146,14 @@ party_totals as (
 -- Independent expenditure only
 ie as (
     select
-        extract(month from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as year,
-        sum(independent_expenditures_period) as receipts,
-        sum(independent_contributions_period) as disbursements
-    from ofec_reports_ie_only_mv_tmp
+        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
+        sum(ttl_indt_exp) as receipts,
+        sum(ttl_indt_contb) as disbursements
+    from
+        fec_vsum_f5
+    where
+        most_recent_filing_flag like 'Y'
     group by
         month,
         year
@@ -158,7 +165,7 @@ communicaiton as (
         extract(year from to_date(cast(communication_dt as text), 'YYYY-MM-DD')) as year,
         null::float as receipts,
         sum(communication_cost) as disbursements
-    from ofec_communication_cost_mv_tmp
+    from fec_vsum_f76
     group by
         month,
         year

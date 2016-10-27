@@ -4,6 +4,9 @@ import functools
 
 import six
 import sqlalchemy as sa
+
+from collections import defaultdict
+
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects import postgresql
@@ -39,6 +42,9 @@ API_KEY_ARG = fields.Str(
 if os.getenv('PRODUCTION'):
     Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
 
+fec_url_map = {'9': 'http://docquery.fec.gov/dcdev/posted/{0}.fec'}
+fec_url_map = defaultdict(lambda : 'http://docquery.fec.gov/paper/posted/{0}.fec', fec_url_map)
+
 
 def check_cap(kwargs, cap):
     if cap:
@@ -52,11 +58,11 @@ def check_cap(kwargs, cap):
 def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False,
                count=None, cap=100, index_column=None):
     check_cap(kwargs, cap)
-    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
+    sort, hide_null, reverse_nulls = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_reverse_nulls')
     if sort:
         query, _ = sorting.sort(
             query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, index_column=index_column,
+            clear=clear, hide_null=hide_null, index_column=index_column, reverse_nulls=reverse_nulls
         )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
@@ -64,21 +70,17 @@ def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear
 
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
-    if paginator.sort_column is not None:
-        sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
-    else:
-        sort_index = None
-    return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
+    return paginator.get_page(last_index=kwargs['last_index'], sort_index=None, eager=eager)
 
 
 def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
-    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
+    sort, hide_null, reverse_nulls = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_reverse_nulls')
     if sort:
         query, sort_column = sorting.sort(
             query, sort,
-            model=model, clear=clear, hide_null=hide_null,
+            model=model, clear=clear, hide_null=hide_null, reverse_nulls=reverse_nulls
         )
     else:
         sort_column = None
@@ -208,6 +210,18 @@ def make_csv_url(file_num):
         return 'http://docquery.fec.gov/csv/000/{0}.csv'.format(file_number)
     elif file_num >= 100:
         return 'http://docquery.fec.gov/csv/{0}/{1}.csv'.format(file_number[-3:], file_number)
+
+def make_fec_url(image_number, file_num):
+    image_number = str(image_number)
+    if file_num < 0:
+        return
+    file_num = str(file_num)
+    indicator = -1
+    if len(image_number) == 18:
+        indicator = image_number[8]
+    elif len(image_number) == 11:
+        indicator = image_number[2]
+    return fec_url_map[indicator].format(file_num)
 
 def get_index_column(model):
     column = model.__mapper__.primary_key[0]
