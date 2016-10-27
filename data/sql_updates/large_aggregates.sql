@@ -70,7 +70,7 @@ pac_totals as (
             (
                 coalesce(pol_pty_cmte_contb_per_i,0) +
                 coalesce(other_pol_cmte_contb_per_i,0) +
-                coalesce(ttl_op_exp_per,0) +
+                coalesce(offests_to_op_exp,0) +
                 coalesce(fed_cand_contb_ref_per,0) +
                 coalesce(tranf_from_nonfed_acct_per,0) +
                 coalesce(loan_repymts_received_per,0) +
@@ -146,14 +146,13 @@ party_totals as (
 -- Independent expenditure only
 ie as (
     select
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
-        sum(ttl_indt_exp) as receipts,
-        sum(ttl_indt_contb) as disbursements
-    from
-        fec_vsum_f5
+    extract(month from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as month,
+    extract(year from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as year,
+    sum(independent_expenditures_period) as receipts,
+    sum(independent_contributions_period) as disbursements
+    from ofec_reports_ie_only_mv_tmp
     where
-        most_recent_filing_flag like 'Y'
+        is_amended = False
     group by
         month,
         year
