@@ -54,7 +54,7 @@ class Filings(db.Model, CsvMixin):
     update_date = db.Column(db.Date)
     pdf_url = db.Column(db.String)
     fec_url = db.Column(db.String)
-    means_filed = db.Column(db.String)
+    means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
 
     @property
     def document_description(self):

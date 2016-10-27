@@ -109,7 +109,7 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))#P
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
-    means_filed = db.Column(db.String)
+    means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
     fec_url = db.Column(db.String)
 
     @property
@@ -308,7 +308,7 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     report_form = 'Form 5'
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
-    means_filed = db.Column(db.String)
+    means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
     fec_url = db.Column(db.String)
 
 
