@@ -34,7 +34,7 @@ create or replace function report_fec_url(image_number text, file_number integer
 begin
 
     return case
-        when file_number < 0 then null
+        when file_number < 1 then null
         when image_number is not null and not is_electronic(image_number) then format(
             'http://docquery.fec.gov/paper/posted/%1$s.fec',
             file_number
