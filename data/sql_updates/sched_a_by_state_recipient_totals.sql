@@ -6,13 +6,13 @@ with grouped_totals as (
     select
         sum(agg_st.total) as total,
         agg_st.cycle,
-        agg_st.state
+        agg_st.state,
         cd.committee_type,
         cd.committee_type_full
     from
         ofec_sched_a_aggregate_state as agg_st
     join
-        ofec_committee_detail as cd
+        ofec_committee_detail_mv_tmp as cd
     on (agg_st.cmte_id = cd.committee_id)
     where
         agg_st.state in (
@@ -21,26 +21,24 @@ with grouped_totals as (
         )
     group by
         agg_st.cycle,
-        agg_st.state
+        agg_st.state,
         cd.committee_type,
         cd.committee_type_full
-)
-
-with overall_total as (
+),
+overall_total as (
     select
         sum(totals.total) as total,
         totals.cycle,
-        totals.state
-        ' ' as committee_type,
-        'All' as committee_type_full
+        totals.state,
+        ' '::text as committee_type,
+        'All'::text as committee_type_full
     from
         grouped_totals as totals
     group by
         totals.cycle,
         totals.state
-)
-
-with combined as (
+),
+combined as (
     select * from grouped_totals
     union all
     select * from overall_total
@@ -57,12 +55,11 @@ order by
 
 create unique index on ofec_sched_a_aggregate_state_recipient_totals_tmp (idx);
 
-create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (total, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (cycle, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (state, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (state_full, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (committee_type, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (committee_type_full, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (total, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (cycle, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (state, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (committee_type, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (committee_type_full, idx);
 
 -- Remove previous aggregate total table and rename new aggregate total table.
 drop table if exists ofec_sched_a_aggregate_state_recipient_totals;
