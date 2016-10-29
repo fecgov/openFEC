@@ -217,6 +217,7 @@ api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules
 
 api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
 api.add_resource(committees.TotalsCommitteeHistoryView, '/committees/totals/')
+api.add_resource(totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/')
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,
@@ -306,6 +307,7 @@ apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 # apidoc.register(large_aggregates.EntityReceiptsTotalsView, blueprint='v1')
 # apidoc.register(large_aggregates.EntityDisbursementsTotalsView, blueprint='v1')
+apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

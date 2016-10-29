@@ -5,7 +5,7 @@ from tests.common import ApiBaseTest
 
 from webservices import utils
 from webservices.rest import api
-from webservices.resources.totals import TotalsView
+from webservices.resources.totals import TotalsView, ScheduleAByStateRecipientTotalsView
 
 
 shared_fields = {
