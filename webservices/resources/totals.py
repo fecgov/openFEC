@@ -6,6 +6,7 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.common.views import ApiResource
 from webservices.utils import use_kwargs
 from webservices.resources.reports import reports_type_map
 
@@ -77,3 +78,44 @@ class TotalsView(utils.Resource):
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
 
+
+@doc(
+    tags=['receipts'],
+    description=(docs.STATE_AGGREGATE)  # TODO: Make specific description.
+)
+class ScheduleAByStateRecipientTotalsView(ApiResource):
+    model = models.ScheduleAByStateRecipientTotals
+    schema = schemas.ScheduleAByStateRecipientTotalsSchema
+    page_schema = schemas.ScheduleAByStateRecipientTotalsPageSchema
+
+    filter_multi_fields = [
+        ('cycle', models.ScheduleAByStateRecipientTotals.cycle),
+        ('state', models.ScheduleAByStateRecipientTotals.state),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.schedule_a_by_state_recipient_totals,
+            args.make_seek_args(),
+            args.make_sort_args(
+                default='cycle',
+                validator=args.OptionValidator([
+                    'cycle',
+                    'state',
+                    'committee_type',
+                ]),
+            )
+        )
+
+    @property
+    def index_column(self):
+        return self.model.idx
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+
+        if kwargs['hide_null']:
+            query = query.filter(self.model.state_full != None)  # noqa
+
+        return query
