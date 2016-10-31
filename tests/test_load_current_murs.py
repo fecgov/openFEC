@@ -26,7 +26,7 @@ def test_parse_statutory_citations_with_reclassifications():
 
 def test_parse_statutory_citations_no_reclassifications():
     assert parse_statutory_citations("9999", 1, 2) == [{'text': '2 U.S.C. 9999',
-	'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]
 
 def assert_es_index_call(call_args, expected_mur):
     index, doc_type, mur = call_args[0]
@@ -138,8 +138,6 @@ class TestLoadCurrentMURs(BaseTestCase):
         case_no = '1'
         name = 'Open Elections LLC'
         mur_subject = 'Fraudulent misrepresentation'
-        case_type = 'mur'
-        sol_earliest= '2012-01-01'
         pg_date = '2016-10-08'
         self.create_mur(case_id, case_no, name, mur_subject)
 
@@ -196,7 +194,8 @@ class TestLoadCurrentMURs(BaseTestCase):
         expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
             'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
             'citations': [{'text': '52 U.S.C. 30101',
-            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'},
+            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52'
+                '&section=30101'},
             {'text': '11 C.F.R. 456',
             'url': '/regulations/456/CURRENT'}]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
