@@ -80,24 +80,36 @@ pac_totals as (
         extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         sum(coalesce(ttl_receipts, 0) -
             (
+                -- contributions from political party committees and other political committees
                 coalesce(pol_pty_cmte_contb_per_i,0) +
+                -- contributions from political party committees and other political committees
                 coalesce(other_pol_cmte_contb_per_i,0) +
+                -- offsets to operating expenditures
                 coalesce(offests_to_op_exp,0) +
+                -- Contribution refunds going out
                 coalesce(fed_cand_contb_ref_per,0) +
+                -- Transfers from nonfederal accounts for allocated activities
                 coalesce(tranf_from_nonfed_acct_per,0) +
-                coalesce(loan_repymts_received_per,0) +
+                -- loan repayments
+                --coalesce(loan_repymts_received_per,0) +
+                coalesce(loan_repymts_made_per, 0) +
+                -- contribution refunds
                 coalesce(ttl_contb_refund,0)
             )
         ) as adjusted_total_receipts,
         sum(coalesce(ttl_disb,0) -
             (
+                -- Nonfederal share of allocated disbursements
                 coalesce(shared_nonfed_op_exp_per,0) +
-                -- confirm var
+                -- Transfers to other authorized committees and affiliated committees
                 coalesce(tranf_to_affliliated_cmte_per,0) +
-                -- coalesce(tranf_to_other_auth_cmte,0) +
+                -- Contributions to candidates and other political committees
                 coalesce(fed_cand_cmte_contb_per,0) +
+                -- Loan repayments
                 coalesce(loan_repymts_made_per,0) +
+                -- Contribution refunds
                 coalesce(ttl_contb_refund,0) +
+                -- Other disbursements
                 coalesce(other_disb_per,0)
             )
         ) as adjusted_total_disbursements
@@ -125,7 +137,8 @@ party_totals as (
                 coalesce(offests_to_op_exp,0) +
                 coalesce(fed_cand_contb_ref_per,0) +
                 coalesce(tranf_from_nonfed_acct_per,0) +
-                coalesce(loan_repymts_received_per,0) +
+                -- coalesce(loan_repymts_received_per,0) +
+                coalesce(loan_repymts_made_per, 0) +
                 coalesce(ttl_contb_refund,0)
             )
         ) as adjusted_total_receipts,
