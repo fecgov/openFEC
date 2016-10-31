@@ -1,8 +1,10 @@
 drop table if exists large_aggregates_tmp;
 create table large_aggregates_tmp as
 -- candidates
-with cand as (
+with candidates as (
     select
+        get_cycle(rpt_yr) as cycle,
+        cmte_id,
         extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         ttl_receipts_per as ttl_receipts,
@@ -19,6 +21,8 @@ with cand as (
     where most_recent_filing_flag like 'Y'
     union all
     select
+        get_cycle(rpt_yr) as cycle,
+        cmte_id,
         extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         ttl_receipts_per as ttl_receipts,
@@ -33,6 +37,14 @@ with cand as (
     from fec_vsum_f3
     where most_recent_filing_flag like 'Y'
 ),
+-- Remove candidate activity that does not apply to the current election
+cand as (
+    select * from candidates
+    inner join
+        -- check we don't need to normalize fec_election_yr
+        cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
+),
+-- Create sums
 cand_totals as (
     select
         'candidate'::text as type,
@@ -110,7 +122,7 @@ party_totals as (
             (
                 coalesce(pol_pty_cmte_contb_per_i,0) +
                 coalesce(other_pol_cmte_contb_per_i,0) +
-                coalesce(ttl_op_exp_per,0) +
+                coalesce(offests_to_op_exp,0) +
                 coalesce(fed_cand_contb_ref_per,0) +
                 coalesce(tranf_from_nonfed_acct_per,0) +
                 coalesce(loan_repymts_received_per,0) +
@@ -146,13 +158,14 @@ party_totals as (
 -- Independent expenditure only
 ie as (
     select
-    extract(month from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as month,
-    extract(year from to_date(cast(coverage_end_date as text), 'YYYY-MM-DD')) as year,
-    sum(independent_expenditures_period) as receipts,
-    sum(independent_contributions_period) as disbursements
-    from ofec_reports_ie_only_mv_tmp
+        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
+        sum(ttl_indt_exp) as receipts,
+        sum(ttl_indt_contb) as disbursements
+    from
+        fec_vsum_f5
     where
-        is_amended = False
+        most_recent_filing_flag like 'Y'
     group by
         month,
         year
