@@ -91,6 +91,7 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
     filter_multi_fields = [
         ('cycle', models.ScheduleAByStateRecipientTotals.cycle),
         ('state', models.ScheduleAByStateRecipientTotals.state),
+        ('committee_type', models.ScheduleAByStateRecipientTotals.committee_type),
     ]
 
     @property
