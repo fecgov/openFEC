@@ -97,7 +97,7 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
     def args(self):
         return utils.extend(
             args.schedule_a_by_state_recipient_totals,
-            args.make_seek_args(),
+            args.paging,
             args.make_sort_args(
                 default='cycle',
                 validator=args.OptionValidator([
@@ -111,11 +111,3 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
-
-    def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
-
-        if kwargs['hide_null']:
-            query = query.filter(self.model.state_full != None)  # noqa
-
-        return query
