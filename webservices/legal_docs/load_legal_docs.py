@@ -527,9 +527,9 @@ def enable_stemming():
         }
     }
 
-    docs_new = Index('docs_new', using=es)
-    if not docs_new.exists():
-        es.indices.create('docs_new', settings)
+    docs_backup = Index('docs_backup', using=es)
+    if not docs_backup.exists():
+        es.indices.create('docs_backup', settings)
 
     doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
     original_count = []
@@ -540,21 +540,21 @@ def enable_stemming():
         total = Search().using(es).query(Q('term', _type=_type)).execute().hits.total
         original_count.append(total)
         all_docs = elasticsearch.helpers.scan(es, query, scroll='1m', index='docs', doc_type=_type, size=500)
-        all_docs = list(Result(doc).to_dict() for doc in all_docs)
-        count, _ = elasticsearch.helpers.bulk(es, all_docs, index='docs_new',
-                    doc_type=_type, chunk_size=100, request_timeout=30)
+        all_docs = (Result(doc).to_dict() for doc in all_docs)
+        count, _ = elasticsearch.helpers.bulk(es, all_docs, index='docs_backup',
+                    chunk_size=100, doc_type=_type, request_timeout=30)
         backed_up_count.append(count)
-        docs_new.refresh()
+        docs_backup.refresh()
         print("Backed up %d %s." % (count, _type))
 
     if original_count == backed_up_count and sum(original_count) > 0:
         Index('docs', using=es).delete()
         es.indices.create('docs', settings)
     else:
-        raise Exception("Could not back up docs index to docs_new.")
+        raise Exception("Could not back up docs index to docs_backup.")
 
     for _type in doc_types:
-        all_docs = elasticsearch.helpers.scan(es, query, scroll='1m', index='docs_new', doc_type=_type, size=500)
+        all_docs = elasticsearch.helpers.scan(es, query, scroll='1m', index='docs_backup', doc_type=_type, size=500)
         all_docs = (Result(doc).to_dict() for doc in all_docs)
         count, _ = elasticsearch.helpers.bulk(es, all_docs, index='docs',
                     chunk_size=100, doc_type=_type, request_timeout=30)
@@ -562,6 +562,6 @@ def enable_stemming():
         print("Reindexed %d %s." % (count, _type))
 
     if original_count == reindexed_count and sum(original_count) > 0:
-        Index('docs_new', using=es).delete()
+        Index('docs_backup', using=es).delete()
     else:
-        raise Exception("Count not reindex docs_new")
+        raise Exception("Count not reindex docs_backup")
