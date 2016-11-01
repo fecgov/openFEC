@@ -12,4 +12,4 @@ from .load_legal_docs import (
     load_archived_murs,
     remap_archived_murs_citations,
     remove_legal_docs,
-    )
+    enable_stemming)
