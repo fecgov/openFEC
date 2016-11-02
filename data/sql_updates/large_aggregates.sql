@@ -1,5 +1,5 @@
-drop table if exists large_aggregates_tmp;
-create table large_aggregates_tmp as
+drop materialized view if exists large_aggregates_tmp;
+create materialized view large_aggregates_tmp as
 -- candidates
 with candidates as (
     select
@@ -246,9 +246,9 @@ select
 from combined
 ;
 
--- creates cumulative table per cycle from the data receipts in the large aggregates
-drop table if exists entity_receipts_chart;
-create table entity_receipts_chart as (
+-- creates cumulative materialized view per cycle from the data receipts in the large aggregates
+drop materialized view if exists entity_receipts_chart;
+create materialized view entity_receipts_chart as (
     select
         idx,
         type,
@@ -261,9 +261,11 @@ create table entity_receipts_chart as (
     where cycle >= 2008
 );
 
--- creates cumulative table per cycle from the data disbursements in the large aggregates
-drop table if exists entity_disbursements_chart;
-create table entity_disbursements_chart as (
+create unique index on large_aggregates_tmp (idx);
+
+-- creates cumulative materialized view per cycle from the data disbursements in the large aggregates
+drop materialized view if exists entity_disbursements_chart;
+create materialized view entity_disbursements_chart as (
     select
         idx,
         type,
@@ -276,8 +278,6 @@ create table entity_disbursements_chart as (
     where cycle >= 2008
 );
 
--- don't need this after making the charts
-drop table if exists large_aggregates_tmp;
 
 create unique index on entity_receipts_chart (idx);
 create index on entity_receipts_chart (cycle);
