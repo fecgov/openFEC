@@ -133,7 +133,7 @@ class CommitteeTotalsIEOnly(BaseModel):
 
 
 class ScheduleAByStateRecipientTotals(BaseModel):
-    __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals'
+    __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals_mv'
 
     total = db.Column(db.Numeric(30, 2), index=True, doc='The calculated total.')
     count = db.Column(db.Integer, index=True, doc='Number of records making up the total.')
