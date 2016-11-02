@@ -235,8 +235,9 @@ combined as (
     select * from pac_totals
     union all
     select * from party_totals
-    union all
-    select * from other
+-- Removing this for now --
+    -- union all
+    -- select * from other
 )
 select
     row_number() over () as idx,
