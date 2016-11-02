@@ -1,7 +1,7 @@
 -- Schedule A summary of individual contributions by state raised for each committee type per cycle.
-drop table if exists ofec_sched_a_aggregate_state_recipient_totals_tmp;
+drop materialized view if exists ofec_sched_a_aggregate_state_recipient_totals_mv_tmp;
 
-create table ofec_sched_a_aggregate_state_recipient_totals_tmp as
+create materialized view ofec_sched_a_aggregate_state_recipient_totals_mv_tmp as
 with grouped_totals as (
     select
         sum(agg_st.total) as total,
@@ -75,16 +75,12 @@ order by
     combined.state, cycle, committee_type
 ;
 
-create unique index on ofec_sched_a_aggregate_state_recipient_totals_tmp (idx);
+create unique index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (idx);
 
-create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (total, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (count, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (cycle, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (state, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (state_full, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (committee_type, idx);
-create index on ofec_sched_a_aggregate_state_recipient_totals_tmp (committee_type_full, idx);
-
--- Remove previous aggregate total table and rename new aggregate total table.
-drop table if exists ofec_sched_a_aggregate_state_recipient_totals;
-alter table ofec_sched_a_aggregate_state_recipient_totals_tmp rename to ofec_sched_a_aggregate_state_recipient_totals;
+create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (total, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (count, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (cycle, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (state, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (state_full, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (committee_type, idx);
+create index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (committee_type_full, idx);
