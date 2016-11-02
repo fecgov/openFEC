@@ -161,6 +161,9 @@ party_totals as (
         most_recent_filing_flag like 'Y'
         and ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
+        -- excluding host conventions because they have different rules than party committees
+        and cmte_id not in ('C00578419', 'C00485110', 'C00422048', 'C00567057', 'C00483586', 'C00431791', 'C00571133',
+            'C00500405', 'C00435560', 'C00572958', 'C00493254', 'C00496570', 'C00431593')
         -- do we have this ?
         -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
     group by
@@ -244,11 +247,33 @@ from combined
 
 -- creates cumulative table per cycle from the data receipts in the large aggregates
 drop table if exists entity_receipts_chart;
-create table entity_receipts_chart as (select idx, type, month, year, cycle, adjusted_total_receipts, sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+create table entity_receipts_chart as (
+    select
+        idx,
+        type,
+        month,
+        year,
+        cycle,
+        adjusted_total_receipts,
+        sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc)
+    from large_aggregates_tmp
+    where cycle >= 2008
+);
 
 -- creates cumulative table per cycle from the data disbursements in the large aggregates
 drop table if exists entity_disbursements_chart;
-create table entity_disbursements_chart as (select idx, type, month, year, cycle, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+create table entity_disbursements_chart as (
+    select
+        idx,
+        type,
+        month,
+        year,
+        cycle,
+        adjusted_total_disbursements,
+        sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc)
+    from large_aggregates_tmp
+    where cycle >= 2008
+);
 
 -- don't need this after making the charts
 drop table if exists large_aggregates_tmp;
