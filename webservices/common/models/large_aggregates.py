@@ -8,7 +8,7 @@ from webservices import docs
 
 class EntityReceiptsTotals(db.Model):
     """two year receipt totals by entity type and two-year election period"""
-    __tablename__ = 'entity_receipts_chart'
+    __tablename__ = 'ofec_entity_receipts_chart_mv'
 
     idx = db.Column(db.Integer, primary_key=True)
     cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
@@ -30,7 +30,7 @@ class EntityReceiptsTotals(db.Model):
 
 class EntityDisbursementsTotals(db.Model):
     """two year disbursement totals by entity type and two-year election period"""
-    __tablename__ = 'entity_disbursements_chart'
+    __tablename__ = 'ofec_entity_disbursements_chart_mv'
 
     idx = db.Column(db.Integer, primary_key=True)
     cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
