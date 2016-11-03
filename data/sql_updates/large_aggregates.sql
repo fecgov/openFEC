@@ -1,5 +1,5 @@
-drop materialized view if exists large_aggregates_tmp;
-create materialized view large_aggregates_tmp as
+drop materialized view if exists ofec_large_aggregates_mv_tmp;
+create materialized view ofec_large_aggregates_mv_tmp as
 -- candidates
 with candidates as (
     select
@@ -247,8 +247,8 @@ from combined
 ;
 
 -- creates cumulative materialized view per cycle from the data receipts in the large aggregates
-drop materialized view if exists entity_receipts_chart;
-create materialized view entity_receipts_chart as (
+drop materialized view if exists ofec_entity_receipts_chart_mv_tmp;
+create materialized view ofec_entity_receipts_chart_mv_tmp as (
     select
         idx,
         type,
@@ -257,15 +257,15 @@ create materialized view entity_receipts_chart as (
         cycle,
         adjusted_total_receipts,
         sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc)
-    from large_aggregates_tmp
+    from ofec_large_aggregates_mv_tmp
     where cycle >= 2008
 );
 
-create unique index on large_aggregates_tmp (idx);
+create unique index on ofec_large_aggregates_mv_tmp (idx);
 
 -- creates cumulative materialized view per cycle from the data disbursements in the large aggregates
-drop materialized view if exists entity_disbursements_chart;
-create materialized view entity_disbursements_chart as (
+drop materialized view if exists entity_disbursements_chart_mv_tmp;
+create materialized view ofec_entity_disbursements_chart_mv_tmp as (
     select
         idx,
         type,
@@ -274,13 +274,13 @@ create materialized view entity_disbursements_chart as (
         cycle,
         adjusted_total_disbursements,
         sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc)
-    from large_aggregates_tmp
+    from ofec_large_aggregates_mv_tmp
     where cycle >= 2008
 );
 
 
-create unique index on entity_receipts_chart (idx);
-create index on entity_receipts_chart (cycle);
+create unique index on ofec_entity_receipts_chart_mv_tmp (idx);
+create index on ofec_entity_receipts_chart_mv_tmp (cycle);
 
-create unique index on entity_disbursements_chart (idx);
-create index on entity_disbursements_chart (cycle);
+create unique index on ofec_entity_disbursements_chart_mv_tmp (idx);
+create index on ofec_entity_disbursements_chart_mv_tmp (cycle);
