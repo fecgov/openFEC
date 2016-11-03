@@ -51,7 +51,7 @@ candidate_totals as (
         totals.cycle,
         totals.state,
         totals.state_full,
-        ''::text as committee_type,
+        'all_candidates'::text as committee_type,
         'All Candidates'::text as committee_type_full
     from
         grouped_totals as totals
@@ -69,7 +69,7 @@ pacs_totals as (
         totals.cycle,
         totals.state,
         totals.state_full,
-        ''::text as committee_type,
+        'all_pacs'::text as committee_type,
         'All PACs'::text as committee_type_full
     from
         grouped_totals as totals
@@ -87,7 +87,7 @@ overall_total as (
         totals.cycle,
         totals.state,
         totals.state_full,
-        ''::text as committee_type,
+        'all'::text as committee_type,
         'All'::text as committee_type_full
     from
         grouped_totals as totals
