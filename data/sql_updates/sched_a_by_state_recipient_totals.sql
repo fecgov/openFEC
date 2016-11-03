@@ -56,7 +56,7 @@ candidate_totals as (
     from
         grouped_totals as totals
     where
-        committee_type in ('H', 'S', 'P')
+        totals.committee_type in ('H', 'S', 'P')
     group by
         totals.cycle,
         totals.state,
@@ -74,7 +74,7 @@ pacs_totals as (
     from
         grouped_totals as totals
     where
-        committee_type in ('B', 'D', 'Q', 'O', 'X', 'N', 'V', 'W')
+        totals.committee_type in ('B', 'D', 'Q', 'O', 'X', 'N', 'V', 'W')
     group by
         totals.cycle,
         totals.state,
