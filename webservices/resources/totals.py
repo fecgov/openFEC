@@ -81,7 +81,7 @@ class TotalsView(utils.Resource):
 
 @doc(
     tags=['receipts'],
-    description=(docs.STATE_AGGREGATE)  # TODO: Make specific description.
+    description=(docs.STATE_AGGREGATE_RECIPIENT_TOTALS)
 )
 class ScheduleAByStateRecipientTotalsView(ApiResource):
     model = models.ScheduleAByStateRecipientTotals
