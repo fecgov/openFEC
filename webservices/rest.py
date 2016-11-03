@@ -304,6 +304,7 @@ apidoc.register(dates.CalendarDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesExport, blueprint='v1')
 apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
+# will make this public after merging endpoints
 # apidoc.register(large_aggregates.EntityReceiptsTotalsView, blueprint='v1')
 # apidoc.register(large_aggregates.EntityDisbursementsTotalsView, blueprint='v1')
 
