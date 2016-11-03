@@ -74,7 +74,7 @@ pacs_totals as (
     from
         grouped_totals as totals
     where
-        totals.committee_type in ('B', 'D', 'Q', 'O', 'X', 'N', 'V', 'W')
+        totals.committee_type in ('N', 'O', 'Q', 'V', 'W')
     group by
         totals.cycle,
         totals.state,
