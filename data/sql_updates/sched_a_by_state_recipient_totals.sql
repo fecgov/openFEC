@@ -47,11 +47,11 @@ with grouped_totals as (
 candidate_totals as (
     select
         sum(totals.total) as total,
-        count(totals.total) as count,
+        sum(totals.count) as count,
         totals.cycle,
         totals.state,
         totals.state_full,
-        ' '::text as committee_type,
+        ''::text as committee_type,
         'All Candidates'::text as committee_type_full
     from
         grouped_totals as totals
@@ -65,11 +65,11 @@ candidate_totals as (
 pacs_totals as (
     select
         sum(totals.total) as total,
-        count(totals.total) as count,
+        sum(totals.count) as count,
         totals.cycle,
         totals.state,
         totals.state_full,
-        ' '::text as committee_type,
+        ''::text as committee_type,
         'All PACs'::text as committee_type_full
     from
         grouped_totals as totals
@@ -83,11 +83,11 @@ pacs_totals as (
 overall_total as (
     select
         sum(totals.total) as total,
-        count(totals.total) as count,
+        sum(totals.count) as count,
         totals.cycle,
         totals.state,
         totals.state_full,
-        ' '::text as committee_type,
+        ''::text as committee_type,
         'All'::text as committee_type_full
     from
         grouped_totals as totals
@@ -104,6 +104,8 @@ combined as (
     select * from pacs_totals
     union all
     select * from overall_total
+    order by
+        state, cycle, committee_type
 )
 
 select
@@ -111,8 +113,6 @@ select
     combined.*
 from
     combined
-order by
-    combined.state, cycle, committee_type
 ;
 
 create unique index on ofec_sched_a_aggregate_state_recipient_totals_mv_tmp (idx);
