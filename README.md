@@ -12,7 +12,7 @@
 ![](http://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
 
 ## About this project
-The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US president, Senate, and House of Representatives.
+The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US President, Senate, and House of Representatives.
 
 Are you interested in seeing how much money a candidate raised? Or spent? How much debt they took on? Who contributed to their campaign? The FEC is the authoritative source for that information.
 
