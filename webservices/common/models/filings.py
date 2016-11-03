@@ -8,7 +8,7 @@ from webservices.common.models.reports import CsvMixin, FecMixin
 from .base import db
 
 
-class Filings(db.Model, CsvMixin):
+class Filings(CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_mv'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -66,7 +66,7 @@ class Filings(db.Model, CsvMixin):
         )
 
 
-class EFilings(db.Model, CsvMixin, FecMixin):
+class EFilings(CsvMixin, FecMixin, db.Model):
     __tablename__ = 'real_efile_reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
@@ -83,9 +83,7 @@ class EFilings(db.Model, CsvMixin, FecMixin):
     amended_by = db.Column('superceded', db.BigInteger, doc=docs.AMENDED_BY)
     amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
     amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
-    means_filed = 'e-file'
-    #fec_url = db.String(db.String)
-
+    fec_url = db.String(db.String)
     report = db.relationship(ReportType)
 
     @property
