@@ -1,8 +1,10 @@
-drop table if exists large_aggregates_tmp;
-create table large_aggregates_tmp as
+drop materialized view if exists ofec_large_aggregates_mv_tmp;
+create materialized view ofec_large_aggregates_mv_tmp as
 -- candidates
-with cand as (
+with candidates as (
     select
+        get_cycle(rpt_yr) as cycle,
+        cmte_id,
         extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         ttl_receipts_per as ttl_receipts,
@@ -19,6 +21,8 @@ with cand as (
     where most_recent_filing_flag like 'Y'
     union all
     select
+        get_cycle(rpt_yr) as cycle,
+        cmte_id,
         extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         ttl_receipts_per as ttl_receipts,
@@ -33,6 +37,14 @@ with cand as (
     from fec_vsum_f3
     where most_recent_filing_flag like 'Y'
 ),
+-- Remove candidate activity that does not apply to the current election
+cand as (
+    select * from candidates
+    inner join
+        -- check we don't need to normalize fec_election_yr
+        cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
+),
+-- Create sums
 cand_totals as (
     select
         'candidate'::text as type,
@@ -68,24 +80,36 @@ pac_totals as (
         extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
         sum(coalesce(ttl_receipts, 0) -
             (
+                -- contributions from political party committees and other political committees
                 coalesce(pol_pty_cmte_contb_per_i,0) +
+                -- contributions from political party committees and other political committees
                 coalesce(other_pol_cmte_contb_per_i,0) +
-                coalesce(ttl_op_exp_per,0) +
+                -- offsets to operating expenditures
+                coalesce(offests_to_op_exp,0) +
+                -- Contribution refunds going out
                 coalesce(fed_cand_contb_ref_per,0) +
+                -- Transfers from nonfederal accounts for allocated activities
                 coalesce(tranf_from_nonfed_acct_per,0) +
-                coalesce(loan_repymts_received_per,0) +
+                -- loan repayments
+                --coalesce(loan_repymts_received_per,0) +
+                coalesce(loan_repymts_made_per, 0) +
+                -- contribution refunds
                 coalesce(ttl_contb_refund,0)
             )
         ) as adjusted_total_receipts,
         sum(coalesce(ttl_disb,0) -
             (
+                -- Nonfederal share of allocated disbursements
                 coalesce(shared_nonfed_op_exp_per,0) +
-                -- confirm var
+                -- Transfers to other authorized committees and affiliated committees
                 coalesce(tranf_to_affliliated_cmte_per,0) +
-                -- coalesce(tranf_to_other_auth_cmte,0) +
+                -- Contributions to candidates and other political committees
                 coalesce(fed_cand_cmte_contb_per,0) +
+                -- Loan repayments
                 coalesce(loan_repymts_made_per,0) +
+                -- Contribution refunds
                 coalesce(ttl_contb_refund,0) +
+                -- Other disbursements
                 coalesce(other_disb_per,0)
             )
         ) as adjusted_total_disbursements
@@ -110,10 +134,11 @@ party_totals as (
             (
                 coalesce(pol_pty_cmte_contb_per_i,0) +
                 coalesce(other_pol_cmte_contb_per_i,0) +
-                coalesce(ttl_op_exp_per,0) +
+                coalesce(offests_to_op_exp,0) +
                 coalesce(fed_cand_contb_ref_per,0) +
                 coalesce(tranf_from_nonfed_acct_per,0) +
-                coalesce(loan_repymts_received_per,0) +
+                -- coalesce(loan_repymts_received_per,0) +
+                coalesce(loan_repymts_made_per, 0) +
                 coalesce(ttl_contb_refund,0)
             )
         ) as adjusted_total_receipts,
@@ -136,6 +161,9 @@ party_totals as (
         most_recent_filing_flag like 'Y'
         and ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
+        -- excluding host conventions because they have different rules than party committees
+        and cmte_id not in ('C00578419', 'C00485110', 'C00422048', 'C00567057', 'C00483586', 'C00431791', 'C00571133',
+            'C00500405', 'C00435560', 'C00572958', 'C00493254', 'C00496570', 'C00431593')
         -- do we have this ?
         -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
     group by
@@ -207,8 +235,9 @@ combined as (
     select * from pac_totals
     union all
     select * from party_totals
-    union all
-    select * from other
+-- Removing this for now --
+    -- union all
+    -- select * from other
 )
 select
     row_number() over () as idx,
@@ -217,19 +246,41 @@ select
 from combined
 ;
 
--- creates cumulative table per cycle from the data receipts in the large aggregates
-drop table if exists entity_receipts_chart;
-create table entity_receipts_chart as (select idx, type, month, year, cycle, adjusted_total_receipts, sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+-- creates cumulative materialized view per cycle from the data receipts in the large aggregates
+drop materialized view if exists ofec_entity_receipts_chart_mv_tmp;
+create materialized view ofec_entity_receipts_chart_mv_tmp as (
+    select
+        idx,
+        type,
+        month,
+        year,
+        cycle,
+        adjusted_total_receipts,
+        sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc)
+    from ofec_large_aggregates_mv_tmp
+    where cycle >= 2008
+);
 
--- creates cumulative table per cycle from the data disbursements in the large aggregates
-drop table if exists entity_disbursements_chart;
-create table entity_disbursements_chart as (select idx, type, month, year, cycle, adjusted_total_disbursements, sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc) from large_aggregates_tmp);
+create unique index on ofec_large_aggregates_mv_tmp (idx);
 
--- don't need this after making the charts
-drop table if exists large_aggregates_tmp;
+-- creates cumulative materialized view per cycle from the data disbursements in the large aggregates
+drop materialized view if exists entity_disbursements_chart_mv_tmp;
+create materialized view ofec_entity_disbursements_chart_mv_tmp as (
+    select
+        idx,
+        type,
+        month,
+        year,
+        cycle,
+        adjusted_total_disbursements,
+        sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc)
+    from ofec_large_aggregates_mv_tmp
+    where cycle >= 2008
+);
 
-create unique index on entity_receipts_chart (idx);
-create index on entity_receipts_chart (cycle);
 
-create unique index on entity_disbursements_chart (idx);
-create index on entity_disbursements_chart (cycle);
+create unique index on ofec_entity_receipts_chart_mv_tmp (idx);
+create index on ofec_entity_receipts_chart_mv_tmp (cycle);
+
+create unique index on ofec_entity_disbursements_chart_mv_tmp (idx);
+create index on ofec_entity_disbursements_chart_mv_tmp (cycle);
