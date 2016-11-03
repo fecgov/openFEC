@@ -72,6 +72,8 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
     if paginator.sort_column is not None:
         sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
+        if paginator.sort_index is None:
+            query = query.filter(paginator.sort_column[0] == None)
     else:
         sort_index = None
     return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
