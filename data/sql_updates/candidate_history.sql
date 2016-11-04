@@ -8,7 +8,7 @@ with
             distinct on (cand_valid_yr_id)
             cand.*
         from disclosure.cand_valid_fec_yr cand
-        join disclosure.cand_cmte_linkage link on
+        left join disclosure.cand_cmte_linkage link on
             cand.cand_id = link.cand_id and
             cand.fec_election_yr = link.fec_election_yr and
             link.linkage_type in ('P', 'A')
