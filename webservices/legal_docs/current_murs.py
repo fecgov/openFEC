@@ -80,7 +80,7 @@ ORDER BY vote_date desc;
 """
 
 STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+([a-z](-1)?)?)')
-REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
+REGULATION_REGEX = re.compile('(?P<part>\d+)?(\.(?P<section>\d+))?(?P<subsection>.*)?')
 
 def load_current_murs():
     es = get_elasticsearch_connection()
@@ -188,12 +188,33 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
 def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
-        for match in REGULATION_REGEX.finditer(regulatory_citation):
-            url = create_eregs_link(match.group('part'), match.group('section'))
-            text = '11 C.F.R. %s' % match.group('part')
-            if match.group('section'):
-                text += '.%s' % match.group('section')
-            citations.append({'text': text, 'url': url})
+        last_part = None
+        last_section = None
+        for citation in re.finditer('(\d|\()+[^;, ]*', regulatory_citation):
+            match = REGULATION_REGEX.match(citation.group())
+            if match:
+                if match.group('part'):
+                    part = match.group('part')
+                    last_part = part
+                elif last_part:
+                    part = last_part
+                else:
+                    break
+                if match.group('section'):
+                    section = match.group('section')
+                    last_section = section
+                elif last_section:
+                    section = last_section
+                else:
+                    section = None
+                    last_section = None
+                url = create_eregs_link(part, section)
+                text = '11 C.F.R. %s' % part
+                if section:
+                    text += '.%s' % section
+                if match.group('subsection'):
+                    text += match.group('subsection')
+                citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)
