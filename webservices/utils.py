@@ -70,7 +70,16 @@ def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
 
-class SeekCoelescePaginator(paginators.SeekPaginator):
+class SeekCoalescePaginator(paginators.SeekPaginator):
+
+    def __init__(self, cursor, per_page, index_column, sort_column=None, count=None):
+        self.column_map = {
+            "date": date.max,
+            "float": float("inf"),
+            "int": float("inf")
+        }
+        super(SeekCoalescePaginator, self).__init__(cursor, per_page, index_column, sort_column, count)
+
 
     def _fetch(self, last_index, sort_index=None, limit=None, eager=True):
         cursor = self.cursor
@@ -78,7 +87,10 @@ class SeekCoelescePaginator(paginators.SeekPaginator):
         lhs, rhs = (), ()
         if sort_index is not None:
             left_index = self.sort_column[0]
-            left_index = sa.func.coalesce(left_index, date.max)
+            print(str(left_index.property.columns[0].type).lower())
+            max_comparator = self.column_map.get(str(left_index.property.columns[0].type).lower())
+            left_index = sa.func.coalesce(left_index, max_comparator)
+
             lhs += (left_index,)
             rhs += (sort_index,)
         if last_index is not None:
@@ -131,7 +143,7 @@ def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, c
         )
     else:
         sort_column = None
-    return SeekCoelescePaginator(
+    return SeekCoalescePaginator(
         query,
         kwargs['per_page'],
         index_column,
