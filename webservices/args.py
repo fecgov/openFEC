@@ -607,3 +607,12 @@ rad_analyst = {
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}
+
+schedule_a_by_state_recipient_totals = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'state': fields.List(IStr, description=docs.STATE_GENERIC),
+    'committee_type': fields.List(
+        IStr,
+        description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
+    ),
+}
