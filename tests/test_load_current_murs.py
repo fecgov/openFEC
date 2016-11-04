@@ -16,6 +16,22 @@ from tests.common import TEST_CONN, BaseTestCase
         [{'text': '11 C.F.R. 110', 'url': '/regulations/110/CURRENT'}]),
     ("110.21", 1, 2,
         [{'text': '11 C.F.R. 110.21', 'url': '/regulations/110-21/CURRENT'}]),
+    ("114.5(a)(3)", 1, 2,
+        [{'text': '11 C.F.R. 114.5(a)(3)', 'url': '/regulations/114-5/CURRENT'}]),
+    ("114.5(a)(3)-(5)", 1, 2,
+        [{'text': '11 C.F.R. 114.5(a)(3)-(5)', 'url': '/regulations/114-5/CURRENT'}]),
+    ("102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)", 1, 2,
+        [{'text': '11 C.F.R. 102.17(a)(l)(i)', 'url': '/regulations/102-17/CURRENT'},
+         {'text': '11 C.F.R. 102.17(b)(l)', 'url': '/regulations/102-17/CURRENT'},
+         {'text': '11 C.F.R. 102.17(b)(2)', 'url': '/regulations/102-17/CURRENT'},
+         {'text': '11 C.F.R. 102.17(c)(3)', 'url': '/regulations/102-17/CURRENT'}
+         ]),
+    ("102.5(a)(2); 104.3(a)(4)(i); 114.5(a)(3)-(5); 114.5(g)(1)", 1, 2,
+        [{'text': '11 C.F.R. 102.5(a)(2)', 'url': '/regulations/102-5/CURRENT'},
+         {'text': '11 C.F.R. 104.3(a)(4)(i)', 'url': '/regulations/104-3/CURRENT'},
+         {'text': '11 C.F.R. 114.5(a)(3)-(5)', 'url': '/regulations/114-5/CURRENT'},
+         {'text': '11 C.F.R. 114.5(g)(1)', 'url': '/regulations/114-5/CURRENT'}
+         ]),
 ])
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
