@@ -36,13 +36,15 @@ from tests.common import TEST_CONN, BaseTestCase
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
 
-def test_parse_statutory_citations_with_reclassifications():
-    assert parse_statutory_citations("431", 1, 2) == [{'text': '52 U.S.C. 30101',
-    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]
-
-def test_parse_statutory_citations_no_reclassifications():
-    assert parse_statutory_citations("9999", 1, 2) == [{'text': '2 U.S.C. 9999',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]
+@pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
+    ("431", 1, 2, # With reclassification
+        [{'text': '52 U.S.C. 30101', 'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]),
+    ("9999", 1, 2, # No reclassification
+        [{'text': '2 U.S.C. 9999',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]),
+])
+def test_parse_statutory_citations(test_input, case_id, entity_id, expected):
+    assert parse_statutory_citations(test_input, case_id, entity_id) == expected
 
 def assert_es_index_call(call_args, expected_mur):
     index, doc_type, mur = call_args[0]
