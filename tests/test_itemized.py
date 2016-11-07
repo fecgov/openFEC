@@ -174,7 +174,6 @@ class TestItemized(ApiBaseTest):
         page1 = self._results(api.url_for(
             ScheduleAView,
             sort='contribution_receipt_date',
-            sort_reverse_nulls='false'
         ))
         self.assertEqual(len(page1), 20)
         self.assertEqual(
@@ -190,7 +189,6 @@ class TestItemized(ApiBaseTest):
                 ScheduleAView,
                 last_index=page1[-1]['sub_id'],
                 sort='contribution_receipt_date',
-                sort_reverse_nulls='true'
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
@@ -201,7 +199,7 @@ class TestItemized(ApiBaseTest):
             [each['contribution_receipt_date'] for each in page2],
             [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[25:]]
         )
-
+    '''
     def test_pagination_with_null_sort_column_values_reversed(self):
         filings = [
             factories.ScheduleAFactory(contribution_receipt_date=None)
@@ -242,7 +240,7 @@ class TestItemized(ApiBaseTest):
             [each['contribution_receipt_date'] for each in page2],
             [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in filings[9::-1]]
         )
-
+    '''
     def test_pagination_with_null_sort_column_parameter(self):
         response = self.app.get(
             api.url_for(
