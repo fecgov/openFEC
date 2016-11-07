@@ -9,7 +9,7 @@ from tests.common import ApiBaseTest
 from webservices import schemas
 from webservices.rest import db
 from webservices.rest import api
-from webservices.resources.reports import ReportsView, CommitteeReportsView
+from webservices.resources.reports import ReportsView, CommitteeReportsView, EFilingSummaryView
 
 
 class TestReports(ApiBaseTest):
@@ -326,3 +326,51 @@ class TestReports(ApiBaseTest):
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data.decode('utf-8'))
         self.assertIn('not found', data['message'].lower())
+
+
+class TestEFileReports(ApiBaseTest):
+
+    def test_efile_presidential_reports(self):
+        factories.EfileReportsPresidentialFactory(committee_id='C8675309')
+
+        results = self._results(
+            api.url_for(
+                EFilingSummaryView,
+                committee_type='presidential',
+            )
+        )
+        print(results)
+        self.assertEqual(
+            results[0]['committee_id'],
+            'C8675309',
+        )
+
+    def test_efile_pac_party_reports(self):
+        factories.EfileReportsPacPartyFactory(committee_id='C8675310')
+
+        results = self._results(
+            api.url_for(
+                EFilingSummaryView,
+                committee_type='pac-party',
+            )
+        )
+        print(results)
+        self.assertEqual(
+            results[0]['committee_id'],
+            'C8675310',
+        )
+
+    def test_efile_house_senate_reports(self):
+        factories.EfileReportsHouseSenateFactory(committee_id='C8675311')
+
+        results = self._results(
+            api.url_for(
+                EFilingSummaryView,
+                committee_type='house-senate',
+            )
+        )
+        print(results)
+        self.assertEqual(
+            results[0]['committee_id'],
+            'C8675311',
+        )

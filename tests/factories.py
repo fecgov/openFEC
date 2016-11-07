@@ -149,6 +149,18 @@ class ReportsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeReportsPacParty
 
+class EfileReportsPresidentialFactory(BaseFactory):
+    class Meta:
+        model = models.BaseF3PFiling
+
+class EfileReportsPacPartyFactory(BaseFactory):
+    class Meta:
+        model = models.BaseF3XFiling
+
+class EfileReportsHouseSenateFactory(BaseFactory):
+    class Meta:
+        model = models.BaseF3Filing
+
 
 class ReportsIEOnlyFactory(BaseFactory):
     class Meta:
