@@ -352,8 +352,11 @@ pagination: {
 }
 ```
 
-To fetch the next page of results, append `last_index=230880619` to the URL. You do not
-need to worry about or use any of the other `last_<x>` columns, just `last_index`.
+To fetch the next page of sorted results, append `last_index=230880619` and
+`last_contribution_receipt_date=2014-01-01` to the URL.  We strongly advise paging through
+these results by using sort indices (defaults to sort by contribution date), otherwise some resources may be
+unintentionally filtered out.  This resource uses keyset pagination to improve query performance and these indices
+are required to properly page through this large dataset.
 
 Note: because the Schedule A data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
@@ -393,8 +396,11 @@ pagination: {
 }
 ```
 
-To fetch the next page of results, append `last_index=230906248` to the URL. You do not
-need to worry about or use any of the other `last_<x>` columns, just `last_index`.
+To fetch the next page of sorted results, append `last_index=230906248` and
+`last_disbursement_date=2014-07-04` to the URL.  We strongly advise paging through
+these results by using the sort indices (defaults to sort by disbursement date, e.g. `last_disbursement_date`), otherwise
+some resources may be unintentionally filtered out.  This resource uses keyset pagination to improve query performance
+and these indices are required to properly page through this large dataset.
 
 Note: because the Schedule B data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
@@ -459,8 +465,11 @@ results with the following pagination information:
 }
 ```
 
-To fetch the next page of results, append `last_index=3023037` to the URL. You do not
-need to worry about or use any of the other `last_<x>` columns, just `last_index`.
+To fetch the next page of sorted results, append `last_index=3023037` and
+`last_expenditure_amount=` to the URL.  We strongly advise paging through
+these results by using the sort indices (defaults to sort by disbursement date, e.g. `last_disbursement_date`), otherwise
+some resources may be unintentionally filtered out.  This resource uses keyset pagination to improve query performance
+and these indices are required to properly page through this large dataset.
 
 Note: because the Schedule E data includes many records, counts for
 large result sets are approximate; you will want to page through the records until no records are returned.
