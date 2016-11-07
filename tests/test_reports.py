@@ -354,7 +354,6 @@ class TestEFileReports(ApiBaseTest):
         )
 
         self.assertEqual(results[0]['committee_id'], 'C8675310')
-        # would like to standardize this to 'cash_on_hand_end_period'
 
     def test_efile_house_senate_reports(self):
         factories.EfileReportsHouseSenateFactory(committee_id='C8675311')
