@@ -116,11 +116,7 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
             missing=default_hide_null,
             description='Hide null values on sorted column(s).'
         ),
-        'sort_reverse_nulls': fields.Bool(
-            missing=default_reverse_nulls,
-            description='Toggle where null values on sorted column(s) appear in results. Ignored if sort_hide_null is true.'
-        ),
-        'nulls_only': fields.Bool(
+        'sort_null_only': fields.Bool(
             missing=default_nulls_only,
             description='Toggle that filters out all rows having sort column that is non-null'
         )

@@ -49,7 +49,7 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
 
 
 def sort(query, key, model, aliases=None, join_columns=None, clear=False,
-         hide_null=False, index_column=None, reverse_nulls=False):
+         hide_null=False, index_column=None):
     """Sort query using string-formatted columns.
 
     :param query: Original query
@@ -81,8 +81,9 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         query=query
     )
 
-    if not hide_null and reverse_nulls:
-        null_order = sa.sql.expression.nullslast if order == sa.desc else sa.sql.expression.nullsfirst
+    if not hide_null:
+        #to enable paging from non-null to nulls, nulls must come last.
+        null_order = sa.sql.expression.nullslast
         sort_column = null_order(order(column))
     else:
         sort_column = order(column)

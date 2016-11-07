@@ -65,7 +65,7 @@ def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear
     if sort:
         query, _ = sorting.sort(
             query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, index_column=index_column, reverse_nulls=reverse_nulls
+            clear=clear, hide_null=hide_null, index_column=index_column
         )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
@@ -73,8 +73,13 @@ def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear
 class SeekCoalescePaginator(paginators.SeekPaginator):
 
     def __init__(self, cursor, per_page, index_column, sort_column=None, count=None):
-        self.column_map = {
+        self.max_column_map = {
             "date": date.max,
+            "float": float("inf"),
+            "int": float("inf")
+        }
+        self.min_column_map = {
+            "date": date.min,
             "float": float("inf"),
             "int": float("inf")
         }
@@ -88,9 +93,12 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         if sort_index is not None:
             left_index = self.sort_column[0]
             print(str(left_index.property.columns[0].type).lower())
-            max_comparator = self.column_map.get(str(left_index.property.columns[0].type).lower())
-            left_index = sa.func.coalesce(left_index, max_comparator)
 
+            if direction == sa.asc:
+                comparator = self.max_column_map.get(str(left_index.property.columns[0].type).lower())
+            else:
+                comparator = self.min_column_map.get(str(left_index.property.columns[0].type).lower())
+            left_index = sa.func.coalesce(left_index, comparator)
             lhs += (left_index,)
             rhs += (sort_index,)
         if last_index is not None:
@@ -115,7 +123,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             ret[key] = paginators.convert_value(result, self.sort_column[0])
             if ret[key] is None:
                 ret.pop(key)
-                ret['nulls_only'] = True
+                ret['sort_null_only'] = True
         return ret
 
 
@@ -123,7 +131,7 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
     if paginator.sort_column is not None:
         sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
-        if not sort_index and kwargs['nulls_only']:
+        if not sort_index and kwargs['sort_null_only']:
             sort_index = None
             query = query.filter(paginator.sort_column[0] == None)
             paginator.cursor = query
@@ -135,11 +143,11 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
 def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
-    sort, hide_null, reverse_nulls = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_reverse_nulls')
+    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
     if sort:
         query, sort_column = sorting.sort(
             query, sort,
-            model=model, clear=clear, hide_null=hide_null, reverse_nulls=reverse_nulls
+            model=model, clear=clear, hide_null=hide_null
         )
     else:
         sort_column = None
