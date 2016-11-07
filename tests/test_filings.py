@@ -123,7 +123,7 @@ class TestFilings(ApiBaseTest):
 
 
 class TestEfileFiles(ApiBaseTest):
-# NO idea why this test fails
+
     def test_filter_date_efile(self):
         [
             factories.EFilingsFactory(committee_id='C010', beginning_image_number=2, receipt_date=datetime.date(2012, 1, 1)),
