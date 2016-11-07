@@ -56,12 +56,20 @@ begin
 end
 $$ language plpgsql immutable;
 
-
+--If the image number string is of length 18, and the 9th character is a 9, then it is electronic
+--if the image number string is of length 11, and the 3rd character is a 9, then also electronic
+--if imaage number is of length 11 and the 3rd and 4th characters are 02 and 03 then it is paper
+--all other combinations are paper filers. (this encoding is outlined at this GitHub issue:
+--https://github.com/18F/openFEC/issues/1882
 create or replace function is_electronic(image_number text) returns boolean as $$
 begin
     return case
         when char_length(image_number) = 18 and substring(image_number from 9 for 1) = '9' then true
         when char_length(image_number) = 11 and substring(image_number from 3 for 1) = '9' then true
+        --these last two cases aren't really needed, but good to add them to make this encoding
+        --explicit to the reader
+        when char_length(image_number) = 11 and substring(image_number from 3 for 2) = '02' then false
+        when char_length(image_number) = 11 and substring(image_number from 3 for 2) = '03' then false
         else false
     end;
 end
