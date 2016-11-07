@@ -173,7 +173,8 @@ class TestItemized(ApiBaseTest):
         ]
         page1 = self._results(api.url_for(
             ScheduleAView,
-            sort='contribution_receipt_date'
+            sort='contribution_receipt_date',
+            sort_reverse_nulls='false'
         ))
         self.assertEqual(len(page1), 20)
         self.assertEqual(
@@ -188,7 +189,8 @@ class TestItemized(ApiBaseTest):
             api.url_for(
                 ScheduleAView,
                 last_index=page1[-1]['sub_id'],
-                sort='contribution_receipt_date'
+                sort='contribution_receipt_date',
+                sort_reverse_nulls='true'
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
