@@ -105,6 +105,7 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
                     'cycle',
                     'state',
                     'committee_type',
+                    'total'
                 ]),
             )
         )
