@@ -733,6 +733,7 @@ FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
 This is usually a Form 1 committee registration.'
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+MEANS_FILED = 'The method used to file with the FEC, either electronic or on paper.'
 
 # schedules
 MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
