@@ -16,17 +16,53 @@ from tests.common import TEST_CONN, BaseTestCase
         [{'text': '11 C.F.R. 110', 'url': '/regulations/110/CURRENT'}]),
     ("110.21", 1, 2,
         [{'text': '11 C.F.R. 110.21', 'url': '/regulations/110-21/CURRENT'}]),
+    ("114.5(a)(3)", 1, 2,
+        [{'text': '11 C.F.R. 114.5(a)(3)', 'url': '/regulations/114-5/CURRENT'}]),
+    ("114.5(a)(3)-(5)", 1, 2,
+        [{'text': '11 C.F.R. 114.5(a)(3)-(5)', 'url': '/regulations/114-5/CURRENT'}]),
+    ("102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)", 1, 2,
+        [{'text': '11 C.F.R. 102.17(a)(l)(i)', 'url': '/regulations/102-17/CURRENT'},
+         {'text': '11 C.F.R. 102.17(b)(l)', 'url': '/regulations/102-17/CURRENT'},
+         {'text': '11 C.F.R. 102.17(b)(2)', 'url': '/regulations/102-17/CURRENT'},
+         {'text': '11 C.F.R. 102.17(c)(3)', 'url': '/regulations/102-17/CURRENT'}
+         ]),
+    ("102.5(a)(2); 104.3(a)(4)(i); 114.5(a)(3)-(5); 114.5(g)(1)", 1, 2,
+        [{'text': '11 C.F.R. 102.5(a)(2)', 'url': '/regulations/102-5/CURRENT'},
+         {'text': '11 C.F.R. 104.3(a)(4)(i)', 'url': '/regulations/104-3/CURRENT'},
+         {'text': '11 C.F.R. 114.5(a)(3)-(5)', 'url': '/regulations/114-5/CURRENT'},
+         {'text': '11 C.F.R. 114.5(g)(1)', 'url': '/regulations/114-5/CURRENT'}
+         ]),
 ])
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
 
-def test_parse_statutory_citations_with_reclassifications():
-    assert parse_statutory_citations("431", 1, 2) == [{'text': '52 U.S.C. 30101',
-    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]
-
-def test_parse_statutory_citations_no_reclassifications():
-    assert parse_statutory_citations("9999", 1, 2) == [{'text': '2 U.S.C. 9999',
-	'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]
+@pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
+    ("431", 1, 2,    # With reclassification
+        [{'text': '52 U.S.C. 30101',
+          'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html'
+          '&title=52&section=30101'}]),
+    ("9999", 1, 2,
+        [{'text': '2 U.S.C. 9999',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]),
+    ("9993(c)(2)", 1, 2,
+        [{'text': '2 U.S.C. 9993(c)(2)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
+    ("9993(a)(4) formerly 438(a)(4)", 1, 2,
+        [{'text': '2 U.S.C. 9993(a)(4)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
+    ("9116(a)(2)(A), 9114(b) (formerly 441a(a)(2)(A), 434(b)), 30116(f) (formerly 441a(f))", 1, 2,
+        [{'text': '2 U.S.C. 9116(a)(2)(A)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9116'},
+        {'text': '2 U.S.C. 9114(b)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9114'},
+        {'text': '2 U.S.C. 30116(f)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=30116'}]),
+    ("9993(a)(4) (formerly 438(a)(4)", 1, 2,  # No matching ')' for (formerly
+        [{'text': '2 U.S.C. 9993(a)(4)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
+])
+def test_parse_statutory_citations(test_input, case_id, entity_id, expected):
+    assert parse_statutory_citations(test_input, case_id, entity_id) == expected
 
 def assert_es_index_call(call_args, expected_mur):
     index, doc_type, mur = call_args[0]
@@ -138,8 +174,6 @@ class TestLoadCurrentMURs(BaseTestCase):
         case_no = '1'
         name = 'Open Elections LLC'
         mur_subject = 'Fraudulent misrepresentation'
-        case_type = 'mur'
-        sol_earliest= '2012-01-01'
         pg_date = '2016-10-08'
         self.create_mur(case_id, case_no, name, mur_subject)
 
@@ -196,7 +230,8 @@ class TestLoadCurrentMURs(BaseTestCase):
         expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
             'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
             'citations': [{'text': '52 U.S.C. 30101',
-            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'},
+            'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52'
+                '&section=30101'},
             {'text': '11 C.F.R. 456',
             'url': '/regulations/456/CURRENT'}]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},

@@ -79,8 +79,8 @@ WHERE case_id = %s
 ORDER BY vote_date desc;
 """
 
-STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+([a-z](-1)?)?)')
-REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))*')
+STATUTE_REGEX = re.compile(r'(?P<section>\d+([a-z](-1)?)?)?(?P<subsection>.*)?')
+REGULATION_REGEX = re.compile('(?P<part>\d+)?(\.(?P<section>\d+))?(?P<subsection>.*)?')
 
 def load_current_murs():
     es = get_elasticsearch_connection()
@@ -168,7 +168,9 @@ def assign_citations(participants, case_id):
 def parse_statutory_citations(statutory_citation, case_id, entity_id):
     citations = []
     if statutory_citation:
-        for match in STATUTE_REGEX.finditer(statutory_citation):
+        statutory_citation = remove_reclassification_notes(statutory_citation)
+        for citation in re.finditer('(\d|\()+[^;, ]*', statutory_citation):
+            match = STATUTE_REGEX.match(citation.group())
             title, section = reclassify_pre2012_citation('2', match.group('section'))
             url = 'https://api.fdsys.gov/link?' +\
                 urlencode([
@@ -178,7 +180,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
                     ('title', title),
                     ('section', section)
                 ])
-            text = '%s U.S.C. %s' % (title, section)
+            text = '%s U.S.C. %s%s' % (title, section, match.group('subsection'))
             citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
@@ -188,12 +190,33 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
 def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
-        for match in REGULATION_REGEX.finditer(regulatory_citation):
-            url = create_eregs_link(match.group('part'), match.group('section'))
-            text = '11 C.F.R. %s' % match.group('part')
-            if match.group('section'):
-                text += '.%s' % match.group('section')
-            citations.append({'text': text, 'url': url})
+        last_part = None
+        last_section = None
+        for citation in re.finditer('(\d|\()+[^;, ]*', regulatory_citation):
+            match = REGULATION_REGEX.match(citation.group())
+            if match:
+                if match.group('part'):
+                    part = match.group('part')
+                    last_part = part
+                elif last_part:
+                    part = last_part
+                else:
+                    break
+                if match.group('section'):
+                    section = match.group('section')
+                    last_section = section
+                elif last_section:
+                    section = last_section
+                else:
+                    section = None
+                    last_section = None
+                url = create_eregs_link(part, section)
+                text = '11 C.F.R. %s' % part
+                if section:
+                    text += '.%s' % section
+                if match.group('subsection'):
+                    text += match.group('subsection')
+                citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)
@@ -220,3 +243,35 @@ def get_documents(case_id, bucket, bucket_name):
             document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
     return document_text, documents
+
+def remove_reclassification_notes(statutory_citation):
+    """ Statutory citations include notes on reclassification of the form
+    "30120 (formerly 441d)" and "30120 (formerly 432(e)(1))". These need to be
+    removed as we explicitly perform the necessary reclassifications.
+    """
+    UNPARENTHESIZED_FORMERLY_REGEX = re.compile(r' formerly \S*')
+    PARENTHESIZED_FORMERLY_REGEX = re.compile(r'\(formerly ')
+
+    def remove_to_matching_parens(citation):
+        """ In the case of reclassification notes of the form "(formerly ...",
+        remove all characters up to the matching closing ')' allowing for nested
+        parentheses pairs.
+        """
+        match = PARENTHESIZED_FORMERLY_REGEX.search(citation)
+        pos = match.end()
+        paren_count = 0
+        while pos < len(citation):
+            if citation[pos] == ')':
+                if paren_count == 0:
+                    return citation[:match.start()] + citation[pos:]
+                else:
+                    paren_count -= 1
+            elif citation[pos] == '(':
+                paren_count += 1
+            pos += 1
+        return citation[:match.start()]  # Degenerate case - no matching ')'
+
+    cleaned_citation = UNPARENTHESIZED_FORMERLY_REGEX.sub(' ', statutory_citation)
+    while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):
+        cleaned_citation = remove_to_matching_parens(cleaned_citation)
+    return cleaned_citation
