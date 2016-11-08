@@ -92,12 +92,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         lhs, rhs = (), ()
         if sort_index is not None:
             left_index = self.sort_column[0]
-            print(str(left_index.property.columns[0].type).lower())
-
-            if direction == sa.asc:
-                comparator = self.max_column_map.get(str(left_index.property.columns[0].type).lower())
-            else:
-                comparator = self.min_column_map.get(str(left_index.property.columns[0].type).lower())
+            comparator = self.max_column_map.get(str(left_index.property.columns[0].type).lower())
             left_index = sa.func.coalesce(left_index, comparator)
             lhs += (left_index,)
             rhs += (sort_index,)
@@ -110,7 +105,6 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             filter = lhs > rhs if direction == sa.asc else lhs < rhs
             cursor = cursor.filter(filter)
         query = cursor.order_by(direction(self.index_column)).limit(limit)
-        print(query)
         return query.all() if eager else query
 
     def _get_index_values(self, result):
@@ -131,7 +125,7 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
     if paginator.sort_column is not None:
         sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
-        if not sort_index and kwargs['sort_null_only']:
+        if not sort_index and kwargs['sort_null_only'] and paginator.sort_column[1] == sa.asc:
             sort_index = None
             query = query.filter(paginator.sort_column[0] == None)
             paginator.cursor = query

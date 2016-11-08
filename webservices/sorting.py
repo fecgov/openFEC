@@ -80,16 +80,9 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         join_columns=join_columns,
         query=query
     )
-
-    if not hide_null:
-        #to enable paging from non-null to nulls, nulls must come last.
-        null_order = sa.sql.expression.nullslast
-        sort_column = null_order(order(column))
-    else:
-        sort_column = order(column)
-
+    sort_column = order(column)
     if model and model.__name__ in ITEMIZED_MODELS:
-        query = query.order_by(sort_column, order(model.sub_id))
+        query = query.order_by(sort_column)
     else:
         query = query.order_by(sort_column)
 
@@ -97,7 +90,5 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         query = query.join(relationship)
     if hide_null:
         query = query.filter(column != None)  # noqa
-    if index_column:
-        query = query.order_by(order(index_column))
 
     return query, (column, order)
