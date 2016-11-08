@@ -142,3 +142,14 @@ class ScheduleAByStateRecipientTotals(BaseModel):
     state_full = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
     committee_type = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
+
+
+class ScheduleECandidateStateTotals(BaseModel):
+    __tablename__ = 'ofec_cand_state_totals_mv'
+
+    state_total = db.Column(db.Numeric(30, 2), index=True, doc='The calculated total.')
+    support_oppose_indicator = db.Column(db.Integer, index=True, doc='Number of records making up the total.')
+    cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
+    state = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
+    committee_type = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
+    candidate_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)

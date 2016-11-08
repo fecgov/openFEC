@@ -616,3 +616,12 @@ schedule_a_by_state_recipient_totals = {
         description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
     ),
 }
+
+schedule_e_candidate_state_totals = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'state': fields.List(IStr, description=docs.STATE_GENERIC),
+    'committee_type': fields.List(
+        IStr,
+        description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
+    ),
+}
