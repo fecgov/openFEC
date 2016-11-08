@@ -2,23 +2,23 @@ drop materialized view if exists ofec_cand_state_totals_mv_tmp;
 create materialized view ofec_cand_state_totals_mv_tmp as
 with records as (
     select
-        cmte_id,
-        s_o_cand_id as cand_id,
-        s_o_ind as support_oppose_indicator,
-        s_o_cand_office_st as candidate_state,
-        committee_type,
-        rpt_yr,
-        rpt_tp,
-        memo_cd,
-        exp_amt
+        sched_e.cmte_id,
+        sched_e.s_o_cand_id as cand_id,
+        sched_e.s_o_ind as support_oppose_indicator,
+        sched_e.s_o_cand_office_st as candidate_state,
+        cd.committee_type,
+        sched_e.rpt_yr,
+        sched_e.rpt_tp,
+        sched_e.memo_cd,
+        sched_e.exp_amt
     from
-        fec_vsum_sched_e
+        fec_vsum_sched_e as sched_e
     join
-        ofec_committee_detail_mv as cd
+        ofec_committee_detail_mv_tmp as cd
     on
-        cmte_id = cd.committee_id
+        (sched_e.cmte_id = cd.committee_id)
     where
-        candidate_state in (
+        sched_e.s_o_cand_office_st in (
             select
                 "Official USPS Code"
             from
@@ -43,11 +43,11 @@ with records as (
         f57.s_o_cand_id as cand_id,
         f57.s_o_ind as support_oppose_indicator,
         f57.s_o_cand_office_st as candidate_state,
-        committee_type,
+        cd.committee_type,
         f5.rpt_yr,
         f5.rpt_tp,
         null as memo_cd,
-        exp_amt
+        f57.exp_amt
     from
         fec_vsum_f57 f57
     join
@@ -55,11 +55,11 @@ with records as (
     on
         (f5.sub_id = f57.link_id)
     join
-        ofec_committee_detail_mv as cd
+        ofec_committee_detail_mv_tmp as cd
     on
-        f57.filer_cmte_id = cd.committee_id
+        (f57.filer_cmte_id = cd.committee_id)
     where
-        candidate_state in (
+        f57.s_o_cand_office_st in (
             select
                 "Official USPS Code"
             from
@@ -97,6 +97,8 @@ processed_records as (
         rpt_tp not in ('24', '48') and
         (memo_cd != 'X' or memo_cd is null)
     group by
+        cmte_id,
+        committee_type,
         candidate_state,
         cand_id,
         support_oppose_indicator,
@@ -109,10 +111,11 @@ totals as (
         committee_type,
         support_oppose_indicator,
         cycle,
-        cand_id
+        cand_id as candidate_id
     from
         processed_records
     group by
+        committee_type,
         candidate_state,
         cand_id,
         support_oppose_indicator,
@@ -136,4 +139,4 @@ create index on ofec_cand_state_totals_mv_tmp (state, idx);
 create index on ofec_cand_state_totals_mv_tmp (committee_type, idx);
 create index on ofec_cand_state_totals_mv_tmp (support_oppose_indicator, idx);
 create index on ofec_cand_state_totals_mv_tmp (cycle, idx);
-create index on ofec_cand_state_totals_mv_tmp (cand_id, idx);
+create index on ofec_cand_state_totals_mv_tmp (candidate_id, idx);
