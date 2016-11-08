@@ -37,11 +37,29 @@ def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
-    ("431", 1, 2, # With reclassification
-        [{'text': '52 U.S.C. 30101', 'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30101'}]),
-    ("9999", 1, 2, # No reclassification
+    ("431", 1, 2,    # With reclassification
+        [{'text': '52 U.S.C. 30101',
+          'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html'
+          '&title=52&section=30101'}]),
+    ("9999", 1, 2,
         [{'text': '2 U.S.C. 9999',
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]),
+    ("9993(c)(2)", 1, 2,
+        [{'text': '2 U.S.C. 9993(c)(2)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
+    ("9993(a)(4) formerly 438(a)(4)", 1, 2,
+        [{'text': '2 U.S.C. 9993(a)(4)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
+    ("9116(a)(2)(A), 9114(b) (formerly 441a(a)(2)(A), 434(b)), 30116(f) (formerly 441a(f))", 1, 2,
+        [{'text': '2 U.S.C. 9116(a)(2)(A)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9116'},
+        {'text': '2 U.S.C. 9114(b)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9114'},
+        {'text': '2 U.S.C. 30116(f)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=30116'}]),
+    ("9993(a)(4) (formerly 438(a)(4)", 1, 2,  # No matching ')' for (formerly
+        [{'text': '2 U.S.C. 9993(a)(4)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
 ])
 def test_parse_statutory_citations(test_input, case_id, entity_id, expected):
     assert parse_statutory_citations(test_input, case_id, entity_id) == expected
