@@ -65,3 +65,6 @@ data/subset.dump
 
 # Celery artifacts
 celerybeat-schedule
+
+# Credientials
+*.env.json
