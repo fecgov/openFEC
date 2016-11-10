@@ -1,0 +1,116 @@
+schema_version: "1.0.0" # 1.0.0 is the current opencontrol.yaml schema version
+name: betafec # Name of the project
+metadata:
+  description: "The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US President, Senate, and House of Representatives. BetaFEC is a collaboration between 18F and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users."
+  maintainers:
+    - lindsayn.young@gsa.gov
+    - carlo.costino@gsa.gov
+    - jonathan.carmack@gsa.gov
+    - noah.manger@gsa.gov
+    - anthony.garvan@gsa.gov
+    - radhakrishnan.vrajmohan@gsa.gov
+    - tadhg.ohiggins@gsa.gsa
+    - christine.cheung@gsa.gov
+# components: # A list of paths to components written in the opencontrol format for more information view: https://github.com/opencontrol/schemas
+#   - ./component-1
+# certifications: # An optional list of certifications for more information visit: https://github.com/opencontrol/schemas
+#   - ./cert-1.yaml
+# standards: # An optional list of standards for more information visit: https://github.com/opencontrol/schemas
+#   - ./standard-1.yaml
+# dependencies:
+certifications: # An optional list of certifications stored remotely
+- url: https://github.com/18F/GSA-Certifications
+  revision: master
+systems:  # An optional list of repos that contain an opencontrol.yaml stored remotely
+- url: https://github.com/18F/cg-compliance
+  revision: master
+standards:   # An optional list of remote repos containing standards info that contain an opencontrol.yaml
+- url: https://github.com/opencontrol/NIST-800-53-Standards
+  revision: master
+references:
+- name: New Relic Application Monitoring
+  path: https://newrelic.com/application-monitoring
+  type: URL
+- name: API Github
+  path: https://github.com/18F/openFEC
+  type: URL
+- name: Web app Github
+  path: https://github.com/18F/openFEC-web-app
+  type: URL
+- name: CMS Github
+  path: https://github.com/18F/fec-cms
+  type: URL
+- name: Regulations Github
+  path: https://github.com/18F/fec-eregs
+  type: URL
+- name: Style Github
+  path: https://github.com/18F/fec-style
+  type: URL
+- name: User Provided Service Documentation
+  path: https://docs.cloudfoundry.org/devguide/services/user-provided.html
+  type: URL
+- name: Code coverage
+  path: https://codecov.io
+  type: URL
+- name: Code hound
+  path: http://www.code-hound.com/
+  type: URL
+- name: OWASP's ZAP
+  path: https://www.owasp.org/index.php/OWASP_Zed_Attack_Proxy_Project
+  type: URL
+- name: gemnysium, Static Security Analysis
+  path: https://gemnasium.com/
+  type: URL
+verifications:
+- key: travis
+  name: openFEC Travis CI
+  path: https://travis-ci.org/18F/openFEC
+  type: URL
+- key: travis
+  name: openFEC-web-app Travis CI
+  path: https://travis-ci.org/18F/openFEC-web-app
+  type: URL
+- key: travis
+  name: fec-eregs Travis CI
+  path: https://travis-ci.org/18F/fec-eregs
+  type: URL
+- key: travis
+  name: fec-cms Travis CI
+  path: https://travis-ci.org/18F/fec-cms
+  type: URL
+- key: codeclimate
+  name: openFEC codeclimate
+  path: https://codeclimate.com/github/18F/openFEC
+  type: URL
+- key: codeclimate
+  name: openFEC-web-app codeclimate
+  path: https://codeclimate.com/github/18F/openFEC-web-app
+  type: URL
+- key: codeclimate
+  name: fec-eregs codeclimate
+  path: https://codeclimate.com/github/18F/fec-eregs
+  type: URL
+- key: codeclimate
+  name: fec-cms codeclimate
+  path: https://codeclimate.com/github/18F/fec-cms
+  type: URL
+- key: gemnasium
+  name: Project's Gemnasium Results
+  path: https://gemnasium.com/github.com/18F/calc
+  type: URL
+- key: gemnasium
+  name: openFEC gemnasium
+  path: https://gemnasium.com/github/18F/openFEC
+  type: URL
+- key: gemnasium
+  name: openFEC-web-app gemnasium
+  path: https://gemnasium.com/github/18F/openFEC-web-app
+  type: URL
+- key: gemnasium
+  name: fec-eregs gemnasium
+  path: https://gemnasium.com/github/18F/fec-eregs
+  type: URL
+- key: gemnasium
+  name: fec-cms gemnasium
+  path: https://gemnasium.com/github/18F/fec-cms
+  type: URL
