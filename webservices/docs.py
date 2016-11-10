@@ -511,6 +511,11 @@ itemized, if those contributions are not itemized, they will not be included in 
 state totals.
 '''
 
+STATE_AGGREGATE_RECIPIENT_TOTALS = STATE_AGGREGATE + '''
+These receipts are then added together by committee type for the total amount
+of each type, grouped by state and cycle.
+'''
+
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at https://api.data.gov/signup.
 '''
@@ -706,6 +711,11 @@ COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
         - Y party, qualified\n\
         - Z national party non-federal account\n\
 '
+COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
+        - all All Committee Types\n\
+        - all_candidates All Candidate Committee Types (H, S, P)\n\
+        - all_pacs All PAC Committee Types (N, O, Q, V, W)\n\
+'
 PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
         - N PAC - nonqualified\n\
         - O independent expenditure-only (super PACs)\n\
@@ -723,6 +733,7 @@ FIRST_FILE_DATE = 'The day the FEC received the committee\'s first filing. \
 This is usually a Form 1 committee registration.'
 LAST_FILE_DATE = 'The day the FEC received the committee\'s most recent filing'
 LAST_F1_DATE = 'The day the FEC received the committee\'s most recent Form 1'
+MEANS_FILED = 'The method used to file with the FEC, either electronic or on paper.'
 
 # schedules
 MEMO_CODE = "'X' indicates that the amount is NOT to be included in the itemization total."
