@@ -325,3 +325,8 @@ class EntityDisbursementsTotalsFactory(BaseFactory):
     class Meta:
         model = models.EntityDisbursementsTotals
     idx = factory.Sequence(lambda n: n)
+
+class ScheduleAByStateRecipientTotalsFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleAByStateRecipientTotals
+    idx = factory.Sequence(lambda n: n)

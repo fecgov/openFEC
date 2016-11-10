@@ -47,7 +47,9 @@ select
         report_year,
         com.committee_type,
         fh.form_type
-    ) as pdf_url
+    ) as pdf_url,
+    means_filed(begin_image_numeric) as means_filed,
+    report_fec_url(begin_image_numeric::text, fh.file_numeric::integer) as fec_url
 from vw_filing_history fh
 left join ofec_committee_history_mv_tmp com on fh.committee_id = com.committee_id and get_cycle(fh.report_year) = com.cycle
 left join ofec_candidate_history_mv_tmp cand on fh.committee_id = cand.candidate_id and get_cycle(fh.report_year) = cand.two_year_period

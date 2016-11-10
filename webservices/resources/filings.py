@@ -38,6 +38,10 @@ class BaseFilings(views.ApiResource):
         (('min_receipt_date', 'max_receipt_date'), models.Filings.receipt_date),
     ]
 
+    filter_match_fields = [
+        ('filer_type', models.Filings.means_filed),
+    ]
+
     @property
     def args(self):
         return utils.extend(
