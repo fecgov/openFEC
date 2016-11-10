@@ -23,13 +23,13 @@ class PdfMixin(object):
         return self.report_year and self.report_year >= 1993
 
 
-class CsvFecMixin(object):
-
+class CsvMixin(object):
     @property
     def csv_url(self):
         if self.file_number:
             return utils.make_csv_url(self.file_number)
 
+class FecMixin(object):
     @property
     def fec_url(self):
         if self.file_number:
@@ -60,7 +60,7 @@ class TreasurerMixin(object):
         return name
 
 
-class CommitteeReports(PdfMixin, CsvFecMixin, BaseModel):
+class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     __abstract__ = True
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -109,6 +109,8 @@ class CommitteeReports(PdfMixin, CsvFecMixin, BaseModel):
     individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))#P
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
+    means_filed = db.Column('means_filed', db.String, doc=docs.MEANS_FILED)
+    fec_url = db.Column(db.String)
 
     @property
     def document_description(self):
@@ -306,6 +308,8 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
     report_form = 'Form 5'
     is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column(db.Date, doc=docs.RECEIPT_DATE)
+    means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
+    fec_url = db.Column(db.String)
 
 
 class BaseFilingSummary(db.Model):
@@ -315,7 +319,7 @@ class BaseFilingSummary(db.Model):
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
-class BaseFiling(PdfMixin, CsvFecMixin, db.Model):
+class BaseFiling(PdfMixin, FecMixin, db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -333,6 +337,7 @@ class BaseFiling(PdfMixin, CsvFecMixin, db.Model):
     election_state = db.Column('el_state', db.String)
     receipt_date = db.Column('create_dt', db.Date, index=True)
     sign_date = db.Column(db.Date)
+
     @property
     def document_description(self):
         return utils.document_description(

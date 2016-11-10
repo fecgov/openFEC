@@ -5,7 +5,7 @@ from tests.common import ApiBaseTest
 
 from webservices import utils
 from webservices.rest import api
-from webservices.resources.totals import TotalsView
+from webservices.resources.totals import TotalsView, ScheduleAByStateRecipientTotalsView
 
 
 shared_fields = {
@@ -183,3 +183,266 @@ class TestTotals(ApiBaseTest):
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data.decode('utf-8'))
         self.assertIn('not found', data['message'].lower())
+
+    def test_sched_a_by_state_recipient_totals(self):
+        rows = [
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=50000,
+                count=10,
+                cycle=2008,
+                state='CA',
+                state_full='California',
+                committee_type='P',
+                committee_type_full='Presidential'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=10000,
+                count=5,
+                cycle=2010,
+                state='ND',
+                state_full='North Dakota',
+                committee_type='H',
+                committee_type_full='House'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=20000,
+                count=15,
+                cycle=2012,
+                state='NC',
+                state_full='North Carolina',
+                committee_type='S',
+                committee_type_full='Senate'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=90000,
+                count=4,
+                cycle=2014,
+                state='NY',
+                state_full='New York',
+                committee_type='U',
+                committee_type_full='single candidate independent expenditure'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=150000,
+                count=15,
+                cycle=2016,
+                state='TX',
+                state_full='Texas',
+                committee_type='',
+                committee_type_full='All'
+            ),
+        ]
+
+        response = self._results(
+            api.url_for(ScheduleAByStateRecipientTotalsView)
+        )
+
+        self.assertEqual(len(response), 5)
+        self.assertEqual(response[0]['total'], 50000)
+        self.assertEqual(response[0]['cycle'], 2008)
+        self.assertEqual(response[0]['state'], 'CA')
+        self.assertEqual(response[0]['committee_type'], 'P')
+        self.assertEqual(response[4]['total'], 150000)
+        self.assertEqual(response[4]['cycle'], 2016)
+        self.assertEqual(response[4]['state'], 'TX')
+        self.assertEqual(response[4]['committee_type'], '')
+
+    def test_sched_a_by_state_recipient_totals_sort_by_cycle(self):
+        rows = [
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=50000,
+                count=10,
+                cycle=2008,
+                state='CA',
+                state_full='California',
+                committee_type='P',
+                committee_type_full='Presidential'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=10000,
+                count=5,
+                cycle=2010,
+                state='ND',
+                state_full='North Dakota',
+                committee_type='H',
+                committee_type_full='House'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=20000,
+                count=15,
+                cycle=2012,
+                state='NC',
+                state_full='North Carolina',
+                committee_type='S',
+                committee_type_full='Senate'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=90000,
+                count=4,
+                cycle=2014,
+                state='NY',
+                state_full='New York',
+                committee_type='U',
+                committee_type_full='single candidate independent expenditure'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=150000,
+                count=15,
+                cycle=2016,
+                state='TX',
+                state_full='Texas',
+                committee_type='',
+                committee_type_full='All'
+            ),
+        ]
+
+        response = self._results(
+            api.url_for(
+                ScheduleAByStateRecipientTotalsView,
+                sort='-cycle'
+            )
+        )
+
+        self.assertEqual(len(response), 5)
+        self.assertEqual(response[0]['total'], 150000)
+        self.assertEqual(response[0]['cycle'], 2016)
+        self.assertEqual(response[0]['state'], 'TX')
+        self.assertEqual(response[0]['committee_type'], '')
+        self.assertEqual(response[4]['total'], 50000)
+        self.assertEqual(response[4]['cycle'], 2008)
+        self.assertEqual(response[4]['state'], 'CA')
+        self.assertEqual(response[4]['committee_type'], 'P')
+
+    def test_sched_a_by_state_recipient_totals_filter_by_committee_types(self):
+        rows = [
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=50000,
+                count=10,
+                cycle=2008,
+                state='CA',
+                state_full='California',
+                committee_type='P',
+                committee_type_full='Presidential'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=10000,
+                count=5,
+                cycle=2010,
+                state='ND',
+                state_full='North Dakota',
+                committee_type='H',
+                committee_type_full='House'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=20000,
+                count=15,
+                cycle=2012,
+                state='NC',
+                state_full='North Carolina',
+                committee_type='S',
+                committee_type_full='Senate'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=90000,
+                count=4,
+                cycle=2014,
+                state='NY',
+                state_full='New York',
+                committee_type='U',
+                committee_type_full='single candidate independent expenditure'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=150000,
+                count=15,
+                cycle=2016,
+                state='TX',
+                state_full='Texas',
+                committee_type='',
+                committee_type_full='All'
+            ),
+        ]
+
+        response = self._results(
+            api.url_for(
+                ScheduleAByStateRecipientTotalsView,
+                committee_type=['P', 'H', 'S',]
+            )
+        )
+
+        self.assertEqual(len(response), 3)
+        self.assertEqual(response[0]['total'], 50000)
+        self.assertEqual(response[0]['cycle'], 2008)
+        self.assertEqual(response[0]['state'], 'CA')
+        self.assertEqual(response[0]['committee_type'], 'P')
+
+        self.assertEqual(response[1]['total'], 10000)
+        self.assertEqual(response[1]['cycle'], 2010)
+        self.assertEqual(response[1]['state'], 'ND')
+        self.assertEqual(response[1]['committee_type'], 'H')
+
+        self.assertEqual(response[2]['total'], 20000)
+        self.assertEqual(response[2]['cycle'], 2012)
+        self.assertEqual(response[2]['state'], 'NC')
+        self.assertEqual(response[2]['committee_type'], 'S')
+
+    def test_sched_a_by_state_recipient_totals_filter_by_state(self):
+        rows = [
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=50000,
+                count=10,
+                cycle=2008,
+                state='CA',
+                state_full='California',
+                committee_type='P',
+                committee_type_full='Presidential'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=10000,
+                count=5,
+                cycle=2010,
+                state='ND',
+                state_full='North Dakota',
+                committee_type='H',
+                committee_type_full='House'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=20000,
+                count=15,
+                cycle=2012,
+                state='NC',
+                state_full='North Carolina',
+                committee_type='S',
+                committee_type_full='Senate'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=90000,
+                count=4,
+                cycle=2014,
+                state='NY',
+                state_full='New York',
+                committee_type='U',
+                committee_type_full='single candidate independent expenditure'
+            ),
+            factories.ScheduleAByStateRecipientTotalsFactory(
+                total=150000,
+                count=15,
+                cycle=2016,
+                state='TX',
+                state_full='Texas',
+                committee_type='',
+                committee_type_full='All'
+            ),
+        ]
+
+        response = self._results(
+            api.url_for(
+                ScheduleAByStateRecipientTotalsView,
+                state='NY'
+            )
+        )
+
+        self.assertEqual(len(response), 1)
+        self.assertEqual(response[0]['total'], 90000)
+        self.assertEqual(response[0]['cycle'], 2014)
+        self.assertEqual(response[0]['state'], 'NY')
+        self.assertEqual(response[0]['committee_type'], 'U')
