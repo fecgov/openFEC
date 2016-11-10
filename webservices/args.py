@@ -213,6 +213,10 @@ filings = {
     'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
     'form_type': fields.List(IStr, description='Form type'),
+    'filer_type': fields.Str(
+        validate=validate.OneOf(['e-file', 'paper']),
+        description=docs.MEANS_FILED,
+    ),
     'primary_general_indicator': fields.List(IStr, description='Primary, general or special election indicator'),
     'amendment_indicator': fields.List(
         IStr,
@@ -242,6 +246,10 @@ reports = {
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
     'is_amended': fields.Bool(description='Report has been amended'),
+    'filer_type': fields.Str(
+        validate=validate.OneOf(['e-file', 'paper']),
+        description=docs.MEANS_FILED,
+    ),
     'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
     'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
     'min_receipts_amount': Currency(description=docs.MIN_FILTER),
@@ -607,3 +615,12 @@ rad_analyst = {
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}
+
+schedule_a_by_state_recipient_totals = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'state': fields.List(IStr, description=docs.STATE_GENERIC),
+    'committee_type': fields.List(
+        IStr,
+        description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
+    ),
+}

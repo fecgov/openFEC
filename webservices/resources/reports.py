@@ -73,6 +73,12 @@ def get_range_filters():
     ]
     return filter_range_fields
 
+def get_match_filters():
+    filter_match_fields = [
+        ('filer_type', models.CommitteeReports.means_filed)
+    ]
+    return filter_match_fields
+
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -84,11 +90,6 @@ def get_range_filters():
     },
 )
 class ReportsView(utils.Resource):
-
-
-    filter_match = [
-        ('type', models.CommitteeHistory.committee_type)
-    ]
 
 
     @use_kwargs(args.paging)
@@ -139,7 +140,7 @@ class ReportsView(utils.Resource):
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
-
+        query = filters.filter_match(query, kwargs, get_match_filters())
         return query, reports_class, reports_schema
 
 
@@ -203,6 +204,7 @@ class CommitteeReportsView(utils.Resource):
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
+        query = filters.filter_match(query, kwargs, get_match_filters())
 
         return query, reports_class, reports_schema
 

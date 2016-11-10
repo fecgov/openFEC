@@ -130,3 +130,15 @@ class CommitteeTotalsIEOnly(BaseModel):
     coverage_end_date = db.Column(db.DateTime, doc=docs.COVERAGE_END_DATE)
     total_independent_contributions = db.Column(db.Numeric(30, 2))
     total_independent_expenditures = db.Column(db.Numeric(30, 2))
+
+
+class ScheduleAByStateRecipientTotals(BaseModel):
+    __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals_mv'
+
+    total = db.Column(db.Numeric(30, 2), index=True, doc='The calculated total.')
+    count = db.Column(db.Integer, index=True, doc='Number of records making up the total.')
+    cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
+    state = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
+    state_full = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
+    committee_type = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
+    committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)

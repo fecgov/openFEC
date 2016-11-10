@@ -86,7 +86,9 @@ select
     rpt_yr as report_year,
     most_recent_filing_flag like 'N' as is_amended,
     receipt_dt as receipt_date,
-    file_num as file_number
+    file_num as file_number,
+    means_filed(begin_image_num) as means_filed,
+    report_fec_url(begin_image_num::text, file_num::integer) as fec_url
 from
     fec_vsum_f3
 where
