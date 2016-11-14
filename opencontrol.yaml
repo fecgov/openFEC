@@ -114,9 +114,7 @@ verifications:
   name: fec-cms gemnasium
   path: https://gemnasium.com/github/18F/fec-cms
   type: URL
-    narrative:
-       - key: ""
-         text: ""
+  narrative:
   - standard_key: NIST-800-53
     control_key: AC-10
     - definition: """Organizations may define the maximum number of concurrent sessions for information system accounts globally, by account type (e.g., privileged user, non-privileged user, domain, specific application), by account, or a combination. For example, organizations may limit the number of concurrent sessions for system administrators or individuals working in particularly sensitive domains or mission-critical applications. This control addresses concurrent sessions for information system accounts and does not address concurrent sessions by single users via multiple system accounts."""
@@ -137,14 +135,14 @@ satisfies:
     control_key: AC-10
     narrative:
        - key: ""
-         text: ""
+         text: "We don't limit concurrent sessions."
     - implementation_statuses:
     - control_origins:
     - parameters:
         - key: "The key for a particular parameter of the specific control"
           text: "The parameter text for a particular parameter of a specific control"
     covered_by:
-      - verification_key: The specific verification ID that the reference links, no component or system is needed for internal references
+      - verification_key: The specific verification ID that the reference links no component or system is needed for internal references
       - system_key: System name of the verification (can link to other systems / components)
         component_key: System name of the verification (can link to other systems / components)
   - standard_key: NIST-800-53
@@ -169,28 +167,31 @@ satisfies:
     control_key: AC-2
     narrative:
        - key: ""
-         text: ""
+         text: "a. Only relevnet FEC and 18F team mebers have accounts to systems; b.  Assigns account managers for information system accounts are assigned in cloud.gov given access to the RDS boxes and given accounts for the cms; c. Only developers at 18F have access to the cloud.gov orgnization. Access to the CMS is limited to the 18F-FEC team. The RDS is confined to 18F-FEC DBAs and developers; d. see c e. Cloud.gov administrators and 18F FEC staff grant access to accounts. f. Managed by staff g. accounts can be seen in the respective system. h. 1. No atomatic notifications when accounts are not needed outside of cloud.gov. 2. No automatic notifications on accounts outside of cloud.gov 3. j. - k. - "
+# I don't know how to answer:
+# j.  Reviews accounts for compliance with account management requirements [Assignment: organization-defined frequency]; and
+# k.  Establishes a process for reissuing shared/group account credentials (if deployed) when individuals are removed from the group."
   - standard_key: NIST-800-53
 # ACCOUNT MANAGEMENT | SHARED / GROUP ACCOUNT CREDENTIAL TERMINATION
 # The information system terminates shared/group account credentials when members leave the group.
     control_key: AC-2 (10)
     narrative:
        - key: ""
-         text: ""
+         text: "Account management is be handled by cloud.gov, in the RDS databases, and by superuser accounts in the FEC cms."
   - standard_key: NIST-800-53
 # ACCOUNT MANAGEMENT | DISABLE INACTIVE ACCOUNTS
 # The information system automatically disables inactive accounts after [Assignment: organization-defined time period].
     control_key: AC-2 (3)
     narrative:
        - key: ""
-         text: ""
+         text: "Disabling interactive accounts is be handled automatically by cloud.gov. In the RDS databases and FEC cms by administrators and superuser accounts can manually do this."
   - standard_key: NIST-800-53
 # ACCOUNT MANAGEMENT | INACTIVITY LOGOUT
 #The organization requires that users log out when [Assignment: organization-defined time-period of expected inactivity or description of when to log out]. Related to: SC-23
     control_key: AC-2 (5)
     narrative:
        - key: ""
-         text: ""
+         text: "Cloud.gov has inactivity log out, the CMS and RDS boxes do not."
   - standard_key: NIST-800-53
 # ACCOUNT MANAGEMENT | ROLE-BASED SCHEMES
 # The organization:
@@ -202,7 +203,7 @@ satisfies:
 # Takes [Assignment: organization-defined actions] when privileged role assignments are no longer appropriate.
     control_key: AC-2 (7)
     narrative:
-       - key: ""
+       - key: "Privileges are set by cloud.gov for most things, 18F infrastructure manages the RDS boxes and  FEC and 18F staff control cms privileges."
          text: ""
   - standard_key: NIST-800-53
 # INFORMATION SHARING
@@ -212,7 +213,7 @@ satisfies:
       control_key: AC-21
     narrative:
        - key: ""
-         text: ""
+         text: ""# not sure how to answer this
   - standard_key: NIST-800-53
 # PUBLICLY ACCESSIBLE CONTENT
 # a.  Designates individuals authorized to post information onto a publicly accessible information system;
@@ -222,7 +223,7 @@ satisfies:
     control_key: AC-22
     narrative:
        - key: ""
-         text: ""
+         text: "a. Privileges are set by cloud.gov for most things, 18F infrastructure manages the RDS boxes and  FEC and 18F staff control cms privileges. b. -  c. Code and content are reviewed via pull request review and FEC content governance d. " # b - not sure how to answer
   - standard_key: NIST-800-53
 # INFORMATION FLOW ENFORCEMENT
 # The information system enforces approved authorizations for controlling the flow of information within the system and between interconnected systems based on [Assignment: organization-defined information flow control policies].
