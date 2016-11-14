@@ -83,7 +83,6 @@ class EFilings(CsvMixin, FecMixin, db.Model):
     amended_by = db.Column('superceded', db.BigInteger, doc=docs.AMENDED_BY)
     amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
     amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
-    fec_url = db.String(db.String)
     report = db.relationship(ReportType)
 
     @property
