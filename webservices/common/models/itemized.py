@@ -91,7 +91,6 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     pdf_url = db.Column(db.String)
-    load_date = db.Column('pg_date', db.DateTime)
 
 
 class ScheduleB(BaseItemized):
@@ -152,7 +151,6 @@ class ScheduleB(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_id = db.Column('back_ref_sched_id', db.String)
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
-    load_date = db.Column('pg_date', db.DateTime)
 
     pdf_url = db.Column(db.String)
 
@@ -434,7 +432,6 @@ class ScheduleF(PdfMixin,BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
-    load_date = db.Column('pg_date', db.DateTime)
 
 
     @property
