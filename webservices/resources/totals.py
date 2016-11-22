@@ -113,3 +113,38 @@ class ScheduleAByStateRecipientTotalsView(ApiResource):
     @property
     def index_column(self):
         return self.model.idx
+
+
+@doc(
+    tags=['receipts'],
+    description=(docs.STATE_AGGREGATE_RECIPIENT_TOTALS)
+)
+class ScheduleECandidateStateTotals(ApiResource):
+    model = models.ScheduleECandidateStateTotals
+    schema = schemas.ScheduleECandidateStateTotalsSchema
+    page_schema = schemas.ScheduleECandidateStateTotalsPageSchema
+
+    filter_multi_fields = [
+        ('cycle', models.ScheduleECandidateStateTotals.cycle),
+        ('state', models.ScheduleECandidateStateTotals.state),
+        ('committee_type', models.ScheduleECandidateStateTotals.committee_type),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.schedule_e_candidate_state_totals,
+            args.paging,
+            args.make_sort_args(
+                default='cycle',
+                validator=args.OptionValidator([
+                    'cycle',
+                    'state',
+                    'committee_type',
+                ]),
+            )
+        )
+
+    @property
+    def index_column(self):
+        return self.model.idx

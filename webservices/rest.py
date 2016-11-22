@@ -218,6 +218,7 @@ api.add_resource(candidate_aggregates.ScheduleAByStateCandidateView, '/schedules
 api.add_resource(candidate_aggregates.TotalsCandidateView, '/candidates/totals/')
 api.add_resource(committees.TotalsCommitteeHistoryView, '/committees/totals/')
 api.add_resource(totals.ScheduleAByStateRecipientTotalsView, '/schedules/schedule_a/by_state/totals/')
+api.add_resource(totals.ScheduleECandidateStateTotals, '/schedules/schedule_e/by_candidate/state_totals/')
 
 api.add_resource(
     aggregates.CommunicationCostByCandidateView,

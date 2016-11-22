@@ -72,5 +72,6 @@ def get_graph():
     ])
 
     graph.add_edge('committee_detail', 'sched_a_by_state_recipient_totals')
+    graph.add_edge('committee_detail', 'sched_e_by_candidate_state_totals')
 
     return graph
