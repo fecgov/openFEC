@@ -4,14 +4,15 @@ select
     row_number() over () as idx,
     cand.candidate_id as candidate_id,
     cand.name as candidate_name,
-    fh.committee_id as committee_id,
+    --verify that cand_cmte_id is indeed just candidate's committee id--
+    filing_history.cand_cmte_id as committee_id,
     com.name as committee_name,
     sub_id,
     coverage_start_date,
     coverage_end_date,
     receipt_date,
     election_year,
-    fh.form_type,
+    filing_history.form_tp as form_type,
     report_year,
     get_cycle(report_year) as cycle,
     report_type,
@@ -34,7 +35,7 @@ select
     house_personal_funds,
     senate_personal_funds,
     opposition_personal_funds,
-    fh.treasurer_name,
+    filing_history.tres_nm as treasurer_name,
     file_numeric as file_number,
     previous_file_numeric as previous_file_number,
     report.rpt_tp_desc as report_type_full,
@@ -46,14 +47,14 @@ select
         begin_image_numeric,
         report_year,
         com.committee_type,
-        fh.form_type
+        filing_history.form_tp
     ) as pdf_url,
     means_filed(begin_image_numeric) as means_filed,
-    report_fec_url(begin_image_numeric::text, fh.file_numeric::integer) as fec_url
-from vw_filing_history fh
-left join ofec_committee_history_mv_tmp com on fh.committee_id = com.committee_id and get_cycle(fh.report_year) = com.cycle
-left join ofec_candidate_history_mv_tmp cand on fh.committee_id = cand.candidate_id and get_cycle(fh.report_year) = cand.two_year_period
-left join dimreporttype report on fh.report_type = report.rpt_tp
+    report_fec_url(begin_image_numeric::text, filing_history.file_num::integer) as fec_url
+from disclosure.f_rpt_or_form_sub filing_history
+left join ofec_committee_history_mv_tmp com on filing_history.cand_cmte_id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
+left join ofec_candidate_history_mv_tmp cand on filing_history.cand_cmte_id = cand.candidate_id and get_cycle(filing_history.rpt_yr) = cand.two_year_period
+left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
 where report_year >= :START_YEAR
 ;
 

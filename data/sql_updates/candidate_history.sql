@@ -54,7 +54,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_office_district as district,
     fec_yr.cand_office_district::int as district_number,
     fec_yr.cand_pty_affiliation as party,
-    clean_party(dp.party_affiliation_desc) as party_full,
+    clean_party(ref_party.pty_desc) as party_full,
     cycles.cycles,
     elections.election_years,
     elections.election_districts,
@@ -65,7 +65,7 @@ left join elections using (cand_id)
 left join cand_inactive inactive on
     fec_yr.cand_id = inactive.cand_id and
     fec_yr.fec_election_yr < inactive.election_yr
-inner join dimparty dp on fec_yr.cand_pty_affiliation = dp.party_affiliation
+inner join staging.ref_pty ref_party on fec_yr.cand_pty_affiliation = ref_party.pty_cd
 where max_cycle >= :START_YEAR
 ;
 
