@@ -11,6 +11,7 @@ class RadAnalyst(db.Model):
     committee_id = db.Column(db.String, primary_key=True, index=True, doc=docs.COMMITTEE_ID)
     committee_name = db.Column(db.String(100), index=True, doc=docs.COMMITTEE_NAME)
     analyst_id = db.Column(db.Numeric(38, 0), index=True, doc='ID of RAD analyst.')
+    analyst_short_id = db.Column(db.Numeric(4, 0), doc='Short ID of RAD analyst.')
     first_name = db.Column(db.String(255), index=True, doc='Fist name of RAD analyst')
     last_name = db.Column(db.String(100), index=True, doc='Last name of RAD analyst')
     telephone_ext = db.Column(db.Numeric(4, 0), index=True, doc='Telephone extension of RAD analyst')
