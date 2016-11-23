@@ -35,7 +35,7 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     f1.org_tp as organization_type,
     expand_organization_type(f1.org_tp) as organization_type_full,
     --verify, but this column is gone now
-    --f1.expire_date as expire_date,
+    null as expire_date,
     -- Address
     fec_yr.cmte_st1 as street_1,
     fec_yr.cmte_st2 as street_2,
