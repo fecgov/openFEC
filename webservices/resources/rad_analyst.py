@@ -24,6 +24,7 @@ class RadAnalystView(ApiResource):
 
     filter_multi_fields = [
         ('analyst_id', model.analyst_id),
+        ('analyst_short_id', model.analyst_short_id),
         ('telephone_ext', model.telephone_ext),
         ('committee_id', model.committee_id),
     ]
