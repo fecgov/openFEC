@@ -1,9 +1,8 @@
-import csv
 import logging
 logger = logging.getLogger(__name__)
 
 
-def reclassify_pre2012_citation(title, section, archived_mur_citation_map={}):
+def reclassify_pre2012_citation(title, section):
     """
     MURs have citations referring to old USC Titles that were remapped in 2012.
     We link to the current laws based on the original citations.
