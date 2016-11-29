@@ -8,7 +8,7 @@ from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
 
-from .reclassify_statutory_citation import reclassify_pre2012_citation
+from .reclassify_statutory_citation import reclassify_current_mur_statutory_citation
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +171,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
         statutory_citation = remove_reclassification_notes(statutory_citation)
         for citation in re.finditer('(\d|\()+[^;, ]*', statutory_citation):
             match = STATUTE_REGEX.match(citation.group())
-            title, section = reclassify_pre2012_citation('2', match.group('section'))
+            title, section = reclassify_current_mur_statutory_citation(match.group('section'))
             url = 'https://api.fdsys.gov/link?' +\
                 urlencode([
                     ('collection', 'uscode'),

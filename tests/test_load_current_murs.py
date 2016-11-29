@@ -41,6 +41,9 @@ def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
         [{'text': '52 U.S.C. 30101',
           'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html'
           '&title=52&section=30101'}]),
+    ("30116", 1, 2,  # Already reclassified
+        [{'text': '52 U.S.C. 30116',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30116'}]),
     ("9999", 1, 2,
         [{'text': '2 U.S.C. 9999',
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]),
@@ -55,8 +58,8 @@ def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9116'},
         {'text': '2 U.S.C. 9114(b)',
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9114'},
-        {'text': '2 U.S.C. 30116(f)',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=30116'}]),
+        {'text': '52 U.S.C. 30116(f)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30116'}]),
     ("9993(a)(4) (formerly 438(a)(4)", 1, 2,  # No matching ')' for (formerly
         [{'text': '2 U.S.C. 9993(a)(4)',
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
