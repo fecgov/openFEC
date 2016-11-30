@@ -131,19 +131,15 @@ class TestEfileFiles(ApiBaseTest):
             factories.EFilingsFactory(committee_id='C012', beginning_image_number=4, receipt_date=datetime.date(2014, 1, 1)),
             factories.EFilingsFactory(committee_id='C013', beginning_image_number=5, receipt_date=datetime.date(2015, 1, 1)),
         ]
-        # print(factories.EFilingsFactory(committee_id='C013', receipt_date=datetime.date(2015, 1, 1)).__dict__)
+
         min_date = datetime.date(2013, 1, 1)
         r = self._results(api.url_for(EFilingsView))
-        # print(r)
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date))
-        print(results)
         self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
         max_date = datetime.date(2014, 1, 1)
         results = self._results(api.url_for(EFilingsView, max_receipt_date=max_date))
-        print(results)
         self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
         results = self._results(api.url_for(EFilingsView, min_receipt_date=min_date, max_receipt_date=max_date))
-        print(results)
         self.assertTrue(
             all(
                 each for each in results
