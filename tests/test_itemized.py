@@ -249,7 +249,54 @@ class TestItemized(ApiBaseTest):
         )
 
     def test_null_pagination_with_null_sort_column_values_ascending(self):
-        pass
+        filings = [
+            factories.ScheduleAFactory(contribution_receipt_date=None)
+            # this range should ensure the page has a null transition
+            for _ in range(10)
+            ]
+        filings = filings + [
+            factories.ScheduleAFactory(
+                contribution_receipt_date=datetime.date(2016, 1, 1)
+            )
+            for _ in range(15)
+            ]
+
+        page1 = self._results(api.url_for(
+            ScheduleAView,
+            sort='contribution_receipt_date',
+            sort_reverse_nulls='true'
+        ))
+
+        self.assertEqual(len(page1), 20)
+
+        top_reversed_from_middle = filings[10::]
+        reversed_from_bottom_to_middle = filings[0:5:]
+        top_reversed_from_middle.extend(reversed_from_bottom_to_middle)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in top_reversed_from_middle],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page1],
+            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in
+             top_reversed_from_middle]
+        )
+        page2 = self._results(api.url_for(
+            ScheduleAView,
+            last_index=page1[-1]['sub_id'],
+            sort_null_only=True,
+            sort='contribution_receipt_date',
+        ))
+        self.assertEqual(len(page2), 5)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[5:10:]],
+        )
+        self.assertEqual(
+            [each['contribution_receipt_date'] for each in page2],
+            [each.contribution_receipt_date.strftime('%Y-%m-%d') if each.contribution_receipt_date else None for each in
+             filings[5:10:]]
+        )
 
     def test_pagination_with_null_sort_column_parameter(self):
         response = self.app.get(
