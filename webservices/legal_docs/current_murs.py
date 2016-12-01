@@ -185,8 +185,8 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
                 match_text = statutory_citation[match.start():]
             else:
                 match_text = statutory_citation[match.start():matches[index + 1].start()]
-            text = '%s U.S.C. %s' % (orig_title, match_text.rstrip(' ,;'))
-            citations.append({'text': text, 'url': url})
+            text = match_text.rstrip(' ,;')
+            citations.append({'text': text, 'type': 'statute', 'title': orig_title,  'url': url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
                     statutory_citation, entity_id, case_id)
@@ -204,8 +204,8 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
                 match_text = regulatory_citation[match.start():]
             else:
                 match_text = regulatory_citation[match.start():matches[index + 1].start()]
-            text = '11 C.F.R. %s' % match_text.rstrip(' ,;')
-            citations.append({'text': text, 'url': url})
+            text = match_text.rstrip(' ,;')
+            citations.append({'text': text, 'type': 'regulation', 'title': '11',  'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)
