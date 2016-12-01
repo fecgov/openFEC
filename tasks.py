@@ -26,8 +26,6 @@ EXCLUDE_TABLES = [
     'dimcandproperties',
     'f_rpt_or_form_sub',
     'f_item_receipt_or_exp',
-    #'staging.ref_pty',
-    #'staging.ref_rpt_tp',
 ]
 # Include records used in integration tests
 FORCE_INCLUDE = [
