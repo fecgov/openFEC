@@ -4,7 +4,6 @@ select
     row_number() over () as idx,
     cand.candidate_id as candidate_id,
     cand.name as candidate_name,
-    --verify that cand_cmte_id is indeed just candidate's committee id--
     filing_history.cand_cmte_id as committee_id,
     com.name as committee_name,
     sub_id,
