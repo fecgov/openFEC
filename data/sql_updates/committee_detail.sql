@@ -13,7 +13,6 @@ create index on ofec_committee_detail_mv_tmp(party);
 create index on ofec_committee_detail_mv_tmp(state);
 create index on ofec_committee_detail_mv_tmp(party_full);
 create index on ofec_committee_detail_mv_tmp(designation);
-create index on ofec_committee_detail_mv_tmp(expire_date);
 create index on ofec_committee_detail_mv_tmp(committee_id);
 create index on ofec_committee_detail_mv_tmp(committee_type);
 create index on ofec_committee_detail_mv_tmp(last_file_date);
