@@ -399,13 +399,16 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
             )''',
         foreign_keys=file_number,
         uselist=True,
+        lazy='subquery',
     )
 
     @declared_attr
     def report(self):
         return db.relationship(ReportType,
                                primaryjoin="and_(BaseF3PFiling.report_type==ReportType.report_type)",
-                               foreign_keys=self.report_type,)
+                               foreign_keys=self.report_type,
+                               lazy='subquery',
+        )
 
 
 
@@ -451,13 +454,17 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
             )''',
         foreign_keys=file_number,
         uselist=True,
+        lazy='subquery',
     )
 
     @declared_attr
     def report(self):
-        return db.relationship(ReportType,
-                               primaryjoin="and_(BaseF3Filing.report_type==ReportType.report_type)",
-                               foreign_keys=self.report_type, )
+        return db.relationship(
+            ReportType,
+            primaryjoin="and_(BaseF3Filing.report_type==ReportType.report_type)",
+            foreign_keys=self.report_type,
+            lazy='subquery',
+        )
 
 class BaseF3XFiling(BaseFiling):
     __tablename__ = 'real_efile_f3x'
@@ -476,10 +483,14 @@ class BaseF3XFiling(BaseFiling):
             )''',
         foreign_keys=file_number,
         uselist=True,
+        lazy='subquery',
     )
 
     @declared_attr
     def report(self):
-        return db.relationship(ReportType,
-                               primaryjoin="and_(BaseF3XFiling.report_type==ReportType.report_type)",
-                               foreign_keys=self.report_type, )
+        return db.relationship(
+            ReportType,
+            primaryjoin="and_(BaseF3XFiling.report_type==ReportType.report_type)",
+            foreign_keys=self.report_type,
+            lazy='subquery',
+        )
