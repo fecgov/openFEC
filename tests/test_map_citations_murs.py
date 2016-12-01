@@ -15,14 +15,12 @@ class TestRemapCitations(unittest.TestCase):
         dict that the raw elasticsearch-py would return."""
         return dict(id=result['id'], _source=result)
 
-
     @mock.patch('webservices.utils.get_elasticsearch_connection')
     @mock.patch('elasticsearch.helpers.scan')
     @mock.patch('elasticsearch.helpers.bulk')
     def test_citations(self, mock_bulk, mock_scan, mock_get_elasticsearch_connection):
         es_mock = mock.Mock()
         mock_get_elasticsearch_connection.return_value = es_mock
-
 
         # Should be unchanged
         regulations_citations = [dict(text="11 C.F.R. 6.1", url="/regulations/6-1/CURRENT")]
@@ -88,19 +86,19 @@ class TestRemapCitations(unittest.TestCase):
 
 class TestGetCitations(unittest.TestCase):
 
-    def test_reclassify_pre2012_citation(self):
+    def test_reclassify_archived_mur_statutory_citation(self):
         # spot check a few cases from the csv
-        assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '431') == ('52', '30101')
-        assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '437g') == ('52', '30109')
-        assert reclassify_statutory_citation.reclassify_pre2012_citation('2', '441a-1') == ('52', '30117')
+        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('2', '431') == ('52', '30101')
+        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('2', '437g') == ('52', '30109')
+        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('2', '441a-1') == ('52', '30117')
 
         # and a fallback
-        assert reclassify_statutory_citation.reclassify_pre2012_citation('99', '12345') == ('99', '12345')
+        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('99', '12345') == ('99', '12345')
 
 
-    @mock.patch.object(reclassify_statutory_citation, 'reclassify_pre2012_citation')
-    def test_get_citations_statute(self, reclassify_pre2012_citation):
-        reclassify_pre2012_citation.return_value = ('99', '31999')
+    @mock.patch.object(reclassify_statutory_citation, 'reclassify_archived_mur_statutory_citation')
+    def test_get_citations_statute(self, reclassify_archived_mur_statutory_citation):
+        reclassify_archived_mur_statutory_citation.return_value = ('99', '31999')
         citation_text = [
             '2 U.S.C. 23',
             '2 U.S.C. 23a',
@@ -121,7 +119,7 @@ class TestGetCitations(unittest.TestCase):
         us_code = citations['us_code']
 
         assert len(us_code) == len(expected_calls)
-        assert reclassify_pre2012_citation.call_args_list == expected_calls
+        assert reclassify_archived_mur_statutory_citation.call_args_list == expected_calls
 
         assert us_code[0]['text'] == '99 U.S.C. 31999'
         assert us_code[1]['text'] == '99 U.S.C. 31999'
