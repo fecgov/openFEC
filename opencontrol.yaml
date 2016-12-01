@@ -141,7 +141,7 @@ satisfies:
  control_key: AC-2
  narrative:
   - key: ""
-    text: "a. Only relevnet FEC and 18F team mebers have accounts to systems; b.  Assigns account managers for information system accounts are assigned in cloud.gov given access to the RDS boxes and given accounts for the cms; c. Only developers at 18F have access to the cloud.gov orgnization. Access to the CMS is limited to the 18F-FEC team. The RDS is confined to 18F-FEC DBAs and developers; d. see c e. Cloud.gov administrators and 18F FEC staff grant access to accounts. f. Managed by staff g. accounts can be seen in the respective system. h. 1. No atomatic notifications when accounts are not needed outside of cloud.gov. 2. No automatic notifications on accounts outside of cloud.gov 3. j. - k. - "
+    text: "a. Only relevnet FEC and 18F team mebers have accounts to systems; b.  Assigns account managers for information system accounts are assigned in cloud.gov given access to the RDS boxes and given accounts for the CMS; c. Only developers at 18F have access to the cloud.gov orgnization. Access to the CMS is limited to the 18F-FEC team. The RDS is confined to 18F-FEC DBAs and developers; d. see c e. Cloud.gov administrators and 18F FEC staff grant access to accounts. f. Managed by staff g. accounts can be seen in the respective system. h. 1. No atomatic notifications when accounts are not needed outside of cloud.gov. 2. No automatic notifications on accounts outside of cloud.gov 3. j. - k. - "
     # I don't know how to answer:
     # j.  Reviews accounts for compliance with account management requirements [Assignment: organization-defined frequency]; and
     # k.  Establishes a process for reissuing shared/group account credentials (if deployed) when individuals are removed from the group."
@@ -152,7 +152,7 @@ satisfies:
  control_key: AC-2 (10)
  narrative:
   - key: ""
-    text: "Account management is be handled by cloud.gov in the RDS databases and by superuser accounts in the FEC cms."
+    text: "Account management is be handled by cloud.gov in the RDS databases and by superuser accounts in the FEC CMS."
 -
  standard_key: NIST-800-53
     # ACCOUNT MANAGEMENT | DISABLE INACTIVE ACCOUNTS
@@ -160,7 +160,7 @@ satisfies:
  control_key: AC-2 (3)
  narrative:
   - key: ""
-    text: "Disabling interactive accounts is be handled automatically by cloud.gov. In the RDS databases and FEC cms by administrators and superuser accounts can manually do this."
+    text: "Disabling interactive accounts is be handled automatically by cloud.gov. In the RDS databases and FEC CMS by administrators and superuser accounts can manually do this."
 -
  standard_key: NIST-800-53
     # ACCOUNT MANAGEMENT | INACTIVITY LOGOUT
@@ -168,7 +168,7 @@ satisfies:
  control_key: AC-2 (5)
  narrative:
   - key: ""
-    text: "Cloud.gov has inactivity log out the CMS and RDS boxes do not."
+    text: "Cloud.gov will log out users duw to inactivity. The RDS boxes use Amazon's log out system. The CMS does not do this."
 -
  standard_key: NIST-800-53
     # ACCOUNT MANAGEMENT | ROLE-BASED SCHEMES
@@ -181,7 +181,7 @@ satisfies:
     # Takes [Assignment: organization-defined actions] when privileged role assignments are no longer appropriate.
  control_key: AC-2 (7)
  narrative:
-  - key: "Privileges are set by cloud.gov for most things 18F infrastructure manages the RDS boxes and  FEC and 18F staff control cms privileges."
+  - key: "Privileges are set by cloud.gov for most things 18F infrastructure manages the RDS boxes and FEC and 18F staff control CMS privileges."
     text: ""
 -
  standard_key: NIST-800-53
@@ -203,7 +203,7 @@ satisfies:
  control_key: AC-22
  narrative:
   - key: ""
-    text: "a. Privileges are set by cloud.gov for most things, 18F infrastructure manages the RDS boxes and  FEC and 18F staff control cms privileges. b. GSA and FEC employees are trained aobut PII through their respective agencies  c. Code and content are reviewed via pull request review and FEC content governance d. " # 
+    text: "a. Privileges are set by cloud.gov for most things, 18F infrastructure manages the RDS boxes and  FEC and 18F staff control CMS privileges. b. GSA and FEC employees are trained aobut PII through their respective agencies  c. Code and content are reviewed via pull request review and FEC content governance d. " #
 -
  standard_key: NIST-800-53
     # INFORMATION FLOW ENFORCEMENT
@@ -267,7 +267,7 @@ satisfies:
     control_key: AU-6 (3)
     narrative:
        - key: ""
-         text: "Errors are discussed in slack with relevant parties as they are bing resolved."
+         text: "Errors are discussed in slack with relevant parties as they are being resolved."
   - standard_key: NIST-800-53
 # AUDIT REDUCTION AND REPORT GENERATION | AUTOMATIC PROCESSING
 # The information system provides the capability to process audit records for events of interest based on [Assignment: organization-defined audit fields within audit records].
@@ -312,7 +312,7 @@ satisfies:
     control_key: IA-2 (1)
     narrative:
        - key: ""
-         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control cms access."
+         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control CMS access."
   - standard_key: NIST-800-53
 # IDENTIFICATION AND AUTHENTICATION (ORGANIZATIONAL USERS) | REMOTE ACCESS - SEPARATE DEVICE
 # The information system implements multifactor authentication for remote access to privileged and non-privileged accounts such that one of the factors is provided by a device separate from the system gaining access and the device meets [Assignment: organization-defined strength of mechanism requirements].
@@ -320,7 +320,7 @@ satisfies:
     control_key: IA-2 (11)
     narrative:
        - key: ""
-         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control cms access."
+         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control CMS access."
   - standard_key: NIST-800-53
 # IDENTIFICATION AND AUTHENTICATION (ORGANIZATIONAL USERS) | ACCEPTANCE OF PIV CREDENTIALS
 # The information system accepts and electronically verifies Personal Identity Verification (PIV) credentials.
@@ -335,7 +335,7 @@ satisfies:
     control_key: IA-2 (2)
     narrative:
        - key: ""
-         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control cms access."
+         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control CMS access."
   - standard_key: NIST-800-53
 # IDENTIFIER MANAGEMENT
 # a.  Receiving authorization from [Assignment: organization-defined personnel or roles] to assign an individual, group, role, or device identifier;
@@ -363,7 +363,7 @@ satisfies:
     control_key: IA-5
     narrative:
        - key: ""
-         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control cms access."
+         text: "Access to applications is set by cloud.gov, 18F infrastructure manages the RDS boxes and FEC and 18F staff control CMS access."
   - standard_key: NIST-800-53
 # AUTHENTICATOR MANAGEMENT | PASSWORD-BASED AUTHENTICATION
 # The information system, for password-based authentication:
@@ -382,7 +382,7 @@ satisfies:
     control_key: IA-5 (1)
     narrative:
        - key: ""
-         text: "Cloud.gov and Amazon handle authentication for the respective systems. For the CMS, Django provides password storage system and uses PBKDF2 by default. (a) Adding a complexity check for cms users (b) Adding a complexity check for cms users (c) CMS Uses Django password storage protections (d) CMS uses Django password storage protections (e) Password reuse is prohibited by cloud.gov and Amazon, not cms (f) Temporary password for system logons with an immediate change to a permanent password on the system level with cloud.gov and Amazon, not cms"
+         text: "Cloud.gov and Amazon handle authentication for the respective systems. For the CMS, Django provides password storage system and uses PBKDF2 by default. (a) Adding a complexity check for CMS users (b) Adding a complexity check for CMS users (c) CMS Uses Django password storage protections (d) CMS uses Django password storage protections (e) Password reuse is prohibited by cloud.gov and Amazon, not CMS (f) Temporary password for system logons with an immediate change to a permanent password on the system level with cloud.gov and Amazon, not CMS"
   - standard_key: NIST-800-53
 # AUTHENTICATOR MANAGEMENT | HARDWARE TOKEN-BASED AUTHENTICATION
 # The information system, for hardware token-based authentication, employs mechanisms that satisfy [Assignment: organization-defined token quality requirements].
@@ -421,7 +421,7 @@ satisfies:
     control_key: IA-5 (4)
     narrative:
        - key: ""
-         text: "Cloud.gov and Amazon handle authentication for the respective systems. For the CMS, ading a complexity check for cms users."
+         text: "Cloud.gov and Amazon handle authentication for the respective systems. For the CMS, ading a complexity check for CMS users."
   - standard_key: NIST-800-53
 # AUTHENTICATOR MANAGEMENT | PROTECTION OF AUTHENTICATORS
 # The organization protects authenticators commensurate with the security category of the information to which use of the authenticator permits access.
