@@ -76,8 +76,8 @@ def reclassify_current_mur_statutory_citation(section):
     if mapped_section:
         logger.info('Mapping current MUR statute citation %s -> %s',
                     section, (MAPPED_TITLE, mapped_section))
-        return MAPPED_TITLE, mapped_section
+        return ORIGINAL_TITLE, MAPPED_TITLE, mapped_section
     elif RECLASSIFIED_STATUTE_SECTION_REGEX.match(section):
-        return MAPPED_TITLE, section
+        return MAPPED_TITLE, MAPPED_TITLE, section
     else:
-        return ORIGINAL_TITLE, section
+        return ORIGINAL_TITLE, ORIGINAL_TITLE, section
