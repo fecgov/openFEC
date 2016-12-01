@@ -10,8 +10,7 @@ from webservices.env import env
 
 DEFAULT_FRACTION = 0.5
 FULL_TABLES = [
-    'dimdates',
-    'dimparty',
+    'staging.pty_desc',
     'dimreporttype',
     'cand_inactive',
 ]
