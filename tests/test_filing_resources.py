@@ -28,13 +28,14 @@ class TestFilerResources(ApiBaseTest):
             factories.RadAnalystFactory(telephone_ext=123, committee_id='C0001'),
             factories.RadAnalystFactory(telephone_ext=456, committee_id='C0002'),
             factories.RadAnalystFactory(analyst_id=789, committee_id='C0003'),
-            factories.RadAnalystFactory(analyst_id=1011, committee_id='C0004'),
+            factories.RadAnalystFactory(analyst_id=1011, analyst_short_id=11, committee_id='C0004'),
         ]
 
         filter_fields = (
             ('committee_id', 'C0002'),
             ('telephone_ext', 123),
-            ('analyst_id', 789)
+            ('analyst_id', 789),
+            ('analyst_short_id', 11),
         )
 
         # checking one example from each field
