@@ -79,8 +79,8 @@ WHERE case_id = %s
 ORDER BY vote_date desc;
 """
 
-STATUTE_REGEX = re.compile(r'(?P<section>\d+([a-z](-1)?)?)?(?P<subsection>.*)?')
-REGULATION_REGEX = re.compile('(?P<part>\d+)?(\.(?P<section>\d+))?(?P<subsection>.*)?')
+STATUTE_REGEX = re.compile(r'(?<!\()(?P<section>\d+([a-z](-1)?)?)')
+REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 
 def load_current_murs():
     es = get_elasticsearch_connection()
@@ -169,18 +169,23 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
     citations = []
     if statutory_citation:
         statutory_citation = remove_reclassification_notes(statutory_citation)
-        for citation in re.finditer('(\d|\()+[^;, ]*', statutory_citation):
-            match = STATUTE_REGEX.match(citation.group())
-            title, section = reclassify_current_mur_statutory_citation(match.group('section'))
+        matches = list(STATUTE_REGEX.finditer(statutory_citation))
+        for index, match in enumerate(matches):
+            section = match.group('section')
+            orig_title, new_title, new_section = reclassify_current_mur_statutory_citation(section)
             url = 'https://api.fdsys.gov/link?' +\
                 urlencode([
                     ('collection', 'uscode'),
                     ('year', 'mostrecent'),
                     ('link-type', 'html'),
-                    ('title', title),
-                    ('section', section)
+                    ('title', new_title),
+                    ('section', new_section)
                 ])
-            text = '%s U.S.C. %s%s' % (title, section, match.group('subsection'))
+            if index == len(matches) - 1:
+                match_text = statutory_citation[match.start():]
+            else:
+                match_text = statutory_citation[match.start():matches[index + 1].start()]
+            text = '%s U.S.C. %s' % (orig_title, match_text.rstrip(' ,;'))
             citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
@@ -190,33 +195,17 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
 def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
-        last_part = None
-        last_section = None
-        for citation in re.finditer('(\d|\()+[^;, ]*', regulatory_citation):
-            match = REGULATION_REGEX.match(citation.group())
-            if match:
-                if match.group('part'):
-                    part = match.group('part')
-                    last_part = part
-                elif last_part:
-                    part = last_part
-                else:
-                    break
-                if match.group('section'):
-                    section = match.group('section')
-                    last_section = section
-                elif last_section:
-                    section = last_section
-                else:
-                    section = None
-                    last_section = None
-                url = create_eregs_link(part, section)
-                text = '11 C.F.R. %s' % part
-                if section:
-                    text += '.%s' % section
-                if match.group('subsection'):
-                    text += match.group('subsection')
-                citations.append({'text': text, 'url': url})
+        matches = list(REGULATION_REGEX.finditer(regulatory_citation))
+        for index, match in enumerate(matches):
+            part = match.group('part')
+            section = match.group('section')
+            url = create_eregs_link(part, section)
+            if index == len(matches) - 1:
+                match_text = regulatory_citation[match.start():]
+            else:
+                match_text = regulatory_citation[match.start():matches[index + 1].start()]
+            text = '11 C.F.R. %s' % match_text.rstrip(' ,;')
+            citations.append({'text': text, 'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)
@@ -263,7 +252,7 @@ def remove_reclassification_notes(statutory_citation):
         while pos < len(citation):
             if citation[pos] == ')':
                 if paren_count == 0:
-                    return citation[:match.start()] + citation[pos:]
+                    return citation[:match.start()] + citation[pos + 1:]
                 else:
                     paren_count -= 1
             elif citation[pos] == '(':
