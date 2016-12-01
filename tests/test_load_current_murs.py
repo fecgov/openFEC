@@ -41,6 +41,9 @@ def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     ("30116", 1, 2,  # Already reclassified
         [{'text': '52 U.S.C. 30116',
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30116'}]),
+    ("434(a)(11)", 1, 2,
+        [{'text': '2 U.S.C. 434(a)(11)',
+        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30104'}]),
     ("9999", 1, 2,
         [{'text': '2 U.S.C. 9999',
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]),
