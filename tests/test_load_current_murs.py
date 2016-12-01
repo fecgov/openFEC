@@ -21,10 +21,7 @@ from tests.common import TEST_CONN, BaseTestCase
     ("114.5(a)(3)-(5)", 1, 2,
         [{'text': '11 C.F.R. 114.5(a)(3)-(5)', 'url': '/regulations/114-5/CURRENT'}]),
     ("102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)", 1, 2,
-        [{'text': '11 C.F.R. 102.17(a)(l)(i)', 'url': '/regulations/102-17/CURRENT'},
-         {'text': '11 C.F.R. 102.17(b)(l)', 'url': '/regulations/102-17/CURRENT'},
-         {'text': '11 C.F.R. 102.17(b)(2)', 'url': '/regulations/102-17/CURRENT'},
-         {'text': '11 C.F.R. 102.17(c)(3)', 'url': '/regulations/102-17/CURRENT'}
+        [{'text': '11 C.F.R. 102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)', 'url': '/regulations/102-17/CURRENT'}
          ]),
     ("102.5(a)(2); 104.3(a)(4)(i); 114.5(a)(3)-(5); 114.5(g)(1)", 1, 2,
         [{'text': '11 C.F.R. 102.5(a)(2)', 'url': '/regulations/102-5/CURRENT'},
@@ -38,7 +35,7 @@ def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
     ("431", 1, 2,    # With reclassification
-        [{'text': '52 U.S.C. 30101',
+        [{'text': '2 U.S.C. 431',
           'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html'
           '&title=52&section=30101'}]),
     ("30116", 1, 2,  # Already reclassified
@@ -232,7 +229,7 @@ class TestLoadCurrentMURs(BaseTestCase):
 
         expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
             'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
-            'citations': [{'text': '52 U.S.C. 30101',
+            'citations': [{'text': '2 U.S.C. 431',
             'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52'
                 '&section=30101'},
             {'text': '11 C.F.R. 456',
