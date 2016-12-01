@@ -32,8 +32,6 @@ def _reset_schema_for_integration():
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('drop schema if exists staging cascade;')
     rest.db.engine.execute('create schema public;')
-    #rest.db.engine.execute('create schema staging;')
-
 
 
 class BaseTestCase(unittest.TestCase):
