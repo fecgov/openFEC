@@ -39,21 +39,18 @@ class ElasticSearchMock:
             assert index == 'docs'
             assert mappings
 
-    class ElasticSearchTransportMock:
-        def perform_request(self, method, url):
-            assert method == 'DELETE'
-            assert url == '/docs/murs'
-
     def __init__(self, dictToIndex):
         self.dictToIndex = dictToIndex
         self.indices = ElasticSearchMock.ElasticSearchIndicesMock()
-        self.transport = ElasticSearchMock.ElasticSearchTransportMock()
 
     def search():
         pass
 
     def index(self, index, doc_type, doc, id):
         assert self.dictToIndex == doc
+
+    def delete_by_query(self, index, body, doc_type):
+        assert index == 'docs'
 
 
 def get_es_with_doc(doc):
