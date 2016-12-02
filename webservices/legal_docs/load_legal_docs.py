@@ -382,8 +382,14 @@ def delete_murs_from_s3():
         obj.delete()
 
 def delete_murs_from_es():
+    delete_from_es('docs', 'murs')
+
+def delete_advisory_opinions_from_es():
+    delete_from_es('docs', 'advisory_opinions')
+
+def delete_from_es(index, doc_type):
     es = utils.get_elasticsearch_connection()
-    es.transport.perform_request('DELETE', '/docs/murs')
+    es.delete_by_query(index=index, body={'query': {'match_all': {}}}, doc_type=doc_type)
 
 def get_mur_names(mur_names={}):
     # Cache the mur names

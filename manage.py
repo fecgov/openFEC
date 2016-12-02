@@ -30,6 +30,7 @@ logging.basicConfig(level=logging.INFO)
 # --no-debug flag to `runserver`.
 manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
+manager.command(legal_docs.delete_advisory_opinions_from_es)
 manager.command(legal_docs.delete_advisory_opinions_from_s3)
 manager.command(legal_docs.delete_murs_from_es)
 manager.command(legal_docs.delete_murs_from_s3)
