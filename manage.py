@@ -2,8 +2,6 @@
 
 import os
 import glob
-import collections
-import json
 import logging
 import subprocess
 import multiprocessing
@@ -13,12 +11,11 @@ import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 
-from webservices import flow, partition, utils
+from webservices import flow, partition
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
-from webservices.tasks.utils import get_bucket, get_object
 import webservices.legal_docs as legal_docs
 
 manager = Manager(app)
@@ -97,7 +94,8 @@ def get_actual_weekly_itemized_totals(schedules):
     actual_weekly_totals = {}
 
     for schedule in schedules:
-        cmd = 'select count(*) from ofec_sched_{0}_master where pg_date > current_date - interval \'7 days\';'.format(schedule)
+        cmd = 'select count(*) from ofec_sched_{0}_master where pg_date > current_date - interval \'7 days\';'.format(
+            schedule)
         result = db.engine.execute(cmd)
         actual_weekly_totals[schedule] = result.scalar()
 
@@ -300,10 +298,11 @@ def cf_startup():
 
 @manager.command
 def load_efile_sheets():
-    """Run this management command if there are changes to incoming efiling data structures. It will make the json mapping from the spreadsheets you provide it."""
+    """Run this management command if there are changes to incoming efiling data structures.
+    It will make the json mapping from the spreadsheets you provide it."""
     import pandas as pd
     sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
-    for i in range(4,7):
+    for i in range(4, 7):
         table = sheet_map.get(i)
         df = pd.read_excel(
             # /Users/jonathancarmack/Documents/repos/openFEC
@@ -321,7 +320,6 @@ def load_efile_sheets():
         columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
         df.drop(columns_to_drop, axis=1, inplace=True)
         df.to_json(path_or_buf="data/" + table + ".json", orient='values')
-
 
 
 if __name__ == '__main__':
