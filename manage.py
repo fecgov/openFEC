@@ -39,7 +39,6 @@ manager.command(legal_docs.load_archived_murs)
 manager.command(legal_docs.load_current_murs)
 manager.command(legal_docs.remap_archived_murs_citations)
 manager.command(legal_docs.remove_legal_docs)
-manager.command(legal_docs.enable_stemming)
 
 def check_itemized_queues(schedule):
     """Checks to see if the queues associated with an itemized schedule have
