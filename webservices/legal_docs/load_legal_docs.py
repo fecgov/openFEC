@@ -13,7 +13,7 @@ import logging
 from urllib.parse import urlencode
 
 import elasticsearch
-from elasticsearch_dsl import Search, Q, Index
+from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.result import Result
 import requests
 
@@ -501,7 +501,7 @@ def remap_archived_murs_citations():
 
     # Fetch archived murs from ES
     query = Search() \
-            .query(Q('term', mur_type='archived') &  Q('term', _type='murs')) \
+            .query(Q('term', mur_type='archived') & Q('term', _type='murs')) \
             .source(include='citations')
     archived_murs = elasticsearch.helpers.scan(es, query.to_dict(), scroll='1m', index='docs', doc_type='murs', size=500)
 
