@@ -1,117 +1,117 @@
 drop materialized view if exists ofec_filings_mv_tmp;
 create materialized view ofec_filings_mv_tmp as
-with filings AS (
-    SELECT
-        cand.candidate_id                                                         AS candidate_id,
-        cand.name                                                                   AS candidate_name,
-        filing_history.cand_cmte_id                                                 AS committee_id,
-        com.name                                                                    AS committee_name,
+with filings as (
+    select
+        cand.candidate_id as candidate_id,
+        cand.name as candidate_name,
+        filing_history.cand_cmte_id as committee_id,
+        com.name as committee_name,
         sub_id,
-        cast(cast(cvg_start_dt AS TEXT) AS DATE)                                    AS coverage_start_date,
-        cast(cast(cvg_end_dt AS TEXT) AS DATE)                                      AS coverage_end_date,
-        cast(cast(receipt_dt AS TEXT) AS DATE)                                      AS receipt_date,
-        election_yr                                                                 AS election_year,
-        filing_history.form_tp                                                      AS form_type,
-        rpt_yr                                                                      AS report_year,
-        get_cycle(rpt_yr)                                                           AS cycle,
-        rpt_tp                                                                      AS report_type,
-        to_from_ind                                                                 AS document_type,
-        expand_document(to_from_ind)                                                AS document_type_full,
-        begin_image_num :: BIGINT                                                   AS beginning_image_number,
-        end_image_num                                                               AS ending_image_number,
+        cast(cast(cvg_start_dt as text) as date) as coverage_start_date,
+        cast(cast(cvg_end_dt as text) as date) as coverage_end_date,
+        cast(cast(receipt_dt as text) as date) as receipt_date,
+        election_yr as election_year,
+        filing_history.form_tp as form_type,
+        rpt_yr as report_year,
+        get_cycle(rpt_yr) as cycle,
+        rpt_tp as report_type,
+        to_from_ind as document_type,
+        expand_document(to_from_ind) as document_type_full,
+        begin_image_num :: BIGINT as beginning_image_number,
+        end_image_num as ending_image_number,
         pages,
-        ttl_receipts                                                                AS total_receipts,
-        ttl_indt_contb                                                              AS total_individual_contributions,
-        net_dons                                                                    AS net_donations,
-        ttl_disb                                                                    AS total_disbursements,
-        ttl_indt_exp                                                                AS total_independent_expenditures,
-        ttl_communication_cost                                                      AS total_communication_cost,
-        coh_bop                                                                     AS cash_on_hand_beginning_period,
-        coh_cop                                                                     AS cash_on_hand_end_period,
-        debts_owed_by_cmte                                                          AS debts_owed_by_committee,
-        debts_owed_to_cmte                                                          AS debts_owed_to_committee,
+        ttl_receipts as total_receipts,
+        ttl_indt_contb as total_individual_contributions,
+        net_dons as net_donations,
+        ttl_disb as total_disbursements,
+        ttl_indt_exp as total_independent_expenditures,
+        ttl_communication_cost as total_communication_cost,
+        coh_bop as cash_on_hand_beginning_period,
+        coh_cop as cash_on_hand_end_period,
+        debts_owed_by_cmte as debts_owed_by_committee,
+        debts_owed_to_cmte as debts_owed_to_committee,
         -- personal funds aren't a thing anymore
-        hse_pers_funds_amt                                                          AS house_personal_funds,
-        sen_pers_funds_amt                                                          AS senate_personal_funds,
-        oppos_pers_fund_amt                                                         AS opposition_personal_funds,
-        filing_history.tres_nm                                                      AS treasurer_name,
-        file_num                                                                    AS file_number,
-        prev_file_num                                                               AS previous_file_number,
-        report.rpt_tp_desc                                                          AS report_type_full,
-        rpt_pgi                                                                     AS primary_general_indicator,
-        request_tp                                                                  AS request_type,
-        amndt_ind                                                                   AS amendment_indicator,
-        lst_updt_dt                                                                 AS update_date,
+        hse_pers_funds_amt as house_personal_funds,
+        sen_pers_funds_amt as senate_personal_funds,
+        oppos_pers_fund_amt as opposition_personal_funds,
+        filing_history.tres_nm as treasurer_name,
+        file_num as file_number,
+        prev_file_num as previous_file_number,
+        report.rpt_tp_desc as report_type_full,
+        rpt_pgi as primary_general_indicator,
+        request_tp as request_type,
+        amndt_ind as amendment_indicator,
+        lst_updt_dt as update_date,
         report_pdf_url_or_null(
             begin_image_num,
             rpt_yr,
             com.committee_type,
             filing_history.form_tp
-        )                                                                           AS pdf_url,
-        means_filed(begin_image_num)                                                AS means_filed,
-        report_fec_url(begin_image_num :: TEXT, filing_history.file_num :: INTEGER) AS fec_url
-    FROM disclosure.f_rpt_or_form_sub filing_history
-        LEFT JOIN ofec_committee_history_mv_tmp com
-            ON filing_history.cand_cmte_id = com.committee_id AND get_cycle(filing_history.rpt_yr) = com.cycle
-        LEFT JOIN ofec_candidate_history_mv_tmp cand ON filing_history.cand_cmte_id = cand.candidate_id AND
+        ) as pdf_url,
+        means_filed(begin_image_num) as means_filed,
+        report_fec_url(begin_image_num :: text, filing_history.file_num :: integer) as fec_url
+    from disclosure.f_rpt_or_form_sub filing_history
+        left join ofec_committee_history_mv_tmp com
+            on filing_history.cand_cmte_id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
+        left join ofec_candidate_history_mv_tmp cand on filing_history.cand_cmte_id = cand.candidate_id and
                                                         get_cycle(filing_history.rpt_yr) = cand.two_year_period
-        LEFT JOIN staging.ref_rpt_tp report ON filing_history.rpt_tp = report.rpt_tp_cd
-    WHERE rpt_yr >= :START_YEAR
+        left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
+    where rpt_yr >= :START_YEAR
 ),
-rfai_filings AS (
-    SELECT
-        cand.candidate_id AS candidate_id,
-        cand.name AS candidate_name,
-        id AS committee_id,
-        com.name AS committee_name,
+rfai_filings as (
+    select
+        cand.candidate_id as candidate_id,
+        cand.name as candidate_name,
+        id as committee_id,
+        com.name as committee_name,
         sub_id,
-        cvg_start_dt AS coverage_start_date,
-        cvg_end_dt AS coverage_end_date,
-        rfai_dt AS receipt_date,
-        rpt_yr AS election_year,
-        'RFAI'::text AS form_type,
-        rpt_yr AS report_year,
-        get_cycle(rpt_yr) AS CYCLE,
-        rpt_tp AS report_type,
-        null::character varying(1) AS document_type,
-        null::text AS document_type_full,
-        begin_image_num::BIGINT AS beginning_image_number,
-        end_image_num AS ending_image_number,
-        0 AS pages,
-        0.00 AS total_receipts,
-        0.00 AS total_individual_contributions,
-        0.00 AS net_donations,
-        0.00 AS total_disbursements,
-        0.00 AS total_independent_expenditures,
-        0.00 AS total_communication_cost,
-        0.00 AS cash_on_hand_beginning_period,
-        0.00 AS cash_on_hand_end_period,
-        0.00 AS debts_owed_by_committee,
-        0.00 AS debts_owed_to_committee,
+        cvg_start_dt as coverage_start_date,
+        cvg_end_dt as coverage_end_date,
+        rfai_dt as receipt_date,
+        rpt_yr as election_year,
+        'RFAI'::text as form_type,
+        rpt_yr as report_year,
+        get_cycle(rpt_yr) as CYCLE,
+        rpt_tp as report_type,
+        null::character varying(1) as document_type,
+        null::text as document_type_full,
+        begin_image_num::bigint as beginning_image_number,
+        end_image_num as ending_image_number,
+        0 as pages,
+        0.00 as total_receipts,
+        0.00 as total_individual_contributions,
+        0.00 as net_donations,
+        0.00 as total_disbursements,
+        0.00 as total_independent_expenditures,
+        0.00 as total_communication_cost,
+        0.00 as cash_on_hand_beginning_period,
+        0.00 as cash_on_hand_end_period,
+        0.00 as debts_owed_by_committee,
+        0.00 as debts_owed_to_committee,
         -- personal funds aren't a thing anymore
-        0.00 AS house_personal_funds,
-        0.00 AS senate_personal_funds,
-        0.00 AS opposition_personal_funds,
-        null::character varying(38) AS treasurer_name,
-        file_num AS file_number,
-        0 AS previous_file_number,
-        report.rpt_tp_desc AS report_type_full,
-        null::character varying(5)  AS primary_general_indicator,
-        request_tp AS request_type,
-        amndt_ind AS amendment_indicator,
-        last_update_dt AS update_date,
+        0.00 as house_personal_funds,
+        0.00 as senate_personal_funds,
+        0.00 as opposition_personal_funds,
+        null::character varying(38) as treasurer_name,
+        file_num as file_number,
+        0 as previous_file_number,
+        report.rpt_tp_desc as report_type_full,
+        null::character varying(5)  as primary_general_indicator,
+        request_tp as request_type,
+        amndt_ind as amendment_indicator,
+        last_update_dt as update_date,
         report_pdf_url_or_null(
         begin_image_num,
         rpt_yr,
         com.committee_type,
         'RFAI'::text
-        ) AS pdf_url,
-        means_filed(begin_image_num) AS means_filed,
-        report_fec_url(begin_image_num::TEXT, filing_history.file_num::INTEGER ) AS fec_url
-    FROM disclosure.nml_form_rfai filing_history
-    LEFT JOIN ofec_committee_history_mv_tmp com ON filing_history.id = com.committee_id AND get_cycle(filing_history.rpt_yr) = com.cycle
-    LEFT JOIN ofec_candidate_history_mv_tmp cand ON filing_history.id = cand.candidate_id AND get_cycle(filing_history.rpt_yr) = cand.two_year_period
-    LEFT JOIN staging.ref_rpt_tp report ON filing_history.rpt_tp = report.rpt_tp_cd
+        ) as pdf_url,
+        means_filed(begin_image_num) as means_filed,
+        report_fec_url(begin_image_num::text, filing_history.file_num::integer ) as fec_url
+    from disclosure.nml_form_rfai filing_history
+    left join ofec_committee_history_mv_tmp com on filing_history.id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
+    left join ofec_candidate_history_mv_tmp cand on filing_history.id = cand.candidate_id and get_cycle(filing_history.rpt_yr) = cand.two_year_period
+    left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
 WHERE rpt_yr >= :START_YEAR
 ),
 combined as(
