@@ -4,6 +4,7 @@ from collections import defaultdict
 from urllib.parse import urlencode
 
 from webservices.env import env
+from webservices.legal_docs.load_legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -104,7 +105,7 @@ def load_current_murs():
             mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            es.index('docs', 'murs', mur, id=mur['doc_id'])
+            es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
 
 def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:

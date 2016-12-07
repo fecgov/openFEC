@@ -8,6 +8,7 @@ import pytest
 
 import manage
 from webservices import rest
+from webservices.legal_docs.load_legal_docs import DOCS_INDEX
 from webservices.legal_docs.current_murs import parse_regulatory_citations, parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 
@@ -137,7 +138,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         manage.legal_docs.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
-        assert index == 'docs'
+        assert index == DOCS_INDEX
         assert doc_type == 'murs'
         assert mur == expected_mur
 
@@ -175,7 +176,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         manage.legal_docs.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
-        assert index == 'docs'
+        assert index == DOCS_INDEX
         assert doc_type == 'murs'
         for key in expected_mur:
             assert mur[key] == expected_mur[key]
