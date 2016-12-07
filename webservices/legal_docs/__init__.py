@@ -11,5 +11,4 @@ from .load_legal_docs import (
     index_statutes,
     load_advisory_opinions_into_s3,
     load_archived_murs,
-    remap_archived_murs_citations,
     remove_legal_docs)
