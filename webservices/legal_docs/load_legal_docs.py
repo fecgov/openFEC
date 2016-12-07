@@ -33,6 +33,7 @@ sys.path = [get_python_lib() + '/slate'] + sys.path
 import slate
 sys.path = sys.path[1:]
 
+DOCS_INDEX = 'docs_index'
 logger = logging.getLogger('manager')
 
 def get_sections(reg):
@@ -116,7 +117,7 @@ def index_regulations():
                        "text": sections[section_label]['text'], 'url': reg_url,
                        "no": no}
 
-                es.index('docs', 'regulations', doc, id=doc['doc_id'])
+                es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
             reg_count += 1
         print("%d regulation parts indexed." % reg_count)
     else:
@@ -171,7 +172,7 @@ def index_advisory_opinions():
                    "date": row[9],
                    "url": pdf_url}
 
-            es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
+            es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
         print("%d docs loaded" % loading_doc)
 
@@ -222,7 +223,7 @@ def get_title_52_statutes():
                            "chapter": chapter,
                            "subchapter": subchapter_no,
                            "url": pdf_url}
-                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
 
 def get_title_26_statutes():
     es = utils.get_elasticsearch_connection()
@@ -254,7 +255,7 @@ def get_title_26_statutes():
                            "title": "26",
                            "chapter": chapter_no,
                            "url": pdf_url}
-                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
 
 
 def index_statutes():
@@ -403,10 +404,10 @@ def delete_murs_from_s3():
         obj.delete()
 
 def delete_murs_from_es():
-    delete_from_es('docs', 'murs')
+    delete_from_es(DOCS_INDEX, 'murs')
 
 def delete_advisory_opinions_from_es():
-    delete_from_es('docs', 'advisory_opinions')
+    delete_from_es(DOCS_INDEX, 'advisory_opinions')
 
 def delete_from_es(index, doc_type):
     es = utils.get_elasticsearch_connection()
@@ -476,7 +477,7 @@ def process_mur(mur):
         'citations': citations,
         'url': pdf_url
     }
-    es.index('docs', 'murs', doc, id=doc['doc_id'])
+    es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs():
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text

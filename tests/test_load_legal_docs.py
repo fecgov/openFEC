@@ -18,6 +18,7 @@ from webservices.legal_docs.load_legal_docs import (
     get_title_52_statutes,
     get_xml_tree_from_url,
 )
+from webservices.legal_docs.load_legal_docs import DOCS_INDEX
 
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
@@ -50,7 +51,7 @@ class ElasticSearchMock:
         assert self.dictToIndex == doc
 
     def delete_by_query(self, index, body, doc_type):
-        assert index == 'docs'
+        assert index == DOCS_INDEX
 
 
 def get_es_with_doc(doc):
