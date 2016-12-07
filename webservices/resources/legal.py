@@ -67,8 +67,8 @@ def parse_query_string(query):
 
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q, from_hit=0, hits_returned=20, type='all',
-            ao_no=None, ao_name=None, **kwargs):
+    def get(self, q='', from_hit=0, hits_returned=20, type='all',
+            ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None, **kwargs):
         if type == 'all':
             types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -112,6 +112,17 @@ class UniversalSearch(utils.Resource):
 
                 if ao_name:
                     query = query.query("match", name=' '.join(ao_name))
+
+                date_range = {}
+
+                if ao_min_date:
+                    date_range['gte'] = ao_min_date
+
+                if ao_max_date:
+                    date_range['lte'] = ao_max_date
+
+                if date_range:
+                    query = query.query("range", date=date_range)
 
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
