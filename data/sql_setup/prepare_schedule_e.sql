@@ -6,7 +6,8 @@ select
     cast(null as timestamp) as timestamp,
     image_pdf_url(image_num) as pdf_url,
     coalesce(rpt_tp, '') in ('24', '48') as is_notice,
-    to_tsvector(pye_nm) as payee_name_text
+    to_tsvector(pye_nm) as payee_name_text,
+    now() as pg_date
 from fec_vsum_sched_e;
 
 insert into ofec_sched_e_tmp (cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
@@ -18,17 +19,17 @@ insert into ofec_sched_e_tmp (cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm
                               exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm, conduit_cmte_st1,
                               conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd,
                               action_cd_desc, tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id,
-                              orig_sub_id, sub_id, filing_form, pg_date, rpt_tp, rpt_yr, election_cycle, timestamp,
-                              pdf_url, is_notice, payee_name_text)
+                              orig_sub_id, sub_id, filing_form, rpt_tp, rpt_yr, election_cycle, timestamp,
+                              pdf_url, is_notice, payee_name_text, pg_date)
 select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suffix,pye_st1, pye_st2, pye_city, pye_st,
     pye_zip, entity_tp, entity_tp_desc, exp_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_f_nm,
     s_o_cand_l_nm, s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
     s_o_cand_office_st, s_o_cand_office_state_desc, s_o_cand_office_district, s_o_ind, s_o_ind_desc, election_tp,
     fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
     conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
-    tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form, pg_date,
+    tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form,
     rpt_tp, rpt_yr, election_cycle, cast(null as timestamp) as TIMESTAMP, image_pdf_url(image_num) as pdf_url, False,
-    to_tsvector(pye_nm)
+    to_tsvector(pye_nm), now() as pg_date
 from fec_vsum_f57;
 
 insert into ofec_sched_e_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
@@ -40,18 +41,18 @@ insert into ofec_sched_e_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm,
                               exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm, conduit_cmte_st1,
                               conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd,
                               action_cd_desc, tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id,
-                              orig_sub_id, sub_id, filing_form, pg_date, rpt_tp, rpt_yr, election_cycle, timestamp,
-                              pdf_url, is_notice, payee_name_text)
+                              orig_sub_id, sub_id, filing_form, rpt_tp, rpt_yr, election_cycle, timestamp,
+                              pdf_url, is_notice, payee_name_text, pg_date)
 select cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,pye_st1, pye_st2, pye_city, pye_st,
     pye_zip, entity_tp, entity_tp_desc, exp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first,
     s_o_cand_nm_last, s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
     s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, s_o_ind, s_o_ind_desc, election_tp,
     fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
     conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
-    tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form, cast(null as timestamp) as pg_date,
+    tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form,
     rpt_tp, rpt_yr, cycle, cast(null as timestamp) as TIMESTAMP, image_pdf_url(image_num) as pdf_url, True,
-    to_tsvector(pye_nm)
-from fec_sched_e_notice_vw;
+    to_tsvector(pye_nm), now() as pg_date
+from fec_sched_e_notice;
 
 insert into ofec_sched_e_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
                               pye_st1, pye_st2, pye_city, pye_st, pye_zip, entity_tp, entity_tp_desc, exp_desc,
@@ -62,18 +63,18 @@ insert into ofec_sched_e_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm,
                               exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm, conduit_cmte_st1,
                               conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd,
                               action_cd_desc, tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id,
-                              orig_sub_id, sub_id, filing_form, pg_date, rpt_tp, rpt_yr, election_cycle, timestamp,
-                              pdf_url, is_notice, payee_name_text)
+                              orig_sub_id, sub_id, filing_form, rpt_tp, rpt_yr, election_cycle, timestamp,
+                              pdf_url, is_notice, payee_name_text, pg_date)
 select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suffix,pye_st1, pye_st2, pye_city, pye_st,
     pye_zip, entity_tp, entity_tp_desc, exp_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_f_nm,
     s_o_cand_l_nm, s_o_cand_m_nm, s_o_cand_prefix, s_o_cand_suffix, s_o_cand_office, s_o_cand_office_desc,
     s_o_cand_office_st, s_o_cand_office_state_desc, s_o_cand_office_district, s_o_ind, s_o_ind_desc, election_tp,
     fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
     conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
-    tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form, cast(null as timestamp) as pg_date,
+    tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form,
     rpt_tp, rpt_yr, cycle, cast(null as timestamp) as TIMESTAMP, image_pdf_url(image_num) as pdf_url, True,
-    to_tsvector(pye_nm)
-from fec_f57_notice_vw;
+    to_tsvector(pye_nm), now() as pg_date
+from fec_f57_notice;
 
 alter table ofec_sched_e_tmp add primary key (sub_id);
 
@@ -87,6 +88,7 @@ create index on ofec_sched_e_tmp (rpt_yr);
 create index on ofec_sched_e_tmp (filing_form);
 create index on ofec_sched_e_tmp (get_cycle(rpt_yr));
 create index on ofec_sched_e_tmp (is_notice);
+create index on ofec_sched_e_tmp (pg_date);
 
 -- Create composite indices on sortable columns
 create index on ofec_sched_e_tmp (exp_dt, sub_id);
@@ -217,7 +219,7 @@ end
 $$ language plpgsql;
 
 drop trigger if exists ofec_sched_e_queue_trigger on fec_vsum_sched_e;
-create trigger ofec_sched_e_queue_trigger before insert or update or delete
+create trigger ofec_sched_e_queue_trigger instead of insert or update or delete
     on fec_vsum_sched_e for each row execute procedure ofec_sched_e_update_queues()
 ;
 
@@ -232,7 +234,7 @@ create trigger ofec_f57_trigger before insert or update or delete
 ;
 
 drop trigger if exists fec_vsum_f57_trigger on fec_vsum_f57;
-create trigger fec_vsum_f57_trigger before insert or update or delete
+create trigger fec_vsum_f57_trigger instead of insert or update or delete
     on fec_vsum_f57 for each row execute procedure fec_vsum_f57_update_queues()
 ;
 drop table if exists ofec_sched_e;

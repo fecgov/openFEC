@@ -208,6 +208,7 @@ class ScheduleC(PdfMixin,BaseItemized):
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     cycle = db.Column('election_cycle', db.Integer)
+    load_date = db.Column('pg_date', db.DateTime)
 
     @property
     def pdf_url(self):
@@ -258,8 +259,8 @@ class ScheduleD(PdfMixin,BaseItemized):
     action_code_full = db.Column('action_cd_desc', db.String)
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
-    load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
+    load_date = db.Column('pg_date', db.DateTime)
 
     @property
     def pdf_url(self):
@@ -431,6 +432,7 @@ class ScheduleF(PdfMixin,BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
+
 
     @property
     def pdf_url(self):
