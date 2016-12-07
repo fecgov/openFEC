@@ -1,53 +1,83 @@
-import csv
+import re
 import logging
+
+"""
+MURs have citations referring to old USC Titles that were remapped in 2012.
+We link to the current laws based on the original citations.
+Source: http://uscode.house.gov/editorialreclassification/t52/Reclassifications_Title_52.html
+"""
+
 logger = logging.getLogger(__name__)
 
+CITATIONS_MAP = {
+    "431": "30101",
+    "432": "30102",
+    "433": "30103",
+    "434": "30104",
+    "437": "30105",
+    "437c": "30106",
+    "437d": "30107",
+    "437f": "30108",
+    "437g": "30109",
+    "437h": "30110",
+    "438": "30111",
+    "438a": "30112",
+    "439": "30113",
+    "439a": "30114",
+    "439c": "30115",
+    "441a": "30116",
+    "441a-1": "30117",
+    "441b": "30118",
+    "441c": "30119",
+    "441d": "30120",
+    "441e": "30121",
+    "441f": "30122",
+    "441g": "30123",
+    "441h": "30124",
+    "441i": "30125",
+    "441k": "30126",
+    "451": "30141",
+    "452": "30142",
+    "453": "30143",
+    "454": "30144",
+    "455": "30145",
+    "457": "30146",
+}
 
-def reclassify_pre2012_citation(title, section, archived_mur_citation_map={}):
+# The new section numbers are 5 digit numbers starting with 30. e.g., 30106
+RECLASSIFIED_STATUTE_SECTION_REGEX = re.compile(r'30\d{3,}')
+
+def reclassify_archived_mur_statutory_citation(title, section):
     """
-    MURs have citations referring to old USC Titles that were remapped in 2012.
-    We link to the current laws based on the original citations.
-    Source: http://uscode.house.gov/editorialreclassification/t52/Reclassifications_Title_52.html
+    Archived MURs indicate the titles explicitly. They also cite titles other than 2,
+    but not 52. If we can successfully reclassify title 2, we assume that they
+    are title 52, otherwise we retain the original title.
     """
+    MAPPED_TITLE = "52"
+    if title == "2":
+        mapped_section = CITATIONS_MAP.get(section)
+        if mapped_section:
+            logger.info('Mapping archived MUR statute citation %s -> %s',
+                        (title, section), (MAPPED_TITLE, mapped_section))
+            return MAPPED_TITLE, mapped_section
+    return title, section
 
-    citations_map = {
-        "2:431": ("52", "30101"),
-        "2:432": ("52", "30102"),
-        "2:433": ("52", "30103"),
-        "2:434": ("52", "30104"),
-        "2:437": ("52", "30105"),
-        "2:437c": ("52", "30106"),
-        "2:437d": ("52", "30107"),
-        "2:437f": ("52", "30108"),
-        "2:437g": ("52", "30109"),
-        "2:437h": ("52", "30110"),
-        "2:438": ("52", "30111"),
-        "2:438a": ("52", "30112"),
-        "2:439": ("52", "30113"),
-        "2:439a": ("52", "30114"),
-        "2:439c": ("52", "30115"),
-        "2:441a": ("52", "30116"),
-        "2:441a-1": ("52", "30117"),
-        "2:441b": ("52", "30118"),
-        "2:441c": ("52", "30119"),
-        "2:441d": ("52", "30120"),
-        "2:441e": ("52", "30121"),
-        "2:441f": ("52", "30122"),
-        "2:441g": ("52", "30123"),
-        "2:441h": ("52", "30124"),
-        "2:441i": ("52", "30125"),
-        "2:441k": ("52", "30126"),
-        "2:451": ("52", "30141"),
-        "2:452": ("52", "30142"),
-        "2:453": ("52", "30143"),
-        "2:454": ("52", "30144"),
-        "2:455": ("52", "30145"),
-        "2:457": ("52", "30146"),
-    }
-
-    # Fallback to title, section if no mapping exists
-    citation = citations_map.get('%s:%s' % (title, section), (title, section))
-    if (title, section) != citation:
-        logger.info('Mapping archived MUR statute citation %s ->  %s' % ((title, section), citation))
-
-    return citation
+def reclassify_current_mur_statutory_citation(section):
+    """
+    Current MURs do not indicate the titles explicitly; they have to be deduced
+    from the section. Sometimes the sections have already been reclassified.
+    If we can successfully reclassify them, or if they match the reclassified
+    section pattern, we assign the title of 52, otherwise they are assumed to be
+    title 2.
+    """
+    ORIGINAL_TITLE = "2"
+    MAPPED_TITLE = "52"
+    mapped_section = CITATIONS_MAP.get(section)
+    if mapped_section:
+        logger.info('Mapping current MUR statute citation %s -> %s',
+                    section, (MAPPED_TITLE, mapped_section))
+        return ORIGINAL_TITLE, MAPPED_TITLE, mapped_section
+    elif RECLASSIFIED_STATUTE_SECTION_REGEX.match(section):
+        return MAPPED_TITLE, MAPPED_TITLE, section
+    else:
+        return ORIGINAL_TITLE, ORIGINAL_TITLE, section

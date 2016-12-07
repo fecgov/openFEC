@@ -7,6 +7,9 @@ import sqlalchemy as sa
 
 from collections import defaultdict
 
+from datetime import date
+
+
 from sqlalchemy.orm import foreign
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.dialects import postgresql
@@ -62,16 +65,70 @@ def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear
     if sort:
         query, _ = sorting.sort(
             query, sort, model=model, aliases=aliases, join_columns=join_columns,
-            clear=clear, hide_null=hide_null, index_column=index_column, reverse_nulls=reverse_nulls
+            clear=clear, hide_null=hide_null, index_column=index_column
         )
     paginator = paginators.OffsetPaginator(query, kwargs['per_page'], count=count)
     return paginator.get_page(kwargs['page'])
+
+class SeekCoalescePaginator(paginators.SeekPaginator):
+
+    def __init__(self, cursor, per_page, index_column, sort_column=None, count=None):
+        self.max_column_map = {
+            "date": date.max,
+            "float": float("inf"),
+            "int": float("inf")
+        }
+        self.min_column_map = {
+            "date": date.min,
+            "float": float("inf"),
+            "int": float("inf")
+        }
+        super(SeekCoalescePaginator, self).__init__(cursor, per_page, index_column, sort_column, count)
+
+
+    def _fetch(self, last_index, sort_index=None, limit=None, eager=True):
+        cursor = self.cursor
+        direction = self.sort_column[1] if self.sort_column else sa.asc
+        lhs, rhs = (), ()
+        if sort_index is not None:
+            left_index = self.sort_column[0]
+            comparator = self.max_column_map.get(str(left_index.property.columns[0].type).lower())
+            left_index = sa.func.coalesce(left_index, comparator)
+            lhs += (left_index,)
+            rhs += (sort_index,)
+        if last_index is not None:
+            lhs += (self.index_column,)
+            rhs += (last_index,)
+        lhs = sa.tuple_(*lhs)
+        rhs = sa.tuple_(*rhs)
+        if rhs.clauses:
+            filter = lhs > rhs if direction == sa.asc else lhs < rhs
+            cursor = cursor.filter(filter)
+        query = cursor.order_by(direction(self.index_column)).limit(limit)
+        return query.all() if eager else query
+
+    def _get_index_values(self, result):
+        """Get index values from last result, to be used in seeking to the next
+        page. Optionally include sort values, if any.
+        """
+        ret = {'last_index': paginators.convert_value(result, self.index_column)}
+        if self.sort_column:
+            key = 'last_{0}'.format(self.sort_column[0].key)
+            ret[key] = paginators.convert_value(result, self.sort_column[0])
+            if ret[key] is None:
+                ret.pop(key)
+                ret['sort_null_only'] = True
+        return ret
 
 
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
     if paginator.sort_column is not None:
         sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
+        if not sort_index and kwargs['sort_null_only'] and paginator.sort_column[1] == sa.asc:
+            sort_index = None
+            query = query.filter(paginator.sort_column[0] == None)
+            paginator.cursor = query
     else:
         sort_index = None
     return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
@@ -80,15 +137,15 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
 def fetch_seek_paginator(query, kwargs, index_column, clear=False, count=None, cap=100):
     check_cap(kwargs, cap)
     model = index_column.parent.class_
-    sort, hide_null, reverse_nulls = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_reverse_nulls')
+    sort, hide_null = kwargs.get('sort'), kwargs.get('sort_hide_null')
     if sort:
         query, sort_column = sorting.sort(
             query, sort,
-            model=model, clear=clear, hide_null=hide_null, reverse_nulls=reverse_nulls
+            model=model, clear=clear, hide_null=hide_null
         )
     else:
         sort_column = None
-    return paginators.SeekPaginator(
+    return SeekCoalescePaginator(
         query,
         kwargs['per_page'],
         index_column,
