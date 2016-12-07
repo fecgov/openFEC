@@ -271,5 +271,3 @@ class EFilingSummaryView(views.ApiResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         return query
-
-
