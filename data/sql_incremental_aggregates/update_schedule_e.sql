@@ -34,8 +34,8 @@ begin
         s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, s_o_ind, s_o_ind_desc, election_tp,
         fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
         conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip,tran_id, filing_form,
-        schedule_type, image_num, file_num, link_id, orig_sub_id, sub_id, pg_date,
-        timestamp, pdf_url, is_notice, payee_name_text)
+        schedule_type, image_num, file_num, link_id, orig_sub_id, sub_id,
+        timestamp, pg_date, pdf_url, is_notice, payee_name_text)
     select f57.filer_cmte_id,
         f57.pye_nm,
         f57.pye_l_nm,
@@ -88,8 +88,8 @@ begin
         f57.link_id,
         f57.orig_sub_id,
         f57.sub_id,
-        f57.pg_date,
         cast(null as timestamp) as TIMESTAMP,
+        now() as pg_date,
         image_pdf_url(f57.image_num) as pdf_url,
         False,
         to_tsvector(f57.pye_nm)
@@ -111,8 +111,8 @@ begin
         s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, memo_cd, memo_cd_desc, s_o_ind, s_o_ind_desc, election_tp,
         fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, memo_text, conduit_cmte_id, conduit_cmte_nm,
         conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
-        tran_id, filing_form, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, pg_date,
-        rpt_tp, rpt_yr, election_cycle, timestamp, pdf_url, is_notice, payee_name_text)
+        tran_id, filing_form, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id,
+        rpt_tp, rpt_yr, election_cycle, timestamp, pg_date, pdf_url, is_notice, payee_name_text)
     select se.cmte_id,
         se.pye_nm,
         se.payee_l_nm as pye_l_nm,
@@ -174,11 +174,11 @@ begin
         se.link_id,
         se.orig_sub_id,
         se.sub_id,
-        se.pg_date,
         f24.rpt_tp,
         f24.rpt_yr,
         f24.rpt_yr + mod(f24.rpt_yr, 2::numeric) AS cycle,
         cast(null as timestamp) as TIMESTAMP,
+        now() as pg_date,
         image_pdf_url(se.image_num) as pdf_url,
         True,
         to_tsvector(se.pye_nm)
@@ -201,8 +201,8 @@ begin
         s_o_cand_office_st, s_o_cand_office_st_desc, s_o_cand_office_district, s_o_ind, s_o_ind_desc, election_tp,
         fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
         conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
-        tran_id, filing_form, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, pg_date,
-        rpt_tp, rpt_yr, election_cycle, timestamp, pdf_url, is_notice, payee_name_text)
+        tran_id, filing_form, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id,
+        rpt_tp, rpt_yr, election_cycle, timestamp, pg_date, pdf_url, is_notice, payee_name_text)
     select f57.filer_cmte_id,
         f57.pye_nm,
         f57.pye_l_nm,
@@ -262,11 +262,11 @@ begin
         f57.link_id,
         f57.orig_sub_id,
         f57.sub_id,
-        f57.pg_date,
         f5.rpt_tp,
         f5.rpt_yr,
         f5.rpt_yr + mod(f5.rpt_yr, 2::numeric) AS cycle,
         cast(null as timestamp) as TIMESTAMP,
+        now() as pg_date,
         image_pdf_url(f57.image_num) as pdf_url,
         True,
         to_tsvector(f57.pye_nm)
