@@ -164,8 +164,6 @@ party_totals as (
         -- excluding host conventions because they have different rules than party committees
         and cmte_id not in ('C00578419', 'C00485110', 'C00422048', 'C00567057', 'C00483586', 'C00431791', 'C00571133',
             'C00500405', 'C00435560', 'C00572958', 'C00493254', 'C00496570', 'C00431593')
-        -- do we have this ?
-        -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
     group by
         month,
         year
@@ -199,6 +197,7 @@ full outer join party_totals using (month, year)
 group by
     month,
     year
+order by year, month
 ;
 
 -- creates cumulative materialized view per cycle from the data receipts in the large aggregates
@@ -209,12 +208,12 @@ create materialized view ofec_entity_chart_mv_tmp as (
         month,
         year,
         cycle,
-        sum(candidate_receipts) OVER (PARTITION BY cycle order by year, month desc) as cumulative_candidate_receipts,
-        sum(canidate_disbursements) OVER (PARTITION BY cycle order by year, month desc) as cumulative_canidate_disbursements,
-        sum(pac_receipts) OVER (PARTITION BY cycle order by year, month desc) as cumulative_pac_receipts,
-        sum(pac_disbursements) OVER (PARTITION BY cycle order by year, month desc) as cumulative_pac_disbursements,
-        sum(party_receipts) OVER (PARTITION BY cycle order by year, month desc) as cumulative_party_receipts,
-        sum(party_disbursements) OVER (PARTITION BY cycle order by year, month desc) as cumulative_party_disbursements
+        sum(candidate_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_receipts,
+        sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_canidate_disbursements,
+        sum(pac_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_receipts,
+        sum(pac_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_disbursements,
+        sum(party_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_receipts,
+        sum(party_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_disbursements
     from ofec_large_aggregates_mv_tmp
     where cycle >= 2008
 );
