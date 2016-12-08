@@ -327,16 +327,11 @@ class RadAnalystFactory(BaseFactory):
     idx = factory.Sequence(lambda n: n)
 
 
-class EntityReceiptsTotalsFactory(BaseFactory):
+class EntityReceiptDisbursementTotalsFactory(BaseFactory):
     class Meta:
-        model = models.EntityReceiptsTotals
+        model = models.EntityReceiptDisbursementTotals
     idx = factory.Sequence(lambda n: n)
 
-
-class EntityDisbursementsTotalsFactory(BaseFactory):
-    class Meta:
-        model = models.EntityDisbursementsTotals
-    idx = factory.Sequence(lambda n: n)
 
 class ScheduleAByStateRecipientTotalsFactory(BaseFactory):
     class Meta:
