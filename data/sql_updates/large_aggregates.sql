@@ -200,6 +200,8 @@ group by
 order by year, month
 ;
 
+create unique index on ofec_large_aggregates_mv_tmp (idx);
+
 -- creates cumulative materialized view per cycle from the data receipts in the large aggregates
 drop materialized view if exists ofec_entity_chart_mv_tmp;
 create materialized view ofec_entity_chart_mv_tmp as (
