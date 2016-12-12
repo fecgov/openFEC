@@ -38,6 +38,9 @@ def get_graph():
     ])
 
     graph.add_edges_from([
+        ('filing_amendments', 'reports_presidential')
+    ])
+    graph.add_edges_from([
         ('totals_house_senate', 'totals_combined'),
         ('totals_presidential', 'totals_combined'),
         ('totals_pac_party', 'totals_combined'),
