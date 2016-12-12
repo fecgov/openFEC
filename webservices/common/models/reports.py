@@ -3,6 +3,7 @@ from webservices import docs, utils
 from .base import db, BaseModel
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from webservices.common.models.dates import ReportType
 from sqlalchemy.ext.declarative import declared_attr
@@ -248,6 +249,9 @@ class CommitteeReportsPacParty(CommitteeReports):
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
 
+    amendment_chain = db.Column(ARRAY(db.Numeric))
+    previous_file_number = db.Column(db.Numeric)
+    most_recent_file_number = db.Column(db.Numeric)
     candidate_contribution_period = db.Column(db.Numeric(30, 2))#mapped
     candidate_contribution_ytd = db.Column(db.Numeric(30, 2))#mapped
     exempt_legal_accounting_disbursement_period = db.Column(db.Numeric(30, 2))#mapped
