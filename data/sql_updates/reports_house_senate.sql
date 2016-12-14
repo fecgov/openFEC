@@ -2,7 +2,7 @@ drop materialized view if exists ofec_reports_house_senate_mv_tmp;
 create materialized view ofec_reports_house_senate_mv_tmp as
 select
     row_number() over () as idx,
-    cmte_id as committee_id,
+    f3.cmte_id as committee_id,
     election_cycle as cycle,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
@@ -53,7 +53,7 @@ select
     ref_pol_pty_cmte_contb_per as refunded_political_party_committee_contributions_period,
     ref_pol_pty_cmte_contb_ytd as refunded_political_party_committee_contributions_ytd,
     ref_ttl_contb_col_ttl_ytd as refunds_total_contributions_col_total_ytd,
-    rpt_yr as report_ytd,
+    f3.rpt_yr as report_ytd,
     subttl_per as subtotal_period,
     ttl_contb_ref_col_ttl_per as total_contribution_refunds_col_total_period,
     ttl_contb_ref_per as total_contribution_refunds_period,
@@ -81,16 +81,20 @@ select
     tranf_from_other_auth_cmte_ytd as transfers_from_other_authorized_committee_ytd,
     tranf_to_other_auth_cmte_per as transfers_to_other_authorized_committee_period,
     tranf_to_other_auth_cmte_ytd as transfers_to_other_authorized_committee_ytd,
-    rpt_tp as report_type,
+    f3.rpt_tp as report_type,
     rpt_tp_desc as report_type_full,
-    rpt_yr as report_year,
+    f3.rpt_yr as report_year,
     most_recent_filing_flag like 'N' as is_amended,
-    receipt_dt as receipt_date,
-    file_num as file_number,
+    f3.receipt_dt as receipt_date,
+    f3.file_num as file_number,
     means_filed(begin_image_num) as means_filed,
-    report_fec_url(begin_image_num::text, file_num::integer) as fec_url
+    report_fec_url(begin_image_num::text, f3.file_num::integer) as fec_url,
+    amendments.amendment_chain,
+    amendments.prev_file_num as previous_file_number,
+    amendments.mst_rct_file_num as most_recent_file_number
 from
-    fec_vsum_f3
+    fec_vsum_f3 f3 left join ofec_house_senate_amendments_mv_tmp amendments
+    on f3.file_num = amendments.file_num
 where
     election_cycle >= :START_YEAR
 ;

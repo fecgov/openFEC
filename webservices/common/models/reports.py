@@ -67,6 +67,11 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     committee = utils.related('CommitteeHistory', 'committee_id', 'committee_id', 'report_year', 'cycle')
 
+    #These columns derived from amendments materializeds view
+    amendment_chain = db.Column(ARRAY(db.Numeric))
+    previous_file_number = db.Column(db.Numeric)
+    most_recent_file_number = db.Column(db.Numeric)
+
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
     file_number = db.Column(db.Integer)
     beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
@@ -249,9 +254,6 @@ class CommitteeReportsPacParty(CommitteeReports):
 class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
 
-    amendment_chain = db.Column(ARRAY(db.Numeric))
-    previous_file_number = db.Column(db.Numeric)
-    most_recent_file_number = db.Column(db.Numeric)
     candidate_contribution_period = db.Column(db.Numeric(30, 2))#mapped
     candidate_contribution_ytd = db.Column(db.Numeric(30, 2))#mapped
     exempt_legal_accounting_disbursement_period = db.Column(db.Numeric(30, 2))#mapped
