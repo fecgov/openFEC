@@ -96,7 +96,9 @@ select
 from
     fec_vsum_f3p f3p
     left join
-    ofec_presidential_amendments_mv_tmp amendments on f3p.file_num = amendments.file_num
+    (select * from ofec_presidential_electronic_amendments_mv_tmp union all
+     select * from ofec_presidential_paper_amendments_mv_tmp) amendments
+     on f3p.file_num = amendments.file_num
 where
     election_cycle >= :START_YEAR
 ;

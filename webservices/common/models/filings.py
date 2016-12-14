@@ -1,9 +1,11 @@
-import datetime
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin
+
+
 
 from .base import db
 
@@ -46,7 +48,6 @@ class Filings(CsvMixin, db.Model):
     opposition_personal_funds = db.Column(db.Numeric(30, 2))
     treasurer_name = db.Column(db.String, doc=docs.TREASURER_NAME)
     file_number = db.Column(db.BigInteger)
-    previous_file_number = db.Column(db.BigInteger)
     primary_general_indicator = db.Column(db.String, index=True)
     report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
     request_type = db.Column(db.String)
@@ -55,6 +56,10 @@ class Filings(CsvMixin, db.Model):
     pdf_url = db.Column(db.String)
     fec_url = db.Column(db.String)
     means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
+
+    amendment_chain = db.Column(ARRAY(db.Numeric))
+    previous_file_number = db.Column(db.BigInteger)
+    most_recent_file_number = db.Column(db.BigInteger)
 
     @property
     def document_description(self):
