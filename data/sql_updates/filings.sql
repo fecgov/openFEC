@@ -4,7 +4,9 @@ create materialized view ofec_filings_amendments_all_mv_tmp as
     union all
     select * from ofec_presidential_paper_amendments_mv_tmp
     union all
-    select * from ofec_house_senate_amendments_mv_tmp
+    select * from ofec_house_senate_electronic_amendments_mv_tmp
+    union all
+    select * from ofec_house_senate_paper_amendments_mv_tmp
     union all
     select * from ofec_pac_party_electronic_amendments_mv_tmp
     union all
