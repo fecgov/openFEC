@@ -18,10 +18,11 @@ class GetLegalDocument(utils.Resource):
 
     def get(self, doc_type, no, **kwargs):
         es_results = Search().using(es) \
-          .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
-          .source(exclude='text') \
-          .extra(size=200) \
-          .execute()
+            .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
+            .source(exclude='text') \
+            .extra(size=200) \
+            .index(DOCS_SEARCH) \
+            .execute()
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
         return results
