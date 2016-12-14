@@ -11,4 +11,4 @@ from .load_legal_docs import (
     index_statutes,
     load_advisory_opinions_into_s3,
     load_archived_murs,
-    remove_legal_docs)
+    initialize_legal_docs)

@@ -37,7 +37,7 @@ manager.command(legal_docs.index_statutes)
 manager.command(legal_docs.load_advisory_opinions_into_s3)
 manager.command(legal_docs.load_archived_murs)
 manager.command(legal_docs.load_current_murs)
-manager.command(legal_docs.remove_legal_docs)
+manager.command(legal_docs.initialize_legal_docs)
 
 def check_itemized_queues(schedule):
     """Checks to see if the queues associated with an itemized schedule have
