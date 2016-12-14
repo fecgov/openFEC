@@ -18,6 +18,7 @@ from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
+from webservices.resources.legal import DOCS_SEARCH
 
 from . import reclassify_statutory_citation
 
@@ -51,7 +52,12 @@ def get_text(node):
     return text
 
 
-def remove_legal_docs():
+def initialize_legal_docs():
+    """
+    Initialize elasticsearch for storing legal documents. Create the `docs` index,
+    and set up the aliases `docs_index` and `docs_search` to point to the `docs`
+    index. If the `doc` index already exists, it is deleted.
+    """
     settings = {
         "mappings": {
             "_default_": {
@@ -81,6 +87,10 @@ def remove_legal_docs():
         },
         "settings": {
             "analysis": {"analyzer": {"default": {"type": "english"}}}
+        },
+        "aliases": {
+            DOCS_INDEX: {},
+            DOCS_SEARCH: {}
         }
     }
 
