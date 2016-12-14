@@ -1,7 +1,5 @@
-drop table if exists temp_paper_filer_chain_house_senate cascade;
-drop table if exists temp_electronic_filer_chain_house_senate cascade;
-
-create table temp_electronic_filer_chain_house_senate as
+drop materialized view if exists ofec_house_senate_electronic_amendments_mv_tmp cascade;
+create materialized view ofec_house_senate_electronic_amendments_mv_tmp as
 with recursive oldest_filing as (
   (
     SELECT cmte_id, rpt_yr, rpt_tp, amndt_ind, receipt_dt, file_num, prev_file_num, mst_rct_file_num, array[file_num]::numeric[] as amendment_chain, 1 as depth, file_num as last
@@ -35,7 +33,8 @@ SELECT old_f.cmte_id,
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
 ) select * from electronic_filer_chain;
 
-create table temp_paper_filer_chain_house_senate as
+drop materialized view if exists ofec_house_senate_paper_amendments_mv_tmp;
+create materialized view ofec_house_senate_paper_amendments_mv_tmp as
 with recursive oldest_filing_paper as (
   (
     SELECT cmte_id,
@@ -86,15 +85,7 @@ with recursive oldest_filing_paper as (
    select distinct * from oldest_filing_paper ofp where ofp.last not in (select last from longest_path)
    ORDER BY depth desc
 )
-select * from filtered_longest_path;
-
-
-
-drop materialized view if exists ofec_house_senate_amendments_mv_tmp;
-create materialized view ofec_house_senate_amendments_mv_tmp as
-select * from temp_electronic_filer_chain_house_senate
-union all select
-    cmte_id,
+select cmte_id,
     rpt_yr,
     rpt_tp,
     amndt_ind,
@@ -103,4 +94,4 @@ union all select
     prev_file_num,
     mst_rct_file_num,
     amendment_chain
-from temp_paper_filer_chain_house_senate
+from filtered_longest_path;

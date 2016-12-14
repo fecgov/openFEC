@@ -93,7 +93,11 @@ select
     amendments.prev_file_num as previous_file_number,
     amendments.mst_rct_file_num as most_recent_file_number
 from
-    fec_vsum_f3 f3 left join ofec_house_senate_amendments_mv_tmp amendments
+    fec_vsum_f3 f3 left join
+    (select * from ofec_house_senate_electronic_amendments_mv_tmp
+     union all
+     select * from ofec_house_senate_paper_amendments_mv_tmp
+    ) amendments
     on f3.file_num = amendments.file_num
 where
     election_cycle >= :START_YEAR

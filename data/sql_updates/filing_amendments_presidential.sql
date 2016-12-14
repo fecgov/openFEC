@@ -1,5 +1,5 @@
 drop materialized view if exists ofec_presidential_electronic_amendments_mv_tmp cascade;
-create table ofec_presidential_electronic_amendments_mv_tmp as
+create materialized view ofec_presidential_electronic_amendments_mv_tmp as
 with recursive oldest_filing as (
   (
     SELECT cmte_id, rpt_yr, rpt_tp, amndt_ind, receipt_dt, file_num, prev_file_num, mst_rct_file_num, array[file_num]::numeric[] as amendment_chain, 1 as depth, file_num as last
@@ -33,7 +33,8 @@ SELECT old_f.cmte_id,
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
 ) select * from electronic_filer_chain;
 
-create table ofec_presidential_paper_amendments_mv_tmp as
+drop materialized view if exists ofec_presidential_paper_amendments_mv_tmp cascade;
+create materialized view ofec_presidential_paper_amendments_mv_tmp as
 with recursive oldest_filing_paper as (
   (
     SELECT cmte_id,
