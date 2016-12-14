@@ -8,7 +8,7 @@ import pytest
 
 import manage
 from webservices import rest
-from webservices.legal_docs.load_legal_docs import DOCS_INDEX
+from webservices.legal_docs import DOCS_INDEX
 from webservices.legal_docs.current_murs import parse_regulatory_citations, parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 

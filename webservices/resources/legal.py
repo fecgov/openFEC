@@ -6,8 +6,7 @@ from webargs import fields
 from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
-
-DOCS_SEARCH = 'docs_search'
+from webservices.legal_docs import DOCS_SEARCH
 es = utils.get_elasticsearch_connection()
 
 class GetLegalDocument(utils.Resource):
