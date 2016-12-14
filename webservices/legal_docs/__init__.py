@@ -1,3 +1,5 @@
+DOCS_INDEX = 'docs_index'
+DOCS_SEARCH = 'docs_search'
 
 from .current_murs import load_current_murs
 

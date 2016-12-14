@@ -18,7 +18,10 @@ from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
-from webservices.resources.legal import DOCS_SEARCH
+from webservices.legal_docs import (
+    DOCS_INDEX,
+    DOCS_SEARCH
+)
 
 from . import reclassify_statutory_citation
 
@@ -31,7 +34,6 @@ sys.path = [get_python_lib() + '/slate'] + sys.path
 import slate
 sys.path = sys.path[1:]
 
-DOCS_INDEX = 'docs_index'
 logger = logging.getLogger('manager')
 
 def get_sections(reg):

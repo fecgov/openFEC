@@ -4,7 +4,7 @@ from collections import defaultdict
 from urllib.parse import urlencode
 
 from webservices.env import env
-from webservices.legal_docs.load_legal_docs import DOCS_INDEX
+from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
