@@ -6,7 +6,7 @@ from webargs import fields
 from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
-
+from webservices.legal_docs import DOCS_SEARCH
 es = utils.get_elasticsearch_connection()
 
 class GetLegalDocument(utils.Resource):
@@ -17,10 +17,11 @@ class GetLegalDocument(utils.Resource):
 
     def get(self, doc_type, no, **kwargs):
         es_results = Search().using(es) \
-          .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
-          .source(exclude='text') \
-          .extra(size=200) \
-          .execute()
+            .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
+            .source(exclude='text') \
+            .extra(size=200) \
+            .index(DOCS_SEARCH) \
+            .execute()
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
         return results
@@ -59,7 +60,6 @@ def parse_query_string(query):
             terms.insert(0, term)
 
         return (terms, phrases)
-
 
     terms, phrases = _parse_query_string(query)
     return dict(terms=terms, phrases=phrases)
@@ -101,7 +101,7 @@ class UniversalSearch(utils.Resource):
                 .highlight('description', 'name', 'no', 'summary', 'text') \
                 .source(exclude='text') \
                 .extra(size=hits_returned, from_=from_hit) \
-                .index('docs')
+                .index(DOCS_SEARCH)
 
             if type == 'advisory_opinions':
                 query = query.query("match", category="Final Opinion")
