@@ -4,6 +4,7 @@ from collections import defaultdict
 from urllib.parse import urlencode
 
 from webservices.env import env
+from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -104,7 +105,7 @@ def load_current_murs():
             mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            es.index('docs', 'murs', mur, id=mur['doc_id'])
+            es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
 
 def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:
@@ -186,7 +187,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
             else:
                 match_text = statutory_citation[match.start():matches[index + 1].start()]
             text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'statute', 'title': orig_title,  'url': url})
+            citations.append({'text': text, 'type': 'statute', 'title': orig_title, 'url': url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
                     statutory_citation, entity_id, case_id)
@@ -205,7 +206,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
             else:
                 match_text = regulatory_citation[match.start():matches[index + 1].start()]
             text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'regulation', 'title': '11',  'url': url})
+            citations.append({'text': text, 'type': 'regulation', 'title': '11', 'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)
