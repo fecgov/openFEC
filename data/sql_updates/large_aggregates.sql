@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_large_aggregates_mv_tmp;
-create materialized view ofec_large_aggregates_mv_tmp as
+drop materialized view if exists ofec_entity_chart_mv_tmp;
+create materialized view ofec_entity_chart_mv_tmp as
 -- candidates
 with candidates as (
     select
@@ -167,58 +167,59 @@ party_totals as (
     group by
         month,
         year
-)
-select
-    row_number() over () as idx,
-    month,
-    year,
-    year::numeric + (year::numeric % 2) as cycle,
-    case when max(candidate_adjusted_total_receipts) is null
-        then 0 else max(candidate_adjusted_total_receipts) end
-    as candidate_receipts,
-    case when max(cand_totals.candidate_adjusted_total_disbursements) is null
-        then 0 else max(cand_totals.candidate_adjusted_total_disbursements) end
-    as canidate_disbursements,
-    case when max(pac_totals.pac_adjusted_total_receipts) is null
-        then 0 else max(pac_totals.pac_adjusted_total_receipts) end
-    as pac_receipts,
-    case when max(pac_totals.pac_adjusted_total_disbursements) is null
-        then 0 else max(pac_totals.pac_adjusted_total_disbursements) end
-    as pac_disbursements,
-    case when max(party_totals.party_adjusted_total_receipts) is null
-        then 0 else max(party_totals.party_adjusted_total_receipts) end
-    as party_receipts,
-    case when max(party_totals.party_adjusted_total_disbursements) is null
-        then 0 else max(party_totals.party_adjusted_total_disbursements) end
-    as party_disbursements
-from cand_totals
-full outer join pac_totals using (month, year)
-full outer join party_totals using (month, year)
-group by
-    month,
-    year
-order by year, month
-;
-
-create unique index on ofec_large_aggregates_mv_tmp (idx);
-
--- creates cumulative materialized view per cycle from the data receipts in the large aggregates
-drop materialized view if exists ofec_entity_chart_mv_tmp;
-create materialized view ofec_entity_chart_mv_tmp as (
+), -- merge
+combined as (
     select
-        idx,
+        row_number() over () as idx,
         month,
         year,
-        cycle,
-        sum(candidate_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_receipts,
-        sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_canidate_disbursements,
-        sum(pac_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_receipts,
-        sum(pac_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_disbursements,
-        sum(party_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_receipts,
-        sum(party_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_disbursements
-    from ofec_large_aggregates_mv_tmp
-    where cycle >= 2008
-);
+        year::numeric + (year::numeric % 2) as cycle,
+        case when max(candidate_adjusted_total_receipts) is null
+            then 0 else max(candidate_adjusted_total_receipts) end
+        as candidate_receipts,
+        case when max(cand_totals.candidate_adjusted_total_disbursements) is null
+            then 0 else max(cand_totals.candidate_adjusted_total_disbursements) end
+        as canidate_disbursements,
+        case when max(pac_totals.pac_adjusted_total_receipts) is null
+            then 0 else max(pac_totals.pac_adjusted_total_receipts) end
+        as pac_receipts,
+        case when max(pac_totals.pac_adjusted_total_disbursements) is null
+            then 0 else max(pac_totals.pac_adjusted_total_disbursements) end
+        as pac_disbursements,
+        case when max(party_totals.party_adjusted_total_receipts) is null
+            then 0 else max(party_totals.party_adjusted_total_receipts) end
+        as party_receipts,
+        case when max(party_totals.party_adjusted_total_disbursements) is null
+            then 0 else max(party_totals.party_adjusted_total_disbursements) end
+        as party_disbursements
+    from cand_totals
+    full outer join pac_totals using (month, year)
+    full outer join party_totals using (month, year)
+    group by
+        month,
+        year
+    order by year, month
+)
+select
+    idx,
+    month,
+    year,
+    cycle,
+    sum(candidate_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_receipts,
+    candidate_receipts,
+    sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_canidate_disbursements,
+    canidate_disbursements,
+    sum(pac_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_receipts,
+    pac_receipts,
+    sum(pac_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_disbursements,
+    pac_disbursements,
+    sum(party_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_receipts,
+    party_receipts,
+    sum(party_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_disbursements,
+    party_disbursements
+from combined
+where cycle >= 2008
+;
 
 create unique index on ofec_entity_chart_mv_tmp (idx);
 create index on ofec_entity_chart_mv_tmp (cycle);
