@@ -7,6 +7,7 @@ from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
 
+DOCS_SEARCH = 'docs_search'
 es = utils.get_elasticsearch_connection()
 
 class GetLegalDocument(utils.Resource):
@@ -60,7 +61,6 @@ def parse_query_string(query):
 
         return (terms, phrases)
 
-
     terms, phrases = _parse_query_string(query)
     return dict(terms=terms, phrases=phrases)
 
@@ -101,7 +101,7 @@ class UniversalSearch(utils.Resource):
                 .highlight('description', 'name', 'no', 'summary', 'text') \
                 .source(exclude='text') \
                 .extra(size=hits_returned, from_=from_hit) \
-                .index('docs')
+                .index(DOCS_SEARCH)
 
             if type == 'advisory_opinions':
                 query = query.query("match", category="Final Opinion")
