@@ -11,7 +11,7 @@ with recursive oldest_filing as (
   from oldest_filing oldest, disclosure.nml_form_3p f3p
   where f3p.prev_file_num = oldest.file_num and f3p.rpt_tp = oldest.rpt_tp and f3p.file_num <> f3p.prev_file_num and f3p.file_num > 0
 ),
---this joins the right sight to left having the effect that the max depth row will be null,
+--this joins the right side to left having the effect that the max depth row will be null,
 --the where statement then filters down to those rows.
 --  Ref: http://stackoverflow.com/questions/7745609/sql-select-only-rows-with-max-value-on-a-column
  most_recent_filing as (
@@ -34,8 +34,7 @@ SELECT
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
 ) select row_number() over () as idx, * from electronic_filer_chain;
 
-drop index if exists file_number_presidential_electronic_index;
-create unique index file_number_presidential_electronic_index on ofec_presidential_electronic_amendments_mv_tmp(idx);
+create unique index file_number_presidential_electronic_index_tmp on ofec_presidential_electronic_amendments_mv_tmp(idx);
 
 
 drop materialized view if exists ofec_presidential_paper_amendments_mv_tmp cascade;
@@ -74,9 +73,6 @@ with recursive oldest_filing_paper as (
   from oldest_filing_paper oldest, disclosure.nml_form_3p f3p
   where f3p.amndt_ind = 'A' and f3p.rpt_tp = oldest.rpt_tp and f3p.rpt_yr = oldest.rpt_yr and f3p.cmte_id = oldest.cmte_id and f3p.file_num < 0 and f3p.receipt_dt > date_chain[array_length(date_chain, 1)]
 ), longest_path as
- --select distinct on (file_num, depth) * from oldest_filing
- --where file_num = -8442913 or file_num = -8393823 or file_num = -8397828
- --order by depth desc;
   (SELECT b.*
    FROM oldest_filing_paper a LEFT OUTER JOIN oldest_filing_paper b ON a.file_num = b.file_num
    WHERE a.depth < b.depth
@@ -104,5 +100,4 @@ with recursive oldest_filing_paper as (
     select row_number() over () as idx, * from paper_filer_chain;
 ;
 
-drop index if exists file_number_presidential_paper_index;
-create unique index file_number_presidential_paper_index on ofec_presidential_paper_amendments_mv_tmp(idx);
+create unique index file_number_presidential_paper_index_tmp on ofec_presidential_paper_amendments_mv_tmp(idx);

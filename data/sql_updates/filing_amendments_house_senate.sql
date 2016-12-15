@@ -11,7 +11,7 @@ with recursive oldest_filing as (
   from oldest_filing oldest, disclosure.nml_form_3 f3
   where f3.prev_file_num = oldest.file_num and f3.rpt_tp = oldest.rpt_tp and f3.file_num <> f3.prev_file_num and f3.file_num > 0
 ),
---this joins the right sight to left having the effect that the max depth row will be null,
+--this joins the right side to left having the effect that the max depth row will be null,
 --the where statement then filters down to those rows.
 --  Ref: http://stackoverflow.com/questions/7745609/sql-select-only-rows-with-max-value-on-a-column
  most_recent_filing as (
@@ -33,8 +33,7 @@ SELECT old_f.cmte_id,
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
 ) select row_number() over () as idx, * from electronic_filer_chain;
 
-drop index if exists file_number_house_senate_electronic_index;
-create unique index file_number_house_senate_electronic_index on ofec_house_senate_electronic_amendments_mv_tmp(idx);
+create unique index file_number_house_senate_electronic_index_tmp on ofec_house_senate_electronic_amendments_mv_tmp(idx);
 
 drop materialized view if exists ofec_house_senate_paper_amendments_mv_tmp;
 create materialized view ofec_house_senate_paper_amendments_mv_tmp as
@@ -77,7 +76,7 @@ with recursive oldest_filing_paper as (
    FROM oldest_filing_paper a LEFT OUTER JOIN oldest_filing_paper b ON a.file_num = b.file_num
    WHERE a.depth < b.depth
 ), filtered_longest_path as
-  --filterng out erroneuou paths that skip intermediate dates
+  --filtering out erroneous paths that skip intermediate dates
   (select distinct old_f.*
     from oldest_filing_paper old_f inner join longest_path lp
     on  old_f.last = lp.last
@@ -101,5 +100,4 @@ select
     amendment_chain
 from filtered_longest_path;
 
-drop index if exists file_number_house_senate_paper_index;
-create unique index file_number_house_senate_paper_index on ofec_house_senate_paper_amendments_mv_tmp(idx);
+create unique index file_number_house_senate_paper_index_tmp on ofec_house_senate_paper_amendments_mv_tmp(idx);

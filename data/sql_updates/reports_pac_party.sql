@@ -1,4 +1,4 @@
-drop materialized view if exists ofec_reports_pacs_parties_mv_tmp cascade;
+drop materialized view if exists ofec_reports_pacs_parties_mv_tmp;
 create materialized view ofec_reports_pacs_parties_mv_tmp as
 select
     row_number() over () as idx,
