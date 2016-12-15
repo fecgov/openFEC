@@ -12,37 +12,11 @@ from webservices.common.views import ApiResource
     tags=['financial'],
     description=docs.ENTITY_RECEIPTS_TOTLAS,
 )
-class EntityReceiptsTotalsView(ApiResource):
+class EntityReceiptDisbursementTotalsView(ApiResource):
 
-    model = models.EntityReceiptsTotals
-    schema = schemas.EntityReceiptsTotalsSchema
-    page_schema = schemas.EntityReceiptsTotalsPageSchema
-
-    filter_match_fields = [
-        ('cycle', model.cycle),
-    ]
-
-    @property
-    def args(self):
-        return utils.extend(
-            args.paging,
-            args.large_aggregates,
-        )
-
-    @property
-    def index_column(self):
-        return self.model.idx
-
-
-@doc(
-    tags=['financial'],
-    description=docs.ENTITY_DISBURSEMENTS_TOTLAS,
-)
-class EntityDisbursementsTotalsView(ApiResource):
-
-    model = models.EntityDisbursementsTotals
-    schema = schemas.EntityDisbursementsTotalsSchema
-    page_schema = schemas.EntityDisbursementsTotalsPageSchema
+    model = models.EntityReceiptDisbursementTotals
+    schema = schemas.EntityReceiptDisbursementTotalsSchema
+    page_schema = schemas.EntityReceiptDisbursementTotalsPageSchema
 
     filter_match_fields = [
         ('cycle', model.cycle),
