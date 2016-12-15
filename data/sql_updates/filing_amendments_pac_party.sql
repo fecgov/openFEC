@@ -11,7 +11,7 @@ with recursive oldest_filing as (
   from oldest_filing oldest, disclosure.nml_form_3x f3x
   where f3x.prev_file_num = oldest.file_num and f3x.rpt_tp = oldest.rpt_tp and f3x.file_num <> f3x.prev_file_num and f3x.file_num > 0
 ),
---this joins the right sight to left having the effect that the max depth row will be null,
+--this joins the right side to left having the effect that the max depth row will be null,
 --the where statement then filters down to those rows.
 --  Ref: http://stackoverflow.com/questions/7745609/sql-select-only-rows-with-max-value-on-a-column
  most_recent_filing as (
@@ -33,8 +33,7 @@ SELECT old_f.cmte_id,
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
 ) select row_number() over () as idx, * from electronic_filer_chain;
 
-drop index if exists file_number_pac_party_electronic_index;
-create unique index file_number_pac_party_electronic_index on ofec_pac_party_electronic_amendments_mv_tmp(idx);
+create unique index file_number_pac_party_electronic_index_tmp on ofec_pac_party_electronic_amendments_mv_tmp(idx);
 
 drop materialized view if exists ofec_pac_party_paper_amendments_mv_tmp cascade;
 create materialized view ofec_pac_party_paper_amendments_mv_tmp as
@@ -101,8 +100,7 @@ with recursive oldest_filing_paper as (
         and flp.last = prf.last)
     select row_number() over () as idx, * from paper_filer_chain;
 
-drop index if exists file_number_pac_party_paper_index;
-create unique index file_number_pac_party_paper_index on ofec_pac_party_paper_amendments_mv_tmp(idx);
+create unique index file_number_pac_party_paper_index_tmp on ofec_pac_party_paper_amendments_mv_tmp(idx);
 
 
 
