@@ -217,6 +217,7 @@ filings = {
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,
     ),
+    'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'primary_general_indicator': fields.List(IStr, description='Primary, general or special election indicator'),
     'amendment_indicator': fields.List(
         IStr,
