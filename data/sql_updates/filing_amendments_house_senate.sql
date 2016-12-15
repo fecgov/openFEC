@@ -31,7 +31,10 @@ SELECT old_f.cmte_id,
   mrf.file_num as mst_rct_file_num,
   old_f.amendment_chain
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
-) select * from electronic_filer_chain;
+) select row_number() over () as idx, * from electronic_filer_chain;
+
+drop index if exists file_number_house_senate_electronic_index;
+create unique index file_number_house_senate_electronic_index on ofec_house_senate_electronic_amendments_mv_tmp(idx);
 
 drop materialized view if exists ofec_house_senate_paper_amendments_mv_tmp;
 create materialized view ofec_house_senate_paper_amendments_mv_tmp as
@@ -85,7 +88,9 @@ with recursive oldest_filing_paper as (
    select distinct * from oldest_filing_paper ofp where ofp.last not in (select last from longest_path)
    ORDER BY depth desc
 )
-select cmte_id,
+select
+    row_number() over () as idx,
+    cmte_id,
     rpt_yr,
     rpt_tp,
     amndt_ind,
@@ -95,3 +100,6 @@ select cmte_id,
     mst_rct_file_num,
     amendment_chain
 from filtered_longest_path;
+
+drop index if exists file_number_house_senate_paper_index;
+create unique index file_number_house_senate_paper_index on ofec_house_senate_paper_amendments_mv_tmp(idx);
