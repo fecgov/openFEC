@@ -142,8 +142,8 @@ query = {
     'type': fields.Str(required=False, description='Document type to refine search by'),
     'ao_no': fields.List(IStr, required=False, description='Force advisory opinion number'),
     'ao_name': fields.List(IStr, required=False, description='Force advisory opinion name'),
-    'ao_min_date': fields.Date(descripion="Minimum issue date of advisory opinion (inclusive)"),
-    'ao_max_date': fields.Date(description="Maximum issue date of advisory opinion (inclusive)")
+    'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
+    'ao_max_date': fields.Date(description="Latest issue date of advisory opinion")
 }
 
 candidate_detail = {
