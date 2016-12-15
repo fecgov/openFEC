@@ -68,7 +68,7 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     committee = utils.related('CommitteeHistory', 'committee_id', 'committee_id', 'report_year', 'cycle')
 
     #These columns derived from amendments materializeds view
-    amendment_chain = db.Column(ARRAY(db.Numeric))
+    amendment_chain = db.Column(ARRAY(db.Numeric), doc=docs.AMENDMENT_CHAIN)
     previous_file_number = db.Column(db.Numeric)
     most_recent_file_number = db.Column(db.Numeric)
 

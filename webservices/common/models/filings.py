@@ -51,7 +51,7 @@ class Filings(CsvMixin, db.Model):
     primary_general_indicator = db.Column(db.String, index=True)
     report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
     request_type = db.Column(db.String)
-    amendment_indicator = db.Column(db.String, index=True)
+    amendment_indicator = db.Column(db.String, index=True, doc=docs.AMENDMENT_CHAIN)
     update_date = db.Column(db.Date)
     pdf_url = db.Column(db.String)
     fec_url = db.Column(db.String)
