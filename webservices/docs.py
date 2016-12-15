@@ -532,6 +532,7 @@ SEARCH_TAG = '''
 Search for candidates or committees by name.
 '''
 
+
 FILINGS_TAG = '''
 Search for financial reports and other FEC documents.
 '''
@@ -936,6 +937,12 @@ EFILING_TAG += WIP_TAG
 
 EFILE_FILES = 'Basic information about electronic files coming into the FEC, posted as they are received.'
 FILE_NUMBER = 'Filing ID number'
+
+AMENDMENT_CHAIN = '''
+The first value in the chain is the original filing.  The ordering in the chain reflects the order the
+amendments were filed up to the amendment being viewed.
+'''
+
 AMENDED_BY = '''
 If this report has been amended, this field gives the file_number of the report that should be used. For example,
 if a report is amended multiple times, the first report and the first amendment will have the file_number of the final amended
