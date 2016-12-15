@@ -21,7 +21,8 @@ with recursive oldest_filing as (
         on a.cmte_id = b.cmte_id and a.last = b.last and a.depth < b.depth
     where b.cmte_id is null
 ), electronic_filer_chain as (
-SELECT old_f.cmte_id,
+SELECT
+  old_f.cmte_id,
   old_f.rpt_yr,
   old_f.rpt_tp,
   old_f.amndt_ind,
@@ -31,7 +32,11 @@ SELECT old_f.cmte_id,
   mrf.file_num as mst_rct_file_num,
   old_f.amendment_chain
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
-) select * from electronic_filer_chain;
+) select row_number() over () as idx, * from electronic_filer_chain;
+
+drop index if exists file_number_presidential_electronic_index;
+create unique index file_number_presidential_electronic_index on ofec_presidential_electronic_amendments_mv_tmp(idx);
+
 
 drop materialized view if exists ofec_presidential_paper_amendments_mv_tmp cascade;
 create materialized view ofec_presidential_paper_amendments_mv_tmp as
@@ -96,5 +101,8 @@ with recursive oldest_filing_paper as (
       flp.amendment_chain
       from filtered_longest_path flp inner join paper_recent_filing prf on flp.cmte_id = prf.cmte_id
         and flp.last = prf.last)
-    select * from paper_filer_chain;
+    select row_number() over () as idx, * from paper_filer_chain;
 ;
+
+drop index if exists file_number_presidential_paper_index;
+create unique index file_number_presidential_paper_index on ofec_presidential_paper_amendments_mv_tmp(idx);

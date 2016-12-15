@@ -1,16 +1,30 @@
 drop materialized view if exists ofec_filings_amendments_all_mv_tmp;
-create materialized view ofec_filings_amendments_all_mv_tmp as
-    select * from ofec_presidential_electronic_amendments_mv_tmp
-    union all
-    select * from ofec_presidential_paper_amendments_mv_tmp
-    union all
-    select * from ofec_house_senate_electronic_amendments_mv_tmp
-    union all
-    select * from ofec_house_senate_paper_amendments_mv_tmp
-    union all
-    select * from ofec_pac_party_electronic_amendments_mv_tmp
-    union all
-    select * from ofec_pac_party_paper_amendments_mv_tmp;
+--there is a lot of room for refactoring I believe, but I feel it's
+--best to keep paper and electronic separate until the kinks in paper
+--can (maybe?) get worked out
+create materialized view ofec_filings_amendments_all_mv_tmp as with combined AS (
+  SELECT *
+  FROM ofec_presidential_electronic_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_presidential_paper_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_house_senate_electronic_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_house_senate_paper_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_pac_party_electronic_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_pac_party_paper_amendments_mv_tmp
+) select row_number() over () as idx2, * from combined;
+
+drop index if exists file_number_amendments_all_index;
+create unique index file_number_amendments_all_index on ofec_filings_amendments_all_mv_tmp(idx2);
+
 
 
 drop materialized view if exists ofec_filings_mv_tmp;
