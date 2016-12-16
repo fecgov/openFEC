@@ -207,7 +207,7 @@ select
     cycle,
     sum(candidate_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_receipts,
     candidate_receipts,
-    sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_canidate_disbursements,
+    sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_disbursements,
     canidate_disbursements,
     sum(pac_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_receipts,
     pac_receipts,
