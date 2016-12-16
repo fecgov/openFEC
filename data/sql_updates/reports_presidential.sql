@@ -2,7 +2,7 @@ drop materialized view if exists ofec_reports_presidential_mv_tmp;
 create materialized view ofec_reports_presidential_mv_tmp as
 select
     row_number() over () as idx,
-    cmte_id as committee_id,
+    f3p.cmte_id as committee_id,
     election_cycle as cycle,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
@@ -61,7 +61,7 @@ select
     repymts_loans_made_cand_ytd as repayments_loans_made_candidate_ytd,
     repymts_other_loans_per as repayments_other_loans_period,
     repymts_other_loans_ytd as repayments_other_loans_ytd,
-    rpt_yr as report_year,
+    f3p.rpt_yr as report_year,
     subttl_sum_page_per as subtotal_summary_period,
     ttl_contb_ref_per as total_contribution_refunds_period,
     ttl_contb_ref_ytd as total_contribution_refunds_ytd,
@@ -83,15 +83,22 @@ select
     tranf_from_affiliated_cmte_ytd as transfers_from_affiliated_committee_ytd,
     tranf_to_other_auth_cmte_per as transfers_to_other_authorized_committee_period,
     tranf_to_other_auth_cmte_ytd as transfers_to_other_authorized_committee_ytd,
-    rpt_tp as report_type,
+    f3p.rpt_tp as report_type,
     rpt_tp_desc as report_type_full,
     most_recent_filing_flag like 'N' as is_amended,
-    receipt_dt as receipt_date,
-    file_num as file_number,
+    f3p.receipt_dt as receipt_date,
+    f3p.file_num as file_number,
     means_filed(begin_image_num) as means_filed,
-    report_fec_url(begin_image_num::text, file_num::integer) as fec_url
+    report_fec_url(begin_image_num::text, f3p.file_num::integer) as fec_url,
+    amendments.amendment_chain,
+    amendments.prev_file_num as previous_file_number,
+    amendments.mst_rct_file_num as most_recent_file_number
 from
-    fec_vsum_f3p
+    fec_vsum_f3p f3p
+    left join
+    (select * from ofec_presidential_electronic_amendments_mv_tmp union all
+     select * from ofec_presidential_paper_amendments_mv_tmp) amendments
+     on f3p.file_num = amendments.file_num
 where
     election_cycle >= :START_YEAR
 ;

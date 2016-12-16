@@ -1,3 +1,31 @@
+drop materialized view if exists ofec_filings_amendments_all_mv_tmp;
+--there is a lot of room for refactoring I believe, but I feel it's
+--best to keep paper and electronic separate until the kinks in paper
+--can (maybe?) get worked out
+create materialized view ofec_filings_amendments_all_mv_tmp as with combined AS (
+  SELECT *
+  FROM ofec_presidential_electronic_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_presidential_paper_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_house_senate_electronic_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_house_senate_paper_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_pac_party_electronic_amendments_mv_tmp
+  UNION ALL
+  SELECT *
+  FROM ofec_pac_party_paper_amendments_mv_tmp
+) select row_number() over () as idx2, * from combined;
+
+create unique index file_number_amendments_all_index_tmp on ofec_filings_amendments_all_mv_tmp(idx2);
+
+
+
 drop materialized view if exists ofec_filings_mv_tmp;
 create materialized view ofec_filings_mv_tmp as
 with filings as (
@@ -9,12 +37,12 @@ with filings as (
         sub_id,
         cast(cast(cvg_start_dt as text) as date) as coverage_start_date,
         cast(cast(cvg_end_dt as text) as date) as coverage_end_date,
-        cast(cast(receipt_dt as text) as date) as receipt_date,
+        cast(cast(filing_history.receipt_dt as text) as date) as receipt_date,
         election_yr as election_year,
         filing_history.form_tp as form_type,
-        rpt_yr as report_year,
-        get_cycle(rpt_yr) as cycle,
-        rpt_tp as report_type,
+        filing_history.rpt_yr as report_year,
+        get_cycle(filing_history.rpt_yr) as cycle,
+        filing_history.rpt_tp as report_type,
         to_from_ind as document_type,
         expand_document(to_from_ind) as document_type_full,
         begin_image_num :: BIGINT as beginning_image_number,
@@ -35,28 +63,34 @@ with filings as (
         sen_pers_funds_amt as senate_personal_funds,
         oppos_pers_fund_amt as opposition_personal_funds,
         filing_history.tres_nm as treasurer_name,
-        file_num as file_number,
-        prev_file_num as previous_file_number,
+        filing_history.file_num as file_number,
+        --for now let's not derive prev_file_num from amendments tables
+        filing_history.prev_file_num as previous_file_number,
         report.rpt_tp_desc as report_type_full,
         rpt_pgi as primary_general_indicator,
         request_tp as request_type,
-        amndt_ind as amendment_indicator,
+        filing_history.amndt_ind as amendment_indicator,
         lst_updt_dt as update_date,
         report_pdf_url_or_null(
             begin_image_num,
-            rpt_yr,
+            filing_history.rpt_yr,
             com.committee_type,
             filing_history.form_tp
         ) as pdf_url,
         means_filed(begin_image_num) as means_filed,
-        report_fec_url(begin_image_num :: text, filing_history.file_num :: integer) as fec_url
+        report_fec_url(begin_image_num::text, filing_history.file_num::integer) as fec_url,
+        amendments.amendment_chain,
+        --amendments.prev_file_num as previous_file_number,
+        amendments.mst_rct_file_num as most_recent_file_number
     from disclosure.f_rpt_or_form_sub filing_history
         left join ofec_committee_history_mv_tmp com
             on filing_history.cand_cmte_id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
         left join ofec_candidate_history_mv_tmp cand on filing_history.cand_cmte_id = cand.candidate_id and
                                                         get_cycle(filing_history.rpt_yr) = cand.two_year_period
         left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
-    where rpt_yr >= :START_YEAR
+        left join ofec_filings_amendments_all_mv_tmp amendments on filing_history.file_num = amendments.file_num
+    where filing_history.rpt_yr >= :START_YEAR
+
 ),
 rfai_filings as (
     select
@@ -101,13 +135,15 @@ rfai_filings as (
         amndt_ind as amendment_indicator,
         last_update_dt as update_date,
         report_pdf_url_or_null(
-        begin_image_num,
-        rpt_yr,
-        com.committee_type,
-        'RFAI'::text
+            begin_image_num,
+            filing_history.rpt_yr,
+            com.committee_type,
+            'RFAI'::text
         ) as pdf_url,
         means_filed(begin_image_num) as means_filed,
-        report_fec_url(begin_image_num::text, filing_history.file_num::integer ) as fec_url
+        report_fec_url(begin_image_num::text, filing_history.file_num::integer ) as fec_url,
+        null::numeric[] as amendment_chain,
+        null::int as most_recent_file_number
     from disclosure.nml_form_rfai filing_history
     left join ofec_committee_history_mv_tmp com on filing_history.id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
     left join ofec_candidate_history_mv_tmp cand on filing_history.id = cand.candidate_id and get_cycle(filing_history.rpt_yr) = cand.two_year_period
