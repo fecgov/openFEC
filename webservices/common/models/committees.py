@@ -31,8 +31,6 @@ class BaseCommittee(BaseModel):
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(50), doc=docs.PARTY)
     state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
-    # ? how to explain
-    expire_date = db.Column(db.DateTime())
 
 
 class BaseConcreteCommittee(BaseCommittee):
