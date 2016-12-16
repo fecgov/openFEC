@@ -81,7 +81,8 @@ with filings as (
         report_fec_url(begin_image_num::text, filing_history.file_num::integer) as fec_url,
         amendments.amendment_chain,
         --amendments.prev_file_num as previous_file_number,
-        amendments.mst_rct_file_num as most_recent_file_number
+        amendments.mst_rct_file_num as most_recent_file_number,
+        is_amended(amendments.mst_rct_file_num, amendments.file_num) as is_amended
     from disclosure.f_rpt_or_form_sub filing_history
         left join ofec_committee_history_mv_tmp com
             on filing_history.cand_cmte_id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
