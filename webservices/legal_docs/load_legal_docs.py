@@ -12,17 +12,13 @@ from multiprocessing import Pool
 import logging
 from urllib.parse import urlencode
 
-import elasticsearch
 import requests
 
 from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
-from webservices.legal_docs import (
-    DOCS_INDEX,
-    DOCS_SEARCH
-)
+from webservices.legal_docs import DOCS_INDEX
 
 from . import reclassify_statutory_citation
 
@@ -53,56 +49,6 @@ def get_text(node):
     for child in node["children"]:
         text += ' ' + get_text(child)
     return text
-
-
-def initialize_legal_docs():
-    """
-    Initialize elasticsearch for storing legal documents. Create the `docs` index,
-    and set up the aliases `docs_index` and `docs_search` to point to the `docs`
-    index. If the `doc` index already exists, it is deleted.
-    """
-    settings = {
-        "mappings": {
-            "_default_": {
-                "properties": {
-                    "no": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "text": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "name": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "description": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "summary": {
-                        "type": "string",
-                        "analyzer": "english"
-                    }
-                }
-            }
-        },
-        "settings": {
-            "analysis": {"analyzer": {"default": {"type": "english"}}}
-        },
-        "aliases": {
-            DOCS_INDEX: {},
-            DOCS_SEARCH: {}
-        }
-    }
-
-    es = utils.get_elasticsearch_connection()
-    try:
-        es.indices.delete('docs')
-    except elasticsearch.exceptions.NotFoundError:
-        pass
-    es.indices.create('docs', settings)
 
 
 def index_regulations():
