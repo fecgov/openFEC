@@ -12,5 +12,11 @@ from .load_legal_docs import (
     index_regulations,
     index_statutes,
     load_advisory_opinions_into_s3,
-    load_archived_murs,
-    initialize_legal_docs)
+    load_archived_murs
+)
+
+from .index_management import (
+    initialize_legal_docs,
+    create_staging_index,
+    restore_from_staging_index,
+)
