@@ -35,6 +35,38 @@ sys.path = [get_python_lib() + '/slate'] + sys.path
 import slate
 sys.path = sys.path[1:]
 
+DEFAULT_MAPPINGS = {
+    "_default_": {
+        "properties": {
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "text": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "description": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "summary": {
+                "type": "string",
+                "analyzer": "english"
+            }
+        }
+    }
+}
+
+ANALYZER_SETTINGS = {
+    "analysis": {"analyzer": {"default": {"type": "english"}}}
+}
+
+
 logger = logging.getLogger('manager')
 
 def get_sections(reg):
@@ -61,49 +93,47 @@ def initialize_legal_docs():
     and set up the aliases `docs_index` and `docs_search` to point to the `docs`
     index. If the `doc` index already exists, it is deleted.
     """
-    settings = {
-        "mappings": {
-            "_default_": {
-                "properties": {
-                    "no": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "text": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "name": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "description": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "summary": {
-                        "type": "string",
-                        "analyzer": "english"
-                    }
-                }
-            }
-        },
-        "settings": {
-            "analysis": {"analyzer": {"default": {"type": "english"}}}
-        },
-        "aliases": {
-            DOCS_INDEX: {},
-            DOCS_SEARCH: {}
-        }
-    }
 
     es = utils.get_elasticsearch_connection()
     try:
         es.indices.delete('docs')
     except elasticsearch.exceptions.NotFoundError:
         pass
-    es.indices.create('docs', settings)
+    es.indices.create('docs', {
+        "mappings": DEFAULT_MAPPINGS,
+        "settings": ANALYZER_SETTINGS,
+        "aliases": {
+            DOCS_INDEX: {},
+            DOCS_SEARCH: {}
+        }
+    })
 
+def move_index_for_loads(old_index, new_index):
+    """
+    Create the index new_index.
+    Move the alias docs_index to point to new_index instead of old_index.
+    """
+    es = utils.get_elasticsearch_connection()
+    es.indices.create(new_index, {
+        "mappings": DEFAULT_MAPPINGS,
+        "settings": ANALYZER_SETTINGS,
+    })
+    es.indices.update_aliases(body={"actions": [
+        {"remove": {"index": old_index, "alias": DOCS_INDEX}},
+        {"add": {"index": new_index, "alias": DOCS_INDEX}}
+    ]})
+
+def move_index_for_searches(old_index, new_index):
+    """
+    Move the alias docs_search to point to new_index instead of old_index.
+    Remove the index old_index.
+    """
+    es = utils.get_elasticsearch_connection()
+    es.indices.update_aliases(body={"actions": [
+        {"remove": {"index": old_index, "alias": DOCS_SEARCH}},
+        {"add": {"index": new_index, "alias": DOCS_SEARCH}}
+    ]})
+    es.indices.delete(old_index)
 
 def index_regulations():
     eregs_api = env.get_credential('FEC_EREGS_API', '')

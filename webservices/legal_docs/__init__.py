@@ -13,4 +13,6 @@ from .load_legal_docs import (
     index_statutes,
     load_advisory_opinions_into_s3,
     load_archived_murs,
+    move_index_for_loads,
+    move_index_for_searches,
     initialize_legal_docs)
