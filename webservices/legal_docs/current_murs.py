@@ -27,6 +27,12 @@ MUR_SUBJECTS = """
     WHERE case_id = %s
 """
 
+MUR_ELECTION_CYCLES = """
+    SELECT election_cycle::INT
+    FROM fecmur.electioncycle
+    WHERE case_id = %s
+"""
+
 MUR_PARTICIPANTS = """
     SELECT entity_id, name, role.description AS role
     FROM fecmur.players
@@ -98,6 +104,7 @@ def load_current_murs():
                 'mur_type': 'current',
             }
             mur['subject'] = {"text": get_subjects(case_id)}
+            mur['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
@@ -106,6 +113,14 @@ def load_current_murs():
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
             es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+
+def get_election_cycles(case_id):
+    election_cycles = []
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_ELECTION_CYCLES, case_id)
+        for row in rs:
+            election_cycles.append(row['election_cycle'])
+    return election_cycles
 
 def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:
