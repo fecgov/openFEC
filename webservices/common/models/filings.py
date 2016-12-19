@@ -56,6 +56,8 @@ class Filings(CsvMixin, db.Model):
     pdf_url = db.Column(db.String)
     fec_url = db.Column(db.String)
     means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
+    is_amended = db.Column(db.Boolean)
+    most_recent = db.Column(db.Boolean)
 
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)
