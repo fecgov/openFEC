@@ -117,6 +117,7 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
     means_filed = db.Column('means_filed', db.String, doc=docs.MEANS_FILED)
     fec_url = db.Column(db.String)
+    most_recent = db.Column(db.Boolean)
 
     @property
     def document_description(self):
