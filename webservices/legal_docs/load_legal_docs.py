@@ -12,6 +12,7 @@ from multiprocessing import Pool
 import logging
 from urllib.parse import urlencode
 
+import elasticsearch
 import requests
 
 from webservices.rest import db
@@ -97,7 +98,10 @@ def initialize_legal_docs():
     }
 
     es = utils.get_elasticsearch_connection()
-    es.indices.delete('docs')
+    try:
+        es.indices.delete('docs')
+    except elasticsearch.exceptions.NotFoundError:
+        pass
     es.indices.create('docs', settings)
 
 
