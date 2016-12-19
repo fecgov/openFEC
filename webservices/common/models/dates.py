@@ -6,7 +6,7 @@ from .base import db, BaseModel
 
 
 class ReportType(db.Model):
-    __tablename__ = 'dimreporttype'
+    __tablename__ = 'staging.dimreporttype'
 
     report_type = db.Column('rpt_tp', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
@@ -32,7 +32,7 @@ class DateMixin(object):
 
 
 class ReportDate(db.Model, DateMixin):
-    __tablename__ = 'trc_report_due_date'
+    __tablename__ = 'fecapp.trc_report_due_date'
     report = db.relationship(ReportType)
     report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
 
@@ -43,7 +43,7 @@ def clean_report_type(report_type):
 
 
 class ElectionDate(db.Model):
-    __tablename__ = 'trc_election'
+    __tablename__ = 'fecapp.trc_election'
 
     trc_election_id = db.Column(db.Integer, primary_key=True)
     election_state = db.Column(db.String, index=True, doc=docs.STATE)
@@ -85,7 +85,7 @@ class ElectionClassDate(db.Model):
     senate_class = db.Column(db.Integer, index=True, doc=docs.SENATE_CLASS)
 
 
-class CalendarDate(BaseModel):
+class CalendarDate(db.Model):
     __tablename__ = 'ofec_omnibus_dates_mv'
 
     event_id = db.Column('idx', db.Integer, primary_key=True, doc=docs.EVENT_ID)

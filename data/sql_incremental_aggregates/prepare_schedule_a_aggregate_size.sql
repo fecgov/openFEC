@@ -33,6 +33,10 @@ create index on ofec_sched_a_aggregate_size_tmp (size);
 create index on ofec_sched_a_aggregate_size_tmp (total);
 create index on ofec_sched_a_aggregate_size_tmp (count);
 
+-- this drops totals during rebuild
+drop table if exists ofec_sched_a_aggregate_state cascade;
+drop table if exists ofec_sched_a_aggregate_size_old cascade;
+
 -- Remove previous aggregate and rename new aggregate
 -- ofec_sched_a_aggregate_size_old is removed when the dependent materialized
 -- view (ofec_sched_a_aggregate_size_merged_mv) is recreated to prevent
