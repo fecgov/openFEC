@@ -210,6 +210,8 @@ committee_history = {
 
 filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'is_amended': fields.Bool(description='Filing has been amended'),
+    'most_recent': fields.Bool(description='Filing is either new or is the most-recently filed amendment'),
     'report_type': fields.List(IStr, description='Report type'),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
@@ -251,6 +253,7 @@ reports = {
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
     'is_amended': fields.Bool(description='Report has been amended'),
+    'most_recent': fields.Bool(description='Report is either new or is the most-recently filed amendment'),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,
