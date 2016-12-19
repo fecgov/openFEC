@@ -42,7 +42,7 @@ cand as (
     select * from candidates
     inner join
         -- check we don't need to normalize fec_election_yr
-        cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
+        disclosure.cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
 ),
 -- Create sums
 cand_totals as (
