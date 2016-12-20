@@ -9,7 +9,7 @@ from webservices.legal_docs import (
     index_statutes,
     load_advisory_opinions_into_s3,
     load_archived_murs,
-    remove_legal_docs
+    initialize_legal_docs
 )
 
 from webservices.legal_docs.load_legal_docs import (
@@ -18,6 +18,7 @@ from webservices.legal_docs.load_legal_docs import (
     get_title_52_statutes,
     get_xml_tree_from_url,
 )
+from webservices.legal_docs import DOCS_INDEX
 
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
@@ -50,7 +51,7 @@ class ElasticSearchMock:
         assert self.dictToIndex == doc
 
     def delete_by_query(self, index, body, doc_type):
-        assert index == 'docs'
+        assert index == DOCS_INDEX
 
 
 def get_es_with_doc(doc):
@@ -274,11 +275,11 @@ class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
     def test_delete_advisory_opinions_from_s3(self):
         delete_advisory_opinions_from_s3()
 
-class RemoveLegalDocsTest(unittest.TestCase):
+class InitializeLegalDocsTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
     get_es_with_doc({}))
-    def test_remove_legal_docs(self):
-        remove_legal_docs()
+    def test_initialize_legal_docs(self):
+        initialize_legal_docs()
 
 def raise_pdf_exception(PDF):
     raise Exception('Could not parse PDF')

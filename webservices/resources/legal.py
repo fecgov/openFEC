@@ -6,7 +6,7 @@ from webargs import fields
 from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
-
+from webservices.legal_docs import DOCS_SEARCH
 es = utils.get_elasticsearch_connection()
 
 class GetLegalDocument(utils.Resource):
@@ -17,10 +17,11 @@ class GetLegalDocument(utils.Resource):
 
     def get(self, doc_type, no, **kwargs):
         es_results = Search().using(es) \
-          .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
-          .source(exclude='text') \
-          .extra(size=200) \
-          .execute()
+            .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
+            .source(exclude='text') \
+            .extra(size=200) \
+            .index(DOCS_SEARCH) \
+            .execute()
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
         return results
@@ -60,14 +61,14 @@ def parse_query_string(query):
 
         return (terms, phrases)
 
-
     terms, phrases = _parse_query_string(query)
     return dict(terms=terms, phrases=phrases)
 
 
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q, from_hit=0, hits_returned=20, type='all', **kwargs):
+    def get(self, q='', from_hit=0, hits_returned=20, type='all',
+            ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None, **kwargs):
         if type == 'all':
             types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -101,10 +102,27 @@ class UniversalSearch(utils.Resource):
                 .highlight('description', 'name', 'no', 'summary', 'text') \
                 .source(exclude='text') \
                 .extra(size=hits_returned, from_=from_hit) \
-                .index('docs')
+                .index(DOCS_SEARCH)
 
             if type == 'advisory_opinions':
-                query = query.query("match", category="Final Opinion")
+                query = query.query('match', category='Final Opinion')
+
+                if ao_no:
+                    query = query.query('terms', no=ao_no)
+
+                if ao_name:
+                    query = query.query("match", name=' '.join(ao_name))
+
+                date_range = {}
+
+                if ao_min_date:
+                    date_range['gte'] = ao_min_date
+
+                if ao_max_date:
+                    date_range['lte'] = ao_max_date
+
+                if date_range:
+                    query = query.query("range", date=date_range)
 
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
