@@ -6,7 +6,7 @@ from webservices.partition.base import TableGroup
 
 class SchedBGroup(TableGroup):
 
-    parent = 'fec_vsum_sched_b_vw'
+    parent = 'fec_vsum_sched_b'
     base_name = 'ofec_sched_b'
     queue_new = 'ofec_sched_b_queue_new'
     queue_old = 'ofec_sched_b_queue_old'

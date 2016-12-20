@@ -1,8 +1,8 @@
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;
 drop table if exists ofec_sched_a_queue_old;
-create table ofec_sched_a_queue_new as select * from fec_vsum_sched_a_vw limit 0;
-create table ofec_sched_a_queue_old as select * from fec_vsum_sched_a_vw limit 0;
+create table ofec_sched_a_queue_new as select * from fec_vsum_sched_a limit 0;
+create table ofec_sched_a_queue_old as select * from fec_vsum_sched_a limit 0;
 alter table ofec_sched_a_queue_new add column timestamp timestamp;
 alter table ofec_sched_a_queue_old add column timestamp timestamp;
 alter table ofec_sched_a_queue_new add column two_year_transaction_period smallint;
@@ -56,7 +56,7 @@ begin
 end
 $$ language plpgsql;
 
-drop trigger if exists ofec_sched_a_queue_trigger on fec_vsum_sched_a_vw;
+drop trigger if exists ofec_sched_a_queue_trigger on fec_vsum_sched_a;
 create trigger ofec_sched_a_queue_trigger before insert or update or delete
-    on fec_vsum_sched_a_vw for each row execute procedure ofec_sched_a_update_queues(:START_YEAR_AGGREGATE)
+    on fec_vsum_sched_a for each row execute procedure ofec_sched_a_update_queues(:START_YEAR_AGGREGATE)
 ;
