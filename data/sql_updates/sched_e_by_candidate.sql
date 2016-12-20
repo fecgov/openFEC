@@ -9,7 +9,7 @@ with records as (
         rpt_tp,
         memo_cd,
         exp_amt
-    from fec_vsum_sched_e
+    from fec_vsum_sched_e_vw
     union all
     select
         f57.filer_cmte_id as cmte_id,
@@ -19,8 +19,8 @@ with records as (
         f5.rpt_tp,
         null as memo_cd,
         exp_amt
-    from fec_vsum_f57 f57
-    join fec_vsum_f5 f5
+    from fec_vsum_f57_vw f57
+    join fec_vsum_f5_vw f5
         on (f5.sub_id = f57.link_id)
 )
 select

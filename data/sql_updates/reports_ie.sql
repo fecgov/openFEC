@@ -22,7 +22,7 @@ select
     means_filed(begin_image_num) as means_filed,
     report_fec_url(begin_image_num::text, file_num::integer) as fec_url
 from
-    fec_vsum_f5
+    fec_vsum_f5_vw
 where
     election_cycle >= :START_YEAR
 ;

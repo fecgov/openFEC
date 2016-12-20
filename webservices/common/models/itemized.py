@@ -156,7 +156,7 @@ class ScheduleB(BaseItemized):
 
 
 class ScheduleC(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_c'
+    __tablename__ = 'fec_vsum_sched_c_vw'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     incurred_date = db.Column('incurred_dt', db.DateTime)
@@ -218,7 +218,7 @@ class ScheduleC(PdfMixin,BaseItemized):
 
 
 class ScheduleD(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_d'
+    __tablename__ = 'fec_vsum_sched_d_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -358,7 +358,7 @@ class ScheduleE(BaseItemized):
 
 
 class ScheduleF(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_f'
+    __tablename__ = 'fec_vsum_sched_f_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
