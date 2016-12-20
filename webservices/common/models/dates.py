@@ -6,7 +6,7 @@ from .base import db, BaseModel
 
 
 class ReportType(db.Model):
-    __tablename__ = 'staging.dimreporttype'
+    __tablename__ = 'staging.ref_rpt_tp'
 
     report_type = db.Column('rpt_tp', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
