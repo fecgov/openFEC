@@ -22,7 +22,7 @@ create materialized view ofec_filings_amendments_all_mv_tmp as with combined AS 
   FROM ofec_pac_party_paper_amendments_mv_tmp
 ) select row_number() over () as idx2, * from combined;
 
-create unique index file_number_amendments_all_index_tmp on ofec_filings_amendments_all_mv_tmp(idx2);
+create unique index on ofec_filings_amendments_all_mv_tmp(idx2);
 
 
 
