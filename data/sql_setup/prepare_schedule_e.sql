@@ -8,7 +8,7 @@ select
     coalesce(rpt_tp, '') in ('24', '48') as is_notice,
     to_tsvector(pye_nm) as payee_name_text,
     now() as pg_date
-from fec_vsum_sched_e;
+from fec_vsum_sched_e_vw;
 
 insert into ofec_sched_e_tmp (cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
                               pye_st1, pye_st2, pye_city, pye_st, pye_zip, entity_tp, entity_tp_desc, exp_desc,
@@ -30,7 +30,7 @@ select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suff
     tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form,
     rpt_tp, rpt_yr, election_cycle, cast(null as timestamp) as TIMESTAMP, image_pdf_url(image_num) as pdf_url, False,
     to_tsvector(pye_nm)
-from fec_vsum_f57;
+from fec_vsum_f57_vw;
 
 insert into ofec_sched_e_tmp(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
                               pye_st1, pye_st2, pye_city, pye_st, pye_zip, entity_tp, entity_tp_desc, exp_desc,
@@ -115,10 +115,10 @@ create table ofec_nml_24_queue_new as select * from disclosure.nml_sched_e limit
 create table ofec_nml_24_queue_old as select * from disclosure.nml_sched_e limit 0;
 create table ofec_f57_queue_old as select * from disclosure.nml_form_57 limit 0;
 create table ofec_f57_queue_new as select * from disclosure.nml_form_57 limit 0;
-create table fec_vsum_f57_queue_new as select * from fec_vsum_f57 limit 0;
-create table fec_vsum_f57_queue_old as select * from fec_vsum_f57 limit 0;
-create table ofec_sched_e_queue_new as select * from fec_vsum_sched_e limit 0;
-create table ofec_sched_e_queue_old as select * from fec_vsum_sched_e limit 0;
+create table fec_vsum_f57_queue_new as select * from fec_vsum_f57_vw limit 0;
+create table fec_vsum_f57_queue_old as select * from fec_vsum_f57_vw limit 0;
+create table ofec_sched_e_queue_new as select * from fec_vsum_sched_e_vw limit 0;
+create table ofec_sched_e_queue_old as select * from fec_vsum_sched_e_vw limit 0;
 
 alter table ofec_sched_e_queue_new add column timestamp timestamp;
 alter table ofec_sched_e_queue_old add column timestamp timestamp;
@@ -216,9 +216,9 @@ begin
 end
 $$ language plpgsql;
 
-drop trigger if exists ofec_sched_e_queue_trigger on fec_vsum_sched_e;
+drop trigger if exists ofec_sched_e_queue_trigger on fec_vsum_sched_e_vw;
 create trigger ofec_sched_e_queue_trigger instead of insert or update or delete
-    on fec_vsum_sched_e for each row execute procedure ofec_sched_e_update_queues()
+    on fec_vsum_sched_e_vw for each row execute procedure ofec_sched_e_update_queues()
 ;
 
 drop trigger if exists nml_form_24_trigger on disclosure.nml_sched_e;
@@ -231,9 +231,9 @@ create trigger ofec_f57_trigger before insert or update or delete
     on disclosure.nml_form_57 for each row execute procedure ofec_f57_update_notice_queues()
 ;
 
-drop trigger if exists fec_vsum_f57_trigger on fec_vsum_f57;
+drop trigger if exists fec_vsum_f57_trigger on fec_vsum_f57_vw;
 create trigger fec_vsum_f57_trigger instead of insert or update or delete
-    on fec_vsum_f57 for each row execute procedure fec_vsum_f57_update_queues()
+    on fec_vsum_f57_vw for each row execute procedure fec_vsum_f57_update_queues()
 ;
 drop table if exists ofec_sched_e;
 alter table ofec_sched_e_tmp rename to ofec_sched_e;

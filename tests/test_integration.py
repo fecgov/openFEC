@@ -24,7 +24,7 @@ def make_factory():
     class SchedAFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.fec_vsum_sched_a
+            model = automap.classes.fec_vsum_sched_a_vw
         filing_form = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
@@ -32,7 +32,7 @@ def make_factory():
     class SchedBFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.fec_vsum_sched_b
+            model = automap.classes.fec_vsum_sched_b_vw
         filing_form = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
@@ -447,7 +447,7 @@ class TestViews(common.IntegrationTestCase):
         )
 
         # Create a committee and committee report
-        rep = sa.Table('fec_vsum_f3', db.metadata, autoload=True, autoload_with=db.engine)
+        rep = sa.Table('fec_vsum_f3_vw', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
             indv_unitem_contb_per=20,
             cmte_id=existing.committee_id,

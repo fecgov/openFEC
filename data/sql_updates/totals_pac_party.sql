@@ -2,7 +2,7 @@ drop materialized view if exists ofec_totals_pacs_parties_mv_tmp cascade;
 create materialized view ofec_totals_pacs_parties_mv_tmp as
 with last as (
     select distinct on (cmte_id, election_cycle) *
-    from fec_vsum_f3x
+    from fec_vsum_f3x_vw
     order by
         cmte_id,
         election_cycle,
@@ -62,7 +62,7 @@ select
     max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
     max(last.rpt_yr) as last_report_year
 from
-    fec_vsum_f3x pnp
+    fec_vsum_f3x_vw pnp
     inner join last using (cmte_id, election_cycle)
 where
     pnp.most_recent_filing_flag like 'Y'

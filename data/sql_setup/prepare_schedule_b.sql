@@ -1,12 +1,12 @@
 -- Create index for join on electioneering costs
 drop index if exists fec_vsum_sched_b_link_id_idx;
-create index fec_vsum_sched_b_link_id_idx on fec_vsum_sched_b (link_id);
+create index fec_vsum_sched_b_link_id_idx on fec_vsum_sched_b_vw (link_id);
 
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
 drop table if exists ofec_sched_b_queue_old;
-create table ofec_sched_b_queue_new as select * from fec_vsum_sched_b limit 0;
-create table ofec_sched_b_queue_old as select * from fec_vsum_sched_b limit 0;
+create table ofec_sched_b_queue_new as select * from fec_vsum_sched_b_vw limit 0;
+create table ofec_sched_b_queue_old as select * from fec_vsum_sched_b_vw limit 0;
 alter table ofec_sched_b_queue_new add column timestamp timestamp;
 alter table ofec_sched_b_queue_old add column timestamp timestamp;
 alter table ofec_sched_b_queue_new add column two_year_transaction_period smallint;
@@ -60,7 +60,7 @@ begin
 end
 $$ language plpgsql;
 
-drop trigger if exists ofec_sched_b_queue_trigger on fec_vsum_sched_b;
+drop trigger if exists ofec_sched_b_queue_trigger on fec_vsum_sched_b_vw;
 create trigger ofec_sched_b_queue_trigger before insert or update or delete
-    on fec_vsum_sched_b for each row execute procedure ofec_sched_b_update_queues(:START_YEAR_AGGREGATE)
+    on fec_vsum_sched_b_vw for each row execute procedure ofec_sched_b_update_queues(:START_YEAR_AGGREGATE)
 ;
