@@ -24,7 +24,7 @@ def make_factory():
     class SchedAFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.fec_vsum_sched_a_vw
+            model = automap.classes.fec_vsum_sched_a
         filing_form = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
@@ -32,7 +32,7 @@ def make_factory():
     class SchedBFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.fec_vsum_sched_b_vw
+            model = automap.classes.fec_vsum_sched_b
         filing_form = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016

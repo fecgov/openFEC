@@ -65,7 +65,7 @@ with elections_raw as(
             else elections_raw.election_state
         end as report_contest
     from fecapp.trc_report_due_date reports
-    left join staging.ref_rpt_tp on reports.report_type = staging.ref_rpt_tp.rpt_tp
+    left join staging.ref_rpt_tp on reports.report_type = ref_rpt_tp.rpt_tp_cd
     left join elections_raw using (trc_election_id)
     where
         coalesce(trc_election_status_id, 1) = 1
