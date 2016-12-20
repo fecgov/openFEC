@@ -26,6 +26,36 @@ class BaseItemized(db.Model):
         return self.memo_code == 'X'
 
 
+class BaseRawItemized(db.Model):
+    __abstract__ = True
+
+    file_number = db.Column("repid", db.Integer)
+    related_line_number = db.Column("rel_lineno", db.Integer)
+    committee_id = db.Column("comid", db.String)
+    line_number = db.Column("line_number", db.Integer)
+    transaction_id = db.Column('tran_id', db.String)
+    image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
+    amount = db.Column(db.Integer)
+    entity_type = db.Column('entity', db.String)
+    transaction_description = db.Column('transdesc', db.String)
+    receipt_date = db.Column('create_dt', db.TIMESTAMP)
+    amendment_indicator = db.Column('amend', db.String)
+    memo_code = db.Column(db.String)
+    memo_text = db.Column(db.String)
+    year_to_date = db.Column('ytd', db.Integer)
+    br_tran_id = db.Column(db.String)
+    br_sname = db.Column(db.String)
+
+class ScheduleEEfile(BaseRawItemized):
+
+    #pcf == person completing form
+    filer_first_name = db.Column('pcf_lname', db.String)
+    filer_middle_name = db.Column('pcf_mname', db.String)
+    filer_last_name = db.Column('pcf_fname', db.String)
+    filer_suffix = db.Column('pcf_suffix', db.String)
+    filer_prefix = db.Column('pcf_prefix', db.String)
+
+
 class ScheduleA(BaseItemized):
     __tablename__ = 'ofec_sched_a_master'
 
@@ -437,5 +467,4 @@ class ScheduleF(PdfMixin,BaseItemized):
         if self.has_pdf:
             return utils.make_schedule_pdf_url(self.image_number)
         return None
-
 
