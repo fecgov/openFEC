@@ -4,6 +4,7 @@ from collections import defaultdict
 from urllib.parse import urlencode
 
 from webservices.env import env
+from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -23,6 +24,12 @@ MUR_SUBJECTS = """
     FROM fecmur.case_subject
     JOIN fecmur.subject USING (subject_id)
     LEFT OUTER JOIN fecmur.relatedsubject USING (subject_id, relatedsubject_id)
+    WHERE case_id = %s
+"""
+
+MUR_ELECTION_CYCLES = """
+    SELECT election_cycle::INT
+    FROM fecmur.electioncycle
     WHERE case_id = %s
 """
 
@@ -97,6 +104,7 @@ def load_current_murs():
                 'mur_type': 'current',
             }
             mur['subject'] = {"text": get_subjects(case_id)}
+            mur['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
@@ -104,7 +112,15 @@ def load_current_murs():
             mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            es.index('docs', 'murs', mur, id=mur['doc_id'])
+            es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+
+def get_election_cycles(case_id):
+    election_cycles = []
+    with db.engine.connect() as conn:
+        rs = conn.execute(MUR_ELECTION_CYCLES, case_id)
+        for row in rs:
+            election_cycles.append(row['election_cycle'])
+    return election_cycles
 
 def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:
@@ -186,7 +202,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
             else:
                 match_text = statutory_citation[match.start():matches[index + 1].start()]
             text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'statute', 'title': orig_title,  'url': url})
+            citations.append({'text': text, 'type': 'statute', 'title': orig_title, 'url': url})
         if not citations:
             logger.warn("Cannot parse statutory citation %s for Entity %s in case %s",
                     statutory_citation, entity_id, case_id)
@@ -205,7 +221,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
             else:
                 match_text = regulatory_citation[match.start():matches[index + 1].start()]
             text = match_text.rstrip(' ,;')
-            citations.append({'text': text, 'type': 'regulation', 'title': '11',  'url': url})
+            citations.append({'text': text, 'type': 'regulation', 'title': '11', 'url': url})
         if not citations:
             logger.warn("Cannot parse regulatory citation %s for Entity %s in case %s",
                     regulatory_citation, entity_id, case_id)

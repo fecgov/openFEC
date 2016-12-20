@@ -34,7 +34,6 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     to_tsvector(fec_yr.tres_nm) as treasurer_text,
     f1.org_tp as organization_type,
     expand_organization_type(f1.org_tp) as organization_type_full,
-    null as expire_date,
     -- Address
     fec_yr.cmte_st1 as street_1,
     fec_yr.cmte_st2 as street_2,

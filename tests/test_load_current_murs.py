@@ -8,6 +8,7 @@ import pytest
 
 import manage
 from webservices import rest
+from webservices.legal_docs import DOCS_INDEX
 from webservices.legal_docs.current_murs import parse_regulatory_citations, parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 
@@ -123,6 +124,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'no': '1',
             'name': 'Simple MUR',
             'mur_type': 'current',
+            'election_cycles': [2016],
             'text': '',
             'doc_id': 'mur_1',
             'participants': [],
@@ -137,7 +139,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         manage.legal_docs.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
-        assert index == 'docs'
+        assert index == DOCS_INDEX
         assert doc_type == 'murs'
         assert mur == expected_mur
 
@@ -151,6 +153,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'no': '1',
             'name': 'MUR with participants',
             'mur_type': 'current',
+            'election_cycles': [2016],
             'doc_id': 'mur_1',
             'subject': {"text": [mur_subject]},
         }
@@ -175,7 +178,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         manage.legal_docs.load_current_murs()
         index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
 
-        assert index == 'docs'
+        assert index == DOCS_INDEX
         assert doc_type == 'murs'
         for key in expected_mur:
             assert mur[key] == expected_mur[key]
@@ -268,6 +271,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'text': '', 'subject': {'text': ['Fraudulent misrepresentation']},
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
+            'election_cycles': [2016],
             'close_date': datetime(2008, 1, 1, 0, 0),
             'url': '/legal/matter-under-review/1/'}
 
@@ -283,6 +287,9 @@ class TestLoadCurrentMURs(BaseTestCase):
         self.connection.execute(
             "INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id) "
             "VALUES (%s, %s, -1)", case_id, subject_id)
+        self.connection.execute(
+            "INSERT INTO fecmur.electioncycle (case_id, election_cycle) "
+            "VALUES (%s, 2016)", case_id)
 
     def create_participant(self, case_id, entity_id, role, name,
             stage=None, statutory_citation=None, regulatory_citation=None):
@@ -352,6 +359,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             "players",
             "entity",
             "case_subject",
+            "electioncycle",
             "case",
             "calendar",
             "settlement",
