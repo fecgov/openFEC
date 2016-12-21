@@ -4,12 +4,21 @@ from webservices import decoders, docs
 from sqlalchemy.dialects.postgresql import ARRAY, TSVECTOR
 from .base import db, BaseModel
 
+class DisclosureMixin(object):
+    __table_args__ = {"schema": "disclosure"}
 
-class ReportType(db.Model):
-    __tablename__ = 'staging.ref_rpt_tp'
+class StagingMixin(object):
+    __table_args__ = {"schema": "staging"}
 
-    report_type = db.Column('rpt_tp', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
+class FecAppMixin(object):
+    __table_args__ = {"schema": "fecapp"}
+
+class ReportType(db.Model, StagingMixin):
+    __tablename__ = 'ref_rpt_tp'
+
+    report_type = db.Column('rpt_tp_cd', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
+
 
 
 """
@@ -31,8 +40,8 @@ class DateMixin(object):
         return clean_report_type(self.report.report_type_full)
 
 
-class ReportDate(db.Model, DateMixin):
-    __tablename__ = 'fecapp.trc_report_due_date'
+class ReportDate(db.Model, DateMixin, FecAppMixin):
+    __tablename__ = 'trc_report_due_date'
     report = db.relationship(ReportType)
     report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
 
@@ -42,8 +51,8 @@ def clean_report_type(report_type):
     return REPORT_TYPE_CLEAN.sub('', report_type).strip()
 
 
-class ElectionDate(db.Model):
-    __tablename__ = 'fecapp.trc_election'
+class ElectionDate(db.Model, FecAppMixin):
+    __tablename__ = 'trc_election'
 
     trc_election_id = db.Column(db.Integer, primary_key=True)
     election_state = db.Column(db.String, index=True, doc=docs.STATE)
