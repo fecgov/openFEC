@@ -29,31 +29,27 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    file_number = db.Column("repid", db.Integer)
     related_line_number = db.Column("rel_lineno", db.Integer)
     committee_id = db.Column("comid", db.String)
     line_number = db.Column("line_number", db.Integer)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
-    amount = db.Column(db.Integer)
     entity_type = db.Column('entity', db.String)
     transaction_description = db.Column('transdesc', db.String)
-    receipt_date = db.Column('create_dt', db.TIMESTAMP)
+    load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
     memo_code = db.Column(db.String)
     memo_text = db.Column(db.String)
-    year_to_date = db.Column('ytd', db.Integer)
-    br_tran_id = db.Column(db.String)
-    br_sname = db.Column(db.String)
+    back_reference_transaction_id = db.Column('br_tran_id', db.String)
+    back_reference_schedule_name = db.Column('br_sname', db.String)
 
-class ScheduleEEfile(BaseRawItemized):
+    @hybrid_property
+    def memoed_subtotal(self):
+        return self.memo_code == 'X'
 
-    #pcf == person completing form
-    filer_first_name = db.Column('pcf_lname', db.String)
-    filer_middle_name = db.Column('pcf_mname', db.String)
-    filer_last_name = db.Column('pcf_fname', db.String)
-    filer_suffix = db.Column('pcf_suffix', db.String)
-    filer_prefix = db.Column('pcf_prefix', db.String)
+    @property
+    def pdf_url(self):
+        return utils.make_schedule_pdf_url(self.image_number)
 
 
 class ScheduleA(BaseItemized):
@@ -298,7 +294,7 @@ class ScheduleD(PdfMixin,BaseItemized):
         return None
 
 
-class ScheduleE(BaseItemized):
+class ScheduleE(BaseItemized, PdfMixin):
     __tablename__ = 'ofec_sched_e'
 
     sub_id = db.Column(db.String, primary_key=True)
@@ -384,6 +380,62 @@ class ScheduleE(BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
 
     pdf_url = db.Column(db.String)
+
+
+
+class ScheduleEEfile(BaseRawItemized):
+    __tablename__ = 'real_efile_se'
+
+    # payee info
+    payee_prefix = db.Column('prefix', db.String)
+    #need to add vectorized column
+    #payee_name_text = db.Column(TSVECTOR)
+    payee_first_name = db.Column('fname', db.String)
+    payee_middle_name = db.Column('mname', db.String)
+    payee_last_name = db.Column('lname', db.String)
+    payee_suffix = db.Column('suffix', db.String)
+    payee_street_1 = db.Column('str1', db.String)
+    payee_street_2 = db.Column('str2', db.String)
+    payee_city = db.Column('city', db.String)
+    payee_state = db.Column('state', db.String)
+    payee_zip = db.Column('zip', db.String)
+
+    # pcf == person completing form -> filer?
+    filer_first_name = db.Column('pcf_lname', db.String)
+    filer_middle_name = db.Column('pcf_mname', db.String)
+    filer_last_name = db.Column('pcf_fname', db.String)
+    filer_suffix = db.Column('pcf_suffix', db.String)
+    filer_prefix = db.Column('pcf_prefix', db.String)
+
+    # Candidate info
+    candidate_id = db.Column('so_canid', db.String)
+    #find some way to grep the report year from the columns we have
+    #candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
+    candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_prefix = db.Column('so_prefix', db.String)
+    candidate_first_name = db.Column('so_fname', db.String)
+    candidate_middle_name = db.Column('so_mmame', db.String)
+    # candidate_last_name = db.Column('s_o_cand_nm_last', db.String)
+    candidate_suffix = db.Column('so_suffix', db.String)
+    candidate_office = db.Column('so_can_off', db.String, doc=docs.OFFICE)
+    cand_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
+    cand_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
+
+    #is_notice = db.Column(db.Boolean, index=True)
+    expenditure_description = db.Column('exp_desc', db.String)
+    expenditure_date = db.Column('exp_dt', db.Date)
+    expenditure_amount = db.Column('amount', db.Integer)
+    office_total_ytd = db.Column('ytd', db.Float)
+    category_code = db.Column('cat_code', db.String)
+    #category_code_full = db.Column('catg_cd_desc', db.String)
+    support_oppose_indicator = db.Column('position', db.String)
+
+    notary_sign_date = db.Column('not_date', db.Date)
+
+    dissemination_date = db.Column('dissem_dt', db.Date)
+
+    file_number = db.Column("repid", db.Integer, primary_key=True)
+
 
 
 class ScheduleF(PdfMixin,BaseItemized):
