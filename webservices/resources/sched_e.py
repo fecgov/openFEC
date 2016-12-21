@@ -6,6 +6,7 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.common import views
 from webservices.common.views import ItemizedResource
 
 
@@ -84,3 +85,14 @@ class ScheduleEView(ItemizedResource):
         if kwargs['district']:
             query = query.filter(models.CandidateHistory.district == kwargs['district'])
         return query
+
+
+@doc(
+    tags=['independent expenditures'],
+    description=docs.SCHEDULE_E,
+)
+class ScheduleEEfileView(views.ApiResource):
+
+    model = models.ScheduleEEfile
+    schema = schemas.ItemizedScheduleEfilingsSchema
+    page_schema = schemas.ScheduleEEfilePageSchema
