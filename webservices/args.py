@@ -82,23 +82,22 @@ class IndexValidator(OptionValidator):
     :param Base model: SQLALchemy model.
     :param list exclude: Optional list of columns to exclude.
     """
-    def __init__(self, model, extra=None, exclude=None):
+    def __init__(self, model, extra=None, exclude=None, schema=None):
         self.model = model
         self.extra = extra or []
         self.exclude = exclude or []
+        self.database_schema = schema
 
     @property
     def values(self):
         inspector = sa.inspect(db.engine)
-
         column_map = {
             column.key: label
             for label, column in self.model.__mapper__.columns.items()
         }
-
         return [
             column_map[column['column_names'][0]]
-            for column in inspector.get_indexes(self.model.__tablename__)
+            for column in inspector.get_indexes(self.model.__tablename__, self.database_schema)
             if not self._is_excluded(column_map.get(column['column_names'][0]))
         ] + self.extra
 
@@ -136,10 +135,14 @@ names = {
 }
 
 query = {
-    'q': fields.Str(required=True, description='Text to search legal documents for.'),
+    'q': fields.Str(required=False, description='Text to search legal documents for.'),
     'from_hit': fields.Int(required=False, description='Get results starting from this index.'),
     'hits_returned': fields.Int(required=False, description='Number of results to return (max 10).'),
-    'type': fields.Str(required=False, description='Document type to refine search by')
+    'type': fields.Str(required=False, description='Document type to refine search by'),
+    'ao_no': fields.List(IStr, required=False, description='Force advisory opinion number'),
+    'ao_name': fields.List(IStr, required=False, description='Force advisory opinion name'),
+    'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
+    'ao_max_date': fields.Date(description="Latest issue date of advisory opinion")
 }
 
 candidate_detail = {
@@ -217,6 +220,7 @@ filings = {
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,
     ),
+    'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'primary_general_indicator': fields.List(IStr, description='Primary, general or special election indicator'),
     'amendment_indicator': fields.List(
         IStr,

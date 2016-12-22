@@ -710,7 +710,7 @@ CalendarDateSchema = make_schema(
     },
     options={
         'exclude': (
-            'summary_text', 'description_text', 'idx'
+            'summary_text', 'description_text'
         )
     },
 )
@@ -786,23 +786,14 @@ RadAnalystPageSchema = make_page_schema(RadAnalystSchema)
 register_schema(RadAnalystSchema)
 register_schema(RadAnalystPageSchema)
 
-EntityReceiptsTotalsSchema = make_schema(
-    models.EntityReceiptsTotals,
+EntityReceiptDisbursementTotalsSchema = make_schema(
+    models.EntityReceiptDisbursementTotals,
     options={'exclude': ('idx','month', 'year')},
     fields={'date': ma.fields.Date(doc='The cumulative total for this month.')},
 )
-EntityReceiptsTotalsPageSchema = make_page_schema(EntityReceiptsTotalsSchema)
-register_schema(EntityReceiptsTotalsSchema)
-register_schema(EntityReceiptsTotalsPageSchema)
-
-EntityDisbursementsTotalsSchema = make_schema(
-    models.EntityDisbursementsTotals,
-    options={'exclude': ('idx','month', 'year')},
-    fields={'date': ma.fields.Date(doc='The cumulative total for this month.')},
-)
-EntityDisbursementsTotalsPageSchema = make_page_schema(EntityDisbursementsTotalsSchema)
-register_schema(EntityDisbursementsTotalsSchema)
-register_schema(EntityDisbursementsTotalsPageSchema)
+EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)
+register_schema(EntityReceiptDisbursementTotalsSchema)
+register_schema(EntityReceiptDisbursementTotalsPageSchema)
 
 ScheduleAByStateRecipientTotalsSchema = make_schema(
     models.ScheduleAByStateRecipientTotals,
