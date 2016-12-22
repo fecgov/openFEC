@@ -42,6 +42,7 @@ class DateMixin(object):
 
 class ReportDate(db.Model, DateMixin, FecAppMixin):
     __tablename__ = 'trc_report_due_date'
+
     report = db.relationship(ReportType)
     report_type = db.Column(db.String, db.ForeignKey(ReportType.report_type), index=True)
 
