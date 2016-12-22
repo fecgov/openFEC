@@ -22,15 +22,18 @@ def _reset_schema():
     rest.db.engine.execute('drop schema if exists public cascade;')
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('drop schema if exists staging cascade;')
+    rest.db.engine.execute('drop schema if exists fecapp cascade;')
     rest.db.engine.execute('create schema public;')
     rest.db.engine.execute('create schema disclosure;')
     rest.db.engine.execute('create schema staging;')
+    rest.db.engine.execute('create schema fecapp;')
 
 
 def _reset_schema_for_integration():
     rest.db.engine.execute('drop schema if exists public cascade;')
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('drop schema if exists staging cascade;')
+    rest.db.engine.execute('drop schema if exists fecapp cascade;')
     rest.db.engine.execute('create schema public;')
 
 

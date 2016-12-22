@@ -94,7 +94,7 @@ select
     amendments.prev_file_num as previous_file_number,
     amendments.mst_rct_file_num as most_recent_file_number
 from
-    fec_vsum_f3p f3p
+    fec_vsum_f3p_vw f3p
     left join
     (select * from ofec_presidential_electronic_amendments_mv_tmp union all
      select * from ofec_presidential_paper_amendments_mv_tmp) amendments
