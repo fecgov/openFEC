@@ -2,7 +2,7 @@ drop materialized view if exists ofec_reports_pacs_parties_mv_tmp;
 create materialized view ofec_reports_pacs_parties_mv_tmp as
 select
     row_number() over () as idx,
-    cmte_id as committee_id,
+    f3x.cmte_id as committee_id,
     election_cycle as cycle,
     cvg_start_dt as coverage_start_date,
     cvg_end_dt as coverage_end_date,
@@ -61,7 +61,7 @@ select
     pol_pty_cmte_refund_ytd as refunded_political_party_committee_contributions_ytd,
     pol_pty_cmte_contb_per_i as political_party_committee_contributions_period,
     pol_pty_cmte_contb_ytd_i as political_party_committee_contributions_ytd,
-    rpt_yr as report_year,
+    f3x.rpt_yr as report_year,
     shared_fed_actvy_nonfed_ytd as shared_fed_activity_nonfed_ytd,
     shared_fed_actvy_fed_shr_per as shared_fed_activity_period,
     shared_fed_actvy_fed_shr_ytd as shared_fed_activity_ytd,
@@ -101,16 +101,22 @@ select
     tranf_from_nonfed_levin_ytd as transfers_from_nonfed_levin_ytd,
     tranf_to_affliliated_cmte_per as transfers_to_affiliated_committee_period,
     tranf_to_affilitated_cmte_ytd as transfers_to_affilitated_committees_ytd,
-    rpt_tp as report_type,
+    f3x.rpt_tp as report_type,
     rpt_tp_desc as report_type_full,
     most_recent_filing_flag like 'N' as is_amended,
-    receipt_dt as receipt_date,
-    file_num as file_number,
+    f3x.receipt_dt as receipt_date,
+    f3x.file_num as file_number,
     means_filed(begin_image_num) as means_filed,
-    report_fec_url(begin_image_num::text, file_num::integer) as fec_url
+    report_fec_url(begin_image_num::text, f3x.file_num::integer) as fec_url,
+    amendments.amendment_chain,
+    amendments.prev_file_num as previous_file_number,
+    amendments.mst_rct_file_num as most_recent_file_number
 
 from
-    fec_vsum_f3x
+    fec_vsum_f3x_vw f3x
+    left join ( select * from ofec_pac_party_paper_amendments_mv_tmp
+                union all select * from ofec_pac_party_electronic_amendments_mv_tmp) amendments
+    on f3x.file_num = amendments.file_num
 where
     election_cycle >= :START_YEAR
 ;

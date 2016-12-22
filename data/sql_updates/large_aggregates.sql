@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_large_aggregates_mv_tmp;
-create materialized view ofec_large_aggregates_mv_tmp as
+drop materialized view if exists ofec_entity_chart_mv_tmp;
+create materialized view ofec_entity_chart_mv_tmp as
 -- candidates
 with candidates as (
     select
@@ -17,7 +17,7 @@ with candidates as (
         ttl_loans_received_per as ttl_loan_repymts,
         ttl_contb_ref_per as ttl_contb_ref,
         other_disb_per
-    from fec_vsum_f3p
+    from fec_vsum_f3p_vw
     where most_recent_filing_flag like 'Y'
     union all
     select
@@ -34,7 +34,7 @@ with candidates as (
         ttl_loan_repymts_per as ttl_loan_repymts,
         ttl_contb_ref_col_ttl_per as ttl_contb_ref,
         other_disb_per
-    from fec_vsum_f3
+    from fec_vsum_f3_vw
     where most_recent_filing_flag like 'Y'
 ),
 -- Remove candidate activity that does not apply to the current election
@@ -42,7 +42,7 @@ cand as (
     select * from candidates
     inner join
         -- check we don't need to normalize fec_election_yr
-        cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
+        disclosure.cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
 ),
 -- Create sums
 cand_totals as (
@@ -58,7 +58,7 @@ cand_totals as (
                 coalesce(cand.ttl_loan_repymts,0) +
                 coalesce(cand.ttl_contb_ref,0)
             )
-        ) as adjusted_total_receipts,
+        ) as candidate_adjusted_total_receipts,
         sum(coalesce(cand.ttl_disb, 0) -
             (
                 coalesce(cand.tranf_to_other_auth_cmte,0) +
@@ -66,7 +66,7 @@ cand_totals as (
                 coalesce(cand.ttl_contb_ref,0) +
                 coalesce(cand.other_disb_per,0)
             )
-        ) as adjusted_total_disbursements
+        ) as candidate_adjusted_total_disbursements
     from cand
     group by
         month,
@@ -96,7 +96,7 @@ pac_totals as (
                 -- contribution refunds
                 coalesce(ttl_contb_refund,0)
             )
-        ) as adjusted_total_receipts,
+        ) as pac_adjusted_total_receipts,
         sum(coalesce(ttl_disb,0) -
             (
                 -- Nonfederal share of allocated disbursements
@@ -112,8 +112,8 @@ pac_totals as (
                 -- Other disbursements
                 coalesce(other_disb_per,0)
             )
-        ) as adjusted_total_disbursements
-    from fec_vsum_f3x
+        ) as pac_adjusted_total_disbursements
+    from fec_vsum_f3x_vw
     left join
         ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
@@ -141,7 +141,7 @@ party_totals as (
                 coalesce(loan_repymts_made_per, 0) +
                 coalesce(ttl_contb_refund,0)
             )
-        ) as adjusted_total_receipts,
+        ) as party_adjusted_total_receipts,
         sum(coalesce(ttl_disb,0) -
             (
                 coalesce(shared_nonfed_op_exp_per,0) +
@@ -153,8 +153,8 @@ party_totals as (
                 coalesce(ttl_contb_refund,0) +
                 coalesce(other_disb_per,0)
             )
-        ) as adjusted_total_disbursements
-    from fec_vsum_f3x
+        ) as party_adjusted_total_disbursements
+    from fec_vsum_f3x_vw
     left join
         ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
@@ -164,123 +164,62 @@ party_totals as (
         -- excluding host conventions because they have different rules than party committees
         and cmte_id not in ('C00578419', 'C00485110', 'C00422048', 'C00567057', 'C00483586', 'C00431791', 'C00571133',
             'C00500405', 'C00435560', 'C00572958', 'C00493254', 'C00496570', 'C00431593')
-        -- do we have this ?
-        -- and cm.cmte_id not in (select cmte_id from pclark.ref_pty_host_convention)
     group by
         month,
         year
-),
--- other
--- Independent expenditure only
-ie as (
+), -- merge
+combined as (
     select
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
-        sum(ttl_indt_exp) as receipts,
-        sum(ttl_indt_contb) as disbursements
-    from
-        fec_vsum_f5
-    where
-        most_recent_filing_flag like 'Y'
-    group by
-        month,
-        year
-),
--- communication cost
-communicaiton as (
-    select
-        extract(month from to_date(cast(communication_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(communication_dt as text), 'YYYY-MM-DD')) as year,
-        null::float as receipts,
-        sum(communication_cost) as disbursements
-    from fec_vsum_f76
-    group by
-        month,
-        year
-),
--- electioneering
-electioneering as (
-    select
-        extract(month from to_date(cast(disb_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(disb_dt as text), 'YYYY-MM-DD')) as year,
-        null::float as receipts,
-        sum(calculated_cand_share) as adjusted_total_disbursements
-    from electioneering_com_vw
-    group by
-        month,
-        year
-),
--- (why not delegate?)
-other as(
-    select
-        'other'::text as type,
+        row_number() over () as idx,
         month,
         year,
-        sum(receipts),
-        sum(disbursements)
-    from (
-        select * from ie
-        union all
-        select * from communicaiton
-        union all
-        select * from electioneering
-    ) conglomerate
+        year::numeric + (year::numeric % 2) as cycle,
+        case when max(candidate_adjusted_total_receipts) is null
+            then 0 else max(candidate_adjusted_total_receipts) end
+        as candidate_receipts,
+        case when max(cand_totals.candidate_adjusted_total_disbursements) is null
+            then 0 else max(cand_totals.candidate_adjusted_total_disbursements) end
+        as canidate_disbursements,
+        case when max(pac_totals.pac_adjusted_total_receipts) is null
+            then 0 else max(pac_totals.pac_adjusted_total_receipts) end
+        as pac_receipts,
+        case when max(pac_totals.pac_adjusted_total_disbursements) is null
+            then 0 else max(pac_totals.pac_adjusted_total_disbursements) end
+        as pac_disbursements,
+        case when max(party_totals.party_adjusted_total_receipts) is null
+            then 0 else max(party_totals.party_adjusted_total_receipts) end
+        as party_receipts,
+        case when max(party_totals.party_adjusted_total_disbursements) is null
+            then 0 else max(party_totals.party_adjusted_total_disbursements) end
+        as party_disbursements
+    from cand_totals
+    full outer join pac_totals using (month, year)
+    full outer join party_totals using (month, year)
     group by
         month,
         year
-),
-combined as (
-    select * from cand_totals
-    union all
-    select * from pac_totals
-    union all
-    select * from party_totals
--- Removing this for now --
-    -- union all
-    -- select * from other
+    order by year, month
 )
 select
-    row_number() over () as idx,
-    year::numeric + (year::numeric % 2) as cycle,
-    combined.*
+    idx,
+    month,
+    year,
+    cycle,
+    sum(candidate_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_receipts,
+    candidate_receipts,
+    sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_disbursements,
+    canidate_disbursements,
+    sum(pac_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_receipts,
+    pac_receipts,
+    sum(pac_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_pac_disbursements,
+    pac_disbursements,
+    sum(party_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_receipts,
+    party_receipts,
+    sum(party_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_disbursements,
+    party_disbursements
 from combined
+where cycle >= 2008
 ;
 
--- creates cumulative materialized view per cycle from the data receipts in the large aggregates
-drop materialized view if exists ofec_entity_receipts_chart_mv_tmp;
-create materialized view ofec_entity_receipts_chart_mv_tmp as (
-    select
-        idx,
-        type,
-        month,
-        year,
-        cycle,
-        adjusted_total_receipts,
-        sum(adjusted_total_receipts) OVER (PARTITION BY cycle, type order by year, month, type desc)
-    from ofec_large_aggregates_mv_tmp
-    where cycle >= 2008
-);
-
-create unique index on ofec_large_aggregates_mv_tmp (idx);
-
--- creates cumulative materialized view per cycle from the data disbursements in the large aggregates
-drop materialized view if exists entity_disbursements_chart_mv_tmp;
-create materialized view ofec_entity_disbursements_chart_mv_tmp as (
-    select
-        idx,
-        type,
-        month,
-        year,
-        cycle,
-        adjusted_total_disbursements,
-        sum(adjusted_total_disbursements) OVER (PARTITION BY cycle, type order by year, month, type desc)
-    from ofec_large_aggregates_mv_tmp
-    where cycle >= 2008
-);
-
-
-create unique index on ofec_entity_receipts_chart_mv_tmp (idx);
-create index on ofec_entity_receipts_chart_mv_tmp (cycle);
-
-create unique index on ofec_entity_disbursements_chart_mv_tmp (idx);
-create index on ofec_entity_disbursements_chart_mv_tmp (cycle);
+create unique index on ofec_entity_chart_mv_tmp (idx);
+create index on ofec_entity_chart_mv_tmp (cycle);

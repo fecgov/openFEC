@@ -12,15 +12,16 @@ from multiprocessing import Pool
 import logging
 from urllib.parse import urlencode
 
-import elasticsearch
-from elasticsearch_dsl import Search, Q, Index
-from elasticsearch_dsl.result import Result
 import requests
 
 from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
+from webservices.legal_docs import (
+    DOCS_INDEX,
+    DOCS_SEARCH
+)
 
 from . import reclassify_statutory_citation
 
@@ -53,21 +54,51 @@ def get_text(node):
     return text
 
 
-def remove_legal_docs():
-    es = utils.get_elasticsearch_connection()
-    es.indices.delete('docs')
-    es.indices.create('docs', {
+def initialize_legal_docs():
+    """
+    Initialize elasticsearch for storing legal documents. Create the `docs` index,
+    and set up the aliases `docs_index` and `docs_search` to point to the `docs`
+    index. If the `doc` index already exists, it is deleted.
+    """
+    settings = {
         "mappings": {
             "_default_": {
                 "properties": {
                     "no": {
                         "type": "string",
                         "index": "not_analyzed"
+                    },
+                    "text": {
+                        "type": "string",
+                        "analyzer": "english"
+                    },
+                    "name": {
+                        "type": "string",
+                        "analyzer": "english"
+                    },
+                    "description": {
+                        "type": "string",
+                        "analyzer": "english"
+                    },
+                    "summary": {
+                        "type": "string",
+                        "analyzer": "english"
                     }
                 }
             }
+        },
+        "settings": {
+            "analysis": {"analyzer": {"default": {"type": "english"}}}
+        },
+        "aliases": {
+            DOCS_INDEX: {},
+            DOCS_SEARCH: {}
         }
-    })
+    }
+
+    es = utils.get_elasticsearch_connection()
+    es.indices.delete('docs')
+    es.indices.create('docs', settings)
 
 
 def index_regulations():
@@ -95,7 +126,7 @@ def index_regulations():
                        "text": sections[section_label]['text'], 'url': reg_url,
                        "no": no}
 
-                es.index('docs', 'regulations', doc, id=doc['doc_id'])
+                es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
             reg_count += 1
         print("%d regulation parts indexed." % reg_count)
     else:
@@ -150,7 +181,7 @@ def index_advisory_opinions():
                    "date": row[9],
                    "url": pdf_url}
 
-            es.index('docs', 'advisory_opinions', doc, id=doc['doc_id'])
+            es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
         print("%d docs loaded" % loading_doc)
 
@@ -201,7 +232,7 @@ def get_title_52_statutes():
                            "chapter": chapter,
                            "subchapter": subchapter_no,
                            "url": pdf_url}
-                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
 
 def get_title_26_statutes():
     es = utils.get_elasticsearch_connection()
@@ -233,7 +264,7 @@ def get_title_26_statutes():
                            "title": "26",
                            "chapter": chapter_no,
                            "url": pdf_url}
-                    es.index('docs', 'statutes', doc, id=doc['doc_id'])
+                    es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
 
 
 def index_statutes():
@@ -382,8 +413,14 @@ def delete_murs_from_s3():
         obj.delete()
 
 def delete_murs_from_es():
+    delete_from_es(DOCS_INDEX, 'murs')
+
+def delete_advisory_opinions_from_es():
+    delete_from_es(DOCS_INDEX, 'advisory_opinions')
+
+def delete_from_es(index, doc_type):
     es = utils.get_elasticsearch_connection()
-    es.transport.perform_request('DELETE', '/docs/murs')
+    es.delete_by_query(index=index, body={'query': {'match_all': {}}}, doc_type=doc_type)
 
 def get_mur_names(mur_names={}):
     # Cache the mur names
@@ -449,7 +486,7 @@ def process_mur(mur):
         'citations': citations,
         'url': pdf_url
     }
-    es.index('docs', 'murs', doc, id=doc['doc_id'])
+    es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs():
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
@@ -465,104 +502,3 @@ def load_archived_murs():
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
     with Pool(processes=1, maxtasksperchild=1) as pool:
         pool.map(process_mur, murs, chunksize=1)
-
-def remap_archived_murs_citations():
-    """Re-map citations for archived MURs. To extract the MUR
-    information from the archived PDFs, use load_archived_murs"""
-
-    es = utils.get_elasticsearch_connection()
-
-    # Fetch archived murs from ES
-    query = Search() \
-            .query(Q('term', mur_type='archived') &  Q('term', _type='murs')) \
-            .source(include='citations')
-    archived_murs = elasticsearch.helpers.scan(es, query.to_dict(), scroll='1m', index='docs', doc_type='murs', size=500)
-
-    # Re-map the citations
-    update_murs = (dict(_op_type='update', _id=mur.meta.id, doc=mur.to_dict()) for mur in remap_citations(archived_murs))
-
-    # Save MURs to ES
-    count, _ = elasticsearch.helpers.bulk(es, update_murs, index='docs', doc_type='murs', chunk_size=100, request_timeout=30)
-    logger.info("Re-mapped %d archived MURs" % count)
-
-
-def remap_citations(archived_murs):
-    for mur in archived_murs:
-        mur = Result(mur)
-
-        # Include regulations and us_code citations in the re-map
-        mur.citations = get_citations(map(lambda c: c['text'], list(mur.citations['regulations']) + list(mur.citations['us_code'])))
-        yield mur
-
-def enable_stemming():
-    es = utils.get_elasticsearch_connection()
-    settings = {
-        "mappings": {
-            "_default_": {
-                "properties": {
-                    "no": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "text": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "name": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "description": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "summary": {
-                        "type": "string",
-                        "analyzer": "english"
-                    }
-                }
-            }
-        },
-        "settings": {
-            "analysis": {"analyzer": {"default": {"type": "english"}}}
-        }
-    }
-
-    docs_backup = Index('docs_backup', using=es)
-    if not docs_backup.exists():
-        es.indices.create('docs_backup', settings)
-
-    doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
-    original_count = []
-    backed_up_count = []
-    reindexed_count = []
-    for _type in doc_types:
-        query = {"query": {"match_all": {}}}
-        total = Search().using(es).query(Q('term', _type=_type)).execute().hits.total
-        original_count.append(total)
-        all_docs = elasticsearch.helpers.scan(es, query, scroll='1m', index='docs', doc_type=_type, size=500)
-        all_docs = (Result(doc).to_dict() for doc in all_docs)
-        count, _ = elasticsearch.helpers.bulk(es, all_docs, index='docs_backup',
-                    chunk_size=100, doc_type=_type, request_timeout=30)
-        backed_up_count.append(count)
-        docs_backup.refresh()
-        print("Backed up %d %s." % (count, _type))
-
-    if original_count == backed_up_count and sum(original_count) > 0:
-        Index('docs', using=es).delete()
-        es.indices.create('docs', settings)
-    else:
-        raise Exception("Could not back up docs index to docs_backup.")
-
-    for _type in doc_types:
-        all_docs = elasticsearch.helpers.scan(es, query, scroll='1m', index='docs_backup', doc_type=_type, size=500)
-        all_docs = (Result(doc).to_dict() for doc in all_docs)
-        count, _ = elasticsearch.helpers.bulk(es, all_docs, index='docs',
-                    chunk_size=100, doc_type=_type, request_timeout=30)
-        reindexed_count.append(count)
-        print("Reindexed %d %s." % (count, _type))
-
-    if original_count == reindexed_count and sum(original_count) > 0:
-        Index('docs_backup', using=es).delete()
-    else:
-        raise Exception("Count not reindex docs_backup")

@@ -10,9 +10,6 @@ from webservices.env import env
 
 DEFAULT_FRACTION = 0.5
 FULL_TABLES = [
-    'dimdates',
-    'dimparty',
-    'dimreporttype',
     'cand_inactive',
 ]
 EXCLUDE_TABLES = [
@@ -28,11 +25,11 @@ EXCLUDE_TABLES = [
     'f_item_receipt_or_exp',
 ]
 # Include records used in integration tests
-FORCE_INCLUDE = [
-    ('dimcand', 10025229),  # Nancy Pelosi
-    ('dimcand', 10012694),  # John Boehner
-    ('dimcmte', 10031117),  # Raul Grijalva (committee)
-]
+# FORCE_INCLUDE = [
+#     ('dimcand', 10025229),  # Nancy Pelosi
+#     ('dimcand', 10012694),  # John Boehner
+#     ('dimcmte', 10031117),  # Raul Grijalva (committee)
+# ]
 
 
 @task

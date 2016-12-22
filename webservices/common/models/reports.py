@@ -3,6 +3,7 @@ from webservices import docs, utils
 from .base import db, BaseModel
 
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.dialects.postgresql import ARRAY
 
 from webservices.common.models.dates import ReportType
 from sqlalchemy.ext.declarative import declared_attr
@@ -65,6 +66,11 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     committee = utils.related('CommitteeHistory', 'committee_id', 'committee_id', 'report_year', 'cycle')
+
+    #These columns derived from amendments materializeds view
+    amendment_chain = db.Column(ARRAY(db.Numeric), doc=docs.AMENDMENT_CHAIN)
+    previous_file_number = db.Column(db.Numeric)
+    most_recent_file_number = db.Column(db.Numeric)
 
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
     file_number = db.Column(db.Integer)
