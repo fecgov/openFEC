@@ -12,7 +12,7 @@ class TestEntityReceiptDisbursementTotals(ApiBaseTest):
             factories.EntityReceiptDisbursementTotalsFactory(cycle=2000, cumulative_candidate_receipts=50000, month=3, year=1999),
             factories.EntityReceiptDisbursementTotalsFactory(cycle=2020, cumulative_party_receipts=90000, month=3, year=2019),
             factories.EntityReceiptDisbursementTotalsFactory(cycle=1998, cumulative_pac_disbursements=50000, month=3, year=1997),
-            factories.EntityReceiptDisbursementTotalsFactory(cycle=2008, cumulative_canidate_disbursements=90000, month=3, year=2008)
+            factories.EntityReceiptDisbursementTotalsFactory(cycle=2008, cumulative_candidate_disbursements=90000, month=3, year=2008)
         ]
 
         filter_fields = (

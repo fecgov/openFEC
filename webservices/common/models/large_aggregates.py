@@ -15,7 +15,7 @@ class EntityReceiptDisbursementTotals(db.Model):
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
     cumulative_candidate_receipts = db.Column(db.Float, doc="Cumulative candidate receipts in a two year period, adjusted to avoid double counting.")
-    cumulative_canidate_disbursements = db.Column(db.Float, doc="Cumulative candidate disbursements in a two year period, adjusted to avoid double counting.")
+    cumulative_candidate_disbursements = db.Column(db.Float, doc="Cumulative candidate disbursements in a two year period, adjusted to avoid double counting.")
     cumulative_pac_receipts = db.Column(db.Float, doc="Cumulative PAC recipts in a two year period, adjusted to avoid double counting.")
     cumulative_pac_disbursements = db.Column(db.Float, doc="Cumulative PAC disbursements in a two year period, adjusted to avoid double counting.")
     cumulative_party_receipts = db.Column(db.Float, doc="Cumulative party receipts in a two year period, adjusted to avoid double counting.")

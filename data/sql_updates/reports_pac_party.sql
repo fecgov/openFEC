@@ -113,7 +113,7 @@ select
     amendments.mst_rct_file_num as most_recent_file_number
 
 from
-    fec_vsum_f3x f3x
+    fec_vsum_f3x_vw f3x
     left join ( select * from ofec_pac_party_paper_amendments_mv_tmp
                 union all select * from ofec_pac_party_electronic_amendments_mv_tmp) amendments
     on f3x.file_num = amendments.file_num

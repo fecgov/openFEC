@@ -9,7 +9,7 @@ select
     sum(ttl_indt_contb) as total_independent_contributions,
     sum(ttl_indt_exp) as total_independent_expenditures
 from
-    fec_vsum_f5
+    fec_vsum_f5_vw
 where
     election_cycle >= :START_YEAR
     and most_recent_filing_flag like 'Y'
