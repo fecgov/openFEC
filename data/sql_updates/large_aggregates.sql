@@ -17,7 +17,7 @@ with candidates as (
         ttl_loans_received_per as ttl_loan_repymts,
         ttl_contb_ref_per as ttl_contb_ref,
         other_disb_per
-    from fec_vsum_f3p
+    from fec_vsum_f3p_vw
     where most_recent_filing_flag like 'Y'
     union all
     select
@@ -34,7 +34,7 @@ with candidates as (
         ttl_loan_repymts_per as ttl_loan_repymts,
         ttl_contb_ref_col_ttl_per as ttl_contb_ref,
         other_disb_per
-    from fec_vsum_f3
+    from fec_vsum_f3_vw
     where most_recent_filing_flag like 'Y'
 ),
 -- Remove candidate activity that does not apply to the current election
@@ -42,7 +42,7 @@ cand as (
     select * from candidates
     inner join
         -- check we don't need to normalize fec_election_yr
-        cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
+        disclosure.cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
 ),
 -- Create sums
 cand_totals as (
@@ -113,7 +113,7 @@ pac_totals as (
                 coalesce(other_disb_per,0)
             )
         ) as pac_adjusted_total_disbursements
-    from fec_vsum_f3x
+    from fec_vsum_f3x_vw
     left join
         ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where
@@ -154,7 +154,7 @@ party_totals as (
                 coalesce(other_disb_per,0)
             )
         ) as party_adjusted_total_disbursements
-    from fec_vsum_f3x
+    from fec_vsum_f3x_vw
     left join
         ofec_committee_detail_mv_tmp on committee_id = cmte_id
     where

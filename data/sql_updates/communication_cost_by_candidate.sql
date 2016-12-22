@@ -8,7 +8,7 @@ select
     sum(communication_cost) as total,
     count(communication_cost) as count,
     extract(year from communication_dt)::integer + extract(year from communication_dt)::integer % 2 as cycle
-from fec_vsum_f76
+from fec_vsum_f76_vw
 where extract(year from communication_dt) >= :START_YEAR
 and s_o_cand_id is not null
 group by
