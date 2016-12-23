@@ -277,6 +277,9 @@ def index_statutes():
 
 
 def delete_advisory_opinions_from_s3():
+    """
+    Deletes all advisory opinions documents from S3
+    """
     for obj in get_bucket().objects.filter(Prefix="legal/aos"):
         obj.delete()
 
@@ -412,17 +415,29 @@ def get_citations(citation_texts):
     return {"us_code": us_codes, "regulations": regulations}
 
 def delete_murs_from_s3():
+    """
+    Deletes all MUR documents from S3
+    """
     bucket = get_bucket()
     for obj in bucket.objects.filter(Prefix="legal/murs"):
         obj.delete()
 
 def delete_murs_from_es():
+    """
+    Deletes all MURs from Elasticsearch
+    """
     delete_from_es(DOCS_INDEX, 'murs')
 
 def delete_advisory_opinions_from_es():
+    """
+    Deletes all advisory opinions from Elasticsearch
+    """
     delete_from_es(DOCS_INDEX, 'advisory_opinions')
 
 def delete_from_es(index, doc_type):
+    """
+    Deletes all documents with the given `doc_type` from Elasticsearch
+    """
     es = utils.get_elasticsearch_connection()
     es.delete_by_query(index=index, body={'query': {'match_all': {}}}, doc_type=doc_type)
 
@@ -493,6 +508,12 @@ def process_mur(mur):
     es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs():
+    """
+    Reads data for archived MURs from TODO, assembles a JSON document
+    corresponding to the MUR and indexes this document in Elasticsearch in the index
+    `docs_index` with a doc_type of `murs`. In addition, the MUR document
+    is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
+    """
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     bucket = get_bucket()

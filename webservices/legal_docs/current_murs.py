@@ -90,6 +90,12 @@ STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 
 def load_current_murs():
+    """
+    Reads data for current MURs from a Postgres database, assembles a JSON document
+    corresponding to the MUR and indexes this document in Elasticsearch in the index
+    `docs_index` with a doc_type of `murs`. In addition, all documents attached to
+    the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
+    """
     es = get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
