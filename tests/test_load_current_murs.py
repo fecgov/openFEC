@@ -125,7 +125,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'name': 'Simple MUR',
             'mur_type': 'current',
             'election_cycles': [2016],
-            'text': '',
             'doc_id': 'mur_1',
             'participants': [],
             'subject': {"text": [mur_subject]},
@@ -186,10 +185,8 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert participants == [(p['role'], p['name'])
                                 for p in mur['participants']]
 
-        assert mur['text'].strip() == "Some text Different text"
-
-        assert [(d[0], len(d[1])) for d in documents] == [
-            (d['category'], d['length']) for d in mur['documents']]
+        assert [(d[0], d[1], len(d[1])) for d in documents] == [
+            (d['category'], d['text'], d['length']) for d in mur['documents']]
         for d in mur['documents']:
             assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
 
@@ -268,7 +265,7 @@ class TestLoadCurrentMURs(BaseTestCase):
                 'url': '/regulations/456/CURRENT'}
             ]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
-            'text': '', 'subject': {'text': ['Fraudulent misrepresentation']},
+            'subject': {'text': ['Fraudulent misrepresentation']},
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
             'election_cycles': [2016],
