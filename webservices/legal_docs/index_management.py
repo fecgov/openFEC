@@ -29,6 +29,34 @@ DEFAULT_MAPPINGS = {
             "summary": {
                 "type": "string",
                 "analyzer": "english"
+            },
+            "documents": {
+                "type": "nested",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "document_date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    },
+                    "document_id": {
+                        "type": "long"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "length": {
+                        "type": "long"
+                    },
+                    "url": {
+                        "type": "string"
+                    }
+                }
             }
         }
     }
