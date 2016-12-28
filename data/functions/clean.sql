@@ -8,7 +8,7 @@ begin
 end
 $$ language plpgsql;
 
-
+-- TODO: Wondering if we still need this after switching to need table --
 -- These fields include additional descriptions in curly braces that we don't want to show in the dimreporttype table that appear in curly braces. Like: { one of 4 codes }
 create or replace function clean_report(report text)
 returns text as $$

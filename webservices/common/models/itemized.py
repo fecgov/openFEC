@@ -184,7 +184,7 @@ class ScheduleB(BaseItemized):
 
 
 class ScheduleC(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_c'
+    __tablename__ = 'fec_vsum_sched_c_vw'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     incurred_date = db.Column('incurred_dt', db.DateTime)
@@ -236,6 +236,7 @@ class ScheduleC(PdfMixin,BaseItemized):
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     cycle = db.Column('election_cycle', db.Integer)
+    load_date = db.Column('pg_date', db.DateTime)
 
     @property
     def pdf_url(self):
@@ -245,7 +246,7 @@ class ScheduleC(PdfMixin,BaseItemized):
 
 
 class ScheduleD(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_d'
+    __tablename__ = 'fec_vsum_sched_d_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -286,8 +287,8 @@ class ScheduleD(PdfMixin,BaseItemized):
     action_code_full = db.Column('action_cd_desc', db.String)
     schedule_type = db.Column(db.String)
     schedule_type_full = db.Column('schedule_type_desc', db.String)
-    load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
+    load_date = db.Column('pg_date', db.DateTime)
 
     @property
     def pdf_url(self):
@@ -447,7 +448,7 @@ class ScheduleEEfile(BaseRawItemized):
 
 
 class ScheduleF(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_f'
+    __tablename__ = 'fec_vsum_sched_f_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -521,6 +522,7 @@ class ScheduleF(PdfMixin,BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
+
 
     @property
     def pdf_url(self):

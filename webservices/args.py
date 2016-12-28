@@ -82,23 +82,22 @@ class IndexValidator(OptionValidator):
     :param Base model: SQLALchemy model.
     :param list exclude: Optional list of columns to exclude.
     """
-    def __init__(self, model, extra=None, exclude=None):
+    def __init__(self, model, extra=None, exclude=None, schema=None):
         self.model = model
         self.extra = extra or []
         self.exclude = exclude or []
+        self.database_schema = schema
 
     @property
     def values(self):
         inspector = sa.inspect(db.engine)
-
         column_map = {
             column.key: label
             for label, column in self.model.__mapper__.columns.items()
         }
-
         return [
             column_map[column['column_names'][0]]
-            for column in inspector.get_indexes(self.model.__tablename__)
+            for column in inspector.get_indexes(self.model.__tablename__, self.database_schema)
             if not self._is_excluded(column_map.get(column['column_names'][0]))
         ] + self.extra
 
@@ -143,7 +142,11 @@ query = {
     'ao_no': fields.List(IStr, required=False, description='Force advisory opinion number'),
     'ao_name': fields.List(IStr, required=False, description='Force advisory opinion name'),
     'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
-    'ao_max_date': fields.Date(description="Latest issue date of advisory opinion")
+    'ao_max_date': fields.Date(description="Latest issue date of advisory opinion"),
+    'no': fields.List(IStr, required=False, description='Filter by case number'),
+    'election_cycles': fields.Int(IStr, required=False, description='Filter by election cycles'),
+    'document_category': fields.Str(IStr, required=False, description='Filter by category of associated documents'),
+    'document_text': fields.Str(IStr, required=False, description='Text to search for in the associated documents'),
 }
 
 candidate_detail = {
