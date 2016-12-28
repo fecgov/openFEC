@@ -189,10 +189,10 @@ def index_advisory_opinions():
                                 where ao.ao_no='{0}' and (role_id = 0 or role_id = 1);""".format(row[8]))
 
             respondent_names = []
-            respondent_types = []
+            respondent_types = set()
             for respondent in respondents:
                 respondent_names.append(respondent[0])
-                respondent_types.append(respondent[1])
+                respondent_types.add(respondent[1])
 
             doc = {"doc_id": row[0],
                    "text": row[1],
@@ -207,7 +207,7 @@ def index_advisory_opinions():
                    "is_pending": row[10],
                    "url": pdf_url,
                    "respondent_names": respondent_names,
-                   "respondent_types": respondent_types}
+                   "respondent_types": list(respondent_types)}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1

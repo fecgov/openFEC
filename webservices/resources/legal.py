@@ -105,7 +105,7 @@ class UniversalSearch(utils.Resource):
                 .index(DOCS_SEARCH)
 
             if type == 'advisory_opinions':
-                query = query.query('match', category='Final Opinion')
+                # query = query.query('match', category='Final Opinion')
 
                 if ao_no:
                     query = query.query('terms', no=ao_no)
