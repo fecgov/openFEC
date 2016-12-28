@@ -679,8 +679,11 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'beginning_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
+        'is_notice':ma.fields.Boolean(),
         #'csv_url': ma.fields.Str(),
     },
+    #options={'exclude': ('e_filing',)},
+
 )
 
 augment_schemas(ItemizedScheduleEfilingsSchema)

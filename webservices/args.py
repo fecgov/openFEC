@@ -612,6 +612,19 @@ schedule_e = {
     'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
 }
 
+schedule_e_efile = {
+    #'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'filing_form': fields.List(IStr, description='Filing form'),
+    'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'support_oppose_indicator': fields.List(
+        IStr(validate=validate.OneOf(['S', 'O'])),
+        description='Support or opposition',
+    ),
+    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+}
+
 rad_analyst = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'analyst_id': fields.List(fields.Int(), description='ID of RAD analyst'),
