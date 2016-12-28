@@ -1,7 +1,11 @@
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import select
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.orm import column_property
 
 from webservices import docs, utils
+
+from webservices.common.models.filings import EFilings
 
 from .base import db
 from .reports import PdfMixin
@@ -29,13 +33,11 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    related_line_number = db.Column("rel_lineno", db.Integer)
     committee_id = db.Column("comid", db.String)
-    line_number = db.Column("line_number", db.Integer)
+    line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
-    image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
+    image_number = db.Column('imageno', db.Numeric, doc=docs.IMAGE_NUMBER)
     entity_type = db.Column('entity', db.String)
-    transaction_description = db.Column('transdesc', db.String)
     load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
     memo_code = db.Column(db.String)
@@ -49,7 +51,7 @@ class BaseRawItemized(db.Model):
 
     @property
     def pdf_url(self):
-        return utils.make_schedule_pdf_url(self.image_number)
+        return utils.make_schedule_pdf_url(str(self.image_number))
 
 
 class ScheduleA(BaseItemized):
@@ -384,7 +386,7 @@ class ScheduleE(BaseItemized, PdfMixin):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_se'
+    __tablename__ = 'real_efile_schedule_e_reports'
 
     # payee info
     payee_prefix = db.Column('prefix', db.String)
@@ -414,16 +416,17 @@ class ScheduleEEfile(BaseRawItemized):
     candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
     candidate_prefix = db.Column('so_prefix', db.String)
     candidate_first_name = db.Column('so_fname', db.String)
-    candidate_middle_name = db.Column('so_mmame', db.String)
+    candidate_middle_name = db.Column('so_mname', db.String)
     # candidate_last_name = db.Column('s_o_cand_nm_last', db.String)
     candidate_suffix = db.Column('so_suffix', db.String)
     candidate_office = db.Column('so_can_off', db.String, doc=docs.OFFICE)
     cand_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
     cand_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
-
+    #is there an obvious way to figure out if 24/48 notice?
+    #seems like it can be gleaned from the table `real_efile_reps` via a join
     #is_notice = db.Column(db.Boolean, index=True)
-    expenditure_description = db.Column('exp_desc', db.String)
-    expenditure_date = db.Column('exp_dt', db.Date)
+    expenditure_description = db.Column('transdesc', db.String)
+    expenditure_date = db.Column('t_date', db.Date)
     expenditure_amount = db.Column('amount', db.Integer)
     office_total_ytd = db.Column('ytd', db.Float)
     category_code = db.Column('cat_code', db.String)
@@ -435,6 +438,11 @@ class ScheduleEEfile(BaseRawItemized):
     dissemination_date = db.Column('dissem_dt', db.Date)
 
     file_number = db.Column("repid", db.Integer, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
+
+    is_notice = db.Column(db.Boolean)
+    form_type = db.Column('form', db.String)
+
 
 
 
