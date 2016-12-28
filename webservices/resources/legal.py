@@ -129,6 +129,11 @@ class UniversalSearch(utils.Resource):
                     query = query.query('terms', no=kwargs.get('no'))
                 if kwargs.get('election_cycles'):
                     query = query.query('term', election_cycles=kwargs.get('election_cycles'))
+                if kwargs.get('document_category') and kwargs.get('document_text'):
+                    combined_query = [
+                        Q('match', documents__category=kwargs.get('document_category')),
+                        Q('match', documents__text=kwargs.get('document_text'))]
+                    query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
 
