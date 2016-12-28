@@ -124,6 +124,11 @@ class UniversalSearch(utils.Resource):
                 if date_range:
                     query = query.query("range", date=date_range)
 
+            if type == 'murs':
+                if kwargs.get('no'):
+                    query = query.query('terms', no=kwargs.get('no'))
+                if kwargs.get('election_cycles'):
+                    query = query.query('term', election_cycles=kwargs.get('election_cycles'))
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
 
