@@ -33,7 +33,7 @@ SELECT old_f.cmte_id,
 from oldest_filing old_f inner join most_recent_filing mrf on old_f.cmte_id = mrf.cmte_id and old_f.last = mrf.last
 ) select row_number() over () as idx, * from electronic_filer_chain;
 
-create unique index file_number_pac_party_electronic_index_tmp on ofec_pac_party_electronic_amendments_mv_tmp(idx);
+create unique index on ofec_pac_party_electronic_amendments_mv_tmp(idx);
 
 drop materialized view if exists ofec_pac_party_paper_amendments_mv_tmp cascade;
 create materialized view ofec_pac_party_paper_amendments_mv_tmp as
@@ -100,7 +100,7 @@ with recursive oldest_filing_paper as (
         and flp.last = prf.last)
     select row_number() over () as idx, * from paper_filer_chain;
 
-create unique index file_number_pac_party_paper_index_tmp on ofec_pac_party_paper_amendments_mv_tmp(idx);
+create unique index on ofec_pac_party_paper_amendments_mv_tmp(idx);
 
 
 
