@@ -113,10 +113,11 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     individual_unitemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS))#P
     individual_itemized_contributions_ytd = db.Column(db.Numeric(30, 2), doc=docs.add_ytd(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))#P
     individual_itemized_contributions_period = db.Column(db.Numeric(30, 2), doc=docs.add_period(docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS))#P
-    is_amended = db.Column(db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
+    is_amended = db.Column('is_amended', db.Boolean, doc='False indicates that a report is the most recent. True indicates that the report has been superseded by an amendment.')
     receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
     means_filed = db.Column('means_filed', db.String, doc=docs.MEANS_FILED)
     fec_url = db.Column(db.String)
+    most_recent = db.Column('most_recent', db.Boolean)
 
     @property
     def document_description(self):
