@@ -75,7 +75,9 @@ def get_range_filters():
 
 def get_match_filters():
     filter_match_fields = [
-        ('filer_type', models.CommitteeReports.means_filed)
+        ('filer_type', models.CommitteeReports.means_filed),
+        ('is_amended', models.CommitteeReports.is_amended),
+        ('most_recent', models.CommitteeReports.most_recent),
     ]
     return filter_match_fields
 
