@@ -97,7 +97,7 @@ class ScheduleEView(ItemizedResource):
 
 @doc(
     tags=['independent expenditures'],
-    description=docs.SCHEDULE_E,
+    description=docs.EFILING_TAG,
 )
 class ScheduleEEfileView(views.ApiResource):
     model = models.ScheduleEEfile
@@ -118,10 +118,7 @@ class ScheduleEEfileView(views.ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            #args.itemized,
             args.schedule_e_efile,
-            #args.make_seek_args(),
-
             args.make_sort_args(
                 default='-expenditure_date',
                 validator=args.OptionValidator([
