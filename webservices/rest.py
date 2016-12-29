@@ -176,7 +176,7 @@ api.add_resource(sched_c.ScheduleCViewBySubId, '/schedules/schedule_c/<string:su
 api.add_resource(sched_d.ScheduleDView, '/schedules/schedule_d/')
 api.add_resource(sched_d.ScheduleDViewBySubId, '/schedules/schedule_d/<string:sub_id>/')
 api.add_resource(sched_e.ScheduleEView, '/schedules/schedule_e/')
-api.add_resource(sched_e.ScheduleEEfileView, '/efile/schedule_e/')
+api.add_resource(sched_e.ScheduleEEfileView, '/schedules/schedule_e/efile/')
 api.add_resource(sched_f.ScheduleFView, '/schedules/schedule_f/', '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:sub_id>/')
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
