@@ -435,7 +435,6 @@ class TestItemized(ApiBaseTest):
             ('filing_form', ScheduleEEfile.form_type, ['F24N', 'F3XN'])
         ]
         for label, column, values in filters:
-            print(label, column, values)
             [
                 factories.ScheduleEEfileFactory(**{column.key: value})
                 for value in values
