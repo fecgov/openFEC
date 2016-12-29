@@ -298,7 +298,7 @@ class ScheduleD(PdfMixin,BaseItemized):
         return None
 
 
-class ScheduleE(BaseItemized, PdfMixin):
+class ScheduleE(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_e'
 
     sub_id = db.Column(db.String, primary_key=True)
