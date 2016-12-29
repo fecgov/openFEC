@@ -621,6 +621,10 @@ schedule_e_efile = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'filing_form': fields.List(IStr, description='Filing form'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'image_number': fields.List(
+        fields.Str,
+        description='The image number of the page where the schedule item is reported',
+    ),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',

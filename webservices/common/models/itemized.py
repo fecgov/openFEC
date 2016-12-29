@@ -36,7 +36,7 @@ class BaseRawItemized(db.Model):
     committee_id = db.Column("comid", db.String)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
-    image_number = db.Column('imageno', db.Numeric, doc=docs.IMAGE_NUMBER)
+    image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
     entity_type = db.Column('entity', db.String)
     load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
