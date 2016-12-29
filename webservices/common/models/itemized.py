@@ -33,10 +33,11 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    committee_id = db.Column("comid", db.String)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
+    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
     entity_type = db.Column('entity', db.String)
     load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
@@ -412,20 +413,15 @@ class ScheduleEEfile(BaseRawItemized):
 
     # Candidate info
     candidate_id = db.Column('so_canid', db.String)
-    #find some way to grep the report year from the columns we have
-    #candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
+    candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
     candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
     candidate_prefix = db.Column('so_prefix', db.String)
     candidate_first_name = db.Column('so_fname', db.String)
     candidate_middle_name = db.Column('so_mname', db.String)
-    # candidate_last_name = db.Column('s_o_cand_nm_last', db.String)
     candidate_suffix = db.Column('so_suffix', db.String)
     candidate_office = db.Column('so_can_off', db.String, doc=docs.OFFICE)
     cand_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
     cand_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
-    #is there an obvious way to figure out if 24/48 notice?
-    #seems like it can be gleaned from the table `real_efile_reps` via a join
-    #is_notice = db.Column(db.Boolean, index=True)
     expenditure_description = db.Column('transdesc', db.String)
     expenditure_date = db.Column('t_date', db.Date)
     expenditure_amount = db.Column('amount', db.Integer)
@@ -443,8 +439,6 @@ class ScheduleEEfile(BaseRawItemized):
 
     is_notice = db.Column(db.Boolean)
     form_type = db.Column('form', db.String)
-
-
 
 
 class ScheduleF(PdfMixin,BaseItemized):
