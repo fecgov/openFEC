@@ -413,7 +413,8 @@ class ScheduleEEfile(BaseRawItemized):
 
     # Candidate info
     candidate_id = db.Column('so_canid', db.String)
-    candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
+    #causing an N+1 error, leave out for now but consider adding if really needed
+    #candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
     candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
     candidate_prefix = db.Column('so_prefix', db.String)
     candidate_first_name = db.Column('so_fname', db.String)
