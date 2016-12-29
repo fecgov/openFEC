@@ -1,7 +1,11 @@
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import select
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.orm import column_property
 
 from webservices import docs, utils
+
+from webservices.common.models.filings import EFilings
 
 from .base import db
 from .reports import PdfMixin
@@ -24,6 +28,31 @@ class BaseItemized(db.Model):
     @hybrid_property
     def memoed_subtotal(self):
         return self.memo_code == 'X'
+
+
+class BaseRawItemized(db.Model):
+    __abstract__ = True
+
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
+    line_number = db.Column("line_num", db.String)
+    transaction_id = db.Column('tran_id', db.String)
+    image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
+    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
+    entity_type = db.Column('entity', db.String)
+    load_timestamp = db.Column('create_dt', db.TIMESTAMP)
+    amendment_indicator = db.Column('amend', db.String)
+    memo_code = db.Column(db.String)
+    memo_text = db.Column(db.String)
+    back_reference_transaction_id = db.Column('br_tran_id', db.String)
+    back_reference_schedule_name = db.Column('br_sname', db.String)
+
+    @hybrid_property
+    def memoed_subtotal(self):
+        return self.memo_code == 'X'
+
+    @property
+    def pdf_url(self):
+        return utils.make_schedule_pdf_url(str(self.image_number))
 
 
 class ScheduleA(BaseItemized):
@@ -269,7 +298,7 @@ class ScheduleD(PdfMixin,BaseItemized):
         return None
 
 
-class ScheduleE(BaseItemized):
+class ScheduleE(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_e'
 
     sub_id = db.Column(db.String, primary_key=True)
@@ -357,6 +386,62 @@ class ScheduleE(BaseItemized):
     pdf_url = db.Column(db.String)
 
 
+
+class ScheduleEEfile(BaseRawItemized):
+    __tablename__ = 'real_efile_schedule_e_reports'
+
+    # payee info
+    payee_prefix = db.Column('prefix', db.String)
+    #need to add vectorized column
+    #payee_name_text = db.Column(TSVECTOR)
+    payee_first_name = db.Column('fname', db.String)
+    payee_middle_name = db.Column('mname', db.String)
+    payee_last_name = db.Column('lname', db.String)
+    payee_suffix = db.Column('suffix', db.String)
+    payee_street_1 = db.Column('str1', db.String)
+    payee_street_2 = db.Column('str2', db.String)
+    payee_city = db.Column('city', db.String)
+    payee_state = db.Column('state', db.String)
+    payee_zip = db.Column('zip', db.String)
+
+    # pcf == person completing form -> filer?
+    filer_first_name = db.Column('pcf_lname', db.String)
+    filer_middle_name = db.Column('pcf_mname', db.String)
+    filer_last_name = db.Column('pcf_fname', db.String)
+    filer_suffix = db.Column('pcf_suffix', db.String)
+    filer_prefix = db.Column('pcf_prefix', db.String)
+
+    # Candidate info
+    candidate_id = db.Column('so_canid', db.String)
+    #causing an N+1 error, leave out for now but consider adding if really needed
+    #candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
+    candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_prefix = db.Column('so_prefix', db.String)
+    candidate_first_name = db.Column('so_fname', db.String)
+    candidate_middle_name = db.Column('so_mname', db.String)
+    candidate_suffix = db.Column('so_suffix', db.String)
+    candidate_office = db.Column('so_can_off', db.String, doc=docs.OFFICE)
+    cand_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
+    cand_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
+    expenditure_description = db.Column('transdesc', db.String)
+    expenditure_date = db.Column('t_date', db.Date)
+    expenditure_amount = db.Column('amount', db.Integer)
+    office_total_ytd = db.Column('ytd', db.Float)
+    category_code = db.Column('cat_code', db.String)
+    #category_code_full = db.Column('catg_cd_desc', db.String)
+    support_oppose_indicator = db.Column('position', db.String)
+
+    notary_sign_date = db.Column('not_date', db.Date)
+
+    dissemination_date = db.Column('dissem_dt', db.Date)
+
+    file_number = db.Column("repid", db.Integer, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
+
+    is_notice = db.Column(db.Boolean)
+    form_type = db.Column('form', db.String)
+
+
 class ScheduleF(PdfMixin,BaseItemized):
     __tablename__ = 'fec_vsum_sched_f_vw'
 
@@ -439,5 +524,4 @@ class ScheduleF(PdfMixin,BaseItemized):
         if self.has_pdf:
             return utils.make_schedule_pdf_url(self.image_number)
         return None
-
 
