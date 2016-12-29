@@ -616,7 +616,7 @@ schedule_e = {
 }
 
 schedule_e_efile = {
-    #'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'filing_form': fields.List(IStr, description='Filing form'),
