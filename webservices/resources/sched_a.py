@@ -7,6 +7,7 @@ from webservices import utils
 from webservices import filters
 from webservices import schemas
 from webservices.common import models
+from webservices.common import views
 from webservices.common.views import ItemizedResource
 
 
@@ -74,8 +75,48 @@ class ScheduleAView(ItemizedResource):
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
+        '''
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+        '''
         return query
+
+@doc(
+    tags=['receipts'],
+    description=docs.EFILING_TAG,
+)
+class ScheduleAEfileView(views.ApiResource):
+    model = models.ScheduleAEfile
+    schema = schemas.ItemizedScheduleAfilingsSchema
+    page_schema = schemas.ScheduleAEfilePageSchema
+
+    filter_multi_fields = [
+        ('image_number', models.ScheduleAEfile.image_number),
+        ('committee_id', models.ScheduleAEfile.committee_id),
+        #('contributor_id', models.ScheduleAEfile.contributor_id),
+        ('contributor_city', models.ScheduleAEfile.contributor_city),
+        ('contributor_state', models.ScheduleAEfile.contributor_state),
+    ]
+
+    filter_range_fields = [
+        (('min_date', 'max_date'), models.ScheduleAEfile.contribution_receipt_date),
+        (('min_amount', 'max_amount'), models.ScheduleAEfile.contribution_receipt_amount),
+        (('min_image_number', 'max_image_number'), models.ScheduleAEfile.image_number),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_a,
+            args.make_sort_args(
+                default='-contribution_receipt_date',
+                validator=args.OptionValidator([
+                    'contribution_receipt_date',
+                    'contribution_receipt_amount',
+                    'contributor_aggregate_ytd',
+                ]),
+            ),
+        )
 

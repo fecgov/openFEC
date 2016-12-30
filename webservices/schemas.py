@@ -681,12 +681,22 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'fec_url': ma.fields.Str(),
         'is_notice':ma.fields.Boolean(),
         #'csv_url': ma.fields.Str(),
-    },
-    #options={'exclude': ('e_filing',)},
-
+    }
 )
 
 augment_schemas(ItemizedScheduleEfilingsSchema)
+
+ItemizedScheduleAfilingsSchema = make_schema(
+    models.ScheduleAEfile,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'pdf_url': ma.fields.Str(),
+        'fec_url': ma.fields.Str(),
+        #'csv_url': ma.fields.Str(),
+    },
+)
+
+augment_schemas(ItemizedScheduleAfilingsSchema)
 
 ReportTypeSchema = make_schema(models.ReportType)
 register_schema(ReportTypeSchema)
