@@ -413,6 +413,29 @@ schedule_a = {
     ),
 }
 
+schedule_a_e_file = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    #'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
+    'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
+    'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
+    'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
+    'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
+    'last_contribution_receipt_date': fields.Date(missing=None, description='When sorting by `contribution_receipt_date`, this is populated with the `contribution_receipt_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'last_contribution_receipt_amount': fields.Float(missing=None, description='When sorting by `contribution_receipt_amount`, this is populated with the `contribution_receipt_amount` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'last_contributor_aggregate_ytd': fields.Float(missing=None, description='When sorting by `contributor_aggregate_ytd`, this is populated with the `contributor_aggregate_ytd` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'is_individual': fields.Bool(missing=None, description=docs.IS_INDIVIDUAL),
+    'contributor_type': fields.List(
+        fields.Str(validate=validate.OneOf(['individual', 'committee'])),
+        description='Filters individual or committee contributions based on line number'
+    ),
+    'two_year_transaction_period': fields.Int(
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
+        required=True,
+        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+    ),
+}
+
 schedule_a_by_size = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),

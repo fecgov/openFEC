@@ -33,11 +33,12 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
+    file_number = db.Column("repid", db.Integer, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
-    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
     entity_type = db.Column('entity', db.String)
     load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
@@ -74,7 +75,7 @@ class ScheduleA(BaseItemized):
     contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('contbr_nm_first', db.String)
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
-    contributor_last_name = db.Column('contbr_nm_last', db.String)
+    contributor_name = db.Column('contbr_nm_last', db.String)
     contributor_suffix = db.Column('contbr_suffix', db.String)
     # Street address omitted per FEC policy
     # contributor_street_1 = db.Column('contbr_st1', db.String)
@@ -120,6 +121,54 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     pdf_url = db.Column(db.String)
+
+
+class ScheduleAEfile(BaseRawItemized):
+    __tablename__ = 'real_efile_sa7'
+
+    contributor_prefix = db.Column('prefix', db.String)
+    """
+    contributor = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                foreign(ScheduleA.contributor_id) == CommitteeHistory.committee_id,
+                ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
+            )'''
+    )
+    """
+    #contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
+
+    #contributor_name_text = db.Column(TSVECTOR)
+    contributor_first_name = db.Column('fname', db.String)
+    contributor_middle_name = db.Column('mname', db.String)
+    contributor_last_name = db.Column('name', db.String)
+    contributor_suffix = db.Column('suffix', db.String)
+    # Street address omitted per FEC policy
+    # contributor_street_1 = db.Column('contbr_st1', db.String)
+    # contributor_street_2 = db.Column('contbr_st2', db.String)
+    contributor_city = db.Column('city', db.String, doc=docs.CONTRIBUTOR_CITY)
+    contributor_state = db.Column('state', db.String, doc=docs.CONTRIBUTOR_STATE)
+    contributor_zip = db.Column('zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
+    contributor_employer = db.Column('indemp', db.String, doc=docs.CONTRIBUTOR_EMPLOYER)
+    #contributor_employer_text = db.Column(TSVECTOR)
+    contributor_occupation = db.Column('indocc', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
+    #contributor_occupation_text = db.Column(TSVECTOR)
+    #contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
+    contributor_aggregate_ytd = db.Column('ytd', db.Numeric(30, 2))
+    contribution_receipt_amount = db.Column('amount', db.Numeric(30, 2))
+    contribution_receipt_date = db.Column('date_con', db.Integer)
+
+    # Conduit info
+    conduit_committee_id = db.Column('other_comid', db.String)
+    conduit_committee_name = db.Column('donor_comname', db.String)
+    conduit_committee_street1 = db.Column('other_str1', db.String)
+    conduit_committee_street2 = db.Column('other_str2', db.String)
+    conduit_committee_city = db.Column('other_city', db.String)
+    conduit_committee_state = db.Column('other_state', db.String)
+    conduit_committee_zip = db.Column('other_zip', db.Integer)
+
+    #load_date = db.Column('create_dt', db.TIMESTAMP)
+
 
 
 class ScheduleB(BaseItemized):
@@ -435,9 +484,7 @@ class ScheduleEEfile(BaseRawItemized):
 
     dissemination_date = db.Column('dissem_dt', db.Date)
 
-    file_number = db.Column("repid", db.Integer, primary_key=True)
-    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
-
+    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
     is_notice = db.Column(db.Boolean)
     form_type = db.Column('form', db.String)
 
