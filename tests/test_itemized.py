@@ -24,26 +24,27 @@ class TestItemized(ApiBaseTest):
         for factory, resource, schema in params:
             factory()
             results = self._results(api.url_for(resource))
+
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0].keys(), schema().fields.keys())
 
     def test_sorting(self):
         receipts = [
             factories.ScheduleAFactory(
-                report_year=2016,
-                contribution_receipt_date=datetime.date(2016, 1, 1),
-                two_year_transaction_period=2016
+                report_year=2018,
+                contribution_receipt_date=datetime.date(2018, 1, 1),
+                two_year_transaction_period=2018
             ),
             factories.ScheduleAFactory(
-                report_year=2015,
-                contribution_receipt_date=datetime.date(2015, 1, 1),
-                two_year_transaction_period=2016
+                report_year=2017,
+                contribution_receipt_date=datetime.date(2017, 1, 1),
+                two_year_transaction_period=2018
             ),
         ]
         response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
-            [2015, 2016]
+            [2017, 2018]
         )
         self.assertEqual(
             response['pagination']['last_indexes'],
@@ -56,14 +57,14 @@ class TestItemized(ApiBaseTest):
     def test_two_year_transaction_period_default_supplied_automatically(self):
         receipts = [
             factories.ScheduleAFactory(
-                report_year=2014,
-                contribution_receipt_date=datetime.date(2014, 1, 1),
-                two_year_transaction_period=2014
-            ),
-            factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
                 two_year_transaction_period=2016
+            ),
+            factories.ScheduleAFactory(
+                report_year=2018,
+                contribution_receipt_date=datetime.date(2018, 1, 1),
+                two_year_transaction_period=2018
             ),
         ]
 
