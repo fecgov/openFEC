@@ -1,12 +1,21 @@
 import sqlalchemy as sa
+from sqlalchemy import func
 from flask_apispec import doc
 
 from webservices import args
 from webservices import docs
+from webservices import filters
 from webservices import utils
 from webservices import schemas
+
 from webservices.common import models
+from webservices.common import views
 from webservices.common.views import ItemizedResource
+
+from webservices.common.models import (
+    EFilings,
+    db
+)
 
 
 @doc(
@@ -84,3 +93,42 @@ class ScheduleEView(ItemizedResource):
         if kwargs['district']:
             query = query.filter(models.CandidateHistory.district == kwargs['district'])
         return query
+
+
+@doc(
+    tags=['independent expenditures'],
+    description=docs.EFILING_TAG,
+)
+class ScheduleEEfileView(views.ApiResource):
+    model = models.ScheduleEEfile
+    schema = schemas.ItemizedScheduleEfilingsSchema
+    page_schema = schemas.ScheduleEEfilePageSchema
+
+    filter_multi_fields = [
+        ('cycle', sa.func.get_cycle(models.ScheduleEEfile.report_year)),
+        ('image_number', models.ScheduleEEfile.image_number),
+        ('committee_id', models.ScheduleEEfile.committee_id),
+        ('candidate_id', models.ScheduleEEfile.candidate_id),
+        ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
+        ('filing_form', models.ScheduleEEfile.form_type),
+        ('is_notice', models.ScheduleEEfile.is_notice),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_e_efile,
+            args.make_sort_args(
+                default='-expenditure_date',
+                validator=args.OptionValidator([
+                    'expenditure_date',
+                    'expenditure_amount',
+                    'office_total_ytd',
+                ]),
+            ),
+        )
+
+
+
+

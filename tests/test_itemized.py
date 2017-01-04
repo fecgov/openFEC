@@ -6,24 +6,26 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA, ScheduleE
+from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleEEfile
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView
 from webservices.resources.sched_b import ScheduleBView
-from webservices.resources.sched_e import ScheduleEView
+from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
 
 
 class TestItemized(ApiBaseTest):
+    kwargs = {'two_year_transaction_period': 2016}
 
     def test_fields(self):
+
         params = [
             (factories.ScheduleAFactory, ScheduleAView, ScheduleASchema),
             (factories.ScheduleBFactory, ScheduleBView, ScheduleBSchema),
         ]
         for factory, resource, schema in params:
             factory()
-            results = self._results(api.url_for(resource))
+            results = self._results(api.url_for(resource, **self.kwargs))
             self.assertEqual(len(results), 1)
             self.assertEqual(results[0].keys(), schema().fields.keys())
 
@@ -40,7 +42,7 @@ class TestItemized(ApiBaseTest):
                 two_year_transaction_period=2016
             ),
         ]
-        response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date'))
+        response = self._response(api.url_for(ScheduleAView, sort='contribution_receipt_date', **self.kwargs))
         self.assertEqual(
             [each['report_year'] for each in response['results']],
             [2015, 2016]
@@ -52,18 +54,19 @@ class TestItemized(ApiBaseTest):
                 'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
             }
         )
-
+    #This is the only test that the years will have to be bumped when in a new cycle
+    #maybe refactor to use some logic based on current year?
     def test_two_year_transaction_period_default_supplied_automatically(self):
         receipts = [
-            factories.ScheduleAFactory(
-                report_year=2014,
-                contribution_receipt_date=datetime.date(2014, 1, 1),
-                two_year_transaction_period=2014
-            ),
             factories.ScheduleAFactory(
                 report_year=2016,
                 contribution_receipt_date=datetime.date(2016, 1, 1),
                 two_year_transaction_period=2016
+            ),
+            factories.ScheduleAFactory(
+                report_year=2018,
+                contribution_receipt_date=datetime.date(2018, 1, 1),
+                two_year_transaction_period=2018
             ),
         ]
 
@@ -99,7 +102,7 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(contributor_state='NY'),
             factories.ScheduleAFactory(contributor_state='CA'),
         ]
-        results = self._results(api.url_for(ScheduleAView, contributor_state='CA'))
+        results = self._results(api.url_for(ScheduleAView, contributor_state='CA', **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
@@ -108,7 +111,7 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(contributor_city='NEW YORK'),
             factories.ScheduleAFactory(contributor_city='DES MOINES'),
         ]
-        results = self._results(api.url_for(ScheduleAView, contributor_city='new york'))
+        results = self._results(api.url_for(ScheduleAView, contributor_city='new york', **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
 
@@ -118,7 +121,7 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(contributor_name=name)
             for name in names
         ]
-        results = self._results(api.url_for(ScheduleAView, contributor_name='soros'))
+        results = self._results(api.url_for(ScheduleAView, contributor_name='soros', **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_name'], 'George Soros')
 
@@ -128,7 +131,7 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(contributor_employer=employer)
             for employer in employers
         ]
-        results = self._results(api.url_for(ScheduleAView, contributor_employer='vandelay'))
+        results = self._results(api.url_for(ScheduleAView, contributor_employer='vandelay', **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_employer'], 'Vandelay Industries')
 
@@ -138,7 +141,7 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(contributor_occupation=occupation)
             for occupation in occupations
         ]
-        results = self._results(api.url_for(ScheduleAView, contributor_occupation='doctor'))
+        results = self._results(api.url_for(ScheduleAView, contributor_occupation='doctor', **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_occupation'], 'Doctor of Philosophy')
 
@@ -147,13 +150,13 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory()
             for _ in range(30)
         ]
-        page1 = self._results(api.url_for(ScheduleAView))
+        page1 = self._results(api.url_for(ScheduleAView, **self.kwargs))
         self.assertEqual(len(page1), 20)
         self.assertEqual(
             [int(each['sub_id']) for each in page1],
             [each.sub_id for each in filings[:20]],
         )
-        page2 = self._results(api.url_for(ScheduleAView, last_index=page1[-1]['sub_id']))
+        page2 = self._results(api.url_for(ScheduleAView, last_index=page1[-1]['sub_id'], **self.kwargs))
         self.assertEqual(len(page2), 10)
         self.assertEqual(
             [int(each['sub_id']) for each in page2],
@@ -174,6 +177,7 @@ class TestItemized(ApiBaseTest):
         page1 = self._results(api.url_for(
             ScheduleAView,
             sort='contribution_receipt_date',
+            **self.kwargs
         ))
         self.assertEqual(len(page1), 20)
         self.assertEqual(
@@ -189,6 +193,7 @@ class TestItemized(ApiBaseTest):
                 ScheduleAView,
                 last_index=page1[-1]['sub_id'],
                 sort='contribution_receipt_date',
+                **self.kwargs
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
@@ -216,7 +221,8 @@ class TestItemized(ApiBaseTest):
         page1 = self._results(api.url_for(
             ScheduleAView,
             sort='-contribution_receipt_date',
-            sort_reverse_nulls='true'
+            sort_reverse_nulls='true',
+            **self.kwargs
         ))
 
         self.assertEqual(len(page1), 20)
@@ -237,6 +243,7 @@ class TestItemized(ApiBaseTest):
             last_index=page1[-1]['sub_id'],
             last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
             sort='-contribution_receipt_date',
+            **self.kwargs
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
@@ -264,7 +271,8 @@ class TestItemized(ApiBaseTest):
         page1 = self._results(api.url_for(
             ScheduleAView,
             sort='contribution_receipt_date',
-            sort_reverse_nulls='true'
+            sort_reverse_nulls='true',
+            **self.kwargs
         ))
 
         self.assertEqual(len(page1), 20)
@@ -286,6 +294,7 @@ class TestItemized(ApiBaseTest):
             last_index=page1[-1]['sub_id'],
             sort_null_only=True,
             sort='contribution_receipt_date',
+            **self.kwargs
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
@@ -318,7 +327,7 @@ class TestItemized(ApiBaseTest):
             factories.ScheduleAFactory(),
             factories.ScheduleAFactory(image_number=image_number),
         ]
-        results = self._results(api.url_for(ScheduleAView, image_number=image_number))
+        results = self._results(api.url_for(ScheduleAView, image_number=image_number, **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['image_number'], image_number)
 
@@ -423,5 +432,22 @@ class TestItemized(ApiBaseTest):
                 for value in values
             ]
             results = self._results(api.url_for(ScheduleEView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
+
+    def test_filters_sched_e_efile(self):
+        filters = [
+            ('image_number', ScheduleEEfile.image_number, ['123', '456']),
+            ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
+            ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
+            ('is_notice', ScheduleEEfile.is_notice, [True, False]),
+            ('filing_form', ScheduleEEfile.form_type, ['F24N', 'F3XN'])
+        ]
+        for label, column, values in filters:
+            [
+                factories.ScheduleEEfileFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleEEfileView, **{label: values[0]}))
             assert len(results) == 1
             assert results[0][column.key] == values[0]

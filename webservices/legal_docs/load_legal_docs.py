@@ -18,10 +18,7 @@ from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
-from webservices.legal_docs import (
-    DOCS_INDEX,
-    DOCS_SEARCH
-)
+from webservices.legal_docs import DOCS_INDEX
 
 from . import reclassify_statutory_citation
 
@@ -52,53 +49,6 @@ def get_text(node):
     for child in node["children"]:
         text += ' ' + get_text(child)
     return text
-
-
-def initialize_legal_docs():
-    """
-    Initialize elasticsearch for storing legal documents. Create the `docs` index,
-    and set up the aliases `docs_index` and `docs_search` to point to the `docs`
-    index. If the `doc` index already exists, it is deleted.
-    """
-    settings = {
-        "mappings": {
-            "_default_": {
-                "properties": {
-                    "no": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "text": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "name": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "description": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "summary": {
-                        "type": "string",
-                        "analyzer": "english"
-                    }
-                }
-            }
-        },
-        "settings": {
-            "analysis": {"analyzer": {"default": {"type": "english"}}}
-        },
-        "aliases": {
-            DOCS_INDEX: {},
-            DOCS_SEARCH: {}
-        }
-    }
-
-    es = utils.get_elasticsearch_connection()
-    es.indices.delete('docs')
-    es.indices.create('docs', settings)
 
 
 def index_regulations():
@@ -273,6 +223,9 @@ def index_statutes():
 
 
 def delete_advisory_opinions_from_s3():
+    """
+    Deletes all advisory opinions documents from S3
+    """
     for obj in get_bucket().objects.filter(Prefix="legal/aos"):
         obj.delete()
 
@@ -408,17 +361,29 @@ def get_citations(citation_texts):
     return {"us_code": us_codes, "regulations": regulations}
 
 def delete_murs_from_s3():
+    """
+    Deletes all MUR documents from S3
+    """
     bucket = get_bucket()
     for obj in bucket.objects.filter(Prefix="legal/murs"):
         obj.delete()
 
 def delete_murs_from_es():
+    """
+    Deletes all MURs from Elasticsearch
+    """
     delete_from_es(DOCS_INDEX, 'murs')
 
 def delete_advisory_opinions_from_es():
+    """
+    Deletes all advisory opinions from Elasticsearch
+    """
     delete_from_es(DOCS_INDEX, 'advisory_opinions')
 
 def delete_from_es(index, doc_type):
+    """
+    Deletes all documents with the given `doc_type` from Elasticsearch
+    """
     es = utils.get_elasticsearch_connection()
     es.delete_by_query(index=index, body={'query': {'match_all': {}}}, doc_type=doc_type)
 
@@ -489,6 +454,12 @@ def process_mur(mur):
     es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs():
+    """
+    Reads data for archived MURs from TODO, assembles a JSON document
+    corresponding to the MUR and indexes this document in Elasticsearch in the index
+    `docs_index` with a doc_type of `murs`. In addition, the MUR document
+    is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
+    """
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     bucket = get_bucket()
