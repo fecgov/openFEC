@@ -219,8 +219,6 @@ filings = {
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
-    'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
-    'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
     'form_type': fields.List(IStr, description='Form type'),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
@@ -625,6 +623,8 @@ schedule_e_efile = {
     'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'filing_form': fields.List(IStr, description='Filing form'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'min_expenditure_date': fields.Date(description='Selects all items expended by this committee after this date'),
+    'max_expenditure_date': fields.Date(description='Selects all items expended by this committee before this date'),
     'image_number': fields.List(
         fields.Str,
         description='The image number of the page where the schedule item is reported',
