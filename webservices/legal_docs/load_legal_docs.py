@@ -69,6 +69,10 @@ def initialize_legal_docs():
                         "type": "string",
                         "index": "not_analyzed"
                     },
+                    "category": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
                     "text": {
                         "type": "string",
                         "analyzer": "english"
