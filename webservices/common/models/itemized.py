@@ -8,7 +8,7 @@ from webservices import docs, utils
 from webservices.common.models.filings import EFilings
 
 from .base import db
-from .reports import PdfMixin
+from .reports import PdfMixin, name_generator
 
 
 class BaseItemized(db.Model):
@@ -37,7 +37,7 @@ class BaseRawItemized(db.Model):
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
-    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
+    #report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
     entity_type = db.Column('entity', db.String)
     load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
@@ -386,9 +386,8 @@ class ScheduleE(PdfMixin, BaseItemized):
     pdf_url = db.Column(db.String)
 
 
-
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_schedule_e_reports'
+    __tablename__ = 'real_efile_se'
 
     # payee info
     payee_prefix = db.Column('prefix', db.String)
@@ -438,8 +437,23 @@ class ScheduleEEfile(BaseRawItemized):
     file_number = db.Column("repid", db.Integer, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
 
-    is_notice = db.Column(db.Boolean)
-    form_type = db.Column('form', db.String)
+    #committee = utils.related_committee_history('committee_id', cycle_label='report_year')
+
+    @hybrid_property
+    def payee_name(self):
+        name = name_generator(
+            self.payee_last_name,
+            self.payee_prefix,
+            self.payee_first_name,
+            self.payee_middle_name,
+            self.payee_suffix
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
 
 class ScheduleF(PdfMixin,BaseItemized):
