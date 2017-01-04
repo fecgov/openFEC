@@ -680,6 +680,8 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'is_notice':ma.fields.Boolean(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'payee_name': ma.fields.Str(),
         #'csv_url': ma.fields.Str(),
     },
     #options={'exclude': ('e_filing',)},

@@ -8,7 +8,7 @@ from webservices import docs, utils
 from webservices.common.models.filings import EFilings
 
 from .base import db
-from .reports import PdfMixin
+from .reports import PdfMixin, name_generator
 
 
 class BaseItemized(db.Model):
@@ -33,6 +33,7 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
+    committee = utils.related_committee_history('committee_id', cycle_label='report_year')
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
@@ -440,6 +441,23 @@ class ScheduleEEfile(BaseRawItemized):
 
     is_notice = db.Column(db.Boolean)
     form_type = db.Column('form', db.String)
+    report_type = db.Column(db.String)
+
+    @hybrid_property
+    def payee_name(self):
+        name = name_generator(
+            self.payee_last_name,
+            self.payee_prefix,
+            self.payee_first_name,
+            self.payee_middle_name,
+            self.payee_suffix
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
 
 class ScheduleF(PdfMixin,BaseItemized):

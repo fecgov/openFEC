@@ -622,6 +622,7 @@ schedule_e_efile = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'filing_form': fields.List(IStr, description='Filing form'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
     'image_number': fields.List(

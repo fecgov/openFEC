@@ -112,6 +112,11 @@ class ScheduleEEfileView(views.ApiResource):
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
         ('filing_form', models.ScheduleEEfile.form_type),
         ('is_notice', models.ScheduleEEfile.is_notice),
+        ('candidate_name', models.ScheduleEEfile.candidate_name),
+    ]
+
+    filter_range_fields = [
+        (('min_date', 'max_date'), models.ScheduleEEfile.expenditure_date),
     ]
 
     @property
