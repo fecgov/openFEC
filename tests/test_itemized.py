@@ -177,7 +177,7 @@ class TestItemized(ApiBaseTest):
         page1 = self._results(api.url_for(
             ScheduleAView,
             sort='contribution_receipt_date',
-            **self.kwargs,
+            **self.kwargs
         ))
         self.assertEqual(len(page1), 20)
         self.assertEqual(
@@ -193,7 +193,7 @@ class TestItemized(ApiBaseTest):
                 ScheduleAView,
                 last_index=page1[-1]['sub_id'],
                 sort='contribution_receipt_date',
-                **self.kwargs,
+                **self.kwargs
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
@@ -222,7 +222,7 @@ class TestItemized(ApiBaseTest):
             ScheduleAView,
             sort='-contribution_receipt_date',
             sort_reverse_nulls='true',
-            **self.kwargs,
+            **self.kwargs
         ))
 
         self.assertEqual(len(page1), 20)
@@ -243,7 +243,7 @@ class TestItemized(ApiBaseTest):
             last_index=page1[-1]['sub_id'],
             last_contribution_receipt_date=page1[-1]['contribution_receipt_date'],
             sort='-contribution_receipt_date',
-            **self.kwargs,
+            **self.kwargs
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
@@ -272,7 +272,7 @@ class TestItemized(ApiBaseTest):
             ScheduleAView,
             sort='contribution_receipt_date',
             sort_reverse_nulls='true',
-            **self.kwargs,
+            **self.kwargs
         ))
 
         self.assertEqual(len(page1), 20)
@@ -294,7 +294,7 @@ class TestItemized(ApiBaseTest):
             last_index=page1[-1]['sub_id'],
             sort_null_only=True,
             sort='contribution_receipt_date',
-            **self.kwargs,
+            **self.kwargs
         ))
         self.assertEqual(len(page2), 5)
         self.assertEqual(
