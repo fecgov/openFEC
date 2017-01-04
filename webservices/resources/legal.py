@@ -68,7 +68,8 @@ def parse_query_string(query):
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, type='all',
-            ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None, **kwargs):
+            ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None,
+            ao_category='F', **kwargs):
         if type == 'all':
             types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -105,7 +106,15 @@ class UniversalSearch(utils.Resource):
                 .index(DOCS_SEARCH)
 
             if type == 'advisory_opinions':
-                # query = query.query('match', category='Final Opinion')
+                categories = {'F': 'Final Opinion',
+                              'V': 'Votes',
+                              'D': 'Draft Documents',
+                              'R': 'AO Request, Supplemental Material, and Extensions of Time',
+                              'W': 'Withdrawal of Request',
+                              'C': 'Comments and Ex parte Communications',
+                              'S': 'Commissioner Statements'}
+                ao_category = [categories[c] for c in ao_category]
+                query = query.query('terms', category=ao_category)
 
                 if ao_no:
                     query = query.query('terms', no=ao_no)

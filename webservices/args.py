@@ -143,7 +143,9 @@ query = {
     'ao_no': fields.List(IStr, required=False, description='Force advisory opinion number'),
     'ao_name': fields.List(IStr, required=False, description='Force advisory opinion name'),
     'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
-    'ao_max_date': fields.Date(description="Latest issue date of advisory opinion")
+    'ao_max_date': fields.Date(description="Latest issue date of advisory opinion"),
+    'ao_category': fields.List(IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
+                                    description="Category of the document")
 }
 
 candidate_detail = {
