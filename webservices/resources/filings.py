@@ -41,6 +41,8 @@ class BaseFilings(views.ApiResource):
 
     filter_match_fields = [
         ('filer_type', models.Filings.means_filed),
+        ('is_amended', models.Filings.is_amended),
+        ('most_recent', models.Filings.most_recent),
     ]
 
     @property
