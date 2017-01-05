@@ -114,6 +114,7 @@ def load_current_murs():
 
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
+            mur['respondents'] = get_sorted_respondents(mur['participants'])
             mur['disposition'] = get_disposition(case_id)
             mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
@@ -161,6 +162,16 @@ def get_participants(case_id):
                 'citations': defaultdict(list)
             }
     return participants
+
+def get_sorted_respondents(participants):
+    """
+    Returns the respondents in a MUR sorted in the order of most important to least important
+    """
+    SORTED_RESPONDENT_ROLES = ['Primary Respondent', 'Respondent', 'Previous Respondent']
+    respondents = []
+    for role in SORTED_RESPONDENT_ROLES:
+        respondents.extend(sorted([p['name'] for p in participants if p['role'] == role]))
+    return respondents
 
 def get_subjects(case_id):
     subjects = []

@@ -67,8 +67,7 @@ def parse_query_string(query):
 
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q='', from_hit=0, hits_returned=20, type='all',
-            ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None, **kwargs):
+    def get(self, q='', from_hit=0, hits_returned=20, type='all', **kwargs):
         if type == 'all':
             types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -105,35 +104,11 @@ class UniversalSearch(utils.Resource):
                 .index(DOCS_SEARCH)
 
             if type == 'advisory_opinions':
-                query = query.query('match', category='Final Opinion')
-
-                if ao_no:
-                    query = query.query('terms', no=ao_no)
-
-                if ao_name:
-                    query = query.query("match", name=' '.join(ao_name))
-
-                date_range = {}
-
-                if ao_min_date:
-                    date_range['gte'] = ao_min_date
-
-                if ao_max_date:
-                    date_range['lte'] = ao_max_date
-
-                if date_range:
-                    query = query.query("range", date=date_range)
+                query = apply_ao_specific_query_params(query, **kwargs)
 
             if type == 'murs':
-                if kwargs.get('no'):
-                    query = query.query('terms', no=kwargs.get('no'))
-                if kwargs.get('election_cycles'):
-                    query = query.query('term', election_cycles=kwargs.get('election_cycles'))
-                if kwargs.get('document_category') and kwargs.get('document_text'):
-                    combined_query = [
-                        Q('match', documents__category=kwargs.get('document_category')),
-                        Q('match', documents__text=kwargs.get('document_text'))]
-                    query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+                query = apply_mur_specific_query_params(query, **kwargs)
+
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
 
@@ -157,3 +132,36 @@ class UniversalSearch(utils.Resource):
 
         results['total_all'] = total_count
         return results
+
+def apply_mur_specific_query_params(query, **kwargs):
+    if kwargs.get('no'):
+        query = query.query('terms', no=kwargs.get('no'))
+    if kwargs.get('respondents'):
+        query = query.query('match', respondents=kwargs.get('respondents'))
+    if kwargs.get('election_cycles'):
+        query = query.query('term', election_cycles=kwargs.get('election_cycles'))
+    if kwargs.get('document_category') and kwargs.get('document_text'):
+        combined_query = [
+            Q('match', documents__category=kwargs.get('document_category')),
+            Q('match', documents__text=kwargs.get('document_text'))]
+        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+
+    return query
+
+def apply_ao_specific_query_params(query, **kwargs):
+    query = query.query('match', category='Final Opinion')
+
+    if kwargs.get('ao_no'):
+        query = query.query('terms', no=kwargs.get('ao_no'))
+    if kwargs.get('ao_name'):
+        query = query.query("match", name=' '.join(kwargs.get('ao_name')))
+
+    date_range = {}
+    if kwargs.get('ao_min_date'):
+        date_range['gte'] = kwargs.get('ao_min_date')
+    if kwargs.get('ao_max_date'):
+        date_range['lte'] = kwargs.get('ao_max_date')
+    if date_range:
+        query = query.query("range", date=date_range)
+
+    return query
