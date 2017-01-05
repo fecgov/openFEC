@@ -185,18 +185,18 @@ def index_advisory_opinions():
             key = "legal/aos/%s.pdf" % row[0]
             pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
 
-            respondents = db.engine.execute("""select e.name, et.description
+            requestors = db.engine.execute("""select e.name, et.description
                                 from aouser.players p
                                 inner join aouser.ao ao on ao.ao_id = p.ao_id
                                 inner join aouser.entity e on p.entity_id = e.entity_id
                                 inner join aouser.entity_type et on et.entity_type_id = e.type
                                 where ao.ao_no='{0}' and (role_id = 0 or role_id = 1);""".format(row[8]))
 
-            respondent_names = []
-            respondent_types = set()
-            for respondent in respondents:
-                respondent_names.append(respondent[0])
-                respondent_types.add(respondent[1])
+            requestor_names = []
+            requestor_types = set()
+            for requestor in requestors:
+                requestor_names.append(requestor[0])
+                requestor_types.add(requestor[1])
 
             doc = {"doc_id": row[0],
                    "text": row[1],
@@ -210,8 +210,8 @@ def index_advisory_opinions():
                    "date": row[9],
                    "is_pending": row[10],
                    "url": pdf_url,
-                   "respondent_names": respondent_names,
-                   "respondent_types": list(respondent_types)}
+                   "requestor_names": requestor_names,
+                   "requestor_types": list(requestor_types)}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
