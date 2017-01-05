@@ -56,6 +56,37 @@ class TableGroup:
         cls.rename()
 
     @classmethod
+    def add_cycles(cls, cycle, amount):
+        """Adds new child tables to an existing partition.
+        Note:  Will not override existing tables.
+        """
+
+        parent = utils.load_table(cls.parent)
+
+        # Calculate all of the cycles to be added at once.
+        cycles = [ cycle + i for i in range(0, amount * 2, 2) ]
+
+        for cycle in cycles:
+            child_name = cls.get_child_name(cycle)
+
+            if utils.load_table(child_name) is None:
+                cls.create_child(parent, cycle, False)
+                cls.rename_child(cycle)
+                logger.info(
+                    'Successfully added cycle {cycle} as {name}.'.format(
+                        cycle=cycle,
+                        name=child_name
+                    )
+                )
+            else:
+                logger.warn(
+                    'Cycle {cycle} already exists as {name}; skipping.'.format(
+                        cycle=cycle,
+                        name=child_name
+                    )
+                )
+
+    @classmethod
     def get_child_name(cls, cycle):
         return '{base}_{start}_{stop}'.format(
             base=cls.base_name,
@@ -76,7 +107,7 @@ class TableGroup:
         table.create(db.engine)
 
     @classmethod
-    def create_child(cls, parent, cycle):
+    def create_child(cls, parent, cycle, temp=True):
         start, stop = cycle - 1, cycle
         name = '{base}_{start}_{stop}_tmp'.format(base=cls.base_name, start=start, stop=stop)
 
@@ -99,15 +130,16 @@ class TableGroup:
         db.engine.execute(create)
         child = utils.load_table(name)
 
-        cls.create_constraints(child, cycle)
+        cls.create_constraints(child, cycle, temp)
         cls.create_indexes(child)
         cls.update_child(child)
         db.engine.execute(utils.Analyze(child))
         return child
 
     @classmethod
-    def create_constraints(cls, child, cycle):
+    def create_constraints(cls, child, cycle, temp=True):
         start, stop = cycle - 1, cycle
+        master_name = '_tmp' if temp else ''
         cmds = [
             'alter table {child} alter column {primary} set not null',
             'alter table {child} add primary key ({primary})',
@@ -119,7 +151,7 @@ class TableGroup:
             'start': start,
             'stop': stop,
             'child': child.name,
-            'master': '{0}_master_tmp'.format(cls.base_name),
+            'master': '{0}_master{1}'.format(cls.base_name, master_name),
             'primary': cls.primary,
         }
         for cmd in cmds:
@@ -137,6 +169,14 @@ class TableGroup:
     @classmethod
     def rename(cls):
         # Rename master table
+        cls.rename_master()
+
+        # Rename child tables
+        for cycle in get_cycles():
+            cls.rename_child(cycle)
+
+    @classmethod
+    def rename_master(cls):
         cmds = [
             'drop table if exists {0}_master cascade',
             'alter table {0}_master_tmp rename to {0}_master',
@@ -145,26 +185,26 @@ class TableGroup:
         for cmd in cmds:
             db.engine.execute(cmd.format(cls.base_name))
 
-        # Rename child tables
-        for cycle in get_cycles():
-            child_name = cls.get_child_name(cycle)
-            cmd = 'alter table {0}_tmp rename to {0}'.format(child_name)
-            db.engine.execute(cmd)
-            child = utils.load_table(child_name)
+    @classmethod
+    def rename_child(cls, cycle):
+        child_name = cls.get_child_name(cycle)
+        cmd = 'alter table {0}_tmp rename to {0}'.format(child_name)
+        db.engine.execute(cmd)
+        child = utils.load_table(child_name)
 
-            # Rename child table primary key
+        # Rename child table primary key
+        cmd = 'alter index {0} rename to {1}'.format(
+            child.primary_key.name,
+            child.primary_key.name.replace('_tmp', '')
+        )
+        db.engine.execute(cmd)
+
+        # Rename child table indexes
+        for index in child.indexes:
             cmd = 'alter index {0} rename to {1}'.format(
-                child.primary_key.name,
-                child.primary_key.name.replace('_tmp', '')
+                index.name, index.name.replace('_tmp', '')
             )
             db.engine.execute(cmd)
-
-            # Rename child table indexes
-            for index in child.indexes:
-                cmd = 'alter index {0} rename to {1}'.format(
-                    index.name, index.name.replace('_tmp', '')
-                )
-                db.engine.execute(cmd)
 
     @classmethod
     def refresh_children(cls):
