@@ -440,8 +440,7 @@ class TestItemized(ApiBaseTest):
             ('image_number', ScheduleEEfile.image_number, ['123', '456']),
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
-            ('is_notice', ScheduleEEfile.is_notice, [True, False]),
-            ('filing_form', ScheduleEEfile.form_type, ['F24N', 'F3XN'])
+            #('filing_form', ScheduleEEfile.form_type, ['F24N', 'F3XN'])
         ]
         for label, column, values in filters:
             [

@@ -46,6 +46,13 @@ class BaseRawItemized(db.Model):
     memo_text = db.Column(db.String)
     back_reference_transaction_id = db.Column('br_tran_id', db.String)
     back_reference_schedule_name = db.Column('br_sname', db.String)
+    committee = utils.related_committee_history('committee_id')
+    #filing = utils.related_efile_summary()
+    '''
+    @hybrid_property
+    def report_type(self):
+        return self.filing.form_type
+    '''
 
     @hybrid_property
     def memoed_subtotal(self):
@@ -437,7 +444,7 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_schedule_e_reports'
+    __tablename__ = 'real_efile_se'
 
     # payee info
     payee_prefix = db.Column('prefix', db.String)
@@ -483,10 +490,6 @@ class ScheduleEEfile(BaseRawItemized):
     notary_sign_date = db.Column('not_date', db.Date)
 
     dissemination_date = db.Column('dissem_dt', db.Date)
-
-    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
-    is_notice = db.Column(db.Boolean)
-    form_type = db.Column('form', db.String)
 
 
 class ScheduleF(PdfMixin,BaseItemized):

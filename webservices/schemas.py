@@ -461,14 +461,7 @@ ScheduleASchema = make_schema(
             'contributor_employer_text',
             'contributor_occupation_text',
         ),
-        'relationships': [
-            Relationship(
-                models.ScheduleA.committee,
-                models.CommitteeHistory.name,
-                'committee_name',
-                1
-            ),
-        ],
+
     }
 )
 
@@ -690,8 +683,11 @@ ItemizedScheduleAfilingsSchema = make_schema(
     models.ScheduleAEfile,
     fields={
         'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
         #'csv_url': ma.fields.Str(),
     },
 )
