@@ -105,13 +105,10 @@ class ScheduleEEfileView(views.ApiResource):
     page_schema = schemas.ScheduleEEfilePageSchema
 
     filter_multi_fields = [
-        ('cycle', sa.func.get_cycle(models.ScheduleEEfile.report_year)),
         ('image_number', models.ScheduleEEfile.image_number),
         ('committee_id', models.ScheduleEEfile.committee_id),
         ('candidate_id', models.ScheduleEEfile.candidate_id),
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
-        ('filing_form', models.ScheduleEEfile.form_type),
-        ('is_notice', models.ScheduleEEfile.is_notice),
     ]
 
     @property

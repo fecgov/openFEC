@@ -92,9 +92,9 @@ class ScheduleAEfileView(views.ApiResource):
     filter_multi_fields = [
         ('image_number', models.ScheduleAEfile.image_number),
         ('committee_id', models.ScheduleAEfile.committee_id),
-        #('contributor_id', models.ScheduleAEfile.contributor_id),
         ('contributor_city', models.ScheduleAEfile.contributor_city),
         ('contributor_state', models.ScheduleAEfile.contributor_state),
+        #('contributor_name', models.ScheduleAEfile.contr)
     ]
 
     filter_range_fields = [
@@ -102,7 +102,13 @@ class ScheduleAEfileView(views.ApiResource):
         (('min_amount', 'max_amount'), models.ScheduleAEfile.contribution_receipt_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleAEfile.image_number),
     ]
-
+    '''
+    filter_fulltext_fields = [
+        ('contributor_name', models.ScheduleAE.contributor_name_text),
+        ('contributor_employer', models.ScheduleAE.contributor_employer_text),
+        ('contributor_occupation', models.ScheduleAE.contributor_occupation_text),
+    ]
+    '''
     @property
     def args(self):
         return utils.extend(
