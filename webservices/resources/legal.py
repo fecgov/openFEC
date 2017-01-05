@@ -136,6 +136,8 @@ class UniversalSearch(utils.Resource):
 def apply_mur_specific_query_params(query, **kwargs):
     if kwargs.get('no'):
         query = query.query('terms', no=kwargs.get('no'))
+    if kwargs.get('respondents'):
+        query = query.query('match', respondents=kwargs.get('respondents'))
     if kwargs.get('election_cycles'):
         query = query.query('term', election_cycles=kwargs.get('election_cycles'))
     if kwargs.get('document_category') and kwargs.get('document_text'):

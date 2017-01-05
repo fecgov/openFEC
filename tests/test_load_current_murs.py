@@ -128,6 +128,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'doc_id': 'mur_1',
             'participants': [],
             'subject': {"text": [mur_subject]},
+            'respondents': [],
             'documents': [],
             'disposition': {'data': [], 'text': []},
             'close_date': None,
@@ -155,6 +156,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'election_cycles': [2016],
             'doc_id': 'mur_1',
             'subject': {"text": [mur_subject]},
+            'respondents': ["Bilbo Baggins", "Thorin Oakenshield"]
         }
         participants = [
             ("Complainant", "Gollum"),
@@ -266,6 +268,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             ]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
             'subject': {'text': ['Fraudulent misrepresentation']},
+            'respondents': [],
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
             'election_cycles': [2016],
