@@ -144,6 +144,7 @@ query = {
     'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
     'ao_max_date': fields.Date(description="Latest issue date of advisory opinion"),
     'no': fields.List(IStr, required=False, description='Filter by case number'),
+    'respondents': fields.Str(IStr, required=False, description='Filter by respondents'),
     'election_cycles': fields.Int(IStr, required=False, description='Filter by election cycles'),
     'document_category': fields.Str(IStr, required=False, description='Filter by category of associated documents'),
     'document_text': fields.Str(IStr, required=False, description='Text to search for in the associated documents'),
