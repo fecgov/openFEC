@@ -75,7 +75,7 @@ class ScheduleA(BaseItemized):
     contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('contbr_nm_first', db.String)
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
-    contributor_name = db.Column('contbr_nm_last', db.String)
+    contributor_last_name = db.Column('contbr_nm_last', db.String)
     contributor_suffix = db.Column('contbr_suffix', db.String)
     # Street address omitted per FEC policy
     # contributor_street_1 = db.Column('contbr_st1', db.String)
