@@ -145,7 +145,8 @@ query = {
     'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
     'ao_max_date': fields.Date(description="Latest issue date of advisory opinion"),
     'ao_category': fields.List(IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
-                                    description="Category of the document")
+                                    description="Category of the document"),
+    'ao_is_pending': fields.Bool(description="Status of AO (pending or completed)")
 }
 
 candidate_detail = {

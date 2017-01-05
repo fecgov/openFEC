@@ -69,7 +69,7 @@ class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, type='all',
             ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None,
-            ao_category='F', **kwargs):
+            ao_category='F', ao_is_pending=None, **kwargs):
         if type == 'all':
             types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -121,6 +121,9 @@ class UniversalSearch(utils.Resource):
 
                 if ao_name:
                     query = query.query("match", name=' '.join(ao_name))
+
+                if ao_is_pending is not None:
+                    query = query.query('term', is_pending=ao_is_pending)
 
                 date_range = {}
 
