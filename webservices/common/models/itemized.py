@@ -33,9 +33,7 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    file_number = db.Column("repid", db.Integer, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
-    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
@@ -46,13 +44,10 @@ class BaseRawItemized(db.Model):
     memo_text = db.Column(db.String)
     back_reference_transaction_id = db.Column('br_tran_id', db.String)
     back_reference_schedule_name = db.Column('br_sname', db.String)
-    committee = utils.related_committee_history('committee_id')
-    #filing = utils.related_efile_summary()
-    '''
+
     @hybrid_property
     def report_type(self):
         return self.filing.form_type
-    '''
 
     @hybrid_property
     def memoed_subtotal(self):
@@ -133,6 +128,8 @@ class ScheduleA(BaseItemized):
 class ScheduleAEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sa7'
 
+    file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     contributor_prefix = db.Column('prefix', db.String)
     """
     contributor = db.relationship(
@@ -173,9 +170,23 @@ class ScheduleAEfile(BaseRawItemized):
     conduit_committee_city = db.Column('other_city', db.String)
     conduit_committee_state = db.Column('other_state', db.String)
     conduit_committee_zip = db.Column('other_zip', db.Integer)
+    filing = db.relationship(
+        'EFilings',
+        primaryjoin='''and_(
+                    ScheduleAEfile.file_number == EFilings.file_number,
+                )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
 
-    #load_date = db.Column('create_dt', db.TIMESTAMP)
-
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                        ScheduleAEfile.committee_id == CommitteeHistory.committee_id,
+                    )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )
 
 
 class ScheduleB(BaseItemized):
@@ -444,8 +455,10 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_se'
+    __tablename__ = 'real_efile_schedule_e_reports'
 
+    file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     # payee info
     payee_prefix = db.Column('prefix', db.String)
     #need to add vectorized column
@@ -490,6 +503,24 @@ class ScheduleEEfile(BaseRawItemized):
     notary_sign_date = db.Column('not_date', db.Date)
 
     dissemination_date = db.Column('dissem_dt', db.Date)
+
+    filing = db.relationship(
+        'EFilings',
+        primaryjoin='''and_(
+                        ScheduleEEfile.file_number == EFilings.file_number,
+                    )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                            ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
+                        )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )
 
 
 class ScheduleF(PdfMixin,BaseItemized):

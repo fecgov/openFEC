@@ -670,6 +670,8 @@ ItemizedScheduleEfilingsSchema = make_schema(
     models.ScheduleEEfile,
     fields={
         'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'is_notice':ma.fields.Boolean(),
