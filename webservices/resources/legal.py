@@ -69,7 +69,8 @@ class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, type='all',
             ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None,
-            ao_category='F', ao_is_pending=None, ao_requestor=None, **kwargs):
+            ao_category='F', ao_is_pending=None, ao_requestor=None,
+            ao_requestor_type=None, **kwargs):
         if type == 'all':
             types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -113,6 +114,7 @@ class UniversalSearch(utils.Resource):
                               'W': 'Withdrawal of Request',
                               'C': 'Comments and Ex parte Communications',
                               'S': 'Commissioner Statements'}
+
                 ao_category = [categories[c] for c in ao_category]
                 query = query.query('terms', category=ao_category)
 
@@ -126,8 +128,26 @@ class UniversalSearch(utils.Resource):
                     query = query.query('term', is_pending=ao_is_pending)
 
                 if ao_requestor:
-                    print(ao_requestor)
                     query = query.query("match", requestor_names=ao_requestor)
+
+                if ao_requestor_type:
+                    requestor_types = {1: 'Federal candidate/candidate committee/officeholder',
+                                  2: 'Publicly funded candidates/committees',
+                                  3: 'Party committee, national',
+                                  4: 'Party committee, state or local',
+                                  5: 'Nonconnected political committee',
+                                  6: 'Separate segregated fund',
+                                  7: 'Labor Organization',
+                                  8: 'Trade Association',
+                                  9: 'Membership Organization, Cooperative, Corporation W/O Capital Stock',
+                                 10: 'Corporation (including LLCs electing corporate status)',
+                                 11: 'Partnership (including LLCs electing partnership status)',
+                                 12: 'Governmental entity',
+                                 13: 'Research/Public Interest/Educational Institution',
+                                 14: 'Law Firm',
+                                 15: 'Individual',
+                                 16: 'Other'}
+                    query = query.query("terms", requestor_types=[requestor_types[r] for r in ao_requestor_type])
 
                 date_range = {}
 

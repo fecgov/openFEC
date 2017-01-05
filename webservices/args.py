@@ -147,7 +147,9 @@ query = {
     'ao_category': fields.List(IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
                                     description="Category of the document"),
     'ao_is_pending': fields.Bool(description="Status of AO (pending or completed)"),
-    'ao_requestor': fields.Str(description="The / a requestor of the advisory opinion")
+    'ao_requestor': fields.Str(description="The requestor of the advisory opinion"),
+    'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
+                                            description="Code of the advisory opinion requestor type.")
 }
 
 candidate_detail = {
