@@ -113,7 +113,8 @@ class ScheduleAEfileView(views.ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            args.schedule_a,
+            args.schedule_a_e_file,
+            args.itemized,
             args.make_sort_args(
                 default='-contribution_receipt_date',
                 validator=args.OptionValidator([

@@ -33,7 +33,6 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
@@ -129,6 +128,7 @@ class ScheduleAEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sa7'
 
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     contributor_prefix = db.Column('prefix', db.String)
     """
@@ -455,9 +455,10 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_schedule_e_reports'
+    __tablename__ = 'real_efile_se'
 
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     # payee info
     payee_prefix = db.Column('prefix', db.String)
@@ -507,20 +508,22 @@ class ScheduleEEfile(BaseRawItemized):
     filing = db.relationship(
         'EFilings',
         primaryjoin='''and_(
-                        ScheduleEEfile.file_number == EFilings.file_number,
-                    )''',
+                            ScheduleEEfile.file_number == EFilings.file_number,
+                        )''',
         foreign_keys=file_number,
         lazy='joined',
     )
-
+    #This primary join is filtering out some valid efile entries (must be doing an inner join),
+    #see if there is a way to force this to be a left outer join
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
-                            ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
-                        )''',
+                                ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
+                            )''',
         foreign_keys=committee_id,
         lazy='joined',
     )
+
 
     @hybrid_property
     def payee_name(self):
