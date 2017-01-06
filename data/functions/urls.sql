@@ -74,3 +74,15 @@ begin
     end;
 end
 $$ language plpgsql immutable;
+
+create or replace function is_amended(most_recent_file_number integer, file_number integer) returns boolean as $$
+begin
+    return not is_most_recent(most_recent_file_number, file_number);
+end
+$$ language plpgsql immutable;
+
+create or replace function is_most_recent(most_recent_file_number integer, file_number integer) returns boolean as $$
+begin
+    return most_recent_file_number = file_number;
+end
+$$ language plpgsql immutable;

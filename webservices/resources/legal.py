@@ -67,10 +67,7 @@ def parse_query_string(query):
 
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q='', from_hit=0, hits_returned=20, type='all',
-            ao_no=None, ao_name=None, ao_min_date=None, ao_max_date=None,
-            ao_category='F', ao_is_pending=None, ao_requestor=None,
-            ao_requestor_type=None, **kwargs):
+    def get(self, q='', from_hit=0, hits_returned=20, type='all', **kwargs):
         if type == 'all':
             types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -107,58 +104,10 @@ class UniversalSearch(utils.Resource):
                 .index(DOCS_SEARCH)
 
             if type == 'advisory_opinions':
-                categories = {'F': 'Final Opinion',
-                              'V': 'Votes',
-                              'D': 'Draft Documents',
-                              'R': 'AO Request, Supplemental Material, and Extensions of Time',
-                              'W': 'Withdrawal of Request',
-                              'C': 'Comments and Ex parte Communications',
-                              'S': 'Commissioner Statements'}
+                query = apply_ao_specific_query_params(query, **kwargs)
 
-                ao_category = [categories[c] for c in ao_category]
-                query = query.query('terms', category=ao_category)
-
-                if ao_no:
-                    query = query.query('terms', no=ao_no)
-
-                if ao_name:
-                    query = query.query("match", name=' '.join(ao_name))
-
-                if ao_is_pending is not None:
-                    query = query.query('term', is_pending=ao_is_pending)
-
-                if ao_requestor:
-                    query = query.query("match", requestor_names=ao_requestor)
-
-                if ao_requestor_type:
-                    requestor_types = {1: 'Federal candidate/candidate committee/officeholder',
-                                  2: 'Publicly funded candidates/committees',
-                                  3: 'Party committee, national',
-                                  4: 'Party committee, state or local',
-                                  5: 'Nonconnected political committee',
-                                  6: 'Separate segregated fund',
-                                  7: 'Labor Organization',
-                                  8: 'Trade Association',
-                                  9: 'Membership Organization, Cooperative, Corporation W/O Capital Stock',
-                                 10: 'Corporation (including LLCs electing corporate status)',
-                                 11: 'Partnership (including LLCs electing partnership status)',
-                                 12: 'Governmental entity',
-                                 13: 'Research/Public Interest/Educational Institution',
-                                 14: 'Law Firm',
-                                 15: 'Individual',
-                                 16: 'Other'}
-                    query = query.query("terms", requestor_types=[requestor_types[r] for r in ao_requestor_type])
-
-                date_range = {}
-
-                if ao_min_date:
-                    date_range['gte'] = ao_min_date
-
-                if ao_max_date:
-                    date_range['lte'] = ao_max_date
-
-                if date_range:
-                    query = query.query("range", date=date_range)
+            if type == 'murs':
+                query = apply_mur_specific_query_params(query, **kwargs)
 
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
@@ -183,3 +132,74 @@ class UniversalSearch(utils.Resource):
 
         results['total_all'] = total_count
         return results
+
+def apply_mur_specific_query_params(query, **kwargs):
+    if kwargs.get('mur_no'):
+        query = query.query('terms', no=kwargs.get('mur_no'))
+    if kwargs.get('mur_respondents'):
+        query = query.query('match', respondents=kwargs.get('mur_respondents'))
+    if kwargs.get('mur_election_cycles'):
+        query = query.query('term', election_cycles=kwargs.get('mur_election_cycles'))
+    if kwargs.get('mur_document_category') and kwargs.get('mur_document_text'):
+        combined_query = [
+            Q('match', documents__category=kwargs.get('mur_document_category')),
+            Q('match', documents__text=kwargs.get('mur_document_text'))]
+        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+
+    return query
+
+def apply_ao_specific_query_params(query, **kwargs):
+    categories = {'F': 'Final Opinion',
+                  'V': 'Votes',
+                  'D': 'Draft Documents',
+                  'R': 'AO Request, Supplemental Material, and Extensions of Time',
+                  'W': 'Withdrawal of Request',
+                  'C': 'Comments and Ex parte Communications',
+                  'S': 'Commissioner Statements'}
+
+    if kwargs.get('ao_category'):
+        ao_category = [categories[c] for c in kwargs.get('ao_category')]
+    else:
+        ao_category = ['Final Opinion']
+    query = query.query('terms', category=ao_category)
+
+    if kwargs.get('ao_no'):
+        query = query.query('terms', no=kwargs.get('ao_no'))
+
+    if kwargs.get('ao_name'):
+        query = query.query("match", name=' '.join(kwargs.get('ao_name')))
+
+    if kwargs.get('ao_is_pending') is not None:
+        query = query.query('term', is_pending=kwargs.get('ao_is_pending'))
+
+    if kwargs.get('ao_requestor'):
+        query = query.query("match", requestor_names=kwargs.get('ao_requestor'))
+
+    if kwargs.get('ao_requestor_type'):
+        requestor_types = {1: 'Federal candidate/candidate committee/officeholder',
+                      2: 'Publicly funded candidates/committees',
+                      3: 'Party committee, national',
+                      4: 'Party committee, state or local',
+                      5: 'Nonconnected political committee',
+                      6: 'Separate segregated fund',
+                      7: 'Labor Organization',
+                      8: 'Trade Association',
+                      9: 'Membership Organization, Cooperative, Corporation W/O Capital Stock',
+                     10: 'Corporation (including LLCs electing corporate status)',
+                     11: 'Partnership (including LLCs electing partnership status)',
+                     12: 'Governmental entity',
+                     13: 'Research/Public Interest/Educational Institution',
+                     14: 'Law Firm',
+                     15: 'Individual',
+                     16: 'Other'}
+        query = query.query("terms", requestor_types=[requestor_types[r] for r in kwargs.get('ao_requestor_type')])
+
+    date_range = {}
+    if kwargs.get('ao_min_date'):
+        date_range['gte'] = kwargs.get('ao_min_date')
+    if kwargs.get('ao_max_date'):
+        date_range['lte'] = kwargs.get('ao_max_date')
+    if date_range:
+        query = query.query("range", date=date_range)
+
+    return query

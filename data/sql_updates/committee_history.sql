@@ -91,7 +91,7 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     cycles.cycles,
     coalesce(candidates.candidate_ids, '{}'::text[]) as candidate_ids
 from disclosure.cmte_valid_fec_yr fec_yr
-left join fec_vsum_f1 f1 on fec_yr.cmte_id = f1.cmte_id and fec_yr.fec_election_yr >= f1.rpt_yr
+left join fec_vsum_f1_vw f1 on fec_yr.cmte_id = f1.cmte_id and fec_yr.fec_election_yr >= f1.rpt_yr
 left join cycles on fec_yr.cmte_id = cycles.cmte_id
 left join dates on fec_yr.cmte_id = dates.cmte_id
 left join candidates on fec_yr.cmte_id = candidates.cmte_id
