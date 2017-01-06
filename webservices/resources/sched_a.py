@@ -102,13 +102,13 @@ class ScheduleAEfileView(views.ApiResource):
         (('min_amount', 'max_amount'), models.ScheduleAEfile.contribution_receipt_amount),
         (('min_image_number', 'max_image_number'), models.ScheduleAEfile.image_number),
     ]
-    '''
+
     filter_fulltext_fields = [
-        ('contributor_name', models.ScheduleAE.contributor_name_text),
-        ('contributor_employer', models.ScheduleAE.contributor_employer_text),
-        ('contributor_occupation', models.ScheduleAE.contributor_occupation_text),
+        ('contributor_name', models.ScheduleAEfile.contributor_name_text),
+        ('contributor_employer', models.ScheduleAEfile.contributor_employer_text),
+        ('contributor_occupation', models.ScheduleAEfile.contributor_occupation_text),
     ]
-    '''
+
     @property
     def args(self):
         return utils.extend(

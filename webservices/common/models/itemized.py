@@ -8,7 +8,7 @@ from webservices import docs, utils
 from webservices.common.models.filings import EFilings
 
 from .base import db
-from .reports import PdfMixin
+from .reports import PdfMixin, name_generator
 
 
 class BaseItemized(db.Model):
@@ -142,7 +142,7 @@ class ScheduleAEfile(BaseRawItemized):
     """
     #contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
 
-    #contributor_name_text = db.Column(TSVECTOR)
+    contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('fname', db.String)
     contributor_middle_name = db.Column('mname', db.String)
     contributor_last_name = db.Column('name', db.String)
@@ -154,9 +154,9 @@ class ScheduleAEfile(BaseRawItemized):
     contributor_state = db.Column('state', db.String, doc=docs.CONTRIBUTOR_STATE)
     contributor_zip = db.Column('zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
     contributor_employer = db.Column('indemp', db.String, doc=docs.CONTRIBUTOR_EMPLOYER)
-    #contributor_employer_text = db.Column(TSVECTOR)
+    contributor_employer_text = db.Column(TSVECTOR)
     contributor_occupation = db.Column('indocc', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
-    #contributor_occupation_text = db.Column(TSVECTOR)
+    contributor_occupation_text = db.Column(TSVECTOR)
     #contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
     contributor_aggregate_ytd = db.Column('ytd', db.Numeric(30, 2))
     contribution_receipt_amount = db.Column('amount', db.Numeric(30, 2))
@@ -521,6 +521,22 @@ class ScheduleEEfile(BaseRawItemized):
         foreign_keys=committee_id,
         lazy='joined',
     )
+
+    @hybrid_property
+    def payee_name(self):
+        name = name_generator(
+            self.payee_last_name,
+            self.payee_prefix,
+            self.payee_first_name,
+            self.payee_middle_name,
+            self.payee_suffix
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
 
 class ScheduleF(PdfMixin,BaseItemized):
