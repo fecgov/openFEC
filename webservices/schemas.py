@@ -675,6 +675,8 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'is_notice':ma.fields.Boolean(),
+        'payee_name': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
         #'csv_url': ma.fields.Str(),
     }
 )
@@ -692,6 +694,13 @@ ItemizedScheduleAfilingsSchema = make_schema(
         'report_type': ma.fields.Str(),
         #'csv_url': ma.fields.Str(),
     },
+    options={
+        'exclude': (
+            'contributor_name_text',
+            'contributor_employer_text',
+            'contributor_occupation_text',
+        ),
+    }
 )
 
 augment_schemas(ItemizedScheduleAfilingsSchema)

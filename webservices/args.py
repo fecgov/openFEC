@@ -642,11 +642,12 @@ schedule_e = {
 }
 
 schedule_e_efile = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    #'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'filing_form': fields.List(IStr, description='Filing form'),
+    #'filing_form': fields.List(IStr, description='Filing form'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'image_number': fields.List(
         fields.Str,
         description='The image number of the page where the schedule item is reported',
@@ -655,7 +656,9 @@ schedule_e_efile = {
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
     ),
-    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+    'min_date': fields.Date(description='Selects all items expended by this committee after this date'),
+    'max_date': fields.Date(description='Selects all items expended by this committee before this date'),
+    #'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
 }
 
 rad_analyst = {
