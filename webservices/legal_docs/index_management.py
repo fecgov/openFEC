@@ -30,6 +30,51 @@ DEFAULT_MAPPINGS = {
                 "type": "string",
                 "analyzer": "english"
             },
+            "disposition": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "citations": {
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "disposition": {
+                                "type": "string",
+                                "index": "not_analyzed"
+                            },
+                            "penalty": {
+                                "type": "double"
+                            },
+                            "respondent": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "text": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "vote_date": {
+                                "type": "date",
+                                "format": "dateOptionalTime"
+                            }
+                        }
+                    }
+                }
+            },
             "documents": {
                 "type": "nested",
                 "properties": {

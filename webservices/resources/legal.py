@@ -145,6 +145,8 @@ def apply_mur_specific_query_params(query, **kwargs):
             Q('match', documents__category=kwargs.get('mur_document_category')),
             Q('match', documents__text=kwargs.get('mur_document_text'))]
         query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+    if kwargs.get('mur_dispositions'):
+        query = query.query('match', disposition__data__disposition=kwargs.get('mur_dispositions'))
 
     return query
 
