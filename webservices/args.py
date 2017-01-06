@@ -82,23 +82,22 @@ class IndexValidator(OptionValidator):
     :param Base model: SQLALchemy model.
     :param list exclude: Optional list of columns to exclude.
     """
-    def __init__(self, model, extra=None, exclude=None):
+    def __init__(self, model, extra=None, exclude=None, schema=None):
         self.model = model
         self.extra = extra or []
         self.exclude = exclude or []
+        self.database_schema = schema
 
     @property
     def values(self):
         inspector = sa.inspect(db.engine)
-
         column_map = {
             column.key: label
             for label, column in self.model.__mapper__.columns.items()
         }
-
         return [
             column_map[column['column_names'][0]]
-            for column in inspector.get_indexes(self.model.__tablename__)
+            for column in inspector.get_indexes(self.model.__tablename__, self.database_schema)
             if not self._is_excluded(column_map.get(column['column_names'][0]))
         ] + self.extra
 
@@ -149,7 +148,12 @@ query = {
     'ao_is_pending': fields.Bool(description="Status of AO (pending or completed)"),
     'ao_requestor': fields.Str(description="The requestor of the advisory opinion"),
     'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
-                                            description="Code of the advisory opinion requestor type.")
+                                            description="Code of the advisory opinion requestor type."),
+    'mur_no': fields.List(IStr, required=False, description='Filter by case number'),
+    'mur_respondents': fields.Str(IStr, required=False, description='Filter by respondents'),
+    'mur_election_cycles': fields.Int(IStr, required=False, description='Filter by election cycles'),
+    'mur_document_category': fields.Str(IStr, required=False, description='Filter by category of associated documents'),
+    'mur_document_text': fields.Str(IStr, required=False, description='Text to search for in the associated documents')
 }
 
 candidate_detail = {
@@ -216,6 +220,8 @@ committee_history = {
 
 filings = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'is_amended': fields.Bool(description='Filing has been amended'),
+    'most_recent': fields.Bool(description='Filing is either new or is the most-recently filed amendment'),
     'report_type': fields.List(IStr, description='Report type'),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
@@ -257,6 +263,7 @@ reports = {
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
     'is_amended': fields.Bool(description='Report has been amended'),
+    'most_recent': fields.Bool(description='Report is either new or is the most-recently filed amendment'),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,
@@ -611,6 +618,23 @@ schedule_e = {
     'last_expenditure_amount': fields.Float(missing=None, description='When sorting by `expenditure_amount`, this is populated with the `expenditure_amount` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'last_office_total_ytd': fields.Float(missing=None, description='When sorting by `office_total_ytd`, this is populated with the `office_total_ytd` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'support_oppose_indicator': fields.List(
+        IStr(validate=validate.OneOf(['S', 'O'])),
+        description='Support or opposition',
+    ),
+    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+}
+
+schedule_e_efile = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'filing_form': fields.List(IStr, description='Filing form'),
+    'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'image_number': fields.List(
+        fields.Str,
+        description='The image number of the page where the schedule item is reported',
+    ),
     'support_oppose_indicator': fields.List(
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',

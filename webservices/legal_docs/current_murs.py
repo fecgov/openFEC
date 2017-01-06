@@ -90,6 +90,12 @@ STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 
 def load_current_murs():
+    """
+    Reads data for current MURs from a Postgres database, assembles a JSON document
+    corresponding to the MUR and indexes this document in Elasticsearch in the index
+    `docs_index` with a doc_type of `murs`. In addition, all documents attached to
+    the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
+    """
     es = get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
@@ -108,8 +114,9 @@ def load_current_murs():
 
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
+            mur['respondents'] = get_sorted_respondents(mur['participants'])
             mur['disposition'] = get_disposition(case_id)
-            mur['text'], mur['documents'] = get_documents(case_id, bucket, bucket_name)
+            mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
             es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
@@ -155,6 +162,16 @@ def get_participants(case_id):
                 'citations': defaultdict(list)
             }
     return participants
+
+def get_sorted_respondents(participants):
+    """
+    Returns the respondents in a MUR sorted in the order of most important to least important
+    """
+    SORTED_RESPONDENT_ROLES = ['Primary Respondent', 'Respondent', 'Previous Respondent']
+    respondents = []
+    for role in SORTED_RESPONDENT_ROLES:
+        respondents.extend(sorted([p['name'] for p in participants if p['role'] == role]))
+    return respondents
 
 def get_subjects(case_id):
     subjects = []
@@ -229,7 +246,6 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
 
 def get_documents(case_id, bucket, bucket_name):
     documents = []
-    document_text = ""
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_DOCUMENTS, case_id)
         for row in rs:
@@ -238,16 +254,16 @@ def get_documents(case_id, bucket, bucket_name):
                 'category': row['category'],
                 'description': row['description'],
                 'length': row['length'],
+                'text': row['ocrtext'],
                 'document_date': row['document_date'],
             }
-            document_text += row['ocrtext'] + ' '
             pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
             document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
-    return document_text, documents
+    return documents
 
 def remove_reclassification_notes(statutory_citation):
     """ Statutory citations include notes on reclassification of the form

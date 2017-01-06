@@ -17,9 +17,9 @@ with elections_raw as(
         -- check and correct bad codes
         expand_election_type_caucus_convention_clean(trc_election_type_id::text, trc_election_id::numeric) as election_type,
         initcap(rp.pty_desc) as party
-    from trc_election
+    from fecapp.trc_election
     --- switch this table
-    left join ref_pty rp on trc_election.election_party = rp.pty_cd
+    left join ref_pty rp on fecapp.trc_election.election_party = rp.pty_cd
     where
         trc_election_status_id = 1
 ), elections as (
@@ -64,8 +64,8 @@ with elections_raw as(
                 ], '-')
             else elections_raw.election_state
         end as report_contest
-    from trc_report_due_date reports
-    left join dimreporttype on reports.report_type = dimreporttype.rpt_tp
+    from fecapp.trc_report_due_date reports
+    left join staging.ref_rpt_tp on reports.report_type = ref_rpt_tp.rpt_tp_cd
     left join elections_raw using (trc_election_id)
     where
         coalesce(trc_election_status_id, 1) = 1
@@ -116,7 +116,7 @@ with elections_raw as(
         elections_raw.party as rp_party,
         elections_raw.election_notes as rp_election_notes
     from
-        trc_election_dates
+        fecapp.trc_election_dates
     inner join elections_raw using (trc_election_id)
 ), ie_24hr as(
     select
@@ -241,9 +241,9 @@ with elections_raw as(
         end_date,
         use_time = 'N' as all_day,
         url
-    from cal_event
-    join cal_event_category using (cal_event_id)
-    join cal_category using (cal_category_id)
+    from fecapp.cal_event
+    join fecapp.cal_event_category using (cal_event_id)
+    join fecapp.cal_category using (cal_category_id)
     where
         -- when successful add 'IE Periods' and 'EC Periods'
         category_name not in ('Election Dates', 'Reporting Deadlines', 'Quarterly', 'Monthly', 'Pre and Post-Elections', 'IE Periods', 'EC Periods') and

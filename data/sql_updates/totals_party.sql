@@ -3,7 +3,7 @@ create materialized view ofec_totals_parties_mv_tmp as
 
 with last as (
     select distinct on (cmte_id, election_cycle) *
-    from fec_vsum_f3x
+    from fec_vsum_f3x_vw
     inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
     order by
         cmte_id,
@@ -66,7 +66,7 @@ select
     max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
     max(last.rpt_yr) as last_report_year
 from
-    fec_vsum_f3x pnp
+    fec_vsum_f3x_vw pnp
     inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
     left join last using (cmte_id, election_cycle)
 where
