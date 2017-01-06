@@ -8,7 +8,7 @@ from webservices import docs, utils
 from webservices.common.models.filings import EFilings
 
 from .base import db
-from .reports import PdfMixin
+from .reports import PdfMixin, name_generator
 
 
 class BaseItemized(db.Model):
@@ -33,18 +33,20 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
-    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
     entity_type = db.Column('entity', db.String)
-    load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
     memo_code = db.Column(db.String)
     memo_text = db.Column(db.String)
     back_reference_transaction_id = db.Column('br_tran_id', db.String)
     back_reference_schedule_name = db.Column('br_sname', db.String)
+
+    @hybrid_property
+    def report_type(self):
+        return self.filing.form_type
 
     @hybrid_property
     def memoed_subtotal(self):
@@ -182,6 +184,55 @@ class ScheduleB(BaseItemized):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
 
     pdf_url = db.Column(db.String)
+
+class ScheduleBEfile(BaseRawItemized):
+    __tablename__ = 'real_efile_sb4'
+
+    file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
+    recipient_name = db.Column('lname', db.String)
+    #recipient_name_text = db.Column(TSVECTOR)
+    # Street address omitted per FEC policy
+    # recipient_street_1 = db.Column('recipient_st1', db.String)
+    # recipient_street_2 = db.Column('recipient_st2', db.String)
+    recipient_city = db.Column('city', db.String)
+    recipient_state = db.Column('state', db.String)
+    recipient_zip = db.Column('zip', db.String)
+    recipient_prefix = db.Column('prefix', db.String)
+    recipient_suffix = db.Column('suffix', db.String)
+
+    beneficiary_committee_name = db.Column('ben_comname', db.String)
+
+    disbursement_type = db.Column('dis_code', db.String)
+    disbursement_description = db.Column('transdesc', db.String)
+
+    disbursement_date = db.Column('date_dis', db.Date)
+    disbursement_amount = db.Column('amount', db.Numeric(30, 2))
+
+    semi_annual_bundled_refund = db.Column('refund', db.Integer)
+
+    candidate_office = db.Column('can_off', db.String)
+    candidate_office_district = db.Column('can_dist', db.String)
+    load_date = db.Column('create_dt', db.DateTime)
+
+    filing = db.relationship(
+        'EFilings',
+        primaryjoin='''and_(
+                        ScheduleBEfile.file_number == EFilings.file_number,
+                    )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                            ScheduleBEfile.committee_id == CommitteeHistory.committee_id,
+                        )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )
+
 
 
 class ScheduleC(PdfMixin,BaseItemized):
@@ -388,8 +439,10 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_schedule_e_reports'
+    __tablename__ = 'real_efile_se'
 
+    file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     # payee info
     payee_prefix = db.Column('prefix', db.String)
     #need to add vectorized column
@@ -435,11 +488,39 @@ class ScheduleEEfile(BaseRawItemized):
 
     dissemination_date = db.Column('dissem_dt', db.Date)
 
-    file_number = db.Column("repid", db.Integer, primary_key=True)
-    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
+    filing = db.relationship(
+        'EFilings',
+        primaryjoin='''and_(
+                        ScheduleEEfile.file_number == EFilings.file_number,
+                    )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
 
-    is_notice = db.Column(db.Boolean)
-    form_type = db.Column('form', db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                            ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
+                        )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )
+
+    @hybrid_property
+    def payee_name(self):
+        name = name_generator(
+            self.payee_last_name,
+            self.payee_prefix,
+            self.payee_first_name,
+            self.payee_middle_name,
+            self.payee_suffix
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
 
 class ScheduleF(PdfMixin,BaseItemized):
