@@ -692,6 +692,7 @@ ItemizedScheduleAfilingsSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'report_type': ma.fields.Str(),
+        'cycle': ma.fields.Int(),
         #'csv_url': ma.fields.Str(),
     },
     options={
