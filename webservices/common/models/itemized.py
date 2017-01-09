@@ -49,6 +49,10 @@ class BaseRawItemized(db.Model):
         return self.filing.form_type
 
     @hybrid_property
+    def cycle(self):
+        return self.load_timestamp.year
+
+    @hybrid_property
     def memoed_subtotal(self):
         return self.memo_code == 'X'
 
@@ -170,21 +174,24 @@ class ScheduleAEfile(BaseRawItemized):
     conduit_committee_city = db.Column('other_city', db.String)
     conduit_committee_state = db.Column('other_state', db.String)
     conduit_committee_zip = db.Column('other_zip', db.Integer)
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                            ScheduleAEfile.committee_id == CommitteeHistory.committee_id,
+                            extract('year', ScheduleAEfile.load_timestamp) +cast(extract('year',
+                            ScheduleAEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                            )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )
+
     filing = db.relationship(
         'EFilings',
         primaryjoin='''and_(
                     ScheduleAEfile.file_number == EFilings.file_number,
                 )''',
         foreign_keys=file_number,
-        lazy='joined',
-    )
-
-    committee = db.relationship(
-        'CommitteeHistory',
-        primaryjoin='''and_(
-                        ScheduleAEfile.committee_id == CommitteeHistory.committee_id,
-                    )''',
-        foreign_keys=committee_id,
         lazy='joined',
     )
 
@@ -513,13 +520,14 @@ class ScheduleEEfile(BaseRawItemized):
         foreign_keys=file_number,
         lazy='joined',
     )
-    #This primary join is filtering out some valid efile entries (must be doing an inner join),
-    #see if there is a way to force this to be a left outer join
+
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
                                 ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
-                            )''',
+                                extract('year', ScheduleAEfile.load_timestamp) +cast(extract('year',
+                                ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                                )''',
         foreign_keys=committee_id,
         lazy='joined',
     )
