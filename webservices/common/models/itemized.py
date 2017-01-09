@@ -43,6 +43,8 @@ class BaseRawItemized(db.Model):
     memo_text = db.Column(db.String)
     back_reference_transaction_id = db.Column('br_tran_id', db.String)
     back_reference_schedule_name = db.Column('br_sname', db.String)
+    load_timestamp = db.Column('create_dt', db.DateTime)
+
 
     @hybrid_property
     def report_type(self):
@@ -213,7 +215,6 @@ class ScheduleBEfile(BaseRawItemized):
 
     candidate_office = db.Column('can_off', db.String)
     candidate_office_district = db.Column('can_dist', db.String)
-    load_date = db.Column('create_dt', db.DateTime)
 
     filing = db.relationship(
         'EFilings',
