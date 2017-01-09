@@ -525,7 +525,7 @@ class ScheduleEEfile(BaseRawItemized):
         'CommitteeHistory',
         primaryjoin='''and_(
                                 ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
-                                extract('year', ScheduleAEfile.load_timestamp) +cast(extract('year',
+                                extract('year', ScheduleEEfile.load_timestamp) +cast(extract('year',
                                 ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
                                 )''',
         foreign_keys=committee_id,
