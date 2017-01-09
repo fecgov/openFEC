@@ -110,9 +110,12 @@ class Engine:
             self.result = [(self.legal_loaded,)]
         if 'count' in sql:
             self.result = [(5,)]
+        if 'aouser.players' in sql:
+            self.result = [('Charles Babbage', 'Individual'),
+                            ('Ada Lovelace', 'Individual')]
         if 'DOCUMENT_ID' in sql:
             self.result = [(123, 'textAB', 'description123', 'category123', 'id123',
-                           'name4U', 'summaryABC', 'tags123', 'no123', 'date123')]
+                           'name4U', 'summaryABC', 'tags123', 'no123', 'date123', True)]
         return self
 
 
@@ -244,7 +247,8 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
             'tags': 'tags123', 'name': 'name4U', 'text': 'textAB',
             'description': 'description123',
             'url': 'https://bucket123.s3.amazonaws.com/legal/aos/123.pdf',
-            'doc_id': 123, 'id': 'id123'}))
+            'doc_id': 123, 'id': 'id123', 'is_pending': True,
+            'requestor_names': ['Charles Babbage', 'Ada Lovelace'], 'requestor_types': ['Individual']}))
     def test_advisory_opinion_load(self):
         index_advisory_opinions()
 

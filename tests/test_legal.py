@@ -199,7 +199,7 @@ class SearchTest(unittest.TestCase):
                  "must": [
                      {"term": {"_type": "advisory_opinions"}},
                      {"match": {"_all": "president"}},
-                     {'match': {'category': 'Final Opinion'}}
+                     {'terms': {'category': ['Final Opinion']}}
                      ],
                  "should": [
                      {"match": {"no": "president"}},
