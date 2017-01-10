@@ -139,12 +139,12 @@ def apply_mur_specific_query_params(query, q='', **kwargs):
     if kwargs.get('mur_respondents'):
         query = query.query('match', respondents=kwargs.get('mur_respondents'))
     if kwargs.get('mur_dispositions'):
-        query = query.query('match', disposition__data__disposition=kwargs.get('mur_dispositions'))
+        query = query.query('terms', disposition__data__disposition=kwargs.get('mur_dispositions'))
     if kwargs.get('mur_election_cycles'):
         query = query.query('term', election_cycles=kwargs.get('mur_election_cycles'))
     if kwargs.get('mur_document_category'):
         combined_query = [
-            Q('match', documents__category=kwargs.get('mur_document_category')),
+            Q('terms', documents__category=kwargs.get('mur_document_category')),
             Q('match', documents__text=q)]
         query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
 
