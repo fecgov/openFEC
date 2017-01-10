@@ -644,8 +644,10 @@ schedule_e_efile = {
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
     ),
-    'min_date': fields.Date(description='Selects all items expended by this committee after this date'),
-    'max_date': fields.Date(description='Selects all items expended by this committee before this date'),
+    'min_expenditure_date': fields.Date(description='Selects all items expended by this committee after this date'),
+    'max_expenditure_date': fields.Date(description='Selects all items expended by this committee before this date'),
+    'min_expenditure_amount': fields.Date(description='Selects all items expended by this committee greater than this amount'),
+    'max_expenditure_amount': fields.Date(description='Selects all items expended by this committee less than this date'),
     #'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
 }
 

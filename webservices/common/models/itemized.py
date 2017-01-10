@@ -56,6 +56,11 @@ class BaseRawItemized(db.Model):
     def memoed_subtotal(self):
         return self.memo_code == 'X'
 
+    @hybrid_property
+    def fec_election_type_desc(self):
+        election_map = {'P': 'PRIMARY', 'G': 'GENERAL', 'O': 'OTHER'}
+        return election_map.get(str(self.pgo).upper()[0])
+
     @property
     def pdf_url(self):
         return utils.make_schedule_pdf_url(str(self.image_number))
@@ -174,6 +179,7 @@ class ScheduleAEfile(BaseRawItemized):
     conduit_committee_city = db.Column('other_city', db.String)
     conduit_committee_state = db.Column('other_state', db.String)
     conduit_committee_zip = db.Column('other_zip', db.Integer)
+    pgo = db.Column(db.String)
 
     committee = db.relationship(
         'CommitteeHistory',
@@ -194,6 +200,22 @@ class ScheduleAEfile(BaseRawItemized):
         foreign_keys=file_number,
         lazy='joined',
     )
+
+    @hybrid_property
+    def contributor_name(self):
+        name = name_generator(
+            self.contributor_last_name,
+            self.contributor_prefix,
+            self.contributor_first_name,
+            self.contributor_middle_name,
+            self.contributor_suffix
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
 
 class ScheduleB(BaseItemized):
