@@ -113,7 +113,7 @@ class Engine:
         if 'aouser.players' in sql:
             self.result = [('Charles Babbage', 'Individual'),
                             ('Ada Lovelace', 'Individual')]
-        if 'DOCUMENT_ID' in sql:
+        if 'document_id' in sql:
             self.result = [(123, 'textAB', 'description123', 'category123', 'id123',
                            'name4U', 'summaryABC', 'tags123', 'no123', 'date123', True)]
         return self
