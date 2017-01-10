@@ -149,11 +149,11 @@ query = {
     'ao_requestor': fields.Str(description="The requestor of the advisory opinion"),
     'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
                                             description="Code of the advisory opinion requestor type."),
-    'mur_no': fields.List(IStr, required=False, description='Filter by case number'),
-    'mur_respondents': fields.Str(IStr, required=False, description='Filter by respondents'),
-    'mur_election_cycles': fields.Int(IStr, required=False, description='Filter by election cycles'),
-    'mur_document_category': fields.Str(IStr, required=False, description='Filter by category of associated documents'),
-    'mur_document_text': fields.Str(IStr, required=False, description='Text to search for in the associated documents')
+    'mur_no': fields.List(IStr, required=False, description='Filter MURs by case number'),
+    'mur_respondents': fields.Str(IStr, required=False, description='Filter MURs by respondents'),
+    'mur_dispositions': fields.List(IStr, required=False, description='Filter MURs by dispositions'),
+    'mur_election_cycles': fields.Int(IStr, required=False, description='Filter MURs by election cycles'),
+    'mur_document_category': fields.List(IStr, required=False, description='Filter MURs by category of associated documents'),
 }
 
 candidate_detail = {
