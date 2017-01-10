@@ -51,6 +51,64 @@ def get_text(node):
     return text
 
 
+def initialize_legal_docs():
+    """
+    Initialize elasticsearch for storing legal documents. Create the `docs` index,
+    and set up the aliases `docs_index` and `docs_search` to point to the `docs`
+    index. If the `doc` index already exists, it is deleted.
+    """
+    settings = {
+        "mappings": {
+            "_default_": {
+                "properties": {
+                    "no": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "category": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "requestor_types": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "text": {
+                        "type": "string",
+                        "analyzer": "english"
+                    },
+                    "name": {
+                        "type": "string",
+                        "analyzer": "english"
+                    },
+                    "description": {
+                        "type": "string",
+                        "analyzer": "english"
+                    },
+                    "summary": {
+                        "type": "string",
+                        "analyzer": "english"
+                    }
+                }
+            }
+        },
+        "settings": {
+            "analysis": {"analyzer": {"default": {"type": "english"}}}
+        },
+        "aliases": {
+            DOCS_INDEX: {},
+            DOCS_SEARCH: {}
+        }
+    }
+
+    es = utils.get_elasticsearch_connection()
+    try:
+        es.indices.delete('docs')
+    except elasticsearch.exceptions.NotFoundError:
+        pass
+    es.indices.create('docs', settings)
+
+
 def index_regulations():
     """
         Indexes the regulations relevant to the FEC in Elasticsearch.
@@ -106,17 +164,24 @@ def index_advisory_opinions():
     print('Indexing advisory opinions...')
 
     if legal_loaded():
-        count = db.engine.execute('select count(*) from AO').fetchone()[0]
+        count = db.engine.execute('SELECT COUNT(*) FROM ao').fetchone()[0]
         print('AO count: %d' % count)
-        count = db.engine.execute('select count(*) from DOCUMENT').fetchone()[0]
+        count = db.engine.execute('SELECT COUNT(*) FROM document').fetchone()[0]
         print('DOC count: %d' % count)
 
         es = utils.get_elasticsearch_connection()
 
-        result = db.engine.execute("""select DOCUMENT_ID, OCRTEXT, DESCRIPTION,
-                                CATEGORY, DOCUMENT.AO_ID, NAME, SUMMARY,
-                                TAGS, AO_NO, DOCUMENT_DATE FROM DOCUMENT INNER JOIN
-                                AO on AO.AO_ID = DOCUMENT.AO_ID""")
+        result = db.engine.execute("""SELECT document_id, ocrtext, description,
+                                category, document.ao_id, name, summary,
+                                tags, ao_no, document_date,
+                                CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
+                                FROM aouser.document INNER JOIN
+                                aouser.ao ON ao.ao_id = document.ao_id
+                                LEFT JOIN (SELECT ao_id, 1 AS finished
+                                           FROM aouser.document
+                                           WHERE category='Final Opinion'
+                                            OR category='Withdrawal of Request') AS finished
+                                ON document.ao_id = finished.ao_id""")
 
         loading_doc = 0
 
@@ -127,6 +192,20 @@ def index_advisory_opinions():
         for row in result:
             key = "legal/aos/%s.pdf" % row[0]
             pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
+
+            requestors = db.engine.execute("""SELECT e.name, et.description
+                                FROM aouser.players p
+                                INNER JOIN aouser.ao ao ON ao.ao_id = p.ao_id
+                                INNER JOIN aouser.entity e ON p.entity_id = e.entity_id
+                                INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
+                                WHERE ao.ao_no='{0}' AND (role_id = 0 or role_id = 1);""".format(row[8]))
+
+            requestor_names = []
+            requestor_types = set()
+            for requestor in requestors:
+                requestor_names.append(requestor[0])
+                requestor_types.add(requestor[1])
+
             doc = {"doc_id": row[0],
                    "text": row[1],
                    "description": row[2],
@@ -137,7 +216,10 @@ def index_advisory_opinions():
                    "tags": row[7],
                    "no": row[8],
                    "date": row[9],
-                   "url": pdf_url}
+                   "is_pending": row[10],
+                   "url": pdf_url,
+                   "requestor_names": requestor_names,
+                   "requestor_types": list(requestor_types)}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
