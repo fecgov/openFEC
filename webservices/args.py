@@ -154,7 +154,6 @@ query = {
     'mur_dispositions': fields.Str(IStr, required=False, description='Filter MURs dispositions'),
     'mur_election_cycles': fields.Int(IStr, required=False, description='Filter MURs by election cycles'),
     'mur_document_category': fields.Str(IStr, required=False, description='Filter MURs by category of associated documents'),
-    'mur_document_text': fields.Str(IStr, required=False, description='Text to search for in the associated documents')
 }
 
 candidate_detail = {
