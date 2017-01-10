@@ -228,8 +228,10 @@ class ScheduleBEfile(BaseRawItemized):
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
-                            ScheduleBEfile.committee_id == CommitteeHistory.committee_id,
-                        )''',
+                                ScheduleBEfile.committee_id == CommitteeHistory.committee_id,
+                                extract('year', ScheduleBEfile.load_timestamp) +cast(extract('year',
+                                ScheduleBEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                                )''',
         foreign_keys=committee_id,
         lazy='joined',
     )
