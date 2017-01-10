@@ -52,6 +52,10 @@ def get_text(node):
 
 
 def index_regulations():
+    """
+        Indexes the regulations relevant to the FEC in Elasticsearch.
+        The regulations are accessed from FEC_EREGS_API.
+    """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
 
     if(eregs_api):
@@ -95,6 +99,10 @@ def legal_loaded():
 
 
 def index_advisory_opinions():
+    """
+        Indexes advisory opinions in Elasticsearch.
+        The advisory opinions are read from the local Postgres DB.
+    """
     print('Indexing advisory opinions...')
 
     if legal_loaded():
@@ -218,6 +226,10 @@ def get_title_26_statutes():
 
 
 def index_statutes():
+    """
+        Indexes statutes with titles 26 and 52 in Elasticsearch.
+        The statutes are downloaded from http://uscode.house.gov.
+    """
     get_title_26_statutes()
     get_title_52_statutes()
 
@@ -231,6 +243,10 @@ def delete_advisory_opinions_from_s3():
 
 
 def load_advisory_opinions_into_s3():
+    """
+        Uploads advisory opinions documents to S3.
+        The advisory opinions are read from the local Postgres DB.
+    """
     if legal_loaded():
         docs_in_db = set([str(r[0]) for r in db.engine.execute(
                          "select document_id from document").fetchall()])
@@ -455,10 +471,10 @@ def process_mur(mur):
 
 def load_archived_murs():
     """
-    Reads data for archived MURs from TODO, assembles a JSON document
-    corresponding to the MUR and indexes this document in Elasticsearch in the index
-    `docs_index` with a doc_type of `murs`. In addition, the MUR document
-    is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
+    Reads data for archived MURs from http://www.fec.gov/MUR, assembles a JSON
+    document corresponding to the MUR and indexes this document in Elasticsearch
+    in the index `docs_index` with a doc_type of `murs`. In addition, the MUR
+    document is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
     """
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
