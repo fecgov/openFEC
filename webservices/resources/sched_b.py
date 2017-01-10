@@ -86,12 +86,12 @@ class ScheduleBEfileView(views.ApiResource):
         #('recipient_committee_id', models.ScheduleBEfile.recipient_committee_id),
         #('disbursement_purpose_category', models.ScheduleB.disbursement_purpose_category),
     ]
-    '''
+
     filter_fulltext_fields = [
-        ('recipient_name', models.ScheduleB.recipient_name_text),
-        ('disbursement_description', models.ScheduleB.disbursement_description_text),
+        #('recipient_name', models.ScheduleB.recipient_name_text),
+        ('disbursement_description', models.ScheduleBEfile.disbursement_description),
     ]
-    '''
+
     filter_range_fields = [
         (('min_date', 'max_date'), models.ScheduleBEfile.disbursement_date),
         (('min_amount', 'max_amount'), models.ScheduleBEfile.disbursement_amount),
@@ -102,7 +102,7 @@ class ScheduleBEfileView(views.ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            args.schedule_b,
+            args.schedule_b_efile,
             args.make_sort_args(
                 default='-disbursement_date',
                 validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
