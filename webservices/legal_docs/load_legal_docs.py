@@ -156,24 +156,24 @@ def index_advisory_opinions():
     print('Indexing advisory opinions...')
 
     if legal_loaded():
-        count = db.engine.execute('select count(*) from AO').fetchone()[0]
+        count = db.engine.execute('SELECT COUNT(*) FROM ao').fetchone()[0]
         print('AO count: %d' % count)
-        count = db.engine.execute('select count(*) from DOCUMENT').fetchone()[0]
+        count = db.engine.execute('SELECT COUNT(*) FROM document').fetchone()[0]
         print('DOC count: %d' % count)
 
         es = utils.get_elasticsearch_connection()
 
-        result = db.engine.execute("""SELECT DOCUMENT_ID, OCRTEXT, DESCRIPTION,
-                                CATEGORY, DOCUMENT.AO_ID, NAME, SUMMARY,
-                                TAGS, AO_NO, DOCUMENT_DATE,
-                                CASE WHEN FINISHED IS NULL THEN TRUE ELSE FALSE END AS IS_PENDING
-                                FROM AOUSER.DOCUMENT INNER JOIN
-                                AOUSER.AO on AO.AO_ID = DOCUMENT.AO_ID
-                                LEFT JOIN (SELECT AO_ID, 1 AS FINISHED
-                                           FROM AOUSER.DOCUMENT
-                                           WHERE CATEGORY='Final Opinion'
-                                            OR CATEGORY='Withdrawal of Request') AS FINISHED
-                                ON DOCUMENT.AO_ID = FINISHED.AO_ID""")
+        result = db.engine.execute("""SELECT document_id, ocrtext, description,
+                                category, document.ao_id, name, summary,
+                                tags, ao_no, document_date,
+                                CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
+                                FROM aouser.document INNER JOIN
+                                aouser.ao ON ao.ao_id = document.ao_id
+                                LEFT JOIN (SELECT ao_id, 1 AS finished
+                                           FROM aouser.document
+                                           WHERE category='Final Opinion'
+                                            OR category='Withdrawal of Request') AS finished
+                                ON document.ao_id = finished.ao_id""")
 
         loading_doc = 0
 
@@ -185,12 +185,12 @@ def index_advisory_opinions():
             key = "legal/aos/%s.pdf" % row[0]
             pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
 
-            requestors = db.engine.execute("""select e.name, et.description
-                                from aouser.players p
-                                inner join aouser.ao ao on ao.ao_id = p.ao_id
-                                inner join aouser.entity e on p.entity_id = e.entity_id
-                                inner join aouser.entity_type et on et.entity_type_id = e.type
-                                where ao.ao_no='{0}' and (role_id = 0 or role_id = 1);""".format(row[8]))
+            requestors = db.engine.execute("""SELECT e.name, et.description
+                                FROM aouser.players p
+                                INNER JOIN aouser.ao ao ON ao.ao_id = p.ao_id
+                                INNER JOIN aouser.entity e ON p.entity_id = e.entity_id
+                                INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
+                                WHERE ao.ao_no='{0}' AND (role_id = 0 or role_id = 1);""".format(row[8]))
 
             requestor_names = []
             requestor_types = set()
