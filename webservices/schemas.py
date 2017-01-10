@@ -693,6 +693,8 @@ ItemizedScheduleAfilingsSchema = make_schema(
         'fec_url': ma.fields.Str(),
         'report_type': ma.fields.Str(),
         'cycle': ma.fields.Int(),
+        'contributor_name': ma.fields.Str(),
+        'fec_election_type_desc': ma.fields.Str(),
         #'csv_url': ma.fields.Str(),
     },
     options={
