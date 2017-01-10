@@ -107,7 +107,7 @@ class UniversalSearch(utils.Resource):
                 query = apply_ao_specific_query_params(query, **kwargs)
 
             if type == 'murs':
-                query = apply_mur_specific_query_params(query, **kwargs)
+                query = apply_mur_specific_query_params(query, q, **kwargs)
 
             if text_highlight_query:
                 query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
@@ -133,20 +133,20 @@ class UniversalSearch(utils.Resource):
         results['total_all'] = total_count
         return results
 
-def apply_mur_specific_query_params(query, **kwargs):
+def apply_mur_specific_query_params(query, q='', **kwargs):
     if kwargs.get('mur_no'):
         query = query.query('terms', no=kwargs.get('mur_no'))
     if kwargs.get('mur_respondents'):
         query = query.query('match', respondents=kwargs.get('mur_respondents'))
-    if kwargs.get('mur_election_cycles'):
-        query = query.query('term', election_cycles=kwargs.get('mur_election_cycles'))
-    if kwargs.get('mur_document_category') and kwargs.get('mur_document_text'):
-        combined_query = [
-            Q('match', documents__category=kwargs.get('mur_document_category')),
-            Q('match', documents__text=kwargs.get('mur_document_text'))]
-        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
     if kwargs.get('mur_dispositions'):
         query = query.query('match', disposition__data__disposition=kwargs.get('mur_dispositions'))
+    if kwargs.get('mur_election_cycles'):
+        query = query.query('term', election_cycles=kwargs.get('mur_election_cycles'))
+    if kwargs.get('mur_document_category'):
+        combined_query = [
+            Q('match', documents__category=kwargs.get('mur_document_category')),
+            Q('match', documents__text=q)]
+        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
 
     return query
 
