@@ -169,7 +169,7 @@ class ScheduleAEfile(BaseRawItemized):
     #contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
     contributor_aggregate_ytd = db.Column('ytd', db.Numeric(30, 2))
     contribution_receipt_amount = db.Column('amount', db.Numeric(30, 2))
-    contribution_receipt_date = db.Column('date_con', db.Integer)
+    contribution_receipt_date = db.Column('date_con', db.Date)
 
     # Conduit info
     conduit_committee_id = db.Column('other_comid', db.String)
