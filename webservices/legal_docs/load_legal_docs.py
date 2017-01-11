@@ -126,7 +126,7 @@ def index_regulations():
             regulation = requests.get(url).json()
             sections = get_sections(regulation)
 
-            print("Loading part %s" % reg['regulation'])
+            logger.info("Loading part %s" % reg['regulation'])
             for section_label in sections:
                 doc_id = '%s_%s' % (section_label[0], section_label[1])
                 section_formatted = '%s-%s' % (section_label[0], section_label[1])
@@ -140,9 +140,9 @@ def index_regulations():
 
                 es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
             reg_count += 1
-        print("%d regulation parts indexed." % reg_count)
+        logger.info("%d regulation parts indexed." % reg_count)
     else:
-        print("Regs could not be indexed, environment variable not set.")
+        logger.info("Regs could not be indexed, environment variable not set.")
 
 def legal_loaded():
     legal_loaded = db.engine.execute("""SELECT EXISTS (
@@ -151,7 +151,7 @@ def legal_loaded():
                                WHERE  table_name = 'ao'
                             );""").fetchone()[0]
     if not legal_loaded:
-        print('Advisory opinion tables not found.')
+        logger.error('Advisory opinion tables not found.')
 
     return legal_loaded
 
@@ -161,40 +161,40 @@ def index_advisory_opinions():
         Indexes advisory opinions in Elasticsearch.
         The advisory opinions are read from the local Postgres DB.
     """
-    print('Indexing advisory opinions...')
+    logger.info('Indexing advisory opinions...')
 
     if legal_loaded():
         count = db.engine.execute('SELECT COUNT(*) FROM ao').fetchone()[0]
-        print('AO count: %d' % count)
+        logger.info('AO count: %d' % count)
         count = db.engine.execute('SELECT COUNT(*) FROM document').fetchone()[0]
-        print('DOC count: %d' % count)
+        logger.info('DOC count: %d' % count)
 
         es = utils.get_elasticsearch_connection()
 
-        print("getting citations...")
+        logger.info("getting citations...")
         text = db.engine.execute("""SELECT ao_no, category, ocrtext FROM aouser.document
                                     INNER JOIN aouser.ao ON ao.ao_id = document.ao_id""")
 
         citations = {}
         cited_by = {}
         for row in text:
-            print("Getting citations for %s" % row[0])
+            logger.info("Getting citations for %s" % row['ao_no'])
             citations_in_doc = set()
-            text = row[2] or ''
+            text = row['ocrtext'] or ''
             for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?', text):
                 year, no = tuple(citation.split('-'))
                 citation_txt = "{0}-{1:02d}".format(year, int(no))
-                if citation_txt != row[0]:
+                if citation_txt != row['ao_no']:
                     citations_in_doc.add(citation_txt)
 
-            citations[(row[0], row[1])] = citations_in_doc
+            citations[(row['ao_no'], row['category'])] = citations_in_doc
 
-            if row[1] == 'Final Opinion':
+            if row['category'] == 'Final Opinion':
                 for citation in citations_in_doc:
                     if citation not in cited_by:
-                        cited_by[citation] = set([row[0]])
+                        cited_by[citation] = set([row['ao_no']])
                     else:
-                        cited_by[citation].add(row[0])
+                        cited_by[citation].add(row['ao_no'])
 
         result = db.engine.execute("""SELECT document_id, ocrtext, description,
                                 category, document.ao_id, name, summary,
@@ -211,7 +211,7 @@ def index_advisory_opinions():
         loading_doc = 0
 
         if loading_doc % 500 == 0:
-            print("%d docs loaded" % loading_doc)
+            logger.info("%d docs loaded" % loading_doc)
 
         bucket_name = env.get_credential('bucket')
         for row in result:
@@ -250,7 +250,7 @@ def index_advisory_opinions():
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
-        print("%d docs loaded" % loading_doc)
+        logger.info("%d docs loaded" % loading_doc)
 
 def get_xml_tree_from_url(url):
     r = requests.get(url, stream=True)
@@ -379,10 +379,10 @@ def load_advisory_opinions_into_s3():
                 bucket.put_object(Key=key, Body=bytes(fileimage),
                                   ContentType='application/pdf', ACL='public-read')
                 url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
-                print("pdf written to %s" % url)
-                print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
+                logger.info("pdf written to %s" % url)
+                logger.info("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
         else:
-            print("No new advisory opinions found.")
+            logger.info("No new advisory opinions found.")
 
 def process_mur_pdf(mur_no, pdf_key, bucket):
     response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
@@ -524,7 +524,7 @@ def get_mur_names(mur_names={}):
     return mur_names
 
 def process_mur(mur):
-    print("processing mur %d of %d" % (mur[0], mur[1]))
+    logger.info("processing mur %d of %d" % (mur[0], mur[1]))
     es = utils.get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
@@ -532,10 +532,10 @@ def process_mur(mur):
     (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
         = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
     mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-    print("processing mur %s" % mur_no)
+    logger.info("processing mur %s" % mur_no)
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
-        print('already processed %s' % pdf_key)
+        logger.info('already processed %s' % pdf_key)
         return
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
     pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)

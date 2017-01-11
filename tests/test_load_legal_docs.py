@@ -114,8 +114,8 @@ class Engine:
             self.result = [('Charles Babbage', 'Individual'),
                             ('Ada Lovelace', 'Individual')]
         if 'SELECT ao_no, category, ocrtext' in sql:
-            self.result = [('1993-01', 'Votes', 'test 1993-01 test 2015-05 and 2014-1'),
-                         ('2007-05', 'Final Opinion', 'test2 1993-01 test2')]
+            self.result = [{'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-05 and 2014-1'},
+                         {'ao_no': '2007-05', 'category': 'Final Opinion', 'ocrtext': 'test2 1993-01 test2'}]
         if 'document_id' in sql:
             self.result = [(123, 'textAB', 'description123', 'Votes', 'id123',
                            'name4U', 'summaryABC', 'tags123', '1993-01', 'date123', True)]
