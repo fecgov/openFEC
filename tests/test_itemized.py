@@ -440,8 +440,10 @@ class TestItemized(ApiBaseTest):
         filters = [
             ('image_number', ScheduleAEfile.image_number, ['123', '456']),
             ('committee_id', ScheduleAEfile.committee_id, ['C01', 'C02']),
-            #('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
-            #('filing_form', ScheduleEEfile.form_type, ['F24N', 'F3XN'])
+            #may have to rethink this, currently on efile itemized resources the city isn't all caps
+            #but for processed it is, is that something we are forcing when when
+            #we build the tables?
+            ('contributor_city', ScheduleAEfile.contributor_city, ['KANSAS CITY', 'HONOLULU']),
         ]
         for label, column, values in filters:
             [
@@ -458,7 +460,6 @@ class TestItemized(ApiBaseTest):
             ('image_number', ScheduleEEfile.image_number, ['123', '456']),
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
-            #('filing_form', ScheduleEEfile.form_type, ['F24N', 'F3XN'])
         ]
         for label, column, values in filters:
             [
