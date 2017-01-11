@@ -276,6 +276,28 @@ def update_aggregates():
     logger.info('Finished updating incremental aggregates.')
 
 @manager.command
+def add_itemized_partition_cycle(cycle=None, amount=1):
+    """Adds a new itemized cycle child table.
+    By default this will try to add just the current cycle to all partitioned
+    itemized schedule tables if it doesn't already exist.
+    If the child table already exists, skip over it.
+    """
+
+    amount = int(amount)
+
+    if not cycle:
+        cycle = SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+    else:
+        cycle = int(cycle)
+
+    logger.info('Adding Schedule A cycles...')
+    partition.SchedAGroup.add_cycles(cycle, amount)
+    logger.info('Finished adding Schedule A cycles.')
+    logger.info('Adding Schedule B cycles...')
+    partition.SchedBGroup.add_cycles(cycle, amount)
+    logger.info('Finished adding Schedule B cycles.')
+
+@manager.command
 def update_all(processes=1):
     """Update all derived data. Warning: Extremely slow on production data.
     """
