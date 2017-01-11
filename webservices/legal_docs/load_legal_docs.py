@@ -245,8 +245,8 @@ def index_advisory_opinions():
                    "url": pdf_url,
                    "requestor_names": requestor_names,
                    "requestor_types": list(requestor_types),
-                   "citations": list(citations[(row[8], row[3])]),
-                   "cited_by": [list(cited_by[row[8]]) if row[8] in cited_by else []]}
+                   "citations": sorted(list(citations[(row[8], row[3])])),
+                   "cited_by": sorted(list(cited_by[row[8]])) if row[8] in cited_by else []}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
