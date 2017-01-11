@@ -171,6 +171,31 @@ def index_advisory_opinions():
 
         es = utils.get_elasticsearch_connection()
 
+        print("getting citations...")
+        text = db.engine.execute("""SELECT ao_no, category, ocrtext FROM aouser.document
+                                    INNER JOIN aouser.ao ON ao.ao_id = document.ao_id""")
+
+        citations = {}
+        cited_by = {}
+        for row in text:
+            print("Getting citations for %s" % row[0])
+            citations_in_doc = set()
+            text = row[2] or ''
+            for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?', text):
+                year, no = tuple(citation.split('-'))
+                citation_txt = "{0}-{1:02d}".format(year, int(no))
+                if citation_txt != row[0]:
+                    citations_in_doc.add(citation_txt)
+
+            citations[(row[0], row[1])] = citations_in_doc
+
+            if row[1] == 'Final Opinion':
+                for citation in citations_in_doc:
+                    if citation not in cited_by:
+                        cited_by[citation] = set([row[0]])
+                    else:
+                        cited_by[citation].add(row[0])
+
         result = db.engine.execute("""SELECT document_id, ocrtext, description,
                                 category, document.ao_id, name, summary,
                                 tags, ao_no, document_date,
@@ -219,7 +244,9 @@ def index_advisory_opinions():
                    "is_pending": row[10],
                    "url": pdf_url,
                    "requestor_names": requestor_names,
-                   "requestor_types": list(requestor_types)}
+                   "requestor_types": list(requestor_types),
+                   "citations": list(citations[(row[8], row[3])]),
+                   "cited_by": [list(cited_by[row[8]]) if row[8] in cited_by else []]}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
