@@ -206,18 +206,16 @@ class ScheduleEFactory(BaseFactory):
 
 class ScheduleEEfileFactory(BaseFactory):
     class Meta:
-        model = models.ScheduleAEfile
+        model = models.ScheduleEEfile
     file_number = factory.Sequence(lambda n: n)
     related_line_number = factory.Sequence(lambda n: n)
-    #report_year = 2016
 
 
 class ScheduleAEfileFactory(BaseFactory):
     class Meta:
-        model = models.ScheduleEEfile
+        model = models.ScheduleAEfile
     file_number = factory.Sequence(lambda n: n)
     related_line_number = factory.Sequence(lambda n: n)
-    #report_year = 2016
 
 
 class FilingsFactory(BaseFactory):
