@@ -114,7 +114,7 @@ class Engine:
             self.result = [('Charles Babbage', 'Individual'),
                             ('Ada Lovelace', 'Individual')]
         if 'SELECT ao_no, category, ocrtext' in sql:
-            self.result = [('1993-01', 'Votes', 'test 1993-01 test 2015-05'),
+            self.result = [('1993-01', 'Votes', 'test 1993-01 test 2015-05 and 2014-1'),
                          ('2007-05', 'Final Opinion', 'test2 1993-01 test2')]
         if 'document_id' in sql:
             self.result = [(123, 'textAB', 'description123', 'Votes', 'id123',
@@ -253,7 +253,7 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
             'doc_id': 123, 'id': 'id123', 'is_pending': True,
             'requestor_names': ['Charles Babbage', 'Ada Lovelace'],
             'requestor_types': ['Individual'],
-            'citations': ['2015-05'], 'cited_by': [['2007-05']]}))
+            'citations': ['2015-05', '2014-01'], 'cited_by': [['2007-05']]}))
     def test_advisory_opinion_load(self):
         index_advisory_opinions()
 
