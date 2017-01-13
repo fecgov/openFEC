@@ -51,64 +51,6 @@ def get_text(node):
     return text
 
 
-def initialize_legal_docs():
-    """
-    Initialize elasticsearch for storing legal documents. Create the `docs` index,
-    and set up the aliases `docs_index` and `docs_search` to point to the `docs`
-    index. If the `doc` index already exists, it is deleted.
-    """
-    settings = {
-        "mappings": {
-            "_default_": {
-                "properties": {
-                    "no": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "category": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "requestor_types": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "text": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "name": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "description": {
-                        "type": "string",
-                        "analyzer": "english"
-                    },
-                    "summary": {
-                        "type": "string",
-                        "analyzer": "english"
-                    }
-                }
-            }
-        },
-        "settings": {
-            "analysis": {"analyzer": {"default": {"type": "english"}}}
-        },
-        "aliases": {
-            DOCS_INDEX: {},
-            DOCS_SEARCH: {}
-        }
-    }
-
-    es = utils.get_elasticsearch_connection()
-    try:
-        es.indices.delete('docs')
-    except elasticsearch.exceptions.NotFoundError:
-        pass
-    es.indices.create('docs', settings)
-
-
 def index_regulations():
     """
         Indexes the regulations relevant to the FEC in Elasticsearch.
