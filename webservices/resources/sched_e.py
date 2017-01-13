@@ -113,7 +113,7 @@ class ScheduleEEfileView(views.ApiResource):
     ]
 
     filter_range_fields = [
-        (('min_expenditure_date', 'max_expenditure_date'), models.ScheduleEEfile.expenditure_date),
+        (('min_date', 'max_date'), models.ScheduleEEfile.expenditure_date),
     ]
 
     @property
@@ -130,7 +130,3 @@ class ScheduleEEfileView(views.ApiResource):
                 ]),
             ),
         )
-
-
-
-

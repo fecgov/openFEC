@@ -6,11 +6,11 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleEEfile, ScheduleAEfile
+from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
-from webservices.resources.sched_b import ScheduleBView
+from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
 
 
@@ -435,7 +435,6 @@ class TestItemized(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
-
     def test_filters_sched_a_efile(self):
         filters = [
             ('image_number', ScheduleAEfile.image_number, ['123', '456']),
@@ -454,6 +453,20 @@ class TestItemized(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
+    def test_filters_sched_b_efile(self):
+        filters = [
+            ('image_number', ScheduleBEfile.image_number, ['123', '456']),
+            ('committee_id', ScheduleBEfile.committee_id, ['C01', 'C02']),
+            ('recipient_state', ScheduleBEfile.recipient_state, ['MISSOURI', 'NEW YORK']),
+        ]
+        for label, column, values in filters:
+            [
+                factories.ScheduleBEfileFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleBEfileView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
 
     def test_filters_sched_e_efile(self):
         filters = [
