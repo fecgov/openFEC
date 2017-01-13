@@ -773,6 +773,13 @@ SUPPORT_OPPOSE_INDICATOR = 'Explains if the money was spent in order to support 
 # schedule B
 PURPOSE = 'Purpose of the expenditure'
 
+# schedule E
+EXPENDITURE_MAX_DATE = 'Selects all items expended by this committee before this date'
+EXPENDITURE_MIN_DATE = 'Selects all items expended by this committee after this date'
+EXPENDITURE_MIN_AMOUNT = 'Selects all items expended by this committee greater than this amount'
+EXPENDITURE_MAX_AMOUNT = 'Selects all items expended by this committee less than this amount'
+
+
 # dates
 DUE_DATE = 'Date the report is due'
 CREATE_DATE = 'Date the record was created'
