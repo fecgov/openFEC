@@ -59,7 +59,9 @@ class BaseRawItemized(db.Model):
     @hybrid_property
     def fec_election_type_desc(self):
         election_map = {'P': 'PRIMARY', 'G': 'GENERAL', 'O': 'OTHER'}
-        return election_map.get(str(self.pgo).upper()[0])
+        if self.pgo:
+            return election_map.get(str(self.pgo).upper()[0])
+        return None
 
     @property
     def pdf_url(self):
@@ -140,17 +142,6 @@ class ScheduleAEfile(BaseRawItemized):
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
     committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     contributor_prefix = db.Column('prefix', db.String)
-    """
-    contributor = db.relationship(
-        'CommitteeHistory',
-        primaryjoin='''and_(
-                foreign(ScheduleA.contributor_id) == CommitteeHistory.committee_id,
-                ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
-            )'''
-    )
-    """
-    #contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
-
     contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('fname', db.String)
     contributor_middle_name = db.Column('mname', db.String)
@@ -166,7 +157,6 @@ class ScheduleAEfile(BaseRawItemized):
     contributor_employer_text = db.Column(TSVECTOR)
     contributor_occupation = db.Column('indocc', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
     contributor_occupation_text = db.Column(TSVECTOR)
-    #contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
     contributor_aggregate_ytd = db.Column('ytd', db.Numeric(30, 2))
     contribution_receipt_amount = db.Column('amount', db.Numeric(30, 2))
     contribution_receipt_date = db.Column('date_con', db.Date)
