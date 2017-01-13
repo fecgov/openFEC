@@ -236,7 +236,12 @@ related_candidate_history = functools.partial(
     'candidate_id',
     related_cycle_label='two_year_period',
 )
-
+related_efile_summary = functools.partial(
+    related,
+    'EFilings',
+    'file_number',
+    related_id_label='file_number',
+)
 
 def document_description(report_year, report_type=None, document_type=None, form_type=None):
     if report_type:
