@@ -6,10 +6,10 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleBEfile, ScheduleEEfile
+from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
-from webservices.resources.sched_a import ScheduleAView
+from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
 
@@ -435,6 +435,24 @@ class TestItemized(ApiBaseTest):
             assert len(results) == 1
             assert results[0][column.key] == values[0]
 
+    def test_filters_sched_a_efile(self):
+        filters = [
+            ('image_number', ScheduleAEfile.image_number, ['123', '456']),
+            ('committee_id', ScheduleAEfile.committee_id, ['C01', 'C02']),
+            #may have to rethink this, currently on efile itemized resources the city isn't all caps
+            #but for processed it is, is that something we are forcing when when
+            #we build the tables?
+            ('contributor_city', ScheduleAEfile.contributor_city, ['KANSAS CITY', 'HONOLULU']),
+        ]
+        for label, column, values in filters:
+            [
+                factories.ScheduleAEfileFactory(**{column.key: value})
+                for value in values
+            ]
+            results = self._results(api.url_for(ScheduleAEfileView, **{label: values[0]}))
+            assert len(results) == 1
+            assert results[0][column.key] == values[0]
+
     def test_filters_sched_b_efile(self):
         filters = [
             ('image_number', ScheduleBEfile.image_number, ['123', '456']),
@@ -455,9 +473,6 @@ class TestItemized(ApiBaseTest):
             ('image_number', ScheduleEEfile.image_number, ['123', '456']),
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
-            #this filter could be hard
-            #('is_notice', ScheduleEEfile.is_notice, [True, False]),
-            #('filing_form', ScheduleEEfile.form_type, ['F24N', 'F3XN'])
         ]
         for label, column, values in filters:
             [

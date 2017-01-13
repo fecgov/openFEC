@@ -66,17 +66,18 @@ OPEN_AND_CLOSE_DATES = """
 
 DISPOSITION_DATA = """
     SELECT fecmur.event.event_name,
-    fecmur.settlement.final_amount, fecmur.entity.name, violations.statutory_citation,
-    violations.regulatory_citation
-    from fecmur.calendar
-    inner join fecmur.event on fecmur.calendar.event_id = fecmur.event.event_id
-    inner join fecmur.entity on fecmur.entity.entity_id = fecmur.calendar.entity_id
-    left join (select * from fecmur.relatedobjects where relation_id=1) AS relatedobjects
-    on relatedobjects.detail_key = fecmur.calendar.entity_id
-    left join fecmur.settlement on fecmur.settlement.settlement_id = relatedobjects.master_key
-    left join (select * from fecmur.violations where stage='Closed' and case_id={0})
-    as violations on violations.entity_id = fecmur.calendar.entity_id
-    where fecmur.calendar.case_id={0} and event_name not in ('Complaint/Referral', 'Disposition')
+        fecmur.settlement.final_amount, fecmur.entity.name, violations.statutory_citation,
+        violations.regulatory_citation
+    FROM fecmur.calendar
+    INNER JOIN fecmur.event ON fecmur.calendar.event_id = fecmur.event.event_id
+    INNER JOIN fecmur.entity ON fecmur.entity.entity_id = fecmur.calendar.entity_id
+    LEFT JOIN (SELECT * FROM fecmur.relatedobjects WHERE relation_id = 1) AS relatedobjects
+        ON relatedobjects.detail_key = fecmur.calendar.entity_id
+    LEFT JOIN fecmur.settlement ON fecmur.settlement.settlement_id = relatedobjects.master_key
+    LEFT JOIN (SELECT * FROM fecmur.violations WHERE stage = 'Closed' AND case_id = {0}) AS violations
+        ON violations.entity_id = fecmur.calendar.entity_id
+    WHERE fecmur.calendar.case_id = {0}
+        AND event_name NOT IN ('Complaint/Referral', 'Disposition')
     ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
 """
 

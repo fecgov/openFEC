@@ -44,10 +44,12 @@ RESOURCE_WHITELIST = {
     reports.CommitteeReportsView,
     reports.EFilingSummaryView,
     sched_a.ScheduleAView,
+    sched_a.ScheduleAEfileView,
     sched_b.ScheduleBView,
     sched_b.ScheduleBEfileView,
     sched_d.ScheduleDView,
     sched_e.ScheduleEView,
+    sched_e.ScheduleEEfileView,
     sched_f.ScheduleFView
 }
 
