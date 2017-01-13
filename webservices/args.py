@@ -143,11 +143,17 @@ query = {
     'ao_name': fields.List(IStr, required=False, description='Force advisory opinion name'),
     'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
     'ao_max_date': fields.Date(description="Latest issue date of advisory opinion"),
-    'no': fields.List(IStr, required=False, description='Filter by case number'),
-    'respondents': fields.Str(IStr, required=False, description='Filter by respondents'),
-    'election_cycles': fields.Int(IStr, required=False, description='Filter by election cycles'),
-    'document_category': fields.Str(IStr, required=False, description='Filter by category of associated documents'),
-    'document_text': fields.Str(IStr, required=False, description='Text to search for in the associated documents'),
+    'ao_category': fields.List(IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
+                                    description="Category of the document"),
+    'ao_is_pending': fields.Bool(description="Status of AO (pending or completed)"),
+    'ao_requestor': fields.Str(description="The requestor of the advisory opinion"),
+    'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
+                                            description="Code of the advisory opinion requestor type."),
+    'mur_no': fields.List(IStr, required=False, description='Filter MURs by case number'),
+    'mur_respondents': fields.Str(IStr, required=False, description='Filter MURs by respondents'),
+    'mur_dispositions': fields.List(IStr, required=False, description='Filter MURs by dispositions'),
+    'mur_election_cycles': fields.Int(IStr, required=False, description='Filter MURs by election cycles'),
+    'mur_document_category': fields.List(IStr, required=False, description='Filter MURs by category of associated documents'),
 }
 
 candidate_detail = {
@@ -414,6 +420,17 @@ schedule_a = {
     ),
 }
 
+schedule_a_e_file = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    #'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
+    'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
+    'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
+    'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
+    'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
+
+}
+
 schedule_a_by_size = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
@@ -637,11 +654,10 @@ schedule_e = {
 }
 
 schedule_e_efile = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'filing_form': fields.List(IStr, description='Filing form'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'image_number': fields.List(
         fields.Str,
         description='The image number of the page where the schedule item is reported',
@@ -650,7 +666,10 @@ schedule_e_efile = {
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
     ),
-    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+    'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
+    'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
+    'min_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MIN_AMOUNT),
+    'max_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MAX_AMOUNT),
 }
 
 rad_analyst = {

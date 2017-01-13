@@ -110,9 +110,15 @@ class Engine:
             self.result = [(self.legal_loaded,)]
         if 'count' in sql:
             self.result = [(5,)]
-        if 'DOCUMENT_ID' in sql:
-            self.result = [(123, 'textAB', 'description123', 'category123', 'id123',
-                           'name4U', 'summaryABC', 'tags123', 'no123', 'date123')]
+        if 'aouser.players' in sql:
+            self.result = [('Charles Babbage', 'Individual'),
+                            ('Ada Lovelace', 'Individual')]
+        if 'SELECT ao_no, category, ocrtext' in sql:
+            self.result = [{'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-05 and 2014-1'},
+                         {'ao_no': '2007-05', 'category': 'Final Opinion', 'ocrtext': 'test2 1993-01 test2'}]
+        if 'document_id' in sql:
+            self.result = [(123, 'textAB', 'description123', 'Votes', 'id123',
+                           'name4U', 'summaryABC', 'tags123', '1993-01', 'date123', True)]
         return self
 
 
@@ -239,12 +245,15 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
     @patch('webservices.legal_docs.load_legal_docs.env.get_credential',
         lambda cred: cred + '123')
     @patch('webservices.utils.get_elasticsearch_connection',
-            get_es_with_doc({'category': 'category123',
-            'summary': 'summaryABC', 'no': 'no123', 'date': 'date123',
+            get_es_with_doc({'category': 'Votes',
+            'summary': 'summaryABC', 'no': '1993-01', 'date': 'date123',
             'tags': 'tags123', 'name': 'name4U', 'text': 'textAB',
             'description': 'description123',
             'url': 'https://bucket123.s3.amazonaws.com/legal/aos/123.pdf',
-            'doc_id': 123, 'id': 'id123'}))
+            'doc_id': 123, 'id': 'id123', 'is_pending': True,
+            'requestor_names': ['Charles Babbage', 'Ada Lovelace'],
+            'requestor_types': ['Individual'],
+            'citations': ['2014-01', '2015-05'], 'cited_by': ['2007-05']}))
     def test_advisory_opinion_load(self):
         index_advisory_opinions()
 
