@@ -8,7 +8,7 @@ from webservices import docs, utils
 from webservices.common.models.filings import EFilings
 
 from .base import db
-from .reports import PdfMixin
+from .reports import PdfMixin, name_generator
 
 
 class BaseItemized(db.Model):
@@ -33,11 +33,9 @@ class BaseItemized(db.Model):
 class BaseRawItemized(db.Model):
     __abstract__ = True
 
-    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     line_number = db.Column("line_num", db.String)
     transaction_id = db.Column('tran_id', db.String)
     image_number = db.Column('imageno', db.String, doc=docs.IMAGE_NUMBER)
-    report_year = db.Column(db.Integer, doc=docs.REPORT_YEAR)
     entity_type = db.Column('entity', db.String)
     load_timestamp = db.Column('create_dt', db.TIMESTAMP)
     amendment_indicator = db.Column('amend', db.String)
@@ -47,8 +45,23 @@ class BaseRawItemized(db.Model):
     back_reference_schedule_name = db.Column('br_sname', db.String)
 
     @hybrid_property
+    def report_type(self):
+        return self.filing.form_type
+
+    @hybrid_property
+    def cycle(self):
+        return self.load_timestamp.year
+
+    @hybrid_property
     def memoed_subtotal(self):
         return self.memo_code == 'X'
+
+    @hybrid_property
+    def fec_election_type_desc(self):
+        election_map = {'P': 'PRIMARY', 'G': 'GENERAL', 'O': 'OTHER'}
+        if self.pgo:
+            return election_map.get(str(self.pgo).upper()[0])
+        return None
 
     @property
     def pdf_url(self):
@@ -120,6 +133,79 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     pdf_url = db.Column(db.String)
+
+
+class ScheduleAEfile(BaseRawItemized):
+    __tablename__ = 'real_efile_sa7'
+
+    file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
+    contributor_prefix = db.Column('prefix', db.String)
+    contributor_name_text = db.Column(TSVECTOR)
+    contributor_first_name = db.Column('fname', db.String)
+    contributor_middle_name = db.Column('mname', db.String)
+    contributor_last_name = db.Column('name', db.String)
+    contributor_suffix = db.Column('suffix', db.String)
+    # Street address omitted per FEC policy
+    # contributor_street_1 = db.Column('contbr_st1', db.String)
+    # contributor_street_2 = db.Column('contbr_st2', db.String)
+    contributor_city = db.Column('city', db.String, doc=docs.CONTRIBUTOR_CITY)
+    contributor_state = db.Column('state', db.String, doc=docs.CONTRIBUTOR_STATE)
+    contributor_zip = db.Column('zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
+    contributor_employer = db.Column('indemp', db.String, doc=docs.CONTRIBUTOR_EMPLOYER)
+    contributor_employer_text = db.Column(TSVECTOR)
+    contributor_occupation = db.Column('indocc', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
+    contributor_occupation_text = db.Column(TSVECTOR)
+    contributor_aggregate_ytd = db.Column('ytd', db.Numeric(30, 2))
+    contribution_receipt_amount = db.Column('amount', db.Numeric(30, 2))
+    contribution_receipt_date = db.Column('date_con', db.Date)
+
+    # Conduit info
+    conduit_committee_id = db.Column('other_comid', db.String)
+    conduit_committee_name = db.Column('donor_comname', db.String)
+    conduit_committee_street1 = db.Column('other_str1', db.String)
+    conduit_committee_street2 = db.Column('other_str2', db.String)
+    conduit_committee_city = db.Column('other_city', db.String)
+    conduit_committee_state = db.Column('other_state', db.String)
+    conduit_committee_zip = db.Column('other_zip', db.Integer)
+    pgo = db.Column(db.String)
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                            ScheduleAEfile.committee_id == CommitteeHistory.committee_id,
+                            extract('year', ScheduleAEfile.load_timestamp) +cast(extract('year',
+                            ScheduleAEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                            )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )
+
+    filing = db.relationship(
+        'EFilings',
+        primaryjoin='''and_(
+                    ScheduleAEfile.file_number == EFilings.file_number,
+                )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
+    @hybrid_property
+    def contributor_name(self):
+        name = name_generator(
+            self.contributor_last_name,
+            self.contributor_prefix,
+            self.contributor_first_name,
+            self.contributor_middle_name,
+            self.contributor_suffix
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
 
 class ScheduleB(BaseItemized):
@@ -388,8 +474,11 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_schedule_e_reports'
+    __tablename__ = 'real_efile_se'
 
+    file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
+    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
+    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
     # payee info
     payee_prefix = db.Column('prefix', db.String)
     #need to add vectorized column
@@ -435,11 +524,42 @@ class ScheduleEEfile(BaseRawItemized):
 
     dissemination_date = db.Column('dissem_dt', db.Date)
 
-    file_number = db.Column("repid", db.Integer, primary_key=True)
-    related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
+    filing = db.relationship(
+        'EFilings',
+        primaryjoin='''and_(
+                            ScheduleEEfile.file_number == EFilings.file_number,
+                        )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
 
-    is_notice = db.Column(db.Boolean)
-    form_type = db.Column('form', db.String)
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+                                ScheduleEEfile.committee_id == CommitteeHistory.committee_id,
+                                extract('year', ScheduleEEfile.load_timestamp) +cast(extract('year',
+                                ScheduleEEfile.load_timestamp), Integer) % 2 == CommitteeHistory.cycle,
+                                )''',
+        foreign_keys=committee_id,
+        lazy='joined',
+    )
+
+
+    @hybrid_property
+    def payee_name(self):
+        name = name_generator(
+            self.payee_last_name,
+            self.payee_prefix,
+            self.payee_first_name,
+            self.payee_middle_name,
+            self.payee_suffix
+        )
+        name = (
+            name
+            if name
+            else None
+        )
+        return name
 
 
 class ScheduleF(PdfMixin,BaseItemized):
