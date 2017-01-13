@@ -674,6 +674,32 @@ EFilingsSchema = make_schema(
 )
 augment_schemas(EFilingsSchema)
 
+ItemizedScheduleBfilingsSchema = make_schema(
+    models.ScheduleBEfile,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
+        'pdf_url': ma.fields.Str(),
+        'fec_url': ma.fields.Str(),
+        'is_notice':ma.fields.Boolean(),
+        'payee_name': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+        #'csv_url': ma.fields.Str(),
+    },
+    options={
+        'relationships': [
+            Relationship(
+                models.ScheduleEEfile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+augment_schemas(ItemizedScheduleBfilingsSchema)
+
 ItemizedScheduleEfilingsSchema = make_schema(
     models.ScheduleEEfile,
     fields={
