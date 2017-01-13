@@ -461,6 +461,14 @@ ScheduleASchema = make_schema(
             'contributor_employer_text',
             'contributor_occupation_text',
         ),
+        'relationships': [
+            Relationship(
+                models.ScheduleA.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
 
     }
 )
