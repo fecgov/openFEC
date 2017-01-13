@@ -45,6 +45,7 @@ RESOURCE_WHITELIST = {
     reports.EFilingSummaryView,
     sched_a.ScheduleAView,
     sched_b.ScheduleBView,
+    sched_b.ScheduleBEfileView,
     sched_d.ScheduleDView,
     sched_e.ScheduleEView,
     sched_f.ScheduleFView
