@@ -109,11 +109,15 @@ class ScheduleEEfileView(views.ApiResource):
         ('committee_id', models.ScheduleEEfile.committee_id),
         ('candidate_id', models.ScheduleEEfile.candidate_id),
         ('support_oppose_indicator', models.ScheduleEEfile.support_oppose_indicator),
-        ('candidate_name', models.ScheduleEEfile.candidate_name),
+        #('candidate_name', models.ScheduleEEfile.candidate_name),
     ]
 
     filter_range_fields = [
         (('min_expenditure_date', 'max_expenditure_date'), models.ScheduleEEfile.expenditure_date),
+    ]
+
+    filter_fulltext_fields = [
+        ('candidate_name', models.ScheduleEEfile.candidate_name),
     ]
 
     @property
