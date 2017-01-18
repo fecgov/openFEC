@@ -1,22 +1,17 @@
 drop materialized view if exists ofec_filings_amendments_all_mv_tmp;
 --there is a lot of room for refactoring I believe, but I feel it's
 --best to keep paper and electronic separate until the kinks in paper
---can (maybe?) get worked out
-create materialized view ofec_filings_amendments_all_mv_tmp as with combined AS (
+--can (maybe?) get worked out (drastically improved, next step see
+--if paper can be combined to one table)
+create materialized view ofec_filings_amendments_all_mv_tmp as
+with combined AS (
   SELECT *
-  FROM ofec_presidential_electronic_amendments_mv_tmp
-  UNION ALL
+  from ofec_amendemnts_mv_tmp
   SELECT *
   FROM ofec_presidential_paper_amendments_mv_tmp
   UNION ALL
   SELECT *
-  FROM ofec_house_senate_electronic_amendments_mv_tmp
-  UNION ALL
-  SELECT *
   FROM ofec_house_senate_paper_amendments_mv_tmp
-  UNION ALL
-  SELECT *
-  FROM ofec_pac_party_electronic_amendments_mv_tmp
   UNION ALL
   SELECT *
   FROM ofec_pac_party_paper_amendments_mv_tmp
