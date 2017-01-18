@@ -6,7 +6,8 @@ drop materialized view if exists ofec_filings_amendments_all_mv_tmp;
 create materialized view ofec_filings_amendments_all_mv_tmp as
 with combined AS (
   SELECT *
-  from ofec_amendemnts_mv_tmp
+  from ofec_amendments_mv_tmp
+  union all
   SELECT *
   FROM ofec_presidential_paper_amendments_mv_tmp
   UNION ALL
