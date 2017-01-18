@@ -1,4 +1,4 @@
-drop materialized view if exists ofec_house_senate_paper_amendments_mv_tmp;
+drop materialized view if exists ofec_house_senate_paper_amendments_mv_tmp cascade;
 create materialized view ofec_house_senate_paper_amendments_mv_tmp as
 with recursive oldest_filing_paper as (
   (
