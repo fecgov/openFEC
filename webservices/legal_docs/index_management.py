@@ -14,6 +14,14 @@ DEFAULT_MAPPINGS = {
                 "type": "string",
                 "index": "not_analyzed"
             },
+            "category": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "requestor_types": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
             "text": {
                 "type": "string",
                 "analyzer": "english"
@@ -29,6 +37,51 @@ DEFAULT_MAPPINGS = {
             "summary": {
                 "type": "string",
                 "analyzer": "english"
+            },
+            "disposition": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "citations": {
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "disposition": {
+                                "type": "string",
+                                "index": "not_analyzed"
+                            },
+                            "penalty": {
+                                "type": "double"
+                            },
+                            "respondent": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "text": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "vote_date": {
+                                "type": "date",
+                                "format": "dateOptionalTime"
+                            }
+                        }
+                    }
+                }
             },
             "documents": {
                 "type": "nested",
@@ -94,6 +147,12 @@ def create_staging_index():
     Move the alias docs_index to point to `docs_staging` instead of `docs`.
     """
     es = utils.get_elasticsearch_connection()
+    try:
+        es.indices.delete('docs_staging')
+        logger.info("docs_staging already existed. It has been deleted.")
+    except:
+        pass
+
     es.indices.create('docs_staging', {
         "mappings": DEFAULT_MAPPINGS,
         "settings": ANALYZER_SETTINGS,
@@ -124,7 +183,7 @@ def restore_from_staging_index():
         "settings": ANALYZER_SETTINGS
     })
 
-    elasticsearch.helpers.reindex(es, 'docs_staging', 'docs')
+    elasticsearch.helpers.reindex(es, 'docs_staging', 'docs', chunk_size=50)
 
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs_staging', "alias": DOCS_INDEX}},

@@ -11,12 +11,12 @@ with
     ),
     dates as (
         select
-            committee_id as cmte_id,
-            min(receipt_date) as first_file_date,
-            max(receipt_date) as last_file_date,
-            max(receipt_date) filter (where form_type = 'F1') as last_f1_date
-        from vw_filing_history
-        group by committee_id
+            cand_cmte_id as cmte_id,
+            min(receipt_dt) as first_file_date,
+            max(receipt_dt) as last_file_date,
+            max(receipt_dt) filter (where form_tp = 'F1') as last_f1_date
+        from disclosure.f_rpt_or_form_sub
+        group by cand_cmte_id
     ),
     candidates as (
         select

@@ -40,6 +40,8 @@ manager.command(legal_docs.load_current_murs)
 manager.command(legal_docs.initialize_legal_docs)
 manager.command(legal_docs.create_staging_index)
 manager.command(legal_docs.restore_from_staging_index)
+manager.command(legal_docs.reinitialize_all_legal_docs)
+manager.command(legal_docs.refresh_legal_docs_zero_downtime)
 
 def check_itemized_queues(schedule):
     """Checks to see if the queues associated with an itemized schedule have
@@ -128,7 +130,9 @@ def execute_sql_folder(path, processes):
 
 @manager.command
 def load_nicknames():
-    """For improved search when candidates have a name that doesn't appear on their form"""
+    """For improved search when candidates have a name that doesn't appear on their form.
+    Additional nicknames can be added to the csv for improved search.
+    """
     import pandas as pd
     import sqlalchemy as sa
     try:
@@ -140,7 +144,8 @@ def load_nicknames():
 
 @manager.command
 def load_pacronyms():
-    """For improved search of organizations that go by acronyms"""
+    """For improved search of organizations that go by acronyms
+    """
     import pandas as pd
     import sqlalchemy as sa
     try:
@@ -159,12 +164,17 @@ def load_table(frame, tablename, if_exists='replace', indexes=()):
 
 @manager.command
 def build_districts():
+    """This creats the zipcode mapping for Congress based on data that is save as csvs.
+    """
     import pandas as pd
     load_table(pd.read_csv('data/fips_states.csv'), 'ofec_fips_states')
     load_table(pd.read_csv('data/natl_zccd_delim.csv'), 'ofec_zips_districts', indexes=('ZCTA', ))
 
 @manager.command
 def load_election_dates():
+    """ This is from before we had direct access to election data and needed it, we are still using the
+    data from a csv, to populate the ElectionClassDate model.
+    """
     import pandas as pd
     frame = pd.read_excel('data/election_dates.xlsx')
     frame.columns = [column.lower() for column in frame.columns]
@@ -175,6 +185,8 @@ def load_election_dates():
 
 @manager.command
 def dump_districts(dest=None):
+    """ Makes districts locally that you can then add as a table to the databases
+    """
     source = db.engine.url
     dest = dest or './data/districts.dump'
     cmd = (
@@ -185,6 +197,9 @@ def dump_districts(dest=None):
 
 @manager.command
 def load_districts(source=None):
+    """ Loads that districts that you made locally so that you can then add them as a
+    table to the databases
+    """
     source = source or './data/districts.dump'
     dest = db.engine.url
     cmd = (
@@ -194,6 +209,8 @@ def load_districts(source=None):
 
 @manager.command
 def build_district_counts(outname='districts.json'):
+    """ Compiles the districts for a state
+    """
     import utils
     utils.write_district_counts(outname)
 
@@ -306,7 +323,8 @@ def update_all(processes=1):
 
 @manager.command
 def refresh_materialized():
-    """Refresh materialized views."""
+    """Refresh materialized views nightly
+    """
     logger.info('Refreshing materialized views...')
     execute_sql_file('data/refresh_materialized_views.sql')
     logger.info('Finished refreshing materialized views.')
@@ -321,7 +339,8 @@ def cf_startup():
 @manager.command
 def load_efile_sheets():
     """Run this management command if there are changes to incoming efiling data structures.
-    It will make the json mapping from the spreadsheets you provide it."""
+    It will make the json mapping from the spreadsheets you provide it
+    """
     import pandas as pd
     sheet_map = {4: 'efile_guide_f3', 5: 'efile_guide_f3p', 6: 'efile_guide_f3x'}
     for i in range(4, 7):
