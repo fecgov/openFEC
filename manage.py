@@ -41,6 +41,8 @@ manager.command(legal_docs.load_current_adrs)
 manager.command(legal_docs.initialize_legal_docs)
 manager.command(legal_docs.create_staging_index)
 manager.command(legal_docs.restore_from_staging_index)
+manager.command(legal_docs.reinitialize_all_legal_docs)
+manager.command(legal_docs.refresh_legal_docs_zero_downtime)
 
 def check_itemized_queues(schedule):
     """Checks to see if the queues associated with an itemized schedule have
@@ -186,6 +188,12 @@ def dump_districts(dest=None):
 
 @manager.command
 def load_districts(source=None):
+<<<<<<< HEAD
+=======
+    """ Loads that districts that you made locally so that you can then add them as a
+    table to the databases
+    """
+>>>>>>> release/public-beta-20170118
     source = source or './data/districts.dump'
     dest = db.engine.url
     cmd = (
