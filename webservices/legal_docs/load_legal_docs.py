@@ -52,6 +52,10 @@ def get_text(node):
 
 
 def index_regulations():
+    """
+        Indexes the regulations relevant to the FEC in Elasticsearch.
+        The regulations are accessed from FEC_EREGS_API.
+    """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
 
     if(eregs_api):
@@ -64,7 +68,7 @@ def index_regulations():
             regulation = requests.get(url).json()
             sections = get_sections(regulation)
 
-            print("Loading part %s" % reg['regulation'])
+            logger.info("Loading part %s" % reg['regulation'])
             for section_label in sections:
                 doc_id = '%s_%s' % (section_label[0], section_label[1])
                 section_formatted = '%s-%s' % (section_label[0], section_label[1])
@@ -78,9 +82,9 @@ def index_regulations():
 
                 es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
             reg_count += 1
-        print("%d regulation parts indexed." % reg_count)
+        logger.info("%d regulation parts indexed." % reg_count)
     else:
-        print("Regs could not be indexed, environment variable not set.")
+        logger.info("Regs could not be indexed, environment variable not set.")
 
 def legal_loaded():
     legal_loaded = db.engine.execute("""SELECT EXISTS (
@@ -89,36 +93,86 @@ def legal_loaded():
                                WHERE  table_name = 'ao'
                             );""").fetchone()[0]
     if not legal_loaded:
-        print('Advisory opinion tables not found.')
+        logger.error('Advisory opinion tables not found.')
 
     return legal_loaded
 
 
 def index_advisory_opinions():
-    print('Indexing advisory opinions...')
+    """
+        Indexes advisory opinions in Elasticsearch.
+        The advisory opinions are read from the local Postgres DB.
+    """
+    logger.info('Indexing advisory opinions...')
 
     if legal_loaded():
-        count = db.engine.execute('select count(*) from AO').fetchone()[0]
-        print('AO count: %d' % count)
-        count = db.engine.execute('select count(*) from DOCUMENT').fetchone()[0]
-        print('DOC count: %d' % count)
+        count = db.engine.execute('SELECT COUNT(*) FROM ao').fetchone()[0]
+        logger.info('AO count: %d' % count)
+        count = db.engine.execute('SELECT COUNT(*) FROM document').fetchone()[0]
+        logger.info('DOC count: %d' % count)
 
         es = utils.get_elasticsearch_connection()
 
-        result = db.engine.execute("""select DOCUMENT_ID, OCRTEXT, DESCRIPTION,
-                                CATEGORY, DOCUMENT.AO_ID, NAME, SUMMARY,
-                                TAGS, AO_NO, DOCUMENT_DATE FROM DOCUMENT INNER JOIN
-                                AO on AO.AO_ID = DOCUMENT.AO_ID""")
+        logger.info("getting citations...")
+        text = db.engine.execute("""SELECT ao_no, category, ocrtext FROM aouser.document
+                                    INNER JOIN aouser.ao ON ao.ao_id = document.ao_id""")
+
+        citations = {}
+        cited_by = {}
+        for row in text:
+            logger.info("Getting citations for %s" % row['ao_no'])
+            citations_in_doc = set()
+            text = row['ocrtext'] or ''
+            for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?', text):
+                year, no = tuple(citation.split('-'))
+                citation_txt = "{0}-{1:02d}".format(year, int(no))
+                if citation_txt != row['ao_no']:
+                    citations_in_doc.add(citation_txt)
+
+            citations[(row['ao_no'], row['category'])] = citations_in_doc
+
+            if row['category'] == 'Final Opinion':
+                for citation in citations_in_doc:
+                    if citation not in cited_by:
+                        cited_by[citation] = set([row['ao_no']])
+                    else:
+                        cited_by[citation].add(row['ao_no'])
+
+        result = db.engine.execute("""SELECT document_id, ocrtext, description,
+                                category, document.ao_id, name, summary,
+                                tags, ao_no, document_date,
+                                CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
+                                FROM aouser.document INNER JOIN
+                                aouser.ao ON ao.ao_id = document.ao_id
+                                LEFT JOIN (SELECT ao_id, 1 AS finished
+                                           FROM aouser.document
+                                           WHERE category='Final Opinion'
+                                            OR category='Withdrawal of Request') AS finished
+                                ON document.ao_id = finished.ao_id""")
 
         loading_doc = 0
 
         if loading_doc % 500 == 0:
-            print("%d docs loaded" % loading_doc)
+            logger.info("%d docs loaded" % loading_doc)
 
         bucket_name = env.get_credential('bucket')
         for row in result:
             key = "legal/aos/%s.pdf" % row[0]
             pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
+
+            requestors = db.engine.execute("""SELECT e.name, et.description
+                                FROM aouser.players p
+                                INNER JOIN aouser.ao ao ON ao.ao_id = p.ao_id
+                                INNER JOIN aouser.entity e ON p.entity_id = e.entity_id
+                                INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
+                                WHERE ao.ao_no='{0}' AND (role_id = 0 or role_id = 1);""".format(row[8]))
+
+            requestor_names = []
+            requestor_types = set()
+            for requestor in requestors:
+                requestor_names.append(requestor[0])
+                requestor_types.add(requestor[1])
+
             doc = {"doc_id": row[0],
                    "text": row[1],
                    "description": row[2],
@@ -129,11 +183,16 @@ def index_advisory_opinions():
                    "tags": row[7],
                    "no": row[8],
                    "date": row[9],
-                   "url": pdf_url}
+                   "is_pending": row[10],
+                   "url": pdf_url,
+                   "requestor_names": requestor_names,
+                   "requestor_types": list(requestor_types),
+                   "citations": sorted(list(citations[(row[8], row[3])])),
+                   "cited_by": sorted(list(cited_by[row[8]])) if row[8] in cited_by else []}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
-        print("%d docs loaded" % loading_doc)
+        logger.info("%d docs loaded" % loading_doc)
 
 def get_xml_tree_from_url(url):
     r = requests.get(url, stream=True)
@@ -218,6 +277,10 @@ def get_title_26_statutes():
 
 
 def index_statutes():
+    """
+        Indexes statutes with titles 26 and 52 in Elasticsearch.
+        The statutes are downloaded from http://uscode.house.gov.
+    """
     get_title_26_statutes()
     get_title_52_statutes()
 
@@ -231,6 +294,10 @@ def delete_advisory_opinions_from_s3():
 
 
 def load_advisory_opinions_into_s3():
+    """
+        Uploads advisory opinions documents to S3.
+        The advisory opinions are read from the local Postgres DB.
+    """
     if legal_loaded():
         docs_in_db = set([str(r[0]) for r in db.engine.execute(
                          "select document_id from document").fetchall()])
@@ -254,10 +321,10 @@ def load_advisory_opinions_into_s3():
                 bucket.put_object(Key=key, Body=bytes(fileimage),
                                   ContentType='application/pdf', ACL='public-read')
                 url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
-                print("pdf written to %s" % url)
-                print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
+                logger.info("pdf written to %s" % url)
+                logger.info("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
         else:
-            print("No new advisory opinions found.")
+            logger.info("No new advisory opinions found.")
 
 def process_mur_pdf(mur_no, pdf_key, bucket):
     response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
@@ -399,7 +466,7 @@ def get_mur_names(mur_names={}):
     return mur_names
 
 def process_mur(mur):
-    print("processing mur %d of %d" % (mur[0], mur[1]))
+    logger.info("processing mur %d of %d" % (mur[0], mur[1]))
     es = utils.get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
@@ -407,10 +474,10 @@ def process_mur(mur):
     (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
         = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
     mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-    print("processing mur %s" % mur_no)
+    logger.info("processing mur %s" % mur_no)
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
-        print('already processed %s' % pdf_key)
+        logger.info('already processed %s' % pdf_key)
         return
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
     pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
@@ -455,10 +522,10 @@ def process_mur(mur):
 
 def load_archived_murs():
     """
-    Reads data for archived MURs from TODO, assembles a JSON document
-    corresponding to the MUR and indexes this document in Elasticsearch in the index
-    `docs_index` with a doc_type of `murs`. In addition, the MUR document
-    is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
+    Reads data for archived MURs from http://www.fec.gov/MUR, assembles a JSON
+    document corresponding to the MUR and indexes this document in Elasticsearch
+    in the index `docs_index` with a doc_type of `murs`. In addition, the MUR
+    document is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
     """
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
