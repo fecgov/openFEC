@@ -9,9 +9,9 @@ from . import (
 )
 from webservices import utils
 
-DEFAULT_MAPPINGS = {
 logger = logging.getLogger(__name__)
 
+MAPPINGS = {
     "_default_": {
         "properties": {
             "no": {
@@ -116,6 +116,139 @@ logger = logging.getLogger(__name__)
                 }
             }
         }
+    },
+    "murs": {
+        "properties": {
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "doc_id": {
+                "type": "string",
+                "index": "no"
+            },
+            "mur_type": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "election_cycles": {
+                "type": "long"
+            },
+            "open_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "close_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            },
+            "subject": {
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    }
+                }
+            },
+            "disposition": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "citations": {
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "disposition": {
+                                "type": "string",
+                                "index": "not_analyzed"
+                            },
+                            "penalty": {
+                                "type": "double"
+                            },
+                            "respondent": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "text": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "vote_date": {
+                                "type": "date",
+                                "format": "dateOptionalTime"
+                            }
+                        }
+                    }
+                }
+            },
+            "documents": {
+                "type": "nested",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "document_date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    },
+                    "document_id": {
+                        "type": "long",
+                        "index": "no"
+                    },
+                    "length": {
+                        "type": "long",
+                        "index": "no"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "index": "no"
+                    }
+                }
+            },
+            "participants": {
+                "properties": {
+                    "citations": {
+                        "type": "object"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    }
+                }
+            },
+            "respondents": {
+                "type": "string"
+            }
+        }
     }
 }
 
@@ -140,7 +273,7 @@ def initialize_legal_docs():
 
     logger.info("Create index 'docs'")
     es.indices.create('docs', {
-        "mappings": DEFAULT_MAPPINGS,
+        "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
         "aliases": {
             DOCS_INDEX: {},
@@ -162,7 +295,7 @@ def create_staging_index():
 
     logger.info("Create index 'docs_staging'")
     es.indices.create('docs_staging', {
-        "mappings": DEFAULT_MAPPINGS,
+        "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
     })
 
@@ -192,7 +325,7 @@ def restore_from_staging_index():
     logger.info("Delete and re-create index 'docs'")
     es.indices.delete('docs')
     es.indices.create('docs', {
-        "mappings": DEFAULT_MAPPINGS,
+        "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS
     })
 
