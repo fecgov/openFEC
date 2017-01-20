@@ -133,9 +133,12 @@ def initialize_legal_docs():
 
     es = utils.get_elasticsearch_connection()
     try:
+        logger.info("Delete index 'docs'")
         es.indices.delete('docs')
     except elasticsearch.exceptions.NotFoundError:
         pass
+
+    logger.info("Create index 'docs'")
     es.indices.create('docs', {
         "mappings": DEFAULT_MAPPINGS,
         "settings": ANALYZER_SETTINGS,
@@ -152,15 +155,18 @@ def create_staging_index():
     """
     es = utils.get_elasticsearch_connection()
     try:
+        logger.info("Delete index 'docs_staging'")
         es.indices.delete('docs_staging')
-        logger.info("docs_staging already existed. It has been deleted.")
     except:
         pass
 
+    logger.info("Create index 'docs_staging'")
     es.indices.create('docs_staging', {
         "mappings": DEFAULT_MAPPINGS,
         "settings": ANALYZER_SETTINGS,
     })
+
+    logger.info("Move alias '%s' to point to 'docs_staging'", DOCS_INDEX)
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs', "alias": DOCS_INDEX}},
         {"add": {"index": 'docs_staging', "alias": DOCS_INDEX}}
@@ -176,23 +182,29 @@ def restore_from_staging_index():
        Delete index `docs_staging`.
     """
     es = utils.get_elasticsearch_connection()
+
+    logger.info("Move alias '%s' to point to 'docs_staging'", DOCS_SEARCH)
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs', "alias": DOCS_SEARCH}},
         {"add": {"index": 'docs_staging', "alias": DOCS_SEARCH}}
     ]})
 
+    logger.info("Delete and re-create index 'docs'")
     es.indices.delete('docs')
     es.indices.create('docs', {
         "mappings": DEFAULT_MAPPINGS,
         "settings": ANALYZER_SETTINGS
     })
 
+    logger.info("Reindex all documents from index 'docs_staging' to index 'docs'")
     elasticsearch.helpers.reindex(es, 'docs_staging', 'docs', chunk_size=50)
 
+    logger.info("Move aliases '%s' and '%s' to point to 'docs'", DOCS_INDEX, DOCS_SEARCH)
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs_staging', "alias": DOCS_INDEX}},
         {"remove": {"index": 'docs_staging', "alias": DOCS_SEARCH}},
         {"add": {"index": 'docs', "alias": DOCS_INDEX}},
         {"add": {"index": 'docs', "alias": DOCS_SEARCH}}
     ]})
+    logger.info("Delete index 'docs_staging'")
     es.indices.delete('docs_staging')
