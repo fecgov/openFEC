@@ -1,3 +1,5 @@
+import logging
+
 import elasticsearch
 import elasticsearch.helpers
 
@@ -8,6 +10,8 @@ from . import (
 from webservices import utils
 
 DEFAULT_MAPPINGS = {
+logger = logging.getLogger(__name__)
+
     "_default_": {
         "properties": {
             "no": {
