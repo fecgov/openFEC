@@ -431,15 +431,26 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 
 * [auto] `release/my-release` is deployed to `stage`
 * Review of staging
+* Issue a pull request to master
+* Check if there are any SQL files changed. Depending on where the changes are, you may need to run migrations. Ask the person who made the change what, if anything, you need to run. 
 * Developer merges release branch into `master` (and backmerges into `develop`) and pushes to origin:
 
     ```
+    git config --global push.followTags true
     git flow release finish my-release
-    git checkout master
-    git push origin master --follow-tags
+    ```
+    You'll need to save several merge messages, and add a tag message which is named the name of the release (eg., public-beta-20170118).
+    ```
     git checkout develop
     git push origin develop
     ```
+    Watch the develop build on travis and make sure it passes. Now you are ready to push to prod (:tada:).
+    
+    ```
+    git checkout master
+    git push origin master --follow-tags
+    ```
+   Watch travis to make sure it passes, then test the production site manually to make sure everything looks ok.
 
 * `master` is deployed to `prod`
 * `develop` is deployed to `dev`
