@@ -152,7 +152,7 @@ rfai_filings as (
     left join ofec_committee_history_mv_tmp com on filing_history.id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
     left join ofec_candidate_history_mv_tmp cand on filing_history.id = cand.candidate_id and get_cycle(filing_history.rpt_yr) = cand.two_year_period
     left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
-WHERE rpt_yr >= :START_YEAR
+WHERE rpt_yr >= :START_YEAR and delete_ind is null
 ),
 combined as(
     select * from filings
