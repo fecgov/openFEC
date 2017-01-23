@@ -114,6 +114,12 @@ def index_advisory_opinions():
         es = utils.get_elasticsearch_connection()
 
         logger.info("getting citations...")
+        ao_names_results = db.engine.execute("""SELECT ao_no, name FROM aouser.document
+                                      INNER JOIN aouser.ao ON ao.ao_id = document.ao_id""")
+        ao_names = {}
+        for row in ao_names_results:
+            ao_names[row['ao_no']] = row['name']
+
         text = db.engine.execute("""SELECT ao_no, category, ocrtext FROM aouser.document
                                     INNER JOIN aouser.ao ON ao.ao_id = document.ao_id""")
 
@@ -126,10 +132,11 @@ def index_advisory_opinions():
             for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?', text):
                 year, no = tuple(citation.split('-'))
                 citation_txt = "{0}-{1:02d}".format(year, int(no))
-                if citation_txt != row['ao_no']:
+                if citation_txt != row['ao_no'] and citation_txt in ao_names:
                     citations_in_doc.add(citation_txt)
 
-            citations[(row['ao_no'], row['category'])] = citations_in_doc
+            citations[(row['ao_no'], row['category'])] = sorted([{'no': citation, 'name': ao_names[citation]}
+             for citation in citations_in_doc], key=lambda d: d['no'])
 
             if row['category'] == 'Final Opinion':
                 for citation in citations_in_doc:
@@ -137,6 +144,11 @@ def index_advisory_opinions():
                         cited_by[citation] = set([row['ao_no']])
                     else:
                         cited_by[citation].add(row['ao_no'])
+
+        for citation, cited_by_set in cited_by.items():
+            cited_by_with_name = sorted([{'no': c, 'name': ao_names[c]}
+                for c in cited_by_set], key=lambda d: d['no'])
+            cited_by[citation] = cited_by_with_name
 
         result = db.engine.execute("""SELECT document_id, ocrtext, description,
                                 category, document.ao_id, name, summary,
@@ -187,8 +199,8 @@ def index_advisory_opinions():
                    "url": pdf_url,
                    "requestor_names": requestor_names,
                    "requestor_types": list(requestor_types),
-                   "citations": sorted(list(citations[(row[8], row[3])])),
-                   "cited_by": sorted(list(cited_by[row[8]])) if row[8] in cited_by else []}
+                   "citations": citations[(row[8], row[3])],
+                   "cited_by": cited_by[row[8]] if row[8] in cited_by else []}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
