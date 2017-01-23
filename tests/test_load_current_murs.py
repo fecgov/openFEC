@@ -127,6 +127,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'election_cycles': [2016],
             'doc_id': 'mur_1',
             'participants': [],
+            'subjects': [mur_subject],
             'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
@@ -157,6 +158,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_1',
+            'subjects': [mur_subject],
             'subject': {"text": [mur_subject]},
             'respondents': ["Bilbo Baggins", "Thorin Oakenshield"]
         }
@@ -285,7 +287,8 @@ class TestLoadCurrentMURs(BaseTestCase):
                     'url': '/regulations/456/CURRENT'}
                 ]
             }],
-            'subject': {'text': ['Fraudulent misrepresentation']},
+            'subjects': ['Fraudulent misrepresentation'],
+            'subject': {"text": ['Fraudulent misrepresentation']},
             'respondents': [],
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),

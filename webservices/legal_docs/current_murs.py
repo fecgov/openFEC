@@ -110,7 +110,8 @@ def load_current_murs():
                 'name': row['name'],
                 'mur_type': 'current',
             }
-            mur['subject'] = {"text": get_subjects(case_id)}
+            mur['subjects'] = get_subjects(case_id)
+            mur['subject'] = {'text': mur['subjects']}
             mur['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)

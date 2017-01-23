@@ -149,6 +149,9 @@ MAPPINGS = {
                 "type": "string",
                 "index": "no"
             },
+            "subjects": {
+                "type": "string"
+            },
             "subject": {
                 "properties": {
                     "text": {
