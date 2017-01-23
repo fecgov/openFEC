@@ -149,6 +149,9 @@ MAPPINGS = {
                 "type": "string",
                 "index": "no"
             },
+            "subjects": {
+                "type": "string"
+            },
             "subject": {
                 "properties": {
                     "text": {
@@ -198,6 +201,47 @@ MAPPINGS = {
                                 "format": "dateOptionalTime"
                             }
                         }
+                    }
+                }
+            },
+            "commission_votes": {
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "vote_date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    }
+                }
+            },
+            'dispositions': {
+                "properties": {
+                    "citations": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "type": "string"
+                            },
+                            "url": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "disposition": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "penalty": {
+                        "type": "double"
+                    },
+                    "respondent": {
+                        "type": "string"
                     }
                 }
             },
