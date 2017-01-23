@@ -127,10 +127,13 @@ class TestLoadCurrentMURs(BaseTestCase):
             'election_cycles': [2016],
             'doc_id': 'mur_1',
             'participants': [],
+            'subjects': [mur_subject],
             'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
             'disposition': {'data': [], 'text': []},
+            'commission_votes': [],
+            'dispositions': [],
             'close_date': None,
             'open_date': None,
             'url': '/legal/matter-under-review/1/'
@@ -155,6 +158,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'mur_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'mur_1',
+            'subjects': [mur_subject],
             'subject': {"text": [mur_subject]},
             'respondents': ["Bilbo Baggins", "Thorin Oakenshield"]
         }
@@ -267,7 +271,24 @@ class TestLoadCurrentMURs(BaseTestCase):
                 'url': '/regulations/456/CURRENT'}
             ]}],
             'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
-            'subject': {'text': ['Fraudulent misrepresentation']},
+            'commission_votes': [{'action': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}],
+            'dispositions': [{
+                'disposition': 'Conciliation-PPC',
+                'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
+                'citations': [
+                    {'text': '431',
+                    'title': '2',
+                    'type': 'statute',
+                    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52'
+                    '&section=30101'},
+                    {'text': '456',
+                    'title': '11',
+                    'type': 'regulation',
+                    'url': '/regulations/456/CURRENT'}
+                ]
+            }],
+            'subjects': ['Fraudulent misrepresentation'],
+            'subject': {"text": ['Fraudulent misrepresentation']},
             'respondents': [],
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
