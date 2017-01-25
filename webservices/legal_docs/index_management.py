@@ -293,6 +293,38 @@ MAPPINGS = {
                 "type": "string"
             }
         }
+    },
+    "statutes": {
+        "properties": {
+            "doc_id": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "text": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "title": {
+                "type": "string"
+            },
+            "chapter": {
+                "type": "string"
+            },
+            "subchapter": {
+                "type": "string"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            }
+        }
     }
 }
 
