@@ -108,7 +108,7 @@ class Engine:
             return [(1, 'ABC'.encode('utf8'))]
         if 'EXISTS' in sql:
             self.result = [(self.legal_loaded,)]
-        if 'count' in sql:
+        if 'COUNT' in sql:
             self.result = [(5,)]
         if 'aouser.players' in sql:
             self.result = [{'name': 'Charles Babbage', 'description': 'Individual'},
@@ -263,9 +263,6 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
     def test_advisory_opinion_load(self):
         index_advisory_opinions()
 
-    @patch('webservices.legal_docs.load_legal_docs.db', Db(False))
-    def test_no_legal_loaded(self):
-        index_advisory_opinions()
 
 class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
     @patch('webservices.legal_docs.load_legal_docs.db', Db())
