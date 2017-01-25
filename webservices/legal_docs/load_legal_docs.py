@@ -169,7 +169,7 @@ def index_advisory_opinions():
 
         bucket_name = env.get_credential('bucket')
         for row in result:
-            key = "legal/aos/%s.pdf" % row[0]
+            key = "legal/aos/%s.pdf" % row['document_id']
             pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
 
             requestors = db.engine.execute("""SELECT e.name, et.description
@@ -177,30 +177,30 @@ def index_advisory_opinions():
                                 INNER JOIN aouser.ao ao ON ao.ao_id = p.ao_id
                                 INNER JOIN aouser.entity e ON p.entity_id = e.entity_id
                                 INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
-                                WHERE ao.ao_no='{0}' AND (role_id = 0 or role_id = 1);""".format(row[8]))
+                                WHERE ao.ao_no='{0}' AND (role_id = 0 or role_id = 1);""".format(row['ao_no']))
 
             requestor_names = []
             requestor_types = set()
             for requestor in requestors:
-                requestor_names.append(requestor[0])
-                requestor_types.add(requestor[1])
+                requestor_names.append(requestor['name'])
+                requestor_types.add(requestor['description'])
 
-            doc = {"doc_id": row[0],
-                   "text": row[1],
-                   "description": row[2],
-                   "category": row[3],
-                   "id": row[4],
-                   "name": row[5],
-                   "summary": row[6],
-                   "tags": row[7],
-                   "no": row[8],
-                   "date": row[9],
-                   "is_pending": row[10],
+            doc = {"doc_id": row['document_id'],
+                   "text": row['ocrtext'],
+                   "description": row['description'],
+                   "category": row['category'],
+                   "id": row['ao_id'],
+                   "name": row['name'],
+                   "summary": row['summary'],
+                   "tags": row['tags'],
+                   "no": row['ao_no'],
+                   "date": row['document_date'],
+                   "is_pending": row['is_pending'],
                    "url": pdf_url,
                    "requestor_names": requestor_names,
                    "requestor_types": list(requestor_types),
-                   "citations": citations[(row[8], row[3])],
-                   "cited_by": cited_by[row[8]] if row[8] in cited_by else []}
+                   "citations": citations[(row['ao_no'], row['category'])],
+                   "cited_by": cited_by[row['ao_no']] if row['ao_no'] in cited_by else []}
 
             es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
             loading_doc += 1
@@ -311,7 +311,7 @@ def load_advisory_opinions_into_s3():
         The advisory opinions are read from the local Postgres DB.
     """
     if legal_loaded():
-        docs_in_db = set([str(r[0]) for r in db.engine.execute(
+        docs_in_db = set([str(r['document_id']) for r in db.engine.execute(
                          "select document_id from document").fetchall()])
 
         bucket = get_bucket()

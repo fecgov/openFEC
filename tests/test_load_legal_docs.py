@@ -111,8 +111,8 @@ class Engine:
         if 'count' in sql:
             self.result = [(5,)]
         if 'aouser.players' in sql:
-            self.result = [('Charles Babbage', 'Individual'),
-                            ('Ada Lovelace', 'Individual')]
+            self.result = [{'name': 'Charles Babbage', 'description': 'Individual'},
+                            {'name': 'Ada Lovelace', 'description': 'Individual'}]
         if 'SELECT ao_no, category, ocrtext' in sql:
             self.result = [{'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-05 and 2014-1'},
                          {'ao_no': '2007-05', 'category': 'Final Opinion', 'ocrtext': 'test2 1993-01 test2'}]
@@ -120,8 +120,10 @@ class Engine:
             self.result = [{'ao_no': '1993-01', 'name': 'RNC'}, {'ao_no': '2007-05', 'name': 'Church'},
                             {'ao_no': '2014-01', 'name': 'DNC'}, {'ao_no': '2015-05', 'name': 'Outkast'}]
         if 'document_id' in sql:
-            self.result = [(123, 'textAB', 'description123', 'Votes', 'id123',
-                           'name4U', 'summaryABC', 'tags123', '1993-01', 'date123', True)]
+            self.result = [{'document_id': 123, 'ocrtext': 'textAB', 'description': 'description123',
+                           'category': 'Votes', 'ao_id': 'id123',
+                           'name': 'name4U', 'summary': 'summaryABC', 'tags': 'tags123',
+                           'ao_no': '1993-01', 'document_date': 'date123', 'is_pending': True}]
         return self
 
 
