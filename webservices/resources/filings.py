@@ -102,6 +102,9 @@ class EFilingsView(views.ApiResource):
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.EFilings.receipt_date),
     ]
+    filter_match_fields = [
+        ('most_recent_filenumber', models.EFilings.most_recent_filing),
+    ]
 
     @property
     def args(self):

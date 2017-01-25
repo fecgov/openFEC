@@ -19,15 +19,6 @@ class ReportType(db.Model, StagingMixin):
     report_type = db.Column('rpt_tp_cd', db.String, index=True, primary_key=True, doc=docs.REPORT_TYPE)
     report_type_full = db.Column('rpt_tp_desc', db.String, index=True, doc=docs.REPORT_TYPE)
 
-
-
-"""
-Keep this here as a reference as to a strategy for doing this if needed
-class DisclosureMixin(object):
-    __table_args__ = {"schema": "disclosure"}
-"""
-
-
 class DateMixin(object):
     trc_report_due_date_id = db.Column(db.BigInteger, primary_key=True)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
