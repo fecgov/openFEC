@@ -659,6 +659,12 @@ FilingsSchema = make_schema(
 )
 augment_schemas(FilingsSchema)
 
+EfilingsAmendmentsSchema = make_schema(
+    models.EfilingsAmendments,
+)
+
+augment_schemas(EfilingsAmendmentsSchema)
+
 EFilingsSchema = make_schema(
     models.EFilings,
     fields={
@@ -669,6 +675,8 @@ EFilingsSchema = make_schema(
         #'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
+        'most_recent_filing': ma.fields.Str(),
+        'amendment': ma.fields.Nested(schemas['EfilingsAmendmentsSchema'])
     },
     options={'exclude': ('report',)},
 )

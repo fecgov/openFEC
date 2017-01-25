@@ -1,9 +1,12 @@
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin
+
+
 
 
 
@@ -72,6 +75,14 @@ class Filings(CsvMixin, db.Model):
             self.form_type,
         )
 
+class EfilingsAmendments(db.Model):
+    __tablename__ = 'efiling_amendment_chain_vw'
+    file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
+    amendment_chain = db.Column(ARRAY(db.Numeric))
+    most_recent_filing = db.Column(db.Numeric)
+    depth = db.Column(db.Numeric)
+    last = db.Column(db.Numeric)
+    previous_file_number = db.Column('previd', db.Numeric)
 
 class EFilings(CsvMixin, FecMixin, db.Model):
     __tablename__ = 'real_efile_reps'
@@ -92,6 +103,15 @@ class EFilings(CsvMixin, FecMixin, db.Model):
     amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
     report = db.relationship(ReportType)
 
+    amendment = db.relationship(
+        'EfilingsAmendments',
+        primaryjoin='''and_(
+                            EfilingsAmendments.file_number == EFilings.file_number,
+                        )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
     @property
     def document_description(self):
         return utils.document_description(
@@ -111,6 +131,14 @@ class EFilings(CsvMixin, FecMixin, db.Model):
     def pdf_url(self):
         image_number = str(self.beginning_image_number)
         return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
+
+    @hybrid_property
+    def most_recent_filing(self):
+        return self.amendment.most_recent_filing
+
+    @most_recent_filing.expression
+    def most_recent_filing(cls):
+        return EfilingsAmendments.most_recent_filing
 
 
 # TODO: add index on committee id and filed_date
