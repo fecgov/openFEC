@@ -645,7 +645,7 @@ ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=pagi
 register_schema(ElectioneeringSchema)
 register_schema(ElectioneeringPageSchema)
 
-FilingsSchema = make_schema(
+BaseFilingsSchema = make_schema(
     models.Filings,
     fields={
         'document_description': ma.fields.Str(),
@@ -657,6 +657,12 @@ FilingsSchema = make_schema(
     },
     options={'exclude': ('committee', )},
 )
+class FilingsSchema(BaseFilingsSchema):
+    @post_dump
+    def remove_fec_url(self, obj):
+        if not obj.get('fec_url'):
+            obj.pop('fec_url')
+
 augment_schemas(FilingsSchema)
 
 EFilingsSchema = make_schema(
