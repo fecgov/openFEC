@@ -136,9 +136,14 @@ class EFilings(CsvMixin, FecMixin, db.Model):
     def most_recent_filing(self):
         return self.amendment.most_recent_filing
 
+    @hybrid_property
+    def amendment_chain(self):
+        return self.amendment.amendment_chain
+    '''
     @most_recent_filing.expression
     def most_recent_filing(cls):
         return EfilingsAmendments.most_recent_filing
+    '''
 
 
 # TODO: add index on committee id and filed_date
