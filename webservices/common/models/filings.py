@@ -62,6 +62,7 @@ class Filings(CsvMixin, db.Model):
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)
     most_recent_file_number = db.Column(db.BigInteger)
+    amendment_version = db.Column(db.Integer)
 
     @property
     def document_description(self):
