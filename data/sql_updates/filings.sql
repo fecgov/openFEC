@@ -143,7 +143,7 @@ rfai_filings as (
             'RFAI'::text
         ) as pdf_url,
         means_filed(begin_image_num) as means_filed,
-        report_fec_url(begin_image_num::text, filing_history.file_num::integer ) as fec_url,
+        null::text as fec_url,
         null::numeric[] as amendment_chain,
         null::int as most_recent_file_number,
         null::boolean as is_amended,
