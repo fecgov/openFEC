@@ -5,11 +5,10 @@ from datetime import datetime
 from decimal import Decimal
 
 import pytest
-
 import manage
 from webservices import rest
 from webservices.legal_docs import DOCS_INDEX
-from webservices.legal_docs.current_adrs import parse_regulatory_citations, parse_statutory_citations
+from webservices.legal_docs.utils import parse_regulatory_citations, parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
@@ -32,6 +31,7 @@ from tests.common import TEST_CONN, BaseTestCase
          {'text': '114.5(g)(1)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'}
          ]),
 ])
+
 def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
     assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
 
@@ -86,6 +86,7 @@ def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
           'type': 'statute',
         'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
 ])
+
 def test_parse_statutory_citations(test_input, case_id, entity_id, expected):
     assert parse_statutory_citations(test_input, case_id, entity_id) == expected
 
@@ -95,10 +96,10 @@ def assert_es_index_call(call_args, expected_adr):
     assert doc_type == 'adrs'
     assert adr == expected_adr
 
-class TestLoadCurrentADRs(BaseTestCase):
+class TestLoadADRs(BaseTestCase):
     @classmethod
     def setUpClass(cls):
-        super(TestLoadCurrentADRs, cls).setUpClass()
+        super(TestLoadADRs, cls).setUpClass()
         subprocess.check_call(
             ['psql', TEST_CONN, '-f', 'data/load_murs_schema.sql'])
 
@@ -106,7 +107,7 @@ class TestLoadCurrentADRs(BaseTestCase):
     def tearDownClass(cls):
         subprocess.check_call(
             ['psql', TEST_CONN, '-c', 'DROP SCHEMA fecmur CASCADE'])
-        super(TestLoadCurrentADRs, cls).tearDownClass()
+        super(TestLoadADRs, cls).tearDownClass()
 
     def setUp(self):
         self.connection = rest.db.engine.connect()
@@ -116,8 +117,8 @@ class TestLoadCurrentADRs(BaseTestCase):
         self.connection.close()
         rest.db.session.remove()
 
-    @patch('webservices.legal_docs.current_adrs.get_bucket')
-    @patch('webservices.legal_docs.current_adrs.get_elasticsearch_connection')
+    @patch('webservices.legal_docs.adrs.get_bucket')
+    @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
     def test_simple_adr(self, get_es_conn, get_bucket):
         adr_subject = 'Fraudulent misrepresentation'
         expected_adr = {
@@ -136,7 +137,7 @@ class TestLoadCurrentADRs(BaseTestCase):
             'url': '/legal/matter-under-review/1/'
         }
         self.create_adr(1, expected_adr['no'], expected_adr['name'], adr_subject)
-        manage.legal_docs.load_current_adrs()
+        manage.legal_docs.load_adrs()
         index, doc_type, adr = get_es_conn.return_value.index.call_args[0]
        
         assert index == DOCS_INDEX
@@ -144,8 +145,8 @@ class TestLoadCurrentADRs(BaseTestCase):
         assert adr == expected_adr
     
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.legal_docs.current_adrs.get_bucket')
-    @patch('webservices.legal_docs.current_adrs.get_elasticsearch_connection')
+    @patch('webservices.legal_docs.adrs.get_bucket')
+    @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
     def test_adr_with_participants_and_documents(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
         adr_subject = 'Fraudulent misrepresentation'
@@ -176,7 +177,7 @@ class TestLoadCurrentADRs(BaseTestCase):
             category, ocrtext = document
             self.create_document(case_id, document_id, category, ocrtext)
 
-        manage.legal_docs.load_current_adrs()
+        manage.legal_docs.load_adrs()
         index, doc_type, adr = get_es_conn.return_value.index.call_args[0]
 
         assert index == DOCS_INDEX
@@ -193,8 +194,8 @@ class TestLoadCurrentADRs(BaseTestCase):
             assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.legal_docs.current_adrs.get_bucket')
-    @patch('webservices.legal_docs.current_adrs.get_elasticsearch_connection')
+    @patch('webservices.legal_docs.adrs.get_bucket')
+    @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
     def test_adr_with_disposition(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
         case_no = '1'
@@ -250,7 +251,7 @@ class TestLoadCurrentADRs(BaseTestCase):
         action = 'Conciliation Reached.'
         self.create_commission(commission_id, agenda_date, vote_date, action, case_id, pg_date)
 
-        manage.legal_docs.load_current_adrs()
+        manage.legal_docs.load_adrs()
         index, doc_type, adr = get_es_conn.return_value.index.call_args[0]
 
         expected_adr = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
