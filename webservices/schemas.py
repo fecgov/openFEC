@@ -665,6 +665,12 @@ class FilingsSchema(BaseFilingsSchema):
 
 augment_schemas(FilingsSchema)
 
+EfilingsAmendmentsSchema = make_schema(
+    models.EfilingsAmendments,
+)
+
+augment_schemas(EfilingsAmendmentsSchema)
+
 EFilingsSchema = make_schema(
     models.EFilings,
     fields={
@@ -675,8 +681,10 @@ EFilingsSchema = make_schema(
         #'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
+        'most_recent_filing': ma.fields.Str(),
+        'amendment_chain': ma.fields.List(ma.fields.Int()),
     },
-    options={'exclude': ('report',)},
+    options={'exclude': ('report', 'amendment')},
 )
 augment_schemas(EFilingsSchema)
 
