@@ -27,6 +27,10 @@ class EntityReceiptDisbursementTotalsView(ApiResource):
         return utils.extend(
             args.paging,
             args.large_aggregates,
+            args.make_sort_args(
+                default='chart_date',
+                validator=args.OptionValidator(['chart_date',]),
+            )
         )
 
     @property
