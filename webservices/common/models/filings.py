@@ -80,6 +80,7 @@ class EfilingsAmendments(db.Model):
     __tablename__ = 'efiling_amendment_chain_vw'
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
     amendment_chain = db.Column(ARRAY(db.Numeric))
+    longest_chain = db.Column(ARRAY(db.Numeric))
     most_recent_filing = db.Column(db.Numeric)
     depth = db.Column(db.Numeric)
     last = db.Column(db.Numeric)
@@ -99,7 +100,7 @@ class EFilings(CsvMixin, FecMixin, db.Model):
     beginning_image_number = db.Column('starting', db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
     ending_image_number = db.Column('ending', db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
     report_type = db.Column('rptcode', db.String, db.ForeignKey(ReportType.report_type), doc=docs.REPORT_TYPE)
-    amended_by = db.Column('superceded', db.BigInteger, doc=docs.AMENDED_BY)
+    superceded = db.Column(db.BigInteger, doc=docs.AMENDED_BY)
     amends_file = db.Column('previd', db.BigInteger, doc=docs.AMENDS_FILE)
     amendment_number = db.Column('rptnum', db.Integer, doc=docs.AMENDMENT_NUMBER)
     report = db.relationship(ReportType)
@@ -123,8 +124,15 @@ class EFilings(CsvMixin, FecMixin, db.Model):
         )
 
     @property
+    def amended_by(self):
+        if not self.superceded and not self.most_recent and self.amendment and len(self.amendment.longest_chain) > 0:
+            index = self.amendment.longest_chain.index(self.file_number)
+            return self.amendment.longest_chain[index + 1]
+        else:
+            return self.superceded
+    @property
     def is_amended(self):
-        if self.superceded is not None:
+        if self.superceded is not None or not self.most_recent:
             return True
         return False
 
@@ -144,11 +152,6 @@ class EFilings(CsvMixin, FecMixin, db.Model):
     @hybrid_property
     def amendment_chain(self):
         return self.amendment.amendment_chain
-    '''
-    @most_recent_filing.expression
-    def most_recent_filing(cls):
-        return EfilingsAmendments.most_recent_filing
-    '''
 
 
 # TODO: add index on committee id and filed_date
