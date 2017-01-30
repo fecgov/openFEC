@@ -205,6 +205,7 @@ select
     month,
     year,
     cycle,
+    make_date(cast(year as int), cast(month as int), 01) as chart_date,
     sum(candidate_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_receipts,
     candidate_receipts,
     sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_disbursements,
