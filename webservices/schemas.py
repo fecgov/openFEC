@@ -682,6 +682,7 @@ EFilingsSchema = make_schema(
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
         'most_recent_filing': ma.fields.Str(),
+        'most_recent': ma.fields.Bool(),
         'amendment_chain': ma.fields.List(ma.fields.Int()),
     },
     options={'exclude': ('report', 'amendment')},

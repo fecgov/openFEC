@@ -133,6 +133,10 @@ class EFilings(CsvMixin, FecMixin, db.Model):
         image_number = str(self.beginning_image_number)
         return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
 
+    @property
+    def most_recent(self):
+        return self.file_number == self.amendment.most_recent_filing
+
     @hybrid_property
     def most_recent_filing(self):
         return self.amendment.most_recent_filing
