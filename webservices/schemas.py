@@ -684,8 +684,11 @@ EFilingsSchema = make_schema(
         'most_recent_filing': ma.fields.Str(),
         'most_recent': ma.fields.Bool(),
         'amendment_chain': ma.fields.List(ma.fields.Int()),
+        'longest_chain': ma.fields.List(ma.fields.Int()),
+        'amended_by': ma.fields.Str(),
+
     },
-    options={'exclude': ('report', 'amendment')},
+    options={'exclude': ('report', 'amendment', 'superceded')},
 )
 augment_schemas(EFilingsSchema)
 
