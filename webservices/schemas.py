@@ -681,12 +681,10 @@ EFilingsSchema = make_schema(
         #'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
-        'most_recent_filing': ma.fields.Str(),
+        'most_recent_filing': ma.fields.Int(),
         'most_recent': ma.fields.Bool(),
         'amendment_chain': ma.fields.List(ma.fields.Int()),
-        'longest_chain': ma.fields.List(ma.fields.Int()),
-        'amended_by': ma.fields.Str(),
-
+        'amended_by': ma.fields.Int(),
     },
     options={'exclude': ('report', 'amendment', 'superceded')},
 )
