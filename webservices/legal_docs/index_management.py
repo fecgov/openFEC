@@ -1,3 +1,5 @@
+import logging
+
 import elasticsearch
 import elasticsearch.helpers
 
@@ -7,10 +9,20 @@ from . import (
 )
 from webservices import utils
 
-DEFAULT_MAPPINGS = {
+logger = logging.getLogger(__name__)
+
+MAPPINGS = {
     "_default_": {
         "properties": {
             "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "category": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "requestor_types": {
                 "type": "string",
                 "index": "not_analyzed"
             },
@@ -104,6 +116,183 @@ DEFAULT_MAPPINGS = {
                 }
             }
         }
+    },
+    "murs": {
+        "properties": {
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "doc_id": {
+                "type": "string",
+                "index": "no"
+            },
+            "mur_type": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "election_cycles": {
+                "type": "long"
+            },
+            "open_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "close_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            },
+            "subjects": {
+                "type": "string"
+            },
+            "subject": {
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    }
+                }
+            },
+            "disposition": {
+                "properties": {
+                    "data": {
+                        "properties": {
+                            "citations": {
+                                "properties": {
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            "disposition": {
+                                "type": "string",
+                                "index": "not_analyzed"
+                            },
+                            "penalty": {
+                                "type": "double"
+                            },
+                            "respondent": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "text": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "vote_date": {
+                                "type": "date",
+                                "format": "dateOptionalTime"
+                            }
+                        }
+                    }
+                }
+            },
+            "commission_votes": {
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "vote_date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    }
+                }
+            },
+            'dispositions': {
+                "properties": {
+                    "citations": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "type": "string"
+                            },
+                            "url": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "disposition": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "penalty": {
+                        "type": "double"
+                    },
+                    "respondent": {
+                        "type": "string"
+                    }
+                }
+            },
+            "documents": {
+                "type": "nested",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "document_date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    },
+                    "document_id": {
+                        "type": "long",
+                        "index": "no"
+                    },
+                    "length": {
+                        "type": "long",
+                        "index": "no"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string",
+                        "index": "no"
+                    }
+                }
+            },
+            "participants": {
+                "properties": {
+                    "citations": {
+                        "type": "object"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    }
+                }
+            },
+            "respondents": {
+                "type": "string"
+            }
+        }
     }
 }
 
@@ -121,11 +310,14 @@ def initialize_legal_docs():
 
     es = utils.get_elasticsearch_connection()
     try:
+        logger.info("Delete index 'docs'")
         es.indices.delete('docs')
     except elasticsearch.exceptions.NotFoundError:
         pass
+
+    logger.info("Create index 'docs'")
     es.indices.create('docs', {
-        "mappings": DEFAULT_MAPPINGS,
+        "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
         "aliases": {
             DOCS_INDEX: {},
@@ -139,10 +331,19 @@ def create_staging_index():
     Move the alias docs_index to point to `docs_staging` instead of `docs`.
     """
     es = utils.get_elasticsearch_connection()
+    try:
+        logger.info("Delete index 'docs_staging'")
+        es.indices.delete('docs_staging')
+    except:
+        pass
+
+    logger.info("Create index 'docs_staging'")
     es.indices.create('docs_staging', {
-        "mappings": DEFAULT_MAPPINGS,
+        "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
     })
+
+    logger.info("Move alias '%s' to point to 'docs_staging'", DOCS_INDEX)
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs', "alias": DOCS_INDEX}},
         {"add": {"index": 'docs_staging', "alias": DOCS_INDEX}}
@@ -158,23 +359,29 @@ def restore_from_staging_index():
        Delete index `docs_staging`.
     """
     es = utils.get_elasticsearch_connection()
+
+    logger.info("Move alias '%s' to point to 'docs_staging'", DOCS_SEARCH)
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs', "alias": DOCS_SEARCH}},
         {"add": {"index": 'docs_staging', "alias": DOCS_SEARCH}}
     ]})
 
+    logger.info("Delete and re-create index 'docs'")
     es.indices.delete('docs')
     es.indices.create('docs', {
-        "mappings": DEFAULT_MAPPINGS,
+        "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS
     })
 
-    elasticsearch.helpers.reindex(es, 'docs_staging', 'docs')
+    logger.info("Reindex all documents from index 'docs_staging' to index 'docs'")
+    elasticsearch.helpers.reindex(es, 'docs_staging', 'docs', chunk_size=50)
 
+    logger.info("Move aliases '%s' and '%s' to point to 'docs'", DOCS_INDEX, DOCS_SEARCH)
     es.indices.update_aliases(body={"actions": [
         {"remove": {"index": 'docs_staging', "alias": DOCS_INDEX}},
         {"remove": {"index": 'docs_staging', "alias": DOCS_SEARCH}},
         {"add": {"index": 'docs', "alias": DOCS_INDEX}},
         {"add": {"index": 'docs', "alias": DOCS_SEARCH}}
     ]})
+    logger.info("Delete index 'docs_staging'")
     es.indices.delete('docs_staging')

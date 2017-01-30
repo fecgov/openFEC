@@ -469,6 +469,7 @@ ScheduleASchema = make_schema(
                 1
             ),
         ],
+
     }
 )
 
@@ -644,7 +645,7 @@ ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=pagi
 register_schema(ElectioneeringSchema)
 register_schema(ElectioneeringPageSchema)
 
-FilingsSchema = make_schema(
+BaseFilingsSchema = make_schema(
     models.Filings,
     fields={
         'document_description': ma.fields.Str(),
@@ -656,7 +657,19 @@ FilingsSchema = make_schema(
     },
     options={'exclude': ('committee', )},
 )
+class FilingsSchema(BaseFilingsSchema):
+    @post_dump
+    def remove_fec_url(self, obj):
+        if not obj.get('fec_url'):
+            obj.pop('fec_url')
+
 augment_schemas(FilingsSchema)
+
+EfilingsAmendmentsSchema = make_schema(
+    models.EfilingsAmendments,
+)
+
+augment_schemas(EfilingsAmendmentsSchema)
 
 EFilingsSchema = make_schema(
     models.EFilings,
@@ -668,25 +681,98 @@ EFilingsSchema = make_schema(
         #'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
+        'most_recent_filing': ma.fields.Str(),
+        'amendment_chain': ma.fields.List(ma.fields.Int()),
     },
-    options={'exclude': ('report',)},
+    options={'exclude': ('report', 'amendment')},
 )
 augment_schemas(EFilingsSchema)
+
+ItemizedScheduleBfilingsSchema = make_schema(
+    models.ScheduleBEfile,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
+        'pdf_url': ma.fields.Str(),
+        'fec_url': ma.fields.Str(),
+        'is_notice':ma.fields.Boolean(),
+        'payee_name': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+        #'csv_url': ma.fields.Str(),
+    },
+    options={
+        'relationships': [
+            Relationship(
+                models.ScheduleEEfile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+augment_schemas(ItemizedScheduleBfilingsSchema)
 
 ItemizedScheduleEfilingsSchema = make_schema(
     models.ScheduleEEfile,
     fields={
         'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'is_notice':ma.fields.Boolean(),
+        'payee_name': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
         #'csv_url': ma.fields.Str(),
     },
-    #options={'exclude': ('e_filing',)},
-
+    options={
+        'relationships': [
+            Relationship(
+                models.ScheduleEEfile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
 )
 
 augment_schemas(ItemizedScheduleEfilingsSchema)
+
+ItemizedScheduleAfilingsSchema = make_schema(
+    models.ScheduleAEfile,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
+        'pdf_url': ma.fields.Str(),
+        'fec_url': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+        'cycle': ma.fields.Int(),
+        'contributor_name': ma.fields.Str(),
+        'fec_election_type_desc': ma.fields.Str(),
+        #'csv_url': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'contributor_name_text',
+            'contributor_employer_text',
+            'contributor_occupation_text',
+        ),
+        'relationships': [
+            Relationship(
+                models.ScheduleAEfile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+
+augment_schemas(ItemizedScheduleAfilingsSchema)
 
 ReportTypeSchema = make_schema(models.ReportType)
 register_schema(ReportTypeSchema)

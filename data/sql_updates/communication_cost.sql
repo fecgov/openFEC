@@ -6,7 +6,7 @@ select
     s_o_cand_id as cand_id,
     org_id as cmte_id,
     report_pdf_url(image_num) as pdf_url
-from fec_vsum_f76
+from fec_vsum_f76_vw
 where extract(year from communication_dt)::integer >= :START_YEAR
 ;
 
