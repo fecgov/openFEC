@@ -20,6 +20,7 @@ select
     fix_party_spelling(rad_branch) as rad_branch,
     firstname as first_name,
     lastname as last_name,
+    anlyst_email as analyst_email,
     to_tsvector(firstname || ' ' || lastname) as name_txt,
     telephone_ext
 from rad_cmte_analyst_search_vw
@@ -35,3 +36,4 @@ create index on ofec_rad_mv_tmp (telephone_ext);
 create index on ofec_rad_mv_tmp (committee_name);
 create index on ofec_rad_mv_tmp (last_name);
 create index on ofec_rad_mv_tmp using gin(name_txt);
+create index on ofec_rad_mv_tmp (analyst_email);
