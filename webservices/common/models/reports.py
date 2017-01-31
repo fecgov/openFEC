@@ -80,9 +80,9 @@ class AmendmentChainMixin(object):
 
     @property
     def amended_by(self):
-        if len(self.amendment.longest_chain) > 0 and self.is_amended:
-            index = self.amendment.longest_chain.index(self.file_number)
-            return self.amendment.longest_chain[index + 1]
+        amender_file_number = self.amendment.next_in_chain(self.file_number)
+        if amender_file_number > 0:
+            return amender_file_number
         else:
             return None
 
