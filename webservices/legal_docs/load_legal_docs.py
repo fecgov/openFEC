@@ -57,34 +57,34 @@ def index_regulations():
         The regulations are accessed from FEC_EREGS_API.
     """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
+    if not eregs_api:
+        logger.info("Regs could not be indexed, environment variable FEC_EREGS_API not set.")
+        return
 
-    if(eregs_api):
-        reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
-        es = utils.get_elasticsearch_connection()
-        reg_count = 0
-        for reg in reg_versions:
-            url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'],
-                                          reg['version'])
-            regulation = requests.get(url).json()
-            sections = get_sections(regulation)
+    reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
+    es = utils.get_elasticsearch_connection()
+    reg_count = 0
+    for reg in reg_versions:
+        url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'],
+                                        reg['version'])
+        regulation = requests.get(url).json()
+        sections = get_sections(regulation)
 
-            logger.info("Loading part %s" % reg['regulation'])
-            for section_label in sections:
-                doc_id = '%s_%s' % (section_label[0], section_label[1])
-                section_formatted = '%s-%s' % (section_label[0], section_label[1])
-                reg_url = '/regulations/{0}/{1}#{0}'.format(section_formatted,
-                                                            reg['version'])
-                no = '%s.%s' % (section_label[0], section_label[1])
-                name = sections[section_label]['title'].split(no)[1].strip()
-                doc = {"doc_id": doc_id, "name": name,
-                       "text": sections[section_label]['text'], 'url': reg_url,
-                       "no": no}
+        logger.info("Loading part %s" % reg['regulation'])
+        for section_label in sections:
+            doc_id = '%s_%s' % (section_label[0], section_label[1])
+            section_formatted = '%s-%s' % (section_label[0], section_label[1])
+            reg_url = '/regulations/{0}/{1}#{0}'.format(section_formatted,
+                                                        reg['version'])
+            no = '%s.%s' % (section_label[0], section_label[1])
+            name = sections[section_label]['title'].split(no)[1].strip()
+            doc = {"doc_id": doc_id, "name": name,
+                    "text": sections[section_label]['text'], 'url': reg_url,
+                    "no": no}
 
-                es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
-            reg_count += 1
-        logger.info("%d regulation parts indexed." % reg_count)
-    else:
-        logger.info("Regs could not be indexed, environment variable not set.")
+            es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
+        reg_count += 1
+    logger.info("%d regulation parts indexed." % reg_count)
 
 def get_ao_citations():
     logger.info("getting citations...")
