@@ -125,14 +125,14 @@ class EFilings(CsvMixin, FecMixin, db.Model):
 
     @property
     def amended_by(self):
-        if not self.superceded and not self.most_recent and self.amendment and len(self.amendment.longest_chain) > 0:
+        if len(self.amendment.longest_chain) > 0:
             index = self.amendment.longest_chain.index(self.file_number)
             return self.amendment.longest_chain[index + 1]
         else:
             return self.superceded
     @property
     def is_amended(self):
-        if self.superceded is not None or not self.most_recent:
+        if not self.superceded or not self.most_recent:
             return True
         return False
 
