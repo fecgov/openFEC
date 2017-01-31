@@ -66,6 +66,11 @@ class BaseEfileSchema(BaseSchema):
     fec_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
+    most_recent_filing = ma.fields.Int()
+    most_recent = ma.fields.Bool()
+    amendment_chain = ma.fields.List(ma.fields.Int())
+    amended_by = ma.fields.Int()
+    is_amended = ma.fields.Bool()
 
     @post_dump
     def extract_summary_rows(self, obj):
@@ -76,6 +81,8 @@ class BaseEfileSchema(BaseSchema):
                     continue
                 obj[key] = value
             obj.pop('summary_lines')
+        if obj.get('amendment'):
+            obj.pop('amendment')
 
 
 def extract_columns(obj, column_a, column_b, descriptions):

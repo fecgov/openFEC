@@ -60,6 +60,32 @@ class TreasurerMixin(object):
         )
         return name
 
+class AmendmentChainMixin(object):
+
+    @property
+    def most_recent(self):
+        return self.file_number == self.amendment.most_recent_filing
+
+    @hybrid_property
+    def most_recent_filing(self):
+        return self.amendment.most_recent_filing
+
+    @hybrid_property
+    def amendment_chain(self):
+        return self.amendment.amendment_chain
+
+    @property
+    def is_amended(self):
+        return not self.most_recent
+
+    @property
+    def amended_by(self):
+        if len(self.amendment.longest_chain) > 0 and self.is_amended:
+            index = self.amendment.longest_chain.index(self.file_number)
+            return self.amendment.longest_chain[index + 1]
+        else:
+            return None
+
 
 class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
     __abstract__ = True
@@ -326,7 +352,7 @@ class BaseFilingSummary(db.Model):
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
-class BaseFiling(PdfMixin, FecMixin, db.Model):
+class BaseFiling(AmendmentChainMixin, PdfMixin, FecMixin, db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -344,6 +370,7 @@ class BaseFiling(PdfMixin, FecMixin, db.Model):
     election_state = db.Column('el_state', db.String)
     receipt_date = db.Column('create_dt', db.Date, index=True)
     sign_date = db.Column(db.Date)
+    superceded = ''
 
     @property
     def document_description(self):
@@ -409,6 +436,15 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
         lazy='subquery',
     )
 
+    amendment = db.relationship(
+        'EfilingsAmendments',
+        primaryjoin='''and_(
+                                EfilingsAmendments.file_number == BaseF3PFiling.file_number,
+                            )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
     @declared_attr
     def report(self):
         return db.relationship(ReportType,
@@ -454,6 +490,15 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
         )
         return name
 
+    amendment = db.relationship(
+        'EfilingsAmendments',
+        primaryjoin='''and_(
+                                    EfilingsAmendments.file_number == BaseF3Filing.file_number,
+                                )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
     summary_lines = db.relationship(
         'BaseFilingSummary',
         primaryjoin='''and_(
@@ -491,6 +536,15 @@ class BaseF3XFiling(BaseFiling):
         foreign_keys=file_number,
         uselist=True,
         lazy='subquery',
+    )
+
+    amendment = db.relationship(
+        'EfilingsAmendments',
+        primaryjoin='''and_(
+                                    EfilingsAmendments.file_number == BaseF3XFiling.file_number,
+                                )''',
+        foreign_keys=file_number,
+        lazy='joined',
     )
 
     @declared_attr

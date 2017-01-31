@@ -4,7 +4,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
-from webservices.common.models.reports import CsvMixin, FecMixin
+from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin
 
 
 
@@ -86,7 +86,7 @@ class EfilingsAmendments(db.Model):
     last = db.Column(db.Numeric)
     previous_file_number = db.Column('previd', db.Numeric)
 
-class EFilings(CsvMixin, FecMixin, db.Model):
+class EFilings(AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
     __tablename__ = 'real_efile_reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
@@ -135,22 +135,11 @@ class EFilings(CsvMixin, FecMixin, db.Model):
     def is_amended(self):
         return self.superceded or not self.most_recent
 
+
     @property
     def pdf_url(self):
         image_number = str(self.beginning_image_number)
         return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
-
-    @property
-    def most_recent(self):
-        return self.file_number == self.amendment.most_recent_filing
-
-    @hybrid_property
-    def most_recent_filing(self):
-        return self.amendment.most_recent_filing
-
-    @hybrid_property
-    def amendment_chain(self):
-        return self.amendment.amendment_chain
 
 
 # TODO: add index on committee id and filed_date
