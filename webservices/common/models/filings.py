@@ -86,6 +86,13 @@ class EfilingsAmendments(db.Model):
     last = db.Column(db.Numeric)
     previous_file_number = db.Column('previd', db.Numeric)
 
+    def next_in_chain(self, file_number):
+        if len(self.longest_chain) > 0 and self.depth <= len(self.longest_chain) - 1:
+            index = self.longest_chain.index(file_number)
+            return self.longest_chain[index + 1]
+        else:
+            return 0
+
 class EFilings(AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
     __tablename__ = 'real_efile_reps'
 
@@ -125,9 +132,9 @@ class EFilings(AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
 
     @property
     def amended_by(self):
-        if len(self.amendment.longest_chain) > 0 and self.is_amended:
-            index = self.amendment.longest_chain.index(self.file_number)
-            return self.amendment.longest_chain[index + 1]
+        amender_file_number = self.amendment.next_in_chain(self.file_number)
+        if amender_file_number > 0:
+            return amender_file_number
         else:
             return self.superceded
 
