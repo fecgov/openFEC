@@ -325,6 +325,33 @@ MAPPINGS = {
                 "index": "no"
             }
         }
+    },
+    "regulations": {
+        "properties": {
+            "doc_id": {
+                "type": "string"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "text": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            },
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            }
+        }
     }
 }
 
