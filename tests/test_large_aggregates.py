@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.rest import api
+from webservices.rest import api, db
 from webservices.resources.large_aggregates import EntityReceiptDisbursementTotalsView
 
 
@@ -36,6 +36,9 @@ class TestEntityReceiptDisbursementTotals(ApiBaseTest):
             cumulative_candidate_receipts=50000,
             month=3,
             year=1999,
-            date=sa.func.make_timestamp(1999, 3, 1, 0, 0, 0.0)
+            date=sa.func.last_day_of_month(sa.func.make_timestamp(1999, 3, 1, 0, 0, 0.0))
         )
-        assert totals.date == datetime.datetime(1999, 3, 1, 0, 0)
+
+        db.session.commit()
+
+        assert totals.date == datetime.datetime(1999, 3, 31, 0, 0)

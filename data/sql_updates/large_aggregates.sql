@@ -205,7 +205,7 @@ select
     month,
     year,
     cycle,
-    make_timestamp(cast(year as int), cast(month as int), 1, 0, 0, 0.0) as date,
+    last_day_of_month(make_timestamp(cast(year as int), cast(month as int), 1, 0, 0, 0.0)) as date,
     sum(candidate_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_receipts,
     candidate_receipts,
     sum(canidate_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_candidate_disbursements,
