@@ -141,8 +141,8 @@ def index_advisory_opinions():
     es = utils.get_elasticsearch_connection()
 
     result = db.engine.execute("""SELECT document_id, ocrtext, description,
-                            category, document.ao_id, name, summary,
-                            tags, ao_no, document_date,
+                            category, name, summary,
+                            ao_no, document_date,
                             CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
                             FROM aouser.document INNER JOIN
                             aouser.ao ON ao.ao_id = document.ao_id
@@ -179,10 +179,8 @@ def index_advisory_opinions():
                "text": row['ocrtext'],
                "description": row['description'],
                "category": row['category'],
-               "id": row['ao_id'],
                "name": row['name'],
                "summary": row['summary'],
-               "tags": row['tags'],
                "no": row['ao_no'],
                "date": row['document_date'],
                "is_pending": row['is_pending'],
