@@ -1,3 +1,7 @@
+import datetime
+
+import sqlalchemy as sa
+
 from tests import factories
 from tests.common import ApiBaseTest
 
@@ -31,5 +35,7 @@ class TestEntityReceiptDisbursementTotals(ApiBaseTest):
             cycle=2000,
             cumulative_candidate_receipts=50000,
             month=3,
-            year=1999)
-        assert totals.date == '1999-03-01'
+            year=1999,
+            date=sa.func.make_timestamp(1999, 3, 1, 0, 0, 0.0)
+        )
+        assert totals.date == datetime.datetime(1999, 3, 1, 0, 0)
