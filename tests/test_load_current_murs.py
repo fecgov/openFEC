@@ -1,15 +1,13 @@
 import re
 import subprocess
+import pytest
+import manage
 from mock import patch
 from datetime import datetime
 from decimal import Decimal
-
-import pytest
-
-import manage
 from webservices import rest
 from webservices.legal_docs import DOCS_INDEX
-from webservices.legal_docs.current_murs import parse_regulatory_citations, parse_statutory_citations
+from webservices.legal_docs.utils import parse_regulatory_citations, parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
