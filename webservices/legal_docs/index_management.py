@@ -215,7 +215,7 @@ MAPPINGS = {
                     }
                 }
             },
-            'dispositions': {
+            "dispositions": {
                 "properties": {
                     "citations": {
                         "properties": {
