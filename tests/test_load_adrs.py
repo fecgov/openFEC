@@ -8,32 +8,8 @@ import pytest
 import manage
 from webservices import rest
 from webservices.legal_docs import DOCS_INDEX
-from webservices.legal_docs.utils import parse_regulatory_citations, parse_statutory_citations
+from webservices.legal_docs.utils import parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
-
-@pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
-    ("110", 1, 2,
-        [{'text': '110', 'title': '11', 'type': 'regulation', 'url': '/regulations/110/CURRENT'}]),
-    ("110.21", 1, 2,
-        [{'text': '110.21', 'title': '11', 'type': 'regulation', 'url': '/regulations/110-21/CURRENT'}]),
-    ("114.5(a)(3)", 1, 2,
-        [{'text': '114.5(a)(3)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'}]),
-    ("114.5(a)(3)-(5)", 1, 2,
-        [{'text': '114.5(a)(3)-(5)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'}]),
-    ("102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)", 1, 2,
-        [{'text': '102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)', 'title': '11',
-          'type': 'regulation', 'url': '/regulations/102-17/CURRENT'}
-         ]),
-    ("102.5(a)(2); 104.3(a)(4)(i); 114.5(a)(3)-(5); 114.5(g)(1)", 1, 2,
-        [{'text': '102.5(a)(2)', 'title': '11', 'type': 'regulation', 'url': '/regulations/102-5/CURRENT'},
-         {'text': '104.3(a)(4)(i)', 'title': '11', 'type': 'regulation', 'url': '/regulations/104-3/CURRENT'},
-         {'text': '114.5(a)(3)-(5)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'},
-         {'text': '114.5(g)(1)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'}
-         ]),
-])
-
-def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
-    assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
 
 @pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
     ("431", 1, 2,    # With reclassification
