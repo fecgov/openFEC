@@ -81,7 +81,7 @@ DISPOSITION_DATA = """
     ORDER BY fecmur.event.event_name ASC, fecmur.settlement.final_amount DESC NULLS LAST, event_date DESC;
 """
 
-DISPOSITION_TEXT = """
+COMMISSION_VOTES = """
 SELECT vote_date, action from fecmur.commission
 WHERE case_id = %s
 ORDER BY vote_date desc;
@@ -110,13 +110,16 @@ def load_current_murs():
                 'name': row['name'],
                 'mur_type': 'current',
             }
-            mur['subject'] = {"text": get_subjects(case_id)}
+            mur['subjects'] = get_subjects(case_id)
+            mur['subject'] = {'text': mur['subjects']}
             mur['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
             mur['respondents'] = get_sorted_respondents(mur['participants'])
             mur['disposition'] = get_disposition(case_id)
+            mur['commission_votes'] = get_commission_votes(case_id)
+            mur['dispositions'] = mur['disposition']['data']
             mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
@@ -146,11 +149,19 @@ def get_disposition(case_id):
             disposition_data.append({'disposition': row['event_name'], 'penalty': row['final_amount'],
                 'respondent': row['name'], 'citations': citations})
 
-        rs = conn.execute(DISPOSITION_TEXT, case_id)
+        rs = conn.execute(COMMISSION_VOTES, case_id)
         disposition_text = []
         for row in rs:
             disposition_text.append({'vote_date': row['vote_date'], 'text': row['action']})
         return {'text': disposition_text, 'data': disposition_data}
+
+def get_commission_votes(case_id):
+    with db.engine.connect() as conn:
+        rs = conn.execute(COMMISSION_VOTES, case_id)
+        commission_votes = []
+        for row in rs:
+            commission_votes.append({'vote_date': row['vote_date'], 'action': row['action']})
+        return commission_votes
 
 def get_participants(case_id):
     participants = {}
