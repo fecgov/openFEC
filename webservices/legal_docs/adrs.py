@@ -1,17 +1,21 @@
 import logging
-import re
-from collections import defaultdict
-from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
-from webservices.utils import create_eregs_link, get_elasticsearch_connection
+from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
-from webservices.legal_docs.utils import get_subjects, get_election_cycles, get_participants, get_sorted_respondents, get_disposition, get_documents, get_open_and_close_dates
 from webservices.legal_docs.utils import STATUTE_REGEX, REGULATION_REGEX
-
-from .reclassify_statutory_citation import reclassify_current_mur_statutory_citation
+from .utils import (
+    get_subjects,
+    get_election_cycles,
+    get_participants, 
+    get_sorted_respondents, 
+    get_disposition, 
+    get_documents,
+    get_open_and_close_dates,
+    get_commission_votes
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +44,18 @@ def load_adrs():
                 'name': row['name'],
                 'adr_type': 'current',
             }
-            adr['subject'] = {"text": get_subjects(case_id)}
+            adr['subjects'] = get_subjects(case_id)
+            adr['subject'] = {'text': adr['subjects']}
             adr['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)
             adr['participants'] = list(participants.values())
             adr['respondents'] = get_sorted_respondents(adr['participants'])
             adr['disposition'] = get_disposition(case_id)
+            adr['commission_votes'] = get_commission_votes(case_id)
+            adr['dispositions'] = adr['disposition']['data']
             adr['documents'] = get_documents(case_id, bucket, bucket_name)
             adr['open_date'], adr['close_date'] = get_open_and_close_dates(case_id)
-            adr['url'] = '/legal/matter-under-review/%s/' % row['case_no']
+            adr['url'] = '/legal/alternative-dispute-resolution/%s/' % row['case_no']
             es.index(DOCS_INDEX, 'adrs', adr, id=adr['doc_id'])
             
