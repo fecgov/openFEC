@@ -66,6 +66,11 @@ class BaseEfileSchema(BaseSchema):
     fec_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
+    most_recent_filing = ma.fields.Int()
+    most_recent = ma.fields.Bool()
+    amendment_chain = ma.fields.List(ma.fields.Int())
+    amended_by = ma.fields.Int()
+    is_amended = ma.fields.Bool()
 
     @post_dump
     def extract_summary_rows(self, obj):
@@ -76,6 +81,8 @@ class BaseEfileSchema(BaseSchema):
                     continue
                 obj[key] = value
             obj.pop('summary_lines')
+        if obj.get('amendment'):
+            obj.pop('amendment')
 
 
 def extract_columns(obj, column_a, column_b, descriptions):
@@ -645,7 +652,7 @@ ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=pagi
 register_schema(ElectioneeringSchema)
 register_schema(ElectioneeringPageSchema)
 
-FilingsSchema = make_schema(
+BaseFilingsSchema = make_schema(
     models.Filings,
     fields={
         'document_description': ma.fields.Str(),
@@ -657,7 +664,19 @@ FilingsSchema = make_schema(
     },
     options={'exclude': ('committee', )},
 )
+class FilingsSchema(BaseFilingsSchema):
+    @post_dump
+    def remove_fec_url(self, obj):
+        if not obj.get('fec_url'):
+            obj.pop('fec_url')
+
 augment_schemas(FilingsSchema)
+
+EfilingsAmendmentsSchema = make_schema(
+    models.EfilingsAmendments,
+)
+
+augment_schemas(EfilingsAmendmentsSchema)
 
 EFilingsSchema = make_schema(
     models.EFilings,
@@ -669,8 +688,12 @@ EFilingsSchema = make_schema(
         #'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
+        'most_recent_filing': ma.fields.Int(),
+        'most_recent': ma.fields.Bool(),
+        'amendment_chain': ma.fields.List(ma.fields.Int()),
+        'amended_by': ma.fields.Int(),
     },
-    options={'exclude': ('report',)},
+    options={'exclude': ('report', 'amendment', 'superceded')},
 )
 augment_schemas(EFilingsSchema)
 
