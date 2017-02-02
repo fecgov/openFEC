@@ -78,6 +78,7 @@ def get_match_filters():
         ('filer_type', models.CommitteeReports.means_filed),
         ('is_amended', models.CommitteeReports.is_amended),
         ('most_recent', models.CommitteeReports.most_recent),
+        ('amendment_indicator', models.CommitteeReports.amendment_indicator),
     ]
     return filter_match_fields
 
