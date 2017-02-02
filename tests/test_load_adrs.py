@@ -1,70 +1,14 @@
 import re
 import subprocess
+import pytest
+import manage
 from mock import patch
 from datetime import datetime
 from decimal import Decimal
-
-import pytest
-import manage
 from webservices import rest
 from webservices.legal_docs import DOCS_INDEX
 from webservices.legal_docs.utils import parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
-
-@pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
-    ("431", 1, 2,    # With reclassification
-        [{'text': '431',
-          'title': '2',
-          'type': 'statute',
-          'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html'
-          '&title=52&section=30101'}]),
-    ("30116", 1, 2,  # Already reclassified
-        [{'text': '30116',
-          'title': '52',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30116'}]),
-    ("434(a)(11)", 1, 2,
-        [{'text': '434(a)(11)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30104'}]),
-    ("9999", 1, 2,
-        [{'text': '9999',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]),
-    ("9993(c)(2)", 1, 2,
-        [{'text': '9993(c)(2)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
-    ("9993(a)(4) formerly 438(a)(4)", 1, 2,
-        [{'text': '9993(a)(4)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
-    ("9116(a)(2)(A), 9114(b) (formerly 441a(a)(2)(A), 434(b)), 30116(f) (formerly 441a(f))", 1, 2,
-        [{'text': '9116(a)(2)(A)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9116'},
-        {'text': '9114(b)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9114'},
-        {'text': '30116(f)',
-          'title': '52',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30116'}]),
-    ("9993(a)(4) (formerly 438(a)(4)", 1, 2,  # No matching ')' for (formerly
-        [{'text': '9993(a)(4)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
-])
-
-def test_parse_statutory_citations(test_input, case_id, entity_id, expected):
-    assert parse_statutory_citations(test_input, case_id, entity_id) == expected
 
 def assert_es_index_call(call_args, expected_adr):
     index, doc_type, adr = call_args[0]
@@ -104,13 +48,16 @@ class TestLoadADRs(BaseTestCase):
             'election_cycles': [2016],
             'doc_id': 'adr_1',
             'participants': [],
+            'subjects': [adr_subject],
             'subject': {"text": [adr_subject]},
             'respondents': [],
             'documents': [],
             'disposition': {'data': [], 'text': []},
+            'commission_votes': [],
+            'dispositions': [],
             'close_date': None,
             'open_date': None,
-            'url': '/legal/matter-under-review/1/'
+            'url': '/legal/alternative-dispute-resolution/1/'
         }
         self.create_adr(1, expected_adr['no'], expected_adr['name'], adr_subject)
         manage.legal_docs.load_adrs()
@@ -119,7 +66,7 @@ class TestLoadADRs(BaseTestCase):
         assert index == DOCS_INDEX
         assert doc_type == 'adrs'
         assert adr == expected_adr
-    
+  
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal_docs.adrs.get_bucket')
     @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
@@ -132,6 +79,7 @@ class TestLoadADRs(BaseTestCase):
             'adr_type': 'current',
             'election_cycles': [2016],
             'doc_id': 'adr_1',
+            'subjects': [adr_subject],
             'subject': {"text": [adr_subject]},
             'respondents': ["Bilbo Baggins", "Thorin Oakenshield"]
         }
@@ -243,17 +191,34 @@ class TestLoadADRs(BaseTestCase):
                 'type': 'regulation',
                 'url': '/regulations/456/CURRENT'}
             ]}],
-            'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
-            'subject': {'text': ['Fraudulent misrepresentation']},
+           'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
+            'commission_votes': [{'action': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}],
+            'dispositions': [{
+                'disposition': 'Conciliation-PPC',
+                'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
+                'citations': [
+                    {'text': '431',
+                    'title': '2',
+                    'type': 'statute',
+                    'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52'
+                    '&section=30101'},
+                    {'text': '456',
+                    'title': '11',
+                    'type': 'regulation',
+                    'url': '/regulations/456/CURRENT'}
+                ]
+            }],
+            'subjects': ['Fraudulent misrepresentation'],
+            'subject': {"text": ['Fraudulent misrepresentation']},
             'respondents': [],
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'adr_1',
             'adr_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
             'election_cycles': [2016],
             'close_date': datetime(2008, 1, 1, 0, 0),
-            'url': '/legal/matter-under-review/1/'}
+            'url': '/legal/alternative-dispute-resolution/1/'}
 
         assert adr == expected_adr
-    
+        
     def create_adr(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
             "SELECT subject_id FROM fecmur.subject "
