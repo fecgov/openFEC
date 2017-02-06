@@ -12,111 +12,6 @@ from webservices import utils
 logger = logging.getLogger(__name__)
 
 MAPPINGS = {
-    "_default_": {
-        "properties": {
-            "no": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "category": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "requestor_types": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "text": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "name": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "description": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "summary": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "disposition": {
-                "properties": {
-                    "data": {
-                        "properties": {
-                            "citations": {
-                                "properties": {
-                                    "text": {
-                                        "type": "string"
-                                    },
-                                    "title": {
-                                        "type": "string"
-                                    },
-                                    "type": {
-                                        "type": "string"
-                                    },
-                                    "url": {
-                                        "type": "string"
-                                    }
-                                }
-                            },
-                            "disposition": {
-                                "type": "string",
-                                "index": "not_analyzed"
-                            },
-                            "penalty": {
-                                "type": "double"
-                            },
-                            "respondent": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "text": {
-                        "properties": {
-                            "text": {
-                                "type": "string"
-                            },
-                            "vote_date": {
-                                "type": "date",
-                                "format": "dateOptionalTime"
-                            }
-                        }
-                    }
-                }
-            },
-            "documents": {
-                "type": "nested",
-                "properties": {
-                    "category": {
-                        "type": "string",
-                        "index": "not_analyzed"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "document_date": {
-                        "type": "date",
-                        "format": "dateOptionalTime"
-                    },
-                    "document_id": {
-                        "type": "long"
-                    },
-                    "text": {
-                        "type": "string"
-                    },
-                    "length": {
-                        "type": "long"
-                    },
-                    "url": {
-                        "type": "string"
-                    }
-                }
-            }
-        }
-    },
     "murs": {
         "properties": {
             "no": {
@@ -148,6 +43,9 @@ MAPPINGS = {
             "url": {
                 "type": "string",
                 "index": "no"
+            },
+            "subjects": {
+                "type": "string"
             },
             "subject": {
                 "properties": {
@@ -201,6 +99,47 @@ MAPPINGS = {
                     }
                 }
             },
+            "commission_votes": {
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "vote_date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    }
+                }
+            },
+            "dispositions": {
+                "properties": {
+                    "citations": {
+                        "properties": {
+                            "text": {
+                                "type": "string"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "type": {
+                                "type": "string"
+                            },
+                            "url": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "disposition": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "penalty": {
+                        "type": "double"
+                    },
+                    "respondent": {
+                        "type": "string"
+                    }
+                }
+            },
             "documents": {
                 "type": "nested",
                 "properties": {
@@ -247,6 +186,133 @@ MAPPINGS = {
             },
             "respondents": {
                 "type": "string"
+            }
+        }
+    },
+    "statutes": {
+        "properties": {
+            "doc_id": {
+                "type": "string",
+                "index": "no"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "text": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "title": {
+                "type": "string"
+            },
+            "chapter": {
+                "type": "string"
+            },
+            "subchapter": {
+                "type": "string"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            }
+        }
+    },
+    "regulations": {
+        "properties": {
+            "doc_id": {
+                "type": "string",
+                "index": "no"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "text": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            }
+        }
+    },
+    "advisory_opinions": {
+        "properties": {
+            "doc_id": {
+                "type": "string",
+                "index": "no"
+            },
+            "name": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "text": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "no": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "url": {
+                "type": "string",
+                "index": "no"
+            },
+            "is_pending": {
+                "type": "boolean"
+            },
+            "requestor_names": {
+                "type": "string"
+            },
+            "requestor_types": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "citations": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "no": {
+                        "type": "string"
+                    }
+                }
+            },
+            "cited_by": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "no": {
+                        "type": "string"
+                    }
+                }
+            },
+            "summary": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "description": {
+                "type": "string",
+                "analyzer": "english"
+            },
+            "category": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "date": {
+                "type": "date",
+                "format": "dateOptionalTime"
             }
         }
     }

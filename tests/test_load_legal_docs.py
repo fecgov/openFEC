@@ -44,9 +44,6 @@ class ElasticSearchMock:
         self.dictToIndex = dictToIndex
         self.indices = ElasticSearchMock.ElasticSearchIndicesMock()
 
-    def search():
-        pass
-
     def index(self, index, doc_type, doc, id):
         assert self.dictToIndex == doc
 
@@ -108,17 +105,22 @@ class Engine:
             return [(1, 'ABC'.encode('utf8'))]
         if 'EXISTS' in sql:
             self.result = [(self.legal_loaded,)]
-        if 'count' in sql:
+        if 'COUNT' in sql:
             self.result = [(5,)]
         if 'aouser.players' in sql:
-            self.result = [('Charles Babbage', 'Individual'),
-                            ('Ada Lovelace', 'Individual')]
+            self.result = [{'name': 'Charles Babbage', 'description': 'Individual'},
+                            {'name': 'Ada Lovelace', 'description': 'Individual'}]
         if 'SELECT ao_no, category, ocrtext' in sql:
             self.result = [{'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-05 and 2014-1'},
                          {'ao_no': '2007-05', 'category': 'Final Opinion', 'ocrtext': 'test2 1993-01 test2'}]
+        if 'SELECT ao_no, name FROM' in sql:
+            self.result = [{'ao_no': '1993-01', 'name': 'RNC'}, {'ao_no': '2007-05', 'name': 'Church'},
+                            {'ao_no': '2014-01', 'name': 'DNC'}, {'ao_no': '2015-05', 'name': 'Outkast'}]
         if 'document_id' in sql:
-            self.result = [(123, 'textAB', 'description123', 'Votes', 'id123',
-                           'name4U', 'summaryABC', 'tags123', '1993-01', 'date123', True)]
+            self.result = [{'document_id': 123, 'ocrtext': 'textAB', 'description': 'description123',
+                           'category': 'Votes', 'ao_id': 'id123',
+                           'name': 'name4U', 'summary': 'summaryABC', 'tags': 'tags123',
+                           'ao_no': '1993-01', 'document_date': 'date123', 'is_pending': True}]
         return self
 
 
@@ -247,19 +249,17 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
             get_es_with_doc({'category': 'Votes',
             'summary': 'summaryABC', 'no': '1993-01', 'date': 'date123',
-            'tags': 'tags123', 'name': 'name4U', 'text': 'textAB',
+            'name': 'name4U', 'text': 'textAB',
             'description': 'description123',
             'url': 'https://bucket123.s3.amazonaws.com/legal/aos/123.pdf',
-            'doc_id': 123, 'id': 'id123', 'is_pending': True,
+            'doc_id': 123, 'is_pending': True,
             'requestor_names': ['Charles Babbage', 'Ada Lovelace'],
             'requestor_types': ['Individual'],
-            'citations': ['2014-01', '2015-05'], 'cited_by': ['2007-05']}))
+            'citations': [{'name': 'DNC', 'no': '2014-01'}, {'name': 'Outkast', 'no': '2015-05'}],
+                'cited_by': [{'name': 'Church', 'no': '2007-05'}]}))
     def test_advisory_opinion_load(self):
         index_advisory_opinions()
 
-    @patch('webservices.legal_docs.load_legal_docs.db', Db(False))
-    def test_no_legal_loaded(self):
-        index_advisory_opinions()
 
 class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
     @patch('webservices.legal_docs.load_legal_docs.db', Db())
