@@ -44,9 +44,6 @@ class ElasticSearchMock:
         self.dictToIndex = dictToIndex
         self.indices = ElasticSearchMock.ElasticSearchIndicesMock()
 
-    def search():
-        pass
-
     def index(self, index, doc_type, doc, id):
         assert self.dictToIndex == doc
 
