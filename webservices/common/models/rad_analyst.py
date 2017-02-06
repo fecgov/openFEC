@@ -16,5 +16,6 @@ class RadAnalyst(db.Model):
     last_name = db.Column(db.String(100), index=True, doc='Last name of RAD analyst')
     analyst_email = db.Column(db.String(100), index=True, doc='Email of RAD analyst')
     telephone_ext = db.Column(db.Numeric(4, 0), index=True, doc='Telephone extension of RAD analyst')
+    analyst_email = db.Column(db.String(255), index=True, doc='Email of the RAD analyst')
     rad_branch = db.Column(db.String(100), index=True, doc='Branch of RAD analyst')
     name_txt = db.Column(TSVECTOR)
