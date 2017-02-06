@@ -121,6 +121,16 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
         )
     }
 
+
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
+    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only )
+    args['sort'] = fields.List(fields.Str(
+            missing=default,
+            validate=validator,
+            description='Provide a field to sort by. Use - for descending order.',
+        ))
+    return args
+
 def make_seek_args(field=fields.Int, description=None):
     return {
         'per_page': per_page,

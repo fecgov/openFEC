@@ -50,7 +50,7 @@ class BaseFilings(views.ApiResource):
         return utils.extend(
             args.paging,
             args.filings,
-            args.make_sort_args(
+            args.make_multi_sort_args(
                 default='-receipt_date',
                 validator=args.IndexValidator(self.model)
             ),
