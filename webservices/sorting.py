@@ -46,6 +46,12 @@ def parse_option(option, model=None, aliases=None, join_columns=None, query=None
     return column, order, relationship
 
 
+def multi_sort(query, keys, model, aliases=None, join_columns=None, clear=False,
+         hide_null=False, index_column=None):
+    for key in keys:
+        query = sort(query, key, model, aliases, join_columns, clear, hide_null, index_column)
+    print(query)
+    return query
 
 
 def sort(query, key, model, aliases=None, join_columns=None, clear=False,
@@ -91,4 +97,4 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     if hide_null:
         query = query.filter(column != None)  # noqa
 
-    return query, (column, order)
+    return query
