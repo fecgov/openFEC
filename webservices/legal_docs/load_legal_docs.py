@@ -132,9 +132,9 @@ def index_advisory_opinions():
     """
     logger.info('Indexing advisory opinions...')
 
-    count = db.engine.execute('SELECT COUNT(*) FROM ao').fetchone()[0]
+    count = db.engine.execute('SELECT COUNT(*) FROM aouser.ao').fetchone()[0]
     logger.info('AO count: %d' % count)
-    count = db.engine.execute('SELECT COUNT(*) FROM document').fetchone()[0]
+    count = db.engine.execute('SELECT COUNT(*) FROM aouser.document').fetchone()[0]
     logger.info('DOC count: %d' % count)
     citations, cited_by = get_ao_citations()
 
@@ -300,7 +300,7 @@ def load_advisory_opinions_into_s3():
     """
 
     docs_in_db = set([str(r['document_id']) for r in db.engine.execute(
-                     "select document_id from document").fetchall()])
+                     "SELECT document_id FROM aouser.document").fetchall()])
 
     bucket = get_bucket()
     docs_in_s3 = set([re.match("legal/aos/([0-9]+)\.pdf", obj.key).group(1)
@@ -309,7 +309,7 @@ def load_advisory_opinions_into_s3():
     new_docs = docs_in_db.difference(docs_in_s3)
 
     if new_docs:
-        query = "select document_id, fileimage from document \
+        query = "SELECT document_id, fileimage FROM aouser.document \
                 where document_id in (%s)" % ','.join(new_docs)
 
         result = db.engine.connect().execution_options(stream_results=True)\
