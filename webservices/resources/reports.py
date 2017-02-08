@@ -78,9 +78,14 @@ def get_match_filters():
         ('filer_type', models.CommitteeReports.means_filed),
         ('is_amended', models.CommitteeReports.is_amended),
         ('most_recent', models.CommitteeReports.most_recent),
-        ('amendment_indicator', models.CommitteeReports.amendment_indicator),
     ]
     return filter_match_fields
+
+def get_multi_filters():
+    filter_multi_fields = [
+        ('amendment_indicator', models.CommitteeReports.amendment_indicator),
+    ]
+    return filter_multi_fields
 
 @doc(
     tags=['financial'],
@@ -144,6 +149,7 @@ class ReportsView(utils.Resource):
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
+        query = filters.filter_multi(query, kwargs, get_multi_filters())
         return query, reports_class, reports_schema
 
 
@@ -208,7 +214,7 @@ class CommitteeReportsView(utils.Resource):
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
-
+        query = filters.filter_multi(query, kwargs, get_multi_filters())
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
