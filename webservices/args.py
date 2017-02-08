@@ -104,6 +104,17 @@ class IndexValidator(OptionValidator):
     def _is_excluded(self, value):
         return not value or value in self.exclude
 
+
+class IndicesValidator(IndexValidator):
+
+    def __call__(self, value):
+        for sort_column in value:
+            if sort_column.lstrip('-') not in self.values:
+                raise ValidationError(
+                    'Cannot sort on value "{0}"'.format(value),
+                    status_code=422
+                )
+
 def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
     return {
         'sort': fields.Str(
@@ -124,11 +135,9 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
 
 def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
     args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only )
-    args['sort'] = fields.List(fields.Str(
-            missing=default,
-            validate=validator,
-            description='Provide a field to sort by. Use - for descending order.',
-        ))
+    args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
+                               description='Provide a field to sort by. Use - for descending order.',
+        )
     return args
 
 def make_seek_args(field=fields.Int, description=None):

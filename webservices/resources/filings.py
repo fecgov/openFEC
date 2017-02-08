@@ -47,19 +47,20 @@ class BaseFilings(views.ApiResource):
 
     @property
     def args(self):
+        default_sort = ['-receipt_date']
         return utils.extend(
             args.paging,
             args.filings,
             args.make_multi_sort_args(
-                default='-receipt_date',
-                validator=args.IndexValidator(self.model)
+                default=default_sort,
+                validator=args.IndicesValidator(self.model)
             ),
         )
 
     def get(self, **kwargs):
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=models.Filings, count=count)
+        return utils.fetch_page(query, kwargs, model=models.Filings, count=count, multi=True)
 
 
 class FilingsView(BaseFilings):

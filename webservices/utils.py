@@ -59,11 +59,16 @@ def check_cap(kwargs, cap):
 
 
 def fetch_page(query, kwargs, model=None, aliases=None, join_columns=None, clear=False,
-               count=None, cap=100, index_column=None):
+               count=None, cap=100, index_column=None, multi=False):
     check_cap(kwargs, cap)
     sort, hide_null, reverse_nulls = kwargs.get('sort'), kwargs.get('sort_hide_null'), kwargs.get('sort_reverse_nulls')
-    if sort:
-        query = sorting.multi_sort(
+    if sort and multi:
+        query, _ = sorting.multi_sort(
+            query, sort, model=model, aliases=aliases, join_columns=join_columns,
+            clear=clear, hide_null=hide_null, index_column=index_column
+        )
+    elif sort:
+        query, _ = sorting.sort(
             query, sort, model=model, aliases=aliases, join_columns=join_columns,
             clear=clear, hide_null=hide_null, index_column=index_column
         )
