@@ -74,7 +74,7 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
 
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
     file_number = db.Column(db.Integer)
-    amendment_indicator = db.Column(db.String)
+    amendment_indicator = db.Column('amendment_indicator', db.String)
     amendment_indicator_full = db.Column(db.String)
     beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD)#P
