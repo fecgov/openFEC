@@ -34,7 +34,7 @@ def test_get_subject_tree():
 class ElasticSearchMock:
     class ElasticSearchIndicesMock:
         def delete(self, index):
-            assert index == 'docs'
+            assert index in ['docs', 'docs_index']
 
         def create(self, index, mappings):
             assert index == 'docs'
