@@ -337,6 +337,12 @@ def initialize_legal_docs():
     except elasticsearch.exceptions.NotFoundError:
         pass
 
+    try:
+        logger.info("Delete index 'docs_index'")
+        es.indices.delete('docs_index')
+    except elasticsearch.exceptions.NotFoundError:
+        pass
+
     logger.info("Create index 'docs'")
     es.indices.create('docs', {
         "mappings": MAPPINGS,
