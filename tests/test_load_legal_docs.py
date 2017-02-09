@@ -111,11 +111,11 @@ class Engine:
             self.result = [{'name': 'Charles Babbage', 'description': 'Individual'},
                             {'name': 'Ada Lovelace', 'description': 'Individual'}]
         if 'SELECT ao_no, category, ocrtext' in sql:
-            self.result = [{'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-05 and 2014-1'},
+            self.result = [{'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-105 and 2014-1'},
                          {'ao_no': '2007-05', 'category': 'Final Opinion', 'ocrtext': 'test2 1993-01 test2'}]
         if 'SELECT ao_no, name FROM' in sql:
             self.result = [{'ao_no': '1993-01', 'name': 'RNC'}, {'ao_no': '2007-05', 'name': 'Church'},
-                            {'ao_no': '2014-01', 'name': 'DNC'}, {'ao_no': '2015-05', 'name': 'Outkast'}]
+                            {'ao_no': '2014-01', 'name': 'DNC'}, {'ao_no': '2015-105', 'name': 'Outkast'}]
         if 'document_id' in sql:
             self.result = [{'document_id': 123, 'ocrtext': 'textAB', 'description': 'description123',
                            'category': 'Votes', 'ao_id': 'id123',
@@ -255,7 +255,7 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
             'doc_id': 123, 'is_pending': True,
             'requestor_names': ['Charles Babbage', 'Ada Lovelace'],
             'requestor_types': ['Individual'],
-            'citations': [{'name': 'DNC', 'no': '2014-01'}, {'name': 'Outkast', 'no': '2015-05'}],
+            'citations': [{'name': 'DNC', 'no': '2014-01'}, {'name': 'Outkast', 'no': '2015-105'}],
                 'cited_by': [{'name': 'Church', 'no': '2007-05'}]}))
     def test_advisory_opinion_load(self):
         index_advisory_opinions()
