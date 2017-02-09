@@ -102,7 +102,7 @@ def get_ao_citations():
         logger.info("Getting citations for %s" % row['ao_no'])
         citations_in_doc = set()
         text = row['ocrtext'] or ''
-        for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?', text):
+        for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?[0-9]?', text):
             year, no = tuple(citation.split('-'))
             citation_txt = "{0}-{1:02d}".format(year, int(no))
             if citation_txt != row['ao_no'] and citation_txt in ao_names:
