@@ -1,6 +1,7 @@
 DOCS_INDEX = 'docs_index'
 DOCS_SEARCH = 'docs_search'
 
+from .advisory_opinions import load_advisory_opinions
 from .current_murs import load_current_murs
 
 from .load_legal_docs import (
