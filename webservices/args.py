@@ -286,7 +286,20 @@ reports = {
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
     'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
-    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID)
+    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID),
+    'amendment_indicator': fields.List(
+        IStr,
+        description='''
+        -N   new\n\
+        -A   amendment\n\
+        -T   terminated\n\
+        -C   consolidated\n\
+        -M   multi-candidate\n\
+        -S   secondary\n\
+
+        Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+        '''
+    ),
 }
 
 committee_reports = {
