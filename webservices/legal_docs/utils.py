@@ -1,5 +1,6 @@
 import logging
 import re
+
 from collections import defaultdict
 from urllib.parse import urlencode
 from webservices.utils import create_eregs_link
