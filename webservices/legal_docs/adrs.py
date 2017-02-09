@@ -5,13 +5,12 @@ from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
-from webservices.legal_docs.utils import STATUTE_REGEX, REGULATION_REGEX
 from .utils import (
     get_subjects,
     get_election_cycles,
-    get_participants, 
-    get_sorted_respondents, 
-    get_disposition, 
+    get_participants,
+    get_sorted_respondents,
+    get_disposition,
     get_documents,
     get_open_and_close_dates,
     get_commission_votes
@@ -26,10 +25,10 @@ ALL_ADRS = """
 """
 def load_adrs():
     """
-    Reads data for current MURs from a Postgres database, assembles a JSON document
-    corresponding to the MUR and indexes this document in Elasticsearch in the index
+    Reads data for current ADRs from a Postgres database, assembles a JSON document
+    corresponding to the ADR and indexes this document in Elasticsearch in the index
     `docs_index` with a doc_type of `murs`. In addition, all documents attached to
-    the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
+    the ADR are uploaded to an S3 bucket under the _directory_ `legal/adrs/current/`.
     """
     es = get_elasticsearch_connection()
     bucket = get_bucket()
@@ -58,4 +57,3 @@ def load_adrs():
             adr['open_date'], adr['close_date'] = get_open_and_close_dates(case_id)
             adr['url'] = '/legal/alternative-dispute-resolution/%s/' % row['case_no']
             es.index(DOCS_INDEX, 'adrs', adr, id=adr['doc_id'])
-            

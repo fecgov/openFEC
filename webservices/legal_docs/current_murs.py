@@ -5,14 +5,12 @@ from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
-from webservices.legal_docs.utils import STATUTE_REGEX, REGULATION_REGEX
-
 from .utils import (
     get_subjects,
     get_election_cycles,
-    get_participants, 
-    get_sorted_respondents, 
-    get_disposition, 
+    get_participants,
+    get_sorted_respondents,
+    get_disposition,
     get_documents,
     get_open_and_close_dates,
     get_commission_votes

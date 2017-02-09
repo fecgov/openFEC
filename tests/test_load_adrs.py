@@ -1,13 +1,12 @@
 import re
 import subprocess
-import pytest
 import manage
+
 from mock import patch
 from datetime import datetime
 from decimal import Decimal
 from webservices import rest
 from webservices.legal_docs import DOCS_INDEX
-from webservices.legal_docs.utils import parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 
 def assert_es_index_call(call_args, expected_adr):
@@ -62,11 +61,11 @@ class TestLoadADRs(BaseTestCase):
         self.create_adr(1, expected_adr['no'], expected_adr['name'], adr_subject)
         manage.legal_docs.load_adrs()
         index, doc_type, adr = get_es_conn.return_value.index.call_args[0]
-       
+
         assert index == DOCS_INDEX
         assert doc_type == 'adrs'
         assert adr == expected_adr
-  
+
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal_docs.adrs.get_bucket')
     @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
@@ -191,7 +190,7 @@ class TestLoadADRs(BaseTestCase):
                 'type': 'regulation',
                 'url': '/regulations/456/CURRENT'}
             ]}],
-           'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
+            'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
             'commission_votes': [{'action': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}],
             'dispositions': [{
                 'disposition': 'Conciliation-PPC',
@@ -218,7 +217,7 @@ class TestLoadADRs(BaseTestCase):
             'url': '/legal/alternative-dispute-resolution/1/'}
 
         assert adr == expected_adr
-        
+
     def create_adr(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
             "SELECT subject_id FROM fecmur.subject "

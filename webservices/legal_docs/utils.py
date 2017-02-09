@@ -1,19 +1,12 @@
 import logging
 import re
-import pytest
 from collections import defaultdict
 from urllib.parse import urlencode
-
-from webservices.env import env
-from webservices.legal_docs import DOCS_INDEX
 from webservices.utils import create_eregs_link
 from webservices.rest import db
-
 from .reclassify_statutory_citation import reclassify_current_mur_statutory_citation
 
 logger = logging.getLogger(__name__)
-
-""
 
 SUBJECTS = """
     SELECT subject.description AS subj, relatedsubject.description AS rel
