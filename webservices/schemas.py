@@ -564,9 +564,9 @@ ScheduleFSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={
+    options={'exclude': ('payee_name_text',)
+             },
 
-    },
 )
 ScheduleFPageSchema = make_page_schema(
     ScheduleFSchema

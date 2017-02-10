@@ -34,6 +34,10 @@ class ScheduleFView(ApiResource):
         (('min_image_number', 'max_image_number'), models.ScheduleF.image_number),
     ]
 
+    filter_fulltext_fields = [
+        ('payee_name', models.ScheduleF.payee_name_text)
+    ]
+
     @property
     def args(self):
         return utils.extend(
