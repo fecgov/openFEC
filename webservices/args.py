@@ -711,6 +711,7 @@ rad_analyst = {
     'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
     'name': fields.List(fields.Str, description='Name of RAD analyst'),
     'email': fields.List(fields.Str, description='Email of RAD analyst'),
+    'title': fields.List(fields.Str, description='Title of RAD analyst'),
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}
