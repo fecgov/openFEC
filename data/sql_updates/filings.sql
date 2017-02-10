@@ -176,6 +176,7 @@ create index on ofec_filings_mv_tmp (form_type, idx);
 create index on ofec_filings_mv_tmp (primary_general_indicator, idx);
 create index on ofec_filings_mv_tmp (amendment_indicator, idx);
 create index on ofec_filings_mv_tmp (report_type, idx);
+create index on ofec_filings_mv_tmp (report_type_full, idx);
 create index on ofec_filings_mv_tmp (report_year, idx);
 create index on ofec_filings_mv_tmp (cycle, idx);
 create index on ofec_filings_mv_tmp (total_receipts, idx);
