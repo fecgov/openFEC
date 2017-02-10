@@ -19,7 +19,6 @@ ALL_AOS = """
                FROM aouser.document
                WHERE category IN ('Final Opinion', 'Withdrawal of Request')) AS finished
     ON ao.ao_id = finished.finished
-    LIMIT 1
 """
 
 AO_REQUESTORS = """
@@ -62,9 +61,8 @@ def load_advisory_opinions():
                 "cited_by": cited_by[row['ao_no']] if row['ao_no'] in cited_by else []
             }
             ao['documents'] = get_documents(ao_id, bucket, bucket_name)
-            requestor_names, requestor_types = get_requestors(ao_id)
-            ao['requestor_names'] = requestor_names
-            ao['requestor_types'] = requestor_types
+            ao['requestor_names'], ao['requestor_types'] = get_requestors(ao_id)
+
             es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
 
 def get_requestors(ao_id):
@@ -97,6 +95,14 @@ def get_documents(ao_id, bucket, bucket_name):
             documents.append(document)
     return documents
 
+def get_filtered_matches(text, regex, filter_set):
+    matches = set()
+    if text:
+        for citation in regex.findall(text):
+            if citation in filter_set:
+                matches.add(citation)
+    return matches
+
 def get_ao_citations():
     AO_CITATION_REGEX = re.compile(r'\b\d{4,4}-\d+\b')
 
@@ -114,12 +120,9 @@ def get_ao_citations():
     cited_by = defaultdict(set)
     for row in rs:
         logger.info("Getting citations for %s" % row['ao_no'])
-        text = row['ocrtext'] or ''
 
-        citations_in_doc = set()
-        for citation in AO_CITATION_REGEX.findall(text):
-            if citation != row['ao_no'] and citation in ao_names:
-                citations_in_doc.add(citation)
+        citations_in_doc = get_filtered_matches(row['ocrtext'], AO_CITATION_REGEX, ao_names)
+        citations_in_doc.discard(row['ao_no'])  # Remove self
 
         citations[(row['ao_no'])].update(citations_in_doc)
 
