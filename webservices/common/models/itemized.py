@@ -652,6 +652,7 @@ class ScheduleF(PdfMixin,BaseItemized):
     payee_last_name = db.Column('payee_l_nm', db.String)
     payee_middle_name = db.Column('payee_m_nm', db.String)
     payee_first_name = db.Column('payee_f_nm', db.String)
+    payee_name_text = db.Column(TSVECTOR)
     aggregate_general_election_expenditure = db.Column('aggregate_gen_election_exp', db.String)
     expenditure_type = db.Column('exp_tp', db.String)
     expenditure_type_full = db.Column('exp_tp_desc', db.String)
