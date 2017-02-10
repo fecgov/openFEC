@@ -44,9 +44,6 @@ class ElasticSearchMock:
         self.dictToIndex = dictToIndex
         self.indices = ElasticSearchMock.ElasticSearchIndicesMock()
 
-    def search():
-        pass
-
     def index(self, index, doc_type, doc, id):
         assert self.dictToIndex == doc
 
@@ -252,10 +249,10 @@ class IndexAdvisoryOpinionsTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
             get_es_with_doc({'category': 'Votes',
             'summary': 'summaryABC', 'no': '1993-01', 'date': 'date123',
-            'tags': 'tags123', 'name': 'name4U', 'text': 'textAB',
+            'name': 'name4U', 'text': 'textAB',
             'description': 'description123',
             'url': 'https://bucket123.s3.amazonaws.com/legal/aos/123.pdf',
-            'doc_id': 123, 'id': 'id123', 'is_pending': True,
+            'doc_id': 123, 'is_pending': True,
             'requestor_names': ['Charles Babbage', 'Ada Lovelace'],
             'requestor_types': ['Individual'],
             'citations': [{'name': 'DNC', 'no': '2014-01'}, {'name': 'Outkast', 'no': '2015-05'}],
