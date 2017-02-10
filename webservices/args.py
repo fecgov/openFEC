@@ -534,7 +534,11 @@ schedule_e_by_candidate = {
 schedule_d = {
     'min_payment_period': fields.Float(),
     'max_payment_period': fields.Float(),
+    'min_amount_incurred': fields.Float(),
+    'max_amount_incurred': fields.Float(),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'creditor_debtor_name': fields.Str(),
+    'nature_of_debt': fields.Str(),
 }
 
 schedule_f = {

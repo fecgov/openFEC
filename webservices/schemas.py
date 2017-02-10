@@ -548,7 +548,7 @@ ScheduleDSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={
+    options={'exclude': ('creditor_debtor_name_text',)
 
     },
 )
