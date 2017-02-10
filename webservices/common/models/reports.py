@@ -91,7 +91,7 @@ class AmendmentChainMixin(object):
 class FecFileNumberMixin(object):
     @property
     def fec_file_id(self):
-        if self.file_number > 0:
+        if self.file_number and self.file_number > 0:
             return ("FEC-" + str(self.file_number))
         else:
             return None
