@@ -537,7 +537,7 @@ schedule_d = {
     'min_amount_incurred': fields.Float(),
     'max_amount_incurred': fields.Float(),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'creditor_debtor_name': fields.Str(),
+    'creditor_debtor_name': fields.List(fields.Str),
     'nature_of_debt': fields.Str(),
 }
 
