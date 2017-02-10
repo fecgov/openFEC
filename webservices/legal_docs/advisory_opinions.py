@@ -67,8 +67,8 @@ def get_advisory_opinions():
                 "name": row['name'],
                 "summary": row['summary'],
                 "is_pending": row['is_pending'],
-                "citations": citations[row['ao_no']],
-                "cited_by": cited_by[row['ao_no']] if row['ao_no'] in cited_by else []
+                "citations": citations.get(row['ao_no'], []),
+                "cited_by": cited_by.get(row['ao_no'], [])
             }
             ao['documents'] = get_documents(ao_id, bucket, bucket_name)
             ao['requestor_names'], ao['requestor_types'] = get_requestors(ao_id)
