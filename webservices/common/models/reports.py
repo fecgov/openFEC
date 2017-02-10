@@ -60,6 +60,7 @@ class TreasurerMixin(object):
         )
         return name
 
+
 class AmendmentChainMixin(object):
 
     @property
@@ -87,7 +88,16 @@ class AmendmentChainMixin(object):
             return None
 
 
-class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
+class FecFileNumberMixin(object):
+    @property
+    def fec_file_id(self):
+        if self.file_number and self.file_number > 0:
+            return ("FEC-" + str(self.file_number))
+        else:
+            return None
+
+
+class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     __abstract__ = True
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -354,7 +364,7 @@ class BaseFilingSummary(db.Model):
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
-class BaseFiling(AmendmentChainMixin, PdfMixin, FecMixin, db.Model):
+class BaseFiling(FecFileNumberMixin, AmendmentChainMixin, PdfMixin, FecMixin, db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
