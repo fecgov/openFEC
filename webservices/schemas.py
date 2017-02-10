@@ -71,6 +71,7 @@ class BaseEfileSchema(BaseSchema):
     amendment_chain = ma.fields.List(ma.fields.Int())
     amended_by = ma.fields.Int()
     is_amended = ma.fields.Bool()
+    fec_file_id = ma.fields.Str()
 
     @post_dump
     def extract_summary_rows(self, obj):
@@ -391,6 +392,7 @@ make_reports_schema = functools.partial(
         'committee_name': ma.fields.Str(attribute='committee.name'),
         'beginning_image_number': ma.fields.Str(),
         'end_image_number': ma.fields.Str(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('idx', 'committee')},
 )
@@ -661,6 +663,7 @@ BaseFilingsSchema = make_schema(
         'fec_url': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('committee', )},
 )
@@ -692,6 +695,7 @@ EFilingsSchema = make_schema(
         'most_recent': ma.fields.Bool(),
         'amendment_chain': ma.fields.List(ma.fields.Int()),
         'amended_by': ma.fields.Int(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('report', 'amendment', 'superceded')},
 )
