@@ -62,7 +62,7 @@ class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
-    #csv_url = ma.fields.Str()
+    csv_url = ma.fields.Str()
     fec_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
@@ -383,7 +383,7 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
         'document_description': ma.fields.Str(),
@@ -659,7 +659,7 @@ BaseFilingsSchema = make_schema(
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
     options={'exclude': ('committee', )},
@@ -685,7 +685,7 @@ EFilingsSchema = make_schema(
         'ending_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
         'most_recent_filing': ma.fields.Int(),
@@ -708,7 +708,7 @@ ItemizedScheduleBfilingsSchema = make_schema(
         'is_notice':ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
     },
     options={
         'relationships': [
@@ -734,7 +734,7 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'is_notice':ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
     },
     options={
         'relationships': [
@@ -762,7 +762,7 @@ ItemizedScheduleAfilingsSchema = make_schema(
         'cycle': ma.fields.Int(),
         'contributor_name': ma.fields.Str(),
         'fec_election_type_desc': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
     },
     options={
         'exclude': (
