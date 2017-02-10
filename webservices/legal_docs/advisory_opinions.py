@@ -41,13 +41,23 @@ REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 
 def load_advisory_opinions():
     """
-    TODO
+    Reads data for advisory opinions from a Postgres database, assembles a JSON document
+    corresponding to the advisory opinion and indexes this document in Elasticsearch in
+    the index `docs_index` with a doc_type of `advisory_opinions`. In addition, all documents
+    attached to the advisory opinion are uploaded to an S3 bucket under the _directory_
+    `legal/aos/`.
     """
     es = get_elasticsearch_connection()
+
+    for ao in get_advisory_opinions():
+        es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
+
+def get_advisory_opinions():
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
     citations, cited_by = get_ao_citations()
+
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_AOS)
         for row in rs:
@@ -63,7 +73,8 @@ def load_advisory_opinions():
             ao['documents'] = get_documents(ao_id, bucket, bucket_name)
             ao['requestor_names'], ao['requestor_types'] = get_requestors(ao_id)
 
-            es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
+            yield ao
+
 
 def get_requestors(ao_id):
     requestor_names = []
