@@ -1,30 +1,8 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 9.5.4
--- Dumped by pg_dump version 9.5.2
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SET check_function_bodies = false;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Name: aouser; Type: SCHEMA; Schema: -; Owner: fec
---
-
 CREATE SCHEMA aouser;
 
 
 SET search_path = aouser, pg_catalog;
 
-SET default_tablespace = '';
-
-SET default_with_oids = false;
 
 --
 -- Name: ao; Type: TABLE; Schema: aouser; Owner: fec
@@ -144,3 +122,24 @@ ALTER TABLE ONLY players
     ADD CONSTRAINT players_pkey PRIMARY KEY (player_id);
 
 
+--
+-- Data for Name: entity_type; Type: TABLE DATA; Schema: aouser; Owner: fec
+--
+
+INSERT INTO entity_type VALUES (0, NULL, NULL, '2017-01-04 17:18:57.682');
+INSERT INTO entity_type VALUES (1, 'Federal candidate/candidate committee/officeholder', NULL, '2017-01-04 17:18:57.691');
+INSERT INTO entity_type VALUES (2, 'Publicly funded candidates/committees', NULL, '2017-01-04 17:18:57.698');
+INSERT INTO entity_type VALUES (3, 'Party committee, national', NULL, '2017-01-04 17:18:57.705');
+INSERT INTO entity_type VALUES (4, 'Party committee, state or local', NULL, '2017-01-04 17:18:57.712');
+INSERT INTO entity_type VALUES (5, 'Nonconnected political committee', NULL, '2017-01-04 17:18:57.72');
+INSERT INTO entity_type VALUES (6, 'Separate segregated fund', NULL, '2017-01-04 17:18:57.729');
+INSERT INTO entity_type VALUES (7, 'Labor Organization', NULL, '2017-01-04 17:18:57.736');
+INSERT INTO entity_type VALUES (8, 'Trade Association', NULL, '2017-01-04 17:18:57.742');
+INSERT INTO entity_type VALUES (9, 'Membership Organization, Cooperative, Corporation W/O Capital Stock', NULL, '2017-01-04 17:18:57.75');
+INSERT INTO entity_type VALUES (10, 'Corporation (including LLCs electing corporate status)', NULL, '2017-01-04 17:18:57.759');
+INSERT INTO entity_type VALUES (11, 'Partnership (including LLCs electing partnership status)', NULL, '2017-01-04 17:18:57.766');
+INSERT INTO entity_type VALUES (12, 'Governmental entity', NULL, '2017-01-04 17:18:57.773');
+INSERT INTO entity_type VALUES (13, 'Research/Public Interest/Educational Institution', NULL, '2017-01-04 17:18:57.78');
+INSERT INTO entity_type VALUES (14, 'Law Firm', NULL, '2017-01-04 17:18:57.786');
+INSERT INTO entity_type VALUES (15, 'Individual', NULL, '2017-01-04 17:18:57.793');
+INSERT INTO entity_type VALUES (16, 'Other', NULL, '2017-01-04 17:18:57.8');
