@@ -103,14 +103,14 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         ao1_document = {
             "document_id": 1,
             "category": "Final Opinion",
-            "text": 'Some Text',
+            "text": 'Not an AO reference 1776-01',
             "description": 'Some Description',
             "document_date": datetime.datetime(2017, 2, 9, 0, 0)
         }
         ao1 = {
             "no": '2017-01',
-            "name": "An AO name",
-            "summary": "An AO summary",
+            "name": "1st AO name",
+            "summary": "1st AO summary",
             "is_pending": False,
             "citations": [],
             "cited_by": [],
@@ -122,14 +122,14 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         ao2_document = {
             "document_id": 2,
             "category": "Final Opinion",
-            "text": 'Some Text',
+            "text": 'Reference to AO 2017-01',
             "description": 'Some Description',
             "document_date": datetime.datetime(2017, 2, 9, 0, 0)
         }
         ao2 = {
-            "no": '2017-01',
-            "name": "An AO name",
-            "summary": "An AO summary",
+            "no": '2017-02',
+            "name": "2nd AO name",
+            "summary": "2nd AO summary",
             "is_pending": False,
             "citations": [],
             "cited_by": [],
@@ -145,6 +145,15 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         actual_aos = [ao for ao in get_advisory_opinions()]
         assert len(actual_aos) == 2
+
+        actual_ao1 = next(filter(lambda a: a['no'] == '2017-01', actual_aos))
+        actual_ao2 = next(filter(lambda a: a['no'] == '2017-02', actual_aos))
+
+        assert actual_ao1['citations'] == []
+        assert actual_ao1['cited_by'] == [{'no': '2017-02', 'name': '2nd AO name'}]
+
+        assert actual_ao2['citations'] == [{'no': '2017-01', 'name': '1st AO name'}]
+        assert actual_ao2['cited_by'] == []
 
     def create_ao(self, ao_id, ao):
         self.connection.execute(
