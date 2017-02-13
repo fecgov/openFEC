@@ -108,6 +108,21 @@ class TestFilings(ApiBaseTest):
         response = self.app.get(api.url_for(FilingsList, sort='request_type'))
         self.assertEqual(response.status_code, 422)
 
+    def test_sort_multi_column(self):
+        [
+            factories.FilingsFactory(beginning_image_number=2, coverage_end_date='2017-01-01'),
+            factories.FilingsFactory(beginning_image_number=1, coverage_end_date='2017-01-01'),
+            factories.FilingsFactory(beginning_image_number=0, coverage_end_date='2017-01-02'),
+        ]
+
+        results = self._results(api.url_for(FilingsList, sort=['coverage_end_date', 'beginning_image_number']))
+        self.assertEqual(results[0]['beginning_image_number'], '1')
+        self.assertEqual(results[2]['beginning_image_number'], '0')
+        results = self._results(api.url_for(FilingsList, sort=['coverage_end_date', '-beginning_image_number']))
+        self.assertEqual(results[0]['beginning_image_number'], '2')
+        results = self._results(api.url_for(FilingsList, sort=['-coverage_end_date', '-beginning_image_number']))
+        self.assertEqual(results[0]['beginning_image_number'], '0')
+
     def test_regex(self):
         """ Getting rid of extra text that comes in the tables."""
         factories.FilingsFactory(
