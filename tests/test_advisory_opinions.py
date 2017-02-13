@@ -69,6 +69,31 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao == expected_ao
 
     @patch('webservices.legal_docs.advisory_opinions.get_bucket')
+    def test_ao_with_requestors(self, get_bucket):
+        expected_requestor_names = ["The Manchurian Candidate", "Federation of Interstate Truckers"]
+        expected_requestor_types = ["Federal candidate/candidate committee/officeholder", "Labor Organization"]
+        expected_ao = {
+            "no": '2017-01',
+            "name": "An AO name",
+            "summary": "An AO summary",
+            "is_pending": True,
+            "citations": [],
+            "cited_by": [],
+            "documents": [],
+            "requestor_names": expected_requestor_names,
+            "requestor_types": expected_requestor_types,
+        }
+
+        self.create_ao(1, expected_ao)
+        for i, _ in enumerate(expected_requestor_names):
+            self.create_requestor(1, i + 1, expected_requestor_names[i], expected_requestor_types[i])
+
+        actual_ao = next(get_advisory_opinions())
+
+        assert set(actual_ao["requestor_names"]) == set(expected_requestor_names)
+        assert set(actual_ao["requestor_types"]) == set(expected_requestor_types)
+
+    @patch('webservices.legal_docs.advisory_opinions.get_bucket')
     def test_completed_ao_with_docs(self, get_bucket):
         expected_document = {
             "document_id": 1,
@@ -175,13 +200,36 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             document['document_date']
         )
 
+    def create_requestor(self, ao_id, entity_id, requestor_name, requestor_type):
+        entity_type_id = self.connection.execute(
+            "SELECT entity_type_id FROM aouser.entity_type "
+            " WHERE description = %s ", requestor_type).scalar()
+        self.connection.execute(
+            """
+            INSERT INTO aouser.entity
+            (entity_id, name, type)
+            VALUES (%s, %s, %s)""",
+            entity_id,
+            requestor_name,
+            entity_type_id
+        )
+        self.connection.execute(
+            """
+            INSERT INTO aouser.players
+            (player_id, ao_id, entity_id, role_id)
+            VALUES (%s, %s, %s, %s)""",
+            entity_id,
+            ao_id,
+            entity_id,
+            1
+        )
+
     def clear_test_data(self):
         tables = [
             "ao",
             "document",
             "players",
-            "entity",
-            "entity_type"
+            "entity"
         ]
         for table in tables:
             self.connection.execute("DELETE FROM aouser.{}".format(table))
