@@ -1,8 +1,9 @@
 CREATE SCHEMA aouser;
 
 
-SET search_path = aouser, pg_catalog;
 
+
+SET search_path = aouser, pg_catalog;
 
 --
 -- Name: ao; Type: TABLE; Schema: aouser; Owner: fec
