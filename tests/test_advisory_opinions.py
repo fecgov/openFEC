@@ -10,7 +10,8 @@ from tests.common import TEST_CONN, BaseTestCase
 from webservices import rest
 from webservices.legal_docs.advisory_opinions import (
     get_advisory_opinions,
-    get_filtered_matches
+    get_filtered_matches,
+    parse_statutory_citations
 )
 
 EMPTY_SET = set()
@@ -28,6 +29,14 @@ def test_parse_ao_citations(text, filter_set, expected):
     regex = re.compile(r"\b\d{4,4}-\d+\b")
     assert get_filtered_matches(text, regex, filter_set) == expected
 
+@pytest.mark.parametrize("text,expected", [
+    ("2 U.S.C. 432h", set([(2, 432)])),
+    ("52 U.S.C. 30116a", set([(52, 30116)])),
+    ("2 U.S.C. 441b, 441c, 441e", set([(2, 441)])),
+    (" 2 U.S.C. §437f", set([(2, 437)])),
+])
+def test_parse_statutory_citations(text, expected):
+    assert parse_statutory_citations(text) == expected
 
 class TestLoadAdvisoryOpinions(BaseTestCase):
     @classmethod
@@ -57,8 +66,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "An AO name",
             "summary": "An AO summary",
             "is_pending": True,
-            "ao_citations": [],
-            "aos_cited_by": [],
+            "ao_citations": EMPTY_SET,
+            "statutory_citations": EMPTY_SET,
+            "aos_cited_by": EMPTY_SET,
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
@@ -77,8 +87,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "An AO name",
             "summary": "An AO summary",
             "is_pending": True,
-            "ao_citations": [],
-            "aos_cited_by": [],
+            "ao_citations": EMPTY_SET,
+            "statutory_citations": EMPTY_SET,
+            "aos_cited_by": EMPTY_SET,
             "documents": [],
             "requestor_names": expected_requestor_names,
             "requestor_types": expected_requestor_types,
@@ -107,8 +118,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "An AO name",
             "summary": "An AO summary",
             "is_pending": False,
-            "ao_citations": [],
-            "aos_cited_by": [],
+            "ao_citations": EMPTY_SET,
+            "statutory_citations": EMPTY_SET,
+            "aos_cited_by": EMPTY_SET,
             "documents": [expected_document],
             "requestor_names": [],
             "requestor_types": [],
@@ -137,8 +149,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "1st AO name",
             "summary": "1st AO summary",
             "is_pending": False,
-            "ao_citations": [],
-            "aos_cited_by": [],
+            "ao_citations": EMPTY_SET,
+            "statutory_citations": EMPTY_SET,
+            "aos_cited_by": EMPTY_SET,
             "documents": [ao1_document],
             "requestor_names": [],
             "requestor_types": [],
@@ -157,6 +170,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "2nd AO summary",
             "is_pending": False,
             "ao_citations": [],
+            "statutory_citations": EMPTY_SET,
             "aos_cited_by": [],
             "documents": [ao2_document],
             "requestor_names": [],
@@ -178,7 +192,36 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao1["aos_cited_by"] == [{"no": "2017-02", "name": "2nd AO name"}]
 
         assert actual_ao2["ao_citations"] == [{"no": "2017-01", "name": "1st AO name"}]
-        assert actual_ao2["aos_cited_by"] == []
+        assert actual_ao2["aos_cited_by"] == set()
+
+    @patch("webservices.legal_docs.advisory_opinions.get_bucket")
+    def test_statutory_citations(self, get_bucket):
+        ao_document = {
+            "document_id": 1,
+            "category": "Final Opinion",
+            "text": "A statutory citation 2 U.S.C. 431 and some text",
+            "description": "Some Description",
+            "document_date": datetime.datetime(2017, 2, 9, 0, 0)
+        }
+        ao = {
+            "no": "2017-01",
+            "name": "An AO name",
+            "summary": "An AO summary",
+            "is_pending": False,
+            "ao_citations": EMPTY_SET,
+            "statutory_citations": EMPTY_SET,
+            "aos_cited_by": EMPTY_SET,
+            "documents": [ao_document],
+            "requestor_names": [],
+            "requestor_types": [],
+        }
+
+        self.create_ao(1, ao)
+        self.create_document(1, ao_document)
+
+        actual_ao = next(get_advisory_opinions())
+
+        assert actual_ao["statutory_citations"] == set([(2, 431)])
 
     def create_ao(self, ao_id, ao):
         self.connection.execute(
