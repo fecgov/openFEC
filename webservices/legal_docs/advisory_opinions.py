@@ -61,17 +61,17 @@ def get_advisory_opinions():
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_AOS)
         for row in rs:
-            ao_id = row['ao_id']
+            ao_id = row["ao_id"]
             ao = {
-                "no": row['ao_no'],
-                "name": row['name'],
-                "summary": row['summary'],
-                "is_pending": row['is_pending'],
-                "citations": citations.get(row['ao_no'], []),
-                "cited_by": cited_by.get(row['ao_no'], [])
+                "no": row["ao_no"],
+                "name": row["name"],
+                "summary": row["summary"],
+                "is_pending": row["is_pending"],
+                "citations": citations.get(row["ao_no"], []),
+                "cited_by": cited_by.get(row["ao_no"], [])
             }
-            ao['documents'] = get_documents(ao_id, bucket, bucket_name)
-            ao['requestor_names'], ao['requestor_types'] = get_requestors(ao_id)
+            ao["documents"] = get_documents(ao_id, bucket, bucket_name)
+            ao["requestor_names"], ao["requestor_types"] = get_requestors(ao_id)
 
             yield ao
 
@@ -82,8 +82,8 @@ def get_requestors(ao_id):
     with db.engine.connect() as conn:
         rs = conn.execute(AO_REQUESTORS, ao_id)
         for row in rs:
-            requestor_names.append(row['name'])
-            requestor_types.add(row['description'])
+            requestor_names.append(row["name"])
+            requestor_types.add(row["description"])
     return requestor_names, list(requestor_types)
 
 def get_documents(ao_id, bucket, bucket_name):
@@ -92,17 +92,17 @@ def get_documents(ao_id, bucket, bucket_name):
         rs = conn.execute(AO_DOCUMENTS, ao_id)
         for row in rs:
             document = {
-                'document_id': row['document_id'],
-                'category': row['category'],
-                'description': row['description'],
-                'text': row['ocrtext'],
-                'document_date': row['document_date'],
+                "document_id": row["document_id"],
+                "category": row["category"],
+                "description": row["description"],
+                "text": row["ocrtext"],
+                "document_date": row["document_date"],
             }
-            pdf_key = 'legal/aos/%s.pdf' % row['document_id']
+            pdf_key = "legal/aos/%s.pdf" % row["document_id"]
             logger.info("S3: Uploading {}".format(pdf_key))
-            bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                    ContentType='application/pdf', ACL='public-read')
-            document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+            bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
+                    ContentType="application/pdf", ACL="public-read")
+            document["url"] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
     return documents
 
@@ -115,7 +115,7 @@ def get_filtered_matches(text, regex, filter_set):
     return matches
 
 def get_ao_citations():
-    AO_CITATION_REGEX = re.compile(r'\b\d{4,4}-\d+\b')
+    AO_CITATION_REGEX = re.compile(r"\b\d{4,4}-\d+\b")
 
     logger.info("Getting AO citations...")
 
@@ -130,26 +130,26 @@ def get_ao_citations():
     citations = defaultdict(set)
     cited_by = defaultdict(set)
     for row in rs:
-        logger.info("Getting citations for %s" % row['ao_no'])
+        logger.info("Getting citations for %s" % row["ao_no"])
 
-        citations_in_doc = get_filtered_matches(row['ocrtext'], AO_CITATION_REGEX, ao_names)
-        citations_in_doc.discard(row['ao_no'])  # Remove self
+        citations_in_doc = get_filtered_matches(row["ocrtext"], AO_CITATION_REGEX, ao_names)
+        citations_in_doc.discard(row["ao_no"])  # Remove self
 
-        citations[(row['ao_no'])].update(citations_in_doc)
+        citations[(row["ao_no"])].update(citations_in_doc)
 
         for citation in citations_in_doc:
-            cited_by[citation].add(row['ao_no'])
+            cited_by[citation].add(row["ao_no"])
 
     citations_with_names = {}
     for ao, citations_in_ao in citations.items():
         citations_with_names[ao] = sorted([
-            {'no': c, 'name': ao_names[c]}
-            for c in citations_in_ao], key=lambda d: d['no'])
+            {"no": c, "name": ao_names[c]}
+            for c in citations_in_ao], key=lambda d: d["no"])
 
     cited_by_with_names = {}
     for citation, cited_by_set in cited_by.items():
         cited_by_with_names[citation] = sorted([
-            {'no': c, 'name': ao_names[c]}
-            for c in cited_by_set], key=lambda d: d['no'])
+            {"no": c, "name": ao_names[c]}
+            for c in cited_by_set], key=lambda d: d["no"])
 
     return citations_with_names, cited_by_with_names
