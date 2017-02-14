@@ -35,8 +35,7 @@ AO_DOCUMENTS = """
     WHERE ao_id = %s
 """
 
-
-STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
+STATUTE_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+)")
 REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
 AO_CITATION_REGEX = re.compile(r"\b\d{4,4}-\d+\b")
 
@@ -58,7 +57,7 @@ def get_advisory_opinions():
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
-    ao_citations, aos_cited_by = get_citations()
+    citations = get_citations()
 
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_AOS)
@@ -69,8 +68,9 @@ def get_advisory_opinions():
                 "name": row["name"],
                 "summary": row["summary"],
                 "is_pending": row["is_pending"],
-                "ao_citations": ao_citations.get(row["ao_no"], []),
-                "aos_cited_by": aos_cited_by.get(row["ao_no"], [])
+                "ao_citations": citations[row["ao_no"]]["ao"],
+                "aos_cited_by": citations[row["ao_no"]]["aos_cited"],
+                "statutory_citations": citations[row["ao_no"]]["statutes"],
             }
             ao["documents"] = get_documents(ao_id, bucket, bucket_name)
             ao["requestor_names"], ao["requestor_types"] = get_requestors(ao_id)
@@ -127,7 +127,7 @@ def get_citations():
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
                               WHERE category = 'Final Opinion'""")
-    ao_citations = defaultdict(set)
+    citations = defaultdict(lambda: defaultdict(set))
     aos_cited_by = defaultdict(set)
     for row in rs:
         logger.info("Getting citations for AO %s" % row["ao_no"])
@@ -135,21 +135,28 @@ def get_citations():
         ao_citations_in_doc = get_filtered_matches(row["ocrtext"], AO_CITATION_REGEX, ao_names)
         ao_citations_in_doc.discard(row["ao_no"])  # Remove self
 
-        ao_citations[(row["ao_no"])].update(ao_citations_in_doc)
+        citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
 
         for citation in ao_citations_in_doc:
             aos_cited_by[citation].add(row["ao_no"])
 
-    ao_citations_with_names = {}
-    for ao, citations_in_ao in ao_citations.items():
-        ao_citations_with_names[ao] = sorted([
-            {"no": c, "name": ao_names[c]}
-            for c in citations_in_ao], key=lambda d: d["no"])
+        citations[row["ao_no"]]["statutes"].update(parse_statutory_citations(row["ocrtext"]))
 
-    aos_cited_by_with_names = {}
-    for ao_citation, aos_cited_by_set in aos_cited_by.items():
-        aos_cited_by_with_names[ao_citation] = sorted([
+    for ao in citations:
+        citations[ao]["ao"] = sorted([
             {"no": c, "name": ao_names[c]}
-            for c in aos_cited_by_set], key=lambda d: d["no"])
+            for c in citations[ao]["ao"]], key=lambda d: d["no"])
 
-    return ao_citations_with_names, aos_cited_by_with_names
+    for ao in aos_cited_by:
+        citations[ao]["aos_cited"] = sorted([
+            {"no": c, "name": ao_names[c]}
+            for c in aos_cited_by[ao]], key=lambda d: d["no"])
+
+    return citations
+
+def parse_statutory_citations(text):
+    matches = set()
+    if text:
+        for citation in STATUTE_CITATION_REGEX.finditer(text):
+            matches.add((int(citation.group('title')), int(citation.group('section'))))
+    return matches
