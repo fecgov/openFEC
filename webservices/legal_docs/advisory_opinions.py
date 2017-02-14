@@ -36,8 +36,10 @@ AO_DOCUMENTS = """
 """
 
 
-STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
-REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
+STATUTE_REGEX = re.compile(r"(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)")
+REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
+AO_CITATION_REGEX = re.compile(r"\b\d{4,4}-\d+\b")
+
 
 def load_advisory_opinions():
     """
@@ -56,7 +58,7 @@ def get_advisory_opinions():
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
-    citations, cited_by = get_ao_citations()
+    ao_citations, aos_cited_by = get_citations()
 
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_AOS)
@@ -67,8 +69,8 @@ def get_advisory_opinions():
                 "name": row["name"],
                 "summary": row["summary"],
                 "is_pending": row["is_pending"],
-                "citations": citations.get(row["ao_no"], []),
-                "cited_by": cited_by.get(row["ao_no"], [])
+                "ao_citations": ao_citations.get(row["ao_no"], []),
+                "aos_cited_by": aos_cited_by.get(row["ao_no"], [])
             }
             ao["documents"] = get_documents(ao_id, bucket, bucket_name)
             ao["requestor_names"], ao["requestor_types"] = get_requestors(ao_id)
@@ -114,42 +116,40 @@ def get_filtered_matches(text, regex, filter_set):
                 matches.add(citation)
     return matches
 
-def get_ao_citations():
-    AO_CITATION_REGEX = re.compile(r"\b\d{4,4}-\d+\b")
-
-    logger.info("Getting AO citations...")
+def get_citations():
+    logger.info("Getting citations...")
 
     ao_names_results = db.engine.execute("""SELECT ao_no, name FROM aouser.ao""")
     ao_names = {}
     for row in ao_names_results:
-        ao_names[row['ao_no']] = row['name']
+        ao_names[row["ao_no"]] = row["name"]
 
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
                               WHERE category = 'Final Opinion'""")
-    citations = defaultdict(set)
-    cited_by = defaultdict(set)
+    ao_citations = defaultdict(set)
+    aos_cited_by = defaultdict(set)
     for row in rs:
-        logger.info("Getting citations for %s" % row["ao_no"])
+        logger.info("Getting citations for AO %s" % row["ao_no"])
 
-        citations_in_doc = get_filtered_matches(row["ocrtext"], AO_CITATION_REGEX, ao_names)
-        citations_in_doc.discard(row["ao_no"])  # Remove self
+        ao_citations_in_doc = get_filtered_matches(row["ocrtext"], AO_CITATION_REGEX, ao_names)
+        ao_citations_in_doc.discard(row["ao_no"])  # Remove self
 
-        citations[(row["ao_no"])].update(citations_in_doc)
+        ao_citations[(row["ao_no"])].update(ao_citations_in_doc)
 
-        for citation in citations_in_doc:
-            cited_by[citation].add(row["ao_no"])
+        for citation in ao_citations_in_doc:
+            aos_cited_by[citation].add(row["ao_no"])
 
-    citations_with_names = {}
-    for ao, citations_in_ao in citations.items():
-        citations_with_names[ao] = sorted([
+    ao_citations_with_names = {}
+    for ao, citations_in_ao in ao_citations.items():
+        ao_citations_with_names[ao] = sorted([
             {"no": c, "name": ao_names[c]}
             for c in citations_in_ao], key=lambda d: d["no"])
 
-    cited_by_with_names = {}
-    for citation, cited_by_set in cited_by.items():
-        cited_by_with_names[citation] = sorted([
+    aos_cited_by_with_names = {}
+    for ao_citation, aos_cited_by_set in aos_cited_by.items():
+        aos_cited_by_with_names[ao_citation] = sorted([
             {"no": c, "name": ao_names[c]}
-            for c in cited_by_set], key=lambda d: d["no"])
+            for c in aos_cited_by_set], key=lambda d: d["no"])
 
-    return citations_with_names, cited_by_with_names
+    return ao_citations_with_names, aos_cited_by_with_names

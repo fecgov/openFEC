@@ -24,7 +24,7 @@ EMPTY_SET = set()
     ("1994-01not a word boundary", {"1994-01"}, EMPTY_SET),
     ("1994-doesn't match pattern", {"1994-01"}, EMPTY_SET),
 ])
-def test_parse_regulatory_citations(text, filter_set, expected):
+def test_parse_ao_citations(text, filter_set, expected):
     regex = re.compile(r"\b\d{4,4}-\d+\b")
     assert get_filtered_matches(text, regex, filter_set) == expected
 
@@ -57,8 +57,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "An AO name",
             "summary": "An AO summary",
             "is_pending": True,
-            "citations": [],
-            "cited_by": [],
+            "ao_citations": [],
+            "aos_cited_by": [],
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
@@ -77,8 +77,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "An AO name",
             "summary": "An AO summary",
             "is_pending": True,
-            "citations": [],
-            "cited_by": [],
+            "ao_citations": [],
+            "aos_cited_by": [],
             "documents": [],
             "requestor_names": expected_requestor_names,
             "requestor_types": expected_requestor_types,
@@ -107,8 +107,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "An AO name",
             "summary": "An AO summary",
             "is_pending": False,
-            "citations": [],
-            "cited_by": [],
+            "ao_citations": [],
+            "aos_cited_by": [],
             "documents": [expected_document],
             "requestor_names": [],
             "requestor_types": [],
@@ -137,8 +137,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "1st AO name",
             "summary": "1st AO summary",
             "is_pending": False,
-            "citations": [],
-            "cited_by": [],
+            "ao_citations": [],
+            "aos_cited_by": [],
             "documents": [ao1_document],
             "requestor_names": [],
             "requestor_types": [],
@@ -156,8 +156,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "2nd AO name",
             "summary": "2nd AO summary",
             "is_pending": False,
-            "citations": [],
-            "cited_by": [],
+            "ao_citations": [],
+            "aos_cited_by": [],
             "documents": [ao2_document],
             "requestor_names": [],
             "requestor_types": [],
@@ -174,11 +174,11 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         actual_ao1 = next(filter(lambda a: a["no"] == "2017-01", actual_aos))
         actual_ao2 = next(filter(lambda a: a["no"] == "2017-02", actual_aos))
 
-        assert actual_ao1["citations"] == []
-        assert actual_ao1["cited_by"] == [{"no": "2017-02", "name": "2nd AO name"}]
+        assert actual_ao1["ao_citations"] == []
+        assert actual_ao1["aos_cited_by"] == [{"no": "2017-02", "name": "2nd AO name"}]
 
-        assert actual_ao2["citations"] == [{"no": "2017-01", "name": "1st AO name"}]
-        assert actual_ao2["cited_by"] == []
+        assert actual_ao2["ao_citations"] == [{"no": "2017-01", "name": "1st AO name"}]
+        assert actual_ao2["aos_cited_by"] == []
 
     def create_ao(self, ao_id, ao):
         self.connection.execute(
