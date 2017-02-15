@@ -142,7 +142,8 @@ def get_citations():
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
                               WHERE category = 'Final Opinion'""")
-    citations = defaultdict(lambda: defaultdict(set))
+
+    raw_citations = defaultdict(lambda: defaultdict(set))
     aos_cited_by = defaultdict(set)
     for row in rs:
         logger.info("Getting citations for AO %s" % row["ao_no"])
@@ -150,23 +151,28 @@ def get_citations():
         ao_citations_in_doc = get_filtered_matches(row["ocrtext"], AO_CITATION_REGEX, ao_names)
         ao_citations_in_doc.discard(row["ao_no"])  # Remove self
 
-        citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
+        raw_citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
 
         for citation in ao_citations_in_doc:
             aos_cited_by[citation].add(row["ao_no"])
 
-        citations[row["ao_no"]]["statutes"].update(parse_statutory_citations(row["ocrtext"]))
-        citations[row["ao_no"]]["regulations"].update(parse_regulatory_citations(row["ocrtext"]))
+        raw_citations[row["ao_no"]]["statutes"].update(parse_statutory_citations(row["ocrtext"]))
+        raw_citations[row["ao_no"]]["regulations"].update(parse_regulatory_citations(row["ocrtext"]))
 
-    for ao in citations:
+    citations = defaultdict(lambda: defaultdict(list))
+    for ao in raw_citations:
         citations[ao]["ao"] = sorted([
             {"no": c, "name": ao_names[c]}
-            for c in citations[ao]["ao"]], key=lambda d: d["no"])
-
-    for ao in aos_cited_by:
+            for c in raw_citations[ao]["ao"]], key=lambda d: d["no"])
         citations[ao]["aos_cited"] = sorted([
             {"no": c, "name": ao_names[c]}
             for c in aos_cited_by[ao]], key=lambda d: d["no"])
+        citations[ao]["statutes"] = sorted([
+            {"title": c[0], "section": c[1]}
+            for c in raw_citations[ao]["statutes"]], key=lambda d: (d["title"], d["section"]))
+        citations[ao]["regulations"] = sorted([
+            {"title": c[0], "part": c[1], "section": c[2]}
+            for c in raw_citations[ao]["regulations"]], key=lambda d: (d["title"], d["part"], d["section"]))
 
     return citations
 
