@@ -11,6 +11,7 @@ from webservices import rest
 from webservices.legal_docs.advisory_opinions import (
     get_advisory_opinions,
     get_filtered_matches,
+    parse_regulatory_citations,
     parse_statutory_citations
 )
 
@@ -37,6 +38,15 @@ def test_parse_ao_citations(text, filter_set, expected):
 ])
 def test_parse_statutory_citations(text, expected):
     assert parse_statutory_citations(text) == expected
+
+@pytest.mark.parametrize("text,expected", [
+    ("11 CFR 113.2", set([(11, 113, 2)])),
+    ("11 CFR §9034.4(b)(4)", set([(11, 9034, 4)])),
+    ("11 CFR 300.60 and 11 CFR 300.62", set([(11, 300, 60), (11, 300, 62)])),  # TODO: Ranges
+    ("11 CFR 300.60 through 300.65", set([(11, 300, 60)])),
+])
+def test_parse_regulatory_citations(text, expected):
+    assert parse_regulatory_citations(text) == expected
 
 class TestLoadAdvisoryOpinions(BaseTestCase):
     @classmethod
@@ -68,6 +78,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "is_pending": True,
             "ao_citations": EMPTY_SET,
             "statutory_citations": EMPTY_SET,
+            "regulatory_citations": EMPTY_SET,
             "aos_cited_by": EMPTY_SET,
             "documents": [],
             "requestor_names": [],
@@ -89,6 +100,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "is_pending": True,
             "ao_citations": EMPTY_SET,
             "statutory_citations": EMPTY_SET,
+            "regulatory_citations": EMPTY_SET,
             "aos_cited_by": EMPTY_SET,
             "documents": [],
             "requestor_names": expected_requestor_names,
@@ -120,6 +132,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "is_pending": False,
             "ao_citations": EMPTY_SET,
             "statutory_citations": EMPTY_SET,
+            "regulatory_citations": EMPTY_SET,
             "aos_cited_by": EMPTY_SET,
             "documents": [expected_document],
             "requestor_names": [],
@@ -151,6 +164,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "is_pending": False,
             "ao_citations": EMPTY_SET,
             "statutory_citations": EMPTY_SET,
+            "regulatory_citations": EMPTY_SET,
             "aos_cited_by": EMPTY_SET,
             "documents": [ao1_document],
             "requestor_names": [],
@@ -171,6 +185,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "is_pending": False,
             "ao_citations": [],
             "statutory_citations": EMPTY_SET,
+            "regulatory_citations": EMPTY_SET,
             "aos_cited_by": [],
             "documents": [ao2_document],
             "requestor_names": [],
@@ -210,6 +225,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "is_pending": False,
             "ao_citations": EMPTY_SET,
             "statutory_citations": EMPTY_SET,
+            "regulatory_citations": EMPTY_SET,
             "aos_cited_by": EMPTY_SET,
             "documents": [ao_document],
             "requestor_names": [],
@@ -222,6 +238,36 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         actual_ao = next(get_advisory_opinions())
 
         assert actual_ao["statutory_citations"] == set([(2, 431)])
+
+    @patch("webservices.legal_docs.advisory_opinions.get_bucket")
+    def test_regulatory_citations(self, get_bucket):
+        ao_document = {
+            "document_id": 1,
+            "category": "Final Opinion",
+            "text": "A regulatory citation 11 CFR §9034.4(b)(4) and some text",
+            "description": "Some Description",
+            "document_date": datetime.datetime(2017, 2, 9, 0, 0)
+        }
+        ao = {
+            "no": "2017-01",
+            "name": "An AO name",
+            "summary": "An AO summary",
+            "is_pending": False,
+            "ao_citations": EMPTY_SET,
+            "statutory_citations": EMPTY_SET,
+            "regulatory_citations": EMPTY_SET,
+            "aos_cited_by": EMPTY_SET,
+            "documents": [ao_document],
+            "requestor_names": [],
+            "requestor_types": [],
+        }
+
+        self.create_ao(1, ao)
+        self.create_document(1, ao_document)
+
+        actual_ao = next(get_advisory_opinions())
+
+        assert actual_ao["regulatory_citations"] == set([(11, 9034, 4)])
 
     def create_ao(self, ao_id, ao):
         self.connection.execute(
