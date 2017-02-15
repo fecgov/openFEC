@@ -97,11 +97,6 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
-            "is_pending": True,
-            "ao_citations": EMPTY_SET,
-            "statutory_citations": EMPTY_SET,
-            "regulatory_citations": EMPTY_SET,
-            "aos_cited_by": EMPTY_SET,
             "documents": [],
             "requestor_names": expected_requestor_names,
             "requestor_types": expected_requestor_types,
@@ -130,13 +125,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "name": "An AO name",
             "summary": "An AO summary",
             "is_pending": False,
-            "ao_citations": EMPTY_SET,
-            "statutory_citations": EMPTY_SET,
-            "regulatory_citations": EMPTY_SET,
-            "aos_cited_by": EMPTY_SET,
             "documents": [expected_document],
-            "requestor_names": [],
-            "requestor_types": [],
         }
         self.create_ao(1, expected_ao)
         self.create_document(1, expected_document)
@@ -161,14 +150,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "1st AO name",
             "summary": "1st AO summary",
-            "is_pending": False,
-            "ao_citations": EMPTY_SET,
-            "statutory_citations": EMPTY_SET,
-            "regulatory_citations": EMPTY_SET,
-            "aos_cited_by": EMPTY_SET,
             "documents": [ao1_document],
-            "requestor_names": [],
-            "requestor_types": [],
         }
 
         ao2_document = {
@@ -182,14 +164,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-02",
             "name": "2nd AO name",
             "summary": "2nd AO summary",
-            "is_pending": False,
-            "ao_citations": [],
-            "statutory_citations": EMPTY_SET,
-            "regulatory_citations": EMPTY_SET,
-            "aos_cited_by": [],
             "documents": [ao2_document],
-            "requestor_names": [],
-            "requestor_types": [],
         }
 
         self.create_ao(1, ao1)
@@ -222,14 +197,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
-            "is_pending": False,
-            "ao_citations": EMPTY_SET,
-            "statutory_citations": EMPTY_SET,
-            "regulatory_citations": EMPTY_SET,
-            "aos_cited_by": EMPTY_SET,
             "documents": [ao_document],
-            "requestor_names": [],
-            "requestor_types": [],
         }
 
         self.create_ao(1, ao)
@@ -252,14 +220,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
-            "is_pending": False,
-            "ao_citations": EMPTY_SET,
-            "statutory_citations": EMPTY_SET,
-            "regulatory_citations": EMPTY_SET,
-            "aos_cited_by": EMPTY_SET,
             "documents": [ao_document],
-            "requestor_names": [],
-            "requestor_types": [],
         }
 
         self.create_ao(1, ao)
