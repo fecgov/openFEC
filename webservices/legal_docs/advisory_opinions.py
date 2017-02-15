@@ -36,7 +36,7 @@ AO_DOCUMENTS = """
 """
 
 STATUTE_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+)")
-REGULATION_REGEX = re.compile(r"(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?")
+REGULATION_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)\.(?P<section>\d+)")
 AO_CITATION_REGEX = re.compile(r"\b\d{4,4}-\d+\b")
 
 
@@ -71,6 +71,7 @@ def get_advisory_opinions():
                 "ao_citations": citations[row["ao_no"]]["ao"],
                 "aos_cited_by": citations[row["ao_no"]]["aos_cited"],
                 "statutory_citations": citations[row["ao_no"]]["statutes"],
+                "regulatory_citations": citations[row["ao_no"]]["regulations"],
             }
             ao["documents"] = get_documents(ao_id, bucket, bucket_name)
             ao["requestor_names"], ao["requestor_types"] = get_requestors(ao_id)
@@ -141,6 +142,7 @@ def get_citations():
             aos_cited_by[citation].add(row["ao_no"])
 
         citations[row["ao_no"]]["statutes"].update(parse_statutory_citations(row["ocrtext"]))
+        citations[row["ao_no"]]["regulations"].update(parse_regulatory_citations(row["ocrtext"]))
 
     for ao in citations:
         citations[ao]["ao"] = sorted([
@@ -159,4 +161,11 @@ def parse_statutory_citations(text):
     if text:
         for citation in STATUTE_CITATION_REGEX.finditer(text):
             matches.add((int(citation.group('title')), int(citation.group('section'))))
+    return matches
+
+def parse_regulatory_citations(text):
+    matches = set()
+    if text:
+        for citation in REGULATION_CITATION_REGEX.finditer(text):
+            matches.add((int(citation.group('title')), int(citation.group('part')), int(citation.group('section'))))
     return matches
