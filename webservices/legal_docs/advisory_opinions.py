@@ -12,17 +12,24 @@ from webservices.tasks.utils import get_bucket
 logger = logging.getLogger(__name__)
 
 ALL_AOS = """
-    SELECT ao_id, ao_no, name, summary,
+    SELECT
+        ao_id,
+        ao_no,
+        name,
+        summary,
+        issue_date,
         CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
     FROM aouser.ao
     LEFT JOIN (SELECT DISTINCT ao_id AS finished
                FROM aouser.document
                WHERE category IN ('Final Opinion', 'Withdrawal of Request')) AS finished
-    ON ao.ao_id = finished.finished
+        ON ao.ao_id = finished.finished
 """
 
 AO_REQUESTORS = """
-    SELECT e.name, et.description
+    SELECT
+        e.name,
+        et.description
     FROM aouser.players p
     INNER JOIN aouser.entity e USING (entity_id)
     INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
@@ -30,7 +37,13 @@ AO_REQUESTORS = """
 """
 
 AO_DOCUMENTS = """
-    SELECT document_id, ocrtext, fileimage, description, category, document_date
+    SELECT
+        document_id,
+        ocrtext,
+        fileimage,
+        description,
+        category,
+        document_date
     FROM aouser.document
     WHERE ao_id = %s
 """
@@ -67,6 +80,7 @@ def get_advisory_opinions():
                 "no": row["ao_no"],
                 "name": row["name"],
                 "summary": row["summary"],
+                "issue_date": row["issue_date"],
                 "is_pending": row["is_pending"],
                 "ao_citations": citations[row["ao_no"]]["ao"],
                 "aos_cited_by": citations[row["ao_no"]]["aos_cited"],

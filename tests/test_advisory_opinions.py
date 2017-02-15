@@ -75,6 +75,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
             "ao_citations": EMPTY_SET,
             "statutory_citations": EMPTY_SET,
@@ -97,6 +98,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "issue_date": datetime.date(2016, 12, 15),
             "documents": [],
             "requestor_names": expected_requestor_names,
             "requestor_types": expected_requestor_types,
@@ -124,6 +126,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "issue_date": datetime.date(2016, 12, 15),
             "is_pending": False,
             "documents": [expected_document],
         }
@@ -150,6 +153,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "1st AO name",
             "summary": "1st AO summary",
+            "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao1_document],
         }
 
@@ -164,6 +168,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-02",
             "name": "2nd AO name",
             "summary": "2nd AO summary",
+            "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao2_document],
         }
 
@@ -197,6 +202,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao_document],
         }
 
@@ -220,6 +226,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao_document],
         }
 
@@ -232,8 +239,9 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
     def create_ao(self, ao_id, ao):
         self.connection.execute(
-            "INSERT INTO aouser.ao (ao_id, ao_no, name, summary) "
-            "VALUES (%s, %s, %s, %s)", ao_id, ao["no"], ao["name"], ao["summary"])
+            "INSERT INTO aouser.ao (ao_id, ao_no, name, summary, issue_date) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            ao_id, ao["no"], ao["name"], ao["summary"], ao["issue_date"])
 
     def create_document(self, ao_id, document):
         self.connection.execute(
