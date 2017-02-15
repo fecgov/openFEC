@@ -77,10 +77,10 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
-            "ao_citations": EMPTY_SET,
-            "statutory_citations": EMPTY_SET,
-            "regulatory_citations": EMPTY_SET,
-            "aos_cited_by": EMPTY_SET,
+            "ao_citations": [],
+            "statutory_citations": [],
+            "regulatory_citations": [],
+            "aos_cited_by": [],
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
@@ -187,7 +187,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao1["aos_cited_by"] == [{"no": "2017-02", "name": "2nd AO name"}]
 
         assert actual_ao2["ao_citations"] == [{"no": "2017-01", "name": "1st AO name"}]
-        assert actual_ao2["aos_cited_by"] == set()
+        assert actual_ao2["aos_cited_by"] == []
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_statutory_citations(self, get_bucket):
@@ -211,7 +211,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         actual_ao = next(get_advisory_opinions())
 
-        assert actual_ao["statutory_citations"] == set([(2, 431)])
+        assert actual_ao["statutory_citations"] == [{"title": 2, "section": 431}]
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_regulatory_citations(self, get_bucket):
@@ -235,7 +235,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         actual_ao = next(get_advisory_opinions())
 
-        assert actual_ao["regulatory_citations"] == set([(11, 9034, 4)])
+        assert actual_ao["regulatory_citations"] == [{"title": 11, "part": 9034, "section": 4}]
 
     def create_ao(self, ao_id, ao):
         self.connection.execute(
