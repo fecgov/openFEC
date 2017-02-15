@@ -83,7 +83,7 @@ def get_advisory_opinions():
                 "issue_date": row["issue_date"],
                 "is_pending": row["is_pending"],
                 "ao_citations": citations[row["ao_no"]]["ao"],
-                "aos_cited_by": citations[row["ao_no"]]["aos_cited"],
+                "aos_cited_by": citations[row["ao_no"]]["aos_cited_by"],
                 "statutory_citations": citations[row["ao_no"]]["statutes"],
                 "regulatory_citations": citations[row["ao_no"]]["regulations"],
             }
@@ -144,7 +144,6 @@ def get_citations():
                               WHERE category = 'Final Opinion'""")
 
     raw_citations = defaultdict(lambda: defaultdict(set))
-    aos_cited_by = defaultdict(set)
     for row in rs:
         logger.info("Getting citations for AO %s" % row["ao_no"])
 
@@ -154,7 +153,7 @@ def get_citations():
         raw_citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
 
         for citation in ao_citations_in_doc:
-            aos_cited_by[citation].add(row["ao_no"])
+            raw_citations[citation]["aos_cited_by"].add(row["ao_no"])
 
         raw_citations[row["ao_no"]]["statutes"].update(parse_statutory_citations(row["ocrtext"]))
         raw_citations[row["ao_no"]]["regulations"].update(parse_regulatory_citations(row["ocrtext"]))
@@ -164,9 +163,9 @@ def get_citations():
         citations[ao]["ao"] = sorted([
             {"no": c, "name": ao_names[c]}
             for c in raw_citations[ao]["ao"]], key=lambda d: d["no"])
-        citations[ao]["aos_cited"] = sorted([
+        citations[ao]["aos_cited_by"] = sorted([
             {"no": c, "name": ao_names[c]}
-            for c in aos_cited_by[ao]], key=lambda d: d["no"])
+            for c in raw_citations[ao]["aos_cited_by"]], key=lambda d: d["no"])
         citations[ao]["statutes"] = sorted([
             {"title": c[0], "section": c[1]}
             for c in raw_citations[ao]["statutes"]], key=lambda d: (d["title"], d["section"]))
