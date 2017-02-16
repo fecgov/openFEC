@@ -1,5 +1,4 @@
 import datetime
-import re
 import subprocess
 from mock import patch
 
@@ -10,14 +9,14 @@ from tests.common import TEST_CONN, BaseTestCase
 from webservices import rest
 from webservices.legal_docs.advisory_opinions import (
     get_advisory_opinions,
-    get_filtered_matches,
+    parse_ao_citations,
     parse_regulatory_citations,
     parse_statutory_citations
 )
 
 EMPTY_SET = set()
 
-@pytest.mark.parametrize("text,filter_set,expected", [
+@pytest.mark.parametrize("text,ao_nos,expected", [
     ("1994-01", {"1994-01"}, {"1994-01"}),
     ("Nothing here", {"1994-01"}, EMPTY_SET),
     ("1994-01 not in filter set", {"1994-02"}, EMPTY_SET),
@@ -25,10 +24,13 @@ EMPTY_SET = set()
     ("1994-01 find multiple 1994-02", {"1994-01", "1994-02"}, {"1994-01", "1994-02"}),
     ("1994-01not a word boundary", {"1994-01"}, EMPTY_SET),
     ("1994-doesn't match pattern", {"1994-01"}, EMPTY_SET),
+    ("1994-123 works if the serial number has 3 digits", {"1994-123"}, {"1994-123"}),
+    ("1994-1 works if the citation drops leading 0 in serial number", {"1994-01"}, {"1994-01"}),
+    ("1994-01 also works if the actual AO drops leading 0 in serial number", {"1994-1"}, {"1994-1"}),
 ])
-def test_parse_ao_citations(text, filter_set, expected):
-    regex = re.compile(r"\b\d{4,4}-\d+\b")
-    assert get_filtered_matches(text, regex, filter_set) == expected
+def test_parse_ao_citations(text, ao_nos, expected):
+    ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_nos}
+    assert parse_ao_citations(text, ao_component_to_name_map) == expected
 
 @pytest.mark.parametrize("text,expected", [
     ("2 U.S.C. 432h", set([(2, 432)])),
