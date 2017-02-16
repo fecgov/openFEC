@@ -50,7 +50,7 @@ AO_DOCUMENTS = """
 
 STATUTE_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+)")
 REGULATION_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)\.(?P<section>\d+)")
-AO_CITATION_REGEX = re.compile(r"\b\d{4,4}-\d+\b")
+AO_CITATION_REGEX = re.compile(r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
 
 
 def load_advisory_opinions():
@@ -123,14 +123,6 @@ def get_documents(ao_id, bucket, bucket_name):
             documents.append(document)
     return documents
 
-def get_filtered_matches(text, regex, filter_set):
-    matches = set()
-    if text:
-        for citation in regex.findall(text):
-            if citation in filter_set:
-                matches.add(citation)
-    return matches
-
 def get_citations():
     logger.info("Getting citations...")
 
@@ -138,6 +130,8 @@ def get_citations():
     ao_names = {}
     for row in ao_names_results:
         ao_names[row["ao_no"]] = row["name"]
+
+    ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
 
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
@@ -147,7 +141,7 @@ def get_citations():
     for row in rs:
         logger.info("Getting citations for AO %s" % row["ao_no"])
 
-        ao_citations_in_doc = get_filtered_matches(row["ocrtext"], AO_CITATION_REGEX, ao_names)
+        ao_citations_in_doc = parse_ao_citations(row["ocrtext"], ao_component_to_name_map)
         ao_citations_in_doc.discard(row["ao_no"])  # Remove self
 
         raw_citations[row["ao_no"]]["ao"].update(ao_citations_in_doc)
@@ -174,6 +168,16 @@ def get_citations():
             for c in raw_citations[ao]["regulations"]], key=lambda d: (d["title"], d["part"], d["section"]))
 
     return citations
+
+def parse_ao_citations(text, ao_component_to_name_map):
+    matches = set()
+
+    if text:
+        for citation in AO_CITATION_REGEX.finditer(text):
+            year, serial_no = int(citation.group('year')), int(citation.group('serial_no'))
+            if (year, serial_no) in ao_component_to_name_map:
+                matches.add(ao_component_to_name_map[(year, serial_no)])
+    return matches
 
 def parse_statutory_citations(text):
     matches = set()
