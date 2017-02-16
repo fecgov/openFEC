@@ -58,6 +58,7 @@ select
     sum(pnp.tranf_to_affliliated_cmte_per) as transfers_to_affiliated_committee,
     max(last.rpt_tp_desc) as last_report_type_full,
     max(last.begin_image_num) as last_beginning_image_number,
+    --max(last.coh_bop) as cash_on_hand_beginning_of_period,
     max(last.coh_cop) as last_cash_on_hand_end_period,
     max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
     max(last.rpt_yr) as last_report_year
