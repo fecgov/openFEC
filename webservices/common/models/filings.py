@@ -4,7 +4,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
-from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin
+from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
 
 
 
@@ -13,7 +13,7 @@ from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChain
 from .base import db
 
 
-class Filings(CsvMixin, db.Model):
+class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     __tablename__ = 'ofec_filings_mv'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -23,8 +23,8 @@ class Filings(CsvMixin, db.Model):
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
     cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
     sub_id = db.Column(db.BigInteger, index=True, primary_key=True)
-    coverage_start_date = db.Column(db.Date, doc=docs.COVERAGE_START_DATE)
-    coverage_end_date = db.Column(db.Date, doc=docs.COVERAGE_END_DATE)
+    coverage_start_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_START_DATE)
+    coverage_end_date = db.Column(db.Date, index=True, doc=docs.COVERAGE_END_DATE)
     receipt_date = db.Column(db.Date, index=True, doc=docs.RECEIPT_DATE)
     election_year = db.Column(db.Integer, doc=docs.ELECTION_YEAR)
     form_type = db.Column(db.String, index=True, doc=docs.FORM_TYPE)
@@ -93,7 +93,7 @@ class EfilingsAmendments(db.Model):
         else:
             return 0
 
-class EFilings(AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
+class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
     __tablename__ = 'real_efile_reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)

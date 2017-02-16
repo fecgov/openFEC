@@ -62,7 +62,7 @@ class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
-    #csv_url = ma.fields.Str()
+    csv_url = ma.fields.Str()
     fec_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
@@ -71,6 +71,7 @@ class BaseEfileSchema(BaseSchema):
     amendment_chain = ma.fields.List(ma.fields.Int())
     amended_by = ma.fields.Int()
     is_amended = ma.fields.Bool()
+    fec_file_id = ma.fields.Str()
 
     @post_dump
     def extract_summary_rows(self, obj):
@@ -383,7 +384,7 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
         'document_description': ma.fields.Str(),
@@ -391,6 +392,7 @@ make_reports_schema = functools.partial(
         'committee_name': ma.fields.Str(attribute='committee.name'),
         'beginning_image_number': ma.fields.Str(),
         'end_image_number': ma.fields.Str(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('idx', 'committee')},
 )
@@ -548,7 +550,7 @@ ScheduleDSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={
+    options={'exclude': ('creditor_debtor_name_text',)
 
     },
 )
@@ -564,9 +566,9 @@ ScheduleFSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={
+    options={'exclude': ('payee_name_text',)
+             },
 
-    },
 )
 ScheduleFPageSchema = make_page_schema(
     ScheduleFSchema
@@ -659,8 +661,9 @@ BaseFilingsSchema = make_schema(
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('committee', )},
 )
@@ -685,13 +688,14 @@ EFilingsSchema = make_schema(
         'ending_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
         'most_recent_filing': ma.fields.Int(),
         'most_recent': ma.fields.Bool(),
         'amendment_chain': ma.fields.List(ma.fields.Int()),
         'amended_by': ma.fields.Int(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('report', 'amendment', 'superceded')},
 )
@@ -708,7 +712,7 @@ ItemizedScheduleBfilingsSchema = make_schema(
         'is_notice':ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
     },
     options={
         'relationships': [
@@ -734,7 +738,7 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'is_notice':ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
     },
     options={
         'relationships': [
@@ -762,7 +766,7 @@ ItemizedScheduleAfilingsSchema = make_schema(
         'cycle': ma.fields.Int(),
         'contributor_name': ma.fields.Str(),
         'fec_election_type_desc': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
     },
     options={
         'exclude': (
@@ -899,7 +903,7 @@ register_schema(RadAnalystPageSchema)
 EntityReceiptDisbursementTotalsSchema = make_schema(
     models.EntityReceiptDisbursementTotals,
     options={'exclude': ('idx','month', 'year')},
-    fields={'date': ma.fields.Date(doc='The cumulative total for this month.')},
+    fields={'date': ma.fields.DateTime(doc='The cumulative total for this month.')},
 )
 EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)
 register_schema(EntityReceiptDisbursementTotalsSchema)

@@ -57,34 +57,34 @@ def index_regulations():
         The regulations are accessed from FEC_EREGS_API.
     """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
+    if not eregs_api:
+        logger.info("Regs could not be indexed, environment variable FEC_EREGS_API not set.")
+        return
 
-    if(eregs_api):
-        reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
-        es = utils.get_elasticsearch_connection()
-        reg_count = 0
-        for reg in reg_versions:
-            url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'],
-                                          reg['version'])
-            regulation = requests.get(url).json()
-            sections = get_sections(regulation)
+    reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
+    es = utils.get_elasticsearch_connection()
+    reg_count = 0
+    for reg in reg_versions:
+        url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'],
+                                        reg['version'])
+        regulation = requests.get(url).json()
+        sections = get_sections(regulation)
 
-            logger.info("Loading part %s" % reg['regulation'])
-            for section_label in sections:
-                doc_id = '%s_%s' % (section_label[0], section_label[1])
-                section_formatted = '%s-%s' % (section_label[0], section_label[1])
-                reg_url = '/regulations/{0}/{1}#{0}'.format(section_formatted,
-                                                            reg['version'])
-                no = '%s.%s' % (section_label[0], section_label[1])
-                name = sections[section_label]['title'].split(no)[1].strip()
-                doc = {"doc_id": doc_id, "name": name,
-                       "text": sections[section_label]['text'], 'url': reg_url,
-                       "no": no}
+        logger.info("Loading part %s" % reg['regulation'])
+        for section_label in sections:
+            doc_id = '%s_%s' % (section_label[0], section_label[1])
+            section_formatted = '%s-%s' % (section_label[0], section_label[1])
+            reg_url = '/regulations/{0}/{1}#{0}'.format(section_formatted,
+                                                        reg['version'])
+            no = '%s.%s' % (section_label[0], section_label[1])
+            name = sections[section_label]['title'].split(no)[1].strip()
+            doc = {"doc_id": doc_id, "name": name,
+                    "text": sections[section_label]['text'], 'url': reg_url,
+                    "no": no}
 
-                es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
-            reg_count += 1
-        logger.info("%d regulation parts indexed." % reg_count)
-    else:
-        logger.info("Regs could not be indexed, environment variable not set.")
+            es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
+        reg_count += 1
+    logger.info("%d regulation parts indexed." % reg_count)
 
 def get_ao_citations():
     logger.info("getting citations...")
@@ -102,7 +102,7 @@ def get_ao_citations():
         logger.info("Getting citations for %s" % row['ao_no'])
         citations_in_doc = set()
         text = row['ocrtext'] or ''
-        for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?', text):
+        for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?[0-9]?', text):
             year, no = tuple(citation.split('-'))
             citation_txt = "{0}-{1:02d}".format(year, int(no))
             if citation_txt != row['ao_no'] and citation_txt in ao_names:
@@ -132,17 +132,17 @@ def index_advisory_opinions():
     """
     logger.info('Indexing advisory opinions...')
 
-    count = db.engine.execute('SELECT COUNT(*) FROM ao').fetchone()[0]
+    count = db.engine.execute('SELECT COUNT(*) FROM aouser.ao').fetchone()[0]
     logger.info('AO count: %d' % count)
-    count = db.engine.execute('SELECT COUNT(*) FROM document').fetchone()[0]
+    count = db.engine.execute('SELECT COUNT(*) FROM aouser.document').fetchone()[0]
     logger.info('DOC count: %d' % count)
     citations, cited_by = get_ao_citations()
 
     es = utils.get_elasticsearch_connection()
 
     result = db.engine.execute("""SELECT document_id, ocrtext, description,
-                            category, document.ao_id, name, summary,
-                            tags, ao_no, document_date,
+                            category, name, summary,
+                            ao_no, document_date,
                             CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
                             FROM aouser.document INNER JOIN
                             aouser.ao ON ao.ao_id = document.ao_id
@@ -179,10 +179,8 @@ def index_advisory_opinions():
                "text": row['ocrtext'],
                "description": row['description'],
                "category": row['category'],
-               "id": row['ao_id'],
                "name": row['name'],
                "summary": row['summary'],
-               "tags": row['tags'],
                "no": row['ao_no'],
                "date": row['document_date'],
                "is_pending": row['is_pending'],
@@ -302,7 +300,7 @@ def load_advisory_opinions_into_s3():
     """
 
     docs_in_db = set([str(r['document_id']) for r in db.engine.execute(
-                     "select document_id from document").fetchall()])
+                     "SELECT document_id FROM aouser.document").fetchall()])
 
     bucket = get_bucket()
     docs_in_s3 = set([re.match("legal/aos/([0-9]+)\.pdf", obj.key).group(1)
@@ -311,7 +309,7 @@ def load_advisory_opinions_into_s3():
     new_docs = docs_in_db.difference(docs_in_s3)
 
     if new_docs:
-        query = "select document_id, fileimage from document \
+        query = "SELECT document_id, fileimage FROM aouser.document \
                 where document_id in (%s)" % ','.join(new_docs)
 
         result = db.engine.connect().execution_options(stream_results=True)\

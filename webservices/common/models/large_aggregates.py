@@ -14,18 +14,10 @@ class EntityReceiptDisbursementTotals(db.Model):
     cycle = db.Column(db.Integer, doc=docs.RECORD_CYCLE)
     month = db.Column(db.Integer, doc="Numeric representation of year")
     year = db.Column(db.Integer, doc="Numeric representation of month")
+    date = db.Column(db.DateTime, doc="Date representation of the month and year")
     cumulative_candidate_receipts = db.Column(db.Float, doc="Cumulative candidate receipts in a two year period, adjusted to avoid double counting.")
     cumulative_candidate_disbursements = db.Column(db.Float, doc="Cumulative candidate disbursements in a two year period, adjusted to avoid double counting.")
     cumulative_pac_receipts = db.Column(db.Float, doc="Cumulative PAC recipts in a two year period, adjusted to avoid double counting.")
     cumulative_pac_disbursements = db.Column(db.Float, doc="Cumulative PAC disbursements in a two year period, adjusted to avoid double counting.")
     cumulative_party_receipts = db.Column(db.Float, doc="Cumulative party receipts in a two year period, adjusted to avoid double counting.")
     cumulative_party_disbursements = db.Column(db.Float, doc="Cumulative party disbursements in a two year period, adjusted to avoid double counting.")
-
-    @property
-    def date(self):
-        end_day = calendar.monthrange(int(self.year), int(self.month))[1]
-        formatted_date = datetime(int(self.year), int(self.month), int(end_day))
-        if formatted_date >= datetime.now():
-            formatted_date = date.today() - timedelta(1)
-        return formatted_date
-
