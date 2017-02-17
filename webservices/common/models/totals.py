@@ -25,13 +25,15 @@ class CommitteeTotals(BaseModel):
     receipts = db.Column(db.Numeric(30, 2))
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
+    net_operating_expenditures = db.Column(db.Numeric(30, 2))
 
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
     last_beginning_image_number = db.Column(db.BigInteger)
     last_cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
+    last_cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
-
+    last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 
 class CommitteeTotalsPacPartyBase(CommitteeTotals):
     __abstract__ = True
@@ -50,7 +52,7 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     loan_repayments_received = db.Column(db.Numeric(30, 2))
     loans_made = db.Column(db.Numeric(30, 2))
     non_allocated_fed_election_activity = db.Column(db.Numeric(30, 2))
-    nonfed_transfers = db.Column(db.Numeric(30, 2))
+    total_transfers = db.Column(db.Numeric(30,2))
     other_fed_operating_expenditures = db.Column(db.Numeric(30, 2))
     other_fed_receipts = db.Column(db.Numeric(30, 2))
     shared_fed_activity = db.Column(db.Numeric(30, 2))
@@ -62,7 +64,6 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     transfers_from_nonfed_levin = db.Column(db.Numeric(30, 2))
     transfers_to_affiliated_committee = db.Column(db.Numeric(30, 2))
     net_contributions = db.Column(db.Numeric(30, 2))
-    net_operating_expenditures = db.Column(db.Numeric(30, 2))
 
 
 class CommitteeTotalsPresidential(CommitteeTotals):
