@@ -202,6 +202,6 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get('ao_max_date'):
         date_range['lte'] = kwargs.get('ao_max_date')
     if date_range:
-        query = query.query("range", date=date_range)
+        query = query.query("range", issue_date=date_range)
 
     return query
