@@ -330,7 +330,7 @@ MAPPINGS = {
                     "description": {
                         "type": "string"
                     },
-                    "document_date": {
+                    "date": {
                         "type": "date",
                         "format": "dateOptionalTime"
                     },

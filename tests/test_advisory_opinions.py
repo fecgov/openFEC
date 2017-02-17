@@ -122,7 +122,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "category": "Final Opinion",
             "text": "Some Text",
             "description": "Some Description",
-            "document_date": datetime.datetime(2017, 2, 9, 0, 0)
+            "date": datetime.datetime(2017, 2, 9, 0, 0)
         }
         expected_ao = {
             "no": "2017-01",
@@ -149,7 +149,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "category": "Final Opinion",
             "text": "Not an AO reference 1776-01",
             "description": "Some Description",
-            "document_date": datetime.datetime(2017, 2, 9, 0, 0)
+            "date": datetime.datetime(2017, 2, 9, 0, 0)
         }
         ao1 = {
             "no": "2017-01",
@@ -164,7 +164,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "category": "Final Opinion",
             "text": "Reference to AO 2017-01",
             "description": "Some Description",
-            "document_date": datetime.datetime(2017, 2, 9, 0, 0)
+            "date": datetime.datetime(2017, 2, 9, 0, 0)
         }
         ao2 = {
             "no": "2017-02",
@@ -198,7 +198,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "category": "Final Opinion",
             "text": "A statutory citation 2 U.S.C. 431 and some text",
             "description": "Some Description",
-            "document_date": datetime.datetime(2017, 2, 9, 0, 0)
+            "date": datetime.datetime(2017, 2, 9, 0, 0)
         }
         ao = {
             "no": "2017-01",
@@ -222,7 +222,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "category": "Final Opinion",
             "text": "A regulatory citation 11 CFR §9034.4(b)(4) and some text",
             "description": "Some Description",
-            "document_date": datetime.datetime(2017, 2, 9, 0, 0)
+            "date": datetime.datetime(2017, 2, 9, 0, 0)
         }
         ao = {
             "no": "2017-01",
@@ -257,7 +257,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             document["text"],
             document["text"],
             document["description"],
-            document["document_date"]
+            document["date"]
         )
 
     def create_requestor(self, ao_id, entity_id, requestor_name, requestor_type):
