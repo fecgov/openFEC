@@ -11,9 +11,7 @@ with last as (
 	  select distinct on (cmte_id, election_cycle)
 	      cmte_id as committee_id,
 	      election_cycle as cycle,
-	      first_value(hs.coh_bop) over wnd as cash_on_hand,
-	      last_value(hs.debts_owed_by_cmte) over wnd as debts_owed_by_cmte,
-	      last_value(hs.debts_owed_to_cmte) over wnd as debts_owed_to_cmte
+	      first_value(hs.coh_bop) over wnd as cash_on_hand
 	  from
         fec_vsum_f3_vw hs
         inner join last using (cmte_id, election_cycle)
@@ -62,6 +60,7 @@ with last as (
         max(last.begin_image_num) as last_beginning_image_number,
         max(greatest(last.coh_cop)) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
+        max(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
         max(last.rpt_yr) as last_report_year
     from
         fec_vsum_f3_vw hs
@@ -73,9 +72,7 @@ with last as (
         cmte_id,
         election_cycle)
 select af.*,
-	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period,
-	cash_beginning_period.debts_owed_by_cmte as debts_owed_by_committee,
-	cash_beginning_period.debts_owed_to_cmte as debts_owed_to_committee
+	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period
 	from aggregate_filings af
 	left join cash_beginning_period using (committee_id, cycle)
 ;
