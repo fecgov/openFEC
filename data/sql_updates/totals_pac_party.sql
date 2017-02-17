@@ -14,7 +14,7 @@ with last as (
 	      first_value(pnp.coh_bop) over wnd as cash_on_hand
 	  from
         fec_vsum_f3x_vw pnp
-        inner join last using (cmte_id, election_cycle)
+        left join last using (cmte_id, election_cycle)
     where
         pnp.most_recent_filing_flag like 'Y'
         and pnp.election_cycle >= :START_YEAR
@@ -53,7 +53,7 @@ with last as (
         sum(pnp.net_contb_per)                 AS net_contributions,
         sum(pnp.net_op_exp_per)                AS net_operating_expenditures,
         sum(pnp.non_alloc_fed_elect_actvy_per) AS non_allocated_fed_election_activity,
-        sum(pnp.ttl_nonfed_tranf_per)          AS nonfed_transfers,
+        sum(pnp.ttl_nonfed_tranf_per)          AS total_transfers,
         sum(pnp.ttl_op_exp_per)                AS offsets_to_operating_expenditures,
         sum(pnp.ttl_op_exp_per)                AS operating_expenditures,
         sum(pnp.other_disb_per)                AS other_disbursements,
@@ -88,7 +88,8 @@ with last as (
         cmte_id,
         pnp.election_cycle
 )select af.*,
-	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period
+	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period,
+  af.transfers_from_nonfed_levin + af.transfers_from_nonfed_account as total_transfers
 	from aggregate_filings af
 	left join cash_beginning_period using (committee_id, cycle)
 ;
