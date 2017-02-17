@@ -1,102 +1,24 @@
 import re
 import subprocess
-import pytest
 import manage
+
 from mock import patch
 from datetime import datetime
 from decimal import Decimal
 from webservices import rest
 from webservices.legal_docs import DOCS_INDEX
-from webservices.legal_docs.utils import parse_regulatory_citations, parse_statutory_citations
 from tests.common import TEST_CONN, BaseTestCase
 
-@pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
-    ("110", 1, 2,
-        [{'text': '110', 'title': '11', 'type': 'regulation', 'url': '/regulations/110/CURRENT'}]),
-    ("110.21", 1, 2,
-        [{'text': '110.21', 'title': '11', 'type': 'regulation', 'url': '/regulations/110-21/CURRENT'}]),
-    ("114.5(a)(3)", 1, 2,
-        [{'text': '114.5(a)(3)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'}]),
-    ("114.5(a)(3)-(5)", 1, 2,
-        [{'text': '114.5(a)(3)-(5)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'}]),
-    ("102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)", 1, 2,
-        [{'text': '102.17(a)(l)(i), (b)(l), (b)(2), and (c)(3)', 'title': '11',
-          'type': 'regulation', 'url': '/regulations/102-17/CURRENT'}
-         ]),
-    ("102.5(a)(2); 104.3(a)(4)(i); 114.5(a)(3)-(5); 114.5(g)(1)", 1, 2,
-        [{'text': '102.5(a)(2)', 'title': '11', 'type': 'regulation', 'url': '/regulations/102-5/CURRENT'},
-         {'text': '104.3(a)(4)(i)', 'title': '11', 'type': 'regulation', 'url': '/regulations/104-3/CURRENT'},
-         {'text': '114.5(a)(3)-(5)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'},
-         {'text': '114.5(g)(1)', 'title': '11', 'type': 'regulation', 'url': '/regulations/114-5/CURRENT'}
-         ]),
-])
-def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
-    assert parse_regulatory_citations(test_input, case_id, entity_id) == expected
-
-@pytest.mark.parametrize("test_input,case_id,entity_id,expected", [
-    ("431", 1, 2,    # With reclassification
-        [{'text': '431',
-          'title': '2',
-          'type': 'statute',
-          'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html'
-          '&title=52&section=30101'}]),
-    ("30116", 1, 2,  # Already reclassified
-        [{'text': '30116',
-          'title': '52',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30116'}]),
-    ("434(a)(11)", 1, 2,
-        [{'text': '434(a)(11)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30104'}]),
-    ("9999", 1, 2,
-        [{'text': '9999',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9999'}]),
-    ("9993(c)(2)", 1, 2,
-        [{'text': '9993(c)(2)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
-    ("9993(a)(4) formerly 438(a)(4)", 1, 2,
-        [{'text': '9993(a)(4)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
-    ("9116(a)(2)(A), 9114(b) (formerly 441a(a)(2)(A), 434(b)), 30116(f) (formerly 441a(f))", 1, 2,
-        [{'text': '9116(a)(2)(A)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9116'},
-        {'text': '9114(b)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9114'},
-        {'text': '30116(f)',
-          'title': '52',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52&section=30116'}]),
-    ("9993(a)(4) (formerly 438(a)(4)", 1, 2,  # No matching ')' for (formerly
-        [{'text': '9993(a)(4)',
-          'title': '2',
-          'type': 'statute',
-        'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=2&section=9993'}]),
-])
-def test_parse_statutory_citations(test_input, case_id, entity_id, expected):
-    assert parse_statutory_citations(test_input, case_id, entity_id) == expected
-
-def assert_es_index_call(call_args, expected_mur):
-    index, doc_type, mur = call_args[0]
+def assert_es_index_call(call_args, expected_adr):
+    index, doc_type, adr = call_args[0]
     assert index == 'docs'
-    assert doc_type == 'murs'
-    assert mur == expected_mur
+    assert doc_type == 'adrs'
+    assert adr == expected_adr
 
-class TestLoadCurrentMURs(BaseTestCase):
+class TestLoadADRs(BaseTestCase):
     @classmethod
     def setUpClass(cls):
-        super(TestLoadCurrentMURs, cls).setUpClass()
+        super(TestLoadADRs, cls).setUpClass()
         subprocess.check_call(
             ['psql', TEST_CONN, '-f', 'data/load_murs_schema.sql'])
 
@@ -104,7 +26,7 @@ class TestLoadCurrentMURs(BaseTestCase):
     def tearDownClass(cls):
         subprocess.check_call(
             ['psql', TEST_CONN, '-c', 'DROP SCHEMA fecmur CASCADE'])
-        super(TestLoadCurrentMURs, cls).tearDownClass()
+        super(TestLoadADRs, cls).tearDownClass()
 
     def setUp(self):
         self.connection = rest.db.engine.connect()
@@ -114,19 +36,19 @@ class TestLoadCurrentMURs(BaseTestCase):
         self.connection.close()
         rest.db.session.remove()
 
-    @patch('webservices.legal_docs.current_murs.get_bucket')
-    @patch('webservices.legal_docs.current_murs.get_elasticsearch_connection')
-    def test_simple_mur(self, get_es_conn, get_bucket):
-        mur_subject = 'Fraudulent misrepresentation'
-        expected_mur = {
+    @patch('webservices.legal_docs.adrs.get_bucket')
+    @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
+    def test_simple_adr(self, get_es_conn, get_bucket):
+        adr_subject = 'Fraudulent misrepresentation'
+        expected_adr = {
             'no': '1',
-            'name': 'Simple MUR',
-            'mur_type': 'current',
+            'name': 'Simple ADR',
+            'adr_type': 'current',
             'election_cycles': [2016],
-            'doc_id': 'mur_1',
+            'doc_id': 'adr_1',
             'participants': [],
-            'subjects': [mur_subject],
-            'subject': {"text": [mur_subject]},
+            'subjects': [adr_subject],
+            'subject': {"text": [adr_subject]},
             'respondents': [],
             'documents': [],
             'disposition': {'data': [], 'text': []},
@@ -134,30 +56,30 @@ class TestLoadCurrentMURs(BaseTestCase):
             'dispositions': [],
             'close_date': None,
             'open_date': None,
-            'url': '/legal/matter-under-review/1/'
+            'url': '/legal/alternative-dispute-resolution/1/'
         }
-        self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
-        manage.legal_docs.load_current_murs()
-        index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
+        self.create_adr(1, expected_adr['no'], expected_adr['name'], adr_subject)
+        manage.legal_docs.load_adrs()
+        index, doc_type, adr = get_es_conn.return_value.index.call_args[0]
 
         assert index == DOCS_INDEX
-        assert doc_type == 'murs'
-        assert mur == expected_mur
+        assert doc_type == 'adrs'
+        assert adr == expected_adr
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.legal_docs.current_murs.get_bucket')
-    @patch('webservices.legal_docs.current_murs.get_elasticsearch_connection')
-    def test_mur_with_participants_and_documents(self, get_es_conn, get_bucket, get_credential):
+    @patch('webservices.legal_docs.adrs.get_bucket')
+    @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
+    def test_adr_with_participants_and_documents(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
-        mur_subject = 'Fraudulent misrepresentation'
-        expected_mur = {
+        adr_subject = 'Fraudulent misrepresentation'
+        expected_adr = {
             'no': '1',
-            'name': 'MUR with participants',
-            'mur_type': 'current',
+            'name': 'ADR with participants',
+            'adr_type': 'current',
             'election_cycles': [2016],
-            'doc_id': 'mur_1',
-            'subjects': [mur_subject],
-            'subject': {"text": [mur_subject]},
+            'doc_id': 'adr_1',
+            'subjects': [adr_subject],
+            'subject': {"text": [adr_subject]},
             'respondents': ["Bilbo Baggins", "Thorin Oakenshield"]
         }
         participants = [
@@ -170,7 +92,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             ('Another Category', 'Different text'),
         ]
 
-        self.create_mur(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
+        self.create_adr(case_id, expected_adr['no'], expected_adr['name'], adr_subject)
         for entity_id, participant in enumerate(participants):
             role, name = participant
             self.create_participant(case_id, entity_id, role, name)
@@ -178,32 +100,32 @@ class TestLoadCurrentMURs(BaseTestCase):
             category, ocrtext = document
             self.create_document(case_id, document_id, category, ocrtext)
 
-        manage.legal_docs.load_current_murs()
-        index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
+        manage.legal_docs.load_adrs()
+        index, doc_type, adr = get_es_conn.return_value.index.call_args[0]
 
         assert index == DOCS_INDEX
-        assert doc_type == 'murs'
-        for key in expected_mur:
-            assert mur[key] == expected_mur[key]
+        assert doc_type == 'adrs'
+        for key in expected_adr:
+            assert adr[key] == expected_adr[key]
 
         assert participants == [(p['role'], p['name'])
-                                for p in mur['participants']]
+                                for p in adr['participants']]
 
         assert [(d[0], d[1], len(d[1])) for d in documents] == [
-            (d['category'], d['text'], d['length']) for d in mur['documents']]
-        for d in mur['documents']:
+            (d['category'], d['text'], d['length']) for d in adr['documents']]
+        for d in adr['documents']:
             assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
-    @patch('webservices.legal_docs.current_murs.get_bucket')
-    @patch('webservices.legal_docs.current_murs.get_elasticsearch_connection')
-    def test_mur_with_disposition(self, get_es_conn, get_bucket, get_credential):
+    @patch('webservices.legal_docs.adrs.get_bucket')
+    @patch('webservices.legal_docs.adrs.get_elasticsearch_connection')
+    def test_adr_with_disposition(self, get_es_conn, get_bucket, get_credential):
         case_id = 1
         case_no = '1'
         name = 'Open Elections LLC'
-        mur_subject = 'Fraudulent misrepresentation'
+        adr_subject = 'Fraudulent misrepresentation'
         pg_date = '2016-10-08'
-        self.create_mur(case_id, case_no, name, mur_subject)
+        self.create_adr(case_id, case_no, name, adr_subject)
 
         entity_id = 1
         event_date = '2005-01-01'
@@ -252,10 +174,10 @@ class TestLoadCurrentMURs(BaseTestCase):
         action = 'Conciliation Reached.'
         self.create_commission(commission_id, agenda_date, vote_date, action, case_id, pg_date)
 
-        manage.legal_docs.load_current_murs()
-        index, doc_type, mur = get_es_conn.return_value.index.call_args[0]
+        manage.legal_docs.load_adrs()
+        index, doc_type, adr = get_es_conn.return_value.index.call_args[0]
 
-        expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
+        expected_adr = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
             'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
             'citations': [
                 {'text': '431',
@@ -288,21 +210,21 @@ class TestLoadCurrentMURs(BaseTestCase):
             'subjects': ['Fraudulent misrepresentation'],
             'subject': {"text": ['Fraudulent misrepresentation']},
             'respondents': [],
-            'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
-            'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
+            'documents': [], 'participants': [], 'no': '1', 'doc_id': 'adr_1',
+            'adr_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
             'election_cycles': [2016],
             'close_date': datetime(2008, 1, 1, 0, 0),
-            'url': '/legal/matter-under-review/1/'}
+            'url': '/legal/alternative-dispute-resolution/1/'}
 
-        assert mur == expected_mur
+        assert adr == expected_adr
 
-    def create_mur(self, case_id, case_no, name, subject_description):
+    def create_adr(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
             "SELECT subject_id FROM fecmur.subject "
             " WHERE description = %s ", subject_description).scalar()
         self.connection.execute(
             "INSERT INTO fecmur.case (case_id, case_no, name, case_type) "
-            "VALUES (%s, %s, %s, 'MUR')", case_id, case_no, name)
+            "VALUES (%s, %s, %s, 'ADR')", case_id, case_no, name)
         self.connection.execute(
             "INSERT INTO fecmur.case_subject (case_id, subject_id, relatedsubject_id) "
             "VALUES (%s, %s, -1)", case_id, subject_id)

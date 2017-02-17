@@ -1,8 +1,7 @@
 DOCS_INDEX = 'docs_index'
 DOCS_SEARCH = 'docs_search'
-
 from .current_murs import load_current_murs
-
+from .adrs import load_adrs
 from .load_legal_docs import (
     delete_advisory_opinions_from_es,
     delete_advisory_opinions_from_s3,
