@@ -113,7 +113,7 @@ def get_documents(ao_id, bucket, bucket_name):
                 "category": row["category"],
                 "description": row["description"],
                 "text": row["ocrtext"],
-                "document_date": row["document_date"],
+                "date": row["document_date"],
             }
             pdf_key = "legal/aos/%s.pdf" % row["document_id"]
             logger.info("S3: Uploading {}".format(pdf_key))
