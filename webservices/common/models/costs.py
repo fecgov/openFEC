@@ -10,6 +10,7 @@ class CommunicationCost(db.Model):
     original_sub_id = db.Column('orig_sub_id', db.Integer, index=True)
     candidate_id = db.Column('cand_id', db.String, index=True)
     committee_id = db.Column('cmte_id', db.String, index=True)
+    committee_name = db.Column('cmte_nm', db.String)
     pdf_url = db.Column(db.String)
     candidate_name = db.Column('s_o_cand_nm', db.String)
     candidate_last_name = db.Column('s_o_cand_l_nm', db.String)
