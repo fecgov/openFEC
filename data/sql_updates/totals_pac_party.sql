@@ -75,6 +75,7 @@ with last as (
         max(last.rpt_tp_desc)                  AS last_report_type_full,
         max(last.begin_image_num)              AS last_beginning_image_number,
         max(greatest(last.coh_cop))            AS last_cash_on_hand_end_period,
+        max(last.coh_bop)                      as last_cash_on_hand_beginning_period,
         max(last.debts_owed_by_cmte)           AS last_debts_owed_by_committee,
         max(last.debts_owed_to_cmte)           AS last_debts_owed_to_committee,
         max(last.rpt_yr)                       AS last_report_year
@@ -88,8 +89,7 @@ with last as (
         cmte_id,
         pnp.election_cycle
 )select af.*,
-	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period,
-  af.transfers_from_nonfed_levin + af.transfers_from_nonfed_account as total_transfers
+	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period
 	from aggregate_filings af
 	left join cash_beginning_period using (committee_id, cycle)
 ;
