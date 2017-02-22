@@ -48,7 +48,7 @@ AO_DOCUMENTS = """
     WHERE ao_id = %s
 """
 
-STATUTE_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+)")
+STATUTE_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+).*\.?")
 REGULATION_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)\.(?P<section>\d+)")
 AO_CITATION_REGEX = re.compile(r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
 
@@ -161,7 +161,7 @@ def get_citations():
             {"no": c, "name": ao_names[c]}
             for c in raw_citations[ao]["aos_cited_by"]], key=lambda d: d["no"])
         citations[ao]["statutes"] = sorted([
-            {"title": c[0], "section": c[1]}
+            {"text": c[0], "title": c[1], "section": c[2]}
             for c in raw_citations[ao]["statutes"]], key=lambda d: (d["title"], d["section"]))
         citations[ao]["regulations"] = sorted([
             {"title": c[0], "part": c[1], "section": c[2]}
@@ -183,12 +183,20 @@ def parse_statutory_citations(text):
     matches = set()
     if text:
         for citation in STATUTE_CITATION_REGEX.finditer(text):
-            matches.add((int(citation.group('title')), int(citation.group('section'))))
+            matches.add((
+                citation.group(0),
+                int(citation.group('title')),
+                int(citation.group('section'))
+            ))
     return matches
 
 def parse_regulatory_citations(text):
     matches = set()
     if text:
         for citation in REGULATION_CITATION_REGEX.finditer(text):
-            matches.add((int(citation.group('title')), int(citation.group('part')), int(citation.group('section'))))
+            matches.add((
+                int(citation.group('title')),
+                int(citation.group('part')),
+                int(citation.group('section'))
+            ))
     return matches
