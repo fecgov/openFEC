@@ -153,6 +153,7 @@ DEPLOY_RULES = (
     ('prod', _detect_prod),
     ('stage', lambda _, branch: branch.startswith('release')),
     ('dev', lambda _, branch: branch == 'develop'),
+    ('gov', lambda _, branch: branch == 'feature/gov-cloud-support'),
 )
 
 
