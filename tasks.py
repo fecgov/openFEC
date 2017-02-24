@@ -187,7 +187,7 @@ def deploy(ctx, space=None, branch=None, yes=False):
         ctx.run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
 
     # Target space
-    ctx.run('cf target -o fec -s {0}'.format(space), echo=True)
+    ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
