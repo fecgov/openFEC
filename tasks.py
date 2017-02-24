@@ -152,14 +152,15 @@ def _detect_space(repo, branch=None, yes=False):
 DEPLOY_RULES = (
     ('prod', _detect_prod),
     ('stage', lambda _, branch: branch.startswith('release')),
-    ('dev', lambda _, branch: branch == 'develop'),
+    # ('dev', lambda _, branch: branch == 'develop'),
+    ('dev', lambda _, branch: branch == 'feature/gov-cloud'),
 )
 
 
 SPACE_URLS = {
-    'dev': [('18f.gov', 'fec-dev-api')],
-    'stage': [('18f.gov', 'fec-stage-api')],
-    'prod': [('18f.gov', 'fec-prod-api')],
+    'dev': [('app.cloud.gov', 'fec-dev-api')],
+    'stage': [('app.cloud.gov', 'fec-stage-api')],
+    'prod': [('app.cloud.gov', 'fec-prod-api')],
 }
 
 
@@ -178,7 +179,7 @@ def deploy(ctx, space=None, branch=None, yes=False):
         return
 
     # Set api
-    api = 'https://api.cloud.gov'
+    api = 'https://api.fr.cloud.gov'
     ctx.run('cf api {0}'.format(api), echo=True)
 
     # Log in if necessary
