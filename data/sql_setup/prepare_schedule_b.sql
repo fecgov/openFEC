@@ -61,6 +61,6 @@ end
 $$ language plpgsql;
 
 drop trigger if exists ofec_sched_b_queue_trigger on fec_vsum_sched_b_vw;
-create trigger ofec_sched_b_queue_trigger before insert or update or delete
+create trigger ofec_sched_b_queue_trigger instead of insert or update or delete
     on fec_vsum_sched_b_vw for each row execute procedure ofec_sched_b_update_queues(:START_YEAR_AGGREGATE)
 ;
