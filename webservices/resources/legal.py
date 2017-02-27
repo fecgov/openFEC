@@ -98,8 +98,8 @@ class UniversalSearch(utils.Resource):
                 .query(Q('bool',
                          must=must_query,
                          should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
-                .highlight('documents.description', 'name', 'no', 'summary', 'documents.text') \
-                .source(exclude='text') \
+                .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
+                .source(exclude=['text', 'documents.text']) \
                 .extra(size=hits_returned, from_=from_hit) \
                 .index(DOCS_SEARCH)
 
