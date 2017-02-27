@@ -1,13 +1,10 @@
 import unittest
 from mock import patch
 from webservices.legal_docs import (
-    delete_advisory_opinions_from_s3,
     delete_murs_from_es,
     delete_murs_from_s3,
-    index_advisory_opinions,
     index_regulations,
     index_statutes,
-    load_advisory_opinions_into_s3,
     load_archived_murs,
     initialize_legal_docs
 )
@@ -241,48 +238,6 @@ class IndexRegulationsTest(unittest.TestCase):
     @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e, d: '')
     def test_no_env_variable(self):
         index_regulations()
-
-class IndexAdvisoryOpinionsTest(unittest.TestCase):
-    @patch('webservices.legal_docs.load_legal_docs.db', Db())
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential',
-        lambda cred: cred + '123')
-    @patch('webservices.utils.get_elasticsearch_connection',
-            get_es_with_doc({'category': 'Votes',
-            'summary': 'summaryABC', 'no': '1993-01', 'date': 'date123',
-            'name': 'name4U', 'text': 'textAB',
-            'description': 'description123',
-            'url': 'https://bucket123.s3.amazonaws.com/legal/aos/123.pdf',
-            'doc_id': 123, 'is_pending': True,
-            'requestor_names': ['Charles Babbage', 'Ada Lovelace'],
-            'requestor_types': ['Individual'],
-            'citations': [{'name': 'DNC', 'no': '2014-01'}, {'name': 'Outkast', 'no': '2015-105'}],
-                'cited_by': [{'name': 'Church', 'no': '2007-05'}]}))
-    def test_advisory_opinion_load(self):
-        index_advisory_opinions()
-
-
-class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
-    @patch('webservices.legal_docs.load_legal_docs.db', Db())
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/2.pdf')], 'legal/aos/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential',
-        lambda cred: cred + '123')
-    def test_load_advisory_opinions_into_s3(self):
-        load_advisory_opinions_into_s3()
-
-    @patch('webservices.legal_docs.load_legal_docs.db', Db())
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/1.pdf'), obj('legal/aos/2.pdf')],
-     'legal/aos/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential',
-        lambda cred: cred + '123')
-    def test_load_advisory_opinions_into_s3_already_loaded(self):
-        load_advisory_opinions_into_s3()
-
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/2.pdf')], 'legal/aos/1.pdf'))
-    def test_delete_advisory_opinions_from_s3(self):
-        delete_advisory_opinions_from_s3()
 
 class InitializeLegalDocsTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
