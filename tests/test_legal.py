@@ -123,18 +123,18 @@ class SearchTest(unittest.TestCase):
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
         expected_query = {"query": {"bool": {
-                 "must": [
-                     {"term": {"_type": "statutes"}},
-                     {"match": {"_all": "president"}},
-                     ],
-                 "should": [
-                     {"match": {"no": "president"}},
-                     {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
-                     ]
-                 }},
-            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}},
-                          "highlight_query": {"match": {"_all": "president"}}},
-            "_source": {"exclude": "text"},
+            "must": [
+                {"term": {"_type": "statutes"}},
+                {"match": {"_all": "president"}},
+            ],
+            "should": [
+                {"match": {"no": "president"}},
+                {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
+            ]}},
+            "highlight": {"fields": {"text": {}, "name": {}, "no": {}, "summary": {},
+                "documents.text": {}, "documents.description": {}},
+                "highlight_query": {"match": {"_all": "president"}}},
+            "_source": {"exclude": ["text", "documents.text"]},
             "from": 0,
             "size": 20}
 
@@ -153,18 +153,18 @@ class SearchTest(unittest.TestCase):
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
         expected_query = {"query": {"bool": {
-                 "must": [
-                     {"term": {"_type": "statutes"}},
-                     {"match_phrase": {"_all": "electronic filing"}},
-                     ],
-                 "should": [
-                     {"match": {"no": '"electronic filing"'}},
-                     {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
-                     ]
-                 }},
-            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}},
-                          "highlight_query": {"bool": {"must": [{"match_phrase": {"_all": "electronic filing"}}]}}},
-            "_source": {"exclude": "text"},
+            "must": [
+                {"term": {"_type": "statutes"}},
+                {"match_phrase": {"_all": "electronic filing"}},
+            ],
+            "should": [
+                {"match": {"no": '"electronic filing"'}},
+                {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
+            ]}},
+            "highlight": {"fields": {"text": {}, "name": {}, "no": {}, "summary": {},
+                "documents.text": {}, "documents.description": {}},
+                "highlight_query": {"bool": {"must": [{"match_phrase": {"_all": "electronic filing"}}]}}},
+            "_source": {"exclude": ["text", "documents.text"]},
             "from": 0,
             "size": 20}
 
@@ -196,19 +196,19 @@ class SearchTest(unittest.TestCase):
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
         expected_query = {"query": {"bool": {
-                 "must": [
-                     {"term": {"_type": "advisory_opinions"}},
-                     {"match": {"_all": "president"}},
-                     {'terms': {'category': ['Final Opinion']}}
-                     ],
-                 "should": [
-                     {"match": {"no": "president"}},
-                     {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
-                     ]
-                 }},
-            "highlight": {"fields": {"description": {}, "summary": {}, "no": {}, "text": {}, "name": {}},
-                          "highlight_query": {"match": {"_all": "president"}}},
-            "_source": {"exclude": "text"},
+            "must": [
+                {"term": {"_type": "advisory_opinions"}},
+                {"match": {"_all": "president"}},
+                {'terms': {'category': ['Final Opinion']}}
+            ],
+            "should": [
+                {"match": {"no": "president"}},
+                {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
+            ]}},
+            "highlight": {"fields": {"text": {}, "name": {}, "no": {}, "summary": {},
+                "documents.text": {}, "documents.description": {}},
+            "highlight_query": {"match": {"_all": "president"}}},
+            "_source": {"exclude": ["text", "documents.text"]},
             "from": 0,
             "size": 20}
 
