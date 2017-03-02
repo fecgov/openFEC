@@ -203,7 +203,6 @@ def deploy(ctx, space=None, branch=None, yes=False):
     ctx.run('cf push celery-worker -f manifest_{0}.yml'.format(space))
 
 
-# this will not be called because the slack integrations are off
 @task
 def notify(ctx):
     try:
