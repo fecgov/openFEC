@@ -86,6 +86,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
+            "sort1": -2017,
+            "sort2": -1,
         }
         self.create_ao(1, expected_ao)
         actual_ao = next(get_advisory_opinions())

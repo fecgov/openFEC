@@ -134,7 +134,8 @@ class SearchTest(unittest.TestCase):
             "highlight": {"fields": {"text": {}, "name": {}, "no": {}, "summary": {},
                 "documents.text": {}, "documents.description": {}},
                 "highlight_query": {"match": {"_all": "president"}}},
-            "_source": {"exclude": ["text", "documents.text"]},
+            "_source": {"exclude": ["text", "documents.text", "sort1", "sort2"]},
+            "sort": ['sort1', 'sort2'],
             "from": 0,
             "size": 20}
 
@@ -164,7 +165,8 @@ class SearchTest(unittest.TestCase):
             "highlight": {"fields": {"text": {}, "name": {}, "no": {}, "summary": {},
                 "documents.text": {}, "documents.description": {}},
                 "highlight_query": {"bool": {"must": [{"match_phrase": {"_all": "electronic filing"}}]}}},
-            "_source": {"exclude": ["text", "documents.text"]},
+            "_source": {"exclude": ["text", "documents.text", "sort1", "sort2"]},
+            "sort": ['sort1', 'sort2'],
             "from": 0,
             "size": 20}
 
@@ -208,7 +210,8 @@ class SearchTest(unittest.TestCase):
             "highlight": {"fields": {"text": {}, "name": {}, "no": {}, "summary": {},
                 "documents.text": {}, "documents.description": {}},
             "highlight_query": {"match": {"_all": "president"}}},
-            "_source": {"exclude": ["text", "documents.text"]},
+            "_source": {"exclude": ["text", "documents.text", "sort1", "sort2"]},
+            "sort": ['sort1', 'sort2'],
             "from": 0,
             "size": 20}
 
