@@ -17,7 +17,6 @@ from flask import Blueprint
 import flask_cors as cors
 import flask_restful as restful
 
-from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
 import sqlalchemy as sa
 
@@ -362,8 +361,5 @@ def initialize_newrelic():
         newrelic.agent.initialize()
 
 initialize_newrelic()
-
-if env.get_credential('SENTRY_DSN'):
-    Sentry(app, dsn=env.get_credential('SENTRY_DSN'))
 
 app.wsgi_app = ProxyFix(app.wsgi_app)

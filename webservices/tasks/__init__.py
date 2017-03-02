@@ -40,11 +40,6 @@ app.conf.update(
     CELERYBEAT_SCHEDULE=schedule,
 )
 
-client = Client(env.get_credential('SENTRY_DSN'))
-
-register_signal(client)
-register_logger_signal(client)
-
 context = {}
 
 @signals.task_prerun.connect
