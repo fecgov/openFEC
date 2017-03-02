@@ -1,6 +1,6 @@
 -- Create index for join on electioneering costs
-drop index if exists fec_vsum_sched_b_vw_link_id_idx;
-create index fec_vsum_sched_b_vw_link_id_idx on fec_vsum_sched_b_vw (link_id);
+drop index if exists disclosure.nml_sched_b_link_id_idx;
+create index nml_sched_b_link_id_idx on disclosure.nml_sched_b (link_id);
 
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
