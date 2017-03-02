@@ -70,12 +70,16 @@ def get_advisory_opinions():
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
-    citations = get_citations()
+    ao_names = get_ao_names()
+    ao_no_to_component_map = {a: tuple(map(int, a.split('-'))) for a in ao_names}
+
+    citations = get_citations(ao_names)
 
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_AOS)
         for row in rs:
             ao_id = row["ao_id"]
+            year, serial = ao_no_to_component_map[row["ao_no"]]
             ao = {
                 "no": row["ao_no"],
                 "name": row["name"],
@@ -86,6 +90,8 @@ def get_advisory_opinions():
                 "aos_cited_by": citations[row["ao_no"]]["aos_cited_by"],
                 "statutory_citations": citations[row["ao_no"]]["statutes"],
                 "regulatory_citations": citations[row["ao_no"]]["regulations"],
+                "sort1": -year,
+                "sort2": -serial,
             }
             ao["documents"] = get_documents(ao_id, bucket, bucket_name)
             ao["requestor_names"], ao["requestor_types"] = get_requestors(ao_id)
@@ -123,15 +129,19 @@ def get_documents(ao_id, bucket, bucket_name):
             documents.append(document)
     return documents
 
-def get_citations():
-    logger.info("Getting citations...")
-
+def get_ao_names():
     ao_names_results = db.engine.execute("""SELECT ao_no, name FROM aouser.ao""")
     ao_names = {}
     for row in ao_names_results:
         ao_names[row["ao_no"]] = row["name"]
 
+    return ao_names
+
+
+def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
+
+    logger.info("Getting citations...")
 
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
