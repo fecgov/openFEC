@@ -12,6 +12,18 @@ from webservices import utils
 logger = logging.getLogger(__name__)
 
 MAPPINGS = {
+    "_default_": {
+        "properties": {
+            "sort1": {
+                "type": "integer",
+                "include_in_all": False
+            },
+            "sort2": {
+                "type": "integer",
+                "include_in_all": False
+            },
+        }
+    },
     "murs": {
         "properties": {
             "no": {
