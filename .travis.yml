@@ -12,8 +12,9 @@ addons:
 
 env:
   global:
-    - secure: "bWqvrpIh4IBlVvckjX+7Cwg/Fh7C0NU02MgsFsgZ8Ur6kt8oHKNv0ax2rRVGopFTVZVUXlFbo+mFm5ha5x9K4uVHo4awq9pWuVR9X7TySsLiBKVDPEP0ziZ54hs0Wb/t7MdLBFaowLun63gheLtmSZZmHHHSHIRTnauEDcKBxaI=" # FEC_CF_USERNAME
-    - secure: "UQnMw00cgmpZcO1ky3YG8uZ4vweaXr+iVyzXaRceZDz1n5SegTy9bQHermrsLUlac/bAKmyHBsWgpt/Nym7JIw35E3OVEl6ttdeqAsAtyZKE+thNQsAXn81+sD31dOPdoLZbQT8MjixsxQyjGdlPJdfqFz1hd1RaOyQ2dnXTR/c=" # FEC_CF_PASSWORD
+    - secure: "inLrUYRWZHjhlT7VfI9ifxy8X/RNjGKJ4salMdYtIi7ovLOFn5i53u/ZlaXwMevVB+7xCIa43nIoTpdTkCSibPeyBfbfX5eNFJxIZpkLLcPhG6lRSybJlYW+iYwQObP625jBoJH5KOlE8aWnXPtS6kIMUwHGBbkgOQUNQ9Z4L9c=" # FEC_CF_USERNAME
+    - secure: "ISfpnJROExw5DLSbKZMuxji4u7stb1UR6aJjuPPAYQkUbB3sYzVrFMw67742cnfF2L1zZPZGxlc0FYpGtU7zxwiG16pDPM7W+byA/bz7SYPFrNyvm16YNuGr8mFZt6Zr1p+V7HW8XS8OG4HEQ6JWP96mQ+DCl9F8GH40haJxBtA=" # FEC_CF_PASSWORD
+
 
 before_script:
   - psql -c 'create database "cfdm_unit_test";' -U postgres
