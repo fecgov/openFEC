@@ -23,6 +23,10 @@ class SchedBGroup(TableGroup):
         sa.Column('two_year_transaction_period', sa.SmallInteger),
     ]
 
+    column_mappings = {
+        'schedule_type': sa.VARCHAR(length=2)
+    }
+
     @classmethod
     def column_factory(cls, parent):
         return [
