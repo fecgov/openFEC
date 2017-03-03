@@ -18,22 +18,29 @@ from webservices.common import models
 
 
 def make_factory():
-    automap = automap_base()
+    # NOTE: Due to the changes made in the production database and the switch
+    # to using views instead of tables, we have attempted to reconstruct the
+    # schema with our test data.  It is an approximation of what is actually
+    # in production, but we are focused more on ensuring that the behavior and
+    # processing of our scripts and business logic are sound as opposed to
+    # mirroring the data exactly as it is at this time.
+    metadata = sa.MetaData(schema='disclosure')
+    automap = automap_base(bind=db.engine, metadata=metadata)
     automap.prepare(db.engine, reflect=True)
 
     class SchedAFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.fec_vsum_sched_a_vw
-        filing_form = '11'
+            model = automap.classes.nml_sched_a
+        form_tp_cd = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
 
     class SchedBFactory(SQLAlchemyModelFactory):
         class Meta:
             sqlalchemy_session = db.session
-            model = automap.classes.fec_vsum_sched_b_vw
-        filing_form = '11'
+            model = automap.classes.nml_sched_b
+        form_tp_cd = '11'
         sub_id = factory.Sequence(lambda n: n)
         rpt_yr = 2016
 
@@ -471,7 +478,7 @@ class TestViews(common.IntegrationTestCase):
             cmte_id='C12345',
             disb_amt=538,
             disb_desc='CAMPAIGN BUTTONS',
-            filing_form='11'
+            form_tp_cd='11'
         )
         db.session.commit()
         manage.update_aggregates()
