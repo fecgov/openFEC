@@ -18,6 +18,12 @@ create index on ofec_sched_b_queue_old (timestamp);
 create index on ofec_sched_b_queue_new (two_year_transaction_period);
 create index on ofec_sched_b_queue_old (two_year_transaction_period);
 
+drop table if exists ofec_nml_sched_b_queue_new;
+drop table if exists ofec_nml_sched_b_queue_old;
+
+create table ofec_nml_sched_b_queue_new as select * from disclosure.nml_sched_b limit 0;
+create table ofec_nml_sched_b_queue_old as select * from disclosure.nml_sched_b limit 0;
+
 -- Create trigger to maintain Schedule B queues
 create or replace function ofec_sched_b_update_queues() returns trigger as $$
 declare
@@ -60,7 +66,32 @@ begin
 end
 $$ language plpgsql;
 
+-- Create trigger to help test the schedule B source data
+create or replace function ofec_sched_b_update_source_queues() returns trigger as $$
+begin
+
+    if tg_op = 'INSERT' then
+        delete from ofec_nml_sched_b_queue_new where sub_id = new.sub_id;
+        insert into ofec_nml_sched_b_queue_new values (new.*);
+        return new;
+    elsif tg_op = 'UPDATE' then
+        delete from ofec_nml_sched_b_queue_new where sub_id = new.sub_id;
+        delete from ofec_nml_sched_b_queue_old where sub_id = old.sub_id;
+        insert into ofec_nml_sched_b_queue_new values (new.*);
+        insert into ofec_nml_sched_b_queue_old values (old.*);
+        return new;
+    elsif tg_op = 'DELETE' then
+        delete from ofec_nml_sched_b_queue_old where sub_id = old.sub_id;
+        insert into ofec_nml_sched_b_queue_old values (old.*);
+        return old;
+    end if;
+end
+$$ language plpgsql;
+
 drop trigger if exists ofec_sched_b_queue_trigger on fec_vsum_sched_b_vw;
 create trigger ofec_sched_b_queue_trigger instead of insert or update or delete
-    on fec_vsum_sched_b_vw for each row execute procedure ofec_sched_b_update_queues(:START_YEAR_AGGREGATE)
-;
+    on fec_vsum_sched_b_vw for each row execute procedure ofec_sched_b_update_queues(:START_YEAR_AGGREGATE);
+
+drop trigger if exists nml_sched_b_trigger on disclosure.nml_sched_b;
+create trigger nml_sched_b_trigger before insert or update or delete
+    on disclosure.nml_sched_b for each row execute procedure ofec_sched_b_update_source_queues();
