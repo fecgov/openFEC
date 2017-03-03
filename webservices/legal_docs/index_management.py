@@ -12,6 +12,18 @@ from webservices import utils
 logger = logging.getLogger(__name__)
 
 MAPPINGS = {
+    "_default_": {
+        "properties": {
+            "sort1": {
+                "type": "integer",
+                "include_in_all": False
+            },
+            "sort2": {
+                "type": "integer",
+                "include_in_all": False
+            },
+        }
+    },
     "murs": {
         "properties": {
             "no": {
@@ -248,28 +260,67 @@ MAPPINGS = {
     },
     "advisory_opinions": {
         "properties": {
-            "doc_id": {
+            "no": {
                 "type": "string",
-                "index": "no"
+                "index": "not_analyzed"
             },
             "name": {
                 "type": "string",
                 "analyzer": "english"
             },
-            "text": {
+            "summary": {
                 "type": "string",
                 "analyzer": "english"
             },
-            "no": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "url": {
-                "type": "string",
-                "index": "no"
+            "issue_date": {
+                "type": "date",
+                "format": "dateOptionalTime"
             },
             "is_pending": {
                 "type": "boolean"
+            },
+            "ao_citations": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "no": {
+                        "type": "string"
+                    }
+                }
+            },
+            "aos_cited_by": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "no": {
+                        "type": "string"
+                    }
+                }
+            },
+            "statutory_citations": {
+                "properties": {
+                    "section": {
+                        "type": "long"
+                    },
+                    "title": {
+                        "type": "long"
+                    }
+                }
+            },
+            "regulatory_citations": {
+                "properties": {
+                    "part": {
+                        "type": "long"
+                    },
+                    "section": {
+                        "type": "long"
+                    },
+                    "title": {
+                        "type": "long"
+                    }
+                }
             },
             "requestor_names": {
                 "type": "string"
@@ -278,41 +329,31 @@ MAPPINGS = {
                 "type": "string",
                 "index": "not_analyzed"
             },
-            "citations": {
+            "documents": {
                 "properties": {
-                    "name": {
+                    "document_id": {
+                        "type": "long",
+                        "index": "no"
+                    },
+                    "category": {
+                        "type": "string",
+                        "index": "not_analyzed"
+                    },
+                    "description": {
                         "type": "string"
                     },
-                    "no": {
-                        "type": "string"
-                    }
-                }
-            },
-            "cited_by": {
-                "properties": {
-                    "name": {
+                    "date": {
+                        "type": "date",
+                        "format": "dateOptionalTime"
+                    },
+                    "text": {
                         "type": "string"
                     },
-                    "no": {
-                        "type": "string"
+                    "url": {
+                        "type": "string",
+                        "index": "no"
                     }
                 }
-            },
-            "summary": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "description": {
-                "type": "string",
-                "analyzer": "english"
-            },
-            "category": {
-                "type": "string",
-                "index": "not_analyzed"
-            },
-            "date": {
-                "type": "date",
-                "format": "dateOptionalTime"
             }
         }
     }
