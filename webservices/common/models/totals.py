@@ -27,7 +27,6 @@ class CommitteeTotals(BaseModel):
     coverage_end_date = db.Column(db.DateTime(), index=True)
     net_operating_expenditures = db.Column(db.Numeric(30, 2))
     net_contributions = db.Column(db.Numeric(30, 2))
-    cash_on_hand_beginning_period = db.Column(db.Numeric(30,2))
 
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
@@ -65,6 +64,7 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     transfers_from_nonfed_account = db.Column(db.Numeric(30, 2))
     transfers_from_nonfed_levin = db.Column(db.Numeric(30, 2))
     transfers_to_affiliated_committee = db.Column(db.Numeric(30, 2))
+    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
 
 
 class CommitteeTotalsPresidential(CommitteeTotals):
@@ -86,6 +86,7 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     repayments_other_loans = db.Column(db.Numeric(30, 2))
     transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
+    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
 
 
 class CommitteeTotalsParty(CommitteeTotalsPacPartyBase):
@@ -119,6 +120,7 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
     other_receipts = db.Column(db.Numeric(30, 2))
     transfers_from_other_authorized_committee = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
+    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
 
 
 class CommitteeTotalsIEOnly(BaseModel):
