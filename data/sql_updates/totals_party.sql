@@ -12,19 +12,18 @@ with last as (
 	  select distinct on (cmte_id, election_cycle)
 	      cmte_id                           as committee_id,
 	      election_cycle                    as cycle,
-	      first_value(pnp.coh_bop) over wnd as cash_on_hand
+	      coh_bop as cash_on_hand
 	  from
         fec_vsum_f3x_vw pnp
         inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
-        left join last using (cmte_id, election_cycle)
     where
         pnp.most_recent_filing_flag like 'Y'
         and pnp.election_cycle >= :START_YEAR
         and (comm_dets.committee_type like 'X' or comm_dets.committee_type like 'Y')
-    WINDOW wnd AS(
-    	partition by cmte_id, election_cycle order by pnp.cmte_id, pnp.election_cycle, pnp.cvg_end_dt
-    	ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-    )
+    order by
+        cmte_id,
+        election_cycle,
+        cvg_end_dt asc
 ), aggregate_filings as (
     select
         row_number() over () as idx,
