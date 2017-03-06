@@ -11,17 +11,17 @@ with last as (
 	  select distinct on (cmte_id, election_cycle)
 	      cmte_id as committee_id,
 	      election_cycle as cycle,
-	      first_value(hs.coh_bop) over wnd as cash_on_hand
+	      hs.coh_bop as cash_on_hand
 	  from
         fec_vsum_f3p_vw hs
         inner join last using (cmte_id, election_cycle)
     where
         hs.most_recent_filing_flag like 'Y'
         and hs.election_cycle >= :START_YEAR
-    WINDOW wnd AS(
-    	partition by cmte_id, election_cycle order by hs.cmte_id, hs.election_cycle, hs.cvg_end_dt
-    	ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
-    )
+    order by
+        cmte_id,
+        election_cycle,
+        cvg_end_dt asc
 ), aggregate_filings as(
     select
         row_number() over () as idx,
