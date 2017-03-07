@@ -165,10 +165,10 @@ SPACE_URLS = {
 
 
 @task
-def deploy(ctx, space=None, branch=None, yes=False, login=False):
-    """Deploy app to Cloud Foundry. Log in using credentials stored in
-    `FEC_CF_USERNAME` and `FEC_CF_PASSWORD`; push to either `space` or the space
-    detected from the name and tags of the current branch. Note: Must pass `space`
+def deploy(ctx, space=None, branch=None, login=None, yes=False):
+    """Deploy app to Cloud Foundry. Log in using credentials stored per environment
+    like `FEC_CF_USERNAME_DEV` and `FEC_CF_PASSWORD_DEV`; push to either `space` or t
+    he space detected from the name and tags of the current branch. Note: Must pass `space`
     or `branch` if repo is in detached HEAD mode, e.g. when running on Travis.
     """
     # Detect space
@@ -184,6 +184,7 @@ def deploy(ctx, space=None, branch=None, yes=False, login=False):
 
     # Log in if necessary
     if login == True:
+        print('working')
         ctx.run('cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(space.upper()), echo=True)
 
     # Target space
