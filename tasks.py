@@ -183,7 +183,7 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     ctx.run('cf api {0}'.format(api), echo=True)
 
     # Log in if necessary
-    if login == True:
+    if login == 'True':
         login_command = 'cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(space.upper())
         ctx.run(login_command, echo=True)
 
