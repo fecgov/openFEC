@@ -1,42 +1,31 @@
 language: python
-
 sudo: false
-
 cache: pip
-
 python:
-  - "3.4"
-
+- '3.4'
 addons:
-  postgresql: "9.4"
-
+  postgresql: '9.4'
 env:
   global:
-    - secure: "inLrUYRWZHjhlT7VfI9ifxy8X/RNjGKJ4salMdYtIi7ovLOFn5i53u/ZlaXwMevVB+7xCIa43nIoTpdTkCSibPeyBfbfX5eNFJxIZpkLLcPhG6lRSybJlYW+iYwQObP625jBoJH5KOlE8aWnXPtS6kIMUwHGBbkgOQUNQ9Z4L9c=" # FEC_CF_USERNAME
-    - secure: "ISfpnJROExw5DLSbKZMuxji4u7stb1UR6aJjuPPAYQkUbB3sYzVrFMw67742cnfF2L1zZPZGxlc0FYpGtU7zxwiG16pDPM7W+byA/bz7SYPFrNyvm16YNuGr8mFZt6Zr1p+V7HW8XS8OG4HEQ6JWP96mQ+DCl9F8GH40haJxBtA=" # FEC_CF_PASSWORD
-
-
+  - secure: fZSgHvzAttJcq5GYEwp/jo8/hcRs0hW169dTG4VC6vW29sPFjc2R6NuXVzXxGzxkWN16KvUNU+feMiMIse7c2zQIceTmhJh7cz19v+xmmwgqJgv0ln8+7+1rGB6FIblS9C70b2ggKjZ5DYMD4DxCrtQkWkVzQDncdADb4vg0ZA4=
+  - secure: OTXWsWgcECe+A21Tsxnz4sipzVaGW1RrtYqOx6/hFgBZPcGeNMz+sJtSH2PQ8tRj4QPljHwH4+X3vRrQDXYE9ToUrV9lV997SXr+ZLwkKrypQGmqFNnygt4fibrtpPtLHIc/KJoLwHMbFC6OZDi9IqVa2OR6JEmeRpi3N5UOqQk=
 before_script:
-  - psql -c 'create database "cfdm_unit_test";' -U postgres
-  - travis_retry pip install -U pip setuptools wheel
-  - travis_retry pip install -r requirements.txt
-  - travis_retry pip install -r requirements-dev.txt
-  - travis_retry npm install -g swagger-tools
-
+- psql -c 'create database "cfdm_unit_test";' -U postgres
+- travis_retry pip install -U pip setuptools wheel
+- travis_retry pip install -r requirements.txt
+- travis_retry pip install -r requirements-dev.txt
+- travis_retry npm install -g swagger-tools
 script: py.test
-
 after_success:
-  - travis_retry pip install codecov
-  - codecov
-
+- travis_retry pip install codecov
+- codecov
 before_deploy:
-  - export PATH=$HOME:$PATH
-  - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
-  - tar xzvf $HOME/cf.tgz -C $HOME
-  - travis_retry cf install-plugin autopilot -f -r CF-Community
-  - npm install
-  - npm run build
-
+- export PATH=$HOME:$PATH
+- travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
+- tar xzvf $HOME/cf.tgz -C $HOME
+- travis_retry cf install-plugin autopilot -f -r CF-Community
+- npm install
+- npm run build
 deploy:
   provider: script
   skip_cleanup: true
