@@ -32,7 +32,7 @@ before_deploy:
 deploy:
   provider: script
   skip_cleanup: true
-  script: invoke deploy --branch $TRAVIS_BRANCH --yes
+  script: invoke deploy --branch $TRAVIS_BRANCH --yes --login true
   on:
     all_branches: true
 dd:
