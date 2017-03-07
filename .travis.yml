@@ -7,6 +7,8 @@ addons:
   postgresql: '9.4'
 env:
   global:
+  - FEC_CF_USERNAME='true'
+  - FEC_CF_PASSWORD='true'
   - secure: fZSgHvzAttJcq5GYEwp/jo8/hcRs0hW169dTG4VC6vW29sPFjc2R6NuXVzXxGzxkWN16KvUNU+feMiMIse7c2zQIceTmhJh7cz19v+xmmwgqJgv0ln8+7+1rGB6FIblS9C70b2ggKjZ5DYMD4DxCrtQkWkVzQDncdADb4vg0ZA4=
   - secure: OTXWsWgcECe+A21Tsxnz4sipzVaGW1RrtYqOx6/hFgBZPcGeNMz+sJtSH2PQ8tRj4QPljHwH4+X3vRrQDXYE9ToUrV9lV997SXr+ZLwkKrypQGmqFNnygt4fibrtpPtLHIc/KJoLwHMbFC6OZDi9IqVa2OR6JEmeRpi3N5UOqQk=
 before_script:
