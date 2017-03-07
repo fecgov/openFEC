@@ -15,6 +15,7 @@ class SchedAGroup(TableGroup):
 
     columns = [
         sa.Column('timestamp', sa.DateTime),
+        sa.Column('pg_date', sa.DateTime),
         sa.Column('pdf_url', sa.Text),
         sa.Column('contributor_name_text', TSVECTOR),
         sa.Column('contributor_employer_text', TSVECTOR),
@@ -31,6 +32,7 @@ class SchedAGroup(TableGroup):
     @classmethod
     def column_factory(cls, parent):
         return [
+            sa.cast(sa.func.current_timestamp(), sa.DateTime).label('pg_date'),
             sa.func.image_pdf_url(parent.c.image_num).label('pdf_url'),
             sa.func.to_tsvector(
                 sa.func.concat(parent.c.contbr_nm, ' ', parent.c.contbr_id),
