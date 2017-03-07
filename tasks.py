@@ -183,8 +183,8 @@ def deploy(ctx, space=None, branch=None, yes=False):
     ctx.run('cf api {0}'.format(api), echo=True)
 
     # Log in if necessary
-    if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
-        ctx.run('cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}".format(space.upper())', echo=True)
+    # if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
+    ctx.run('cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}".format(space.upper())', echo=True)
 
     # Target space
     ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
