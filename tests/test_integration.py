@@ -151,7 +151,7 @@ class TestViews(common.IntegrationTestCase):
         row = self.SchedAFactory(
             rpt_yr=2014,
             contbr_nm='Sheldon Adelson',
-            contb_receipt_dt=datetime.datetime(2016, 1, 1)
+            contb_receipt_dt=datetime.datetime(2014, 1, 1)
         )
         db.session.commit()
         manage.update_aggregates()
@@ -225,7 +225,7 @@ class TestViews(common.IntegrationTestCase):
         row = self.SchedAFactory(
             rpt_yr=2014,
             contbr_nm='Sheldon Adelson',
-            contb_receipt_dt=datetime.datetime(2016, 1, 1)
+            contb_receipt_dt=datetime.datetime(2014, 1, 1)
         )
         db.session.commit()
         new_queue_count = self._get_sched_a_queue_new_count()
@@ -287,7 +287,7 @@ class TestViews(common.IntegrationTestCase):
         row = self.SchedAFactory(
             rpt_yr=2014,
             contbr_nm='Sheldon Adelson',
-            contb_receipt_dt=datetime.datetime(2016, 1, 1)
+            contb_receipt_dt=datetime.datetime(2014, 1, 1)
         )
         db.session.commit()
         manage.update_aggregates()
@@ -321,7 +321,7 @@ class TestViews(common.IntegrationTestCase):
             'rpt_yr': 2015,
             'cmte_id': 'C12345',
             'contb_receipt_amt': 538,
-            'contb_receipt_dt': datetime.datetime(2016, 1, 1),
+            'contb_receipt_dt': datetime.datetime(2015, 1, 1),
             'receipt_tp': '15J',
             item_key: value,
         })
@@ -354,7 +354,7 @@ class TestViews(common.IntegrationTestCase):
             'rpt_yr': 2015,
             'cmte_id': existing.committee_id,
             'contb_receipt_amt': 538,
-            'contb_receipt_dt': datetime.datetime(2016, 1, 1),
+            'contb_receipt_dt': datetime.datetime(2015, 1, 1),
             'receipt_tp': '15J',
             item_key: getattr(existing, total_key),
         })
@@ -387,7 +387,7 @@ class TestViews(common.IntegrationTestCase):
             cmte_id=existing.committee_id,
             contbr_st=existing.state,
             contb_receipt_amt=None,
-            contb_receipt_dt=datetime.datetime(2016, 1, 1),
+            contb_receipt_dt=datetime.datetime(2015, 1, 1),
             receipt_tp='15J',
         )
         db.session.flush()
@@ -401,7 +401,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
             cmte_id='C6789',
             contb_receipt_amt=538,
-            contb_receipt_dt=datetime.datetime(2016, 1, 1),
+            contb_receipt_dt=datetime.datetime(2015, 1, 1),
             receipt_tp='15J',
         )
         db.session.commit()
@@ -439,7 +439,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
             cmte_id=existing.committee_id,
             contb_receipt_amt=538,
-            contb_receipt_dt=datetime.datetime(2016, 1, 1),
+            contb_receipt_dt=datetime.datetime(2015, 1, 1),
             receipt_tp='15J',
         )
         db.session.commit()
@@ -460,7 +460,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
             cmte_id=existing.committee_id,
             contb_receipt_amt=75,
-            contb_receipt_dt=datetime.datetime(2016, 1, 1),
+            contb_receipt_dt=datetime.datetime(2015, 1, 1),
             receipt_tp='15J',
         )
 
@@ -488,7 +488,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
             cmte_id='C12345',
             disb_amt=538,
-            disb_dt=datetime.datetime(2016, 1, 1),
+            disb_dt=datetime.datetime(2015, 1, 1),
             disb_desc='CAMPAIGN BUTTONS',
             form_tp_cd='11'
         )
@@ -528,7 +528,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
             cmte_id=existing.committee_id,
             disb_amt=538,
-            disb_dt=datetime.datetime(2016, 1, 1),
+            disb_dt=datetime.datetime(2015, 1, 1),
             disb_tp='24K',
         )
         db.session.commit()
