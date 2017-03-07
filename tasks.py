@@ -153,7 +153,7 @@ DEPLOY_RULES = (
     ('prod', _detect_prod),
     ('stage', lambda _, branch: branch.startswith('release')),
     # ('dev', lambda _, branch: branch == 'develop'),
-    ('dev', lambda _, branch: branch == 'feature/gov-cloud'),
+    ('stage', lambda _, branch: branch == 'feature/gov-cloud'),
 )
 
 
@@ -184,7 +184,7 @@ def deploy(ctx, space=None, branch=None, yes=False):
 
     # Log in if necessary
     if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
-        ctx.run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
+        ctx.run('cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}".format(space.upper())', echo=True)
 
     # Target space
     ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
