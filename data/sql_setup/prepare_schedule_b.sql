@@ -68,7 +68,7 @@ declare
     view_row fec_vsum_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'DELETE' then
-    select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
+        select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
         two_year_transaction_period_old = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
 
         if two_year_transaction_period_old >= start_year then
@@ -81,7 +81,7 @@ begin
         select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
         two_year_transaction_period_old = get_transaction_year(old.disb_dt, view_row.rpt_yr);
 
-        if two_year_transaction_period_new >= start_year then
+        if two_year_transaction_period_old >= start_year then
             delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
             insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
         end if;
