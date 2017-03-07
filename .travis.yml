@@ -11,6 +11,7 @@ env:
   - secure: OTXWsWgcECe+A21Tsxnz4sipzVaGW1RrtYqOx6/hFgBZPcGeNMz+sJtSH2PQ8tRj4QPljHwH4+X3vRrQDXYE9ToUrV9lV997SXr+ZLwkKrypQGmqFNnygt4fibrtpPtLHIc/KJoLwHMbFC6OZDi9IqVa2OR6JEmeRpi3N5UOqQk=
   - secure: b8mtTxB1+ZC2uEjFj6K4NjOr5xyprErJl1F3o1z/0iOHIsBaV3MFhv6QbNi+DXbyPGZuYQAIXUzDLFruToc/XTWWK6VFWo16KRKgrdB9JPuBseKDs8sM8pvoIUKbhRDatvN49zYmnsCGdnFN0s5U/fvfnjMIEuSNNgP59CxccL4=
   - secure: Yc2cMJt6lnFiOV8giiFdI2HHqNszqGVV3djMWKWfno0NTy3sebAV9oF/ioXZehhQouH/nqtBJ34yPDu5svrqANnidLF0TB9+t2B9YTjeTQikO7kqRx4+OT3Q7mD+EROyfVOGhp31A32mqju64lEqX6yg2Cy7n2ZMnP3HRvDn81w=
+  - secure: PT/TTWy0apjJZYyQzM4URPKcWI15YOezrikW2JuMo+J1eL5H3hUTVEWclrKDFqmWnL0Ru3wc1qLFllKOXjtiAelzgLlQR+kmHncs6S2O884U6OVwKllEQv7OyunFGffPkWsjWyKLxjHC93DpYezvYrECcp9kHioJA8AoJO/cTi0=
 before_script:
 - psql -c 'create database "cfdm_unit_test";' -U postgres
 - travis_retry pip install -U pip setuptools wheel
