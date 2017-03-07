@@ -184,8 +184,8 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
 
     # Log in if necessary
     if login == True:
-        print('working')
-        ctx.run('cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(space.upper()), echo=True)
+        login_command = 'cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(space.upper())
+        ctx.run(login_command, echo=True)
 
     # Target space
     ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
