@@ -13,10 +13,10 @@ with last as (
 	      election_cycle                    as cycle,
 	      coh_bop as cash_on_hand
 	  from
-        fec_vsum_f3x_vw pnp
+        fec_vsum_f3x_vw
     where
-        pnp.most_recent_filing_flag like 'Y'
-        and pnp.election_cycle >= :START_YEAR
+        most_recent_filing_flag like 'Y'
+        and election_cycle >= :START_YEAR
     order by
         cmte_id,
         election_cycle,

@@ -31,7 +31,6 @@ shared_fields = {
     'last_beginning_image_number': '123',
     'cash_on_hand_beginning_period': 222.0,
     'last_cash_on_hand_end_period': 538,
-    'last_cash_on_hand_beginning_period': 543.0,
     'last_debts_owed_by_committee': 42,
     'net_contributions': 123,
     'net_operating_expenditures': 321,

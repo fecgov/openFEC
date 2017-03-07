@@ -11,13 +11,12 @@ with last as (
 	  select distinct on (cmte_id, election_cycle)
 	      cmte_id as committee_id,
 	      election_cycle as cycle,
-	      hs.coh_bop as cash_on_hand
+	      coh_bop as cash_on_hand
 	  from
-        fec_vsum_f3p_vw hs
-        inner join last using (cmte_id, election_cycle)
+        fec_vsum_f3p_vw
     where
-        hs.most_recent_filing_flag like 'Y'
-        and hs.election_cycle >= :START_YEAR
+        most_recent_filing_flag like 'Y'
+        and election_cycle >= :START_YEAR
     order by
         cmte_id,
         election_cycle,

@@ -32,7 +32,6 @@ class CommitteeTotals(BaseModel):
     last_report_type_full = db.Column(db.String)
     last_beginning_image_number = db.Column(db.BigInteger)
     last_cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
-    last_cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 

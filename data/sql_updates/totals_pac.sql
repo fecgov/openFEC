@@ -9,23 +9,23 @@ with last as (
         election_cycle,
         cvg_end_dt desc
 ), cash_beginning_period as (
-	  select distinct on (cmte_id, election_cycle)
-	      cmte_id                           as committee_id,
-	      election_cycle                    as cycle,
-	      coh_bop as cash_on_hand
+	  select distinct on (pac.cmte_id, pac.election_cycle)
+	      pac.cmte_id                           as committee_id,
+	      pac.election_cycle                    as cycle,
+	      pac.coh_bop as cash_on_hand
 	  from
-        fec_vsum_f3x_vw pnp
-        inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
+        fec_vsum_f3x_vw pac
+        inner join ofec_committee_detail_mv_tmp comm_dets on pac.cmte_id = comm_dets.committee_id
     where
-        pnp.most_recent_filing_flag like 'Y'
-        and pnp.election_cycle >= :START_YEAR
+        pac.most_recent_filing_flag like 'Y'
+        and pac.election_cycle >= :START_YEAR
         and (comm_dets.committee_type like 'N' or comm_dets.committee_type like 'Q'
         or comm_dets.committee_type like 'O' or comm_dets.committee_type like 'V'
         or comm_dets.committee_type like 'W')
     order by
-        cmte_id,
-        election_cycle,
-        cvg_end_dt asc
+        pac.cmte_id,
+        pac.election_cycle,
+        pac.cvg_end_dt asc
 ), aggregate_filings as (
     select
         row_number() over () as idx,
