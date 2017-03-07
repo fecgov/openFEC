@@ -11,7 +11,7 @@ with last as (
     select distinct on (cmte_id, election_cycle)
         coh_bop as cash_on_hand,
         cmte_id as committee_id,
-	      election_cycle as cycle
+	     election_cycle as cycle
     from fec_vsum_f3_vw hs
     where election_cycle >= :START_YEAR
         and hs.most_recent_filing_flag like 'Y'
