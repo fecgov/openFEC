@@ -201,8 +201,13 @@ class SearchTest(unittest.TestCase):
             "must": [
                 {"term": {"_type": "advisory_opinions"}},
                 {"match": {"_all": "president"}},
-                {'terms': {'category': ['Final Opinion']}}
-            ],
+                {'nested': {
+                    'path': 'documents',
+                    'query': {
+                        'bool': {
+                            'must': [
+                                {'terms': {'documents.category': ['Final Opinion']}},
+                                {'match': {'documents.text': 'president'}}]}}}}],
             "should": [
                 {"match": {"no": "president"}},
                 {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
