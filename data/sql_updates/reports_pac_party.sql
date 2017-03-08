@@ -106,6 +106,8 @@ select
     most_recent_filing_flag like 'N' as is_amended,
     f3x.receipt_dt as receipt_date,
     f3x.file_num as file_number,
+    f3x.amndt_ind as amendment_indicator,
+    f3x.amndt_ind_desc as amendment_indicator_full,
     means_filed(begin_image_num) as means_filed,
     report_fec_url(begin_image_num::text, f3x.file_num::integer) as fec_url,
     amendments.amendment_chain,

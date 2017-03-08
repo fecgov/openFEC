@@ -102,7 +102,7 @@ def get_ao_citations():
         logger.info("Getting citations for %s" % row['ao_no'])
         citations_in_doc = set()
         text = row['ocrtext'] or ''
-        for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?', text):
+        for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?[0-9]?', text):
             year, no = tuple(citation.split('-'))
             citation_txt = "{0}-{1:02d}".format(year, int(no))
             if citation_txt != row['ao_no'] and citation_txt in ao_names:
@@ -124,75 +124,6 @@ def get_ao_citations():
         cited_by[citation] = cited_by_with_name
 
     return citations, cited_by
-
-def index_advisory_opinions():
-    """
-        Indexes advisory opinions in Elasticsearch.
-        The advisory opinions are read from the local Postgres DB.
-    """
-    logger.info('Indexing advisory opinions...')
-
-    count = db.engine.execute('SELECT COUNT(*) FROM ao').fetchone()[0]
-    logger.info('AO count: %d' % count)
-    count = db.engine.execute('SELECT COUNT(*) FROM document').fetchone()[0]
-    logger.info('DOC count: %d' % count)
-    citations, cited_by = get_ao_citations()
-
-    es = utils.get_elasticsearch_connection()
-
-    result = db.engine.execute("""SELECT document_id, ocrtext, description,
-                            category, name, summary,
-                            ao_no, document_date,
-                            CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
-                            FROM aouser.document INNER JOIN
-                            aouser.ao ON ao.ao_id = document.ao_id
-                            LEFT JOIN (SELECT ao_id, 1 AS finished
-                                       FROM aouser.document
-                                       WHERE category='Final Opinion'
-                                        OR category='Withdrawal of Request') AS finished
-                            ON document.ao_id = finished.ao_id""")
-
-    loading_doc = 0
-
-    if loading_doc % 500 == 0:
-        logger.info("%d docs loaded" % loading_doc)
-
-    bucket_name = env.get_credential('bucket')
-    for row in result:
-        key = "legal/aos/%s.pdf" % row['document_id']
-        pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
-
-        requestors = db.engine.execute("""SELECT e.name, et.description
-                            FROM aouser.players p
-                            INNER JOIN aouser.ao ao ON ao.ao_id = p.ao_id
-                            INNER JOIN aouser.entity e ON p.entity_id = e.entity_id
-                            INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
-                            WHERE ao.ao_no='{0}' AND (role_id = 0 or role_id = 1);""".format(row['ao_no']))
-
-        requestor_names = []
-        requestor_types = set()
-        for requestor in requestors:
-            requestor_names.append(requestor['name'])
-            requestor_types.add(requestor['description'])
-
-        doc = {"doc_id": row['document_id'],
-               "text": row['ocrtext'],
-               "description": row['description'],
-               "category": row['category'],
-               "name": row['name'],
-               "summary": row['summary'],
-               "no": row['ao_no'],
-               "date": row['document_date'],
-               "is_pending": row['is_pending'],
-               "url": pdf_url,
-               "requestor_names": requestor_names,
-               "requestor_types": list(requestor_types),
-               "citations": citations[(row['ao_no'], row['category'])],
-               "cited_by": cited_by[row['ao_no']] if row['ao_no'] in cited_by else []}
-
-        es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
-        loading_doc += 1
-    logger.info("%d docs loaded" % loading_doc)
 
 def get_xml_tree_from_url(url):
     r = requests.get(url, stream=True)
@@ -284,47 +215,6 @@ def index_statutes():
     get_title_26_statutes()
     get_title_52_statutes()
 
-
-def delete_advisory_opinions_from_s3():
-    """
-    Deletes all advisory opinions documents from S3
-    """
-    for obj in get_bucket().objects.filter(Prefix="legal/aos"):
-        obj.delete()
-
-
-def load_advisory_opinions_into_s3():
-    """
-        Uploads advisory opinions documents to S3.
-        The advisory opinions are read from the local Postgres DB.
-    """
-
-    docs_in_db = set([str(r['document_id']) for r in db.engine.execute(
-                     "select document_id from document").fetchall()])
-
-    bucket = get_bucket()
-    docs_in_s3 = set([re.match("legal/aos/([0-9]+)\.pdf", obj.key).group(1)
-                      for obj in bucket.objects.filter(Prefix="legal/aos")])
-
-    new_docs = docs_in_db.difference(docs_in_s3)
-
-    if new_docs:
-        query = "select document_id, fileimage from document \
-                where document_id in (%s)" % ','.join(new_docs)
-
-        result = db.engine.connect().execution_options(stream_results=True)\
-                .execute(query)
-
-        bucket_name = env.get_credential('bucket')
-        for i, (document_id, fileimage) in enumerate(result):
-            key = "legal/aos/%s.pdf" % document_id
-            bucket.put_object(Key=key, Body=bytes(fileimage),
-                              ContentType='application/pdf', ACL='public-read')
-            url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
-            logger.info("pdf written to %s" % url)
-            logger.info("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
-    else:
-        logger.info("No new advisory opinions found.")
 
 def process_mur_pdf(mur_no, pdf_key, bucket):
     response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'

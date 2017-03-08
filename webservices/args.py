@@ -104,6 +104,17 @@ class IndexValidator(OptionValidator):
     def _is_excluded(self, value):
         return not value or value in self.exclude
 
+
+class IndicesValidator(IndexValidator):
+
+    def __call__(self, value):
+        for sort_column in value:
+            if sort_column.lstrip('-') not in self.values:
+                raise ValidationError(
+                    'Cannot sort on value "{0}"'.format(value),
+                    status_code=422
+                )
+
 def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
     return {
         'sort': fields.Str(
@@ -120,6 +131,14 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
             description='Toggle that filters out all rows having sort column that is non-null'
         )
     }
+
+
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
+    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only )
+    args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
+                               description='Provide a field to sort by. Use - for descending order.',
+        )
+    return args
 
 def make_seek_args(field=fields.Int, description=None):
     return {
@@ -286,7 +305,20 @@ reports = {
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
     'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
-    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID)
+    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID),
+    'amendment_indicator': fields.List(
+        IStr,
+        description='''
+        -N   new\n\
+        -A   amendment\n\
+        -T   terminated\n\
+        -C   consolidated\n\
+        -M   multi-candidate\n\
+        -S   secondary\n\
+
+        Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+        '''
+    ),
 }
 
 committee_reports = {
@@ -534,11 +566,18 @@ schedule_e_by_candidate = {
 schedule_d = {
     'min_payment_period': fields.Float(),
     'max_payment_period': fields.Float(),
+    'min_amount_incurred': fields.Float(),
+    'max_amount_incurred': fields.Float(),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'creditor_debtor_name': fields.List(fields.Str),
+    'nature_of_debt': fields.Str(),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_f = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'payee_name': fields.List(fields.Str),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 communication_cost = {
@@ -679,6 +718,7 @@ rad_analyst = {
     'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
     'name': fields.List(fields.Str, description='Name of RAD analyst'),
     'email': fields.List(fields.Str, description='Email of RAD analyst'),
+    'title': fields.List(fields.Str, description='Title of RAD analyst'),
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}
