@@ -98,10 +98,11 @@ class UniversalSearch(utils.Resource):
                 .query(Q('bool',
                          must=must_query,
                          should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
-                .highlight('description', 'name', 'no', 'summary', 'text') \
-                .source(exclude='text') \
+                .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
+                .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
                 .extra(size=hits_returned, from_=from_hit) \
-                .index(DOCS_SEARCH)
+                .index(DOCS_SEARCH) \
+                .sort("sort1", "sort2")
 
             if type == 'advisory_opinions':
                 query = apply_ao_specific_query_params(query, **kwargs)
@@ -202,6 +203,6 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get('ao_max_date'):
         date_range['lte'] = kwargs.get('ao_max_date')
     if date_range:
-        query = query.query("range", date=date_range)
+        query = query.query("range", issue_date=date_range)
 
     return query
