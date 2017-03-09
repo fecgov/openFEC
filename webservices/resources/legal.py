@@ -164,10 +164,11 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
         ao_category = [categories[c] for c in kwargs.get('ao_category')]
     else:
         ao_category = ['Final Opinion']
-    combined_query = [
-        Q('terms', documents__category=ao_category),
-        Q('match', documents__text=q)]
-    query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+    if q:
+        combined_query = [
+            Q('terms', documents__category=ao_category),
+            Q('match', documents__text=q)]
+        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
 
     if kwargs.get('ao_no'):
         query = query.query('terms', no=kwargs.get('ao_no'))
