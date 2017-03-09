@@ -109,8 +109,6 @@ def load_current_murs():
                 'no': row['case_no'],
                 'name': row['name'],
                 'mur_type': 'current',
-                "sort1": -int(row['case_no']),
-                "sort2": None,
             }
             mur['subjects'] = get_subjects(case_id)
             mur['subject'] = {'text': mur['subjects']}
