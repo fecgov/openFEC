@@ -105,7 +105,7 @@ class UniversalSearch(utils.Resource):
                 .sort("sort1", "sort2")
 
             if type == 'advisory_opinions':
-                query = apply_ao_specific_query_params(query, **kwargs)
+                query = apply_ao_specific_query_params(query, q, **kwargs)
 
             if type == 'murs':
                 query = apply_mur_specific_query_params(query, q, **kwargs)
@@ -151,7 +151,7 @@ def apply_mur_specific_query_params(query, q='', **kwargs):
 
     return query
 
-def apply_ao_specific_query_params(query, **kwargs):
+def apply_ao_specific_query_params(query, q='', **kwargs):
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
                   'D': 'Draft Documents',
@@ -164,7 +164,11 @@ def apply_ao_specific_query_params(query, **kwargs):
         ao_category = [categories[c] for c in kwargs.get('ao_category')]
     else:
         ao_category = ['Final Opinion']
-    query = query.query('terms', category=ao_category)
+    if q:
+        combined_query = [
+            Q('terms', documents__category=ao_category),
+            Q('match', documents__text=q)]
+        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
 
     if kwargs.get('ao_no'):
         query = query.query('terms', no=kwargs.get('ao_no'))
