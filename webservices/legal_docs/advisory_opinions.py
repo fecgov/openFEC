@@ -17,6 +17,7 @@ ALL_AOS = """
         ao_no,
         name,
         summary,
+        req_date,
         issue_date,
         CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
     FROM aouser.ao
@@ -84,6 +85,7 @@ def get_advisory_opinions():
                 "no": row["ao_no"],
                 "name": row["name"],
                 "summary": row["summary"],
+                "request_date": row["req_date"],
                 "issue_date": row["issue_date"],
                 "is_pending": row["is_pending"],
                 "ao_citations": citations[row["ao_no"]]["ao"],
