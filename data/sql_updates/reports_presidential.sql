@@ -88,6 +88,8 @@ select
     most_recent_filing_flag like 'N' as is_amended,
     f3p.receipt_dt as receipt_date,
     f3p.file_num as file_number,
+    f3p.amndt_ind as amendment_indicator,
+    f3p.amndt_ind_desc as amendment_indicator_full,
     means_filed(begin_image_num) as means_filed,
     report_fec_url(begin_image_num::text, f3p.file_num::integer) as fec_url,
     amendments.amendment_chain,
@@ -98,7 +100,7 @@ select
 from
     fec_vsum_f3p_vw f3p
     left join
-    (select * from ofec_presidential_electronic_amendments_mv_tmp union all
+    (select * from ofec_amendments_mv_tmp union all
      select * from ofec_presidential_paper_amendments_mv_tmp) amendments
      on f3p.file_num = amendments.file_num
 where

@@ -87,6 +87,8 @@ select
     most_recent_filing_flag like 'N' as is_amended,
     f3.receipt_dt as receipt_date,
     f3.file_num as file_number,
+    f3.amndt_ind as amendment_indicator,
+    f3.amndt_ind_desc as amendment_indicator_full,
     means_filed(begin_image_num) as means_filed,
     report_fec_url(begin_image_num::text, f3.file_num::integer) as fec_url,
     amendments.amendment_chain,
@@ -95,7 +97,7 @@ select
     is_most_recent(f3.file_num::integer, amendments.mst_rct_file_num::integer) as most_recent
 from
     fec_vsum_f3_vw f3 left join
-    (select * from ofec_house_senate_electronic_amendments_mv_tmp
+    (select * from ofec_amendments_mv_tmp
      union all
      select * from ofec_house_senate_paper_amendments_mv_tmp
     ) amendments

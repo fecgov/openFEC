@@ -52,88 +52,78 @@ def get_text(node):
 
 
 def index_regulations():
+    """
+        Indexes the regulations relevant to the FEC in Elasticsearch.
+        The regulations are accessed from FEC_EREGS_API.
+    """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
+    if not eregs_api:
+        logger.info("Regs could not be indexed, environment variable FEC_EREGS_API not set.")
+        return
 
-    if(eregs_api):
-        reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
-        es = utils.get_elasticsearch_connection()
-        reg_count = 0
-        for reg in reg_versions:
-            url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'],
-                                          reg['version'])
-            regulation = requests.get(url).json()
-            sections = get_sections(regulation)
+    reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
+    es = utils.get_elasticsearch_connection()
+    reg_count = 0
+    for reg in reg_versions:
+        url = '%sregulation/%s/%s' % (eregs_api, reg['regulation'],
+                                        reg['version'])
+        regulation = requests.get(url).json()
+        sections = get_sections(regulation)
 
-            print("Loading part %s" % reg['regulation'])
-            for section_label in sections:
-                doc_id = '%s_%s' % (section_label[0], section_label[1])
-                section_formatted = '%s-%s' % (section_label[0], section_label[1])
-                reg_url = '/regulations/{0}/{1}#{0}'.format(section_formatted,
-                                                            reg['version'])
-                no = '%s.%s' % (section_label[0], section_label[1])
-                name = sections[section_label]['title'].split(no)[1].strip()
-                doc = {"doc_id": doc_id, "name": name,
-                       "text": sections[section_label]['text'], 'url': reg_url,
-                       "no": no}
+        logger.info("Loading part %s" % reg['regulation'])
+        for section_label in sections:
+            doc_id = '%s_%s' % (section_label[0], section_label[1])
+            section_formatted = '%s-%s' % (section_label[0], section_label[1])
+            reg_url = '/regulations/{0}/{1}#{0}'.format(section_formatted,
+                                                        reg['version'])
+            no = '%s.%s' % (section_label[0], section_label[1])
+            name = sections[section_label]['title'].split(no)[1].strip()
+            doc = {"doc_id": doc_id, "name": name,
+                    "text": sections[section_label]['text'], 'url': reg_url,
+                    "no": no}
 
-                es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
-            reg_count += 1
-        print("%d regulation parts indexed." % reg_count)
-    else:
-        print("Regs could not be indexed, environment variable not set.")
+            es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
+        reg_count += 1
+    logger.info("%d regulation parts indexed." % reg_count)
 
-def legal_loaded():
-    legal_loaded = db.engine.execute("""SELECT EXISTS (
-                               SELECT 1
-                               FROM   information_schema.tables
-                               WHERE  table_name = 'ao'
-                            );""").fetchone()[0]
-    if not legal_loaded:
-        print('Advisory opinion tables not found.')
+def get_ao_citations():
+    logger.info("getting citations...")
+    ao_names_results = db.engine.execute("""SELECT ao_no, name FROM aouser.document
+                                  INNER JOIN aouser.ao ON ao.ao_id = document.ao_id""")
+    ao_names = {}
+    for row in ao_names_results:
+        ao_names[row['ao_no']] = row['name']
 
-    return legal_loaded
+    text = db.engine.execute("""SELECT ao_no, category, ocrtext FROM aouser.document
+                                INNER JOIN aouser.ao ON ao.ao_id = document.ao_id""")
+    citations = {}
+    cited_by = {}
+    for row in text:
+        logger.info("Getting citations for %s" % row['ao_no'])
+        citations_in_doc = set()
+        text = row['ocrtext'] or ''
+        for citation in re.findall('[12][789012][0-9][0-9]-[0-9][0-9]?[0-9]?', text):
+            year, no = tuple(citation.split('-'))
+            citation_txt = "{0}-{1:02d}".format(year, int(no))
+            if citation_txt != row['ao_no'] and citation_txt in ao_names:
+                citations_in_doc.add(citation_txt)
 
+        citations[(row['ao_no'], row['category'])] = sorted([{'no': citation, 'name': ao_names[citation]}
+         for citation in citations_in_doc], key=lambda d: d['no'])
 
-def index_advisory_opinions():
-    print('Indexing advisory opinions...')
+        if row['category'] == 'Final Opinion':
+            for citation in citations_in_doc:
+                if citation not in cited_by:
+                    cited_by[citation] = set([row['ao_no']])
+                else:
+                    cited_by[citation].add(row['ao_no'])
 
-    if legal_loaded():
-        count = db.engine.execute('select count(*) from AO').fetchone()[0]
-        print('AO count: %d' % count)
-        count = db.engine.execute('select count(*) from DOCUMENT').fetchone()[0]
-        print('DOC count: %d' % count)
+    for citation, cited_by_set in cited_by.items():
+        cited_by_with_name = sorted([{'no': c, 'name': ao_names[c]}
+            for c in cited_by_set], key=lambda d: d['no'])
+        cited_by[citation] = cited_by_with_name
 
-        es = utils.get_elasticsearch_connection()
-
-        result = db.engine.execute("""select DOCUMENT_ID, OCRTEXT, DESCRIPTION,
-                                CATEGORY, DOCUMENT.AO_ID, NAME, SUMMARY,
-                                TAGS, AO_NO, DOCUMENT_DATE FROM DOCUMENT INNER JOIN
-                                AO on AO.AO_ID = DOCUMENT.AO_ID""")
-
-        loading_doc = 0
-
-        if loading_doc % 500 == 0:
-            print("%d docs loaded" % loading_doc)
-
-        bucket_name = env.get_credential('bucket')
-        for row in result:
-            key = "legal/aos/%s.pdf" % row[0]
-            pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
-            doc = {"doc_id": row[0],
-                   "text": row[1],
-                   "description": row[2],
-                   "category": row[3],
-                   "id": row[4],
-                   "name": row[5],
-                   "summary": row[6],
-                   "tags": row[7],
-                   "no": row[8],
-                   "date": row[9],
-                   "url": pdf_url}
-
-            es.index(DOCS_INDEX, 'advisory_opinions', doc, id=doc['doc_id'])
-            loading_doc += 1
-        print("%d docs loaded" % loading_doc)
+    return citations, cited_by
 
 def get_xml_tree_from_url(url):
     r = requests.get(url, stream=True)
@@ -218,46 +208,13 @@ def get_title_26_statutes():
 
 
 def index_statutes():
+    """
+        Indexes statutes with titles 26 and 52 in Elasticsearch.
+        The statutes are downloaded from http://uscode.house.gov.
+    """
     get_title_26_statutes()
     get_title_52_statutes()
 
-
-def delete_advisory_opinions_from_s3():
-    """
-    Deletes all advisory opinions documents from S3
-    """
-    for obj in get_bucket().objects.filter(Prefix="legal/aos"):
-        obj.delete()
-
-
-def load_advisory_opinions_into_s3():
-    if legal_loaded():
-        docs_in_db = set([str(r[0]) for r in db.engine.execute(
-                         "select document_id from document").fetchall()])
-
-        bucket = get_bucket()
-        docs_in_s3 = set([re.match("legal/aos/([0-9]+)\.pdf", obj.key).group(1)
-                          for obj in bucket.objects.filter(Prefix="legal/aos")])
-
-        new_docs = docs_in_db.difference(docs_in_s3)
-
-        if new_docs:
-            query = "select document_id, fileimage from document \
-                    where document_id in (%s)" % ','.join(new_docs)
-
-            result = db.engine.connect().execution_options(stream_results=True)\
-                    .execute(query)
-
-            bucket_name = env.get_credential('bucket')
-            for i, (document_id, fileimage) in enumerate(result):
-                key = "legal/aos/%s.pdf" % document_id
-                bucket.put_object(Key=key, Body=bytes(fileimage),
-                                  ContentType='application/pdf', ACL='public-read')
-                url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, key)
-                print("pdf written to %s" % url)
-                print("%d of %d advisory opinions written to s3" % (i + 1, len(new_docs)))
-        else:
-            print("No new advisory opinions found.")
 
 def process_mur_pdf(mur_no, pdf_key, bucket):
     response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
@@ -399,7 +356,7 @@ def get_mur_names(mur_names={}):
     return mur_names
 
 def process_mur(mur):
-    print("processing mur %d of %d" % (mur[0], mur[1]))
+    logger.info("processing mur %d of %d" % (mur[0], mur[1]))
     es = utils.get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
@@ -407,10 +364,10 @@ def process_mur(mur):
     (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
         = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
     mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-    print("processing mur %s" % mur_no)
+    logger.info("processing mur %s" % mur_no)
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
-        print('already processed %s' % pdf_key)
+        logger.info('already processed %s' % pdf_key)
         return
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
     pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
@@ -455,10 +412,10 @@ def process_mur(mur):
 
 def load_archived_murs():
     """
-    Reads data for archived MURs from TODO, assembles a JSON document
-    corresponding to the MUR and indexes this document in Elasticsearch in the index
-    `docs_index` with a doc_type of `murs`. In addition, the MUR document
-    is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
+    Reads data for archived MURs from http://www.fec.gov/MUR, assembles a JSON
+    document corresponding to the MUR and indexes this document in Elasticsearch
+    in the index `docs_index` with a doc_type of `murs`. In addition, the MUR
+    document is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
     """
     table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]

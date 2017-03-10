@@ -61,7 +61,43 @@ class TreasurerMixin(object):
         return name
 
 
-class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
+class AmendmentChainMixin(object):
+
+    @property
+    def most_recent(self):
+        return self.file_number == self.amendment.most_recent_filing
+
+    @hybrid_property
+    def most_recent_filing(self):
+        return self.amendment.most_recent_filing
+
+    @hybrid_property
+    def amendment_chain(self):
+        return self.amendment.amendment_chain
+
+    @property
+    def is_amended(self):
+        return not self.most_recent
+
+    @property
+    def amended_by(self):
+        amender_file_number = self.amendment.next_in_chain(self.file_number)
+        if amender_file_number > 0:
+            return amender_file_number
+        else:
+            return None
+
+
+class FecFileNumberMixin(object):
+    @property
+    def fec_file_id(self):
+        if self.file_number and self.file_number > 0:
+            return ("FEC-" + str(self.file_number))
+        else:
+            return None
+
+
+class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     __abstract__ = True
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -74,6 +110,8 @@ class CommitteeReports(PdfMixin, CsvMixin, BaseModel):
 
     cycle = db.Column(db.Integer, index=True, doc=docs.CYCLE)
     file_number = db.Column(db.Integer)
+    amendment_indicator = db.Column('amendment_indicator', db.String)
+    amendment_indicator_full = db.Column(db.String)
     beginning_image_number = db.Column(db.BigInteger, doc=docs.BEGINNING_IMAGE_NUMBER)
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2), doc=docs.CASH_ON_HAND_BEGIN_PERIOD)#P
     cash_on_hand_end_period = db.Column('cash_on_hand_end_period', db.Numeric(30, 2), doc=docs.CASH_ON_HAND_END_PERIOD)#P
@@ -326,7 +364,7 @@ class BaseFilingSummary(db.Model):
     column_a = db.Column('cola', db.Float)
     column_b = db.Column('colb', db.Float)
 
-class BaseFiling(PdfMixin, FecMixin, db.Model):
+class BaseFiling(FecFileNumberMixin, AmendmentChainMixin, PdfMixin, FecMixin, db.Model):
     __abstract__ = True
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_id = db.Column('comid', db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -344,6 +382,7 @@ class BaseFiling(PdfMixin, FecMixin, db.Model):
     election_state = db.Column('el_state', db.String)
     receipt_date = db.Column('create_dt', db.Date, index=True)
     sign_date = db.Column(db.Date)
+    superceded = ''
 
     @property
     def document_description(self):
@@ -409,6 +448,15 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
         lazy='subquery',
     )
 
+    amendment = db.relationship(
+        'EfilingsAmendments',
+        primaryjoin='''and_(
+                                EfilingsAmendments.file_number == BaseF3PFiling.file_number,
+                            )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
     @declared_attr
     def report(self):
         return db.relationship(ReportType,
@@ -454,6 +502,15 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
         )
         return name
 
+    amendment = db.relationship(
+        'EfilingsAmendments',
+        primaryjoin='''and_(
+                                    EfilingsAmendments.file_number == BaseF3Filing.file_number,
+                                )''',
+        foreign_keys=file_number,
+        lazy='joined',
+    )
+
     summary_lines = db.relationship(
         'BaseFilingSummary',
         primaryjoin='''and_(
@@ -491,6 +548,15 @@ class BaseF3XFiling(BaseFiling):
         foreign_keys=file_number,
         uselist=True,
         lazy='subquery',
+    )
+
+    amendment = db.relationship(
+        'EfilingsAmendments',
+        primaryjoin='''and_(
+                                    EfilingsAmendments.file_number == BaseF3XFiling.file_number,
+                                )''',
+        foreign_keys=file_number,
+        lazy='joined',
     )
 
     @declared_attr

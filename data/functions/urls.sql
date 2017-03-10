@@ -81,8 +81,28 @@ begin
 end
 $$ language plpgsql immutable;
 
+create or replace function is_amended(most_recent_file_number integer, file_number integer, form_type text) returns boolean as $$
+begin
+    return case
+        when form_type = 'F99' then false
+        when form_type = 'FRQ' then false
+        else not is_most_recent(most_recent_file_number, file_number)
+    end;
+end
+$$ language plpgsql immutable;
+
 create or replace function is_most_recent(most_recent_file_number integer, file_number integer) returns boolean as $$
 begin
     return most_recent_file_number = file_number;
+end
+$$ language plpgsql immutable;
+
+create or replace function is_most_recent(most_recent_file_number integer, file_number integer, form_type text) returns boolean as $$
+begin
+    return case
+        when form_type = 'F99' then true
+        when form_type = 'FRQ' then true
+        else most_recent_file_number = file_number
+    end;
 end
 $$ language plpgsql immutable;

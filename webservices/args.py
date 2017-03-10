@@ -104,6 +104,17 @@ class IndexValidator(OptionValidator):
     def _is_excluded(self, value):
         return not value or value in self.exclude
 
+
+class IndicesValidator(IndexValidator):
+
+    def __call__(self, value):
+        for sort_column in value:
+            if sort_column.lstrip('-') not in self.values:
+                raise ValidationError(
+                    'Cannot sort on value "{0}"'.format(value),
+                    status_code=422
+                )
+
 def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
     return {
         'sort': fields.Str(
@@ -120,6 +131,14 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
             description='Toggle that filters out all rows having sort column that is non-null'
         )
     }
+
+
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
+    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only )
+    args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
+                               description='Provide a field to sort by. Use - for descending order.',
+        )
+    return args
 
 def make_seek_args(field=fields.Int, description=None):
     return {
@@ -143,10 +162,17 @@ query = {
     'ao_name': fields.List(IStr, required=False, description='Force advisory opinion name'),
     'ao_min_date': fields.Date(description="Earliest issue date of advisory opinion"),
     'ao_max_date': fields.Date(description="Latest issue date of advisory opinion"),
-    'no': fields.List(IStr, required=False, description='Filter by case number'),
-    'election_cycles': fields.Int(IStr, required=False, description='Filter by election cycles'),
-    'document_category': fields.Str(IStr, required=False, description='Filter by category of associated documents'),
-    'document_text': fields.Str(IStr, required=False, description='Text to search for in the associated documents'),
+    'ao_category': fields.List(IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
+                                    description="Category of the document"),
+    'ao_is_pending': fields.Bool(description="Status of AO (pending or completed)"),
+    'ao_requestor': fields.Str(description="The requestor of the advisory opinion"),
+    'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
+                                            description="Code of the advisory opinion requestor type."),
+    'mur_no': fields.List(IStr, required=False, description='Filter MURs by case number'),
+    'mur_respondents': fields.Str(IStr, required=False, description='Filter MURs by respondents'),
+    'mur_dispositions': fields.List(IStr, required=False, description='Filter MURs by dispositions'),
+    'mur_election_cycles': fields.Int(IStr, required=False, description='Filter MURs by election cycles'),
+    'mur_document_category': fields.List(IStr, required=False, description='Filter MURs by category of associated documents'),
 }
 
 candidate_detail = {
@@ -279,7 +305,20 @@ reports = {
     'max_total_contributions': Currency(description=docs.MAX_FILTER),
     'type': fields.List(fields.Str, description=docs.COMMITTEE_TYPE),
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
-    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID)
+    'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID),
+    'amendment_indicator': fields.List(
+        IStr,
+        description='''
+        -N   new\n\
+        -A   amendment\n\
+        -T   terminated\n\
+        -C   consolidated\n\
+        -M   multi-candidate\n\
+        -S   secondary\n\
+
+        Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+        '''
+    ),
 }
 
 committee_reports = {
@@ -413,6 +452,17 @@ schedule_a = {
     ),
 }
 
+schedule_a_e_file = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    #'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
+    'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
+    'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
+    'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
+    'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
+
+}
+
 schedule_a_by_size = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'size': fields.List(fields.Int(validate=validate.OneOf([0, 200, 500, 1000, 2000])), description=docs.SIZE),
@@ -472,6 +522,23 @@ schedule_b = {
     ),
 }
 
+schedule_b_efile = {
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    #'recipient_committee_id': fields.List(IStr, description='The FEC identifier should be represented here if the contributor is registered with the FEC.'),
+    #'recipient_name': fields.List(fields.Str, description='Name of recipient'),
+    'disbursement_description': fields.List(fields.Str, description='Description of disbursement'),
+    'image_number': fields.List(
+        fields.Str,
+        description='The image number of the page where the schedule item is reported',
+    ),
+    'recipient_city': fields.List(IStr, description='City of recipient'),
+    'recipient_state': fields.List(IStr, description='State of recipient'),
+    'max_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'min_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
+    'min_amount': Currency(description='Filter for all amounts less than a value.'),
+    'max_amount': Currency(description='Filter for all amounts less than a value.'),
+}
+
 schedule_b_by_purpose = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'purpose': fields.List(fields.Str, description='Disbursement purpose category'),
@@ -499,11 +566,18 @@ schedule_e_by_candidate = {
 schedule_d = {
     'min_payment_period': fields.Float(),
     'max_payment_period': fields.Float(),
+    'min_amount_incurred': fields.Float(),
+    'max_amount_incurred': fields.Float(),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'creditor_debtor_name': fields.List(fields.Str),
+    'nature_of_debt': fields.Str(),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 schedule_f = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'payee_name': fields.List(fields.Str),
+    'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
 }
 
 communication_cost = {
@@ -619,11 +693,10 @@ schedule_e = {
 }
 
 schedule_e_efile = {
-    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'filing_form': fields.List(IStr, description='Filing form'),
     'payee_name': fields.List(fields.Str, description='Name of the entity that received the payment'),
+    'candidate_name': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'image_number': fields.List(
         fields.Str,
         description='The image number of the page where the schedule item is reported',
@@ -632,7 +705,10 @@ schedule_e_efile = {
         IStr(validate=validate.OneOf(['S', 'O'])),
         description='Support or opposition',
     ),
-    'is_notice': fields.List(fields.Bool, description='Record filed as 24- or 48-hour notice'),
+    'min_expenditure_date': fields.Date(description=docs.EXPENDITURE_MAX_DATE),
+    'max_expenditure_date': fields.Date(description=docs.EXPENDITURE_MIN_DATE),
+    'min_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MIN_AMOUNT),
+    'max_expenditure_amount': fields.Date(description=docs.EXPENDITURE_MAX_AMOUNT),
 }
 
 rad_analyst = {
@@ -641,6 +717,8 @@ rad_analyst = {
     'analyst_short_id': fields.List(fields.Int(), description='Short ID of RAD analyst'),
     'telephone_ext': fields.List(fields.Int(), description='Telephone extension of RAD analyst'),
     'name': fields.List(fields.Str, description='Name of RAD analyst'),
+    'email': fields.List(fields.Str, description='Email of RAD analyst'),
+    'title': fields.List(fields.Str, description='Title of RAD analyst'),
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}

@@ -62,10 +62,16 @@ class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
     report_year = ma.fields.Int()
     pdf_url = ma.fields.Str()
-    #csv_url = ma.fields.Str()
+    csv_url = ma.fields.Str()
     fec_url = ma.fields.Str()
     document_description = ma.fields.Str()
     beginning_image_number = ma.fields.Str()
+    most_recent_filing = ma.fields.Int()
+    most_recent = ma.fields.Bool()
+    amendment_chain = ma.fields.List(ma.fields.Int())
+    amended_by = ma.fields.Int()
+    is_amended = ma.fields.Bool()
+    fec_file_id = ma.fields.Str()
 
     @post_dump
     def extract_summary_rows(self, obj):
@@ -76,6 +82,8 @@ class BaseEfileSchema(BaseSchema):
                     continue
                 obj[key] = value
             obj.pop('summary_lines')
+        if obj.get('amendment'):
+            obj.pop('amendment')
 
 
 def extract_columns(obj, column_a, column_b, descriptions):
@@ -376,7 +384,7 @@ make_reports_schema = functools.partial(
     make_schema,
     fields={
         'pdf_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'report_form': ma.fields.Str(),
         'document_description': ma.fields.Str(),
@@ -384,6 +392,7 @@ make_reports_schema = functools.partial(
         'committee_name': ma.fields.Str(attribute='committee.name'),
         'beginning_image_number': ma.fields.Str(),
         'end_image_number': ma.fields.Str(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('idx', 'committee')},
 )
@@ -469,6 +478,7 @@ ScheduleASchema = make_schema(
                 1
             ),
         ],
+
     }
 )
 
@@ -540,7 +550,7 @@ ScheduleDSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={
+    options={'exclude': ('creditor_debtor_name_text',)
 
     },
 )
@@ -556,9 +566,9 @@ ScheduleFSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={
+    options={'exclude': ('payee_name_text',)
+             },
 
-    },
 )
 ScheduleFPageSchema = make_page_schema(
     ScheduleFSchema
@@ -644,19 +654,32 @@ ElectioneeringPageSchema = make_page_schema(ElectioneeringSchema, page_type=pagi
 register_schema(ElectioneeringSchema)
 register_schema(ElectioneeringPageSchema)
 
-FilingsSchema = make_schema(
+BaseFilingsSchema = make_schema(
     models.Filings,
     fields={
         'document_description': ma.fields.Str(),
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
+        'fec_file_id': ma.fields.Str(),
     },
     options={'exclude': ('committee', )},
 )
+class FilingsSchema(BaseFilingsSchema):
+    @post_dump
+    def remove_fec_url(self, obj):
+        if not obj.get('fec_url'):
+            obj.pop('fec_url')
+
 augment_schemas(FilingsSchema)
+
+EfilingsAmendmentsSchema = make_schema(
+    models.EfilingsAmendments,
+)
+
+augment_schemas(EfilingsAmendmentsSchema)
 
 EFilingsSchema = make_schema(
     models.EFilings,
@@ -665,28 +688,104 @@ EFilingsSchema = make_schema(
         'ending_image_number': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        #'csv_url': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
         'is_amended': ma.fields.Boolean(),
         'document_description': ma.fields.Str(),
+        'most_recent_filing': ma.fields.Int(),
+        'most_recent': ma.fields.Bool(),
+        'amendment_chain': ma.fields.List(ma.fields.Int()),
+        'amended_by': ma.fields.Int(),
+        'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('report',)},
+    options={'exclude': ('report', 'amendment', 'superceded')},
 )
 augment_schemas(EFilingsSchema)
+
+ItemizedScheduleBfilingsSchema = make_schema(
+    models.ScheduleBEfile,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
+        'pdf_url': ma.fields.Str(),
+        'fec_url': ma.fields.Str(),
+        'is_notice':ma.fields.Boolean(),
+        'payee_name': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
+    },
+    options={
+        'relationships': [
+            Relationship(
+                models.ScheduleEEfile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+augment_schemas(ItemizedScheduleBfilingsSchema)
 
 ItemizedScheduleEfilingsSchema = make_schema(
     models.ScheduleEEfile,
     fields={
         'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'is_notice':ma.fields.Boolean(),
-        #'csv_url': ma.fields.Str(),
+        'payee_name': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
     },
-    #options={'exclude': ('e_filing',)},
-
+    options={
+        'relationships': [
+            Relationship(
+                models.ScheduleEEfile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
 )
 
 augment_schemas(ItemizedScheduleEfilingsSchema)
+
+ItemizedScheduleAfilingsSchema = make_schema(
+    models.ScheduleAEfile,
+    fields={
+        'beginning_image_number': ma.fields.Str(),
+        'committee': ma.fields.Nested(schemas['CommitteeHistorySchema']),
+        'filing': ma.fields.Nested(schemas['EFilingsSchema']),
+        'pdf_url': ma.fields.Str(),
+        'fec_url': ma.fields.Str(),
+        'report_type': ma.fields.Str(),
+        'cycle': ma.fields.Int(),
+        'contributor_name': ma.fields.Str(),
+        'fec_election_type_desc': ma.fields.Str(),
+        'csv_url': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'contributor_name_text',
+            'contributor_employer_text',
+            'contributor_occupation_text',
+        ),
+        'relationships': [
+            Relationship(
+                models.ScheduleAEfile.committee,
+                models.CommitteeHistory.name,
+                'committee_name',
+                1
+            ),
+        ],
+    }
+)
+
+augment_schemas(ItemizedScheduleAfilingsSchema)
 
 ReportTypeSchema = make_schema(models.ReportType)
 register_schema(ReportTypeSchema)
@@ -804,7 +903,7 @@ register_schema(RadAnalystPageSchema)
 EntityReceiptDisbursementTotalsSchema = make_schema(
     models.EntityReceiptDisbursementTotals,
     options={'exclude': ('idx','month', 'year')},
-    fields={'date': ma.fields.Date(doc='The cumulative total for this month.')},
+    fields={'date': ma.fields.DateTime(doc='The cumulative total for this month.')},
 )
 EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)
 register_schema(EntityReceiptDisbursementTotalsSchema)
