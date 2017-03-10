@@ -1,13 +1,10 @@
 import unittest
 from mock import patch
 from webservices.legal_docs import (
-    delete_advisory_opinions_from_s3,
     delete_murs_from_es,
     delete_murs_from_s3,
-    index_advisory_opinions,
     index_regulations,
     index_statutes,
-    load_advisory_opinions_into_s3,
     load_archived_murs,
     initialize_legal_docs
 )
@@ -34,7 +31,7 @@ def test_get_subject_tree():
 class ElasticSearchMock:
     class ElasticSearchIndicesMock:
         def delete(self, index):
-            assert index == 'docs'
+            assert index in ['docs', 'docs_index']
 
         def create(self, index, mappings):
             assert index == 'docs'
@@ -43,9 +40,6 @@ class ElasticSearchMock:
     def __init__(self, dictToIndex):
         self.dictToIndex = dictToIndex
         self.indices = ElasticSearchMock.ElasticSearchIndicesMock()
-
-    def search():
-        pass
 
     def index(self, index, doc_type, doc, id):
         assert self.dictToIndex == doc
@@ -108,11 +102,22 @@ class Engine:
             return [(1, 'ABC'.encode('utf8'))]
         if 'EXISTS' in sql:
             self.result = [(self.legal_loaded,)]
-        if 'count' in sql:
+        if 'COUNT' in sql:
             self.result = [(5,)]
-        if 'DOCUMENT_ID' in sql:
-            self.result = [(123, 'textAB', 'description123', 'category123', 'id123',
-                           'name4U', 'summaryABC', 'tags123', 'no123', 'date123')]
+        if 'aouser.players' in sql:
+            self.result = [{'name': 'Charles Babbage', 'description': 'Individual'},
+                            {'name': 'Ada Lovelace', 'description': 'Individual'}]
+        if 'SELECT ao_no, category, ocrtext' in sql:
+            self.result = [{'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-105 and 2014-1'},
+                         {'ao_no': '2007-05', 'category': 'Final Opinion', 'ocrtext': 'test2 1993-01 test2'}]
+        if 'SELECT ao_no, name FROM' in sql:
+            self.result = [{'ao_no': '1993-01', 'name': 'RNC'}, {'ao_no': '2007-05', 'name': 'Church'},
+                            {'ao_no': '2014-01', 'name': 'DNC'}, {'ao_no': '2015-105', 'name': 'Outkast'}]
+        if 'document_id' in sql:
+            self.result = [{'document_id': 123, 'ocrtext': 'textAB', 'description': 'description123',
+                           'category': 'Votes', 'ao_id': 'id123',
+                           'name': 'name4U', 'summary': 'summaryABC', 'tags': 'tags123',
+                           'ao_no': '1993-01', 'document_date': 'date123', 'is_pending': True}]
         return self
 
 
@@ -233,47 +238,6 @@ class IndexRegulationsTest(unittest.TestCase):
     @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e, d: '')
     def test_no_env_variable(self):
         index_regulations()
-
-class IndexAdvisoryOpinionsTest(unittest.TestCase):
-    @patch('webservices.legal_docs.load_legal_docs.db', Db())
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential',
-        lambda cred: cred + '123')
-    @patch('webservices.utils.get_elasticsearch_connection',
-            get_es_with_doc({'category': 'category123',
-            'summary': 'summaryABC', 'no': 'no123', 'date': 'date123',
-            'tags': 'tags123', 'name': 'name4U', 'text': 'textAB',
-            'description': 'description123',
-            'url': 'https://bucket123.s3.amazonaws.com/legal/aos/123.pdf',
-            'doc_id': 123, 'id': 'id123'}))
-    def test_advisory_opinion_load(self):
-        index_advisory_opinions()
-
-    @patch('webservices.legal_docs.load_legal_docs.db', Db(False))
-    def test_no_legal_loaded(self):
-        index_advisory_opinions()
-
-class LoadAdvisoryOpinionsIntoS3Test(unittest.TestCase):
-    @patch('webservices.legal_docs.load_legal_docs.db', Db())
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/2.pdf')], 'legal/aos/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential',
-        lambda cred: cred + '123')
-    def test_load_advisory_opinions_into_s3(self):
-        load_advisory_opinions_into_s3()
-
-    @patch('webservices.legal_docs.load_legal_docs.db', Db())
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/1.pdf'), obj('legal/aos/2.pdf')],
-     'legal/aos/1.pdf'))
-    @patch('webservices.legal_docs.load_legal_docs.env.get_credential',
-        lambda cred: cred + '123')
-    def test_load_advisory_opinions_into_s3_already_loaded(self):
-        load_advisory_opinions_into_s3()
-
-    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
-     get_bucket_mock([obj('legal/aos/2.pdf')], 'legal/aos/1.pdf'))
-    def test_delete_advisory_opinions_from_s3(self):
-        delete_advisory_opinions_from_s3()
 
 class InitializeLegalDocsTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',

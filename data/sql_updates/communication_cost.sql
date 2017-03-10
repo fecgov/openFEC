@@ -1,12 +1,19 @@
 drop materialized view if exists ofec_communication_cost_mv_tmp;
 create materialized view ofec_communication_cost_mv_tmp as
-select
-    row_number() over () as idx,
-    *,
-    s_o_cand_id as cand_id,
-    org_id as cmte_id,
+with com_names as(
+    select distinct on(committee_id)
+    committee_id,
+    name as committee_name
+from ofec_committee_history_mv_tmp
+order by committee_id, cycle desc
+) select
+    f76.*,
+    f76.s_o_cand_id as cand_id,
+    f76.org_id as cmte_id,
+    com_names.committee_name,
     report_pdf_url(image_num) as pdf_url
-from fec_vsum_f76
+from fec_vsum_f76_vw f76
+    left join com_names on f76.org_id = com_names.committee_id
 where extract(year from communication_dt)::integer >= :START_YEAR
 ;
 

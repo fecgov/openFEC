@@ -1,22 +1,18 @@
 drop materialized view if exists ofec_filings_amendments_all_mv_tmp;
 --there is a lot of room for refactoring I believe, but I feel it's
 --best to keep paper and electronic separate until the kinks in paper
---can (maybe?) get worked out
-create materialized view ofec_filings_amendments_all_mv_tmp as with combined AS (
+--can (maybe?) get worked out (drastically improved, next step see
+--if paper can be combined to one table)
+create materialized view ofec_filings_amendments_all_mv_tmp as
+with combined AS (
   SELECT *
-  FROM ofec_presidential_electronic_amendments_mv_tmp
-  UNION ALL
+  from ofec_amendments_mv_tmp
+  union all
   SELECT *
   FROM ofec_presidential_paper_amendments_mv_tmp
   UNION ALL
   SELECT *
-  FROM ofec_house_senate_electronic_amendments_mv_tmp
-  UNION ALL
-  SELECT *
   FROM ofec_house_senate_paper_amendments_mv_tmp
-  UNION ALL
-  SELECT *
-  FROM ofec_pac_party_electronic_amendments_mv_tmp
   UNION ALL
   SELECT *
   FROM ofec_pac_party_paper_amendments_mv_tmp
@@ -82,8 +78,12 @@ with filings as (
         amendments.amendment_chain,
         --amendments.prev_file_num as previous_file_number,
         amendments.mst_rct_file_num as most_recent_file_number,
-        is_amended(amendments.mst_rct_file_num::integer, amendments.file_num::integer) as is_amended,
-        is_most_recent(amendments.mst_rct_file_num::integer, amendments.file_num::integer) as most_recent
+        is_amended(amendments.mst_rct_file_num::integer, amendments.file_num::integer, filing_history.form_tp) as is_amended,
+        is_most_recent(amendments.mst_rct_file_num::integer, amendments.file_num::integer, filing_history.form_tp) as most_recent,
+        case when upper(filing_history.form_tp) = 'FRQ' then 0
+             when upper(filing_history.form_tp) = 'F99' then 0
+		         else array_length(amendments.amendment_chain, 1) - 1
+	        end as amendment_version
     from disclosure.f_rpt_or_form_sub filing_history
         left join ofec_committee_history_mv_tmp com
             on filing_history.cand_cmte_id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
@@ -143,16 +143,17 @@ rfai_filings as (
             'RFAI'::text
         ) as pdf_url,
         means_filed(begin_image_num) as means_filed,
-        report_fec_url(begin_image_num::text, filing_history.file_num::integer ) as fec_url,
+        null::text as fec_url,
         null::numeric[] as amendment_chain,
         null::int as most_recent_file_number,
         null::boolean as is_amended,
-        True as most_recent
+        True as most_recent,
+        0 as amendement_version
     from disclosure.nml_form_rfai filing_history
     left join ofec_committee_history_mv_tmp com on filing_history.id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
     left join ofec_candidate_history_mv_tmp cand on filing_history.id = cand.candidate_id and get_cycle(filing_history.rpt_yr) = cand.two_year_period
     left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
-WHERE rpt_yr >= :START_YEAR
+WHERE rpt_yr >= :START_YEAR and delete_ind is null
 ),
 combined as(
     select * from filings
@@ -175,6 +176,7 @@ create index on ofec_filings_mv_tmp (form_type, idx);
 create index on ofec_filings_mv_tmp (primary_general_indicator, idx);
 create index on ofec_filings_mv_tmp (amendment_indicator, idx);
 create index on ofec_filings_mv_tmp (report_type, idx);
+create index on ofec_filings_mv_tmp (report_type_full, idx);
 create index on ofec_filings_mv_tmp (report_year, idx);
 create index on ofec_filings_mv_tmp (cycle, idx);
 create index on ofec_filings_mv_tmp (total_receipts, idx);

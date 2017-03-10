@@ -19,7 +19,7 @@ with elections_raw as(
         initcap(rp.pty_desc) as party
     from fecapp.trc_election
     --- switch this table
-    left join ref_pty rp on fecapp.trc_election.election_party = rp.pty_cd
+    left join staging.ref_pty rp on fecapp.trc_election.election_party = rp.pty_cd
     where
         trc_election_status_id = 1
 ), elections as (

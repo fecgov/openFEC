@@ -204,12 +204,26 @@ class ScheduleEFactory(BaseFactory):
         obj.payee_name_text = sa.func.to_tsvector(obj.payee_name)
 
 
+class ScheduleBEfileFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleBEfile
+    file_number = factory.Sequence(lambda n: n)
+    related_line_number = factory.Sequence(lambda n: n)
+    #report_year = 2016
+
+
 class ScheduleEEfileFactory(BaseFactory):
     class Meta:
         model = models.ScheduleEEfile
     file_number = factory.Sequence(lambda n: n)
     related_line_number = factory.Sequence(lambda n: n)
-    #report_year = 2016
+
+
+class ScheduleAEfileFactory(BaseFactory):
+    class Meta:
+        model = models.ScheduleAEfile
+    file_number = factory.Sequence(lambda n: n)
+    related_line_number = factory.Sequence(lambda n: n)
 
 
 class FilingsFactory(BaseFactory):

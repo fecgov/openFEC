@@ -81,6 +81,12 @@ def get_match_filters():
     ]
     return filter_match_fields
 
+def get_multi_filters():
+    filter_multi_fields = [
+        ('amendment_indicator', models.CommitteeReports.amendment_indicator),
+    ]
+    return filter_multi_fields
+
 @doc(
     tags=['financial'],
     description=docs.REPORTS,
@@ -143,6 +149,7 @@ class ReportsView(utils.Resource):
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
+        query = filters.filter_multi(query, kwargs, get_multi_filters())
         return query, reports_class, reports_schema
 
 
@@ -207,7 +214,7 @@ class CommitteeReportsView(utils.Resource):
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
-
+        query = filters.filter_multi(query, kwargs, get_multi_filters())
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
@@ -235,16 +242,15 @@ class CommitteeReportsView(utils.Resource):
 )
 class EFilingSummaryView(views.ApiResource):
 
-    model = models.BaseF3PFiling
+    model = models.BaseF3Filing
     schema = schemas.BaseF3FilingSchema
     page_schema = schemas.BaseF3FilingSchema
 
-    filter_multi_fields = [
-        ('file_number', models.BaseFiling.file_number),
-        ('committee_id', models.BaseFiling.committee_id),
-    ]
     filter_range_fields = [
-        (('min_receipt_date', 'max_receipt_date' ), models.BaseFiling.receipt_date),
+        (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
+    ]
+    filter_multi_fields = [
+        ('committee_id',  models.BaseFiling.committee_id),
     ]
 
     @property
@@ -259,11 +265,13 @@ class EFilingSummaryView(views.ApiResource):
 
         )
 
-
     def get(self, committee_type=None, **kwargs):
         if committee_type:
             self.model, self.schema, self.page_schema = \
                 efile_reports_schema_map.get(form_type_map.get(committee_type))
+            #Filters need to be set dynamically at runtime (otherwise sql alchemy couldn't
+            #determine proper table repid for the join operation)
+            self.filter_multi_fields[0] = ('file_number', self.model.file_number)
         query = self.build_query(**kwargs)
 
         count = counts.count_estimate(query, models.db.session, threshold=5000)

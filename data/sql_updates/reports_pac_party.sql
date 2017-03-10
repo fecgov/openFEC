@@ -106,6 +106,8 @@ select
     most_recent_filing_flag like 'N' as is_amended,
     f3x.receipt_dt as receipt_date,
     f3x.file_num as file_number,
+    f3x.amndt_ind as amendment_indicator,
+    f3x.amndt_ind_desc as amendment_indicator_full,
     means_filed(begin_image_num) as means_filed,
     report_fec_url(begin_image_num::text, f3x.file_num::integer) as fec_url,
     amendments.amendment_chain,
@@ -115,8 +117,8 @@ select
 
 from
     fec_vsum_f3x_vw f3x
-    left join ( select * from ofec_pac_party_paper_amendments_mv_tmp
-                union all select * from ofec_pac_party_electronic_amendments_mv_tmp) amendments
+    left join ( select * from ofec_amendments_mv_tmp
+                union all select * from ofec_pac_party_paper_amendments_mv_tmp) amendments
     on f3x.file_num = amendments.file_num
 where
     election_cycle >= :START_YEAR
