@@ -7,6 +7,6 @@ services:
   - fec-s3-stage
   - fec-search-stage
 env:
-  NEW_RELIC_APP_NAME: OpenFEC API (staging)
+  NEW_RELIC_APP_NAME: fec | api | stage
   NEW_RELIC_ENV: staging
   FEC_API_WHITELIST_IPS: true
