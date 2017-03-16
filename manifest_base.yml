@@ -7,6 +7,8 @@ env:
   NEW_RELIC_CONFIG_FILE: /home/vcap/app/newrelic.ini
   NEW_RELIC_LOG: stdout
   WEB_CONCURRENCY: 4
+services:
+  - fec-api-search
 applications:
 - name: api
 - name: celery-beat

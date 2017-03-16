@@ -319,7 +319,7 @@ def get_election_duration(column):
     )
 
 def get_elasticsearch_connection():
-    es_conn = env.get_service(label='elasticsearch-swarm-1.7.1')
+    es_conn = env.get_service(name='fec-api-search')
     if es_conn:
         es = Elasticsearch([es_conn.get_url(url='uri')])
     else:

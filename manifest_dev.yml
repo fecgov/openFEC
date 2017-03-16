@@ -5,7 +5,6 @@ services:
   - fec-creds-dev
   - fec-redis-dev
   - fec-s3-dev
-  - fec-search-dev
 env:
   NEW_RELIC_APP_NAME: fec | api | dev
   NEW_RELIC_ENV: development
