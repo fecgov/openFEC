@@ -168,6 +168,8 @@ query = {
     'ao_requestor': fields.Str(description="The requestor of the advisory opinion"),
     'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
                                             description="Code of the advisory opinion requestor type."),
+    'ao_regulatory_citation': fields.List(IStr, required=False, description="Search for regulatory citations"),
+    'ao_statutory_citation': fields.List(IStr, required=False, description="Search for statutory citations"),
     'mur_no': fields.List(IStr, required=False, description='Filter MURs by case number'),
     'mur_respondents': fields.Str(IStr, required=False, description='Filter MURs by respondents'),
     'mur_dispositions': fields.List(IStr, required=False, description='Filter MURs by dispositions'),
