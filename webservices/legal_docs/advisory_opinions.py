@@ -123,8 +123,8 @@ def get_documents(ao_id, bucket, bucket_name):
             }
             pdf_key = "legal/aos/%s.pdf" % row["document_id"]
             logger.info("S3: Uploading {}".format(pdf_key))
-            bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
-                    ContentType="application/pdf", ACL="public-read")
+            #bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
+            #        ContentType="application/pdf", ACL="public-read")
             document["url"] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
     return documents
@@ -147,6 +147,8 @@ def get_citations(ao_names):
                                 INNER JOIN aouser.ao USING (ao_id)
                               WHERE category = 'Final Opinion'""")
 
+    all_regulatory_citations = set()
+    all_statutory_citations = set()
     raw_citations = defaultdict(lambda: defaultdict(set))
     for row in rs:
         logger.info("Getting citations for AO %s" % row["ao_no"])
@@ -159,8 +161,12 @@ def get_citations(ao_names):
         for citation in ao_citations_in_doc:
             raw_citations[citation]["aos_cited_by"].add(row["ao_no"])
 
-        raw_citations[row["ao_no"]]["statutes"].update(parse_statutory_citations(row["ocrtext"]))
-        raw_citations[row["ao_no"]]["regulations"].update(parse_regulatory_citations(row["ocrtext"]))
+        statutory_citations = parse_statutory_citations(row["ocrtext"])
+        regulatory_citations = parse_regulatory_citations(row["ocrtext"])
+        all_statutory_citations.update(statutory_citations)
+        all_regulatory_citations.update(regulatory_citations)
+        raw_citations[row["ao_no"]]["statutes"].update(statutory_citations)
+        raw_citations[row["ao_no"]]["regulations"].update(regulatory_citations)
 
     citations = defaultdict(lambda: defaultdict(list))
     for ao in raw_citations:
@@ -177,6 +183,15 @@ def get_citations(ao_names):
             {"title": c[0], "part": c[1], "section": c[2]}
             for c in raw_citations[ao]["regulations"]], key=lambda d: (d["title"], d["part"], d["section"]))
 
+    es = get_elasticsearch_connection()
+
+    for citation in all_regulatory_citations:
+        entry = {'text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]), 'citation_type': 'regulation'}
+        es.index(DOCS_INDEX, 'citations', entry, id=entry['text'])
+
+    for citation in all_statutory_citations:
+        entry = {'text': '%d U.S.C. §%d' % (citation[1], citation[2]), 'citation_type': 'statute'}
+        es.index(DOCS_INDEX, 'citations', entry, id=entry['text'])
     return citations
 
 def parse_ao_citations(text, ao_component_to_name_map):
