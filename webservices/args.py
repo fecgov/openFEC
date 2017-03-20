@@ -170,11 +170,14 @@ query = {
                                             description="Code of the advisory opinion requestor type."),
     'ao_regulatory_citation': fields.List(IStr, required=False, description="Search for regulatory citations"),
     'ao_statutory_citation': fields.List(IStr, required=False, description="Search for statutory citations"),
+    'ao_citation_require_all': fields.Bool(
+        description="Require all citations to be in document (default behavior is any)"),
     'mur_no': fields.List(IStr, required=False, description='Filter MURs by case number'),
     'mur_respondents': fields.Str(IStr, required=False, description='Filter MURs by respondents'),
     'mur_dispositions': fields.List(IStr, required=False, description='Filter MURs by dispositions'),
     'mur_election_cycles': fields.Int(IStr, required=False, description='Filter MURs by election cycles'),
-    'mur_document_category': fields.List(IStr, required=False, description='Filter MURs by category of associated documents'),
+    'mur_document_category': fields.List(IStr, required=False,
+        description='Filter MURs by category of associated documents'),
 }
 
 candidate_detail = {
