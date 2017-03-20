@@ -203,11 +203,12 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get('ao_requestor'):
         must_clauses.append(Q("match", requestor_names=kwargs.get('ao_requestor')))
 
+    citation_queries = []
     if kwargs.get('ao_regulatory_citation'):
         for citation in kwargs.get('ao_regulatory_citation'):
             exact_match = re.match(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)\.(?P<section>\d+)", citation)
             if(exact_match):
-                must_clauses.append(Q("nested", path="regulatory_citations", query=Q("bool",
+                citation_queries.append(Q("nested", path="regulatory_citations", query=Q("bool",
                     must=[Q("term", regulatory_citations__title=int(exact_match.group('title'))),
                         Q("term", regulatory_citations__part=int(exact_match.group('part'))),
                         Q("term", regulatory_citations__section=int(exact_match.group('section')))])))
@@ -215,10 +216,15 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get('ao_statutory_citation'):
         for citation in kwargs.get('ao_statutory_citation'):
             exact_match = re.match(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+).*\.?", citation)
-            print(exact_match)
             if(exact_match):
-                must_clauses.append(Q("nested", path="statutory_citations", query=Q("bool",
-                    must=[Q("term", statutory_citations__title=int(exact_match.group('title')))])))
+                citation_queries.append(Q("nested", path="statutory_citations", query=Q("bool",
+                    must=[Q("term", statutory_citations__title=int(exact_match.group('title'))),
+                    Q("term", statutory_citations__section=int(exact_match.group('section')))])))
+
+    if kwargs.get('ao_citation_require_all'):
+        must_clauses.append(Q('bool', must=citation_queries))
+    else:
+        must_clauses.append(Q('bool', should=citation_queries, minimum_should_match=1))
 
     if kwargs.get('ao_requestor_type'):
         requestor_types = {1: 'Federal candidate/candidate committee/officeholder',
