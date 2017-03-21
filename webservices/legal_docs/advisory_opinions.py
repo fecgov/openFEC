@@ -7,6 +7,7 @@ from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
+from .reclassify_statutory_citation import reclassify_archived_mur_statutory_citation
 
 
 logger = logging.getLogger(__name__)
@@ -177,7 +178,7 @@ def get_citations(ao_names):
             {"no": c, "name": ao_names[c]}
             for c in raw_citations[ao]["aos_cited_by"]], key=lambda d: d["no"])
         citations[ao]["statutes"] = sorted([
-            {"text": c[0], "title": c[1], "section": c[2]}
+            {"text": c[0], "title": c[1], "section": c[2], "former_title": c[3], "former_section": c[4]}
             for c in raw_citations[ao]["statutes"]], key=lambda d: (d["title"], d["section"]))
         citations[ao]["regulations"] = sorted([
             {"title": c[0], "part": c[1], "section": c[2]}
@@ -190,7 +191,12 @@ def get_citations(ao_names):
         es.index(DOCS_INDEX, 'citations', entry, id=entry['text'])
 
     for citation in all_statutory_citations:
-        entry = {'text': '%d U.S.C. §%d' % (citation[1], citation[2]), 'citation_type': 'statute'}
+        if citation[3] != citation[1]:
+            entry = {'text': '%s U.S.C. §%s' % (citation[1], citation[2]),
+                'formerly': '%d U.S.C. §%d' % (citation[3], citation[4]),
+                'citation_type': 'statute'}
+        else:
+            entry = {'text': '%d U.S.C. §%d' % (citation[1], citation[2]), 'citation_type': 'statute'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['text'])
     return citations
 
@@ -208,8 +214,12 @@ def parse_statutory_citations(text):
     matches = set()
     if text:
         for citation in STATUTE_CITATION_REGEX.finditer(text):
+            new_title, new_section = reclassify_archived_mur_statutory_citation(
+                citation.group('title'), citation.group('section'))
             matches.add((
                 citation.group(0),
+                int(new_title),
+                int(new_section),
                 int(citation.group('title')),
                 int(citation.group('section'))
             ))
