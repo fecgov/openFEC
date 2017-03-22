@@ -2,9 +2,9 @@ language: python
 sudo: false
 cache: pip
 python:
-- '3.4'
+  - "3.4"
 addons:
-  postgresql: '9.4'
+  postgresql: "9.4"
 env:
   global:
   - secure: fZSgHvzAttJcq5GYEwp/jo8/hcRs0hW169dTG4VC6vW29sPFjc2R6NuXVzXxGzxkWN16KvUNU+feMiMIse7c2zQIceTmhJh7cz19v+xmmwgqJgv0ln8+7+1rGB6FIblS9C70b2ggKjZ5DYMD4DxCrtQkWkVzQDncdADb4vg0ZA4=
@@ -17,22 +17,22 @@ env:
   - secure: DHeDA3k09XnfgRR6BqLY0I3elYQkp6s5Id1slNicvRuhrrmT8h6bRr7FmIy2JiaUieMDZ0cuoF965PJpGN3QAmE6Z0wRTkxpexM3XW8d43kufXy36eVLb85m/S9p5W3bcDUlGa/tn8Lq2TtckJidZ7uO2KPFuaobGfOUO5rspIM= # stage user name
   - secure: XGUU6IbLojPiAKKEE/r8VGUWrQfIlN4KwbniCR7ZbdTKMevQ8ApG2kS3VPKeN17cvEbQZmN+xJgLdxozzM7oIVAS77hbH4EEnJ2Dq2re1H2V87FpD9SCIbFhdmNWybLWmRvxMiCQYtmPPlShdSI/ZsfWZuIZxfFW1kB594DRKCs= # stage password
 before_script:
-- psql -c 'create database "cfdm_unit_test";' -U postgres
-- travis_retry pip install -U pip setuptools wheel
-- travis_retry pip install -r requirements.txt
-- travis_retry pip install -r requirements-dev.txt
-- travis_retry npm install -g swagger-tools
+  - psql -c 'create database "cfdm_unit_test";' -U postgres
+  - travis_retry pip install -U pip setuptools wheel
+  - travis_retry pip install -r requirements.txt
+  - travis_retry pip install -r requirements-dev.txt
+  - travis_retry npm install -g swagger-tools
 script: py.test
 after_success:
-- travis_retry pip install codecov
-- codecov
+  - travis_retry pip install codecov
+  - codecov
 before_deploy:
-- export PATH=$HOME:$PATH
-- travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
-- tar xzvf $HOME/cf.tgz -C $HOME
-- travis_retry cf install-plugin autopilot -f -r CF-Community
-- npm install
-- npm run build
+  - export PATH=$HOME:$PATH
+  - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
+  - tar xzvf $HOME/cf.tgz -C $HOME
+  - travis_retry cf install-plugin autopilot -f -r CF-Community
+  - npm install
+  - npm run build
 deploy:
   provider: script
   skip_cleanup: true
