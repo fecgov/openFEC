@@ -29,15 +29,13 @@ SQL_CONFIG = {
 
 REQUIRED_CREDS = (
     'SQLA_CONN',
-
     'FEC_SLACK_TOKEN',
-
     'MANDRILL_API_KEY',
     'FEC_EMAIL_SENDER',
     'FEC_EMAIL_RECIPIENTS',
 )
 
-REQUIRED_SERVICES = ('redis28-swarm', 's3', 'elasticsearch-swarm-1.7.1')
+REQUIRED_SERVICES = ('redis28', 's3', 'elasticsearch24')
 
 REQUIRED_TABLES = (
     tuple(db.Model.metadata.tables.keys()) +
@@ -69,4 +67,4 @@ CHECKS = [
 def check_config():
     results = [check_keys(*check) for check in CHECKS]
     if any(results):
-        raise RuntimeError('Invalid configuration')
+        raise RuntimeError('Invalid configuration: {0}'.format(results))

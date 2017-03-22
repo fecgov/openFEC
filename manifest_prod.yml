@@ -6,10 +6,9 @@ services:
   - fec-creds-prod
   - fec-redis-prod
   - fec-s3-prod
-  - fec-search-prod
 env:
   PRODUCTION: True
-  NEW_RELIC_APP_NAME: OpenFEC API (production)
-  NEW_RELIC_ENV: development
+  NEW_RELIC_APP_NAME: fec | api | production
+  NEW_RELIC_ENV: production
   FEC_API_WHITELIST_IPS: true
   FEC_CACHE_AGE: 3600

@@ -17,7 +17,6 @@ from flask import Blueprint
 import flask_cors as cors
 import flask_restful as restful
 
-from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
 import sqlalchemy as sa
 
@@ -58,7 +57,6 @@ def sqla_conn_string():
     if not sqla_conn_string:
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
-    print(sqla_conn_string)
     return sqla_conn_string
 
 
@@ -362,8 +360,5 @@ def initialize_newrelic():
         newrelic.agent.initialize()
 
 initialize_newrelic()
-
-if env.get_credential('SENTRY_DSN'):
-    Sentry(app, dsn=env.get_credential('SENTRY_DSN'))
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
