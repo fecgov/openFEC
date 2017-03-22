@@ -7,5 +7,5 @@ services:
   - fec-s3-stage
 env:
   NEW_RELIC_APP_NAME: fec | api | stage
-  NEW_RELIC_ENV: staging
+  NEW_RELIC_ENV: stage
   FEC_API_WHITELIST_IPS: true
