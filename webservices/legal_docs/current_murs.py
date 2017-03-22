@@ -98,6 +98,10 @@ def load_current_murs():
     the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
     """
     es = get_elasticsearch_connection()
+    for mur in get_murs():
+        es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+
+def get_murs():
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
     with db.engine.connect() as conn:
@@ -123,7 +127,7 @@ def load_current_murs():
             mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+            yield mur
 
 def get_election_cycles(case_id):
     election_cycles = []
