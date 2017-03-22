@@ -107,7 +107,7 @@ createdb cfdm_unit_test
 Load our sample data into the development database (`cfdm_test`) by running:
 
 ```
-pg_restore --dbname cfdm_test data/subset.dump
+pg_restore --dbname cfdm_test --no-acl --no-owner data/subset.dump
 ./manage.py update_all
 ```
 
