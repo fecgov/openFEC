@@ -8,4 +8,3 @@ services:
 env:
   NEW_RELIC_APP_NAME: fec | api | dev
   NEW_RELIC_ENV: development
-CF_TRACE: true
