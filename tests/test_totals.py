@@ -29,8 +29,12 @@ shared_fields = {
     'last_report_year': 2012,
     'last_report_type_full': 'Q3',
     'last_beginning_image_number': '123',
+    'cash_on_hand_beginning_period': 222.0,
     'last_cash_on_hand_end_period': 538,
     'last_debts_owed_by_committee': 42,
+    'net_contributions': 123,
+    'net_operating_expenditures': 321,
+    'last_debts_owed_to_committee': 42
 }
 
 class TestTotals(ApiBaseTest):
@@ -66,8 +70,12 @@ class TestTotals(ApiBaseTest):
         fields = utils.extend(shared_fields, presidential_fields)
 
         committee_total = factories.TotalsPresidentialFactory(**fields)
-        results = self._results(api.url_for(TotalsView, committee_id=committee_id))
 
+        results = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        for key, value in results[0].items():
+            if key not in fields:
+                print(key)
+        print(results[0] == fields)
         self.assertEqual(results[0], fields)
 
     def test_House_Senate_totals(self):
@@ -123,7 +131,7 @@ class TestTotals(ApiBaseTest):
             'loan_repayments_received': 12,
             'loans_made': 13,
             'non_allocated_fed_election_activity': 14,
-            'nonfed_transfers': 15,
+            'total_transfers': 15,
             'other_fed_operating_expenditures': 16,
             'other_fed_receipts': 17,
             'shared_fed_activity': 18,
