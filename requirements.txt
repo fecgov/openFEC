@@ -21,7 +21,7 @@ slacker==0.8.6
 raven[flask]==5.8.1
 ujson==1.33
 requests==2.10.0
-elasticsearch==1.9.0
+elasticsearch==2.4.0
 elasticsearch-dsl==2.1.0
 git+https://github.com/timClicks/slate.git
 
