@@ -44,7 +44,7 @@ class GetLegalDocument(utils.Resource):
     def get(self, doc_type, no, **kwargs):
         es_results = Search().using(es) \
             .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
-            .source(exclude='text') \
+            .source(exclude='documents.text') \
             .extra(size=200) \
             .index(DOCS_SEARCH) \
             .execute()
