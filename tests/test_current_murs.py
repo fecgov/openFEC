@@ -131,7 +131,9 @@ class TestLoadCurrentMURs(BaseTestCase):
             'dispositions': [],
             'close_date': None,
             'open_date': None,
-            'url': '/legal/matter-under-review/1/'
+            'url': '/legal/matter-under-review/1/',
+            'sort1': -1,
+            'sort2': ''
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
         actual_mur = next(get_murs())
@@ -280,8 +282,10 @@ class TestLoadCurrentMURs(BaseTestCase):
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
             'election_cycles': [2016],
             'close_date': datetime(2008, 1, 1, 0, 0),
-            'url': '/legal/matter-under-review/1/'}
-
+            'url': '/legal/matter-under-review/1/',
+            'sort1': -1,
+            'sort2': ''
+        }
         assert actual_mur == expected_mur
 
     def create_mur(self, case_id, case_no, name, subject_description):
