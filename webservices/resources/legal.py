@@ -131,7 +131,7 @@ class UniversalSearch(utils.Resource):
                 .sort("sort1", "sort2")
 
             if type == 'advisory_opinions':
-                query = apply_ao_specific_query_params(query, **kwargs)
+                query = apply_ao_specific_query_params(query, q, **kwargs)
 
             if type == 'murs':
                 query = apply_mur_specific_query_params(query, q, **kwargs)
@@ -177,7 +177,7 @@ def apply_mur_specific_query_params(query, q='', **kwargs):
 
     return query
 
-def apply_ao_specific_query_params(query, **kwargs):
+def apply_ao_specific_query_params(query, q='', **kwargs):
     must_clauses = []
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
@@ -191,7 +191,13 @@ def apply_ao_specific_query_params(query, **kwargs):
         ao_category = [categories[c] for c in kwargs.get('ao_category')]
     else:
         ao_category = ['Final Opinion']
-    must_clauses.append(Q('terms', category=ao_category))
+
+    must_clauses.append(Q("nested", path="documents", query=Q('bool',
+        must=Q('terms', documents__category=ao_category))))
+
+    if q:
+        must_clauses.append(Q("nested", path="documents", query=Q('bool',
+            must=Q('match', documents__text=q))))
 
     if kwargs.get('ao_no'):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
@@ -256,5 +262,5 @@ def apply_ao_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", issue_date=date_range))
 
     query = query.query('bool', must=must_clauses)
-    print(query.to_dict())
+
     return query

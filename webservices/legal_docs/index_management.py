@@ -344,6 +344,7 @@ MAPPINGS = {
                 "index": "not_analyzed"
             },
             "documents": {
+                "type": "nested",
                 "properties": {
                     "document_id": {
                         "type": "long",
