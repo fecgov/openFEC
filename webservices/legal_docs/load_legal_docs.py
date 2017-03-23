@@ -164,14 +164,18 @@ def get_title_52_statutes():
                     pdf_url = 'http://api.fdsys.gov/link?collection=uscode&' +\
                               'title=52&year=mostrecent&section=%s'\
                               % section_no
-                    doc = {"doc_id": section.attrib['identifier'],
-                           "text": text,
-                           "name": heading,
-                           "no": section_no,
-                           "title": "52",
-                           "chapter": chapter,
-                           "subchapter": subchapter_no,
-                           "url": pdf_url}
+                    doc = {
+                        "doc_id": section.attrib['identifier'],
+                        "text": text,
+                        "name": heading,
+                        "no": section_no,
+                        "title": "52",
+                        "chapter": chapter,
+                        "subchapter": subchapter_no,
+                        "url": pdf_url,
+                        "sort1": 52,
+                        "sort2": int(section_no)
+                    }
                     es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
 
 def get_title_26_statutes():
@@ -197,13 +201,17 @@ def get_title_26_statutes():
                     pdf_url = 'http://api.fdsys.gov/link?collection=uscode&' +\
                               'title=26&year=mostrecent&section=%s'\
                               % section_no
-                    doc = {"doc_id": section.attrib['identifier'],
-                           "text": text,
-                           "name": heading,
-                           "no": section_no,
-                           "title": "26",
-                           "chapter": chapter_no,
-                           "url": pdf_url}
+                    doc = {
+                        "doc_id": section.attrib['identifier'],
+                        "text": text,
+                        "name": heading,
+                        "no": section_no,
+                        "title": "26",
+                        "chapter": chapter_no,
+                        "url": pdf_url,
+                        "sort1": 26,
+                        "sort2": int(section_no)
+                    }
                     es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
 
 
