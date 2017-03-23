@@ -89,6 +89,7 @@ ORDER BY vote_date desc;
 
 STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
+MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)(?P<extra>.*)')
 
 def load_current_murs():
     """
@@ -108,11 +109,14 @@ def get_murs():
         rs = conn.execute(ALL_MURS)
         for row in rs:
             case_id = row['case_id']
+            sort1, sort2 = get_sort_fields(row['case_no'])
             mur = {
                 'doc_id': 'mur_%s' % row['case_no'],
                 'no': row['case_no'],
                 'name': row['name'],
                 'mur_type': 'current',
+                'sort1': sort1,
+                'sort2': sort2,
             }
             mur['subjects'] = get_subjects(case_id)
             mur['subject'] = {'text': mur['subjects']}
@@ -312,3 +316,7 @@ def remove_reclassification_notes(statutory_citation):
     while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):
         cleaned_citation = remove_to_matching_parens(cleaned_citation)
     return cleaned_citation
+
+def get_sort_fields(case_no):
+    match = MUR_NO_REGEX.match(case_no)
+    return -int(match.group("serial")), match.group("extra")
