@@ -8,7 +8,7 @@ select
     expand_state(contbr_st) as state_full,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
-from fec_vsum_sched_a
+from fec_vsum_sched_a_vw
 where
     rpt_yr >= :START_YEAR_AGGREGATE and
     is_unitemized(memo_text::text) = false

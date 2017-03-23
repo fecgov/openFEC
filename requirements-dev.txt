@@ -10,6 +10,8 @@ factory-boy>=2.5.2
 faker>=0.7.5
 nplusone>=0.3.0
 webtest>=2.0.2
+pdbpp>=0.8.3
+pygments>=2.2.0
 
 
 #efiling
