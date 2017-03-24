@@ -3,7 +3,7 @@
 import os
 import glob
 import logging
-import shelex
+import shlex
 import subprocess
 import multiprocessing
 
@@ -192,7 +192,7 @@ def dump_districts(dest=None):
         'pg_dump {source} --format c --no-acl --no-owner -f {dest} '
         '-t ofec_fips_states -t ofec_zips_districts'
     ).format(**locals())
-    subprocess.call(shelex.quote(cmd), shell=True)
+    subprocess.call(shlex.quote(cmd), shell=True)
 
 @manager.command
 def load_districts(source=None):
@@ -204,7 +204,7 @@ def load_districts(source=None):
     cmd = (
         'pg_restore --dbname {dest} --no-acl --no-owner --clean {source}'
     ).format(**locals())
-    subprocess.call(shelex.quote(cmd), shell=True)
+    subprocess.call(shlex.quote(cmd), shell=True)
 
 @manager.command
 def build_district_counts(outname='districts.json'):
