@@ -1,15 +1,15 @@
 with last as (
-    select distinct on (cmte_id, election_cycle) *
-    from fec_vsum_f3p_vw
+    select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*
+    from fec_vsum_f3p_vw f3p
     order by
-        cmte_id,
-        election_cycle,
-        cvg_end_dt desc
+        f3p.cmte_id,
+        f3p.election_cycle,
+        f3p.cvg_end_dt desc
 ), aggregate_filings as(
     select
         row_number() over () as idx,
         cand_id as candidate_id,
-        last.election_cycle as cycle,
+        p.election_cycle as cycle,
         min(p.cvg_start_dt) as coverage_start_date,
         max(p.cvg_end_dt) as coverage_end_date,
         sum(p.cand_contb_per) as candidate_contribution,
@@ -51,7 +51,7 @@ with last as (
         max(last.net_op_exp_sum_page_per) as net_operating_expenditures,
         max(last.rpt_tp_desc) as last_report_type_full,
         max(last.begin_image_num) as last_beginning_image_number,
-        max(last.coh_cop) as last_cash_on_hand_end_period,
+        sum(last.coh_cop) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
         max(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
         max(last.rpt_yr) as last_report_year
@@ -67,7 +67,7 @@ with last as (
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
     group by
-        last.election_cycle,
+        p.election_cycle,
         cand_id)
 select af.*
 	from aggregate_filings af
