@@ -233,7 +233,8 @@ class IndexRegulationsTest(unittest.TestCase):
             get_es_with_doc({'text': 'sectionContentA sectionContentB',
             'no': '104.1', 'name': 'Title',
             'url': '/regulations/104-1/versionA#104-1',
-            'doc_id': '104_1'}))
+            'doc_id': '104_1',
+            'sort1': 104, 'sort2': 1}))
     def test_index_regulations(self):
         index_regulations()
 
