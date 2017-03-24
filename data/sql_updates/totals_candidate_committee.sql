@@ -63,16 +63,12 @@ with last as (
     where
         p.most_recent_filing_flag like 'Y'
         and p.election_cycle >= :START_YEAR
-        and cand_detail.candidate_id = 'P80002801'
-        and substr(link.cand_id, 1, 1) = link.cmte_tp 
+        and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
     group by
-        link,
         last.election_cycle,
         cand_id)
-select af.candidate_id,
-        af.cycle,
-        af.last_cash_on_hand_end_period
+select af.*
 	from aggregate_filings af
 ;
