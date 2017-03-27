@@ -24,9 +24,10 @@ before_script:
 - travis_retry npm install -g swagger-tools
 script: py.test
 after_success:
+- travis_retry pip install bandit
+- bandit -r
 - travis_retry pip install codecov
 - codecov
-- bandit -r
 before_deploy:
 - export PATH=$HOME:$PATH
 - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
