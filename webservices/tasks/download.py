@@ -194,8 +194,6 @@ def make_bundle(resource):
                 resource['query'],
                 resource['schema']
             )
-            import ipdb
-            ipdb.set_trace()
             copy_to(
                 query,
                 fp,
