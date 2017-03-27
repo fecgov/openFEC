@@ -187,24 +187,30 @@ def dump_districts(dest=None):
     """ Makes districts locally that you can then add as a table to the databases
     """
     source = db.engine.url
-    dest = dest or './data/districts.dump'
+    if dest is None:
+        dest = './data/districts.dump'
+    else:
+        dest = shlex.quote(dest)
     cmd = (
         'pg_dump {source} --format c --no-acl --no-owner -f {dest} '
         '-t ofec_fips_states -t ofec_zips_districts'
     ).format(**locals())
-    subprocess.call(shlex.quote(cmd), shell=True)
+    subprocess.call(cmd, shell=True)
 
 @manager.command
 def load_districts(source=None):
     """ Loads that districts that you made locally so that you can then add them as a
     table to the databases
     """
-    source = source or './data/districts.dump'
+    if source is None:
+        source = './data/districts.dump'
+    else:
+        source = shlex.quote(source)
     dest = db.engine.url
     cmd = (
         'pg_restore --dbname {dest} --no-acl --no-owner --clean {source}'
     ).format(**locals())
-    subprocess.call(shlex.quote(cmd), shell=True)
+    subprocess.call(cmd, shell=True)
 
 @manager.command
 def build_district_counts(outname='districts.json'):
