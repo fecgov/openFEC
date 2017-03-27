@@ -1,13 +1,33 @@
 with last as (
     select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*
     from fec_vsum_f3p_vw f3p
+    inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
+    where
+        substr(link.cand_id, 1, 1) = link.cmte_tp
+        and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
+        and link.cand_id = 'P80002801'
+        and election_cycle >= 2008
     order by
         f3p.cmte_id,
         f3p.election_cycle,
         f3p.cvg_end_dt desc
-), aggregate_filings as(
+), aggregate_last as(
+    select last.election_cycle as cycle,
+    max(last.net_contb_sum_page_per) as net_contributions,
+    max(last.net_op_exp_sum_page_per) as net_operating_expenditures,
+            max(last.rpt_tp_desc) as last_report_type_full,
+            max(last.begin_image_num) as last_beginning_image_number,
+            sum(last.coh_cop) as last_cash_on_hand_end_period,
+            max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
+            max(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
+            max(last.rpt_yr) as last_report_year
+    from last
+
+    group by
+        last.election_cycle
+),
+aggregate_filings as(
     select
-        row_number() over () as idx,
         cand_id as candidate_id,
         p.election_cycle as cycle,
         min(p.cvg_start_dt) as coverage_start_date,
@@ -46,29 +66,26 @@ with last as (
         sum(p.tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee,
         sum(p.coh_bop) as cash_on_hand_beginning_of_period,
         sum(p.debts_owed_by_cmte) as debts_owed_by_cmte,
-        sum(p.debts_owed_to_cmte) as debts_owed_to_cmte,
-        max(last.net_contb_sum_page_per) as net_contributions,
-        max(last.net_op_exp_sum_page_per) as net_operating_expenditures,
-        max(last.rpt_tp_desc) as last_report_type_full,
-        max(last.begin_image_num) as last_beginning_image_number,
-        sum(last.coh_cop) as last_cash_on_hand_end_period,
-        max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
-        max(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
-        max(last.rpt_yr) as last_report_year
+        sum(p.debts_owed_to_cmte) as debts_owed_to_cmte
+
     from
         ofec_candidate_detail_mv cand_detail
         inner join ofec_cand_cmte_linkage_mv link on link.cand_id = cand_detail.candidate_id
         inner join fec_vsum_f3p_vw p on link.cmte_id = p.cmte_id and link.fec_election_yr = p.election_cycle
-        inner join last on p.cmte_id = last.cmte_id and last.election_cycle = p.election_cycle
     where
         p.most_recent_filing_flag like 'Y'
-        and p.election_cycle >= :START_YEAR
+        and p.election_cycle >= 2008
+        and cand_detail.candidate_id = 'P80002801'
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
     group by
         p.election_cycle,
         cand_id)
-select af.*
-	from aggregate_filings af
+
+        select af.cycle,af.disbursements, aggregate_last.last_cash_on_hand_end_period
+        from aggregate_filings af
+        inner join aggregate_last
+        on aggregate_last.cycle = af.cycle
+
 ;
