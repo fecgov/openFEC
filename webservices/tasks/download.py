@@ -194,10 +194,12 @@ def make_bundle(resource):
                 resource['query'],
                 resource['schema']
             )
+            import ipdb
+            ipdb.set_trace()
             copy_to(
                 query,
-                db.session.connection().engine,
                 fp,
+                db.session.connection().engine,
                 format='csv',
                 header=True
             )
