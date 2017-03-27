@@ -25,7 +25,9 @@ before_script:
 script: py.test
 after_success:
 - travis_retry pip install bandit
+- cd ..
 - bandit -r openFEC
+- cd openFEC
 - travis_retry pip install codecov
 - codecov
 before_deploy:
