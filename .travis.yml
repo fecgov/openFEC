@@ -26,6 +26,7 @@ script: py.test
 after_success:
 - travis_retry pip install codecov
 - codecov
+- pip3.5 install bandit && bandit -r
 before_deploy:
 - export PATH=$HOME:$PATH
 - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
