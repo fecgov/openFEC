@@ -2,7 +2,7 @@ language: python
 sudo: false
 cache: pip
 python:
-  - "3.4"
+  - "3.5"
 addons:
   postgresql: "9.4"
 env:
@@ -21,14 +21,20 @@ before_script:
   - travis_retry pip install -U pip setuptools wheel
   - travis_retry pip install -r requirements.txt
   - travis_retry pip install -r requirements-dev.txt
+  - ". $HOME/.nvm/nvm.sh"
+  - nvm install v7.7.4
+  - nvm use v7.7.4
+  - npm i -g npm
   - travis_retry npm install -g swagger-tools
+  - travis_retry npm install
+  - npm run build
 script: py.test
 after_success:
   - travis_retry pip install codecov
   - codecov
 before_deploy:
   - export PATH=$HOME:$PATH
-  - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
+  - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.25.0"
   - tar xzvf $HOME/cf.tgz -C $HOME
   - travis_retry cf install-plugin autopilot -f -r CF-Community
   - npm install
