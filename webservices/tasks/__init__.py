@@ -4,8 +4,6 @@ import celery
 from celery import signals
 from celery.schedules import crontab
 
-from raven import Client
-from raven.contrib.celery import register_signal, register_logger_signal
 
 from webservices.env import env
 from webservices.tasks import utils
