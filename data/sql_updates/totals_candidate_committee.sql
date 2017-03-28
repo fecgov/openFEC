@@ -1,30 +1,30 @@
 with last as (
-    select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*
+    select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*, link.cand_id
     from fec_vsum_f3p_vw f3p
     inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
     where
         substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
-        and link.cand_id = 'P80002801'
-        and election_cycle >= 2008
+        and election_cycle >= :START_YEAR
     order by
         f3p.cmte_id,
         f3p.election_cycle,
         f3p.cvg_end_dt desc
 ), aggregate_last as(
     select last.election_cycle as cycle,
-    max(last.net_contb_sum_page_per) as net_contributions,
-    max(last.net_op_exp_sum_page_per) as net_operating_expenditures,
-            max(last.rpt_tp_desc) as last_report_type_full,
-            max(last.begin_image_num) as last_beginning_image_number,
-            sum(last.coh_cop) as last_cash_on_hand_end_period,
-            max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
-            max(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
-            max(last.rpt_yr) as last_report_year
+        last.cand_id as candidate_id,
+        sum(last.net_contb_sum_page_per) as net_contributions,
+        sum(last.net_op_exp_sum_page_per) as net_operating_expenditures,
+        max(last.rpt_tp_desc) as last_report_type_full,
+        max(last.begin_image_num) as last_beginning_image_number,
+        sum(last.coh_cop) as last_cash_on_hand_end_period,
+        sum(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
+        sum(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
+        max(last.rpt_yr) as last_report_year
     from last
-
     group by
-        last.election_cycle
+        last.election_cycle,
+        last.cand_id
 ),
 aggregate_filings as(
     select
@@ -74,8 +74,7 @@ aggregate_filings as(
         inner join fec_vsum_f3p_vw p on link.cmte_id = p.cmte_id and link.fec_election_yr = p.election_cycle
     where
         p.most_recent_filing_flag like 'Y'
-        and p.election_cycle >= 2008
-        and cand_detail.candidate_id = 'P80002801'
+        and p.election_cycle >= :START_YEAR
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
@@ -83,9 +82,16 @@ aggregate_filings as(
         p.election_cycle,
         cand_id)
 
-        select af.cycle,af.disbursements, aggregate_last.last_cash_on_hand_end_period
+        select af.*,
+            aggregate_last.last_cash_on_hand_end_period,
+            aggregate_last.net_contributions,
+            aggregate_last.net_operating_expenditures,
+            aggregate_last.last_report_type_full,
+            aggregate_last.last_debts_owed_to_committee,
+            aggregate_last.last_debts_owed_by_committee,
+            aggregate_last.last_beginning_image_number,
+            aggregate_last.last_report_year
         from aggregate_filings af
         inner join aggregate_last
-        on aggregate_last.cycle = af.cycle
-
+        on aggregate_last.cycle = af.cycle and aggregate_last.candidate_id = af.candidate_id
 ;
