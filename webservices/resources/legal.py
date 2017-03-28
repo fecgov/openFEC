@@ -17,7 +17,6 @@ class GetLegalCitation(utils.Resource):
         "citation": fields.Str(required=True, description='Citation to search for.')}
 
     def get(self, citation_type, citation, **kwargs):
-        print(citation)
         citation = '*%s*' % citation
         query = Search().using(es) \
             .query('bool', must=[Q("term", _type='citations'),
@@ -28,10 +27,8 @@ class GetLegalCitation(utils.Resource):
             .extra(size=10) \
             .index(DOCS_SEARCH)
 
-        print(query.to_dict())
         es_results = query.execute()
 
-        print(es_results)
         results = {"citations": [hit.to_dict() for hit in es_results]}
         return results
 

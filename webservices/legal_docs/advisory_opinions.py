@@ -126,8 +126,8 @@ def get_documents(ao_id, bucket, bucket_name):
             }
             pdf_key = "legal/aos/%s.pdf" % row["document_id"]
             logger.info("S3: Uploading {}".format(pdf_key))
-            #bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
-            #        ContentType="application/pdf", ACL="public-read")
+            bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
+                    ContentType="application/pdf", ACL="public-read")
             document["url"] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
             documents.append(document)
     return documents
