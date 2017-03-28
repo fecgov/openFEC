@@ -33,10 +33,10 @@ def test_parse_ao_citations(text, ao_nos, expected):
     assert parse_ao_citations(text, ao_component_to_name_map) == expected
 
 @pytest.mark.parametrize("text,expected", [
-    ("2 U.S.C. 432h", set([("2 U.S.C. 432h", 2, 432)])),
-    ("52 U.S.C. 30116a", set([("52 U.S.C. 30116a", 52, 30116)])),
-    ("2 U.S.C. 441b, 441c, 441e", set([("2 U.S.C. 441b, 441c, 441e", 2, 441)])),
-    (" 2 U.S.C. §437f", set([("2 U.S.C. §437f", 2, 437)])),
+    ("2 U.S.C. 432h", set([("2 U.S.C. 432h", 52, 30102, 2, 432)])),
+    ("52 U.S.C. 30116a", set([("52 U.S.C. 30116a", 52, 30116, 52, 30116)])),
+    ("2 U.S.C. 441b, 441c, 441e", set([("2 U.S.C. 441b, 441c, 441e", 2, 441, 2, 441)])),
+    (" 2 U.S.C. §437f", set([("2 U.S.C. §437f", 52, 30105, 2, 437)])),
 ])
 def test_parse_statutory_citations(text, expected):
     assert parse_statutory_citations(text) == expected
@@ -199,7 +199,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao2["aos_cited_by"] == []
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
-    def test_statutory_citations(self, get_bucket):
+    @patch("webservices.legal_docs.advisory_opinions.get_elasticsearch_connection")
+    def test_statutory_citations(self, get_bucket, get_elasticsearch_connection):
         ao_document = {
             "document_id": 1,
             "category": "Final Opinion",
@@ -221,10 +222,12 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         actual_ao = next(get_advisory_opinions())
 
-        assert actual_ao["statutory_citations"] == [{"text": "2 U.S.C. 431 and some text", "title": 2, "section": 431}]
+        assert actual_ao["statutory_citations"] == [{'title': 52, 'section': 30101,
+            'former_title': 2, 'former_section': 431, 'text': '2 U.S.C. 431 and some text'}]
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
-    def test_regulatory_citations(self, get_bucket):
+    @patch("webservices.legal_docs.advisory_opinions.get_elasticsearch_connection")
+    def test_regulatory_citations(self, get_bucket, get_elasticsearch_connection):
         ao_document = {
             "document_id": 1,
             "category": "Final Opinion",
