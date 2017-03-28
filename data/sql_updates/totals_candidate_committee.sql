@@ -7,7 +7,7 @@ with last as (
     where
         substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
-        and election_cycle >= :START_YEAR
+        and election_cycle >= 2005
     order by
         f3p.cmte_id,
         f3p.election_cycle,
@@ -37,7 +37,7 @@ with last as (
             inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
     where
         f3p.most_recent_filing_flag like 'Y'
-        and f3p.election_cycle >= :START_YEAR
+        and f3p.election_cycle >= 2005
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
     order by
@@ -101,15 +101,16 @@ with last as (
         inner join fec_vsum_f3p_vw p on link.cmte_id = p.cmte_id and link.fec_election_yr = p.election_cycle
     where
         p.most_recent_filing_flag like 'Y'
-        and p.election_cycle >= :START_YEAR
+        and p.election_cycle >= 2005
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
     group by
         p.election_cycle,
-        cand_id)
-
-        select af.*,
+        cand_id
+    ), presidential_totals as (
+        select
+            af.*,
             aggregate_last.last_cash_on_hand_end_period,
             aggregate_last.net_contributions,
             aggregate_last.net_operating_expenditures,
@@ -122,5 +123,24 @@ with last as (
         from aggregate_filings af
         inner join aggregate_last on aggregate_last.cycle = af.cycle and aggregate_last.candidate_id = af.candidate_id
         inner join cash_beginning_period_aggregate on cash_beginning_period_aggregate.cycle = af.cycle and cash_beginning_period_aggregate.candidate_id = af.candidate_id
-        order by af.cycle
+    )
+        select
+                totals.candidate_id as candidate_id,
+                max(election.cand_election_year) as election_year,
+                true as full_election,
+                sum(totals.receipts) as receipts,
+                sum(totals.disbursements) as disbursements,
+                sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
+                sum(last_debts_owed_by_committee) as debts_owed_by_committee
+
+        from presidential_totals totals
+        inner join ofec_candidate_election_mv election on
+            totals.candidate_id = election.candidate_id and
+            totals.cycle <= election.cand_election_year and
+            totals.cycle > election.prev_election_year
+        where
+            totals.candidate_id = 'P80002801' and
+            totals.cycle > 2004
+        group by
+            totals.candidate_id
 ;
