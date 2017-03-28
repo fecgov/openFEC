@@ -77,7 +77,7 @@ class CanonicalPageTest(unittest.TestCase):
         # elasitcsearch_dsl correctly.
         expected_query = {"query": {"bool": {"must": [{"term": {"no": "1993-02"}},
                           {"term": {"_type": "advisory_opinions"}}]}},
-                          "_source": {"exclude": "text"}, "size": 200}
+                          "_source": {"exclude": "documents.text"}, "size": 200}
         es_search.assert_called_with(body=expected_query,
                                      doc_type=mock.ANY,
                                      index=mock.ANY)
@@ -197,33 +197,27 @@ class SearchTest(unittest.TestCase):
         # This is mostly copy/pasted from the dict-based query. This is not a
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
-        expected_query = {"query": {"bool": {
-            "must": [
-                {"term": {"_type": "advisory_opinions"}},
-                {"match": {"_all": "president"}},
-                {'nested': {
-                    'path': 'documents',
-                    'query': {
-                        'bool': {
-                            'must': [
-                                {'terms': {'documents.category': ['Final Opinion']}},
-                                {'match': {'documents.text': 'president'}}]}}}}],
-            "should": [
-                {"match": {"no": "president"}},
-                {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
-            ]}},
-            "highlight": {"fields": {"text": {}, "name": {}, "no": {}, "summary": {},
-                "documents.text": {}, "documents.description": {}},
-            "highlight_query": {"match": {"_all": "president"}}},
-            "_source": {"exclude": ["text", "documents.text", "sort1", "sort2"]},
-            "sort": ['sort1', 'sort2'],
-            "from": 0,
-            "size": 20}
+        expected_query = {'sort': ['sort1', 'sort2'],
+            'from': 0,
+            'query': {'bool': {
+                'must': [{'term': {'_type': 'advisory_opinions'}},
+                    {'match': {'_all': 'president'}},
+                    {'nested': {'path': 'documents',
+                                'query': {'bool': {'must': [
+                                    {'terms': {'documents.category': ['Final Opinion']}}]}}}},
+                    {'nested': {'path': 'documents',
+                        'query': {'bool': {'must': [{
+                            'match': {'documents.text': 'president'}}]}}}},
+                    {'bool': {'minimum_should_match': 1}}], 'should': [{'match': {'no': 'president'}},
+                    {'match_phrase': {'_all': {'slop': 50, 'query': 'president'}}}]}},
+            'size': 20, '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']},
+            'highlight': {'highlight_query': {'match': {'_all': 'president'}},
+            'fields': {'documents.text': {}, 'text': {},
+            'documents.description': {}, 'name': {}, 'no': {}, 'summary': {}}}}
 
         es_search.assert_called_with(body=expected_query,
                                      index=mock.ANY,
                                      doc_type=mock.ANY)
-
 
 
 class LegalPhraseParseTests(unittest.TestCase):

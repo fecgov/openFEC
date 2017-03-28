@@ -9,6 +9,29 @@ from webservices.utils import use_kwargs
 from webservices.legal_docs import DOCS_SEARCH
 es = utils.get_elasticsearch_connection()
 
+
+class GetLegalCitation(utils.Resource):
+    @property
+    def args(self):
+        return {"citation_type": fields.Str(required=True, description="Citation type (regulation or statute)"),
+        "citation": fields.Str(required=True, description='Citation to search for.')}
+
+    def get(self, citation_type, citation, **kwargs):
+        citation = '*%s*' % citation
+        query = Search().using(es) \
+            .query('bool', must=[Q("term", _type='citations'),
+            Q('match', citation_type=citation_type)],
+            should=[Q('wildcard', text=citation),
+            Q('wildcard', formerly=citation)],
+            minimum_should_match=1) \
+            .extra(size=10) \
+            .index(DOCS_SEARCH)
+
+        es_results = query.execute()
+
+        results = {"citations": [hit.to_dict() for hit in es_results]}
+        return results
+
 class GetLegalDocument(utils.Resource):
     @property
     def args(self):
@@ -18,7 +41,7 @@ class GetLegalDocument(utils.Resource):
     def get(self, doc_type, no, **kwargs):
         es_results = Search().using(es) \
             .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
-            .source(exclude='text') \
+            .source(exclude='documents.text') \
             .extra(size=200) \
             .index(DOCS_SEARCH) \
             .execute()
@@ -152,6 +175,7 @@ def apply_mur_specific_query_params(query, q='', **kwargs):
     return query
 
 def apply_ao_specific_query_params(query, q='', **kwargs):
+    must_clauses = []
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
                   'D': 'Draft Documents',
@@ -164,23 +188,48 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
         ao_category = [categories[c] for c in kwargs.get('ao_category')]
     else:
         ao_category = ['Final Opinion']
+
+    must_clauses.append(Q("nested", path="documents", query=Q('bool',
+        must=Q('terms', documents__category=ao_category))))
+
     if q:
-        combined_query = [
-            Q('terms', documents__category=ao_category),
-            Q('match', documents__text=q)]
-        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+        must_clauses.append(Q("nested", path="documents", query=Q('bool',
+            must=Q('match', documents__text=q))))
 
     if kwargs.get('ao_no'):
-        query = query.query('terms', no=kwargs.get('ao_no'))
+        must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
 
     if kwargs.get('ao_name'):
-        query = query.query("match", name=' '.join(kwargs.get('ao_name')))
+        must_clauses.append(Q("match", name=' '.join(kwargs.get('ao_name'))))
 
     if kwargs.get('ao_is_pending') is not None:
-        query = query.query('term', is_pending=kwargs.get('ao_is_pending'))
+        must_clauses.append(Q('term', is_pending=kwargs.get('ao_is_pending')))
 
     if kwargs.get('ao_requestor'):
-        query = query.query("match", requestor_names=kwargs.get('ao_requestor'))
+        must_clauses.append(Q("match", requestor_names=kwargs.get('ao_requestor')))
+
+    citation_queries = []
+    if kwargs.get('ao_regulatory_citation'):
+        for citation in kwargs.get('ao_regulatory_citation'):
+            exact_match = re.match(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)\.(?P<section>\d+)", citation)
+            if(exact_match):
+                citation_queries.append(Q("nested", path="regulatory_citations", query=Q("bool",
+                    must=[Q("term", regulatory_citations__title=int(exact_match.group('title'))),
+                        Q("term", regulatory_citations__part=int(exact_match.group('part'))),
+                        Q("term", regulatory_citations__section=int(exact_match.group('section')))])))
+
+    if kwargs.get('ao_statutory_citation'):
+        for citation in kwargs.get('ao_statutory_citation'):
+            exact_match = re.match(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+).*\.?", citation)
+            if(exact_match):
+                citation_queries.append(Q("nested", path="statutory_citations", query=Q("bool",
+                    must=[Q("term", statutory_citations__title=int(exact_match.group('title'))),
+                    Q("term", statutory_citations__section=int(exact_match.group('section')))])))
+
+    if kwargs.get('ao_citation_require_all'):
+        must_clauses.append(Q('bool', must=citation_queries))
+    else:
+        must_clauses.append(Q('bool', should=citation_queries, minimum_should_match=1))
 
     if kwargs.get('ao_requestor_type'):
         requestor_types = {1: 'Federal candidate/candidate committee/officeholder',
@@ -199,7 +248,7 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
                      14: 'Law Firm',
                      15: 'Individual',
                      16: 'Other'}
-        query = query.query("terms", requestor_types=[requestor_types[r] for r in kwargs.get('ao_requestor_type')])
+        must_clauses.append(Q("terms", requestor_types=[requestor_types[r] for r in kwargs.get('ao_requestor_type')]))
 
     date_range = {}
     if kwargs.get('ao_min_date'):
@@ -207,6 +256,8 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
     if kwargs.get('ao_max_date'):
         date_range['lte'] = kwargs.get('ao_max_date')
     if date_range:
-        query = query.query("range", issue_date=date_range)
+        must_clauses.append(Q("range", issue_date=date_range))
+
+    query = query.query('bool', must=must_clauses)
 
     return query
