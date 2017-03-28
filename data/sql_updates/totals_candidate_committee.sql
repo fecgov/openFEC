@@ -1,3 +1,5 @@
+drop materialized view if exists ofec_totals_candidates_committees_mv_tmp cascade;
+create materialized view ofec_totals_candidate_committees_mv_tmp as
 with last as (
     select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*, link.cand_id
     from fec_vsum_f3p_vw f3p
@@ -25,8 +27,33 @@ with last as (
     group by
         last.election_cycle,
         last.cand_id
-),
-aggregate_filings as(
+), cash_beginning_period as (
+    select distinct on (f3p.cmte_id, f3p.election_cycle) link.cand_id as candidate_id,
+          f3p.cmte_id as committee_id,
+          f3p.election_cycle as cycle,
+          f3p.coh_bop as cash_on_hand
+      from
+        fec_vsum_f3p_vw f3p
+            inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
+    where
+        f3p.most_recent_filing_flag like 'Y'
+        and f3p.election_cycle >= :START_YEAR
+        and substr(link.cand_id, 1, 1) = link.cmte_tp
+        and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
+    order by
+        f3p.cmte_id,
+        f3p.election_cycle,
+        f3p.cvg_end_dt asc
+), cash_beginning_period_aggregate as (
+      select sum(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_of_period,
+        cash_beginning_period.cycle,
+        cash_beginning_period.candidate_id
+      from cash_beginning_period
+      group by
+        cash_beginning_period.cycle,
+        cash_beginning_period.candidate_id
+
+), aggregate_filings as(
     select
         cand_id as candidate_id,
         p.election_cycle as cycle,
@@ -90,8 +117,10 @@ aggregate_filings as(
             aggregate_last.last_debts_owed_to_committee,
             aggregate_last.last_debts_owed_by_committee,
             aggregate_last.last_beginning_image_number,
-            aggregate_last.last_report_year
+            aggregate_last.last_report_year,
+            cash_beginning_period_aggregate.cash_on_hand_beginning_of_period
         from aggregate_filings af
-        inner join aggregate_last
-        on aggregate_last.cycle = af.cycle and aggregate_last.candidate_id = af.candidate_id
+        inner join aggregate_last on aggregate_last.cycle = af.cycle and aggregate_last.candidate_id = af.candidate_id
+        inner join cash_beginning_period_aggregate on cash_beginning_period_aggregate.cycle = af.cycle and cash_beginning_period_aggregate.candidate_id = af.candidate_id
+        order by af.cycle
 ;
