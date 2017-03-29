@@ -46,13 +46,13 @@ We are always trying to improve our documentation. If you have suggestions or ru
 ### Project prerequisites
 1. Ensure you have the following requirements installed:
 
-    * Python 3.4 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
+    * Python 3.5.3 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
-    * PostgreSQL (the latest 9.5 release).
+    * PostgreSQL (the latest 9.6 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-    * Elastic Search 1.7 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/_installation.html)
+    * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/javascript/).
 
@@ -312,8 +312,6 @@ the following keys are set:
 * FEC_WEB_API_KEY
 * FEC_WEB_API_KEY_PUBLIC
 * FEC_GITHUB_TOKEN
-* SENTRY_DSN
-* SENTRY_PUBLIC_DSN
 * NEW_RELIC_LICENSE_KEY
 * WRITE_AUTHORIZED_TOKENS
 
