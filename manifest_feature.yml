@@ -7,5 +7,5 @@ services:
   - fec-s3-feature
   - fec-search-feature
 env:
-  NEW_RELIC_APP_NAME: OpenFEC API (feature)
+  NEW_RELIC_APP_NAME: fec | api | feature
   NEW_RELIC_ENV: feature

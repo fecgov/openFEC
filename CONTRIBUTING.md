@@ -160,7 +160,6 @@ development tools:
 We currently have several monitoring tools in place:
 
 - New Relic, mainly for basic pings
-- Sentry, for catching more verbose error reports and logs
 - A custom script powered by Mandrill to e-mail us nightly status reports in
   the `dev`, `stage`, and `prod` environments.
 
