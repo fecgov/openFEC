@@ -7,7 +7,7 @@ with last as (
     where
         substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
-        and election_cycle >= 2005
+        and election_cycle >= 1990
     order by
         f3p.cmte_id,
         f3p.election_cycle,
@@ -37,7 +37,7 @@ with last as (
             inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
     where
         f3p.most_recent_filing_flag like 'Y'
-        and f3p.election_cycle >= 2005
+        and f3p.election_cycle >= 1990
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
     order by
@@ -57,6 +57,7 @@ with last as (
     select
         cand_id as candidate_id,
         p.election_cycle as cycle,
+        p.election_cycle as election_year,
         min(p.cvg_start_dt) as coverage_start_date,
         max(p.cvg_end_dt) as coverage_end_date,
         sum(p.cand_contb_per) as candidate_contribution,
@@ -91,7 +92,6 @@ with last as (
         sum(p.repymts_other_loans_per) as repayments_other_loans,
         sum(p.tranf_from_affilated_cmte_per) as transfers_from_affiliated_committee,
         sum(p.tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee,
-        sum(p.coh_bop) as cash_on_hand_beginning_of_period,
         sum(p.debts_owed_by_cmte) as debts_owed_by_cmte,
         sum(p.debts_owed_to_cmte) as debts_owed_to_cmte
 
@@ -101,7 +101,7 @@ with last as (
         inner join fec_vsum_f3p_vw p on link.cmte_id = p.cmte_id and link.fec_election_yr = p.election_cycle
     where
         p.most_recent_filing_flag like 'Y'
-        and p.election_cycle >= 2005
+        and p.election_cycle >= 1990
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
@@ -111,6 +111,7 @@ with last as (
     ), presidential_totals as (
         select
             af.*,
+            false as full_election,
             aggregate_last.last_cash_on_hand_end_period,
             aggregate_last.net_contributions,
             aggregate_last.net_operating_expenditures,
@@ -123,24 +124,77 @@ with last as (
         from aggregate_filings af
         inner join aggregate_last on aggregate_last.cycle = af.cycle and aggregate_last.candidate_id = af.candidate_id
         inner join cash_beginning_period_aggregate on cash_beginning_period_aggregate.cycle = af.cycle and cash_beginning_period_aggregate.candidate_id = af.candidate_id
-    )
+    ), intermediate_combined_totals as (
         select
                 totals.candidate_id as candidate_id,
-                max(election.cand_election_year) as election_year,
-                true as full_election,
-                sum(totals.receipts) as receipts,
+                max(totals.cycle) as cycle,
+                max(totals.election_year) as election_year,
+                min(totals.coverage_start_date) as coverage_start_date,
+                max(totals.coverage_end_date) as coverage_end_date,
+                sum(totals.candidate_contribution) as candidate_contribution,
+                sum(totals.contribution_refunds) as contribution_refunds,
+                sum(totals.contributions) as contributions,
                 sum(totals.disbursements) as disbursements,
-                sum(last_cash_on_hand_end_period) as cash_on_hand_end_period,
-                sum(last_debts_owed_by_committee) as debts_owed_by_committee
-
+                sum(totals.exempt_legal_accounting_disbursement) as exempt_legal_accounting_disbursement,
+                sum(totals.federal_funds) as federal_funds,
+                sum(totals.federal_funds) > 0 as federal_funds_flag,
+                sum(totals.fundraising_disbursements) as fundraising_disbursements,
+                sum(totals.individual_contributions) as individual_contributions,
+                sum(totals.individual_unitemized_contributions) as individual_unitemized_contributions,
+                sum(totals.individual_itemized_contributions) as individual_itemized_contributions,
+                sum(totals.loans_received) as loans_received,
+                sum(totals.loans_received_from_candidate) as loans_received_from_candidate,
+                sum(totals.loan_repayments_made) as loan_repayments_made,
+                sum(totals.offsets_to_fundraising_expenditures) as offsets_to_fundraising_expenditures,
+                sum(totals.offsets_to_legal_accounting) as offsets_to_legal_accounting,
+                sum(totals.offsets_to_operating_expenditures) as offsets_to_operating_expenditures,
+                sum(totals.total_offsets_to_operating_expenditures) as total_offsets_to_operating_expenditures,
+                sum(totals.operating_expenditures) as operating_expenditures,
+                sum(totals.other_disbursements) as other_disbursements,
+                sum(totals.other_loans_received) as other_loans_received,
+                sum(totals.other_political_committee_contributions) as other_political_committee_contributions,
+                sum(totals.other_receipts) as other_receipts,
+                sum(totals.political_party_committee_contributions) as political_party_committee_contributions,
+                sum(totals.receipts) as receipts,
+                sum(totals.refunded_individual_contributions) as refunded_individual_contributions,
+                sum(totals.refunded_other_political_committee_contributions) as refunded_other_political_committee_contributions,
+                sum(totals.refunded_political_party_committee_contributions) as refunded_political_party_committee_contributions,
+                sum(totals.repayments_loans_made_by_candidate) as repayments_loans_made_by_candidate,
+                sum(totals.repayments_other_loans ) as repayments_other_loans,
+                sum(totals.transfers_from_affiliated_committee) as transfers_from_affiliated_committee,
+                sum(totals.transfers_to_other_authorized_committee) as transfers_to_other_authorized_committee,
+                sum(totals.debts_owed_by_cmte) as debts_owed_by_cmte,
+                sum(totals.debts_owed_to_cmte) as debts_owed_to_cmte,
+                true as full_election
         from presidential_totals totals
         inner join ofec_candidate_election_mv election on
             totals.candidate_id = election.candidate_id and
             totals.cycle <= election.cand_election_year and
             totals.cycle > election.prev_election_year
-        where
-            totals.candidate_id = 'P80002801' and
-            totals.cycle > 2004
         group by
-            totals.candidate_id
+            totals.candidate_id,
+            election.cand_election_year
+        ), combined_totals as (
+            select ict.*,
+                totals.last_cash_on_hand_end_period,
+                totals.net_contributions,
+                totals.net_operating_expenditures,
+                totals.last_report_type_full,
+                totals.last_debts_owed_to_committee,
+                totals.last_debts_owed_by_committee,
+                totals.last_beginning_image_number,
+                totals.last_report_year,
+                0.0 as cash_on_hand_beginning_of_period
+                --totals.cash_on_hand_beginning_of_period get this from first cycle
+            from presidential_totals totals
+            inner join ofec_candidate_election_mv election on
+                totals.candidate_id = election.candidate_id and
+                totals.cycle = election.cand_election_year
+            inner join intermediate_combined_totals ict on totals.candidate_id = ict.candidate_id and totals.cycle = ict.cycle
+            where totals.cycle > 1990
+
+        )
+        select cycle, receipts, disbursements, last_cash_on_hand_end_period, last_debts_owed_by_committee, last_debts_owed_to_committee, full_election from presidential_totals where candidate_id = 'P80002801'
+        union all
+        select cycle, receipts, disbursements, last_cash_on_hand_end_period, last_debts_owed_by_committee, last_debts_owed_to_committee, full_election from combined_totals where candidate_id = 'P80002801'
 ;
