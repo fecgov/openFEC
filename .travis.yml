@@ -2,41 +2,41 @@ language: python
 sudo: false
 cache: pip
 python:
-- '3.4'
+  - "3.4"
 addons:
-  postgresql: '9.4'
+  postgresql: "9.4"
 env:
   global:
-  - secure: fZSgHvzAttJcq5GYEwp/jo8/hcRs0hW169dTG4VC6vW29sPFjc2R6NuXVzXxGzxkWN16KvUNU+feMiMIse7c2zQIceTmhJh7cz19v+xmmwgqJgv0ln8+7+1rGB6FIblS9C70b2ggKjZ5DYMD4DxCrtQkWkVzQDncdADb4vg0ZA4=
-  - secure: OTXWsWgcECe+A21Tsxnz4sipzVaGW1RrtYqOx6/hFgBZPcGeNMz+sJtSH2PQ8tRj4QPljHwH4+X3vRrQDXYE9ToUrV9lV997SXr+ZLwkKrypQGmqFNnygt4fibrtpPtLHIc/KJoLwHMbFC6OZDi9IqVa2OR6JEmeRpi3N5UOqQk=
-  - secure: b8mtTxB1+ZC2uEjFj6K4NjOr5xyprErJl1F3o1z/0iOHIsBaV3MFhv6QbNi+DXbyPGZuYQAIXUzDLFruToc/XTWWK6VFWo16KRKgrdB9JPuBseKDs8sM8pvoIUKbhRDatvN49zYmnsCGdnFN0s5U/fvfnjMIEuSNNgP59CxccL4=
-  - secure: Yc2cMJt6lnFiOV8giiFdI2HHqNszqGVV3djMWKWfno0NTy3sebAV9oF/ioXZehhQouH/nqtBJ34yPDu5svrqANnidLF0TB9+t2B9YTjeTQikO7kqRx4+OT3Q7mD+EROyfVOGhp31A32mqju64lEqX6yg2Cy7n2ZMnP3HRvDn81w=
-  - secure: PT/TTWy0apjJZYyQzM4URPKcWI15YOezrikW2JuMo+J1eL5H3hUTVEWclrKDFqmWnL0Ru3wc1qLFllKOXjtiAelzgLlQR+kmHncs6S2O884U6OVwKllEQv7OyunFGffPkWsjWyKLxjHC93DpYezvYrECcp9kHioJA8AoJO/cTi0=
-  - secure: cv6AuS3LYbsI/zoHdfnPd6CTwXr7V14lW/RvTlsIweCQrk94krcoahB0M1F3svuL555QBT0Hr+tApPQwt8k9SjGLuhWdLWAwC5lPX9Kgr/WseLuDbQ+DGa09rRgf6orOH5I2e+n7o5j+89BA9vYoyzPVv2SjG+DhglX9VysoQqA= # dev user name
-  - secure: F1dtnMCk7weobmhNVYrnqHEoFOOWNQJcLhjSxErtakuK0Lvk+iuLPaVE3fljjy2VDrcYTCmYbAD1gkOwkSnB+kD516PSWQ9T9vfeKEoPSl8FzWi8w8SHKYyUuiCt3PNDedsUzjn9VQsD+P1mRRF1R2BBk9roE+Qz2HlMoBomQHw= # dev password
-  - secure: DHeDA3k09XnfgRR6BqLY0I3elYQkp6s5Id1slNicvRuhrrmT8h6bRr7FmIy2JiaUieMDZ0cuoF965PJpGN3QAmE6Z0wRTkxpexM3XW8d43kufXy36eVLb85m/S9p5W3bcDUlGa/tn8Lq2TtckJidZ7uO2KPFuaobGfOUO5rspIM= # stage user name
-  - secure: XGUU6IbLojPiAKKEE/r8VGUWrQfIlN4KwbniCR7ZbdTKMevQ8ApG2kS3VPKeN17cvEbQZmN+xJgLdxozzM7oIVAS77hbH4EEnJ2Dq2re1H2V87FpD9SCIbFhdmNWybLWmRvxMiCQYtmPPlShdSI/ZsfWZuIZxfFW1kB594DRKCs= # stage password
+    - secure: fZSgHvzAttJcq5GYEwp/jo8/hcRs0hW169dTG4VC6vW29sPFjc2R6NuXVzXxGzxkWN16KvUNU+feMiMIse7c2zQIceTmhJh7cz19v+xmmwgqJgv0ln8+7+1rGB6FIblS9C70b2ggKjZ5DYMD4DxCrtQkWkVzQDncdADb4vg0ZA4=
+    - secure: OTXWsWgcECe+A21Tsxnz4sipzVaGW1RrtYqOx6/hFgBZPcGeNMz+sJtSH2PQ8tRj4QPljHwH4+X3vRrQDXYE9ToUrV9lV997SXr+ZLwkKrypQGmqFNnygt4fibrtpPtLHIc/KJoLwHMbFC6OZDi9IqVa2OR6JEmeRpi3N5UOqQk=
+    - secure: b8mtTxB1+ZC2uEjFj6K4NjOr5xyprErJl1F3o1z/0iOHIsBaV3MFhv6QbNi+DXbyPGZuYQAIXUzDLFruToc/XTWWK6VFWo16KRKgrdB9JPuBseKDs8sM8pvoIUKbhRDatvN49zYmnsCGdnFN0s5U/fvfnjMIEuSNNgP59CxccL4=
+    - secure: Yc2cMJt6lnFiOV8giiFdI2HHqNszqGVV3djMWKWfno0NTy3sebAV9oF/ioXZehhQouH/nqtBJ34yPDu5svrqANnidLF0TB9+t2B9YTjeTQikO7kqRx4+OT3Q7mD+EROyfVOGhp31A32mqju64lEqX6yg2Cy7n2ZMnP3HRvDn81w=
+    - secure: PT/TTWy0apjJZYyQzM4URPKcWI15YOezrikW2JuMo+J1eL5H3hUTVEWclrKDFqmWnL0Ru3wc1qLFllKOXjtiAelzgLlQR+kmHncs6S2O884U6OVwKllEQv7OyunFGffPkWsjWyKLxjHC93DpYezvYrECcp9kHioJA8AoJO/cTi0=
+    - secure: cv6AuS3LYbsI/zoHdfnPd6CTwXr7V14lW/RvTlsIweCQrk94krcoahB0M1F3svuL555QBT0Hr+tApPQwt8k9SjGLuhWdLWAwC5lPX9Kgr/WseLuDbQ+DGa09rRgf6orOH5I2e+n7o5j+89BA9vYoyzPVv2SjG+DhglX9VysoQqA= # dev user name
+    - secure: F1dtnMCk7weobmhNVYrnqHEoFOOWNQJcLhjSxErtakuK0Lvk+iuLPaVE3fljjy2VDrcYTCmYbAD1gkOwkSnB+kD516PSWQ9T9vfeKEoPSl8FzWi8w8SHKYyUuiCt3PNDedsUzjn9VQsD+P1mRRF1R2BBk9roE+Qz2HlMoBomQHw= # dev password
+    - secure: DHeDA3k09XnfgRR6BqLY0I3elYQkp6s5Id1slNicvRuhrrmT8h6bRr7FmIy2JiaUieMDZ0cuoF965PJpGN3QAmE6Z0wRTkxpexM3XW8d43kufXy36eVLb85m/S9p5W3bcDUlGa/tn8Lq2TtckJidZ7uO2KPFuaobGfOUO5rspIM= # stage user name
+    - secure: XGUU6IbLojPiAKKEE/r8VGUWrQfIlN4KwbniCR7ZbdTKMevQ8ApG2kS3VPKeN17cvEbQZmN+xJgLdxozzM7oIVAS77hbH4EEnJ2Dq2re1H2V87FpD9SCIbFhdmNWybLWmRvxMiCQYtmPPlShdSI/ZsfWZuIZxfFW1kB594DRKCs= # stage password
 before_script:
-- psql -c 'create database "cfdm_unit_test";' -U postgres
-- travis_retry pip install -U pip setuptools wheel
-- travis_retry pip install -r requirements.txt
-- travis_retry pip install -r requirements-dev.txt
-- travis_retry npm install -g swagger-tools
+  - psql -c 'create database "cfdm_unit_test";' -U postgres
+  - travis_retry pip install -U pip setuptools wheel
+  - travis_retry pip install -r requirements.txt
+  - travis_retry pip install -r requirements-dev.txt
+  - travis_retry npm install -g swagger-tools
 script: py.test
 after_success:
-- travis_retry pip install bandit
-- cd ..
-- bandit -r openFEC
-- cd openFEC
-- travis_retry pip install codecov
-- codecov
+  - travis_retry pip install bandit
+  - cd ..
+  - bandit -r openFEC
+  - cd openFEC
+  - travis_retry pip install codecov
+  - codecov
 before_deploy:
-- export PATH=$HOME:$PATH
-- travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
-- tar xzvf $HOME/cf.tgz -C $HOME
-- travis_retry cf install-plugin autopilot -f -r CF-Community
-- npm install
-- npm run build
+  - export PATH=$HOME:$PATH
+  - travis_retry curl -L -o $HOME/cf.tgz "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.22.2"
+  - tar xzvf $HOME/cf.tgz -C $HOME
+  - travis_retry cf install-plugin autopilot -f -r CF-Community
+  - npm install
+  - npm run build
 deploy:
   provider: script
   skip_cleanup: true
