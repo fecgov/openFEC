@@ -21,7 +21,7 @@ class GetLegalCitation(utils.Resource):
         query = Search().using(es) \
             .query('bool', must=[Q("term", _type='citations'),
             Q('match', citation_type=citation_type)],
-            should=[Q('wildcard', text=citation),
+            should=[Q('wildcard', citation_text=citation),
             Q('wildcard', formerly=citation)],
             minimum_should_match=1) \
             .extra(size=10) \
