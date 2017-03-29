@@ -22,6 +22,7 @@ ujson==1.33
 requests==2.13.0
 elasticsearch==2.4.0
 elasticsearch-dsl==2.1.0
+bandit==1.4.0
 git+https://github.com/timClicks/slate.git
 
 # Marshalling

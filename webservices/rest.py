@@ -247,6 +247,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.UniversalSearch, '/legal/search/')
+api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(load.Legal, '/load/legal/')
 
