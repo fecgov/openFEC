@@ -1,5 +1,5 @@
-drop materialized view if exists ofec_totals_candidates_committees_mv_tmp cascade;
-create materialized view ofec_totals_candidate_committees_mv_tmp as
+drop materialized view if exists ofec_totals_candidates_committees_presidential_mv_tmp cascade;
+create materialized view ofec_totals_candidate_committees_presidential_mv_tmp as
 with last as (
     select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*, link.cand_id
     from fec_vsum_f3p_vw f3p
@@ -7,7 +7,7 @@ with last as (
     where
         substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
-        and election_cycle >= 1990
+        and election_cycle >= :START_YEAR
     order by
         f3p.cmte_id,
         f3p.election_cycle,
@@ -37,7 +37,7 @@ with last as (
             inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
     where
         f3p.most_recent_filing_flag like 'Y'
-        and f3p.election_cycle >= 1990
+        and f3p.election_cycle >= :START_YEAR
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
     order by
@@ -101,7 +101,7 @@ with last as (
         inner join fec_vsum_f3p_vw p on link.cmte_id = p.cmte_id and link.fec_election_yr = p.election_cycle
     where
         p.most_recent_filing_flag like 'Y'
-        and p.election_cycle >= 1990
+        and p.election_cycle >= :START_YEAR
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
@@ -191,7 +191,7 @@ with last as (
                 totals.candidate_id = election.candidate_id and
                 totals.cycle = election.cand_election_year
             inner join intermediate_combined_totals ict on totals.candidate_id = ict.candidate_id and totals.cycle = ict.cycle
-            where totals.cycle > 1990
+            where totals.cycle > :START_YEAR
 
         )
         select cycle, receipts, disbursements, last_cash_on_hand_end_period, last_debts_owed_by_committee, last_debts_owed_to_committee, full_election from presidential_totals where candidate_id = 'P80002801'
