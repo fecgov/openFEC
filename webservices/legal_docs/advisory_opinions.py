@@ -189,17 +189,17 @@ def get_citations(ao_names):
     es = get_elasticsearch_connection()
 
     for citation in all_regulatory_citations:
-        entry = {'text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]), 'citation_type': 'regulation'}
-        es.index(DOCS_INDEX, 'citations', entry, id=entry['text'])
+        entry = {'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]), 'citation_type': 'regulation'}
+        es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
         if citation[3] != citation[1]:
-            entry = {'text': '%s U.S.C. §%s' % (citation[1], citation[2]),
+            entry = {'citation_text': '%s U.S.C. §%s' % (citation[1], citation[2]),
                 'formerly': '%d U.S.C. §%d' % (citation[3], citation[4]),
                 'citation_type': 'statute'}
         else:
-            entry = {'text': '%d U.S.C. §%d' % (citation[1], citation[2]), 'citation_type': 'statute'}
-        es.index(DOCS_INDEX, 'citations', entry, id=entry['text'])
+            entry = {'citation_text': '%d U.S.C. §%d' % (citation[1], citation[2]), 'citation_type': 'statute'}
+        es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
     return citations
 
 def parse_ao_citations(text, ao_component_to_name_map):
