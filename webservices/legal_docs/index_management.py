@@ -30,7 +30,7 @@ MAPPINGS = {
                 "type": "string",
                 "index": "not_analyzed"
             },
-            "text": {
+            "citation_text": {
                 "type": "string",
                 "index": "not_analyzed"
             }
