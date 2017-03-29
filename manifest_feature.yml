@@ -5,7 +5,7 @@ services:
   - fec-creds-feature
   - fec-redis-feature
   - fec-s3-feature
-  - fec-search-feature
+  - fec-api-search
 env:
   NEW_RELIC_APP_NAME: fec | api | feature
   NEW_RELIC_ENV: feature
