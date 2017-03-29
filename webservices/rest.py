@@ -57,7 +57,6 @@ def sqla_conn_string():
     if not sqla_conn_string:
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
-    # print(sqla_conn_string)
     return sqla_conn_string
 
 
@@ -248,6 +247,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.UniversalSearch, '/legal/search/')
+api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(load.Legal, '/load/legal/')
 

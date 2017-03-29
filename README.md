@@ -375,6 +375,23 @@ One other thing you may want to consider doing is adding explicit log statements
 
 *Note: We hope to have a better way of accomplishing this in the future.*
 
+### SSH
+*Likely only useful for 18F FEC team members*
+
+You can SSH directly into the running app container to help troubleshoot or inspect things with the instance(s).  Run the following command:
+
+```bash
+cf ssh <app name>
+```
+
+Where *<app name>* is the name of the application instance you want to connect to.  Once you are logged into the remote secure shell, you'll also want to run this command to setup the shell environment correctly:
+
+```bash
+. /home/vcap/app/bin/cf_env_setup.sh
+```
+
+More information about using SSH with cloud.dov can be found in the [cloud.gov SSH documentation](https://cloud.gov/docs/apps/using-ssh/#cf-ssh).
+
 ### Create a changelog
 If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).
 
