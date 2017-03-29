@@ -185,7 +185,8 @@ class IndexStatutesTest(unittest.TestCase):
             'chapter': '1', 'title': '26', 'no': '123',
             'text': '   title  content ', 'doc_id': '/us/usc/t26/s123',
             'url': 'http://api.fdsys.gov/link?collection=uscode&title=26&' +
-                    'year=mostrecent&section=123'}))
+                    'year=mostrecent&section=123',
+            'sort1': 26, 'sort2': 123}))
     @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_xml(
         """<?xml version="1.0" encoding="UTF-8"?>
             <uscDoc xmlns="http://xml.house.gov/schemas/uslm/1.0">
@@ -205,7 +206,8 @@ class IndexStatutesTest(unittest.TestCase):
             'text': '   title  content ',
             'url': 'http://api.fdsys.gov/link?collection=uscode&title=52&' +
                    'year=mostrecent&section=123',
-            'title': '52', 'name': 'title', 'no': '123'}))
+            'title': '52', 'name': 'title', 'no': '123',
+            'sort1': 52, 'sort2': 123}))
     @patch('webservices.legal_docs.load_legal_docs.requests.get', mock_xml(
         """<?xml version="1.0" encoding="UTF-8"?>
             <uscDoc xmlns="http://xml.house.gov/schemas/uslm/1.0">
@@ -231,7 +233,8 @@ class IndexRegulationsTest(unittest.TestCase):
             get_es_with_doc({'text': 'sectionContentA sectionContentB',
             'no': '104.1', 'name': 'Title',
             'url': '/regulations/104-1/versionA#104-1',
-            'doc_id': '104_1'}))
+            'doc_id': '104_1',
+            'sort1': 104, 'sort2': 1}))
     def test_index_regulations(self):
         index_regulations()
 
