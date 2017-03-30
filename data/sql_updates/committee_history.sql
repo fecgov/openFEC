@@ -95,7 +95,8 @@ left join fec_vsum_f1_vw f1 on fec_yr.cmte_id = f1.cmte_id and fec_yr.fec_electi
 left join cycles on fec_yr.cmte_id = cycles.cmte_id
 left join dates on fec_yr.cmte_id = dates.cmte_id
 left join candidates on fec_yr.cmte_id = candidates.cmte_id
-where cycles.max_cycle >= :START_YEAR
+where cycles.max_cycle >= :START_YEAR and
+fec_yr.cmte_id not in (select distinct cmte_id from unverified_filers_vw where cmte_id like 'C%')
 order by fec_yr.cmte_id, fec_yr.fec_election_yr desc, f1.rpt_yr desc
 ;
 
