@@ -89,7 +89,7 @@ ORDER BY vote_date desc;
 
 STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
-MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)(?P<extra>.*)')
+MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
 def load_current_murs():
     """
@@ -319,4 +319,4 @@ def remove_reclassification_notes(statutory_citation):
 
 def get_sort_fields(case_no):
     match = MUR_NO_REGEX.match(case_no)
-    return -int(match.group("serial")), match.group("extra")
+    return -int(match.group("serial")), None
