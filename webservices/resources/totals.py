@@ -27,7 +27,7 @@ candidate_totals_schema_map = {
     'S': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
 }
 
-default_candidate_schemas = (models.CandidateCommitteeTotalsPresidential, schemas.CandidateCommitteeTotalsPresidentialPageSchema)
+default_candidate_schemas = (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema)
 
 @doc(
     tags=['financial'],
