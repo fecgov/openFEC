@@ -21,6 +21,13 @@ totals_schema_map = {
 }
 default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
 
+candidate_totals_schema_map = {
+    'P': (models.CandidateCommitteeTotalsPresidential, schemas.CandidateCommitteeTotalsPresidentialPageSchema),
+    'H': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
+    'S': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
+}
+
+default_candidate_schemas = (models.CandidateCommitteeTotalsPresidential, schemas.CandidateCommitteeTotalsPresidentialPageSchema)
 
 @doc(
     tags=['financial'],
@@ -77,6 +84,52 @@ class TotalsView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
+
+@doc(
+    tags=['candidate'],
+    description=docs.TOTALS,
+    params={
+        'candidate_id': {'description': docs.CANDIDATE_ID},
+    },
+)
+class CandidateTotalsView(utils.Resource):
+
+    @use_kwargs(args.paging)
+    @use_kwargs(args.totals)
+    @use_kwargs(args.candidate_committee_totals)
+    @use_kwargs(args.make_sort_args(default='-cycle'))
+    @marshal_with(schemas.CommitteeTotalsPageSchema(), apply=False)
+    def get(self, candidate_id, **kwargs):
+        query, totals_class, totals_schema = self.build_query(
+            candidate_id=candidate_id,
+            **kwargs
+        )
+        if kwargs['sort']:
+            validator = args.IndexValidator(totals_class)
+            validator(kwargs['sort'])
+        page = utils.fetch_page(query, kwargs, model=totals_class)
+        return totals_schema().dump(page).data
+
+    def build_query(self, candidate_id=None, **kwargs):
+        totals_class, totals_schema = candidate_totals_schema_map.get(
+            self._resolve_committee_type(
+                candidate_id=candidate_id,
+                **kwargs
+            ),
+            default_schemas,
+        )
+        query = totals_class.query
+        if kwargs.get('cycle'):
+            query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
+        if candidate_id:
+            query = query.filter(totals_class.candidate_id == candidate_id)
+        if kwargs.get('full_election'):
+            query = query.filter(totals_class.full_election == kwargs['full_election'])
+        return query, totals_class, totals_schema
+
+    def _resolve_committee_type(self, candidate_id=None, **kwargs):
+        if candidate_id is not None:
+            return candidate_id[0]
 
 
 @doc(
