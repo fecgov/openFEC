@@ -39,10 +39,6 @@ with last as (
         and f3.election_cycle >= :START_YEAR
         and substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
-    order by
-        f3.cmte_id,
-        f3.election_cycle,
-        f3.cvg_end_dt asc
 ), cash_beginning_period_aggregate as (
       select sum(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_of_period,
         cash_beginning_period.cycle,
@@ -87,8 +83,7 @@ with last as (
         sum(hs.tranf_from_other_auth_cmte_per) as transfers_from_other_authorized_committee,
         sum(hs.tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee
     from
-        ofec_candidate_detail_mv_tmp cand_detail
-        inner join ofec_cand_cmte_linkage_mv_tmp link on link.cand_id = cand_detail.candidate_id
+        ofec_cand_cmte_linkage_mv_tmp link
         inner join fec_vsum_f3_vw hs on link.cmte_id = hs.cmte_id and link.fec_election_yr = hs.election_cycle
     where
         hs.most_recent_filing_flag like 'Y'
@@ -180,7 +175,7 @@ with last as (
             from
                 ofec_candidate_election_mv_tmp election
                 inner join presidential_totals p_totals on election.candidate_id = p_totals.candidate_id
-                and p_totals.cycle > election.prev_election_year and p_totals.cycle < election.cand_election_year
+                and p_totals.cycle = election.prev_election_year + 2 and p_totals.cycle < election.cand_election_year
         ), final_combined_total as (
             select ct.*,
             cpa.cash_on_hand_beginning_of_period
