@@ -47,6 +47,8 @@ class BaseFilings(views.ApiResource):
 
     @property
     def args(self):
+        #Place the sort argument in a list, as the api will return a 422 status code if it's not in a list
+        #list is needed because multisort is used
         default_sort = ['-receipt_date']
         return utils.extend(
             args.paging,
