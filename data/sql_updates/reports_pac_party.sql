@@ -45,7 +45,7 @@ select
     non_alloc_fed_elect_actvy_per as non_allocated_fed_election_activity_period,
     non_alloc_fed_elect_actvy_ytd as non_allocated_fed_election_activity_ytd,
     shared_nonfed_op_exp_per as nonfed_share_allocated_disbursements_period,
-    offsets_to_op_exp as offsets_to_operating_expenditures_period,
+    offests_to_op_exp as offsets_to_operating_expenditures_period,
     offsets_to_op_exp_ytd_i as offsets_to_operating_expenditures_ytd,
     other_disb_per as other_disbursements_period,
     other_disb_ytd as other_disbursements_ytd,
