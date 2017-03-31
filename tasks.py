@@ -157,17 +157,17 @@ DEPLOY_RULES = (
 
 
 SPACE_URLS = {
-    'dev': [('18f.gov', 'fec-dev-api')],
-    'stage': [('18f.gov', 'fec-stage-api')],
-    'prod': [('18f.gov', 'fec-prod-api')],
+    'dev': [('app.cloud.gov', 'fec-dev-api')],
+    'stage': [('app.cloud.gov', 'fec-stage-api')],
+    'prod': [('app.cloud.gov', 'fec-prod-api')],
 }
 
 
 @task
-def deploy(ctx, space=None, branch=None, yes=False):
-    """Deploy app to Cloud Foundry. Log in using credentials stored in
-    `FEC_CF_USERNAME` and `FEC_CF_PASSWORD`; push to either `space` or the space
-    detected from the name and tags of the current branch. Note: Must pass `space`
+def deploy(ctx, space=None, branch=None, login=None, yes=False):
+    """Deploy app to Cloud Foundry. Log in using credentials stored per environment
+    like `FEC_CF_USERNAME_DEV` and `FEC_CF_PASSWORD_DEV`; push to either `space` or t
+    he space detected from the name and tags of the current branch. Note: Must pass `space`
     or `branch` if repo is in detached HEAD mode, e.g. when running on Travis.
     """
     # Detect space
@@ -178,15 +178,16 @@ def deploy(ctx, space=None, branch=None, yes=False):
         return
 
     # Set api
-    api = 'https://api.cloud.gov'
+    api = 'https://api.fr.cloud.gov'
     ctx.run('cf api {0}'.format(api), echo=True)
 
     # Log in if necessary
-    if os.getenv('FEC_CF_USERNAME') and os.getenv('FEC_CF_PASSWORD'):
-        ctx.run('cf auth "$FEC_CF_USERNAME" "$FEC_CF_PASSWORD"', echo=True)
+    if login == 'True':
+        login_command = 'cf auth "$FEC_CF_USERNAME_{0}" "$FEC_CF_PASSWORD_{0}"'.format(space.upper())
+        ctx.run(login_command, echo=True)
 
     # Target space
-    ctx.run('cf target -o fec -s {0}'.format(space), echo=True)
+    ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
@@ -202,7 +203,6 @@ def deploy(ctx, space=None, branch=None, yes=False):
     ctx.run('cf push celery-worker -f manifest_{0}.yml'.format(space))
 
 
-# this will not be called because the slack integrations are off
 @task
 def notify(ctx):
     try:

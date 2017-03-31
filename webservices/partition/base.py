@@ -27,6 +27,7 @@ class TableGroup:
     transaction_date_column = None
 
     columns = []
+    column_mappings = {}
 
     @classmethod
     def column_factory(cls, parent):
@@ -47,12 +48,43 @@ class TableGroup:
         ]
 
     @classmethod
+    def redefine_columns(cls, parent):
+        """Redefines columns in a table definition that are not the type that
+        we expect in the parent view.
+        """
+
+        for column_name, cast_type in cls.column_mappings.items():
+            parent.c[column_name].type = cast_type
+
+        return parent
+
+    @classmethod
+    def recast_columns(cls, parent):
+        """Recasts columns in a table definition that are not the type that
+        we expect in the parent view.
+        """
+
+        columns = [
+            column for column in parent.columns
+            if column.name not in cls.column_mappings.keys()
+        ]
+
+        for column_name, cast_type in cls.column_mappings.items():
+            columns.append(
+                sa.cast(parent.c[column_name], cast_type).label(column_name)
+            )
+
+        return columns
+
+    @classmethod
     def run(cls):
         parent = utils.load_table(cls.parent)
         cls.create_master(parent)
         cycles = get_cycles()
+
         for cycle in cycles:
             cls.create_child(parent, cycle)
+
         cls.rename()
 
     @classmethod
@@ -96,6 +128,7 @@ class TableGroup:
 
     @classmethod
     def create_master(cls, parent):
+        parent = cls.redefine_columns(parent)
         name = '{0}_master_tmp'.format(cls.base_name)
         table = sa.Table(
             name,
@@ -109,10 +142,14 @@ class TableGroup:
     @classmethod
     def create_child(cls, parent, cycle, temp=True):
         start, stop = cycle - 1, cycle
-        name = '{base}_{start}_{stop}_tmp'.format(base=cls.base_name, start=start, stop=stop)
+        name = '{base}_{start}_{stop}_tmp'.format(
+            base=cls.base_name,
+            start=start,
+            stop=stop
+        )
 
         select = sa.select(
-            parent.columns + cls.timestamp_factory(parent) + cls.column_factory(parent)
+            cls.recast_columns(parent) + cls.timestamp_factory(parent) + cls.column_factory(parent)
         ).where(
             sa.func.get_transaction_year(
                 parent.c[cls.transaction_date_column],

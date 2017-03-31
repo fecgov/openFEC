@@ -24,6 +24,18 @@ MAPPINGS = {
             },
         }
     },
+    "citations": {
+        "properties": {
+            "citation_type": {
+                "type": "string",
+                "index": "not_analyzed"
+            },
+            "citation_text": {
+                "type": "string",
+                "index": "not_analyzed"
+            }
+        }
+    },
     "murs": {
         "properties": {
             "no": {
@@ -300,6 +312,7 @@ MAPPINGS = {
                 }
             },
             "statutory_citations": {
+                "type": "nested",
                 "properties": {
                     "section": {
                         "type": "long"
@@ -310,6 +323,7 @@ MAPPINGS = {
                 }
             },
             "regulatory_citations": {
+                "type": "nested",
                 "properties": {
                     "part": {
                         "type": "long"

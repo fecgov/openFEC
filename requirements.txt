@@ -1,28 +1,29 @@
+apispec==0.19.0
 cfenv==0.5.2
-invoke==0.13.0
-psycopg2==2.6.2
-Flask==0.11
-Flask-Cors==2.1.0
+invoke==0.15.0
+psycopg2==2.7.1
+Flask==0.12
+Flask-Cors==3.0.2
 Flask-Script==2.0.5
 Flask-RESTful==0.3.5
 Flask-SQLAlchemy==2.1
 python-dateutil==2.4.2
-sqlalchemy-postgres-copy==0.1.0
-networkx==1.9.1
+sqlalchemy-postgres-copy==0.3.0
+networkx==1.11
 newrelic==2.78.0.57
-SQLAlchemy==1.0.15
+SQLAlchemy==1.0.17
 mandrill==1.0.57
 icalendar==3.9.1
 GitPython==1.0.1
-gunicorn==19.3.0
+gunicorn==19.7.1
 webargs==0.18.0
 slacker==0.8.6
-raven[flask]==5.8.1
 ujson==1.33
-requests==2.10.0
-elasticsearch==1.9.0
+requests==2.13.0
+elasticsearch==2.4.0
 elasticsearch-dsl==2.1.0
-git+https://github.com/timClicks/slate.git
+bandit==1.4.0
+git+https://github.com/18F/slate.git
 
 # Marshalling
 flask-apispec==0.2.0
@@ -31,9 +32,9 @@ marshmallow-sqlalchemy==0.8.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data export
-boto3==1.2.2
+boto3==1.4.4
 
 # Task queue
-celery==3.1.23
+celery==3.1.25
 celery-once==0.1.4
 redis==2.10.5
