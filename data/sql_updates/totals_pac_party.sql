@@ -53,7 +53,7 @@ with last as (
         sum(pnp.net_op_exp_per)                AS net_operating_expenditures,
         sum(pnp.non_alloc_fed_elect_actvy_per) AS non_allocated_fed_election_activity,
         sum(pnp.ttl_nonfed_tranf_per)          AS total_transfers,
-        sum(pnp.offsets_to_op_exp)             AS offsets_to_operating_expenditures,
+        sum(pnp.offests_to_op_exp)             AS offsets_to_operating_expenditures,
         sum(pnp.ttl_op_exp_per)                AS operating_expenditures,
         sum(pnp.other_disb_per)                AS other_disbursements,
         sum(pnp.other_fed_op_exp_per)          AS other_fed_operating_expenditures,
