@@ -46,13 +46,13 @@ We are always trying to improve our documentation. If you have suggestions or ru
 ### Project prerequisites
 1. Ensure you have the following requirements installed:
 
-    * Python 3.4 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
+    * Python 3.5.3 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
-    * PostgreSQL (the latest 9.5 release).
+    * PostgreSQL (the latest 9.6 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-    * Elastic Search 1.7 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/1.7/_installation.html)
+    * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://pages.18f.gov/dev-environment-standardization/languages/javascript/).
 
@@ -107,7 +107,7 @@ createdb cfdm_unit_test
 Load our sample data into the development database (`cfdm_test`) by running:
 
 ```
-pg_restore --dbname cfdm_test data/subset.dump
+pg_restore --dbname cfdm_test --no-acl --no-owner data/subset.dump
 ./manage.py update_all
 ```
 
@@ -292,11 +292,11 @@ invoke deploy --space dev
 This command will explicitly target the `dev` space.
 
 #### Setting up a service
-On Cloud Foundry, we use the redis28-swarm
+On Cloud Foundry, we use the redis28
 service. The Redis service can be created as follows:
 
 ```
-cf create-service redis28-swarm standard fec-redis
+cf create-service redis28 standard fec-redis
 ```
 
 #### Setting up credentials
@@ -312,8 +312,6 @@ the following keys are set:
 * FEC_WEB_API_KEY
 * FEC_WEB_API_KEY_PUBLIC
 * FEC_GITHUB_TOKEN
-* SENTRY_DSN
-* SENTRY_PUBLIC_DSN
 * NEW_RELIC_LICENSE_KEY
 * WRITE_AUTHORIZED_TOKENS
 
@@ -374,6 +372,23 @@ cf delete <one-off-app-name>
 One other thing you may want to consider doing is adding explicit log statements or an email notification to whatever command you are running so that you know for sure when the command finishes (or errors out). However, please do not check in these custom modifications.
 
 *Note: We hope to have a better way of accomplishing this in the future.*
+
+### SSH
+*Likely only useful for 18F FEC team members*
+
+You can SSH directly into the running app container to help troubleshoot or inspect things with the instance(s).  Run the following command:
+
+```bash
+cf ssh <app name>
+```
+
+Where *<app name>* is the name of the application instance you want to connect to.  Once you are logged into the remote secure shell, you'll also want to run this command to setup the shell environment correctly:
+
+```bash
+. /home/vcap/app/bin/cf_env_setup.sh
+```
+
+More information about using SSH with cloud.dov can be found in the [cloud.gov SSH documentation](https://cloud.gov/docs/apps/using-ssh/#cf-ssh).
 
 ### Create a changelog
 If you're preparing a release to production, you should also create a changelog. The preferred way to do this is using the [changelog generator](https://github.com/skywinder/github-changelog-generator).

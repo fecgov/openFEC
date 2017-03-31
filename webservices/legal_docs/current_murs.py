@@ -89,6 +89,7 @@ ORDER BY vote_date desc;
 
 STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
+MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
 def load_current_murs():
     """
@@ -98,17 +99,24 @@ def load_current_murs():
     the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
     """
     es = get_elasticsearch_connection()
+    for mur in get_murs():
+        es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+
+def get_murs():
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
     with db.engine.connect() as conn:
         rs = conn.execute(ALL_MURS)
         for row in rs:
             case_id = row['case_id']
+            sort1, sort2 = get_sort_fields(row['case_no'])
             mur = {
                 'doc_id': 'mur_%s' % row['case_no'],
                 'no': row['case_no'],
                 'name': row['name'],
                 'mur_type': 'current',
+                'sort1': sort1,
+                'sort2': sort2,
             }
             mur['subjects'] = get_subjects(case_id)
             mur['subject'] = {'text': mur['subjects']}
@@ -123,7 +131,7 @@ def load_current_murs():
             mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+            yield mur
 
 def get_election_cycles(case_id):
     election_cycles = []
@@ -308,3 +316,7 @@ def remove_reclassification_notes(statutory_citation):
     while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):
         cleaned_citation = remove_to_matching_parens(cleaned_citation)
     return cleaned_citation
+
+def get_sort_fields(case_no):
+    match = MUR_NO_REGEX.match(case_no)
+    return -int(match.group("serial")), None
