@@ -1,4 +1,4 @@
-drop materialized view if exists ofec_totals_candidates_committees_presidential_mv_tmp cascade;
+drop materialized view if exists ofec_totals_candidate_committees_presidential_mv_tmp;
 create materialized view ofec_totals_candidate_committees_presidential_mv_tmp as
 with last as (
     select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*, link.cand_id
