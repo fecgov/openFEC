@@ -3,7 +3,7 @@ create materialized view ofec_totals_candidate_committees_presidential_mv_tmp as
 with last as (
     select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*, link.cand_id
     from fec_vsum_f3p_vw f3p
-    inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
+    inner join ofec_cand_cmte_linkage_mv_tmp link on link.cmte_id = f3p.cmte_id
     where
         substr(link.cand_id, 1, 1) = link.cmte_tp
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
@@ -34,7 +34,7 @@ with last as (
           f3p.coh_bop as cash_on_hand
       from
         fec_vsum_f3p_vw f3p
-            inner join ofec_cand_cmte_linkage_mv link on link.cmte_id = f3p.cmte_id
+            inner join ofec_cand_cmte_linkage_mv_tmp link on link.cmte_id = f3p.cmte_id
     where
         f3p.most_recent_filing_flag like 'Y'
         and f3p.election_cycle >= :START_YEAR
@@ -96,8 +96,8 @@ with last as (
         sum(p.debts_owed_to_cmte) as debts_owed_to_cmte
 
     from
-        ofec_candidate_detail_mv cand_detail
-        inner join ofec_cand_cmte_linkage_mv link on link.cand_id = cand_detail.candidate_id
+        ofec_candidate_detail_mv_tmp cand_detail
+        inner join ofec_cand_cmte_linkage_mv_tmp link on link.cand_id = cand_detail.candidate_id
         inner join fec_vsum_f3p_vw p on link.cmte_id = p.cmte_id and link.fec_election_yr = p.election_cycle
     where
         p.most_recent_filing_flag like 'Y'
@@ -167,7 +167,7 @@ with last as (
                 sum(totals.debts_owed_to_cmte) as debts_owed_to_cmte,
                 true as full_election
         from presidential_totals totals
-        inner join ofec_candidate_election_mv election on
+        inner join ofec_candidate_election_mv_tmp election on
             totals.candidate_id = election.candidate_id and
             totals.cycle <= election.cand_election_year and
             totals.cycle > election.prev_election_year
@@ -187,7 +187,7 @@ with last as (
                 --0.0 as cash_on_hand_beginning_of_period
                 --totals.cash_on_hand_beginning_of_period get this from first cycle
             from presidential_totals totals
-            inner join ofec_candidate_election_mv election on
+            inner join ofec_candidate_election_mv_tmp election on
                 totals.candidate_id = election.candidate_id and
                 totals.cycle = election.cand_election_year
             inner join intermediate_combined_totals ict on totals.candidate_id = ict.candidate_id and totals.cycle = ict.cycle
@@ -199,7 +199,7 @@ with last as (
                 election.cand_election_year,
                 p_totals.candidate_id
             from
-                ofec_candidate_election_mv election
+                ofec_candidate_election_mv_tmp election
                 inner join presidential_totals p_totals on election.candidate_id = p_totals.candidate_id
                 and p_totals.cycle > election.prev_election_year and p_totals.cycle < election.cand_election_year
         ), final_combined_total as (
@@ -212,3 +212,12 @@ with last as (
         union all
         select * from final_combined_total
 ;
+
+create unique index on ofec_totals_candidate_committees_presidential_mv_tmp (candidate_id, cycle, full_election);
+
+create index on ofec_totals_candidate_committees_presidential_mv_tmp (candidate_id);
+create index on ofec_totals_candidate_committees_presidential_mv_tmp (election_year);
+create index on ofec_totals_candidate_committees_presidential_mv_tmp (cycle);
+create index on ofec_totals_candidate_committees_presidential_mv_tmp (receipts);
+create index on ofec_totals_candidate_committees_presidential_mv_tmp (disbursements);
+create index on ofec_totals_candidate_committees_presidential_mv_tmp (federal_funds_flag);

@@ -35,6 +35,8 @@ class CommitteeTotals(BaseModel):
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 
+
+
 class CommitteeTotalsPacPartyBase(CommitteeTotals):
     __abstract__ = True
 
@@ -143,3 +145,26 @@ class ScheduleAByStateRecipientTotals(BaseModel):
     state_full = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
     committee_type = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
+'''
+class CandidateCommitteeTotalsPresidential(CommitteeTotals):
+    #candidate_id
+    candidate_contribution = db.Column(db.Numeric(30, 2))
+    exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2))
+    federal_funds = db.Column(db.Numeric(30, 2))
+    fundraising_disbursements = db.Column(db.Numeric(30, 2))
+    loan_repayments_made = db.Column(db.Numeric(30, 2))
+    loans_received = db.Column(db.Numeric(30, 2))
+    loans_received_from_candidate = db.Column(db.Numeric(30, 2))
+    offsets_to_fundraising_expenditures = db.Column(db.Numeric(30, 2))
+    offsets_to_legal_accounting = db.Column(db.Numeric(30, 2))
+    total_offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
+    other_loans_received = db.Column(db.Numeric(30, 2))
+    other_receipts = db.Column(db.Numeric(30, 2))
+    repayments_loans_made_by_candidate = db.Column(db.Numeric(30, 2))
+    repayments_other_loans = db.Column(db.Numeric(30, 2))
+    transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
+    transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
+    cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
+
+class CandidateCommitteeTotalsHouseSenate(CommitteeTotals):
+'''
