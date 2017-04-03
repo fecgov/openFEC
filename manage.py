@@ -132,27 +132,57 @@ def load_nicknames():
     """For improved search when candidates have a name that doesn't appear on their form.
     Additional nicknames can be added to the csv for improved search.
     """
+
+    logger.info('Loading nicknames...')
+
     import pandas as pd
     import sqlalchemy as sa
+
     try:
-        table = sa.Table('ofec_nicknames', db.metadata, autoload_with=db.engine)
+        table = sa.Table(
+            'ofec_nicknames',
+            db.metadata,
+            autoload_with=db.engine
+        )
         db.engine.execute(table.delete())
     except sa.exc.NoSuchTableError:
         pass
-    load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames', if_exists='append')
+
+    load_table(
+        pd.read_csv('data/nicknames.csv'),
+        'ofec_nicknames',
+        if_exists='append'
+    )
+
+    logger.info('Finished loading nicknames.')
 
 @manager.command
 def load_pacronyms():
     """For improved search of organizations that go by acronyms
     """
+
+    logger.info('Loading pacronyms...')
+
     import pandas as pd
     import sqlalchemy as sa
+
     try:
-        table = sa.Table('ofec_pacronyms', db.metadata, autoload_with=db.engine)
+        table = sa.Table(
+            'ofec_pacronyms',
+            db.metadata,
+            autoload_with=db.engine
+        )
         db.engine.execute(table.delete())
     except sa.exc.NoSuchTableError:
         pass
-    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms', if_exists='append')
+
+    load_table(
+        pd.read_excel('data/pacronyms.xlsx'),
+        'ofec_pacronyms',
+        if_exists='append'
+    )
+
+    logger.info('Finished loading pacronyms.')
 
 def load_table(frame, tablename, if_exists='replace', indexes=()):
     import sqlalchemy as sa
@@ -174,6 +204,9 @@ def load_election_dates():
     """ This is from before we had direct access to election data and needed it, we are still using the
     data from a csv, to populate the ElectionClassDate model.
     """
+
+    logger.info('Loading election dates...')
+
     import pandas as pd
     frame = pd.read_excel('data/election_dates.xlsx')
     frame.columns = [column.lower() for column in frame.columns]
@@ -181,6 +214,8 @@ def load_election_dates():
         frame, 'ofec_election_dates',
         indexes=('office', 'state', 'district', 'election_yr', 'senate_class'),
     )
+
+    logger.info('Finished loading election dates.')
 
 @manager.command
 def dump_districts(dest=None):
@@ -192,25 +227,31 @@ def dump_districts(dest=None):
     else:
         dest = shlex.quote(dest)
     cmd = (
-        'pg_dump {source} --format c --no-acl --no-owner -f {dest} '
+        'pg_dump "{source}" --format c --no-acl --no-owner -f {dest} '
         '-t ofec_fips_states -t ofec_zips_districts'
     ).format(**locals())
-    subprocess.call(cmd, shell=True)
+    subprocess.run(cmd, shell=True)
 
 @manager.command
 def load_districts(source=None):
     """ Loads that districts that you made locally so that you can then add them as a
     table to the databases
     """
+
+    logger.info('Loading districts...')
+
     if source is None:
         source = './data/districts.dump'
     else:
         source = shlex.quote(source)
+
     dest = db.engine.url
     cmd = (
-        'pg_restore --dbname {dest} --no-acl --no-owner --clean {source}'
+        'pg_restore --dbname "{dest}" --no-acl --no-owner --clean {source}'
     ).format(**locals())
-    subprocess.call(cmd, shell=True)
+
+    subprocess.run(cmd, shell=True)
+    logger.info('Finished loading districts.')
 
 @manager.command
 def build_district_counts(outname='districts.json'):
