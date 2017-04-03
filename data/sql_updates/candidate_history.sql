@@ -65,7 +65,7 @@ left join elections using (cand_id)
 left join disclosure.cand_inactive inactive on
     fec_yr.cand_id = inactive.cand_id and
     fec_yr.fec_election_yr < inactive.election_yr
-inner join staging.ref_pty ref_party on fec_yr.cand_pty_affiliation = ref_party.pty_cd
+left join staging.ref_pty ref_party on fec_yr.cand_pty_affiliation = ref_party.pty_cd
 where max_cycle >= :START_YEAR and
     fec_yr.cand_id not in (select distinct cmte_id from unverified_filers_vw where cmte_id similar to '(P|S|H)%')
 ;

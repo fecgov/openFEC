@@ -134,7 +134,7 @@ class TestReports(ApiBaseTest):
         contributions = [0, 100]
         factories.ReportsHouseSenateFactory(committee_id=committee_id, net_contributions_period=contributions[0])
         factories.ReportsHouseSenateFactory(committee_id=committee_id, net_contributions_period=contributions[1])
-        results = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id, sort='-net_contributions_period'))
+        results = self._results(api.url_for(CommitteeReportsView, committee_id=committee_id, sort=['-net_contributions_period']))
         self.assertEqual([each['net_contributions_period'] for each in results], contributions[::-1])
 
     def test_reports_sort_default(self):
