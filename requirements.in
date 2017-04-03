@@ -29,7 +29,7 @@ bandit                   ~= 1.4.0
 # Marshalling
 flask-apispec            ~= 0.2.0
 marshmallow              ~= 2.6.0
-marshmallow-sqlalchemy
+marshmallow-sqlalchemy   ~= 0.8.0
 -e git+https://github.com/jmcarp/marshmallow-pagination@master#egg=marshmallow-pagination
 
 # Data export
