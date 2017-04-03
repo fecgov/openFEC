@@ -1,5 +1,5 @@
---House/Senate totals are same process but in seperate file to handle columns that are
---unique to a presidential candidate.  Otherwise aggregation and relations are the same.
+--House/Senate totals are same process as presidnetials but in seperate file to handle columns that are
+--unique to a congressional candidate.  Otherwise aggregation and relations are the same.
 drop materialized view if exists ofec_totals_candidates_committees_house_senate_mv_tmp;
 create materialized view ofec_totals_candidate_committees_house_senate_mv_tmp as
 with last as (
