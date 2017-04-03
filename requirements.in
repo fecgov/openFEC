@@ -24,13 +24,13 @@ requests
 elasticsearch            ~= 2.4.0
 elasticsearch-dsl        ~= 2.1.0
 bandit                   ~= 1.4.0
-git+https://github.com/18F/slate.git
+-e git+https://github.com/18F/slate.git#egg=slate
 
 # Marshalling
 flask-apispec            ~= 0.2.0
 marshmallow              ~= 2.6.0
-marshmallow-sqlalchemy   ~= 0.8.0
-git+https://github.com/jmcarp/marshmallow-pagination@master
+marshmallow-sqlalchemy
+-e git+https://github.com/jmcarp/marshmallow-pagination@master#egg=marshmallow-pagination
 
 # Data export
 boto3                    ~= 1.4.4
