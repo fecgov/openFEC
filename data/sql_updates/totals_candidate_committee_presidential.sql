@@ -53,7 +53,7 @@ with last as (
         cash_beginning_period.cycle,
         cash_beginning_period.candidate_id
 
-), aggregate_filings as(
+), cycle_totals as(
     select
         cand_id as candidate_id,
         p.election_cycle as cycle,
@@ -108,7 +108,7 @@ with last as (
     group by
         p.election_cycle,
         cand_id
-    ), presidential_totals as (
+    ), last_totals as (
         select
             af.*,
             false as full_election,
@@ -121,9 +121,9 @@ with last as (
             aggregate_last.last_beginning_image_number,
             aggregate_last.last_report_year,
             cash_beginning_period_aggregate.cash_on_hand_beginning_of_period
-        from aggregate_filings af
-        inner join aggregate_last on aggregate_last.cycle = af.cycle and aggregate_last.candidate_id = af.candidate_id
-        inner join cash_beginning_period_aggregate on cash_beginning_period_aggregate.cycle = af.cycle and cash_beginning_period_aggregate.candidate_id = af.candidate_id
+        from cycle_totals ct
+        inner join aggregate_last on aggregate_last.cycle = ct.cycle and aggregate_last.candidate_id = ct.candidate_id
+        inner join cash_beginning_period_aggregate on cash_beginning_period_aggregate.cycle = ct.cycle and cash_beginning_period_aggregate.candidate_id = ct.candidate_id
     ), intermediate_combined_totals as (
         select
                 totals.candidate_id as candidate_id,
@@ -166,7 +166,7 @@ with last as (
                 sum(totals.debts_owed_by_cmte) as debts_owed_by_cmte,
                 sum(totals.debts_owed_to_cmte) as debts_owed_to_cmte,
                 true as full_election
-        from presidential_totals totals
+        from last_totals totals
         inner join ofec_candidate_election_mv_tmp election on
             totals.candidate_id = election.candidate_id and
             totals.cycle <= election.cand_election_year and
@@ -174,7 +174,7 @@ with last as (
         group by
             totals.candidate_id,
             election.cand_election_year
-        ), combined_totals as (
+        ), full_election_totals as (
             select ict.*,
                 totals.last_cash_on_hand_end_period,
                 totals.net_contributions,
@@ -186,7 +186,7 @@ with last as (
                 totals.last_report_year
                 --0.0 as cash_on_hand_beginning_of_period
                 --totals.cash_on_hand_beginning_of_period get this from first cycle
-            from presidential_totals totals
+            from last_totals totals
             inner join ofec_candidate_election_mv_tmp election on
                 totals.candidate_id = election.candidate_id and
                 totals.cycle = election.cand_election_year
@@ -200,15 +200,15 @@ with last as (
                 p_totals.candidate_id
             from
                 ofec_candidate_election_mv_tmp election
-                inner join presidential_totals p_totals on election.candidate_id = p_totals.candidate_id
+                inner join last_totals p_totals on election.candidate_id = p_totals.candidate_id
                 and p_totals.cycle > election.prev_election_year and p_totals.cycle < election.cand_election_year
         ), final_combined_total as (
-            select ct.*,
+            select full_totals.*,
             cpa.cash_on_hand_beginning_of_period
-            from combined_totals ct
-            inner join cash_period_aggregate cpa on ct.candidate_id = cpa.candidate_id and ct.cycle = cpa.cand_election_year
+            from full_election_totals full_totals
+            inner join cash_period_aggregate cpa on full_totals.candidate_id = cpa.candidate_id and full_totals.cycle = cpa.cand_election_year
         )
-        select * from presidential_totals
+        select * from last_totals
         union all
         select * from final_combined_total
 ;
