@@ -222,10 +222,12 @@ def dump_districts(dest=None):
     """ Makes districts locally that you can then add as a table to the databases
     """
     source = db.engine.url
+
     if dest is None:
         dest = './data/districts.dump'
     else:
         dest = shlex.quote(dest)
+
     cmd = (
         'pg_dump "{source}" --format c --no-acl --no-owner -f {dest} '
         '-t ofec_fips_states -t ofec_zips_districts'
@@ -288,6 +290,20 @@ def update_itemized(schedule):
     logger.info('Updating Schedule {0} tables...'.format(schedule))
     execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
     logger.info('Finished Schedule {0} update.'.format(schedule))
+
+@manager.command
+def partition_itemized():
+    """This command runs the partitioning against the larger itemized
+    schedule tables.
+    """
+
+    logger.info('Partitioning Schedule A...')
+    partition.SchedAGroup.run()
+    logger.info('Finished partitioning Schedule A.')
+
+    logger.info('Partitioning Schedule B...')
+    partition.SchedBGroup.run()
+    logger.info('Finished partitioning Schedule B.')
 
 @manager.command
 def rebuild_aggregates(processes=1):
@@ -358,12 +374,7 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
-    logger.info('Partitioning Schedule A...')
-    partition.SchedAGroup.run()
-    logger.info('Finished partitioning Schedule A.')
-    logger.info('Partitioning Schedule B...')
-    partition.SchedBGroup.run()
-    logger.info('Finished partitioning Schedule B.')
+    partition_itemized()
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
