@@ -1,5 +1,6 @@
 drop materialized view if exists ofec_totals_candidate_committees_presidential_mv_tmp;
 create materialized view ofec_totals_candidate_committees_presidential_mv_tmp as
+--get ending financials for all primary committees
 with last as (
     select distinct on (f3p.cmte_id, f3p.election_cycle) f3p.*, link.cand_id
     from fec_vsum_f3p_vw f3p
@@ -12,7 +13,8 @@ with last as (
         f3p.cmte_id,
         f3p.election_cycle,
         f3p.cvg_end_dt desc
-), aggregate_last as(
+) --sum the ending totals
+  , aggregate_last as(
     select last.election_cycle as cycle,
         last.cand_id as candidate_id,
         sum(last.net_contb_sum_page_per) as net_contributions,
@@ -27,7 +29,8 @@ with last as (
     group by
         last.election_cycle,
         last.cand_id
-), cash_beginning_period as (
+) --capture needed beginning financial column
+  , cash_beginning_period as (
     select distinct on (f3p.cmte_id, f3p.election_cycle) link.cand_id as candidate_id,
           f3p.cmte_id as committee_id,
           f3p.election_cycle as cycle,
@@ -44,7 +47,8 @@ with last as (
         f3p.cmte_id,
         f3p.election_cycle,
         f3p.cvg_end_dt asc
-), cash_beginning_period_aggregate as (
+) --aggregate beggining finance column
+  , cash_beginning_period_aggregate as (
       select sum(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_of_period,
         cash_beginning_period.cycle,
         cash_beginning_period.candidate_id
@@ -53,7 +57,8 @@ with last as (
         cash_beginning_period.cycle,
         cash_beginning_period.candidate_id
 
-), cycle_totals as(
+) --sum all a candidates totals for a cycle
+  , cycle_totals as(
     select
         cand_id as candidate_id,
         p.election_cycle as cycle,
@@ -108,9 +113,10 @@ with last as (
     group by
         p.election_cycle,
         cand_id
-    ), last_totals as (
+    ) --join cycle totals to last_totals and combine
+    , last_totals as (
         select
-            af.*,
+            ct.*,
             false as full_election,
             aggregate_last.last_cash_on_hand_end_period,
             aggregate_last.net_contributions,
@@ -124,7 +130,8 @@ with last as (
         from cycle_totals ct
         inner join aggregate_last on aggregate_last.cycle = ct.cycle and aggregate_last.candidate_id = ct.candidate_id
         inner join cash_beginning_period_aggregate on cash_beginning_period_aggregate.cycle = ct.cycle and cash_beginning_period_aggregate.candidate_id = ct.candidate_id
-    ), intermediate_combined_totals as (
+    )-- sum all of a candidates totals (across all committees), for full election period
+     , intermediate_combined_totals as (
         select
                 totals.candidate_id as candidate_id,
                 max(totals.cycle) as cycle,
@@ -174,7 +181,8 @@ with last as (
         group by
             totals.candidate_id,
             election.cand_election_year
-        ), full_election_totals as (
+        )--apend with ending financials
+         ,full_election_totals as (
             select ict.*,
                 totals.last_cash_on_hand_end_period,
                 totals.net_contributions,
@@ -202,7 +210,8 @@ with last as (
                 ofec_candidate_election_mv_tmp election
                 inner join last_totals p_totals on election.candidate_id = p_totals.candidate_id
                 and p_totals.cycle > election.prev_election_year and p_totals.cycle < election.cand_election_year
-        ), final_combined_total as (
+        )--join to add beginning totals for full_election totals
+        , final_combined_total as (
             select full_totals.*,
             cpa.cash_on_hand_beginning_of_period
             from full_election_totals full_totals
@@ -212,7 +221,7 @@ with last as (
         union all
         select * from final_combined_total
 ;
-
+--these columns should be a unique primary key when considered together
 create unique index on ofec_totals_candidate_committees_presidential_mv_tmp (candidate_id, cycle, full_election);
 
 create index on ofec_totals_candidate_committees_presidential_mv_tmp (candidate_id);
