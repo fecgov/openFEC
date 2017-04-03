@@ -133,7 +133,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'open_date': None,
             'url': '/legal/matter-under-review/1/',
             'sort1': -1,
-            'sort2': ''
+            'sort2': None
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
         actual_mur = next(get_murs())
@@ -284,7 +284,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'close_date': datetime(2008, 1, 1, 0, 0),
             'url': '/legal/matter-under-review/1/',
             'sort1': -1,
-            'sort2': ''
+            'sort2': None
         }
         assert actual_mur == expected_mur
 
