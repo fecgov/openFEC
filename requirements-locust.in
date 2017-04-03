@@ -1,0 +1,3 @@
+-r requirements.txt
+
+locustio ~= 0.7.3

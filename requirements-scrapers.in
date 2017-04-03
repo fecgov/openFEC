@@ -1,0 +1,6 @@
+-r requirements.txt
+
+lxml
+requests
+xlrd
+uuid
