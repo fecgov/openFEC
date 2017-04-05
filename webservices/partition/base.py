@@ -7,7 +7,7 @@ from webservices.config import SQL_CONFIG
 
 from . import utils
 
-logger = logging.getLogger('partitioner.base')
+logger = logging.getLogger('partitioner')
 logging.basicConfig(level=logging.INFO)
 
 def get_cycles():
@@ -16,6 +16,7 @@ def get_cycles():
         SQL_CONFIG['END_YEAR_ITEMIZED'] + 3,
         2,
     )
+    #return range(1978, 1980, 2)
 
 class TableGroup:
 
@@ -185,6 +186,13 @@ class TableGroup:
         cls.create_indexes(child)
         cls.update_child(child)
         db.engine.execute(utils.Analyze(child))
+        logger.info(
+            'Successfully created child table {base}_{start}_{stop}.'.format(
+                base=cls.base_name,
+                start=start,
+                stop=stop
+            )
+        )
         return child
 
     @classmethod

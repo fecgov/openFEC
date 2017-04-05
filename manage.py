@@ -297,9 +297,24 @@ def partition_itemized():
     schedule tables.
     """
 
+    partition_itemized_a()
+    partition_itemized_b()
+
+@manager.command
+def partition_itemized_a():
+    """This command runs the partitioning against the larger itemized
+    schedule a table.
+    """
+
     logger.info('Partitioning Schedule A...')
     partition.SchedAGroup.run()
     logger.info('Finished partitioning Schedule A.')
+
+@manager.command
+def partition_itemized_b():
+    """This command runs the partitioning against the larger itemized
+    schedule b table.
+    """
 
     logger.info('Partitioning Schedule B...')
     partition.SchedBGroup.run()
