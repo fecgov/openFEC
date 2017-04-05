@@ -91,7 +91,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "sort2": -1,
         }
         self.create_ao(1, expected_ao)
-        actual_ao = next(get_advisory_opinions())
+        actual_ao = next(get_advisory_opinions(None))
 
         assert actual_ao == expected_ao
 
@@ -114,7 +114,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         for i, _ in enumerate(expected_requestor_names):
             self.create_requestor(1, i + 1, expected_requestor_names[i], expected_requestor_types[i])
 
-        actual_ao = next(get_advisory_opinions())
+        actual_ao = next(get_advisory_opinions(None))
 
         assert set(actual_ao["requestor_names"]) == set(expected_requestor_names)
         assert set(actual_ao["requestor_types"]) == set(expected_requestor_types)
@@ -140,7 +140,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.create_ao(1, expected_ao)
         self.create_document(1, expected_document)
 
-        actual_ao = next(get_advisory_opinions())
+        actual_ao = next(get_advisory_opinions(None))
         assert actual_ao["is_pending"] is False
 
         actual_document = actual_ao["documents"][0]
@@ -186,7 +186,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.create_ao(2, ao2)
         self.create_document(2, ao2_document)
 
-        actual_aos = [ao for ao in get_advisory_opinions()]
+        actual_aos = [ao for ao in get_advisory_opinions(None)]
         assert len(actual_aos) == 2
 
         actual_ao1 = next(filter(lambda a: a["no"] == "2017-01", actual_aos))
@@ -220,7 +220,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.create_ao(1, ao)
         self.create_document(1, ao_document)
 
-        actual_ao = next(get_advisory_opinions())
+        actual_ao = next(get_advisory_opinions(None))
 
         assert actual_ao["statutory_citations"] == [{'title': 52, 'section': 30101,
             'former_title': 2, 'former_section': 431, 'text': '2 U.S.C. 431 and some text'}]
@@ -247,7 +247,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.create_ao(1, ao)
         self.create_document(1, ao_document)
 
-        actual_ao = next(get_advisory_opinions())
+        actual_ao = next(get_advisory_opinions(None))
 
         assert actual_ao["regulatory_citations"] == [{"title": 11, "part": 9034, "section": 4}]
 
@@ -256,6 +256,72 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "INSERT INTO aouser.ao (ao_id, ao_no, name, summary, req_date, issue_date) "
             "VALUES (%s, %s, %s, %s, %s, %s)",
             ao_id, ao["no"], ao["name"], ao["summary"], ao["request_date"], ao["issue_date"])
+
+    @patch("webservices.legal_docs.advisory_opinions.get_bucket")
+    def test_ao_offsets(self, get_bucket):
+        expected_ao1 = {
+            "no": "2015-01",
+            "name": "AO name1",
+            "summary": "AO summary1",
+            "request_date": datetime.date(2016, 6, 10),
+            "issue_date": datetime.date(2016, 12, 15),
+            "is_pending": True,
+            "ao_citations": [],
+            "statutory_citations": [],
+            "regulatory_citations": [],
+            "aos_cited_by": [],
+            "documents": [],
+            "requestor_names": [],
+            "requestor_types": [],
+            "sort1": -2015,
+            "sort2": -1,
+        }
+        expected_ao2 = {
+            "no": "2015-02",
+            "name": "An AO name2",
+            "summary": "An AO summary2",
+            "request_date": datetime.date(2016, 6, 10),
+            "issue_date": datetime.date(2016, 12, 15),
+            "is_pending": True,
+            "ao_citations": [],
+            "statutory_citations": [],
+            "regulatory_citations": [],
+            "aos_cited_by": [],
+            "documents": [],
+            "requestor_names": [],
+            "requestor_types": [],
+            "sort1": -2015,
+            "sort2": -2,
+        }
+        expected_ao3 = {
+            "no": "2016-01",
+            "name": "An AO name3",
+            "summary": "An AO summary3",
+            "request_date": datetime.date(2016, 6, 10),
+            "issue_date": datetime.date(2016, 12, 15),
+            "is_pending": True,
+            "ao_citations": [],
+            "statutory_citations": [],
+            "regulatory_citations": [],
+            "aos_cited_by": [],
+            "documents": [],
+            "requestor_names": [],
+            "requestor_types": [],
+            "sort1": -2016,
+            "sort2": -1,
+        }
+        self.create_ao(1, expected_ao1)
+        self.create_ao(2, expected_ao2)
+        self.create_ao(3, expected_ao3)
+
+        gen = get_advisory_opinions(None)
+        assert(next(gen)) == expected_ao1
+        assert(next(gen)) == expected_ao2
+        assert(next(gen)) == expected_ao3
+
+        gen = get_advisory_opinions('2015-02')
+        assert(next(gen)) == expected_ao2
+        assert(next(gen)) == expected_ao3
 
     def create_document(self, ao_id, document):
         self.connection.execute(
