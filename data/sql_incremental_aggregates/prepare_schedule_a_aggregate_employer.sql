@@ -31,11 +31,11 @@ alter table ofec_sched_a_aggregate_employer_tmp rename to ofec_sched_a_aggregate
 create or replace function ofec_sched_a_update_aggregate_employer() returns void as $$
 begin
     with new as (
-        select 1 as multiplier, *
+        select 1 as multiplier, cmte_id, rpt_yr, contbr_employer, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
         from ofec_sched_a_queue_new
     ),
     old as (
-        select -1 as multiplier, *
+        select -1 as multiplier, cmte_id, rpt_yr, contbr_employer, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
         from ofec_sched_a_queue_old
     ),
     patch as (
