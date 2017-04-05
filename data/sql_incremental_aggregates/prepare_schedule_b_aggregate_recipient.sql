@@ -31,11 +31,11 @@ alter table ofec_sched_b_aggregate_recipient_tmp rename to ofec_sched_b_aggregat
 create or replace function ofec_sched_b_update_aggregate_recipient() returns void as $$
 begin
     with new as (
-        select 1 as multiplier, *
+        select 1 as multiplier, cmte_id, rpt_yr, recipient_nm, disb_amt, memo_cd
         from ofec_sched_b_queue_new
     ),
     old as (
-        select -1 as multiplier, *
+        select -1 as multiplier, cmte_id, rpt_yr, recipient_nm, disb_amt, memo_cd
         from ofec_sched_b_queue_old
     ),
     patch as (
