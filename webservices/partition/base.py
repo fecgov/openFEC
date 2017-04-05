@@ -51,6 +51,10 @@ class TableGroup:
     def redefine_columns(cls, parent):
         """Redefines columns in a table definition that are not the type that
         we expect in the parent view.
+
+        This is intended to be used when creating the master table of a
+        partition, which is when the structure of the table is derived
+        directly and solely from the parent/source table/view.
         """
 
         for column_name, cast_type in cls.column_mappings.items():
@@ -62,6 +66,12 @@ class TableGroup:
     def recast_columns(cls, parent):
         """Recasts columns in a table definition that are not the type that
         we expect in the parent view.
+
+        This is intended to be used when creating the child tables that
+        inherit from the master table in a partition, which is when the
+        structure of the table is partially derived from the parent/source
+        table/view but also modified to represent the actual data that will
+        live within the child table.
         """
 
         columns = [
