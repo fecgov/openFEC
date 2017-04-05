@@ -50,7 +50,7 @@ class TableGroup:
     @classmethod
     def redefine_columns(cls, parent):
         """Redefines columns in a table definition that are not the type that
-        we expect in the parent view.
+        we expect in the parent table/view.
 
         This is intended to be used when creating the master table of a
         partition, which is when the structure of the table is derived
@@ -65,13 +65,17 @@ class TableGroup:
     @classmethod
     def recast_columns(cls, parent):
         """Recasts columns in a table definition that are not the type that
-        we expect in the parent view.
+        we expect in the parent table/view.
 
         This is intended to be used when creating the child tables that
         inherit from the master table in a partition, which is when the
         structure of the table is partially derived from the parent/source
         table/view but also modified to represent the actual data that will
         live within the child table.
+
+        This is also used for accessing the data found in the queue tables for
+        a refresh due to the fact that they also may have unknown/incorrect
+        column types.
         """
 
         columns = [
@@ -294,7 +298,7 @@ class TableGroup:
             ]
 
             insert_select = sa.select(
-                queue_new.columns + columns
+                cls.recast_columns(queue_new) + columns
             ).select_from(
                 queue_new.join(
                     queue_old,
