@@ -475,6 +475,18 @@ ALTER TABLE ONLY subject
     ADD CONSTRAINT subject_pkey PRIMARY KEY (subject_id);
 
 --
+-- Name: cases_with_parsed_case_serial_numbers; Type: VIEW; Schema: fecmur; Owner: fec
+--
+CREATE VIEW cases_with_parsed_case_serial_numbers
+AS
+    SELECT
+        case_id,
+        case_no,
+        regexp_replace(case_no, '(\d+).*', '\1')::int AS case_serial,
+        name,
+        case_type
+    FROM fecmur.case;
+--
 -- Data for Name: role; Type: TABLE DATA; Schema: fecmur; Owner: fec
 --
 
