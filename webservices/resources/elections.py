@@ -98,7 +98,7 @@ class ElectionList(utils.Resource):
                 #want candidates with null districts showing up.  Thoughts?  The TODO directly
                 #above is also indicator of some prior inconsistent data, is this still the case?
                 #CandidateHistory.district == None,  # noqa
-                CandidateHistory.district != '99',
+                CandidateHistory.district != '99'
             )
         )
         if kwargs.get('cycle'):
