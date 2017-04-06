@@ -136,7 +136,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             'sort2': None
         }
         self.create_mur(1, expected_mur['no'], expected_mur['name'], mur_subject)
-        actual_mur = next(get_murs())
+        actual_mur = next(get_murs(None))
 
         assert actual_mur == expected_mur
 
@@ -173,7 +173,7 @@ class TestLoadCurrentMURs(BaseTestCase):
             category, ocrtext = document
             self.create_document(case_id, document_id, category, ocrtext)
 
-        actual_mur = next(get_murs())
+        actual_mur = next(get_murs(None))
 
         for key in expected_mur:
             assert actual_mur[key] == expected_mur[key]
@@ -243,7 +243,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         action = 'Conciliation Reached.'
         self.create_commission(commission_id, agenda_date, vote_date, action, case_id, pg_date)
 
-        actual_mur = next(get_murs())
+        actual_mur = next(get_murs(None))
 
         expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
             'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
@@ -287,6 +287,82 @@ class TestLoadCurrentMURs(BaseTestCase):
             'sort2': None
         }
         assert actual_mur == expected_mur
+
+    @patch('webservices.legal_docs.current_murs.get_bucket')
+    def test_mur_offsets(self, get_bucket):
+        mur_subject = 'Fraudulent misrepresentation'
+        expected_mur1 = {
+            'no': '1',
+            'name': 'Simple MUR1',
+            'mur_type': 'current',
+            'election_cycles': [2016],
+            'doc_id': 'mur_1',
+            'participants': [],
+            'subjects': [mur_subject],
+            'subject': {"text": [mur_subject]},
+            'respondents': [],
+            'documents': [],
+            'disposition': {'data': [], 'text': []},
+            'commission_votes': [],
+            'dispositions': [],
+            'close_date': None,
+            'open_date': None,
+            'url': '/legal/matter-under-review/1/',
+            'sort1': -1,
+            'sort2': None
+        }
+        expected_mur2 = {
+            'no': '2',
+            'name': 'Simple MUR2',
+            'mur_type': 'current',
+            'election_cycles': [2016],
+            'doc_id': 'mur_2',
+            'participants': [],
+            'subjects': [mur_subject],
+            'subject': {"text": [mur_subject]},
+            'respondents': [],
+            'documents': [],
+            'disposition': {'data': [], 'text': []},
+            'commission_votes': [],
+            'dispositions': [],
+            'close_date': None,
+            'open_date': None,
+            'url': '/legal/matter-under-review/2/',
+            'sort1': -2,
+            'sort2': None
+        }
+        expected_mur3 = {
+            'no': '3',
+            'name': 'Simple MUR',
+            'mur_type': 'current',
+            'election_cycles': [2016],
+            'doc_id': 'mur_3',
+            'participants': [],
+            'subjects': [mur_subject],
+            'subject': {"text": [mur_subject]},
+            'respondents': [],
+            'documents': [],
+            'disposition': {'data': [], 'text': []},
+            'commission_votes': [],
+            'dispositions': [],
+            'close_date': None,
+            'open_date': None,
+            'url': '/legal/matter-under-review/3/',
+            'sort1': -3,
+            'sort2': None
+        }
+        self.create_mur(1, expected_mur1['no'], expected_mur1['name'], mur_subject)
+        self.create_mur(2, expected_mur2['no'], expected_mur2['name'], mur_subject)
+        self.create_mur(3, expected_mur3['no'], expected_mur3['name'], mur_subject)
+
+        gen = get_murs(None)
+        assert(next(gen)) == expected_mur1
+        assert(next(gen)) == expected_mur2
+        assert(next(gen)) == expected_mur3
+
+        gen = get_murs('2')
+        assert(next(gen)) == expected_mur2
+        assert(next(gen)) == expected_mur3
 
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
