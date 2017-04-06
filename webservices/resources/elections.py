@@ -67,14 +67,14 @@ class ElectionList(utils.Resource):
                 ],
                 else_=4,
             ).label('_office_status'),
-        ).outerjoin(
+        ).join(
             ElectionResult,
             sa.and_(
                 elections.c.state == ElectionResult.cand_office_st,
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
                 elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
-            ),
+            )
         ).order_by(
             '_office_status',
             ElectionResult.cand_office_district,
@@ -91,7 +91,13 @@ class ElectionList(utils.Resource):
             CandidateHistory.candidate_inactive == False,  # noqa
             # TODO(jmcarp) Revert after #1271 is resolved
             sa.or_(
-                CandidateHistory.district == None,  # noqa
+                #This line was causing some semi-duplicate entries
+                #an example here: https://beta.fec.gov/data/elections/?cycle=2016&state=AK
+                #young shows up once. In one of those entries the district is null.  I don't know
+                #if this was to counter a bug or some incomplete data.  But I would say we don't
+                #want candidates with null districts showing up.  Thoughts?  The TODO directly
+                #above is also indicator of some prior inconsistent data, is this still the case?
+                #CandidateHistory.district == None,  # noqa
                 CandidateHistory.district != '99',
             )
         )
