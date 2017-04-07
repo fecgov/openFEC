@@ -17,7 +17,6 @@ from flask import Blueprint
 import flask_cors as cors
 import flask_restful as restful
 
-from raven.contrib.flask import Sentry
 from werkzeug.contrib.fixers import ProxyFix
 import sqlalchemy as sa
 
@@ -58,7 +57,6 @@ def sqla_conn_string():
     if not sqla_conn_string:
         print("Environment variable SQLA_CONN is empty; running against " + "local `cfdm_test`")
         sqla_conn_string = 'postgresql://:@/cfdm_test'
-    print(sqla_conn_string)
     return sqla_conn_string
 
 
@@ -165,6 +163,7 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
+api.add_resource(totals.CandidateTotalsView, '/candidate/<string:candidate_id>/totals/')
 api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
 api.add_resource(reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
@@ -249,6 +248,7 @@ api.add_resource(filings.FilingsList, '/filings/')
 api.add_resource(download.DownloadView, '/download/<path:path>/')
 
 api.add_resource(legal.UniversalSearch, '/legal/search/')
+api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
 api.add_resource(load.Legal, '/load/legal/')
 
@@ -272,6 +272,7 @@ apidoc.register(reports.ReportsView, blueprint='v1')
 apidoc.register(reports.CommitteeReportsView, blueprint='v1')
 apidoc.register(reports.EFilingSummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
+apidoc.register(totals.CandidateTotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAEfileView, blueprint='v1')
 apidoc.register(sched_b.ScheduleBView, blueprint='v1')
@@ -362,8 +363,5 @@ def initialize_newrelic():
         newrelic.agent.initialize()
 
 initialize_newrelic()
-
-if env.get_credential('SENTRY_DSN'):
-    Sentry(app, dsn=env.get_credential('SENTRY_DSN'))
 
 app.wsgi_app = ProxyFix(app.wsgi_app)

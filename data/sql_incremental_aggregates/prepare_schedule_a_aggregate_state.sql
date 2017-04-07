@@ -8,7 +8,7 @@ select
     expand_state(contbr_st) as state_full,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
-from fec_vsum_sched_a
+from fec_vsum_sched_a_vw
 where
     rpt_yr >= :START_YEAR_AGGREGATE and
     is_unitemized(memo_text::text) = false
@@ -35,11 +35,11 @@ alter table ofec_sched_a_aggregate_state_tmp rename to ofec_sched_a_aggregate_st
 create or replace function ofec_sched_a_update_aggregate_state() returns void as $$
 begin
     with new as (
-        select 1 as multiplier, *
+        select 1 as multiplier, cmte_id, rpt_yr, contbr_st, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
         from ofec_sched_a_queue_new
     ),
     old as (
-        select -1 as multiplier, *
+        select -1 as multiplier, cmte_id, rpt_yr, contbr_st, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
         from ofec_sched_a_queue_old
     ),
     patch as (

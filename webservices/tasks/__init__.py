@@ -4,8 +4,6 @@ import celery
 from celery import signals
 from celery.schedules import crontab
 
-from raven import Client
-from raven.contrib.celery import register_signal, register_logger_signal
 
 from webservices.env import env
 from webservices.tasks import utils
@@ -22,7 +20,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     }
 
 def redis_url():
-    redis = env.get_service(label='redis28-swarm')
+    redis = env.get_service(label='redis28')
     if redis:
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
@@ -39,11 +37,6 @@ app.conf.update(
     ),
     CELERYBEAT_SCHEDULE=schedule,
 )
-
-client = Client(env.get_credential('SENTRY_DSN'))
-
-register_signal(client)
-register_logger_signal(client)
 
 context = {}
 
