@@ -434,6 +434,19 @@ augment_models(
     models.CommitteeTotalsPac
 )
 
+make_candidate_totals_schema = functools.partial(
+    make_schema,
+    fields={
+        'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
+        'last_beginning_image_number': ma.fields.Str(),
+    },
+)
+augment_models(
+    make_candidate_totals_schema,
+    models.CandidateCommitteeTotalsPresidential,
+    models.CandidateCommitteeTotalsHouseSenate
+)
+
 register_schema(CommitteeReportsSchema)
 register_schema(CommitteeReportsPageSchema)
 

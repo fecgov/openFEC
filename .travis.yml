@@ -16,6 +16,8 @@ env:
     - secure: F1dtnMCk7weobmhNVYrnqHEoFOOWNQJcLhjSxErtakuK0Lvk+iuLPaVE3fljjy2VDrcYTCmYbAD1gkOwkSnB+kD516PSWQ9T9vfeKEoPSl8FzWi8w8SHKYyUuiCt3PNDedsUzjn9VQsD+P1mRRF1R2BBk9roE+Qz2HlMoBomQHw= # dev password
     - secure: DHeDA3k09XnfgRR6BqLY0I3elYQkp6s5Id1slNicvRuhrrmT8h6bRr7FmIy2JiaUieMDZ0cuoF965PJpGN3QAmE6Z0wRTkxpexM3XW8d43kufXy36eVLb85m/S9p5W3bcDUlGa/tn8Lq2TtckJidZ7uO2KPFuaobGfOUO5rspIM= # stage user name
     - secure: XGUU6IbLojPiAKKEE/r8VGUWrQfIlN4KwbniCR7ZbdTKMevQ8ApG2kS3VPKeN17cvEbQZmN+xJgLdxozzM7oIVAS77hbH4EEnJ2Dq2re1H2V87FpD9SCIbFhdmNWybLWmRvxMiCQYtmPPlShdSI/ZsfWZuIZxfFW1kB594DRKCs= # stage password
+    - secure: aTDfum2GWiI7E+4LTqQarXTIKITWVArirkTwC/xbkhF74HHfeHFelxRZcbAJKCPS+6zImrI2nODEX7+FGr1Nsn0KCs/YT6bulEy6cIymRos/cfL3Qw7J1NYE04UBwRDv9kL/zl3PLW3DxeFRtVhHiIMa6tIuo52vsbHCBK/OWdE= # prod user name
+    - secure: fOtfMxFpv3MDrH3lzZccqMPTXunH9wqMBLNRgkI5dCGX5gjY2fxGwzfj9wtiXiqYifo/c9DFqNxS37dkFihGShGrE0sfCv5h+kiDRc8R50bH8vK/jE+if8ID8TUH71w7bjWQco7miRsy4MdT/0iFWjeSwwG31Egn5Z/dCxCcGPM= # prod password
 before_script:
   - psql -c 'create database "cfdm_unit_test";' -U postgres
   - travis_retry pip install -U pip setuptools wheel

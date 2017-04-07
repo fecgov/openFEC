@@ -355,6 +355,10 @@ totals = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
 }
 
+candidate_committee_totals = {
+    'full_election': fields.Bool(description='Get totals for full election period.')
+}
+
 
 itemized = {
     # TODO(jmcarp) Request integer image numbers from FEC and update argument types
