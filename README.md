@@ -164,7 +164,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
    export FEC_WEB_PASSWORD=<password_of_your_choosing>
    ```
 
-   Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.  
+   Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.
 
    *Note: 18F team members should not set these environment variables. 18F and FEC team members will also have additional environment variables to set up. Please reach out to a team member for detailed information.*
 
@@ -447,7 +447,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 * [auto] `release/my-release` is deployed to `stage`
 * Review of staging
 * Issue a pull request to master
-* Check if there are any SQL files changed. Depending on where the changes are, you may need to run migrations. Ask the person who made the change what, if anything, you need to run. 
+* Check if there are any SQL files changed. Depending on where the changes are, you may need to run migrations. Ask the person who made the change what, if anything, you need to run.
 * Developer merges release branch into `master` (and backmerges into `develop`) and pushes to origin:
 
     ```
@@ -460,7 +460,7 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
     git push origin develop
     ```
     Watch the develop build on travis and make sure it passes. Now you are ready to push to prod (:tada:).
-    
+
     ```
     git checkout master
     git push origin master --follow-tags
@@ -493,6 +493,51 @@ The production and staging environments use relational database service (RDS) in
 ### Nightly updates
 Incrementally-updated aggregates and materialized views are updated nightly; see
 `webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
+
+### Loading legal documents
+There are individual management commands for loading individual legal documents. More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
+```
+cf run-task api  "python manage.py reinitialize_all_legal_docs" -m 2G --name reinit-legal
+```
+The progress of these tasks can be monitored using, e.g.,
+```
+cf logs api | grep reinit-legal
+```
+
+
+#### Loading statutes
+```
+python manage.py index_statutes
+```
+
+#### Loading regulations
+```
+python manage.py index_regulations
+```
+This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
+
+#### Loading advisory opinions
+```
+python manage.py load_advisory_opinions [-f FROM_AO_NO]
+```
+
+#### Loading current MURs
+```
+python manage.py load_current_murs [-f FROM_MUR_NO]
+```
+
+#### Loading all legal documents for the 1st time
+```
+python manage.py reinitialize_all_legal_docs
+```
+
+#### Loading all legal documents with no downtime
+```
+python manage.py reinitialize_all_legal_docs
+```
+This command is typically used when there is a schema change. A staging index is built
+and populated in the background. When ready, the staging index is moved to the production index with no downtime.
+
 
 ### Production stack
 The OpenFEC API is a Flask application deployed using the gunicorn WSGI server behind
