@@ -3,11 +3,12 @@ path: .
 memory: 1G
 stack: cflinuxfs2
 buildpack: python_buildpack
-domain: 18f.gov
 env:
-  NEW_RELIC_CONFIG_FILE: newrelic.ini
+  NEW_RELIC_CONFIG_FILE: /home/vcap/app/newrelic.ini
   NEW_RELIC_LOG: stdout
   WEB_CONCURRENCY: 4
+services:
+  - fec-api-search
 applications:
 - name: api
 - name: celery-beat

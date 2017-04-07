@@ -102,18 +102,21 @@ class ReportsView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
-    @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
+    @use_kwargs(
+        args.make_multi_sort_args(default=['-coverage_end_date'])
+    )
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_type=None, **kwargs):
         committee_id = kwargs.get('committee_id')
+        print(kwargs)
         query, reports_class, reports_schema = self.build_query(
             committee_type=committee_type,
             **kwargs
         )
         if kwargs['sort']:
-            validator = args.IndexValidator(reports_class)
+            validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=reports_class)
+        page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
         return reports_schema().dump(page).data
 
     def build_query(self, committee_type=None, **kwargs):
@@ -165,7 +168,7 @@ class CommitteeReportsView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.committee_reports)
-    @use_kwargs(args.make_sort_args(default='-coverage_end_date'))
+    @use_kwargs(args.make_multi_sort_args(default=['-coverage_end_date']))
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_id=None, committee_type=None, **kwargs):
         query, reports_class, reports_schema = self.build_query(
@@ -174,9 +177,9 @@ class CommitteeReportsView(utils.Resource):
             **kwargs
         )
         if kwargs['sort']:
-            validator = args.IndexValidator(reports_class)
+            validator = args.IndicesValidator(reports_class)
             validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=reports_class)
+        page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
         return reports_schema().dump(page).data
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
