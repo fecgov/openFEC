@@ -1,6 +1,10 @@
 import datetime
 
+import factory
+from factory.alchemy import SQLAlchemyModelFactory
+
 import sqlalchemy as sa
+from sqlalchemy.ext.automap import automap_base
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -13,6 +17,17 @@ from webservices.resources.committees import CommitteeView
 from webservices.resources.committees import CommitteeHistoryView
 from webservices.resources.candidates import CandidateView
 
+def make_factory():
+    automap = automap_base(bind=db.engine)
+    automap.prepare(db.engine, reflect=True)
+
+    class UnverifiedFilersViewFactory(SQLAlchemyModelFactory):
+        class Meta:
+            sqlalchemy_session = db.session
+            model = automap.classes.unverified_filers_vw
+
+
+    return UnverifiedFilersViewFactory
 
 ## old, re-factored Committee tests ##
 class CommitteeFormatTest(ApiBaseTest):
@@ -317,11 +332,16 @@ class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
-        self.committees = [factories.CommitteeDetailFactory() for _ in range(2)]
+        self.committees = [factories.CommitteeDetailFactory() for _ in range(4)]
         self.histories = [
             factories.CommitteeHistoryFactory(committee_id=self.committees[0].committee_id, cycle=2010),
             factories.CommitteeHistoryFactory(committee_id=self.committees[1].committee_id, cycle=2012),
+            factories.CommitteeHistoryFactory(committee_id=self.committees[2].committee_id, cycle=2016),
+            factories.CommitteeHistoryFactory(committee_id=self.committees[3].committee_id, cycle=2016),
         ]
+
+        cls.UnverifiedFilersViewFactory = make_factory()
+
         db.session.flush()
         self.links = [
             factories.CandidateCommitteeLinkFactory(
@@ -334,6 +354,18 @@ class TestCommitteeHistory(ApiBaseTest):
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 fec_election_year=2012,
+                committee_type='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[2].committee_id,
+                fec_election_year=2016,
+                committee_type='P',
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[2].committee_id,
+                fec_election_year=2016,
                 committee_type='P',
             ),
         ]
@@ -366,3 +398,19 @@ class TestCommitteeHistory(ApiBaseTest):
         assert results[0]['committee_id'] == self.committees[0].committee_id
         assert results[1]['cycle'] == 2012
         assert results[1]['committee_id'] == self.committees[1].committee_id
+
+    def test_unverified_filer_excluded(self):
+        row = self.UnverifiedFilersViewFactory(
+            cmte_id=self.committees[3].committee_id
+        )
+        db.session.commit()
+
+        results = self._results(
+            api.url_for(
+                CommitteeHistoryView,
+                candidate_id=self.candidate.candidate_id, cycle=2016, election_full='true',
+            )
+        )
+        assert len(results) == 1
+        assert results[0]['cycle'] == 2016
+        assert results[0]['committee_id'] == self.committees[2].committee_id
