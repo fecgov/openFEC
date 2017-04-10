@@ -167,6 +167,17 @@ party_totals as (
     group by
         month,
         year
+),
+communication_totals as (
+  select
+    get_cycle(rpt_yr) as cycle,
+    f.rpt_yr as year,
+    extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+    sum(coalesce(ttl_communication_cost ,0)) as comms_totals
+  from public.fec_vsum_f7_vw f
+  where rpt_yr >= 2007
+  and most_recent_filing_flag = 'Y'
+  group by get_cycle(rpt_yr), f.rpt_yr, extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD'))
 ), -- merge
 combined as (
     select
@@ -191,10 +202,15 @@ combined as (
         as party_receipts,
         case when max(party_totals.party_adjusted_total_disbursements) is null
             then 0 else max(party_totals.party_adjusted_total_disbursements) end
-        as party_disbursements
+        as party_disbursements,
+        case when max(communication_totals.comms_totals) is null
+            then 0 else max(communication_totals.comms_totals) end
+        as communications_totals
+
     from cand_totals
     full outer join pac_totals using (month, year)
     full outer join party_totals using (month, year)
+    full outer join communication_totals using (month, year)
     group by
         month,
         year
@@ -217,7 +233,10 @@ select
     sum(party_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_receipts,
     party_receipts,
     sum(party_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_disbursements,
-    party_disbursements
+    party_disbursements,
+    sum(communications_totals) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_communication_totals,
+    communications_totals
+
 from combined
 where cycle >= 2008
 ;
