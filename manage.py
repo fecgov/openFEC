@@ -251,7 +251,6 @@ def load_districts(source=None):
     cmd = (
         'pg_restore --dbname "{dest}" --no-acl --no-owner --clean {source}'
     ).format(**locals())
-
     subprocess.run(cmd, shell=True)
     logger.info('Finished loading districts.')
 
