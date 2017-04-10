@@ -533,7 +533,7 @@ python manage.py reinitialize_all_legal_docs
 
 #### Loading all legal documents with no downtime
 ```
-python manage.py reinitialize_all_legal_docs
+python manage.py refresh_legal_docs_zero_downtime
 ```
 This command is typically used when there is a schema change. A staging index is built
 and populated in the background. When ready, the staging index is moved to the production index with no downtime.
