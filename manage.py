@@ -361,9 +361,9 @@ def refresh_itemized_a():
 
     for message in output_messages:
         if message[0] == 0:
-            logger.info(message)
+            logger.info(message[1])
         else:
-            logger.error(message)
+            logger.error(message[1])
 
     logger.info('Finished updating Schedule A.')
 
@@ -375,9 +375,9 @@ def refresh_itemized_b():
 
     for message in output_messages:
         if message[0] == 0:
-            logger.info(message)
+            logger.info(message[1])
         else:
-            logger.error(message)
+            logger.error(message[1])
 
     logger.info('Finished updating Schedule B.')
 
