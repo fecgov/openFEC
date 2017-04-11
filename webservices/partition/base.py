@@ -281,6 +281,7 @@ class TableGroup:
             base=cls.base_name, start=start, stop=stop
         )
         child = utils.load_table(name)
+        errors = []
         connection = db.engine.connect()
         transaction = connection.begin()
 
@@ -339,11 +340,16 @@ class TableGroup:
             logger.info('Successfully refreshed {name}.'.format(name=name))
         except Exception as e:
             transaction.rollback()
-            logger.error(
-                'Refreshing {name} failed: {error}'.format(name=name, error=e)
+
+            error_message = 'Refreshing {name} failed: {error}'.format(
+                name=name,
+                error=e
             )
+            logger.error(error_message)
+            errors.append(error_message)
 
         connection.close()
+        return errors
 
     @classmethod
     def clear_queue(cls, queue, record_ids, connection):

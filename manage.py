@@ -343,15 +343,37 @@ def update_aggregates():
         )
         logger.info('Finished updating Schedule E and support aggregates.')
 
-    logger.info('Updating Schedule A...')
-    partition.SchedAGroup.refresh_children()
-    logger.info('Finished updating Schedule A.')
+@manager.command
+def refresh_itemized():
+    """These are run nightly to refresh the itemized schedule A and B data."""
 
-    logger.info('Updating Schedule B...')
-    partition.SchedBGroup.refresh_children()
-    logger.info('Finished updating Schedule B.')
+    refresh_itemized_a()
+    refresh_itemized_b()
 
     logger.info('Finished updating incremental aggregates.')
+
+@manager.command
+def refresh_itemized_a():
+    """Used to refresh the itemized Schedule A data."""
+
+    logger.info('Updating Schedule A...')
+    errors = partition.SchedAGroup.refresh_children()
+
+    for error_message in errors:
+        logger.error(error_message)
+
+    logger.info('Finished updating Schedule A.')
+
+@manager.command
+def refresh_itemized_b():
+    """Used to refresh the itemized Schedule B data."""
+    logger.info('Updating Schedule B...')
+    errors = partition.SchedBGroup.refresh_children()
+
+    for error_message in errors:
+        logger.error(error_message)
+
+    logger.info('Finished updating Schedule B.')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
