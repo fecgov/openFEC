@@ -267,21 +267,36 @@ class TableGroup:
 
     @classmethod
     def refresh_children(cls):
+        """Loops through all child tables and refreshes them.
+
+        Returns a list of tuples that contain success values and messages with
+        details.
+        """
+
         queue_old = utils.load_table(cls.queue_old)
         queue_new = utils.load_table(cls.queue_new)
         cycles = get_cycles()
+        output_messages = []
 
         for cycle in cycles:
-            cls.refresh_child(cycle, queue_old, queue_new)
+            output_messages.append(
+                cls.refresh_child(cycle, queue_old, queue_new)
+            )
+
+        return output_messages
 
     @classmethod
     def refresh_child(cls, cycle, queue_old, queue_new):
+        """Refreshes a single child table and returns a tuple with a success
+        value (0 for success, 1 for failure) and message with details.
+        """
+
         start, stop = cycle - 1, cycle
+        output_message = (0, '')
         name = '{base}_{start}_{stop}'.format(
             base=cls.base_name, start=start, stop=stop
         )
         child = utils.load_table(name)
-        errors = []
         connection = db.engine.connect()
         transaction = connection.begin()
 
@@ -337,19 +352,25 @@ class TableGroup:
             ), connection)
 
             transaction.commit()
-            logger.info('Successfully refreshed {name}.'.format(name=name))
+            output_message = (
+                0,
+                'Successfully refreshed {name}.'.format(name=name),
+            )
+            logger.info(output_message[1])
         except Exception as e:
             transaction.rollback()
 
-            error_message = 'Refreshing {name} failed: {error}'.format(
-                name=name,
-                error=e
+            output_message = (
+                1,
+                'Refreshing {name} failed: {error}'.format(
+                    name=name,
+                    error=e
+                ),
             )
-            logger.error(error_message)
-            errors.append(error_message)
+            logger.error(output_message[1])
 
         connection.close()
-        return errors
+        return output_message
 
     @classmethod
     def clear_queue(cls, queue, record_ids, connection):
