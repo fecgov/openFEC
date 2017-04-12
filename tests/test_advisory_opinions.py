@@ -87,6 +87,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
+            "commenter_names": [],
+            "representative_names": [],
             "sort1": -2017,
             "sort2": -1,
         }
@@ -96,9 +98,11 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert actual_ao == expected_ao
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
-    def test_ao_with_requestors(self, get_bucket):
+    def test_ao_with_entities(self, get_bucket):
         expected_requestor_names = ["The Manchurian Candidate", "Federation of Interstate Truckers"]
         expected_requestor_types = ["Federal candidate/candidate committee/officeholder", "Labor Organization"]
+        expected_commenter_names = ["Tom Troll", "Harry Troll"]
+        expected_representative_names = ["Dewey Cheetham and Howe LLC"]
         expected_ao = {
             "no": "2017-01",
             "name": "An AO name",
@@ -113,11 +117,19 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.create_ao(1, expected_ao)
         for i, _ in enumerate(expected_requestor_names):
             self.create_requestor(1, i + 1, expected_requestor_names[i], expected_requestor_types[i])
+        offset = len(expected_requestor_names)
+        for i, _ in enumerate(expected_commenter_names):
+            self.create_commenter(1, i + offset + 1, expected_commenter_names[i])
+        offset += len(expected_commenter_names)
+        for i, _ in enumerate(expected_representative_names):
+            self.create_representative(1, i + offset + 1, expected_representative_names[i])
 
         actual_ao = next(get_advisory_opinions(None))
 
         assert set(actual_ao["requestor_names"]) == set(expected_requestor_names)
         assert set(actual_ao["requestor_types"]) == set(expected_requestor_types)
+        assert set(actual_ao["commenter_names"]) == set(expected_commenter_names)
+        assert set(actual_ao["representative_names"]) == set(expected_representative_names)
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_completed_ao_with_docs(self, get_bucket):
@@ -273,6 +285,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
+            "commenter_names": [],
+            "representative_names": [],
             "sort1": -2015,
             "sort2": -1,
         }
@@ -290,6 +304,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
+            "commenter_names": [],
+            "representative_names": [],
             "sort1": -2015,
             "sort2": -2,
         }
@@ -307,6 +323,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "documents": [],
             "requestor_names": [],
             "requestor_types": [],
+            "commenter_names": [],
+            "representative_names": [],
             "sort1": -2016,
             "sort2": -1,
         }
@@ -342,6 +360,16 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         entity_type_id = self.connection.execute(
             "SELECT entity_type_id FROM aouser.entity_type "
             " WHERE description = %s ", requestor_type).scalar()
+
+        self.create_entity(ao_id, entity_id, requestor_name, entity_type_id, 1)
+
+    def create_commenter(self, ao_id, entity_id, requestor_name):
+        self.create_entity(ao_id, entity_id, requestor_name, 16, 2)
+
+    def create_representative(self, ao_id, entity_id, requestor_name):
+        self.create_entity(ao_id, entity_id, requestor_name, 16, 3)
+
+    def create_entity(self, ao_id, entity_id, requestor_name, entity_type_id, role_id):
         self.connection.execute(
             """
             INSERT INTO aouser.entity
@@ -359,7 +387,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             entity_id,
             ao_id,
             entity_id,
-            1
+            role_id
         )
 
     def clear_test_data(self):
