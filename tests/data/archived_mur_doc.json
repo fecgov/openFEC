@@ -3,7 +3,7 @@
   "pdf_pages": 2,
   "text": "page1 page2",
   "no": "1", "close_date": "1983-11-03T00:00:00",
-  "url": "https://bucket123.s3.amazonaws.com/legal/murs/1.pdf",
+  "url": "https://bucket123.s3-us-gov-west-1.amazonaws.com/legal/murs/1.pdf",
   "mur_type": "archived",
   "citations":
     {"us_code": [{"text": "2 U.S.C. 104",
