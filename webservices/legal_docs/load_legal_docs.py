@@ -446,4 +446,4 @@ def load_archived_murs():
         pool.map(process_mur, murs, chunksize=1)
 
 def generate_aws_s3_url(bucket_name, pdf_key):
-    return "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+    return "https://%s.s3-us-gov-west-1.amazonaws.com/%s" % (bucket_name, pdf_key)
