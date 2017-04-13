@@ -384,7 +384,7 @@ def process_mur(mur):
         logger.info('already processed %s' % pdf_key)
         return
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
-    pdf_url = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+    pdf_url = generate_aws_s3_url(bucket_name, pdf_key)
     open_date, close_date = (None, None)
     if open_date_td:
         open_date = datetime.strptime(open_date_td, '%m/%d/%Y').isoformat()
@@ -444,3 +444,6 @@ def load_archived_murs():
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
     with Pool(processes=1, maxtasksperchild=1) as pool:
         pool.map(process_mur, murs, chunksize=1)
+
+def generate_aws_s3_url(bucket_name, pdf_key):
+    return "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
