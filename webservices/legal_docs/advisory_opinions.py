@@ -4,6 +4,7 @@ import re
 
 from webservices.env import env
 from webservices.legal_docs import DOCS_INDEX
+from webservices.legal_docs.load_legal_docs import generate_aws_s3_url
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -140,7 +141,7 @@ def get_documents(ao_id, bucket, bucket_name):
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
-            document["url"] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+            document["url"] = generate_aws_s3_url(bucket_name, pdf_key)
             documents.append(document)
     return documents
 
