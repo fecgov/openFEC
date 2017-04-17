@@ -35,14 +35,16 @@ ALL_AOS = """
     ORDER BY ao_year, ao_serial
 """
 
-AO_REQUESTORS = """
+AO_ENTITIES = """
     SELECT
         e.name,
-        et.description
+        et.description AS entity_type_description,
+        r.description AS role_description
     FROM aouser.players p
     INNER JOIN aouser.entity e USING (entity_id)
     INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
-    WHERE p.ao_id = %s AND role_id IN (0, 1)
+    INNER JOIN aouser.role r USING (role_id)
+    WHERE p.ao_id = %s
 """
 
 AO_DOCUMENTS = """
@@ -110,20 +112,29 @@ def get_advisory_opinions(from_ao_no):
                 "sort2": -serial,
             }
             ao["documents"] = get_documents(ao_id, bucket, bucket_name)
-            ao["requestor_names"], ao["requestor_types"] = get_requestors(ao_id)
+            (ao["requestor_names"], ao["requestor_types"], ao["commenter_names"],
+                    ao["representative_names"]) = get_entities(ao_id)
 
             yield ao
 
 
-def get_requestors(ao_id):
+def get_entities(ao_id):
     requestor_names = []
+    commenter_names = []
+    representative_names = []
     requestor_types = set()
     with db.engine.connect() as conn:
-        rs = conn.execute(AO_REQUESTORS, ao_id)
+        rs = conn.execute(AO_ENTITIES, ao_id)
         for row in rs:
-            requestor_names.append(row["name"])
-            requestor_types.add(row["description"])
-    return requestor_names, list(requestor_types)
+            if row["role_description"] == "Requestor":
+                requestor_names.append(row["name"])
+                requestor_types.add(row["entity_type_description"])
+            elif row["role_description"] == "Commenter":
+                commenter_names.append(row["name"])
+            elif row["role_description"] == "Counsel/Representative":
+                representative_names.append(row["name"])
+    return requestor_names, list(requestor_types), commenter_names, representative_names
+
 
 def get_documents(ao_id, bucket, bucket_name):
     documents = []
