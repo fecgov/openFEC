@@ -381,7 +381,7 @@ ANALYZER_SETTINGS = {
 
 def initialize_legal_docs():
     """
-    Initialize elasticsearch for storing legal documents.
+    Initialize Elasticsearch for storing legal documents.
     Create the `docs` index, and set up the aliases `docs_index` and `docs_search`
     to point to the `docs` index. If the `doc` index already exists, delete it.
     """

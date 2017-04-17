@@ -105,23 +105,21 @@ class UniversalSearch(utils.Resource):
         total_count = 0
         for type in types:
             must_query = [Q('term', _type=type)]
-            text_highlight_query = Q()
 
             if len(terms):
                 term_query = Q('match', _all=' '.join(terms))
                 must_query.append(term_query)
-                text_highlight_query = text_highlight_query & term_query
 
             if len(phrases):
                 phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
                 must_query.extend(phrase_queries)
-                text_highlight_query = text_highlight_query & Q('bool', must=phrase_queries)
 
             query = Search().using(es) \
                 .query(Q('bool',
                          must=must_query,
                          should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
                 .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
+                .highlight_options(require_field_match=False) \
                 .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
                 .extra(size=hits_returned, from_=from_hit) \
                 .index(DOCS_SEARCH) \
@@ -132,9 +130,6 @@ class UniversalSearch(utils.Resource):
 
             if type == 'murs':
                 query = apply_mur_specific_query_params(query, q, **kwargs)
-
-            if text_highlight_query:
-                query = query.highlight_options(highlight_query=text_highlight_query.to_dict())
 
             es_results = query.execute()
 
@@ -251,12 +246,20 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
         must_clauses.append(Q("terms", requestor_types=[requestor_types[r] for r in kwargs.get('ao_requestor_type')]))
 
     date_range = {}
-    if kwargs.get('ao_min_date'):
-        date_range['gte'] = kwargs.get('ao_min_date')
-    if kwargs.get('ao_max_date'):
-        date_range['lte'] = kwargs.get('ao_max_date')
+    if kwargs.get('ao_min_issue_date'):
+        date_range['gte'] = kwargs.get('ao_min_issue_date')
+    if kwargs.get('ao_max_issue_date'):
+        date_range['lte'] = kwargs.get('ao_max_issue_date')
     if date_range:
         must_clauses.append(Q("range", issue_date=date_range))
+
+    date_range = {}
+    if kwargs.get('ao_min_request_date'):
+        date_range['gte'] = kwargs.get('ao_min_request_date')
+    if kwargs.get('ao_max_request_date'):
+        date_range['lte'] = kwargs.get('ao_max_request_date')
+    if date_range:
+        must_clauses.append(Q("range", request_date=date_range))
 
     query = query.query('bool', must=must_clauses)
 

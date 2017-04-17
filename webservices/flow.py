@@ -86,6 +86,16 @@ def get_graph():
         ('communication_cost', 'large_aggregates'),
     ])
 
+    graph.add_edges_from([
+        ('cand_cmte_linkage', 'totals_candidate_committee_house_senate'),
+        ('candidate_election', 'totals_candidate_committee_house_senate'),
+    ])
+
+    graph.add_edges_from([
+        ('cand_cmte_linkage', 'totals_candidate_committee_presidential'),
+        ('candidate_election', 'totals_candidate_committee_presidential'),
+    ])
+
     graph.add_edge('committee_history', 'communication_cost')
     graph.add_edge('committee_detail', 'sched_a_by_state_recipient_totals')
 

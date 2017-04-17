@@ -7,7 +7,7 @@ from webservices.config import SQL_CONFIG
 
 from . import utils
 
-logger = logging.getLogger('partitioner.base')
+logger = logging.getLogger('partitioner')
 logging.basicConfig(level=logging.INFO)
 
 def get_cycles():
@@ -16,6 +16,7 @@ def get_cycles():
         SQL_CONFIG['END_YEAR_ITEMIZED'] + 3,
         2,
     )
+    #return range(1978, 1980, 2)
 
 class TableGroup:
 
@@ -50,7 +51,11 @@ class TableGroup:
     @classmethod
     def redefine_columns(cls, parent):
         """Redefines columns in a table definition that are not the type that
-        we expect in the parent view.
+        we expect in the parent table/view.
+
+        This is intended to be used when creating the master table of a
+        partition, which is when the structure of the table is derived
+        directly and solely from the parent/source table/view.
         """
 
         for column_name, cast_type in cls.column_mappings.items():
@@ -61,7 +66,17 @@ class TableGroup:
     @classmethod
     def recast_columns(cls, parent):
         """Recasts columns in a table definition that are not the type that
-        we expect in the parent view.
+        we expect in the parent table/view.
+
+        This is intended to be used when creating the child tables that
+        inherit from the master table in a partition, which is when the
+        structure of the table is partially derived from the parent/source
+        table/view but also modified to represent the actual data that will
+        live within the child table.
+
+        This is also used for accessing the data found in the queue tables for
+        a refresh due to the fact that they also may have unknown/incorrect
+        column types.
         """
 
         columns = [
@@ -171,6 +186,13 @@ class TableGroup:
         cls.create_indexes(child)
         cls.update_child(child)
         db.engine.execute(utils.Analyze(child))
+        logger.info(
+            'Successfully created child table {base}_{start}_{stop}.'.format(
+                base=cls.base_name,
+                start=start,
+                stop=stop
+            )
+        )
         return child
 
     @classmethod
@@ -245,16 +267,32 @@ class TableGroup:
 
     @classmethod
     def refresh_children(cls):
+        """Loops through all child tables and refreshes them.
+
+        Returns a list of tuples that contain success values and messages with
+        details.
+        """
+
         queue_old = utils.load_table(cls.queue_old)
         queue_new = utils.load_table(cls.queue_new)
         cycles = get_cycles()
+        output_messages = []
 
         for cycle in cycles:
-            cls.refresh_child(cycle, queue_old, queue_new)
+            output_messages.append(
+                cls.refresh_child(cycle, queue_old, queue_new)
+            )
+
+        return output_messages
 
     @classmethod
     def refresh_child(cls, cycle, queue_old, queue_new):
+        """Refreshes a single child table and returns a tuple with a success
+        value (0 for success, 1 for failure) and message with details.
+        """
+
         start, stop = cycle - 1, cycle
+        output_message = (0, '')
         name = '{base}_{start}_{stop}'.format(
             base=cls.base_name, start=start, stop=stop
         )
@@ -284,7 +322,7 @@ class TableGroup:
             ]
 
             insert_select = sa.select(
-                queue_new.columns + columns
+                cls.recast_columns(queue_new) + columns
             ).select_from(
                 queue_new.join(
                     queue_old,
@@ -314,14 +352,25 @@ class TableGroup:
             ), connection)
 
             transaction.commit()
-            logger.info('Successfully refreshed {name}.'.format(name=name))
+            output_message = (
+                0,
+                'Successfully refreshed {name}.'.format(name=name),
+            )
+            logger.info(output_message[1])
         except Exception as e:
             transaction.rollback()
-            logger.error(
-                'Refreshing {name} failed: {error}'.format(name=name, error=e)
+
+            output_message = (
+                1,
+                'Refreshing {name} failed: {error}'.format(
+                    name=name,
+                    error=e
+                ),
             )
+            logger.error(output_message[1])
 
         connection.close()
+        return output_message
 
     @classmethod
     def clear_queue(cls, queue, record_ids, connection):
