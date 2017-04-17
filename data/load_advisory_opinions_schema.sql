@@ -124,6 +124,21 @@ ALTER TABLE ONLY players
 
 
 --
+-- Name: aos_with_parsed_numbers; Type: VIEW; Schema: aouser; Owner: fec
+--
+CREATE VIEW aos_with_parsed_numbers
+AS
+    SELECT
+        ao_id,
+        ao_no,
+        regexp_replace(ao_no, '(\d+)-(\d+)', '\1')::int AS ao_year,
+        regexp_replace(ao_no, '(\d+)-(\d+)', '\2')::int AS ao_serial,
+        name,
+        summary,
+        req_date,
+        issue_date
+    FROM aouser.ao;
+--
 -- Data for Name: entity_type; Type: TABLE DATA; Schema: aouser; Owner: fec
 --
 

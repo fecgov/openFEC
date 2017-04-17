@@ -35,11 +35,11 @@ alter table ofec_sched_a_aggregate_zip_tmp rename to ofec_sched_a_aggregate_zip;
 create or replace function ofec_sched_a_update_aggregate_zip() returns void as $$
 begin
     with new as (
-        select 1 as multiplier, *
+        select 1 as multiplier, cmte_id, rpt_yr, contbr_zip, contbr_st, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
         from ofec_sched_a_queue_new
     ),
     old as (
-        select -1 as multiplier, *
+        select -1 as multiplier, cmte_id, rpt_yr, contbr_zip, contbr_st, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
         from ofec_sched_a_queue_old
     ),
     patch as (

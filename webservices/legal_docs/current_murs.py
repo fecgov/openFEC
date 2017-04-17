@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.legal_docs import DOCS_INDEX
+from webservices.legal_docs.load_legal_docs import generate_aws_s3_url
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -15,8 +16,10 @@ logger = logging.getLogger(__name__)
 
 ALL_MURS = """
     SELECT case_id, case_no, name
-    FROM fecmur.case
+    FROM fecmur.cases_with_parsed_case_serial_numbers
     WHERE case_type = 'MUR'
+    AND case_serial >= %s
+    ORDER BY case_serial
 """
 
 MUR_SUBJECTS = """
@@ -91,7 +94,7 @@ STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
-def load_current_murs():
+def load_current_murs(from_mur_no=None):
     """
     Reads data for current MURs from a Postgres database, assembles a JSON document
     corresponding to the MUR and indexes this document in Elasticsearch in the index
@@ -99,14 +102,21 @@ def load_current_murs():
     the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
     """
     es = get_elasticsearch_connection()
-    for mur in get_murs():
+    for mur in get_murs(from_mur_no):
+        logger.info("Loading MUR: %s", mur['no'])
         es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
 
-def get_murs():
+def get_murs(from_mur_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
+
+    if from_mur_no is None:
+        start_mur_serial = 0
+    else:
+        start_mur_serial = int(MUR_NO_REGEX.match(from_mur_no).group('serial'))
+
     with db.engine.connect() as conn:
-        rs = conn.execute(ALL_MURS)
+        rs = conn.execute(ALL_MURS, start_mur_serial)
         for row in rs:
             case_id = row['case_id']
             sort1, sort2 = get_sort_fields(row['case_no'])
@@ -281,7 +291,7 @@ def get_documents(case_id, bucket, bucket_name):
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
-            document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+            document['url'] = generate_aws_s3_url(bucket_name, pdf_key)
             documents.append(document)
     return documents
 
