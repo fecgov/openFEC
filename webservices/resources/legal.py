@@ -261,6 +261,11 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
     if date_range:
         must_clauses.append(Q("range", request_date=date_range))
 
+    if kwargs.get('ao_entity_name'):
+        must_clauses.append(Q('bool', should=[Q('match', commenter_names=' '.join(kwargs.get('ao_entity_name'))),
+          Q('match', representative_names=' '.join(kwargs.get('ao_entity_name')))],
+            minimum_should_match=1))
+
     query = query.query('bool', must=must_clauses)
 
     return query
