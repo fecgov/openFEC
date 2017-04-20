@@ -90,11 +90,11 @@ def parse_query_string(query):
 
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q='', from_hit=0, hits_returned=20, type='all', **kwargs):
-        if type == 'all':
-            types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
+    def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
+        if kwargs.get('type', 'all') == 'all':
+            doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
-            types = [type]
+            doc_types = [kwargs.get('type')]
 
         parsed_query = parse_query_string(q)
         terms = parsed_query.get('terms')
@@ -103,7 +103,7 @@ class UniversalSearch(utils.Resource):
 
         results = {}
         total_count = 0
-        for type_ in types:
+        for type_ in doc_types:
             must_query = [Q('term', _type=type_)]
 
             if len(terms):
