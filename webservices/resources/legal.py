@@ -103,8 +103,8 @@ class UniversalSearch(utils.Resource):
 
         results = {}
         total_count = 0
-        for type in types:
-            must_query = [Q('term', _type=type)]
+        for type_ in types:
+            must_query = [Q('term', _type=type_)]
 
             if len(terms):
                 term_query = Q('match', _all=' '.join(terms))
@@ -125,10 +125,10 @@ class UniversalSearch(utils.Resource):
                 .index(DOCS_SEARCH) \
                 .sort("sort1", "sort2")
 
-            if type == 'advisory_opinions':
+            if type_ == 'advisory_opinions':
                 query = apply_ao_specific_query_params(query, q, **kwargs)
 
-            if type == 'murs':
+            if type_ == 'murs':
                 query = apply_mur_specific_query_params(query, q, **kwargs)
 
             es_results = query.execute()
@@ -146,8 +146,8 @@ class UniversalSearch(utils.Resource):
             count = es_results.hits.total
             total_count += count
 
-            results[type] = formatted_hits
-            results['total_%s' % type] = count
+            results[type_] = formatted_hits
+            results['total_%s' % type_] = count
 
         results['total_all'] = total_count
         return results
