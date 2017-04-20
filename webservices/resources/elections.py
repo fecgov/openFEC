@@ -74,7 +74,7 @@ class ElectionList(utils.Resource):
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
                 elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
-            )
+            ),
         ).order_by(
             '_office_status',
             ElectionResult.cand_office_district,
@@ -180,7 +180,7 @@ class ElectionView(utils.Resource):
         ).join(
             latest,
             aggregates.c.candidate_id == latest.c.candidate_id,
-        ).join(
+        ).outerjoin(
             outcomes,
             aggregates.c.candidate_id == outcomes.c.cand_id,
         )
