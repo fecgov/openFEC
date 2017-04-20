@@ -358,7 +358,8 @@ class CommitteeReportsIEOnly(PdfMixin, BaseModel):
 
 
 class BaseFilingSummary(db.Model):
-    __tablename__ = 'real_efile.summary'
+    __table_args__ = {'schema' : 'real_efile'}
+    __tablename__ = 'summary'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     line_number = db.Column('lineno', db.Integer, primary_key=True)
     column_a = db.Column('cola', db.Float)
@@ -416,7 +417,8 @@ def name_generator(*args):
     return name.strip()
 
 class BaseF3PFiling(TreasurerMixin, BaseFiling):
-    __tablename__ = 'real_efile.f3p'
+    __table_args__ = {'schema' : 'real_efile'}
+    __tablename__ = 'f3p'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_name = db.Column('c_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
     street_1 = db.Column('c_str1', db.String)
@@ -468,7 +470,8 @@ class BaseF3PFiling(TreasurerMixin, BaseFiling):
 
 
 class BaseF3Filing(TreasurerMixin, BaseFiling):
-    __tablename__ = 'real_efile.f3'
+    __table_args__ = {'schema' : 'real_efile'}
+    __tablename__ = 'f3'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
     committee_name = db.Column('com_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
     candidate_id = db.Column('canid', db.String)
@@ -531,7 +534,8 @@ class BaseF3Filing(TreasurerMixin, BaseFiling):
         )
 
 class BaseF3XFiling(BaseFiling):
-    __tablename__ = 'real_efile.f3x'
+    __table_args__ = {'schema' : 'real_efile'}
+    __tablename__ = 'f3x'
     file_number = db.Column('repid', db.Integer, index=True, primary_key=True)
 
     committee_name = db.Column('com_name', db.String, index=True, doc=docs.COMMITTEE_NAME)
