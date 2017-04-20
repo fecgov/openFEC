@@ -2,6 +2,7 @@ import sqlalchemy as sa
 
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
+from sqlalchemy.ext.automap import automap_base
 
 from webservices.rest import db
 from webservices.common import models
