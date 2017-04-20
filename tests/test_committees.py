@@ -317,12 +317,10 @@ class TestCommitteeHistory(ApiBaseTest):
     def setUp(self):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
-        self.committees = [factories.CommitteeDetailFactory() for _ in range(4)]
+        self.committees = [factories.CommitteeDetailFactory() for _ in range(2)]
         self.histories = [
             factories.CommitteeHistoryFactory(committee_id=self.committees[0].committee_id, cycle=2010),
             factories.CommitteeHistoryFactory(committee_id=self.committees[1].committee_id, cycle=2012),
-            factories.CommitteeHistoryFactory(committee_id=self.committees[2].committee_id, cycle=2016),
-            factories.CommitteeHistoryFactory(committee_id=self.committees[3].committee_id, cycle=2016),
         ]
 
         db.session.flush()
@@ -337,18 +335,6 @@ class TestCommitteeHistory(ApiBaseTest):
                 candidate_id=self.candidate.candidate_id,
                 committee_id=self.committees[1].committee_id,
                 fec_election_year=2012,
-                committee_type='P',
-            ),
-            factories.CandidateCommitteeLinkFactory(
-                candidate_id=self.candidate.candidate_id,
-                committee_id=self.committees[2].committee_id,
-                fec_election_year=2016,
-                committee_type='P',
-            ),
-            factories.CandidateCommitteeLinkFactory(
-                candidate_id=self.candidate.candidate_id,
-                committee_id=self.committees[3].committee_id,
-                fec_election_year=2016,
                 committee_type='P',
             ),
         ]
