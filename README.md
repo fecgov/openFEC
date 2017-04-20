@@ -315,6 +315,19 @@ the following keys are set:
 * NEW_RELIC_LICENSE_KEY
 * WRITE_AUTHORIZED_TOKENS
 
+*Note: You can supply the path to a JSON file instead of a JSON string with the `-p` argument.*
+
+#### Updating credentials
+Before updating the credentials, be sure you make a copy of all of them first and save them as a JSON file.  You need to upload all of the existing keys in addition to whatever modifications/additions/deletions you've made, otherwise you will wipe out all of the existing credentials that were set.
+
+```
+cf target -s dev
+cf uups fec-creds-dev -p '{"SQLA_CONN": "..."}'
+```
+
+*Note: You can supply the path to a JSON file instead of a JSON string with the `-p` argument.*
+
+#### Manual deployment
 Deploys of a single app can be performed manually by targeting the env/space, and specifying the corresponding manifest, as well as the app you want, like so:
 
 ```
