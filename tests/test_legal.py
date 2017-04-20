@@ -4,7 +4,6 @@ import codecs
 import unittest
 import mock
 from mock import patch
-from elasticsearch_dsl import Q
 
 from webservices.resources.legal import es, parse_query_string
 
@@ -81,7 +80,6 @@ class CanonicalPageTest(unittest.TestCase):
         es_search.assert_called_with(body=expected_query,
                                      doc_type=mock.ANY,
                                      index=mock.ANY)
-        result = json.loads(codecs.decode(response.data))
 
 class SearchTest(unittest.TestCase):
     def setUp(self):
@@ -160,15 +158,16 @@ class SearchTest(unittest.TestCase):
         # This is mostly copy/pasted from the dict-based query. This is not a
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
-        expected_query = {"query": {"bool": {
-            "must": [
-                {"term": {"_type": "statutes"}},
-                {"match_phrase": {"_all": "electronic filing"}},
-            ],
-            "should": [
-                {"match": {"no": '"electronic filing"'}},
-                {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
-            ]}},
+        expected_query = {
+            "query": {"bool": {
+                "must": [
+                    {"term": {"_type": "statutes"}},
+                    {"match_phrase": {"_all": "electronic filing"}},
+                ],
+                "should": [
+                    {"match": {"no": '"electronic filing"'}},
+                    {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
+                ]}},
             "highlight": {
                 "fields": {
                     "text": {},
@@ -271,7 +270,9 @@ class LegalPhraseSearchTests(unittest.TestCase):
 
         # Get the first `match_phrase` in the `must` clause
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrase == {
+            'match_phrase': {
+                '_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         # No `match` clause for terms
         match = next((q for q in must_clause if 'match' in q), None)
@@ -280,7 +281,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
     @patch.object(es, 'search')
     def test_with_terms_and_phrase(self, es_search):
         es_search.return_value = {'hits': {'hits': [], 'total': 0}}
-        response = self.app.get('/v1/legal/search/', query_string=dict(q='required "electronic filing" 2016', type='statutes'))
+        response = self.app.get('/v1/legal/search/',
+            query_string=dict(q='required "electronic filing" 2016', type='statutes'))
 
         assert response.status_code == 200
         assert es_search.call_count == 1
@@ -290,7 +292,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
 
         # Get the first `match_phrase` in the `must` clause
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrase == {
+            'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         match = next((q for q in must_clause if 'match' in q), None)
         assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
@@ -311,8 +314,10 @@ class LegalPhraseSearchTests(unittest.TestCase):
         # Get all the `match_phrase`s in the `must` clause
         match_phrases = [q for q in must_clause if 'match_phrase' in q]
         assert len(match_phrases) == 2
-        assert match_phrases[0] == {'match_phrase': {'_all': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
-        assert match_phrases[1] == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrases[0] == {
+            'match_phrase': {'_all': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrases[1] == {
+            'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         match = next((q for q in must_clause if 'match' in q), None)
         assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
