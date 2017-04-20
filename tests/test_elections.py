@@ -16,6 +16,7 @@ class TestElectionSearch(ApiBaseTest):
             factories.CandidateHistoryFactory,
             two_year_period=2012,
             election_years=[2012],
+            cycles=[2012],
             candidate_status='C',
         )
         self.candidates = [
@@ -90,6 +91,7 @@ class TestElections(ApiBaseTest):
                 state='NY',
                 two_year_period=2012,
                 election_years=[2010, 2012],
+                cycles=[2010, 2012],
                 office='S',
             ),
             factories.CandidateHistoryFactory(
@@ -97,6 +99,7 @@ class TestElections(ApiBaseTest):
                 state='NY',
                 two_year_period=2010,
                 election_years=[2010, 2012],
+                cycles=[2010, 2012],
                 office='S',
             ),
         ]
