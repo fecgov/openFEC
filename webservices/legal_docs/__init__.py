@@ -27,10 +27,18 @@ def load_all_legal_docs():
     #load_archived_murs()
 
 def reinitialize_all_legal_docs():
+    """
+    Creates the Elasticsearch index and loads all the different types of legal documents.
+    """
     initialize_legal_docs()
     load_all_legal_docs()
 
 def refresh_legal_docs_zero_downtime():
+    """
+    Creates a staging index and loads all the different types of legal documents into it.
+    When done, moves the staging index to the production index with no downtime.
+    This is typically used when there is a schema change.
+    """
     create_staging_index()
     load_all_legal_docs()
     restore_from_staging_index()

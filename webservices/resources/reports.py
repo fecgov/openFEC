@@ -263,7 +263,7 @@ class EFilingSummaryView(views.ApiResource):
             args.efilings,
             args.make_sort_args(
                 default='-receipt_date',
-                validator=args.IndexValidator(self.model),
+                # validator=args.IndexValidator(self.model),
             ),
 
         )

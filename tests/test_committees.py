@@ -322,6 +322,7 @@ class TestCommitteeHistory(ApiBaseTest):
             factories.CommitteeHistoryFactory(committee_id=self.committees[0].committee_id, cycle=2010),
             factories.CommitteeHistoryFactory(committee_id=self.committees[1].committee_id, cycle=2012),
         ]
+
         db.session.flush()
         self.links = [
             factories.CandidateCommitteeLinkFactory(
@@ -358,7 +359,9 @@ class TestCommitteeHistory(ApiBaseTest):
         results = self._results(
             api.url_for(
                 CommitteeHistoryView,
-                candidate_id=self.candidate.candidate_id, cycle=2012, election_full='true',
+                candidate_id=self.candidate.candidate_id,
+                cycle=2012,
+                election_full='true'
             )
         )
         assert len(results) == 2

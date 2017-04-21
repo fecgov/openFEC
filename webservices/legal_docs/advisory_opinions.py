@@ -22,21 +22,29 @@ ALL_AOS = """
         req_date,
         issue_date,
         CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
-    FROM aouser.ao
+    FROM aouser.aos_with_parsed_numbers ao
     LEFT JOIN (SELECT DISTINCT ao_id AS finished
                FROM aouser.document
                WHERE category IN ('Final Opinion', 'Withdrawal of Request')) AS finished
         ON ao.ao_id = finished.finished
+    WHERE (
+        (ao_year = %s AND ao_serial >= %s)
+        OR
+        (ao_year > %s)
+    )
+    ORDER BY ao_year, ao_serial
 """
 
-AO_REQUESTORS = """
+AO_ENTITIES = """
     SELECT
         e.name,
-        et.description
+        et.description AS entity_type_description,
+        r.description AS role_description
     FROM aouser.players p
     INNER JOIN aouser.entity e USING (entity_id)
     INNER JOIN aouser.entity_type et ON et.entity_type_id = e.type
-    WHERE p.ao_id = %s AND role_id IN (0, 1)
+    INNER JOIN aouser.role r USING (role_id)
+    WHERE p.ao_id = %s
 """
 
 AO_DOCUMENTS = """
@@ -56,7 +64,7 @@ REGULATION_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)
 AO_CITATION_REGEX = re.compile(r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
 
 
-def load_advisory_opinions():
+def load_advisory_opinions(from_ao_no=None):
     """
     Reads data for advisory opinions from a Postgres database, assembles a JSON document
     corresponding to the advisory opinion and indexes this document in Elasticsearch in
@@ -66,10 +74,11 @@ def load_advisory_opinions():
     """
     es = get_elasticsearch_connection()
 
-    for ao in get_advisory_opinions():
+    for ao in get_advisory_opinions(from_ao_no):
+        logger.info("Loading AO: %s", ao['no'])
         es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
 
-def get_advisory_opinions():
+def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
@@ -78,8 +87,13 @@ def get_advisory_opinions():
 
     citations = get_citations(ao_names)
 
+    if from_ao_no is None:
+        start_ao_year, start_ao_serial = 0, 0
+    else:
+        start_ao_year, start_ao_serial = tuple(map(int, from_ao_no.split('-')))
+
     with db.engine.connect() as conn:
-        rs = conn.execute(ALL_AOS)
+        rs = conn.execute(ALL_AOS, (start_ao_year, start_ao_serial, start_ao_year))
         for row in rs:
             ao_id = row["ao_id"]
             year, serial = ao_no_to_component_map[row["ao_no"]]
@@ -98,20 +112,29 @@ def get_advisory_opinions():
                 "sort2": -serial,
             }
             ao["documents"] = get_documents(ao_id, bucket, bucket_name)
-            ao["requestor_names"], ao["requestor_types"] = get_requestors(ao_id)
+            (ao["requestor_names"], ao["requestor_types"], ao["commenter_names"],
+                    ao["representative_names"]) = get_entities(ao_id)
 
             yield ao
 
 
-def get_requestors(ao_id):
+def get_entities(ao_id):
     requestor_names = []
+    commenter_names = []
+    representative_names = []
     requestor_types = set()
     with db.engine.connect() as conn:
-        rs = conn.execute(AO_REQUESTORS, ao_id)
+        rs = conn.execute(AO_ENTITIES, ao_id)
         for row in rs:
-            requestor_names.append(row["name"])
-            requestor_types.add(row["description"])
-    return requestor_names, list(requestor_types)
+            if row["role_description"] == "Requestor":
+                requestor_names.append(row["name"])
+                requestor_types.add(row["entity_type_description"])
+            elif row["role_description"] == "Commenter":
+                commenter_names.append(row["name"])
+            elif row["role_description"] == "Counsel/Representative":
+                representative_names.append(row["name"])
+    return requestor_names, list(requestor_types), commenter_names, representative_names
+
 
 def get_documents(ao_id, bucket, bucket_name):
     documents = []

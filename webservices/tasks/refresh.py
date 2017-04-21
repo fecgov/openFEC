@@ -17,6 +17,7 @@ def refresh():
     with mail.CaptureLogs(manage.logger, buffer):
         try:
             manage.update_aggregates()
+            manage.refresh_itemized()
             manage.refresh_materialized()
             download.clear_bucket()
         except Exception as error:
