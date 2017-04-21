@@ -94,7 +94,8 @@ class EfilingsAmendments(db.Model):
             return 0
 
 class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.Model):
-    __tablename__ = 'real_efile_reps'
+    __table_args__ = {'schema' : 'real_efile'}
+    __tablename__ = 'reps'
 
     file_number = db.Column('repid', db.BigInteger, index=True, primary_key=True, doc=docs.FILE_NUMBER)
     form_type = db.Column('form', db.String, doc=docs.FORM_TYPE)
