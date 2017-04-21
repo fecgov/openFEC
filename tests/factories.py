@@ -151,23 +151,14 @@ class ReportsPacPartyFactory(BaseTotalsFactory):
         model = models.CommitteeReportsPacParty
 
 class EfileReportsPresidentialFactory(BaseFactory):
-    metadata = sa.MetaData(schema='real_efile')
-    automap = automap_base(bind=db.engine, metadata=metadata)
-    automap.prepare(db.engine, reflect=True)
     class Meta:
         model = models.BaseF3PFiling
 
 class EfileReportsPacPartyFactory(BaseFactory):
-    metadata = sa.MetaData(schema='real_efile')
-    automap = automap_base(bind=db.engine, metadata=metadata)
-    automap.prepare(db.engine, reflect=True)
     class Meta:
         model = models.BaseF3XFiling
 
 class EfileReportsHouseSenateFactory(BaseFactory):
-    metadata = sa.MetaData(schema='real_efile')
-    automap = automap_base(bind=db.engine, metadata=metadata)
-    automap.prepare(db.engine, reflect=True)
     class Meta:
         model = models.BaseF3Filing
 
