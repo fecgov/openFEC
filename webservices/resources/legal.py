@@ -246,12 +246,25 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
         must_clauses.append(Q("terms", requestor_types=[requestor_types[r] for r in kwargs.get('ao_requestor_type')]))
 
     date_range = {}
-    if kwargs.get('ao_min_date'):
-        date_range['gte'] = kwargs.get('ao_min_date')
-    if kwargs.get('ao_max_date'):
-        date_range['lte'] = kwargs.get('ao_max_date')
+    if kwargs.get('ao_min_issue_date'):
+        date_range['gte'] = kwargs.get('ao_min_issue_date')
+    if kwargs.get('ao_max_issue_date'):
+        date_range['lte'] = kwargs.get('ao_max_issue_date')
     if date_range:
         must_clauses.append(Q("range", issue_date=date_range))
+
+    date_range = {}
+    if kwargs.get('ao_min_request_date'):
+        date_range['gte'] = kwargs.get('ao_min_request_date')
+    if kwargs.get('ao_max_request_date'):
+        date_range['lte'] = kwargs.get('ao_max_request_date')
+    if date_range:
+        must_clauses.append(Q("range", request_date=date_range))
+
+    if kwargs.get('ao_entity_name'):
+        must_clauses.append(Q('bool', should=[Q('match', commenter_names=' '.join(kwargs.get('ao_entity_name'))),
+          Q('match', representative_names=' '.join(kwargs.get('ao_entity_name')))],
+            minimum_should_match=1))
 
     query = query.query('bool', must=must_clauses)
 

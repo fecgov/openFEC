@@ -83,6 +83,15 @@ CREATE TABLE players (
     pg_date timestamp without time zone DEFAULT now()
 );
 
+--
+-- Name: role; Type: TABLE; Schema: aouser; Owner: fec
+--
+
+CREATE TABLE role (
+    role_id integer NOT NULL,
+    description character varying(255),
+    pg_date timestamp without time zone DEFAULT now()
+);
 
 --
 -- Name: ao_pkey; Type: CONSTRAINT; Schema: aouser; Owner: fec
@@ -122,6 +131,29 @@ ALTER TABLE ONLY entity_type
 ALTER TABLE ONLY players
     ADD CONSTRAINT players_pkey PRIMARY KEY (player_id);
 
+--
+-- Name: role role_pkey; Type: CONSTRAINT; Schema: aouser; Owner: fec
+--
+
+ALTER TABLE ONLY role
+    ADD CONSTRAINT role_pkey PRIMARY KEY (role_id);
+
+
+--
+-- Name: aos_with_parsed_numbers; Type: VIEW; Schema: aouser; Owner: fec
+--
+CREATE VIEW aos_with_parsed_numbers
+AS
+    SELECT
+        ao_id,
+        ao_no,
+        regexp_replace(ao_no, '(\d+)-(\d+)', '\1')::int AS ao_year,
+        regexp_replace(ao_no, '(\d+)-(\d+)', '\2')::int AS ao_serial,
+        name,
+        summary,
+        req_date,
+        issue_date
+    FROM aouser.ao;
 
 --
 -- Data for Name: entity_type; Type: TABLE DATA; Schema: aouser; Owner: fec
@@ -144,3 +176,12 @@ INSERT INTO entity_type VALUES (13, 'Research/Public Interest/Educational Instit
 INSERT INTO entity_type VALUES (14, 'Law Firm', NULL, '2017-01-04 17:18:57.786');
 INSERT INTO entity_type VALUES (15, 'Individual', NULL, '2017-01-04 17:18:57.793');
 INSERT INTO entity_type VALUES (16, 'Other', NULL, '2017-01-04 17:18:57.8');
+
+--
+-- Data for Name: role; Type: TABLE DATA; Schema: aouser; Owner: fec
+--
+
+INSERT INTO role VALUES (0, 'Requestor', '2017-03-14 09:52:50.646026');
+INSERT INTO role VALUES (1, 'Requestor', '2017-03-14 09:52:50.646026');
+INSERT INTO role VALUES (2, 'Commenter', '2017-03-14 09:52:50.646026');
+INSERT INTO role VALUES (3, 'Counsel/Representative', '2017-03-14 09:52:50.646026');
