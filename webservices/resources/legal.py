@@ -91,6 +91,13 @@ def parse_query_string(query):
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
+        searchers = {
+            "statutes": generic_searcher,
+            "regulations": generic_searcher,
+            "advisory_opinions": generic_searcher,
+            "murs": generic_searcher
+        }
+
         if kwargs.get('type', 'all') == 'all':
             doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
@@ -104,53 +111,55 @@ class UniversalSearch(utils.Resource):
         results = {}
         total_count = 0
         for type_ in doc_types:
-            must_query = [Q('term', _type=type_)]
-
-            if len(terms):
-                term_query = Q('match', _all=' '.join(terms))
-                must_query.append(term_query)
-
-            if len(phrases):
-                phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
-                must_query.extend(phrase_queries)
-
-            query = Search().using(es) \
-                .query(Q('bool',
-                         must=must_query,
-                         should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
-                .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
-                .highlight_options(require_field_match=False) \
-                .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
-                .extra(size=hits_returned, from_=from_hit) \
-                .index(DOCS_SEARCH) \
-                .sort("sort1", "sort2")
-
-            if type_ == 'advisory_opinions':
-                query = apply_ao_specific_query_params(query, q, **kwargs)
-
-            if type_ == 'murs':
-                query = apply_mur_specific_query_params(query, q, **kwargs)
-
-            es_results = query.execute()
-
-            formatted_hits = []
-            for hit in es_results:
-                formatted_hit = hit.to_dict()
-                formatted_hit['highlights'] = []
-                formatted_hits.append(formatted_hit)
-
-                if 'highlight' in hit.meta:
-                    for key in hit.meta.highlight:
-                        formatted_hit['highlights'].extend(hit.meta.highlight[key])
-
-            count = es_results.hits.total
-            total_count += count
-
+            formatted_hits, count = searchers.get(type_)(q, terms, phrases, type_, from_hit, hits_returned, **kwargs)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
+            total_count += count
 
         results['total_all'] = total_count
         return results
+
+def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
+    must_query = [Q('term', _type=type_)]
+
+    if len(terms):
+        term_query = Q('match', _all=' '.join(terms))
+        must_query.append(term_query)
+
+    if len(phrases):
+        phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
+        must_query.extend(phrase_queries)
+
+    query = Search().using(es) \
+        .query(Q('bool',
+                    must=must_query,
+                    should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
+        .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
+        .highlight_options(require_field_match=False) \
+        .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
+        .extra(size=hits_returned, from_=from_hit) \
+        .index(DOCS_SEARCH) \
+        .sort("sort1", "sort2")
+
+    if type_ == 'advisory_opinions':
+        query = apply_ao_specific_query_params(query, q, **kwargs)
+
+    if type_ == 'murs':
+        query = apply_mur_specific_query_params(query, q, **kwargs)
+
+    es_results = query.execute()
+
+    formatted_hits = []
+    for hit in es_results:
+        formatted_hit = hit.to_dict()
+        formatted_hit['highlights'] = []
+        formatted_hits.append(formatted_hit)
+
+        if 'highlight' in hit.meta:
+            for key in hit.meta.highlight:
+                formatted_hit['highlights'].extend(hit.meta.highlight[key])
+
+    return formatted_hits, es_results.hits.total
 
 def apply_mur_specific_query_params(query, q='', **kwargs):
     if kwargs.get('mur_no'):
