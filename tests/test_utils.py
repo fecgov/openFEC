@@ -54,8 +54,8 @@ class TestSort(ApiBaseTest):
 
         ]
         candidateHistory = [
-            factories.CandidateHistoryFactory(candidate_id='C1234', two_year_period=2016, election_years=[2016]),
-            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, election_years=[2016])
+            factories.CandidateHistoryFactory(candidate_id='C1234', two_year_period=2016, election_years=[2016], cycles=[2016]),
+            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, election_years=[2016], cycles=[2016])
         ]
         candidateTotals = [
             factories.CandidateTotalFactory(candidate_id='C1234', is_election=False, cycle=2016),
@@ -85,8 +85,8 @@ class TestSort(ApiBaseTest):
         db.session.flush()
         candidateHistory = [
             factories.CandidateHistoryFactory(candidate_id='C1234', two_year_period=2016, state='MO',
-                                              candidate_inactive=False, district='01', office='S', election_years=[2016]),
-            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, state='MO', election_years=[2016],
+                                              candidate_inactive=False, district='01', office='S', election_years=[2016], cycles=[2016]),
+            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, state='MO', election_years=[2016], cycles=[2016],
                                               candidate_inactive=False, district='02', office='S')
         ]
         candidateCmteLinks = [
