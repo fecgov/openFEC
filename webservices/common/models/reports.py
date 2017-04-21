@@ -571,8 +571,3 @@ class BaseF3XFiling(BaseFiling):
             foreign_keys=self.report_type,
             lazy='subquery',
         )
-
-# for tests to pass
-class Reps():
-    __table_args__ = {'schema' : 'real_efile'}
-    __tablename__ = 'reps'
