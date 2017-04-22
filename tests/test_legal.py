@@ -198,10 +198,8 @@ class SearchTest(unittest.TestCase):
                     {'match': {'_all': 'president'}},
                     {'nested': {'path': 'documents',
                                 'query': {'bool': {'must': [
-                                    {'terms': {'documents.category': ['Final Opinion']}}]}}}},
-                    {'nested': {'path': 'documents',
-                        'query': {'bool': {'must': [{
-                            'match': {'documents.text': 'president'}}]}}}},
+                                    {'terms': {'documents.category': ['Final Opinion']}},
+                                    {'match': {'documents.text': 'president'}}]}}}},
                     {'bool': {'minimum_should_match': 1}}]}},
             'size': 20, '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']},
             'highlight': {

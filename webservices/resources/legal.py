@@ -191,12 +191,12 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
     else:
         ao_category = ['Final Opinion']
 
-    must_clauses.append(Q("nested", path="documents", query=Q('bool',
-        must=Q('terms', documents__category=ao_category))))
-
     if q:
+        combined_query = [
+            Q('terms', documents__category=ao_category),
+            Q('match', documents__text=q)]
         must_clauses.append(Q("nested", path="documents", query=Q('bool',
-            must=Q('match', documents__text=q))))
+            must=combined_query)))
 
     if kwargs.get('ao_no'):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
