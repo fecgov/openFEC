@@ -131,9 +131,7 @@ def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs
         must_query.extend(phrase_queries)
 
     query = Search().using(es) \
-        .query(Q('bool',
-                    must=must_query,
-                    should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
+        .query(Q('bool', must=must_query)) \
         .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
         .highlight_options(require_field_match=False) \
         .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
