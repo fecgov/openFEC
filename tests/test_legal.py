@@ -124,10 +124,6 @@ class SearchTest(unittest.TestCase):
             "must": [
                 {"term": {"_type": "statutes"}},
                 {"match": {"_all": "president"}},
-            ],
-            "should": [
-                {"match": {"no": "president"}},
-                {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
             ]}},
             "highlight": {
                 "fields": {
@@ -163,10 +159,6 @@ class SearchTest(unittest.TestCase):
                 "must": [
                     {"term": {"_type": "statutes"}},
                     {"match_phrase": {"_all": "electronic filing"}},
-                ],
-                "should": [
-                    {"match": {"no": '"electronic filing"'}},
-                    {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
                 ]}},
             "highlight": {
                 "fields": {
@@ -210,8 +202,7 @@ class SearchTest(unittest.TestCase):
                     {'nested': {'path': 'documents',
                         'query': {'bool': {'must': [{
                             'match': {'documents.text': 'president'}}]}}}},
-                    {'bool': {'minimum_should_match': 1}}], 'should': [{'match': {'no': 'president'}},
-                    {'match_phrase': {'_all': {'slop': 50, 'query': 'president'}}}]}},
+                    {'bool': {'minimum_should_match': 1}}]}},
             'size': 20, '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']},
             'highlight': {
                 'fields': {
