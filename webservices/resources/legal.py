@@ -140,10 +140,10 @@ def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs
         .sort("sort1", "sort2")
 
     if type_ == 'advisory_opinions':
-        query = apply_ao_specific_query_params(query, q, **kwargs)
+        query = apply_ao_specific_query_params(query, terms, phrases, **kwargs)
 
     if type_ == 'murs':
-        query = apply_mur_specific_query_params(query, q, **kwargs)
+        query = apply_mur_specific_query_params(query, terms, phrases, **kwargs)
 
     es_results = query.execute()
 
@@ -159,7 +159,7 @@ def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs
 
     return formatted_hits, es_results.hits.total
 
-def apply_mur_specific_query_params(query, q='', **kwargs):
+def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
     if kwargs.get('mur_no'):
         query = query.query('terms', no=kwargs.get('mur_no'))
     if kwargs.get('mur_respondents'):
@@ -168,15 +168,17 @@ def apply_mur_specific_query_params(query, q='', **kwargs):
         query = query.query('terms', disposition__data__disposition=kwargs.get('mur_dispositions'))
     if kwargs.get('mur_election_cycles'):
         query = query.query('term', election_cycles=kwargs.get('mur_election_cycles'))
+
     if kwargs.get('mur_document_category'):
-        combined_query = [
-            Q('terms', documents__category=kwargs.get('mur_document_category')),
-            Q('match', documents__text=q)]
+        combined_query = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
+        if terms:
+            combined_query.append(Q('match', documents__text=' '.join(terms)))
+        combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
         query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
 
     return query
 
-def apply_ao_specific_query_params(query, q='', **kwargs):
+def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
     must_clauses = []
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
@@ -191,12 +193,13 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
     else:
         ao_category = ['Final Opinion']
 
-    if q:
-        combined_query = [
-            Q('terms', documents__category=ao_category),
-            Q('match', documents__text=q)]
-        must_clauses.append(Q("nested", path="documents", query=Q('bool',
-            must=combined_query)))
+    combined_query = [Q('terms', documents__category=ao_category)]
+    if terms:
+        combined_query.append(Q('match', documents__text=' '.join(terms)))
+    combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
+
+    must_clauses.append(Q("nested", path="documents", query=Q('bool',
+        must=combined_query)))
 
     if kwargs.get('ao_no'):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
