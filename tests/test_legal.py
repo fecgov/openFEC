@@ -91,13 +91,24 @@ class SearchTest(unittest.TestCase):
         assert response.status_code == 200
         result = json.loads(codecs.decode(response.data))
         assert result == {
-            'regulations': [{'highlights': ['a', 'b']}],
+            'regulations': [
+                {'highlights': ['a', 'b'], 'document_highlights': {}}
+            ],
+            'total_regulations': 1,
+            'statutes': [
+                {'highlights': ['e'], 'document_highlights': {}}
+            ],
+            'total_statutes': 3,
+            'murs': [
+                {'highlights': ['f'], 'document_highlights': {}}
+            ],
+            'total_murs': 4,
+            'advisory_opinions': [
+                {'highlights': ['a', 'b'], 'document_highlights': {}},
+                {'highlights': ['c', 'd'], 'document_highlights': {}}
+            ],
             'total_advisory_opinions': 2,
-            'statutes': [{'highlights': ['e']}], 'total_statutes': 3,
-            'total_regulations': 1, 'total_murs': 4,
-            'murs': [{'highlights': ['f']}],
-            'advisory_opinions': [{'highlights': ['a', 'b']},
-              {'highlights': ['c', 'd']}], 'total_all': 10}
+            'total_all': 10}
 
     @patch('webservices.rest.legal.es.search', es_search)
     def test_type_search(self):
@@ -107,8 +118,12 @@ class SearchTest(unittest.TestCase):
         result = json.loads(codecs.decode(response.data))
         assert result == {
             'total_advisory_opinions': 2,
-            'advisory_opinions': [{'highlights': ['a', 'b']},
-              {'highlights': ['c', 'd']}], 'total_all': 2}
+            'advisory_opinions': [
+                {'highlights': ['a', 'b'], 'document_highlights': {}},
+                {'highlights': ['c', 'd'], 'document_highlights': {}}
+            ],
+            'total_all': 2
+        }
 
     @patch.object(es, 'search')
     def test_query_dsl(self, es_search):
@@ -191,17 +206,43 @@ class SearchTest(unittest.TestCase):
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
         expected_query = {
+            'query': {
+                'bool': {
+                    'must': [
+                        {'term': {'_type': 'advisory_opinions'}},
+                        {'match': {'_all': 'president'}},
+                        {'nested': {
+                            'path': 'documents',
+                            'query': {
+                                'bool': {
+                                    'must': [
+                                        {'terms': {'documents.category': ['Final Opinion']}},
+                                        {'match': {'documents.text': 'president'}}
+                                    ]
+                                }
+                            },
+                            'inner_hits': {
+                                '_source': False,
+                                'highlight': {
+                                    'require_field_match': False,
+                                    'fields': {
+                                        'documents.text': {},
+                                        'documents.description': {}
+                                    }
+                                }
+                            }
+                        }},
+                        {'bool': {'minimum_should_match': 1}}
+                    ]
+                }},
             'sort': ['sort1', 'sort2'],
             'from': 0,
-            'query': {'bool': {
-                'must': [{'term': {'_type': 'advisory_opinions'}},
-                    {'match': {'_all': 'president'}},
-                    {'nested': {'path': 'documents',
-                                'query': {'bool': {'must': [
-                                    {'terms': {'documents.category': ['Final Opinion']}},
-                                    {'match': {'documents.text': 'president'}}]}}}},
-                    {'bool': {'minimum_should_match': 1}}]}},
-            'size': 20, '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']},
+            'size': 20,
+            '_source': {
+                'exclude': [
+                    'text', 'documents.text', 'sort1', 'sort2'
+                ]
+            },
             'highlight': {
                 'fields': {
                     'documents.text': {},
