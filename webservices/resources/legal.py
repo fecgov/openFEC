@@ -9,6 +9,17 @@ from webservices.utils import use_kwargs
 from webservices.legal_docs import DOCS_SEARCH
 es = utils.get_elasticsearch_connection()
 
+INNER_HITS = {
+    "_source": False,
+    "highlight": {
+        "require_field_match": False,
+        "fields": {
+            "documents.text": {},
+            "documents.description": {}
+        }
+    }
+}
+
 
 class GetLegalCitation(utils.Resource):
     @property
@@ -151,11 +162,20 @@ def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs
     for hit in es_results:
         formatted_hit = hit.to_dict()
         formatted_hit['highlights'] = []
+        formatted_hit['document_highlights'] = {}
         formatted_hits.append(formatted_hit)
 
         if 'highlight' in hit.meta:
             for key in hit.meta.highlight:
                 formatted_hit['highlights'].extend(hit.meta.highlight[key])
+
+        if 'inner_hits' in hit.meta:
+            for inner_hit in hit.meta.inner_hits['documents'].hits:
+                if 'highlight' in inner_hit.meta and 'nested' in inner_hit.meta:
+                    offset = inner_hit.meta['nested']['offset']
+                    highlights = inner_hit.meta.highlight.to_dict().values()
+                    formatted_hit['document_highlights'][offset] = [
+                        hl for hl_list in highlights for hl in hl_list]
 
     return formatted_hits, es_results.hits.total
 
@@ -174,7 +194,7 @@ def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
         if terms:
             combined_query.append(Q('match', documents__text=' '.join(terms)))
         combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
-        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+        query = query.query("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
 
     return query
 
@@ -198,7 +218,7 @@ def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
         combined_query.append(Q('match', documents__text=' '.join(terms)))
     combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
 
-    must_clauses.append(Q("nested", path="documents", query=Q('bool',
+    must_clauses.append(Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool',
         must=combined_query)))
 
     if kwargs.get('ao_no'):
