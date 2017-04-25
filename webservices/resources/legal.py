@@ -9,6 +9,17 @@ from webservices.utils import use_kwargs
 from webservices.legal_docs import DOCS_SEARCH
 es = utils.get_elasticsearch_connection()
 
+INNER_HITS = {
+    "_source": False,
+    "highlight": {
+        "require_field_match": False,
+        "fields": {
+            "documents.text": {},
+            "documents.description": {}
+        }
+    }
+}
+
 
 class GetLegalCitation(utils.Resource):
     @property
@@ -90,11 +101,18 @@ def parse_query_string(query):
 
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
-    def get(self, q='', from_hit=0, hits_returned=20, type='all', **kwargs):
-        if type == 'all':
-            types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
+    def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
+        searchers = {
+            "statutes": generic_searcher,
+            "regulations": generic_searcher,
+            "advisory_opinions": generic_searcher,
+            "murs": generic_searcher
+        }
+
+        if kwargs.get('type', 'all') == 'all':
+            doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
         else:
-            types = [type]
+            doc_types = [kwargs.get('type')]
 
         parsed_query = parse_query_string(q)
         terms = parsed_query.get('terms')
@@ -103,56 +121,65 @@ class UniversalSearch(utils.Resource):
 
         results = {}
         total_count = 0
-        for type in types:
-            must_query = [Q('term', _type=type)]
-
-            if len(terms):
-                term_query = Q('match', _all=' '.join(terms))
-                must_query.append(term_query)
-
-            if len(phrases):
-                phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
-                must_query.extend(phrase_queries)
-
-            query = Search().using(es) \
-                .query(Q('bool',
-                         must=must_query,
-                         should=[Q('match', no=q), Q('match_phrase', _all={"query": q, "slop": 50})])) \
-                .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
-                .highlight_options(require_field_match=False) \
-                .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
-                .extra(size=hits_returned, from_=from_hit) \
-                .index(DOCS_SEARCH) \
-                .sort("sort1", "sort2")
-
-            if type == 'advisory_opinions':
-                query = apply_ao_specific_query_params(query, q, **kwargs)
-
-            if type == 'murs':
-                query = apply_mur_specific_query_params(query, q, **kwargs)
-
-            es_results = query.execute()
-
-            formatted_hits = []
-            for hit in es_results:
-                formatted_hit = hit.to_dict()
-                formatted_hit['highlights'] = []
-                formatted_hits.append(formatted_hit)
-
-                if 'highlight' in hit.meta:
-                    for key in hit.meta.highlight:
-                        formatted_hit['highlights'].extend(hit.meta.highlight[key])
-
-            count = es_results.hits.total
+        for type_ in doc_types:
+            formatted_hits, count = searchers.get(type_)(q, terms, phrases, type_, from_hit, hits_returned, **kwargs)
+            results[type_] = formatted_hits
+            results['total_%s' % type_] = count
             total_count += count
-
-            results[type] = formatted_hits
-            results['total_%s' % type] = count
 
         results['total_all'] = total_count
         return results
 
-def apply_mur_specific_query_params(query, q='', **kwargs):
+def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
+    must_query = [Q('term', _type=type_)]
+
+    if len(terms):
+        term_query = Q('match', _all=' '.join(terms))
+        must_query.append(term_query)
+
+    if len(phrases):
+        phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
+        must_query.extend(phrase_queries)
+
+    query = Search().using(es) \
+        .query(Q('bool', must=must_query)) \
+        .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
+        .highlight_options(require_field_match=False) \
+        .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
+        .extra(size=hits_returned, from_=from_hit) \
+        .index(DOCS_SEARCH) \
+        .sort("sort1", "sort2")
+
+    if type_ == 'advisory_opinions':
+        query = apply_ao_specific_query_params(query, terms, phrases, **kwargs)
+
+    if type_ == 'murs':
+        query = apply_mur_specific_query_params(query, terms, phrases, **kwargs)
+
+    es_results = query.execute()
+
+    formatted_hits = []
+    for hit in es_results:
+        formatted_hit = hit.to_dict()
+        formatted_hit['highlights'] = []
+        formatted_hit['document_highlights'] = {}
+        formatted_hits.append(formatted_hit)
+
+        if 'highlight' in hit.meta:
+            for key in hit.meta.highlight:
+                formatted_hit['highlights'].extend(hit.meta.highlight[key])
+
+        if 'inner_hits' in hit.meta:
+            for inner_hit in hit.meta.inner_hits['documents'].hits:
+                if 'highlight' in inner_hit.meta and 'nested' in inner_hit.meta:
+                    offset = inner_hit.meta['nested']['offset']
+                    highlights = inner_hit.meta.highlight.to_dict().values()
+                    formatted_hit['document_highlights'][offset] = [
+                        hl for hl_list in highlights for hl in hl_list]
+
+    return formatted_hits, es_results.hits.total
+
+def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
     if kwargs.get('mur_no'):
         query = query.query('terms', no=kwargs.get('mur_no'))
     if kwargs.get('mur_respondents'):
@@ -161,15 +188,17 @@ def apply_mur_specific_query_params(query, q='', **kwargs):
         query = query.query('terms', disposition__data__disposition=kwargs.get('mur_dispositions'))
     if kwargs.get('mur_election_cycles'):
         query = query.query('term', election_cycles=kwargs.get('mur_election_cycles'))
+
     if kwargs.get('mur_document_category'):
-        combined_query = [
-            Q('terms', documents__category=kwargs.get('mur_document_category')),
-            Q('match', documents__text=q)]
-        query = query.query("nested", path="documents", query=Q('bool', must=combined_query))
+        combined_query = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
+        if terms:
+            combined_query.append(Q('match', documents__text=' '.join(terms)))
+        combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
+        query = query.query("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
 
     return query
 
-def apply_ao_specific_query_params(query, q='', **kwargs):
+def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
     must_clauses = []
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
@@ -184,12 +213,13 @@ def apply_ao_specific_query_params(query, q='', **kwargs):
     else:
         ao_category = ['Final Opinion']
 
-    must_clauses.append(Q("nested", path="documents", query=Q('bool',
-        must=Q('terms', documents__category=ao_category))))
+    combined_query = [Q('terms', documents__category=ao_category)]
+    if terms:
+        combined_query.append(Q('match', documents__text=' '.join(terms)))
+    combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
 
-    if q:
-        must_clauses.append(Q("nested", path="documents", query=Q('bool',
-            must=Q('match', documents__text=q))))
+    must_clauses.append(Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool',
+        must=combined_query)))
 
     if kwargs.get('ao_no'):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))

@@ -4,7 +4,6 @@ import codecs
 import unittest
 import mock
 from mock import patch
-from elasticsearch_dsl import Q
 
 from webservices.resources.legal import es, parse_query_string
 
@@ -81,7 +80,6 @@ class CanonicalPageTest(unittest.TestCase):
         es_search.assert_called_with(body=expected_query,
                                      doc_type=mock.ANY,
                                      index=mock.ANY)
-        result = json.loads(codecs.decode(response.data))
 
 class SearchTest(unittest.TestCase):
     def setUp(self):
@@ -93,13 +91,24 @@ class SearchTest(unittest.TestCase):
         assert response.status_code == 200
         result = json.loads(codecs.decode(response.data))
         assert result == {
-            'regulations': [{'highlights': ['a', 'b']}],
+            'regulations': [
+                {'highlights': ['a', 'b'], 'document_highlights': {}}
+            ],
+            'total_regulations': 1,
+            'statutes': [
+                {'highlights': ['e'], 'document_highlights': {}}
+            ],
+            'total_statutes': 3,
+            'murs': [
+                {'highlights': ['f'], 'document_highlights': {}}
+            ],
+            'total_murs': 4,
+            'advisory_opinions': [
+                {'highlights': ['a', 'b'], 'document_highlights': {}},
+                {'highlights': ['c', 'd'], 'document_highlights': {}}
+            ],
             'total_advisory_opinions': 2,
-            'statutes': [{'highlights': ['e']}], 'total_statutes': 3,
-            'total_regulations': 1, 'total_murs': 4,
-            'murs': [{'highlights': ['f']}],
-            'advisory_opinions': [{'highlights': ['a', 'b']},
-              {'highlights': ['c', 'd']}], 'total_all': 10}
+            'total_all': 10}
 
     @patch('webservices.rest.legal.es.search', es_search)
     def test_type_search(self):
@@ -109,8 +118,12 @@ class SearchTest(unittest.TestCase):
         result = json.loads(codecs.decode(response.data))
         assert result == {
             'total_advisory_opinions': 2,
-            'advisory_opinions': [{'highlights': ['a', 'b']},
-              {'highlights': ['c', 'd']}], 'total_all': 2}
+            'advisory_opinions': [
+                {'highlights': ['a', 'b'], 'document_highlights': {}},
+                {'highlights': ['c', 'd'], 'document_highlights': {}}
+            ],
+            'total_all': 2
+        }
 
     @patch.object(es, 'search')
     def test_query_dsl(self, es_search):
@@ -126,10 +139,6 @@ class SearchTest(unittest.TestCase):
             "must": [
                 {"term": {"_type": "statutes"}},
                 {"match": {"_all": "president"}},
-            ],
-            "should": [
-                {"match": {"no": "president"}},
-                {"match_phrase": {"_all": {"query": "president", "slop": 50}}},
             ]}},
             "highlight": {
                 "fields": {
@@ -160,15 +169,12 @@ class SearchTest(unittest.TestCase):
         # This is mostly copy/pasted from the dict-based query. This is not a
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
-        expected_query = {"query": {"bool": {
-            "must": [
-                {"term": {"_type": "statutes"}},
-                {"match_phrase": {"_all": "electronic filing"}},
-            ],
-            "should": [
-                {"match": {"no": '"electronic filing"'}},
-                {"match_phrase": {"_all": {"query": '"electronic filing"', "slop": 50}}},
-            ]}},
+        expected_query = {
+            "query": {"bool": {
+                "must": [
+                    {"term": {"_type": "statutes"}},
+                    {"match_phrase": {"_all": "electronic filing"}},
+                ]}},
             "highlight": {
                 "fields": {
                     "text": {},
@@ -200,20 +206,43 @@ class SearchTest(unittest.TestCase):
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
         expected_query = {
+            'query': {
+                'bool': {
+                    'must': [
+                        {'term': {'_type': 'advisory_opinions'}},
+                        {'match': {'_all': 'president'}},
+                        {'nested': {
+                            'path': 'documents',
+                            'query': {
+                                'bool': {
+                                    'must': [
+                                        {'terms': {'documents.category': ['Final Opinion']}},
+                                        {'match': {'documents.text': 'president'}}
+                                    ]
+                                }
+                            },
+                            'inner_hits': {
+                                '_source': False,
+                                'highlight': {
+                                    'require_field_match': False,
+                                    'fields': {
+                                        'documents.text': {},
+                                        'documents.description': {}
+                                    }
+                                }
+                            }
+                        }},
+                        {'bool': {'minimum_should_match': 1}}
+                    ]
+                }},
             'sort': ['sort1', 'sort2'],
             'from': 0,
-            'query': {'bool': {
-                'must': [{'term': {'_type': 'advisory_opinions'}},
-                    {'match': {'_all': 'president'}},
-                    {'nested': {'path': 'documents',
-                                'query': {'bool': {'must': [
-                                    {'terms': {'documents.category': ['Final Opinion']}}]}}}},
-                    {'nested': {'path': 'documents',
-                        'query': {'bool': {'must': [{
-                            'match': {'documents.text': 'president'}}]}}}},
-                    {'bool': {'minimum_should_match': 1}}], 'should': [{'match': {'no': 'president'}},
-                    {'match_phrase': {'_all': {'slop': 50, 'query': 'president'}}}]}},
-            'size': 20, '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']},
+            'size': 20,
+            '_source': {
+                'exclude': [
+                    'text', 'documents.text', 'sort1', 'sort2'
+                ]
+            },
             'highlight': {
                 'fields': {
                     'documents.text': {},
@@ -271,7 +300,9 @@ class LegalPhraseSearchTests(unittest.TestCase):
 
         # Get the first `match_phrase` in the `must` clause
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrase == {
+            'match_phrase': {
+                '_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         # No `match` clause for terms
         match = next((q for q in must_clause if 'match' in q), None)
@@ -280,7 +311,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
     @patch.object(es, 'search')
     def test_with_terms_and_phrase(self, es_search):
         es_search.return_value = {'hits': {'hits': [], 'total': 0}}
-        response = self.app.get('/v1/legal/search/', query_string=dict(q='required "electronic filing" 2016', type='statutes'))
+        response = self.app.get('/v1/legal/search/',
+            query_string=dict(q='required "electronic filing" 2016', type='statutes'))
 
         assert response.status_code == 200
         assert es_search.call_count == 1
@@ -290,7 +322,8 @@ class LegalPhraseSearchTests(unittest.TestCase):
 
         # Get the first `match_phrase` in the `must` clause
         match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrase == {
+            'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         match = next((q for q in must_clause if 'match' in q), None)
         assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
@@ -311,8 +344,10 @@ class LegalPhraseSearchTests(unittest.TestCase):
         # Get all the `match_phrase`s in the `must` clause
         match_phrases = [q for q in must_clause if 'match_phrase' in q]
         assert len(match_phrases) == 2
-        assert match_phrases[0] == {'match_phrase': {'_all': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
-        assert match_phrases[1] == {'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrases[0] == {
+            'match_phrase': {'_all': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
+        assert match_phrases[1] == {
+            'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
 
         match = next((q for q in must_clause if 'match' in q), None)
         assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
