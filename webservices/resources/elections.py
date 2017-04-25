@@ -67,7 +67,7 @@ class ElectionList(utils.Resource):
                 ],
                 else_=4,
             ).label('_office_status'),
-        ).outerjoin(
+        ).join(
             ElectionResult,
             sa.and_(
                 elections.c.state == ElectionResult.cand_office_st,
@@ -89,14 +89,9 @@ class ElectionList(utils.Resource):
             CandidateHistory.two_year_period,
         ).filter(
             CandidateHistory.candidate_inactive == False,  # noqa
-            # TODO(jmcarp) Revert after #1271 is resolved
-            sa.or_(
-                CandidateHistory.district == None,  # noqa
-                CandidateHistory.district != '99',
-            )
         )
         if kwargs.get('cycle'):
-            query = query.filter(CandidateHistory.election_years.contains(kwargs['cycle']))
+            query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
         if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(CandidateHistory.office.in_(values))
@@ -327,7 +322,7 @@ def filter_candidates(query, kwargs):
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
-        CandidateHistory.election_years.any(kwargs['cycle']),
+        CandidateHistory.cycles.any(kwargs['cycle']),
         CandidateHistory.office == kwargs['office'][0].upper(),
     )
     if kwargs.get('state'):

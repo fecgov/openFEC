@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.legal_docs import DOCS_INDEX
+from webservices.legal_docs.load_legal_docs import generate_aws_s3_url
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -134,9 +135,8 @@ def get_murs(from_mur_no):
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
             mur['respondents'] = get_sorted_respondents(mur['participants'])
-            mur['disposition'] = get_disposition(case_id)
             mur['commission_votes'] = get_commission_votes(case_id)
-            mur['dispositions'] = mur['disposition']['data']
+            mur['dispositions'] = get_disposition(case_id)
             mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
@@ -166,11 +166,7 @@ def get_disposition(case_id):
             disposition_data.append({'disposition': row['event_name'], 'penalty': row['final_amount'],
                 'respondent': row['name'], 'citations': citations})
 
-        rs = conn.execute(COMMISSION_VOTES, case_id)
-        disposition_text = []
-        for row in rs:
-            disposition_text.append({'vote_date': row['vote_date'], 'text': row['action']})
-        return {'text': disposition_text, 'data': disposition_data}
+        return disposition_data
 
 def get_commission_votes(case_id):
     with db.engine.connect() as conn:
@@ -290,7 +286,7 @@ def get_documents(case_id, bucket, bucket_name):
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
-            document['url'] = "https://%s.s3.amazonaws.com/%s" % (bucket_name, pdf_key)
+            document['url'] = generate_aws_s3_url(bucket_name, pdf_key)
             documents.append(document)
     return documents
 

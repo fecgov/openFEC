@@ -16,6 +16,7 @@ class TestElectionSearch(ApiBaseTest):
             factories.CandidateHistoryFactory,
             two_year_period=2012,
             election_years=[2012],
+            cycles=[2012],
             candidate_status='C',
         )
         self.candidates = [
@@ -24,6 +25,17 @@ class TestElectionSearch(ApiBaseTest):
             factory(office='H', state='NJ', district='09'),
             factory(office='S', state='VA', district='00'),
             factory(office='H', state='VA', district='05'),
+            factory(office='S', state='GA', district='00'),
+        ]
+        factory = functools.partial(
+            factories.ElectionResultFactory
+        )
+        self.elections = [
+            factory(election_yr=2008, cand_office='P', cand_office_st='US', cand_office_district='00'),
+            factory(election_yr=2006, cand_office='S', cand_office_st='NJ', cand_office_district='00'),
+            factory(election_yr=2010, cand_office='H', cand_office_st='NJ', cand_office_district='09'),
+            factory(election_yr=2006, cand_office='S', cand_office_st='VA', cand_office_district='00'),
+            factory(election_yr=2010, cand_office='H', cand_office_st='VA', cand_office_district='05'),
         ]
 
     def test_search_district(self):
@@ -52,19 +64,20 @@ class TestElectionSearch(ApiBaseTest):
         assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
 
     def test_search_incumbent(self):
+
         [
             factories.ElectionResultFactory(
                 cand_office='S',
                 election_yr=2006,
-                cand_office_st='NJ',
+                cand_office_st='GA',
                 cand_office_district='00',
                 cand_id='S012345',
-                cand_name='Howard Stackhouse',
+                cand_name='George P. Burdell',
             )
         ]
-        results = self._results(api.url_for(ElectionList, office='senate', state='NJ'))
+        results = self._results(api.url_for(ElectionList, office='senate', state='GA'))
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'incumbent_id': 'S012345', 'incumbent_name': 'Howard Stackhouse'})
+        assert_dicts_subset(results[0], {'incumbent_id': 'S012345', 'incumbent_name': 'George P. Burdell'})
 
 
 class TestElections(ApiBaseTest):
@@ -78,6 +91,7 @@ class TestElections(ApiBaseTest):
                 state='NY',
                 two_year_period=2012,
                 election_years=[2010, 2012],
+                cycles=[2010, 2012],
                 office='S',
             ),
             factories.CandidateHistoryFactory(
@@ -85,6 +99,7 @@ class TestElections(ApiBaseTest):
                 state='NY',
                 two_year_period=2010,
                 election_years=[2010, 2012],
+                cycles=[2010, 2012],
                 office='S',
             ),
         ]

@@ -174,6 +174,7 @@ query = {
     'ao_statutory_citation': fields.List(IStr, required=False, description="Search for statutory citations"),
     'ao_citation_require_all': fields.Bool(
         description="Require all citations to be in document (default behavior is any)"),
+    'ao_entity_name': fields.List(IStr, required=False, description='Search by name of commenter or representative'),
     'mur_no': fields.List(IStr, required=False, description='Filter MURs by case number'),
     'mur_respondents': fields.Str(IStr, required=False, description='Filter MURs by respondents'),
     'mur_dispositions': fields.List(IStr, required=False, description='Filter MURs by dispositions'),

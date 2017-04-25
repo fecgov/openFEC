@@ -126,7 +126,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
-            'disposition': {'data': [], 'text': []},
             'commission_votes': [],
             'dispositions': [],
             'close_date': None,
@@ -184,7 +183,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert [(d[0], d[1], len(d[1])) for d in documents] == [
             (d['category'], d['text'], d['length']) for d in actual_mur['documents']]
         for d in actual_mur['documents']:
-            assert re.match(r'https://BUCKET_NAME.s3.amazonaws.com/legal/murs/current', d['url'])
+            assert re.match(r'https://BUCKET_NAME.s3-us-gov-west-1.amazonaws.com/legal/murs/current', d['url'])
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal_docs.current_murs.get_bucket')
@@ -245,20 +244,7 @@ class TestLoadCurrentMURs(BaseTestCase):
 
         actual_mur = next(get_murs(None))
 
-        expected_mur = {'disposition': {'data': [{'disposition': 'Conciliation-PPC',
-            'respondent': 'Open Elections LLC', 'penalty': Decimal('50000.00'),
-            'citations': [
-                {'text': '431',
-                'title': '2',
-                'type': 'statute',
-                'url': 'https://api.fdsys.gov/link?collection=uscode&year=mostrecent&link-type=html&title=52'
-                '&section=30101'},
-                {'text': '456',
-                'title': '11',
-                'type': 'regulation',
-                'url': '/regulations/456/CURRENT'}
-            ]}],
-            'text': [{'text': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}]},
+        expected_mur = {
             'commission_votes': [{'action': 'Conciliation Reached.', 'vote_date': datetime(2008, 1, 1, 0, 0)}],
             'dispositions': [{
                 'disposition': 'Conciliation-PPC',
@@ -302,7 +288,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
-            'disposition': {'data': [], 'text': []},
             'commission_votes': [],
             'dispositions': [],
             'close_date': None,
@@ -322,7 +307,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
-            'disposition': {'data': [], 'text': []},
             'commission_votes': [],
             'dispositions': [],
             'close_date': None,
@@ -342,7 +326,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
-            'disposition': {'data': [], 'text': []},
             'commission_votes': [],
             'dispositions': [],
             'close_date': None,

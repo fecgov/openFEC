@@ -163,6 +163,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sub_id == row.sub_id
         ).one()
@@ -173,6 +174,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(row)
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sub_id == row.sub_id
         ).one()
@@ -183,6 +185,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.delete(row)
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
         self.assertEqual(
             models.ScheduleA.query.filter(
                 models.ScheduleA.sub_id == row.sub_id
@@ -202,6 +205,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(row)
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
         self.assertEqual(
             models.ScheduleA.query.filter(
                 models.ScheduleA.sub_id == row.sub_id
@@ -241,6 +245,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(new_queue_count, 1)
         self.assertEqual(old_queue_count, 0)
         manage.update_aggregates()
+        manage.refresh_itemized()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sub_id == row.sub_id
         ).one()
@@ -259,6 +264,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(new_queue_count, 1)
         self.assertEqual(old_queue_count, 1)
         manage.update_aggregates()
+        manage.refresh_itemized()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sub_id == row.sub_id
         ).one()
@@ -277,6 +283,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(new_queue_count, 0)
         self.assertEqual(old_queue_count, 1)
         manage.update_aggregates()
+        manage.refresh_itemized()
         new_queue_count = self._get_sched_a_queue_new_count()
         old_queue_count = self._get_sched_a_queue_old_count()
         self.assertEqual(new_queue_count, 0)
@@ -299,6 +306,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
 
         # Test insert/update failure
         row.contbr_nm = 'Shelley Adelson'
@@ -313,6 +321,7 @@ class TestViews(common.IntegrationTestCase):
         old_queue_count = self._get_sched_a_queue_old_count()
         self.assertEqual(old_queue_count, 0)
         manage.update_aggregates()
+        manage.refresh_itemized()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sub_id == row.sub_id
         ).one()
@@ -400,6 +409,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.flush()
         manage.update_aggregates()
+        manage.refresh_itemized()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total)
         self.assertEqual(existing.count, count)
@@ -502,6 +512,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
         rows = models.ScheduleBByPurpose.query.filter_by(
             cycle=2016,
             committee_id='C12345',
@@ -514,6 +525,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(filing)
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 538)
         self.assertEqual(rows[0].count, 1)
@@ -521,6 +533,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(filing)
         db.session.commit()
         manage.update_aggregates()
+        manage.refresh_itemized()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
@@ -544,3 +557,62 @@ class TestViews(common.IntegrationTestCase):
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
+
+    def test_unverified_filers_excluded_in_candidates(self):
+        candidate_history_count = models.CandidateHistory.query.count()
+
+        unverified_candidates = models.UnverifiedFiler.query.filter(sa.or_(
+            models.UnverifiedFiler.candidate_committee_id.like('H%'),
+            models.UnverifiedFiler.candidate_committee_id.like('S%'),
+            models.UnverifiedFiler.candidate_committee_id.like('P%')
+        )).all()
+
+        unverified_candidate_ids = [
+            c.candidate_committee_id for c in unverified_candidates
+        ]
+
+        candidate_history_verified_count = models.CandidateHistory.query.filter(
+            ~models.CandidateHistory.candidate_id._in(unverified_candidate_ids)
+        ).count()
+
+        self.assertEqual(
+            candidate_history_count,
+            candidate_history_verified_count
+        )
+
+    def test_unverified_filers_excluded_in_committees(self):
+        committee_history_count = models.CommitteeHistory.query.count()
+
+        unverified_committees = models.UnverifiedFiler.query.filter(
+            models.UnverifiedFiler.candidate_committee_id.like('C%')
+        ).all()
+
+        unverified_committees_ids = [
+            c.candidate_committee_id for c in unverified_committees
+        ]
+
+        committee_history_verified_count = models.CommitteeHistory.query.filter(
+            ~models.CommitteeHistory.committee_id.in_(unverified_committees_ids)
+        ).count()
+
+        self.assertEqual(committee_history_count, committee_history_verified_count)
+
+    def test_unverified_filers_excluded_in_candidates(self):
+        committee_history_count = models.CommitteeHistory.query.count()
+
+        unverified_committees = models.UnverifiedFiler.query.filter(
+            models.UnverifiedFiler.candidate_committee_id.like('C%')
+        ).all()
+
+        unverified_committees_ids = [
+            c.candidate_committee_id for c in unverified_committees
+        ]
+
+        committee_history_verified_count = models.CommitteeHistory.query.filter(
+            ~models.CommitteeHistory.committee_id.in_(unverified_committees_ids)
+        ).count()
+
+        self.assertEqual(
+            committee_history_count,
+            committee_history_verified_count
+        )
