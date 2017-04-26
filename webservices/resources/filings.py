@@ -63,7 +63,6 @@ class BaseFilings(views.ApiResource):
         if kwargs.get('form_type') and 'RFAI' in kwargs.get('form_type'):
             #If user happened to also pass in 'FRQ', remove it to prevent unnecessary filtering
             #by appending to the list we don't wipe out the other form_type(s) passed in
-            kwargs.get('form_type').remove('FRQ')
             kwargs.get('form_type').append('FRQ')
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
