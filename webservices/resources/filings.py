@@ -61,7 +61,8 @@ class BaseFilings(views.ApiResource):
 
     def get(self, **kwargs):
         if kwargs.get('form_type') and 'RFAI' in kwargs.get('form_type'):
-            kwargs['form_type'] = ['RFAI', 'FRQ']
+            #Adds FRQ types if RFAI was requested
+            kwargs.get('form_type').append('FRQ')
         query = self.build_query(**kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=models.Filings, count=count, multi=True)
