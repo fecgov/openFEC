@@ -1,42 +1,62 @@
-CREATE OR REPLACE VIEW public.fec_vsumcolumns_f3_vw AS 
-SELECT VS.cmte_id,
-vs.cvg_start_dt,
-vs.cvg_end_dt,
-vs.rpt_yr,
-vs.ttl_contb as ttl_contb_per,
-vs.ttl_contb_ref as ttl_contb_ref_per,
-vs.net_contb as net_contb_per,
-vs.op_exp_per as ttl_op_exp_per,
-vs.offsets_to_op_exp as ttl_offsets_to_op_exp_per,
-vs.net_op_exp as net_op_exp_per,
-vs.coh_cop AS coh_cop,
-vs.debts_owed_to_cmte,
-vs.debts_owed_by_cmte,
-vs.indv_item_contb AS indv_item_contb_per,
-vs.indv_unitem_contb AS indv_unitem_contb_per,
-vs.indv_contb AS ttl_indv_contb_per,
-vs.pty_cmte_contb AS pol_pty_cmte_contb_per,
-VS.OTH_CMTE_CONTB AS other_pol_cmte_contb_per,
-VS.CAND_CNTB AS cand_contb_per,
-vs.TTL_CONTB AS ttl_contb_per,
-vs.tranf_from_other_auth_cmte AS tranf_from_other_auth_cmte_per,
-VS.CAND_LOAN AS loans_made_by_cand_per,
-VS.OTH_LOANS AS all_other_loans_per,
-VS.TTL_LOANS AS ttl_loans_per,
-VS.offsets_to_op_exp AS offsets_to_op_exp_per,
-VS.OTHER_RECEIPTS AS other_receipts_per,
-VS.ttl_receipts AS ttl_receipts_per,
-VS.OP_EXP_PER AS op_exp_per,
-VS.tranf_to_other_auth_cmte AS tranf_to_other_auth_cmte_per,
-vs.cand_loan_repymnt as loan_repymts_cand_loans_per,
-vs.OTH_LOAN_REPYMTS loan_repymts_other_loans_per,
-vs.ttl_loan_repymts as ttl_loan_repymts_per,
-vs.indv_ref as ref_indv_contb_per,
-vs.pol_pty_cmte_contb as ref_pol_pty_cmte_contb_per, -- the vs column name is unfortunate but that's the way it goes
-vs.oth_cmte_ref as ref_other_pol_cmte_contb_per,
-vs.ttl_contb_ref as ttl_contb_ref_per,
-vs.other_disb_per as other_disb_per,
-vs.ttl_disb AS ttl_disb_per,
-vs.coh_bop,
-vs.orig_sub_id as sub_id
-FROM disclosure.v_sum_and_det_sum_report vs;
+drop materialized view if exists ofec_f3_reports_mw_tmp;
+create or replace materialized view ofec_f3_reports_mw_tmp as
+select
+    vs.cmte_id as committee_id,
+    vs.cvg_start_dt as coverage_start_date,
+    vs.cvg_end_dtas as coverage_end_date,
+    vs.rpt_yr as report_year,
+    vs.ttl_contb as total_contributions_period,
+    vs.ttl_contb_ref as total_contribution_refunds_period,
+    vs.net_contb as net_contributions_period,
+    vs.op_exp_per as total_operating_expenditures_period,
+    vs.offsets_to_op_exp as total_offsets_to_operating_expenditures_period,
+    vs.net_op_exp as net_operating_expenditures_period,
+    vs.coh_cop as cash_on_hand_end_period,
+    vs.debts_owed_to_cmte as debts_owed_to_committee,
+    vs.debts_owed_by_cmte as debts_owed_by_committee,
+    vs.indv_item_contb as individual_itemized_contributions_period,
+    vs.indv_unitem_contb as individual_unitemized_contributions_period,
+    vs.indv_contb as total_individual_contributions_period,
+    vs.pty_cmte_contb as refunded_political_party_committee_contributions_period,
+    vs.OTH_CMTE_CONTB as other_political_committee_contributions_period,
+    vs.CAND_CNTB as candidate_contribution_period,
+    vs.TTL_CONTB as total_contributions_period,
+    vs.tranf_from_other_auth_cmte as transfers_from_other_authorized_committee_period,
+    vs.CAND_LOAN as loans_made_by_candidate_period,
+    vs.OTH_LOANS as all_other_loans_period,
+    vs.TTL_LOANS as total_loans_received_period,
+    vs.offsets_to_op_exp as offsets_to_operating_expenditures_period,
+    vs.OTHER_RECEIPTS as other_receipts_period,
+    vs.ttl_receipts as total_receipts_period,
+    vs.OP_EXP_PER as operating_expenditures_period,
+    vs.tranf_to_other_auth_cmte as transfers_to_other_authorized_committee_period,
+    vs.cand_loan_repymnt as loan_repayments_candidate_loans_period,
+    vs.OTH_LOAN_REPYMTS as loan_repayments_other_loans_period,
+    vs.ttl_loan_repymts as total_loan_repayments_made_period,
+    vs.indv_ref as refunded_individual_contributions_period,
+    vs.pol_pty_cmte_contb as refunded_political_party_committee_contributions_period, -- the vs column name is unfortunate but that's the way it goes
+    vs.oth_cmte_ref as refunded_other_political_committee_contributions_period,
+    vs.ttl_contb_ref as total_contribution_refunds_period,
+    vs.other_disb_per as other_disbursements_period,
+    vs.ttl_disb as total_disbursements_period,
+    vs.coh_bop as cash_on_hand_beginning_period,
+    vs.orig_sub_id as sub_id
+from disclosure.v_sum_and_det_sum_report vs
+where
+    election_cycle >= :START_YEAR
+;
+
+
+create unique index on ofec_f3_reports_mw_tmp(sub_id);
+
+create index on ofec_f3_reports_mw_tmp(cycle, sub_id);
+create index on ofec_f3_reports_mw_tmp(report_type, sub_id);
+create index on ofec_f3_reports_mw_tmp(report_year, sub_id);
+create index on ofec_f3_reports_mw_tmp(committee_id, sub_id);
+create index on ofec_f3_reports_mw_tmp(coverage_end_date, sub_id);
+create index on ofec_f3_reports_mw_tmp(coverage_start_date, sub_id);
+create index on ofec_f3_reports_mw_tmp(beginning_image_number, sub_id);
+create index on ofec_f3_reports_mw_tmp(is_amended, sub_id);
+create index on ofec_f3_reports_mw_tmp(total_receipts_period, sub_id);
+create index on ofec_f3_reports_mw_tmp(total_disbursements_period, sub_id);
+create index on ofec_f3_reports_mw_tmp(receipt_date, sub_id);
