@@ -1,3 +1,4 @@
+CREATE OR REPLACE VIEW public.fec_vsumcolumns_f3p_vw AS 
 SELECT VS.cmte_id,
 VS.cvg_start_dt,
 VS.cvg_end_dt,
