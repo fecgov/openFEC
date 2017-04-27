@@ -1,3 +1,4 @@
+CREATE OR REPLACE VIEW public.fec_vsumcolumns_f3x_vw AS 
 SELECT 
 VS.cmte_id,
 VS.RPT_TP AS RPT_TP,
