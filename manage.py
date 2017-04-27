@@ -21,7 +21,6 @@ import webservices.legal_docs as legal_docs
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
-logging.basicConfig(level=logging.INFO)
 
 # The Flask app server should only be used for local testing, so we default to
 # using debug mode and auto-reload. To disable debug mode locally, pass the

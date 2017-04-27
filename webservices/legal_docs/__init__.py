@@ -1,8 +1,13 @@
 DOCS_INDEX = 'docs_index'
 DOCS_SEARCH = 'docs_search'
 
+import logging
+import sys
+
 from .advisory_opinions import load_advisory_opinions
 from .current_murs import load_current_murs
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 from .load_legal_docs import (
     delete_advisory_opinions_from_es,
