@@ -70,6 +70,7 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c.is_individual),
             sa.Index(None, c.clean_contbr_id),
             sa.Index(None, c.two_year_transaction_period),
+            sa.Index(None, c.line_no, child.c[cls.primary]),
 
             sa.Index(None, c.contb_receipt_amt, child.c[cls.primary]),
             sa.Index(None, c.contb_receipt_dt, child.c[cls.primary]),
