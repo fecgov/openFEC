@@ -58,7 +58,7 @@ def index_regulations():
     """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
     if not eregs_api:
-        logger.info("Regs could not be indexed, environment variable FEC_EREGS_API not set.")
+        logger.error("Regs could not be indexed, environment variable FEC_EREGS_API not set.")
         return
 
     reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
@@ -70,7 +70,7 @@ def index_regulations():
         regulation = requests.get(url).json()
         sections = get_sections(regulation)
 
-        logger.info("Loading part %s" % reg['regulation'])
+        logger.debug("Loading part %s" % reg['regulation'])
         for section_label in sections:
             doc_id = '%s_%s' % (section_label[0], section_label[1])
             section_formatted = '%s-%s' % (section_label[0], section_label[1])
