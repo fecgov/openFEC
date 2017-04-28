@@ -258,7 +258,7 @@ def document_description(report_year, report_type=None, document_type=None, form
     else:
         clean = 'Document'
 
-    if form_type and form_type == 'RFAI':
+    if form_type and (form_type == 'RFAI' or form_type == 'FRQ'):
         clean = 'RFAI: ' + clean
     return '{0} {1}'.format(clean.strip(), report_year)
 
