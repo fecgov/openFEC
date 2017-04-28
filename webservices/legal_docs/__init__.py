@@ -8,6 +8,8 @@ from .advisory_opinions import load_advisory_opinions
 from .current_murs import load_current_murs
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+logger = logging.getLogger('elasticsearch')
+logger.setLevel('WARN')
 
 from .load_legal_docs import (
     delete_advisory_opinions_from_es,
