@@ -63,6 +63,7 @@ class SchedBGroup(TableGroup):
             sa.Index(None, c.recipient_city),
             sa.Index(None, c.clean_recipient_cmte_id),
             sa.Index(None, c.two_year_transaction_period),
+            sa.Index(None, c.line_num, child.c[cls.primary]),
 
             sa.Index(None, c.disb_dt, c[cls.primary]),
             sa.Index(None, c.disb_amt, c[cls.primary]),

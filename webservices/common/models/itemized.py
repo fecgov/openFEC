@@ -87,6 +87,8 @@ class ScheduleA(BaseItemized):
             ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
         )'''
     )
+
+
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
 
     contributor_name_text = db.Column(TSVECTOR)

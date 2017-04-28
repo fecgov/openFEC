@@ -224,3 +224,42 @@ returns text as $$
         end;
     end
 $$ language plpgsql;
+
+create or replace function on expand_line_number_sched_a(form_type text, line_number text)
+returns text as $$
+    begin
+        return case form_type
+            when '3x' then expand_line_number_f3x_a(line_number)
+            when '3p' then expand_line_number_f3p_a(line_number)
+            when '3' then expand_line_number_f3_a(line_number)
+    end;
+$$ language plpgsql;
+create or replace function expand_line_number_f3X_a(line_number text)
+returns text as $$
+    begin
+        return case line_number
+            when '11A1' then 'Contributions from individuals/persons other than political committees'
+            when '11AI' then 'Contributions from individuals/persons other than political committees'
+            when '11B' then 'Contributions from political party committees'
+            when '11C' then 'Contributions from other political committees'
+            when '11D' then 'Contributions from the candidate'
+            when '12' then 'Transfers from authorized committees'
+            when '13' then 'Loans'
+            when '13A' then 'Loans made or guaranteed by the candidate'
+            when '13B' then 'All other loans'
+            when '14' then 'Offsets to operation expenditures'
+            when '14A' then ''
+            when '15' then 'Other receipts'
+            when '16' then 'Total Receipts'
+            when '16A'
+            when '17' then ''
+            when '17A'
+            when '17B'
+            when '17C'
+            when '17D'
+            when 'SL1A'
+            when 'SL2'
+            else null
+        end;
+    end
+$$ language plpgsql;
