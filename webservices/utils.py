@@ -42,7 +42,7 @@ API_KEY_ARG = fields.Str(
     missing='DEMO_KEY',
     description=docs.API_KEY_DESCRIPTION,
 )
-if os.getenv('PRODUCTION'):
+if env.get_credential('PRODUCTION'):
     Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
 
 fec_url_map = {'9': 'http://docquery.fec.gov/dcdev/posted/{0}.fec'}
