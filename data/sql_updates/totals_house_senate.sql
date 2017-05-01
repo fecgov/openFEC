@@ -85,4 +85,3 @@ create unique index on ofec_totals_house_senate_mv_tmp(file_num);
 
 create index on ofec_totals_house_senate_mv_tmp(cycle, file_num);
 create index on ofec_totals_house_senate_mv_tmp(committee_id, file_num);
-
