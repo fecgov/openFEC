@@ -25,16 +25,16 @@ with candidates as (
         cmte_id,
         extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
         extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
-        ttl_receipts_per as ttl_receipts,
-        pol_pty_cmte_contb_per as pty_cmte_contb,
-        other_pol_cmte_contb_per as oth_cmte_contb,
-        ttl_disb_per as ttl_disb,
-        tranf_to_other_auth_cmte_per as tranf_to_other_auth_cmte,
-        offsets_to_op_exp_per as offsets_to_op_exp,
-        ttl_loan_repymts_per as ttl_loan_repymts,
-        ttl_contb_ref_col_ttl_per as ttl_contb_ref,
+        ttl_receipts,
+        pty_cmte_contb,
+        oth_cmte_contb,
+        ttl_disb,
+        tranf_to_other_auth_cmte,
+        offsets_to_op_exp,
+        ttl_loan_repymts,
+        ttl_contb_ref,
         other_disb_per
-    from fec_vsum_f3_vw
+    from v_sum_and_det_sum_report
     where most_recent_filing_flag like 'Y'
 ),
 -- Remove candidate activity that does not apply to the current election
