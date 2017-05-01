@@ -4,7 +4,7 @@ with recursive oldest_filing as (
   (
     SELECT cand_cmte_id, rpt_yr, rpt_tp, amndt_ind, cast(cast(receipt_dt as text) as date) as receipt_date, file_num, prev_file_num, array[file_num]::numeric[] as amendment_chain, 1 as depth, file_num as last
     FROM disclosure.f_rpt_or_form_sub
-    WHERE file_num = prev_file_num and file_num > 0
+    WHERE (file_num = prev_file_num or prev_file_num is null) and file_num > 0
   )
   union
   select f3.cand_cmte_id, f3.rpt_yr, f3.rpt_tp, f3.amndt_ind, cast(cast(f3.receipt_dt as text) as date) as receipt_date, f3.file_num, f3.prev_file_num, (oldest.amendment_chain || f3.file_num)::numeric(7,0)[], oldest.depth + 1, oldest.amendment_chain[1]
