@@ -217,7 +217,9 @@ def get_citations(ao_names):
     es = get_elasticsearch_connection()
 
     for citation in all_regulatory_citations:
-        entry = {'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]), 'citation_type': 'regulation'}
+        entry = {
+            'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
+            'citation_type': 'regulation'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
