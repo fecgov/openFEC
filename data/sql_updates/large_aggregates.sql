@@ -35,7 +35,6 @@ with candidates as (
         ttl_contb_ref,
         other_disb_per
     from v_sum_and_det_sum_report
-    where most_recent_filing_flag like 'Y'
 ),
 -- Remove candidate activity that does not apply to the current election
 cand as (
