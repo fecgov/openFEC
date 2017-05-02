@@ -74,9 +74,13 @@ def load_advisory_opinions(from_ao_no=None):
     """
     es = get_elasticsearch_connection()
 
+    logger.info("Loading advisory opinions")
+    ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
-        logger.debug("Loading AO: %s", ao['no'])
+        logger.info("Loading AO: %s", ao['no'])
         es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
+        ao_count += 1
+    logger.info("%d advisory opinions loaded", ao_count)
 
 def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
