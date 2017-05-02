@@ -102,9 +102,13 @@ def load_current_murs(from_mur_no=None):
     the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
     """
     es = get_elasticsearch_connection()
+    logger.info("Loading current MURs")
+    mur_count = 0
     for mur in get_murs(from_mur_no):
-        logger.debug("Loading MUR: %s", mur['no'])
+        logger.info("Loading current MUR: %s", mur['no'])
         es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+        mur_count += 1
+    logger.info("%d current MURs loaded", mur_count)
 
 def get_murs(from_mur_no):
     bucket = get_bucket()
