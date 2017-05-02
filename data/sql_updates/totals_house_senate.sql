@@ -11,7 +11,7 @@ with last as (
         hs.rpt_yr,
         get_cycle(hs.rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report hs
-    left join fec_vsum_f3_vw vsum using(file_num)
+    left join fec_vsum_f3_vw vsum on hs.orig_sub_id = vsum.sub_id
     order by
         hs.cmte_id,
         cycle,
@@ -22,7 +22,7 @@ with last as (
         vsum.cmte_id as committee_id,
         vsum.election_cycle as cycle
     from disclosure.v_sum_and_det_sum_report hs
-    left join fec_vsum_f3_vw vsum using(file_num)
+    left join fec_vsum_f3_vw vsum on hs.orig_sub_id = vsum.sub_id
     where vsum.election_cycle >= :START_YEAR
     order by
         hs.cmte_id,
@@ -30,6 +30,7 @@ with last as (
         hs.cvg_end_dt asc
 )
     select
+        max(hs.file_num),
         hs.cmte_id as committee_id,
         get_cycle(hs.rpt_yr) as cycle,
         min(hs.cvg_start_dt) as coverage_start_date,
@@ -75,7 +76,7 @@ with last as (
             hs.cmte_id = cash_beginning_period.committee_id and
             get_cycle(hs.rpt_yr) = cash_beginning_period.cycle
     where
-        cycle >= :START_YEAR
+        get_cycle(hs.rpt_yr) >= :START_YEAR
     group by
         hs.cmte_id,
         get_cycle(hs.rpt_yr)
