@@ -1,36 +1,49 @@
 drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
-with last as (
+with last_subset as (
     select distinct on (cmte_id, cycle)
+        hs.orig_sub_id,
         hs.cmte_id,
-        vsum.begin_image_num,
         hs.coh_cop,
         hs.debts_owed_by_cmte,
         hs.debts_owed_to_cmte,
-        vsum.rpt_tp_desc,
         hs.rpt_yr,
         get_cycle(hs.rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report hs
-    left join fec_vsum_f3_vw vsum on hs.orig_sub_id = vsum.sub_id
+    left join ofec_filings_mv of on hs.orig_sub_id = of.sub_id
+    where
+        get_cycle(hs.rpt_yr) >= 1980 --:START_YEAR
     order by
         hs.cmte_id,
         cycle,
         hs.cvg_end_dt desc
+),
+last as(
+    select
+        ls.cmte_id,
+        of.beginning_image_number,
+        ls.coh_cop,
+        ls.debts_owed_by_cmte,
+        ls.debts_owed_to_cmte,
+        of.report_type_full,
+        ls.rpt_yr,
+        ls.cycle
+    from last_subset ls
+    left join ofec_filings_mv of on ls.orig_sub_id = of.sub_id
 ), cash_beginning_period as (
-    select distinct on (hs.cmte_id, election_cycle)
-        hs.coh_bop as cash_on_hand,
-        vsum.cmte_id as committee_id,
-        vsum.election_cycle as cycle
+    select distinct on (hs.cmte_id, get_cycle(rpt_yr))
+        coh_bop as cash_on_hand,
+        cmte_id as committee_id,
+        get_cycle(rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report hs
-    left join fec_vsum_f3_vw vsum on hs.orig_sub_id = vsum.sub_id
-    where vsum.election_cycle >= :START_YEAR
+    -- where get_cycle(rpt_yr) >= :START_YEAR
     order by
         hs.cmte_id,
-        election_cycle,
+        get_cycle(rpt_yr),
         hs.cvg_end_dt asc
 )
     select
-        max(hs.file_num),
+        max(hs.orig_sub_id),
         hs.cmte_id as committee_id,
         get_cycle(hs.rpt_yr) as cycle,
         min(hs.cvg_start_dt) as coverage_start_date,
@@ -62,8 +75,8 @@ with last as (
         sum(hs.pol_pty_cmte_contb) as refunded_political_party_committee_contributions,
         sum(hs.tranf_from_other_auth_cmte) as transfers_from_other_authorized_committee,
         sum(hs.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
-        max(last.rpt_tp_desc) as last_report_type_full,
-        max(last.begin_image_num) as last_beginning_image_number,
+        max(last.report_type_full) as last_report_type_full,
+        max(last.beginning_image_number) as last_beginning_image_number,
         min(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_period,
         max(greatest(last.coh_cop)) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
@@ -75,14 +88,14 @@ with last as (
         left join cash_beginning_period on
             hs.cmte_id = cash_beginning_period.committee_id and
             get_cycle(hs.rpt_yr) = cash_beginning_period.cycle
-    where
-        get_cycle(hs.rpt_yr) >= :START_YEAR
+    -- where
+    --     get_cycle(hs.rpt_yr) >= :START_YEAR
     group by
         hs.cmte_id,
         get_cycle(hs.rpt_yr)
 ;
 
-create unique index on ofec_totals_house_senate_mv_tmp(file_num);
+create unique index on ofec_totals_house_senate_mv_tmp(sub_id);
 
-create index on ofec_totals_house_senate_mv_tmp(cycle, file_num);
-create index on ofec_totals_house_senate_mv_tmp(committee_id, file_num);
+create index on ofec_totals_house_senate_mv_tmp(cycle, sub_id);
+create index on ofec_totals_house_senate_mv_tmp(committee_id, sub_id);
