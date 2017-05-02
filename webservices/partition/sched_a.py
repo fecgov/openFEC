@@ -23,6 +23,7 @@ class SchedAGroup(TableGroup):
         sa.Column('is_individual', sa.Boolean),
         sa.Column('clean_contbr_id', sa.String),
         sa.Column('two_year_transaction_period', sa.SmallInteger),
+        sa.Column('line_number_label', sa.String),
     ]
 
     column_mappings = {
@@ -54,6 +55,10 @@ class SchedAGroup(TableGroup):
                 parent.c[cls.transaction_date_column],
                 parent.c.rpt_yr
             ).label('two_year_transaction_period'),
+            sa.func.expand_line_number(
+                parent.c.filing_form,
+                parent.c.line_num,
+            ).label('line_number_label')
         ]
 
     @classmethod
@@ -70,7 +75,7 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c.is_individual),
             sa.Index(None, c.clean_contbr_id),
             sa.Index(None, c.two_year_transaction_period),
-            sa.Index(None, c.line_no, child.c[cls.primary]),
+            sa.Index(None, c.line_num, child.c[cls.primary]),
 
             sa.Index(None, c.contb_receipt_amt, child.c[cls.primary]),
             sa.Index(None, c.contb_receipt_dt, child.c[cls.primary]),
