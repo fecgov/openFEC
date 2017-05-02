@@ -225,41 +225,124 @@ returns text as $$
     end
 $$ language plpgsql;
 
-create or replace function on expand_line_number_sched_a(form_type text, line_number text)
+create or replace function expand_line_number(form_type text, line_number text)
 returns text as $$
     begin
         return case form_type
-            when '3x' then expand_line_number_f3x_a(line_number)
-            when '3p' then expand_line_number_f3p_a(line_number)
-            when '3' then expand_line_number_f3_a(line_number)
-    end;
+            when '3x' then expand_line_number_f3x(line_number)
+            when '3p' then expand_line_number_f3p(line_number)
+            when '3' then expand_line_number_f3(line_number)
+            else null
+        end;
+    end
 $$ language plpgsql;
-create or replace function expand_line_number_f3X_a(line_number text)
+
+create or replace function expand_line_number_f3X(line_number text)
 returns text as $$
     begin
         return case line_number
+            --Receipts
             when '11A1' then 'Contributions from individuals/persons other than political committees'
             when '11AI' then 'Contributions from individuals/persons other than political committees'
             when '11B' then 'Contributions from political party committees'
             when '11C' then 'Contributions from other political committees'
             when '11D' then 'Contributions from the candidate'
             when '12' then 'Transfers from authorized committees'
-            when '13' then 'Loans'
-            when '13A' then 'Loans made or guaranteed by the candidate'
-            when '13B' then 'All other loans'
-            when '14' then 'Offsets to operation expenditures'
-            when '14A' then ''
-            when '15' then 'Other receipts'
-            when '16' then 'Total Receipts'
-            when '16A'
-            when '17' then ''
-            when '17A'
-            when '17B'
-            when '17C'
-            when '17D'
-            when 'SL1A'
-            when 'SL2'
+            when '13' then 'Loans received'
+            when '14' then 'Loan Repayments Received'
+            when '15' then 'Offsets To Operating Expenditures '
+            when '16' then 'Refunds of Contributions Made to Federal Candidates and Other Political Committees'
+            when '17' then 'Other Federal Receipts (Dividends, Interest, etc.).'
+            when 'SL1A' then 'Non-Federal Receipts from Persons Levin (L-1A)'
+            when 'SL2' then 'Non-Federal Other Receipt Levin (L-2)'
+            --Disbursements
+            when '21' then 'Operating Expenditures'
+            when '21B' then 'Other Federal Operating Expenditures'
+            when '22' then 'Transfers to Affiliated/Other Party Committees'
+            when '23' then 'Contributions to Federal Candidates/Committees and Other Political Committees'
+            when '24' then 'Independent Expenditures'
+            when '25' then 'Coordinated Party Expenditures'
+            when '26' then 'Loan Repayments Made'
+            when '27' then 'Loans Made'
+            when '28A' then 'Refunds of Contributions Made to Individuals/Persons Other Than Political Committees'
+            when '28B' then 'Refunds of Contributions to Political Party Committees'
+            when '28C' then 'Refunds of Contributions to Other Political Committees'
+            when '28D' then 'Total Contributions Refunds'
+            when '29' then 'Other Disbursements'
+            when '30' then 'Federal Election Activity'
+            when '30A' then 'Allocated Federal Election Activity'
+            when '30B' then 'Federal Election Activity Paid Entirely With Federal Funds'
+            when 'SL4A' then 'Levin Funds'
+            when 'SL4B' then 'Levin Funds'
+            when 'SL4C' then 'Levin Funds'
+            when 'SL4D' then 'Levin Funds'
+            when 'SL5' then 'Levin Funds'
             else null
         end;
     end
 $$ language plpgsql;
+
+create or replace function expand_line_number_f3p(line_number text)
+returns text as $$
+    begin
+        return case line_number
+            --Receipts
+            when '16' then 'Federal Funds'
+            when '17A' then 'Contributions From Individuals/Persons Other Than Political Committees'
+            when '17B' then 'Contributions From Political Party Committees'
+            when '17C' then 'Contributions From Other Political Committees'
+            when '17D' then 'Contributions From the Candidate'
+            when '18' then 'Transfers From Other Authorized Committees'
+            when '19A' then 'Loans Received From or Guaranteed by Candidate'
+            when '19B' then 'Other Loans'
+            when '20A' then 'Offsets To Expenditures - Operating'
+            when '20B' then 'Offsets To Expenditures - Fundraising'
+            when '20C' then 'Offsets To Expenditures - Legal and Accounting'
+            when '21' then 'Other Receipts'
+            --Disbursements
+            when '23' then 'Operating Expenditures'
+            when '24' then 'Transfers to Other Authorized Committees'
+            when '25' then 'Fundraising Disbursements'
+            when '26' then 'Exempt Legal and Accounting Disbursements'
+            when '27A' then 'Loan Repayments Made or Guaranteed by Candidate'
+            when '27B' then 'Other Loan Repayments'
+            when '28A' then 'Refunds of Contributions to Individuals/Persons Other Than Political Committees'
+            when '28B' then 'Refunds of Contributions to Political Party Committees'
+            when '28C' then 'Refunds of Contributions to Other Political Committees'
+            when '29' then 'Other Disbursements'
+            else null
+        end;
+    end
+$$ language plpgsql;
+
+create or replace function expand_line_number_f3(line_number text)
+returns text as $$
+    begin
+        return case line_number
+            --Receipts
+            when '11A1' then 'Contributions From Individuals/Persons Other Than Political Committees'
+            when '11AI' then 'Contributions From Individuals/Persons Other Than Political Committees'
+            when '11B' then 'Contributions From Political Party Committees'
+            when '11C' then 'Contributions From Other Political Committees'
+            when '11D' then 'Contributions From the Candidate'
+            when '12' then 'Transfers from authorized committees'
+            when '13' then 'Loans Received'
+            when '13A' then 'Loans Received from the Candidate'
+            when '13B' then 'All Other Loans Received'
+            when '14' then 'Offsets to Operating Expenditures'
+            when '15' then 'Total Amount of Other Receipts'
+            --Disbursements
+            when '17' then 'Operating Expenditures'
+            when '18' then 'Transfers to Other Authorized Committees'
+            when '19' then 'Loan Repayments'
+            when '19A' then 'Loan Repayments Made or Guaranteed by Candidate'
+            when '19B' then 'Other Loan Repayments'
+            when '20A' then 'Refunds of Contributions to Individuals/Persons Other Than Political Committees'
+            when '20B' then 'Refunds of Contributions to Political Party Committees'
+            when '20C' then 'Refunds of Contributions to Other Political Committees'
+            when '21' then 'Other Disbursements'
+            else null
+        end;
+    end
+$$ language plpgsql;
+
