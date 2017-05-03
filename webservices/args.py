@@ -375,6 +375,7 @@ itemized = {
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
     'min_date': fields.Date(description='Minimum date'),
     'max_date': fields.Date(description='Maximum date'),
+    'line_number': fields.Str()
 }
 
 reporting_dates = {
