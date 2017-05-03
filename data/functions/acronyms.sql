@@ -229,9 +229,9 @@ create or replace function expand_line_number(form_type text, line_number text)
 returns text as $$
     begin
         return case form_type
-            when '3x' then expand_line_number_f3x(line_number)
-            when '3p' then expand_line_number_f3p(line_number)
-            when '3' then expand_line_number_f3(line_number)
+            when 'F3X' then expand_line_number_f3x(line_number)
+            when 'F3P' then expand_line_number_f3p(line_number)
+            when 'F3' then expand_line_number_f3(line_number)
             else null
         end;
     end
@@ -242,13 +242,13 @@ returns text as $$
     begin
         return case line_number
             --Receipts
-            when '11A1' then 'Contributions from individuals/persons other than political committees'
-            when '11AI' then 'Contributions from individuals/persons other than political committees'
-            when '11B' then 'Contributions from political party committees'
-            when '11C' then 'Contributions from other political committees'
-            when '11D' then 'Contributions from the candidate'
-            when '12' then 'Transfers from authorized committees'
-            when '13' then 'Loans received'
+            when '11A1' then 'Contributions From Individuals/Persons Other Than Political Committees'
+            when '11AI' then 'Contributions From Individuals/Persons Other Than Political Committees'
+            when '11B' then 'Contributions From Political Party Committees'
+            when '11C' then 'Contributions From Other Political Committees'
+            when '11D' then 'Contributions From the Candidate'
+            when '12' then 'Transfers from Authorized Committees'
+            when '13' then 'Loans Received'
             when '14' then 'Loan Repayments Received'
             when '15' then 'Offsets To Operating Expenditures '
             when '16' then 'Refunds of Contributions Made to Federal Candidates and Other Political Committees'
