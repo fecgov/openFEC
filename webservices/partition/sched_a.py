@@ -23,7 +23,7 @@ class SchedAGroup(TableGroup):
         sa.Column('is_individual', sa.Boolean),
         sa.Column('clean_contbr_id', sa.String),
         sa.Column('two_year_transaction_period', sa.SmallInteger),
-        sa.Column('line_number_label', sa.String),
+        sa.Column('line_number_label', sa.Text),
     ]
 
     column_mappings = {

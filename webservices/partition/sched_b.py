@@ -22,6 +22,7 @@ class SchedBGroup(TableGroup):
         sa.Column('disbursement_purpose_category', sa.String),
         sa.Column('clean_recipient_cmte_id', sa.String),
         sa.Column('two_year_transaction_period', sa.SmallInteger),
+        sa.Column('line_number_label', sa.Text),
     ]
 
     column_mappings = {
@@ -49,6 +50,10 @@ class SchedBGroup(TableGroup):
                 parent.c[cls.transaction_date_column],
                 parent.c.rpt_yr
             ).label('two_year_transaction_period'),
+            sa.func.expand_line_number(
+                parent.c.filing_form,
+                parent.c.line_num,
+            ).label('line_number_label'),
         ]
 
     @classmethod
