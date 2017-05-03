@@ -58,9 +58,10 @@ def index_regulations():
     """
     eregs_api = env.get_credential('FEC_EREGS_API', '')
     if not eregs_api:
-        logger.info("Regs could not be indexed, environment variable FEC_EREGS_API not set.")
+        logger.error("Regs could not be indexed, environment variable FEC_EREGS_API not set.")
         return
 
+    logger.info("Indexing regulations")
     reg_versions = requests.get(eregs_api + 'regulation').json()['versions']
     es = utils.get_elasticsearch_connection()
     reg_count = 0
@@ -70,7 +71,7 @@ def index_regulations():
         regulation = requests.get(url).json()
         sections = get_sections(regulation)
 
-        logger.info("Loading part %s" % reg['regulation'])
+        logger.debug("Loading part %s" % reg['regulation'])
         for section_label in sections:
             doc_id = '%s_%s' % (section_label[0], section_label[1])
             section_formatted = '%s-%s' % (section_label[0], section_label[1])
@@ -90,7 +91,7 @@ def index_regulations():
 
             es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
         reg_count += 1
-    logger.info("%d regulation parts indexed." % reg_count)
+    logger.info("%d regulation parts indexed", reg_count)
 
 def get_ao_citations():
     logger.info("getting citations...")
@@ -152,6 +153,7 @@ def get_title_52_statutes():
     title_parsed = get_xml_tree_from_url('http://uscode.house.gov/download/' +
                     'releasepoints/us/pl/114/219/xml_usc52@114-219.zip')
     tag_name = '{{http://xml.house.gov/schemas/uslm/1.0}}{0}'
+    section_count = 0
     for subtitle in title_parsed.iter(tag_name.format('subtitle')):
         if subtitle.attrib['identifier'] == '/us/usc/t52/stIII':
             for subchapter in subtitle.iter(tag_name.format('subchapter')):
@@ -183,6 +185,8 @@ def get_title_52_statutes():
                         "sort2": int(section_no)
                     }
                     es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
+                    section_count += 1
+    return section_count
 
 def get_title_26_statutes():
     es = utils.get_elasticsearch_connection()
@@ -190,6 +194,7 @@ def get_title_26_statutes():
     title_parsed = get_xml_tree_from_url('http://uscode.house.gov/download/' +
                     'releasepoints/us/pl/114/219/xml_usc26@114-219.zip')
     tag_name = '{{http://xml.house.gov/schemas/uslm/1.0}}{0}'
+    section_count = 0
     for subtitle in title_parsed.iter(tag_name.format('subtitle')):
         if subtitle.attrib['identifier'] == '/us/usc/t26/stH':
             for chapter in subtitle.iter(tag_name.format('chapter')):
@@ -219,6 +224,8 @@ def get_title_26_statutes():
                         "sort2": int(section_no)
                     }
                     es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
+                    section_count += 1
+    return section_count
 
 
 def index_statutes():
@@ -226,8 +233,10 @@ def index_statutes():
         Indexes statutes with titles 26 and 52 in Elasticsearch.
         The statutes are downloaded from http://uscode.house.gov.
     """
-    get_title_26_statutes()
-    get_title_52_statutes()
+    logger.info("Indexing statutes")
+    title_26_section_count = get_title_26_statutes()
+    title_52_section_count = get_title_52_statutes()
+    logger.info("%d statute sections indexed", title_26_section_count + title_52_section_count)
 
 
 def process_mur_pdf(mur_no, pdf_key, bucket):

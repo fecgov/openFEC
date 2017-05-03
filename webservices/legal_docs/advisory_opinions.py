@@ -74,9 +74,13 @@ def load_advisory_opinions(from_ao_no=None):
     """
     es = get_elasticsearch_connection()
 
+    logger.info("Loading advisory opinions")
+    ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
         logger.info("Loading AO: %s", ao['no'])
         es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
+        ao_count += 1
+    logger.info("%d advisory opinions loaded", ao_count)
 
 def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
@@ -149,7 +153,7 @@ def get_documents(ao_id, bucket, bucket_name):
                 "date": row["document_date"],
             }
             pdf_key = "legal/aos/%s.pdf" % row["document_id"]
-            logger.info("S3: Uploading {}".format(pdf_key))
+            logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
             document["url"] = generate_aws_s3_url(bucket_name, pdf_key)
@@ -168,7 +172,7 @@ def get_ao_names():
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
 
-    logger.info("Getting citations...")
+    logger.debug("Getting citations...")
 
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
@@ -178,7 +182,7 @@ def get_citations(ao_names):
     all_statutory_citations = set()
     raw_citations = defaultdict(lambda: defaultdict(set))
     for row in rs:
-        logger.info("Getting citations for AO %s" % row["ao_no"])
+        logger.debug("Getting citations for AO %s" % row["ao_no"])
 
         ao_citations_in_doc = parse_ao_citations(row["ocrtext"], ao_component_to_name_map)
         ao_citations_in_doc.discard(row["ao_no"])  # Remove self
@@ -213,7 +217,9 @@ def get_citations(ao_names):
     es = get_elasticsearch_connection()
 
     for citation in all_regulatory_citations:
-        entry = {'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]), 'citation_type': 'regulation'}
+        entry = {
+            'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
+            'citation_type': 'regulation'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
