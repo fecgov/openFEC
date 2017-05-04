@@ -296,7 +296,7 @@ class CommitteeReportsF3(AsAmenedBase):
     total_loan_repayments_made_period = db.Column(db.Numeric(30, 2))#mapped
     total_loans_received_period = db.Column(db.Numeric(30, 2))#mapped
     total_offsets_to_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
-    total_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    # total_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
     transfers_from_other_authorized_committee_period = db.Column(db.Numeric(30, 2))#mapped
     transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))#mapped
 
