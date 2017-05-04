@@ -54,11 +54,6 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('filings', 'f3_reports'),
-        ('filings', 'totals_house_senate')
-    ])
-
-    graph.add_edges_from([
         ('totals_house_senate', 'totals_combined'),
         ('totals_presidential', 'totals_combined'),
         ('totals_pac_party', 'totals_combined'),
@@ -84,6 +79,11 @@ def get_graph():
         ('totals_presidential', 'candidate_aggregates'),
         ('candidate_election', 'candidate_aggregates'),
         ('cand_cmte_linkage', 'candidate_aggregates'),
+    ])
+
+    graph.add_edges_from([
+        ('filings', 'f3_reports'),
+        ('filings', 'totals_house_senate')
     ])
 
     graph.add_edges_from([

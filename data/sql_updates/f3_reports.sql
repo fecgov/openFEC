@@ -1,7 +1,22 @@
+-- Missing these. We had them in the other
+
+-- political_party_committee_contributions_period
+-- offsets_to_operating_expenditures_period
+-- aggregate_amount_personal_contributions_general
+-- aggregate_contributions_personal_funds_primary
+-- gross_receipt_authorized_committee_general
+-- gross_receipt_authorized_committee_primary
+-- gross_receipt_minus_personal_contribution_general
+-- gross_receipt_minus_personal_contributions_primary
+-- total_contribution_refunds_col_total_period
+-- total_contributions_column_total_period
+
+
 drop materialized view if exists ofec_reports_f3_mv_tmp;
 create materialized view ofec_reports_f3_mv_tmp as
 select
     get_cycle(rpt_yr) as cycle,
+    file_num as file_number,
     cmte_id as committee_id,
     to_timestamp(cvg_start_dt) as coverage_start_date,
     to_timestamp(cvg_end_dt) as coverage_end_date,
@@ -9,7 +24,7 @@ select
     rpt_yr as report_year,
     ttl_contb as total_contributions_period,
     net_contb as net_contributions_period,
-    op_exp_per as total_operating_expenditures_period,
+    op_exp_per as offsets_to_operating_expenditures_period,
     offsets_to_op_exp as total_offsets_to_operating_expenditures_period,
     net_op_exp as net_operating_expenditures_period,
     coh_cop as cash_on_hand_end_period,
@@ -32,6 +47,7 @@ select
     oth_loan_repymts as loan_repayments_other_loans_period,
     ttl_loan_repymts as total_loan_repayments_made_period,
     indv_ref as refunded_individual_contributions_period,
+    pty_cmte_contb as political_party_committee_contributions_period,
     pol_pty_cmte_contb as refunded_political_party_committee_contributions_period,
     oth_cmte_ref as refunded_other_political_committee_contributions_period,
     ttl_contb_ref as total_contribution_refunds_period,
@@ -39,8 +55,15 @@ select
     ttl_disb as total_disbursements_period,
     coh_bop as cash_on_hand_beginning_period,
     rpt_tp as report_type,
-    orig_sub_id as sub_id
+    rpt.report_type as report_type_full,
+    orig_sub_id as sub_id,
+    of.beginning_image_number,
+    of.ending_image_number,
+    report_fec_url(of.beginning_image_number::text, f3.file_num::integer) as fec_url,
+    means_filed(of.beginning_image_number) as means_filed,
 from disclosure.v_sum_and_det_sum_report
+    left join staging.ref_rpt_tp rpt on disclosure.v_sum_and_det_sum_report.rpt_tp = ref_rpt_tp.rpt_tp_cd
+    left join ofec_filings_mv_tmp of on hs.orig_sub_id = of.sub_id
 where
     get_cycle(rpt_yr) >= :START_YEAR
 ;
@@ -54,7 +77,7 @@ create index on ofec_reports_f3_mv_tmp(report_year, sub_id);
 create index on ofec_reports_f3_mv_tmp(committee_id, sub_id);
 create index on ofec_reports_f3_mv_tmp(coverage_end_date, sub_id);
 create index on ofec_reports_f3_mv_tmp(coverage_start_date, sub_id);
--- create index on ofec_reports_f3_mv_tmp(beginning_image_number, sub_id);
+create index on ofec_reports_f3_mv_tmp(beginning_image_number, sub_id);
 create index on ofec_reports_f3_mv_tmp(total_receipts_period, sub_id);
 create index on ofec_reports_f3_mv_tmp(total_disbursements_period, sub_id);
 create index on ofec_reports_f3_mv_tmp(receipt_date, sub_id);
