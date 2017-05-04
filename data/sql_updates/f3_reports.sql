@@ -10,6 +10,7 @@
 -- gross_receipt_minus_personal_contributions_primary
 -- total_contribution_refunds_col_total_period
 -- total_contributions_column_total_period
+-- total_operating_expenditures_period
 
 
 drop materialized view if exists ofec_reports_f3_mv_tmp;
@@ -55,15 +56,14 @@ select
     ttl_disb as total_disbursements_period,
     coh_bop as cash_on_hand_beginning_period,
     rpt_tp as report_type,
-    rpt.report_type as report_type_full,
     orig_sub_id as sub_id,
+    of.report_type_full,
     of.beginning_image_number,
     of.ending_image_number,
-    report_fec_url(of.beginning_image_number::text, f3.file_num::integer) as fec_url,
-    means_filed(of.beginning_image_number) as means_filed,
+    report_fec_url(of.beginning_image_number::text, file_num::integer) as fec_url,
+    means_filed(of.beginning_image_number::text) as means_filed
 from disclosure.v_sum_and_det_sum_report
-    left join staging.ref_rpt_tp rpt on disclosure.v_sum_and_det_sum_report.rpt_tp = ref_rpt_tp.rpt_tp_cd
-    left join ofec_filings_mv_tmp of on hs.orig_sub_id = of.sub_id
+    left join ofec_filings_mv_tmp of on disclosure.v_sum_and_det_sum_report.orig_sub_id = of.sub_id
 where
     get_cycle(rpt_yr) >= :START_YEAR
 ;
