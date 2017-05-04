@@ -67,6 +67,7 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c[cls.primary]),
             sa.Index(None, c.contbr_st),
             sa.Index(None, c.contbr_city),
+            sa.Index(None, c.contbr_zip),
             sa.Index(None, c.is_individual),
             sa.Index(None, c.clean_contbr_id),
             sa.Index(None, c.two_year_transaction_period),

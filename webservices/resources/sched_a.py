@@ -37,6 +37,7 @@ class ScheduleAView(ItemizedResource):
         ('contributor_id', models.ScheduleA.contributor_id),
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
+        ('contributor_zip', models.ScheduleA.contributor_zip)
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
