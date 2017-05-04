@@ -12,11 +12,11 @@ with last_subset as (
     from disclosure.v_sum_and_det_sum_report hs
     left join ofec_filings_mv of on hs.orig_sub_id = of.sub_id
     where
-        get_cycle(hs.rpt_yr) >= 1980 --:START_YEAR
+        get_cycle(hs.rpt_yr) >= :START_YEAR
     order by
         hs.cmte_id,
         cycle,
-        hs.cvg_end_dt desc
+        to_timestamp(hs.cvg_end_dt) desc
 ),
 last as(
     select
@@ -36,18 +36,18 @@ last as(
         cmte_id as committee_id,
         get_cycle(rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report hs
-    -- where get_cycle(rpt_yr) >= :START_YEAR
+    where get_cycle(rpt_yr) >= :START_YEAR
     order by
         hs.cmte_id,
         get_cycle(rpt_yr),
-        hs.cvg_end_dt asc
+        to_timestamp(hs.cvg_end_dt) asc
 )
     select
-        max(hs.orig_sub_id),
+        max(hs.orig_sub_id) as sub_id,
         hs.cmte_id as committee_id,
         get_cycle(hs.rpt_yr) as cycle,
-        min(hs.cvg_start_dt) as coverage_start_date,
-        max(hs.cvg_end_dt) as coverage_end_date,
+        min(to_timestamp(hs.cvg_start_dt)) as coverage_start_date,
+        max(to_timestamp(hs.cvg_end_dt)) as coverage_end_date,
         sum(hs.OTH_LOANS) as all_other_loans,
         sum(hs.CAND_CNTB) as candidate_contribution,
         sum(hs.ttl_contb_ref) as contribution_refunds,
@@ -88,8 +88,8 @@ last as(
         left join cash_beginning_period on
             hs.cmte_id = cash_beginning_period.committee_id and
             get_cycle(hs.rpt_yr) = cash_beginning_period.cycle
-    -- where
-    --     get_cycle(hs.rpt_yr) >= :START_YEAR
+    where
+        get_cycle(hs.rpt_yr) >= :START_YEAR
     group by
         hs.cmte_id,
         get_cycle(hs.rpt_yr)

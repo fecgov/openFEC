@@ -1,13 +1,13 @@
-drop materialized view if exists ofec_f3_reports_mv_tmp;
-create materialized view ofec_f3_reports_mv_tmp as
+drop materialized view if exists ofec_reports_f3_mv_tmp;
+create materialized view ofec_reports_f3_mv_tmp as
 select
     get_cycle(rpt_yr) as cycle,
     cmte_id as committee_id,
-    cvg_start_dt as coverage_start_date,
-    cvg_end_dt as coverage_end_date,
+    to_timestamp(cvg_start_dt) as coverage_start_date,
+    to_timestamp(cvg_end_dt) as coverage_end_date,
+    receipt_dt as receipt_date,
     rpt_yr as report_year,
     ttl_contb as total_contributions_period,
-    ttl_contb_ref as total_contribution_refunds_period,
     net_contb as net_contributions_period,
     op_exp_per as total_operating_expenditures_period,
     offsets_to_op_exp as total_offsets_to_operating_expenditures_period,
@@ -18,14 +18,12 @@ select
     indv_item_contb as individual_itemized_contributions_period,
     indv_unitem_contb as individual_unitemized_contributions_period,
     indv_contb as total_individual_contributions_period,
-    pty_cmte_contb as refunded_political_party_committee_contributions_period,
     oth_cmte_contb as other_political_committee_contributions_period,
     cand_cntb as candidate_contribution_period,
     tranf_from_other_auth_cmte as transfers_from_other_authorized_committee_period,
     cand_loan as loans_made_by_candidate_period,
     oth_loans as all_other_loans_period,
     ttl_loans as total_loans_received_period,
-    offsets_to_op_exp as offsets_to_operating_expenditures_period,
     other_receipts as other_receipts_period,
     ttl_receipts as total_receipts_period,
     op_exp_per as operating_expenditures_period,
@@ -40,6 +38,7 @@ select
     other_disb_per as other_disbursements_period,
     ttl_disb as total_disbursements_period,
     coh_bop as cash_on_hand_beginning_period,
+    rpt_tp as report_type,
     orig_sub_id as sub_id
 from disclosure.v_sum_and_det_sum_report
 where
@@ -47,16 +46,15 @@ where
 ;
 
 
-create unique index on ofec_f3_reports_mv_tmp(sub_id);
+create unique index on ofec_reports_f3_mv_tmp(sub_id);
 
-create index on ofec_f3_reports_mv_tmp(cycle, sub_id);
-create index on ofec_f3_reports_mv_tmp(report_type, sub_id);
-create index on ofec_f3_reports_mv_tmp(report_year, sub_id);
-create index on ofec_f3_reports_mv_tmp(committee_id, sub_id);
-create index on ofec_f3_reports_mv_tmp(coverage_end_date, sub_id);
-create index on ofec_f3_reports_mv_tmp(coverage_start_date, sub_id);
-create index on ofec_f3_reports_mv_tmp(beginning_image_number, sub_id);
-create index on ofec_f3_reports_mv_tmp(is_amended, sub_id);
-create index on ofec_f3_reports_mv_tmp(total_receipts_period, sub_id);
-create index on ofec_f3_reports_mv_tmp(total_disbursements_period, sub_id);
-create index on ofec_f3_reports_mv_tmp(receipt_date, sub_id);
+create index on ofec_reports_f3_mv_tmp(cycle, sub_id);
+create index on ofec_reports_f3_mv_tmp(report_type, sub_id);
+create index on ofec_reports_f3_mv_tmp(report_year, sub_id);
+create index on ofec_reports_f3_mv_tmp(committee_id, sub_id);
+create index on ofec_reports_f3_mv_tmp(coverage_end_date, sub_id);
+create index on ofec_reports_f3_mv_tmp(coverage_start_date, sub_id);
+-- create index on ofec_reports_f3_mv_tmp(beginning_image_number, sub_id);
+create index on ofec_reports_f3_mv_tmp(total_receipts_period, sub_id);
+create index on ofec_reports_f3_mv_tmp(total_disbursements_period, sub_id);
+create index on ofec_reports_f3_mv_tmp(receipt_date, sub_id);
