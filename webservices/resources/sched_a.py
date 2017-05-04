@@ -80,8 +80,8 @@ class ScheduleAView(ItemizedResource):
         if kwargs.get('line_number'):
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
-                query = query.filter_by(filing_form = form)
-                query = query.filter_by(line_number = line_no)
+                query = query.filter_by(filing_form=form.upper())
+                query = query.filter_by(line_number=line_no)
         return query
 
 @doc(
