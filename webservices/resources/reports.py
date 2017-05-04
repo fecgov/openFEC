@@ -22,7 +22,7 @@ reports_schema_map = {
 reports_as_amended_schema_map = {
     'P': (models.CommitteeReportsPresidential, schemas.CommitteeReportsPresidentialPageSchema),
     'H': (models.CommitteeReportsF3, schemas.AsAmendedReportsPageSchema),
-    'S': (models.CommitteeReportsHouseSenate, schemas.CommitteeReportsHouseSenatePageSchema),
+    'S': (models.CommitteeReportsF3, schemas.AsAmendedReportsPageSchema),
     'I': (models.CommitteeReportsIEOnly, schemas.CommitteeReportsIEOnlyPageSchema),
 }
 

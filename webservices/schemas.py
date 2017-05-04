@@ -415,9 +415,6 @@ CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
 CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
 
-
-
-
 make_reports_as_amended_schema = functools.partial(
     make_schema,
     fields={
@@ -432,22 +429,22 @@ make_reports_as_amended_schema = functools.partial(
         'end_image_number': ma.fields.Str(),
         'fec_file_id': ma.fields.Str(),
     },
-    options={'exclude': ('committee')},
+    options={'exclude': ('committee',)},
 )
 
 augment_models(
-    make_reports_schema,
-    # models.CommitteeReportsF3P,
+    make_reports_as_amended_schema,
+    models.CommitteeReportsPresidential,
     models.CommitteeReportsF3,
-    # models.CommitteeReportsF3X,
-    # models.CommitteeReportsF5,
+    models.CommitteeReportsPacParty,
+    models.CommitteeReportsIEOnly,
 )
 
 reports_as_amended_schemas = (
-    # schemas['CommitteeReportsPresidentialSchema'],
+    schemas['CommitteeReportsPresidentialSchema'],
     schemas['CommitteeReportsF3Schema'],
-    # schemas['CommitteeReportsPacPartySchema'],
-    # schemas['CommitteeReportsIEOnlySchema'],
+    schemas['CommitteeReportsPacPartySchema'],
+    schemas['CommitteeReportsIEOnlySchema'],
 )
 AsAmendedReportsSchema = type('AsAmendedReportsSchema', reports_as_amended_schemas, {})
 AsAmendedReportsPageSchema = make_page_schema(AsAmendedReportsSchema)
