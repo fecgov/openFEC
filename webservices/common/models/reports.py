@@ -224,6 +224,46 @@ class CommitteeReportsHouseSenate(CommitteeReports):
         )
 
 
+class CommitteeReportsF3(CommitteeReports):
+    __tablename__ = 'ofec_f3_reports_mv'
+
+    aggregate_amount_personal_contributions_general = db.Column(db.Numeric(30, 2))#missing
+    aggregate_contributions_personal_funds_primary = db.Column(db.Numeric(30, 2))#missing
+    all_other_loans_period = db.Column(db.Numeric(30, 2))#mapped
+    candidate_contribution_period = db.Column(db.Numeric(30, 2))#mapped
+    gross_receipt_authorized_committee_general = db.Column(db.Numeric(30, 2))#missing
+    gross_receipt_authorized_committee_primary = db.Column(db.Numeric(30, 2))#missing
+    gross_receipt_minus_personal_contribution_general = db.Column(db.Numeric(30, 2))#missing
+    gross_receipt_minus_personal_contributions_primary = db.Column(db.Numeric(30, 2))#missing
+    loan_repayments_candidate_loans_period = db.Column(db.Numeric(30, 2))#mapped
+    loan_repayments_other_loans_period = db.Column(db.Numeric(30, 2))#mapped
+    loans_made_by_candidate_period = db.Column(db.Numeric(30, 2))#mapped
+    net_contributions_period = db.Column(db.Numeric(30, 2), index=True)#mapped
+    net_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    other_receipts_period = db.Column(db.Numeric(30, 2))#mapped
+    subtotal_period = db.Column(db.Numeric(30, 2))#mapped
+    total_contribution_refunds_col_total_period = db.Column(db.Numeric(30, 2))#mapped, but rename to match column above
+    total_contributions_column_total_period = db.Column(db.Numeric(30, 2))#missing
+    total_loan_repayments_made_period = db.Column(db.Numeric(30, 2))#mapped
+    total_loans_received_period = db.Column(db.Numeric(30, 2))#mapped
+    total_offsets_to_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    total_operating_expenditures_period = db.Column(db.Numeric(30, 2))#mapped
+    transfers_from_other_authorized_committee_period = db.Column(db.Numeric(30, 2))#mapped
+    transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))#mapped
+
+
+    @property
+    def has_pdf(self):
+        committee = self.committee
+        return (
+            self.report_year and committee and
+            (
+                committee.committee_type == 'H' and self.report_year >= 1996 or
+                committee.committee_type == 'S' and self.report_year >= 2000
+            )
+        )
+
 class CommitteeReportsPacParty(CommitteeReports):
     __tablename__ = 'ofec_reports_pacs_parties_mv'
 

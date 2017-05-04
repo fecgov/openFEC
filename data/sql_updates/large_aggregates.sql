@@ -19,12 +19,13 @@ with candidates as (
         other_disb_per
     from fec_vsum_f3p_vw
     where most_recent_filing_flag like 'Y'
+    and get_cycle(rpt_yr) >= 2008
     union all
     select
         get_cycle(rpt_yr) as cycle,
         cmte_id,
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
+        extract(month from to_timestamp(cvg_end_dt)) as month,
+        extract(year from to_timestamp(cvg_end_dt)) as year,
         ttl_receipts,
         pty_cmte_contb,
         oth_cmte_contb,
@@ -34,7 +35,8 @@ with candidates as (
         ttl_loan_repymts,
         ttl_contb_ref,
         other_disb_per
-    from v_sum_and_det_sum_report
+    from disclosure.v_sum_and_det_sum_report
+    where get_cycle(rpt_yr) >= 2008
 ),
 -- Remove candidate activity that does not apply to the current election
 cand as (
@@ -119,6 +121,7 @@ pac_totals as (
         most_recent_filing_flag like 'Y'
         and ofec_committee_detail_mv_tmp.committee_type in ('N', 'Q', 'O', 'V', 'W')
         and ofec_committee_detail_mv_tmp.designation <> 'J'
+        and cycle >= 2008
     group by
         month,
         year
@@ -163,6 +166,7 @@ party_totals as (
         -- excluding host conventions because they have different rules than party committees
         and cmte_id not in ('C00578419', 'C00485110', 'C00422048', 'C00567057', 'C00483586', 'C00431791', 'C00571133',
             'C00500405', 'C00435560', 'C00572958', 'C00493254', 'C00496570', 'C00431593')
+        and cycle >= 2008
     group by
         month,
         year

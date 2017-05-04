@@ -76,6 +76,7 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
     if follower.strip()
 ]
+print(app.config['SQLALCHEMY_FOLLOWERS'])
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
@@ -165,6 +166,7 @@ api.add_resource(
 api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
 api.add_resource(totals.CandidateTotalsView, '/candidate/<string:candidate_id>/totals/')
 api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
+api.add_resource(reports.ReportsAsAmended, '/reports-as-amended/<string:committee_type>/')
 api.add_resource(reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/')
 api.add_resource(search.CandidateNameSearch, '/names/candidates/')
 api.add_resource(search.CommitteeNameSearch, '/names/committees/')
@@ -269,6 +271,7 @@ apidoc.register(committees.CommitteeView, blueprint='v1')
 apidoc.register(committees.CommitteeList, blueprint='v1')
 apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
+apidoc.register(reports.ReportsAsAmended, blueprint='v1')
 apidoc.register(reports.CommitteeReportsView, blueprint='v1')
 apidoc.register(reports.EFilingSummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
