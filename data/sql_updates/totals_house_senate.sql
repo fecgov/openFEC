@@ -10,7 +10,7 @@ with last_subset as (
         hs.rpt_yr,
         get_cycle(hs.rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report hs
-    left join ofec_filings_mv of on hs.orig_sub_id = of.sub_id
+    left join ofec_filings_mv_tmp of on hs.orig_sub_id = of.sub_id
     where
         get_cycle(hs.rpt_yr) >= :START_YEAR
     order by
@@ -29,7 +29,7 @@ last as(
         ls.rpt_yr,
         ls.cycle
     from last_subset ls
-    left join ofec_filings_mv of on ls.orig_sub_id = of.sub_id
+    left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
 ), cash_beginning_period as (
     select distinct on (hs.cmte_id, get_cycle(rpt_yr))
         coh_bop as cash_on_hand,
