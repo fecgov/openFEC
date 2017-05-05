@@ -1,92 +1,117 @@
 drop materialized view if exists ofec_totals_presidential_mv_tmp cascade;
 create materialized view ofec_totals_presidential_mv_tmp as
-with last as (
-    select distinct on (cmte_id, election_cycle) *
-    from fec_vsum_f3p_vw
-    order by
-        cmte_id,
-        election_cycle,
-        cvg_end_dt desc
-), cash_beginning_period as (
-	  select distinct on (cmte_id, election_cycle)
-	      cmte_id as committee_id,
-	      election_cycle as cycle,
-	      coh_bop as cash_on_hand
-	  from
-        fec_vsum_f3p_vw
+with last_subset as (
+    select distinct on (cmte_id, cycle)
+        p.orig_sub_id,
+        p.cmte_id,
+        p.coh_cop,
+        p.debts_owed_by_cmte,
+        p.debts_owed_to_cmte,
+        p.net_contb,
+        p.net_op_exp,
+        p.rpt_yr,
+        get_cycle(p.rpt_yr) as cycle
+    from disclosure.v_sum_and_det_sum_report p
     where
-        most_recent_filing_flag like 'Y'
-        and election_cycle >= :START_YEAR
+        get_cycle(p.rpt_yr) >= :START_YEAR
     order by
-        cmte_id,
-        election_cycle,
-        cvg_end_dt asc
-), aggregate_filings as(
+        p.cmte_id,
+        cycle,
+        to_timestamp(cvg_end_dt) desc
+),
+last as(
     select
-        row_number() over () as idx,
+        ls.orig_sub_id,
+        ls.cmte_id,
+        ls.coh_cop,
+        ls.debts_owed_by_cmte,
+        ls.debts_owed_to_cmte,
+        ls.net_contb,
+        ls.net_op_exp,
+        ls.rpt_yr,
+        ls.cycle,
+        of.beginning_image_number,
+        of.report_type_full,
+    from last_subset ls
+    left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
+),
+cash_beginning_period as (
+	  select distinct on (p.cmte_id, get_cycle(rpt_yr))
+	      cmoh_bop as cash_on_hand,
         cmte_id as committee_id,
-        election_cycle as cycle,
-        min(p.cvg_start_dt) as coverage_start_date,
-        max(p.cvg_end_dt) as coverage_end_date,
-        sum(p.cand_contb_per) as candidate_contribution,
-        sum(p.ttl_contb_ref_per) as contribution_refunds,
-        sum(p.ttl_contb_per) as contributions,
-        sum(p.ttl_disb_per) as disbursements,
-        sum(p.exempt_legal_acctg_disb_per) as exempt_legal_accounting_disbursement,
+        get_cycle(rpt_yr) as cycle
+    from disclosure.v_sum_and_det_sum_report p
+    where
+        get_cycle(rpt_yr) >= :START_YEAR
+    order by
+        p.cmte_id,
+        get_cycle(rpt_yr),
+        to_timestamp(p.cvg_end_dt) asc
+)
+    select
+        max(p.orig_sub_id) as sub_id,
+        p.cmte_id as committee_id,
+        get_cycle(p.rpt_yr)  as cycle,
+        min(to_timestamp(p.cvg_start_dt)) as coverage_start_date,
+        max(to_timestamp(p.cvg_end_dt)) as coverage_end_date,
+        sum(p.CAND_CNTB) as candidate_contribution,
+        sum(p.POL_PTY_CMTE_CONTB + p.OTH_CMTE_REF) as contribution_refunds,
+        sum(p.TTL_CONTB) as contributions,
+        sum(p.TTL_DISB) as disbursements,
+        sum(p.EXEMPT_LEGAL_ACCTG_DISB) as exempt_legal_accounting_disbursement,
         sum(p.fed_funds_per) as federal_funds,
         sum(p.fed_funds_per) > 0 as federal_funds_flag,
-        sum(p.fndrsg_disb_per) as fundraising_disbursements,
-        sum(p.ttl_indiv_contb_per) as individual_contributions,
-        sum(p.indv_unitem_contb_per) as individual_unitemized_contributions,
-        sum(p.indv_item_contb_per) as individual_itemized_contributions,
-        sum(p.ttl_loans_received_per) as loans_received,
-        sum(p.loans_received_from_cand_per) as loans_received_from_candidate,
-        sum(p.ttl_loan_repymts_made_per) as loan_repayments_made,
-        sum(p.offsets_to_fndrsg_exp_per) as offsets_to_fundraising_expenditures,
-        sum(p.offsets_to_legal_acctg_per) as offsets_to_legal_accounting,
-        sum(p.offsets_to_op_exp_per) as offsets_to_operating_expenditures,
-        sum(p.ttl_offsets_to_op_exp_per) as total_offsets_to_operating_expenditures,
+        sum(p.FNDRSG_DISB) as fundraising_disbursements,
+        sum(p.INDV_REF) as individual_contributions,
+        sum(p.INDV_UNITEM_CONTB) as individual_unitemized_contributions,
+        sum(p.INDV_ITEM_CONTB) as individual_itemized_contributions,
+        sum(p.ttl_loans) as loans_received,
+        sum(p.CAND_LOAN) as loans_received_from_candidate,
+        sum(p.CAND_LOAN_REPYMNT + p.OTH_LOAN_REPYMTS) as loan_repayments_made,
+        sum(p.offsets_to_fndrsg) as offsets_to_fundraising_expenditures,
+        sum(p.OFFSETS_TO_LEGAL_ACCTG) as offsets_to_legal_accounting,
+        sum(p.OFFSETS_TO_OP_EXP) as offsets_to_operating_expenditures,
+        sum(p.OFFSETS_TO_OP_EXP + p.offsets_to_fndrsg + VS.OFFSETS_TO_LEGAL_ACCTG) as total_offsets_to_operating_expenditures,
         sum(p.op_exp_per) as operating_expenditures,
         sum(p.other_disb_per) as other_disbursements,
-        sum(p.other_loans_received_per) as other_loans_received,
-        sum(p.other_pol_cmte_contb_per) as other_political_committee_contributions,
-        sum(p.other_receipts_per) as other_receipts,
-        sum(p.pol_pty_cmte_contb_per) as political_party_committee_contributions,
-        sum(p.ttl_receipts_per) as receipts,
-        sum(p.ref_indv_contb_per) as refunded_individual_contributions, -- renamed from "refunds_"
-        sum(p.ref_other_pol_cmte_contb_per) as refunded_other_political_committee_contributions,
-        sum(p.ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
-        sum(p.repymts_loans_made_by_cand_per) as repayments_loans_made_by_candidate,
-        sum(p.repymts_other_loans_per) as repayments_other_loans,
-        sum(p.tranf_from_affilated_cmte_per) as transfers_from_affiliated_committee,
-        sum(p.tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee,
+        sum(p.OTH_LOANS) as other_loans_received,
+        sum(p.OTH_CMTE_CONTB) as other_political_committee_contributions,
+        sum(p.OTHER_RECEIPTS) as other_receipts,
+        sum(p.POL_PTY_CMTE_CONTB) as political_party_committee_contributions,
+        sum(p.TTL_RECEIPTS) as receipts,
+        sum(p.INDV_REF) as refunded_individual_contributions, -- renamed from "refunds_"
+        sum(p.OTH_CMTE_REF) as refunded_other_political_committee_contributions,
+        sum(p.POL_PTY_CMTE_CONTB) as refunded_political_party_committee_contributions,
+        sum(p.CAND_LOAN_REPYMNT) as repayments_loans_made_by_candidate,
+        sum(p.OTH_LOAN_REPYMTS) as repayments_other_loans,
+        sum(p.TRANF_FROM_OTHER_AUTH_CMTE) as transfers_from_affiliated_committee,
+        sum(p.TRANF_TO_OTHER_AUTH_CMTE) as transfers_to_other_authorized_committee,
         sum(p.coh_bop) as cash_on_hand_beginning_of_period,
         sum(p.debts_owed_by_cmte) as debts_owed_by_cmte,
         sum(p.debts_owed_to_cmte) as debts_owed_to_cmte,
-        max(last.net_contb_sum_page_per) as net_contributions,
-        max(last.net_op_exp_sum_page_per) as net_operating_expenditures,
-        max(last.rpt_tp_desc) as last_report_type_full,
-        max(last.begin_image_num) as last_beginning_image_number,
+        max(last.net_contb) as net_contributions,
+        max(last.net_op_exp) as net_operating_expenditures,
+        max(last.report_type_full) as last_report_type_full,
+        max(last.beginning_image_number) as last_beginning_image_number,
+        min(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_period,
         max(last.coh_cop) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
         max(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
         max(last.rpt_yr) as last_report_year
     from
-        fec_vsum_f3p_vw p
-        inner join last using (cmte_id, election_cycle)
+        disclosure.v_sum_and_det_sum_report p
+        inner join last on p.cmte_id = last.cmte_id and get_cycle(p.rpt_yr) = last.cycle
+        left join cash_beginning_period on
+            p.cmte_id = cash_beginning_period.committee_id and
+            get_cycle(p.rpt_yr) = cash_beginning_period.cycle
     where
-        p.most_recent_filing_flag like 'Y'
-        and election_cycle >= :START_YEAR
+        get_cycle(p.rpt_yr) >= :START_YEAR
     group by
-        cmte_id,
-        p.election_cycle)
-select af.*,
-	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period
-	from aggregate_filings af
-	left join cash_beginning_period using (committee_id, cycle)
+        p.cmte_id,
+        get_cycle(p.rpt_yr)
 ;
 
-create unique index on ofec_totals_presidential_mv_tmp(idx);
+create unique index on ofec_totals_presidential_mv_tmp(sub_id);
 
-create index on ofec_totals_presidential_mv_tmp(cycle, idx);
-create index on ofec_totals_presidential_mv_tmp(committee_id, idx);
+create index on ofec_totals_presidential_mv_tmp(cycle, sub_id);
+create index on ofec_totals_presidential_mv_tmp(committee_id, sub_id);
