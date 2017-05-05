@@ -1,8 +1,8 @@
 
 -- Creates materialized view of the most recent report per committee, per cycle
--- done in two steps to reduce the scope of the join
-drop materialized view if exists ofec_first_report_mv_tmp;
+drop materialized view if exists ofec_totals_combined_mv_tmp;
 create materialized view ofec_first_report_mv_tmp as
+-- done in two steps to reduce the scope of the join
 with last_subset as (
     select distinct on (cmte_id, cycle)
         orig_sub_id,
