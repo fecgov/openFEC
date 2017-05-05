@@ -6,16 +6,13 @@ select
     cycle,
     coverage_start_date,
     coverage_end_date,
-    total_independent_contributions,
-    total_independent_expenditures,
+    contributions as total_independent_contributions,
+    independent_expenditures as total_independent_expenditures,
     last_beginning_image_number
 from
     ofec_totals_combined_mv_tmp
 where
     form_type = 'F5'
-group by
-    cmte_id,
-    get_cycle(rpt_yr)
 ;
 
 create unique index on ofec_totals_ie_only_mv_tmp(sub_id);
