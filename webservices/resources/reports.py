@@ -19,13 +19,6 @@ reports_schema_map = {
     'I': (models.CommitteeReportsIEOnly, schemas.CommitteeReportsIEOnlyPageSchema),
 }
 
-reports_as_amended_schema_map = {
-    'P': (models.CommitteeReportsPresidential, schemas.CommitteeReportsPresidentialPageSchema),
-    'H': (models.CommitteeReportsF3, schemas.AsAmendedReportsPageSchema),
-    'S': (models.CommitteeReportsF3, schemas.AsAmendedReportsPageSchema),
-    'I': (models.CommitteeReportsIEOnly, schemas.CommitteeReportsIEOnlyPageSchema),
-}
-
 efile_reports_schema_map = {
     'P': (models.BaseF3PFiling, schemas.BaseF3PFilingSchema, schemas.BaseF3PFilingPageSchema),
     'H': (models.BaseF3Filing, schemas.BaseF3FilingSchema, schemas.BaseF3FilingPageSchema),
@@ -191,82 +184,6 @@ class CommitteeReportsView(utils.Resource):
 
     def build_query(self, committee_id=None, committee_type=None, **kwargs):
         reports_class, reports_schema = reports_schema_map.get(
-            self._resolve_committee_type(
-                committee_id=committee_id,
-                committee_type=committee_type,
-                **kwargs
-            ),
-            default_schemas,
-        )
-        query = reports_class.query
-        # Eagerly load committees if applicable
-
-        if hasattr(reports_class, 'committee'):
-            query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
-
-        if committee_id is not None:
-            query = query.filter_by(committee_id=committee_id)
-        if kwargs.get('year'):
-            query = query.filter(reports_class.report_year.in_(kwargs['year']))
-        if kwargs.get('cycle'):
-            query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
-        if kwargs.get('beginning_image_number'):
-            query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-        if kwargs.get('report_type'):
-            include, exclude = parse_types(kwargs['report_type'])
-            if include:
-                query = query.filter(reports_class.report_type.in_(include))
-            elif exclude:
-                query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
-
-        if kwargs.get('is_amended') is not None:
-            query = query.filter(reports_class.is_amended == kwargs['is_amended'])
-
-        query = filters.filter_range(query, kwargs, get_range_filters())
-        query = filters.filter_match(query, kwargs, get_match_filters())
-        query = filters.filter_multi(query, kwargs, get_multi_filters())
-        return query, reports_class, reports_schema
-
-    def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
-        if committee_id is not None:
-            query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
-            if kwargs.get('cycle'):
-                query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
-            query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
-            committee = query.first_or_404()
-            return committee.committee_type
-        elif committee_type is not None:
-            return reports_type_map.get(committee_type)
-
-
-@doc(
-    tags=['financial'],
-    description=docs.REPORTS,
-    params={
-        'committee_id': {'description': docs.COMMITTEE_ID},
-    },
-)
-class ReportsAsAmended(utils.Resource):
-
-
-    @use_kwargs(args.paging)
-    @use_kwargs(args.committee_reports)
-    @use_kwargs(args.make_multi_sort_args(default=['-coverage_end_date']))
-    @marshal_with(schemas.AsAmendedReportsPageSchema(), apply=False)
-    def get(self, committee_id=None, committee_type=None, **kwargs):
-        query, reports_class, reports_schema = self.build_query(
-            committee_id=committee_id,
-            committee_type=committee_type,
-            **kwargs
-        )
-        if kwargs['sort']:
-            validator = args.IndicesValidator(reports_class)
-            validator(kwargs['sort'])
-        page = utils.fetch_page(query, kwargs, model=reports_class, multi=True)
-        return reports_schema().dump(page).data
-
-    def build_query(self, committee_id=None, committee_type=None, **kwargs):
-        reports_class, reports_schema = reports_as_amended_schema_map.get(
             self._resolve_committee_type(
                 committee_id=committee_id,
                 committee_type=committee_type,
