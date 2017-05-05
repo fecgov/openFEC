@@ -25,6 +25,7 @@ last as(
         ls.coh_cop,
         ls.debts_owed_by_cmte,
         ls.debts_owed_to_cmte,
+        ls.net_contb,
         of.report_type_full,
         ls.rpt_yr,
         ls.cycle
@@ -63,7 +64,6 @@ cash_beginning_period as (
         sum(hs.OTH_LOAN_REPYMTS) as loan_repayments_other_loans,
         sum(hs.TTL_LOANS) as loans,
         sum(hs.CAND_LOAN) as loans_made_by_candidate,
-        sum(hs.net_contb) as net_contributions,
         sum(hs.net_op_exp) as net_operating_expenditures,
         sum(hs.offsets_to_op_exp) as offsets_to_operating_expenditures,
         sum(hs.op_exp_per) as operating_expenditures,
@@ -77,6 +77,7 @@ cash_beginning_period as (
         sum(hs.pol_pty_cmte_contb) as refunded_political_party_committee_contributions,
         sum(hs.tranf_from_other_auth_cmte) as transfers_from_other_authorized_committee,
         sum(hs.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
+        sum(last.net_contb) as net_contributions,
         max(last.report_type_full) as last_report_type_full,
         max(last.beginning_image_number) as last_beginning_image_number,
         min(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_period,
