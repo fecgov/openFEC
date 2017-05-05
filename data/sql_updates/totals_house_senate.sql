@@ -1,21 +1,22 @@
 drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
+-- done in two steps to reduce the scope of the join
 with last_subset as (
     select distinct on (cmte_id, cycle)
-        hs.orig_sub_id,
-        hs.cmte_id,
-        hs.coh_cop,
-        hs.debts_owed_by_cmte,
-        hs.debts_owed_to_cmte,
-        hs.rpt_yr,
-        get_cycle(hs.rpt_yr) as cycle
+        orig_sub_id,
+        cmte_id,
+        coh_cop,
+        debts_owed_by_cmte,
+        debts_owed_to_cmte,
+        rpt_yr,
+        get_cycle(rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report
     where
-        get_cycle(hs.rpt_yr) >= :START_YEAR
+        get_cycle(rpt_yr) >= :START_YEAR
     order by
-        hs.cmte_id,
+        cmte_id,
         cycle,
-        to_timestamp(hs.cvg_end_dt) desc
+        to_timestamp(cvg_end_dt) desc
 ),
 last as(
     select
@@ -31,17 +32,17 @@ last as(
     left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
 ),
 cash_beginning_period as (
-    select distinct on (hs.cmte_id, get_cycle(rpt_yr))
+    select distinct on (cmte_id, get_cycle(rpt_yr))
         coh_bop as cash_on_hand,
         cmte_id as committee_id,
         get_cycle(rpt_yr) as cycle
-    from disclosure.v_sum_and_det_sum_report hs
+    from disclosure.v_sum_and_det_sum_report
     where
         get_cycle(rpt_yr) >= :START_YEAR
     order by
-        hs.cmte_id,
+        cmte_id,
         get_cycle(rpt_yr),
-        to_timestamp(hs.cvg_end_dt) asc
+        to_timestamp(cvg_end_dt) asc
 )
     select
         max(hs.orig_sub_id) as sub_id,
