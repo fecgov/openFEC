@@ -1,21 +1,22 @@
 drop materialized view if exists ofec_totals_presidential_mv_tmp cascade;
 create materialized view ofec_totals_presidential_mv_tmp as
+-- done in two steps to reduce the scope of the join
 with last_subset as (
     select distinct on (cmte_id, cycle)
-        p.orig_sub_id,
-        p.cmte_id,
-        p.coh_cop,
-        p.debts_owed_by_cmte,
-        p.debts_owed_to_cmte,
-        p.net_contb,
-        p.net_op_exp,
-        p.rpt_yr,
-        get_cycle(p.rpt_yr) as cycle
-    from disclosure.v_sum_and_det_sum_report p
+        orig_sub_id,
+        cmte_id,
+        coh_cop,
+        debts_owed_by_cmte,
+        debts_owed_to_cmte,
+        net_contb,
+        net_op_exp,
+        rpt_yr,
+        get_cycle(rpt_yr) as cycle
+    from disclosure.v_sum_and_det_sum_report
     where
-        get_cycle(p.rpt_yr) >= :START_YEAR
+        get_cycle(rpt_yr) >= :START_YEAR
     order by
-        p.cmte_id,
+        cmte_id,
         cycle,
         to_timestamp(cvg_end_dt) desc
 ),
@@ -31,22 +32,22 @@ last as(
         ls.rpt_yr,
         ls.cycle,
         of.beginning_image_number,
-        of.report_type_full,
+        of.report_type_full
     from last_subset ls
     left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
 ),
 cash_beginning_period as (
-	  select distinct on (p.cmte_id, get_cycle(rpt_yr))
-	      cmoh_bop as cash_on_hand,
+	  select distinct on (cmte_id, get_cycle(rpt_yr))
+	    coh_bop as cash_on_hand,
         cmte_id as committee_id,
         get_cycle(rpt_yr) as cycle
-    from disclosure.v_sum_and_det_sum_report p
+    from disclosure.v_sum_and_det_sum_report
     where
         get_cycle(rpt_yr) >= :START_YEAR
     order by
-        p.cmte_id,
+        cmte_id,
         get_cycle(rpt_yr),
-        to_timestamp(p.cvg_end_dt) asc
+        to_timestamp(cvg_end_dt) asc
 )
     select
         max(p.orig_sub_id) as sub_id,
@@ -54,38 +55,38 @@ cash_beginning_period as (
         get_cycle(p.rpt_yr)  as cycle,
         min(to_timestamp(p.cvg_start_dt)) as coverage_start_date,
         max(to_timestamp(p.cvg_end_dt)) as coverage_end_date,
-        sum(p.CAND_CNTB) as candidate_contribution,
-        sum(p.POL_PTY_CMTE_CONTB + p.OTH_CMTE_REF) as contribution_refunds,
-        sum(p.TTL_CONTB) as contributions,
-        sum(p.TTL_DISB) as disbursements,
-        sum(p.EXEMPT_LEGAL_ACCTG_DISB) as exempt_legal_accounting_disbursement,
+        sum(p.cand_cntb) as candidate_contribution,
+        sum(p.pol_pty_cmte_contb + p.oth_cmte_ref) as contribution_refunds,
+        sum(p.ttl_contb) as contributions,
+        sum(p.ttl_disb) as disbursements,
+        sum(p.exempt_legal_acctg_disb) as exempt_legal_accounting_disbursement,
         sum(p.fed_funds_per) as federal_funds,
         sum(p.fed_funds_per) > 0 as federal_funds_flag,
-        sum(p.FNDRSG_DISB) as fundraising_disbursements,
-        sum(p.INDV_REF) as individual_contributions,
-        sum(p.INDV_UNITEM_CONTB) as individual_unitemized_contributions,
-        sum(p.INDV_ITEM_CONTB) as individual_itemized_contributions,
+        sum(p.fndrsg_disb) as fundraising_disbursements,
+        sum(p.indv_ref) as individual_contributions,
+        sum(p.indv_unitem_contb) as individual_unitemized_contributions,
+        sum(p.indv_item_contb) as individual_itemized_contributions,
         sum(p.ttl_loans) as loans_received,
-        sum(p.CAND_LOAN) as loans_received_from_candidate,
-        sum(p.CAND_LOAN_REPYMNT + p.OTH_LOAN_REPYMTS) as loan_repayments_made,
+        sum(p.cand_loan) as loans_received_from_candidate,
+        sum(p.cand_loan_repymnt + p.oth_loan_repymts) as loan_repayments_made,
         sum(p.offsets_to_fndrsg) as offsets_to_fundraising_expenditures,
-        sum(p.OFFSETS_TO_LEGAL_ACCTG) as offsets_to_legal_accounting,
-        sum(p.OFFSETS_TO_OP_EXP) as offsets_to_operating_expenditures,
-        sum(p.OFFSETS_TO_OP_EXP + p.offsets_to_fndrsg + VS.OFFSETS_TO_LEGAL_ACCTG) as total_offsets_to_operating_expenditures,
+        sum(p.offsets_to_legal_acctg) as offsets_to_legal_accounting,
+        sum(p.offsets_to_op_exp) as offsets_to_operating_expenditures,
+        sum(p.offsets_to_op_exp + p.offsets_to_fndrsg + p.offsets_to_legal_acctg) as total_offsets_to_operating_expenditures,
         sum(p.op_exp_per) as operating_expenditures,
         sum(p.other_disb_per) as other_disbursements,
-        sum(p.OTH_LOANS) as other_loans_received,
-        sum(p.OTH_CMTE_CONTB) as other_political_committee_contributions,
-        sum(p.OTHER_RECEIPTS) as other_receipts,
-        sum(p.POL_PTY_CMTE_CONTB) as political_party_committee_contributions,
-        sum(p.TTL_RECEIPTS) as receipts,
-        sum(p.INDV_REF) as refunded_individual_contributions, -- renamed from "refunds_"
-        sum(p.OTH_CMTE_REF) as refunded_other_political_committee_contributions,
-        sum(p.POL_PTY_CMTE_CONTB) as refunded_political_party_committee_contributions,
-        sum(p.CAND_LOAN_REPYMNT) as repayments_loans_made_by_candidate,
-        sum(p.OTH_LOAN_REPYMTS) as repayments_other_loans,
-        sum(p.TRANF_FROM_OTHER_AUTH_CMTE) as transfers_from_affiliated_committee,
-        sum(p.TRANF_TO_OTHER_AUTH_CMTE) as transfers_to_other_authorized_committee,
+        sum(p.oth_loans) as other_loans_received,
+        sum(p.oth_cmte_contb) as other_political_committee_contributions,
+        sum(p.other_receipts) as other_receipts,
+        sum(p.pol_pty_cmte_contb) as political_party_committee_contributions,
+        sum(p.ttl_receipts) as receipts,
+        sum(p.indv_ref) as refunded_individual_contributions,
+        sum(p.oth_cmte_ref) as refunded_other_political_committee_contributions,
+        sum(p.pol_pty_cmte_contb) as refunded_political_party_committee_contributions,
+        sum(p.cand_loan_repymnt) as repayments_loans_made_by_candidate,
+        sum(p.oth_loan_repymts) as repayments_other_loans,
+        sum(p.tranf_from_other_auth_cmte) as transfers_from_affiliated_committee,
+        sum(p.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
         sum(p.coh_bop) as cash_on_hand_beginning_of_period,
         sum(p.debts_owed_by_cmte) as debts_owed_by_cmte,
         sum(p.debts_owed_to_cmte) as debts_owed_to_cmte,
