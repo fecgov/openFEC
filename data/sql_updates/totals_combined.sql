@@ -1,7 +1,7 @@
 
 -- Creates materialized view of the most recent report per committee, per cycle
 drop materialized view if exists ofec_totals_combined_mv_tmp;
-create materialized view ofec_first_report_mv_tmp as
+create materialized view ofec_totals_combined_mv_tmp as
 -- done in two steps to reduce the scope of the join
 with last_subset as (
     select distinct on (cmte_id, cycle)
@@ -71,8 +71,8 @@ first as (
         max(last.coh_cop) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee, -- confirm this is outstanding debt and not a total taken out this period
         max(last.debts_owed_to_cmte) as last_debts_owed_to_committee, -- confirm this is outstanding debt and not a total taken out this period
-        max(last.rpt_type) as last_report_type,
-        max(last.rpt_type_full) as last_report_type_full,
+        max(last.report_type) as last_report_type,
+        max(last.report_type_full) as last_report_type_full,
         max(last.rpt_yr) as last_report_year,
         max(last.coverage_end_date) as coverage_end_date,
         max(vsd.orig_sub_id) as sub_id,
@@ -145,7 +145,7 @@ first as (
         vsd.cmte_id as committee_id,
         -- double check this makes sense down stream
         -- form type can change if a committee changes this should create 2 records
-        vsd.form_type,
+        vsd.form_tp_cd as form_type,
         -- make it null by form type to be clear candidate's can't do independent expenditures
         case
             when max(last.form_type) in ('F3', 'F3P') then
@@ -162,7 +162,7 @@ first as (
     --     get_cycle(vsd.rpt_yr) >= :START_YEAR
     group by
         vsd.cmte_id,
-        vsd.form_type,
+        vsd.form_tp_cd,
         get_cycle(vsd.rpt_yr)
 ;
 

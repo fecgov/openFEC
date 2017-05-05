@@ -54,9 +54,10 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('totals_house_senate', 'totals_combined'),
-        ('totals_presidential', 'totals_combined'),
-        ('totals_pac_party', 'totals_combined'),
+        ('totals_combined', 'totals_house_senate'),
+        ('totals_combined', 'totals_presidential'),
+        ('totals_combined', 'totals_pac_party'),
+        ('totals_combined', 'totals_ie'),
     ])
 
     graph.add_edges_from([
@@ -64,15 +65,18 @@ def get_graph():
         ('totals_combined', 'committee_fulltext'),
     ])
 
-    graph.add_edge('committee_detail', 'totals_party')
-    graph.add_edge('committee_detail', 'totals_pac')
+    graph.add_edge('committee_detail', 'totals_pac_party')
 
     graph.add_edges_from([
         ('candidate_detail', 'candidate_fulltext'),
         ('totals_combined', 'candidate_fulltext'),
     ])
 
-    graph.add_edge('totals_combined', 'sched_a_by_size_merged')
+    graph.add_edges_from([
+        ('totals_combined', 'sched_a_by_size_merged'),
+        ('totals_presidential', 'sched_a_by_size_merged'),
+        ('totals_house_senate', 'sched_a_by_size_merged'),
+    ])
 
     graph.add_edges_from([
         ('totals_house_senate', 'candidate_aggregates'),
@@ -82,8 +86,7 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('filings', 'totals_house_senate'),
-        ('filings', 'totals_presidential'),
+        ('filings', 'totals_combined'),
     ])
 
     graph.add_edges_from([

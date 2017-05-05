@@ -34,13 +34,17 @@ select
     refunded_individual_contributions,
     refunded_other_political_committee_contributions,
     refunded_political_party_committee_contributions,
-    epayments_loans_made_by_candidate,
+    -- naming variation
+    loan_repayments_made as payments_loans_made_by_candidate,
     repayments_other_loans,
     transfers_from_affiliated_committee,
     transfers_to_other_authorized_committee,
-    cash_on_hand_beginning_of_period,
-    debts_owed_by_cmte,
-    debts_owed_to_cmte,
+    -- naming variation
+    cash_on_hand_beginning_period as cash_on_hand_beginning_of_period,
+    -- naming variation
+    last_debts_owed_by_committee as debts_owed_by_cmte,
+    -- naming variation
+    last_debts_owed_to_committee as debts_owed_to_cmte,
     net_contributions,
     net_operating_expenditures,
     last_report_type_full,

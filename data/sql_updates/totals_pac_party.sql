@@ -53,7 +53,8 @@ select
      last_report_type_full,
      last_beginning_image_number,
      last_cash_on_hand_end_period,
-     last_cash_on_hand_beginning_period,
+     -- last_cash_on_hand_beginning_period,
+     cash_on_hand_beginning_period,
      last_debts_owed_by_committee,
      last_debts_owed_to_committee,
      last_report_year
@@ -72,11 +73,11 @@ create index on ofec_totals_pacs_parties_mv_tmp(committee_id, sub_id );
 drop materialized view if exists ofec_totals_pacs_mv_tmp;
 create materialized view ofec_totals_pacs_mv_tmp as
 select
-    * ,
+    pp.* ,
     comm_dets.committee_type as committee_type
 from
-    ofec_totals_pacs_parties_mv_tmp
-    inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
+    ofec_totals_pacs_parties_mv_tmp pp
+    inner join ofec_committee_detail_mv_tmp comm_dets using(committee_id)
 where
     (comm_dets.committee_type = 'N' or comm_dets.committee_type = 'Q'
     or comm_dets.committee_type = 'O' or comm_dets.committee_type = 'V'
@@ -87,11 +88,11 @@ where
 drop materialized view if exists ofec_totals_parties_mv_tmp;
 create materialized view ofec_totals_parties_mv_tmp as
 select
-    * ,
+    pp.* ,
     comm_dets.committee_type as committee_type
 from
-    ofec_totals_pacs_parties_mv_tmp
-    inner join ofec_committee_detail_mv_tmp comm_dets on cmte_id = comm_dets.committee_id
+    ofec_totals_pacs_parties_mv_tmp pp
+    inner join ofec_committee_detail_mv_tmp comm_dets using(committee_id)
 where
     (comm_dets.committee_type = 'X' or comm_dets.committee_type = 'Y')
 ;
