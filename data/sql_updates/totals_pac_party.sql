@@ -62,6 +62,7 @@ select
      comm_dets.designation
 from
     ofec_totals_combined_mv_tmp
+    inner join ofec_committee_detail_mv_tmp comm_dets using(committee_id)
 where
     form_type = 'F3X'
 ;
@@ -70,31 +71,24 @@ create unique index on ofec_totals_pacs_parties_mv_tmp(sub_id);
 
 create index on ofec_totals_pacs_parties_mv_tmp(cycle, sub_id);
 create index on ofec_totals_pacs_parties_mv_tmp(committee_id, sub_id );
-
+create index on ofec_totals_pacs_parties_mv_tmp(committee_type, sub_id );
+create index on ofec_totals_pacs_parties_mv_tmp(designation, sub_id );
 
 drop materialized view if exists ofec_totals_pacs_mv_tmp;
 create materialized view ofec_totals_pacs_mv_tmp as
-select
-    pp.* ,
-    comm_dets.committee_type as committee_type
-from
-    ofec_totals_pacs_parties_mv_tmp pp
-    inner join ofec_committee_detail_mv_tmp comm_dets using(committee_id)
+select *
+from ofec_totals_pacs_parties_mv_tmp
 where
-    (comm_dets.committee_type = 'N' or comm_dets.committee_type = 'Q'
-    or comm_dets.committee_type = 'O' or comm_dets.committee_type = 'V'
-    or comm_dets.committee_type = 'W')
+    (committee_type = 'N' or committee_type = 'Q'
+    or committee_type = 'O' or committee_type = 'V'
+    or committee_type = 'W')
 ;
 
 
 drop materialized view if exists ofec_totals_parties_mv_tmp;
 create materialized view ofec_totals_parties_mv_tmp as
-select
-    pp.* ,
-    comm_dets.committee_type as committee_type
-from
-    ofec_totals_pacs_parties_mv_tmp pp
-    inner join ofec_committee_detail_mv_tmp comm_dets using(committee_id)
+select *
+from ofec_totals_pacs_parties_mv_tmp pp
 where
-    (comm_dets.committee_type = 'X' or comm_dets.committee_type = 'Y')
+    (committee_type = 'X' or committee_type = 'Y')
 ;

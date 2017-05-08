@@ -4,34 +4,29 @@ create materialized view ofec_entity_chart_mv_tmp as
 with cand_totals as (
     select
         'candidate'::text as type,
-        month,
-        year,
-        sum(coalesce(cand.ttl_receipts,0) -
+        extract(month from coverage_end_date) as month,
+        extract(year from coverage_end_date) as year,
+        sum(coalesce(receipts,0) -
             (
-                coalesce(cand.pty_cmte_contb ,0) +
-                coalesce(cand.oth_cmte_contb ,0) +
-                coalesce(cand.offsets_to_op_exp,0) +
-                coalesce(cand.ttl_loan_repymts,0) +
-                coalesce(cand.ttl_contb_ref,0)
+                coalesce(political_party_committee_contributions,0) +
+                coalesce(other_political_committee_contributions,0) +
+                coalesce(offsets_to_operating_expenditures,0) +
+                coalesce(loan_repayments,0) +
+                coalesce(contribution_refunds,0)
             )
         ) as candidate_adjusted_total_receipts,
-        sum(coalesce(cand.ttl_disb, 0) -
+        sum(coalesce(disbursements, 0) -
             (
-                coalesce(cand.tranf_to_other_auth_cmte,0) +
-                coalesce(cand.ttl_loan_repymts,0) +
-                coalesce(cand.ttl_contb_ref,0) +
-                coalesce(cand.other_disb_per,0)
+                coalesce(transfers_to_other_authorized_committee,0) +
+                coalesce(loan_repayments,0) +
+                coalesce(contribution_refunds,0) +
+                coalesce(other_disbursements,0)
             )
         ) as candidate_adjusted_total_disbursements
     from
-        disclosure.v_sum_and_det_sum_report
-    inner join
-        -- check we don't need to normalize fec_election_yr
-        disclosure.cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle
-        and cvf.cmte_id = candidates.cmte_id
+        ofec_totals_house_senate_mv_tmp
     where
-        (form_type = 'F3' or form_type = 'F3P')
-        and get_cycle(rpt_yr) >= 2008
+        cycle >= 2008
     group by
         month,
         year
@@ -40,28 +35,28 @@ with cand_totals as (
 pac_totals as (
     select
         'pac'::text as type,
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
-        sum(coalesce(ttl_receipts, 0) -
+        extract(month from coverage_end_date) as month,
+        extract(year from coverage_end_date) as year,
+        sum(coalesce(receipts, 0) -
             (
                 -- contributions from political party committees and other political committees
-                coalesce(pol_pty_cmte_contb_per_i,0) +
+                coalesce(political_party_committee_contributions,0) +
                 -- contributions from political party committees and other political committees
-                coalesce(other_pol_cmte_contb_per_i,0) +
+                coalesce(other_political_committee_contributions,0) +
                 -- offsets to operating expenditures
-                coalesce(offests_to_op_exp,0) +
+                coalesce(offsets_to_operating_expenditures,0) +
                 -- Contribution refunds going out
-                coalesce(fed_cand_contb_ref_per,0) +
+                coalesce(fed_candidate_contribution_refunds,0) +
                 -- Transfers from nonfederal accounts for allocated activities
-                coalesce(tranf_from_nonfed_acct_per,0) +
+                coalesce(transfers_from_nonfed_account,0) +
                 -- loan repayments
                 --coalesce(loan_repymts_received_per,0) +
-                coalesce(loan_repymts_made_per, 0) +
+                coalesce(loan_repayments_other_loans, 0) +
                 -- contribution refunds
-                coalesce(ttl_contb_refund,0)
+                coalesce(contribution_refunds,0)
             )
         ) as pac_adjusted_total_receipts,
-        sum(coalesce(ttl_disb,0) -
+        sum(coalesce(disbursements,0) -
             (
                 -- Nonfederal share of allocated disbursements
                 coalesce(shared_nonfed_op_exp_per,0) +
@@ -77,13 +72,10 @@ pac_totals as (
                 coalesce(other_disb_per,0)
             )
         ) as pac_adjusted_total_disbursements
-    from fec_vsum_f3x_vw
-    left join
-        ofec_committee_detail_mv_tmp on committee_id = cmte_id
+    from ofec_totals_house_senate_mv_tmp
     where
-        most_recent_filing_flag like 'Y'
-        and ofec_committee_detail_mv_tmp.committee_type in ('N', 'Q', 'O', 'V', 'W')
-        and ofec_committee_detail_mv_tmp.designation <> 'J'
+        committee_type in ('N', 'Q', 'O', 'V', 'W')
+        and designation <> 'J'
         and cycle >= 2008
     group by
         month,
@@ -93,41 +85,39 @@ pac_totals as (
 party_totals as (
     select
         'party'::text as type,
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
-        sum(coalesce(ttl_receipts, 0) -
+        extract(month from coverage_end_date) as month,
+        extract(year from coverage_end_date) as year,
+        sum(coalesce(receipts, 0) -
             (
-                coalesce(pol_pty_cmte_contb_per_i,0) +
-                coalesce(other_pol_cmte_contb_per_i,0) +
-                coalesce(offests_to_op_exp,0) +
-                coalesce(fed_cand_contb_ref_per,0) +
-                coalesce(tranf_from_nonfed_acct_per,0) +
+                coalesce(political_party_committee_contributions,0) +
+                coalesce(other_political_committee_contributions,0) +
+                coalesce(offsets_to_operating_expenditures,0) +
+                coalesce(fed_candidate_contribution_refunds,0) +
+                coalesce(transfers_from_nonfed_account,0) +
+                -- this was already commented out, want to confirm this
                 -- coalesce(loan_repymts_received_per,0) +
-                coalesce(loan_repymts_made_per, 0) +
-                coalesce(ttl_contb_refund,0)
+                coalesce(loan_repayments_other_loans, 0) +
+                coalesce(contribution_refunds,0)
             )
         ) as party_adjusted_total_receipts,
-        sum(coalesce(ttl_disb,0) -
+        sum(coalesce(disbursements,0) -
             (
-                coalesce(shared_nonfed_op_exp_per,0) +
+                coalesce(shared_nonfed_operating_expenditures,0) +
                 -- confirm var
-                coalesce(tranf_to_affliliated_cmte_per,0) +
+                coalesce(transfers_to_other_authorized_committee,0) +
                 -- coalesce(tranf_to_other_auth_cmte,0) +
-                coalesce(fed_cand_cmte_contb_per,0) +
-                coalesce(loan_repymts_made_per,0) +
-                coalesce(ttl_contb_refund,0) +
-                coalesce(other_disb_per,0)
+                coalesce(fed_candidate_committee_contributions,0) +
+                coalesce(loan_repayments_other_loans,0) +
+                coalesce(contribution_refunds,0) +
+                coalesce(other_disbursements,0)
             )
         ) as party_adjusted_total_disbursements
-    from fec_vsum_f3x_vw
-    left join
-        ofec_committee_detail_mv_tmp on committee_id = cmte_id
+    from ofec_totals_parties_mv_tmp
     where
-        most_recent_filing_flag like 'Y'
-        and ofec_committee_detail_mv_tmp.committee_type in ('X', 'Y')
-        and ofec_committee_detail_mv_tmp.designation <> 'J'
+        committee_type in ('X', 'Y')
+        and designation <> 'J'
         -- excluding host conventions because they have different rules than party committees
-        and cmte_id not in ('C00578419', 'C00485110', 'C00422048', 'C00567057', 'C00483586', 'C00431791', 'C00571133',
+        and committee_id not in ('C00578419', 'C00485110', 'C00422048', 'C00567057', 'C00483586', 'C00431791', 'C00571133',
             'C00500405', 'C00435560', 'C00572958', 'C00493254', 'C00496570', 'C00431593')
         and cycle >= 2008
     group by
@@ -136,7 +126,6 @@ party_totals as (
 ), -- merge
 combined as (
     select
-        row_number() over () as idx,
         month,
         year,
         year::numeric + (year::numeric % 2) as cycle,
@@ -167,7 +156,7 @@ combined as (
     order by year, month
 )
 select
-    idx,
+    row_number() over () as idx,
     month,
     year,
     cycle,
