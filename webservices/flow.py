@@ -90,9 +90,10 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('committee_detail', 'large_aggregates'),
-        ('reports_ie', 'large_aggregates'),
-        ('communication_cost', 'large_aggregates'),
+        ('totals_pac_party', 'large_aggregates'),
+        ('totals_combined', 'large_aggregates')
+        # ('reports_ie', 'large_aggregates'),
+        # ('communication_cost', 'large_aggregates'),
     ])
 
     graph.add_edges_from([
