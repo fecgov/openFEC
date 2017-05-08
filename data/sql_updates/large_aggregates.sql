@@ -1,52 +1,7 @@
 drop materialized view if exists ofec_entity_chart_mv_tmp;
 create materialized view ofec_entity_chart_mv_tmp as
 -- candidates
-with candidates as (
-    select
-        get_cycle(rpt_yr) as cycle,
-        cmte_id,
-        extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
-        extract(year from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as year,
-        ttl_receipts_per as ttl_receipts,
-        pol_pty_cmte_contb_per as pty_cmte_contb,
-        other_pol_cmte_contb_per as oth_cmte_contb,
-        ttl_disb_per as ttl_disb,
-        -- double check var
-        tranf_to_other_auth_cmte_per as tranf_to_other_auth_cmte,
-        offsets_to_op_exp_per as offsets_to_op_exp,
-        ttl_loans_received_per as ttl_loan_repymts,
-        ttl_contb_ref_per as ttl_contb_ref,
-        other_disb_per
-    from fec_vsum_f3p_vw
-    where most_recent_filing_flag like 'Y'
-    and get_cycle(rpt_yr) >= 2008
-    union all
-    select
-        get_cycle(rpt_yr) as cycle,
-        cmte_id,
-        extract(month from to_timestamp(cvg_end_dt)) as month,
-        extract(year from to_timestamp(cvg_end_dt)) as year,
-        ttl_receipts,
-        pty_cmte_contb,
-        oth_cmte_contb,
-        ttl_disb,
-        tranf_to_other_auth_cmte,
-        offsets_to_op_exp,
-        ttl_loan_repymts,
-        ttl_contb_ref,
-        other_disb_per
-    from disclosure.v_sum_and_det_sum_report
-    where get_cycle(rpt_yr) >= 2008
-),
--- Remove candidate activity that does not apply to the current election
-cand as (
-    select * from candidates
-    inner join
-        -- check we don't need to normalize fec_election_yr
-        disclosure.cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle and cvf.cmte_id = candidates.cmte_id
-),
--- Create sums
-cand_totals as (
+with cand_totals as (
     select
         'candidate'::text as type,
         month,
@@ -68,7 +23,15 @@ cand_totals as (
                 coalesce(cand.other_disb_per,0)
             )
         ) as candidate_adjusted_total_disbursements
-    from cand
+    from
+        disclosure.v_sum_and_det_sum_report
+    inner join
+        -- check we don't need to normalize fec_election_yr
+        disclosure.cmte_valid_fec_yr cvf on cvf.fec_election_yr = candidates.cycle
+        and cvf.cmte_id = candidates.cmte_id
+    where
+        (form_type = 'F3' or form_type = 'F3P')
+        and get_cycle(rpt_yr) >= 2008
     group by
         month,
         year
