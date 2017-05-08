@@ -59,20 +59,20 @@ pac_totals as (
         sum(coalesce(disbursements,0) -
             (
                 -- Nonfederal share of allocated disbursements
-                coalesce(shared_nonfed_op_exp_per,0) +
+                coalesce(shared_nonfed_operating_expenditures,0) +
                 -- Transfers to other authorized committees and affiliated committees
-                coalesce(tranf_to_affliliated_cmte_per,0) +
+                coalesce(transfers_to_affiliated_committee,0) +
                 -- Contributions to candidates and other political committees
-                coalesce(fed_cand_cmte_contb_per,0) +
+                coalesce(fed_candidate_committee_contributions,0) +
                 -- Loan repayments
-                coalesce(loan_repymts_made_per,0) +
+                coalesce(loan_repayments_other_loans,0) +
                 -- Contribution refunds
-                coalesce(ttl_contb_refund,0) +
+                coalesce(contribution_refunds,0) +
                 -- Other disbursements
-                coalesce(other_disb_per,0)
+                coalesce(other_disbursements,0)
             )
         ) as pac_adjusted_total_disbursements
-    from ofec_totals_house_senate_mv_tmp
+    from ofec_totals_pacs_mv_tmp
     where
         committee_type in ('N', 'Q', 'O', 'V', 'W')
         and designation <> 'J'

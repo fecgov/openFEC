@@ -74,8 +74,6 @@ def get_graph():
 
     graph.add_edges_from([
         ('totals_combined', 'sched_a_by_size_merged'),
-        ('totals_presidential', 'sched_a_by_size_merged'),
-        ('totals_house_senate', 'sched_a_by_size_merged'),
     ])
 
     graph.add_edges_from([
@@ -91,9 +89,8 @@ def get_graph():
 
     graph.add_edges_from([
         ('totals_pac_party', 'large_aggregates'),
-        ('totals_combined', 'large_aggregates')
-        # ('reports_ie', 'large_aggregates'),
-        # ('communication_cost', 'large_aggregates'),
+        ('totals_house_senate', 'large_aggregates'),
+        ('totals_combined', 'large_aggregates'),
     ])
 
     graph.add_edges_from([
