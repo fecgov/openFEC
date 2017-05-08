@@ -57,7 +57,7 @@ select
 from
     ofec_totals_combined_mv_tmp
 where
-    form_type = 'F3'
+    form_type = 'F3P'
 ;
 
 create unique index on ofec_totals_presidential_mv_tmp(sub_id);

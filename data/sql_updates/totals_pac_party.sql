@@ -57,7 +57,9 @@ select
      cash_on_hand_beginning_period,
      last_debts_owed_by_committee,
      last_debts_owed_to_committee,
-     last_report_year
+     last_report_year,
+     comm_dets.committee_type,
+     comm_dets.designation
 from
     ofec_totals_combined_mv_tmp
 where
