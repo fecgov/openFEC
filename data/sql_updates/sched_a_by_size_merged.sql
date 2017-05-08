@@ -14,25 +14,7 @@ with grouped as (
         0 as size,
         individual_unitemized_contributions as total,
         0 as count
-    from ofec_totals_pacs_parties_mv_tmp
-    where cycle >= :START_YEAR_AGGREGATE
-    union all
-    select
-        committee_id as cmte_id,
-        cycle as cycle,
-        0 as size,
-        individual_unitemized_contributions as total,
-        0 as count
-    from ofec_totals_presidential_mv_tmp
-    where cycle >= :START_YEAR_AGGREGATE
-    union all
-    select
-        committee_id as cmte_id,
-        cycle as cycle,
-        0 as size,
-        individual_unitemized_contributions as total,
-        0 as count
-    from ofec_totals_house_senate_mv_tmp
+    from ofec_totals_combined_mv_tmp
     where cycle >= :START_YEAR_AGGREGATE
     union all
     select *
