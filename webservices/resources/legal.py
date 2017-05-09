@@ -178,16 +178,20 @@ def mur_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwarg
 def ao_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
 
+    should_query = []
     if len(terms):
-        term_query = Q('match', _all=' '.join(terms))
-        must_query.append(term_query)
+        term_query = Q('multi_match', query=' '.join(terms), fields=['ao_no', 'name', 'summary'])
+        should_query.append(term_query)
 
     if len(phrases):
-        phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
-        must_query.extend(phrase_queries)
+        phrase_queries = [
+            Q('multi_match', type='phrase', query=phrase, fields=['ao_no', 'name', 'summary']) for phrase in phrases]
+        should_query.extend(phrase_queries)
+
+    should_query.append(get_ao_document_query(terms, phrases, **kwargs))
 
     query = Search().using(es) \
-        .query(Q('bool', must=must_query)) \
+        .query(Q('bool', must=must_query, should=should_query, minimum_should_match=1)) \
         .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
         .highlight_options(require_field_match=False) \
         .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
@@ -216,8 +220,7 @@ def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
 
     return query
 
-def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
-    must_clauses = []
+def get_ao_document_query(terms, phrases, **kwargs):
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
                   'D': 'Draft Documents',
@@ -236,9 +239,10 @@ def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
         combined_query.append(Q('match', documents__text=' '.join(terms)))
     combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
 
-    must_clauses.append(Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool',
-        must=combined_query)))
+    return Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
 
+def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
+    must_clauses = []
     if kwargs.get('ao_no'):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
 
