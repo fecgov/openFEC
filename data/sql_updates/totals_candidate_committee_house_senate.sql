@@ -163,10 +163,10 @@ with last as (
                 totals.last_report_year
                 --0.0 as cash_on_hand_beginning_of_period
             from last_totals totals
-            inner join ofec_candidate_election_mv_tmp election on
+            left join ofec_candidate_election_mv_tmp election on
                 totals.candidate_id = election.candidate_id and
                 totals.cycle = election.cand_election_year
-            inner join intermediate_combined_totals ict on totals.candidate_id = ict.candidate_id and totals.cycle = ict.cycle
+            left join intermediate_combined_totals ict on totals.candidate_id = ict.candidate_id and totals.cycle = ict.cycle
             where totals.cycle > :START_YEAR
 
         ), cash_period_aggregate as(
@@ -176,13 +176,13 @@ with last as (
                 p_totals.candidate_id
             from
                 ofec_candidate_election_mv_tmp election
-                inner join last_totals p_totals on election.candidate_id = p_totals.candidate_id
+                left join last_totals p_totals on election.candidate_id = p_totals.candidate_id
                 and p_totals.cycle = election.prev_election_year + 2 and p_totals.cycle < election.cand_election_year
         ), final_combined_total as (
             select ct.*,
             cpa.cash_on_hand_beginning_of_period
             from combined_totals ct
-            inner join cash_period_aggregate cpa on ct.candidate_id = cpa.candidate_id and ct.cycle = cpa.cand_election_year
+            left join cash_period_aggregate cpa on ct.candidate_id = cpa.candidate_id and ct.cycle = cpa.cand_election_year
         )
 
         select * from last_totals

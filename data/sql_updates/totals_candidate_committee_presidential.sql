@@ -195,10 +195,10 @@ with last as (
                 --0.0 as cash_on_hand_beginning_of_period
                 --totals.cash_on_hand_beginning_of_period get this from first cycle
             from last_totals totals
-            inner join ofec_candidate_election_mv_tmp election on
+            left join ofec_candidate_election_mv_tmp election on
                 totals.candidate_id = election.candidate_id and
                 totals.cycle = election.cand_election_year
-            inner join intermediate_combined_totals ict on totals.candidate_id = ict.candidate_id and totals.cycle = ict.cycle
+            left join intermediate_combined_totals ict on totals.candidate_id = ict.candidate_id and totals.cycle = ict.cycle
             where totals.cycle > :START_YEAR
 
         ), cash_period_aggregate as(
@@ -208,14 +208,14 @@ with last as (
                 p_totals.candidate_id
             from
                 ofec_candidate_election_mv_tmp election
-                inner join last_totals p_totals on election.candidate_id = p_totals.candidate_id
+                left join last_totals p_totals on election.candidate_id = p_totals.candidate_id
                 and p_totals.cycle > election.prev_election_year and p_totals.cycle < election.cand_election_year
         )--join to add beginning totals for full_election totals
         , final_combined_total as (
             select full_totals.*,
             cpa.cash_on_hand_beginning_of_period
             from full_election_totals full_totals
-            inner join cash_period_aggregate cpa on full_totals.candidate_id = cpa.candidate_id and full_totals.cycle = cpa.cand_election_year
+            left join cash_period_aggregate cpa on full_totals.candidate_id = cpa.candidate_id and full_totals.cycle = cpa.cand_election_year
         )
         select * from last_totals
         union all
