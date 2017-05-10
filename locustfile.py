@@ -122,6 +122,22 @@ class Tasks(locust.TaskSet):
         self.client.get(os.path.join('committee', committee_id), name='committee_detail', params=params)
 
     @locust.task
+    def load_candidate_totals(self, candidate_id=None):
+        params = {
+            'api_key': API_KEY,
+        }
+        candidate_id = candidate_id or random.choice(self.candidates)
+        self.client.get(os.path.join('candidate', candidate_id, 'totals'), name='candidate_totals', params=params)
+
+    @locust.task
+    def load_committee_totals(self, committee_id=None):
+        params = {
+            'api_key': API_KEY,
+        }
+        committee_id = committee_id or random.choice(self.committees)
+        self.client.get(os.path.join('committee', committee_id, 'totals'), name='committee_totals', params=params)
+
+    @locust.task
     def load_legal_documents_search(self, term=None):
         term = term or random.choice(CANDIDATES)
         params = {
