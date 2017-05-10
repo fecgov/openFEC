@@ -23,7 +23,7 @@ except KeyError:
     AUTH = None
 
 CYCLES = range(1980, 2018, 2)
-TERMS = [
+CANDIDATES = [
     'bush'
     'cheney',
     'gore',
@@ -41,7 +41,13 @@ TERMS = [
     'graham',
     'kasich',
 ]
-
+TERMS = [
+    'embezzle',
+    'email',
+    'department',
+    'contribution',
+    'commission'
+]
 
 class Tasks(locust.TaskSet):
 
@@ -65,7 +71,7 @@ class Tasks(locust.TaskSet):
 
     @locust.task
     def load_candidates_search(self, term=None):
-        term = term or random.choice(TERMS)
+        term = term or random.choice(CANDIDATES)
         params = {
             'api_key': API_KEY,
             'sort': '-receipts',
@@ -75,7 +81,7 @@ class Tasks(locust.TaskSet):
 
     @locust.task
     def load_committees_search(self, term=None):
-        term = term or random.choice(TERMS)
+        term = term or random.choice(CANDIDATES)
         params = {
             'api_key': API_KEY,
             'sort': '-receipts',
@@ -115,6 +121,21 @@ class Tasks(locust.TaskSet):
         committee_id = committee_id or random.choice(self.committees)
         self.client.get(os.path.join('committee', committee_id), name='committee_detail', params=params)
 
+    @locust.task
+    def load_legal_documents_search(self, term=None):
+        term = term or random.choice(CANDIDATES)
+        params = {
+            'q': term,
+            'api_key': API_KEY,
+        }
+        self.client.get('legal/search', name='legal_search', params=params)
+
+    @locust.task
+    def get_document(self, term=None):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('legal/docs/murs/7074', name='legal_get', params=params)
 
 class Swarm(locust.HttpLocust):
     task_set = Tasks
