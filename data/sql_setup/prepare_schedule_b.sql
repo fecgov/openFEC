@@ -32,25 +32,38 @@ declare
 begin
     if tg_op = 'INSERT' then
         select into view_row * from fec_vsum_sched_b_vw where sub_id = new.sub_id;
-        two_year_transaction_period_new = get_transaction_year(new.disb_dt, view_row.rpt_yr);
 
-        if two_year_transaction_period_new >= start_year then
-            delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
-            insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
+        -- Check to see if the resultset returned anything from the view.  If
+        -- it did not, skip the processing of the record, otherwise we'll end
+        -- up with a record full of NULL values.
+        -- "FOUND" is a PL/pgSQL boolean variable set to false initially in
+        -- any PL/pgSQL function and reset whenever certain statements are
+        -- run, e.g., a "SELECT INTO..." statement.  For more information,
+        -- visit here:
+        -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
+        if found then
+            two_year_transaction_period_new = get_transaction_year(new.disb_dt, view_row.rpt_yr);
+
+            if two_year_transaction_period_new >= start_year then
+                delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
+                insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
+            end if;
+
+            return new;
         end if;
-
-        return new;
     elsif tg_op = 'UPDATE' then
         select into view_row * from fec_vsum_sched_b_vw where sub_id = new.sub_id;
 
-        two_year_transaction_period_new = get_transaction_year(new.disb_dt, view_row.rpt_yr);
+        if found then
+            two_year_transaction_period_new = get_transaction_year(new.disb_dt, view_row.rpt_yr);
 
-        if two_year_transaction_period_new >= start_year then
-            delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
-            insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
+            if two_year_transaction_period_new >= start_year then
+                delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
+                insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
+            end if;
+
+            return new;
         end if;
-
-        return new;
     end if;
 end
 $$ language plpgsql;
@@ -69,24 +82,38 @@ declare
 begin
     if tg_op = 'DELETE' then
         select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
-        two_year_transaction_period_old = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
 
-        if two_year_transaction_period_old >= start_year then
-            delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
-            insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
+        -- Check to see if the resultset returned anything from the view.  If
+        -- it did not, skip the processing of the record, otherwise we'll end
+        -- up with a record full of NULL values.
+        -- "FOUND" is a PL/pgSQL boolean variable set to false initially in
+        -- any PL/pgSQL function and reset whenever certain statements are
+        -- run, e.g., a "SELECT INTO..." statement.  For more information,
+        -- visit here:
+        -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
+        if found then
+            two_year_transaction_period_old = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
+
+            if two_year_transaction_period_old >= start_year then
+                delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
+                insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
+            end if;
+
+            return old;
         end if;
-
-        return old;
     elsif tg_op = 'UPDATE' then
         select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
-        two_year_transaction_period_old = get_transaction_year(old.disb_dt, view_row.rpt_yr);
 
-        if two_year_transaction_period_old >= start_year then
-            delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
-            insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
+        if found then
+            two_year_transaction_period_old = get_transaction_year(old.disb_dt, view_row.rpt_yr);
+
+            if two_year_transaction_period_old >= start_year then
+                delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
+                insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
+            end if;
+
+            return new;
         end if;
-
-        return new;
     end if;
 end
 $$ language plpgsql;
