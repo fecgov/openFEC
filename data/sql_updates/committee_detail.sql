@@ -26,3 +26,5 @@ create index on ofec_committee_detail_mv_tmp(organization_type_full);
 create index on ofec_committee_detail_mv_tmp using gin (cycles);
 create index on ofec_committee_detail_mv_tmp using gin (candidate_ids);
 create index on ofec_committee_detail_mv_tmp using gin (treasurer_text);
+
+create index on ofec_committee_detail_mv_tmp using gin (cycles, candidate_ids);

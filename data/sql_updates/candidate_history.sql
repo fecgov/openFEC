@@ -79,3 +79,4 @@ create index on ofec_candidate_history_mv_tmp(office);
 create index on ofec_candidate_history_mv_tmp(state);
 create index on ofec_candidate_history_mv_tmp(district);
 create index on ofec_candidate_history_mv_tmp(district_number);
+create index on ofec_candidate_history_mv_tmp(two_year_period, candidate_id);
