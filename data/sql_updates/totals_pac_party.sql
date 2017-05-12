@@ -97,3 +97,4 @@ create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
 
 create index on ofec_totals_pacs_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_pacs_parties_mv_tmp(committee_id, idx);
+create index on ofec_totals_pacs_parties_mv_tmp(cycle, committee_id);
