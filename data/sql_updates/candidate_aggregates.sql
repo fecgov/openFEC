@@ -119,3 +119,4 @@ create index on ofec_candidate_totals_mv_tmp (receipts);
 create index on ofec_candidate_totals_mv_tmp (disbursements);
 create index on ofec_candidate_totals_mv_tmp (has_raised_funds);
 create index on ofec_candidate_totals_mv_tmp (federal_funds_flag);
+create index on ofec_candidate_totals_mv_tmp (cycle, candidate_id);

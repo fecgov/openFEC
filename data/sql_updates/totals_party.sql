@@ -106,3 +106,4 @@ create index on ofec_totals_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_parties_mv_tmp(committee_id, idx);
 create index on ofec_totals_parties_mv_tmp(receipts, idx);
 create index on ofec_totals_parties_mv_tmp(disbursements, idx);
+create index on ofec_totals_parties_mv_tmp(cycle, committee_id);
