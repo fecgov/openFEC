@@ -20,3 +20,5 @@ create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
 
 create index on ofec_candidate_detail_mv_tmp using gin (cycles);
 create index on ofec_candidate_detail_mv_tmp using gin (election_years);
+
+create index on ofec_candidate_detail_mv_tmp(cycles, candidate_id);
