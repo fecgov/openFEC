@@ -28,3 +28,4 @@ create unique index on ofec_candidate_election_mv_tmp (candidate_id, cand_electi
 create index on ofec_candidate_election_mv_tmp (candidate_id);
 create index on ofec_candidate_election_mv_tmp (cand_election_year);
 create index on ofec_candidate_election_mv_tmp (prev_election_year);
+create index on ofec_candidate_election_mv_tmp (cand_election_year, candidate_id);

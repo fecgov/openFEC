@@ -51,3 +51,5 @@ create index on ofec_sched_e_aggregate_candidate_mv_tmp (support_oppose_indicato
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (cycle);
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (total);
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (count);
+create index on ofec_sched_e_aggregate_candidate_mv_tmp (cycle, cmte_id);
+create index on ofec_sched_e_aggregate_candidate_mv_tmp (cycle, cand_id);

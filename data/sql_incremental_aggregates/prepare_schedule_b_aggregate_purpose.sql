@@ -22,6 +22,7 @@ create index on ofec_sched_b_aggregate_purpose_tmp (cycle, idx);
 create index on ofec_sched_b_aggregate_purpose_tmp (purpose, idx);
 create index on ofec_sched_b_aggregate_purpose_tmp (total, idx);
 create index on ofec_sched_b_aggregate_purpose_tmp (count, idx);
+create index on ofec_sched_b_aggregate_purpose_tmp (cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_b_aggregate_purpose;

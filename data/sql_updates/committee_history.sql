@@ -106,3 +106,4 @@ create index on ofec_committee_history_mv_tmp(name);
 create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
 create index on ofec_committee_history_mv_tmp(designation);
+create index on ofec_committee_history_mv_tmp(cycle, committee_id);
