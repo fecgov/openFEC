@@ -12,3 +12,9 @@ env:
   NEW_RELIC_ENV: production
   FEC_API_WHITELIST_IPS: true
   FEC_CACHE_AGE: 3600
+- name: celery-worker
+  instances: 4
+  memory: 512M
+  no-route: true
+  health-check-type: process
+  command: celery worker --app webservices.tasks --loglevel INFO --concurrency 2
