@@ -138,3 +138,5 @@ create index on ofec_reports_pacs_parties_mv_tmp(total_receipts_period, idx);
 create index on ofec_reports_pacs_parties_mv_tmp(total_disbursements_period, idx);
 create index on ofec_reports_pacs_parties_mv_tmp(receipt_date, idx);
 create index on ofec_reports_pacs_parties_mv_tmp(independent_expenditures_period, idx);
+create index on ofec_reports_pacs_parties_mv_tmp(cycle, idx);
+create index on ofec_reports_pacs_parties_mv_tmp(cycle, committee_id);

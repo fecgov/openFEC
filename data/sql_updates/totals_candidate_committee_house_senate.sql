@@ -197,3 +197,5 @@ create index on ofec_totals_candidate_committees_house_senate_mv_tmp (election_y
 create index on ofec_totals_candidate_committees_house_senate_mv_tmp (cycle);
 create index on ofec_totals_candidate_committees_house_senate_mv_tmp (receipts);
 create index on ofec_totals_candidate_committees_house_senate_mv_tmp (disbursements);
+create index on ofec_totals_candidate_committees_house_senate_mv_tmp (cycle, candidate_id);
+create index on ofec_totals_candidate_committees_house_senate_mv_tmp (election_year, candidate_id);

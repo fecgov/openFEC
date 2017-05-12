@@ -59,3 +59,4 @@ create index on ofec_sched_a_aggregate_size_merged_mv_tmp (cycle, idx);
 create index on ofec_sched_a_aggregate_size_merged_mv_tmp (size, idx);
 create index on ofec_sched_a_aggregate_size_merged_mv_tmp (total, idx);
 create index on ofec_sched_a_aggregate_size_merged_mv_tmp (count, idx);
+create index on ofec_sched_a_aggregate_size_merged_mv_tmp (cycle, cmte_id);
