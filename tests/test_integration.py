@@ -572,7 +572,7 @@ class TestViews(common.IntegrationTestCase):
         ]
 
         candidate_history_verified_count = models.CandidateHistory.query.filter(
-            ~models.CandidateHistory.candidate_id._in(unverified_candidate_ids)
+            ~models.CandidateHistory.candidate_id.in_(unverified_candidate_ids)
         ).count()
 
         self.assertEqual(
@@ -596,23 +596,3 @@ class TestViews(common.IntegrationTestCase):
         ).count()
 
         self.assertEqual(committee_history_count, committee_history_verified_count)
-
-    def test_unverified_filers_excluded_in_candidates(self):
-        committee_history_count = models.CommitteeHistory.query.count()
-
-        unverified_committees = models.UnverifiedFiler.query.filter(
-            models.UnverifiedFiler.candidate_committee_id.like('C%')
-        ).all()
-
-        unverified_committees_ids = [
-            c.candidate_committee_id for c in unverified_committees
-        ]
-
-        committee_history_verified_count = models.CommitteeHistory.query.filter(
-            ~models.CommitteeHistory.committee_id.in_(unverified_committees_ids)
-        ).count()
-
-        self.assertEqual(
-            committee_history_count,
-            committee_history_verified_count
-        )
