@@ -46,3 +46,4 @@ create index on ofec_totals_combined_mv_tmp (committee_id);
 create index on ofec_totals_combined_mv_tmp (cycle);
 create index on ofec_totals_combined_mv_tmp (receipts);
 create index on ofec_totals_combined_mv_tmp (disbursements);
+create index on ofec_totals_combined_mv_tmp (cycle, committee_id);
