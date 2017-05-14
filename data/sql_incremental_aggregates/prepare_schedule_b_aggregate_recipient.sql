@@ -22,6 +22,7 @@ create index on ofec_sched_b_aggregate_recipient_tmp (cycle, idx);
 create index on ofec_sched_b_aggregate_recipient_tmp (recipient_nm, idx);
 create index on ofec_sched_b_aggregate_recipient_tmp (total, idx);
 create index on ofec_sched_b_aggregate_recipient_tmp (count, idx);
+create index on ofec_sched_b_aggregate_recipient_tmp (cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_b_aggregate_recipient;
