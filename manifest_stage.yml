@@ -9,9 +9,3 @@ env:
   NEW_RELIC_APP_NAME: fec | api | stage
   NEW_RELIC_ENV: stage
   FEC_API_WHITELIST_IPS: true
-- name: celery-worker
-  instances: 1
-  memory: 512M
-  no-route: true
-  health-check-type: process
-  command: celery worker --app webservices.tasks --loglevel INFO --concurrency 2
