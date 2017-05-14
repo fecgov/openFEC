@@ -184,3 +184,4 @@ create index on ofec_filings_mv_tmp (total_disbursements, idx);
 create index on ofec_filings_mv_tmp (total_independent_expenditures, idx);
 create index on ofec_filings_mv_tmp (coverage_start_date, idx);
 create index on ofec_filings_mv_tmp (coverage_end_date, idx);
+create index on ofec_filings_mv_tmp (cycle, committee_id);
