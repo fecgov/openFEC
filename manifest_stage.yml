@@ -11,5 +11,5 @@ env:
   FEC_API_WHITELIST_IPS: true
 applications:
   - name: celery-worker
-  instances: 1
-  memory: 512M
+    instances: 1
+    memory: 512M
