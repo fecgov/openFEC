@@ -8,3 +8,7 @@ services:
 env:
   NEW_RELIC_APP_NAME: fec | api | feature
   NEW_RELIC_ENV: feature
+applications:
+  - name: celery-worker
+  instances: 1
+  memory: 512M
