@@ -12,4 +12,3 @@ applications:
   - name: celery-worker
     instances: 1
     memory: 512M
-
