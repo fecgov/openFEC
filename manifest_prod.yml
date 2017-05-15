@@ -1,7 +1,6 @@
 ---
 inherit: manifest_base.yml
 host: fec-prod-api
-instances: 4
 services:
   - fec-creds-prod
   - fec-redis-prod
@@ -12,3 +11,9 @@ env:
   NEW_RELIC_ENV: production
   FEC_API_WHITELIST_IPS: true
   FEC_CACHE_AGE: 3600
+applications:
+  - name: api
+    instances: 4
+  - name: celery-worker
+    instances: 4
+    memory: 1G
