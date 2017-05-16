@@ -20,4 +20,3 @@ applications:
 - name: celery-worker
   no-route: true
   health-check-type: process
-  command: celery worker --app webservices.tasks --loglevel INFO --concurrency 2
