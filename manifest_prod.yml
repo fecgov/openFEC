@@ -15,5 +15,6 @@ applications:
   - name: api
     instances: 4
   - name: celery-worker
-    instances: 4
-    memory: 1G
+    instances: 1
+    memory: 4G
+    command: celery worker --app webservices.tasks --loglevel INFO --concurrency 8
