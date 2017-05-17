@@ -11,10 +11,11 @@ with last_subset as (
         debts_owed_by_cmte,
         debts_owed_to_cmte,
         rpt_yr,
+        -- check if report end date is better
         get_cycle(rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report
-    -- where
-    --     get_cycle(rpt_yr) >= :START_YEAR
+    where
+        get_cycle(rpt_yr) >= :START_YEAR
     order by
         cmte_id,
         cycle,
@@ -46,8 +47,8 @@ first_subset as (
         cmte_id as committee_id,
         get_cycle(rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report
-    -- where
-    --     get_cycle(rpt_yr) >= :START_YEAR
+    where
+        get_cycle(rpt_yr) >= :START_YEAR
     order by
         cmte_id,
         get_cycle(rpt_yr),
@@ -60,8 +61,8 @@ first as (
         to_timestamp(cvg_start_dt) as coverage_start_date,
         get_cycle(rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report
-    -- where
-    --     get_cycle(rpt_yr) >= :START_YEAR
+    where
+        get_cycle(rpt_yr) >= :START_YEAR
     order by
         cmte_id,
         get_cycle(rpt_yr),
@@ -161,8 +162,8 @@ first as (
         left join first on
             vsd.cmte_id = first.committee_id and
             get_cycle(vsd.rpt_yr) = first.cycle
-    -- where
-    --     get_cycle(vsd.rpt_yr) >= :START_YEAR
+    where
+        get_cycle(vsd.rpt_yr) >= :START_YEAR
     group by
         vsd.cmte_id,
         vsd.form_tp_cd,
