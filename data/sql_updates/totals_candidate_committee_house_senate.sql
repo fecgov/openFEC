@@ -54,15 +54,6 @@ with last as (
         f3.cmte_id,
         link.cand_election_yr,
         f3.cvg_end_dt asc
-), cash_beginning_period_aggregate as (
-      select sum(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_of_period,
-        cash_beginning_period.cycle,
-        cash_beginning_period.candidate_id
-      from cash_beginning_period
-      group by
-        cash_beginning_period.cycle,
-        cash_beginning_period.candidate_id
-
 ), cycle_totals as(
     select
         link.cand_id as candidate_id,
@@ -119,10 +110,10 @@ with last as (
             aggregate_last.last_debts_owed_by_committee,
             aggregate_last.last_beginning_image_number,
             aggregate_last.last_report_year,
-            cash_beginning_period_aggregate.cash_on_hand_beginning_of_period
+            cash_beginning_period.cash_on_hand_beginning_of_period
         from cycle_totals c_totals
         inner join aggregate_last on aggregate_last.cycle = c_totals.cycle and aggregate_last.candidate_id = c_totals.candidate_id
-        inner join cash_beginning_period_aggregate on cash_beginning_period_aggregate.cycle = c_totals.cycle and cash_beginning_period_aggregate.candidate_id = c_totals.candidate_id
+        inner join cash_beginning_period on cash_beginning_period.cycle = c_totals.cycle and cash_beginning_period.candidate_id = c_totals.candidate_id
     ), intermediate_combined_totals as (
         select
                 totals.candidate_id as candidate_id,
