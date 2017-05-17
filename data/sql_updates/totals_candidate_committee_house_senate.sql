@@ -3,7 +3,12 @@
 drop materialized view if exists ofec_totals_candidates_committees_house_senate_mv_tmp;
 create materialized view ofec_totals_candidate_committees_house_senate_mv_tmp as
 with last as (
-    select distinct on (f3.cmte_id, link.cand_election_yr) f3.*,
+    select distinct on (f3.cmte_id, link.cand_election_yr)
+        f3.rpt_yr,
+        f3.orig_sub_id as sub_id,
+        f3.coh_cop,
+        f3.debts_owed_by_cmte,
+        f3.debts_owed_to_cmte,
         link.cand_id as candidate_id,
         link.cand_election_yr as election_cycle
     from disclosure.v_sum_and_det_sum_report f3
@@ -14,34 +19,41 @@ with last as (
         and election_cycle >= :START_YEAR
     order by
         f3.cmte_id,
-        election_cycle,
+        link.cand_election_yr,
         f3.cvg_end_dt desc
 ), aggregate_last as(
     select last.election_cycle as cycle,
         last.candidate_id,
-        max(last.rpt_tp_desc) as last_report_type_full,
-        max(last.begin_image_num) as last_beginning_image_number,
+        last.election_cycle,
+        max(of.report_type_full) as last_report_type_full,
+        max(of.beginning_image_number) as last_beginning_image_number,
         sum(last.coh_cop) as last_cash_on_hand_end_period,
         sum(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
         sum(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
         max(last.rpt_yr) as last_report_year
     from last
+    -- TO DO add to flow
+        left join ofec_filings_mv of using (sub_id)
     group by
         last.election_cycle,
         last.candidate_id
 ), cash_beginning_period as (
-    select distinct on (f3.cmte_id, f3.election_cycle) link.cand_id as candidate_id,
+    select distinct on (f3.cmte_id, link.cand_election_yr) link.cand_id as candidate_id,
           f3.cmte_id as committee_id,
-          f3.election_cycle as cycle,
+          link.cand_id as candidate_id,
+          link.cand_election_yr as cycle,
           f3.coh_bop as cash_on_hand
-      from
-        fec_vsum_f3_vw f3
+    from
+        disclosure.v_sum_and_det_sum_report f3
             inner join ofec_cand_cmte_linkage_mv_tmp link on link.cmte_id = f3.cmte_id
     where
-        f3.most_recent_filing_flag like 'Y'
-        and f3.election_cycle >= :START_YEAR
+        rpt_yr >= :START_YEAR
         and f3.form_tp_cd = 'F3'
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
+    order by
+        f3.cmte_id,
+        link.cand_election_yr,
+        f3.cvg_end_dt asc
 ), cash_beginning_period_aggregate as (
       select sum(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_of_period,
         cash_beginning_period.cycle,
@@ -87,7 +99,7 @@ with last as (
         sum(hs.tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee
     from
         ofec_cand_cmte_linkage_mv_tmp link
-        inner join fec_vsum_f3_vw hs on link.cmte_id = hs.cmte_id and link.fec_election_yr = hs.election_cycle
+        inner join disclosure.v_sum_and_det_sum_report hs on link.cmte_id = hs.cmte_id and link.fec_election_yr = hs.election_cycle
     where
         hs.most_recent_filing_flag like 'Y'
         and hs.election_cycle >= :START_YEAR
