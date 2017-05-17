@@ -414,7 +414,6 @@ reports_schemas = (
 CommitteeReportsSchema = type('CommitteeReportsSchema', reports_schemas, {})
 CommitteeReportsPageSchema = make_page_schema(CommitteeReportsSchema)
 
-
 make_totals_schema = functools.partial(
     make_schema,
     fields={

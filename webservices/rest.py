@@ -76,7 +76,6 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
     if follower.strip()
 ]
-print(app.config['SQLALCHEMY_FOLLOWERS'])
 # app.config['SQLALCHEMY_ECHO'] = True
 db.init_app(app)
 cors.CORS(app)
