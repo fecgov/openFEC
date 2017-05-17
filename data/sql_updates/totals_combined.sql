@@ -28,6 +28,7 @@ last as (
         ls.debts_owed_by_cmte,
         ls.debts_owed_to_cmte,
         ls.rpt_yr,
+        of.candidate_id,
         of.beginning_image_number,
         of.coverage_end_date,
         of.form_type,
@@ -35,6 +36,7 @@ last as (
         of.report_type
     from last_subset ls
     left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
+    left join  fec on ls.orig_sub_id = fec.sub_id
 ),
 -- Creates materialized view of the earliest report as amended per committee, per cycle
 first_subset as (
@@ -67,6 +69,7 @@ first as (
 )
     select
         get_cycle(vsd.rpt_yr) as cycle,
+        max(last.candidate_id) as candidate_id,
         max(last.beginning_image_number) as last_beginning_image_number,
         max(last.coh_cop) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee, -- confirm this is outstanding debt and not a total taken out this period

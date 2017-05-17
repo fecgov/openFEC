@@ -1,9 +1,11 @@
 drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
 select
+    candidate_id,
+    cycle,
     sub_id,
     committee_id,
-    cycle,
+    election_cycle,
     coverage_start_date,
     coverage_end_date,
     all_other_loans,
@@ -19,6 +21,7 @@ select
     loan_repayments_other_loans,
     loans,
     loans_made_by_candidate,
+    net_contributions,
     net_operating_expenditures,
     offsets_to_operating_expenditures,
     operating_expenditures,
@@ -32,7 +35,6 @@ select
     refunded_political_party_committee_contributions,
     transfers_from_other_authorized_committee,
     transfers_to_other_authorized_committee,
-    net_contributions,
     last_report_type_full,
     last_beginning_image_number,
     cash_on_hand_beginning_period,
@@ -49,4 +51,6 @@ where
 create unique index on ofec_totals_house_senate_mv_tmp(sub_id);
 
 create index on ofec_totals_house_senate_mv_tmp(cycle, sub_id);
+create index on ofec_totals_house_senate_mv_tmp(candidate_id, sub_id);
+create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
 create index on ofec_totals_house_senate_mv_tmp(committee_id, sub_id);
