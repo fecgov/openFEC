@@ -1,19 +1,20 @@
---House/Senate totals are same process as presidnetials but in seperate file to handle columns that are
+--House/Senate totals are same process as presidential but in separate file to handle columns that are
 --unique to a congressional candidate.  Otherwise aggregation and relations are the same.
 drop materialized view if exists ofec_totals_candidates_committees_house_senate_mv_tmp;
 create materialized view ofec_totals_candidate_committees_house_senate_mv_tmp as
 with last as (
-    select distinct on (f3.cmte_id, f3.election_cycle) f3.*,
-        link.cand_id as candidate_id
-    from fec_vsum_f3_vw f3
+    select distinct on (f3.cmte_id, link.cand_election_yr) f3.*,
+        link.cand_id as candidate_id,
+        link.cand_election_yr as election_cycle
+    from disclosure.v_sum_and_det_sum_report f3
     inner join ofec_cand_cmte_linkage_mv_tmp link on link.cmte_id = f3.cmte_id
     where
-        substr(link.cand_id, 1, 1) = link.cmte_tp
+        f3.form_tp_cd = 'F3'
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
         and election_cycle >= :START_YEAR
     order by
         f3.cmte_id,
-        f3.election_cycle,
+        election_cycle,
         f3.cvg_end_dt desc
 ), aggregate_last as(
     select last.election_cycle as cycle,
@@ -39,7 +40,7 @@ with last as (
     where
         f3.most_recent_filing_flag like 'Y'
         and f3.election_cycle >= :START_YEAR
-        and substr(link.cand_id, 1, 1) = link.cmte_tp
+        and f3.form_tp_cd = 'F3'
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 ), cash_beginning_period_aggregate as (
       select sum(cash_beginning_period.cash_on_hand) as cash_on_hand_beginning_of_period,
@@ -90,7 +91,7 @@ with last as (
     where
         hs.most_recent_filing_flag like 'Y'
         and hs.election_cycle >= :START_YEAR
-        and substr(link.cand_id, 1, 1) = link.cmte_tp
+        and f3.form_tp_cd = 'F3'
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 
     group by
