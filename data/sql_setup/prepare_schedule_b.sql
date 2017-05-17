@@ -38,8 +38,7 @@ create or replace function ofec_sched_b_insert_update_queues() returns trigger a
 declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
-    two_year_transaction_period_new smallint;
-    two_year_transaction_period_old smallint;
+    two_year_transaction_period smallint;
     view_row fec_vsum_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'INSERT' then
@@ -54,11 +53,11 @@ begin
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
         if found then
-            two_year_transaction_period_new = get_transaction_year(new.disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = get_transaction_year(new.disb_dt, view_row.rpt_yr);
 
-            if two_year_transaction_period_new >= start_year then
+            if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
-                insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
+                insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period);
             end if;
         else
             -- We weren't able to successfully retrieve a row from the view,
@@ -76,11 +75,11 @@ begin
         select into view_row * from fec_vsum_sched_b_vw where sub_id = new.sub_id;
 
         if found then
-            two_year_transaction_period_new = get_transaction_year(new.disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = get_transaction_year(new.disb_dt, view_row.rpt_yr);
 
-            if two_year_transaction_period_new >= start_year then
+            if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
-                insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
+                insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period);
             end if;
         else
             -- We weren't able to successfully retrieve a row from the view,
@@ -106,8 +105,7 @@ create or replace function ofec_sched_b_delete_update_queues() returns trigger a
 declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
-    two_year_transaction_period_new smallint;
-    two_year_transaction_period_old smallint;
+    two_year_transaction_period smallint;
     view_row fec_vsum_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'DELETE' then
@@ -122,11 +120,11 @@ begin
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
         if found then
-            two_year_transaction_period_old = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
 
-            if two_year_transaction_period_old >= start_year then
+            if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
-                insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
+                insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period);
             end if;
         else
             -- We weren't able to successfully retrieve a row from the view,
@@ -144,11 +142,11 @@ begin
         select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
 
         if found then
-            two_year_transaction_period_old = get_transaction_year(old.disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = get_transaction_year(old.disb_dt, view_row.rpt_yr);
 
-            if two_year_transaction_period_old >= start_year then
+            if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
-                insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
+                insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period);
             end if;
         else
             -- We weren't able to successfully retrieve a row from the view,
