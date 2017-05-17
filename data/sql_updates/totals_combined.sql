@@ -37,7 +37,6 @@ last as (
         of.report_type
     from last_subset ls
     left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
-    left join  fec on ls.orig_sub_id = fec.sub_id
 ),
 -- Creates materialized view of the earliest report as amended per committee, per cycle
 first_subset as (
