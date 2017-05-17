@@ -24,7 +24,7 @@ select
     anlyst_title as analyst_title,
     to_tsvector(firstname || ' ' || lastname) as name_txt,
     telephone_ext
-from rad_cmte_analyst_search_vw
+from disclosure.rad_cmte_analyst_search_vw
 ;
 
 create unique index on ofec_rad_mv_tmp (idx);
