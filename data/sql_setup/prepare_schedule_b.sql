@@ -2,6 +2,18 @@
 drop index if exists disclosure.nml_sched_b_link_id_idx;
 create index nml_sched_b_link_id_idx on disclosure.nml_sched_b (link_id);
 
+-- Create table to hold sub_ids of records that fail during the nightly
+-- processing so that they can be tried at a later time.
+-- "sub_id" is not unique as we may have to process it multiple times.
+-- The "action" column denotes what should happen with the record:
+--    insert, update, or delete
+drop table if exists ofec_sched_b_nightly_retries;
+create table ofec_sched_b_nightly_retries (
+    sub_id numeric(19,0) not null primary key,
+    action varchar(6) not null
+);
+create index on ofec_sched_b_nightly_retries (sub_id);
+
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
 drop table if exists ofec_sched_b_queue_old;
@@ -48,9 +60,18 @@ begin
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
                 insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
             end if;
+        else
+            -- We weren't able to successfully retrieve a row from the view,
+            -- so keep track of this sub_id if we haven't already so we can
+            -- try processing it again each night until we're able to
+            -- successfully process it.
+            raise notice 'sub_id % not found, adding to secondary queue.', new.sub_id;
 
-            return new;
+            delete from ofec_sched_b_nightly_retries where sub_id = new.sub_id;
+            insert into ofec_sched_b_nightly_retries values (new.sub_id, 'insert');
         end if;
+
+        return new;
     elsif tg_op = 'UPDATE' then
         select into view_row * from fec_vsum_sched_b_vw where sub_id = new.sub_id;
 
@@ -61,9 +82,18 @@ begin
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
                 insert into ofec_sched_b_queue_new values (view_row.*, timestamp, two_year_transaction_period_new);
             end if;
+        else
+            -- We weren't able to successfully retrieve a row from the view,
+            -- so keep track of this sub_id if we haven't already so we can
+            -- try processing it again each night until we're able to
+            -- successfully process it.
+            raise notice 'sub_id % not found, adding to secondary queue.', new.sub_id;
 
-            return new;
+            delete from ofec_sched_b_nightly_retries where sub_id = new.sub_id;
+            insert into ofec_sched_b_nightly_retries values (new.sub_id, 'update');
         end if;
+
+        return new;
     end if;
 end
 $$ language plpgsql;
@@ -98,9 +128,18 @@ begin
                 delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
                 insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
             end if;
+        else
+            -- We weren't able to successfully retrieve a row from the view,
+            -- so keep track of this sub_id if we haven't already so we can
+            -- try processing it again each night until we're able to
+            -- successfully process it.
+            raise notice 'sub_id % not found, adding to secondary queue.', old.sub_id;
 
-            return old;
+            delete from ofec_sched_b_nightly_retries where sub_id = old.sub_id;
+            insert into ofec_sched_b_nightly_retries values (old.sub_id, 'delete');
         end if;
+
+        return old;
     elsif tg_op = 'UPDATE' then
         select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
 
@@ -111,9 +150,18 @@ begin
                 delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
                 insert into ofec_sched_b_queue_old values (view_row.*, timestamp, two_year_transaction_period_old);
             end if;
+        else
+            -- We weren't able to successfully retrieve a row from the view,
+            -- so keep track of this sub_id if we haven't already so we can
+            -- try processing it again each night until we're able to
+            -- successfully process it.
+            raise notice 'sub_id % not found, adding to secondary queue.', old.sub_id;
 
-            return new;
+            delete from ofec_sched_b_nightly_retries where sub_id = old.sub_id;
+            insert into ofec_sched_b_nightly_retries values (old.sub_id, 'update');
         end if;
+
+        return old;
     end if;
 end
 $$ language plpgsql;
