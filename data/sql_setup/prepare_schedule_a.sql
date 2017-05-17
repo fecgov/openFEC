@@ -26,6 +26,54 @@ create index on ofec_sched_a_queue_old (timestamp);
 create index on ofec_sched_a_queue_new (two_year_transaction_period);
 create index on ofec_sched_a_queue_old (two_year_transaction_period);
 
+
+-- Support for processing of schedule A itemized records that need to be
+-- retried.
+create or replace function retry_processing_schedule_a_records(start_year integer) returns void as $$
+declare
+    timestamp timestamp = current_timestamp;
+    two_year_transaction_period smallint;
+    view_row fec_vsum_sched_a_vw%ROWTYPE;
+    schedule_a_record record;
+begin
+    for schedule_a_record in select * from ofec_sched_a_nightly_retries loop
+        select into view_row * from fec_vsum_sched_a_vw where sub_id = schedule_a_record.sub_id;
+
+        if found then
+            two_year_transaction_period = get_transaction_year(view_row.contb_receipt_dt, view_row.rpt_yr);
+
+            if two_year_transaction_period >= start_year then
+                -- Determine which queue(s) the found record should go into.
+                case schedule_a_record.action
+                    when 'insert' then
+                        delete from ofec_sched_a_queue_new where sub_id = view_row.sub_id;
+                        insert into ofec_sched_a_queue_new values (view_row.*, timestamp, two_year_transaction_period);
+
+                        delete from ofec_sched_a_nightly_retries where sub_id = schedule_a_record.sub_id;
+                    when 'delete' then
+                        delete from ofec_sched_a_queue_old where sub_id = view_row.sub_id;
+                        insert into ofec_sched_a_queue_old values (view_row.*, timestamp, two_year_transaction_period);
+
+                        delete from ofec_sched_a_nightly_retries where sub_id = schedule_a_record.sub_id;
+                    when 'update' then
+                        delete from ofec_sched_a_queue_new where sub_id = view_row.sub_id;
+                        delete from ofec_sched_a_queue_old where sub_id = view_row.sub_id;
+                        insert into ofec_sched_a_queue_new values (view_row.*, timestamp, two_year_transaction_period);
+                        insert into ofec_sched_a_queue_old values (view_row.*, timestamp, two_year_transaction_period);
+
+                        delete from ofec_sched_a_nightly_retries where sub_id = schedule_a_record.sub_id;
+                    else
+                        raise warning 'Invalid action supplied: %', schedule_a_record.action;
+                end case;
+            end if;
+        else
+            raise notice 'sub_id % still not found', schedule_a_record.sub_id;
+        end if;
+    end loop;
+end
+$$ language plpgsql;
+
+
 -- Create trigger to maintain Schedule A queues for inserts and updates
 -- These happen after a row is inserted/updated so that we can leverage pulling
 -- the new record information from the view itself, which contains the data in
@@ -48,7 +96,7 @@ begin
         -- run, e.g., a "SELECT INTO..." statement.  For more information,
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
-        if found then
+        if FOUND then
             two_year_transaction_period = get_transaction_year(new.contb_receipt_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
@@ -70,7 +118,7 @@ begin
     elsif tg_op = 'UPDATE' then
         select into view_row * from fec_vsum_sched_a_vw where sub_id = new.sub_id;
 
-        if found then
+        if FOUND then
             two_year_transaction_period = get_transaction_year(new.contb_receipt_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
@@ -92,6 +140,7 @@ begin
     end if;
 end
 $$ language plpgsql;
+
 
 -- Create trigger to maintain Schedule A queues deletes and updates
 -- These happen before a row is removed/updated so that we can leverage pulling
@@ -115,7 +164,7 @@ begin
         -- run, e.g., a "SELECT INTO..." statement.  For more information,
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
-        if found then
+        if FOUND then
             two_year_transaction_period = get_transaction_year(view_row.contb_receipt_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
@@ -137,7 +186,7 @@ begin
     elsif tg_op = 'UPDATE' then
         select into view_row * from fec_vsum_sched_a_vw where sub_id = old.sub_id;
 
-        if found then
+        if FOUND then
             two_year_transaction_period = get_transaction_year(old.contb_receipt_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
@@ -159,6 +208,7 @@ begin
     end if;
 end
 $$ language plpgsql;
+
 
 -- Drop old trigger if it exists
 drop trigger if exists ofec_sched_a_queue_trigger on fec_vsum_sched_a_vw;
