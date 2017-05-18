@@ -1,11 +1,23 @@
 drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
+
+with hs_cycle as(
 select
-    candidate_id,
-    cycle,
+    cmte_id as committee_id,
+    cand_election_yr,
+    fec_election_yr as cycle
+from disclosure.cand_cmte_linkage
+group by
+    cmte_id,
+    cand_election_yr,
+    cycle
+)
+select
+    f3.candidate_id,
+    f3.cycle,
     sub_id,
-    committee_id,
-    election_cycle,
+    f3.committee_id,
+    hs_cycle.cand_election_yr as election_cycle,
     coverage_start_date,
     coverage_end_date,
     all_other_loans,
@@ -43,7 +55,8 @@ select
     last_debts_owed_to_committee,
     last_report_year
 from
-    ofec_totals_combined_mv_tmp
+    ofec_totals_combined_mv_tmp f3
+    left join hs_cycle using (committee_id, cycle)
 where
     form_type = 'F3'
 ;
