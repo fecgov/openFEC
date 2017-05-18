@@ -1,8 +1,9 @@
 drop materialized view if exists ofec_totals_pacs_parties_mv_tmp cascade;
 create materialized view ofec_totals_pacs_parties_mv_tmp as
 select
-    oft.sub_id,
+    oft.sub_id as idx,
     oft.committee_id,
+    oft.committee_name,
     oft.cycle,
     oft.coverage_start_date,
     oft.coverage_end_date,
@@ -19,6 +20,7 @@ select
     oft.fed_disbursements,
     oft.fed_election_activity,
     -- sum(pnp.ttl_fed_op_exp_per) as fed_operating_expenditures, -- was in F3x can't find in detsum
+    null::numeric as fed_operating_expenditures,
     oft.fed_receipts,
     oft.independent_expenditures,
     oft.refunded_individual_contributions,
@@ -69,12 +71,12 @@ where
     oft.form_type = 'F3X'
 ;
 
-create unique index on ofec_totals_pacs_parties_mv_tmp(sub_id);
+create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
 
-create index on ofec_totals_pacs_parties_mv_tmp(cycle, sub_id);
-create index on ofec_totals_pacs_parties_mv_tmp(committee_id, sub_id );
-create index on ofec_totals_pacs_parties_mv_tmp(committee_type, sub_id );
-create index on ofec_totals_pacs_parties_mv_tmp(designation, sub_id );
+create index on ofec_totals_pacs_parties_mv_tmp(cycle, idx);
+create index on ofec_totals_pacs_parties_mv_tmp(committee_id, idx );
+create index on ofec_totals_pacs_parties_mv_tmp(committee_type, idx );
+create index on ofec_totals_pacs_parties_mv_tmp(designation, idx );
 
 drop materialized view if exists ofec_totals_pacs_mv_tmp;
 create materialized view ofec_totals_pacs_mv_tmp as
@@ -86,6 +88,12 @@ where
     or committee_type = 'W')
 ;
 
+create unique index on ofec_totals_pacs_mv_tmp(idx);
+
+create index on ofec_totals_pacs_mv_tmp(cycle, idx);
+create index on ofec_totals_pacs_mv_tmp(committee_id, idx );
+create index on ofec_totals_pacs_mv_tmp(committee_type, idx );
+create index on ofec_totals_pacs_mv_tmp(designation, idx );
 
 drop materialized view if exists ofec_totals_parties_mv_tmp;
 create materialized view ofec_totals_parties_mv_tmp as
@@ -94,3 +102,10 @@ from ofec_totals_pacs_parties_mv_tmp pp
 where
     (committee_type = 'X' or committee_type = 'Y')
 ;
+
+create unique index on ofec_totals_parties_mv_tmp(idx);
+
+create index on ofec_totals_parties_mv_tmp(cycle, idx);
+create index on ofec_totals_parties_mv_tmp(committee_id, idx );
+create index on ofec_totals_parties_mv_tmp(committee_type, idx );
+create index on ofec_totals_parties_mv_tmp(designation, idx );

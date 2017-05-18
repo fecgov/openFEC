@@ -483,13 +483,12 @@ class TestViews(common.IntegrationTestCase):
         )
 
         # Create a committee and committee report
-        rep = sa.Table('fec_vsum_f3_vw', db.metadata, autoload=True, autoload_with=db.engine)
+        rep = sa.Table('disclosure.v_sum_and_det_sum_report', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
-            indv_unitem_contb_per=20,
+            indv_unitem_contb=20,
             cmte_id=existing.committee_id,
-            election_cycle=2016,
+            rpt_yr=2016,
             sub_id=9,
-            most_recent_filing_flag='Y'
         )
         db.session.execute(ins)
         db.session.commit()

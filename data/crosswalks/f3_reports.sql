@@ -39,7 +39,7 @@ SELECT
     vs.pol_pty_cmte_contb as ref_pol_pty_cmte_contb_per, -- the vs column name is unfortunate but that's the way it goes
     vs.oth_cmte_ref as ref_other_pol_cmte_contb_per,
     vs.ttl_contb_ref as ttl_contb_ref_per,
-    vs.other_disb_per as other_disb_per,
+    vs.other_disb_per,
     vs.ttl_disb as ttl_disb_per,
     vs.coh_bop,
     vs.orig_sub_id as sub_id
