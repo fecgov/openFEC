@@ -203,8 +203,8 @@ begin
             insert into ofec_sched_a_nightly_retries values (old.sub_id, 'update');
         end if;
 
-        # We have to return new here because this record is intended to change
-        # with an update.
+        -- We have to return new here because this record is intended to change
+        -- with an update.
         return new;
     end if;
 end
