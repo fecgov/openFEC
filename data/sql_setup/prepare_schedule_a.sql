@@ -1,6 +1,5 @@
 -- Create table to hold sub_ids of records that fail during the nightly
 -- processing so that they can be tried at a later time.
--- "sub_id" is not unique as we may have to process it multiple times.
 -- The "action" column denotes what should happen with the record:
 --    insert, update, or delete
 drop table if exists ofec_sched_a_nightly_retries;
