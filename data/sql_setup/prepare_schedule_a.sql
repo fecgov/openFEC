@@ -203,7 +203,9 @@ begin
             insert into ofec_sched_a_nightly_retries values (old.sub_id, 'update');
         end if;
 
-        return old;
+        # We have to return new here because this record is intended to change
+        # with an update.
+        return new;
     end if;
 end
 $$ language plpgsql;
