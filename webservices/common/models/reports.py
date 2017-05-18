@@ -97,7 +97,7 @@ class FecFileNumberMixin(object):
             return None
 
 
-class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, db.Model):
+class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     __abstract__ = True
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
@@ -167,7 +167,7 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, db.Model):
         )
 
 
-class CommitteeReportsHouseSenate(CommitteeReports, BaseModel):
+class CommitteeReportsHouseSenate(CommitteeReports):
     __tablename__ = 'ofec_reports_house_senate_mv'
 
     aggregate_amount_personal_contributions_general = db.Column(db.Numeric(30, 2))#missing
@@ -224,7 +224,7 @@ class CommitteeReportsHouseSenate(CommitteeReports, BaseModel):
         )
 
 
-class CommitteeReportsPacParty(CommitteeReports, BaseModel):
+class CommitteeReportsPacParty(CommitteeReports):
     __tablename__ = 'ofec_reports_pacs_parties_mv'
 
     all_loans_received_period = db.Column(db.Numeric(30, 2))#mapped
@@ -290,7 +290,7 @@ class CommitteeReportsPacParty(CommitteeReports, BaseModel):
     report_form = 'Form 3X'
 
 
-class CommitteeReportsPresidential(CommitteeReports, BaseModel):
+class CommitteeReportsPresidential(CommitteeReports):
     __tablename__ = 'ofec_reports_presidential_mv'
 
     candidate_contribution_period = db.Column(db.Numeric(30, 2))#mapped
