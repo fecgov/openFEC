@@ -15,7 +15,7 @@ group by
 select
     f3.candidate_id,
     f3.cycle,
-    sub_id,
+    sub_id as idx,
     f3.committee_id,
     hs_cycle.cand_election_yr as election_cycle,
     coverage_start_date,
@@ -61,9 +61,9 @@ where
     form_type = 'F3'
 ;
 
-create unique index on ofec_totals_house_senate_mv_tmp(sub_id);
+create unique index on ofec_totals_house_senate_mv_tmp(idx);
 
-create index on ofec_totals_house_senate_mv_tmp(cycle, sub_id);
-create index on ofec_totals_house_senate_mv_tmp(candidate_id, sub_id);
+create index on ofec_totals_house_senate_mv_tmp(cycle, idx);
+create index on ofec_totals_house_senate_mv_tmp(candidate_id, idx);
 create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
-create index on ofec_totals_house_senate_mv_tmp(committee_id, sub_id);
+create index on ofec_totals_house_senate_mv_tmp(committee_id, idx);

@@ -34,7 +34,9 @@ last as (
         of.coverage_end_date,
         of.form_type,
         of.report_type_full,
-        of.report_type
+        of.report_type,
+        of.candidate_name,
+        of.committee_name
     from last_subset ls
     left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
 ),
@@ -70,6 +72,8 @@ first as (
     select
         get_cycle(vsd.rpt_yr) as cycle,
         max(last.candidate_id) as candidate_id,
+        max(last.candidate_name) as candidate_name,
+        max(last.committee_name) as committee_name,
         max(last.beginning_image_number) as last_beginning_image_number,
         max(last.coh_cop) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee, -- confirm this is outstanding debt and not a total taken out this period
