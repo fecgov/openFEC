@@ -12,7 +12,6 @@ with last_cycle as (
     select distinct on (f3.cmte_id, link.fec_election_yr)
         f3.cmte_id,
         f3.rpt_yr,
-        f3.orig_sub_id as sub_id,
         f3.coh_cop as last_cash_on_hand_end_period,
         f3.cvg_end_dt,
         f3.debts_owed_by_cmte as debts_owed_by_committee,
@@ -112,7 +111,7 @@ with last_cycle as (
         false as full_election
     from
         -- starting with candidate will consolidate record in the event that a candidate has multiple committees
-        ofec_cand_cmte_linkage_mv_tmp link
+        disclosure.cand_cmte_linkage link
         left join disclosure.v_sum_and_det_sum_report hs on link.cmte_id = hs.cmte_id and link.fec_election_yr = get_cycle(hs.rpt_yr)
         left join last_cycle last on link.cmte_id = last.cmte_id and link.fec_election_yr = last.cycle
         left join first_cycle first on link.cmte_id = first.committee_id and link.fec_election_yr = first.cycle
