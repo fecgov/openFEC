@@ -12,7 +12,6 @@ with last_cycle as (
     select distinct on (f3p.cmte_id, link.fec_election_yr)
         f3p.cmte_id,
         f3p.rpt_yr,
-        f3p.orig_sub_id as sub_id,
         f3p.coh_cop as last_cash_on_hand_end_period,
         f3p.cvg_end_dt,
         f3p.debts_owed_by_cmte as debts_owed_by_committee,

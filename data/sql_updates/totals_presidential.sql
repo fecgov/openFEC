@@ -35,7 +35,7 @@ select
     refunded_other_political_committee_contributions,
     refunded_political_party_committee_contributions,
     -- naming variation
-    loan_repayments_made as payments_loans_made_by_candidate,
+    loan_repayments_made as repayments_loans_made_by_candidate,
     loan_repayments_other_loans,
     repayments_other_loans,
     transfers_from_affiliated_committee,
