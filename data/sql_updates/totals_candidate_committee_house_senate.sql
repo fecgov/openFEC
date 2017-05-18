@@ -10,7 +10,6 @@ create materialized view ofec_totals_candidate_committees_house_senate_mv_tmp as
 -- get ending financials from most recent report of the cycle for all primary committees
 with last_cycle as (
     select distinct on (f3.cmte_id, link.fec_election_yr)
-        f3.sub_id,
         f3.cmte_id,
         f3.rpt_yr,
         f3.orig_sub_id as sub_id,
@@ -68,7 +67,6 @@ with last_cycle as (
     -- totals per candidate, per two-year cycle, with firsts and lasts
     cycle_totals as(
     select
-        max(last.sub_id) as idx,
         link.cand_id as candidate_id,
         link.fec_election_yr as cycle,
         -- double check this
@@ -181,13 +179,13 @@ with last_cycle as (
             totals.election_year
         )
         -- combining cycle totals and election totals into a single table that can be filtered with the full_election boolean downstream
+
         select * from cycle_totals
         union all
         select * from election_totals
 ;
 
 create unique index on ofec_totals_candidate_committees_house_senate_mv_tmp (candidate_id, cycle, full_election);
-create unique index on ofec_totals_candidate_committees_house_senate_mv_tmp (idx);
 
 create index on ofec_totals_candidate_committees_house_senate_mv_tmp (candidate_id);
 create index on ofec_totals_candidate_committees_house_senate_mv_tmp (election_year);
