@@ -1,7 +1,7 @@
 drop materialized view if exists ofec_totals_presidential_mv_tmp cascade;
 create materialized view ofec_totals_presidential_mv_tmp as
 select
-    sub_id,
+    sub_id as idx,
     committee_id,
     cycle,
     coverage_start_date,
@@ -61,7 +61,7 @@ where
     form_type = 'F3P'
 ;
 
-create unique index on ofec_totals_presidential_mv_tmp(sub_id);
+create unique index on ofec_totals_presidential_mv_tmp(idx);
 
-create index on ofec_totals_presidential_mv_tmp(cycle, sub_id);
-create index on ofec_totals_presidential_mv_tmp(committee_id, sub_id);
+create index on ofec_totals_presidential_mv_tmp(cycle, idx);
+create index on ofec_totals_presidential_mv_tmp(committee_id, idx);

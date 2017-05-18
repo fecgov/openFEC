@@ -483,7 +483,8 @@ class TestViews(common.IntegrationTestCase):
         )
 
         # Create a committee and committee report
-        rep = sa.Table('disclosure.v_sum_and_det_sum_report', db.metadata, autoload=True, autoload_with=db.engine)
+        rep = sa.Table('v_sum_and_det_sum_report', db.metadata, autoload=True, autoload_with=db.engine)
+        metadata = sa.MetaData(schema='disclosure')
         ins = rep.insert().values(
             indv_unitem_contb=20,
             cmte_id=existing.committee_id,
