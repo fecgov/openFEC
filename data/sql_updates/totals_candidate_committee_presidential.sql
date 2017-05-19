@@ -33,6 +33,15 @@ with last_cycle as (
         link.fec_election_yr,
         f3p.cvg_end_dt desc
     ),
+    -- newest report of the 4-year Presidential cycle
+    last_election as (
+    select distinct on (committee_id, election_year) *
+    from last_cycle
+    order by
+        committee_id,
+        election_year,
+        cvg_start_dt desc
+    ),
     -- oldest report of the cycle to see how much cash the committee started with and beginning coverage date
     first_cycle as (
     select distinct on (f3p.cmte_id, link.cand_election_yr)
@@ -54,21 +63,19 @@ with last_cycle as (
         f3p.cvg_end_dt asc
     ),
     -- Oldest report of the 4-year Presidential cycle to see how much cash the committee started with
-    -- We don't need this for last, because the 6 year cycle is labeled with the last year so the join is the same.
     first_election as (
     select distinct on (committee_id, election_year) *
     from first_cycle
     order by
         committee_id,
         election_year,
-        cvg_start_dt desc
+        cvg_start_dt asc
     ),
     -- totals per candidate, per two-year cycle, with firsts and lasts
     cycle_totals as(
     select
         link.cand_id as candidate_id,
         link.fec_election_yr as cycle,
-        -- double check this
         max(link.fec_election_yr) as election_year,
         min(first.cvg_start_dt) as coverage_start_date,
         max(last.cvg_end_dt) as coverage_end_date,
@@ -167,18 +174,18 @@ with last_cycle as (
             sum(totals.transfers_from_affiliated_committee) as transfers_from_affiliated_committee,
             sum(totals.transfers_to_other_authorized_committee) as transfers_to_other_authorized_committee,
             -- these are added in the event that a candidate has multiple committees
-            sum(totals.last_cash_on_hand_end_period) as last_cash_on_hand_end_period,
-            max(totals.last_report_type_full) as last_report_type_full,
-            sum(totals.last_debts_owed_to_committee) as last_debts_owed_to_committee,
-            sum(totals.last_debts_owed_by_committee) as last_debts_owed_by_committee,
+            sum(last.last_cash_on_hand_end_period) as last_cash_on_hand_end_period,
+            max(last.last_report_type_full) as last_report_type_full,
+            sum(last.last_debts_owed_to_committee) as last_debts_owed_to_committee,
+            sum(last.last_debts_owed_by_committee) as last_debts_owed_by_committee,
             sum(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
-            max(totals.last_report_year) as last_report_year,
-            max(totals.last_beginning_image_number) as last_beginning_image_number,
+            max(last.last_report_year) as last_report_year,
+            max(last.last_beginning_image_number) as last_beginning_image_number,
             true as full_election
         from
             cycle_totals totals
             left join first_election first using (candidate_id, election_year)
-            -- We don't need this for last, because the 4 year cycle is labeled with the last year so the join is the same.
+            left join last_election last using (candidate_id, election_year)
         group by
             totals.candidate_id,
             -- this is where the senate records are combined into 6 year election periods
