@@ -161,7 +161,8 @@ first as (
                 sum(indt_exp_per)
         end as independent_expenditures
     from disclosure.v_sum_and_det_sum_report vsd
-        inner join last on vsd.cmte_id = last.cmte_id and get_cycle(vsd.rpt_yr) = last.cycle
+        --this was filtering results in the tests, do we really want this to be as restrictive as an inner join? -jcc
+        left join last on vsd.cmte_id = last.cmte_id and get_cycle(vsd.rpt_yr) = last.cycle
         left join first on
             vsd.cmte_id = first.committee_id and
             get_cycle(vsd.rpt_yr) = first.cycle
