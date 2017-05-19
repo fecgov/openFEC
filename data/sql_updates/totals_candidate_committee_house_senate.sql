@@ -13,7 +13,7 @@ with last_cycle as (
         f3.cmte_id,
         f3.rpt_yr as report_year,
         f3.coh_cop as cash_on_hand_end_period,
-        f3.cvg_end_dt as coverage_end_date,
+        to_timestamp(f3.cvg_end_dt) as coverage_end_date,
         f3.debts_owed_by_cmte as debts_owed_by_committee,
         f3.debts_owed_to_cmte as debts_owed_to_committee,
         of.report_type_full as report_type_full,
@@ -50,7 +50,7 @@ with last_cycle as (
         f3.cmte_id as committee_id,
         link.fec_election_yr as cycle,
         link.cand_election_yr as election_year,
-        f3.cvg_start_dt as cvg_start_dt,
+        to_timestamp(f3.cvg_start_dt) as cvg_start_dt,
         f3.coh_bop as cash_on_hand_beginning_of_period
     from
         disclosure.v_sum_and_det_sum_report f3
@@ -82,7 +82,7 @@ with last_cycle as (
         -- double check this
         max(link.cand_election_yr) as election_year,
         min(to_timestamp(first.cvg_start_dt)) as coverage_start_date,
-        max(to_timestamp(last.coverage_end_date)) as coverage_end_date,
+        max(last.coverage_end_date) as coverage_end_date,
         sum(hs.oth_loans) as all_other_loans,
         sum(hs.cand_cntb) as candidate_contribution,
         sum(hs.ttl_contb_ref) as contribution_refunds,
