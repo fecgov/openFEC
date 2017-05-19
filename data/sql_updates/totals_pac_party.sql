@@ -19,8 +19,10 @@ select
     --sum(pnp.ttl_fed_disb_per) as fed_disbursements,
     oft.fed_disbursements,
     oft.fed_election_activity,
+    -- MISSING--
     -- sum(pnp.ttl_fed_op_exp_per) as fed_operating_expenditures, -- was in F3x can't find in detsum
     null::numeric as fed_operating_expenditures,
+    --
     oft.fed_receipts,
     oft.independent_expenditures,
     oft.refunded_individual_contributions,
@@ -73,6 +75,8 @@ where
 
 create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
 
+create index on ofec_totals_pacs_parties_mv_tmp(receipts);
+create index on ofec_totals_pacs_parties_mv_tmp(disbursements);
 create index on ofec_totals_pacs_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_pacs_parties_mv_tmp(committee_id, idx );
 create index on ofec_totals_pacs_parties_mv_tmp(committee_type, idx );
@@ -90,6 +94,8 @@ where
 
 create unique index on ofec_totals_pacs_mv_tmp(idx);
 
+create index on ofec_totals_pacs_parties_mv_tmp(receipts);
+create index on ofec_totals_pacs_parties_mv_tmp(disbursements);
 create index on ofec_totals_pacs_mv_tmp(cycle, idx);
 create index on ofec_totals_pacs_mv_tmp(committee_id, idx );
 create index on ofec_totals_pacs_mv_tmp(committee_type, idx );
@@ -105,6 +111,8 @@ where
 
 create unique index on ofec_totals_parties_mv_tmp(idx);
 
+create index on ofec_totals_pacs_parties_mv_tmp(receipts);
+create index on ofec_totals_pacs_parties_mv_tmp(disbursements);
 create index on ofec_totals_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_parties_mv_tmp(committee_id, idx );
 create index on ofec_totals_parties_mv_tmp(committee_type, idx );

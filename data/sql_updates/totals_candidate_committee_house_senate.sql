@@ -78,7 +78,7 @@ with last_cycle as (
     cycle_totals as(
     select
         link.cand_id as candidate_id,
-        link.fec_election_yr as cycle,
+        max(link.fec_election_yr) as cycle,
         -- double check this
         max(link.cand_election_yr) as election_year,
         min(first.cvg_start_dt) as coverage_start_date,
