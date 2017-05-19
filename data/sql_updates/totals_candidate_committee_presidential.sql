@@ -75,7 +75,7 @@ with last_cycle as (
     cycle_totals as(
     select
         link.cand_id as candidate_id,
-        link.fec_election_yr as cycle,
+        max(link.fec_election_yr) as cycle,
         max(link.fec_election_yr) as election_year,
         min(first.cvg_start_dt) as coverage_start_date,
         max(last.coverage_end_date) as coverage_end_date,
@@ -111,6 +111,7 @@ with last_cycle as (
         sum(p.oth_loan_repymts) as repayments_other_loans,
         sum(p.tranf_from_other_auth_cmte) as transfers_from_affiliated_committee,
         sum(p.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
+        sum(p.net_op_exp) as net_operating_expenditures,
         -- these are added in the event that a candidate has multiple committees
         sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
         max(last.report_type_full) as last_report_type_full,
@@ -173,6 +174,7 @@ with last_cycle as (
             sum(totals.repayments_other_loans ) as repayments_other_loans,
             sum(totals.transfers_from_affiliated_committee) as transfers_from_affiliated_committee,
             sum(totals.transfers_to_other_authorized_committee) as transfers_to_other_authorized_committee,
+            sum(totals.net_operating_expenditures) as net_operating_expenditures,
             -- these are added in the event that a candidate has multiple committees
             sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
             max(last.report_type_full) as last_report_type_full,
