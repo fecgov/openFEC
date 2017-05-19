@@ -81,8 +81,8 @@ with last_cycle as (
         max(link.fec_election_yr) as cycle,
         -- double check this
         max(link.cand_election_yr) as election_year,
-        min(first.cvg_start_dt) as coverage_start_date,
-        max(last.coverage_end_date) as coverage_end_date,
+        min(to_timestamp(first.cvg_start_dt)) as coverage_start_date,
+        max(to_timestamp(last.coverage_end_date)) as coverage_end_date,
         sum(hs.oth_loans) as all_other_loans,
         sum(hs.cand_cntb) as candidate_contribution,
         sum(hs.ttl_contb_ref) as contribution_refunds,
