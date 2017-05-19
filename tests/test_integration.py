@@ -96,6 +96,7 @@ class TestViews(common.IntegrationTestCase):
                 continue
             if not hasattr(model, '__table__'):
                 continue
+                print (model)
             self.assertGreater(model.query.count(), 0)
     def test_refresh_materialized(self):
         db.session.execute('select refresh_materialized()')
