@@ -7,7 +7,7 @@
 
 drop materialized view if exists ofec_totals_candidates_committees_house_senate_mv_tmp;
 create materialized view ofec_totals_candidate_committees_house_senate_mv_tmp as
--- get ending financials from most recent report of the cycle for all primary committees
+-- get ending financials from most recent report of the two-year cycle for all primary committees
 with last_cycle as (
     select distinct on (f3.cmte_id, link.fec_election_yr)
         f3.cmte_id,
@@ -31,6 +31,15 @@ with last_cycle as (
         f3.cmte_id,
         link.fec_election_yr,
         f3.cvg_end_dt desc
+    ),
+    -- newest report of the 2-year House and 6-year Senate cycle
+    last_election as (
+    select distinct on (committee_id, election_year) *
+    from last_cycle
+    order by
+        committee_id,
+        election_year,
+        cvg_start_dt desc
     ),
     -- oldest report of the 2-year cycle to see how much cash the committee started with
     first_cycle as (
@@ -61,7 +70,7 @@ with last_cycle as (
     order by
         committee_id,
         election_year,
-        cvg_start_dt desc
+        cvg_start_dt asc
     ),
     -- totals per candidate, per two-year cycle, with firsts and lasts
     cycle_totals as(
@@ -79,7 +88,6 @@ with last_cycle as (
         sum(hs.ttl_disb) as disbursements,
         sum(hs.indv_contb) as individual_contributions,
         sum(hs.indv_item_contb) as individual_itemized_contributions,
-        sum(hs.indv_unitem_contb) as individual_unitemized_contributions,
         sum(hs.ttl_loan_repymts) as loan_repayments,
         sum(hs.cand_loan_repymnt) as loan_repayments_candidate_loans,
         sum(hs.oth_loan_repymts) as loan_repayments_other_loans,
@@ -171,14 +179,13 @@ with last_cycle as (
         from
             cycle_totals totals
             left join first_election first using (candidate_id, election_year)
-            -- We don't need this for last, because the 6 year cycle is labeled with the last year so the join is the same.
+            left join last_election last using (candidate_id, electio_year)
         group by
             totals.candidate_id,
             -- this is where the senate records are combined into 6 year election periods
             totals.election_year
         )
         -- combining cycle totals and election totals into a single table that can be filtered with the full_election boolean downstream
-
         select * from cycle_totals
         union all
         select * from election_totals
