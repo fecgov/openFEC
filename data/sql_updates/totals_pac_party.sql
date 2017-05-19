@@ -75,6 +75,8 @@ where
 
 create unique index on ofec_totals_pacs_parties_mv_tmp(idx);
 
+create index on ofec_totals_pacs_parties_mv_tmp(receipts);
+create index on ofec_totals_pacs_parties_mv_tmp(disbursements);
 create index on ofec_totals_pacs_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_pacs_parties_mv_tmp(committee_id, idx );
 create index on ofec_totals_pacs_parties_mv_tmp(committee_type, idx );
@@ -92,6 +94,8 @@ where
 
 create unique index on ofec_totals_pacs_mv_tmp(idx);
 
+create index on ofec_totals_pacs_parties_mv_tmp(receipts);
+create index on ofec_totals_pacs_parties_mv_tmp(disbursements);
 create index on ofec_totals_pacs_mv_tmp(cycle, idx);
 create index on ofec_totals_pacs_mv_tmp(committee_id, idx );
 create index on ofec_totals_pacs_mv_tmp(committee_type, idx );
@@ -107,6 +111,8 @@ where
 
 create unique index on ofec_totals_parties_mv_tmp(idx);
 
+create index on ofec_totals_pacs_parties_mv_tmp(receipts);
+create index on ofec_totals_pacs_parties_mv_tmp(disbursements);
 create index on ofec_totals_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_parties_mv_tmp(committee_id, idx );
 create index on ofec_totals_parties_mv_tmp(committee_type, idx );
