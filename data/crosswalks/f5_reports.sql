@@ -1,16 +1,17 @@
-CREATE OR REPLACE VIEW public.fec_vsumcolumns_f5_vw AS 
- SELECT VS.CMTE_ID AS indv_org_id,
-    VS.rpt_tp,
-    VS.cvg_start_dt,
-    VS.cvg_end_dt,
-    VS.rpt_yr,
-    VS.receipt_dt,
-    VS.rpt_yr + mod(VS.rpt_yr, 2::numeric) AS election_cycle,
-    VS.TTL_CONTB AS ttl_indt_contb,
-    VS.INDT_EXP_PER AS ttl_indt_exp,
-    'F5' AS form_tp,
-    VS.file_num,
-    VS.ORIG_SUB_ID AS sub_id,
+-- vsum is as amended and has fewer columns
+-- this takes the name from sum_and_det_sum_report to vsum
+select vs.cmte_id as indv_org_id,
+    vs.rpt_tp,
+    vs.cvg_start_dt,
+    vs.cvg_end_dt,
+    vs.rpt_yr,
+    vs.receipt_dt,
+    vs.rpt_yr + mod(vs.rpt_yr, 2::numeric) as election_cycle,
+    vs.ttl_contb as ttl_indt_contb,
+    vs.indt_exp_per as ttl_indt_exp,
+    'F5' as form_tp,
+    vs.file_num,
+    vs.orig_sub_id as sub_id,
        'Y' AS most_recent_filing_flag
-   FROM  disclosure.v_sum_and_det_sum_report vs 
-  WHERE  (VS.rpt_tp::text <> ALL (ARRAY['24'::character varying, '48'::character varying]::text[]));
+from  disclosure.v_sum_and_det_sum_report vs
+where  (vs.rpt_tp::text <> all (array['24'::character varying, '48'::character varying]::text[]));

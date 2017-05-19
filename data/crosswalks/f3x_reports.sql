@@ -1,54 +1,56 @@
-CREATE OR REPLACE VIEW public.fec_vsumcolumns_f3x_vw AS 
-SELECT 
-VS.cmte_id,
-VS.RPT_TP AS RPT_TP,
-VS.CVG_START_DT AS CVG_START_DT,
-VS.CVG_END_DT AS CVG_END_DT,
-VS.RPT_YR AS RPT_YR,
-VS.RECEIPT_DT AS RECEIPT_DT,
-VS.rpt_yr + VS.rpt_yr % 2::numeric AS election_cycle,
-VS.COH_BOP AS COH_BOP, --CASH ON HAND AT THE BEGINNING OF THE PERIOD
-VS.TTL_RECEIPTS AS TTL_RECEIPTS, -- TOTAL RECEIPTS
-VS.NET_CONTB, --NET CONTRIBUTIONS
-VS.TTL_DISB AS TTL_DISB_SUM_PAGE_PER, --TOTAL DISBURSEMENTS
-VS.COH_COP AS COH_COP, -- CASH ON HAND AT THE CLOSE OF THE PERIOD
-VS.DEBTS_OWED_TO_CMTE AS DEBTS_OWED_TO_CMTE, 
-VS.DEBTS_OWED_BY_CMTE AS DEBTS_OWED_BY_CMTE,
-VS.INDV_UNITEM_CONTB AS indv_unitem_contb_per, --UNITEMIZED INDIVIDUAL CONTRIBUTIONS
-VS.INDV_ITEM_CONTB AS INDV_ITEM_CONTB_PER, --ITEMIZED INDIVIDUAL CONTRIBUTIONS
-VS.INDV_CONTB AS TTL_INDV_CONTB, -- TOTAL INDIVIDUAL CONTRIBUTIONS
-VS.PTY_CMTE_CONTB AS POL_PTY_CMTE_CONTB_PER_I, --PARTY COMMITTEE CONTRIBUTIONS
-VS.OTH_CMTE_CONTB AS OTHER_POL_CMTE_CONTB_PER_I, --OTHER COMMITTEE CONTRIBUTIONS
-VS.TTL_CONTB AS TTL_CONTB_COL_TTL_PER, --TOTAL CONTRIBUTIONS
-VS.TRANF_FROM_OTHER_AUTH_CMTE AS TRANF_FROM_AFFILIATED_PTY_PER, --TRANSFERS FROM AFFILIATED COMMITTEES
-VS.ALL_LOANS_RECEIVED_PER AS ALL_LOANS_RECEIVED_PER, -- LOANS RECEIVED
-VS.LOAN_REPYMTS_RECEIVED_PER AS LOAN_REPYMTS_RECEIVED_PER, -- LOAN REPAYMENTS RECEIVED
-VS.OFFSETS_TO_OP_EXP AS OFFSETS_TO_OP_EXP_PER_I, -- OFFSETS TO OPERATING EXPENDITURES
-VS.FED_CAND_CONTB_REF_PER AS FED_CAND_CONTB_REF_PER, -- CANDIDATE REFUNDS
-VS.OTHER_RECEIPTS AS OTHER_FED_RECEIPTS_PER,  --OTHER RECEIPTS
-VS.TRANF_FROM_NONFED_ACCT_PER AS TRANF_FROM_NONFED_ACCT_PER, 
-VS.TRANF_FROM_NONFED_LEVIN_PER AS TRANF_FROM_NONFED_LEVIN_PER, --LEVIN FUNDS
-VS.TTL_NONFED_TRANF_PER AS TTL_NONFED_TRANF_PER, --NON-FEDERAL TRANSFERS
-VS.TTL_FED_RECEIPTS_PER, --TOTAL FEDERAL RECEIPTS
-VS.SHARED_FED_OP_EXP_PER AS SHARED_FED_OP_EXP_PER, --Allocated operating expenditures - federal
-VS.SHARED_NONFED_OP_EXP_PER AS SHARED_NONFED_OP_EXP_PER, --Allocated operating expenditures - Non-federal
-VS.OTHER_FED_OP_EXP_PER AS OTHER_FED_OP_EXP_PER, --Other federal operating expenditures
-VS.TTL_OP_EXP_PER AS TTL_OP_EXP_PER, --OPERATING EXPENDITURES
-VS.TRANF_TO_OTHER_AUTH_CMTE AS TRANF_TO_AFFLILIATED_CMTE_PER, --TRANSFERS TO AFFILIATED COMMITTEES
-VS.FED_CAND_CMTE_CONTB_PER AS FED_CAND_CMTE_CONTB_PER, --CONTRIBUTIONS TO OTHER COMMITTEES
-VS.INDT_EXP_PER AS INDT_EXP_PER, --INDEPENDENT EXPENDITURES
-VS.COORD_EXP_BY_PTY_CMTE_PER AS COORD_EXP_BY_PTY_CMTE_PER, --COORDINATED PARTY EXPENDITURES
-VS.LOANS_MADE_PER AS LOANS_MADE_PER, --LOANS MADE
-VS.OTH_LOAN_REPYMTS AS LOAN_REPYMTS_MADE_PER, --TOTAL LOAN REPAYMENTS MADE
-VS.INDV_REF AS INDV_CONTB_REF_PER, --Individual refunds
-VS.POL_PTY_CMTE_CONTB AS pol_pty_cmte_refund, --Political party refunds
-VS.OTH_CMTE_REF AS other_pol_cmte_refund, --Other committee refunds
-VS.TTL_CONTB_REF AS ttl_contb_refund, --TOTAL CONTRIBUTION REFUNDS
-VS.OTHER_DISB_PER AS OTHER_DISB_PER, --OTHER DISBURSEMENTS
-VS.SHARED_FED_ACTVY_FED_SHR_PER AS SHARED_FED_ACTVY_FED_SHR_PER, --Allocated federal election activity - federal share
-VS.SHARED_FED_ACTVY_NONFED_PER AS SHARED_FED_ACTVY_NONFED_PER, --Allocated federal election activity - Levin share
-VS.NON_ALLOC_FED_ELECT_ACTVY_PER AS NON_ALLOC_FED_ELECT_ACTVY_PER, --Federal election activity - federal only
-VS.TTL_FED_ELECT_ACTVY_PER AS TTL_FED_ELECT_ACTVY_PER, --TOTAL FEDERAL ELECTION ACTIVITY
-VS.RPT_YR AS calendar_yr,
-VS.ORIG_SUB_ID AS sub_id
-FROM disclosure.v_sum_and_det_sum_report vs 
+-- vsum is as amended and has fewer columns
+-- this takes the name from sum_and_det_sum_report to vsum
+select
+vs.cmte_id,
+vs.rpt_tp as rpt_tp,
+vs.cvg_start_dt as cvg_start_dt,
+vs.cvg_end_dt as cvg_end_dt,
+vs.rpt_yr as rpt_yr,
+vs.receipt_dt as receipt_dt,
+vs.rpt_yr + vs.rpt_yr % 2::numeric as election_cycle,
+vs.coh_bop as coh_bop, --cash on hand at the beginning of the period
+vs.ttl_receipts as ttl_receipts, -- total receipts
+vs.net_contb, --net contributions
+vs.ttl_disb as ttl_disb_sum_page_per, --total disbursements
+vs.coh_cop as coh_cop, -- cash on hand at the close of the period
+vs.debts_owed_to_cmte as debts_owed_to_cmte,
+vs.debts_owed_by_cmte as debts_owed_by_cmte,
+vs.indv_unitem_contb as indv_unitem_contb_per, --unitemized individual contributions
+vs.indv_item_contb as indv_item_contb_per, --itemized individual contributions
+vs.indv_contb as ttl_indv_contb, -- total individual contributions
+vs.pty_cmte_contb as pol_pty_cmte_contb_per_i, --party committee contributions
+vs.oth_cmte_contb as other_pol_cmte_contb_per_i, --other committee contributions
+vs.ttl_contb as ttl_contb_col_ttl_per, --total contributions
+vs.tranf_from_other_auth_cmte as tranf_from_affiliated_pty_per, --transfers from affiliated committees
+vs.all_loans_received_per as all_loans_received_per, -- loans received
+vs.loan_repymts_received_per as loan_repymts_received_per, -- loan repayments received
+vs.offsets_to_op_exp as offsets_to_op_exp_per_i, -- offsets to operating expenditures
+vs.fed_cand_contb_ref_per as fed_cand_contb_ref_per, -- candidate refunds
+vs.other_receipts as other_fed_receipts_per,  --other receipts
+vs.tranf_from_nonfed_acct_per as tranf_from_nonfed_acct_per,
+vs.tranf_from_nonfed_levin_per as tranf_from_nonfed_levin_per, --levin funds
+vs.ttl_nonfed_tranf_per as ttl_nonfed_tranf_per, --non-federal transfers
+vs.ttl_fed_receipts_per, --total federal receipts
+vs.shared_fed_op_exp_per as shared_fed_op_exp_per, --allocated operating expenditures - federal
+vs.shared_nonfed_op_exp_per as shared_nonfed_op_exp_per, --allocated operating expenditures - non-federal
+vs.other_fed_op_exp_per as other_fed_op_exp_per, --other federal operating expenditures
+vs.ttl_op_exp_per as ttl_op_exp_per, --operating expenditures
+vs.tranf_to_other_auth_cmte as tranf_to_affliliated_cmte_per, --transfers to affiliated committees
+vs.fed_cand_cmte_contb_per as fed_cand_cmte_contb_per, --contributions to other committees
+vs.indt_exp_per as indt_exp_per, --independent expenditures
+vs.coord_exp_by_pty_cmte_per as coord_exp_by_pty_cmte_per, --coordinated party expenditures
+vs.loans_made_per as loans_made_per, --loans made
+vs.oth_loan_repymts as loan_repymts_made_per, --total loan repayments made
+vs.indv_ref as indv_contb_ref_per, --individual refunds
+vs.pol_pty_cmte_contb as pol_pty_cmte_refund, --political party refunds
+vs.oth_cmte_ref as other_pol_cmte_refund, --other committee refunds
+vs.ttl_contb_ref as ttl_contb_refund, --total contribution refunds
+vs.other_disb_per as other_disb_per, --other disbursements
+vs.shared_fed_actvy_fed_shr_per as shared_fed_actvy_fed_shr_per, --allocated federal election activity - federal share
+vs.shared_fed_actvy_nonfed_per as shared_fed_actvy_nonfed_per, --allocated federal election activity - levin share
+vs.non_alloc_fed_elect_actvy_per as non_alloc_fed_elect_actvy_per, --federal election activity - federal only
+vs.ttl_fed_elect_actvy_per as ttl_fed_elect_actvy_per, --total federal election activity
+vs.rpt_yr as calendar_yr,
+vs.orig_sub_id as sub_id
+from disclosure.v_sum_and_det_sum_report vs
+;
