@@ -1,4 +1,5 @@
-CREATE OR REPLACE VIEW public.fec_vsumcolumns_f3p_vw AS
+-- vsum is as amended and has fewer columns
+-- this takes the name from sum_and_det_sum_report to vsum
 select vs.cmte_id,
     vs.cvg_start_dt,
     vs.cvg_end_dt,
