@@ -112,6 +112,7 @@ with last_cycle as (
         sum(p.tranf_from_other_auth_cmte) as transfers_from_affiliated_committee,
         sum(p.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
         sum(p.net_op_exp) as net_operating_expenditures,
+        sum(p.net_contb) as net_contributions,
         -- these are added in the event that a candidate has multiple committees
         sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
         max(last.report_type_full) as last_report_type_full,
@@ -175,6 +176,7 @@ with last_cycle as (
             sum(totals.transfers_from_affiliated_committee) as transfers_from_affiliated_committee,
             sum(totals.transfers_to_other_authorized_committee) as transfers_to_other_authorized_committee,
             sum(totals.net_operating_expenditures) as net_operating_expenditures,
+            sum(totals.net_contributions) as net_contributions,
             -- these are added in the event that a candidate has multiple committees
             sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
             max(last.report_type_full) as last_report_type_full,
