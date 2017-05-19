@@ -11,16 +11,16 @@ create materialized view ofec_totals_candidate_committees_presidential_mv_tmp as
 with last_cycle as (
     select distinct on (f3p.cmte_id, link.fec_election_yr)
         f3p.cmte_id,
-        f3p.rpt_yr,
-        f3p.coh_cop as last_cash_on_hand_end_period,
-        f3p.cvg_end_dt,
+        f3p.rpt_yr as report_year,
+        f3p.coh_cop as cash_on_hand_end_period,
+        f3p.cvg_end_dt as coverage_end_date,
         f3p.debts_owed_by_cmte as debts_owed_by_committee,
         f3p.debts_owed_to_cmte as debts_owed_to_committee,
-        of.report_type_full as last_report_type_full,
+        of.report_type_full as report_type_full,
         of.beginning_image_number,
         link.cand_id as candidate_id,
         link.fec_election_yr as cycle,
-        link.cand_election_yr as election_cycle
+        link.cand_election_yr as election_year
     from disclosure.v_sum_and_det_sum_report f3p
         inner join ofec_cand_cmte_linkage_mv_tmp link on link.cmte_id = f3p.cmte_id
         left join ofec_filings_mv_tmp of on of.sub_id = f3p.orig_sub_id
@@ -35,12 +35,12 @@ with last_cycle as (
     ),
     -- newest report of the 4-year Presidential cycle
     last_election as (
-    select distinct on (committee_id, election_year) *
+    select distinct on (cmte_id, election_year) *
     from last_cycle
     order by
-        committee_id,
+        cmte_id,
         election_year,
-        cvg_start_dt desc
+        coverage_end_date desc
     ),
     -- oldest report of the cycle to see how much cash the committee started with and beginning coverage date
     first_cycle as (
@@ -78,7 +78,7 @@ with last_cycle as (
         link.fec_election_yr as cycle,
         max(link.fec_election_yr) as election_year,
         min(first.cvg_start_dt) as coverage_start_date,
-        max(last.cvg_end_dt) as coverage_end_date,
+        max(last.coverage_end_date) as coverage_end_date,
         sum(p.cand_cntb) as candidate_contribution,
         sum(p.pol_pty_cmte_contb + p.oth_cmte_ref) as contribution_refunds,
         sum(p.ttl_contb) as contributions,
@@ -112,12 +112,12 @@ with last_cycle as (
         sum(p.tranf_from_other_auth_cmte) as transfers_from_affiliated_committee,
         sum(p.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
         -- these are added in the event that a candidate has multiple committees
-        sum(last.last_cash_on_hand_end_period) as last_cash_on_hand_end_period,
-        max(last.last_report_type_full) as last_report_type_full,
+        sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
+        max(last.report_type_full) as last_report_type_full,
         sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
         sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
         max(last.beginning_image_number) as last_beginning_image_number,
-        max(last.rpt_yr) as last_report_year,
+        max(last.report_year) as last_report_year,
         min(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
         false as full_election
     from
@@ -174,13 +174,13 @@ with last_cycle as (
             sum(totals.transfers_from_affiliated_committee) as transfers_from_affiliated_committee,
             sum(totals.transfers_to_other_authorized_committee) as transfers_to_other_authorized_committee,
             -- these are added in the event that a candidate has multiple committees
-            sum(last.last_cash_on_hand_end_period) as last_cash_on_hand_end_period,
-            max(last.last_report_type_full) as last_report_type_full,
-            sum(last.last_debts_owed_to_committee) as last_debts_owed_to_committee,
-            sum(last.last_debts_owed_by_committee) as last_debts_owed_by_committee,
+            sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
+            max(last.report_type_full) as last_report_type_full,
+            sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
+            sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
             sum(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
-            max(last.last_report_year) as last_report_year,
-            max(last.last_beginning_image_number) as last_beginning_image_number,
+            max(last.report_year) as last_report_year,
+            max(last.beginning_image_number) as last_beginning_image_number,
             true as full_election
         from
             cycle_totals totals

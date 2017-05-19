@@ -11,14 +11,16 @@ create materialized view ofec_totals_candidate_committees_house_senate_mv_tmp as
 with last_cycle as (
     select distinct on (f3.cmte_id, link.fec_election_yr)
         f3.cmte_id,
-        f3.rpt_yr,
-        f3.coh_cop as last_cash_on_hand_end_period,
-        f3.cvg_end_dt,
+        f3.rpt_yr as report_year,
+        f3.coh_cop as cash_on_hand_end_period,
+        f3.cvg_end_dt as coverage_end_date,
         f3.debts_owed_by_cmte as debts_owed_by_committee,
         f3.debts_owed_to_cmte as debts_owed_to_committee,
-        of.report_type_full as last_report_type_full,
+        of.report_type_full as report_type_full,
         of.beginning_image_number,
         f3.cmte_id as committee_id,
+        link.cand_id as candidate_id,
+        link.cand_election_yr as election_year,
         link.fec_election_yr as cycle
     from disclosure.v_sum_and_det_sum_report f3
         inner join disclosure.cand_cmte_linkage link on link.cmte_id = f3.cmte_id
@@ -39,7 +41,7 @@ with last_cycle as (
     order by
         committee_id,
         election_year,
-        cvg_start_dt desc
+        coverage_end_date desc
     ),
     -- oldest report of the 2-year cycle to see how much cash the committee started with
     first_cycle as (
@@ -80,7 +82,7 @@ with last_cycle as (
         -- double check this
         max(link.cand_election_yr) as election_year,
         min(first.cvg_start_dt) as coverage_start_date,
-        max(last.cvg_end_dt) as coverage_end_date,
+        max(last.coverage_end_date) as coverage_end_date,
         sum(hs.oth_loans) as all_other_loans,
         sum(hs.cand_cntb) as candidate_contribution,
         sum(hs.ttl_contb_ref) as contribution_refunds,
@@ -88,6 +90,7 @@ with last_cycle as (
         sum(hs.ttl_disb) as disbursements,
         sum(hs.indv_contb) as individual_contributions,
         sum(hs.indv_item_contb) as individual_itemized_contributions,
+        sum(hs.indv_unitem_contb) as individual_unitemized_contributions,
         sum(hs.ttl_loan_repymts) as loan_repayments,
         sum(hs.cand_loan_repymnt) as loan_repayments_candidate_loans,
         sum(hs.oth_loan_repymts) as loan_repayments_other_loans,
@@ -108,13 +111,13 @@ with last_cycle as (
         sum(hs.tranf_from_other_auth_cmte) as transfers_from_other_authorized_committee,
         sum(hs.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
         -- these are added in the event that a candidate has multiple committees
-        sum(last.last_cash_on_hand_end_period) as last_cash_on_hand_end_period,
-        max(last.last_report_type_full) as last_report_type_full,
+        sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
+        max(last.report_type_full) as last_report_type_full,
         sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
         sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
         -- this should be an array
         min(last.beginning_image_number) as last_beginning_image_number,
-        max(last.rpt_yr) as last_report_year,
+        max(last.report_year) as last_report_year,
         sum(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
         false as full_election
     from
@@ -167,19 +170,19 @@ with last_cycle as (
             sum(totals.transfers_from_other_authorized_committee) as transfers_from_other_authorized_committee,
             sum(totals.transfers_to_other_authorized_committee) as transfers_to_other_authorized_committee,
             -- these are added in the event that a candidate has multiple committees
-            sum(totals.last_cash_on_hand_end_period) as last_cash_on_hand_end_period,
-            max(totals.last_report_type_full) as last_report_type_full,
-            sum(totals.last_debts_owed_to_committee) as last_debts_owed_to_committee,
-            sum(totals.last_debts_owed_by_committee) as last_debts_owed_by_committee,
+            sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
+            max(last.report_type_full) as last_report_type_full,
+            sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
+            sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
             sum(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
             -- this could be an array if we wanted to be precise
-            max(totals.last_beginning_image_number) as last_beginning_image_number,
-            max(totals.last_report_year) as last_report_year,
+            max(last.beginning_image_number) as last_beginning_image_number,
+            max(last.report_year) as last_report_year,
             true as full_election
         from
             cycle_totals totals
             left join first_election first using (candidate_id, election_year)
-            left join last_election last using (candidate_id, electio_year)
+            left join last_election last using (candidate_id, election_year)
         group by
             totals.candidate_id,
             -- this is where the senate records are combined into 6 year election periods
