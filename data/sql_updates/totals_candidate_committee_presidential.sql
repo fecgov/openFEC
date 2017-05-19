@@ -22,7 +22,7 @@ with last_cycle as (
         link.fec_election_yr as cycle,
         link.cand_election_yr as election_cycle
     from disclosure.v_sum_and_det_sum_report f3p
-        inner join disclosure.cand_cmte_linkage link on link.cmte_id = f3p.cmte_id
+        inner join ofec_cand_cmte_linkage_mv_tmp link on link.cmte_id = f3p.cmte_id
         left join ofec_filings_mv_tmp of on of.sub_id = f3p.orig_sub_id
     where
         f3p.form_tp_cd = 'F3P'
@@ -42,9 +42,8 @@ with last_cycle as (
         link.cand_election_yr as election_year,
         f3p.cvg_start_dt as cvg_start_dt,
         f3p.coh_bop as cash_on_hand_beginning_of_period
-    from
-        disclosure.v_sum_and_det_sum_report f3p
-            inner join disclosure.cand_cmte_linkage link on link.cmte_id = f3p.cmte_id
+    from disclosure.v_sum_and_det_sum_report f3p
+        inner join disclosure.cand_cmte_linkage link on link.cmte_id = f3p.cmte_id
     where
         rpt_yr >= :START_YEAR
         and f3p.form_tp_cd = 'F3P'
