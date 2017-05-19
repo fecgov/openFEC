@@ -2,13 +2,14 @@ drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
 
 with hs_cycle as(
-select
+select DISTINCT on (fec_election_yr, cmte_id)
     cmte_id as committee_id,
     cand_election_yr,
     fec_election_yr as cycle
 from disclosure.cand_cmte_linkage
-group by
+order by
     cmte_id,
+    fec_election_yr,
     cand_election_yr,
     cycle
 )

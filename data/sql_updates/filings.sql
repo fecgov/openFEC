@@ -19,7 +19,7 @@ with combined AS (
 ) select row_number() over () as idx2, * from combined;
 
 create unique index on ofec_filings_amendments_all_mv_tmp(idx2);
-
+create index on ofec_filings_amendments_all_mv_tmp(file_num);
 
 
 drop materialized view if exists ofec_filings_mv_tmp;
