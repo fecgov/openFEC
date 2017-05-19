@@ -343,6 +343,21 @@ def update_aggregates():
         logger.info('Finished updating Schedule E and support aggregates.')
 
 @manager.command
+def retry_itemized():
+    """This is run nightly to retry processing itemized schedule A and B
+    data that was not able to be processed normally.
+    """
+    logger.info('Retrying itemized schedule processing...')
+
+    with db.engine.begin() as connection:
+        connection.execute(
+            sa.text('select retry_processing_itemized_records()').execution_options(
+                autocommit=True
+            )
+        )
+        logger.info('Finished retrying itemized schedule processing.')
+
+@manager.command
 def refresh_itemized():
     """These are run nightly to refresh the itemized schedule A and B data."""
 
