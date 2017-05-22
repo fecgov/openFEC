@@ -334,6 +334,62 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(search.sub_id, row.sub_id)
         self.assertEqual(search.contributor_name, 'Sheldon Adelson')
 
+    def test_sched_a_retry_processing(self):
+        rows = [
+            self.SchedAFactory(
+                rpt_yr=2014,
+                contbr_nm='Sheldon Adelson',
+                contb_receipt_dt=datetime.datetime(2014, 1, 1)
+            ),
+            self.SchedAFactory(
+                rpt_yr=2015,
+                contbr_nm='Shelly Adelson',
+                contb_receipt_dt=datetime.datetime(2015, 1, 1)
+            ),
+            self.SchedAFactory(
+                rpt_yr=2016,
+                contbr_nm='Jane Doe',
+                contb_receipt_dt=datetime.datetime(2016, 1, 1)
+            )
+        ]
+
+        db.session.commit()
+
+        # Make sure queues are clear before testing this
+        self._clear_sched_a_queues()
+
+        db.session.execute(
+            'insert into ofec_sched_a_nightly_retries values ({sub_id}, \'insert\')'.format(sub_id=rows[0].sub_id)
+        )
+        db.session.execute(
+            'insert into ofec_sched_a_nightly_retries values ({sub_id}, \'update\')'.format(sub_id=rows[1].sub_id)
+        )
+        db.session.execute(
+            'insert into ofec_sched_a_nightly_retries values ({sub_id}, \'delete\')'.format(sub_id=rows[2].sub_id)
+        )
+
+        db.session.commit()
+
+        retry_queue_count = db.engine.execute(
+            'select count(*) from ofec_sched_a_nightly_retries'
+        ).scalar()
+
+        self.assertEqual(retry_queue_count, 3)
+
+        manage.retry_itemized()
+
+        new_queue_count = self._get_sched_a_queue_new_count()
+        old_queue_count = self._get_sched_a_queue_old_count()
+        self.assertEqual(new_queue_count, 2)
+        self.assertEqual(old_queue_count, 2)
+
+        retry_queue_count = db.engine.execute(
+            'select count(*) from ofec_sched_a_nightly_retries'
+        ).scalar()
+
+        self.assertEqual(retry_queue_count, 0)
+
+
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.SchedAFactory(**{
             'rpt_yr': 2015,
@@ -576,7 +632,7 @@ class TestViews(common.IntegrationTestCase):
         ]
 
         candidate_history_verified_count = models.CandidateHistory.query.filter(
-            ~models.CandidateHistory.candidate_id._in(unverified_candidate_ids)
+            ~models.CandidateHistory.candidate_id.in_(unverified_candidate_ids)
         ).count()
 
         self.assertEqual(
@@ -600,23 +656,3 @@ class TestViews(common.IntegrationTestCase):
         ).count()
 
         self.assertEqual(committee_history_count, committee_history_verified_count)
-
-    def test_unverified_filers_excluded_in_candidates(self):
-        committee_history_count = models.CommitteeHistory.query.count()
-
-        unverified_committees = models.UnverifiedFiler.query.filter(
-            models.UnverifiedFiler.candidate_committee_id.like('C%')
-        ).all()
-
-        unverified_committees_ids = [
-            c.candidate_committee_id for c in unverified_committees
-        ]
-
-        committee_history_verified_count = models.CommitteeHistory.query.filter(
-            ~models.CommitteeHistory.committee_id.in_(unverified_committees_ids)
-        ).count()
-
-        self.assertEqual(
-            committee_history_count,
-            committee_history_verified_count
-        )

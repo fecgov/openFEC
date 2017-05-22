@@ -57,7 +57,7 @@ def reclassify_archived_mur_statutory_citation(title, section):
     if title == "2":
         mapped_section = CITATIONS_MAP.get(section)
         if mapped_section:
-            logger.info('Mapping archived MUR statute citation %s -> %s',
+            logger.debug('Mapping archived MUR statute citation %s -> %s',
                         (title, section), (MAPPED_TITLE, mapped_section))
             return MAPPED_TITLE, mapped_section
     return title, section
@@ -74,7 +74,7 @@ def reclassify_current_mur_statutory_citation(section):
     MAPPED_TITLE = "52"
     mapped_section = CITATIONS_MAP.get(section)
     if mapped_section:
-        logger.info('Mapping current MUR statute citation %s -> %s',
+        logger.debug('Mapping current MUR statute citation %s -> %s',
                     section, (MAPPED_TITLE, mapped_section))
         return ORIGINAL_TITLE, MAPPED_TITLE, mapped_section
     elif RECLASSIFIED_STATUTE_SECTION_REGEX.match(section):

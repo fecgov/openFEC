@@ -17,3 +17,4 @@ create unique index on ofec_candidate_history_latest_mv_tmp (candidate_id, cand_
 
 create index on ofec_candidate_history_latest_mv_tmp (candidate_id);
 create index on ofec_candidate_history_latest_mv_tmp (cand_election_year);
+create index on ofec_candidate_history_latest_mv_tmp (cand_election_year, candidate_id);

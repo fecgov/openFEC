@@ -105,7 +105,6 @@ class ScheduleA(BaseItemized):
     contributor_occupation = db.Column('contbr_occupation', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
     contributor_occupation_text = db.Column(TSVECTOR)
     contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
-    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
     is_individual = db.Column(db.Boolean, index=True)
 
     # Primary transaction info
@@ -116,6 +115,7 @@ class ScheduleA(BaseItemized):
     memo_text = db.Column(db.String)
     contribution_receipt_date = db.Column('contb_receipt_dt', db.Date)
     contribution_receipt_amount = db.Column('contb_receipt_amt', db.Numeric(30, 2))
+    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
 
     # Related candidate info
     candidate_office = db.Column('cand_office', db.String)

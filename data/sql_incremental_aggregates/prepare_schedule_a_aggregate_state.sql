@@ -26,6 +26,7 @@ create index on ofec_sched_a_aggregate_state_tmp (state, idx);
 create index on ofec_sched_a_aggregate_state_tmp (state_full, idx);
 create index on ofec_sched_a_aggregate_state_tmp (total, idx);
 create index on ofec_sched_a_aggregate_state_tmp (count, idx);
+create index on ofec_sched_a_aggregate_state_tmp (cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_a_aggregate_state;

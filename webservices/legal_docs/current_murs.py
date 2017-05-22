@@ -102,9 +102,13 @@ def load_current_murs(from_mur_no=None):
     the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
     """
     es = get_elasticsearch_connection()
+    logger.info("Loading current MURs")
+    mur_count = 0
     for mur in get_murs(from_mur_no):
-        logger.info("Loading MUR: %s", mur['no'])
+        logger.info("Loading current MUR: %s", mur['no'])
         es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+        mur_count += 1
+    logger.info("%d current MURs loaded", mur_count)
 
 def get_murs(from_mur_no):
     bucket = get_bucket()
@@ -283,7 +287,7 @@ def get_documents(case_id, bucket, bucket_name):
                 'document_date': row['document_date'],
             }
             pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
-            logger.info("S3: Uploading {}".format(pdf_key))
+            logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
             document['url'] = generate_aws_s3_url(bucket_name, pdf_key)
