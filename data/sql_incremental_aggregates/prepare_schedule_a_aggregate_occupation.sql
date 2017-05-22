@@ -22,6 +22,7 @@ create index on ofec_sched_a_aggregate_occupation_tmp (cycle, idx);
 create index on ofec_sched_a_aggregate_occupation_tmp (occupation, idx);
 create index on ofec_sched_a_aggregate_occupation_tmp (total, idx);
 create index on ofec_sched_a_aggregate_occupation_tmp (count, idx);
+create index on ofec_sched_a_aggregate_occupation_tmp (cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_a_aggregate_occupation;

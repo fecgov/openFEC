@@ -21,7 +21,6 @@ import webservices.legal_docs as legal_docs
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
-logging.basicConfig(level=logging.INFO)
 
 # The Flask app server should only be used for local testing, so we default to
 # using debug mode and auto-reload. To disable debug mode locally, pass the
@@ -342,6 +341,21 @@ def update_aggregates():
             )
         )
         logger.info('Finished updating Schedule E and support aggregates.')
+
+@manager.command
+def retry_itemized():
+    """This is run nightly to retry processing itemized schedule A and B
+    data that was not able to be processed normally.
+    """
+    logger.info('Retrying itemized schedule processing...')
+
+    with db.engine.begin() as connection:
+        connection.execute(
+            sa.text('select retry_processing_itemized_records()').execution_options(
+                autocommit=True
+            )
+        )
+        logger.info('Finished retrying itemized schedule processing.')
 
 @manager.command
 def refresh_itemized():
