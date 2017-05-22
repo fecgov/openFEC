@@ -112,8 +112,6 @@ begin
             -- so keep track of this sub_id if we haven't already so we can
             -- try processing it again each night until we're able to
             -- successfully process it.
-            raise notice 'sub_id % not found, adding to secondary queue.', new.sub_id;
-
             delete from ofec_sched_b_nightly_retries where sub_id = new.sub_id;
             insert into ofec_sched_b_nightly_retries values (new.sub_id, 'insert');
         end if;
@@ -134,8 +132,6 @@ begin
             -- so keep track of this sub_id if we haven't already so we can
             -- try processing it again each night until we're able to
             -- successfully process it.
-            raise notice 'sub_id % not found, adding to secondary queue.', new.sub_id;
-
             delete from ofec_sched_b_nightly_retries where sub_id = new.sub_id;
             insert into ofec_sched_b_nightly_retries values (new.sub_id, 'update');
         end if;
@@ -180,8 +176,6 @@ begin
             -- so keep track of this sub_id if we haven't already so we can
             -- try processing it again each night until we're able to
             -- successfully process it.
-            raise notice 'sub_id % not found, adding to secondary queue.', old.sub_id;
-
             delete from ofec_sched_b_nightly_retries where sub_id = old.sub_id;
             insert into ofec_sched_b_nightly_retries values (old.sub_id, 'delete');
         end if;
@@ -202,8 +196,6 @@ begin
             -- so keep track of this sub_id if we haven't already so we can
             -- try processing it again each night until we're able to
             -- successfully process it.
-            raise notice 'sub_id % not found, adding to secondary queue.', old.sub_id;
-
             delete from ofec_sched_b_nightly_retries where sub_id = old.sub_id;
             insert into ofec_sched_b_nightly_retries values (old.sub_id, 'update');
         end if;
