@@ -77,7 +77,6 @@ with last_cycle as (
         link.cand_id as candidate_id,
         max(link.fec_election_yr) as cycle,
         max(link.fec_election_yr) as election_year,
-        min(first.cvg_start_dt) as coverage_start_date,
         max(last.coverage_end_date) as coverage_end_date,
         sum(p.cand_cntb) as candidate_contribution,
         sum(p.pol_pty_cmte_contb + p.oth_cmte_ref) as contribution_refunds,
@@ -114,14 +113,15 @@ with last_cycle as (
         sum(p.net_op_exp) as net_operating_expenditures,
         sum(p.net_contb) as net_contributions,
         -- these are added in the event that a candidate has multiple committees
+        false as full_election,
+        min(first.cvg_start_dt) as coverage_start_date,
         sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
         max(last.report_type_full) as last_report_type_full,
         sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
         sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
         max(last.beginning_image_number) as last_beginning_image_number,
         max(last.report_year) as last_report_year,
-        min(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
-        false as full_election
+        min(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period
     from
         -- starting with candidate will consolidate record in the event that a candidate has multiple committees
         ofec_cand_cmte_linkage_mv_tmp link
@@ -141,7 +141,6 @@ with last_cycle as (
             totals.candidate_id as candidate_id,
             max(totals.cycle) as cycle,
             max(totals.election_year) as election_year,
-            min(first.cvg_start_dt) as coverage_start_date,
             max(totals.coverage_end_date) as coverage_end_date,
             sum(totals.candidate_contribution) as candidate_contribution,
             sum(totals.contribution_refunds) as contribution_refunds,
@@ -178,13 +177,6 @@ with last_cycle as (
             sum(totals.net_operating_expenditures) as net_operating_expenditures,
             sum(totals.net_contributions) as net_contributions,
             -- these are added in the event that a candidate has multiple committees
-            sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
-            max(last.report_type_full) as last_report_type_full,
-            sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
-            sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
-            sum(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
-            max(last.report_year) as last_report_year,
-            max(last.beginning_image_number) as last_beginning_image_number,
             true as full_election
         from
             cycle_totals totals
@@ -195,12 +187,44 @@ with last_cycle as (
         group by
             totals.candidate_id,
             -- this is where the senate records are combined into 6 year election periods
-            election.cand_election_yr
+            election.cand_election_year
+        ),
+        begginning_and_ending_totals as(
+            select
+                first.candidate_id,
+                first.election_year,
+                min(first.cvg_start_dt) as coverage_start_date,
+                sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
+                max(last.report_type_full) as last_report_type_full,
+                sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
+                sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
+                sum(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period,
+                max(last.report_year) as last_report_year,
+                max(last.beginning_image_number) as last_beginning_image_number
+            from
+                first_election first
+                left join last_election last on last.candidate_id = first.candidate_id and first.election_year = last.election_year
+            group by
+                first.candidate_id,
+                first.election_year
+        ), election_totals_with_begginning_and_ending_totals as(
+            select
+                election_totals.*,
+                begginning_and_ending_totals.coverage_start_date,
+                begginning_and_ending_totals.last_cash_on_hand_end_period,
+                begginning_and_ending_totals.last_report_type_full,
+                begginning_and_ending_totals.last_debts_owed_to_committee,
+                begginning_and_ending_totals.last_debts_owed_by_committee,
+                begginning_and_ending_totals.last_beginning_image_number,
+                begginning_and_ending_totals.last_report_year,
+                begginning_and_ending_totals.cash_on_hand_beginning_of_period
+            from election_totals left join begginning_and_ending_totals using(candidate_id, election_year)
         )
+
         -- combining cycle totals and election totals into a single table that can be filtered with the full_election boolean downstream
         select * from cycle_totals
         union all
-        select * from election_totals
+        select * from election_totals_with_begginning_and_ending_totals
 ;
 --these columns should be a unique primary key when considered together
 create unique index on ofec_totals_candidate_committees_presidential_mv_tmp (candidate_id, cycle, full_election);
