@@ -358,44 +358,6 @@ def retry_itemized():
         logger.info('Finished retrying itemized schedule processing.')
 
 @manager.command
-def refresh_itemized():
-    """These are run nightly to refresh the itemized schedule A and B data."""
-
-    refresh_itemized_a()
-    refresh_itemized_b()
-
-    logger.info('Finished updating incremental aggregates.')
-
-@manager.command
-def refresh_itemized_a():
-    """Used to refresh the itemized Schedule A data."""
-
-    logger.info('Updating Schedule A...')
-    output_messages = partition.SchedAGroup.refresh_children()
-
-    for message in output_messages:
-        if message[0] == 0:
-            logger.info(message[1])
-        else:
-            logger.error(message[1])
-
-    logger.info('Finished updating Schedule A.')
-
-@manager.command
-def refresh_itemized_b():
-    """Used to refresh the itemized Schedule B data."""
-    logger.info('Updating Schedule B...')
-    output_messages = partition.SchedBGroup.refresh_children()
-
-    for message in output_messages:
-        if message[0] == 0:
-            logger.info(message[1])
-        else:
-            logger.error(message[1])
-
-    logger.info('Finished updating Schedule B.')
-
-@manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
     """Adds a new itemized cycle child table.
     By default this will try to add just the current cycle to all partitioned
