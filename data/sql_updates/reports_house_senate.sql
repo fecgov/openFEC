@@ -53,7 +53,6 @@ select
     ref_pol_pty_cmte_contb_per as refunded_political_party_committee_contributions_period,
     ref_pol_pty_cmte_contb_ytd as refunded_political_party_committee_contributions_ytd,
     ref_ttl_contb_col_ttl_ytd as refunds_total_contributions_col_total_ytd,
-    f3.rpt_yr as report_ytd,
     subttl_per as subtotal_period,
     ttl_contb_ref_col_ttl_per as total_contribution_refunds_col_total_period,
     ttl_contb_ref_per as total_contribution_refunds_period,

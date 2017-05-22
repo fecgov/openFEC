@@ -88,7 +88,7 @@ class TestViews(common.IntegrationTestCase):
         #models.CaniddateCommitteeTotalsHouseSenate passed integration, so testing this specific
         #model really isn't expanding code coverage.  I can try and get the model passing but it's proving
         #to be difficult considering the joins needed (and our limited test subset)
-        whitelist = [models.CandidateCommitteeTotalsPresidential]
+        whitelist = [models.CandidateCommitteeTotalsPresidential, models.EntityReceiptDisbursementTotals]
 
         for model in db.Model._decl_class_registry.values():
             print(model)
@@ -96,6 +96,7 @@ class TestViews(common.IntegrationTestCase):
                 continue
             if not hasattr(model, '__table__'):
                 continue
+                print (model)
             self.assertGreater(model.query.count(), 0)
     def test_refresh_materialized(self):
         db.session.execute('select refresh_materialized()')
@@ -408,18 +409,21 @@ class TestViews(common.IntegrationTestCase):
         )
 
         # Create a committee and committee report
-        rep = sa.Table('fec_vsum_f3_vw', db.metadata, autoload=True, autoload_with=db.engine)
+        # Changed to point to sampled data, may be problematic in the future if det sum table
+        # changes a lot and hence the tests need to test new behavior, believe it's fine for now though. -jcc
+        rep = sa.Table('detsum_sample', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
-            indv_unitem_contb_per=20,
+            indv_unitem_contb=20,
             cmte_id=existing.committee_id,
-            election_cycle=2016,
-            sub_id=9,
-            most_recent_filing_flag='Y'
+            rpt_yr=2016,
+            orig_sub_id=9,
+            form_tp_cd='F3',
         )
         db.session.execute(ins)
         db.session.commit()
         manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
+        db.session.execute('refresh materialized view ofec_totals_combined_mv')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(existing)
         # Updated total includes new Schedule A filing and new report
