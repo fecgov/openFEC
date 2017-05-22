@@ -1,0 +1,1 @@
+This code doesn't get run, but it provides a crosswalk between tow versions of naming that are predominate in the FEC data. Since we have switched between tables several times, I am saving this as a resource so that in the future we don't have to spend time figuring out the translations again.
