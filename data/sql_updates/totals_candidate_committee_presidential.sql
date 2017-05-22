@@ -188,12 +188,14 @@ with last_cycle as (
             true as full_election
         from
             cycle_totals totals
-            left join first_election first using (candidate_id, election_year)
-            left join last_election last using (candidate_id, election_year)
+            left join ofec_candidate_election_mv_tmp election on
+                totals.candidate_id = election.candidate_id and
+                totals.cycle <= election.cand_election_year and
+                totals.cycle > election.prev_election_year
         group by
             totals.candidate_id,
             -- this is where the senate records are combined into 6 year election periods
-            totals.election_year
+            election.cand_election_yr
         )
         -- combining cycle totals and election totals into a single table that can be filtered with the full_election boolean downstream
         select * from cycle_totals
