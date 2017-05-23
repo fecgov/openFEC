@@ -19,7 +19,7 @@ with combined AS (
 ) select row_number() over () as idx2, * from combined;
 
 create unique index on ofec_filings_amendments_all_mv_tmp(idx2);
-
+create index on ofec_filings_amendments_all_mv_tmp(file_num);
 
 
 drop materialized view if exists ofec_filings_mv_tmp;
@@ -91,7 +91,7 @@ with filings as (
                                                         get_cycle(filing_history.rpt_yr) = cand.two_year_period
         left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
         left join ofec_filings_amendments_all_mv_tmp amendments on filing_history.file_num = amendments.file_num
-    where filing_history.rpt_yr >= :START_YEAR
+    where filing_history.rpt_yr >= :START_YEAR and filing_history.form_tp != 'SL'
 
 ),
 rfai_filings as (
