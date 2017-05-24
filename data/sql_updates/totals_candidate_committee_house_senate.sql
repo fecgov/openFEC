@@ -140,7 +140,7 @@ with last_cycle as (
             totals.candidate_id as candidate_id,
             max(totals.cycle) as cycle,
             max(totals.election_year) as election_year,
-            min(first.cvg_start_dt) as coverage_start_date,
+            min(totals.coverage_start_date) as coverage_start_date,
             max(totals.coverage_end_date) as coverage_end_date,
             sum(totals.all_other_loans) as all_other_loans,
             sum(totals.candidate_contribution) as candidate_contribution,
