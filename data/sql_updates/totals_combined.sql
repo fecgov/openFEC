@@ -31,7 +31,7 @@ last as (
         ls.rpt_yr,
         of.candidate_id,
         of.beginning_image_number,
-        of.coverage_end_date,
+        of.coverage_end_date::date,
         of.form_type,
         of.report_type_full,
         of.report_type,
@@ -59,7 +59,7 @@ first as (
     select distinct on (cmte_id, get_cycle(rpt_yr))
         coh_bop as cash_on_hand,
         cmte_id as committee_id,
-        cvg_start_dt as coverage_start_date,
+        to_date(to_char(cvg_start_dt, '99999999'),'YYYYMMDD') as coverage_start_date,
         get_cycle(rpt_yr) as cycle
     from disclosure.v_sum_and_det_sum_report
     where
