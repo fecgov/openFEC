@@ -1,4 +1,4 @@
-import os
+from datetime import timedelta
 
 import celery
 from celery import signals
@@ -20,7 +20,11 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
         'calandar': {
             'task': 'manage.refresh_calendar',
             'schedule': crontab(minute='0,15,30,45'),
-        }
+        },
+        'refresh_legal_docs': {
+            'task': 'webservices.tasks.legal_docs.refresh',
+            'schedule': timedelta(minutes=15),
+        },
     }
 
 def redis_url():
@@ -38,6 +42,7 @@ app.conf.update(
     CELERY_IMPORTS=(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
+        'webservices.tasks.legal_docs',
     ),
     CELERYBEAT_SCHEDULE=schedule,
 )
