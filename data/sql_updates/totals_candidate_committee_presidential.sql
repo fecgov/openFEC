@@ -14,6 +14,7 @@ with last_cycle as (
         f3p.rpt_yr as report_year,
         f3p.coh_cop as cash_on_hand_end_period,
         to_date(to_char(f3p.cvg_end_dt, '99999999'),'YYYYMMDD') as coverage_end_date,
+        to_date(to_char(f3p.cvg_start_dt, '99999999'),'YYYYMMDD') as coverage_start_date,
         f3p.debts_owed_by_cmte as debts_owed_by_committee,
         f3p.debts_owed_to_cmte as debts_owed_to_committee,
         of.report_type_full as report_type_full,
@@ -114,7 +115,7 @@ with last_cycle as (
         sum(p.net_contb) as net_contributions,
         -- these are added in the event that a candidate has multiple committees
         false as full_election,
-        min(first.cvg_start_dt) as coverage_start_date,
+        coalesce(min(first.cvg_start_dt), min(last.coverage_start_date)) as coverage_start_date,
         sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
         max(last.report_type_full) as last_report_type_full,
         sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
@@ -177,7 +178,8 @@ with last_cycle as (
             sum(totals.net_operating_expenditures) as net_operating_expenditures,
             sum(totals.net_contributions) as net_contributions,
             -- these are added in the event that a candidate has multiple committees
-            true as full_election
+            true as full_election,
+            min(totals.coverage_start_date) as coverage_start_date
         from
             cycle_totals totals
             left join ofec_candidate_election_mv_tmp election on
@@ -193,7 +195,7 @@ with last_cycle as (
             select
                 first.candidate_id,
                 first.election_year,
-                min(first.cvg_start_dt) as coverage_start_date,
+                --min(first.cvg_start_dt) as coverage_start_date,
                 sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
                 max(last.report_type_full) as last_report_type_full,
                 sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
@@ -210,7 +212,7 @@ with last_cycle as (
         ), election_totals_with_begginning_and_ending_totals as(
             select
                 election_totals.*,
-                begginning_and_ending_totals.coverage_start_date,
+                --begginning_and_ending_totals.coverage_start_date,
                 begginning_and_ending_totals.last_cash_on_hand_end_period,
                 begginning_and_ending_totals.last_report_type_full,
                 begginning_and_ending_totals.last_debts_owed_to_committee,
