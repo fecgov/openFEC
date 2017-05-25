@@ -201,10 +201,10 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     # Deploy worker applications
     deployed_cw = ctx.run('cf app celery-worker', echo=True, warn=True)
     cmd = 'zero-downtime-push' if deployed_cw.ok else 'push'
-    ctx.run('cf {0} celery-worker -f manifest_celery_worker_{1}.yml'.format(cmd, space), echo=True)
+    ctx.run('cf {0} celery-worker -f manifests/manifest_celery_worker_{1}.yml'.format(cmd, space), echo=True)
     deployed_cb = ctx.run('cf app celery-beat', echo=True, warn=True)
     cmd = 'zero-downtime-push' if deployed_cb.ok else 'push'
-    ctx.run('cf {0} celery-beat -f manifest_celery_beat_{1}.yml'.format(cmd, space), echo=True)
+    ctx.run('cf {0} celery-beat -f manifests/manifest_celery_beat_{1}.yml'.format(cmd, space), echo=True)
 
 
 @task
