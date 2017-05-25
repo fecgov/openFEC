@@ -13,7 +13,7 @@ with last_cycle as (
         f3.cmte_id,
         f3.rpt_yr as report_year,
         f3.coh_cop as cash_on_hand_end_period,
-        case when f3.cvg_end_dt = 99999999 then null::date
+        case when f3.cvg_end_dt = 99999999 then null::timestamp
           else cast(cast(f3.cvg_end_dt as text) as date) end
         as coverage_end_date,
         f3.debts_owed_by_cmte as debts_owed_by_committee,
@@ -52,7 +52,7 @@ with last_cycle as (
         f3.cmte_id as committee_id,
         link.fec_election_yr as cycle,
         link.cand_election_yr as election_year,
-        case when f3.cvg_start_dt = 99999999 then null::date
+        case when f3.cvg_start_dt = 99999999 then null::timestamp
           else cast(cast(f3.cvg_start_dt as text) as date) end
         as cvg_start_dt,
         f3.coh_bop as cash_on_hand_beginning_of_period
