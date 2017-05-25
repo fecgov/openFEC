@@ -200,7 +200,6 @@ with last_cycle as (
             select
                 first.candidate_id,
                 first.election_year,
-                --min(first.cvg_start_dt) as coverage_start_date,
                 sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
                 max(last.report_type_full) as last_report_type_full,
                 sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
@@ -217,7 +216,6 @@ with last_cycle as (
         ), election_totals_with_begginning_and_ending_totals as(
             select
                 election_totals.*,
-                --begginning_and_ending_totals.coverage_start_date,
                 begginning_and_ending_totals.last_cash_on_hand_end_period,
                 begginning_and_ending_totals.last_report_type_full,
                 begginning_and_ending_totals.last_debts_owed_to_committee,
