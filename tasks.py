@@ -196,11 +196,15 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     # Deploy API
     deployed = ctx.run('cf app api', echo=True, warn=True)
     cmd = 'zero-downtime-push' if deployed.ok else 'push'
-    ctx.run('cf {0} api -f manifest_{1}.yml'.format(cmd, space), echo=True)
+    ctx.run('cf {0} api -f manifests/manifest_api_{1}.yml'.format(cmd, space), echo=True)
 
     # Deploy worker applications
-    ctx.run('cf push celery-beat -f manifest_{0}.yml'.format(space))
-    ctx.run('cf push celery-worker -f manifest_{0}.yml'.format(space))
+    deployed_cw = ctx.run('cf app celery-worker', echo=True, warn=True)
+    cmd = 'zero-downtime-push' if deployed_cw.ok else 'push'
+    ctx.run('cf {0} celery-worker -f manifests/manifest_celery_worker_{0}.yml'.format(cmd, space), echo=True)
+    deployed_cb = ctx.run('cf app celery-beat', echo=True, warn=True)
+    cmd = 'zero-downtime-push' if deployed_cb.ok else 'push'
+    ctx.run('cf {0} celery-beat -f manifests/manifest_celery_beat_{0}.yml'.format(cmd, space), echo=True)
 
 
 @task
