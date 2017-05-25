@@ -69,7 +69,7 @@ begin
     -- a "SELECT INTO..." statement.  For more information, visit here:
     -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
     if FOUND then
-        two_year_transaction_period = get_transaction_year(new.disb_dt, view_row.rpt_yr);
+        two_year_transaction_period = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
 
         -- TODO:  Do we still want this check?
         if two_year_transaction_period >= start_year then
