@@ -18,7 +18,6 @@ def refresh():
         try:
             manage.update_aggregates()
             manage.retry_itemized()
-            manage.refresh_itemized()
             manage.refresh_materialized()
             download.clear_bucket()
         except Exception as error:

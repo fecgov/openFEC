@@ -8,8 +8,6 @@ class SchedAGroup(TableGroup):
 
     parent = 'fec_vsum_sched_a_vw'
     base_name = 'ofec_sched_a'
-    queue_new = 'ofec_sched_a_queue_new'
-    queue_old = 'ofec_sched_a_queue_old'
     primary = 'sub_id'
     transaction_date_column = 'contb_receipt_dt'
 
