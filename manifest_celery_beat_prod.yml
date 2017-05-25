@@ -2,6 +2,7 @@
 inherit: manifest_prod.yml
 env:
   NEW_RELIC_APP_NAME: fec | celery beat | stage
+applications:
 - name: celery-beat
   instances: 1
   memory: 500M

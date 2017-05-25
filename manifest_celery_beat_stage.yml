@@ -1,5 +1,6 @@
 ---
 inherit: manifest_stage.yml
+applications:
 - name: celery-beat
   instances: 1
   memory: 256M
