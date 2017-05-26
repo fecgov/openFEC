@@ -1,0 +1,7 @@
+---
+inherit: manifest_dev.yml
+env:
+  NEW_RELIC_APP_NAME: fec | api | dev
+applications:
+  - name: api
+    instances: 1

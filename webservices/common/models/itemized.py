@@ -327,7 +327,7 @@ class ScheduleBEfile(BaseRawItemized):
 
 
 class ScheduleC(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_c_vw'
+    __tablename__ = 'ofec_sched_c_mv'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     incurred_date = db.Column('incurred_dt', db.DateTime)
