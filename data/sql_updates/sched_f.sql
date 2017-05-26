@@ -13,8 +13,3 @@ create index on ofec_sched_f_mv_tmp (image_num, sub_id);
 create index on ofec_sched_f_mv_tmp (exp_amt, sub_id);
 create index on ofec_sched_f_mv_tmp (exp_dt, sub_id);
 create index on ofec_sched_f_mv_tmp using gin (payee_name_text);
-
-
-
-
-
