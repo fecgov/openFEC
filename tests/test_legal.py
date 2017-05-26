@@ -215,7 +215,7 @@ class SearchTest(unittest.TestCase):
                     'should': [
                         {'multi_match': {
                             'query': 'president',
-                            'fields': ['ao_no', 'name', 'summary']}},
+                            'fields': ['no', 'name', 'summary']}},
                         {'nested': {
                             'path': 'documents',
                             'query': {
