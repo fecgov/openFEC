@@ -13,7 +13,10 @@ with last_cycle as (
         f3p.cmte_id,
         f3p.rpt_yr as report_year,
         f3p.coh_cop as cash_on_hand_end_period,
-        to_timestamp(f3p.cvg_end_dt) as coverage_end_date,
+        case when f3p.cvg_start_dt = 99999999 then null::timestamp
+          else cast(cast(f3p.cvg_start_dt as text) as date) end
+        as coverage_start_date,
+        cast(cast(f3p.cvg_end_dt as text) as timestamp) as coverage_end_date,
         f3p.debts_owed_by_cmte as debts_owed_by_committee,
         f3p.debts_owed_to_cmte as debts_owed_to_committee,
         of.report_type_full as report_type_full,
@@ -49,7 +52,10 @@ with last_cycle as (
         f3p.cmte_id as committee_id,
         link.fec_election_yr as cycle,
         link.cand_election_yr as election_year,
-        to_timestamp(f3p.cvg_start_dt) as cvg_start_dt,
+        case when f3p.cvg_start_dt = 99999999 then null::timestamp
+          else cast(cast(f3p.cvg_start_dt as text) as date)
+        end
+        as cvg_start_dt,
         f3p.coh_bop as cash_on_hand_beginning_of_period
     from disclosure.v_sum_and_det_sum_report f3p
         inner join disclosure.cand_cmte_linkage link on link.cmte_id = f3p.cmte_id
@@ -114,7 +120,7 @@ with last_cycle as (
         sum(p.net_contb) as net_contributions,
         -- these are added in the event that a candidate has multiple committees
         false as full_election,
-        min(first.cvg_start_dt) as coverage_start_date,
+        coalesce(min(first.cvg_start_dt), min(last.coverage_start_date)) as coverage_start_date,
         sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
         max(last.report_type_full) as last_report_type_full,
         sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
@@ -177,7 +183,8 @@ with last_cycle as (
             sum(totals.net_operating_expenditures) as net_operating_expenditures,
             sum(totals.net_contributions) as net_contributions,
             -- these are added in the event that a candidate has multiple committees
-            true as full_election
+            true as full_election,
+            min(totals.coverage_start_date) as coverage_start_date
         from
             cycle_totals totals
             left join ofec_candidate_election_mv_tmp election on
@@ -193,7 +200,6 @@ with last_cycle as (
             select
                 first.candidate_id,
                 first.election_year,
-                min(first.cvg_start_dt) as coverage_start_date,
                 sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
                 max(last.report_type_full) as last_report_type_full,
                 sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
@@ -210,7 +216,6 @@ with last_cycle as (
         ), election_totals_with_begginning_and_ending_totals as(
             select
                 election_totals.*,
-                begginning_and_ending_totals.coverage_start_date,
                 begginning_and_ending_totals.last_cash_on_hand_end_period,
                 begginning_and_ending_totals.last_report_type_full,
                 begginning_and_ending_totals.last_debts_owed_to_committee,
