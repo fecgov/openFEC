@@ -19,7 +19,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
         },
         'calandar': {
             'task': 'manage.refresh_calendar',
-            'schedule': crontab(minute='0,5,30,45'),
+            'schedule': crontab(minute='0,15,30,45'),
         }
     }
 
