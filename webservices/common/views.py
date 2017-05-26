@@ -76,7 +76,7 @@ class ItemizedResource(ApiResource):
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)
         query = self.build_query(**kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        count = None #counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_seek_page(query, kwargs, self.index_column, count=count, cap=self.cap)
 
     def join_committee_queries(self, kwargs):
