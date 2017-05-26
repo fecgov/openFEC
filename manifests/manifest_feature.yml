@@ -6,10 +6,4 @@ services:
   - fec-redis-feature
   - fec-s3-feature
 env:
-  NEW_RELIC_APP_NAME: fec | api | feature
   NEW_RELIC_ENV: feature
-applications:
-  - name: celery-worker
-    instances: 1
-    memory: 512M
-    command: celery worker --app webservices.tasks --loglevel INFO --concurrency 2
