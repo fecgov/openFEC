@@ -23,6 +23,8 @@ create index on ofec_sched_c_mv_tmp (pg_date);
 
 -- Create composite indexes on sortable columns
 create index on ofec_sched_c_mv_tmp (incurred_dt, sub_id);
+create index on ofec_sched_c_mv_tmp (pymt_to_dt, sub_id);
+create index on ofec_sched_c_mv_tmp (orig_loan_amt, sub_id);
 
 -- Create index on filtered fulltext columns
 create index on ofec_sched_c_mv_tmp using gin (candidate_name_text);
