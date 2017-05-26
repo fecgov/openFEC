@@ -193,18 +193,11 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     with open('.cfmeta', 'w') as fp:
         json.dump({'user': os.getenv('USER'), 'branch': branch}, fp)
 
-    # Deploy API
-    deployed = ctx.run('cf app api', echo=True, warn=True)
-    cmd = 'zero-downtime-push' if deployed.ok else 'push'
-    ctx.run('cf {0} api -f manifest_api_{1}.yml'.format(cmd, space), echo=True)
-
-    # Deploy worker applications
-    deployed_cw = ctx.run('cf app celery-worker', echo=True, warn=True)
-    cmd = 'zero-downtime-push' if deployed_cw.ok else 'push'
-    ctx.run('cf {0} celery-worker -f manifests/manifest_celery_worker_{1}.yml'.format(cmd, space), echo=True)
-    deployed_cb = ctx.run('cf app celery-beat', echo=True, warn=True)
-    cmd = 'zero-downtime-push' if deployed_cb.ok else 'push'
-    ctx.run('cf {0} celery-beat -f manifests/manifest_celery_beat_{1}.yml'.format(cmd, space), echo=True)
+    # Deploy API and worker applications
+    for app in ('api', 'celery-worker', 'celery-beat'):
+        deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
+        cmd = 'zero-downtime-push' if deployed.ok else 'push'
+        ctx.run('cf {0} {1} -f manifests/manifest_{2}_{3}.yml'.format(cmd, app, space), echo=True)
 
 
 @task
