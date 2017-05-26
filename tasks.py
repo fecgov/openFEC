@@ -197,7 +197,12 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     for app in ('api', 'celery-worker', 'celery-beat'):
         deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
         cmd = 'zero-downtime-push' if deployed.ok else 'push'
-        ctx.run('cf {0} {1} -f manifests/manifest_{1}_{2}.yml'.format(cmd, app.replace('-','_'), space), echo=True)
+        ctx.run('cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
+            cmd=cmd,
+            app=app,
+            file=app.replace('-','_'),
+            space=space
+        ), echo=True)
 
 
 @task
