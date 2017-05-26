@@ -1,4 +1,9 @@
-# the dependency goes on the left
+# All files in the `data/sql_updates` folder are automatically added to the
+# graph as nodes.
+
+# If you need to add a dependency, note that the dependency must be listed on
+# the left first.
+
 import os
 
 import networkx as nx
