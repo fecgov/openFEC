@@ -180,12 +180,12 @@ def ao_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs
 
     should_query = []
     if len(terms):
-        term_query = Q('multi_match', query=' '.join(terms), fields=['ao_no', 'name', 'summary'])
+        term_query = Q('multi_match', query=' '.join(terms), fields=['no', 'name', 'summary'])
         should_query.append(term_query)
 
     if len(phrases):
         phrase_queries = [
-            Q('multi_match', type='phrase', query=phrase, fields=['ao_no', 'name', 'summary']) for phrase in phrases]
+            Q('multi_match', type='phrase', query=phrase, fields=['no', 'name', 'summary']) for phrase in phrases]
         should_query.extend(phrase_queries)
 
     should_query.append(get_ao_document_query(terms, phrases, **kwargs))
