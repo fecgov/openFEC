@@ -618,7 +618,7 @@ class ScheduleEEfile(BaseRawItemized):
 
 
 class ScheduleF(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_f_vw'
+    __tablename__ = 'ofec_sched_f_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
