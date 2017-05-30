@@ -152,7 +152,8 @@ AS
         name,
         summary,
         req_date,
-        issue_date
+        issue_date,
+        pg_date
     FROM aouser.ao;
 
 --
