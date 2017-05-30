@@ -13,10 +13,6 @@ from celery_once import QueueOnce
 from webservices import utils
 from webservices.common import counts
 from webservices.common.models import db
-from webservices.resources import (
-    aggregates, candidates, candidate_aggregates, committees, costs, filings,
-    reports, sched_a, sched_b, sched_d, sched_e, sched_f
-)
 
 from webservices.tasks import app
 from webservices.tasks import utils as task_utils
@@ -24,34 +20,6 @@ from webservices.tasks import utils as task_utils
 logger = logging.getLogger(__name__)
 
 IGNORE_FIELDS = {'page', 'per_page', 'sort', 'sort_hide_null'}
-RESOURCE_WHITELIST = {
-    aggregates.ScheduleABySizeView,
-    aggregates.ScheduleAByStateView,
-    aggregates.ScheduleAByZipView,
-    aggregates.ScheduleAByEmployerView,
-    aggregates.ScheduleAByOccupationView,
-    aggregates.ScheduleBByRecipientView,
-    aggregates.ScheduleBByRecipientIDView,
-    aggregates.ScheduleBByPurposeView,
-    candidates.CandidateList,
-    committees.CommitteeList,
-    costs.CommunicationCostView,
-    costs.ElectioneeringView,
-    filings.EFilingsView,
-    filings.FilingsList,
-    filings.FilingsView,
-    reports.ReportsView,
-    reports.CommitteeReportsView,
-    reports.EFilingSummaryView,
-    sched_a.ScheduleAView,
-    sched_a.ScheduleAEfileView,
-    sched_b.ScheduleBView,
-    sched_b.ScheduleBEfileView,
-    sched_d.ScheduleDView,
-    sched_e.ScheduleEView,
-    sched_e.ScheduleEEfileView,
-    sched_f.ScheduleFView
-}
 
 COUNT_NOTE = (
     '*Note: The record count displayed on the website is an estimate. The record '
@@ -63,8 +31,6 @@ def call_resource(path, qs):
     app = task_utils.get_app()
     endpoint, arguments = app.url_map.bind('').match(path)
     resource_type = app.view_functions[endpoint].view_class
-    if resource_type not in RESOURCE_WHITELIST:
-        raise ValueError('Downloads on resource {} not supported'.format(resource_type.__name__))
     resource = resource_type()
     fields, kwargs = parse_kwargs(resource, qs)
     kwargs = utils.extend(arguments, kwargs)
