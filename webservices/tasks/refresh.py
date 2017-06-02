@@ -30,6 +30,6 @@ def refresh():
 
 
 @app.task
-def refresh_calandar():
+def refresh_calendar():
     """ Updates calendar, is called every 15 minutes"""
     manage.refresh_calendar()
