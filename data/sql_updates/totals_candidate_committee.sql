@@ -50,7 +50,8 @@
         link.cand_id as candidate_id,
         link.fec_election_yr as cycle,
         max(link.fec_election_yr) as election_year,
-        --max(last.coverage_end_date) as coverage_end_date,
+        --case when max(p.cvg_start_dt) = 99999999 then null::timestamp
+        min(cast(cast(p.cvg_start_dt as text) as date)) as coverage_start_date,
         sum(p.cand_cntb) as candidate_contribution,
         sum(p.pol_pty_cmte_contb + p.oth_cmte_ref) as contribution_refunds,
         sum(p.ttl_contb) as contributions,
@@ -97,6 +98,9 @@
         inner join disclosure.v_sum_and_det_sum_report p on link.cmte_id = p.cmte_id and link.fec_election_yr = get_cycle(p.rpt_yr)
     where
         link.fec_election_yr >= 1970
+        -- this issue with the data is really driving me nuts.  Jeff said he's looking into it,
+        -- leaving a reminder here, but this check filters out these 9999... records.
+        and p.cvg_start_dt != 99999999
         and (p.form_tp_cd = 'F3P' or p.form_tp_cd = 'F3')
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
     group by
@@ -109,7 +113,7 @@
       cycle_totals.cycle,
       ending_totals.cycle,
       ending_totals.coverage_end_date,
-      ending_totals.coverage_start_date,
+      cycle_totals.coverage_start_date,
       ending_totals.last_report_type_full,
       ending_totals.last_beginning_image_number,
       ending_totals.last_cash_on_hand_end_period,
@@ -119,5 +123,5 @@
     from cycle_totals cycle_totals
     inner join ending_totals_per_cycle ending_totals
   on ending_totals.cycle = cycle_totals.cycle and ending_totals.candidate_id = cycle_totals.candidate_id
-    where cycle_totals.candidate_id = 'S6AZ00019';
+    where cycle_totals.candidate_id = 'P80002801';
   --select receipts, disbursements, cycle, last_cash_on_hand_end_period from cycle_totals where candidate_id = 'P80002801';
