@@ -27,3 +27,9 @@ def refresh():
         mail.send_mail(buffer)
     except Exception as error:
         logger.exception(error)
+
+
+@app.task
+def refresh_calandar():
+    """ Updates calendar, is called every 15 minutes"""
+    manage.refresh_calendar()
