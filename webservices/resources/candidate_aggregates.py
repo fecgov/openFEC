@@ -93,16 +93,6 @@ class ScheduleABySizeCandidateView(utils.Resource):
         _, query = candidate_aggregate(ScheduleABySize, label_columns, group_columns, kwargs)
         return utils.fetch_page(query, kwargs, cap=None)
 
-    def get_query(self, **kwargs):
-        label_columns = [
-            ScheduleABySize.size,
-            sa.func.sum(ScheduleABySize.total).label('total'),
-        ]
-        group_columns = [ScheduleABySize.size]
-        return candidate_aggregate(ScheduleABySize, label_columns, group_columns, kwargs)
-
-
-
 
 @doc(
     tags=['receipts'],
