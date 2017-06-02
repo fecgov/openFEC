@@ -210,7 +210,12 @@ class SearchTest(unittest.TestCase):
                 'bool': {
                     'must': [
                         {'term': {'_type': 'advisory_opinions'}},
-                        {'match': {'_all': 'president'}},
+                        {'bool': {'minimum_should_match': 1}}
+                    ],
+                    'should': [
+                        {'multi_match': {
+                            'query': 'president',
+                            'fields': ['no', 'name', 'summary']}},
                         {'nested': {
                             'path': 'documents',
                             'query': {
@@ -231,9 +236,9 @@ class SearchTest(unittest.TestCase):
                                     }
                                 }
                             }
-                        }},
-                        {'bool': {'minimum_should_match': 1}}
-                    ]
+                        }}
+                    ],
+                    'minimum_should_match': 1
                 }},
             'sort': ['sort1', 'sort2'],
             'from': 0,
