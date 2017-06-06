@@ -22,9 +22,9 @@ totals_schema_map = {
 default_schemas = (models.CommitteeTotalsPacParty, schemas.CommitteeTotalsPacPartyPageSchema)
 
 candidate_totals_schema_map = {
-    'P': (models.CandidateCommitteeTotalsPresidential, schemas.CandidateCommitteeTotalsPresidentialPageSchema),
-    'H': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
-    'S': (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
+    'P': (models.CandidateCommitteeTotalsTestStub, schemas.CandidateCommitteeTotalsPresidentialPageSchema),
+    'H': (models.CandidateCommitteeTotalsTestStub, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
+    'S': (models.CandidateCommitteeTotalsTestStub, schemas.CandidateCommitteeTotalsHouseSenatePageSchema),
 }
 
 default_candidate_schemas = (models.CandidateCommitteeTotalsHouseSenate, schemas.CandidateCommitteeTotalsHouseSenatePageSchema)
@@ -111,6 +111,9 @@ class CandidateTotalsView(utils.Resource):
         return totals_schema().dump(page).data
 
     def build_query(self, candidate_id=None, **kwargs):
+        totals_class = models.CandidateCommitteeTotalsTestStub
+        totals_schema = schemas.CandidateCommitteeTotalsTestStubSchema
+        '''
         totals_class, totals_schema = candidate_totals_schema_map.get(
             self._resolve_committee_type(
                 candidate_id=candidate_id,
@@ -118,6 +121,7 @@ class CandidateTotalsView(utils.Resource):
             ),
             default_schemas,
         )
+        '''
         query = totals_class.query
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))

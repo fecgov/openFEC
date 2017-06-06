@@ -123,6 +123,32 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
 
+#in order to test with dev database, adding a temp model, this prevents breaking current build and allows
+#testing
+class CandidateCommitteeTotalsTestStub(CandidateCommitteeTotals):
+    __tablename__ = 'ofec_totals_candidate_committees_mv'
+
+    candidate_contribution = db.Column(db.Numeric(30, 2))
+    exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2))
+    federal_funds = db.Column(db.Numeric(30, 2))
+    fundraising_disbursements = db.Column(db.Numeric(30, 2))
+    loan_repayments_made = db.Column(db.Numeric(30, 2))
+    loans_received = db.Column(db.Numeric(30, 2))
+    loans_received_from_candidate = db.Column(db.Numeric(30, 2))
+    offsets_to_fundraising_expenditures = db.Column(db.Numeric(30, 2))
+    offsets_to_legal_accounting = db.Column(db.Numeric(30, 2))
+    total_offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
+    other_loans_received = db.Column(db.Numeric(30, 2))
+    other_receipts = db.Column(db.Numeric(30, 2))
+    repayments_loans_made_by_candidate = db.Column(db.Numeric(30, 2))
+    repayments_other_loans = db.Column(db.Numeric(30, 2))
+    transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
+    transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
+    #Leaving this column out for now, it takes more logic that is timely to write (and isn't even used currently by
+    #webapp)
+    #cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
+    full_election = db.Column(db.Boolean, primary_key=True)
+
 class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
     __tablename__ = 'ofec_totals_candidate_committees_presidential_mv'
 
