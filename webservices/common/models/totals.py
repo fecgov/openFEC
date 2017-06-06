@@ -142,8 +142,6 @@ class CandidateCommitteeTotalsTestStub(CandidateCommitteeTotals):
     other_receipts = db.Column(db.Numeric(30, 2))
     repayments_loans_made_by_candidate = db.Column(db.Numeric(30, 2))
     repayments_other_loans = db.Column(db.Numeric(30, 2))
-    transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
-    transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
     #Leaving this column out for now, it takes more logic that is timely to write (and isn't even used currently by
     #webapp)
     #cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
