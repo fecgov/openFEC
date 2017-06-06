@@ -111,6 +111,12 @@ def get_graph():
         ('cand_cmte_linkage', 'totals_candidate_committee_presidential'),
     ])
 
+    graph.add_edges_from([
+        ('candidate_election', 'totals_candidate_committee'),
+        ('filings', 'totals_candidate_committee'),
+        ('cand_cmte_linkage', 'totals_candidate_committee'),
+    ])
+
     graph.add_edge('committee_history', 'communication_cost')
     graph.add_edge('committee_detail', 'sched_a_by_state_recipient_totals')
 

@@ -1,4 +1,7 @@
-  with last_cycle as (
+
+drop materialized view if exists ofec_totals_candidate_committees_mv_tmp;
+create materialized view ofec_totals_candidate_committees_mv_tmp as
+with last_cycle as (
     select distinct on (v_sum.cmte_id, link.fec_election_yr)
 	      v_sum.cmte_id,
         v_sum.rpt_yr as report_year,
@@ -15,13 +18,14 @@
         link.fec_election_yr as cycle,
         link.cand_election_yr as election_year
     from disclosure.v_sum_and_det_sum_report v_sum
-	  left join ofec_cand_cmte_linkage_mv link using(cmte_id)
-	  left join ofec_filings_mv of on of.sub_id = v_sum.orig_sub_id
+	  left join ofec_cand_cmte_linkage_mv_tmp link using(cmte_id)
+	  left join ofec_filings_mv_tmp of on of.sub_id = v_sum.orig_sub_id
 	  where
 		  (v_sum.form_tp_cd = 'F3P' or v_sum.form_tp_cd = 'F3')
 		  and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
 	  	and cvg_end_dt != 99999999
 		  and link.fec_election_yr = get_cycle(extract (year from cast(cast(v_sum.cvg_end_dt as text) as timestamp))::int)
+      and link.fec_election_yr >= :START_YEAR
 		order by
 			v_sum.cmte_id,
 			link.fec_election_yr,
@@ -43,8 +47,7 @@
         last.cycle,
         last.candidate_id
     ),
-
-    -- totals per candidate, per two-year cycle, with firsts and lasts
+  -- totals per candidate, per two-year cycle
   cycle_totals as(
     select
         link.cand_id as candidate_id,
@@ -86,18 +89,13 @@
         sum(p.tranf_to_other_auth_cmte) as transfers_to_other_authorized_committee,
         sum(p.net_op_exp) as net_operating_expenditures,
         sum(p.net_contb) as net_contributions,
-        -- these are added in the event that a candidate has multiple committees
         false as full_election
-        --coalesce(min(first.cvg_start_dt), min(last.coverage_start_date)) as coverage_start_date,
 
-        --min(first.cash_on_hand_beginning_of_period) as cash_on_hand_beginning_of_period
     from
-        -- starting with candidate will consolidate record in the event that a candidate has multiple committees
-        --ofec_cand_cmte_linkage_mv link
-        ofec_cand_cmte_linkage_mv link
+        ofec_cand_cmte_linkage_mv_tmp link
         left join disclosure.v_sum_and_det_sum_report p on link.cmte_id = p.cmte_id and link.fec_election_yr = get_cycle(p.rpt_yr)
     where
-        link.fec_election_yr >= 1970
+        link.fec_election_yr >= :START_YEAR
         -- this issue with the data is really driving me nuts.  Jeff said he's looking into it,
         -- leaving a reminder here, but this check filters out these 9999... records.
         and p.cvg_start_dt != 99999999
@@ -125,7 +123,6 @@
             max(totals.cycle) as cycle,
             max(totals.election_year) as election_year,
             min(totals.coverage_start_date) as coverage_start_date,
-            max(totals.coverage_end_date) as coverage_end_date,
             sum(totals.candidate_contribution) as candidate_contribution,
             sum(totals.contribution_refunds) as contribution_refunds,
             sum(totals.contributions) as contributions,
@@ -161,10 +158,11 @@
             sum(totals.net_operating_expenditures) as net_operating_expenditures,
             sum(totals.net_contributions) as net_contributions,
             -- these are added in the event that a candidate has multiple committees
-            true as full_election
+            true as full_election,
+            max(totals.coverage_end_date) as coverage_end_date
         from
             cycle_totals_with_ending_aggregates totals
-            left join ofec_candidate_election_mv election on
+            left join ofec_candidate_election_mv_tmp election on
                 totals.candidate_id = election.candidate_id and
                 totals.cycle <= election.cand_election_year and
                 totals.cycle > election.prev_election_year
@@ -174,24 +172,33 @@
             election.cand_election_year
   ), election_totals_with_ending_aggregates as (
             select et.*,
-                totals.last_cash_on_hand_end_period,
                 totals.last_report_type_full,
-                totals.last_debts_owed_to_committee,
-                totals.last_debts_owed_by_committee,
                 totals.last_beginning_image_number,
+                totals.last_cash_on_hand_end_period,
+                totals.last_debts_owed_by_committee,
+                totals.last_debts_owed_to_committee,
                 totals.last_report_year
                 --0.0 as cash_on_hand_beginning_of_period
             from ending_totals_per_cycle totals
-            inner join ofec_candidate_election_mv election on
+            inner join ofec_candidate_election_mv_tmp election on
                 totals.candidate_id = election.candidate_id and
                 totals.cycle = election.cand_election_year
             left join election_totals et on totals.candidate_id = et.candidate_id and totals.cycle = et.cycle
-            where totals.cycle > 1970
+            where totals.cycle > :START_YEAR
 
         )
 
-    select coverage_start_date, coverage_end_date,candidate_id, receipts, disbursements, cycle, full_election, last_cash_on_hand_end_period from cycle_totals_with_ending_aggregates where candidate_id = 'S6MO00305'
+    select * from cycle_totals_with_ending_aggregates
     union all
-    select coverage_start_date, coverage_end_date, candidate_id, receipts, disbursements, cycle, full_election, last_cash_on_hand_end_period from election_totals_with_ending_aggregates where candidate_id = 'S6MO00305'
+    select * from election_totals_with_ending_aggregates
   ;
+
+create unique index on ofec_totals_candidate_committees_mv_tmp (candidate_id, cycle, full_election);
+
+create index on ofec_totals_candidate_committees_mv_tmp (candidate_id);
+create index on ofec_totals_candidate_committees_mv_tmp (election_year);
+create index on ofec_totals_candidate_committees_mv_tmp (cycle);
+create index on ofec_totals_candidate_committees_mv_tmp (receipts);
+create index on ofec_totals_candidate_committees_mv_tmp (disbursements);
+create index on ofec_totals_candidate_committees_mv_tmp (federal_funds_flag);
 
