@@ -231,10 +231,10 @@ def get_ao_document_query(terms, phrases, **kwargs):
 
     if kwargs.get('ao_category'):
         ao_category = [categories[c] for c in kwargs.get('ao_category')]
+        combined_query = [Q('terms', documents__category=ao_category)]
     else:
-        ao_category = ['Final Opinion']
+        combined_query = []
 
-    combined_query = [Q('terms', documents__category=ao_category)]
     if terms:
         combined_query.append(Q('match', documents__text=' '.join(terms)))
     combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
