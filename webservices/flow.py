@@ -100,18 +100,6 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('candidate_election', 'totals_candidate_committee_house_senate'),
-        ('filings', 'totals_candidate_committee_house_senate'),
-        ('cand_cmte_linkage', 'totals_candidate_committee_house_senate'),
-    ])
-
-    graph.add_edges_from([
-        ('candidate_election', 'totals_candidate_committee_presidential'),
-        ('filings', 'totals_candidate_committee_presidential'),
-        ('cand_cmte_linkage', 'totals_candidate_committee_presidential'),
-    ])
-
-    graph.add_edges_from([
         ('candidate_election', 'totals_candidate_committee'),
         ('filings', 'totals_candidate_committee'),
         ('cand_cmte_linkage', 'totals_candidate_committee'),
