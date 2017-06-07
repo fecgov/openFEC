@@ -218,3 +218,16 @@ create trigger f_item_sched_a_after_trigger after insert or update
 drop trigger if exists f_item_sched_a_before_trigger on disclosure.f_item_receipt_or_exp;
 create trigger f_item_sched_a_before_trigger before delete or update
     on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_a_delete_update_queues(:START_YEAR_AGGREGATE);
+
+CREATE OR REPLACE FUNCTION insert_sched_master() RETURNS TRIGGER AS $$
+DECLARE
+    child_table_prefix TEXT = TG_ARGV[0];
+    child_table_name TEXT;
+BEGIN
+    child_table_name = child_table_prefix || get_partition_suffix(new.two_year_transaction_period);
+    EXECUTE format('INSERT INTO %I VALUES ($1.*)', child_table_name)
+        USING new;
+
+    RETURN NULL;
+END
+$$ LANGUAGE plpgsql;

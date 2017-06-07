@@ -101,6 +101,7 @@ class TableGroup:
             cls.create_child(parent, cycle)
 
         cls.rename()
+        cls.create_trigger()
 
     @classmethod
     def add_cycles(cls, cycle, amount):
@@ -111,7 +112,7 @@ class TableGroup:
         parent = utils.load_table(cls.parent)
 
         # Calculate all of the cycles to be added at once.
-        cycles = [ cycle + i for i in range(0, amount * 2, 2) ]
+        cycles = [cycle + i for i in range(0, amount * 2, 2)]
 
         for cycle in cycles:
             child_name = cls.get_child_name(cycle)
@@ -265,46 +266,20 @@ class TableGroup:
             db.engine.execute(cmd)
 
     @classmethod
-    def refresh_children(cls):
-        """Loops through all child tables and refreshes them.
-
-        Returns a list of tuples that contain success values and messages with
-        details.
-        """
-
+    def process_queues(cls):
         queue_old = utils.load_table(cls.queue_old)
         queue_new = utils.load_table(cls.queue_new)
-        cycles = get_cycles()
-        output_messages = []
 
-        for cycle in cycles:
-            output_messages.append(
-                cls.refresh_child(cycle, queue_old, queue_new)
-            )
-
-        return output_messages
-
-    @classmethod
-    def refresh_child(cls, cycle, queue_old, queue_new):
-        """Refreshes a single child table and returns a tuple with a success
-        value (0 for success, 1 for failure) and message with details.
-        """
-
-        start, stop = cycle - 1, cycle
         output_message = (0, '')
-        name = '{base}_{start}_{stop}'.format(
-            base=cls.base_name, start=start, stop=stop
-        )
-        child = utils.load_table(name)
+        name = '{base}_master'.format(base=cls.base_name)
+        master_table = utils.load_table(name)
         connection = db.engine.connect()
         transaction = connection.begin()
 
         try:
-            delete_select = sa.select([queue_old.c.get(cls.primary)]).where(
-                queue_old.c.two_year_transaction_period.in_([start, stop])
-            )
-            delete = sa.delete(child).where(
-                child.c.get(cls.primary).in_(delete_select)
+            delete_select = sa.select([queue_old.c.get(cls.primary)])
+            delete = sa.delete(master_table).where(
+                master_table.c.get(cls.primary).in_(delete_select)
             )
             connection.execute(delete)
 
@@ -315,6 +290,7 @@ class TableGroup:
             # populating the child tables during normal partitioning.
             # Otherwise, an error is thrown due more values being specified
             # than there are columns to accept them.
+            # VM TODO - Is this still needed?
             columns = [
                 column for column in cls.column_factory(queue_new)
                 if column.name != 'two_year_transaction_period'
@@ -332,13 +308,11 @@ class TableGroup:
                     isouter=True,
                 )
             ).where(
-                queue_new.c.two_year_transaction_period.in_([start, stop])
-            ).where(
                 queue_old.c.get(cls.primary) == None  # noqa
             ).distinct(
                 queue_new.c.get(cls.primary)
             )
-            insert = sa.insert(child).from_select(
+            insert = sa.insert(master_table).from_select(
                 insert_select.columns,
                 insert_select
             )
