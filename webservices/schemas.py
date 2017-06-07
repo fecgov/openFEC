@@ -445,7 +445,6 @@ augment_models(
     make_candidate_totals_schema,
     models.CandidateCommitteeTotalsPresidential,
     models.CandidateCommitteeTotalsHouseSenate,
-    models.CandidateCommitteeTotalsTestStub,
 )
 
 register_schema(CommitteeReportsSchema)

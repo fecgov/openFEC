@@ -6,6 +6,8 @@ with last_cycle as (
 	      v_sum.cmte_id,
         v_sum.rpt_yr as report_year,
         v_sum.coh_cop as cash_on_hand_end_period,
+        v_sum.net_op_exp as net_operating_expenditures,
+        v_sum.net_contb as net_contributions,
         case when v_sum.cvg_start_dt = 99999999 then null::timestamp
           else cast(cast(v_sum.cvg_start_dt as text) as date) end
         as coverage_start_date,
@@ -41,7 +43,9 @@ with last_cycle as (
         sum(last.cash_on_hand_end_period) as last_cash_on_hand_end_period,
         sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
         sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
-        max(last.report_year) as last_report_year
+        max(last.report_year) as last_report_year,
+        sum(last.net_operating_expenditures) as last_net_operating_expenditures,
+        sum(last.net_contributions) as last_net_contributions
       from last_cycle last
       group by
         last.cycle,
@@ -63,7 +67,7 @@ with last_cycle as (
         sum(p.fed_funds_per) as federal_funds,
         sum(p.fed_funds_per) > 0 as federal_funds_flag,
         sum(p.fndrsg_disb) as fundraising_disbursements,
-        sum(p.indv_ref) as individual_contributions,-- unfortunately, a wrong name in v_sum
+        sum(p.indv_contb) as individual_contributions,-- unfortunately, a wrong name in v_sum
         sum(p.indv_unitem_contb) as individual_unitemized_contributions,
         sum(p.indv_item_contb) as individual_itemized_contributions,
         sum(p.ttl_loans) as loans_received,
@@ -113,7 +117,9 @@ with last_cycle as (
         ending_totals.last_cash_on_hand_end_period,
         ending_totals.last_debts_owed_by_committee,
         ending_totals.last_debts_owed_to_committee,
-        ending_totals.last_report_year
+        ending_totals.last_report_year,
+        ending_totals.last_net_operating_expenditures,
+        ending_totals.last_net_contributions
       from cycle_totals cycle_totals
       left join ending_totals_per_cycle ending_totals
       on ending_totals.cycle = cycle_totals.cycle AND ending_totals.candidate_id = cycle_totals.candidate_id
@@ -177,7 +183,9 @@ with last_cycle as (
                 totals.last_cash_on_hand_end_period,
                 totals.last_debts_owed_by_committee,
                 totals.last_debts_owed_to_committee,
-                totals.last_report_year
+                totals.last_report_year,
+                totals.last_net_operating_expenditures,
+                totals.last_net_contributions
                 --0.0 as cash_on_hand_beginning_of_period
             from ending_totals_per_cycle totals
             inner join ofec_candidate_election_mv_tmp election on
