@@ -123,8 +123,8 @@ class CommitteeTotalsPresidential(CommitteeTotals):
 
 
 class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
-    __tablename__ = 'ofec_totals_candidate_committees_mv'
     __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_totals_candidate_committees_mv'
 
     candidate_contribution = db.Column(db.Numeric(30, 2))
     exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2))
@@ -149,8 +149,8 @@ class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
 
 
 class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
-    __tablename__ = 'ofec_totals_candidate_committees_mv'
     __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_totals_candidate_committees_mv'
 
     all_other_loans = db.Column('other_loans_received', db.Numeric(30, 2))
     candidate_contribution = db.Column(db.Numeric(30, 2))
