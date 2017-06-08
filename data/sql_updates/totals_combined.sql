@@ -19,7 +19,7 @@ with last_subset as (
     order by
         cmte_id,
         cycle,
-        to_timestamp(cvg_end_dt) desc
+        to_timestamp(cvg_end_dt) desc nulls last
 ),
 last as (
     select
