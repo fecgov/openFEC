@@ -157,7 +157,7 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
     loan_repayments = db.Column('loan_repayments_made', db.Numeric(30, 2))
     loan_repayments_candidate_loans = db.Column('repayments_loans_made_by_candidate', db.Numeric(30, 2))
     loan_repayments_other_loans = db.Column('repayments_other_loans', db.Numeric(30, 2))
-
+    loans = db.Column('loans_received', db.Numeric(30,2))
     loans_made_by_candidate = db.Column('loans_received_from_candidate', db.Numeric(30, 2))
     other_receipts = db.Column(db.Numeric(30, 2))
     transfers_from_other_authorized_committee = db.Column('transfers_from_affiliated_committee', db.Numeric(30, 2))
