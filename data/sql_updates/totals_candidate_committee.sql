@@ -199,7 +199,7 @@ with last_cycle as (
                 totals.last_net_contributions
                 --0.0 as cash_on_hand_beginning_of_period
             from ending_totals_per_cycle totals
-            inner join ofec_candidate_election_mv_tmp election on
+            left join ofec_candidate_election_mv_tmp election on
                 totals.candidate_id = election.candidate_id and
                 totals.cycle = election.cand_election_year
             left join election_totals et on totals.candidate_id = et.candidate_id and totals.cycle = et.cycle
