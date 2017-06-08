@@ -25,8 +25,8 @@ class CommitteeTotals(BaseModel):
     receipts = db.Column(db.Numeric(30, 2))
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
-    net_operating_expenditures = db.Column(db.Numeric(30, 2))
     net_contributions = db.Column(db.Numeric(30, 2))
+    net_operating_expenditures = db.Column(db.Numeric(30, 2))
 
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
@@ -48,7 +48,6 @@ class CandidateCommitteeTotals(db.Model):
     other_political_committee_contributions = db.Column(db.Numeric(30, 2))
     individual_itemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_ITEMIZED_CONTRIBUTIONS)
     individual_unitemized_contributions = db.Column(db.Numeric(30, 2), doc=docs.INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS)
-    operating_expenditures = db.Column(db.Numeric(30, 2))
     disbursements = db.Column(db.Numeric(30, 2), doc=docs.DISBURSEMENTS)
     contributions = db.Column(db.Numeric(30, 2), doc=docs.CONTRIBUTIONS)
     contribution_refunds = db.Column(db.Numeric(30, 2))
@@ -59,8 +58,8 @@ class CandidateCommitteeTotals(db.Model):
     receipts = db.Column(db.Numeric(30, 2))
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
-    net_operating_expenditures = db.Column(db.Numeric(30, 2))
-    net_contributions = db.Column(db.Numeric(30, 2))
+    operating_expenditures = db.Column(db.Numeric(30, 2))
+
 
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
@@ -68,7 +67,6 @@ class CandidateCommitteeTotals(db.Model):
     last_cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
-
 
 
 class CommitteeTotalsPacPartyBase(CommitteeTotals):
@@ -123,8 +121,10 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
 
+
 class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
-    __tablename__ = 'ofec_totals_candidate_committees_presidential_mv'
+    __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_totals_candidate_committees_mv'
 
     candidate_contribution = db.Column(db.Numeric(30, 2))
     exempt_legal_accounting_disbursement = db.Column(db.Numeric(30, 2))
@@ -142,24 +142,31 @@ class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
     repayments_other_loans = db.Column(db.Numeric(30, 2))
     transfers_from_affiliated_committee = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
-    cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
+    #cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
     full_election = db.Column(db.Boolean, primary_key=True)
+    net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
+    net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
 
 
 class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
-    __tablename__ = 'ofec_totals_candidate_committees_house_senate_mv'
-    all_other_loans = db.Column(db.Numeric(30, 2))
+    __table_args__ = {'extend_existing': True}
+    __tablename__ = 'ofec_totals_candidate_committees_mv'
+
+    all_other_loans = db.Column('other_loans_received', db.Numeric(30, 2))
     candidate_contribution = db.Column(db.Numeric(30, 2))
-    loan_repayments = db.Column(db.Numeric(30, 2))
-    loan_repayments_candidate_loans = db.Column(db.Numeric(30, 2))
-    loan_repayments_other_loans = db.Column(db.Numeric(30, 2))
-    loans = db.Column(db.Numeric(30, 2))
-    loans_made_by_candidate = db.Column(db.Numeric(30, 2))
+    loan_repayments = db.Column('loan_repayments_made', db.Numeric(30, 2))
+    loan_repayments_candidate_loans = db.Column('repayments_loans_made_by_candidate', db.Numeric(30, 2))
+    loan_repayments_other_loans = db.Column('repayments_other_loans', db.Numeric(30, 2))
+    loans = db.Column('loans_received', db.Numeric(30,2))
+    loans_made_by_candidate = db.Column('loans_received_from_candidate', db.Numeric(30, 2))
     other_receipts = db.Column(db.Numeric(30, 2))
-    transfers_from_other_authorized_committee = db.Column(db.Numeric(30, 2))
+    transfers_from_other_authorized_committee = db.Column('transfers_from_affiliated_committee', db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
-    cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
+    #cash_on_hand_beginning_of_period = db.Column(db.Numeric(30, 2))
     full_election = db.Column(db.Boolean, primary_key=True)
+    net_operating_expenditures = db.Column(db.Numeric(30, 2))
+    net_contributions = db.Column(db.Numeric(30, 2))
+
 
 class CommitteeTotalsParty(CommitteeTotalsPacPartyBase):
     __tablename__ = 'ofec_totals_parties_mv'
