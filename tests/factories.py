@@ -38,6 +38,15 @@ class CandidateDetailFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateDetail
 
+class CandidateCommitteeTotalsPresidentialFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateCommitteeTotalsPresidential
+    cycle = 2016
+
+class CandidateCommitteeTotalsHouseSenateFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateCommitteeTotalsHouseSenate
+    cycle = 2016
 
 class CandidateHistoryFactory(BaseCandidateFactory):
     class Meta:
@@ -91,7 +100,6 @@ class CommitteeTotalsHouseSenateFactory(BaseCommitteeFactory):
     class Meta:
         model = models.CommitteeTotalsHouseSenate
     cycle = 2016
-
 
 # Force linked factories to share sequence counters
 for each in BaseCandidateFactory.__subclasses__():
