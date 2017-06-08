@@ -1,6 +1,8 @@
-
+-- This Script computes cycle and election totals for all candidate types:
+-- Presidential and congressional.
 drop materialized view if exists ofec_totals_candidate_committees_mv_tmp;
 create materialized view ofec_totals_candidate_committees_mv_tmp as
+--Collect last report of cycle for all primary committees affiliated with candidate
 with last_cycle as (
     select distinct on (v_sum.cmte_id, link.fec_election_yr)
 	      v_sum.cmte_id,
@@ -32,10 +34,10 @@ with last_cycle as (
 			v_sum.cmte_id,
 			link.fec_election_yr,
 			cvg_end_dt desc nulls last),
+  --Here we compute the ending aggregates per cycle
   ending_totals_per_cycle as (
       select last.cycle,
         last.candidate_id,
-        --should use max here?
         max(last.coverage_end_date) as coverage_end_date,
         min(last.coverage_start_date) as coverage_start_date,
         max(last.report_type_full) as last_report_type_full,
@@ -44,6 +46,7 @@ with last_cycle as (
         sum(last.debts_owed_by_committee) as last_debts_owed_by_committee,
         sum(last.debts_owed_to_committee) as last_debts_owed_to_committee,
         max(last.report_year) as last_report_year,
+        --these two columns below are only referenced by the Presidential model
         sum(last.net_operating_expenditures) as last_net_operating_expenditures,
         sum(last.net_contributions) as last_net_contributions
       from last_cycle last
@@ -57,7 +60,6 @@ with last_cycle as (
         link.cand_id as candidate_id,
         link.fec_election_yr as cycle,
         max(link.fec_election_yr) as election_year,
-        --case when max(p.cvg_start_dt) = 99999999 then null::timestamp
         min(cast(cast(p.cvg_start_dt as text) as timestamp)) as coverage_start_date,
         sum(p.cand_cntb) as candidate_contribution,
         sum(p.pol_pty_cmte_contb + p.oth_cmte_ref) as contribution_refunds,
@@ -108,7 +110,11 @@ with last_cycle as (
     group by
         link.fec_election_yr,
         link.cand_id
-    ), cycle_totals_with_ending_aggregates as (
+    ),
+    -- here we related the cycle totals to the cycles, this logic was pulled out of the above
+    -- cte because the way we were grouping was throwing the ending totals off, as indicated in the
+    -- by the filed issues
+    cycle_totals_with_ending_aggregates as (
       select
         cycle_totals.*,
         ending_totals.coverage_end_date,
@@ -123,8 +129,10 @@ with last_cycle as (
       from cycle_totals cycle_totals
       left join ending_totals_per_cycle ending_totals
       on ending_totals.cycle = cycle_totals.cycle AND ending_totals.candidate_id = cycle_totals.candidate_id
-  ), election_totals as (
-    select
+  ),
+    -- election totals for presidential and congressional candidates
+    election_totals as (
+      select
             totals.candidate_id as candidate_id,
             max(totals.cycle) as cycle,
             max(totals.election_year) as election_year,
@@ -176,7 +184,10 @@ with last_cycle as (
             totals.candidate_id,
             -- this is where the senate records are combined into 6 year election periods
             election.cand_election_year
-  ), election_totals_with_ending_aggregates as (
+  ),
+    -- Just as above, pulled the aggregation out of the above CTE as the group by was causing issues
+    -- with the aggregation
+    election_totals_with_ending_aggregates as (
             select et.*,
                 totals.last_report_type_full,
                 totals.last_beginning_image_number,
@@ -195,7 +206,7 @@ with last_cycle as (
             where totals.cycle > :START_YEAR
 
         )
-
+    -- Combing cycle totals and full election totals
     select * from cycle_totals_with_ending_aggregates
     union all
     select * from election_totals_with_ending_aggregates
