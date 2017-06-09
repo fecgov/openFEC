@@ -92,7 +92,7 @@ first as (
         sum(vsd.cand_cntb) as candidate_contribution,
         sum(vsd.cand_loan_repymnt + vsd.oth_loan_repymts) as loan_repayments_made,
         sum(vsd.cand_loan_repymnt) as loan_repayments_candidate_loans,
-        sum(vsd.cand_loan_repymnt) as loans_made_by_candidate, -- f3
+        sum(vsd.cand_loan) as loans_made_by_candidate, -- f3
         sum(vsd.cand_loan_repymnt) as repayments_loans_made_by_candidate, -- f3p
         sum(vsd.cand_loan) as loans_received_from_candidate,
         sum(vsd.coord_exp_by_pty_cmte_per) as coordinated_expenditures_by_party_committee,
