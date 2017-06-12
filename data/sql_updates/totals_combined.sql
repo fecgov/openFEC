@@ -10,6 +10,8 @@ with last_subset as (
         coh_cop,
         debts_owed_by_cmte,
         debts_owed_to_cmte,
+        net_op_exp,
+        net_contb,
         rpt_yr,
         -- check if report end date is better
         get_cycle(rpt_yr) as cycle
@@ -28,6 +30,8 @@ last as (
         ls.cycle,
         ls.debts_owed_by_cmte,
         ls.debts_owed_to_cmte,
+        ls.net_op_exp,
+        ls.net_contb,
         ls.rpt_yr,
         of.candidate_id,
         of.beginning_image_number,
@@ -81,6 +85,8 @@ first as (
         max(last.coh_cop) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee, -- confirm this is outstanding debt and not a total taken out this period
         max(last.debts_owed_to_cmte) as last_debts_owed_to_committee, -- confirm this is outstanding debt and not a total taken out this period
+        max(last.net_contb) as last_net_contributions,
+        max(last.net_op_exp) as last_net_operating_expenditures,
         max(last.report_type) as last_report_type,
         max(last.report_type_full) as last_report_type_full,
         max(last.rpt_yr) as last_report_year,
