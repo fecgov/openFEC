@@ -221,7 +221,6 @@ class SearchTest(unittest.TestCase):
                             'query': {
                                 'bool': {
                                     'must': [
-                                        {'terms': {'documents.category': ['Final Opinion']}},
                                         {'match': {'documents.text': 'president'}}
                                     ]
                                 }

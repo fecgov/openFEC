@@ -9,6 +9,7 @@ from nplusone.ext.flask_sqlalchemy import NPlusOne
 
 import manage
 from webservices import rest
+from webservices.common import models
 from webservices import __API_VERSION__
 
 
@@ -74,12 +75,14 @@ class ApiBaseTest(BaseTestCase):
         super(ApiBaseTest, cls).setUpClass()
         manage.load_districts()
         manage.update_functions()
+        whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
         rest.db.metadata.create_all(
             rest.db.engine,
             tables=[
                 each.__table__ for each in rest.db.Model._decl_class_registry.values()
-                if hasattr(each, '__table__')
+                if hasattr(each, '__table__') and each not in whitelist
             ]
+
         )
 
     def setUp(self):

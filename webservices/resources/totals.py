@@ -84,7 +84,46 @@ class TotalsView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
+'''
+@doc(
+    tags=['candidate'],
+    description=docs.TOTALS,
+    params={
+        'candidate_id': {'description': docs.CANDIDATE_ID},
+    },
+)
+class CandidateTotalsView(ApiResource):
+    model = models.CandidateCommitteeTotalsTestStub
+    schema = schemas.CandidateCommitteeTotalsTestStubSchema
+    page_schema = schemas.CandidateCommitteeTotalsTestStubPageSchema
+    filter_match_fields = [
+        ('election_full', models.CandidateCommitteeTotalsTestStub.full_election),
+    ]
+    filter_multi_fields = [
+        ('cycle', models.CandidateCommitteeTotalsTestStub.cycle)
+    ]
 
+    @property
+    def args(self):
+        return utils.extend(
+            args.candidate_committee_totals,
+            args.paging,
+            args.totals,
+            args.make_sort_args(
+                default='cycle',
+                validator=args.OptionValidator([
+                    'cycle',
+                ]),
+            )
+        )
+
+    def build_query(self, candidate_id=None, **kwargs):
+        query = super().build_query(**kwargs)
+        if candidate_id is not None:
+            query = query.filter(self.model.candidate_id == candidate_id)
+        print(kwargs)
+        return query
+'''
 @doc(
     tags=['candidate'],
     description=docs.TOTALS,
@@ -130,7 +169,6 @@ class CandidateTotalsView(utils.Resource):
     def _resolve_committee_type(self, candidate_id=None, **kwargs):
         if candidate_id is not None:
             return candidate_id[0]
-
 
 @doc(
     tags=['receipts'],
