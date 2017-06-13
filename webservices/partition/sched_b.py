@@ -81,7 +81,7 @@ class SchedBGroup(TableGroup):
 
     @classmethod
     def create_trigger(cls):
-        db.engine.execute('DROP TRIGGER IF EXISTS insert_sched_a_trigger ON ofec_sched_b_master')
+        db.engine.execute('DROP TRIGGER IF EXISTS insert_sched_b_trigger ON ofec_sched_b_master')
         db.engine.execute('''
-            CREATE trigger insert_sched_a_trigger BEFORE INSERT ON ofec_sched_b_master FOR EACH ROW EXECUTE PROCEDURE insert_sched_master('ofec_sched_b_');
+            CREATE trigger insert_sched_b_trigger BEFORE INSERT ON ofec_sched_b_master FOR EACH ROW EXECUTE PROCEDURE insert_sched_master('ofec_sched_b_');
             ''')

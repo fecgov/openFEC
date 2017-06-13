@@ -208,9 +208,7 @@ end
 $$ language plpgsql;
 
 
--- Drop old trigger if it exists
-drop trigger if exists ofec_sched_b_queue_trigger on fec_vsum_sched_b_vw;
-
+-- Create new triggers
 drop trigger if exists nml_sched_b_after_trigger on disclosure.nml_sched_b;
 create trigger nml_sched_b_after_trigger after insert or update
     on disclosure.nml_sched_b for each row execute procedure ofec_sched_b_insert_update_queues(:START_YEAR_AGGREGATE);

@@ -203,9 +203,6 @@ end
 $$ language plpgsql;
 
 
--- Drop old trigger if it exists
-drop trigger if exists ofec_sched_a_queue_trigger on fec_vsum_sched_a_vw;
-
 -- Create new triggers
 drop trigger if exists nml_sched_a_after_trigger on disclosure.nml_sched_a;
 create trigger nml_sched_a_after_trigger after insert or update
@@ -215,6 +212,11 @@ drop trigger if exists nml_sched_a_before_trigger on disclosure.nml_sched_a;
 create trigger nml_sched_a_before_trigger before delete or update
     on disclosure.nml_sched_a for each row execute procedure ofec_sched_a_delete_update_queues(:START_YEAR_AGGREGATE);
 
+
+-- Create trigger for the master partition table to be created later, once the
+-- master partition table is in place.
+-- TODO:  This is used for both schedule A and B and should be moved into a
+--        more appropriately named home.
 CREATE OR REPLACE FUNCTION insert_sched_master() RETURNS TRIGGER AS $$
 DECLARE
     child_table_prefix TEXT = TG_ARGV[0];
@@ -227,3 +229,4 @@ BEGIN
     RETURN NULL;
 END
 $$ LANGUAGE plpgsql;
+
