@@ -69,7 +69,7 @@ class CanonicalPageTest(unittest.TestCase):
     def test_query_dsl(self, es_search):
         app = rest.app.test_client()
         response = app.get('/v1/legal/docs/advisory_opinions/1993-02?api_key=1234')
-        assert response.status_code == 200
+        assert response.status_code == 404
 
         # This is mostly copy/pasted from the dict-based query. This is not a
         # very meaningful test but helped to ensure we're using the
@@ -221,7 +221,6 @@ class SearchTest(unittest.TestCase):
                             'query': {
                                 'bool': {
                                     'must': [
-                                        {'terms': {'documents.category': ['Final Opinion']}},
                                         {'match': {'documents.text': 'president'}}
                                     ]
                                 }

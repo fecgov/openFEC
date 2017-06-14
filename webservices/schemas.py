@@ -444,7 +444,7 @@ make_candidate_totals_schema = functools.partial(
 augment_models(
     make_candidate_totals_schema,
     models.CandidateCommitteeTotalsPresidential,
-    models.CandidateCommitteeTotalsHouseSenate
+    models.CandidateCommitteeTotalsHouseSenate,
 )
 
 register_schema(CommitteeReportsSchema)
