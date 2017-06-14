@@ -67,7 +67,7 @@ class ElectionList(utils.Resource):
                 ],
                 else_=4,
             ).label('_office_status'),
-        ).join(
+        ).innerjoin(
             ElectionResult,
             sa.and_(
                 elections.c.state == ElectionResult.cand_office_st,
