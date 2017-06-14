@@ -2,6 +2,7 @@ import re
 
 from elasticsearch_dsl import Search, Q
 from webargs import fields
+from flask import abort
 
 from webservices import args
 from webservices import utils
@@ -58,8 +59,11 @@ class GetLegalDocument(utils.Resource):
             .execute()
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
-        return results
 
+        if len(results['docs']) > 0:
+            return results
+        else:
+            return abort(404)
 
 phrase_regex = re.compile('"(?P<phrase>[^"]*)"')
 def parse_query_string(query):
