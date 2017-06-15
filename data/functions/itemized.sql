@@ -5,8 +5,8 @@
 -- If the record is successfully processed, it will be added to the main
 -- nightly refresh queues to be taken care of with all of the other records
 -- that were originally processed successfully.  If it is not, meaning it still
--- couldn't be found in the public.fec_vsum_sched_a_vw or
--- public.fec_vsum_sched_b_vw views, the sub_id will remain in the
+-- couldn't be found in the public.fec_fitem_sched_a_vw or
+-- public.fec_fitem_sched_b_vw views, the sub_id will remain in the
 -- ofec_sched_a_nightly_retries/ofec_sched_b_nightly_retries table until it is.
 
 -- Convenience function that takes care of all of the processing at once.
