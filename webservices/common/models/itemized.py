@@ -587,6 +587,7 @@ class ScheduleEEfile(BaseRawItemized):
                         )''',
         foreign_keys=file_number,
         lazy='joined',
+        innerjoin='True',
     )
 
 
@@ -599,6 +600,7 @@ class ScheduleEEfile(BaseRawItemized):
                                 )''',
         foreign_keys=committee_id,
         lazy='joined',
+        innerjoin='True',
     )
 
     @hybrid_property
