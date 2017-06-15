@@ -389,7 +389,7 @@ class ScheduleC(PdfMixin,BaseItemized):
 
 
 class ScheduleD(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_d_vw'
+    __tablename__ = 'fec_fitem_sched_d_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
