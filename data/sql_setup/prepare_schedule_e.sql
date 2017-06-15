@@ -116,7 +116,7 @@ create table ofec_nml_24_queue_old as select * from disclosure.nml_sched_e limit
 create table ofec_f57_queue_old as select * from disclosure.nml_form_57 limit 0;
 create table ofec_f57_queue_new as select * from disclosure.nml_form_57 limit 0;
 create table fec_fitem_f57_queue_new as select * from fec_fitem_f57_vw limit 0;
-create table fec_fitem_f57_queue_old as select * from fec_fiem_f57_vw limit 0;
+create table fec_fitem_f57_queue_old as select * from fec_fitem_f57_vw limit 0;
 create table ofec_sched_e_queue_new as select * from fec_fitem_sched_e_vw limit 0;
 create table ofec_sched_e_queue_old as select * from fec_fitem_sched_e_vw limit 0;
 
