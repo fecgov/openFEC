@@ -30,7 +30,7 @@ incumbent_info as(
         cand_election_yr desc,
         latest_receipt_dt desc
 )
-select *, incumbent_info.*
+select *, fec.*
 from election_dates
 left join
     incumbent_info fec on
