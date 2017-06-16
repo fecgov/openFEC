@@ -1,4 +1,5 @@
 -- A simple union to pull in the f5 filers.  Real_efile_se has a few more columns, so had to account for that (pcf info, notary, etc).
+drop view if exists real_efile_se_f57;
 create view real_efile_se_f57 as
  select repid,
      null as line_num,--is there an actual line number for this?
