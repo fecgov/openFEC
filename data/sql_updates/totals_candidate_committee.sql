@@ -57,6 +57,7 @@ with last_cycle as (
   -- totals per candidate, per two-year cycle
   cycle_totals as(
     select
+        distinct on (candidate_id, cycle)
         link.cand_id as candidate_id,
         link.fec_election_yr as cycle,
         max(link.fec_election_yr) as election_year,
@@ -109,6 +110,7 @@ with last_cycle as (
         and (link.cmte_dsgn = 'A' or link.cmte_dsgn = 'P')
     group by
         link.fec_election_yr,
+        link.cand_election_yr,
         link.cand_id
     ),
     -- here we related the cycle totals to the cycles, this logic was pulled out of the above
