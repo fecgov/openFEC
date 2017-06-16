@@ -21,7 +21,7 @@ def refresh():
             manage.refresh_itemized()
             manage.update_schemas()
             # remaking temporarily
-            manage.refresh_itemized('e')
+            manage.update_itemized('e')
             download.clear_bucket()
         except Exception as error:
             manage.logger.exception(error)
