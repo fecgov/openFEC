@@ -25,7 +25,7 @@ create or replace function ofec_sched_e_update_from_f57() returns void as $$
 begin
     -- Drop all queued deletes
     delete from ofec_sched_e
-    where sub_id = any(select sub_id from fec_vsum_f57_queue_old)
+    where sub_id = any(select sub_id from fec_fitem_f57_queue_old)
     ;
     -- Insert all queued updates, unless a row with the same key exists in the
     -- delete queue with a later timestamp
@@ -93,7 +93,7 @@ begin
         image_pdf_url(f57.image_num) as pdf_url,
         False,
         to_tsvector(f57.pye_nm)
-    from fec_vsum_f57_queue_new f57;
+    from fec_fitem_f57_queue_new f57;
 end
 $$ language plpgsql;
 

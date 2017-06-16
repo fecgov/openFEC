@@ -12,7 +12,7 @@ order by committee_id, cycle desc
     f76.org_id as cmte_id,
     com_names.committee_name,
     report_pdf_url(image_num) as pdf_url
-from fec_vsum_f76_vw f76
+from fec_fitem_f76_vw f76
     left join com_names on f76.org_id = com_names.committee_id
 where extract(year from communication_dt)::integer >= :START_YEAR
 ;
