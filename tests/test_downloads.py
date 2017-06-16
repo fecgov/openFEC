@@ -8,6 +8,10 @@ from botocore.exceptions import ClientError
 from webservices.rest import db, api
 from webservices.tasks import download as tasks
 from webservices.resources import download as resource
+from webservices.resources import (
+    aggregates, candidates, candidate_aggregates, committees, costs, filings,
+    reports, sched_a, sched_b, sched_d, sched_e, sched_f
+)
 
 from tests import factories
 from tests.common import ApiBaseTest
@@ -68,7 +72,37 @@ class TestDownloadTask(ApiBaseTest):
 
         db.session.commit()
 
-        for view in tasks.RESOURCE_WHITELIST:
+        # these are the major downloadable resources, we may want to add more later
+        RESOURCE_WHITELIST = {
+            aggregates.ScheduleABySizeView,
+            aggregates.ScheduleAByStateView,
+            aggregates.ScheduleAByZipView,
+            aggregates.ScheduleAByEmployerView,
+            aggregates.ScheduleAByOccupationView,
+            aggregates.ScheduleBByRecipientView,
+            aggregates.ScheduleBByRecipientIDView,
+            aggregates.ScheduleBByPurposeView,
+            candidates.CandidateList,
+            committees.CommitteeList,
+            costs.CommunicationCostView,
+            costs.ElectioneeringView,
+            filings.EFilingsView,
+            filings.FilingsList,
+            filings.FilingsView,
+            reports.ReportsView,
+            reports.CommitteeReportsView,
+            reports.EFilingSummaryView,
+            sched_a.ScheduleAView,
+            sched_a.ScheduleAEfileView,
+            sched_b.ScheduleBView,
+            sched_b.ScheduleBEfileView,
+            sched_d.ScheduleDView,
+            sched_e.ScheduleEView,
+            sched_e.ScheduleEEfileView,
+            sched_f.ScheduleFView
+        }
+
+        for view in RESOURCE_WHITELIST:
             if view.endpoint in ['reportsview', 'efilingsummaryview',]:
                 url = api.url_for(
                     view,

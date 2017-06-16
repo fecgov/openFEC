@@ -18,8 +18,8 @@ begin
     delete from ofec_sched_e_queue_old;
 
     perform ofec_sched_e_update_from_f57();
-    delete from fec_vsum_f57_queue_new;
-    delete from fec_vsum_f57_queue_old;
+    delete from fec_fitem_f57_queue_new;
+    delete from fec_fitem_f57_queue_old;
 
     perform ofec_sched_e_notice_update_from_f24();
     delete from ofec_nml_24_queue_old;
