@@ -78,3 +78,10 @@ class SchedBGroup(TableGroup):
     def update_child(cls, child):
         cmd = 'alter table {0} alter column recipient_st set statistics 1000'.format(child.name)
         db.engine.execute(cmd)
+
+    @classmethod
+    def create_trigger(cls):
+        db.engine.execute('DROP TRIGGER IF EXISTS insert_sched_b_trigger ON ofec_sched_b_master')
+        db.engine.execute('''
+            CREATE trigger insert_sched_b_trigger BEFORE INSERT ON ofec_sched_b_master FOR EACH ROW EXECUTE PROCEDURE insert_sched_master('ofec_sched_b_');
+            ''')

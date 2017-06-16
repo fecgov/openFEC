@@ -76,9 +76,12 @@ class BaseRawItemized(db.Model):
 class ScheduleA(BaseItemized):
     __tablename__ = 'ofec_sched_a_master'
 
+    committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
+
     # Contributor info
     entity_type = db.Column('entity_tp', db.String)
     entity_type_desc = db.Column('entity_tp_desc', db.String)
+    unused_contbr_id = db.Column('contbr_id', db.String)
     contributor_prefix = db.Column('contbr_prefix', db.String)
     contributor = db.relationship(
         'CommitteeHistory',
@@ -94,9 +97,8 @@ class ScheduleA(BaseItemized):
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
     contributor_last_name = db.Column('contbr_nm_last', db.String)
     contributor_suffix = db.Column('contbr_suffix', db.String)
-    # Street address omitted per FEC policy
-    # contributor_street_1 = db.Column('contbr_st1', db.String)
-    # contributor_street_2 = db.Column('contbr_st2', db.String)
+    contributor_street_1 = db.Column('contbr_st1', db.String)
+    contributor_street_2 = db.Column('contbr_st2', db.String)
     contributor_city = db.Column('contbr_city', db.String, doc=docs.CONTRIBUTOR_CITY)
     contributor_state = db.Column('contbr_st', db.String, doc=docs.CONTRIBUTOR_STATE)
     contributor_zip = db.Column('contbr_zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
@@ -109,6 +111,7 @@ class ScheduleA(BaseItemized):
 
     # Primary transaction info
     receipt_type = db.Column('receipt_tp', db.String)
+    receipt_type_desc = db.Column('receipt_tp_desc', db.String)
     receipt_type_full = db.Column('receipt_desc', db.String)
     memo_code = db.Column('memo_cd', db.String)
     memo_code_full = db.Column('memo_cd_desc', db.String)
@@ -118,11 +121,36 @@ class ScheduleA(BaseItemized):
     contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
 
     # Related candidate info
+    candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
+    candidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_first_name = db.Column('cand_nm_first', db.String)
+    candidate_last_name = db.Column('cand_nm_last', db.String)
+    candidate_middle_name = db.Column('cand_m_nm', db.String)
+    candidate_prefix = db.Column('cand_prefix', db.String)
+    candidate_suffix = db.Column('cand_suffix', db.String)
     candidate_office = db.Column('cand_office', db.String)
-    candidate_office_description = db.Column('cand_office_desc', db.String)
-    candidate_office_district = db.Column('cand_office_district', db.String)
+    candidate_office_full = db.Column('cand_office_desc', db.String)
+    candidate_office_state = db.Column('cand_office_st', db.String)
+    candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
+    candidate_office_district = db.Column('cand_office_district', db.String, doc=docs.DISTRICT)
+
+    # Conduit info
+    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
+    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
+    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
+    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
+    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
+    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+
+    donor_committee_name = db.Column('donor_cmte_nm', db.String)
+    national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
+    cycle = db.Column('election_cycle', db.Integer)
+    timestamp = db.Column('timestamp', db.DateTime)
 
     # Transaction meta info
+    election_type = db.Column('election_tp', db.String) # ? election_type looks like it's included in BaseItemized already
+    election_type_full = db.Column('election_tp_desc', db.String)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_yr', db.String)
     two_year_transaction_period = db.Column(db.SmallInteger, doc=docs.TWO_YEAR_TRANSACTION_PERIOD)

@@ -10,9 +10,9 @@
 -- ofec_sched_a_nightly_retries/ofec_sched_b_nightly_retries table until it is.
 
 -- Convenience function that takes care of all of the processing at once.
-create or replace function retry_processing_itemized_records() returns void as $$
-begin
-    perform retry_processing_schedule_a_records(:START_YEAR_AGGREGATE);
-    perform retry_processing_schedule_b_records(:START_YEAR_AGGREGATE);
-end
-$$ language plpgsql;
+CREATE OR REPLACE FUNCTION retry_processing_itemized_records() RETURNS VOID AS $$
+BEGIN
+    PERFORM retry_processing_schedule_a_records(:START_YEAR_AGGREGATE);
+    PERFORM retry_processing_schedule_b_records(:START_YEAR_AGGREGATE);
+END
+$$ LANGUAGE plpgsql;

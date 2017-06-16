@@ -72,3 +72,14 @@ begin
     return weekly_total;
 end
 $$ language plpgsql;
+
+CREATE OR REPLACE FUNCTION get_partition_suffix(year NUMERIC)
+RETURNS TEXT AS $$
+BEGIN
+    IF year % 2 = 0 THEN
+        RETURN (year - 1)::TEXT || '_' || year::TEXT;
+    ELSE
+        RETURN year::TEXT || '_' || (year + 1)::TEXT;
+    END IF;
+END
+$$ LANGUAGE PLPGSQL IMMUTABLE;
