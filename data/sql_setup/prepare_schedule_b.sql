@@ -16,8 +16,8 @@ create index on ofec_sched_b_nightly_retries (sub_id);
 -- Create queue tables to hold changes to Schedule B
 drop table if exists ofec_sched_b_queue_new;
 drop table if exists ofec_sched_b_queue_old;
-create table ofec_sched_b_queue_new as select * from fec_vsum_sched_b_vw limit 0;
-create table ofec_sched_b_queue_old as select * from fec_vsum_sched_b_vw limit 0;
+create table ofec_sched_b_queue_new as select * from fec_fitem_sched_b_vw limit 0;
+create table ofec_sched_b_queue_old as select * from fec_fitem_sched_b_vw limit 0;
 alter table ofec_sched_b_queue_new add column timestamp timestamp;
 alter table ofec_sched_b_queue_old add column timestamp timestamp;
 alter table ofec_sched_b_queue_new add column two_year_transaction_period smallint;
@@ -37,11 +37,11 @@ create or replace function retry_processing_schedule_b_records(start_year intege
 declare
     timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
-    view_row fec_vsum_sched_b_vw%ROWTYPE;
+    view_row fec_fitem_sched_b_vw%ROWTYPE;
     schedule_b_record record;
 begin
     for schedule_b_record in select * from ofec_sched_b_nightly_retries loop
-        select into view_row * from fec_vsum_sched_b_vw where sub_id = schedule_b_record.sub_id;
+        select into view_row * from fec_fitem_sched_b_vw where sub_id = schedule_b_record.sub_id;
 
         if found then
             two_year_transaction_period = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
@@ -87,10 +87,10 @@ declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
-    view_row fec_vsum_sched_b_vw%ROWTYPE;
+    view_row fec_fitem_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'INSERT' then
-        select into view_row * from fec_vsum_sched_b_vw where sub_id = new.sub_id;
+        select into view_row * from fec_fitem_sched_b_vw where sub_id = new.sub_id;
 
         -- Check to see if the resultset returned anything from the view.  If
         -- it did not, skip the processing of the record, otherwise we'll end
@@ -118,7 +118,7 @@ begin
 
         return new;
     elsif tg_op = 'UPDATE' then
-        select into view_row * from fec_vsum_sched_b_vw where sub_id = new.sub_id;
+        select into view_row * from fec_fitem_sched_b_vw where sub_id = new.sub_id;
 
         if FOUND then
             two_year_transaction_period = get_transaction_year(new.disb_dt, view_row.rpt_yr);
@@ -151,10 +151,10 @@ declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
-    view_row fec_vsum_sched_b_vw%ROWTYPE;
+    view_row fec_fitem_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'DELETE' then
-        select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
+        select into view_row * from fec_fitem_sched_b_vw where sub_id = old.sub_id;
 
         -- Check to see if the resultset returned anything from the view.  If
         -- it did not, skip the processing of the record, otherwise we'll end
@@ -182,7 +182,7 @@ begin
 
         return old;
     elsif tg_op = 'UPDATE' then
-        select into view_row * from fec_vsum_sched_b_vw where sub_id = old.sub_id;
+        select into view_row * from fec_fitem_sched_b_vw where sub_id = old.sub_id;
 
         if FOUND then
             two_year_transaction_period = get_transaction_year(old.disb_dt, view_row.rpt_yr);
@@ -209,7 +209,7 @@ $$ language plpgsql;
 
 
 -- Drop old trigger if it exists
-drop trigger if exists ofec_sched_b_queue_trigger on fec_vsum_sched_b_vw;
+drop trigger if exists ofec_sched_b_queue_trigger on fec_fitem_sched_b_vw;
 
 drop trigger if exists nml_sched_b_after_trigger on disclosure.nml_sched_b;
 create trigger nml_sched_b_after_trigger after insert or update
