@@ -38,7 +38,7 @@ begin
     for schedule_a_record in select * from ofec_sched_a_nightly_retries loop
         select into view_row * from fec_fitem_sched_a_vw where sub_id = schedule_a_record.sub_id;
 
-        if found then
+        if FOUND then
             two_year_transaction_period = get_transaction_year(view_row.contb_receipt_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
