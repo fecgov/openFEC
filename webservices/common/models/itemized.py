@@ -600,7 +600,6 @@ class ScheduleEEfile(BaseRawItemized):
                                 )''',
         foreign_keys=committee_id,
         lazy='joined',
-        innerjoin='True',
     )
 
     @hybrid_property
