@@ -64,7 +64,7 @@ create index on ofec_sched_e_queue_old (timestamp);
 
 -- Support for processing of schedule A itemized records that need to be
 -- retried.
-create or replace function retry_processing_schedule_e_records(start_year integer) returns void as $$
+create or replace function retry_processing_schedule_e_records() returns void as $$
 declare
     timestamp timestamp = current_timestamp;
     view_row fec_fitem_sched_e_vw%ROWTYPE;
@@ -78,7 +78,7 @@ begin
             case schedule_e_record.action
                 when 'insert' then
                     delete from ofec_sched_e_queue_new where sub_id = view_row.sub_id;
-                    insert into ofec_sched_e_queue_new values (view_row.*, timestamp, two_year_transaction_period);
+                    insert into ofec_sched_e_queue_new values (view_row.*, timestamp);
 
                     delete from ofec_sched_e_nightly_retries where sub_id = schedule_e_record.sub_id;
                 when 'delete' then
