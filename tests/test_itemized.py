@@ -6,7 +6,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile
+from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
@@ -474,6 +474,7 @@ class TestItemized(ApiBaseTest):
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
         ]
+        factories.EFilingsFactory(file_number=123)
         for label, column, values in filters:
             [
                 factories.ScheduleEEfileFactory(**{column.key: value})
