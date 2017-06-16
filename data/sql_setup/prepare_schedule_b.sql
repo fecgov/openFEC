@@ -218,3 +218,11 @@ create trigger nml_sched_b_after_trigger after insert or update
 drop trigger if exists nml_sched_b_before_trigger on disclosure.nml_sched_b;
 create trigger nml_sched_b_before_trigger before delete or update
     on disclosure.nml_sched_b for each row execute procedure ofec_sched_b_delete_update_queues(:START_YEAR_AGGREGATE);
+
+drop trigger if exists f_item_sched_b_after_trigger on disclosure.f_item_receipt_or_exp;
+create trigger f_item_sched_b_after_trigger after insert or update
+    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_b_insert_update_queues(:START_YEAR_AGGREGATE);
+
+drop trigger if exists f_item_sched_b_before_trigger on disclosure.f_item_receipt_or_exp;
+create trigger f_item_sched_b_before_trigger before delete or update
+    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_b_delete_update_queues(:START_YEAR_AGGREGATE);
