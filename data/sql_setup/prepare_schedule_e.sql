@@ -10,9 +10,9 @@ select
     now() as pg_date
 from fec_fitem_sched_e_vw;
 
-alter table ofec_sched_e_tmp add primary key (sub_id);
-
+-- Set up the primary key
 create unique index idx_ofec_sched_e_sub_id_tmp on ofec_sched_e_tmp (sub_id);
+alter table ofec_sched_e_tmp add constraint ofec_sched_e_sub_id_pkey_tmp primary key using index idx_ofec_sched_e_sub_id_tmp;
 
 -- Create simple indices on filtered columns
 create index idx_ofec_sched_e_cmte_id_tmp on ofec_sched_e_tmp (cmte_id);
@@ -45,7 +45,6 @@ create table ofec_sched_e_nightly_retries (
     sub_id numeric(19,0) not null primary key,
     action varchar(6) not null
 );
-create index on ofec_sched_e_nightly_retries (sub_id);
 
 -- Create queue tables to hold changes to Schedule E
 drop table if exists ofec_sched_e_queue_new;
@@ -218,19 +217,19 @@ $$ language plpgsql;
 -- Create new triggers
 drop trigger if exists nml_sched_e_after_trigger on disclosure.nml_sched_e;
 create trigger nml_sched_e_after_trigger after insert or update
-    on disclosure.nml_sched_e for each row execute procedure ofec_sched_e_insert_update_queues(:START_YEAR_AGGREGATE);
+    on disclosure.nml_sched_e for each row execute procedure ofec_sched_e_insert_update_queues();
 
 drop trigger if exists nml_sched_e_before_trigger on disclosure.nml_sched_e;
 create trigger nml_sched_e_before_trigger before delete or update
-    on disclosure.nml_sched_e for each row execute procedure ofec_sched_e_delete_update_queues(:START_YEAR_AGGREGATE);
+    on disclosure.nml_sched_e for each row execute procedure ofec_sched_e_delete_update_queues();
 
-drop trigger if exists f_item_sched_e_after_trigger on disclosure.f_item_receipt_or_exp;
-create trigger f_item_sched_e_after_trigger after insert or update
-    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_e_insert_update_queues(:START_YEAR_AGGREGATE);
+--drop trigger if exists f_item_sched_e_after_trigger on disclosure.f_item_receipt_or_exp;
+--create trigger f_item_sched_e_after_trigger after insert or update
+--    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_e_insert_update_queues();
 
-drop trigger if exists f_item_sched_e_before_trigger on disclosure.f_item_receipt_or_exp;
-create trigger f_item_sched_e_before_trigger before delete or update
-    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_e_delete_update_queues(:START_YEAR_AGGREGATE);
+--drop trigger if exists f_item_sched_e_before_trigger on disclosure.f_item_receipt_or_exp;
+--create trigger f_item_sched_e_before_trigger before delete or update
+--    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_e_delete_update_queues();
 
 
 -- Replace the existing table
@@ -238,7 +237,7 @@ drop table if exists ofec_sched_e;
 alter table ofec_sched_e_tmp rename to ofec_sched_e;
 
 -- Rename indexes
-alter index idx_ofec_sched_e_sub_id_tmp rename to idx_ofec_sched_e_sub_id;
+alter index ofec_sched_e_sub_id_pkey_tmp rename to ofec_sched_e_sub_id_pkey;
 alter index idx_ofec_sched_e_cmte_id_tmp rename to idx_ofec_sched_e_cmte_id;
 alter index idx_ofec_sched_e_s_o_cand_id_tmp rename to idx_ofec_sched_e_s_o_cand_id;
 alter index idx_ofec_sched_e_entity_tp_tmp rename to idx_ofec_sched_e_entity_tp;
