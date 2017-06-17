@@ -7,7 +7,6 @@ create table ofec_sched_a_nightly_retries (
     sub_id numeric(19,0) not null primary key,
     action varchar(6) not null
 );
-create index on ofec_sched_a_nightly_retries (sub_id);
 
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;
