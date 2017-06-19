@@ -1,6 +1,6 @@
--- Powers election search
-------------------------- drop materialized view if exists ofec_election_result_mv_tmp;
-------------------------- create materialized view ofec_election_result_mv_tmp as
+-- This view powers election search
+drop materialized view if exists ofec_election_result_mv_tmp;
+create materialized view ofec_election_result_mv_tmp as
 -- get the years with election records by office, state and district
 -- this data starts in 2003
 with election_dates as(
@@ -35,6 +35,7 @@ incumbent_info as(
         cand_election_yr desc,
         latest_receipt_dt desc
 ),
+-- Election records and the incumbent info if applicable
 records_with_incumbents as (
     select
         fec.cand_valid_yr_id,
@@ -64,6 +65,7 @@ records_with_incumbents as (
         latest_receipt_dt desc
 ),
 -- We don't have future candidates in the ICI data, so we want to look that up
+-- this uses functions in /data/functions/elections.sql to see if the most recent incumbent is within a reasonable time frame
 record_without_incumbents as (
     select * from records_with_incumbents
     where cand_id is null
@@ -128,7 +130,7 @@ select
     row_number() over () as idx
 from combined
 ;
--- change to idx
+
 create unique index on ofec_election_result_mv_tmp (idx);
 
 create index on ofec_election_result_mv_tmp (election_yr);
