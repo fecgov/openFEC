@@ -1,11 +1,7 @@
-from sqlalchemy import select
-from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
-from sqlalchemy.orm import column_property
 
 from webservices import docs, utils
-
-from webservices.common.models.filings import EFilings
 
 from .base import db
 from .reports import PdfMixin, name_generator
@@ -43,11 +39,6 @@ class BaseRawItemized(db.Model):
     back_reference_transaction_id = db.Column('br_tran_id', db.String)
     back_reference_schedule_name = db.Column('br_sname', db.String)
     load_timestamp = db.Column('create_dt', db.DateTime)
-
-
-    @hybrid_property
-    def report_type(self):
-        return self.filing.form_type
 
     @hybrid_property
     def report_type(self):
