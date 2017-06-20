@@ -2,6 +2,7 @@ import re
 
 from elasticsearch_dsl import Search, Q
 from webargs import fields
+from flask import abort
 
 from webservices import args
 from webservices import utils
@@ -58,8 +59,11 @@ class GetLegalDocument(utils.Resource):
             .execute()
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
-        return results
 
+        if len(results['docs']) > 0:
+            return results
+        else:
+            return abort(404)
 
 phrase_regex = re.compile('"(?P<phrase>[^"]*)"')
 def parse_query_string(query):
@@ -102,11 +106,11 @@ def parse_query_string(query):
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
-        searchers = {
-            "statutes": generic_searcher,
-            "regulations": generic_searcher,
-            "advisory_opinions": generic_searcher,
-            "murs": generic_searcher
+        query_builders = {
+            "statutes": generic_query_builder,
+            "regulations": generic_query_builder,
+            "advisory_opinions": ao_query_builder,
+            "murs": mur_query_builder
         }
 
         if kwargs.get('type', 'all') == 'all':
@@ -122,7 +126,8 @@ class UniversalSearch(utils.Resource):
         results = {}
         total_count = 0
         for type_ in doc_types:
-            formatted_hits, count = searchers.get(type_)(q, terms, phrases, type_, from_hit, hits_returned, **kwargs)
+            query = query_builders.get(type_)(q, terms, phrases, type_, from_hit, hits_returned, **kwargs)
+            formatted_hits, count = execute_query(query)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
             total_count += count
@@ -130,7 +135,7 @@ class UniversalSearch(utils.Resource):
         results['total_all'] = total_count
         return results
 
-def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
+def generic_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
 
     if len(terms):
@@ -150,34 +155,55 @@ def generic_searcher(q, terms, phrases, type_, from_hit, hits_returned, **kwargs
         .index(DOCS_SEARCH) \
         .sort("sort1", "sort2")
 
-    if type_ == 'advisory_opinions':
-        query = apply_ao_specific_query_params(query, terms, phrases, **kwargs)
+    return query
 
-    if type_ == 'murs':
-        query = apply_mur_specific_query_params(query, terms, phrases, **kwargs)
+def mur_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
+    must_query = [Q('term', _type=type_)]
 
-    es_results = query.execute()
+    if len(terms):
+        term_query = Q('match', _all=' '.join(terms))
+        must_query.append(term_query)
 
-    formatted_hits = []
-    for hit in es_results:
-        formatted_hit = hit.to_dict()
-        formatted_hit['highlights'] = []
-        formatted_hit['document_highlights'] = {}
-        formatted_hits.append(formatted_hit)
+    if len(phrases):
+        phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
+        must_query.extend(phrase_queries)
 
-        if 'highlight' in hit.meta:
-            for key in hit.meta.highlight:
-                formatted_hit['highlights'].extend(hit.meta.highlight[key])
+    query = Search().using(es) \
+        .query(Q('bool', must=must_query)) \
+        .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
+        .highlight_options(require_field_match=False) \
+        .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
+        .extra(size=hits_returned, from_=from_hit) \
+        .index(DOCS_SEARCH) \
+        .sort("sort1", "sort2")
 
-        if 'inner_hits' in hit.meta:
-            for inner_hit in hit.meta.inner_hits['documents'].hits:
-                if 'highlight' in inner_hit.meta and 'nested' in inner_hit.meta:
-                    offset = inner_hit.meta['nested']['offset']
-                    highlights = inner_hit.meta.highlight.to_dict().values()
-                    formatted_hit['document_highlights'][offset] = [
-                        hl for hl_list in highlights for hl in hl_list]
+    return apply_mur_specific_query_params(query, terms, phrases, **kwargs)
 
-    return formatted_hits, es_results.hits.total
+def ao_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
+    must_query = [Q('term', _type=type_)]
+
+    should_query = []
+    if len(terms):
+        term_query = Q('multi_match', query=' '.join(terms), fields=['no', 'name', 'summary'])
+        should_query.append(term_query)
+
+    if len(phrases):
+        phrase_queries = [
+            Q('multi_match', type='phrase', query=phrase, fields=['no', 'name', 'summary']) for phrase in phrases]
+        should_query.extend(phrase_queries)
+
+    should_query.append(get_ao_document_query(terms, phrases, **kwargs))
+
+    query = Search().using(es) \
+        .query(Q('bool', must=must_query, should=should_query, minimum_should_match=1)) \
+        .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
+        .highlight_options(require_field_match=False) \
+        .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
+        .extra(size=hits_returned, from_=from_hit) \
+        .index(DOCS_SEARCH) \
+        .sort("sort1", "sort2")
+
+    return apply_ao_specific_query_params(query, terms, phrases, **kwargs)
 
 def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
     if kwargs.get('mur_no'):
@@ -198,8 +224,7 @@ def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
 
     return query
 
-def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
-    must_clauses = []
+def get_ao_document_query(terms, phrases, **kwargs):
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
                   'D': 'Draft Documents',
@@ -210,17 +235,18 @@ def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
 
     if kwargs.get('ao_category'):
         ao_category = [categories[c] for c in kwargs.get('ao_category')]
+        combined_query = [Q('terms', documents__category=ao_category)]
     else:
-        ao_category = ['Final Opinion']
+        combined_query = []
 
-    combined_query = [Q('terms', documents__category=ao_category)]
     if terms:
         combined_query.append(Q('match', documents__text=' '.join(terms)))
     combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
 
-    must_clauses.append(Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool',
-        must=combined_query)))
+    return Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
 
+def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
+    must_clauses = []
     if kwargs.get('ao_no'):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
 
@@ -299,3 +325,27 @@ def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
     query = query.query('bool', must=must_clauses)
 
     return query
+
+def execute_query(query):
+    es_results = query.execute()
+
+    formatted_hits = []
+    for hit in es_results:
+        formatted_hit = hit.to_dict()
+        formatted_hit['highlights'] = []
+        formatted_hit['document_highlights'] = {}
+        formatted_hits.append(formatted_hit)
+
+        if 'highlight' in hit.meta:
+            for key in hit.meta.highlight:
+                formatted_hit['highlights'].extend(hit.meta.highlight[key])
+
+        if 'inner_hits' in hit.meta:
+            for inner_hit in hit.meta.inner_hits['documents'].hits:
+                if 'highlight' in inner_hit.meta and 'nested' in inner_hit.meta:
+                    offset = inner_hit.meta['nested']['offset']
+                    highlights = inner_hit.meta.highlight.to_dict().values()
+                    formatted_hit['document_highlights'][offset] = [
+                        hl for hl_list in highlights for hl in hl_list]
+
+    return formatted_hits, es_results.hits.total

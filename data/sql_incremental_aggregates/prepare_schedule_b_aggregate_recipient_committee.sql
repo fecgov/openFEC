@@ -8,7 +8,7 @@ select
     max(recipient_nm) as recipient_nm,
     sum(disb_amt) as total,
     count(disb_amt) as count
-from fec_vsum_sched_b_vw
+from fec_fitem_sched_b_vw
 where rpt_yr >= :START_YEAR_AGGREGATE
 and disb_amt is not null
 and (memo_cd != 'X' or memo_cd is null)
@@ -24,6 +24,7 @@ create index on ofec_sched_b_aggregate_recipient_id_tmp (cycle, idx);
 create index on ofec_sched_b_aggregate_recipient_id_tmp (recipient_cmte_id, idx);
 create index on ofec_sched_b_aggregate_recipient_id_tmp (total, idx);
 create index on ofec_sched_b_aggregate_recipient_id_tmp (count, idx);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (cmte_id, cycle);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_b_aggregate_recipient_id;

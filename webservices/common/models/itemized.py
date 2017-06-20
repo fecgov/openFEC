@@ -105,7 +105,6 @@ class ScheduleA(BaseItemized):
     contributor_occupation = db.Column('contbr_occupation', db.String, doc=docs.CONTRIBUTOR_OCCUPATION)
     contributor_occupation_text = db.Column(TSVECTOR)
     contributor_id = db.Column('clean_contbr_id', db.String, doc=docs.CONTRIBUTOR_ID)
-    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
     is_individual = db.Column(db.Boolean, index=True)
 
     # Primary transaction info
@@ -116,6 +115,7 @@ class ScheduleA(BaseItemized):
     memo_text = db.Column(db.String)
     contribution_receipt_date = db.Column('contb_receipt_dt', db.Date)
     contribution_receipt_amount = db.Column('contb_receipt_amt', db.Numeric(30, 2))
+    contributor_aggregate_ytd = db.Column('contb_aggregate_ytd', db.Numeric(30, 2))
 
     # Related candidate info
     candidate_office = db.Column('cand_office', db.String)
@@ -327,7 +327,7 @@ class ScheduleBEfile(BaseRawItemized):
 
 
 class ScheduleC(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_c_vw'
+    __tablename__ = 'ofec_sched_c_mv'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
     incurred_date = db.Column('incurred_dt', db.DateTime)
@@ -389,7 +389,7 @@ class ScheduleC(PdfMixin,BaseItemized):
 
 
 class ScheduleD(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_d_vw'
+    __tablename__ = 'fec_fitem_sched_d_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -531,7 +531,7 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_se'
+    __tablename__ = 'real_efile_se_f57'
 
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
@@ -561,20 +561,20 @@ class ScheduleEEfile(BaseRawItemized):
     candidate_id = db.Column('so_canid', db.String)
     #candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
     candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
-    candidate_prefix = db.Column('so_prefix', db.String)
-    candidate_first_name = db.Column('so_fname', db.String)
-    candidate_middle_name = db.Column('so_mname', db.String)
-    candidate_suffix = db.Column('so_suffix', db.String)
+    candidate_prefix = db.Column('so_can_prefix', db.String)
+    candidate_first_name = db.Column('so_can_fname', db.String)
+    candidate_middle_name = db.Column('so_can_mname', db.String)
+    candidate_suffix = db.Column('so_can_suffix', db.String)
     candidate_office = db.Column('so_can_off', db.String, doc=docs.OFFICE)
     cand_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
     cand_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
-    expenditure_description = db.Column('transdesc', db.String)
-    expenditure_date = db.Column('t_date', db.Date)
+    expenditure_description = db.Column('exp_desc', db.String)
+    expenditure_date = db.Column('exp_date', db.Date)
     expenditure_amount = db.Column('amount', db.Integer)
     office_total_ytd = db.Column('ytd', db.Float)
     category_code = db.Column('cat_code', db.String)
     #category_code_full = db.Column('catg_cd_desc', db.String)
-    support_oppose_indicator = db.Column('position', db.String)
+    support_oppose_indicator = db.Column('supop', db.String)
 
     notary_sign_date = db.Column('not_date', db.Date)
 
@@ -587,7 +587,9 @@ class ScheduleEEfile(BaseRawItemized):
                         )''',
         foreign_keys=file_number,
         lazy='joined',
+        innerjoin='True',
     )
+
 
     committee = db.relationship(
         'CommitteeHistory',
@@ -618,7 +620,7 @@ class ScheduleEEfile(BaseRawItemized):
 
 
 class ScheduleF(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_f_vw'
+    __tablename__ = 'ofec_sched_f_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)

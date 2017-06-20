@@ -1,80 +1,71 @@
 drop materialized view if exists ofec_totals_house_senate_mv_tmp cascade;
 create materialized view ofec_totals_house_senate_mv_tmp as
-with last as (
-    select distinct on (cmte_id, election_cycle) *
-    from fec_vsum_f3_vw
-    order by
-        cmte_id,
-        election_cycle,
-        cvg_end_dt desc
-), cash_beginning_period as (
-    select distinct on (cmte_id, election_cycle)
-        coh_bop as cash_on_hand,
-        cmte_id as committee_id,
-	     election_cycle as cycle
-    from fec_vsum_f3_vw hs
-    where election_cycle >= :START_YEAR
-        and hs.most_recent_filing_flag like 'Y'
-    order by
-        cmte_id,
-        election_cycle,
-        cvg_end_dt asc
-), aggregate_filings as(
-    select
-        row_number() over () as idx,
-        cmte_id as committee_id,
-        election_cycle as cycle,
-        min(hs.cvg_start_dt) as coverage_start_date,
-        max(hs.cvg_end_dt) as coverage_end_date,
-        sum(hs.all_other_loans_per) as all_other_loans,
-        sum(hs.cand_contb_per) as candidate_contribution,
-        sum(hs.ttl_contb_ref_per) as contribution_refunds,
-        sum(hs.ttl_contb_per) as contributions,
-        sum(hs.ttl_disb_per) as disbursements,
-        sum(hs.ttl_indv_contb_per) as individual_contributions,
-        sum(hs.indv_item_contb_per) as individual_itemized_contributions,
-        sum(hs.indv_unitem_contb_per) as individual_unitemized_contributions,
-        sum(hs.ttl_loan_repymts_per) as loan_repayments,
-        sum(hs.loan_repymts_cand_loans_per) as loan_repayments_candidate_loans,
-        sum(hs.loan_repymts_other_loans_per) as loan_repayments_other_loans,
-        sum(hs.ttl_loans_per) as loans,
-        sum(hs.loans_made_by_cand_per) as loans_made_by_candidate,
-        sum(hs.net_contb_per) as net_contributions,
-        sum(hs.net_op_exp_per) as net_operating_expenditures,
-        sum(hs.offsets_to_op_exp_per) as offsets_to_operating_expenditures,
-        sum(hs.ttl_op_exp_per) as operating_expenditures,
-        sum(hs.other_disb_per) as other_disbursements,
-        sum(hs.other_pol_cmte_contb_per) as other_political_committee_contributions,
-        sum(hs.other_receipts_per) as other_receipts,
-        sum(hs.pol_pty_cmte_contb_per) as political_party_committee_contributions,
-        sum(hs.ttl_receipts_per) as receipts,
-        sum(hs.ref_indv_contb_per) as refunded_individual_contributions,
-        sum(hs.ref_other_pol_cmte_contb_per) as refunded_other_political_committee_contributions,
-        sum(hs.ref_pol_pty_cmte_contb_per) as refunded_political_party_committee_contributions,
-        sum(hs.tranf_from_other_auth_cmte_per) as transfers_from_other_authorized_committee,
-        sum(hs.tranf_to_other_auth_cmte_per) as transfers_to_other_authorized_committee,
-        max(hs.rpt_tp_desc) as last_report_type_full,
-        max(last.begin_image_num) as last_beginning_image_number,
-        max(greatest(last.coh_cop)) as last_cash_on_hand_end_period,
-        max(last.debts_owed_by_cmte) as last_debts_owed_by_committee,
-        max(last.debts_owed_to_cmte) as last_debts_owed_to_committee,
-        max(last.rpt_yr) as last_report_year
-    from
-        fec_vsum_f3_vw hs
-        inner join last using (cmte_id, election_cycle)
-    where
-        hs.most_recent_filing_flag like 'Y'
-        and hs.election_cycle >= :START_YEAR
-    group by
-        cmte_id,
-        election_cycle)
-select af.*,
-	cash_beginning_period.cash_on_hand as cash_on_hand_beginning_period
-	from aggregate_filings af
-	left join cash_beginning_period using (committee_id, cycle)
+
+with hs_cycle as(
+select DISTINCT on (fec_election_yr, cmte_id)
+    cmte_id as committee_id,
+    cand_election_yr,
+    fec_election_yr as cycle
+from disclosure.cand_cmte_linkage
+order by
+    cmte_id,
+    fec_election_yr,
+    cand_election_yr,
+    cycle
+)
+select
+    f3.candidate_id,
+    f3.cycle,
+    sub_id as idx,
+    f3.committee_id,
+    hs_cycle.cand_election_yr as election_cycle,
+    coverage_start_date,
+    coverage_end_date,
+    all_other_loans,
+    candidate_contribution,
+    contribution_refunds,
+    contributions,
+    disbursements,
+    individual_contributions,
+    individual_itemized_contributions,
+    individual_unitemized_contributions,
+    loan_repayments,
+    loan_repayments_candidate_loans,
+    loan_repayments_other_loans,
+    loans,
+    loans_made_by_candidate,
+    net_contributions,
+    net_operating_expenditures,
+    offsets_to_operating_expenditures,
+    operating_expenditures,
+    other_disbursements,
+    other_political_committee_contributions,
+    other_receipts,
+    political_party_committee_contributions,
+    receipts,
+    refunded_individual_contributions,
+    refunded_other_political_committee_contributions,
+    refunded_political_party_committee_contributions,
+    transfers_from_other_authorized_committee,
+    transfers_to_other_authorized_committee,
+    last_report_type_full,
+    last_beginning_image_number,
+    cash_on_hand_beginning_period,
+    last_cash_on_hand_end_period,
+    last_debts_owed_by_committee,
+    last_debts_owed_to_committee,
+    last_report_year
+from
+    ofec_totals_combined_mv_tmp f3
+    left join hs_cycle using (committee_id, cycle)
+where
+    form_type = 'F3'
 ;
 
 create unique index on ofec_totals_house_senate_mv_tmp(idx);
 
 create index on ofec_totals_house_senate_mv_tmp(cycle, idx);
+create index on ofec_totals_house_senate_mv_tmp(candidate_id, idx);
+create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
 create index on ofec_totals_house_senate_mv_tmp(committee_id, idx);
+create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);

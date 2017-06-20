@@ -193,14 +193,16 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     with open('.cfmeta', 'w') as fp:
         json.dump({'user': os.getenv('USER'), 'branch': branch}, fp)
 
-    # Deploy API
-    deployed = ctx.run('cf app api', echo=True, warn=True)
-    cmd = 'zero-downtime-push' if deployed.ok else 'push'
-    ctx.run('cf {0} api -f manifest_{1}.yml'.format(cmd, space), echo=True)
-
-    # Deploy worker applications
-    ctx.run('cf push celery-beat -f manifest_{0}.yml'.format(space))
-    ctx.run('cf push celery-worker -f manifest_{0}.yml'.format(space))
+    # Deploy API and worker applications
+    for app in ('api', 'celery-worker', 'celery-beat'):
+        deployed = ctx.run('cf app {0}'.format(app), echo=True, warn=True)
+        cmd = 'zero-downtime-push' if deployed.ok else 'push'
+        ctx.run('cf {cmd} {app} -f manifests/manifest_{file}_{space}.yml'.format(
+            cmd=cmd,
+            app=app,
+            file=app.replace('-','_'),
+            space=space
+        ), echo=True)
 
 
 @task

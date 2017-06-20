@@ -6,7 +6,7 @@ from webservices.partition.base import TableGroup
 
 class SchedBGroup(TableGroup):
 
-    parent = 'fec_vsum_sched_b_vw'
+    parent = 'fec_fitem_sched_b_vw'
     base_name = 'ofec_sched_b'
     queue_new = 'ofec_sched_b_queue_new'
     queue_old = 'ofec_sched_b_queue_old'
@@ -58,18 +58,17 @@ class SchedBGroup(TableGroup):
             sa.Index(None, c.rpt_yr),
             sa.Index(None, c.pg_date),
             sa.Index(None, c.image_num),
-            sa.Index(None, c[cls.primary]),
             sa.Index(None, c.recipient_st),
             sa.Index(None, c.recipient_city),
             sa.Index(None, c.clean_recipient_cmte_id),
             sa.Index(None, c.two_year_transaction_period),
 
-            sa.Index(None, c.disb_dt, c[cls.primary]),
-            sa.Index(None, c.disb_amt, c[cls.primary]),
+            sa.Index('ix_{0}_sub_id_date_tmp'.format(child.name[:-4]), c.disb_dt, c[cls.primary]),
+            sa.Index('ix_{0}_sub_id_amount_tmp'.format(child.name[:-4]), c.disb_amt, c[cls.primary]),
 
-            sa.Index(None, c.cmte_id, c[cls.primary]),
-            sa.Index(None, c.cmte_id, c.disb_dt, c[cls.primary]),
-            sa.Index(None, c.cmte_id, c.disb_amt, c[cls.primary]),
+            sa.Index('ix_{0}_cmte_id_tmp'.format(child.name[:-4]), c.cmte_id, c[cls.primary]),
+            sa.Index('ix_{0}_cmte_id_date_tmp'.format(child.name[:-4]), c.cmte_id, c.disb_dt, c[cls.primary]),
+            sa.Index('ix_{0}_cmte_id_amount_tmp'.format(child.name[:-4]), c.cmte_id, c.disb_amt, c[cls.primary]),
 
             sa.Index(None, c.recipient_name_text, postgresql_using='gin'),
             sa.Index(None, c.disbursement_description_text, postgresql_using='gin'),

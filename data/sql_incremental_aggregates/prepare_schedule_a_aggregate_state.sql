@@ -8,7 +8,7 @@ select
     expand_state(contbr_st) as state_full,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
-from fec_vsum_sched_a_vw
+from fec_fitem_sched_a_vw
 where
     rpt_yr >= :START_YEAR_AGGREGATE and
     is_unitemized(memo_text::text) = false
@@ -26,6 +26,7 @@ create index on ofec_sched_a_aggregate_state_tmp (state, idx);
 create index on ofec_sched_a_aggregate_state_tmp (state_full, idx);
 create index on ofec_sched_a_aggregate_state_tmp (total, idx);
 create index on ofec_sched_a_aggregate_state_tmp (count, idx);
+create index on ofec_sched_a_aggregate_state_tmp (cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_a_aggregate_state;

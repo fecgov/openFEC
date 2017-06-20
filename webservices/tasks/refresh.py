@@ -17,8 +17,11 @@ def refresh():
     with mail.CaptureLogs(manage.logger, buffer):
         try:
             manage.update_aggregates()
+            manage.retry_itemized()
             manage.refresh_itemized()
-            manage.refresh_materialized()
+            manage.update_schemas()
+            # remaking temporarily
+            manage.update_itemized('e')
             download.clear_bucket()
         except Exception as error:
             manage.logger.exception(error)
@@ -26,3 +29,9 @@ def refresh():
         mail.send_mail(buffer)
     except Exception as error:
         logger.exception(error)
+
+
+@app.task
+def refresh_calendar():
+    """ Updates calendar, is called every 15 minutes"""
+    manage.refresh_calendar()

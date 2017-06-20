@@ -1,4 +1,4 @@
-import os
+from datetime import timedelta
 
 import celery
 from celery import signals
@@ -17,6 +17,14 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'task': 'webservices.tasks.refresh.refresh',
             'schedule': crontab(minute=0, hour=9),
         },
+        'calendar': {
+            'task': 'webservices.tasks.refresh.refresh_calendar',
+            'schedule': timedelta(minutes=15),
+        },
+        'refresh_legal_docs': {
+            'task': 'webservices.tasks.legal_docs.refresh',
+            'schedule': timedelta(minutes=15),
+        },
     }
 
 def redis_url():
@@ -24,7 +32,7 @@ def redis_url():
     if redis:
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
-    return os.getenv('FEC_REDIS_URL', 'redis://localhost:6379/0')
+    return env.get_credential('FEC_REDIS_URL', 'redis://localhost:6379/0')
 
 app = celery.Celery('openfec')
 app.conf.update(
@@ -34,6 +42,7 @@ app.conf.update(
     CELERY_IMPORTS=(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
+        'webservices.tasks.legal_docs',
     ),
     CELERYBEAT_SCHEDULE=schedule,
 )

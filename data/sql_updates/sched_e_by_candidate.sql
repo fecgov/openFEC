@@ -9,7 +9,7 @@ with records as (
         rpt_tp,
         memo_cd,
         exp_amt
-    from fec_vsum_sched_e_vw
+    from fec_fitem_sched_e_vw
     union all
     select
         f57.filer_cmte_id as cmte_id,
@@ -19,7 +19,7 @@ with records as (
         f5.rpt_tp,
         null as memo_cd,
         exp_amt
-    from fec_vsum_f57_vw f57
+    from fec_fitem_f57_vw f57
     join fec_vsum_f5_vw f5
         on (f5.sub_id = f57.link_id)
 )
@@ -51,3 +51,5 @@ create index on ofec_sched_e_aggregate_candidate_mv_tmp (support_oppose_indicato
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (cycle);
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (total);
 create index on ofec_sched_e_aggregate_candidate_mv_tmp (count);
+create index on ofec_sched_e_aggregate_candidate_mv_tmp (cycle, cmte_id);
+create index on ofec_sched_e_aggregate_candidate_mv_tmp (cycle, cand_id);

@@ -6,5 +6,4 @@ services:
   - fec-redis-feature
   - fec-s3-feature
 env:
-  NEW_RELIC_APP_NAME: fec | api | feature
   NEW_RELIC_ENV: feature

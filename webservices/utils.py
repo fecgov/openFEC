@@ -1,4 +1,3 @@
-import os
 import re
 import functools
 
@@ -42,7 +41,7 @@ API_KEY_ARG = fields.Str(
     missing='DEMO_KEY',
     description=docs.API_KEY_DESCRIPTION,
 )
-if os.getenv('PRODUCTION'):
+if env.get_credential('PRODUCTION'):
     Resource = use_kwargs({'api_key': API_KEY_ARG})(Resource)
 
 fec_url_map = {'9': 'http://docquery.fec.gov/dcdev/posted/{0}.fec'}
@@ -258,7 +257,7 @@ def document_description(report_year, report_type=None, document_type=None, form
     else:
         clean = 'Document'
 
-    if form_type and form_type == 'RFAI':
+    if form_type and (form_type == 'RFAI' or form_type == 'FRQ'):
         clean = 'RFAI: ' + clean
     return '{0} {1}'.format(clean.strip(), report_year)
 

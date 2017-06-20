@@ -1,3 +1,9 @@
+# All files in the `data/sql_updates` folder are automatically added to the
+# graph as nodes.
+
+# If you need to add a dependency, note that the dependency must be listed on
+# the left first.
+
 import os
 
 import networkx as nx
@@ -52,10 +58,12 @@ def get_graph():
         ('filing_amendments_all', 'reports_house_senate'),
         ('filing_amendments_all', 'reports_pac_party'),
     ])
+
     graph.add_edges_from([
-        ('totals_house_senate', 'totals_combined'),
-        ('totals_presidential', 'totals_combined'),
-        ('totals_pac_party', 'totals_combined'),
+        ('totals_combined', 'totals_house_senate'),
+        ('totals_combined', 'totals_presidential'),
+        ('totals_combined', 'totals_pac_party'),
+        ('totals_combined', 'totals_ie'),
     ])
 
     graph.add_edges_from([
@@ -63,15 +71,16 @@ def get_graph():
         ('totals_combined', 'committee_fulltext'),
     ])
 
-    graph.add_edge('committee_detail', 'totals_party')
-    graph.add_edge('committee_detail', 'totals_pac')
+    graph.add_edge('committee_detail', 'totals_pac_party')
 
     graph.add_edges_from([
         ('candidate_detail', 'candidate_fulltext'),
         ('totals_combined', 'candidate_fulltext'),
     ])
 
-    graph.add_edge('totals_combined', 'sched_a_by_size_merged')
+    graph.add_edges_from([
+        ('totals_combined', 'sched_a_by_size_merged'),
+    ])
 
     graph.add_edges_from([
         ('totals_house_senate', 'candidate_aggregates'),
@@ -81,19 +90,19 @@ def get_graph():
     ])
 
     graph.add_edges_from([
-        ('committee_detail', 'large_aggregates'),
-        ('reports_ie', 'large_aggregates'),
-        ('communication_cost', 'large_aggregates'),
+        ('filings', 'totals_combined'),
     ])
 
     graph.add_edges_from([
-        ('cand_cmte_linkage', 'totals_candidate_committee_house_senate'),
-        ('candidate_election', 'totals_candidate_committee_house_senate'),
+        ('totals_pac_party', 'large_aggregates'),
+        ('totals_house_senate', 'large_aggregates'),
+        ('totals_combined', 'large_aggregates'),
     ])
 
     graph.add_edges_from([
-        ('cand_cmte_linkage', 'totals_candidate_committee_presidential'),
-        ('candidate_election', 'totals_candidate_committee_presidential'),
+        ('candidate_election', 'totals_candidate_committee'),
+        ('filings', 'totals_candidate_committee'),
+        ('cand_cmte_linkage', 'totals_candidate_committee'),
     ])
 
     graph.add_edge('committee_history', 'communication_cost')

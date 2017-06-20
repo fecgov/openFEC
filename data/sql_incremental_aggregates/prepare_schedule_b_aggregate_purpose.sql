@@ -7,7 +7,7 @@ select
     disbursement_purpose(disb_tp, disb_desc) as purpose,
     sum(disb_amt) as total,
     count(disb_amt) as count
-from fec_vsum_sched_b_vw
+from fec_fitem_sched_b_vw
 where rpt_yr >= :START_YEAR_AGGREGATE
 and disb_amt is not null
 and (memo_cd != 'X' or memo_cd is null)
@@ -22,6 +22,7 @@ create index on ofec_sched_b_aggregate_purpose_tmp (cycle, idx);
 create index on ofec_sched_b_aggregate_purpose_tmp (purpose, idx);
 create index on ofec_sched_b_aggregate_purpose_tmp (total, idx);
 create index on ofec_sched_b_aggregate_purpose_tmp (count, idx);
+create index on ofec_sched_b_aggregate_purpose_tmp (cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_b_aggregate_purpose;

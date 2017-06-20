@@ -64,7 +64,9 @@ app = Flask(__name__)
 app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_POOL_SIZE'] = 50
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 50
 app.config['SQLALCHEMY_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS'] = bool(
     env.get_credential('SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS', '')
 )
@@ -108,7 +110,7 @@ def handle_error(error):
 
 # api.data.gov
 trusted_proxies = ('54.208.160.112', '54.208.160.151')
-FEC_API_WHITELIST_IPS = os.getenv('FEC_API_WHITELIST_IPS', False)
+FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 
 
 @app.before_request
@@ -129,7 +131,7 @@ def limit_remote_addr():
 
 @app.after_request
 def add_caching_headers(response):
-    max_age = os.getenv('FEC_CACHE_AGE')
+    max_age = env.get_credential('FEC_CACHE_AGE')
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
     return response
@@ -348,7 +350,7 @@ def api_ui():
     return render_template(
         'swagger-ui.html',
         specs_url=url_for('docs.api_spec'),
-        PRODUCTION=os.getenv('PRODUCTION'),
+        PRODUCTION=env.get_credential('PRODUCTION'),
     )
 
 
