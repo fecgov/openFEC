@@ -158,28 +158,20 @@ class TableGroup:
     @classmethod
     def create_child(cls, parent, cycle, temp=True):
         start, stop = cycle - 1, cycle
+        parent_name = '{0}_master_tmp'.format(cls.base_name)
         name = '{base}_{start}_{stop}_tmp'.format(
             base=cls.base_name,
             start=start,
             stop=stop
         )
-
-        select = sa.select(
-            cls.recast_columns(parent) + cls.timestamp_factory(parent) + cls.column_factory(parent)
-        ).where(
-            sa.func.cast(
-                sa.func.get_cycle(parent.c.rpt_yr), sa.SmallInteger
-            ).in_([start, stop]),
+        table = sa.Table(
+            name,
+            db.metadata,
+            postgresql_inherits=parent_name
         )
+        db.engine.execute('drop table if exists {0} cascade'.format(name))
+        table.create(db.engine)
 
-        child = utils.load_table(name)
-        if child is not None:
-            try:
-                child.drop(db.engine)
-            except sa.exc.ProgrammingError:
-                pass
-        create = utils.TableAs(name, select)
-        db.engine.execute(create)
         child = utils.load_table(name)
 
         cls.create_constraints(child, cycle, temp)
@@ -203,8 +195,7 @@ class TableGroup:
             'alter table {child} alter column {primary} set not null',
             'alter table {child} add primary key ({primary})',
             'alter table {child} alter column filing_form set not null',
-            'alter table {child} add constraint check_two_year_transaction_period check (two_year_transaction_period in ({start}, {stop}))',  # noqa
-            'alter table {child} inherit {master}'
+            'alter table {child} add constraint check_two_year_transaction_period check (two_year_transaction_period in ({start}, {stop}))'  # noqa
         ]
         params = {
             'start': start,
