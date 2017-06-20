@@ -250,6 +250,7 @@ class ScheduleB(BaseItemized):
     # Recipient info
     entity_type = db.Column('entity_tp', db.String)
     entity_type_desc = db.Column('entity_tp_desc', db.String)
+    unused_recipient_committee_id = db.Column('recipient_cmte_id', db.String)
     recipient_committee_id = db.Column('clean_recipient_cmte_id', db.String)
     recipient_committee = db.relationship(
         'CommitteeHistory',
@@ -260,9 +261,8 @@ class ScheduleB(BaseItemized):
     )
     recipient_name = db.Column('recipient_nm', db.String)
     recipient_name_text = db.Column(TSVECTOR)
-    # Street address omitted per FEC policy
-    # recipient_street_1 = db.Column('recipient_st1', db.String)
-    # recipient_street_2 = db.Column('recipient_st2', db.String)
+    recipient_street_1 = db.Column('recipient_st1', db.String)
+    recipient_street_2 = db.Column('recipient_st2', db.String)
     recipient_city = db.Column(db.String)
     recipient_state = db.Column('recipient_st', db.String)
     recipient_zip = db.Column(db.String)
@@ -271,6 +271,7 @@ class ScheduleB(BaseItemized):
 
     # Primary transaction info
     disbursement_type = db.Column('disb_tp', db.String)
+    disbursement_type_description = db.Column('disb_tp_desc', db.String)
     disbursement_description = db.Column('disb_desc', db.String)
     disbursement_description_text = db.Column(TSVECTOR)
     disbursement_purpose_category = db.Column(db.String)
@@ -284,6 +285,15 @@ class ScheduleB(BaseItemized):
     candidate_office = db.Column('cand_office', db.String)
     candidate_office_description = db.Column('cand_office_desc', db.String)
     candidate_office_district = db.Column('cand_office_district', db.String)
+    candidate_id = db.Column('cand_id', db.String, doc=docs.CANDIDATE_ID)
+    candidate_name = db.Column('cand_nm', db.String, doc=docs.CANDIDATE_NAME)
+    candidate_first_name = db.Column('cand_nm_first', db.String)
+    candidate_last_name = db.Column('cand_nm_last', db.String)
+    candidate_middle_name = db.Column('cand_m_nm', db.String)
+    candidate_prefix = db.Column('cand_prefix', db.String)
+    candidate_suffix = db.Column('cand_suffix', db.String)
+    candidate_office_state = db.Column('cand_office_st', db.String)
+    candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
 
     # Transaction meta info
     election_type = db.Column('election_tp', db.String) # ? election_type looks like it's included in BaseItemized already
@@ -305,6 +315,33 @@ class ScheduleB(BaseItemized):
 
     pdf_url = db.Column(db.String)
     line_number_label = db.Column(db.String)
+
+    # Payee info
+    payee_last_name = db.Column('payee_l_nm', db.String)
+    payee_first_name = db.Column('payee_f_nm', db.String)
+    payee_middle_name = db.Column('payee_m_nm', db.String)
+    payee_prefix = db.Column(db.String)
+    payee_suffix = db.Column(db.String)
+    payee_employer = db.Column('payee_employer', db.String)
+    payee_occupation = db.Column('payee_occupation', db.String)
+
+    # Category info
+    category_code = db.Column('catg_cd', db.String)
+    category_code_full = db.Column('catg_cd_desc', db.String)
+
+    # Conduit info
+    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
+    conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
+    conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
+    conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
+    conduit_committee_city = db.Column('conduit_cmte_city', db.String)
+    conduit_committee_state = db.Column('conduit_cmte_st', db.String)
+    conduit_committee_zip = db.Column('conduit_cmte_zip', db.Integer)
+
+    ref_disp_excess_flg = db.Column('ref_disp_excess_flg', db.String)
+    comm_dt = db.Column('comm_dt', db.Date)
+    cycle = db.Column('election_cycle', db.Integer)
+    timestamp = db.Column('timestamp', db.DateTime)
 
 class ScheduleBEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sb4'
