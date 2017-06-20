@@ -210,10 +210,6 @@ class TableGroup:
     @classmethod
     def create_indexes(cls, child):
         for index in cls.index_factory(child):
-            try:
-                index.drop(db.engine)
-            except sa.exc.ProgrammingError:
-                pass
             index.create(db.engine)
 
     @classmethod
