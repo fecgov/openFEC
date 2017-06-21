@@ -9,9 +9,7 @@ with election_dates as(
             else election_state
         end as election_state,
         office_sought,
-       case when office_sought = 'H' and (trim(election_district) = '' or election_district is null) then '00'
-            else election_district
-        end as election_district,
+        election_district,
         election_yr
     from fecapp.trc_election
         group by
@@ -35,8 +33,11 @@ incumbent_info as(
         cand_election_yr desc,
         latest_receipt_dt desc
 ),
--- Election records and the incumbent info if applicable
-records_with_incumbents as (
+-- This creates election records and the incumbent info if applicable.
+-- We need to do this because a null in the elections date district data
+-- means all the districts in the state but the district is listed,
+-- it only applies to one district.
+records_with_incumbents_districts as (
     select
         fec.cand_valid_yr_id,
         fec.cand_id,
@@ -46,7 +47,7 @@ records_with_incumbents as (
         fec.cand_ici,
         ed.office_sought as cand_office,
         ed.election_state as cand_office_st,
-        ed.election_district as cand_office_district,
+        fec.cand_office_district,
         fec.cand_pty_affiliation,
         fec.cand_name,
         ed.election_yr::numeric as election_yr
@@ -55,14 +56,55 @@ records_with_incumbents as (
         incumbent_info fec on
         ed.election_state = fec.cand_office_st and
         ed.office_sought = fec.cand_office and
-        ed.election_district = fec.cand_office_district and
+        -- in the date table the district is 3 characters
+        --cast(ed.election_district as varchar(2)) = fec.cand_office_district and
         ed.election_yr = fec.cand_election_yr
+    where
+        election_district is not null and
+        election_district != '' and
+        -- this is the one that works in test data but not ruling out the other filters
+        election_district != ' '
     order by
         cand_office_st,
         cand_office,
         cand_office_district,
         cand_election_yr desc,
         latest_receipt_dt desc
+),
+-- This creates election records and the incumbent info if applicable
+-- for Senate, President and (House races without districts)
+records_with_incumbents_no_districts as (
+    select
+        fec.cand_valid_yr_id,
+        fec.cand_id,
+        ed.election_yr + ed.election_yr % 2 as fec_election_yr,
+        fec.cand_election_yr::numeric,
+        fec.cand_status,
+        fec.cand_ici,
+        ed.office_sought as cand_office,
+        ed.election_state as cand_office_st,
+        fec.cand_office_district,
+        fec.cand_pty_affiliation,
+        fec.cand_name,
+        ed.election_yr::numeric as election_yr
+    from election_dates ed
+    left join
+        incumbent_info fec on
+        ed.election_state = fec.cand_office_st and
+        ed.office_sought = fec.cand_office and
+        ed.election_yr = fec.cand_election_yr
+    where (ed.election_district is null or ed.election_district = '')
+    order by
+        cand_office_st,
+        cand_office,
+        cand_office_district,
+        cand_election_yr desc,
+        latest_receipt_dt desc
+),
+records_with_incumbents as(
+    select * from records_with_incumbents_districts
+    union all
+    select * from records_with_incumbents_no_districts
 ),
 -- We don't have future candidates in the ICI data, so we want to look that up
 -- this uses functions in /data/functions/elections.sql to see if the most recent incumbent is within a reasonable time frame
@@ -109,6 +151,7 @@ elections_without_incumbents as (
         rwi.cand_office_district = fec.cand_office_district and
         rwi.cand_office = fec.cand_office and
         rwi.cand_election_yr > fec.cand_election_yr
+    where rwi.cand_id is Null
     order by
         rwi.cand_office_st,
         rwi.cand_office,
