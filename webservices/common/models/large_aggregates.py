@@ -21,3 +21,12 @@ class EntityReceiptDisbursementTotals(db.Model):
     cumulative_pac_disbursements = db.Column(db.Float, doc="Cumulative PAC disbursements in a two year period, adjusted to avoid double counting.")
     cumulative_party_receipts = db.Column(db.Float, doc="Cumulative party receipts in a two year period, adjusted to avoid double counting.")
     cumulative_party_disbursements = db.Column(db.Float, doc="Cumulative party disbursements in a two year period, adjusted to avoid double counting.")
+    cumulative_communication_totals = db.Column(db.Float, doc="Cumulative communication totals, adjusted to avoid double double counting.")
+    cumulative_electioneering_donations = db.Column(db.Float,
+                                                doc="Cumulative electioneering donations, adjusted to avoid double double counting.")
+    cumulative_electioneering_disbursements = db.Column(db.Float,
+                                                doc="Cumulative electioneering disbursements, adjusted to avoid double double counting.")
+    cumulative_independent_contributions = db.Column(db.Float,
+                                                doc="Cumulative independent contributions, adjusted to avoid double double counting.")
+    cumulative_independent_expenditures = db.Column(db.Float,
+                                                     doc="Cumulative independent expenditures, adjusted to avoid double double counting.")

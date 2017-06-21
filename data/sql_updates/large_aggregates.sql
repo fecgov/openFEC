@@ -123,7 +123,43 @@ party_totals as (
     group by
         month,
         year
-), -- merge
+),
+communication_totals as (
+  select
+    get_cycle(rpt_yr) as cycle,
+    f.rpt_yr as year,
+    extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+    sum(coalesce(ttl_communication_cost ,0)) as comms_totals
+  from public.fec_vsum_f7_vw f
+  where rpt_yr >= 2007
+  and most_recent_filing_flag = 'Y'
+  group by get_cycle(rpt_yr), f.rpt_yr, extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD'))
+),
+electioneering_totals as (
+  select
+    get_cycle(rpt_yr) as cycle,
+    f.rpt_yr as year,
+    extract(month from to_date(cast(end_cvg_dt as text), 'YYYY-MM-DD')) as month,
+    sum(coalesce(ttl_dons_this_stmt ,0)) as total_donations_this_statement,
+    sum(coalesce(ttl_disb_this_stmt ,0)) as total_disbursements_this_statement
+  from public.fec_vsum_f9_vw f
+  where rpt_yr >= 2007
+  and most_recent_filing_flag = 'Y'
+  group by get_cycle(rpt_yr), f.rpt_yr, extract(month from to_date(cast(end_cvg_dt as text), 'YYYY-MM-DD'))
+  order by f.rpt_yr, extract(month from to_date(cast(end_cvg_dt as text), 'YYYY-MM-DD'))
+),  -- merge
+independent_expenditures as (
+  select
+    get_cycle(rpt_yr) as cycle,
+    f.rpt_yr as year,
+    extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD')) as month,
+    sum(coalesce(ttl_indt_contb ,0)) as total_independent_contributions,
+    sum(coalesce(ttl_indt_exp ,0)) as total_independent_expenditures
+  from public.fec_vsum_f5_vw f
+  where rpt_yr >= 2007
+    and most_recent_filing_flag = 'Y'
+  group by get_cycle(rpt_yr), f.rpt_yr, extract(month from to_date(cast(cvg_end_dt as text), 'YYYY-MM-DD'))
+  ),
 combined as (
     select
         month,
@@ -146,10 +182,28 @@ combined as (
         as party_receipts,
         case when max(party_totals.party_adjusted_total_disbursements) is null
             then 0 else max(party_totals.party_adjusted_total_disbursements) end
-        as party_disbursements
+        as party_disbursements,
+        case when max(communication_totals.comms_totals) is null
+            then 0 else max(communication_totals.comms_totals) end
+        as communications_totals,
+        case when max(electioneering_totals.total_donations_this_statement) is null
+            then 0 else max(electioneering_totals.total_donations_this_statement) end
+        as electioneering_donations,
+        case when max(electioneering_totals.total_disbursements_this_statement) is null
+            then 0 else max(electioneering_totals.total_disbursements_this_statement) end
+        as electioneering_disbursements,
+        case when max(independent_expenditures.total_independent_contributions) is null
+            then 0 else max(independent_expenditures.total_independent_contributions) end
+        as independent_contributions,
+        case when max(independent_expenditures.total_independent_expenditures) is null
+            then 0 else max(independent_expenditures.total_independent_expenditures) end
+        as independent_expenditures
     from cand_totals
     full outer join pac_totals using (month, year)
     full outer join party_totals using (month, year)
+    full outer join communication_totals using (month, year)
+    full outer join electioneering_totals using (month, year)
+    full outer join independent_expenditures using (month, year)
     group by
         month,
         year
@@ -172,7 +226,18 @@ select
     sum(party_receipts) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_receipts,
     party_receipts,
     sum(party_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_party_disbursements,
-    party_disbursements
+    party_disbursements,
+    sum(communications_totals) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_communication_totals,
+    communications_totals,
+    sum(electioneering_donations) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_electioneering_donations,
+    electioneering_donations,
+    sum(electioneering_disbursements) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_electioneering_disbursements,
+    electioneering_disbursements,
+    sum(independent_contributions) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_independent_contributions,
+    independent_contributions,
+    sum(independent_expenditures) OVER (PARTITION BY cycle order by year asc, month asc) as cumulative_independent_expenditures,
+    independent_expenditures
+
 from combined
 where cycle >= 2008
 ;
