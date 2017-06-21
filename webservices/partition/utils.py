@@ -33,6 +33,7 @@ def _analyze(element, compiler, **kwargs):
 
 def load_table(name):
     try:
+        print(name)
         return sa.Table(name, db.metadata, autoload_with=db.engine)
     except sa.exc.NoSuchTableError:
         return None

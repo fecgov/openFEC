@@ -30,7 +30,6 @@ class ScheduleAView(ItemizedResource):
     @property
     def amount_column(self):
         return self.model.contribution_receipt_amount
-
     filter_multi_fields = [
         ('image_number', models.ScheduleA.image_number),
         ('committee_id', models.ScheduleA.committee_id),
@@ -78,6 +77,11 @@ class ScheduleAView(ItemizedResource):
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+        if kwargs.get('line_number'):
+            if len(kwargs.get('line_number').split('-')) == 2:
+                form, line_no = kwargs.get('line_number').split('-')
+                query = query.filter_by(filing_form=form.upper())
+                query = query.filter_by(line_number=line_no)
         return query
 
 @doc(
