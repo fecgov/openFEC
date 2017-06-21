@@ -450,6 +450,7 @@ schedule_a = {
     'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
     'contributor_state': fields.List(IStr, description=docs.CONTRIBUTOR_STATE),
+    'contributor_zip': fields.List(IStr, description=docs.CONTRIBUTOR_ZIP),
     'contributor_employer': fields.List(fields.Str, description=docs.CONTRIBUTOR_EMPLOYER),
     'contributor_occupation': fields.List(fields.Str, description=docs.CONTRIBUTOR_OCCUPATION),
     'last_contribution_receipt_date': fields.Date(missing=None, description='When sorting by `contribution_receipt_date`, this is populated with the `contribution_receipt_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
