@@ -62,7 +62,6 @@ records_with_incumbents_districts as (
     where
         election_district is not null and
         election_district != '' and
-        -- this is the one that works in test data but not ruling out the other filters
         election_district != ' '
     order by
         cand_office_st,
