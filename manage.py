@@ -344,8 +344,8 @@ def update_aggregates():
 
 @manager.command
 def retry_itemized():
-    """This is run nightly to retry processing itemized schedule A, B, and E
-    data that was not able to be processed normally.
+    """This is run nightly to retry processing itemized schedule A and B data
+    that was not able to be processed normally.
     """
     logger.info('Retrying itemized schedule processing...')
 
