@@ -170,7 +170,7 @@ begin
                         view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                         view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                         view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
 
                     delete from ofec_sched_e_f24_nightly_retries where sub_id = schedule_e_record.sub_id;
                 when 'delete' then
@@ -197,7 +197,7 @@ begin
                         view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                         view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                         view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
 
                     delete from ofec_sched_e_f24_nightly_retries where sub_id = schedule_e_record.sub_id;
                 when 'update' then
@@ -225,7 +225,7 @@ begin
                         view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                         view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                         view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
                     insert into ofec_sched_e_queue_new(cmte_id, pye_nm, payee_l_nm, payee_f_nm,payee_m_nm, payee_prefix, payee_suffix,
                               pye_st1, pye_st2, pye_city, pye_st, pye_zip, entity_tp, entity_tp_desc, exp_desc,
                               catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first, s_o_cand_nm_last,
@@ -248,7 +248,7 @@ begin
                         view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                         view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                         view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                        view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
 
                     delete from ofec_sched_e_f24_nightly_retries where sub_id = schedule_e_record.sub_id;
                 else
@@ -421,7 +421,7 @@ begin
                 view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                 view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                 view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
         else
             -- We weren't able to successfully retrieve a row from the view,
             -- so keep track of this sub_id if we haven't already so we can
@@ -459,7 +459,7 @@ begin
                 view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                 view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                 view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
         else
             -- We weren't able to successfully retrieve a row from the view,
             -- so keep track of this sub_id if we haven't already so we can
@@ -521,7 +521,7 @@ begin
                 view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                 view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                 view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
         else
             -- We weren't able to successfully retrieve a row from the view,
             -- so keep track of this sub_id if we haven't already so we can
@@ -559,7 +559,7 @@ begin
                 view_row.conduit_cmte_st2, view_row.conduit_cmte_city, view_row.conduit_cmte_st, view_row.conduit_cmte_zip,
                 view_row.action_cd, view_row.action_cd_desc, view_row.tran_id, view_row.schedule_type, view_row.schedule_type_desc,
                 view_row.image_num, view_row.file_num, view_row.link_id, view_row.orig_sub_id, view_row.sub_id, view_row.filing_form,
-                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp) as TIMESTAMP);
+                view_row.rpt_tp, view_row.rpt_yr, view_row.cycle, cast(null as timestamp));
         else
             -- We weren't able to successfully retrieve a row from the view,
             -- so keep track of this sub_id if we haven't already so we can
