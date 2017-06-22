@@ -14,6 +14,7 @@ create or replace function retry_processing_itemized_records() returns void as $
 begin
     perform retry_processing_schedule_a_records(:START_YEAR_AGGREGATE);
     perform retry_processing_schedule_b_records(:START_YEAR_AGGREGATE);
-    perform retry_processing_schedule_e_records();
+    perform retry_processing_schedule_e_fitem_records();
+    perform retry_processing_schedule_e_f24_records();
 end
 $$ language plpgsql;
