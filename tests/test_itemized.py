@@ -106,6 +106,16 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
+    def test_filter_zip(self):
+        [
+            factories.ScheduleAFactory(contributor_zip=96789),
+            factories.ScheduleAFactory(contributor_zip=66111)
+        ]
+
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_zip'], '96789')
+
     def test_filter_case_insensitive(self):
         [
             factories.ScheduleAFactory(contributor_city='NEW YORK'),
@@ -124,6 +134,22 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, contributor_name='soros', **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_name'], 'George Soros')
+
+    def test_filter_line_number(self):
+        [
+            factories.ScheduleAFactory(line_number='16', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='17', filing_form='F3X')
+        ]
+        results = self._results(api.url_for(ScheduleAView, line_number='f3X-16', **self.kwargs))
+        self.assertEqual(len(results), 1)
+
+        [
+            factories.ScheduleBFactory(line_number='21', filing_form='F3X'),
+            factories.ScheduleBFactory(line_number='22', filing_form='F3X')
+        ]
+
+        results = self._results(api.url_for(ScheduleBView, line_number='f3X-21', **self.kwargs))
+        self.assertEqual(len(results), 1)
 
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
