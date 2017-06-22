@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
-from webservices.rest import db
 from webservices.partition.base import TableGroup
 
 class SchedBGroup(TableGroup):
@@ -54,20 +53,3 @@ class SchedBGroup(TableGroup):
                 parent.c.line_num,
             ).label('line_number_label'),
         ]
-
-    @classmethod
-    def index_factory(cls, child):
-        return []
-
-    @classmethod
-    def update_child(cls, child):
-        cmd = 'alter table {0} alter column recipient_st set statistics 1000'.format(child.name)
-        db.engine.execute(cmd)
-
-    @classmethod
-    def create_trigger(cls):
-        db.engine.execute('DROP TRIGGER IF EXISTS insert_sched_b_trigger ON ofec_sched_b_master')
-        db.engine.execute('''
-            CREATE trigger insert_sched_b_trigger BEFORE INSERT ON ofec_sched_b_master
-                FOR EACH ROW EXECUTE PROCEDURE insert_sched_master('ofec_sched_b_');
-            ''')
