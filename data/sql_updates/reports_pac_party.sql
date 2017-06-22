@@ -109,6 +109,7 @@ select
     f3x.amndt_ind as amendment_indicator,
     f3x.amndt_ind_desc as amendment_indicator_full,
     means_filed(begin_image_num) as means_filed,
+    report_html_url(means_filed(begin_image_num), f3x.cmte_id::text, f3x.file_num::text) as html_url,
     report_fec_url(begin_image_num::text, f3x.file_num::integer) as fec_url,
     amendments.amendment_chain,
     amendments.prev_file_num as previous_file_number,

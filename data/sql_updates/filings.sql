@@ -74,6 +74,10 @@ with filings as (
             filing_history.form_tp
         ) as pdf_url,
         means_filed(begin_image_num) as means_filed,
+        case when means_filed(begin_image_num) = 'e-file' then
+          report_html_url(means_filed(begin_image_num), filing_history.cand_cmte_id::text, filing_history.file_num::text)
+          else null::text
+        end as html_url,
         report_fec_url(begin_image_num::text, filing_history.file_num::integer) as fec_url,
         amendments.amendment_chain,
         --amendments.prev_file_num as previous_file_number,
@@ -143,6 +147,10 @@ rfai_filings as (
             'RFAI'::text
         ) as pdf_url,
         means_filed(begin_image_num) as means_filed,
+        case when means_filed(begin_image_num) = 'e-file' then
+          report_html_url(means_filed(begin_image_num), id::text, filing_history.file_num::text)
+          else null::text
+        end as html_url,
         null::text as fec_url,
         null::numeric[] as amendment_chain,
         null::int as most_recent_file_number,
