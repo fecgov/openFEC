@@ -87,6 +87,8 @@ class ScheduleA(BaseItemized):
             ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
         )'''
     )
+
+
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
 
     contributor_name_text = db.Column(TSVECTOR)
@@ -138,6 +140,7 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     pdf_url = db.Column(db.String)
+    line_number_label = db.Column(db.String)
 
 
 class ScheduleAEfile(BaseRawItemized):
@@ -273,6 +276,7 @@ class ScheduleB(BaseItemized):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
 
     pdf_url = db.Column(db.String)
+    line_number_label = db.Column(db.String)
 
 class ScheduleBEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sb4'
