@@ -63,14 +63,14 @@ analyze ofec_sched_e_tmp;
 -- processing so that they can be tried at a later time.
 -- The "action" column denotes what should happen with the record:
 --    insert, update, or delete
-drop table if exists ofec_sched_e_nightly_fitem_retries;
+drop table if exists ofec_sched_e_fitem_nightly_retries;
 create table ofec_sched_e_nightly_fitem_retries (
     sub_id numeric(19,0) not null primary key,
     action varchar(6) not null
 );
 
-drop table if exists ofec_sched_e_nightly_f24_retries;
-create table ofec_sched_e_nightly_f24_retries (
+drop table if exists ofec_sched_e_f24_nightly_retries;
+create table ofec_sched_e_f24_nightly_retries (
     sub_id numeric(19,0) not null primary key,
     action varchar(6) not null
 );
