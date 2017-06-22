@@ -11,10 +11,5 @@ begin
     perform ofec_sched_b_update_aggregate_purpose();
     perform ofec_sched_b_update_aggregate_recipient();
     perform ofec_sched_b_update_aggregate_recipient_id();
-
-    -- Update Schedule E
-    perform ofec_sched_e_update();
-    delete from ofec_sched_e_queue_new;
-    delete from ofec_sched_e_queue_old;
 end
 $$ language plpgsql;
