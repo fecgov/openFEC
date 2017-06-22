@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 @app.task
 def refresh():
-    """Update incremental aggregates and materialized views, then email logs
-    to the development team.
+    """Update incremental aggregates, materialized views, and schedule E, then
+    email logs to the development team.
     """
     buffer = io.StringIO()
     with mail.CaptureLogs(manage.logger, buffer):
@@ -20,7 +20,6 @@ def refresh():
             manage.retry_itemized()
             manage.refresh_itemized()
             manage.update_schemas()
-            # remaking temporarily
             manage.update_itemized('e')
             download.clear_bucket()
         except Exception as error:

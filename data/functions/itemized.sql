@@ -1,7 +1,6 @@
 -- Provides the functions that allow us to retry processing itemized schedule
 -- records that failed to process correctly upon initial record changes to the
--- underlying disclosure.nml_sched_a, disclosure.nml_sched_b, and
--- disclosure.nml_sched_e tables.
+-- underlying disclosure.nml_sched_a and disclosure.nml_sched_b tables.
 
 -- If the record is successfully processed, it will be added to the main
 -- nightly refresh queues to be taken care of with all of the other records
@@ -14,7 +13,5 @@ create or replace function retry_processing_itemized_records() returns void as $
 begin
     perform retry_processing_schedule_a_records(:START_YEAR_AGGREGATE);
     perform retry_processing_schedule_b_records(:START_YEAR_AGGREGATE);
-    perform retry_processing_schedule_e_fitem_records();
-    perform retry_processing_schedule_e_f24_records();
 end
 $$ language plpgsql;
