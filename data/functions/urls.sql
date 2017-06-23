@@ -56,6 +56,24 @@ begin
 end
 $$ language plpgsql immutable;
 
+create or replace function report_html_url(means_filed text, cmte_id text, filing_id text) returns text as $$
+BEGIN
+    return CASE
+       when means_filed = 'paper' and filing_id::int > 0 then format (
+           'http://docquery.fec.gov/cgi-bin/paper_forms/%1$s/%2$s/',
+            cmte_id,
+            filing_id
+       )
+       when means_filed = 'e-file' then format (
+           'http://docquery.fec.gov/cgi-bin/forms/%1$s/%2$s/',
+            cmte_id,
+            filing_id
+       )
+       else null
+    end;
+END
+$$ language plpgsql immutable;
+
 --If the image number string is of length 18, and the 9th character is a 9, then it is electronic
 --if the image number string is of length 11, and the 3rd character is a 9, then also electronic
 --if imaage number is of length 11 and the 3rd and 4th characters are 02 and 03 then it is paper
