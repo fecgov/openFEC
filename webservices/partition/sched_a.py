@@ -50,11 +50,4 @@ class SchedAGroup(TableGroup):
                 parent.c.contbr_id,
                 parent.c.cmte_id,
             ).label('clean_contbr_id'),
-            sa.func.cast(
-                sa.func.get_cycle(parent.c.rpt_yr), sa.SmallInteger
-            ).label('two_year_transaction_period'),
-            sa.func.expand_line_number(
-                parent.c.filing_form,
-                parent.c.line_num,
-            ).label('line_number_label')
         ]
