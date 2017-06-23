@@ -86,6 +86,7 @@ declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
+    disb_dt timestamp;
     view_row fec_fitem_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'INSERT' then
@@ -100,7 +101,14 @@ begin
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
         if FOUND then
-            two_year_transaction_period = get_transaction_year(new.disb_dt, view_row.rpt_yr);
+            -- Requires that the hstore extension is installed.
+            if hstore(new) ? 'disb_dt' then
+                disb_dt = new.contb_receipt_dt;
+            else
+                disb_dt = cast(null as timestamp);
+            end if;
+
+            two_year_transaction_period = get_transaction_year(disb_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
@@ -120,7 +128,14 @@ begin
         select into view_row * from fec_fitem_sched_b_vw where sub_id = new.sub_id;
 
         if FOUND then
-            two_year_transaction_period = get_transaction_year(new.disb_dt, view_row.rpt_yr);
+            -- Requires that the hstore extension is installed.
+            if hstore(new) ? 'disb_dt' then
+                disb_dt = new.contb_receipt_dt;
+            else
+                disb_dt = cast(null as timestamp);
+            end if;
+
+            two_year_transaction_period = get_transaction_year(disb_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
@@ -150,6 +165,7 @@ declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
+    disb_dt timestamp;
     view_row fec_fitem_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'DELETE' then
@@ -184,7 +200,14 @@ begin
         select into view_row * from fec_fitem_sched_b_vw where sub_id = old.sub_id;
 
         if FOUND then
-            two_year_transaction_period = get_transaction_year(old.disb_dt, view_row.rpt_yr);
+            -- Requires that the hstore extension is installed.
+            if hstore(new) ? 'disb_dt' then
+                disb_dt = new.contb_receipt_dt;
+            else
+                disb_dt = cast(null as timestamp);
+            end if;
+
+            two_year_transaction_period = get_transaction_year(disb_dt, view_row.rpt_yr);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
