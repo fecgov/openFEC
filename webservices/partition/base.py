@@ -166,9 +166,8 @@ class TableGroup:
         select = sa.select(
             cls.recast_columns(parent) + cls.timestamp_factory(parent) + cls.column_factory(parent)
         ).where(
-            sa.func.get_transaction_year(
-                parent.c[cls.transaction_date_column],
-                parent.c.rpt_yr
+            sa.func.cast(
+                sa.func.get_cycle(parent.c.rpt_yr), sa.SmallInteger
             ).in_([start, stop]),
         )
 

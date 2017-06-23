@@ -43,7 +43,7 @@ begin
         select into view_row * from fec_fitem_sched_b_vw where sub_id = schedule_b_record.sub_id;
 
         if FOUND then
-            two_year_transaction_period = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 -- Determine which queue(s) the found record should go into.
@@ -86,7 +86,6 @@ declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
-    disb_dt timestamp;
     view_row fec_fitem_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'INSERT' then
@@ -101,14 +100,7 @@ begin
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
         if FOUND then
-            -- Requires that the hstore extension is installed.
-            if hstore(new) ? 'disb_dt' then
-                disb_dt = new.disb_dt;
-            else
-                disb_dt = cast(null as timestamp);
-            end if;
-
-            two_year_transaction_period = get_transaction_year(disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
@@ -128,14 +120,7 @@ begin
         select into view_row * from fec_fitem_sched_b_vw where sub_id = new.sub_id;
 
         if FOUND then
-            -- Requires that the hstore extension is installed.
-            if hstore(new) ? 'disb_dt' then
-                disb_dt = new.disb_dt;
-            else
-                disb_dt = cast(null as timestamp);
-            end if;
-
-            two_year_transaction_period = get_transaction_year(disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
@@ -165,7 +150,6 @@ declare
     start_year int = TG_ARGV[0]::int;
     timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
-    disb_dt timestamp;
     view_row fec_fitem_sched_b_vw%ROWTYPE;
 begin
     if tg_op = 'DELETE' then
@@ -180,7 +164,7 @@ begin
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
         if FOUND then
-            two_year_transaction_period = get_transaction_year(view_row.disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
@@ -200,14 +184,7 @@ begin
         select into view_row * from fec_fitem_sched_b_vw where sub_id = old.sub_id;
 
         if FOUND then
-            -- Requires that the hstore extension is installed.
-            if hstore(new) ? 'disb_dt' then
-                disb_dt = new.disb_dt;
-            else
-                disb_dt = cast(null as timestamp);
-            end if;
-
-            two_year_transaction_period = get_transaction_year(disb_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
@@ -230,9 +207,7 @@ end
 $$ language plpgsql;
 
 
--- Drop old trigger if it exists
-drop trigger if exists ofec_sched_b_queue_trigger on fec_fitem_sched_b_vw;
-
+-- Create new triggers
 drop trigger if exists nml_sched_b_after_trigger on disclosure.nml_sched_b;
 create trigger nml_sched_b_after_trigger after insert or update
     on disclosure.nml_sched_b for each row execute procedure ofec_sched_b_insert_update_queues(:START_YEAR_AGGREGATE);
