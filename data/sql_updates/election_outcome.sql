@@ -57,7 +57,7 @@ records_with_incumbents_districts as (
         ed.election_state = fec.cand_office_st and
         ed.office_sought = fec.cand_office and
         -- in the date table the district is 3 characters
-        --cast(ed.election_district as varchar(2)) = fec.cand_office_district and
+        cast(ed.election_district as varchar(2)) = fec.cand_office_district and
         ed.election_yr = fec.cand_election_yr
     where
         election_district is not null and
@@ -92,7 +92,7 @@ records_with_incumbents_no_districts as (
         ed.election_state = fec.cand_office_st and
         ed.office_sought = fec.cand_office and
         ed.election_yr = fec.cand_election_yr
-    where (ed.election_district is null or ed.election_district = '')
+    where (ed.election_district is null or ed.election_district = '' or ed.election_district = ' ')
     order by
         cand_office_st,
         cand_office,

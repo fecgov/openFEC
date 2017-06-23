@@ -5,7 +5,6 @@ create or replace function check_incumbent_char(office char, election_yr numeric
 returns text as $$
     begin
         return case
-        -- add upper?
             when 'office' = 'H' and election_yr - cand_election_yr <= 3
                 then value
             when 'office' = 'S' and election_yr - cand_election_yr <= 7
@@ -21,7 +20,6 @@ create or replace function check_incumbent_numeric(office char, election_yr nume
 returns text as $$
     begin
         return case
-        -- add upper?
             when 'office' = 'H' and election_yr - cand_election_yr <= 3
                 then value
             when 'office' = 'S' and election_yr - cand_election_yr <= 7
