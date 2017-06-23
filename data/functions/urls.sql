@@ -59,16 +59,17 @@ $$ language plpgsql immutable;
 create or replace function report_html_url(means_filed text, cmte_id text, filing_id text) returns text as $$
 BEGIN
     return CASE
-       when means_filed = 'paper' then format (
+       when means_filed = 'paper' and filing_id::int > 0 then format (
            'http://docquery.fec.gov/cgi-bin/paper_forms/%1$s/%2$s/',
             cmte_id,
             filing_id
        )
-       else format (
+       when means_filed = 'e-file' then format (
            'http://docquery.fec.gov/cgi-bin/forms/%1$s/%2$s/',
             cmte_id,
             filing_id
        )
+       else null
     end;
 END
 $$ language plpgsql immutable;
