@@ -133,7 +133,6 @@ def get_murs(from_mur_no):
                 'sort2': sort2,
             }
             mur['subjects'] = get_subjects(case_id)
-            mur['subject'] = {'text': mur['subjects']}
             mur['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)
