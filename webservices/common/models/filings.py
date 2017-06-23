@@ -61,7 +61,7 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     means_filed = db.Column(db.String, doc=docs.MEANS_FILED)
     is_amended = db.Column('is_amended', db.Boolean)
     most_recent = db.Column('most_recent', db.Boolean)
-    html_url = db.Column(db.String)
+    html_url = db.Column(db.String, doc='HTML link to the filing.')
 
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)

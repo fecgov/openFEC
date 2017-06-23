@@ -155,7 +155,7 @@ class CommitteeReports(FecFileNumberMixin, PdfMixin, CsvMixin, BaseModel):
     receipt_date = db.Column('receipt_date', db.Date, doc=docs.RECEIPT_DATE)
     means_filed = db.Column('means_filed', db.String, doc=docs.MEANS_FILED)
     fec_url = db.Column(db.String)
-    html_url = db.Column(db.String)
+    html_url = db.Column(db.String, doc='HTML link to the filing.')
     most_recent = db.Column('most_recent', db.Boolean)
 
     @property
