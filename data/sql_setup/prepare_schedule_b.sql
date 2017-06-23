@@ -103,7 +103,7 @@ begin
         if FOUND then
             -- Requires that the hstore extension is installed.
             if hstore(new) ? 'disb_dt' then
-                disb_dt = new.contb_receipt_dt;
+                disb_dt = new.disb_dt;
             else
                 disb_dt = cast(null as timestamp);
             end if;
@@ -130,7 +130,7 @@ begin
         if FOUND then
             -- Requires that the hstore extension is installed.
             if hstore(new) ? 'disb_dt' then
-                disb_dt = new.contb_receipt_dt;
+                disb_dt = new.disb_dt;
             else
                 disb_dt = cast(null as timestamp);
             end if;
@@ -202,7 +202,7 @@ begin
         if FOUND then
             -- Requires that the hstore extension is installed.
             if hstore(new) ? 'disb_dt' then
-                disb_dt = new.contb_receipt_dt;
+                disb_dt = new.disb_dt;
             else
                 disb_dt = cast(null as timestamp);
             end if;
