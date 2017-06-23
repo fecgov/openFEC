@@ -84,8 +84,8 @@ CREATE TABLE ofec_sched_a_master_tmp (
 );
 
 -- Create the child tables.
-SELECT create_itemized_schedule_partition('a', 1978, 2018);
-SELECT finalize_itemized_schedule_a_tables(1978, 2018);
+SELECT create_itemized_schedule_partition('a', :PARTITION_START_YEAR, :PARTITION_END_YEAR);
+SELECT finalize_itemized_schedule_a_tables(:PARTITION_START_YEAR, :PARTITION_END_YEAR);
 
 -- Create the insert trigger so that records go into the proper child table.
 DROP TRIGGER IF EXISTS insert_sched_a_trigger_tmp ON ofec_sched_a_master_tmp;
