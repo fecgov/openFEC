@@ -71,13 +71,6 @@ MAPPINGS = {
             "subjects": {
                 "type": "string"
             },
-            "subject": {
-                "properties": {
-                    "text": {
-                        "type": "string"
-                    }
-                }
-            },
             "disposition": {
                 "properties": {
                     "data": {
