@@ -7,7 +7,6 @@ create table ofec_sched_a_nightly_retries (
     sub_id numeric(19,0) not null primary key,
     action varchar(6) not null
 );
-create index on ofec_sched_a_nightly_retries (sub_id);
 
 -- Create queue tables to hold changes to Schedule A
 drop table if exists ofec_sched_a_queue_new;
@@ -38,8 +37,8 @@ begin
     for schedule_a_record in select * from ofec_sched_a_nightly_retries loop
         select into view_row * from fec_fitem_sched_a_vw where sub_id = schedule_a_record.sub_id;
 
-        if found then
-            two_year_transaction_period = get_transaction_year(view_row.contb_receipt_dt, view_row.rpt_yr);
+        if FOUND then
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 -- Determine which queue(s) the found record should go into.
@@ -96,7 +95,7 @@ begin
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
         if FOUND then
-            two_year_transaction_period = get_transaction_year(new.contb_receipt_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_new where sub_id = view_row.sub_id;
@@ -116,7 +115,7 @@ begin
         select into view_row * from fec_fitem_sched_a_vw where sub_id = new.sub_id;
 
         if FOUND then
-            two_year_transaction_period = get_transaction_year(new.contb_receipt_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_new where sub_id = view_row.sub_id;
@@ -160,7 +159,7 @@ begin
         -- visit here:
         -- https://www.postgresql.org/docs/current/static/plpgsql-statements.html#PLPGSQL-STATEMENTS-DIAGNOSTICS
         if FOUND then
-            two_year_transaction_period = get_transaction_year(view_row.contb_receipt_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_old where sub_id = view_row.sub_id;
@@ -180,7 +179,7 @@ begin
         select into view_row * from fec_fitem_sched_a_vw where sub_id = old.sub_id;
 
         if FOUND then
-            two_year_transaction_period = get_transaction_year(old.contb_receipt_dt, view_row.rpt_yr);
+            two_year_transaction_period = cast(get_cycle(view_row.rpt_yr) as smallint);
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_old where sub_id = view_row.sub_id;
@@ -203,9 +202,6 @@ end
 $$ language plpgsql;
 
 
--- Drop old trigger if it exists
-drop trigger if exists ofec_sched_a_queue_trigger on fec_fitem_sched_a_vw;
-
 -- Create new triggers
 drop trigger if exists nml_sched_a_after_trigger on disclosure.nml_sched_a;
 create trigger nml_sched_a_after_trigger after insert or update
@@ -214,3 +210,11 @@ create trigger nml_sched_a_after_trigger after insert or update
 drop trigger if exists nml_sched_a_before_trigger on disclosure.nml_sched_a;
 create trigger nml_sched_a_before_trigger before delete or update
     on disclosure.nml_sched_a for each row execute procedure ofec_sched_a_delete_update_queues(:START_YEAR_AGGREGATE);
+
+drop trigger if exists f_item_sched_a_after_trigger on disclosure.f_item_receipt_or_exp;
+create trigger f_item_sched_a_after_trigger after insert or update
+    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_a_insert_update_queues(:START_YEAR_AGGREGATE);
+
+drop trigger if exists f_item_sched_a_before_trigger on disclosure.f_item_receipt_or_exp;
+create trigger f_item_sched_a_before_trigger before delete or update
+    on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_a_delete_update_queues(:START_YEAR_AGGREGATE);
