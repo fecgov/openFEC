@@ -45,11 +45,4 @@ class SchedBGroup(TableGroup):
                 parent.c.recipient_cmte_id,
                 parent.c.cmte_id,
             ).label('clean_recipient_cmte_id'),
-            sa.func.cast(
-                sa.func.get_cycle(parent.c.rpt_yr), sa.SmallInteger
-            ).label('two_year_transaction_period'),
-            sa.func.expand_line_number(
-                parent.c.filing_form,
-                parent.c.line_num,
-            ).label('line_number_label'),
         ]

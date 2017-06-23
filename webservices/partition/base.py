@@ -144,21 +144,8 @@ class TableGroup:
             )
             connection.execute(delete)
 
-            # The queue tables already have the two_year_transaction_period
-            # column set in them so that we can insert the records into the
-            # proper child table. Because of this, we need to exclude the
-            # function call in the column factory normally used when
-            # populating the child tables during normal partitioning.
-            # Otherwise, an error is thrown due more values being specified
-            # than there are columns to accept them.
-            # VM TODO - Is this still needed?
-            columns = [
-                column for column in cls.column_factory(queue_new)
-                if column.name != 'two_year_transaction_period'
-            ]
-
             insert_select = sa.select(
-                cls.recast_columns(queue_new) + columns
+                cls.recast_columns(queue_new) + cls.column_factory(queue_new)
             ).select_from(
                 queue_new.join(
                     queue_old,
