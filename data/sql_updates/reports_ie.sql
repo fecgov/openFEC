@@ -22,6 +22,7 @@ select
     amndt_ind as amendment_indicator,
     amndt_ind_desc as amendment_indicator_full,
     means_filed(begin_image_num) as means_filed,
+    report_html_url(means_filed(begin_image_num), indv_org_id::text, file_num::text) as html_url,
     report_fec_url(begin_image_num::text, file_num::integer) as fec_url
 from
     fec_vsum_f5_vw
