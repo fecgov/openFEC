@@ -20,6 +20,9 @@ select *,
     now() as pg_date
 from fec_sched_e_notice_vw;
 
+update ofec_sched_e_tmp
+set exp_dt = coalesce(exp_dt, dissem_dt);
+
 -- Set up the primary key
 create unique index idx_ofec_sched_e_sub_id_tmp on ofec_sched_e_tmp (sub_id);
 alter table ofec_sched_e_tmp add constraint ofec_sched_e_sub_id_pkey_tmp primary key using index idx_ofec_sched_e_sub_id_tmp;
