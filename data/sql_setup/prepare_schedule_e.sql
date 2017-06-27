@@ -92,7 +92,7 @@ create index idx_ofec_sched_e_cal_ytd_ofc_sought_sub_id_tmp on ofec_sched_e_tmp 
 -- Create indices on filtered fulltext columns
 create index idx_ofec_sched_e_payee_name_text_tmp on ofec_sched_e_tmp using gin (payee_name_text);
 
--- Analyze tables
+-- Analyze the table
 analyze ofec_sched_e_tmp;
 
 -- Replace the existing table
