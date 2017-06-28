@@ -379,7 +379,6 @@ def get_mur_names(mur_names={}):
     return mur_names
 
 def process_mur(mur):
-    logger.info("Processing archived MUR %d of %d" % (mur[0], mur[1]))
     es = utils.get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
@@ -387,6 +386,7 @@ def process_mur(mur):
     (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
         = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
     mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
+    logger.info("Loading archived MUR %s: %s of %s", mur_no, mur[0], mur[1])
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
         logger.info('already processed %s' % pdf_key)
@@ -430,10 +430,9 @@ def process_mur(mur):
         'citations': citations,
         'url': pdf_url
     }
-    logger.info("Loading archived MUR: %s", mur_no)
     es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
-def load_archived_murs():
+def load_archived_murs(num_processes=1):
     """
     Reads data for archived MURs from http://classic.fec.gov/MUR, assembles a JSON
     document corresponding to the MUR and indexes this document in Elasticsearch
@@ -452,7 +451,7 @@ def load_archived_murs():
             not in murs_completed]
     shuffle(rows)
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
-    with Pool(processes=1, maxtasksperchild=1) as pool:
+    with Pool(processes=int(num_processes)) as pool:
         pool.map(process_mur, murs, chunksize=1)
     logger.info("%d archived MURs loaded", len(rows))
 
