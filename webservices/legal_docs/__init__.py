@@ -10,6 +10,10 @@ from .current_murs import load_current_murs
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger('elasticsearch')
 logger.setLevel('WARN')
+logger = logging.getLogger('pdfminer')
+logger.setLevel('ERROR')
+logger = logging.getLogger('botocore')
+logger.setLevel('WARN')
 
 from .load_legal_docs import (
     delete_advisory_opinions_from_es,
