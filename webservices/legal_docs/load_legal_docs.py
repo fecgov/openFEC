@@ -240,7 +240,7 @@ def index_statutes():
 
 
 def process_mur_pdf(mur_no, pdf_key, bucket):
-    response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
+    response = requests.get('http://classic.fec.gov/disclosure_data/mur/%s.pdf'
                             % mur_no, stream=True)
 
     with NamedTemporaryFile('wb+') as pdf:
