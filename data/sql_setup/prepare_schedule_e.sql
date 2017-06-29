@@ -20,6 +20,9 @@ select *,
     now() as pg_date
 from fec_sched_e_notice_vw;
 
+update ofec_sched_e_tmp
+set exp_dt = coalesce(exp_dt, dissem_dt);
+
 -- Add in records for the Form 5 filings
 insert into ofec_sched_e_tmp (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,
                               pye_st1, pye_st2, pye_city, pye_st, pye_zip, entity_tp, entity_tp_desc, exp_desc,
