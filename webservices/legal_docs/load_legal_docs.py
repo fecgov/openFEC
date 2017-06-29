@@ -432,7 +432,7 @@ def process_mur(mur):
     }
     es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
-def load_archived_murs(num_processes=1):
+def load_archived_murs(num_processes=1, tasks_per_child=None):
     """
     Reads data for archived MURs from http://classic.fec.gov/MUR, assembles a JSON
     document corresponding to the MUR and indexes this document in Elasticsearch
@@ -451,7 +451,9 @@ def load_archived_murs(num_processes=1):
             not in murs_completed]
     shuffle(rows)
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
-    with Pool(processes=int(num_processes)) as pool:
+    processes = int(num_processes)
+    maxtasksperchild = int(tasks_per_child) if tasks_per_child else None
+    with Pool(processes=processes, maxtasksperchild=maxtasksperchild) as pool:
         pool.map(process_mur, murs, chunksize=1)
     logger.info("%d archived MURs loaded", len(rows))
 
