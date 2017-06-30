@@ -72,7 +72,7 @@ records_with_incumbents_districts as (
 ),
 -- This creates election records and the incumbent info if applicable
 -- for Senate, President and (House races without districts)
-records_with_incumbents_no_districts as (
+records_with_incumbents as (
     select
         fec.cand_valid_yr_id,
         fec.cand_id,
@@ -104,68 +104,6 @@ records_with_incumbents as(
     select * from records_with_incumbents_districts
     union all
     select * from records_with_incumbents_no_districts
-),
--- We don't have future candidates in the ICI data, so we want to look that up
--- this uses functions in /data/functions/elections.sql to see if the most recent incumbent is within a reasonable time frame
-record_without_incumbents as (
-    select * from records_with_incumbents
-    where cand_id is null
-),
-elections_without_incumbents as (
-    select distinct on (rwi.cand_office_st, rwi.cand_office_district, rwi.cand_office, rwi.election_yr)
-        fec.cand_valid_yr_id,
-        check_incumbent_char(
-            fec.cand_office::char, rwi.election_yr::numeric,
-            fec.cand_election_yr::numeric, fec.cand_id::char
-        ) as cand_id,
-        rwi.fec_election_yr,
-        check_incumbent_numeric(
-            fec.cand_office::char, rwi.election_yr::numeric,
-            fec.cand_election_yr::numeric, fec.cand_election_yr::numeric
-        )::numeric as cand_election_yr,
-        check_incumbent_char(
-            fec.cand_office::char, rwi.election_yr::numeric,
-            fec.cand_election_yr::numeric, fec.cand_status::char
-        ) cand_status,
-        check_incumbent_char(
-            fec.cand_office::char, rwi.election_yr::numeric,
-            fec.cand_election_yr::numeric, fec.cand_ici::char
-        ) cand_ici,
-        rwi.cand_office,
-        rwi.cand_office_st,
-        rwi.cand_office_district,
-        check_incumbent_char(
-            fec.cand_office::char, rwi.election_yr::numeric,
-            fec.cand_election_yr::numeric, fec.cand_pty_affiliation::char
-        ) cand_pty_affiliation,
-        check_incumbent_char(
-            fec.cand_office::char, rwi.election_yr::numeric,
-            fec.cand_election_yr::numeric, fec.cand_name::char
-        ) cand_name,
-        rwi.election_yr
-    from record_without_incumbents rwi
-    left join
-        incumbent_info fec on
-        rwi.cand_office_st = fec.cand_office_st and
-        rwi.cand_office_district = fec.cand_office_district and
-        rwi.cand_office = fec.cand_office and
-        rwi.cand_election_yr > fec.cand_election_yr
-    where rwi.cand_id is Null
-    order by
-        rwi.cand_office_st,
-        rwi.cand_office,
-        rwi.cand_office_district,
-        rwi.election_yr desc,
-        fec.cand_election_yr desc,
-        fec.latest_receipt_dt desc
-),
-combined as (
-    select * from
-        records_with_incumbents
-        where cand_id is not null
-    union all
-    select * from
-        record_without_incumbents
 )
 select
     *,
