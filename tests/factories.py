@@ -223,7 +223,7 @@ class ScheduleBEfileFactory(BaseFactory):
 class ScheduleEEfileFactory(BaseFactory):
     class Meta:
         model = models.ScheduleEEfile
-    file_number = factory.Sequence(lambda n: n)
+    file_number = 123
     related_line_number = factory.Sequence(lambda n: n)
 
 

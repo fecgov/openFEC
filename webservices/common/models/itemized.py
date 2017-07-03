@@ -87,6 +87,8 @@ class ScheduleA(BaseItemized):
             ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
         )'''
     )
+
+
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
 
     contributor_name_text = db.Column(TSVECTOR)
@@ -138,6 +140,7 @@ class ScheduleA(BaseItemized):
     back_reference_transaction_id = db.Column('back_ref_tran_id', db.String)
     back_reference_schedule_name = db.Column('back_ref_sched_nm', db.String)
     pdf_url = db.Column(db.String)
+    line_number_label = db.Column(db.String)
 
 
 class ScheduleAEfile(BaseRawItemized):
@@ -273,6 +276,7 @@ class ScheduleB(BaseItemized):
     semi_annual_bundled_refund = db.Column('semi_an_bundled_refund', db.Numeric(30, 2))
 
     pdf_url = db.Column(db.String)
+    line_number_label = db.Column(db.String)
 
 class ScheduleBEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sb4'
@@ -389,7 +393,7 @@ class ScheduleC(PdfMixin,BaseItemized):
 
 
 class ScheduleD(PdfMixin,BaseItemized):
-    __tablename__ = 'fec_vsum_sched_d_vw'
+    __tablename__ = 'fec_fitem_sched_d_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -531,7 +535,7 @@ class ScheduleE(PdfMixin, BaseItemized):
 
 
 class ScheduleEEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_se'
+    __tablename__ = 'real_efile_se_f57_vw'
 
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
@@ -561,20 +565,20 @@ class ScheduleEEfile(BaseRawItemized):
     candidate_id = db.Column('so_canid', db.String)
     #candidate = utils.related_candidate_history('candidate_id', cycle_label='report_year')
     candidate_name = db.Column('so_can_name', db.String, doc=docs.CANDIDATE_NAME)
-    candidate_prefix = db.Column('so_prefix', db.String)
-    candidate_first_name = db.Column('so_fname', db.String)
-    candidate_middle_name = db.Column('so_mname', db.String)
-    candidate_suffix = db.Column('so_suffix', db.String)
+    candidate_prefix = db.Column('so_can_prefix', db.String)
+    candidate_first_name = db.Column('so_can_fname', db.String)
+    candidate_middle_name = db.Column('so_can_mname', db.String)
+    candidate_suffix = db.Column('so_can_suffix', db.String)
     candidate_office = db.Column('so_can_off', db.String, doc=docs.OFFICE)
     cand_office_state = db.Column('so_can_state', db.String, doc=docs.STATE_GENERIC)
     cand_office_district = db.Column('so_can_dist', db.String, doc=docs.DISTRICT)
-    expenditure_description = db.Column('transdesc', db.String)
-    expenditure_date = db.Column('t_date', db.Date)
+    expenditure_description = db.Column('exp_desc', db.String)
+    expenditure_date = db.Column('exp_date', db.Date)
     expenditure_amount = db.Column('amount', db.Integer)
     office_total_ytd = db.Column('ytd', db.Float)
     category_code = db.Column('cat_code', db.String)
     #category_code_full = db.Column('catg_cd_desc', db.String)
-    support_oppose_indicator = db.Column('position', db.String)
+    support_oppose_indicator = db.Column('supop', db.String)
 
     notary_sign_date = db.Column('not_date', db.Date)
 
@@ -587,7 +591,9 @@ class ScheduleEEfile(BaseRawItemized):
                         )''',
         foreign_keys=file_number,
         lazy='joined',
+        innerjoin='True',
     )
+
 
     committee = db.relationship(
         'CommitteeHistory',
