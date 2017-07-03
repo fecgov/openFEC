@@ -99,11 +99,6 @@ records_with_incumbents as (
         cand_office_district,
         cand_election_yr desc,
         latest_receipt_dt desc
-),
-records_with_incumbents as(
-    select * from records_with_incumbents_districts
-    union all
-    select * from records_with_incumbents_no_districts
 )
 select
     *,
