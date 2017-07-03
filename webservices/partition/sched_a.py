@@ -6,7 +6,7 @@ from webservices.partition.base import TableGroup
 
 class SchedAGroup(TableGroup):
 
-    parent = 'fec_vsum_sched_a_vw'
+    parent = 'fec_fitem_sched_a_vw'
     base_name = 'ofec_sched_a'
     queue_new = 'ofec_sched_a_queue_new'
     queue_old = 'ofec_sched_a_queue_old'
@@ -23,6 +23,7 @@ class SchedAGroup(TableGroup):
         sa.Column('is_individual', sa.Boolean),
         sa.Column('clean_contbr_id', sa.String),
         sa.Column('two_year_transaction_period', sa.SmallInteger),
+        sa.Column('line_number_label', sa.Text),
     ]
 
     column_mappings = {
@@ -50,10 +51,13 @@ class SchedAGroup(TableGroup):
                 parent.c.contbr_id,
                 parent.c.cmte_id,
             ).label('clean_contbr_id'),
-            sa.func.get_transaction_year(
-                parent.c[cls.transaction_date_column],
-                parent.c.rpt_yr
+            sa.func.cast(
+                sa.func.get_cycle(parent.c.rpt_yr), sa.SmallInteger
             ).label('two_year_transaction_period'),
+            sa.func.expand_line_number(
+                parent.c.filing_form,
+                parent.c.line_num,
+            ).label('line_number_label')
         ]
 
     @classmethod
@@ -66,9 +70,11 @@ class SchedAGroup(TableGroup):
             sa.Index(None, c.image_num),
             sa.Index(None, c.contbr_st),
             sa.Index(None, c.contbr_city),
+            sa.Index(None, c.contbr_zip),
             sa.Index(None, c.is_individual),
             sa.Index(None, c.clean_contbr_id),
             sa.Index(None, c.two_year_transaction_period),
+            sa.Index(None, c.line_num, child.c[cls.primary]),
 
             sa.Index('ix_{0}_sub_id_amount_tmp'.format(child.name[:-4]), c.contb_receipt_amt, child.c[cls.primary]),
             sa.Index('ix_{0}_sub_id_date_tmp'.format(child.name[:-4]), c.contb_receipt_dt, child.c[cls.primary]),

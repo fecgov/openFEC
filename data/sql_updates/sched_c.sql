@@ -6,7 +6,7 @@ select
     to_tsvector(cand_nm) as candidate_name_text,
     to_tsvector(loan_src_nm) as loan_source_name_text,
     now() as pg_date
-from fec_vsum_sched_c_vw;
+from fec_fitem_sched_c_vw;
 
 create unique index on ofec_sched_c_mv_tmp (sub_id);
 
