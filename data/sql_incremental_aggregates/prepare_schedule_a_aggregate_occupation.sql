@@ -7,7 +7,7 @@ select
     contbr_occupation as occupation,
     sum(contb_receipt_amt) as total,
     count(contb_receipt_amt) as count
-from fec_vsum_sched_a_vw
+from fec_fitem_sched_a_vw
 where rpt_yr >= :START_YEAR_AGGREGATE
 and contb_receipt_amt is not null
 and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
