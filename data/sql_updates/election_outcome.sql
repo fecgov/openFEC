@@ -5,7 +5,7 @@ create materialized view ofec_election_result_mv_tmp as
 -- this data starts in 2003
 with election_dates as(
     select
-        case when office_sought = 'P' then null
+        case when office_sought = 'P' then 'US'
             else election_state
         end as election_state,
         office_sought,
@@ -47,7 +47,7 @@ records_with_incumbents_districts as (
         fec.cand_ici,
         ed.office_sought as cand_office,
         ed.election_state as cand_office_st,
-        fec.cand_office_district,
+        ed.election_district as cand_office_district,
         fec.cand_pty_affiliation,
         fec.cand_name,
         ed.election_yr::numeric as election_yr
@@ -82,7 +82,11 @@ records_with_incumbents as (
         fec.cand_ici,
         ed.office_sought as cand_office,
         ed.election_state as cand_office_st,
-        fec.cand_office_district,
+        case
+             when ed.office_sought = 'H' and election_yr - cand_election_yr <= 3
+                 then fec.cand_office_district
+             else cast('00' as varchar(2))
+        end as cand_office_district,
         fec.cand_pty_affiliation,
         fec.cand_name,
         ed.election_yr::numeric as election_yr
