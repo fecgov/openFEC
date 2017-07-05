@@ -77,7 +77,7 @@ records_with_incumbents as (
         fec.cand_valid_yr_id,
         fec.cand_id,
         ed.election_yr + ed.election_yr % 2 as fec_election_yr,
-        fec.cand_election_yr::numeric,
+        ed.election_yr as cand_election_yr,
         fec.cand_status,
         fec.cand_ici,
         ed.office_sought as cand_office,
@@ -103,7 +103,7 @@ records_with_incumbents as (
 select
     *,
     row_number() over () as idx
-from combined
+from records_with_incumbents
 ;
 
 create unique index on ofec_election_result_mv_tmp (idx);
