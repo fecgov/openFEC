@@ -80,7 +80,8 @@ CREATE TABLE ofec_sched_a_master_tmp (
     contributor_occupation_text TSVECTOR,
     is_individual               BOOLEAN,
     clean_contbr_id             VARCHAR(9),
-    two_year_transaction_period SMALLINT
+    two_year_transaction_period SMALLINT,
+    line_number_label           TEXT
 );
 
 -- Create the child tables.
