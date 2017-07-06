@@ -80,7 +80,8 @@ CREATE TABLE ofec_sched_b_master_tmp (
     disbursement_description_text TSVECTOR,
     disbursement_purpose_category TEXT,
     clean_recipient_cmte_id       VARCHAR(9),
-    two_year_transaction_period   SMALLINT
+    two_year_transaction_period   SMALLINT,
+    line_number_label             TEXT
 );
 
 -- Create the child tables.
