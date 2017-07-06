@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
+import itertools
 import re
 from zipfile import ZipFile
 from tempfile import NamedTemporaryFile
 from xml.etree import ElementTree as ET
 from datetime import datetime
 from os.path import getsize
-from random import shuffle
 import csv
 from multiprocessing import Pool
 import logging
@@ -429,7 +429,7 @@ def process_mur(mur):
     }
     es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
-def load_archived_murs(num_processes=1, tasks_per_child=None):
+def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, tasks_per_child=None):
     """
     Reads data for archived MURs from http://classic.fec.gov/MUR, assembles a JSON
     document corresponding to the MUR and indexes this document in Elasticsearch
@@ -439,6 +439,12 @@ def load_archived_murs(num_processes=1, tasks_per_child=None):
     logger.info("Loading archived MURs")
     table_text = requests.get('http://classic.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+    if from_mur_no is not None:
+        rows = list(itertools.dropwhile(
+            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) != from_mur_no, rows))
+    elif specific_mur_no is not None:
+        rows = list(filter(
+            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) == specific_mur_no, rows))
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
     processes = int(num_processes)
     maxtasksperchild = int(tasks_per_child) if tasks_per_child else None
