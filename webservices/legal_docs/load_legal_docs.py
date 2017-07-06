@@ -386,7 +386,7 @@ def process_mur(mur):
     (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
         = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
     mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-    logger.info("Loading archived MUR %s: %s of %s", mur_no, mur[0], mur[1])
+    logger.info("Loading archived MUR %s: %s of %s", mur_no, mur[0] + 1, mur[1])
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
     pdf_url = generate_aws_s3_url(bucket_name, pdf_key)
