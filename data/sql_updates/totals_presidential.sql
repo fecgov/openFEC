@@ -54,6 +54,8 @@ select
     last_cash_on_hand_end_period,
     last_debts_owed_by_committee,
     last_debts_owed_to_committee,
+    last_net_contributions,
+    last_net_operating_expenditures,
     last_report_year
 from
     ofec_totals_combined_mv_tmp

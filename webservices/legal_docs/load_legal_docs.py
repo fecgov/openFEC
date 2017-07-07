@@ -240,7 +240,7 @@ def index_statutes():
 
 
 def process_mur_pdf(mur_no, pdf_key, bucket):
-    response = requests.get('http://www.fec.gov/disclosure_data/mur/%s.pdf'
+    response = requests.get('http://classic.fec.gov/disclosure_data/mur/%s.pdf'
                             % mur_no, stream=True)
 
     with NamedTemporaryFile('wb+') as pdf:
@@ -379,7 +379,6 @@ def get_mur_names(mur_names={}):
     return mur_names
 
 def process_mur(mur):
-    logger.info("processing mur %d of %d" % (mur[0], mur[1]))
     es = utils.get_elasticsearch_connection()
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
@@ -387,7 +386,7 @@ def process_mur(mur):
     (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
         = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
     mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-    logger.info("processing mur %s" % mur_no)
+    logger.info("Loading archived MUR %s: %s of %s", mur_no, mur[0], mur[1])
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     if [k for k in bucket.objects.filter(Prefix=pdf_key)]:
         logger.info('already processed %s' % pdf_key)
@@ -433,14 +432,15 @@ def process_mur(mur):
     }
     es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
 
-def load_archived_murs():
+def load_archived_murs(num_processes=1, tasks_per_child=None):
     """
-    Reads data for archived MURs from http://www.fec.gov/MUR, assembles a JSON
+    Reads data for archived MURs from http://classic.fec.gov/MUR, assembles a JSON
     document corresponding to the MUR and indexes this document in Elasticsearch
     in the index `docs_index` with a doc_type of `murs`. In addition, the MUR
     document is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
     """
-    table_text = requests.get('http://www.fec.gov/MUR/MURData.do').text
+    logger.info("Loading archived MURs")
+    table_text = requests.get('http://classic.fec.gov/MUR/MURData.do').text
     rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     bucket = get_bucket()
     murs_completed = set([re.match("legal/murs/([0-9_A-Z]+).pdf", o.key).group(1)
@@ -451,8 +451,11 @@ def load_archived_murs():
             not in murs_completed]
     shuffle(rows)
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
-    with Pool(processes=1, maxtasksperchild=1) as pool:
+    processes = int(num_processes)
+    maxtasksperchild = int(tasks_per_child) if tasks_per_child else None
+    with Pool(processes=processes, maxtasksperchild=maxtasksperchild) as pool:
         pool.map(process_mur, murs, chunksize=1)
+    logger.info("%d archived MURs loaded", len(rows))
 
 def generate_aws_s3_url(bucket_name, pdf_key):
     return "https://%s.s3-us-gov-west-1.amazonaws.com/%s" % (bucket_name, pdf_key)
