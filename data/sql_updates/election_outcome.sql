@@ -83,7 +83,7 @@ records_with_incumbents as (
         ed.office_sought as cand_office,
         ed.election_state as cand_office_st,
         case
-             when ed.office_sought = 'H' and election_yr - cand_election_yr <= 3
+             when ed.office_sought = 'H'
                  then fec.cand_office_district
              else cast('00' as varchar(2))
         end as cand_office_district,
