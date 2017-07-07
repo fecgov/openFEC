@@ -22,7 +22,6 @@ EXCLUDE_TABLES = [
     'ofec_*',
     'dimcandproperties',
     'f_rpt_or_form_sub',
-    'f_item_receipt_or_exp',
 ]
 # Include records used in integration tests
 # FORCE_INCLUDE = [

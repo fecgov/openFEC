@@ -88,7 +88,7 @@ class TestViews(common.IntegrationTestCase):
         #models.CaniddateCommitteeTotalsHouseSenate passed integration, so testing this specific
         #model really isn't expanding code coverage.  I can try and get the model passing but it's proving
         #to be difficult considering the joins needed (and our limited test subset)
-        whitelist = [models.CandidateCommitteeTotalsPresidential, models.EntityReceiptDisbursementTotals]
+        whitelist = [models.EntityReceiptDisbursementTotals]
 
         for model in db.Model._decl_class_registry.values():
             print(model)

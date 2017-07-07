@@ -10,6 +10,8 @@ with last_subset as (
         coh_cop,
         debts_owed_by_cmte,
         debts_owed_to_cmte,
+        net_op_exp,
+        net_contb,
         rpt_yr,
         -- check if report end date is better
         get_cycle(rpt_yr) as cycle
@@ -19,7 +21,7 @@ with last_subset as (
     order by
         cmte_id,
         cycle,
-        to_timestamp(cvg_end_dt) desc
+        to_timestamp(cvg_end_dt) desc nulls last
 ),
 last as (
     select
@@ -28,6 +30,8 @@ last as (
         ls.cycle,
         ls.debts_owed_by_cmte,
         ls.debts_owed_to_cmte,
+        ls.net_op_exp,
+        ls.net_contb,
         ls.rpt_yr,
         of.candidate_id,
         of.beginning_image_number,
@@ -81,6 +85,8 @@ first as (
         max(last.coh_cop) as last_cash_on_hand_end_period,
         max(last.debts_owed_by_cmte) as last_debts_owed_by_committee, -- confirm this is outstanding debt and not a total taken out this period
         max(last.debts_owed_to_cmte) as last_debts_owed_to_committee, -- confirm this is outstanding debt and not a total taken out this period
+        max(last.net_contb) as last_net_contributions,
+        max(last.net_op_exp) as last_net_operating_expenditures,
         max(last.report_type) as last_report_type,
         max(last.report_type_full) as last_report_type_full,
         max(last.rpt_yr) as last_report_year,
@@ -92,7 +98,7 @@ first as (
         sum(vsd.cand_cntb) as candidate_contribution,
         sum(vsd.cand_loan_repymnt + vsd.oth_loan_repymts) as loan_repayments_made,
         sum(vsd.cand_loan_repymnt) as loan_repayments_candidate_loans,
-        sum(vsd.cand_loan_repymnt) as loans_made_by_candidate, -- f3
+        sum(vsd.cand_loan) as loans_made_by_candidate, -- f3
         sum(vsd.cand_loan_repymnt) as repayments_loans_made_by_candidate, -- f3p
         sum(vsd.cand_loan) as loans_received_from_candidate,
         sum(vsd.coord_exp_by_pty_cmte_per) as coordinated_expenditures_by_party_committee,

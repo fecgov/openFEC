@@ -6,7 +6,7 @@ from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile
+from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
@@ -106,6 +106,16 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
+    def test_filter_zip(self):
+        [
+            factories.ScheduleAFactory(contributor_zip=96789),
+            factories.ScheduleAFactory(contributor_zip=66111)
+        ]
+
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['contributor_zip'], '96789')
+
     def test_filter_case_insensitive(self):
         [
             factories.ScheduleAFactory(contributor_city='NEW YORK'),
@@ -124,6 +134,22 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, contributor_name='soros', **self.kwargs))
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_name'], 'George Soros')
+
+    def test_filter_line_number(self):
+        [
+            factories.ScheduleAFactory(line_number='16', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='17', filing_form='F3X')
+        ]
+        results = self._results(api.url_for(ScheduleAView, line_number='f3X-16', **self.kwargs))
+        self.assertEqual(len(results), 1)
+
+        [
+            factories.ScheduleBFactory(line_number='21', filing_form='F3X'),
+            factories.ScheduleBFactory(line_number='22', filing_form='F3X')
+        ]
+
+        results = self._results(api.url_for(ScheduleBView, line_number='f3X-21', **self.kwargs))
+        self.assertEqual(len(results), 1)
 
     def test_filter_fulltext_employer(self):
         employers = ['Acme Corporation', 'Vandelay Industries']
@@ -474,6 +500,7 @@ class TestItemized(ApiBaseTest):
             ('committee_id', ScheduleEEfile.committee_id, ['C01', 'C02']),
             ('support_oppose_indicator', ScheduleEEfile.support_oppose_indicator, ['S', 'O']),
         ]
+        factories.EFilingsFactory(file_number=123)
         for label, column, values in filters:
             [
                 factories.ScheduleEEfileFactory(**{column.key: value})
