@@ -113,7 +113,7 @@ def get_advisory_opinions(from_ao_no):
                 "sort1": -year,
                 "sort2": -serial,
             }
-            ao["documents"] = get_documents(ao_id)
+            ao["documents"] = get_documents(ao_id, bucket)
             (ao["requestor_names"], ao["requestor_types"], ao["commenter_names"],
                     ao["representative_names"], ao["entities"]) = get_entities(ao_id)
 
