@@ -90,6 +90,6 @@ SELECT finalize_itemized_schedule_b_tables(:PARTITION_START_YEAR, :PARTITION_END
 
 -- Create the insert trigger so that records go into the proper child table.
 DROP TRIGGER IF EXISTS insert_sched_b_trigger_tmp ON ofec_sched_b_master_tmp;
-CREATE trigger insert_sched_b_trigger_tmp BEFORE INSERT ON ofec_sched_b_master_tmp FOR EACH ROW EXECUTE PROCEDURE insert_sched_master('ofec_sched_b_', '_tmp');
+CREATE trigger insert_sched_b_trigger_tmp BEFORE INSERT ON ofec_sched_b_master_tmp FOR EACH ROW EXECUTE PROCEDURE insert_sched_master(:PARTITION_START_YEAR);
 
 SELECT rename_table_cascade('ofec_sched_b_master');

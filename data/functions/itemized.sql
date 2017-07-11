@@ -2,13 +2,11 @@
 -- master partition table is in place.
 CREATE OR REPLACE FUNCTION insert_sched_master() RETURNS TRIGGER AS $$
 DECLARE
-    child_table_prefix TEXT = TG_ARGV[0];
-    child_table_suffix TEXT = TG_ARGV[1];
-    transaction_period_lower_guard SMALLINT = TG_ARGV[2]::SMALLINT - 1;
+    transaction_period_lower_guard SMALLINT = TG_ARGV[0]::SMALLINT - 1;
     child_table_name TEXT;
 BEGIN
     IF new.two_year_transaction_period >= transaction_period_lower_guard THEN
-        child_table_name = child_table_prefix || get_partition_suffix(new.two_year_transaction_period) || child_table_suffix;
+        child_table_name = replace(TG_TABLE_NAME, 'master', get_partition_suffix(new.two_year_transaction_period));
         EXECUTE format('INSERT INTO %I VALUES ($1.*)', child_table_name)
             USING new;
     END IF;
