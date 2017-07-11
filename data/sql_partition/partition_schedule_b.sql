@@ -86,7 +86,6 @@ CREATE TABLE ofec_sched_b_master_tmp (
 
 -- Create the child tables.
 SELECT create_itemized_schedule_partition('b', :PARTITION_START_YEAR, :PARTITION_END_YEAR);
-SELECT finalize_itemized_schedule_b_tables(:PARTITION_START_YEAR, :PARTITION_END_YEAR);
 
 -- Create the insert trigger so that records go into the proper child table.
 DROP TRIGGER IF EXISTS insert_sched_b_trigger_tmp ON ofec_sched_b_master_tmp;
@@ -257,4 +256,6 @@ SELECT
     get_cycle(rpt_yr) AS two_year_transaction_period,
     expand_line_number(filing_form, line_num) AS line_number_label
 FROM fec_fitem_sched_b_vw;
+
 SELECT rename_table_cascade('ofec_sched_b_master');
+SELECT finalize_itemized_schedule_b_tables(:PARTITION_START_YEAR, :PARTITION_END_YEAR);
