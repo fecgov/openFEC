@@ -90,7 +90,7 @@ SELECT finalize_itemized_schedule_a_tables(:PARTITION_START_YEAR, :PARTITION_END
 
 -- Create the insert trigger so that records go into the proper child table.
 DROP TRIGGER IF EXISTS insert_sched_a_trigger_tmp ON ofec_sched_a_master_tmp;
-CREATE trigger insert_sched_a_trigger_tmp BEFORE INSERT ON ofec_sched_a_master_tmp FOR EACH ROW EXECUTE PROCEDURE insert_sched_master('ofec_sched_a_', '_tmp', :PARTITION_START_YEAR);
+CREATE trigger insert_sched_a_trigger_tmp BEFORE INSERT ON ofec_sched_a_master_tmp FOR EACH ROW EXECUTE PROCEDURE insert_sched_master(:PARTITION_START_YEAR);
 
 ---- Insert the records from the view
 INSERT INTO ofec_sched_a_master_tmp
@@ -260,7 +260,3 @@ SELECT
 FROM fec_fitem_sched_a_vw;
 
 SELECT rename_table_cascade('ofec_sched_a_master');
-
--- Rebuild the partition-determining trigger for the master table
-DROP TRIGGER IF EXISTS insert_sched_a_trigger_tmp ON ofec_sched_a_master;
-CREATE trigger insert_sched_a_trigger BEFORE INSERT ON ofec_sched_a_master FOR EACH ROW EXECUTE PROCEDURE insert_sched_master('ofec_sched_a_', '', :PARTITION_START_YEAR);
