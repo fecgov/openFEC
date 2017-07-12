@@ -132,14 +132,13 @@ def get_murs(from_mur_no):
                 'sort2': sort2,
             }
             mur['subjects'] = get_subjects(case_id)
-            mur['subject'] = {'text': mur['subjects']}
             mur['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
             mur['respondents'] = get_sorted_respondents(mur['participants'])
             mur['commission_votes'] = get_commission_votes(case_id)
-            mur['dispositions'] = get_disposition(case_id)
+            mur['dispositions'] = get_dispositions(case_id)
             mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
@@ -159,7 +158,7 @@ def get_open_and_close_dates(case_id):
         open_date, close_date = rs.fetchone()
     return open_date, close_date
 
-def get_disposition(case_id):
+def get_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
         disposition_data = []
