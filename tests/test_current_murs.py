@@ -123,7 +123,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'doc_id': 'mur_1',
             'participants': [],
             'subjects': [mur_subject],
-            'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -151,7 +150,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'election_cycles': [2016],
             'doc_id': 'mur_1',
             'subjects': [mur_subject],
-            'subject': {"text": [mur_subject]},
             'respondents': ["Bilbo Baggins", "Thorin Oakenshield"]
         }
         participants = [
@@ -262,7 +260,6 @@ class TestLoadCurrentMURs(BaseTestCase):
                 ]
             }],
             'subjects': ['Fraudulent misrepresentation'],
-            'subject': {"text": ['Fraudulent misrepresentation']},
             'respondents': [],
             'documents': [], 'participants': [], 'no': '1', 'doc_id': 'mur_1',
             'mur_type': 'current', 'name': 'Open Elections LLC', 'open_date': datetime(2005, 1, 1, 0, 0),
@@ -285,7 +282,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'doc_id': 'mur_1',
             'participants': [],
             'subjects': [mur_subject],
-            'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -304,7 +300,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'doc_id': 'mur_2',
             'participants': [],
             'subjects': [mur_subject],
-            'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
             'commission_votes': [],
@@ -323,7 +318,6 @@ class TestLoadCurrentMURs(BaseTestCase):
             'doc_id': 'mur_3',
             'participants': [],
             'subjects': [mur_subject],
-            'subject': {"text": [mur_subject]},
             'respondents': [],
             'documents': [],
             'commission_votes': [],
