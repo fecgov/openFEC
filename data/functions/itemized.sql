@@ -53,6 +53,7 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_image_num_tmp ON %I (image_num)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_contbr_st_tmp ON %I (contbr_st)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_contbr_city_tmp ON %I (contbr_city)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contbr_zip_tmp ON %I (contbr_zip)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_is_individual_tmp ON %I (is_individual)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_clean_contbr_id_tmp ON %I (clean_contbr_id)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_tmp ON %I (two_year_transaction_period)', child_table_root, child_table_name);
@@ -64,6 +65,7 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_contributor_name_text_tmp ON %I USING GIN (contributor_name_text)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_tmp ON %I USING GIN (contributor_employer_text)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_tmp ON %I USING GIN (contributor_occupation_text)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_line_num_tmp ON %I (line_num, sub_id)', child_table_root, child_table_name);
 
         -- Set statistics and analyze the table.
         EXECUTE format('ALTER TABLE %I ALTER COLUMN contbr_st SET STATISTICS 1000', child_table_name);
@@ -100,6 +102,7 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_tmp ON %I (two_year_transaction_period)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_recipient_name_text_tmp ON %I USING GIN (recipient_name_text)', child_table_root, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_disbursement_description_text_tmp ON %I USING GIN (disbursement_description_text)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_line_num_tmp ON %I (line_num, sub_id)', child_table_root, child_table_name);
 
         -- Set statistics and analyze the table.
         EXECUTE format('ALTER TABLE %I ALTER COLUMN recipient_st SET STATISTICS 1000', child_table_name);
