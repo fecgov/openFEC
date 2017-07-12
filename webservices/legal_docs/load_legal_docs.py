@@ -381,7 +381,6 @@ def get_mur_names(mur_names={}):
 def process_mur(mur):
     es = utils.get_elasticsearch_connection()
     bucket = get_bucket()
-    bucket_name = env.get_credential('bucket')
     mur_names = get_mur_names()
     (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
         = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
@@ -389,7 +388,7 @@ def process_mur(mur):
     logger.info("Loading archived MUR %s: %s of %s", mur_no, mur[0] + 1, mur[1])
     pdf_key = 'legal/murs/%s.pdf' % mur_no
     text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
-    pdf_url = generate_aws_s3_url(bucket_name, pdf_key)
+    pdf_url = '/files/' + pdf_key
     open_date, close_date = (None, None)
     if open_date_td:
         open_date = datetime.strptime(open_date_td, '%m/%d/%Y').isoformat()
@@ -451,6 +450,3 @@ def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, 
     with Pool(processes=processes, maxtasksperchild=maxtasksperchild) as pool:
         pool.map(process_mur, murs, chunksize=1)
     logger.info("%d archived MURs loaded", len(rows))
-
-def generate_aws_s3_url(bucket_name, pdf_key):
-    return "https://%s.s3-us-gov-west-1.amazonaws.com/%s" % (bucket_name, pdf_key)

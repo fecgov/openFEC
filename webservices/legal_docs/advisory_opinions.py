@@ -4,7 +4,6 @@ import re
 
 from webservices.env import env
 from webservices.legal_docs import DOCS_INDEX
-from webservices.legal_docs.load_legal_docs import generate_aws_s3_url
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -84,7 +83,6 @@ def load_advisory_opinions(from_ao_no=None):
 
 def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
-    bucket_name = env.get_credential('bucket')
 
     ao_names = get_ao_names()
     ao_no_to_component_map = {a: tuple(map(int, a.split('-'))) for a in ao_names}
@@ -115,9 +113,9 @@ def get_advisory_opinions(from_ao_no):
                 "sort1": -year,
                 "sort2": -serial,
             }
-            ao["documents"] = get_documents(ao_id, bucket, bucket_name)
+            ao["documents"] = get_documents(ao_id, bucket)
             (ao["requestor_names"], ao["requestor_types"], ao["commenter_names"],
-                    ao["representative_names"]) = get_entities(ao_id)
+                    ao["representative_names"], ao["entities"]) = get_entities(ao_id)
 
             yield ao
 
@@ -127,6 +125,7 @@ def get_entities(ao_id):
     commenter_names = []
     representative_names = []
     requestor_types = set()
+    entities = []
     with db.engine.connect() as conn:
         rs = conn.execute(AO_ENTITIES, ao_id)
         for row in rs:
@@ -137,10 +136,13 @@ def get_entities(ao_id):
                 commenter_names.append(row["name"])
             elif row["role_description"] == "Counsel/Representative":
                 representative_names.append(row["name"])
-    return requestor_names, list(requestor_types), commenter_names, representative_names
+            entities.append({"role": row["role_description"],
+                "name": row["name"],
+                "type": row["entity_type_description"]})
+    return requestor_names, list(requestor_types),\
+            commenter_names, representative_names, entities
 
-
-def get_documents(ao_id, bucket, bucket_name):
+def get_documents(ao_id, bucket):
     documents = []
     with db.engine.connect() as conn:
         rs = conn.execute(AO_DOCUMENTS, ao_id)
@@ -156,7 +158,7 @@ def get_documents(ao_id, bucket, bucket_name):
             logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
-            document["url"] = generate_aws_s3_url(bucket_name, pdf_key)
+            document["url"] = '/files/' + pdf_key
             documents.append(document)
     return documents
 

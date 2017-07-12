@@ -91,6 +91,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "representative_names": [],
             "sort1": -2017,
             "sort2": -1,
+            "entities": []
         }
         self.create_ao(1, expected_ao)
         actual_ao = next(get_advisory_opinions(None))
@@ -289,6 +290,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "representative_names": [],
             "sort1": -2015,
             "sort2": -1,
+            "entities": []
         }
         expected_ao2 = {
             "no": "2015-02",
@@ -308,6 +310,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "representative_names": [],
             "sort1": -2015,
             "sort2": -2,
+            "entities": []
         }
         expected_ao3 = {
             "no": "2016-01",
@@ -327,6 +330,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "representative_names": [],
             "sort1": -2016,
             "sort2": -1,
+            "entities": []
         }
         self.create_ao(1, expected_ao1)
         self.create_ao(2, expected_ao2)
