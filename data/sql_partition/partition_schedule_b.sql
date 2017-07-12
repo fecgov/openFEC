@@ -257,5 +257,5 @@ SELECT
     expand_line_number(filing_form, line_num) AS line_number_label
 FROM fec_fitem_sched_b_vw;
 
-SELECT rename_table_cascade('ofec_sched_b_master');
 SELECT finalize_itemized_schedule_b_tables(:PARTITION_START_YEAR, :PARTITION_END_YEAR);
+SELECT rename_table_cascade('ofec_sched_b_master');

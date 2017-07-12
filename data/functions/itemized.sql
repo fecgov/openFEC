@@ -37,31 +37,33 @@ $$ LANGUAGE plpgsql;
 -- schedule A.
 CREATE OR REPLACE FUNCTION finalize_itemized_schedule_a_tables(start_year NUMERIC, end_year NUMERIC) RETURNS VOID AS $$
 DECLARE
+    child_table_root TEXT;
     child_table_name TEXT;
 BEGIN
     FOR cycle in start_year..end_year BY 2 LOOP
-        child_table_name = format('ofec_sched_a_%s_%s', cycle - 1, cycle);
+        child_table_root = format('ofec_sched_a_%s_%s', cycle - 1, cycle);
+        child_table_name = format('ofec_sched_a_%s_%s_tmp', cycle - 1, cycle);
 
         -- Create indexes.
-        EXECUTE format('CREATE UNIQUE INDEX idx_%s_sub_id_tmp ON %I (sub_id)', child_table_name, child_table_name);
-        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id_tmp', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_rpt_yr_tmp ON %I (rpt_yr)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_pg_date_tmp ON %I (pg_date)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_entity_tp_tmp ON %I (entity_tp)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_image_num_tmp ON %I (image_num)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contbr_st_tmp ON %I (contbr_st)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contbr_city_tmp ON %I (contbr_city)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_is_individual_tmp ON %I (is_individual)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_clean_contbr_id_tmp ON %I (clean_contbr_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_tmp ON %I (two_year_transaction_period)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_sub_id_amount_tmp ON %I (contb_receipt_amt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_sub_id_date_tmp ON %I (contb_receipt_dt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_sub_id_cmte_id_tmp ON %I (cmte_id, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_sub_id_cmte_id_amount_tmp ON %I (cmte_id, contb_receipt_amt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_sub_id_cmte_id_date_tmp ON %I (cmte_id, contb_receipt_dt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_name_text_tmp ON %I USING GIN (contributor_name_text)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_tmp ON %I USING GIN (contributor_employer_text)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_tmp ON %I USING GIN (contributor_occupation_text)', child_table_name, child_table_name);
+        EXECUTE format('CREATE UNIQUE INDEX idx_%s_sub_id_tmp ON %I (sub_id)', child_table_root, child_table_name);
+        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id_tmp', child_table_name, child_table_root);
+        EXECUTE format('CREATE INDEX idx_%s_rpt_yr_tmp ON %I (rpt_yr)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_pg_date_tmp ON %I (pg_date)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_entity_tp_tmp ON %I (entity_tp)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_image_num_tmp ON %I (image_num)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contbr_st_tmp ON %I (contbr_st)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contbr_city_tmp ON %I (contbr_city)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_is_individual_tmp ON %I (is_individual)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_clean_contbr_id_tmp ON %I (clean_contbr_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_tmp ON %I (two_year_transaction_period)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_amount_tmp ON %I (contb_receipt_amt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_date_tmp ON %I (contb_receipt_dt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_cmte_id_tmp ON %I (cmte_id, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_cmte_id_amount_tmp ON %I (cmte_id, contb_receipt_amt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_cmte_id_date_tmp ON %I (cmte_id, contb_receipt_dt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_name_text_tmp ON %I USING GIN (contributor_name_text)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_tmp ON %I USING GIN (contributor_employer_text)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_tmp ON %I USING GIN (contributor_occupation_text)', child_table_root, child_table_name);
 
         -- Set statistics and analyze the table.
         EXECUTE format('ALTER TABLE %I ALTER COLUMN contbr_st SET STATISTICS 1000', child_table_name);
@@ -74,28 +76,30 @@ $$ LANGUAGE plpgsql;
 -- schedule B.
 CREATE OR REPLACE FUNCTION finalize_itemized_schedule_b_tables(start_year NUMERIC, end_year NUMERIC) RETURNS VOID AS $$
 DECLARE
+    child_table_root TEXT;
     child_table_name TEXT;
 BEGIN
     FOR cycle in start_year..end_year BY 2 LOOP
-        child_table_name = format('ofec_sched_b_%s_%s', cycle - 1, cycle);
+        child_table_root = format('ofec_sched_b_%s_%s', cycle - 1, cycle);
+        child_table_name = format('ofec_sched_b_%s_%s_tmp', cycle - 1, cycle);
 
         -- Create indexes.
-        EXECUTE format('CREATE UNIQUE INDEX idx_%s_sub_id_tmp ON %I (sub_id)', child_table_name, child_table_name);
-        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id_tmp', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_clean_recipient_cmte_id_tmp ON %I (clean_recipient_cmte_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_cmte_id_sub_id_tmp ON %I (cmte_id, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_cmte_id_disb_amt_sub_id_tmp ON %I (cmte_id, disb_amt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_cmte_id_disb_dt_sub_id_tmp ON %I (cmte_id, disb_dt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_image_num_tmp ON %I (image_num)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_pg_date_tmp ON %I (pg_date)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_recipient_city_tmp ON %I (recipient_city)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_recipient_st_tmp ON %I (recipient_st)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_rpt_yr_tmp ON %I (rpt_yr)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_sub_id_amount_tmp ON %I (disb_amt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_sub_id_date_tmp ON %I (disb_dt, sub_id)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_tmp ON %I (two_year_transaction_period)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_recipient_name_text_tmp ON %I USING GIN (recipient_name_text)', child_table_name, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_disbursement_description_text_tmp ON %I USING GIN (disbursement_description_text)', child_table_name, child_table_name);
+        EXECUTE format('CREATE UNIQUE INDEX idx_%s_sub_id_tmp ON %I (sub_id)', child_table_root, child_table_name);
+        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id_tmp', child_table_name, child_table_root);
+        EXECUTE format('CREATE INDEX idx_%s_clean_recipient_cmte_id_tmp ON %I (clean_recipient_cmte_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_cmte_id_sub_id_tmp ON %I (cmte_id, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_cmte_id_disb_amt_sub_id_tmp ON %I (cmte_id, disb_amt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_cmte_id_disb_dt_sub_id_tmp ON %I (cmte_id, disb_dt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_image_num_tmp ON %I (image_num)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_pg_date_tmp ON %I (pg_date)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_recipient_city_tmp ON %I (recipient_city)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_recipient_st_tmp ON %I (recipient_st)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_rpt_yr_tmp ON %I (rpt_yr)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_amount_tmp ON %I (disb_amt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_sub_id_date_tmp ON %I (disb_dt, sub_id)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_tmp ON %I (two_year_transaction_period)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_recipient_name_text_tmp ON %I USING GIN (recipient_name_text)', child_table_root, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_disbursement_description_text_tmp ON %I USING GIN (disbursement_description_text)', child_table_root, child_table_name);
 
         -- Set statistics and analyze the table.
         EXECUTE format('ALTER TABLE %I ALTER COLUMN recipient_st SET STATISTICS 1000', child_table_name);
@@ -125,6 +129,7 @@ $$ language plpgsql;
 CREATE OR REPLACE FUNCTION rename_table_cascade(table_name TEXT) RETURNS VOID AS $$
 DECLARE
     child_tmp_table_name TEXT;
+    child_table_name TEXT;
     child_tables_cursor CURSOR (parent TEXT) FOR
         SELECT c.oid::pg_catalog.regclass AS name
         FROM pg_catalog.pg_class c, pg_catalog.pg_inherits i
@@ -136,7 +141,23 @@ BEGIN
 
     FOR child_tmp_table IN child_tables_cursor(table_name) LOOP
         child_tmp_table_name = child_tmp_table.name;
-        EXECUTE format('ALTER TABLE %1$I RENAME TO %2$I', child_tmp_table_name, regexp_replace(child_tmp_table_name, '_tmp$', ''));
+        child_table_name =  regexp_replace(child_tmp_table_name, '_tmp$', '');
+        EXECUTE format('ALTER TABLE %1$I RENAME TO %2$I', child_tmp_table_name, child_table_name);
+        PERFORM rename_index_cascade(child_table_name);
+    END LOOP;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION rename_index_cascade(p_table_name TEXT) RETURNS VOID AS $$
+DECLARE
+    indexes_cursor CURSOR FOR
+        SELECT indexname AS name
+        FROM pg_indexes
+        WHERE tablename = p_table_name;
+BEGIN
+
+    FOR index_name IN indexes_cursor LOOP
+        EXECUTE format('ALTER INDEX %1$I RENAME TO %2$I', index_name.name, regexp_replace(index_name.name, '_tmp$', ''));
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
