@@ -290,33 +290,13 @@ def update_itemized(schedule):
     logger.info('Finished Schedule {0} update.'.format(schedule))
 
 @manager.command
-def partition_itemized():
-    """This command runs the partitioning against the larger itemized
-    schedule tables.
+def partition_itemized(schedule):
+    """This command runs the partitioning against the specified itemized
+    schedule table.
     """
-
-    partition_itemized_a()
-    partition_itemized_b()
-
-@manager.command
-def partition_itemized_a():
-    """This command runs the partitioning against the larger itemized
-    schedule a table.
-    """
-
-    logger.info('Partitioning Schedule A...')
-    partition.SchedAGroup.run()
-    logger.info('Finished partitioning Schedule A.')
-
-@manager.command
-def partition_itemized_b():
-    """This command runs the partitioning against the larger itemized
-    schedule b table.
-    """
-
-    logger.info('Partitioning Schedule B...')
-    partition.SchedBGroup.run()
-    logger.info('Finished partitioning Schedule B.')
+    logger.info('Partitioning Schedule %s...', schedule)
+    execute_sql_file('data/sql_partition/partition_schedule_{0}.sql'.format(schedule))
+    logger.info('Finished partitioning Schedule %s.', schedule)
 
 @manager.command
 def rebuild_aggregates(processes=1):
@@ -371,13 +351,12 @@ def refresh_itemized_a():
     """Used to refresh the itemized Schedule A data."""
 
     logger.info('Updating Schedule A...')
-    output_messages = partition.SchedAGroup.refresh_children()
+    message = partition.SchedAGroup.process_queues()
 
-    for message in output_messages:
-        if message[0] == 0:
-            logger.info(message[1])
-        else:
-            logger.error(message[1])
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
 
     logger.info('Finished updating Schedule A.')
 
@@ -385,13 +364,12 @@ def refresh_itemized_a():
 def refresh_itemized_b():
     """Used to refresh the itemized Schedule B data."""
     logger.info('Updating Schedule B...')
-    output_messages = partition.SchedBGroup.refresh_children()
+    message = partition.SchedBGroup.process_queues()
 
-    for message in output_messages:
-        if message[0] == 0:
-            logger.info(message[1])
-        else:
-            logger.error(message[1])
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
 
     logger.info('Finished updating Schedule B.')
 
@@ -430,7 +408,8 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
-    partition_itemized()
+    partition_itemized('a')
+    partition_itemized('b')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
