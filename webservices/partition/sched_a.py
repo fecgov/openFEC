@@ -1,7 +1,6 @@
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
-from webservices.rest import db
 from webservices.partition.base import TableGroup
 
 class SchedAGroup(TableGroup):
@@ -51,44 +50,4 @@ class SchedAGroup(TableGroup):
                 parent.c.contbr_id,
                 parent.c.cmte_id,
             ).label('clean_contbr_id'),
-            sa.func.cast(
-                sa.func.get_cycle(parent.c.rpt_yr), sa.SmallInteger
-            ).label('two_year_transaction_period'),
-            sa.func.expand_line_number(
-                parent.c.filing_form,
-                parent.c.line_num,
-            ).label('line_number_label')
         ]
-
-    @classmethod
-    def index_factory(cls, child):
-        c = child.c
-        return [
-            sa.Index(None, c.rpt_yr),
-            sa.Index(None, c.pg_date),
-            sa.Index(None, c.entity_tp),
-            sa.Index(None, c.image_num),
-            sa.Index(None, c.contbr_st),
-            sa.Index(None, c.contbr_city),
-            sa.Index(None, c.contbr_zip),
-            sa.Index(None, c.is_individual),
-            sa.Index(None, c.clean_contbr_id),
-            sa.Index(None, c.two_year_transaction_period),
-            sa.Index(None, c.line_num, child.c[cls.primary]),
-
-            sa.Index('ix_{0}_sub_id_amount_tmp'.format(child.name[:-4]), c.contb_receipt_amt, child.c[cls.primary]),
-            sa.Index('ix_{0}_sub_id_date_tmp'.format(child.name[:-4]), c.contb_receipt_dt, child.c[cls.primary]),
-
-            sa.Index('ix_{0}_cmte_id_tmp'.format(child.name[:-4]), c.cmte_id, c[cls.primary]),
-            sa.Index('ix_{0}_cmte_id_amount_tmp'.format(child.name[:-4]), c.cmte_id, c.contb_receipt_amt, c[cls.primary]),
-            sa.Index('ix_{0}_cmte_id_date_tmp'.format(child.name[:-4]), c.cmte_id, c.contb_receipt_dt, c[cls.primary]),
-
-            sa.Index(None, c.contributor_name_text, postgresql_using='gin'),
-            sa.Index(None, c.contributor_employer_text, postgresql_using='gin'),
-            sa.Index(None, c.contributor_occupation_text, postgresql_using='gin'),
-        ]
-
-    @classmethod
-    def update_child(cls, child):
-        cmd = 'alter table {0} alter column contbr_st set statistics 1000'.format(child.name)
-        db.engine.execute(cmd)
