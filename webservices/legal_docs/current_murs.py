@@ -5,7 +5,6 @@ from urllib.parse import urlencode
 
 from webservices.env import env
 from webservices.legal_docs import DOCS_INDEX
-from webservices.legal_docs.load_legal_docs import generate_aws_s3_url
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -133,14 +132,13 @@ def get_murs(from_mur_no):
                 'sort2': sort2,
             }
             mur['subjects'] = get_subjects(case_id)
-            mur['subject'] = {'text': mur['subjects']}
             mur['election_cycles'] = get_election_cycles(case_id)
 
             participants = get_participants(case_id)
             mur['participants'] = list(participants.values())
             mur['respondents'] = get_sorted_respondents(mur['participants'])
             mur['commission_votes'] = get_commission_votes(case_id)
-            mur['dispositions'] = get_disposition(case_id)
+            mur['dispositions'] = get_dispositions(case_id)
             mur['documents'] = get_documents(case_id, bucket, bucket_name)
             mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
@@ -160,7 +158,7 @@ def get_open_and_close_dates(case_id):
         open_date, close_date = rs.fetchone()
     return open_date, close_date
 
-def get_disposition(case_id):
+def get_dispositions(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(DISPOSITION_DATA.format(case_id))
         disposition_data = []
@@ -290,7 +288,7 @@ def get_documents(case_id, bucket, bucket_name):
             logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
-            document['url'] = generate_aws_s3_url(bucket_name, pdf_key)
+            document['url'] = '/files/' + pdf_key
             documents.append(document)
     return documents
 
