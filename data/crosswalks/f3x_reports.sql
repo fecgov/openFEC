@@ -40,7 +40,8 @@ vs.fed_cand_cmte_contb_per as fed_cand_cmte_contb_per, --contributions to other 
 vs.indt_exp_per as indt_exp_per, --independent expenditures
 vs.coord_exp_by_pty_cmte_per as coord_exp_by_pty_cmte_per, --coordinated party expenditures
 vs.loans_made_per as loans_made_per, --loans made
-vs.oth_loan_repymts as loan_repymts_made_per, --total loan repayments made
+-- vs.oth_loan_repymts as
+vs.ttl_loan_repymts as loan_repymts_made_per, --total loan repayments made
 vs.indv_ref as indv_contb_ref_per, --individual refunds
 vs.pol_pty_cmte_contb as pol_pty_cmte_refund, --political party refunds
 vs.oth_cmte_ref as other_pol_cmte_refund, --other committee refunds
