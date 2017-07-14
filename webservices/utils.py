@@ -263,11 +263,13 @@ def document_description(report_year, report_type=None, document_type=None, form
 
 
 def make_report_pdf_url(image_number):
-    return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-        str(image_number)[-3:],
-        image_number,
-    )
-
+    if image_number:
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+            str(image_number)[-3:],
+            image_number,
+        )
+    else:
+        return None
 
 def make_schedule_pdf_url(image_number):
     if image_number:
@@ -283,7 +285,7 @@ def make_csv_url(file_num):
 
 def make_fec_url(image_number, file_num):
     image_number = str(image_number)
-    if file_num < 0:
+    if file_num < 0 or file_num is None:
         return
     file_num = str(file_num)
     indicator = -1
