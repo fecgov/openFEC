@@ -23,7 +23,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
         },
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
-            'schedule': timedelta(minutes=15),
+            'schedule': crontab(minute=[5, 20, 35, 50]),
         },
     }
 
