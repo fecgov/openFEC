@@ -31,6 +31,7 @@ select
     oft.individual_contributions,
     -- for F3x total loan repayments made are called other loans
     oft.loan_repayments_other_loans as loan_repayments_made,
+    oft.loan_repayments_other_loans,
     oft.loan_repayments_received,
     oft.loans_made,
     oft.transfers_to_other_authorized_committee, -- was not here before
