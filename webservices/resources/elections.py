@@ -180,7 +180,7 @@ class ElectionView(utils.Resource):
         ).join(
             latest,
             aggregates.c.candidate_id == latest.c.candidate_id,
-        ).join(
+        ).outerjoin(
             outcomes,
             aggregates.c.candidate_id == outcomes.c.cand_id,
         )
