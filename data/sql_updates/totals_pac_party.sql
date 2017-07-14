@@ -29,10 +29,11 @@ select
     oft.individual_itemized_contributions,
     oft.individual_unitemized_contributions,
     oft.individual_contributions,
-    oft.loan_repayments_made,
+    -- for F3x total loan repayments made are called other loans
+    oft.loan_repayments_other_loans as loan_repayments_made,
+    oft.loan_repayments_other_loans,
     oft.loan_repayments_received,
     oft.loans_made,
-    oft.loan_repayments_other_loans, -- was not here before
     oft.transfers_to_other_authorized_committee, -- was not here before
     oft.net_operating_expenditures,
     oft.non_allocated_fed_election_activity,
@@ -59,7 +60,6 @@ select
     oft.last_report_type_full,
     oft.last_beginning_image_number,
     oft.last_cash_on_hand_end_period,
-    -- last_cash_on_hand_beginning_period,
     oft.cash_on_hand_beginning_period,
     oft.last_debts_owed_by_committee,
     oft.last_debts_owed_to_committee,
