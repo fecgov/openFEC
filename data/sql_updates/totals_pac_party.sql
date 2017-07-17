@@ -19,8 +19,7 @@ select
     --sum(pnp.ttl_fed_disb_per) as fed_disbursements,
     oft.fed_disbursements,
     oft.fed_election_activity,
-    -- MISSING--
-    -- sum(pnp.ttl_fed_op_exp_per) as fed_operating_expenditures, -- was in F3x can't find in detsum
+    oft.op_exp_per,
     null::numeric as fed_operating_expenditures,
     --
     oft.fed_receipts,
