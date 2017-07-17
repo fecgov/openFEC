@@ -34,7 +34,8 @@ vs.ttl_fed_receipts_per, --total federal receipts
 vs.shared_fed_op_exp_per as shared_fed_op_exp_per, --allocated operating expenditures - federal
 vs.shared_nonfed_op_exp_per as shared_nonfed_op_exp_per, --allocated operating expenditures - non-federal
 vs.other_fed_op_exp_per as other_fed_op_exp_per, --other federal operating expenditures
-vs.ttl_op_exp_per as ttl_op_exp_per, --operating expenditures
+vs.ttl_op_exp_per as ttl_op_exp_per, --operating expenditures (F3, F3P)
+vs.op_exp_per as op_exp_per, --operating expenditures (F3)
 vs.tranf_to_other_auth_cmte as tranf_to_affliliated_cmte_per, --transfers to affiliated committees
 vs.fed_cand_cmte_contb_per as fed_cand_cmte_contb_per, --contributions to other committees
 vs.indt_exp_per as indt_exp_per, --independent expenditures
