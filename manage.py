@@ -388,12 +388,19 @@ def add_itemized_partition_cycle(cycle=None, amount=1):
     else:
         cycle = int(cycle)
 
-    logger.info('Adding Schedule A cycles...')
-    partition.SchedAGroup.add_cycles(cycle, amount)
-    logger.info('Finished adding Schedule A cycles.')
-    logger.info('Adding Schedule B cycles...')
-    partition.SchedBGroup.add_cycles(cycle, amount)
-    logger.info('Finished adding Schedule B cycles.')
+    logger.info('Adding Schedule A and B cycles...')
+    try:
+        with db.engine.begin() as connection:
+            connection.execute(
+                sa.text('SELECT add_partition_cycles(:start_year, :count)').execution_options(
+                    autocommit=True
+                ),
+                start_year=cycle,
+                count=amount
+            )
+        logger.info('Finished adding Schedule A and B cycles.')
+    except Exception:
+        logger.exception("Failed to add partition cycles")
 
 @manager.command
 def update_all(processes=1):
