@@ -37,5 +37,5 @@ boto3==1.4.4
 
 # Task queue
 celery==3.1.25
-celery-once==0.1.4
+celery-once==1.2.0
 redis==2.10.5
