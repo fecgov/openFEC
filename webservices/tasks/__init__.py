@@ -46,7 +46,7 @@ app.conf.update(
         'webservices.tasks.legal_docs',
     ),
     CELERYBEAT_SCHEDULE=schedule,
-    acks_late=True,
+    tasks_acks_late=True,
 )
 
 app.conf.ONCE = {
