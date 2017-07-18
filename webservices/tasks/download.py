@@ -180,8 +180,14 @@ def make_bundle(resource):
 
 @app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):
-    resource = call_resource(path, qs)
-    make_bundle(resource)
+    try:
+        logger.info('Download query: {0}'.format(qs))
+        resource = call_resource(path, qs)
+        logger.info('Download resource: {0}'.format(qs))
+        make_bundle(resource)
+        logger.info('Bundled: {0}'.format(qs))
+    except:
+        logger.exception('Download failed: {0}'.format(qs))
 
 @app.task
 def clear_bucket():
