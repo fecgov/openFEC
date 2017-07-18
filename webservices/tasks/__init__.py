@@ -43,7 +43,10 @@ app.conf.update(
         'webservices.tasks.legal_docs',
     ),
     beat_schedule=schedule,
-    task_acks_late=True
+    task_acks_late=True,
+    task_serializer='pickle',
+    result_serializer='pickle',
+    accept_content={'pickle'}
 )
 
 app.conf.ONCE = {
