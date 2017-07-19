@@ -35,31 +35,6 @@ class TableGroup:
         return []
 
     @classmethod
-    def update_child(cls, child):
-        pass
-
-    @classmethod
-    def timestamp_factory(cls, parent):
-        return [
-            sa.cast(None, sa.DateTime).label('timestamp'),
-        ]
-
-    @classmethod
-    def redefine_columns(cls, parent):
-        """Redefines columns in a table definition that are not the type that
-        we expect in the parent table/view.
-
-        This is intended to be used when creating the master table of a
-        partition, which is when the structure of the table is derived
-        directly and solely from the parent/source table/view.
-        """
-
-        for column_name, cast_type in cls.column_mappings.items():
-            parent.c[column_name].type = cast_type
-
-        return parent
-
-    @classmethod
     def recast_columns(cls, parent):
         """Recasts columns in a table definition that are not the type that
         we expect in the parent table/view.
@@ -86,45 +61,6 @@ class TableGroup:
             )
 
         return columns
-
-    @classmethod
-    def add_cycles(cls, cycle, amount):
-        """Adds new child tables to an existing partition.
-        Note:  Will not override existing tables.
-        """
-
-        parent = utils.load_table(cls.parent)
-
-        # Calculate all of the cycles to be added at once.
-        cycles = [cycle + i for i in range(0, amount * 2, 2)]
-
-        for cycle in cycles:
-            child_name = cls.get_child_name(cycle)
-
-            if utils.load_table(child_name) is None:
-                cls.create_child(parent, cycle, False)
-                cls.rename_child(cycle)
-                logger.info(
-                    'Successfully added cycle {cycle} as {name}.'.format(
-                        cycle=cycle,
-                        name=child_name
-                    )
-                )
-            else:
-                logger.warn(
-                    'Cycle {cycle} already exists as {name}; skipping.'.format(
-                        cycle=cycle,
-                        name=child_name
-                    )
-                )
-
-    @classmethod
-    def get_child_name(cls, cycle):
-        return '{base}_{start}_{stop}'.format(
-            base=cls.base_name,
-            start=cycle - 1,
-            stop=cycle,
-        )
 
     @classmethod
     def process_queues(cls):
