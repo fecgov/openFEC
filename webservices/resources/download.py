@@ -1,3 +1,4 @@
+import base64
 import http
 
 from marshmallow import fields
@@ -37,7 +38,10 @@ class DownloadView(utils.Resource):
                 'Cannot request downloads with more than {} records'.format(MAX_RECORDS),
                 status_code=http.client.FORBIDDEN,
             )
-        download.export_query.delay(path, request.query_string)
+        download.export_query.delay(
+            path,
+            base64.b64encode(request.query_string).decode('UTF-8')
+        )
         return {'status': 'queued'}
 
 def get_cached_file(path, qs, filename=None):
