@@ -62,6 +62,10 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     is_amended = db.Column('is_amended', db.Boolean)
     most_recent = db.Column('most_recent', db.Boolean)
     html_url = db.Column(db.String, doc='HTML link to the filing.')
+    #If f2 filing, the state of the candidate, else the state of the committee
+    state = db.Column(db.String, doc=docs.STATE)
+    office = db.Column(db.String, doc=docs.OFFICE)
+    party = db.Column(db.String, doc=docs.PARTY)
 
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)
