@@ -256,6 +256,9 @@ filings = {
     'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
     'form_type': fields.List(IStr, description='Form type'),
+    'state': fields.List(IStr, description=docs.STATE),
+    'district': fields.Str(),
+    'party': fields.Str(),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,

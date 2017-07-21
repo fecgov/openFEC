@@ -60,21 +60,6 @@ def filter_election(query, kwargs, candidate_column, cycle_column=None, year_col
         query = query.filter(models.CandidateHistory.district == kwargs['district'])
     return query
 
-def filter_locale(query, kwargs):
-    if kwargs.get('state'):
-        query = query.filter( models.Filings.state == kwargs['state'])
-    if kwargs.get('district'):
-        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ])
-                             == kwargs['district'])
-    if kwargs.get('office'):
-        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ])
-                             == kwargs['office'])
-    if kwargs.get('party'):
-        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ])
-                             == kwargs['party'])
-    return query
-
-
 def get_cycle(kwargs):
     if isinstance(kwargs['cycle'], list):
         if len(kwargs['cycle']) != 1:
