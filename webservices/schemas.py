@@ -699,6 +699,7 @@ EFilingsSchema = make_schema(
     fields={
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
+        'html_url': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'csv_url': ma.fields.Str(),

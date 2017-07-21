@@ -192,5 +192,6 @@ def export_query(path, qs):
 @app.task
 def clear_bucket():
     for obj in task_utils.get_bucket().objects.all():
-        if not obj.key.startswith('legal'):
+        if not obj.key.startswith('legal') or not obj.key.startswith('bulk-downloads'):
             obj.delete()
+
