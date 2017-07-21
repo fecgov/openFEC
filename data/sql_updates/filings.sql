@@ -85,9 +85,7 @@ with filings as (
              when upper(filing_history.form_tp) = 'F99' then 0
 		         else array_length(amendments.amendment_chain, 1) - 1
 	        end as amendment_version,
-        case when upper(filing_history.form_tp) = 'F2' then cand.state
-             else com.state
-        end as state,
+        cand.state,
         cand.office,
         cand.party
 
@@ -157,9 +155,9 @@ rfai_filings as (
         null::boolean as is_amended,
         True as most_recent,
         0 as amendement_version,
-        null::text as state,
-        null::text as office,
-        null::text as party
+        cand.state,
+        cand.office,
+        cand.party
     from disclosure.nml_form_rfai filing_history
     left join ofec_committee_history_mv_tmp com on filing_history.id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
     left join ofec_candidate_history_mv_tmp cand on filing_history.id = cand.candidate_id and get_cycle(filing_history.rpt_yr) = cand.two_year_period
