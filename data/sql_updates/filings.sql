@@ -28,7 +28,6 @@ with filings as (
     select
         cand.candidate_id as candidate_id,
         cand.name as candidate_name,
-        cand.state as candidate_state,
         filing_history.cand_cmte_id as committee_id,
         com.name as committee_name,
         sub_id,
