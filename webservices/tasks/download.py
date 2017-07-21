@@ -1,4 +1,5 @@
 import os
+import base64
 import hashlib
 import logging
 import zipfile
@@ -180,6 +181,8 @@ def make_bundle(resource):
 
 @app.task(base=QueueOnce, once={'graceful': True})
 def export_query(path, qs):
+    qs = base64.b64decode(qs.encode('UTF-8'))
+
     try:
         logger.info('Download query: {0}'.format(qs))
         resource = call_resource(path, qs)
