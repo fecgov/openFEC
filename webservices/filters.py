@@ -64,11 +64,14 @@ def filter_locale(query, kwargs):
     if kwargs.get('state'):
         query = query.filter( models.Filings.state == kwargs['state'])
     if kwargs.get('district'):
-        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ]) == kwargs['district'])
+        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ])
+                             == kwargs['district'])
     if kwargs.get('office'):
-        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ]) == kwargs['office'])
+        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ])
+                             == kwargs['office'])
     if kwargs.get('party'):
-        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ]) == kwargs['party'])
+        query = query.filter(sa.case([(models.Filings.form_type == 'F2', models.Filings.district) ])
+                             == kwargs['party'])
     return query
 
 
