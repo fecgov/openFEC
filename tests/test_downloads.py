@@ -1,3 +1,4 @@
+import base64
 import datetime
 import mock
 import hashlib
@@ -112,7 +113,7 @@ class TestDownloadTask(ApiBaseTest):
                 url = api.url_for(view, committee_id=committee.committee_id)
             else:
                 url = api.url_for(view)
-            tasks.export_query(url, b'')
+            tasks.export_query(url, base64.b64encode(b'').decode('UTF-8'))
 
 
 class TestDownloadResource(ApiBaseTest):
@@ -124,7 +125,10 @@ class TestDownloadResource(ApiBaseTest):
         res = self.client.post_json(api.url_for(resource.DownloadView, path='candidates', office='S'))
         assert res.json == {'status': 'queued'}
         get_cached.assert_called_once_with('/v1/candidates/', b'office=S', filename=None)
-        export.delay.assert_called_once_with('/v1/candidates/', b'office=S')
+        export.delay.assert_called_once_with(
+            '/v1/candidates/',
+            base64.b64encode(b'office=S').decode('UTF-8')
+        )
 
     @mock.patch('webservices.resources.download.get_cached_file')
     @mock.patch('webservices.resources.download.download.export_query')
