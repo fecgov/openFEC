@@ -468,9 +468,9 @@ schedule_a = {
         description='Filters individual or committee contributions based on line number'
     ),
     'two_year_transaction_period': fields.Int(
-        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
-        required=True,
-        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD
+        #required=True,
+        #missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
 }
 
@@ -538,9 +538,9 @@ schedule_b = {
     'last_disbursement_date': fields.Date(missing=None, description='When sorting by `disbursement_date`, this is populated with the `disbursement_date` of the last result. However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'last_disbursement_amount': fields.Float(missing=None, description='When sorting by `disbursement_amount`, this is populated with the `disbursement_amount` of the last result.  However, you will need to pass the index of that last result to `last_index` to get the next page.'),
     'two_year_transaction_period': fields.Int(
-        description=docs.TWO_YEAR_TRANSACTION_PERIOD,
-        required=True,
-        missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
+        description=docs.TWO_YEAR_TRANSACTION_PERIOD
+        #required=True,
+        #missing=SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
     ),
 }
 
