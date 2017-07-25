@@ -207,6 +207,7 @@ candidate_detail = {
 candidate_list = {
     'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'first_filing_date': fields.Bool(description='First date of F2 filing.'),
 }
 
 candidate_history = {
@@ -216,6 +217,7 @@ candidate_history = {
 committee = {
     'year': fields.List(fields.Int, description=docs.COMMITTEE_YEAR),
     'cycle': fields.List(fields.Int, description=docs.COMMITTEE_CYCLE),
+    'first_filing_date': fields.Bool(description='First date of filing.'),
     'designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
@@ -257,8 +259,9 @@ filings = {
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
     'form_type': fields.List(IStr, description='Form type'),
     'state': fields.List(IStr, description=docs.STATE),
-    'district': fields.Str(),
-    'party': fields.Str(),
+    'district': fields.List(IStr, description=docs.DISTRICT),
+    'office': fields.List(IStr, description=docs.OFFICE),
+    'party': fields.List(IStr, description=docs.PARTY),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,
