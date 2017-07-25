@@ -58,7 +58,8 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     cycles.cycles,
     elections.election_years,
     elections.election_districts,
-    elections.active_through
+    elections.active_through,
+    1 = (rank() OVER (PARTITION BY fec_yr.cand_id ORDER BY fec_yr.fec_election_yr ASC)) as first_filing_date
 from fec_yr
 left join cycles using (cand_id)
 left join elections using (cand_id)

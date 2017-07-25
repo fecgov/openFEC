@@ -87,6 +87,7 @@ with filings as (
 	        end as amendment_version,
         cand.state,
         cand.office,
+        cand.district,
         cand.party
 
     from disclosure.f_rpt_or_form_sub filing_history
@@ -157,6 +158,7 @@ rfai_filings as (
         0 as amendement_version,
         cand.state,
         cand.office,
+        cand.district,
         cand.party
     from disclosure.nml_form_rfai filing_history
     left join ofec_committee_history_mv_tmp com on filing_history.id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
