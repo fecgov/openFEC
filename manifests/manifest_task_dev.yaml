@@ -18,7 +18,7 @@ applications:
   services:
   - fec-redis-dev
   - fec-s3-dev
-  - fec-eregs-search
+  - fec-api-search
   - fec-creds-dev
   stack: cflinuxfs2
   health-check-type: process
