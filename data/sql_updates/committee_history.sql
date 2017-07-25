@@ -89,8 +89,7 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     fec_yr.cmte_pty_affiliation as party,
     fec_yr.cmte_pty_affiliation_desc as party_full,
     cycles.cycles,
-    coalesce(candidates.candidate_ids, '{}'::text[]) as candidate_ids,
-    1 = (rank() OVER (PARTITION BY fec_yr.cmte_id ORDER BY fec_yr.fec_election_yr ASC)) as first_filing_date
+    coalesce(candidates.candidate_ids, '{}'::text[]) as candidate_ids
 from disclosure.cmte_valid_fec_yr fec_yr
 left join fec_vsum_f1_vw f1 on fec_yr.cmte_id = f1.cmte_id and fec_yr.fec_election_yr >= f1.rpt_yr
 left join cycles on fec_yr.cmte_id = cycles.cmte_id
@@ -108,3 +107,4 @@ create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
 create index on ofec_committee_history_mv_tmp(designation);
 create index on ofec_committee_history_mv_tmp(cycle, committee_id);
+create index on ofec_committee_history_mv_tmp(first_file_date);

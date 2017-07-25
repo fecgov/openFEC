@@ -44,6 +44,9 @@ class BaseCandidate(BaseModel):
     incumbent_challenge = db.Column(db.String(1), index=True, doc=docs.INCUMBENT_CHALLENGE)
     incumbent_challenge_full = db.Column(db.String(10), doc=docs.INCUMBENT_CHALLENGE_FULL)
     load_date = db.Column(db.Date, index=True, doc=docs.LOAD_DATE)
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_CANDIDATE_FILE_DATE)
+    last_file_date = db.Column(db.Date, doc=docs.LAST_CANDIDATE_FILE_DATE)
+    last_f2_date = db.Column(db.Date, doc=docs.LAST_F2_DATE)
 
     @declared_attr
     def flags(self):
