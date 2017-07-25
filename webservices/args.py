@@ -207,7 +207,8 @@ candidate_detail = {
 candidate_list = {
     'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
-    'first_filing_date': fields.Bool(description='First date of F2 filing.'),
+    'min_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC after this date'),
+    'max_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC before this date'),
 }
 
 candidate_history = {

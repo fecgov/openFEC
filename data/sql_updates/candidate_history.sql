@@ -32,6 +32,15 @@ with
             max(fec_election_yr) as max_cycle
         from fec_yr
         group by cand_id
+    ),
+    dates as (
+        select
+            cand_cmte_id as cand_id,
+            min(receipt_dt) as first_file_date,
+            max(receipt_dt) as last_file_date,
+            max(receipt_dt) filter (where form_tp = 'F2') as last_f2_date
+        from disclosure.f_rpt_or_form_sub
+        group by cand_cmte_id
     )
 select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     row_number() over () as idx,
@@ -56,13 +65,16 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_pty_affiliation as party,
     clean_party(ref_party.pty_desc) as party_full,
     cycles.cycles,
+    dates.first_file_date,
+    dates.last_file_date,
+    dates.last_f2_date,
     elections.election_years,
     elections.election_districts,
-    elections.active_through,
-    1 = (rank() OVER (PARTITION BY fec_yr.cand_id ORDER BY fec_yr.fec_election_yr ASC)) as first_filing_date
+    elections.active_through
 from fec_yr
 left join cycles using (cand_id)
 left join elections using (cand_id)
+left join dates using (cand_id)
 left join disclosure.cand_inactive inactive on
     fec_yr.cand_id = inactive.cand_id and
     fec_yr.fec_election_yr < inactive.election_yr
@@ -80,4 +92,5 @@ create index on ofec_candidate_history_mv_tmp(office);
 create index on ofec_candidate_history_mv_tmp(state);
 create index on ofec_candidate_history_mv_tmp(district);
 create index on ofec_candidate_history_mv_tmp(district_number);
+create index on ofec_candidate_history_mv_tmp(first_file_date);
 create index on ofec_candidate_history_mv_tmp(two_year_period, candidate_id);
