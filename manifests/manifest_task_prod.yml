@@ -1,0 +1,24 @@
+path: ../
+applications:
+- name: <name>-kill-<date>
+  memory: 1024M
+  disk_quota: 1024M
+  command: "(<put your command here> && echo SUCCESS || echo FAIL) && sleep infinity"
+  buildpack: python_buildpack
+  health-check-type: process
+  env:
+    FEC_API_WHITELIST_IPS: true
+    FEC_CACHE_AGE: 3600
+    NEW_RELIC_APP_NAME: fec | api | prod
+    NEW_RELIC_CONFIG_FILE: newrelic.ini
+    NEW_RELIC_ENV: production
+    NEW_RELIC_LOG: stdout
+    PRODUCTION: True
+    WEB_CONCURRENCY: 4
+  no-route: true
+  services:
+  - fec-redis-prod
+  - fec-s3-prod
+  - fec-api-search
+  - fec-creds-prod
+  stack: cflinuxfs2
