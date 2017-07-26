@@ -218,7 +218,6 @@ candidate_history = {
 committee = {
     'year': fields.List(fields.Int, description=docs.COMMITTEE_YEAR),
     'cycle': fields.List(fields.Int, description=docs.COMMITTEE_CYCLE),
-    'first_filing_date': fields.Bool(description='First date of filing.'),
     'designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,

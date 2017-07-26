@@ -31,7 +31,6 @@ class BaseCommittee(BaseModel):
     party = db.Column(db.String(3), index=True, doc=docs.PARTY)
     party_full = db.Column(db.String(50), doc=docs.PARTY)
     state = db.Column(db.String(2), index=True, doc=docs.COMMITTEE_STATE)
-    first_filing_date = db.Column(db.Boolean, doc='First filing of committee')
 
 
 class BaseConcreteCommittee(BaseCommittee):
