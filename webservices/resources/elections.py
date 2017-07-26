@@ -67,6 +67,8 @@ class ElectionList(utils.Resource):
                 ],
                 else_=4,
             ).label('_office_status'),
+        ).order_by(
+            elections.c.candidate_id,
         ).join(
             ElectionResult,
             sa.and_(
@@ -74,7 +76,9 @@ class ElectionList(utils.Resource):
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
                 elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
-            ),
+            )
+        ).distinct(
+            elections.c.candidate_id,
         ).order_by(
             '_office_status',
             ElectionResult.cand_office_district,
