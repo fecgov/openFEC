@@ -65,9 +65,9 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     fec_yr.cand_pty_affiliation as party,
     clean_party(ref_party.pty_desc) as party_full,
     cycles.cycles,
-    dates.first_file_date,
-    dates.last_file_date,
-    dates.last_f2_date,
+    cast(cast(dates.first_file_date as text) as date) as first_file_date,
+    cast(cast(dates.last_file_date as text) as date) as last_file_date,
+    cast(cast(dates.last_f2_date as text) as date) as last_f2_date,
     elections.election_years,
     elections.election_districts,
     elections.active_through
