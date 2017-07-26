@@ -15,6 +15,7 @@ create index on ofec_candidate_detail_mv_tmp(load_date);
 create index on ofec_candidate_detail_mv_tmp(party_full);
 create index on ofec_candidate_detail_mv_tmp(office_full);
 create index on ofec_candidate_detail_mv_tmp(candidate_id);
+create index on ofec_candidate_detail_mv_tmp(first_file_date);
 create index on ofec_candidate_detail_mv_tmp(candidate_status);
 create index on ofec_candidate_detail_mv_tmp(incumbent_challenge);
 
