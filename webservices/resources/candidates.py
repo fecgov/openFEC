@@ -93,8 +93,6 @@ class CandidateList(ApiResource):
         if kwargs.get('election_year'):
             query = query.filter(models.Candidate.election_years.overlap(kwargs['election_year']))
 
-        print(query)
-
         return query
 
 
