@@ -207,6 +207,8 @@ candidate_detail = {
 candidate_list = {
     'q': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'min_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC after this date'),
+    'max_first_file_date': fields.Date(description='Selects all candidates whose first filing was received by the FEC before this date'),
 }
 
 candidate_history = {
@@ -256,6 +258,10 @@ filings = {
     'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
     'form_type': fields.List(IStr, description='Form type'),
+    'state': fields.List(IStr, description=docs.STATE),
+    'district': fields.List(IStr, description=docs.DISTRICT),
+    'office': fields.List(IStr, description=docs.OFFICE),
+    'party': fields.List(IStr, description=docs.PARTY),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
         description=docs.MEANS_FILED,
