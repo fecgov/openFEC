@@ -12,8 +12,6 @@ from elasticsearch import RequestError
 from webservices.exceptions import ApiError
 import logging
 
-import nltk
-from nltk.tokenize import wordpunct_tokenize
 
 es = utils.get_elasticsearch_connection()
 logger = logging.getLogger(__name__)
@@ -73,101 +71,6 @@ class GetLegalDocument(utils.Resource):
         else:
             return abort(404)
 
-phrase_regex = re.compile('"(?P<phrase>[^"]*)"')
-
-def parse_query_string(query):
-    """Parse phrases from a query string for exact matches e.g. "independent agency"."""
-
-    def _parse_query_string(query):
-        """Recursively pull out terms and phrases from query. Each pass pulls
-        out terms leading up to the phrase as well as the phrase itself. Then
-        it processes the remaining string."""
-
-        if not query:
-            return ([], [])
-
-        match = phrase_regex.search(query)
-        if not match:
-            return ([query], [])
-
-        start, end = match.span()
-        before_phrase = query[0:start]
-        after_phrase = query[end:]
-
-        term = before_phrase.strip()
-        phrase = match.group('phrase').strip()
-        remaining = after_phrase.strip()
-
-        terms, phrases = _parse_query_string(remaining)
-
-        if phrase:
-            phrases.insert(0, phrase)
-
-        if term:
-            terms.insert(0, term)
-
-        return (terms, phrases)
-
-    terms, phrases = _parse_query_string(query)
-    return dict(terms=terms, phrases=phrases)
-
-def parse_boolean_query(q):
-    """
-    This is a shift-reduce parser for the keywork input. The operator precedence
-    follows SQL: first NOT, then AND, then OR.
-
-    Here is the grammar:
-    """
-    parser_regex = re.compile('(?P<operator>(?:AND|OR|NOT|\(|\)))|(?P<phrase>(?:"[^"]*"))|(?P<term>[^\s\(\)]+)')
-    parsed = re.findall(parser_regex, q)
-    tokens = []
-
-    RULES = ["CLAUSE -> TERM | PHRASE | AND_CLAUSE | OR_CLAUSE | NOT_CLAUSE",
-            "CLAUSE -> OPEN_PAREN CLAUSE CLOSE_PAREN",
-            "OR_CLAUSE -> CLAUSE CLAUSE | CLAUSE OR CLAUSE",
-            "AND_CLAUSE -> CLAUSE AND CLAUSE",
-            "NOT_CLAUSE -> NOT CLAUSE",
-            "OPEN_PAREN -> '('",
-            "CLOSE_PAREN -> ')'",
-            "AND -> 'AND'",
-            "OR -> 'OR'",
-            "NOT -> 'NOT'"]
-
-    for result in parsed:
-        if result[0]:  # operator
-            tokens.append(result[0])
-        if result[1]:  # phrase
-            tokens.append(result[1])
-            RULES.append("PHRASE -> '%s'" % result[1])
-        if result[2]:  # term
-            tokens.append(result[2])
-            RULES.append("TERM -> '%s'" % result[2])
-
-    print(tokens)
-    parse_tree = list(nltk.ShiftReduceParser(
-        nltk.CFG.fromstring(RULES), trace=2)
-        .parse(tokens))
-
-    print(parse_tree)
-
-    return parse_tree
-
-def build_query_from_parse_tree(clause):
-    print('*' * 50)
-    print(clause)
-    print(clause.label())
-    print(clause[0])
-    if clause.label() == 'CLAUSE':
-        return build_query_from_parse_tree(clause[0])
-    if clause.label() == 'OR_CLAUSE':
-        return Q('bool', must=[build_query_from_parse_tree(clause[0]), build_query_from_parse_tree(clause[-1])],
-                    operator='OR')
-    if clause.label() == 'TERM':
-        return Q('match', _all=clause[0])
-    if clause.label() == 'PHRASE':
-        return Q('match_phrase', _all=clause[0].strip('"'))
-
-
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
@@ -183,13 +86,12 @@ class UniversalSearch(utils.Resource):
         else:
             doc_types = [kwargs.get('type')]
 
-        parsed_query = parse_query_string(q)
-        terms = parsed_query.get('terms')
-        phrases = parsed_query.get('phrases')
         hits_returned = min([200, hits_returned])
 
         results = {}
         total_count = 0
+        print(q)
+        print(kwargs)
         for type_ in doc_types:
             query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
             try:
@@ -205,7 +107,7 @@ class UniversalSearch(utils.Resource):
         return results
 
 def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_), Q('query_string', query=q, lenient=True)]
+    must_query = [Q('term', _type=type_), Q('query_string', query=q)]
 
     query = Search().using(es) \
         .query(Q('bool', must=must_query)) \
@@ -219,7 +121,10 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     return query
 
 def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_), Q('query_string', query=q, fields=['documents.text'], lenient=True)]
+    must_query = [Q('term', _type=type_)]
+
+    if q:
+        must_query.append(Q('query_string', query=q, fields=['documents.text']))
 
     query = Search().using(es) \
         .query(Q('bool', must=must_query)) \
@@ -233,27 +138,12 @@ def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     return apply_mur_specific_query_params(query, **kwargs)
 
 def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_), Q('query_string', query=q, fields=['no', 'name', 'summary'], lenient=True)]
-    # parses = parse_boolean_query(q)
-    # boolean_query = build_query_from_parse_tree(parses[0])
-    # print(boolean_query)
-    # must_query.append(boolean_query)
+    must_query = [Q('term', _type=type_)]
+    should_query = [get_ao_document_query(q, **kwargs),
+                Q('query_string', query=q, fields=['no', 'name', 'summary'])]
 
-    """
-    should_query = []
-    if len(terms):
-        term_query = Q('multi_match', query=' '.join(terms), fields=['no', 'name', 'summary'])
-        should_query.append(term_query)
-
-    if len(phrases):
-        phrase_queries = [
-            Q('multi_match', type='phrase', query=phrase, fields=['no', 'name', 'summary']) for phrase in phrases]
-        should_query.extend(phrase_queries)
-
-    should_query.append(get_ao_document_query(terms, phrases, **kwargs))
-    """
     query = Search().using(es) \
-        .query(Q('bool', must=must_query)) \
+        .query(Q('bool', must=must_query, should=should_query, minimum_should_match=1)) \
         .highlight('text', 'name', 'no', 'summary', 'documents.text', 'documents.description') \
         .highlight_options(require_field_match=False) \
         .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
@@ -279,7 +169,7 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     return query
 
-def get_ao_document_query(terms, phrases, **kwargs):
+def get_ao_document_query(q, **kwargs):
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
                   'D': 'Draft Documents',
@@ -294,9 +184,8 @@ def get_ao_document_query(terms, phrases, **kwargs):
     else:
         combined_query = []
 
-    if terms:
-        combined_query.append(Q('match', documents__text=' '.join(terms)))
-    combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
+    if q:
+        combined_query.append(Q('query_string', query=q, fields=['documents.text']))
 
     return Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
 
