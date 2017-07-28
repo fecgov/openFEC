@@ -5,7 +5,8 @@ import unittest
 import mock
 from mock import patch
 
-from webservices.resources.legal import es, parse_query_string
+from webservices.resources.legal import es
+from elasticsearch import RequestError
 
 # TODO: integrate more with API Schema so that __API_VERSION__ is returned
 # self.assertEqual(result['api_version'], __API_VERSION__)
@@ -29,8 +30,12 @@ def es_mur(*args, **kwargs):
     return {'hits': {'hits': [{'_source': {'text': 'abc'}, '_type': 'murs'},
            {'_source': {'no': '123'}, '_type': 'murs'}]}}
 
+def es_invalid_search(*args, **kwargs):
+    raise RequestError("invalid query")
+
 def es_search(**kwargs):
     _type = kwargs["body"]["query"]["bool"]["must"][0]["term"]["_type"]
+
     if _type == 'regulations':
         return {'hits': {'hits': [{'highlight': {'text': ['a', 'b']},
                                    '_source': {}, '_type': 'regulations'}], 'total': 1}}
@@ -125,6 +130,14 @@ class SearchTest(unittest.TestCase):
             'total_all': 2
         }
 
+    @patch('webservices.rest.legal.es.search', es_invalid_search)
+    def test_invalid_search(self):
+        response = self.app.get('/v1/legal/search/' +
+                                '?q=president%20AND%20OR&type=advisory_opinions')
+        assert response.status_code == 200
+        result = json.loads(codecs.decode(response.data))
+        assert result['status_code'] == 400
+
     @patch.object(es, 'search')
     def test_query_dsl(self, es_search):
         response = self.app.get('/v1/legal/search/', query_string={
@@ -135,61 +148,16 @@ class SearchTest(unittest.TestCase):
         # This is mostly copy/pasted from the dict-based query. This is not a
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
-        expected_query = {"query": {"bool": {
-            "must": [
-                {"term": {"_type": "statutes"}},
-                {"match": {"_all": "president"}},
-            ]}},
-            "highlight": {
-                "fields": {
-                    "text": {},
-                    "name": {},
-                    "no": {},
-                    "summary": {},
-                    "documents.text": {},
-                    "documents.description": {}
-                },
-                "require_field_match": False},
-            "_source": {"exclude": ["text", "documents.text", "sort1", "sort2"]},
-            "sort": ['sort1', 'sort2'],
-            "from": 0,
-            "size": 20}
 
-        es_search.assert_called_with(body=expected_query,
-                                     index=mock.ANY,
-                                     doc_type=mock.ANY)
-
-    @patch.object(es, 'search')
-    def test_query_dsl_phrase_search(self, es_search):
-        response = self.app.get('/v1/legal/search/', query_string={
-                                'q': '"electronic filing"',
-                                'type': 'statutes'})
-        assert response.status_code == 200
-
-        # This is mostly copy/pasted from the dict-based query. This is not a
-        # very meaningful test but helped to ensure we're using the
-        # elasitcsearch_dsl correctly.
-        expected_query = {
-            "query": {"bool": {
-                "must": [
-                    {"term": {"_type": "statutes"}},
-                    {"match_phrase": {"_all": "electronic filing"}},
-                ]}},
-            "highlight": {
-                "fields": {
-                    "text": {},
-                    "name": {},
-                    "no": {},
-                    "summary": {},
-                    "documents.text": {},
-                    "documents.description": {}
-                },
-                "require_field_match": False
-            },
-            "_source": {"exclude": ["text", "documents.text", "sort1", "sort2"]},
-            "sort": ['sort1', 'sort2'],
-            "from": 0,
-            "size": 20}
+        expected_query = {'from': 0,
+        'sort': ['sort1', 'sort2'],
+            'size': 20,
+            'query': {'bool': {'must': [{'term': {'_type': 'statutes'}},
+            {'query_string': {'query': 'president'}}]}},
+            'highlight': {'fields': {'documents.text': {}, 'text': {},
+            'no': {}, 'name': {}, 'documents.description': {}, 'summary': {}},
+            'require_field_match': False},
+            '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']}}
 
         es_search.assert_called_with(body=expected_query,
                                      index=mock.ANY,
@@ -205,153 +173,24 @@ class SearchTest(unittest.TestCase):
         # This is mostly copy/pasted from the dict-based query. This is not a
         # very meaningful test but helped to ensure we're using the
         # elasitcsearch_dsl correctly.
-        expected_query = {
-            'query': {
-                'bool': {
-                    'must': [
-                        {'term': {'_type': 'advisory_opinions'}},
-                        {'bool': {'minimum_should_match': 1}}
-                    ],
-                    'should': [
-                        {'multi_match': {
-                            'query': 'president',
-                            'fields': ['no', 'name', 'summary']}},
-                        {'nested': {
-                            'path': 'documents',
-                            'query': {
-                                'bool': {
-                                    'must': [
-                                        {'match': {'documents.text': 'president'}}
-                                    ]
-                                }
-                            },
-                            'inner_hits': {
-                                '_source': False,
-                                'highlight': {
-                                    'require_field_match': False,
-                                    'fields': {
-                                        'documents.text': {},
-                                        'documents.description': {}
-                                    }
-                                }
-                            }
-                        }}
-                    ],
-                    'minimum_should_match': 1
-                }},
-            'sort': ['sort1', 'sort2'],
-            'from': 0,
-            'size': 20,
-            '_source': {
-                'exclude': [
-                    'text', 'documents.text', 'sort1', 'sort2'
-                ]
-            },
-            'highlight': {
-                'fields': {
-                    'documents.text': {},
-                    'text': {},
-                    'documents.description': {},
-                    'name': {},
-                    'no': {},
-                    'summary': {}
-                },
-                "require_field_match": False
-            }
-        }
+        expected_query = {'query':
+            {'bool':
+                {'must': [{'term': {'_type': 'advisory_opinions'}},
+                {'bool': {'minimum_should_match': 1}}],
+                    'minimum_should_match': 1,
+                    'should': [{'nested': {'path': 'documents',
+                'inner_hits': {'_source': False,
+                'highlight': {'require_field_match': False,
+                'fields': {'documents.text': {}, 'documents.description': {}}}},
+                        'query': {'bool': {'must': [{'query_string': {'query': 'president',
+                        'fields': ['documents.text']}}]}}}},
+                    {'query_string': {'query': 'president', 'fields': ['no', 'name', 'summary']}}]}},
+            'highlight': {'require_field_match': False,
+                'fields': {'text': {}, 'documents.text': {}, 'summary': {},
+                'name': {}, 'documents.description': {}, 'no': {}}},
+            'from': 0, 'size': 20,
+            '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']}, 'sort': ['sort1', 'sort2']}
 
         es_search.assert_called_with(body=expected_query,
                                      index=mock.ANY,
                                      doc_type=mock.ANY)
-
-
-class LegalPhraseParseTests(unittest.TestCase):
-    def test_parse_query_no_phrase(self):
-        parsed = parse_query_string('hello world')
-        assert parsed == dict(terms=['hello world'], phrases=[])
-
-    def test_parse_query_with_phrase(self):
-        parsed = parse_query_string('require "electronic filing" 2016')
-        assert parsed == dict(terms=['require', '2016'], phrases=['electronic filing'])
-
-    def test_parse_query_with_many_phrases(self):
-        parsed = parse_query_string('require "electronic filing" 2016 "sans computer"')
-        assert parsed == dict(terms=['require', '2016'], phrases=['electronic filing', 'sans computer'])
-
-    def test_parse_query_with_only_phrase(self):
-        parsed = parse_query_string('"electronic filing"')
-        assert parsed == dict(terms=[], phrases=['electronic filing'])
-
-    def test_parse_query_terms_after_phrase(self):
-        parsed = parse_query_string('"electronic filing" 2016')
-        assert parsed == dict(terms=['2016'], phrases=['electronic filing'])
-
-
-class LegalPhraseSearchTests(unittest.TestCase):
-    def setUp(self):
-        self.app = rest.app.test_client()
-
-    @patch.object(es, 'search')
-    def test_with_only_phrase(self, es_search):
-        es_search.return_value = {'hits': {'hits': [], 'total': 0}}
-        response = self.app.get('/v1/legal/search/', query_string=dict(q='"electronic filing"', type='statutes'))
-
-        assert response.status_code == 200
-        assert es_search.call_count == 1
-
-        _, args = es_search.call_args
-        must_clause = get_path(args, 'body.query.bool.must')
-
-        # Get the first `match_phrase` in the `must` clause
-        match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {
-            'match_phrase': {
-                '_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
-
-        # No `match` clause for terms
-        match = next((q for q in must_clause if 'match' in q), None)
-        assert match is None, "Unexpected `match` clause"
-
-    @patch.object(es, 'search')
-    def test_with_terms_and_phrase(self, es_search):
-        es_search.return_value = {'hits': {'hits': [], 'total': 0}}
-        response = self.app.get('/v1/legal/search/',
-            query_string=dict(q='required "electronic filing" 2016', type='statutes'))
-
-        assert response.status_code == 200
-        assert es_search.call_count == 1
-
-        _, args = es_search.call_args
-        must_clause = get_path(args, 'body.query.bool.must')
-
-        # Get the first `match_phrase` in the `must` clause
-        match_phrase = next((q for q in must_clause if 'match_phrase' in q), None)
-        assert match_phrase == {
-            'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
-
-        match = next((q for q in must_clause if 'match' in q), None)
-        assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
-
-    @patch.object(es, 'search')
-    def test_with_terms_and_many_phrases(self, es_search):
-        es_search.return_value = {'hits': {'hits': [], 'total': 0}}
-        response = self.app.get('/v1/legal/search/', query_string=dict(
-            q='"vice president" required "electronic filing" 2016',
-            type='statutes'))
-
-        assert response.status_code == 200
-        assert es_search.call_count == 1
-
-        _, args = es_search.call_args
-        must_clause = get_path(args, 'body.query.bool.must')
-
-        # Get all the `match_phrase`s in the `must` clause
-        match_phrases = [q for q in must_clause if 'match_phrase' in q]
-        assert len(match_phrases) == 2
-        assert match_phrases[0] == {
-            'match_phrase': {'_all': 'vice president'}}, "Could not find a `match_phrase` with the key phrase"
-        assert match_phrases[1] == {
-            'match_phrase': {'_all': 'electronic filing'}}, "Could not find a `match_phrase` with the key phrase"
-
-        match = next((q for q in must_clause if 'match' in q), None)
-        assert match == {'match': {'_all': 'required 2016'}}, "Expected `match` clause for non-phrase terms"
