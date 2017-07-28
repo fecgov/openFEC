@@ -98,7 +98,7 @@ class UniversalSearch(utils.Resource):
                 formatted_hits, count = execute_query(query)
             except RequestError as e:
                 logger.info(e.args)
-                return ApiError("Could not parse query", 400)
+                raise ApiError("Could not parse query", 400)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
             total_count += count

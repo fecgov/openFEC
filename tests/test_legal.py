@@ -134,9 +134,7 @@ class SearchTest(unittest.TestCase):
     def test_invalid_search(self):
         response = self.app.get('/v1/legal/search/' +
                                 '?q=president%20AND%20OR&type=advisory_opinions')
-        assert response.status_code == 200
-        result = json.loads(codecs.decode(response.data))
-        assert result['status_code'] == 400
+        assert response.status_code == 400
 
     @patch.object(es, 'search')
     def test_query_dsl(self, es_search):
