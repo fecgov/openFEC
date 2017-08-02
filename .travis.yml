@@ -1,10 +1,11 @@
+dist: trusty
 language: python
 sudo: false
 cache: pip
 python:
   - "3.5"
 addons:
-  postgresql: "9.4"
+  postgresql: "9.6"
 env:
   global:
     - secure: fZSgHvzAttJcq5GYEwp/jo8/hcRs0hW169dTG4VC6vW29sPFjc2R6NuXVzXxGzxkWN16KvUNU+feMiMIse7c2zQIceTmhJh7cz19v+xmmwgqJgv0ln8+7+1rGB6FIblS9C70b2ggKjZ5DYMD4DxCrtQkWkVzQDncdADb4vg0ZA4=
