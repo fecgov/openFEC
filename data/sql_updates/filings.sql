@@ -99,82 +99,11 @@ with filings as (
         left join ofec_filings_amendments_all_mv_tmp amendments on filing_history.file_num = amendments.file_num
     where filing_history.rpt_yr >= :START_YEAR and filing_history.form_tp != 'SL'
 
-),
-rfai_filings as (
-    select
-        cand.candidate_id as candidate_id,
-        cand.name as candidate_name,
-        id as committee_id,
-        com.name as committee_name,
-        sub_id,
-        cvg_start_dt as coverage_start_date,
-        cvg_end_dt as coverage_end_date,
-        rfai_dt as receipt_date,
-        rpt_yr as election_year,
-        'RFAI'::text as form_type,
-        rpt_yr as report_year,
-        get_cycle(rpt_yr) as CYCLE,
-        rpt_tp as report_type,
-        null::character varying(1) as document_type,
-        null::text as document_type_full,
-        begin_image_num::bigint as beginning_image_number,
-        end_image_num as ending_image_number,
-        null::int as pages,
-        null::int as total_receipts,
-        null::int as total_individual_contributions,
-        null::int as net_donations,
-        null::int as total_disbursements,
-        null::int as total_independent_expenditures,
-        null::int as total_communication_cost,
-        null::int as cash_on_hand_beginning_period,
-        null::int as cash_on_hand_end_period,
-        null::int as debts_owed_by_committee,
-        null::int as debts_owed_to_committee,
-        -- personal funds aren't a thing anymore
-        null::int as house_personal_funds,
-        null::int as senate_personal_funds,
-        null::int as opposition_personal_funds,
-        null::character varying(38) as treasurer_name,
-        file_num as file_number,
-        0 as previous_file_number,
-        report.rpt_tp_desc as report_type_full,
-        null::character varying(5)  as primary_general_indicator,
-        request_tp as request_type,
-        amndt_ind as amendment_indicator,
-        last_update_dt as update_date,
-        report_pdf_url_or_null(
-            begin_image_num,
-            filing_history.rpt_yr,
-            com.committee_type,
-            'RFAI'::text
-        ) as pdf_url,
-        means_filed(begin_image_num) as means_filed,
-        report_html_url(means_filed(begin_image_num), id::text, filing_history.file_num::text) as html_url,
-        null::text as fec_url,
-        null::numeric[] as amendment_chain,
-        null::int as most_recent_file_number,
-        null::boolean as is_amended,
-        True as most_recent,
-        0 as amendement_version,
-        cand.state,
-        cand.office,
-        cand.district,
-        cand.party
-    from disclosure.nml_form_rfai filing_history
-    left join ofec_committee_history_mv_tmp com on filing_history.id = com.committee_id and get_cycle(filing_history.rpt_yr) = com.cycle
-    left join ofec_candidate_history_mv_tmp cand on filing_history.id = cand.candidate_id and get_cycle(filing_history.rpt_yr) = cand.two_year_period
-    left join staging.ref_rpt_tp report on filing_history.rpt_tp = report.rpt_tp_cd
-WHERE rpt_yr >= :START_YEAR and delete_ind is null
-),
-combined as(
-    select * from filings
-    union all
-    select * from rfai_filings
 )
 select
     row_number() over () as idx,
-    combined.*
-from combined
+    *
+from filings
 ;
 
 create unique index on ofec_filings_mv_tmp (idx);
