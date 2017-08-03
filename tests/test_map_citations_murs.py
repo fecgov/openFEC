@@ -1,5 +1,5 @@
-import mock
 import unittest
+import unittest.mock as mock
 import urllib
 
 from webservices.legal_docs import load_legal_docs, reclassify_statutory_citation

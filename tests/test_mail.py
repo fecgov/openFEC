@@ -1,7 +1,7 @@
 import io
 import logging
+import unittest.mock as mock
 
-import mock
 import cfenv
 import pytest
 import mandrill

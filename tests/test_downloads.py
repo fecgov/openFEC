@@ -1,7 +1,7 @@
 import base64
 import datetime
-import mock
 import hashlib
+import unittest.mock as mock
 
 import pytest
 from botocore.exceptions import ClientError
