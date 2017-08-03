@@ -16,7 +16,7 @@ from webservices.utils import use_kwargs_original
 
 client = boto3.client('s3')
 
-MAX_RECORDS = 100000
+MAX_RECORDS = 500000
 URL_EXPIRY = 7 * 24 * 60 * 60
 
 class DownloadView(utils.Resource):
