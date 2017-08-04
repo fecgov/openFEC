@@ -339,7 +339,7 @@ pagination: {
     per_page: 20,
     count: 43052850,
     last_indexes: {
-        last_index: 230880619,
+        last_index: "230880619",
         last_contribution_receipt_date: "2014-01-01"
     }
 }
@@ -383,7 +383,7 @@ pagination: {
     per_page: 20,
     count: 19303814,
     last_indexes: {
-        last_index: 230906248,
+        last_index: "230906248",
         last_disbursement_date: "2014-07-04"
     }
 }
@@ -449,7 +449,7 @@ results with the following pagination information:
  "pagination": {
     "count": 152623,
     "last_indexes": {
-      "last_index": 3023037,
+      "last_index": "3023037",
       "last_expenditure_amount": -17348.5
     },
     "per_page": 20,
@@ -668,10 +668,6 @@ CANDIDATE_STATUS = 'One-letter code explaining if the candidate is:\n\
         - N not yet a candidate\n\
         - P prior candidate\n\
 '
-LAST_F2_DATE = 'The day the FEC received the candidate\'s most recent Form 2'
-FIRST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s first filing. \
-This is a F2 candidate registration.'
-LAST_CANDIDATE_FILE_DATE = 'The day the FEC received the candidate\'s most recent filing'
 INCUMBENT_CHALLENGE = "One-letter code ('I', 'C', 'O') explaining if the candidate is an incumbent, a challenger, or if the seat is open."
 INCUMBENT_CHALLENGE_FULL = 'Explains if the candidate is an incumbent, a challenger, or if the seat is open.'
 ACTIVE_THROUGH = 'Last year a candidate was active. This field is specific to the candidate_id so if the same person runs for another office, there may be a different record for them.'
