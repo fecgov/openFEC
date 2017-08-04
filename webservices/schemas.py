@@ -342,7 +342,6 @@ make_candidate_schema = functools.partial(
     fields={
         'federal_funds_flag': ma.fields.Boolean(attribute='flags.federal_funds_flag'),
         'has_raised_funds': ma.fields.Boolean(attribute='flags.has_raised_funds'),
-        'first_file_date': ma.fields.DateTime(),
     }
 )
 
