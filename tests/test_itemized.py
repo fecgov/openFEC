@@ -50,7 +50,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(
             response['pagination']['last_indexes'],
             {
-                'last_index': receipts[0].sub_id,
+                'last_index': str(receipts[0].sub_id),
                 'last_contribution_receipt_date': receipts[0].contribution_receipt_date.isoformat(),
             }
         )

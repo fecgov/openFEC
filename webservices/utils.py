@@ -115,7 +115,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         """Get index values from last result, to be used in seeking to the next
         page. Optionally include sort values, if any.
         """
-        ret = {'last_index': paginators.convert_value(result, self.index_column)}
+        ret = {'last_index': str(paginators.convert_value(result, self.index_column))}
         if self.sort_column:
             key = 'last_{0}'.format(self.sort_column[0].key)
             ret[key] = paginators.convert_value(result, self.sort_column[0])
