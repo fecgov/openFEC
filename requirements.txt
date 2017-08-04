@@ -36,6 +36,6 @@ git+https://github.com/jmcarp/marshmallow-pagination@master
 boto3==1.4.4
 
 # Task queue
-celery==4.0.2
+celery==4.1.0
 celery-once==1.2.0
 redis==2.10.5
