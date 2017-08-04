@@ -17,8 +17,6 @@ def refresh():
     with mail.CaptureLogs(manage.logger, buffer):
         try:
             manage.update_aggregates()
-            # this process is having issues, we will fix in a following PR
-            # manage.retry_itemized()
             manage.refresh_itemized()
             manage.update_itemized('e')
             manage.update_schemas()
