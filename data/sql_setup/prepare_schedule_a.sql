@@ -26,7 +26,6 @@ create index on ofec_sched_a_queue_old (two_year_transaction_period);
 create or replace function ofec_sched_a_insert_update_queues() returns trigger as $$
 declare
     start_year int = TG_ARGV[0]::int;
-    timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
     view_row fec_fitem_sched_a_vw%ROWTYPE;
 begin
@@ -46,7 +45,7 @@ begin
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_new where sub_id = view_row.sub_id;
-                insert into ofec_sched_a_queue_new values (view_row.*, timestamp, two_year_transaction_period);
+                insert into ofec_sched_a_queue_new values (view_row.*, current_timestamp, two_year_transaction_period);
             end if;
         end if;
 
@@ -59,7 +58,7 @@ begin
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_new where sub_id = view_row.sub_id;
-                insert into ofec_sched_a_queue_new values (view_row.*, timestamp, two_year_transaction_period);
+                insert into ofec_sched_a_queue_new values (view_row.*, current_timestamp, two_year_transaction_period);
             end if;
         end if;
 
@@ -76,7 +75,6 @@ $$ language plpgsql;
 create or replace function ofec_sched_a_delete_update_queues() returns trigger as $$
 declare
     start_year int = TG_ARGV[0]::int;
-    timestamp timestamp = current_timestamp;
     two_year_transaction_period smallint;
     view_row fec_fitem_sched_a_vw%ROWTYPE;
 begin
@@ -96,7 +94,7 @@ begin
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_old where sub_id = view_row.sub_id;
-                insert into ofec_sched_a_queue_old values (view_row.*, timestamp, two_year_transaction_period);
+                insert into ofec_sched_a_queue_old values (view_row.*, current_timestamp, two_year_transaction_period);
             end if;
         end if;
 
@@ -109,7 +107,7 @@ begin
 
             if two_year_transaction_period >= start_year then
                 delete from ofec_sched_a_queue_old where sub_id = view_row.sub_id;
-                insert into ofec_sched_a_queue_old values (view_row.*, timestamp, two_year_transaction_period);
+                insert into ofec_sched_a_queue_old values (view_row.*, current_timestamp, two_year_transaction_period);
             end if;
         end if;
 
