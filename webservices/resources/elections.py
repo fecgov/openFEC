@@ -49,6 +49,7 @@ class ElectionList(utils.Resource):
     @marshal_with(schemas.ElectionSearchPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
+        print(query)
         return utils.fetch_page(query, kwargs)
 
     def _get_records(self, kwargs):
@@ -76,6 +77,9 @@ class ElectionList(utils.Resource):
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
                 elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
+                #There are some bad results in candidate_history that were causing results to appear
+                #for Senate that had no valid election
+                elections.c.candidate_id == ElectionResult.cand_id,
             )
         ).distinct(
             elections.c.candidate_id,
@@ -93,6 +97,7 @@ class ElectionList(utils.Resource):
             CandidateHistory.two_year_period,
         ).filter(
             CandidateHistory.candidate_inactive == False,  # noqa
+            CandidateHistory.candidate_status == 'C',
         )
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
