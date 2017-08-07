@@ -50,7 +50,7 @@ begin
             end if;
         end if;
 
-        return new;
+        RETURN NULL; -- result is ignored since this is an AFTER trigger
     elsif tg_op = 'UPDATE' then
         select into view_row * from fec_fitem_sched_a_vw where sub_id = new.sub_id;
 
@@ -63,7 +63,7 @@ begin
             end if;
         end if;
 
-        return new;
+        RETURN NULL; -- result is ignored since this is an AFTER trigger
     end if;
 end
 $$ language plpgsql;
