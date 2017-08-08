@@ -21,7 +21,6 @@ env:
     - secure: fOtfMxFpv3MDrH3lzZccqMPTXunH9wqMBLNRgkI5dCGX5gjY2fxGwzfj9wtiXiqYifo/c9DFqNxS37dkFihGShGrE0sfCv5h+kiDRc8R50bH8vK/jE+if8ID8TUH71w7bjWQco7miRsy4MdT/0iFWjeSwwG31Egn5Z/dCxCcGPM= # prod password
 before_script:
   - psql -c 'create database "cfdm_unit_test";' -U postgres
-  - psql -U postgres -c "create extension btree_gin;"
   - travis_retry pip install -U pip setuptools wheel
   - travis_retry pip install -r requirements.txt
   - travis_retry pip install -r requirements-dev.txt
