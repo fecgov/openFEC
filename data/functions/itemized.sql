@@ -77,7 +77,8 @@ BEGIN
         -- Create indexes.
         -- Note:  The multi-column GIN indexes require the btree_gin extension
         --        https://www.postgresql.org/docs/current/static/btree-gin.html
-        --        This is installed and enabled in RDS by default.
+        --        This is installed but not enabled in RDS by default, it must
+        --        be turned on with this: CREATE EXTENSION btree_gin;
 
         -- Indexes used for search
            -- for sorting by receipt date
@@ -92,9 +93,9 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_sub_id_line_num_dt%s ON %I (line_num, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_dt%s ON %I (two_year_transaction_period, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
-        EXECUTE format('CREATE INDEX idx_%s_contributor_name_text%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_name_text_contb_receipt_dt%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_contb_receipt_dt%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_contb_receipt_dt%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
           -- for sorting by transaction amount
         EXECUTE format('CREATE INDEX idx_%s_image_num_amt%s ON %I (image_num, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
@@ -108,9 +109,9 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_sub_id_line_num_amt%s ON %I (line_num, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_amt%s ON %I (two_year_transaction_period, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
-        EXECUTE format('CREATE INDEX idx_%s_contributor_name_text%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_name_text_contb_receipt_amt%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_contb_receipt_amt%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_contb_receipt_amt%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
         -- Other indexes
         EXECUTE format('CREATE UNIQUE INDEX idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
@@ -151,7 +152,8 @@ BEGIN
         -- Create indexes.
         -- Note:  The multi-column GIN indexes require the btree_gin extension
         --        https://www.postgresql.org/docs/current/static/btree-gin.html
-        --        This is installed and enabled in RDS by default.
+        --        This is installed but not enabled in RDS by default, it must
+        --        be turned on with this: CREATE EXTENSION btree_gin;
 
         -- Indexes for searching
           -- for sorting by date
@@ -165,8 +167,8 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_sub_id_amount_dt%s ON %I (disb_amt, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_cmte_id_dt%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
-        EXECUTE format('CREATE INDEX idx_%s_recipient_name_text%s ON %I USING GIN (recipient_name_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_disbursement_description_text%s ON %I USING GIN (disbursement_description_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_recipient_name_text_disb_dt%s ON %I USING GIN (recipient_name_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_disbursement_description_text_disb_dt%s ON %I USING GIN (disbursement_description_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
           -- for sorting by amount
         EXECUTE format('CREATE INDEX idx_%s_image_num_amt%s ON %I (image_num, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
@@ -179,8 +181,8 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_sub_id_date_amt%s ON %I (disb_dt, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX idx_%s_cmte_id_amt%s ON %I (cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
-        EXECUTE format('CREATE INDEX idx_%s_recipient_name_text%s ON %I USING GIN (recipient_name_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_disbursement_description_text%s ON %I USING GIN (disbursement_description_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_recipient_name_text_disb_amt%s ON %I USING GIN (recipient_name_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_disbursement_description_text_disb_amt%s ON %I USING GIN (disbursement_description_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
 
         -- Other indexes
