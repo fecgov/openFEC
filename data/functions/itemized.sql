@@ -94,8 +94,8 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_dt%s ON %I (two_year_transaction_period, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
         EXECUTE format('CREATE INDEX idx_%s_contributor_name_text_contb_receipt_dt%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_contb_receipt_dt%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_contb_receipt_dt%s ON %I USING GIN (contributor_name_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_contb_receipt_dt%s ON %I USING GIN (contributor_employer_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_contb_receipt_dt%s ON %I USING GIN (contributor_occupation_text, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
           -- for sorting by transaction amount
         EXECUTE format('CREATE INDEX idx_%s_image_num_amt%s ON %I (image_num, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
@@ -110,8 +110,8 @@ BEGIN
         EXECUTE format('CREATE INDEX idx_%s_two_year_transaction_period_amt%s ON %I (two_year_transaction_period, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
         EXECUTE format('CREATE INDEX idx_%s_contributor_name_text_contb_receipt_amt%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_contb_receipt_amt%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_contb_receipt_amt%s ON %I USING GIN (contributor_name_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_employer_text_contb_receipt_amt%s ON %I USING GIN (contributor_employer_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX idx_%s_contributor_occupation_text_contb_receipt_amt%s ON %I USING GIN (contributor_occupation_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
         -- Other indexes
         EXECUTE format('CREATE UNIQUE INDEX idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
