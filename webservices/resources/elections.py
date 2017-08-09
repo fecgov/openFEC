@@ -49,7 +49,6 @@ class ElectionList(utils.Resource):
     @marshal_with(schemas.ElectionSearchPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
-        print(query)
         return utils.fetch_page(query, kwargs)
 
     def _get_records(self, kwargs):
@@ -62,6 +61,7 @@ class ElectionList(utils.Resource):
             ElectionResult.cand_name,
             ElectionResult.election_yr,
             ElectionResult.election_type,
+            ElectionResult.cand_office_district,
             sa.case(
                 [
                     (elections.c.office == 'P', 1),
@@ -79,7 +79,7 @@ class ElectionList(utils.Resource):
                 elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
                 #There are some bad results in candidate_history that were causing results to appear
                 #for Senate that had no valid election
-                sa.func.coalesce(elections.c.candidate_id, ElectionResult.cand_id) == ElectionResult.cand_id,
+                sa.func.coalesce(elections.c.candidate_id) == ElectionResult.cand_id,
             )
         ).distinct(
             elections.c.candidate_id,
@@ -92,6 +92,7 @@ class ElectionList(utils.Resource):
             ElectionResult.cand_name,
             ElectionResult.election_yr,
             ElectionResult.election_type,
+            ElectionResult.cand_office_district,
             sa.case(
                 [
                     (elections.c.office == 'P', 1),
@@ -106,18 +107,18 @@ class ElectionList(utils.Resource):
                 elections.c.state == ElectionResult.cand_office_st,
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
-                elections.c.two_year_period == ElectionResult.fec_election_yr,
-                # There are some bad results in candidate_history that were causing results to appear
-                # for Senate that had no valid election
                 ElectionResult.election_type == 'SP',
-                #ElectionResult.cand_id == None,
-                #ElectionResult.election_yr != 2012
+                ElectionResult.cand_id == None,
+                ElectionResult.election_yr != 2012
             )
         ).distinct(
             elections.c.candidate_id,
         )
 
-        all_elections = regular_elections.union_all(special_elections)
+        all_elections = regular_elections.union_all(special_elections).order_by(
+            '_office_status',
+            ElectionResult.cand_office_district,
+        )
 
 
         return all_elections
@@ -132,7 +133,6 @@ class ElectionList(utils.Resource):
             CandidateHistory.candidate_id,#was causing some weird stuff without this distinct condition
         ).filter(
             CandidateHistory.candidate_inactive == False,  # noqa
-            #CandidateHistory.candidate_status == 'C',
         )
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
