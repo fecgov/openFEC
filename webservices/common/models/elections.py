@@ -4,7 +4,7 @@ from webservices import docs
 
 
 class ElectionResult(db.Model):
-    __tablename__ = 'ofec_election_result_mv_tmp'
+    __tablename__ = 'ofec_election_result_mv'
 
     election_yr = db.Column(db.Integer, primary_key=True, doc=docs.ELECTION_YEAR)
     cand_office = db.Column(db.String, primary_key=True, doc=docs.OFFICE)
