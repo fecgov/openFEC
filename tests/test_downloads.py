@@ -1,7 +1,7 @@
 import base64
 import datetime
-import mock
 import hashlib
+import unittest.mock as mock
 
 import pytest
 from botocore.exceptions import ClientError
@@ -22,7 +22,7 @@ class TestDownloadTask(ApiBaseTest):
     def test_get_filename(self):
         path = '/v1/candidates/'
         qs = '?office=H&sort=name'
-        expected = hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.zip'
+        expected = hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.csv'
         assert tasks.get_s3_name(path, qs) == expected
 
     def test_download_url(self):
@@ -53,8 +53,8 @@ class TestDownloadTask(ApiBaseTest):
             ExpiresIn=resource.URL_EXPIRY,
         )
 
-    @mock.patch('webservices.tasks.download.upload_s3')
-    def test_views(self, upload_s3):
+    @mock.patch('webservices.tasks.download.make_bundle')
+    def test_views(self, make_bundle):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
         factories.CommitteeHistoryFactory(
