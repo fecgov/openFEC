@@ -2,8 +2,8 @@ from webservices import rest
 import json
 import codecs
 import unittest
-import mock
-from mock import patch
+import unittest.mock as mock
+from unittest.mock import patch
 
 from webservices.resources.legal import es, parse_query_string
 
