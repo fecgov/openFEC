@@ -336,61 +336,6 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(search.sub_id, row.sub_id)
         self.assertEqual(search.contributor_name, 'Sheldon Adelson')
 
-    def test_sched_a_retry_processing(self):
-        rows = [
-            self.SchedAFactory(
-                rpt_yr=2014,
-                contbr_nm='Sheldon Adelson',
-                contb_receipt_dt=datetime.datetime(2014, 1, 1)
-            ),
-            self.SchedAFactory(
-                rpt_yr=2015,
-                contbr_nm='Shelly Adelson',
-                contb_receipt_dt=datetime.datetime(2015, 1, 1)
-            ),
-            self.SchedAFactory(
-                rpt_yr=2016,
-                contbr_nm='Jane Doe',
-                contb_receipt_dt=datetime.datetime(2016, 1, 1)
-            )
-        ]
-
-        db.session.commit()
-
-        # Make sure queues are clear before testing this
-        self._clear_sched_a_queues()
-
-        db.session.execute(
-            'insert into ofec_sched_a_nightly_retries values ({sub_id}, \'insert\')'.format(sub_id=rows[0].sub_id)
-        )
-        db.session.execute(
-            'insert into ofec_sched_a_nightly_retries values ({sub_id}, \'update\')'.format(sub_id=rows[1].sub_id)
-        )
-        db.session.execute(
-            'insert into ofec_sched_a_nightly_retries values ({sub_id}, \'delete\')'.format(sub_id=rows[2].sub_id)
-        )
-
-        db.session.commit()
-
-        retry_queue_count = db.engine.execute(
-            'select count(*) from ofec_sched_a_nightly_retries'
-        ).scalar()
-
-        self.assertEqual(retry_queue_count, 3)
-
-        manage.retry_itemized()
-
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 2)
-        self.assertEqual(old_queue_count, 2)
-
-        retry_queue_count = db.engine.execute(
-            'select count(*) from ofec_sched_a_nightly_retries'
-        ).scalar()
-
-        self.assertEqual(retry_queue_count, 0)
-
 
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.SchedAFactory(**{
