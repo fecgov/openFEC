@@ -131,9 +131,9 @@ class ElectionList(utils.Resource):
             CandidateHistory.district,
             CandidateHistory.two_year_period,
             CandidateHistory.candidate_id,#was causing some weird stuff without this distinct condition
-        ).filter(
-            CandidateHistory.candidate_inactive == False,  # noqa
         )
+        #removed candidate_inactive filter; if notice any discrepancies open an issue. But the filter was
+        #removing valid candidates, e.g. CA - 34 for every cycle before 2018.
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
         if kwargs.get('office'):
