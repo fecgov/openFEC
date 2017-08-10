@@ -850,13 +850,10 @@ class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
     office = ma.fields.Str()
     district = ma.fields.Str()
-    candidate_id = ma.fields.Str()
     candidate_status = ma.fields.Str()
     cycle = ma.fields.Int(attribute='two_year_period')
     incumbent_id = ma.fields.Str(attribute='cand_id')
     incumbent_name = ma.fields.Str(attribute='cand_name')
-    election_yr = ma.fields.Int()
-    election_type = ma.fields.Str()
 augment_schemas(ElectionSearchSchema)
 
 class ElectionSummarySchema(ApiSchema):
