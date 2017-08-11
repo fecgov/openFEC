@@ -1,3 +1,5 @@
+-- Drop old retry itemized processing function if it still exists.
+DROP FUNCTION IF EXISTS retry_processing_itemized_records();
 -- Create trigger for the master partition table to be created later, once the
 -- master partition table is in place.
 CREATE OR REPLACE FUNCTION insert_sched_master() RETURNS TRIGGER AS $$
@@ -234,7 +236,3 @@ BEGIN
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
-
-
--- Drop old retry itemized processing function if it still exists.
-DROP FUNCTION IF EXISTS retry_processing_itemized_records();
