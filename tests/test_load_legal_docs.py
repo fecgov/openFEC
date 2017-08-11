@@ -1,5 +1,5 @@
 import unittest
-from mock import patch
+from unittest.mock import patch
 from webservices.legal_docs import (
     delete_murs_from_es,
     delete_murs_from_s3,
