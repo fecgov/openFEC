@@ -1,6 +1,6 @@
 import re
 import subprocess
-from mock import patch
+from unittest.mock import patch
 from datetime import datetime
 from decimal import Decimal
 
