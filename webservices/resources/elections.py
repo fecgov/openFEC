@@ -131,9 +131,13 @@ class ElectionList(utils.Resource):
             CandidateHistory.district,
             CandidateHistory.two_year_period,
             CandidateHistory.candidate_id,#was causing some weird stuff without this distinct condition
+        ).filter(
+            CandidateHistory.candidate_inactive == False,   #noqa
         )
-        #removed candidate_inactive filter; if notice any discrepancies open an issue. But the filter was
-        #removing valid candidates, e.g. CA - 34 for every cycle before 2018.
+        #Adding candidate_inactive back in, after consulting with FEC this is deemed as a needed column, but
+        #strong note that this filter does remove valid candidates
+        #e.g. CA - 34 (Xavier Becerra) for every cycle before 2018.  There may be other cases but this was one found
+        #empirically
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
         if kwargs.get('office'):
