@@ -194,6 +194,7 @@ class ElectionView(utils.Resource):
             CandidateHistory.incumbent_challenge_full,
             CandidateHistory.office,
             CandidateHistory.two_year_period,
+            CandidateHistory.candidate_election_year,
             CandidateCommitteeLink.committee_id,
             totals_model.receipts,
             totals_model.disbursements,
@@ -224,6 +225,7 @@ class ElectionView(utils.Resource):
     def _get_aggregates(self, pairs):
         return db.session.query(
             pairs.c.candidate_id,
+            pairs.c.candidate_election_year,
             sa.func.max(pairs.c.name).label('candidate_name'),
             sa.func.max(pairs.c.party_full).label('party_full'),
             sa.func.max(pairs.c.incumbent_challenge_full).label('incumbent_challenge_full'),
@@ -234,6 +236,7 @@ class ElectionView(utils.Resource):
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
         ).group_by(
             pairs.c.candidate_id,
+            pairs.c.candidate_election_year
         )
 
     def _get_outcomes(self, kwargs):
@@ -324,7 +327,9 @@ def filter_candidates(query, kwargs):
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
         #CandidateHistory.cycles.any(kwargs['cycle']),
+        CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year & 2) == kwargs['cycle'],
         CandidateHistory.office == kwargs['office'][0].upper(),
+
     )
     if kwargs.get('state'):
         query = query.filter(CandidateHistory.state == kwargs['state'])

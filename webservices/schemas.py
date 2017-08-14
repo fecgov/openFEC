@@ -872,6 +872,7 @@ class ElectionSchema(ma.Schema):
     total_disbursements = ma.fields.Decimal(places=2)
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     won = ma.fields.Boolean()
+    candidate_election_year = ma.fields.Int()
 augment_schemas(ElectionSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):

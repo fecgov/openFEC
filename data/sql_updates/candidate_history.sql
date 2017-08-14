@@ -46,6 +46,7 @@ select distinct on (fec_yr.cand_id, fec_yr.fec_election_yr)
     row_number() over () as idx,
     fec_yr.lst_updt_dt as load_date,
     fec_yr.fec_election_yr as two_year_period,
+    fec_yr.cand_election_yr as candidate_election_year,
     fec_yr.cand_id as candidate_id,
     fec_yr.cand_name as name,
     fec_yr.cand_state as address_state,
