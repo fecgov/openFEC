@@ -55,10 +55,13 @@ class ElectionList(utils.Resource):
         """Get election records, sorted by status of office (P > S > H).
         """
         elections = self._get_elections(kwargs).subquery()
-        return db.session.query(
+        regular_elections = db.session.query(
             elections,
             ElectionResult.cand_id,
             ElectionResult.cand_name,
+            ElectionResult.election_yr,
+            ElectionResult.election_type,
+            ElectionResult.cand_office_district,
             sa.case(
                 [
                     (elections.c.office == 'P', 1),
@@ -74,11 +77,51 @@ class ElectionList(utils.Resource):
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
                 elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
-            ),
-        ).order_by(
+                #There are some bad results in candidate_history that were causing results to appear
+                #for Senate that had no valid election
+                sa.func.coalesce(elections.c.candidate_id) == ElectionResult.cand_id,
+            )
+        ).distinct(
+            elections.c.candidate_id,
+        )
+        # union with special elections
+
+        special_elections = db.session.query(
+            elections,
+            ElectionResult.cand_id,
+            ElectionResult.cand_name,
+            ElectionResult.election_yr,
+            ElectionResult.election_type,
+            ElectionResult.cand_office_district,
+            sa.case(
+                [
+                    (elections.c.office == 'P', 1),
+                    (elections.c.office == 'S', 2),
+                    (elections.c.office == 'H', 3),
+                ],
+                else_=4,
+            ).label('_office_status'),
+        ).join(
+            ElectionResult,
+            sa.and_(
+                elections.c.state == ElectionResult.cand_office_st,
+                elections.c.office == ElectionResult.cand_office,
+                sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
+                ElectionResult.election_type == 'SP',
+                ElectionResult.cand_id == None,
+                ElectionResult.election_yr != 2012
+            )
+        ).distinct(
+            elections.c.candidate_id,
+        )
+
+        all_elections = regular_elections.union_all(special_elections).order_by(
             '_office_status',
             ElectionResult.cand_office_district,
         )
+
+
+        return all_elections
 
     def _get_elections(self, kwargs):
         """Get elections from candidate history records."""
@@ -87,9 +130,10 @@ class ElectionList(utils.Resource):
             CandidateHistory.office,
             CandidateHistory.district,
             CandidateHistory.two_year_period,
-        ).filter(
-            CandidateHistory.candidate_inactive == False,  # noqa
+            CandidateHistory.candidate_id,#was causing some weird stuff without this distinct condition
         )
+        #removed candidate_inactive filter; if notice any discrepancies open an issue. But the filter was
+        #removing valid candidates, e.g. CA - 34 for every cycle before 2018.
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
         if kwargs.get('office'):
