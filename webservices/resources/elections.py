@@ -135,7 +135,7 @@ class ElectionList(utils.Resource):
             CandidateHistory.candidate_inactive == False,   #noqa
         )
         #Adding candidate_inactive back in, after consulting with FEC this is deemed as a needed column, but
-        #strong note that this filter does remove valid eeb66701aef569227f1ac918fc4e3192f018cf93
+        #strong note that this filter does remove valid candidates
         #e.g. CA - 34 (Xavier Becerra) for every cycle before 2018.  There may be other cases but this was one found
         #empirically
         if kwargs.get('cycle'):
