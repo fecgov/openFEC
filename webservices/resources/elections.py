@@ -161,7 +161,6 @@ class ElectionView(utils.Resource):
     @marshal_with(schemas.ElectionPageSchema())
     def get(self, **kwargs):
         query = self._get_records(kwargs)
-        print(query)
         return utils.fetch_page(query, kwargs, cap=0)
 
     def _get_records(self, kwargs):
