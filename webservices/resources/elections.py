@@ -327,7 +327,7 @@ def filter_candidates(query, kwargs):
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
         #CandidateHistory.cycles.any(kwargs['cycle']),
-        CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year & 2) == kwargs['cycle'],
+        CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year % 2) == kwargs['cycle'],
         CandidateHistory.office == kwargs['office'][0].upper(),
 
     )
