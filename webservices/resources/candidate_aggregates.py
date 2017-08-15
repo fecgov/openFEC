@@ -137,7 +137,7 @@ class TotalsCandidateView(ApiResource):
         return [
             ('candidate_id', history.candidate_id),
             ('election_year', total.election_year),
-            ('cycle', history.candidate_election_year),
+            ('cycle', total.cycle),
             ('office', history.office),
             ('party', history.party),
             ('state', history.state),
@@ -198,5 +198,4 @@ class TotalsCandidateView(ApiResource):
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         return query
-
 
