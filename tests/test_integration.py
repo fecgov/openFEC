@@ -93,25 +93,6 @@ class TestViews(common.IntegrationTestCase):
         cls.NmlSchedAFactory, cls.NmlSchedBFactory, cls.FItemReceiptOrExp = make_factory()
         manage.update_all(processes=1)
 
-    def test_update_schemas(self):
-        #adding this here: my rationale is that
-        #models.CaniddateCommitteeTotalsHouseSenate passed integration, so testing this specific
-        #model really isn't expanding code coverage.  I can try and get the model passing but it's proving
-        #to be difficult considering the joins needed (and our limited test subset)
-        whitelist = [
-            models.EntityReceiptDisbursementTotals,
-            models.itemized.ScheduleA,
-            models.itemized.ScheduleB,
-            models.aggregates.ScheduleBByRecipientID,
-        ]
-
-        for model in db.Model._decl_class_registry.values():
-            if model in whitelist:
-                continue
-            if not hasattr(model, '__table__'):
-                continue
-            self.assertGreater(model.query.count(), 0)
-
     def test_refresh_materialized(self):
         db.session.execute('select refresh_materialized()')
 
