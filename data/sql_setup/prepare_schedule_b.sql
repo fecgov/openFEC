@@ -48,6 +48,7 @@ begin
         if view_row.election_cycle >= start_year then
             delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
             insert into ofec_sched_b_queue_new values (view_row.*, current_timestamp, view_row.election_cycle);
+            -- upsert here
         end if;
     end if;
 
@@ -79,6 +80,7 @@ begin
         if view_row.election_cycle >= start_year then
             delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
             insert into ofec_sched_b_queue_old values (view_row.*, current_timestamp, view_row.election_cycle);
+            -- delete here if delete
         end if;
     end if;
     if tg_op = 'DELETE' then
