@@ -162,8 +162,6 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2014,
         )
         db.session.commit()
-        manage.update_aggregates()
-        manage.refresh_itemized()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sub_id == nml_row.sub_id
         ).one()
@@ -173,8 +171,6 @@ class TestViews(common.IntegrationTestCase):
         nml_row.contbr_nm = 'Shelly Adelson'
         db.session.add(nml_row)
         db.session.commit()
-        manage.update_aggregates()
-        manage.refresh_itemized()
         search = models.ScheduleA.query.filter(
             models.ScheduleA.sub_id == nml_row.sub_id
         ).one()
@@ -184,8 +180,6 @@ class TestViews(common.IntegrationTestCase):
         # Test delete
         db.session.delete(nml_row)
         db.session.commit()
-        manage.update_aggregates()
-        manage.refresh_itemized()
         self.assertEqual(
             models.ScheduleA.query.filter(
                 models.ScheduleA.sub_id == nml_row.sub_id
@@ -204,8 +198,6 @@ class TestViews(common.IntegrationTestCase):
         make_transient(nml_row)
         db.session.add(nml_row)
         db.session.commit()
-        manage.update_aggregates()
-        manage.refresh_itemized()
         self.assertEqual(
             models.ScheduleA.query.filter(
                 models.ScheduleA.sub_id == nml_row.sub_id
@@ -225,8 +217,12 @@ class TestViews(common.IntegrationTestCase):
 
     def _clear_sched_a_queues(self):
         db.session.execute('delete from ofec_sched_a_queue_new')
-        db.session.commit()
         db.session.execute('delete from ofec_sched_a_queue_old')
+        db.session.commit()
+
+    def _clear_sched_b_queues(self):
+        db.session.execute('delete from ofec_sched_b_queue_new')
+        db.session.execute('delete from ofec_sched_b_queue_old')
         db.session.commit()
 
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
@@ -331,7 +327,6 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.flush()
         manage.update_aggregates()
-        manage.refresh_itemized()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total)
         self.assertEqual(existing.count, count)
@@ -470,7 +465,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.commit()
         manage.update_aggregates()
-        manage.refresh_itemized()
+        self._clear_sched_b_queues()
         rows = models.ScheduleBByPurpose.query.filter_by(
             cycle=2016,
             committee_id='C12345',
@@ -483,7 +478,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(filing)
         db.session.commit()
         manage.update_aggregates()
-        manage.refresh_itemized()
+        self._clear_sched_b_queues()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 538)
         self.assertEqual(rows[0].count, 1)
@@ -491,7 +486,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.add(filing)
         db.session.commit()
         manage.update_aggregates()
-        manage.refresh_itemized()
+        self._clear_sched_b_queues()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
