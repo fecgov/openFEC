@@ -225,7 +225,7 @@ class ElectionView(utils.Resource):
                 [(outcomes.c.cand_id != None, True)],  # noqa
                 else_=False,
             ).label('won'),
-        ).join(
+        ).outerjoin(
             latest,
             aggregates.c.candidate_id == latest.c.candidate_id,
         ).outerjoin(
@@ -241,6 +241,7 @@ class ElectionView(utils.Resource):
             CandidateHistory.incumbent_challenge_full,
             CandidateHistory.office,
             CandidateHistory.two_year_period,
+            CandidateHistory.candidate_election_year,
             CandidateCommitteeLink.committee_id,
             totals_model.receipts,
             totals_model.disbursements,
@@ -263,7 +264,7 @@ class ElectionView(utils.Resource):
         ).subquery()
         return db.session.query(
             latest.c.candidate_id,
-            sa.func.sum(latest.c.cash_on_hand_end_period).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period,0.0)).label('cash_on_hand_end_period'),
         ).group_by(
             latest.c.candidate_id,
         )
@@ -271,16 +272,18 @@ class ElectionView(utils.Resource):
     def _get_aggregates(self, pairs):
         return db.session.query(
             pairs.c.candidate_id,
+            pairs.c.candidate_election_year,
             sa.func.max(pairs.c.name).label('candidate_name'),
             sa.func.max(pairs.c.party_full).label('party_full'),
             sa.func.max(pairs.c.incumbent_challenge_full).label('incumbent_challenge_full'),
             sa.func.max(pairs.c.office).label('office'),
-            sa.func.sum(pairs.c.receipts).label('total_receipts'),
-            sa.func.sum(pairs.c.disbursements).label('total_disbursements'),
-            sa.func.sum(pairs.c.cash_on_hand_end_period).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(pairs.c.receipts, 0.0)).label('total_receipts'),
+            sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('total_disbursements'),
+            sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
         ).group_by(
             pairs.c.candidate_id,
+            pairs.c.candidate_election_year
         )
 
     def _get_outcomes(self, kwargs):
@@ -346,13 +349,13 @@ election_durations = {
 }
 
 def join_candidate_totals(query, kwargs, totals_model):
-    return query.join(
+    return query.outerjoin(
         CandidateCommitteeLink,
         sa.and_(
             CandidateHistory.candidate_id == CandidateCommitteeLink.candidate_id,
             CandidateHistory.two_year_period == CandidateCommitteeLink.fec_election_year,
         )
-    ).join(
+    ).outerjoin(
         totals_model,
         sa.and_(
             CandidateCommitteeLink.committee_id == totals_model.committee_id,
@@ -370,8 +373,10 @@ def filter_candidates(query, kwargs):
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
-        CandidateHistory.cycles.any(kwargs['cycle']),
+        #CandidateHistory.cycles.any(kwargs['cycle']),
+        CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year % 2) == kwargs['cycle'],
         CandidateHistory.office == kwargs['office'][0].upper(),
+
     )
     if kwargs.get('state'):
         query = query.filter(CandidateHistory.state == kwargs['state'])
@@ -384,6 +389,6 @@ def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
         CandidateHistory.candidate_inactive == False,  # noqa
-        CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
+        #CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     )
     return query
