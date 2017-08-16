@@ -256,8 +256,7 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(rows[0].total, 53)
         self.assertEqual(rows[0].count, 1)
 
-    def _check_update_aggregate_existing(self, item_key, total_key, total_model, key_generator):
-        item_key_value = key_generator()
+    def _check_update_aggregate_existing(self, item_key, total_key, total_model, item_key_value):
         filing = self.NmlSchedAFactory(**{
             'rpt_yr': 2015,
             'cmte_id': 'X1234',
@@ -305,11 +304,12 @@ class TestViews(common.IntegrationTestCase):
 
     def test_update_aggregate_existing(self):
         faker = Faker()
-        self._check_update_aggregate_existing('contbr_zip', 'zip', models.ScheduleAByZip, faker.zipcode)
-        self._check_update_aggregate_existing('contbr_st', 'state', models.ScheduleAByState, faker.state_abbr)
-        self._check_update_aggregate_existing('contbr_employer', 'employer', models.ScheduleAByEmployer, faker.company)
+        self._check_update_aggregate_existing('contbr_zip', 'zip', models.ScheduleAByZip, faker.zipcode())
+        self._check_update_aggregate_existing('contbr_st', 'state', models.ScheduleAByState, faker.state_abbr())
         self._check_update_aggregate_existing(
-            'contbr_occupation', 'occupation', models.ScheduleAByOccupation, faker.job)
+            'contbr_employer', 'employer', models.ScheduleAByEmployer, faker.company()[:38])
+        self._check_update_aggregate_existing(
+            'contbr_occupation', 'occupation', models.ScheduleAByOccupation, faker.job()[:38])
 
     def test_update_aggregate_state_existing_null_amount(self):
         existing = models.ScheduleAByState.query.filter_by(
