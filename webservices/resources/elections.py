@@ -108,11 +108,11 @@ class ElectionList(utils.Resource):
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
                 ElectionResult.election_type == 'SP',
-                ElectionResult.cand_id == None,
-                ElectionResult.election_yr != 2012
+                elections.c.two_year_period == ElectionResult.fec_election_yr,
             )
         ).distinct(
-            elections.c.candidate_id,
+            elections.c.state,
+            elections.c.office,
         )
 
         all_elections = regular_elections.union_all(special_elections).order_by(
