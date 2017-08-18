@@ -38,6 +38,7 @@ manager.command(legal_docs.load_current_murs)
 manager.command(legal_docs.initialize_legal_docs)
 manager.command(legal_docs.create_staging_index)
 manager.command(legal_docs.restore_from_staging_index)
+manager.command(legal_docs.delete_index)
 manager.command(legal_docs.reinitialize_all_legal_docs)
 manager.command(legal_docs.refresh_legal_docs_zero_downtime)
 
