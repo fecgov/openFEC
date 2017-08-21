@@ -1,5 +1,10 @@
 -- Drop old retry itemized processing function if it still exists.
 DROP FUNCTION IF EXISTS retry_processing_itemized_records();
+
+-- Drop older finalize functions if they still exist.
+DROP FUNCTION IF EXISTS finalize_itemized_schedule_a_tables(NUMERIC, NUMERIC, BOOLEAN);
+DROP FUNCTION IF EXISTS finalize_itemized_schedule_b_tables(NUMERIC, NUMERIC, BOOLEAN);
+
 -- Create trigger for the master partition table to be created later, once the
 -- master partition table is in place.
 CREATE OR REPLACE FUNCTION insert_sched_master() RETURNS TRIGGER AS $$
@@ -36,8 +41,8 @@ BEGIN
 
         END LOOP;
     END LOOP;
-    PERFORM finalize_itemized_schedule_a_tables(first_cycle_end_year, last_cycle_end_year, FALSE);
-    PERFORM finalize_itemized_schedule_b_tables(first_cycle_end_year, last_cycle_end_year, FALSE);
+    PERFORM finalize_itemized_schedule_a_tables(first_cycle_end_year, last_cycle_end_year, FALSE, TRUE);
+    PERFORM finalize_itemized_schedule_b_tables(first_cycle_end_year, last_cycle_end_year, FALSE, TRUE);
 END
 $$ LANGUAGE plpgsql;
 
@@ -93,7 +98,7 @@ $$ LANGUAGE plpgsql;
 
 -- Performs the final steps needed to setup all of the child tables for
 -- schedule A.
-CREATE OR REPLACE FUNCTION finalize_itemized_schedule_a_tables(start_year NUMERIC, end_year NUMERIC, p_use_tmp BOOLEAN) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION finalize_itemized_schedule_a_tables(start_year NUMERIC, end_year NUMERIC, p_use_tmp BOOLEAN, p_create_primary_key BOOLEAN) RETURNS VOID AS $$
 DECLARE
     child_table_root TEXT;
     child_table_name TEXT;
@@ -149,8 +154,6 @@ BEGIN
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_contrib_occ_text_amt%s ON %I USING GIN (contributor_occupation_text, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
         -- Other indexes
-        EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_rpt_yr%s ON %I (rpt_yr)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_pg_date%s ON %I (pg_date)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_entity_tp%s ON %I (entity_tp)', child_table_root, index_name_suffix, child_table_name);
@@ -158,6 +161,12 @@ BEGIN
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_amount%s ON %I (contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_cmte_id_amount%s ON %I (cmte_id, contb_receipt_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_cmte_id_date%s ON %I (cmte_id, contb_receipt_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
+
+        -- Create the primary key if needed
+        IF p_create_primary_key THEN
+            EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
+        END IF;
 
         -- Set statistics and analyze the table.
         EXECUTE format('ALTER TABLE %I ALTER COLUMN contbr_st SET STATISTICS 1000', child_table_name);
@@ -168,7 +177,7 @@ $$ LANGUAGE plpgsql;
 
 -- Performs the final steps needed to setup all of the child tables for
 -- schedule B.
-CREATE OR REPLACE FUNCTION finalize_itemized_schedule_b_tables(start_year NUMERIC, end_year NUMERIC, p_use_tmp BOOLEAN) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION finalize_itemized_schedule_b_tables(start_year NUMERIC, end_year NUMERIC, p_use_tmp BOOLEAN, p_create_primary_key BOOLEAN) RETURNS VOID AS $$
 DECLARE
     child_table_root TEXT;
     child_table_name TEXT;
@@ -219,13 +228,16 @@ BEGIN
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recip_name_text_amt%s ON %I USING GIN (recipient_name_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_disb_desc_text_amt%s ON %I USING GIN (disbursement_description_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
-
         -- Other indexes
-        EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_amt_sub_id%s ON %I (cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_dt_sub_id%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_pg_date%s ON %I (pg_date)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
+
+        -- Create the primary key if needed
+        IF p_create_primary_key THEN
+            EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
+        END IF;
 
         -- Set statistics and analyze the table.
         EXECUTE format('ALTER TABLE %I ALTER COLUMN recipient_st SET STATISTICS 1000', child_table_name);
