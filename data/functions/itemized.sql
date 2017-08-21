@@ -203,7 +203,7 @@ BEGIN
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_dt%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recip_name_text_dt%s ON %I USING GIN (recipient_name_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS dx_%s_disb_desc_text_dt%s ON %I USING GIN (disbursement_description_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_disb_desc_text_dt%s ON %I USING GIN (disbursement_description_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
 
           -- for sorting by amount
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_image_num_amt%s ON %I (image_num, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
