@@ -3,4 +3,4 @@ SELECT finalize_itemized_schedule_a_tables(:PARTITION_START_YEAR, :PARTITION_END
 
 -- Drop old indexes not needed or used anymore in the itemized schedule A
 -- partition.
-drop_old_itemized_schedule_a_indexes(:PARTITION_START_YEAR, :PARTITION_END_YEAR);
+select drop_old_itemized_schedule_a_indexes(:PARTITION_START_YEAR, :PARTITION_END_YEAR);
