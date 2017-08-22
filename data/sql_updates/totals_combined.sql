@@ -28,9 +28,7 @@ with last_subset as (
 last as (
     select
         ls.cmte_id,
-        -- issue #2601: need this information later in the main query
         ls.orig_sub_id,
-        --
         ls.coh_cop,
         ls.cycle,
         ls.debts_owed_by_cmte,
@@ -104,9 +102,7 @@ first as (
         max(last.report_type_full) as last_report_type_full,
         max(last.rpt_yr) as last_report_year,
         max(last.coverage_end_date) as coverage_end_date,
-        -- issue #2601: should not use max(vsd.orig_sub_id), sub_id's format is not mmddyyyy, so max will not work all the time.  Need to get it from subquery "last"
-        max(last.orig_sub_id) as sub_id,
-        --
+        max(vsd.orig_sub_id) as sub_id,
         min(first.cash_on_hand) as cash_on_hand_beginning_period,
         min(first.coverage_start_date) as coverage_start_date,
         sum(vsd.all_loans_received_per) as all_loans_received,
