@@ -150,7 +150,6 @@ BEGIN
 
         -- Other indexes
         EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_rpt_yr%s ON %I (rpt_yr)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_pg_date%s ON %I (pg_date)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_entity_tp%s ON %I (entity_tp)', child_table_root, index_name_suffix, child_table_name);
@@ -222,7 +221,6 @@ BEGIN
 
         -- Other indexes
         EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_amt_sub_id%s ON %I (cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_dt_sub_id%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_pg_date%s ON %I (pg_date)', child_table_root, index_name_suffix, child_table_name);
