@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 """Load testing for the API and web app. Run from the root directory using the
-`locust` command, then open localhost:8089 to run tests. Note: Locust must be
-run with Python 2.
+`locust --host=https://api-stage.open.fec.gov/v1/` command, then open localhost:8089 to run tests.
+Note: Locust must be run with Python 2.
 """
 
 import os
 import random
 import resource
 
-import furl
 import locust
-import requests
 
 
 # Avoid "Too many open files" error
 resource.setrlimit(resource.RLIMIT_NOFILE, (9999, 999999))
 
 
-WEB_URL = 'https://open.fec.gov'
-API_URL = 'https://api.open.fec.gov/v1'
 API_KEY = os.environ['FEC_API_KEY']
 
 try:
@@ -27,7 +23,7 @@ except KeyError:
     AUTH = None
 
 CYCLES = range(1980, 2018, 2)
-TERMS = [
+CANDIDATES = [
     'bush'
     'cheney',
     'gore',
@@ -45,85 +41,119 @@ TERMS = [
     'graham',
     'kasich',
 ]
-
-
-def fetch_ids(endpoint, key):
-    url = furl.furl(API_URL)
-    url.path.add(endpoint)
-    url.args.update({
-        'per_page': 100,
-        'api_key': API_KEY,
-    })
-    resp = requests.get(url.url, auth=AUTH)
-    return [result[key] for result in resp.json()['results']]
-
-
-CANDIDATE_IDS = fetch_ids('candidates', 'candidate_id')
-COMMITTEE_IDS = fetch_ids('committees', 'committee_id')
-
+TERMS = [
+    'embezzle',
+    'email',
+    'department',
+    'contribution',
+    'commission'
+]
 
 class Tasks(locust.TaskSet):
 
     def on_start(self):
-        self.client.auth = AUTH
+        self.candidates = self.fetch_ids('candidates', 'candidate_id')
+        self.committees = self.fetch_ids('committees', 'committee_id')
+
+    def fetch_ids(self, endpoint, key):
+        params = {
+            'api_key': API_KEY,
+        }
+        resp = self.client.get(endpoint, name='preload_ids', params=params)
+        return [result[key] for result in resp.json()['results']]
 
     @locust.task
     def load_home(self):
-        self.client.get('/', name='home')
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('', name='home', params=params)
 
     @locust.task
     def load_candidates_search(self, term=None):
-        term = term or random.choice(TERMS)
-        url = furl.furl('/')
-        url.args.update({
-            'search_type': 'candidates',
-            'search': term,
-        })
-        self.client.get(url.url, name='candidate_search')
+        term = term or random.choice(CANDIDATES)
+        params = {
+            'api_key': API_KEY,
+            'sort': '-receipts',
+            'q': term,
+        }
+        self.client.get('candidates/search', name='candidate_search', params=params)
 
     @locust.task
     def load_committees_search(self, term=None):
-        term = term or random.choice(TERMS)
-        url = furl.furl('/')
-        url.args.update({
-            'search_type': 'committees',
-            'search': term,
-        })
-        self.client.get(url.url, name='committee_search')
+        term = term or random.choice(CANDIDATES)
+        params = {
+            'api_key': API_KEY,
+            'sort': '-receipts',
+            'q': term,
+        }
+        self.client.get('committees', name='committee_search', params=params)
 
     @locust.task
     def load_candidates_table(self):
-        url = furl.furl(API_URL)
-        url.path.add('candidates')
-        url.args.update({
+        params = {
             'cycle': [random.choice(CYCLES) for _ in range(3)],
             'api_key': API_KEY,
-        })
-        self.client.get(url.url, name='candidates_table')
+        }
+        self.client.get('candidates', name='candidates_table', params=params)
 
     @locust.task
     def load_committees_table(self):
-        url = furl.furl(API_URL)
-        url.path.add('committees')
-        url.args.update({
+        params = {
             'cycle': [random.choice(CYCLES) for _ in range(3)],
             'api_key': API_KEY,
-        })
-        self.client.get(url.url, name='committees_table')
+        }
+        self.client.get('committees', name='committees_table', params=params)
 
     @locust.task
     def load_candidate_detail(self, candidate_id=None):
-        candidate_id = candidate_id or random.choice(CANDIDATE_IDS)
-        self.client.get(os.path.join('/candidate', candidate_id), name='candidate_detail')
+        params = {
+            'api_key': API_KEY,
+        }
+        candidate_id = candidate_id or random.choice(self.candidates)
+        self.client.get(os.path.join('candidate', candidate_id), name='candidate_detail', params=params)
 
     @locust.task
     def load_committee_detail(self, committee_id=None):
-        committee_id = committee_id or random.choice(COMMITTEE_IDS)
-        self.client.get(os.path.join('/committee', committee_id), name='committee_detail')
+        params = {
+            'api_key': API_KEY,
+        }
+        committee_id = committee_id or random.choice(self.committees)
+        self.client.get(os.path.join('committee', committee_id), name='committee_detail', params=params)
 
+    @locust.task
+    def load_candidate_totals(self, candidate_id=None):
+        params = {
+            'api_key': API_KEY,
+        }
+        candidate_id = candidate_id or random.choice(self.candidates)
+        self.client.get(os.path.join('candidate', candidate_id, 'totals'), name='candidate_totals', params=params)
+
+    @locust.task
+    def load_committee_totals(self, committee_id=None):
+        params = {
+            'api_key': API_KEY,
+        }
+        committee_id = committee_id or random.choice(self.committees)
+        self.client.get(os.path.join('committee', committee_id, 'totals'), name='committee_totals', params=params)
+
+    @locust.task
+    def load_legal_documents_search(self, term=None):
+        term = term or random.choice(CANDIDATES)
+        params = {
+            'q': term,
+            'api_key': API_KEY,
+        }
+        self.client.get('legal/search', name='legal_search', params=params)
+
+    @locust.task
+    def get_document(self, term=None):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('legal/docs/murs/7074', name='legal_get', params=params)
 
 class Swarm(locust.HttpLocust):
     task_set = Tasks
-    host = WEB_URL
     min_wait = 5000
     max_wait = 10000

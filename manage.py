@@ -290,33 +290,13 @@ def update_itemized(schedule):
     logger.info('Finished Schedule {0} update.'.format(schedule))
 
 @manager.command
-def partition_itemized():
-    """This command runs the partitioning against the larger itemized
-    schedule tables.
+def partition_itemized(schedule):
+    """This command runs the partitioning against the specified itemized
+    schedule table.
     """
-
-    partition_itemized_a()
-    partition_itemized_b()
-
-@manager.command
-def partition_itemized_a():
-    """This command runs the partitioning against the larger itemized
-    schedule a table.
-    """
-
-    logger.info('Partitioning Schedule A...')
-    partition.SchedAGroup.run()
-    logger.info('Finished partitioning Schedule A.')
-
-@manager.command
-def partition_itemized_b():
-    """This command runs the partitioning against the larger itemized
-    schedule b table.
-    """
-
-    logger.info('Partitioning Schedule B...')
-    partition.SchedBGroup.run()
-    logger.info('Finished partitioning Schedule B.')
+    logger.info('Partitioning Schedule %s...', schedule)
+    execute_sql_file('data/sql_partition/partition_schedule_{0}.sql'.format(schedule))
+    logger.info('Finished partitioning Schedule %s.', schedule)
 
 @manager.command
 def rebuild_aggregates(processes=1):
@@ -343,21 +323,6 @@ def update_aggregates():
         logger.info('Finished updating Schedule E and support aggregates.')
 
 @manager.command
-def retry_itemized():
-    """This is run nightly to retry processing itemized schedule A and B data
-    that was not able to be processed normally.
-    """
-    logger.info('Retrying itemized schedule processing...')
-
-    with db.engine.begin() as connection:
-        connection.execute(
-            sa.text('select retry_processing_itemized_records()').execution_options(
-                autocommit=True
-            )
-        )
-        logger.info('Finished retrying itemized schedule processing.')
-
-@manager.command
 def refresh_itemized():
     """These are run nightly to refresh the itemized schedule A and B data."""
 
@@ -371,13 +336,12 @@ def refresh_itemized_a():
     """Used to refresh the itemized Schedule A data."""
 
     logger.info('Updating Schedule A...')
-    output_messages = partition.SchedAGroup.refresh_children()
+    message = partition.SchedAGroup.process_queues()
 
-    for message in output_messages:
-        if message[0] == 0:
-            logger.info(message[1])
-        else:
-            logger.error(message[1])
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
 
     logger.info('Finished updating Schedule A.')
 
@@ -385,13 +349,12 @@ def refresh_itemized_a():
 def refresh_itemized_b():
     """Used to refresh the itemized Schedule B data."""
     logger.info('Updating Schedule B...')
-    output_messages = partition.SchedBGroup.refresh_children()
+    message = partition.SchedBGroup.process_queues()
 
-    for message in output_messages:
-        if message[0] == 0:
-            logger.info(message[1])
-        else:
-            logger.error(message[1])
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
 
     logger.info('Finished updating Schedule B.')
 
@@ -410,12 +373,19 @@ def add_itemized_partition_cycle(cycle=None, amount=1):
     else:
         cycle = int(cycle)
 
-    logger.info('Adding Schedule A cycles...')
-    partition.SchedAGroup.add_cycles(cycle, amount)
-    logger.info('Finished adding Schedule A cycles.')
-    logger.info('Adding Schedule B cycles...')
-    partition.SchedBGroup.add_cycles(cycle, amount)
-    logger.info('Finished adding Schedule B cycles.')
+    logger.info('Adding Schedule A and B cycles...')
+    try:
+        with db.engine.begin() as connection:
+            connection.execute(
+                sa.text('SELECT add_partition_cycles(:start_year, :count)').execution_options(
+                    autocommit=True
+                ),
+                start_year=cycle,
+                count=amount
+            )
+        logger.info('Finished adding Schedule A and B cycles.')
+    except Exception:
+        logger.exception("Failed to add partition cycles")
 
 @manager.command
 def update_all(processes=1):
@@ -430,7 +400,8 @@ def update_all(processes=1):
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
-    partition_itemized()
+    partition_itemized('a')
+    partition_itemized('b')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 

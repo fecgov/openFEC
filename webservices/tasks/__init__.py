@@ -23,7 +23,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
         },
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
-            'schedule': timedelta(minutes=15),
+            'schedule': crontab(minute=[5, 20, 35, 50]),
         },
     }
 
@@ -36,16 +36,23 @@ def redis_url():
 
 app = celery.Celery('openfec')
 app.conf.update(
-    BROKER_URL=redis_url(),
-    ONCE_REDIS_URL=redis_url(),
-    ONCE_DEFAULT_TIMEOUT=60 * 60,
-    CELERY_IMPORTS=(
+    broker_url=redis_url(),
+    imports=(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
         'webservices.tasks.legal_docs',
     ),
-    CELERYBEAT_SCHEDULE=schedule,
+    beat_schedule=schedule,
+    task_acks_late=False
 )
+
+app.conf.ONCE = {
+    'backend': 'celery_once.backends.Redis',
+    'settings': {
+        'url': redis_url(),
+        'default_timeout': 60 * 60
+    }
+}
 
 context = {}
 

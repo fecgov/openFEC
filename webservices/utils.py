@@ -115,7 +115,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         """Get index values from last result, to be used in seeking to the next
         page. Optionally include sort values, if any.
         """
-        ret = {'last_index': paginators.convert_value(result, self.index_column)}
+        ret = {'last_index': str(paginators.convert_value(result, self.index_column))}
         if self.sort_column:
             key = 'last_{0}'.format(self.sort_column[0].key)
             ret[key] = paginators.convert_value(result, self.sort_column[0])
@@ -263,11 +263,13 @@ def document_description(report_year, report_type=None, document_type=None, form
 
 
 def make_report_pdf_url(image_number):
-    return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
-        str(image_number)[-3:],
-        image_number,
-    )
-
+    if image_number:
+        return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(
+            str(image_number)[-3:],
+            image_number,
+        )
+    else:
+        return None
 
 def make_schedule_pdf_url(image_number):
     if image_number:
@@ -283,7 +285,7 @@ def make_csv_url(file_num):
 
 def make_fec_url(image_number, file_num):
     image_number = str(image_number)
-    if file_num < 0:
+    if file_num < 0 or file_num is None:
         return
     file_num = str(file_num)
     indicator = -1
