@@ -4,8 +4,9 @@ env:
   NEW_RELIC_APP_NAME: fec | celery worker | prod
 applications:
   - name: celery-worker
-    instances: 1
-    memory: 4G
+    instances: 4
+    memory: 1G
+    disk_quota: 2G
     no-route: true
     health-check-type: process
-    command: celery worker --app webservices.tasks --loglevel INFO --concurrency 8
+    command: celery worker --app webservices.tasks --loglevel INFO --concurrency 2

@@ -16,7 +16,7 @@ mandrill==1.0.57
 icalendar==3.9.1
 GitPython==1.0.1
 gunicorn==19.7.1
-gevent==1.2.1
+gevent==1.2.2
 webargs==0.18.0
 slacker==0.8.6
 ujson==1.33
@@ -34,8 +34,9 @@ git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data export
 boto3==1.4.4
+smart_open==1.5.3
 
 # Task queue
-celery==3.1.25
-celery-once==0.1.4
+celery==4.1.0
+celery-once==1.2.0
 redis==2.10.5

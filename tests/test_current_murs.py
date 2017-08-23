@@ -1,6 +1,6 @@
 import re
 import subprocess
-from mock import patch
+from unittest.mock import patch
 from datetime import datetime
 from decimal import Decimal
 
@@ -181,7 +181,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert [(d[0], d[1], len(d[1])) for d in documents] == [
             (d['category'], d['text'], d['length']) for d in actual_mur['documents']]
         for d in actual_mur['documents']:
-            assert re.match(r'https://BUCKET_NAME.s3-us-gov-west-1.amazonaws.com/legal/murs/current', d['url'])
+            assert re.match(r'/files/legal/murs/current', d['url'])
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal_docs.current_murs.get_bucket')
