@@ -1,4 +1,3 @@
-
 -- Creates materialized view of the most recent report per committee, per cycle
 drop materialized view if exists ofec_totals_combined_mv_tmp;
 create materialized view ofec_totals_combined_mv_tmp as
@@ -18,7 +17,10 @@ with last_subset as (
     from disclosure.v_sum_and_det_sum_report
     where
         get_cycle(rpt_yr) >= :START_YEAR
-    order by
+        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
+        and (form_tp_cd != 'F5' or (form_tp_cd = 'F5' and rpt_tp not in ('24','48')))
+        --
+        order by
         cmte_id,
         cycle,
         to_timestamp(cvg_end_dt) desc nulls last
@@ -26,6 +28,7 @@ with last_subset as (
 last as (
     select
         ls.cmte_id,
+        ls.orig_sub_id,
         ls.coh_cop,
         ls.cycle,
         ls.debts_owed_by_cmte,
@@ -44,21 +47,6 @@ last as (
     from last_subset ls
     left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
 ),
--- Creates materialized view of the earliest report as amended per committee, per cycle
-first_subset as (
-    select distinct on (cmte_id, get_cycle(rpt_yr))
-        coh_bop as cash_on_hand,
-        to_timestamp(cvg_start_dt) as coverage_start_date,
-        cmte_id as committee_id,
-        get_cycle(rpt_yr) as cycle
-    from disclosure.v_sum_and_det_sum_report
-    where
-        get_cycle(rpt_yr) >= :START_YEAR
-    order by
-        cmte_id,
-        get_cycle(rpt_yr),
-        to_timestamp(cvg_end_dt) asc
-),
 first as (
     select distinct on (cmte_id, get_cycle(rpt_yr))
         coh_bop as cash_on_hand,
@@ -71,6 +59,9 @@ first as (
     from disclosure.v_sum_and_det_sum_report
     where
         get_cycle(rpt_yr) >= :START_YEAR
+        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
+        and (form_tp_cd != 'F5' or (form_tp_cd = 'F5' and rpt_tp not in ('24','48')))
+        --
     order by
         cmte_id,
         get_cycle(rpt_yr),
@@ -177,7 +168,10 @@ first as (
             get_cycle(vsd.rpt_yr) = first.cycle
     where
         get_cycle(vsd.rpt_yr) >= :START_YEAR
-    group by
+        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
+        and (vsd.form_tp_cd != 'F5' or (vsd.form_tp_cd = 'F5' and vsd.rpt_tp not in ('24','48')))
+        --
+         group by
         vsd.cmte_id,
         vsd.form_tp_cd,
         get_cycle(vsd.rpt_yr)
@@ -190,3 +184,4 @@ create index on ofec_totals_combined_mv_tmp (committee_id, sub_id);
 create index on ofec_totals_combined_mv_tmp (cycle, sub_id);
 create index on ofec_totals_combined_mv_tmp (receipts, sub_id);
 create index on ofec_totals_combined_mv_tmp (disbursements, sub_id);
+
