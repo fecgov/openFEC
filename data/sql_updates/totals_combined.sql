@@ -47,26 +47,6 @@ last as (
     from last_subset ls
     left join ofec_filings_mv_tmp of on ls.orig_sub_id = of.sub_id
 ),
-/* -- issue #2601: this subquery is not referred in later query, can be removed
--- Creates materialized view of the earliest report as amended per committee, per cycle
-first_subset as (
-    select distinct on (cmte_id, get_cycle(rpt_yr))
-        coh_bop as cash_on_hand,
-        to_timestamp(cvg_start_dt) as coverage_start_date,
-        cmte_id as committee_id,
-        get_cycle(rpt_yr) as cycle
-    from disclosure.v_sum_and_det_sum_report
-    where
-        get_cycle(rpt_yr) >= :START_YEAR
-        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
-        and (form_tp_cd != 'F5'or (form_tp_cd = 'F5' and rpt_tp not in ('24','48')))
-        --
-    order by
-        cmte_id,
-        get_cycle(rpt_yr),
-        to_timestamp(cvg_end_dt) asc
-),
-*/
 first as (
     select distinct on (cmte_id, get_cycle(rpt_yr))
         coh_bop as cash_on_hand,
