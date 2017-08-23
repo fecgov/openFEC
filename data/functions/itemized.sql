@@ -177,79 +177,86 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION finalize_itemized_schedule_a_tables(start_year NUMERIC, end_year NUMERIC, p_use_tmp BOOLEAN, p_create_primary_key BOOLEAN) RETURNS VOID AS $$
 BEGIN
     FOR cycle in start_year..end_year BY 2 LOOP
-        raise info 'Creating indexes schedule a (%)', cycle;
+        raise notice 'Creating indexes schedule a (%)', cycle;
         PERFORM add_index_sched_a_table(cycle::NUMERIC, p_use_tmp::BOOLEAN, p_create_primary_key::BOOLEAN);
     END LOOP;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION add_index_sched_b_table(cycle NUMERIC, p_use_tmp BOOLEAN, p_create_primary_key BOOLEAN) RETURNS VOID AS $$
+DECLARE
+    child_table_root TEXT;
+    child_table_name TEXT;
+    index_name_suffix TEXT;
+BEGIN
+    child_table_root = format('ofec_sched_b_%s_%s', cycle - 1, cycle);
+    IF p_use_tmp THEN
+        child_table_name = format('ofec_sched_b_%s_%s_tmp', cycle - 1, cycle);
+        index_name_suffix = '_tmp';
+    ELSE
+        child_table_name = format('ofec_sched_b_%s_%s', cycle - 1, cycle);
+        index_name_suffix = '';
+    END IF;
+
+    -- Create indexes.
+    -- Note:  The multi-column GIN indexes require the btree_gin extension
+    --        https://www.postgresql.org/docs/current/static/btree-gin.html
+    --        This is installed but not enabled in RDS by default, it must
+    --        be turned on with this: CREATE EXTENSION btree_gin;
+
+    -- Indexes for searching
+      -- for sorting by date
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_image_num_dt%s ON %I (image_num, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_clean_recipient_cmte_id_dt%s ON %I (clean_recipient_cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_city_dt%s ON %I (recipient_city, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_st_dt%s ON %I (recipient_st, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_rpt_yr_dt%s ON %I (rpt_yr, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_two_year_transaction_period_dt%s ON %I (two_year_transaction_period, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_line_num_dt%s ON %I (line_num, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_amount_dt%s ON %I (disb_amt, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_dt%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recip_name_text_dt%s ON %I USING GIN (recipient_name_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_disb_desc_text_dt%s ON %I USING GIN (disbursement_description_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+
+      -- for sorting by amount
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_image_num_amt%s ON %I (image_num, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_clean_recipient_cmte_id_amt%s ON %I (clean_recipient_cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_city_amt%s ON %I (recipient_city, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_st_amt%s ON %I (recipient_st, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_rpt_yr_amt%s ON %I (rpt_yr, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_two_year_transaction_period_amt%s ON %I (two_year_transaction_period, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_line_num_amt%s ON %I (line_num, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_date_amt%s ON %I (disb_dt, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_amt%s ON %I (cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recip_name_text_amt%s ON %I USING GIN (recipient_name_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_disb_desc_text_amt%s ON %I USING GIN (disbursement_description_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+
+    -- Other indexes
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_amt_sub_id%s ON %I (cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_dt_sub_id%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_pg_date%s ON %I (pg_date)', child_table_root, index_name_suffix, child_table_name);
+    EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
+
+    -- Create the primary key if needed
+    IF p_create_primary_key THEN
+        EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
+    END IF;
+
+    -- Set statistics and analyze the table.
+    EXECUTE format('ALTER TABLE %I ALTER COLUMN recipient_st SET STATISTICS 1000', child_table_name);
+    EXECUTE format('ANALYZE %I', child_table_name);
 END
 $$ LANGUAGE plpgsql;
 
 -- Performs the final steps needed to setup all of the child tables for
 -- schedule B.
 CREATE OR REPLACE FUNCTION finalize_itemized_schedule_b_tables(start_year NUMERIC, end_year NUMERIC, p_use_tmp BOOLEAN, p_create_primary_key BOOLEAN) RETURNS VOID AS $$
-DECLARE
-    child_table_root TEXT;
-    child_table_name TEXT;
-    index_name_suffix TEXT;
 BEGIN
     FOR cycle in start_year..end_year BY 2 LOOP
-        child_table_root = format('ofec_sched_b_%s_%s', cycle - 1, cycle);
-        IF p_use_tmp THEN
-            child_table_name = format('ofec_sched_b_%s_%s_tmp', cycle - 1, cycle);
-            index_name_suffix = '_tmp';
-        ELSE
-            child_table_name = format('ofec_sched_b_%s_%s', cycle - 1, cycle);
-            index_name_suffix = '';
-        END IF;
-
-        -- Create indexes.
-        -- Note:  The multi-column GIN indexes require the btree_gin extension
-        --        https://www.postgresql.org/docs/current/static/btree-gin.html
-        --        This is installed but not enabled in RDS by default, it must
-        --        be turned on with this: CREATE EXTENSION btree_gin;
-
-        -- Indexes for searching
-          -- for sorting by date
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_image_num_dt%s ON %I (image_num, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_clean_recipient_cmte_id_dt%s ON %I (clean_recipient_cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_city_dt%s ON %I (recipient_city, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_st_dt%s ON %I (recipient_st, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_rpt_yr_dt%s ON %I (rpt_yr, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_two_year_transaction_period_dt%s ON %I (two_year_transaction_period, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_line_num_dt%s ON %I (line_num, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_amount_dt%s ON %I (disb_amt, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_dt%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recip_name_text_dt%s ON %I USING GIN (recipient_name_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_disb_desc_text_dt%s ON %I USING GIN (disbursement_description_text, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-
-          -- for sorting by amount
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_image_num_amt%s ON %I (image_num, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_clean_recipient_cmte_id_amt%s ON %I (clean_recipient_cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_city_amt%s ON %I (recipient_city, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recipient_st_amt%s ON %I (recipient_st, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_rpt_yr_amt%s ON %I (rpt_yr, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_two_year_transaction_period_amt%s ON %I (two_year_transaction_period, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_line_num_amt%s ON %I (line_num, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_sub_id_date_amt%s ON %I (disb_dt, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_amt%s ON %I (cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_recip_name_text_amt%s ON %I USING GIN (recipient_name_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_disb_desc_text_amt%s ON %I USING GIN (disbursement_description_text, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-
-        -- Other indexes
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_amt_sub_id%s ON %I (cmte_id, disb_amt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_cmte_id_disb_dt_sub_id%s ON %I (cmte_id, disb_dt, sub_id)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE INDEX IF NOT EXISTS idx_%s_pg_date%s ON %I (pg_date)', child_table_root, index_name_suffix, child_table_name);
-        EXECUTE format('CREATE UNIQUE INDEX IF NOT EXISTS idx_%s_sub_id%s ON %I (sub_id)', child_table_root, index_name_suffix, child_table_name);
-
-        -- Create the primary key if needed
-        IF p_create_primary_key THEN
-            EXECUTE format('ALTER TABLE %I ADD PRIMARY KEY USING INDEX idx_%s_sub_id%s', child_table_name, child_table_root, index_name_suffix);
-        END IF;
-
-        -- Set statistics and analyze the table.
-        EXECUTE format('ALTER TABLE %I ALTER COLUMN recipient_st SET STATISTICS 1000', child_table_name);
-        EXECUTE format('ANALYZE %I', child_table_name);
+        raise notice 'Creating indexes schedule b (%)', cycle;
+        PERFORM add_index_sched_b_table(cycle::NUMERIC, p_use_tmp::BOOLEAN, p_create_primary_key::BOOLEAN);
     END LOOP;
 END
 $$ LANGUAGE plpgsql;

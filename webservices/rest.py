@@ -4,6 +4,7 @@ full documentation visit: https://api.open.fec.gov/developers.
 """
 import os
 import http
+import logging
 
 from flask import abort
 from flask import request
@@ -51,6 +52,10 @@ from webservices.resources import load
 from webservices.resources import large_aggregates
 from webservices.env import env
 
+
+logging.basicConfig()
+# INFO is really helpful for debugging but a bit of a fire hose for prod
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARN)
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
