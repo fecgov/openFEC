@@ -36,17 +36,14 @@ def redis_url():
 
 app = celery.Celery('openfec')
 app.conf.update(
-    # will be celery_broker_url in celery 4
-    BROKER_URL=redis_url(),
-    ONCE_REDIS_URL=redis_url(),
-    ONCE_DEFAULT_TIMEOUT=60 * 60,
-    CELERY_IMPORTS=(
+    broker_url=redis_url(),
+    imports=(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
         'webservices.tasks.legal_docs',
     ),
-    CELERYBEAT_SCHEDULE=schedule,
-    tasks_acks_late=True,
+    beat_schedule=schedule,
+    task_acks_late=False
 )
 
 app.conf.ONCE = {

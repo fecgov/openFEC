@@ -1,3 +1,4 @@
+import base64
 import datetime
 import hashlib
 import unittest.mock as mock
@@ -21,7 +22,7 @@ class TestDownloadTask(ApiBaseTest):
     def test_get_filename(self):
         path = '/v1/candidates/'
         qs = '?office=H&sort=name'
-        expected = hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.zip'
+        expected = hashlib.sha224((path + qs).encode('utf-8')).hexdigest() + '.csv'
         assert tasks.get_s3_name(path, qs) == expected
 
     def test_download_url(self):
@@ -52,8 +53,8 @@ class TestDownloadTask(ApiBaseTest):
             ExpiresIn=resource.URL_EXPIRY,
         )
 
-    @mock.patch('webservices.tasks.download.upload_s3')
-    def test_views(self, upload_s3):
+    @mock.patch('webservices.tasks.download.make_bundle')
+    def test_views(self, make_bundle):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
         factories.CommitteeHistoryFactory(
@@ -112,7 +113,7 @@ class TestDownloadTask(ApiBaseTest):
                 url = api.url_for(view, committee_id=committee.committee_id)
             else:
                 url = api.url_for(view)
-            tasks.export_query(url, b'')
+            tasks.export_query(url, base64.b64encode(b'').decode('UTF-8'))
 
 
 class TestDownloadResource(ApiBaseTest):
@@ -124,7 +125,10 @@ class TestDownloadResource(ApiBaseTest):
         res = self.client.post_json(api.url_for(resource.DownloadView, path='candidates', office='S'))
         assert res.json == {'status': 'queued'}
         get_cached.assert_called_once_with('/v1/candidates/', b'office=S', filename=None)
-        export.delay.assert_called_once_with('/v1/candidates/', b'office=S')
+        export.delay.assert_called_once_with(
+            '/v1/candidates/',
+            base64.b64encode(b'office=S').decode('UTF-8')
+        )
 
     @mock.patch('webservices.resources.download.get_cached_file')
     @mock.patch('webservices.resources.download.download.export_query')

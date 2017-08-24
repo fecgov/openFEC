@@ -157,7 +157,7 @@ class TotalsCandidateView(ApiResource):
     def build_query(self, **kwargs):
         if kwargs['election_full']:
             history = models.CandidateHistoryLatest
-            year_column = history.cand_election_year
+            year_column = history.candidate_election_year
         else:
             history = models.CandidateHistory
             year_column = history.two_year_period
@@ -198,5 +198,4 @@ class TotalsCandidateView(ApiResource):
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
         return query
-
 

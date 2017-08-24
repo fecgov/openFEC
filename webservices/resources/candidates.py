@@ -22,6 +22,12 @@ def filter_multi_fields(model):
     ]
 
 
+def filter_range_fields(model):
+    return [
+        (('min_first_file_date', 'max_first_file_date'), model.first_file_date),
+    ]
+
+
 @doc(
     tags=['candidate'],
     description=docs.CANDIDATE_LIST,
@@ -32,6 +38,7 @@ class CandidateList(ApiResource):
     schema = schemas.CandidateSchema
     page_schema = schemas.CandidatePageSchema
     filter_multi_fields = filter_multi_fields(models.Candidate)
+    filter_range_fields = filter_range_fields(models.Candidate)
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
     aliases = {'receipts': models.CandidateSearch.receipts}
 

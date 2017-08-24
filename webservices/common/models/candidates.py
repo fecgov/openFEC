@@ -45,6 +45,10 @@ class BaseCandidate(BaseModel):
     incumbent_challenge_full = db.Column(db.String(10), doc=docs.INCUMBENT_CHALLENGE_FULL)
     load_date = db.Column(db.Date, index=True, doc=docs.LOAD_DATE)
 
+    first_file_date = db.Column(db.Date, index=True, doc=docs.FIRST_CANDIDATE_FILE_DATE)
+    last_file_date = db.Column(db.Date, doc=docs.LAST_CANDIDATE_FILE_DATE)
+    last_f2_date = db.Column(db.Date, doc=docs.LAST_F2_DATE)
+
     @declared_attr
     def flags(self):
         return sa.orm.relationship(
@@ -99,20 +103,22 @@ class CandidateHistory(BaseCandidate):
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)
+    candidate_election_year = db.Column(db.Integer, doc="The last year of the cycle for this election.")
     address_city = db.Column(db.String(100), doc='City of candidate\'s address, as reported on their Form 2.')
     address_state = db.Column(db.String(2), doc='State of candidate\'s address, as reported on their Form 2.')
     address_street_1 = db.Column(db.String(200), doc='Street of candidate\'s address, as reported on their Form 2.')
     address_street_2 = db.Column(db.String(200), doc='Additional street information of candidate\'s address, as reported on their Form 2.')
     address_zip = db.Column(db.String(10), doc='Zip code of candidate\'s address, as reported on their Form 2.')
     candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
+    active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
 
 class CandidateHistoryLatest(BaseCandidate):
     __tablename__ = 'ofec_candidate_history_latest_mv'
-
+    #Is there any good reason to have this as a separate model?
     candidate_id = db.Column(db.String, primary_key=True, index=True)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True)
-    cand_election_year = db.Column(db.Integer, index=True)
+    candidate_election_year = db.Column(db.Integer, doc="The last year of the cycle for this election.")
     address_city = db.Column(db.String(100))
     address_state = db.Column(db.String(2))
     address_street_1 = db.Column(db.String(200))

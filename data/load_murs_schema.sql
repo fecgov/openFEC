@@ -484,7 +484,8 @@ AS
         case_no,
         regexp_replace(case_no, '(\d+).*', '\1')::int AS case_serial,
         name,
-        case_type
+        case_type,
+        pg_date
     FROM fecmur.case;
 --
 -- Data for Name: role; Type: TABLE DATA; Schema: fecmur; Owner: fec

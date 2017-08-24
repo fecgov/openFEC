@@ -332,6 +332,8 @@ class ElectionResultFactory(BaseFactory):
     election_yr = 2016
     cand_office_st = 'US'
     cand_office_district = '00'
+    election_type = 'P'
+    fec_election_yr = 2016
 
 
 class CommunicationCostFactory(BaseFactory):

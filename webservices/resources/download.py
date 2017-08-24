@@ -1,3 +1,4 @@
+import base64
 import http
 
 from marshmallow import fields
@@ -11,16 +12,16 @@ from webservices import utils
 from webservices import exceptions
 from webservices.tasks import download
 from webservices.tasks import utils as task_utils
-from webservices.utils import use_kwargs
+from webservices.utils import use_kwargs_original
 
 client = boto3.client('s3')
 
-MAX_RECORDS = 100000
+MAX_RECORDS = 500000
 URL_EXPIRY = 7 * 24 * 60 * 60
 
 class DownloadView(utils.Resource):
 
-    @use_kwargs({'filename': fields.Str(missing=None)})
+    @use_kwargs_original({'filename': fields.Str(missing=None)})
     def post(self, path, filename=None, **kwargs):
         parts = request.path.split('/')
         parts.remove('download')
@@ -37,7 +38,10 @@ class DownloadView(utils.Resource):
                 'Cannot request downloads with more than {} records'.format(MAX_RECORDS),
                 status_code=http.client.FORBIDDEN,
             )
-        download.export_query.delay(path, request.query_string)
+        download.export_query.delay(
+            path,
+            base64.b64encode(request.query_string).decode('UTF-8')
+        )
         return {'status': 'queued'}
 
 def get_cached_file(path, qs, filename=None):

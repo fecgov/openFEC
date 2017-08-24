@@ -62,6 +62,10 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     is_amended = db.Column('is_amended', db.Boolean)
     most_recent = db.Column('most_recent', db.Boolean)
     html_url = db.Column(db.String, doc='HTML link to the filing.')
+    #If f2 filing, the state of the candidate, else the state of the committee
+    state = db.Column(db.String, doc=docs.STATE)
+    office = db.Column(db.String, doc=docs.OFFICE)
+    party = db.Column(db.String, doc=docs.PARTY)
 
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)
@@ -149,6 +153,10 @@ class EFilings(FecFileNumberMixin, AmendmentChainMixin, CsvMixin, FecMixin, db.M
     def pdf_url(self):
         image_number = str(self.beginning_image_number)
         return 'http://docquery.fec.gov/pdf/{0}/{1}/{1}.pdf'.format(image_number[-3:], image_number)
+
+    @property
+    def html_url(self):
+        return 'http://docquery.fec.gov/cgi-bin/forms/{0}/{1}/'.format(self.committee_id, self.file_number)
 
 
 # TODO: add index on committee id and filed_date
