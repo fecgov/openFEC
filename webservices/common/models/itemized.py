@@ -345,8 +345,8 @@ class ScheduleBEfile(BaseRawItemized):
     recipient_name = db.Column('lname', db.String)
     #recipient_name_text = db.Column(TSVECTOR)
     # Street address omitted per FEC policy
-    # recipient_street_1 = db.Column('recipient_st1', db.String)
-    # recipient_street_2 = db.Column('recipient_st2', db.String)
+    recipient_street_1 = db.Column('recipient_st1', db.String)
+    recipient_street_2 = db.Column('recipient_st2', db.String)
     recipient_city = db.Column('city', db.String)
     recipient_state = db.Column('state', db.String)
     recipient_zip = db.Column('zip', db.String)
