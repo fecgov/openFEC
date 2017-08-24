@@ -33,6 +33,9 @@ class BaseFilings(views.ApiResource):
         ('primary_general_indicator', models.Filings.primary_general_indicator),
         ('amendment_indicator', models.Filings.amendment_indicator),
         ('cycle', models.Filings.cycle),
+        ('state', models.Filings.state),
+        ('party', models.Filings.party),
+        ('office', models.Filings.office),
     ]
 
     filter_range_fields = [

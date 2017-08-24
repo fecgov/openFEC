@@ -88,15 +88,17 @@ class TestViews(common.IntegrationTestCase):
         #models.CaniddateCommitteeTotalsHouseSenate passed integration, so testing this specific
         #model really isn't expanding code coverage.  I can try and get the model passing but it's proving
         #to be difficult considering the joins needed (and our limited test subset)
-        whitelist = [models.EntityReceiptDisbursementTotals]
+        whitelist = [
+            models.EntityReceiptDisbursementTotals,
+            models.itemized.ScheduleA,
+            models.itemized.ScheduleB,
+        ]
 
         for model in db.Model._decl_class_registry.values():
-            print(model)
             if model in whitelist:
                 continue
             if not hasattr(model, '__table__'):
                 continue
-                print (model)
             self.assertGreater(model.query.count(), 0)
     def test_refresh_materialized(self):
         db.session.execute('select refresh_materialized()')
@@ -601,3 +603,16 @@ class TestViews(common.IntegrationTestCase):
         ).count()
 
         self.assertEqual(committee_history_count, committee_history_verified_count)
+
+    def test_add_itemized_partition_cycle(self):
+        manage.add_itemized_partition_cycle(3002, 2)
+        expected_tables = {
+            "ofec_sched_a_3001_3002",
+            "ofec_sched_b_3003_3004",
+            "ofec_sched_a_3001_3002",
+            "ofec_sched_b_3003_3004",
+        }
+        inspector = sa.inspect(db.engine)
+        actual_tables = set(inspector.get_table_names())
+        assert expected_tables.issubset(actual_tables)
+        assert "ofec_sched_a_3005_3006" not in actual_tables

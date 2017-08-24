@@ -78,9 +78,9 @@ select distinct on (fec_yr.cmte_id, fec_yr.fec_election_yr)
     f1.cand_pty_tp as party_type,
     f1.cand_pty_tp_desc as party_type_full,
     f1.qual_dt as qualifying_date,
-    dates.first_file_date,
-    dates.last_file_date,
-    dates.last_f1_date,
+    cast(cast(dates.first_file_date as text) as date) as first_file_date,
+    cast(cast(dates.last_file_date as text) as date) as last_file_date,
+    cast(cast(dates.last_f1_date as text) as date) as last_f1_date,
     fec_yr.cmte_dsgn as designation,
     expand_committee_designation(fec_yr.cmte_dsgn) as designation_full,
     fec_yr.cmte_tp as committee_type,
@@ -107,3 +107,4 @@ create index on ofec_committee_history_mv_tmp(cycle);
 create index on ofec_committee_history_mv_tmp(committee_id);
 create index on ofec_committee_history_mv_tmp(designation);
 create index on ofec_committee_history_mv_tmp(cycle, committee_id);
+create index on ofec_committee_history_mv_tmp(first_file_date);

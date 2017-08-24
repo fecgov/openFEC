@@ -699,6 +699,7 @@ EFilingsSchema = make_schema(
     fields={
         'beginning_image_number': ma.fields.Str(),
         'ending_image_number': ma.fields.Str(),
+        'html_url': ma.fields.Str(),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
@@ -849,6 +850,7 @@ class ElectionSearchSchema(ma.Schema):
     state = ma.fields.Str()
     office = ma.fields.Str()
     district = ma.fields.Str()
+    candidate_status = ma.fields.Str()
     cycle = ma.fields.Int(attribute='two_year_period')
     incumbent_id = ma.fields.Str(attribute='cand_id')
     incumbent_name = ma.fields.Str(attribute='cand_name')
@@ -871,6 +873,7 @@ class ElectionSchema(ma.Schema):
     total_disbursements = ma.fields.Decimal(places=2)
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     won = ma.fields.Boolean()
+    candidate_election_year = ma.fields.Int()
 augment_schemas(ElectionSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
