@@ -95,6 +95,7 @@ class TestElections(ApiBaseTest):
                 election_years=[2010, 2012],
                 cycles=[2010, 2012],
                 office='S',
+                candidate_election_year=2012,
             ),
             factories.CandidateHistoryFactory(
                 candidate_id=self.candidate.candidate_id,
@@ -103,6 +104,7 @@ class TestElections(ApiBaseTest):
                 election_years=[2010, 2012],
                 cycles=[2010, 2012],
                 office='S',
+                candidate_election_year=2012,
             ),
         ]
         self.committees = [
