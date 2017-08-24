@@ -175,9 +175,9 @@ class ScheduleAEfile(BaseRawItemized):
     contributor_middle_name = db.Column('mname', db.String)
     contributor_last_name = db.Column('name', db.String)
     contributor_suffix = db.Column('suffix', db.String)
-    # Street address omitted per FEC policy
-    # contributor_street_1 = db.Column('contbr_st1', db.String)
-    # contributor_street_2 = db.Column('contbr_st2', db.String)
+    # Street address omitted per FEC policy in schemas
+    contributor_street_1 = db.Column('contbr_st1', db.String)
+    contributor_street_2 = db.Column('contbr_st2', db.String)
     contributor_city = db.Column('city', db.String, doc=docs.CONTRIBUTOR_CITY)
     contributor_state = db.Column('state', db.String, doc=docs.CONTRIBUTOR_STATE)
     contributor_zip = db.Column('zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
