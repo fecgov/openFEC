@@ -90,8 +90,9 @@ class ScheduleA(BaseItemized):
     contributor_middle_name = db.Column('contbr_m_nm', db.String)
     contributor_last_name = db.Column('contbr_nm_last', db.String)
     contributor_suffix = db.Column('contbr_suffix', db.String)
-    contributor_street_1 = db.Column('contbr_st1', db.String)
-    contributor_street_2 = db.Column('contbr_st2', db.String)
+    # confirm policy was changed before exposing
+    # contributor_street_1 = db.Column('contbr_st1', db.String)
+    # contributor_street_2 = db.Column('contbr_st2', db.String)
     contributor_city = db.Column('contbr_city', db.String, doc=docs.CONTRIBUTOR_CITY)
     contributor_state = db.Column('contbr_st', db.String, doc=docs.CONTRIBUTOR_STATE)
     contributor_zip = db.Column('contbr_zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
@@ -321,7 +322,8 @@ class ScheduleB(BaseItemized):
     category_code_full = db.Column('catg_cd_desc', db.String)
 
     # Conduit info
-    conduit_committee_id = db.Column('conduit_cmte_id', db.String)
+    # missing in the data but want to check if it exists somewhere
+    # conduit_committee_id = db.Column('conduit_cmte_id', db.String)
     conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
     conduit_committee_street1 = db.Column('conduit_cmte_st1', db.String)
     conduit_committee_street2 = db.Column('conduit_cmte_st2', db.String)
