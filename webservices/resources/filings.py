@@ -35,6 +35,7 @@ class BaseFilings(views.ApiResource):
         ('cycle', models.Filings.cycle),
         ('state', models.Filings.state),
         ('party', models.Filings.party),
+        ('office', models.Filings.office),
     ]
 
     filter_range_fields = [
