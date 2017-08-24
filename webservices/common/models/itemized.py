@@ -91,8 +91,8 @@ class ScheduleA(BaseItemized):
     contributor_last_name = db.Column('contbr_nm_last', db.String)
     contributor_suffix = db.Column('contbr_suffix', db.String)
     # confirm policy was changed before exposing
-    # contributor_street_1 = db.Column('contbr_st1', db.String)
-    # contributor_street_2 = db.Column('contbr_st2', db.String)
+    contributor_street_1 = db.Column('contbr_st1', db.String)
+    contributor_street_2 = db.Column('contbr_st2', db.String)
     contributor_city = db.Column('contbr_city', db.String, doc=docs.CONTRIBUTOR_CITY)
     contributor_state = db.Column('contbr_st', db.String, doc=docs.CONTRIBUTOR_STATE)
     contributor_zip = db.Column('contbr_zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
