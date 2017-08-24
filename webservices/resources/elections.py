@@ -231,7 +231,7 @@ class ElectionView(utils.Resource):
         ).outerjoin(
             outcomes,
             aggregates.c.candidate_id == outcomes.c.cand_id,
-        )
+        ).distinct()
 
     def _get_pairs(self, totals_model, kwargs):
         pairs = CandidateHistory.query.with_entities(
