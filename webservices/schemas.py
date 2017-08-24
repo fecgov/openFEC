@@ -465,6 +465,7 @@ CommitteeTotalsPageSchema = make_page_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsSchema)
 register_schema(CommitteeTotalsPageSchema)
 
+# excluding street address to comply with FEC policy
 ScheduleASchema = make_schema(
     models.ScheduleA,
     fields={
@@ -482,6 +483,8 @@ ScheduleASchema = make_schema(
             'contributor_name_text',
             'contributor_employer_text',
             'contributor_occupation_text',
+            'recipient_street_1',
+            'recipient_street_2',
         ),
         'relationships': [
             Relationship(
@@ -517,6 +520,7 @@ ScheduleCSchema = make_schema(
 ScheduleCPageSchema = make_page_schema(
     ScheduleCSchema,
 )
+# excluding street address to comply with FEC policy
 ScheduleBByRecipientIDSchema = make_schema(
     models.ScheduleBByRecipientID,
     fields={
@@ -524,7 +528,7 @@ ScheduleBByRecipientIDSchema = make_schema(
         'recipient_name': ma.fields.Str(),
     },
     options={
-        'exclude': ('committee', 'recipient')
+        'exclude': ('committee', 'recipient', 'recipient_street_1', 'recipient_street_2')
     },
 )
 
