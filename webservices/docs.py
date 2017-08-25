@@ -984,3 +984,11 @@ Provides cumulative disbursement totals by entity type, over a two year cycle. T
 
 This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
 '''
+
+AUDIT_ID = '''
+Number associated with an audit -- Need to find a better description to go here.
+'''
+
+AUDIT_CASE_ID = '''
+Number associated with an audit case -- Need to find a better description to go here.
+'''
