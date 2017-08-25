@@ -753,3 +753,7 @@ schedule_a_by_state_recipient_totals = {
         description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
     ),
 }
+
+auditsearch = {'tier': fields.Int(required=True, description=docs.TIER)}
+
+

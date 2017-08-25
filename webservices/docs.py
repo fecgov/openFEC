@@ -992,3 +992,8 @@ Number associated with an audit -- Need to find a better description to go here.
 AUDIT_CASE_ID = '''
 Number associated with an audit case -- Need to find a better description to go here.
 '''
+
+TIER = '''
+Level of Audit -- Need to find a better description to go here.
+'''
+
