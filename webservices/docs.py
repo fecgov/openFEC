@@ -989,6 +989,14 @@ AUDIT_ID = '''
 Number associated with an audit -- Need to find a better description to go here.
 '''
 
+FINDING_ID = '''
+Number associated with an audit finding -- Need to find a better description to go here.
+'''
+
+FINDING = '''
+Name of the audit finding -- Need to find a better description to go here.
+'''
+
 AUDIT_CASE_ID = '''
 Number associated with an audit case -- Need to find a better description to go here.
 '''
@@ -996,4 +1004,6 @@ Number associated with an audit case -- Need to find a better description to go 
 TIER = '''
 Level of Audit -- Need to find a better description to go here.
 '''
-
+ELECTION_CYCLE = '''
+Two year election cycle -- Need to find a better description to go here.
+'''
