@@ -754,6 +754,9 @@ schedule_a_by_state_recipient_totals = {
     ),
 }
 
-auditsearch = {'tier': fields.Int(required=True, description=docs.TIER)}
-
+auditfinding = {
+    'finding_id': fields.List(fields.Int(), description='ID of Finding'),
+    'finding': fields.List(fields.Str, description='Name of Finding'),
+    'tier': fields.List(fields.Int(), description='Level of Tier'),
+}
 
