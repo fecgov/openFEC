@@ -941,10 +941,7 @@ ScheduleAByStateRecipientTotalsPageSchema = make_page_schema(
 register_schema(ScheduleAByStateRecipientTotalsSchema)
 register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 
-AuditFindingSchema = make_schema(
-    models.AuditFinding,
-    options={'exclude': ('idx', 'finding_id', 'tier')},
-)
+AuditFindingSchema = make_schema(models.AuditFinding)
 AuditFindingPageSchema = make_page_schema(AuditFindingSchema)
 register_schema(AuditFindingSchema)
 register_schema(AuditFindingPageSchema)
