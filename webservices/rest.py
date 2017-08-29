@@ -196,7 +196,7 @@ api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
-api.add_resource(auditsearch.AuditFinding, '/auditfinding/')
+api.add_resource(auditsearch.AuditFinding, '/auditfinding')
 
 
 

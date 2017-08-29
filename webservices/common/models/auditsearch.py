@@ -1,4 +1,5 @@
 
+import sqlalchemy as sa
 from .base import db, BaseModel
 from webservices import docs
 
@@ -18,8 +19,8 @@ class AuditFinding(AuditSearchMixin, db.Model):
     __tablename__ = 'finding'
 
     finding_id = db.Column('finding_pk', db.String, index=True, primary_key=True, doc=docs.FINDING_ID)
-    finding = db.Column('finding', db.String, index=True, doc=docs.FINDING)
-    tier = db.Column('tier', db.Integer, index=True, doc=docs.TIER)
+    finding = db.Column('finding', db.String, doc=docs.FINDING)
+    tier = db.Column('tier', db.Integer, doc=docs.TIER)
 
 class AuditFindingRel(AuditSearchMixin, db.Model):
     __tablename__ = 'finding_rel'
