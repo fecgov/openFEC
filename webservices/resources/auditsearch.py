@@ -37,4 +37,4 @@ class AuditFinding(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.idx
+        return self.model.finding_id
