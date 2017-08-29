@@ -16,16 +16,17 @@ and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, c
 group by cmte_id, cycle, zip
 ;
 
-alter table ofec_sched_a_aggregate_zip_tmp add column idx serial primary key;
+alter table ofec_sched_a_aggregate_zip_tmp add column idx serial;
+alter table ofec_sched_a_aggregate_zip_tmp add constraint uq_cmte_id_cycle_zip unique (cmte_id, cycle, zip);
 
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_zip_tmp (cmte_id, idx);
-create index on ofec_sched_a_aggregate_zip_tmp (cycle, idx);
-create index on ofec_sched_a_aggregate_zip_tmp (zip, idx);
-create index on ofec_sched_a_aggregate_zip_tmp (state, idx);
-create index on ofec_sched_a_aggregate_zip_tmp (state_full, idx);
-create index on ofec_sched_a_aggregate_zip_tmp (total, idx);
-create index on ofec_sched_a_aggregate_zip_tmp (count, idx);
+create index on ofec_sched_a_aggregate_zip_tmp (cmte_id);
+create index on ofec_sched_a_aggregate_zip_tmp (cycle);
+create index on ofec_sched_a_aggregate_zip_tmp (zip);
+create index on ofec_sched_a_aggregate_zip_tmp (state);
+create index on ofec_sched_a_aggregate_zip_tmp (state_full);
+create index on ofec_sched_a_aggregate_zip_tmp (total);
+create index on ofec_sched_a_aggregate_zip_tmp (count);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_a_aggregate_zip;

@@ -14,14 +14,15 @@ and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, c
 group by cmte_id, cycle, employer
 ;
 
-alter table ofec_sched_a_aggregate_employer_tmp add column idx serial primary key;
+alter table ofec_sched_a_aggregate_employer_tmp add column idx serial;
+alter table ofec_sched_a_aggregate_employer_tmp add constraint uq_cmte_id_cycle_employer unique (cmte_id, cycle, employer);
 
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_employer_tmp (cmte_id, idx);
-create index on ofec_sched_a_aggregate_employer_tmp (cycle, idx);
-create index on ofec_sched_a_aggregate_employer_tmp (employer, idx);
-create index on ofec_sched_a_aggregate_employer_tmp (total, idx);
-create index on ofec_sched_a_aggregate_employer_tmp (count, idx);
+create index on ofec_sched_a_aggregate_employer_tmp (cmte_id);
+create index on ofec_sched_a_aggregate_employer_tmp (cycle);
+create index on ofec_sched_a_aggregate_employer_tmp (employer);
+create index on ofec_sched_a_aggregate_employer_tmp (total);
+create index on ofec_sched_a_aggregate_employer_tmp (count);
 create index on ofec_sched_a_aggregate_employer_tmp (cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate

@@ -16,14 +16,15 @@ and clean_repeated(recipient_cmte_id, cmte_id) is not null
 group by cmte_id, cycle, clean_repeated(recipient_cmte_id, cmte_id)
 ;
 
-alter table ofec_sched_b_aggregate_recipient_id_tmp add column idx serial primary key;
+alter table ofec_sched_b_aggregate_recipient_id_tmp add column idx serial;
+alter table ofec_sched_b_aggregate_recipient_id_tmp add constraint uq_cmte_id_cycle_recipient_cmte_id unique (cmte_id, cycle, recipient_cmte_id);
 
 -- Create indices on aggregate
-create index on ofec_sched_b_aggregate_recipient_id_tmp (cmte_id, idx);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (cycle, idx);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (recipient_cmte_id, idx);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (total, idx);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (count, idx);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (cmte_id);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (cycle);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (recipient_cmte_id);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (total);
+create index on ofec_sched_b_aggregate_recipient_id_tmp (count);
 create index on ofec_sched_b_aggregate_recipient_id_tmp (cmte_id, cycle);
 
 -- Remove previous aggregate and rename new aggregate
