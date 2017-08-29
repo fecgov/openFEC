@@ -90,8 +90,7 @@ class UniversalSearch(utils.Resource):
 
         results = {}
         total_count = 0
-        print(q)
-        print(kwargs)
+ 
         for type_ in doc_types:
             query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
             try:
@@ -274,21 +273,21 @@ def execute_query(query):
     es_results = query.execute()
     formatted_hits = []
     for hit in es_results:
-            formatted_hit = hit.to_dict()
-            formatted_hit['highlights'] = []
-            formatted_hit['document_highlights'] = {}
-            formatted_hits.append(formatted_hit)
+        formatted_hit = hit.to_dict()
+        formatted_hit['highlights'] = []
+        formatted_hit['document_highlights'] = {}
+        formatted_hits.append(formatted_hit)
 
-            if 'highlight' in hit.meta:
-                for key in hit.meta.highlight:
-                    formatted_hit['highlights'].extend(hit.meta.highlight[key])
+        if 'highlight' in hit.meta:
+            for key in hit.meta.highlight:
+                formatted_hit['highlights'].extend(hit.meta.highlight[key])
 
-            if 'inner_hits' in hit.meta:
-                for inner_hit in hit.meta.inner_hits['documents'].hits:
-                    if 'highlight' in inner_hit.meta and 'nested' in inner_hit.meta:
-                        offset = inner_hit.meta['nested']['offset']
-                        highlights = inner_hit.meta.highlight.to_dict().values()
-                        formatted_hit['document_highlights'][offset] = [
-                            hl for hl_list in highlights for hl in hl_list]
+        if 'inner_hits' in hit.meta:
+            for inner_hit in hit.meta.inner_hits['documents'].hits:
+                if 'highlight' in inner_hit.meta and 'nested' in inner_hit.meta:
+                    offset = inner_hit.meta['nested']['offset']
+                    highlights = inner_hit.meta.highlight.to_dict().values()
+                    formatted_hit['document_highlights'][offset] = [
+                        hl for hl_list in highlights for hl in hl_list]
 
     return formatted_hits, es_results.hits.total
