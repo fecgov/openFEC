@@ -41,37 +41,6 @@ manager.command(legal_docs.restore_from_staging_index)
 manager.command(legal_docs.reinitialize_all_legal_docs)
 manager.command(legal_docs.refresh_legal_docs_zero_downtime)
 
-def check_itemized_queues(schedule):
-    """Checks to see if the queues associated with an itemized schedule have
-    been successfully cleared out and sends the information to the logs.
-    """
-
-    remaining_new_queue = db.engine.execute(
-        'select count(*) from ofec_sched_{schedule}_queue_new'.format(
-            schedule=schedule
-        )
-    ).scalar()
-    remaining_old_queue = db.engine.execute(
-        'select count(*) from ofec_sched_{schedule}_queue_old'.format(
-            schedule=schedule
-        )
-    ).scalar()
-
-    if remaining_new_queue == remaining_old_queue == 0:
-        logger.info(
-            'Successfully emptied Schedule {schedule} queues.'.format(
-                schedule=schedule.upper()
-            )
-        )
-    else:
-        logger.warn(
-            'Schedule {schedule} queues not empty ({new} new / {old} old left).'.format(
-                schedule=schedule.upper(),
-                new=remaining_new_queue,
-                old=remaining_old_queue
-            )
-        )
-
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
     processed at the point when the weekly aggregate rebuild takes place.
@@ -318,6 +287,12 @@ def rebuild_aggregates(processes=1):
     logger.info('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     logger.info('Finished rebuilding incremental aggregates.')
+
+@manager.command
+def update_aggregates():
+    """These are run nightly to recalculate the totals
+    """
+    logger.info('Updating incremental aggregates...')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
