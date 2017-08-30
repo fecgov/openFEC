@@ -38,3 +38,31 @@ class AuditFinding(ApiResource):
     @property
     def index_column(self):
         return self.model.finding_id
+
+class AuditFindingsView(ApiResource):
+
+    model = models.AuditFindingsView
+    schema = schemas.AuditFindingsViewSchema
+    page_schema = schemas.AuditFindingsViewPageSchema
+
+
+    filter_multi_fields = [
+        ('tier_one_id', model.tier_one_id),
+        ('tier_one_finding', model.tier_one_finding),
+        ('tier_two_id', model.tier_two_id),
+        ('tier_two_finding', model.tier_two_finding),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.AuditFindingsView,
+            args.make_sort_args(
+                validator=args.IndexValidator(models.AuditFindingsView),
+            ),
+        )
+
+    @property
+    def index_column(self):
+        return self.model.tier_one_id
