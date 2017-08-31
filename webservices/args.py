@@ -379,8 +379,8 @@ itemized = {
     'max_image_number': fields.Str(),
     'min_amount': Currency(description='Filter for all amounts greater than a value.'),
     'max_amount': Currency(description='Filter for all amounts less than a value.'),
-    'min_date': fields.Date(description='Minimum date'),
-    'max_date': fields.Date(description='Maximum date'),
+    'min_date': fields.Date(description='Minimum date. If no max date is provided, it will default to the cycle of min_date.'),
+    'max_date': fields.Date(description='Maximum date. If no max date is provided, it will default to the cycle of max_date.'),
     'line_number': fields.Str(description='Filter for form and line number using the following format: '
                                           '`FORM-LINENUMBER`.  For example an argument such as `F3X-16` would filter'
                                           ' down to all entries from form `F3X` line number `16`.')
