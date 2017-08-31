@@ -19,6 +19,7 @@ def get_cycle_end(year):
     return year if year % 2 == 0 else year + 1
 
 CURRENT_YEAR = datetime.datetime.now().year
+CURRENT_CYCLE = datetime.datetime.now().year + datetime.datetime.now().year % 2
 
 SQL_CONFIG = {
     'START_YEAR': get_cycle_start(1980),
@@ -26,7 +27,7 @@ SQL_CONFIG = {
     'END_YEAR_ITEMIZED': get_cycle_start(CURRENT_YEAR),
     'CYCLE_END_YEAR_ITEMIZED': get_cycle_end(CURRENT_YEAR),
     'PARTITION_START_YEAR': 1978,
-    'PARTITION_END_YEAR': 2018,
+    'PARTITION_END_YEAR': CURRENT_CYCLE,
 }
 
 REQUIRED_CREDS = (

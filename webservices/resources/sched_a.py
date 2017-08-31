@@ -9,6 +9,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+from webservices.common import util
 
 
 @doc(
@@ -74,6 +75,7 @@ class ScheduleAView(ItemizedResource):
         )
 
     def build_query(self, **kwargs):
+        kwargs = util.year_defaults(**kwargs)
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
         if kwargs.get('sub_id'):

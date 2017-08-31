@@ -257,8 +257,7 @@ Itemized Schedule A and Schedule B tables. In cases where we have the date of th
 (contribution_receipt_date in schedules/schedule_a, disbursement_date in schedules/schedule_b)
 the two_year_transaction_period is named after the ending, even-numbered year. If we do not
 have the date  of the transation, we fall back to using the report year (report_year in both
-tables) instead,  making the same cycle adjustment as necessary. If no transaction year is
-specified, the results default to the most current cycle.
+tables) instead,  making the same cycle adjustment as necessary.
 '''
 
 TOTALS = '''
