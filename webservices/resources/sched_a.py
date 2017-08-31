@@ -131,4 +131,3 @@ class ScheduleAEfileView(views.ApiResource):
                 ]),
             ),
         )
-
