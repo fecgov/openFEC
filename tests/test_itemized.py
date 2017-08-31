@@ -57,7 +57,6 @@ class TestItemized(ApiBaseTest):
 
     def test_two_year_transaction_period_default_supplied_automatically(self):
         CURRENT_CYCLE = datetime.datetime.now().year + datetime.datetime.now().year % 2
-
         receipts = [
             factories.ScheduleAFactory(
                 report_year=CURRENT_CYCLE,
@@ -88,7 +87,7 @@ class TestItemized(ApiBaseTest):
         receipts = [
             factories.ScheduleAFactory(
                 report_year=2016,
-                contribution_receipt_date=datetime.date(2016, 1, 1),
+                contribution_receipt_date=datetime.date(2016, 2, 1),
                 two_year_transaction_period=2016
             ),
             factories.ScheduleAFactory(
@@ -103,9 +102,10 @@ class TestItemized(ApiBaseTest):
         )
         self.assertEqual(len(response['results']), 1)
         response = self._response(
-            api.url_for(ScheduleAView, max_date='2017-01-01')
+            api.url_for(ScheduleAView, min_date='2016-01-01')
         )
-        self.assertEqual(len(response['results']), 0)
+        print(response['results'])
+        self.assertEqual(len(response['results']), 1)
 
 
     def test_two_year_transaction_period_limits_results_per_cycle(self):
