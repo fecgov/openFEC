@@ -8,7 +8,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
-
+from webservices.common import util
 
 @doc(
     tags=['disbursements'],
@@ -61,6 +61,7 @@ class ScheduleBView(ItemizedResource):
         )
 
     def build_query(self, **kwargs):
+        kwargs = util.year_defaults(**kwargs)
         query = super(ScheduleBView, self).build_query(**kwargs)
         query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
         query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))

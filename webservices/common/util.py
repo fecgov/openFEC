@@ -57,38 +57,44 @@ def year_defaults(**kwargs):
     have receipt date in the future, but we can keep it going now for
     a smoother customer experience and try infer the most consistent
     defaults.
-f
+
     Here are the conditions:
-        - replace empty min_date with first day of the cycle, if cycle is supplied
-        - replace empty min_date with the first day of the cycle, if cycle is supplied
-        - check to make sure there isn't more than a 6 year period
-        - if only a min date, end in the 2-year period for max_date
-        - if only a max date, end in the 2-year period for min_date
-        - if no date information is passed search for the current cycle
+        - if no date supplied default to the current 2-year period
+        - if a cycle is selected, that will provide sufficient date filtering
+        - if there is a min and max date check to make sure there isn't more than a 6 year period
+        - if cycle and only one min date or max-date, it adds the restriction with in the 2-year period
     """
     min_date = kwargs.get('min_date')
     max_date = kwargs.get('max_date')
     cycle = kwargs.get('two_year_transaction_period')
-
-    if cycle and cycle is not None and not min_date:
+    # debug
+    print ('Function:')
+    print ([min_date, max_date, cycle])
+    if min_date is None and max_date is None and cycle is None:
+        print(4)
+        kwargs['two_year_transaction_period'] = CURRENT_CYCLE
+        return kwargs
+    if cycle is not None:
+        return kwargs
+    # this is for cases where only one date (min_date or max_date) is present
+    if not min_date:
+        print(1)
         begin_cycle = cycle - 1
         kwargs['min_date'] = datetime(begin_cycle, 1, 1)
-    if cycle and not max_date:
+        return kwargs
+    if not max_date:
+        print(2)
         kwargs['max_date'] = datetime(cycle, 12, 31)
-    # We plan on rolling this back in the future but wanted to confirm performance
+        return kwargs
+    # We plan on rolling this back the 6 year restriction in the future
+    # but wanted to confirm performance on 6 years first.
     if min_date and max_date:
+        print(3)
         if (max_date - min_date).days > 2190:
             raise ValidationError(
-                'Cannot search for more that a 6 year period. Adjust max_date and min_date',
+                'Cannot search for more that a 6 year period. Adjust max_date and min_date or pick a two_year_period.',
                 status_code=422
             )
-    if min_date is not None:
-        cycle = min_date.year + min_date.year % 2
-        kwargs['max_date'] = datetime(cycle, 12, 31)
-    if max_date is not None:
-        cycle_begin = max_date.year - max_date.year % 2
-        kwargs['min_date'] = datetime(cycle_begin, 12, 31)
-    else:
-        kwargs['two_year_transaction_period'] = CURRENT_CYCLE
 
+    print([min_date, max_date, cycle])
     return kwargs
