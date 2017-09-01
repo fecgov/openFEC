@@ -295,7 +295,7 @@ On Cloud Foundry, we use the redis32
 service. The Redis service can be created as follows:
 
 ```
-cf create-service redis32 standard-ha fec-ha-redis-dev
+cf create-service redis32 standard-ha fec-redis
 ```
 
 #### Setting up credentials
