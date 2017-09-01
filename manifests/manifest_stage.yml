@@ -3,7 +3,7 @@ inherit: manifest_base.yml
 host: fec-stage-api
 services:
   - fec-creds-stage
-  - fec-redis-stage
+  - fec-ha-redis-stage
   - fec-s3-stage
 env:
   NEW_RELIC_ENV: stage
