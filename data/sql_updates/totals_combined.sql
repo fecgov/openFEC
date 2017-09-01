@@ -18,7 +18,10 @@ with last_subset as (
     from disclosure.v_sum_and_det_sum_report
     where
         get_cycle(rpt_yr) >= :START_YEAR
-    order by
+        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
+        and (form_tp_cd != 'F5' or (form_tp_cd = 'F5' and rpt_tp not in ('24','48')))
+        and form_tp_cd != 'F6'
+        order by
         cmte_id,
         cycle,
         to_timestamp(cvg_end_dt) desc nulls last
@@ -54,6 +57,9 @@ first_subset as (
     from disclosure.v_sum_and_det_sum_report
     where
         get_cycle(rpt_yr) >= :START_YEAR
+        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
+        and (form_tp_cd != 'F5'or (form_tp_cd = 'F5' and rpt_tp not in ('24','48')))
+        and form_tp_cd != 'F6'
     order by
         cmte_id,
         get_cycle(rpt_yr),
@@ -71,6 +77,9 @@ first as (
     from disclosure.v_sum_and_det_sum_report
     where
         get_cycle(rpt_yr) >= :START_YEAR
+        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
+        and (form_tp_cd != 'F5' or (form_tp_cd = 'F5' and rpt_tp not in ('24','48')))
+        and form_tp_cd != 'F6'
     order by
         cmte_id,
         get_cycle(rpt_yr),
@@ -177,6 +186,9 @@ first as (
             get_cycle(vsd.rpt_yr) = first.cycle
     where
         get_cycle(vsd.rpt_yr) >= :START_YEAR
+        -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
+        and (vsd.form_tp_cd != 'F5' or (vsd.form_tp_cd = 'F5' and vsd.rpt_tp not in ('24','48')))
+        and vsd.form_tp_cd != 'F6'
     group by
         vsd.cmte_id,
         vsd.form_tp_cd,
