@@ -390,5 +390,5 @@ def filter_candidate_totals(query, kwargs, totals_model):
     query = query.filter(
         CandidateHistory.candidate_inactive == False,  # noqa
         #CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
-    )
+    ).distinct()
     return query
