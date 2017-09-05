@@ -279,7 +279,7 @@ begin
             WHERE
                 %I.sub_id = $1.sub_id',
                 child_table_name, child_table_name) USING view_row;
-            PERFORM increment_aggregates(view_row);
+            PERFORM increment_sched_b_aggregates(view_row);
         end if;
     end if;
 
@@ -312,7 +312,7 @@ begin
             IF tg_op = 'DELETE' THEN
                 DELETE FROM ofec_sched_b_master WHERE sub_id = view_row.sub_id;
             END IF;
-            PERFORM decrement_aggregates(view_row);
+            PERFORM decrement_sched_b_aggregates(view_row);
         end if;
     end if;
     if tg_op = 'DELETE' then
@@ -343,7 +343,7 @@ drop trigger if exists f_item_sched_b_before_trigger on disclosure.f_item_receip
 create trigger f_item_sched_b_before_trigger before delete or update
     on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_b_delete_update(:START_YEAR_AGGREGATE);
 
-CREATE OR REPLACE FUNCTION increment_aggregates(view_row fec_fitem_sched_b_vw) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION increment_sched_b_aggregates(view_row fec_fitem_sched_b_vw) RETURNS VOID AS $$
 BEGIN
     IF view_row.disb_amt IS NOT NULL AND (view_row.memo_cd != 'X' OR view_row.memo_cd IS NULL) THEN
         INSERT INTO ofec_sched_b_aggregate_purpose
@@ -374,7 +374,7 @@ BEGIN
 END
 $$ language plpgsql;
 
-CREATE OR REPLACE FUNCTION decrement_aggregates(view_row fec_fitem_sched_b_vw) RETURNS VOID AS $$
+CREATE OR REPLACE FUNCTION decrement_sched_b_aggregates(view_row fec_fitem_sched_b_vw) RETURNS VOID AS $$
 BEGIN
     IF view_row.disb_amt IS NOT NULL AND (view_row.memo_cd != 'X' OR view_row.memo_cd IS NULL) THEN
         UPDATE ofec_sched_b_aggregate_purpose
