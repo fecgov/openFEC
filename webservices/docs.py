@@ -1001,6 +1001,13 @@ AUDIT_CASE_ID = '''
 Number associated with an audit case -- Need to find a better description to go here.
 '''
 
+ISSUE_ID = '''
+Number associated with an audit issue -- Need to find a better description to go here.
+'''
+
+ISSUE = '''
+Name of the audit finding issue -- Need to find a better description to go here.
+'''
 TIER = '''
 Level of Audit -- Need to find a better description to go here.
 '''

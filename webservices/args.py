@@ -754,16 +754,27 @@ schedule_a_by_state_recipient_totals = {
     ),
 }
 
-AuditFinding = {
-    'finding_id': fields.List(fields.Int(), description='ID of Finding'),
-    'finding': fields.List(fields.Str, description='Name of Finding'),
-    'tier': fields.List(fields.Int(), description='Level of Tier'),
+AuditFindingsView = {
+    'tier': fields.List(fields.Int(), description='Tier'),
+    'tier_one_id': fields.List(fields.Int(), description='ID of Finding'),
+    'tier_one_finding': fields.List(fields.Str, description='Name of Finding'),
+    'tier_two_id': fields.List(fields.Int(), description='ID of Issue'),
+    'tier_two_finding': fields.List(fields.Str, description='Name of Issue'),
+    
 }
 
-AuditFindingsView = {
-    'tier_one_id': fields.List(fields.Str(), description='ID of Finding'),
-    'tier_one_finding': fields.List(fields.Str, description='Name of Finding'),
-    'tier_two_id': fields.List(fields.Str(), description='ID of Finding'),
-    'tier_two_finding': fields.List(fields.Str, description='Name of Finding'),
+AuditSearchView = {
+    'finding_id': fields.List(fields.Int(), description='ID of Finding (Tier 1)'),
+    'finding': fields.List(fields.Str(), description='Name of Finding'),
+    'issue_id': fields.List(fields.Int(), description='ID of Issue (Tier 2)'),
+    'issue': fields.List(fields.Str(), description='Name of Issue'),
+    'election_cycle': fields.List(fields.Int(), description='Election Cycle'),
+    'committee_id': fields.List(fields.Str(), description='Commmittd ID'),
+    'committee_name': fields.List(fields.Str(), description='Committe Name'),
+    'committee_designation': fields.List(fields.Str(), description='Committe Designation'),
+    'committee_type': fields.List(fields.Str(), description='Committe Type'),
+    'committee_description': fields.List(fields.Str(), description='Committe Description'),
+    'candidate_id': fields.List(fields.Str(), description='Candidate ID'),
+    'candidate_name': fields.List(fields.Str(), description='Candidate Name'),
 }
 
