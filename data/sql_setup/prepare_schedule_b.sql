@@ -2,10 +2,13 @@
 drop index if exists disclosure.nml_sched_b_link_id_idx;
 create index nml_sched_b_link_id_idx on disclosure.nml_sched_b (link_id);
 
-
 -- Drop the old nightly refresh retry table and function if they still exist.
 drop table if exists ofec_sched_b_nightly_retries;
 drop function if exists retry_processing_schedule_b_records(start_year integer);
+
+-- Drop the old queues if they still exist.
+drop table if exists ofec_sched_b_queue_new;
+drop table if exists ofec_sched_b_queue_old;
 
 -- Create trigger to maintain Schedule A for inserts and updates
 -- These happen after a row is inserted/updated so that we can leverage pulling
@@ -398,3 +401,7 @@ BEGIN
     END IF;
 END
 $$ language plpgsql;
+
+-- Drop the old trigger functions if they still exist.
+drop function if exists ofec_sched_b_insert_update_queues();
+drop function if exists ofec_sched_b_delete_update_queues();
