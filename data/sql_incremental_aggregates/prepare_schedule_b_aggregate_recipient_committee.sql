@@ -1,3 +1,6 @@
+-- Drop the old functions if they still exist.
+drop function if exists ofec_sched_b_update_aggregate_recipient_id();
+
 -- Create initial aggregate
 drop table if exists ofec_sched_b_aggregate_recipient_id_tmp;
 create table ofec_sched_b_aggregate_recipient_id_tmp as

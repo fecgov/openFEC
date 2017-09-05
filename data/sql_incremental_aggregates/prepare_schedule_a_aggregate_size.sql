@@ -1,3 +1,6 @@
+-- Drop the old functions if they still exist.
+drop function if exists ofec_sched_a_update_aggregate_size();
+
 create or replace function contribution_size(value numeric) returns int as $$
 begin
     return case

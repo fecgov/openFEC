@@ -1,3 +1,6 @@
+-- Drop the old functions if they still exist.
+drop function if exists ofec_sched_a_update_aggregate_state();
+
 -- Create initial aggregate
 drop table if exists ofec_sched_a_aggregate_state_tmp;
 create table ofec_sched_a_aggregate_state_tmp as

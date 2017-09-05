@@ -2,6 +2,10 @@
 drop table if exists ofec_sched_a_nightly_retries;
 drop function if exists retry_processing_schedule_a_records(start_year integer);
 
+-- Drop the old queues if they still exist.
+drop table if exists ofec_sched_a_queue_new;
+drop table if exists ofec_sched_a_queue_old;
+
 
 -- Create trigger to maintain Schedule A for inserts and updates
 -- These happen after a row is inserted/updated so that we can leverage pulling
@@ -425,3 +429,7 @@ BEGIN
     END IF;
 END
 $$ language plpgsql;
+
+-- Drop the old trigger functions if they still exist.
+drop function if exists ofec_sched_a_insert_update_queues();
+drop function if exists ofec_sched_a_delete_update_queues();
