@@ -36,14 +36,10 @@ CREATE MATERIALIZED VIEW ofec_audit_search_mv_tmp AS
   ORDER BY fvw.tier_one_finding, fvw.tier_two_finding
 WITH DATA;
 
-ALTER TABLE public.ofec_audit_search_mv
-  OWNER TO fec;
-GRANT ALL ON TABLE public.ofec_audit_search_mv TO fec;
-GRANT SELECT ON TABLE public.ofec_audit_search_mv TO fec_read;
 
 -- Index: public.ofec_audit_search_candidate_id
 
--- DROP INDEX public.ofec_audit_search_candidate_id;
+DROP INDEX if exists public.ofec_audit_search_candidate_id;
 
 CREATE INDEX ofec_audit_search_candidate_id
   ON public.ofec_audit_search_mv
@@ -52,7 +48,7 @@ CREATE INDEX ofec_audit_search_candidate_id
 
 -- Index: public.ofec_audit_search_committee_id
 
--- DROP INDEX public.ofec_audit_search_committee_id;
+DROP INDEX if exists public.ofec_audit_search_committee_id;
 
 CREATE INDEX ofec_audit_search_committee_id
   ON public.ofec_audit_search_mv
@@ -61,7 +57,7 @@ CREATE INDEX ofec_audit_search_committee_id
 
 -- Index: public.ofec_audit_search_election_cycle
 
--- DROP INDEX public.ofec_audit_search_election_cycle;
+DROP INDEX if exists public.ofec_audit_search_election_cycle;
 
 CREATE INDEX ofec_audit_search_election_cycle
   ON public.ofec_audit_search_mv
@@ -70,7 +66,7 @@ CREATE INDEX ofec_audit_search_election_cycle
 
 -- Index: public.ofec_audit_search_finding_id
 
--- DROP INDEX public.ofec_audit_search_finding_id;
+DROP INDEX if exists public.ofec_audit_search_finding_id;
 
 CREATE INDEX ofec_audit_search_finding_id
   ON public.ofec_audit_search_mv
@@ -79,7 +75,7 @@ CREATE INDEX ofec_audit_search_finding_id
 
 -- Index: public.ofec_audit_search_finding_issue_id
 
--- DROP INDEX public.ofec_audit_search_finding_issue_id;
+DROP INDEX if exists public.ofec_audit_search_finding_issue_id;
 
 CREATE INDEX ofec_audit_search_finding_issue_id
   ON public.ofec_audit_search_mv
@@ -88,7 +84,7 @@ CREATE INDEX ofec_audit_search_finding_issue_id
 
 -- Index: public.ofec_audit_search_issue_id
 
--- DROP INDEX public.ofec_audit_search_issue_id;
+DROP INDEX if exists public.ofec_audit_search_issue_id;
 
 CREATE INDEX ofec_audit_search_issue_id
   ON public.ofec_audit_search_mv
@@ -97,10 +93,14 @@ CREATE INDEX ofec_audit_search_issue_id
 
 -- Index: public.ofec_audit_search_mv_tmp_idx_idx1
 
--- DROP INDEX public.ofec_audit_search_mv_tmp_idx_idx1;
+DROP INDEX if exists public.ofec_audit_search_mv_tmp_idx_idx1;
 
 CREATE UNIQUE INDEX ofec_audit_search_mv_tmp_idx_idx1
   ON public.ofec_audit_search_mv
   USING btree
   (idx);
  
+
+ --
+
+
