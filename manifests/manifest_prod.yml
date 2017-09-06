@@ -3,7 +3,6 @@ inherit: manifest_base.yml
 host: fec-prod-api
 services:
   - fec-creds-prod
-  - fec-redis
   - fec-s3-prod
 env:
   PRODUCTION: True
