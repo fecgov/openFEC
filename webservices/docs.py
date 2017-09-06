@@ -1014,3 +1014,13 @@ Level of Audit -- Need to find a better description to go here.
 ELECTION_CYCLE = '''
 Two year election cycle -- Need to find a better description to go here.
 '''
+#audit search
+AUDIT_SEARCH = '''
+This is a search tool for Final Audit Reports approved by the Commission since inception. 
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
+'''
+#audit finding
+AUDIT_FINDING = '''
+This is a search tool for Final Audit Reports approved by the Commission since inception. 
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
+'''
