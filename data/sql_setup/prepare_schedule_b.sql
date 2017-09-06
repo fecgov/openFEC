@@ -353,7 +353,7 @@ BEGIN
             (cmte_id, cycle, purpose, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, disbursement_purpose(view_row.disb_tp, view_row.disb_desc), view_row.disb_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_purpose DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_ofec_sched_b_aggregate_purpose_cmte_id_cycle_purpose DO UPDATE
         SET
             total = ofec_sched_b_aggregate_purpose.total + excluded.total,
             count = ofec_sched_b_aggregate_purpose.count + excluded.count;
@@ -361,7 +361,7 @@ BEGIN
             (cmte_id, cycle, recipient_nm, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, view_row.recipient_nm, view_row.disb_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_recipient DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_ofec_sched_b_aggregate_recipient_cmte_id_cycle_recipient DO UPDATE
         SET
             total = ofec_sched_b_aggregate_recipient.total + excluded.total,
             count = ofec_sched_b_aggregate_recipient.count + excluded.count;
@@ -369,7 +369,7 @@ BEGIN
             (cmte_id, cycle, recipient_cmte_id, recipient_nm, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, clean_repeated(view_row.recipient_cmte_id, view_row.cmte_id), view_row.recipient_nm, view_row.disb_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_recipient_cmte_id DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_sched_b_agg_recpnt_id_cmte_id_cycle_recipient_cmte_id DO UPDATE
         SET
             total = ofec_sched_b_aggregate_recipient_id.total + excluded.total,
             count = ofec_sched_b_aggregate_recipient_id.count + excluded.count;

@@ -20,16 +20,18 @@ group by cmte_id, cycle, clean_repeated(recipient_cmte_id, cmte_id)
 ;
 
 alter table ofec_sched_b_aggregate_recipient_id_tmp add column idx serial;
-alter table ofec_sched_b_aggregate_recipient_id_tmp add constraint uq_cmte_id_cycle_recipient_cmte_id unique (cmte_id, cycle, recipient_cmte_id);
+-- Have to violate naming convention below due to Postgres identifier length limitations
+alter table ofec_sched_b_aggregate_recipient_id_tmp add constraint uq_sched_b_agg_recpnt_id_tmp_cmte_id_cycle_recipient_cmte_id unique (cmte_id, cycle, recipient_cmte_id);
 
 -- Create indices on aggregate
-create index on ofec_sched_b_aggregate_recipient_id_tmp (cmte_id);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (cycle);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (recipient_cmte_id);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (total);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (count);
-create index on ofec_sched_b_aggregate_recipient_id_tmp (cmte_id, cycle);
+create index ofec_sched_b_aggregate_recipient_id_tmp_cmte_id on ofec_sched_b_aggregate_recipient_id_tmp(cmte_id);
+create index ofec_sched_b_aggregate_recipient_id_tmp_cycle on ofec_sched_b_aggregate_recipient_id_tmp(cycle);
+create index ofec_sched_b_aggregate_recipient_id_tmp_recipient_cmte_id on ofec_sched_b_aggregate_recipient_id_tmp(recipient_cmte_id);
+create index ofec_sched_b_aggregate_recipient_id_tmp_total on ofec_sched_b_aggregate_recipient_id_tmp(total);
+create index ofec_sched_b_aggregate_recipient_id_tmp_count on ofec_sched_b_aggregate_recipient_id_tmp(count);
+create index ofec_sched_b_aggregate_recipient_id_tmp_cmte_id_cycle on ofec_sched_b_aggregate_recipient_id_tmp(cmte_id, cycle);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_b_aggregate_recipient_id;
 alter table ofec_sched_b_aggregate_recipient_id_tmp rename to ofec_sched_b_aggregate_recipient_id;
+select rename_indexes('ofec_sched_b_aggregate_recipient_id');

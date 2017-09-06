@@ -353,7 +353,7 @@ BEGIN
             (cmte_id, cycle, employer, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, view_row.contbr_employer, view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_employer DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_sched_a_aggregate_employer_cmte_id_cycle_employer DO UPDATE
         SET
             total = ofec_sched_a_aggregate_employer.total + excluded.total,
             count = ofec_sched_a_aggregate_employer.count + excluded.count;
@@ -361,7 +361,7 @@ BEGIN
             (cmte_id, cycle, occupation, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, view_row.contbr_occupation, view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_occupation DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_sched_a_aggregate_occupation_cmte_id_cycle_occupation DO UPDATE
         SET
             total = ofec_sched_a_aggregate_occupation.total + excluded.total,
             count = ofec_sched_a_aggregate_occupation.count + excluded.count;
@@ -369,7 +369,7 @@ BEGIN
             (cmte_id, cycle, state, state_full, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, view_row.contbr_st, expand_state(view_row.contbr_st), view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_state DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_ofec_sched_a_aggregate_state_cmte_id_cycle_state DO UPDATE
         SET
             total = ofec_sched_a_aggregate_state.total + excluded.total,
             count = ofec_sched_a_aggregate_state.count + excluded.count;
@@ -377,7 +377,7 @@ BEGIN
             (cmte_id, cycle, zip, state, state_full, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, view_row.contbr_zip, view_row.contbr_st, expand_state(view_row.contbr_st), view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_zip DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_ofec_sched_a_aggregate_zip_cmte_id_cycle_zip DO UPDATE
         SET
             total = ofec_sched_a_aggregate_zip.total + excluded.total,
             count = ofec_sched_a_aggregate_zip.count + excluded.count;
@@ -385,7 +385,7 @@ BEGIN
             (cmte_id, cycle, size, total, count)
         VALUES
             (view_row.cmte_id, view_row.election_cycle, contribution_size(view_row.contb_receipt_amt), view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_cmte_id_cycle_size DO UPDATE
+        ON CONFLICT ON CONSTRAINT uq_ofec_sched_a_aggregate_size_cmte_id_cycle_size DO UPDATE
         SET
             total = ofec_sched_a_aggregate_size.total + excluded.total,
             count = ofec_sched_a_aggregate_size.count + excluded.count;
