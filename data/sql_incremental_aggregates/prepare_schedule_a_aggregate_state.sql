@@ -21,17 +21,18 @@ group by cmte_id, cycle, state
 ;
 
 alter table ofec_sched_a_aggregate_state_tmp add column idx serial;
-alter table ofec_sched_a_aggregate_state_tmp add constraint uq_cmte_id_cycle_state unique (cmte_id, cycle, state);
+alter table ofec_sched_a_aggregate_state_tmp add constraint uq_ofec_sched_a_aggregate_state_tmp_cmte_id_cycle_state unique (cmte_id, cycle, state);
 
 -- Create indices on aggregate
-create index on ofec_sched_a_aggregate_state_tmp (cmte_id);
-create index on ofec_sched_a_aggregate_state_tmp (cycle);
-create index on ofec_sched_a_aggregate_state_tmp (state);
-create index on ofec_sched_a_aggregate_state_tmp (state_full);
-create index on ofec_sched_a_aggregate_state_tmp (total);
-create index on ofec_sched_a_aggregate_state_tmp (count);
-create index on ofec_sched_a_aggregate_state_tmp (cycle, cmte_id);
+create index ofec_sched_a_aggregate_state_tmp_cmte_id on ofec_sched_a_aggregate_state_tmp(cmte_id);
+create index ofec_sched_a_aggregate_state_tmp_cycle on ofec_sched_a_aggregate_state_tmp(cycle);
+create index ofec_sched_a_aggregate_state_tmp_state on ofec_sched_a_aggregate_state_tmp(state);
+create index ofec_sched_a_aggregate_state_tmp_state_full on ofec_sched_a_aggregate_state_tmp(state_full);
+create index ofec_sched_a_aggregate_state_tmp_total on ofec_sched_a_aggregate_state_tmp(total);
+create index ofec_sched_a_aggregate_state_tmp_count on ofec_sched_a_aggregate_state_tmp(count);
+create index ofec_sched_a_aggregate_state_tmp_cycle_cmte_id on ofec_sched_a_aggregate_state_tmp(cycle, cmte_id);
 
 -- Remove previous aggregate and rename new aggregate
 drop table if exists ofec_sched_a_aggregate_state;
 alter table ofec_sched_a_aggregate_state_tmp rename to ofec_sched_a_aggregate_state;
+select rename_indexes('ofec_sched_a_aggregate_state');
