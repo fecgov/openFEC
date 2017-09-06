@@ -267,17 +267,3 @@ BEGIN
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION rename_indexes(p_table_name TEXT) RETURNS VOID AS $$
-DECLARE
-    indexes_cursor CURSOR FOR
-        SELECT indexname AS name
-        FROM pg_indexes
-        WHERE tablename = p_table_name;
-BEGIN
-
-    FOR index_name IN indexes_cursor LOOP
-        EXECUTE format('ALTER INDEX %1$I RENAME TO %2$I', index_name.name, regexp_replace(index_name.name, '_tmp$', ''));
-    END LOOP;
-END
-$$ LANGUAGE plpgsql;
