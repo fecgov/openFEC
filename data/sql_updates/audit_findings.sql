@@ -42,7 +42,7 @@ WITH DATA;
 DROP INDEX if exists public.ofec_audit_search_candidate_id;
 
 CREATE INDEX ofec_audit_search_candidate_id
-  ON public.ofec_audit_search_mv
+  ON public.ofec_audit_search_mv_tmp
   USING btree
   (candidate_id COLLATE pg_catalog."default");
 
@@ -51,7 +51,7 @@ CREATE INDEX ofec_audit_search_candidate_id
 DROP INDEX if exists public.ofec_audit_search_committee_id;
 
 CREATE INDEX ofec_audit_search_committee_id
-  ON public.ofec_audit_search_mv
+  ON public.ofec_audit_search_mv_tmp
   USING btree
   (committee_id COLLATE pg_catalog."default");
 
@@ -60,7 +60,7 @@ CREATE INDEX ofec_audit_search_committee_id
 DROP INDEX if exists public.ofec_audit_search_election_cycle;
 
 CREATE INDEX ofec_audit_search_election_cycle
-  ON public.ofec_audit_search_mv
+  ON public.ofec_audit_search_mv_tmp
   USING btree
   (election_cycle);
 
@@ -69,7 +69,7 @@ CREATE INDEX ofec_audit_search_election_cycle
 DROP INDEX if exists public.ofec_audit_search_finding_id;
 
 CREATE INDEX ofec_audit_search_finding_id
-  ON public.ofec_audit_search_mv
+  ON public.ofec_audit_search_mv_tmp
   USING btree
   (finding_id);
 
@@ -78,7 +78,7 @@ CREATE INDEX ofec_audit_search_finding_id
 DROP INDEX if exists public.ofec_audit_search_finding_issue_id;
 
 CREATE INDEX ofec_audit_search_finding_issue_id
-  ON public.ofec_audit_search_mv
+  ON public.ofec_audit_search_mv_tmp
   USING btree
   (finding_id, issue_id);
 
@@ -87,7 +87,7 @@ CREATE INDEX ofec_audit_search_finding_issue_id
 DROP INDEX if exists public.ofec_audit_search_issue_id;
 
 CREATE INDEX ofec_audit_search_issue_id
-  ON public.ofec_audit_search_mv
+  ON public.ofec_audit_search_mv_tmp
   USING btree
   (issue_id);
 
@@ -96,7 +96,7 @@ CREATE INDEX ofec_audit_search_issue_id
 DROP INDEX if exists public.ofec_audit_search_mv_tmp_idx_idx1;
 
 CREATE UNIQUE INDEX ofec_audit_search_mv_tmp_idx_idx1
-  ON public.ofec_audit_search_mv
+  ON public.ofec_audit_search_mv_tmp
   USING btree
   (idx);
  
