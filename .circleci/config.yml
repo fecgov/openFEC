@@ -29,6 +29,12 @@ jobs:
           command: |
             sudo apt-get update && curl -sL https://deb.nodesource.com/setup_6.x | sudo bash - && sudo apt-get install -y nodejs
 
+      - restore_cache:
+          keys:
+          - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - fec-api-dependencies-
+
       - run:
           name: install dependencies
           command: |
@@ -39,6 +45,12 @@ jobs:
             npm install -g swagger-tools
             npm install
             npm run build
+
+      - save_cache:
+          paths:
+            - ./venv
+            - ./node_modules
+          key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
 
       - run:
           name: run tests
