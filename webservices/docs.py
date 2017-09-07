@@ -986,7 +986,7 @@ This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/l
 '''
 
 AUDIT_ID = '''
-Number associated with an audit -- Need to find a better description to go here.
+A unique identifier associated with an audit
 '''
 
 FINDING_ID = '''
@@ -998,7 +998,7 @@ Name of the audit finding -- Need to find a better description to go here.
 '''
 
 AUDIT_CASE_ID = '''
-Number associated with an audit case -- Need to find a better description to go here.
+A unique identifier associated with an audit case -- Need to find a better description to go here.
 '''
 
 ISSUE_ID = '''
