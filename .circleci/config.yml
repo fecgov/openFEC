@@ -1,0 +1,61 @@
+# Python CircleCI 2.0 configuration file
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+version: 2
+jobs:
+  build:
+    docker:
+      # CircleCI maintains a library of pre-built images documented at
+      # https://circleci.com/docs/2.0/circleci-images/
+      # use `-browsers` prefix for selenium tests, e.g. `<image_name>-browsers`
+
+      # Python
+      - image: circleci/python:3.5.3
+        environment:
+          - TZ=America/New_York
+
+      # PostgreSQL
+      - image: circleci/postgres:9.6.2
+        environment:
+          - POSTGRES_USER=circleci
+          - POSTGRES_DB=fec-api-test
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: install nodejs
+          command: |
+            sudo apt-get update && curl -sL https://deb.nodesource.com/setup_6.x | sudo bash - && sudo apt-get install -y nodejs
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install bandit codecov
+            pip install -r requirements.txt -r requirements-dev.txt
+            npm install -g swagger-tools
+            npm install
+            npm run build
+
+      - run:
+          name: run tests
+          command: |
+            . venv/bin/activate
+            py.test
+
+      - run:
+          name: perform post-test checks
+          command: |
+            . .venv/bin/activate
+            cd ..
+            bandit -r openFEC
+            cd openFEC
+            codecov
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
