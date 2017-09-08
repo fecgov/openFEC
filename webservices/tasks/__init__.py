@@ -28,7 +28,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     }
 
 def redis_url():
-    redis = env.get_service(label='redis28')
+    redis = env.get_service(label='redis32')
     if redis:
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
@@ -43,7 +43,7 @@ app.conf.update(
         'webservices.tasks.legal_docs',
     ),
     beat_schedule=schedule,
-    task_acks_late=True
+    task_acks_late=False
 )
 
 app.conf.ONCE = {

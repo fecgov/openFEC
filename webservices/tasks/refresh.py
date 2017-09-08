@@ -16,7 +16,7 @@ def refresh():
     buffer = io.StringIO()
     with mail.CaptureLogs(manage.logger, buffer):
         try:
-            manage.update_aggregates()
+            manage.update_functions()
             manage.refresh_itemized()
             manage.update_itemized('e')
             manage.update_schemas()

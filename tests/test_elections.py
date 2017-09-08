@@ -20,22 +20,22 @@ class TestElectionSearch(ApiBaseTest):
             candidate_status='C',
         )
         self.candidates = [
-            factory(office='P', state='US', district='00'),
-            factory(office='S', state='NJ', district='00'),
-            factory(office='H', state='NJ', district='09'),
-            factory(office='S', state='VA', district='00'),
-            factory(office='H', state='VA', district='05'),
-            factory(office='S', state='GA', district='00'),
+            factory(office='P', state='US', district='00', candidate_id='P12345'),
+            factory(office='S', state='NJ', district='00', candidate_id='SNJ123'),
+            factory(office='H', state='NJ', district='09', candidate_id='HNJ123'),
+            factory(office='S', state='VA', district='00', candidate_id='SVA123'),
+            factory(office='H', state='VA', district='05', candidate_id='HVA123'),
+            factory(office='S', state='GA', district='00', candidate_id='SGA123'),
         ]
         factory = functools.partial(
             factories.ElectionResultFactory
         )
         self.elections = [
-            factory(election_yr=2008, cand_office='P', cand_office_st='US', cand_office_district='00'),
-            factory(election_yr=2006, cand_office='S', cand_office_st='NJ', cand_office_district='00'),
-            factory(election_yr=2010, cand_office='H', cand_office_st='NJ', cand_office_district='09'),
-            factory(election_yr=2006, cand_office='S', cand_office_st='VA', cand_office_district='00'),
-            factory(election_yr=2010, cand_office='H', cand_office_st='VA', cand_office_district='05'),
+            factory(election_yr=2008, cand_office='P', cand_office_st='US', cand_office_district='00', cand_id='P12345'),
+            factory(election_yr=2006, cand_office='S', cand_office_st='NJ', cand_office_district='00', cand_id='SNJ123'),
+            factory(election_yr=2010, cand_office='H', cand_office_st='NJ', cand_office_district='09', cand_id='HNJ123'),
+            factory(election_yr=2006, cand_office='S', cand_office_st='VA', cand_office_district='00', cand_id='SVA123'),
+            factory(election_yr=2010, cand_office='H', cand_office_st='VA', cand_office_district='05', cand_id='HVA123'),
         ]
 
     def test_search_district(self):
@@ -71,13 +71,15 @@ class TestElectionSearch(ApiBaseTest):
                 election_yr=2006,
                 cand_office_st='GA',
                 cand_office_district='00',
-                cand_id='S012345',
+                cand_id='SGA123',
                 cand_name='George P. Burdell',
+                election_type='G',
+                fec_election_yr=2006,
             )
         ]
         results = self._results(api.url_for(ElectionList, office='senate', state='GA'))
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'incumbent_id': 'S012345', 'incumbent_name': 'George P. Burdell'})
+        assert_dicts_subset(results[0], {'incumbent_id': 'SGA123', 'incumbent_name': 'George P. Burdell'})
 
 
 class TestElections(ApiBaseTest):
@@ -93,6 +95,7 @@ class TestElections(ApiBaseTest):
                 election_years=[2010, 2012],
                 cycles=[2010, 2012],
                 office='S',
+                candidate_election_year=2012,
             ),
             factories.CandidateHistoryFactory(
                 candidate_id=self.candidate.candidate_id,
@@ -101,6 +104,7 @@ class TestElections(ApiBaseTest):
                 election_years=[2010, 2012],
                 cycles=[2010, 2012],
                 office='S',
+                candidate_election_year=2012,
             ),
         ]
         self.committees = [

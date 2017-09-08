@@ -55,10 +55,13 @@ class ElectionList(utils.Resource):
         """Get election records, sorted by status of office (P > S > H).
         """
         elections = self._get_elections(kwargs).subquery()
-        return db.session.query(
+        regular_elections = db.session.query(
             elections,
             ElectionResult.cand_id,
             ElectionResult.cand_name,
+            ElectionResult.election_yr,
+            ElectionResult.election_type,
+            ElectionResult.cand_office_district,
             sa.case(
                 [
                     (elections.c.office == 'P', 1),
@@ -74,11 +77,51 @@ class ElectionList(utils.Resource):
                 elections.c.office == ElectionResult.cand_office,
                 sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
                 elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
-            ),
-        ).order_by(
+                #There are some bad results in candidate_history that were causing results to appear
+                #for Senate that had no valid election
+                sa.func.coalesce(elections.c.candidate_id) == ElectionResult.cand_id,
+            )
+        ).distinct(
+            elections.c.candidate_id,
+        )
+        # union with special elections
+
+        special_elections = db.session.query(
+            elections,
+            ElectionResult.cand_id,
+            ElectionResult.cand_name,
+            ElectionResult.election_yr,
+            ElectionResult.election_type,
+            ElectionResult.cand_office_district,
+            sa.case(
+                [
+                    (elections.c.office == 'P', 1),
+                    (elections.c.office == 'S', 2),
+                    (elections.c.office == 'H', 3),
+                ],
+                else_=4,
+            ).label('_office_status'),
+        ).join(
+            ElectionResult,
+            sa.and_(
+                elections.c.state == ElectionResult.cand_office_st,
+                elections.c.office == ElectionResult.cand_office,
+                sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
+                ElectionResult.election_type == 'SP',
+                elections.c.two_year_period == ElectionResult.fec_election_yr,
+            )
+        ).distinct(
+            elections.c.state,
+            elections.c.office,
+        )
+
+        all_elections = regular_elections.union_all(special_elections).order_by(
             '_office_status',
             ElectionResult.cand_office_district,
         )
+
+
+        return all_elections
 
     def _get_elections(self, kwargs):
         """Get elections from candidate history records."""
@@ -87,9 +130,14 @@ class ElectionList(utils.Resource):
             CandidateHistory.office,
             CandidateHistory.district,
             CandidateHistory.two_year_period,
+            CandidateHistory.candidate_id,#was causing some weird stuff without this distinct condition
         ).filter(
-            CandidateHistory.candidate_inactive == False,  # noqa
+            CandidateHistory.candidate_inactive == False,   #noqa
         )
+        #Adding candidate_inactive back in, after consulting with FEC this is deemed as a needed column, but
+        #strong note that this filter does remove valid candidates
+        #e.g. CA - 34 (Xavier Becerra) for every cycle before 2018.  There may be other cases but this was one found
+        #empirically
         if kwargs.get('cycle'):
             query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
         if kwargs.get('office'):
@@ -177,13 +225,13 @@ class ElectionView(utils.Resource):
                 [(outcomes.c.cand_id != None, True)],  # noqa
                 else_=False,
             ).label('won'),
-        ).join(
+        ).outerjoin(
             latest,
             aggregates.c.candidate_id == latest.c.candidate_id,
         ).outerjoin(
             outcomes,
             aggregates.c.candidate_id == outcomes.c.cand_id,
-        )
+        ).distinct()
 
     def _get_pairs(self, totals_model, kwargs):
         pairs = CandidateHistory.query.with_entities(
@@ -193,6 +241,7 @@ class ElectionView(utils.Resource):
             CandidateHistory.incumbent_challenge_full,
             CandidateHistory.office,
             CandidateHistory.two_year_period,
+            CandidateHistory.candidate_election_year,
             CandidateCommitteeLink.committee_id,
             totals_model.receipts,
             totals_model.disbursements,
@@ -215,7 +264,7 @@ class ElectionView(utils.Resource):
         ).subquery()
         return db.session.query(
             latest.c.candidate_id,
-            sa.func.sum(latest.c.cash_on_hand_end_period).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period,0.0)).label('cash_on_hand_end_period'),
         ).group_by(
             latest.c.candidate_id,
         )
@@ -223,16 +272,18 @@ class ElectionView(utils.Resource):
     def _get_aggregates(self, pairs):
         return db.session.query(
             pairs.c.candidate_id,
+            pairs.c.candidate_election_year,
             sa.func.max(pairs.c.name).label('candidate_name'),
             sa.func.max(pairs.c.party_full).label('party_full'),
             sa.func.max(pairs.c.incumbent_challenge_full).label('incumbent_challenge_full'),
             sa.func.max(pairs.c.office).label('office'),
-            sa.func.sum(pairs.c.receipts).label('total_receipts'),
-            sa.func.sum(pairs.c.disbursements).label('total_disbursements'),
-            sa.func.sum(pairs.c.cash_on_hand_end_period).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(pairs.c.receipts, 0.0)).label('total_receipts'),
+            sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('total_disbursements'),
+            sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
         ).group_by(
             pairs.c.candidate_id,
+            pairs.c.candidate_election_year
         )
 
     def _get_outcomes(self, kwargs):
@@ -298,13 +349,13 @@ election_durations = {
 }
 
 def join_candidate_totals(query, kwargs, totals_model):
-    return query.join(
+    return query.outerjoin(
         CandidateCommitteeLink,
         sa.and_(
             CandidateHistory.candidate_id == CandidateCommitteeLink.candidate_id,
             CandidateHistory.two_year_period == CandidateCommitteeLink.fec_election_year,
         )
-    ).join(
+    ).outerjoin(
         totals_model,
         sa.and_(
             CandidateCommitteeLink.committee_id == totals_model.committee_id,
@@ -322,8 +373,10 @@ def filter_candidates(query, kwargs):
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
-        CandidateHistory.cycles.any(kwargs['cycle']),
+        #CandidateHistory.cycles.any(kwargs['cycle']),
+        CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year % 2) == kwargs['cycle'],
         CandidateHistory.office == kwargs['office'][0].upper(),
+
     )
     if kwargs.get('state'):
         query = query.filter(CandidateHistory.state == kwargs['state'])
@@ -336,6 +389,6 @@ def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
         CandidateHistory.candidate_inactive == False,  # noqa
-        CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
-    )
+        #CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
+    ).distinct()
     return query

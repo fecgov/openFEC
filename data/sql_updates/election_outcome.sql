@@ -8,28 +8,32 @@ with election_dates_house_senate as(
         election_state,
         office_sought,
         election_district,
-        election_yr
+        election_yr,
+        trc_election_type_id
     from fecapp.trc_election
     where office_sought != 'P'
-        group by
+    group by
         election_state,
         office_sought,
         election_district,
-        election_yr
+        election_yr,
+        trc_election_type_id
 ),
 election_dates_president as(
     select distinct on (election_yr)
         'US'::char(2) as election_state,
         office_sought,
         election_district,
-        election_yr
+        election_yr,
+        trc_election_type_id
     from fecapp.trc_election
     where office_sought = 'P'
-        group by
+    group by
         election_state,
         office_sought,
         election_district,
-        election_yr
+        election_yr,
+        trc_election_type_id
 ),
 -- Pull background info for the races
 -- See discussion in https://github.com/18F/openFEC-web-app/issues/514
@@ -62,7 +66,8 @@ records_with_incumbents_districts as (
         ed.election_district as cand_office_district,
         fec.cand_pty_affiliation,
         fec.cand_name,
-        ed.election_yr::numeric as election_yr
+        ed.election_yr::numeric as election_yr,
+        ed.trc_election_type_id as election_type
     from election_dates_house_senate ed
     left join
         incumbent_info fec on
@@ -101,7 +106,8 @@ records_with_incumbents as (
         end as cand_office_district,
         fec.cand_pty_affiliation,
         fec.cand_name,
-        ed.election_yr::numeric as election_yr
+        ed.election_yr::numeric as election_yr,
+        ed.trc_election_type_id as election_type
     from election_dates_house_senate ed
     left join
         incumbent_info fec on
@@ -130,7 +136,8 @@ records_with_incumbents_president as (
         cast('00' as varchar(2)) as cand_office_district,
         fec.cand_pty_affiliation,
         fec.cand_name,
-        ed.election_yr::numeric as election_yr
+        ed.election_yr::numeric as election_yr,
+        ed.trc_election_type_id as election_type
     from election_dates_president ed
     left join
         incumbent_info fec on

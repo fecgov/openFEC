@@ -26,6 +26,7 @@ from .load_legal_docs import (
 
 from .index_management import (
     initialize_legal_docs,
+    delete_index,
     create_staging_index,
     restore_from_staging_index,
 )

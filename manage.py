@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 
-from webservices import flow, partition
+from webservices import flow
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
@@ -38,39 +38,9 @@ manager.command(legal_docs.load_current_murs)
 manager.command(legal_docs.initialize_legal_docs)
 manager.command(legal_docs.create_staging_index)
 manager.command(legal_docs.restore_from_staging_index)
+manager.command(legal_docs.delete_index)
 manager.command(legal_docs.reinitialize_all_legal_docs)
 manager.command(legal_docs.refresh_legal_docs_zero_downtime)
-
-def check_itemized_queues(schedule):
-    """Checks to see if the queues associated with an itemized schedule have
-    been successfully cleared out and sends the information to the logs.
-    """
-
-    remaining_new_queue = db.engine.execute(
-        'select count(*) from ofec_sched_{schedule}_queue_new'.format(
-            schedule=schedule
-        )
-    ).scalar()
-    remaining_old_queue = db.engine.execute(
-        'select count(*) from ofec_sched_{schedule}_queue_old'.format(
-            schedule=schedule
-        )
-    ).scalar()
-
-    if remaining_new_queue == remaining_old_queue == 0:
-        logger.info(
-            'Successfully emptied Schedule {schedule} queues.'.format(
-                schedule=schedule.upper()
-            )
-        )
-    else:
-        logger.warn(
-            'Schedule {schedule} queues not empty ({new} new / {old} old left).'.format(
-                schedule=schedule.upper(),
-                new=remaining_new_queue,
-                old=remaining_old_queue
-            )
-        )
 
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
@@ -299,6 +269,17 @@ def partition_itemized(schedule):
     logger.info('Finished partitioning Schedule %s.', schedule)
 
 @manager.command
+def index_itemized(schedule):
+    """This command (re-)creates the indexes for the itemized schedule table
+    partition and removes any old ones.
+    Run this when you make changes to the index definitions on the itemized
+    schedule A and B data but do not need to do a full repartition.
+    """
+    logger.info('(Re-)indexing Schedule %s...', schedule)
+    execute_sql_file('data/sql_partition/index_schedule_{0}.sql'.format(schedule))
+    logger.info('Finished (re-)indexing Schedule %s.', schedule)
+
+@manager.command
 def rebuild_aggregates(processes=1):
     """These are the functions used to update the aggregates and schedules.
     Run this when you make a change to code in:
@@ -313,50 +294,6 @@ def update_aggregates():
     """These are run nightly to recalculate the totals
     """
     logger.info('Updating incremental aggregates...')
-
-    with db.engine.begin() as connection:
-        connection.execute(
-            sa.text('select update_aggregates()').execution_options(
-                autocommit=True
-            )
-        )
-        logger.info('Finished updating Schedule E and support aggregates.')
-
-@manager.command
-def refresh_itemized():
-    """These are run nightly to refresh the itemized schedule A and B data."""
-
-    refresh_itemized_a()
-    refresh_itemized_b()
-
-    logger.info('Finished updating incremental aggregates.')
-
-@manager.command
-def refresh_itemized_a():
-    """Used to refresh the itemized Schedule A data."""
-
-    logger.info('Updating Schedule A...')
-    message = partition.SchedAGroup.process_queues()
-
-    if message[0] == 0:
-        logger.info(message[1])
-    else:
-        logger.error(message[1])
-
-    logger.info('Finished updating Schedule A.')
-
-@manager.command
-def refresh_itemized_b():
-    """Used to refresh the itemized Schedule B data."""
-    logger.info('Updating Schedule B...')
-    message = partition.SchedBGroup.process_queues()
-
-    if message[0] == 0:
-        logger.info(message[1])
-    else:
-        logger.error(message[1])
-
-    logger.info('Finished updating Schedule B.')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
