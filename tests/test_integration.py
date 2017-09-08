@@ -412,10 +412,14 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_totals_combined_mv')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        db.session.refresh(existing)
+        refreshed = models.ScheduleABySize.query.filter_by(
+            size=0,
+            cycle=2016,
+            committee_id=existing.committee_id,
+        ).first()
         # Updated total includes new Schedule A filing and new report
-        self.assertAlmostEqual(existing.total, total + 75 + 20)
-        self.assertEqual(existing.count, None)
+        self.assertAlmostEqual(refreshed.total, total + 75 + 20)
+        self.assertEqual(refreshed.count, None)
 
     def test_update_aggregate_purpose_create(self):
         db.session.execute('delete from disclosure.f_item_receipt_or_exp')
