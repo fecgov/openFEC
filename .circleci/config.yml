@@ -42,7 +42,7 @@ jobs:
             . venv/bin/activate
             pip install bandit codecov
             pip install -r requirements.txt -r requirements-dev.txt
-            npm install -g swagger-tools
+            sudo npm install -g swagger-tools
             npm install
             npm run build
 
