@@ -18,9 +18,10 @@ BEGIN;
 \i pgtap.sql
 -- Load tests
 
+CREATE SCHEMA test_functions;
+
+\i ../../data/functions/utils.sql 
 \i functions/utils.sql
 
-
--- Finish the tests and clean up.
-SELECT * FROM finish();
+SELECT * FROM runtests('test_functions', '.*');
 ROLLBACK;

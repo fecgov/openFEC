@@ -1,11 +1,11 @@
-\i ../../data/functions/utils.sql 
-
-SELECT plan(6);   -- Number of tests
-
--- Run the tests.
-SELECT is(get_cycle(input), expected,
-          format('get_cycle(%s) == %s', input, expected))
-FROM (VALUES
-  (0, 0), (1, 2), (2, 2),
-  (1998, 1998), (1999, 2000), (2000, 2000)
-) as test_data (input, expected);
+CREATE OR REPLACE FUNCTION test_functions.get_cycle(
+) RETURNS SETOF TEXT AS $$
+BEGIN
+  RETURN NEXT is(get_cycle(0), 0, 'get_cycle(0) == 0');
+  RETURN NEXT is(get_cycle(1), 2, 'get_cycle(1) == 2');
+  RETURN NEXT is(get_cycle(2), 2, 'get_cycle(2) == 2');
+  RETURN NEXT is(get_cycle(1998), 1998, 'get_cycle(1998) == 1998');
+  RETURN NEXT is(get_cycle(1999), 2000, 'get_cycle(1999) == 2000');
+  RETURN NEXT is(get_cycle(2000), 2000, 'get_cycle(2000) == 2000');
+END;
+$$ LANGUAGE plpgsql;
