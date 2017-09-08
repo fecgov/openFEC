@@ -28,7 +28,7 @@ with totals as (
 ),
 -- Aggregated totals by candidate by cycle
 cycle_totals as (
-    select
+    select distinct on (link.cand_id, totals.cycle)
         link.cand_id as candidate_id,
         max(election.cand_election_year) as election_year,
         totals.cycle,
@@ -53,6 +53,7 @@ cycle_totals as (
         link.cmte_dsgn in ('P', 'A')
     group by
         link.cand_id,
+        election.cand_election_year,
         totals.cycle
 ),
 -- Aggregated totals by candidate by election
