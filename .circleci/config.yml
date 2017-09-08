@@ -16,8 +16,8 @@ jobs:
       # PostgreSQL
       - image: circleci/postgres:9.6.2
         environment:
-          - POSTGRES_USER=circleci
-          - POSTGRES_DB=fec-api-test
+          - POSTGRES_USER=postgres
+          - POSTGRES_DB=cfdm_unit_test
 
     working_directory: ~/repo
 
