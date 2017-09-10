@@ -60,10 +60,9 @@ jobs:
           name: Create the test database
           # Commands listed here are from the CircleCI PostgreSQL config docs:
           # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
+          command: apt-get install postgresql-client
           command: echo ‘/usr/lib/postgresql/9.6/bin/:$PATH’ >> $BASH_ENV
-          command: sudo -u postgres psql -p 5432 -c "create user ubuntu with password ‘ubuntu’;”
-          command: sudo -u postgres psql -p 5432 -c "alter user ubuntu with superuser;"
-          command: sudo -u postgres psql -p 5432 -c "create database cfdm_unit_test;"
+          command: psql -c "create database cfdm_unit_test;" -U postgres
 
       - run:
           name: Run tests
