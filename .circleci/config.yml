@@ -25,7 +25,7 @@ jobs:
       - checkout
 
       - run:
-          name: install nodejs
+          name: Install Node.js
           command: |
             sudo apt-get update && curl -sL https://deb.nodesource.com/setup_6.x | sudo bash - && sudo apt-get install -y nodejs
 
@@ -36,7 +36,7 @@ jobs:
           - fec-api-dependencies-
 
       - run:
-          name: install dependencies
+          name: Install dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
@@ -53,13 +53,21 @@ jobs:
           key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
 
       - run:
-          name: run tests
+          name: Ensure database is available
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+
+      - run:
+          name: Create the test database
+          command: psql -c 'create database "cfdm_unit_test";' -U postgres
+
+      - run:
+          name: Run tests
           command: |
             . venv/bin/activate
             py.test
 
       - run:
-          name: perform post-test checks
+          name: Perform post-test checks
           command: |
             . .venv/bin/activate
             cd ..
