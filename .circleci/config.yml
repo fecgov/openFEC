@@ -61,7 +61,7 @@ jobs:
           # Commands listed here are from the CircleCI PostgreSQL config docs:
           # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
           command: |
-            apt-get install postgresql-client
+            sudo apt-get install postgresql-client
             echo ‘/usr/lib/postgresql/9.6/bin/:$PATH’ >> $BASH_ENV
             psql -c "create database cfdm_unit_test;" -U postgres
 
