@@ -291,11 +291,11 @@ invoke deploy --space dev
 This command will explicitly target the `dev` space.
 
 #### Setting up a service
-On Cloud Foundry, we use the redis28
+On Cloud Foundry, we use the redis32
 service. The Redis service can be created as follows:
 
 ```
-cf create-service redis28 standard fec-redis
+cf create-service redis32 standard-ha fec-redis
 ```
 
 #### Setting up credentials
