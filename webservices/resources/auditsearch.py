@@ -59,7 +59,7 @@ class AuditSearchView(ApiResource):
         ('committee_name', model.committee_name),
         ('committee_designation', model.committee_designation),
         ('committee_type', model.committee_type),
-        ('committee_discription', model.committee_description),
+        ('committee_description', model.committee_description),
         ('candidate_id', model.candidate_id),
         ('candidate_name', model.candidate_name),
     ]

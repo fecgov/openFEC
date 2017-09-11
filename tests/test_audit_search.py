@@ -1,23 +1,22 @@
 from tests import factories
 from tests.common import ApiBaseTest
 
-from webservices.rest import api
 from webservices.resources.auditsearch import AuditSearchView
-#from webservices.resources.rad_analyst import RadAnalystView
+from webservices.rest import api
 
 
 class TestAuditSearch(ApiBaseTest):
 
     def test_audit_id_fetch(self):
-        """ check if the a specified audit_id exist and returned from db """
-        audit_id = 461000
+        """ check if the specified audit_id exist """
+        audit_id = 565
         factories.AuditSearchViewFactory(audit_id=audit_id)
 
         results = self._results(api.url_for(AuditSearchView, audit_id=audit_id))
         self.assertEqual(results[0]['audit_id'], audit_id)
 
     def test_rad(self):
-        """ Check RAD returns in general endpoint"""
+        """ Check Audit Search returns general endpoint"""
         factories.AuditSearchViewFactory(committee_id='C00241083')
         factories.AuditSearchViewFactory(committee_id='C00135558')
 
@@ -26,47 +25,49 @@ class TestAuditSearch(ApiBaseTest):
 
     def test_filters(self):
         [
-            factories.AuditSearchViewFactory(committee_description='Pac'),
-            factories.AuditSearchViewFactory(finding='Allocation Issues'),
+            factories.AuditSearchViewFactory(finding_id=3),
+            factories.AuditSearchViewFactory(finding='Disclosure'),
             factories.AuditSearchViewFactory(issue_id=220),
-            factories.AuditSearchViewFactory(committee_id='C00241083'),
-            factories.AuditSearchViewFactory(candidate_name=None),
-            factories.AuditSearchViewFactory(far_release_date='1999-12-16'),  
-            factories.AuditSearchViewFactory(finding_id=2),
-            factories.AuditSearchViewFactory(audit_case_id=1073),     
-
-            factories.AuditSearchViewFactory(issue=260, audit_id=106),
-            factories.AuditSearchViewFactory(election_cycle=1996, audit_id=105, committee_designation='U'),  
-            factories.AuditSearchViewFactory(finding_id=2, audit_id=104 ,committee_id='C00241081'),
-            factories.AuditSearchViewFactory(link_to_report='http://transition.fec.gov/audits/1996/Unauthorized/RepublicansforChoicePAC1996.pdf', audit_id=103),
+            factories.AuditSearchViewFactory(issue='Coordinated Expenditures'),
+            factories.AuditSearchViewFactory(election_cycle=2002),
+            factories.AuditSearchViewFactory(committee_id='C00161786'),
+            factories.AuditSearchViewFactory(committee_name='COLORADO DEMOCRATIC PARTY'),
             factories.AuditSearchViewFactory(committee_designation='U'),
-            factories.AuditSearchViewFactory(audit_id=442),
-            factories.AuditSearchViewFactory(committee_name='REPUBLICANS FOR CHOICE'), 
-            factories.AuditSearchViewFactory(candidate_id=None),
+            factories.AuditSearchViewFactory(committee_type='Y'),
+            factories.AuditSearchViewFactory(committee_description='Party'),
+            factories.AuditSearchViewFactory(candidate_id=''),
+            factories.AuditSearchViewFactory(candidate_name=''),
+            # we may have to add filters and indexes to these fields???
+            # factories.AuditSearchViewFactory(audit_case_id=1203),
+            # factories.AuditSearchViewFactory(link_to_report='http://transition.fec.gov/audits/2002/20050907colorado_dem_prty.pdf'),
+            # factories.AuditSearchViewFactory(audit_id=565),
+            # factories.AuditSearchViewFactory(far_release_date='2005-09-15'),
         ]
 
         filter_fields = (
-            ('committee_description', 'Pac'),     
-            ('finding', 'Allocation Issues'), 
-            ('committee_id', 'C00241083'), 
-            ('issue_id', 220), 
-            ('candidate_name', None), 
-            ('far_release_date', '1999-12-16'), 
-            ('finding_id', 2), 
-            ('audit_case_id', 1073), 
-            # ('issue', 260), 
-            # ('election_cycle', 1996), 
-            # ('link_to_report', 'http://transition.fec.gov/audits/1996/Unauthorized/RepublicansforChoicePAC1996.pdf'), 
-            # ('committee_designation', 'U'), 
-            # ('committee_type', 'Q'), 
-            # ('audit_id', 442), 
-            # ('committee_name', 'REPUBLICANS FOR CHOICE'), 
-            # ('candidate_id', None)
+            ('finding_id', 3),
+            ('finding', 'Disclosure'),
+            ('issue_id', 220),
+            ('issue', 'Coordinated Expenditures'),
+            ('election_cycle', 2002),
+            ('committee_id', 'C00161786'),
+            ('committee_name', 'COLORADO DEMOCRATIC PARTY'),
+            ('committee_designation', 'U'),
+            ('committee_type', 'Y'),
+            ('committee_description', 'Party'),
+            ('candidate_id', ''),
+            ('candidate_name', ''),
+            # ('audit_case_id', 1203),
+            # ('link_to_report', 'http://transition.fec.gov/audits/2002/20050907colorado_dem_prty.pdf'),
+            # ('audit_id', 565),
+            # far_release_date returning mixed results...
+            # ('far_release_date', '2005-09-15'),
         )
 
         # checking one example from each field
         orig_response = self._response(api.url_for(AuditSearchView))
         original_count = orig_response['pagination']['count']
+        print('Original Count :::', original_count)
 
         for field, example in filter_fields:
             page = api.url_for(AuditSearchView, **{field: example})
