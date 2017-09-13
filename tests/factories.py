@@ -369,3 +369,8 @@ class ScheduleAByStateRecipientTotalsFactory(BaseFactory):
     class Meta:
         model = models.ScheduleAByStateRecipientTotals
     idx = factory.Sequence(lambda n: n)
+
+class AuditSearchViewFactory(BaseFactory):
+    class Meta:
+        model = models.AuditSearchView
+    idx = factory.Sequence(lambda n: n)

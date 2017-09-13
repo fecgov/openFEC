@@ -984,3 +984,46 @@ Provides cumulative disbursement totals by entity type, over a two year cycle. T
 
 This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
 '''
+
+AUDIT_ID = '''
+A unique identifier associated with an audit
+'''
+
+FINDING_ID = '''
+Number associated with an audit finding -- Need to find a better description to go here.
+'''
+
+FINDING = '''
+Name of the audit finding -- Need to find a better description to go here.
+'''
+
+AUDIT_CASE_ID = '''
+A unique identifier associated with an audit case -- Need to find a better description to go here.
+'''
+
+ISSUE_ID = '''
+Number associated with an audit issue -- Need to find a better description to go here.
+'''
+
+ISSUE = '''
+Name of the audit finding issue -- Need to find a better description to go here.
+'''
+TIER = '''
+Level of Audit -- Need to find a better description to go here.
+'''
+ELECTION_CYCLE = '''
+Two year election cycle -- Need to find a better description to go here.
+'''
+#audit search
+AUDIT_SEARCH = '''
+This is a search tool for Final Audit Reports approved by the Commission since inception. 
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
+'''
+#audit finding
+AUDIT_FINDING = '''
+This is a search tool for Final Audit Reports approved by the Commission since inception. 
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
+'''
+COMMITTEE_PARTY_FULL = 'Full Name of the committee political party'
+COMMITTEE_TYPE_FULL = 'Full Name of the Committee Type'
+COMMITTEE_DESIGNATION_FULL = 'Full name of the committee designation'

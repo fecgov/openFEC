@@ -49,6 +49,7 @@ from webservices.resources import costs
 from webservices.resources import legal
 from webservices.resources import load
 from webservices.resources import large_aggregates
+from webservices.resources import auditsearch
 from webservices.env import env
 
 
@@ -195,6 +196,8 @@ api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
+api.add_resource(auditsearch.AuditFindingsView, '/audit-finding/')
+api.add_resource(auditsearch.AuditSearchView, '/audit-search/')
 
 
 
@@ -317,6 +320,8 @@ apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
+apidoc.register(auditsearch.AuditFindingsView, blueprint='v1')
+apidoc.register(auditsearch.AuditSearchView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
