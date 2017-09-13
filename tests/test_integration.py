@@ -384,9 +384,10 @@ class TestViews(common.IntegrationTestCase):
             cycle=2016,
         ).first()
         total = existing.total
+        committee_id = existing.committee_id
         filing = self.NmlSchedAFactory(
             rpt_yr=2015,
-            cmte_id=existing.committee_id,
+            cmte_id=committee_id,
             contb_receipt_amt=75,
             contb_receipt_dt=datetime.datetime(2015, 1, 1),
             receipt_tp='15J',
@@ -402,7 +403,7 @@ class TestViews(common.IntegrationTestCase):
         rep = sa.Table('detsum_sample', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
             indv_unitem_contb=20,
-            cmte_id=existing.committee_id,
+            cmte_id=committee_id,
             rpt_yr=2016,
             orig_sub_id=9,
             form_tp_cd='F3',
@@ -415,7 +416,7 @@ class TestViews(common.IntegrationTestCase):
         refreshed = models.ScheduleABySize.query.filter_by(
             size=0,
             cycle=2016,
-            committee_id=existing.committee_id,
+            committee_id=committee_id,
         ).first()
         # Updated total includes new Schedule A filing and new report
         self.assertAlmostEqual(refreshed.total, total + 75 + 20)
