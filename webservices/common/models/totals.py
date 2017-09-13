@@ -5,8 +5,8 @@ from webservices import docs
 
 class CommitteeTotals(BaseModel):
     __abstract__ = True
-
-    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    #Add additional fields and filters to /totals/{committee-type} endpoint#2631
+    committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
     offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
     political_party_committee_contributions = db.Column(db.Numeric(30, 2))
@@ -34,6 +34,12 @@ class CommitteeTotals(BaseModel):
     last_cash_on_hand_end_period = db.Column(db.Numeric(30, 2))
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
+
+    #Add additional fields and filters to /totals/{committee-type} endpoint#2631
+    committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
+    committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE_FULL)
+    committee_designation_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_DESIGNATION_FULL)
+    party_full = db.Column(db.String, doc=docs.COMMITTEE_PARTY_FULL)
 
 class CandidateCommitteeTotals(db.Model):
     __abstract__ = True

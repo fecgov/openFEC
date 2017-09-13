@@ -1024,3 +1024,6 @@ AUDIT_FINDING = '''
 This is a search tool for Final Audit Reports approved by the Commission since inception. 
 The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
 '''
+COMMITTEE_PARTY_FULL = 'Full Name of the committee political party'
+COMMITTEE_TYPE_FULL = 'Full Name of the Committee Type'
+COMMITTEE_DESIGNATION_FULL = 'Full name of the committee designation'
