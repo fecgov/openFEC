@@ -34,7 +34,11 @@ shared_fields = {
     'last_debts_owed_by_committee': 42,
     'net_contributions': 123,
     'net_operating_expenditures': 321,
-    'last_debts_owed_to_committee': 42
+    'last_debts_owed_to_committee': 42,
+    # 'committee_name': None,
+    # 'committee_type_full': None,
+    # 'committee_designation_full': None,
+    # 'party_full': None
 }
 
 class TestTotals(ApiBaseTest):
