@@ -92,4 +92,6 @@ jobs:
           name: Deploy API
           command: |
             export PATH=$HOME/bin:$PATH
+            . venv/bin/activate
+            pip install -r requirements.txt
             invoke deploy --branch $TRAVIS_BRANCH --login True --yes
