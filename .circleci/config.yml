@@ -83,5 +83,5 @@ jobs:
       - deploy:
           name: Deploy API
           command: |
-          . venv/bin/activate
-          invoke deploy --branch $TRAVIS_BRANCH --login True --yes
+            . venv/bin/activate
+            invoke deploy --branch $TRAVIS_BRANCH --login True --yes
