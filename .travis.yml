@@ -31,7 +31,10 @@ before_script:
   - travis_retry npm install -g swagger-tools
   - travis_retry npm install
   - npm run build
-script: py.test
+script:
+  - py.test
+  - cd tests/pgtap
+  - psql -d cfdm_unit_test -U postgres -Xf runner.sql | grep -v '^#' | tappy
 after_success:
   - travis_retry pip install bandit
   - cd ..
