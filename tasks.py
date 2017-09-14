@@ -151,7 +151,9 @@ def _detect_space(repo, branch=None, yes=False):
 DEPLOY_RULES = (
     ('prod', _detect_prod),
     ('stage', lambda _, branch: branch.startswith('release')),
-    ('dev', lambda _, branch: branch == 'develop'),
+    # debug will remove if successful
+    ('dev', lambda _, branch: branch == 'feature/add-circleci-support'),
+    # ('dev', lambda _, branch: branch == 'develop'),
 )
 
 
