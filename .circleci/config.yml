@@ -68,7 +68,7 @@ jobs:
           name: Run tests
           command: |
             . venv/bin/activate
-            echo TRUE
+            py.test
 
       - run:
           name: Perform post-test checks
