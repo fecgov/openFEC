@@ -64,13 +64,6 @@ jobs:
           name: Ensure database is available
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
 
-      # for testing deploy
-      # - run:
-      #     name: Run tests
-      #     command: |
-      #       . venv/bin/activate
-      #       py.test
-
       - run:
           name: Perform post-test checks
           command: |
