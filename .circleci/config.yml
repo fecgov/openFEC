@@ -79,4 +79,5 @@ jobs:
       - store_artifacts:
           path: test-reports
           destination: test-reports
-
+      - deploy:
+          - command: invoke deploy --branch $TRAVIS_BRANCH --login True --yes
