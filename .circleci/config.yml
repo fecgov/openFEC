@@ -80,6 +80,14 @@ jobs:
           path: test-reports
           destination: test-reports
 
+      - run:
+          name: Install cf cli
+          command: |
+            mkdir -p $HOME/bin
+            export PATH=$HOME/bin:$PATH
+            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.23.0" | tar xzv -C $HOME/bin
+            cf install-plugin autopilot -f -r CF-Community
+
       - deploy:
           name: Deploy API
           command: |
