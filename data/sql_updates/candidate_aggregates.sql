@@ -29,7 +29,7 @@ with totals as (
 link as (
     select distinct on (cand_id, cand_election_yr)
     *
-    from ofec_cand_cmte_linkage_mv
+    from ofec_cand_cmte_linkage_mv_tmp
 ),
 -- Aggregated totals by candidate by cycle
 cycle_totals as (
