@@ -8,7 +8,11 @@ select
     coverage_end_date,
     contributions as total_independent_contributions,
     independent_expenditures as total_independent_expenditures,
-    last_beginning_image_number
+    last_beginning_image_number,
+    cmte_nm,
+    cmte_tp,
+    cmte_dsgn,
+    cmte_pty_affiliation_desc
 from
     ofec_totals_combined_mv_tmp
 where

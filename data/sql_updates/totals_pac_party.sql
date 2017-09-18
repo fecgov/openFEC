@@ -64,6 +64,10 @@ select
     oft.last_debts_owed_by_committee,
     oft.last_debts_owed_to_committee,
     oft.last_report_year,
+    oft.cmte_nm,
+    oft.cmte_tp,
+    oft.cmte_dsgn,
+    oft.cmte_pty_affiliation_desc,
     comm_dets.committee_type,
     comm_dets.designation
 from

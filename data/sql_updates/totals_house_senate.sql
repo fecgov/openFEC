@@ -54,7 +54,11 @@ select
     last_cash_on_hand_end_period,
     last_debts_owed_by_committee,
     last_debts_owed_to_committee,
-    last_report_year
+    last_report_year,
+    cmte_nm,
+    cmte_tp,
+    cmte_dsgn,
+    cmte_pty_affiliation_desc
 from
     ofec_totals_combined_mv_tmp f3
     left join hs_cycle using (committee_id, cycle)

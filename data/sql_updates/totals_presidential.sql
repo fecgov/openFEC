@@ -56,7 +56,11 @@ select
     last_debts_owed_to_committee,
     last_net_contributions,
     last_net_operating_expenditures,
-    last_report_year
+    last_report_year,
+    cmte_nm,
+    cmte_tp,
+    cmte_dsgn,
+    cmte_pty_affiliation_desc
 from
     ofec_totals_combined_mv_tmp
 where
