@@ -2,7 +2,6 @@ from .base import db, BaseModel
 
 from webservices import docs
 
-
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
@@ -36,10 +35,10 @@ class CommitteeTotals(BaseModel):
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 
     #Add additional fields and filters to /totals/{committee-type} endpoint#2631
-    # committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
-    # committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE_FULL)
-    # committee_designation_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_DESIGNATION_FULL)
-    # party_full = db.Column(db.String, doc=docs.COMMITTEE_PARTY_FULL)
+    cmte_nm = db.Column(db.String, doc=docs.COMMITTEE_NAME)
+    cmte_tp = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
+    cmte_dsgn = db.Column(db.String, doc=docs.DESIGNATION)
+    cmte_pty_affiliation_desc = db.Column(db.String, doc=docs.PARTY_FULL)
 
 class CandidateCommitteeTotals(db.Model):
     __abstract__ = True
@@ -65,8 +64,6 @@ class CandidateCommitteeTotals(db.Model):
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
     operating_expenditures = db.Column(db.Numeric(30, 2))
-
-
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
     last_beginning_image_number = db.Column(db.BigInteger)
