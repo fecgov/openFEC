@@ -39,7 +39,6 @@ create index ofec_sched_a_aggregate_size_tmp_count on ofec_sched_a_aggregate_siz
 create index ofec_sched_a_aggregate_size_tmp_cmte_id_cycle on ofec_sched_a_aggregate_size_tmp(cmte_id, cycle);
 
 -- this drops totals during rebuild
-drop table if exists ofec_sched_a_aggregate_state cascade;
 drop table if exists ofec_sched_a_aggregate_size_old cascade;
 
 -- Remove previous aggregate and rename new aggregate
