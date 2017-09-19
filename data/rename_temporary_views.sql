@@ -20,3 +20,7 @@ RETURNS INT AS $$
 $$ LANGUAGE plpgsql;
 
 SELECT rename_temporary_views();
+
+-- This is only present after update_aggrages is run. We keep it to power
+-- the existing view while we rebuild the new schedule a by size view
+drop table if exists ofec_sched_a_aggregate_size_old cascade;
