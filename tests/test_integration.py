@@ -12,6 +12,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from apispec import utils, exceptions
 
 import manage
+from manage import execute_sql_file
 from tests import common
 from webservices.rest import db
 from webservices.spec import spec
@@ -318,7 +319,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         rows = models.ScheduleABySize.query.filter_by(
             cycle=2016,
             committee_id='C6789',
@@ -330,7 +331,7 @@ class TestViews(common.IntegrationTestCase):
         filing.contb_receipt_amt = 53
         db.session.add(filing)
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
@@ -356,7 +357,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         existing = get_existing()
         total = existing.total
         count = existing.count
@@ -373,7 +374,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         existing = get_existing()
         self.assertEqual(existing.total, total + NEW_RECEIPT_AMOUNT)
         self.assertEqual(existing.count, count + 1)
@@ -412,7 +413,8 @@ class TestViews(common.IntegrationTestCase):
         db.session.commit()
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_totals_combined_mv')
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        db.session.commit()
+        _rebuild_sched_a_by_size_merged()
         refreshed = models.ScheduleABySize.query.filter_by(
             size=0,
             cycle=2016,
@@ -545,3 +547,6 @@ class TestViews(common.IntegrationTestCase):
         actual_tables = set(inspector.get_table_names())
         assert expected_tables.issubset(actual_tables)
         assert "ofec_sched_a_3005_3006" not in actual_tables
+
+def _rebuild_sched_a_by_size_merged():
+    execute_sql_file('./data/converted_mvs/sched_a_by_size_merged.sql')
