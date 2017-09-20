@@ -41,10 +41,10 @@ group by cmte_id, cycle, size
 
 alter table ofec_sched_a_aggregate_size add constraint uq_ofec_sched_a_aggregate_size_cmte_id_cycle_size unique (cmte_id, cycle, size);
 -- Create indices on aggregate
-create index ofec_sched_a_aggregate_size_cmte_id on ofec_sched_a_aggregate_tmp(cmte_id);
-create index ofec_sched_a_aggregate_size_cycle on ofec_sched_a_aggregate_tmp(cycle);
-create index ofec_sched_a_aggregate_size_size on ofec_sched_a_aggregate_tmp(size);
-create index ofec_sched_a_aggregate_size_total on ofec_sched_a_aggregate_tmp(total);
+create index ofec_sched_a_aggregate_size_cmte_id on ofec_sched_a_aggregate_size(cmte_id);
+create index ofec_sched_a_aggregate_size_cycle on ofec_sched_a_aggregate_size(cycle);
+create index ofec_sched_a_aggregate_size_size on ofec_sched_a_aggregate_size(size);
+create index ofec_sched_a_aggregate_size_total on ofec_sched_a_aggregate_size(total);
 create index ofec_sched_a_aggregate_size_count on ofec_sched_a_aggregate_size(count);
 create index ofec_sched_a_aggregate_size_cmte_id_cycle on ofec_sched_a_aggregate_size(cmte_id, cycle);
 

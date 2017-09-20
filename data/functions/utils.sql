@@ -74,7 +74,7 @@ DECLARE
 BEGIN
 
     FOR index_name IN indexes_cursor LOOP
-        EXECUTE format('ALTER INDEX %1$I RENAME TO %2$I', index_name.name, index_name.name || suffix;
+        EXECUTE format('ALTER INDEX %1$I RENAME TO %1$I' || suffix, index_name.name);
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
