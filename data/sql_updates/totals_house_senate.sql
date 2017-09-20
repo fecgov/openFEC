@@ -73,3 +73,5 @@ create index on ofec_totals_house_senate_mv_tmp(candidate_id, idx);
 create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
 create index on ofec_totals_house_senate_mv_tmp(committee_id, idx);
 create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
+create index on ofec_totals_house_senate_mv_tmp(cmte_tp, idx);
+create index on ofec_totals_house_senate_mv_tmp(cmte_dsgn, idx);

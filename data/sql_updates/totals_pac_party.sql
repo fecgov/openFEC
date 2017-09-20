@@ -121,3 +121,6 @@ create index on ofec_totals_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_parties_mv_tmp(committee_id, idx );
 create index on ofec_totals_parties_mv_tmp(committee_type, idx );
 create index on ofec_totals_parties_mv_tmp(designation, idx );
+create index on ofec_totals_parties_mv_tmp(cmte_tp, idx);
+create index on ofec_totals_parties_mv_tmp(cmte_dsgn, idx);
+

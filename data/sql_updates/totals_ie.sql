@@ -24,3 +24,5 @@ create unique index on ofec_totals_ie_only_mv_tmp(idx);
 create index on ofec_totals_ie_only_mv_tmp(cycle, idx);
 create index on ofec_totals_ie_only_mv_tmp(committee_id, idx);
 create index on ofec_totals_ie_only_mv_tmp(cycle, committee_id);
+create index on ofec_totals_ie_only_mv_tmp(cmte_tp, idx);
+create index on ofec_totals_ie_only_mv_tmp(cmte_dsgn, idx);

@@ -203,4 +203,6 @@ create index on ofec_totals_combined_mv_tmp (committee_id, sub_id);
 create index on ofec_totals_combined_mv_tmp (cycle, sub_id);
 create index on ofec_totals_combined_mv_tmp (receipts, sub_id);
 create index on ofec_totals_combined_mv_tmp (disbursements, sub_id);
+create index on ofec_totals_combined_mv_tmp (cmte_tp, sub_id);
+create index on ofec_totals_combined_mv_tmp (cmte_dsgn, sub_id);
 

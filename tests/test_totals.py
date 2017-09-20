@@ -35,10 +35,10 @@ shared_fields = {
     'net_contributions': 123,
     'net_operating_expenditures': 321,
     'last_debts_owed_to_committee': 42,
-    'cmte_nm': None,
-    'cmte_tp': None,
-    'cmte_dsgn': None,
-    'cmte_pty_affiliation_desc': None
+    'cmte_nm': "",
+    'cmte_tp': "",
+    'cmte_dsgn': "",
+    'cmte_pty_affiliation_desc': ""
 }
 
 class TestTotals(ApiBaseTest):
