@@ -241,6 +241,8 @@ def update_schemas(processes=1):
         path = os.path.join('data', 'sql_updates', '{}.sql'.format(task))
         execute_sql_file(path)
     execute_sql_file('data/rename_temporary_views.sql')
+    execute_sql_file('data/converted_mvs/sched_a_by_size_merged.sql')
+    execute_sql_file('data/converted_mvs/sched_a_by_state_recipient_totals.sql')
     logger.info("Finished DB refresh.")
 
 @manager.command
@@ -288,12 +290,6 @@ def rebuild_aggregates(processes=1):
     logger.info('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     logger.info('Finished rebuilding incremental aggregates.')
-
-@manager.command
-def update_aggregates():
-    """These are run nightly to recalculate the totals
-    """
-    logger.info('Updating incremental aggregates...')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
