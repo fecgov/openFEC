@@ -8,7 +8,13 @@ from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
 from webservices.legal_docs import DOCS_SEARCH
+from elasticsearch import RequestError
+from webservices.exceptions import ApiError
+import logging
+
+
 es = utils.get_elasticsearch_connection()
+logger = logging.getLogger(__name__)
 
 INNER_HITS = {
     "_source": False,
@@ -65,44 +71,6 @@ class GetLegalDocument(utils.Resource):
         else:
             return abort(404)
 
-phrase_regex = re.compile('"(?P<phrase>[^"]*)"')
-def parse_query_string(query):
-    """Parse phrases from a query string for exact matches e.g. "independent agency"."""
-
-    def _parse_query_string(query):
-        """Recursively pull out terms and phrases from query. Each pass pulls
-        out terms leading up to the phrase as well as the phrase itself. Then
-        it processes the remaining string."""
-
-        if not query:
-            return ([], [])
-
-        match = phrase_regex.search(query)
-        if not match:
-            return ([query], [])
-
-        start, end = match.span()
-        before_phrase = query[0:start]
-        after_phrase = query[end:]
-
-        term = before_phrase.strip()
-        phrase = match.group('phrase').strip()
-        remaining = after_phrase.strip()
-
-        terms, phrases = _parse_query_string(remaining)
-
-        if phrase:
-            phrases.insert(0, phrase)
-
-        if term:
-            terms.insert(0, term)
-
-        return (terms, phrases)
-
-    terms, phrases = _parse_query_string(query)
-    return dict(terms=terms, phrases=phrases)
-
-
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
@@ -118,16 +86,18 @@ class UniversalSearch(utils.Resource):
         else:
             doc_types = [kwargs.get('type')]
 
-        parsed_query = parse_query_string(q)
-        terms = parsed_query.get('terms')
-        phrases = parsed_query.get('phrases')
         hits_returned = min([200, hits_returned])
 
         results = {}
         total_count = 0
+
         for type_ in doc_types:
-            query = query_builders.get(type_)(q, terms, phrases, type_, from_hit, hits_returned, **kwargs)
-            formatted_hits, count = execute_query(query)
+            query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
+            try:
+                formatted_hits, count = execute_query(query)
+            except RequestError as e:
+                logger.info(e.args)
+                raise ApiError("Could not parse query", 400)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
             total_count += count
@@ -135,16 +105,8 @@ class UniversalSearch(utils.Resource):
         results['total_all'] = total_count
         return results
 
-def generic_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
-    must_query = [Q('term', _type=type_)]
-
-    if len(terms):
-        term_query = Q('match', _all=' '.join(terms))
-        must_query.append(term_query)
-
-    if len(phrases):
-        phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
-        must_query.extend(phrase_queries)
+def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
+    must_query = [Q('term', _type=type_), Q('query_string', query=q)]
 
     query = Search().using(es) \
         .query(Q('bool', must=must_query)) \
@@ -157,16 +119,11 @@ def generic_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **k
 
     return query
 
-def mur_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
+def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
 
-    if len(terms):
-        term_query = Q('match', _all=' '.join(terms))
-        must_query.append(term_query)
-
-    if len(phrases):
-        phrase_queries = [Q('match_phrase', _all=phrase) for phrase in phrases]
-        must_query.extend(phrase_queries)
+    if q:
+        must_query.append(Q('query_string', query=q))
 
     query = Search().using(es) \
         .query(Q('bool', must=must_query)) \
@@ -177,22 +134,12 @@ def mur_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwarg
         .index(DOCS_SEARCH) \
         .sort("sort1", "sort2")
 
-    return apply_mur_specific_query_params(query, terms, phrases, **kwargs)
+    return apply_mur_specific_query_params(query, **kwargs)
 
-def ao_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs):
+def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
-
-    should_query = []
-    if len(terms):
-        term_query = Q('multi_match', query=' '.join(terms), fields=['no', 'name', 'summary'])
-        should_query.append(term_query)
-
-    if len(phrases):
-        phrase_queries = [
-            Q('multi_match', type='phrase', query=phrase, fields=['no', 'name', 'summary']) for phrase in phrases]
-        should_query.extend(phrase_queries)
-
-    should_query.append(get_ao_document_query(terms, phrases, **kwargs))
+    should_query = [get_ao_document_query(q, **kwargs),
+                Q('query_string', query=q, fields=['no', 'name', 'summary'])]
 
     query = Search().using(es) \
         .query(Q('bool', must=must_query, should=should_query, minimum_should_match=1)) \
@@ -203,9 +150,9 @@ def ao_query_builder(q, terms, phrases, type_, from_hit, hits_returned, **kwargs
         .index(DOCS_SEARCH) \
         .sort("sort1", "sort2")
 
-    return apply_ao_specific_query_params(query, terms, phrases, **kwargs)
+    return apply_ao_specific_query_params(query, **kwargs)
 
-def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
+def apply_mur_specific_query_params(query, **kwargs):
     if kwargs.get('mur_no'):
         query = query.query('terms', no=kwargs.get('mur_no'))
     if kwargs.get('mur_respondents'):
@@ -217,14 +164,11 @@ def apply_mur_specific_query_params(query, terms, phrases, **kwargs):
 
     if kwargs.get('mur_document_category'):
         combined_query = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
-        if terms:
-            combined_query.append(Q('match', documents__text=' '.join(terms)))
-        combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
         query = query.query("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
 
     return query
 
-def get_ao_document_query(terms, phrases, **kwargs):
+def get_ao_document_query(q, **kwargs):
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
                   'D': 'Draft Documents',
@@ -239,13 +183,12 @@ def get_ao_document_query(terms, phrases, **kwargs):
     else:
         combined_query = []
 
-    if terms:
-        combined_query.append(Q('match', documents__text=' '.join(terms)))
-    combined_query.extend([Q('match_phrase', documents__text=phrase) for phrase in phrases])
+    if q:
+        combined_query.append(Q('query_string', query=q, fields=['documents.text']))
 
     return Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
 
-def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
+def apply_ao_specific_query_params(query, **kwargs):
     must_clauses = []
     if kwargs.get('ao_no'):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
@@ -328,7 +271,6 @@ def apply_ao_specific_query_params(query, terms, phrases, **kwargs):
 
 def execute_query(query):
     es_results = query.execute()
-
     formatted_hits = []
     for hit in es_results:
         formatted_hit = hit.to_dict()

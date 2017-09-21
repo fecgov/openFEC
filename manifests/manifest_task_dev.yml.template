@@ -16,7 +16,6 @@ applications:
     WEB_CONCURRENCY: 4
   no-route: true
   services:
-  - fec-redis-dev
   - fec-s3-dev
   - fec-api-search
   - fec-creds-dev
