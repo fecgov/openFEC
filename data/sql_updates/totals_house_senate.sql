@@ -55,10 +55,10 @@ select
     last_debts_owed_by_committee,
     last_debts_owed_to_committee,
     last_report_year,
-    cmte_nm,
-    cmte_tp,
-    cmte_dsgn,
-    cmte_pty_affiliation_desc
+    committee_name_full,
+    committee_type_full,
+    committee_designation_full,
+    party_full
 from
     ofec_totals_combined_mv_tmp f3
     left join hs_cycle using (committee_id, cycle)
@@ -73,5 +73,5 @@ create index on ofec_totals_house_senate_mv_tmp(candidate_id, idx);
 create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
 create index on ofec_totals_house_senate_mv_tmp(committee_id, idx);
 create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
-create index on ofec_totals_house_senate_mv_tmp(cmte_tp, idx);
-create index on ofec_totals_house_senate_mv_tmp(cmte_dsgn, idx);
+create index on ofec_totals_house_senate_mv_tmp(committee_type_full, idx);
+create index on ofec_totals_house_senate_mv_tmp(committee_designation_full, idx);

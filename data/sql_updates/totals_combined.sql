@@ -161,10 +161,10 @@ committee_info as (
         sum(vsd.ttl_loans) as loans, -- f3
         sum(vsd.ttl_nonfed_tranf_per) as total_transfers,
         sum(vsd.ttl_receipts) as receipts,
-        max(committee_info.cmte_nm) as cmte_nm,
-        max(committee_info.cmte_tp) as cmte_tp, 
-        max(committee_info.cmte_dsgn) as cmte_dsgn,
-        max(committee_info.cmte_pty_affiliation_desc) as cmte_pty_affiliation_desc,
+        max(committee_info.cmte_nm) as committee_name_full,
+        max(committee_info.cmte_tp) as committee_type_full, 
+        max(committee_info.cmte_dsgn) as committee_designation_full,
+        max(committee_info.cmte_pty_affiliation_desc) as party_full,
         vsd.cmte_id as committee_id,
 
         -- double check this makes sense down stream
@@ -203,6 +203,6 @@ create index on ofec_totals_combined_mv_tmp (committee_id, sub_id);
 create index on ofec_totals_combined_mv_tmp (cycle, sub_id);
 create index on ofec_totals_combined_mv_tmp (receipts, sub_id);
 create index on ofec_totals_combined_mv_tmp (disbursements, sub_id);
-create index on ofec_totals_combined_mv_tmp (cmte_tp, sub_id);
-create index on ofec_totals_combined_mv_tmp (cmte_dsgn, sub_id);
+create index on ofec_totals_combined_mv_tmp (committee_type_full, sub_id);
+create index on ofec_totals_combined_mv_tmp (committee_designation_full, sub_id);
 

@@ -15,9 +15,9 @@ with nicknames as (
         link.cmte_id = totals.committee_id and
         link.fec_election_yr = totals.cycle
     where
-        totals.cmte_dsgn in ('P', 'A') and (
-            substr(cand_id, 1, 1) = totals.cmte_tp or
-        totals.cmte_tp not in ('P', 'S', 'H')
+        cmte_dsgn in ('P', 'A') and (
+            substr(cand_id, 1, 1) = cmte_tp or
+        cmte_tp not in ('P', 'S', 'H')
         )
     group by cand_id
 )
