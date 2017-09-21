@@ -31,17 +31,13 @@ class TestAuditSearch(ApiBaseTest):
             factories.AuditSearchViewFactory(issue='Coordinated Expenditures'),
             factories.AuditSearchViewFactory(election_cycle=2002),
             factories.AuditSearchViewFactory(committee_id='C00161786'),
-            factories.AuditSearchViewFactory(committee_name='COLORADO DEMOCRATIC PARTY'),
+            # factories.AuditSearchViewFactory(committee_name='COLORADO DEMOCRATIC PARTY'),
             factories.AuditSearchViewFactory(committee_designation='U'),
             factories.AuditSearchViewFactory(committee_type='Y'),
             factories.AuditSearchViewFactory(committee_description='Party'),
             factories.AuditSearchViewFactory(candidate_id=''),
-            factories.AuditSearchViewFactory(candidate_name=''),
-            # we may have to add filters and indexes to these fields???
-            # factories.AuditSearchViewFactory(audit_case_id=1203),
-            # factories.AuditSearchViewFactory(link_to_report='http://transition.fec.gov/audits/2002/20050907colorado_dem_prty.pdf'),
-            # factories.AuditSearchViewFactory(audit_id=565),
-            # factories.AuditSearchViewFactory(far_release_date='2005-09-15'),
+            # factories.AuditSearchViewFactory(candidate_name=''),
+           
         ]
 
         filter_fields = (
@@ -51,18 +47,17 @@ class TestAuditSearch(ApiBaseTest):
             ('issue', 'Coordinated Expenditures'),
             ('election_cycle', 2002),
             ('committee_id', 'C00161786'),
-            ('committee_name', 'COLORADO DEMOCRATIC PARTY'),
+            # ('committee_name', 'COLORADO DEMOCRATIC PARTY'),
             ('committee_designation', 'U'),
             ('committee_type', 'Y'),
             ('committee_description', 'Party'),
             ('candidate_id', ''),
-            ('candidate_name', ''),
-            # ('audit_case_id', 1203),
-            # ('link_to_report', 'http://transition.fec.gov/audits/2002/20050907colorado_dem_prty.pdf'),
-            # ('audit_id', 565),
-            # far_release_date returning mixed results...
-            # ('far_release_date', '2005-09-15'),
+            # ('candidate_name', ''),
+      
         )
+        # filter_range_fields = [
+            # ('election_cycle', AuditSearchView.election_cycle, [2010, 2014]),
+        # ]   
 
         # checking one example from each field
         orig_response = self._response(api.url_for(AuditSearchView))
@@ -77,6 +72,8 @@ class TestAuditSearch(ApiBaseTest):
             # doesn't return all results
             response = self._response(page)
             self.assertGreater(original_count, response['pagination']['count'])
+
+
 
     def test_sort(self):
         [

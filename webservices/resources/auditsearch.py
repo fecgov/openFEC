@@ -49,6 +49,10 @@ class AuditSearchView(ApiResource):
     page_schema = schemas.AuditSearchViewPageSchema
 
 
+    filter_fulltext_fields = [
+       ('candidate_name', model.candidate_name),
+       ('committee_name', model.committee_name),      
+    ]
     filter_multi_fields = [
         ('finding_id', model.finding_id),
         ('finding', model.finding),
@@ -56,12 +60,13 @@ class AuditSearchView(ApiResource):
         ('issue', model.issue),
         ('election_cycle', model.election_cycle),
         ('committee_id', model.committee_id),
-        ('committee_name', model.committee_name),
         ('committee_designation', model.committee_designation),
         ('committee_type', model.committee_type),
         ('committee_description', model.committee_description),
         ('candidate_id', model.candidate_id),
-        ('candidate_name', model.candidate_name),
+     ]
+    filter_range_fields = [
+       (('min_election_cycle', 'max_election_cycle'), model.election_cycle),
     ]
 
     @property
