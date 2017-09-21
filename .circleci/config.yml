@@ -33,11 +33,6 @@ jobs:
             sudo apt-get install postgresql-client
             echo ‘/usr/lib/postgresql/9.6/bin/:$PATH’ >> $BASH_ENV
 
-      - run:
-          name: Install Node.js
-          command: |
-            sudo apt-get update && curl -sL https://deb.nodesource.com/setup_6.x | sudo bash - && sudo apt-get install -y nodejs
-
       - restore_cache:
           keys:
           - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
@@ -45,14 +40,26 @@ jobs:
           - fec-api-dependencies-
 
       - run:
-          name: Install project dependencies
+          name: Install node dependencies
+          command: |
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.4/install.sh | bash
+            echo ". ~/.nvm/nvm.sh" >> $BASH_ENV
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+            nvm install 8.5.0
+            nvm use 8.5.0
+            nvm alias default 8.5.0
+            npm install -g npm swagger-tools
+            npm install
+            npm run build
+
+      - run:
+          name: Install Python dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt -r requirements-dev.txt -r requirements-ci.txt
-            sudo npm install -g swagger-tools
-            npm install
-            npm run build
 
       - save_cache:
           paths:
@@ -92,6 +99,11 @@ jobs:
           name: Deploy API
           command: |
             export PATH=$HOME/bin:$PATH
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
             . venv/bin/activate
+            nvm use default
+            npm run build
             pip install -r requirements.txt
             invoke deploy --branch $TRAVIS_BRANCH --login True --yes
