@@ -37,7 +37,7 @@ REQUIRED_CREDS = (
     'FEC_EMAIL_RECIPIENTS',
 )
 
-REQUIRED_SERVICES = ('redis28', 's3', 'elasticsearch24')
+REQUIRED_SERVICES = ('redis32', 's3', 'elasticsearch24')
 
 REQUIRED_TABLES = (
     tuple(db.Model.metadata.tables.keys()) +

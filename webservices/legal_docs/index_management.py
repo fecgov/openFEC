@@ -357,6 +357,19 @@ def initialize_legal_docs():
         }
     })
 
+def delete_index():
+    """
+    Delete index `docs`.
+    This is usually done in preparation for restoring indexes from a snapshot backup.
+    """
+
+    es = utils.get_elasticsearch_connection()
+    try:
+        logger.info("Delete index 'docs'")
+        es.indices.delete('docs')
+    except elasticsearch.exceptions.NotFoundError:
+        pass
+
 def create_staging_index():
     """
     Create the index `docs_staging`.
