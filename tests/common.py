@@ -40,6 +40,7 @@ def _reset_schema_for_integration():
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('drop schema if exists staging cascade;')
     rest.db.engine.execute('drop schema if exists fecapp cascade;')
+    rest.db.engine.execute('drop schema if exists real_efile cascade;')
     rest.db.engine.execute('create schema public;')
 
 
