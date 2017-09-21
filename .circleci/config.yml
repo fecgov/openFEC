@@ -40,7 +40,7 @@ jobs:
 
       - restore_cache:
           keys:
-          - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
+          - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - fec-api-dependencies-
 
@@ -58,7 +58,7 @@ jobs:
           paths:
             - ./venv
             - ./node_modules
-          key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
+          key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
 
       - run:
           name: Ensure database is available
@@ -85,7 +85,7 @@ jobs:
           command: |
             mkdir -p $HOME/bin
             export PATH=$HOME/bin:$PATH
-            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.23.0" | tar xzv -C $HOME/bin
+            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.31.0" | tar xzv -C $HOME/bin
             cf install-plugin autopilot -f -r CF-Community
 
       - deploy:
