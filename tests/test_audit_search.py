@@ -37,7 +37,7 @@ class TestAuditSearch(ApiBaseTest):
             factories.AuditSearchViewFactory(committee_description='Party'),
             factories.AuditSearchViewFactory(candidate_id=''),
             # factories.AuditSearchViewFactory(candidate_name=''),
-           
+
         ]
 
         filter_fields = (
@@ -53,11 +53,11 @@ class TestAuditSearch(ApiBaseTest):
             ('committee_description', 'Party'),
             ('candidate_id', ''),
             # ('candidate_name', ''),
-      
+
         )
         # filter_range_fields = [
             # ('election_cycle', AuditSearchView.election_cycle, [2010, 2014]),
-        # ]   
+        # ]
 
         # checking one example from each field
         orig_response = self._response(api.url_for(AuditSearchView))
