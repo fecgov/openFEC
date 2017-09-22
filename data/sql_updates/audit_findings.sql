@@ -1,7 +1,7 @@
 
 drop materialized view if exists ofec_audit_search_mv_tmp;
 
-CREATE MATERIALIZED VIEW ofec_audit_search_mv_tmp AS 
+CREATE MATERIALIZED VIEW ofec_audit_search_mv_tmp AS
  SELECT row_number() OVER () AS idx,
     fvw.parent_finding_pk::integer AS finding_id,
     trim(fvw.tier_one_finding::text) AS finding,
@@ -38,55 +38,41 @@ WITH DATA;
 
 
 -- Index: public.ofec_audit_search_candidate_id
-
-DROP INDEX if exists public.ofec_audit_search_candidate_id;
-
-CREATE INDEX ofec_audit_search_candidate_id
+CREATE INDEX ofec_audit_search_candidate_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (candidate_id COLLATE pg_catalog."default");
 
 -- Index: public.ofec_audit_search_committee_id
-
-DROP INDEX if exists public.ofec_audit_search_committee_id;
-
-CREATE INDEX ofec_audit_search_committee_id
+CREATE INDEX ofec_audit_search_committee_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (committee_id COLLATE pg_catalog."default");
 
 -- Index: public.ofec_audit_search_election_cycle
 
-DROP INDEX if exists public.ofec_audit_search_election_cycle;
-
-CREATE INDEX ofec_audit_search_election_cycle
+CREATE INDEX ofec_audit_search_election_cycle_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (election_cycle);
 
 -- Index: public.ofec_audit_search_finding_id
 
-DROP INDEX if exists public.ofec_audit_search_finding_id;
-
-CREATE INDEX ofec_audit_search_finding_id
+CREATE INDEX ofec_audit_search_finding_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (finding_id);
 
 -- Index: public.ofec_audit_search_finding_issue_id
 
-DROP INDEX if exists public.ofec_audit_search_finding_issue_id;
-
-CREATE INDEX ofec_audit_search_finding_issue_id
+CREATE INDEX ofec_audit_search_finding_issue_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (finding_id, issue_id);
 
 -- Index: public.ofec_audit_search_issue_id
 
-DROP INDEX if exists public.ofec_audit_search_issue_id;
-
-CREATE INDEX ofec_audit_search_issue_id
+CREATE INDEX ofec_audit_search_issue_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (issue_id);
@@ -99,8 +85,3 @@ CREATE UNIQUE INDEX ofec_audit_search_mv_tmp_idx_idx1
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (idx);
- 
-
- --
-
-
