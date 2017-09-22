@@ -90,7 +90,7 @@ class UniversalSearch(utils.Resource):
 
         results = {}
         total_count = 0
- 
+
         for type_ in doc_types:
             query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
             try:
@@ -123,7 +123,7 @@ def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
 
     if q:
-        must_query.append(Q('query_string', query=q, fields=['documents.text']))
+        must_query.append(Q('query_string', query=q))
 
     query = Search().using(es) \
         .query(Q('bool', must=must_query)) \

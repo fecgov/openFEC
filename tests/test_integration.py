@@ -12,6 +12,7 @@ from factory.alchemy import SQLAlchemyModelFactory
 from apispec import utils, exceptions
 
 import manage
+from manage import execute_sql_file
 from tests import common
 from webservices.rest import db
 from webservices.spec import spec
@@ -318,7 +319,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         rows = models.ScheduleABySize.query.filter_by(
             cycle=2016,
             committee_id='C6789',
@@ -330,7 +331,7 @@ class TestViews(common.IntegrationTestCase):
         filing.contb_receipt_amt = 53
         db.session.add(filing)
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
@@ -356,7 +357,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         existing = get_existing()
         total = existing.total
         count = existing.count
@@ -373,7 +374,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        _rebuild_sched_a_by_size_merged()
         existing = get_existing()
         self.assertEqual(existing.total, total + NEW_RECEIPT_AMOUNT)
         self.assertEqual(existing.count, count + 1)
@@ -384,9 +385,10 @@ class TestViews(common.IntegrationTestCase):
             cycle=2016,
         ).first()
         total = existing.total
+        committee_id = existing.committee_id
         filing = self.NmlSchedAFactory(
             rpt_yr=2015,
-            cmte_id=existing.committee_id,
+            cmte_id=committee_id,
             contb_receipt_amt=75,
             contb_receipt_dt=datetime.datetime(2015, 1, 1),
             receipt_tp='15J',
@@ -402,7 +404,7 @@ class TestViews(common.IntegrationTestCase):
         rep = sa.Table('detsum_sample', db.metadata, autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
             indv_unitem_contb=20,
-            cmte_id=existing.committee_id,
+            cmte_id=committee_id,
             rpt_yr=2016,
             orig_sub_id=9,
             form_tp_cd='F3',
@@ -411,11 +413,16 @@ class TestViews(common.IntegrationTestCase):
         db.session.commit()
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_totals_combined_mv')
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        db.session.refresh(existing)
+        db.session.commit()
+        _rebuild_sched_a_by_size_merged()
+        refreshed = models.ScheduleABySize.query.filter_by(
+            size=0,
+            cycle=2016,
+            committee_id=committee_id,
+        ).first()
         # Updated total includes new Schedule A filing and new report
-        self.assertAlmostEqual(existing.total, total + 75 + 20)
-        self.assertEqual(existing.count, None)
+        self.assertAlmostEqual(refreshed.total, total + 75 + 20)
+        self.assertEqual(refreshed.count, None)
 
     def test_update_aggregate_purpose_create(self):
         db.session.execute('delete from disclosure.f_item_receipt_or_exp')
@@ -540,3 +547,6 @@ class TestViews(common.IntegrationTestCase):
         actual_tables = set(inspector.get_table_names())
         assert expected_tables.issubset(actual_tables)
         assert "ofec_sched_a_3005_3006" not in actual_tables
+
+def _rebuild_sched_a_by_size_merged():
+    execute_sql_file('./data/converted_mvs/sched_a_by_size_merged.sql')

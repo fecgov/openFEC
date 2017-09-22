@@ -19,7 +19,7 @@ rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
 
 def _setup_extensions():
-    rest.db.engine.execute('create extension btree_gin;')
+    rest.db.engine.execute('create extension if not exists btree_gin;')
 
 
 def _reset_schema():
