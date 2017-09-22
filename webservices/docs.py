@@ -991,23 +991,23 @@ A unique identifier associated with an audit
 '''
 
 FINDING_ID = '''
-Number associated with an audit finding -- Need to find a better description to go here.
+Unique number of an audit finding
 '''
 
 FINDING = '''
-Name of the audit finding -- Need to find a better description to go here.
+Name of the audit finding
 '''
 
 AUDIT_CASE_ID = '''
-A unique identifier associated with an audit case -- Need to find a better description to go here.
+A unique identifier associated with an audit case
 '''
 
 ISSUE_ID = '''
-Number associated with an audit issue -- Need to find a better description to go here.
+Number associated with an audit issue
 '''
 
 ISSUE = '''
-Name of the audit finding issue -- Need to find a better description to go here.
+Name of the audit finding issue
 '''
 TIER = '''
 Level of Audit -- Need to find a better description to go here.
