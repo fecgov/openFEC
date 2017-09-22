@@ -760,7 +760,7 @@ AuditFindingsView = {
     'tier_one_finding': fields.List(fields.Str, description='Name of Finding'),
     'tier_two_id': fields.List(fields.Int(), description='ID of Issue'),
     'tier_two_finding': fields.List(fields.Str, description='Name of Issue'),
-    
+
 }
 
 AuditSearchView = {

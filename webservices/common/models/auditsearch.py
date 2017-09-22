@@ -15,7 +15,7 @@ class AuditFindingsView(AuditSearchMixin, db.Model):
     tier_one_finding = db.Column('tier_one_finding', db.String, doc=docs.FINDING)
     tier_two_id = db.Column('child_finding_pk', db.Integer, index=True)
     tier_two_finding = db.Column('tier_two_finding', db.String, doc=docs.FINDING)
- 
+
 class AuditSearchView(db.Model):
     __tablename__ = 'ofec_audit_search_mv'
 
@@ -36,13 +36,3 @@ class AuditSearchView(db.Model):
     committee_description = db.Column('committee_description', db.String)
     candidate_id = db.Column('candidate_id', db.String, index=True)
     candidate_name = db.Column('candidate_name', db.String)
-
-
-
-
-
-
-
-
- 
-

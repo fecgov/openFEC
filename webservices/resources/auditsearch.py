@@ -39,7 +39,7 @@ class AuditFindingsView(ApiResource):
     def index_column(self):
         return self.model.idx
 
-@doc(tags=['audit-search'], 
+@doc(tags=['audit-search'],
    description='This is a search tool for Final Audit Reports approved by the Commission since inception. The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.',
    )
 class AuditSearchView(ApiResource):
@@ -51,7 +51,7 @@ class AuditSearchView(ApiResource):
 
     filter_fulltext_fields = [
        ('candidate_name', model.candidate_name),
-       ('committee_name', model.committee_name),      
+       ('committee_name', model.committee_name),
     ]
     filter_multi_fields = [
         ('finding_id', model.finding_id),
