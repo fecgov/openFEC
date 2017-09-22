@@ -985,6 +985,7 @@ Provides cumulative disbursement totals by entity type, over a two year cycle. T
 This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
 '''
 
+#Audits
 AUDIT_ID = '''
 A unique identifier associated with an audit
 '''
@@ -1011,9 +1012,18 @@ Name of the audit finding issue -- Need to find a better description to go here.
 TIER = '''
 Level of Audit -- Need to find a better description to go here.
 '''
-ELECTION_CYCLE = '''
-Two year election cycle -- Need to find a better description to go here.
+
+# content from https://www.fec.gov/legal-resources/enforcement/ and https://www.fec.gov/legal-resources/enforcement/audit-reports/
+AUDIT = '''
+The agency’s monitoring process may detect potential violations through a review of a committee’s reports or through a
+Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
+
+The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
+audits a committee when it appears not to have met the threshold requirements for substantial compliance with the Federal
+Election Campaign Act. The audit determines whether the committee complied with limitations, prohibitions and disclosure
+requirements.
 '''
+
 #audit search
 AUDIT_SEARCH = '''
 This is a search tool for Final Audit Reports approved by the Commission since inception.

@@ -8,7 +8,7 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@doc(tags=['audit-finding'], description='Search Audit Findings and Issues can be associated with a committe',)
+@doc(tags=['audit'], description=doc.AUDIT_FINDING)
 class AuditFindingsView(ApiResource):
 
     model = models.AuditFindingsView
@@ -39,15 +39,12 @@ class AuditFindingsView(ApiResource):
     def index_column(self):
         return self.model.idx
 
-@doc(tags=['audit-search'],
-   description='This is a search tool for Final Audit Reports approved by the Commission since inception. The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.',
-   )
+@doc(tags=['audit'], description=doc.AUDIT_FINDING,)
 class AuditSearchView(ApiResource):
 
     model = models.AuditSearchView
     schema = schemas.AuditSearchViewSchema
     page_schema = schemas.AuditSearchViewPageSchema
-
 
     filter_fulltext_fields = [
        ('candidate_name', model.candidate_name),
@@ -82,5 +79,3 @@ class AuditSearchView(ApiResource):
     @property
     def index_column(self):
         return self.model.finding_id
-
-
