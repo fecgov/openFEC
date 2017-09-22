@@ -5,7 +5,7 @@ from tests.common import ApiBaseTest
 
 from webservices import utils
 from webservices.rest import api
-from webservices.resources.totals import TotalsView, ScheduleAByStateRecipientTotalsView
+from webservices.resources.totals import TotalsView, TotalsCommitteeView, ScheduleAByStateRecipientTotalsView
 
 
 shared_fields = {
@@ -75,7 +75,7 @@ class TestTotals(ApiBaseTest):
 
         committee_total = factories.TotalsPresidentialFactory(**fields)
 
-        results = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
         for key, value in results[0].items():
             if key not in fields:
                 print(key)
@@ -108,7 +108,7 @@ class TestTotals(ApiBaseTest):
         fields = utils.extend(house_senate_fields, shared_fields)
 
         committee_total = factories.TotalsHouseSenateFactory(**fields)
-        results = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
 
         self.assertEqual(results[0], fields)
 
@@ -152,7 +152,7 @@ class TestTotals(ApiBaseTest):
         fields = utils.extend(pac_party_fields, shared_fields)
 
         committee_total = factories.TotalsPacPartyFactory(**fields)
-        results = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
 
         self.assertEqual(results[0], fields)
 
@@ -172,7 +172,7 @@ class TestTotals(ApiBaseTest):
         }
 
         committee_total = factories.TotalsIEOnlyFactory(**ie_fields)
-        results = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
 
         self.assertEqual(results[0], ie_fields)
 
@@ -184,13 +184,13 @@ class TestTotals(ApiBaseTest):
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2012),
         ]
-        response = self._results(api.url_for(TotalsView, committee_id=committee_id))
+        response = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]['cycle'], 2012)
         self.assertEqual(response[1]['cycle'], 2008)
 
     def test_totals_committee_not_found(self):
-        resp = self.app.get(api.url_for(TotalsView, committee_id='fake'))
+        resp = self.app.get(api.url_for(TotalsCommitteeView, committee_id='fake'))
         self.assertEqual(resp.status_code, 404)
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data.decode('utf-8'))

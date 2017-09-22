@@ -5,7 +5,7 @@ from webservices import docs
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
     offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
     political_party_committee_contributions = db.Column(db.Numeric(30, 2))
