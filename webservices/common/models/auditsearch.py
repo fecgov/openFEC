@@ -6,15 +6,16 @@ from webservices import docs
 class AuditSearchMixin(object):
     __table_args__ = {"schema": "auditsearch"}
 
+
 class AuditFindingsView(AuditSearchMixin, db.Model):
     __tablename__ = 'findings_vw'
 
     idx = db.Column('finding_pk',db.Integer, primary_key=True)
     tier = db.Column('tier', db.Integer, index=True, doc=docs.TIER)
-    tier_one_id = db.Column('parent_finding_pk', db.Integer, doc=docs.FINDING)
-    tier_one_finding = db.Column('tier_one_finding', db.String, doc=docs.FINDING)
-    tier_two_id = db.Column('child_finding_pk', db.Integer, index=True)
-    tier_two_finding = db.Column('tier_two_finding', db.String, doc=docs.FINDING)
+    tier_one_id = db.Column('parent_finding_pk', db.Integer)
+    tier_one_finding = db.Column('tier_one_finding', db.String)
+    tier_two_id = db.Column('child_finding_pk', db.Integer)
+    tier_two_finding = db.Column('tier_two_finding', db.String)
 
 class AuditSearchView(db.Model):
     __tablename__ = 'ofec_audit_search_mv'

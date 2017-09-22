@@ -994,7 +994,7 @@ FINDING_ID = '''
 Unique number of an audit finding
 '''
 
-FINDING = '''
+AUDIT_FINDING = '''
 Name of the audit finding
 '''
 
