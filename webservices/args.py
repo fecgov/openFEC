@@ -755,27 +755,27 @@ schedule_a_by_state_recipient_totals = {
 }
 
 AuditFindingsView = {
-    'tier': fields.List(fields.Int(), description='Tier'),
-    'tier_one_id': fields.List(fields.Int(), description='ID of Finding'),
-    'tier_one_finding': fields.List(fields.Str, description='Name of Finding'),
-    'tier_two_id': fields.List(fields.Int(), description='ID of Issue'),
-    'tier_two_finding': fields.List(fields.Str, description='Name of Issue'),
+    'tier': fields.List(fields.Int(), description=docs.AUDIT_TIER),
+    'category_id': fields.List(fields.Int(), description=docs.CATEGORY),
+    'category': fields.List(fields.Str, description=docs.CATEGORY),
+    'subcategory_id': fields.List(fields.Int(), description=docs.SUBCATEGORY),
+    'subcategory': fields.List(fields.Str, description=docs.SUBCATEGORY),
 
 }
 
 AuditSearchView = {
-    'finding_id': fields.List(fields.Int(), description='ID of Finding (Tier 1)'),
-    'finding': fields.List(fields.Str(), description='Name of Finding'),
-    'issue_id': fields.List(fields.Int(), description='ID of Issue (Tier 2)'),
-    'issue': fields.List(fields.Str(), description='Name of Issue'),
-    'election_cycle': fields.List(fields.Int(), description='Election Cycle'),
-    'committee_id': fields.List(fields.Str(), description='Committee ID'),
-    'committee_name': fields.List(fields.Str(), description='Committee Name'),
-    'committee_designation': fields.List(fields.Str(), description='Committee Designation'),
-    'committee_type': fields.List(fields.Str(), description='Committee Type'),
+    'category_id': fields.List(fields.Int(), description=docs.CATEGORY),
+    'category': fields.List(fields.Str(), description=docs.CATEGORY),
+    'subcategory_id': fields.List(fields.Int(), description=docs.SUBCATEGORY),
+    'subcategory': fields.List(fields.Str(), description=docs.SUBCATEGORY),
+    'election_cycle': fields.List(fields.Int(), description=docs.CYCLE),
+    'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
+    'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
+    'committee_designation': fields.List(fields.Str(), description=docs.DESIGNATION),
+    'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
     'committee_description': fields.List(fields.Str(), description='Committee Description'),
-    'candidate_id': fields.List(fields.Str(), description='Candidate ID'),
-    'candidate_name': fields.List(fields.Str(), description='Candidate Name'),
+    'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
+    'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
     'min_election_cycle': fields.Int(fields.Int(), description='Min Election Cycle'),
     'max_election_cycle': fields.Int(fields.Int(), description='Max Election Cycle'),
 }

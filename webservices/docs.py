@@ -990,12 +990,12 @@ AUDIT_ID = '''
 A unique identifier associated with an audit
 '''
 
-FINDING_ID = '''
-Unique number of an audit finding
+CATEGORY = '''
+The finding of an audit. Finding are a category of broader issues. Each category has an unique ID.
 '''
 
-AUDIT_FINDING = '''
-Name of the audit finding
+SUBCATEGORY = '''
+The audit issue. Each subcategory has an unique ID.
 '''
 
 AUDIT_CASE_ID = '''
@@ -1009,8 +1009,8 @@ Number associated with an audit issue
 ISSUE = '''
 Name of the audit finding issue
 '''
-TIER = '''
-Level of Audit -- Need to find a better description to go here.
+AUDIT_TIER = '''
+1 specifies a category and 2 specifies a subcategory
 '''
 
 # content from https://www.fec.gov/legal-resources/enforcement/ and https://www.fec.gov/legal-resources/enforcement/audit-reports/
@@ -1022,15 +1022,17 @@ The Commission is required by law to audit Presidential campaigns that accept pu
 audits a committee when it appears not to have met the threshold requirements for substantial compliance with the Federal
 Election Campaign Act. The audit determines whether the committee complied with limitations, prohibitions and disclosure
 requirements.
+
+These endpoints contain Final Audit Reports approved by the Commission since inception.
 '''
 
 #audit search
 AUDIT_SEARCH = '''
-This is a search tool for Final Audit Reports approved by the Commission since inception.
+This endpoint contains Final Audit Reports approved by the Commission since inception.
 The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
 '''
+
 #audit finding
-AUDIT_FINDING = '''
-This is a search tool for Final Audit Reports approved by the Commission since inception.
-The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
+AUDIT_CATEGORIES = '''
+This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
 '''

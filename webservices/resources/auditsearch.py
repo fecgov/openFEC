@@ -8,20 +8,22 @@ from webservices.common import models
 from webservices.common.views import ApiResource
 
 
-@doc(tags=['audit'], description=doc.AUDIT_FINDING)
+@doc(
+    tags=['audit'],
+    description=docs.AUDIT_CATEGORIES,
+)
 class AuditFindingsView(ApiResource):
 
     model = models.AuditFindingsView
     schema = schemas.AuditFindingsViewSchema
     page_schema = schemas.AuditFindingsViewPageSchema
 
-
     filter_multi_fields = [
         ('tier', model.tier),
-        ('tier_one_id', model.tier_one_id),
-        ('tier_one_finding', model.tier_one_finding),
-        ('tier_two_id', model.tier_two_id),
-        ('tier_two_finding', model.tier_two_finding),
+        ('category_id', model.category_id),
+        ('category', model.category),
+        ('subcategory_id', model.subcategory_id),
+        ('subcategory', model.subcategory),
 
     ]
 
@@ -39,22 +41,28 @@ class AuditFindingsView(ApiResource):
     def index_column(self):
         return self.model.idx
 
-@doc(tags=['audit'], description=doc.AUDIT_FINDING,)
+
+@doc(
+    tags=['audit'],
+    description=docs.AUDIT_SEARCH,
+)
 class AuditSearchView(ApiResource):
 
     model = models.AuditSearchView
     schema = schemas.AuditSearchViewSchema
     page_schema = schemas.AuditSearchViewPageSchema
 
-    filter_fulltext_fields = [
-       ('candidate_name', model.candidate_name),
-       ('committee_name', model.committee_name),
-    ]
+    #  we are implementing this on the front end
+    # filter_fulltext_fields = [
+    #    ('candidate_name', model.candidate_name),
+    #    ('committee_name', model.committee_name),
+    # ]
     filter_multi_fields = [
-        ('finding_id', model.finding_id),
-        ('finding', model.finding),
-        ('issue_id', model.issue_id),
-        ('issue', model.issue),
+        ('category_id', model.category_id),
+        ('category', model.category),
+        ('subcategory_id', model.subcategory_id),
+        ('subcategory', model.subcategory),
+        # if this is a 2-yr cycle it should just be cycle I also think this is redundant since we have min and max
         ('election_cycle', model.election_cycle),
         ('committee_id', model.committee_id),
         ('committee_designation', model.committee_designation),
