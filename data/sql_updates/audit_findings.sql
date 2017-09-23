@@ -3,10 +3,10 @@ drop materialized view if exists ofec_audit_search_mv_tmp;
 
 CREATE MATERIALIZED VIEW ofec_audit_search_mv_tmp AS
  SELECT row_number() OVER () AS idx,
-    fvw.parent_finding_pk::integer AS finding_id,
-    trim(fvw.tier_one_finding::text) AS finding,
-    fvw.child_finding_pk::integer AS issue_id,
-    fvw.tier_two_finding AS issue,
+    fvw.parent_finding_pk::integer AS category_id,
+    trim(fvw.tier_one_finding::text) AS category,
+    fvw.child_finding_pk::integer AS subcategory_id,
+    fvw.tier_two_finding AS subcategory,
     ac.audit_case_id::integer AS audit_case_id,
     ac.audit_id::integer AS audit_id,
     ac.election_cycle::integer AS election_cycle,
@@ -58,24 +58,24 @@ CREATE INDEX ofec_audit_search_election_cycle_tmp
 
 -- Index: public.ofec_audit_search_finding_id
 
-CREATE INDEX ofec_audit_search_finding_id_tmp
+CREATE INDEX ofec_audit_search_category_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
-  (finding_id);
+  (category);
 
 -- Index: public.ofec_audit_search_finding_issue_id
 
-CREATE INDEX ofec_audit_search_finding_issue_id_tmp
+CREATE INDEX ofec_audit_search_subcategory_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
-  (finding_id, issue_id);
+  (category, subcategory_id);
 
 -- Index: public.ofec_audit_search_issue_id
 
-CREATE INDEX ofec_audit_search_issue_id_tmp
+CREATE INDEX ofec_audit_search_subcategory_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
-  (issue_id);
+  (subcategory_id);
 
 -- Index: public.ofec_audit_search_mv_tmp_idx_idx1
 
