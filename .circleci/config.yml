@@ -1,0 +1,97 @@
+# Python CircleCI 2.0 configuration file
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+version: 2
+jobs:
+  build:
+    docker:
+      # CircleCI maintains a library of pre-built images documented at
+      # https://circleci.com/docs/2.0/circleci-images/
+      # use `-browsers` prefix for selenium tests, e.g. `<image_name>-browsers`
+
+      # Python
+      - image: circleci/python:3.5.3
+        environment:
+          TZ: America/New_York
+          SQLA_TEST_CONN: postgres://postgres@0.0.0.0/cfdm_unit_test
+
+      # PostgreSQL
+      - image: circleci/postgres:9.6.2
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: cfdm_unit_test
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install system dependencies
+          # Commands listed here are from the CircleCI PostgreSQL config docs:
+          # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
+          command: |
+            sudo apt-get install postgresql-client
+            echo ‘/usr/lib/postgresql/9.6/bin/:$PATH’ >> $BASH_ENV
+
+      - run:
+          name: Install Node.js
+          command: |
+            sudo apt-get update && curl -sL https://deb.nodesource.com/setup_6.x | sudo bash - && sudo apt-get install -y nodejs
+
+      - restore_cache:
+          keys:
+          - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - fec-api-dependencies-
+
+      - run:
+          name: Install project dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install -r requirements.txt -r requirements-dev.txt -r requirements-ci.txt
+            sudo npm install -g swagger-tools
+            npm install
+            npm run build
+
+      - save_cache:
+          paths:
+            - ./venv
+            - ./node_modules
+          key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
+
+      - run:
+          name: Ensure database is available
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+
+      - run:
+          name: Run tests
+          command: |
+            . venv/bin/activate
+            py.test
+
+      - run:
+          name: Perform post-test checks
+          command: |
+            . venv/bin/activate
+            codecov
+
+      - store_artifacts:
+          path: test-reports
+          destination: test-reports
+
+      - run:
+          name: Install cf cli
+          command: |
+            mkdir -p $HOME/bin
+            export PATH=$HOME/bin:$PATH
+            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.23.0" | tar xzv -C $HOME/bin
+            cf install-plugin autopilot -f -r CF-Community
+
+      - deploy:
+          name: Deploy API
+          command: |
+            export PATH=$HOME/bin:$PATH
+            . venv/bin/activate
+            pip install -r requirements.txt
+            invoke deploy --branch $TRAVIS_BRANCH --login True --yes
