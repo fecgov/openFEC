@@ -61,11 +61,11 @@ CREATE INDEX ofec_audit_search_election_cycle_tmp
 CREATE INDEX ofec_audit_search_category_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
-  (category);
+  (category_id);
 
 -- Index: public.ofec_audit_search_finding_issue_id
 
-CREATE INDEX ofec_audit_search_subcategory_id_tmp
+CREATE INDEX ofec_audit_search_subcategory_category_id_tmp
   ON public.ofec_audit_search_mv_tmp
   USING btree
   (category, subcategory_id);
