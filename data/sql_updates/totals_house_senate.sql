@@ -55,7 +55,9 @@ select
     last_debts_owed_by_committee,
     last_debts_owed_to_committee,
     last_report_year,
-    committee_name_full,
+    committee_name,
+    committee_type,
+    committee_designation,
     committee_type_full,
     committee_designation_full,
     party_full

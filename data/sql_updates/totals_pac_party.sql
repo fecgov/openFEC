@@ -64,11 +64,11 @@ select
     oft.last_debts_owed_by_committee,
     oft.last_debts_owed_to_committee,
     oft.last_report_year,
-    oft.committee_name_full,
+    oft.committee_type,
+    oft.committee_designation,
     oft.committee_type_full,
     oft.committee_designation_full,
     oft.party_full,
-    comm_dets.committee_type,
     comm_dets.designation
 from
     ofec_totals_combined_mv_tmp oft

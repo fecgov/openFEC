@@ -9,7 +9,9 @@ select
     contributions as total_independent_contributions,
     independent_expenditures as total_independent_expenditures,
     last_beginning_image_number,
-    committee_name_full,
+    committee_name,
+    committee_type,
+    committee_designation,
     committee_type_full,
     committee_designation_full,
     party_full
