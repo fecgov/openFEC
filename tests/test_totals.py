@@ -35,7 +35,9 @@ shared_fields = {
     'net_contributions': 123,
     'net_operating_expenditures': 321,
     'last_debts_owed_to_committee': 42,
-    'committee_name_full': "",
+    'committee_name': "",
+    'committee_type': "",
+    'committee_designation': "",
     'committee_type_full': "",
     'committee_designation_full': "",
     'party_full': ""

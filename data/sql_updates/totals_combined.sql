@@ -73,7 +73,6 @@ committee_info as (
         cmte_id, 
         fec_election_yr,
         cmte_nm,
-        -- make cmte_tp this field full
         cmte_tp, 
         cmte_dsgn,
         cmte_pty_affiliation_desc
@@ -161,10 +160,12 @@ committee_info as (
         sum(vsd.ttl_loans) as loans, -- f3
         sum(vsd.ttl_nonfed_tranf_per) as total_transfers,
         sum(vsd.ttl_receipts) as receipts,
-        max(committee_info.cmte_nm) as committee_name_full,
-        max(committee_info.cmte_tp) as committee_type_full, 
-        max(committee_info.cmte_dsgn) as committee_designation_full,
+        max(committee_info.cmte_tp) as committee_type, 
+        max(expand_committee_type(committee_info.cmte_tp)) as committee_type_full,
+        max(committee_info.cmte_dsgn) as committee_designation,
+        max(expand_committee_designation(committee_info.cmte_dsgn)) as committee_designation_full,
         max(committee_info.cmte_pty_affiliation_desc) as party_full,
+        -- max(expand_committee_type(committee_info.cmte_pty_affiliation_desc)) as party_full,
         vsd.cmte_id as committee_id,
 
         -- double check this makes sense down stream
