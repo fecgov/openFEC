@@ -25,10 +25,10 @@ class TestAuditSearch(ApiBaseTest):
 
     def test_filters(self):
         [
-            factories.AuditSearchViewFactory(finding_id=3),
-            factories.AuditSearchViewFactory(finding='Disclosure'),
-            factories.AuditSearchViewFactory(issue_id=220),
-            factories.AuditSearchViewFactory(issue='Coordinated Expenditures'),
+            factories.AuditSearchViewFactory(category_id=3),
+            factories.AuditSearchViewFactory(category='Disclosure'),
+            factories.AuditSearchViewFactory(subcategory_id=220),
+            factories.AuditSearchViewFactory(subcategory='Coordinated Expenditures'),
             factories.AuditSearchViewFactory(election_cycle=2002),
             factories.AuditSearchViewFactory(committee_id='C00161786'),
             # factories.AuditSearchViewFactory(committee_name='COLORADO DEMOCRATIC PARTY'),
@@ -41,10 +41,10 @@ class TestAuditSearch(ApiBaseTest):
         ]
 
         filter_fields = (
-            ('finding_id', 3),
-            ('finding', 'Disclosure'),
-            ('issue_id', 220),
-            ('issue', 'Coordinated Expenditures'),
+            ('category_id', 3),
+            ('category', 'Disclosure'),
+            ('subcategory_id', 220),
+            ('subcategory', 'Coordinated Expenditures'),
             ('election_cycle', 2002),
             ('committee_id', 'C00161786'),
             # ('committee_name', 'COLORADO DEMOCRATIC PARTY'),

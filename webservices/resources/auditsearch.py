@@ -86,4 +86,4 @@ class AuditSearchView(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.finding_id
+        return self.model.category_id
