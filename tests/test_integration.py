@@ -59,11 +59,6 @@ def make_factory():
     return NmlSchedAFactory, NmlSchedBFactory, FItemReceiptOrExp
 
 
-CANDIDATE_MODELS = [
-    models.Candidate,
-    models.CandidateDetail,
-    models.CandidateHistory,
-]
 REPORTS_MODELS = [
     models.CommitteeReportsPacParty,
     models.CommitteeReportsPresidential,
