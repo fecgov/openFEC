@@ -30,7 +30,7 @@ jobs:
           # Commands listed here are from the CircleCI PostgreSQL config docs:
           # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
           command: |
-            sudo apt-get install postgresql-client
+            apt-get update -qq && apt-get install -y build-essential postgresql-client
             echo ‘/usr/lib/postgresql/9.6/bin/:$PATH’ >> $BASH_ENV
 
       - restore_cache:
@@ -47,9 +47,9 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-            nvm install 8.5.0
-            nvm use 8.5.0
-            nvm alias default 8.5.0
+            nvm install 8.6.0
+            nvm use 8.6.0
+            nvm alias default 8.6.0
             npm install -g npm swagger-tools
             npm install
             npm run build
@@ -92,7 +92,7 @@ jobs:
           command: |
             mkdir -p $HOME/bin
             export PATH=$HOME/bin:$PATH
-            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.31.0" | tar xzv -C $HOME/bin
+            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0" | tar xzv -C $HOME/bin
             cf install-plugin autopilot -f -r CF-Community
 
       - deploy:
@@ -104,6 +104,4 @@ jobs:
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
             . venv/bin/activate
             nvm use default
-            npm run build
-            pip install -r requirements.txt
             invoke deploy --branch $CIRCLE_BRANCH --login True --yes
