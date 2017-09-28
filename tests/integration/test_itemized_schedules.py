@@ -63,6 +63,7 @@ class TestViews(common.IntegrationTestCase):
         super(TestViews, cls).setUpClass()
         cls.NmlSchedAFactory, cls.NmlSchedBFactory, cls.FItemReceiptOrExp = make_factory()
         manage.update_all(processes=1)
+        #manage.refresh_materialized()
 
     def test_sched_a_fulltext_trigger(self):
         # Test create
