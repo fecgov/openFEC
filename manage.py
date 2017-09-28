@@ -105,23 +105,8 @@ def load_nicknames():
     logger.info('Loading nicknames...')
 
     import pandas as pd
-    import sqlalchemy as sa
 
-    try:
-        table = sa.Table(
-            'ofec_nicknames',
-            db.metadata,
-            autoload_with=db.engine
-        )
-        db.engine.execute(table.delete())
-    except sa.exc.NoSuchTableError:
-        pass
-
-    load_table(
-        pd.read_csv('data/nicknames.csv'),
-        'ofec_nicknames',
-        if_exists='append'
-    )
+    load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames')
 
     logger.info('Finished loading nicknames.')
 
@@ -133,23 +118,8 @@ def load_pacronyms():
     logger.info('Loading pacronyms...')
 
     import pandas as pd
-    import sqlalchemy as sa
 
-    try:
-        table = sa.Table(
-            'ofec_pacronyms',
-            db.metadata,
-            autoload_with=db.engine
-        )
-        db.engine.execute(table.delete())
-    except sa.exc.NoSuchTableError:
-        pass
-
-    load_table(
-        pd.read_excel('data/pacronyms.xlsx'),
-        'ofec_pacronyms',
-        if_exists='append'
-    )
+    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms')
 
     logger.info('Finished loading pacronyms.')
 
