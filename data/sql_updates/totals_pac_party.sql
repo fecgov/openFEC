@@ -64,7 +64,11 @@ select
     oft.last_debts_owed_by_committee,
     oft.last_debts_owed_to_committee,
     oft.last_report_year,
-    comm_dets.committee_type,
+    oft.committee_type,
+    oft.committee_designation,
+    oft.committee_type_full,
+    oft.committee_designation_full,
+    oft.party_full,
     comm_dets.designation
 from
     ofec_totals_combined_mv_tmp oft
@@ -81,6 +85,8 @@ create index on ofec_totals_pacs_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_pacs_parties_mv_tmp(committee_id, idx );
 create index on ofec_totals_pacs_parties_mv_tmp(committee_type, idx );
 create index on ofec_totals_pacs_parties_mv_tmp(designation, idx );
+create index on ofec_totals_pacs_parties_mv_tmp(committee_type_full, idx);
+create index on ofec_totals_pacs_parties_mv_tmp(committee_designation_full, idx);
 
 drop materialized view if exists ofec_totals_pacs_mv_tmp;
 create materialized view ofec_totals_pacs_mv_tmp as
@@ -100,6 +106,8 @@ create index on ofec_totals_pacs_mv_tmp(cycle, idx);
 create index on ofec_totals_pacs_mv_tmp(committee_id, idx );
 create index on ofec_totals_pacs_mv_tmp(committee_type, idx );
 create index on ofec_totals_pacs_mv_tmp(designation, idx );
+create index on ofec_totals_pacs_mv_tmp(committee_type_full, idx);
+create index on ofec_totals_pacs_mv_tmp(committee_designation_full, idx);
 
 drop materialized view if exists ofec_totals_parties_mv_tmp;
 create materialized view ofec_totals_parties_mv_tmp as
@@ -117,3 +125,6 @@ create index on ofec_totals_parties_mv_tmp(cycle, idx);
 create index on ofec_totals_parties_mv_tmp(committee_id, idx );
 create index on ofec_totals_parties_mv_tmp(committee_type, idx );
 create index on ofec_totals_parties_mv_tmp(designation, idx );
+create index on ofec_totals_parties_mv_tmp(committee_type_full, idx);
+create index on ofec_totals_parties_mv_tmp(committee_designation_full, idx);
+
