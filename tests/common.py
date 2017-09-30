@@ -138,3 +138,7 @@ class IntegrationTestCase(BaseTestCase):
                 ['psql', '-f', './data/schema.sql', TEST_CONN],
                 stdout=null
             )
+            subprocess.check_call(
+                ['psql', '-f', './data/states_and_zips_with_data.sql', TEST_CONN],
+                stdout=null
+            )
