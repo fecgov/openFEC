@@ -135,10 +135,10 @@ class IntegrationTestCase(BaseTestCase):
         _reset_schema_for_integration()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
-                ['psql', '-f', './data/schema.sql', TEST_CONN],
+                ['psql', '-f', './data/migrations/V01_schema.sql', TEST_CONN],
                 stdout=null
             )
             subprocess.check_call(
-                ['psql', '-f', './data/states_and_zips_with_data.sql', TEST_CONN],
+                ['psql', '-f', './data/migrations/V02_states_and_zips_with_data.sql', TEST_CONN],
                 stdout=null
             )
