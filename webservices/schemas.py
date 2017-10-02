@@ -941,6 +941,20 @@ ScheduleAByStateRecipientTotalsPageSchema = make_page_schema(
 register_schema(ScheduleAByStateRecipientTotalsSchema)
 register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 
+FindingIssueCategorySchema = make_schema(models.FindingIssueCategory)
+FindingIssueCategoryPageSchema = make_page_schema(FindingIssueCategorySchema)
+register_schema(FindingIssueCategorySchema)
+register_schema(FindingIssueCategoryPageSchema)
+
+
+AuditSearchSchema = make_schema(
+    models.AuditSearch,
+    options={'exclude': ('idx',)})
+AuditSearchPageSchema = make_page_schema(AuditSearchSchema)
+register_schema(AuditSearchSchema)
+register_schema(AuditSearchPageSchema)
+
+
 AuditFindingsViewSchema = make_schema(models.AuditFindingsView, options={'exclude': ('idx',)})
 AuditFindingsViewPageSchema = make_page_schema(AuditFindingsViewSchema)
 register_schema(AuditFindingsViewSchema)

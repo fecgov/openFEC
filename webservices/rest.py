@@ -196,8 +196,10 @@ api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
+api.add_resource(auditsearch.FindingIssueCategory, '/audit-finding-issue-categories/')
+api.add_resource(auditsearch.AuditSearch, '/audit-search/')
 api.add_resource(auditsearch.AuditFindingsView, '/audit-categories/')
-api.add_resource(auditsearch.AuditSearchView, '/audit-search/')
+api.add_resource(auditsearch.AuditSearchView, '/audit-search-view/')
 
 
 
@@ -320,6 +322,8 @@ apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
+apidoc.register(auditsearch.FindingIssueCategory, blueprint='v1')
+apidoc.register(auditsearch.AuditSearch, blueprint='v1')
 apidoc.register(auditsearch.AuditFindingsView, blueprint='v1')
 apidoc.register(auditsearch.AuditSearchView, blueprint='v1')
 
