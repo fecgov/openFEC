@@ -163,7 +163,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     report_type,
                     election_notes,
-                    'Report in Multiple States is Due Today'
+                    'Report in Multiple States is Due'
                 ], ' ')
             when rpt_tp_desc is null and array_length(contest, 1) > 4 then
                 array_to_string(
@@ -171,7 +171,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     report_type,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
@@ -180,21 +180,21 @@ returns text as $$
                     expand_office_description(office_sought),
                     report_type,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
             when array_length(contest, 1) = 0 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
             when array_length(contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     election_notes,
-                    'Report (for Multiple States) is Due Today'
+                    'Report (for Multiple States) is Due'
                 ], ' ')
             else
                 array_to_string(
@@ -203,7 +203,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
         end;
     end
@@ -223,7 +223,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     report_type,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
             when rpt_tp_desc is null and array_length(report_contest, 1) < 3 and array_length(report_contest, 1) >= 1 then
                 array_to_string(
@@ -232,7 +232,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     report_type,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
             when rpt_tp_desc is null then
                 array_to_string(
@@ -240,7 +240,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     report_type,
                     election_notes,
-                    'Report is Due Today. States:',
+                    'Report is Due. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
             when array_length(report_contest, 1) = 1 then array_to_string(
@@ -248,7 +248,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
             when array_length(report_contest, 1) <= 3 then array_to_string(
                 array[
@@ -256,14 +256,14 @@ returns text as $$
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
             when array_length(report_contest, 1) > 4 then array_to_string(
                 array[
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     election_notes,
-                    'Report is Due Today. States:',
+                    'Report is Due. States:',
                     array_to_string(report_contest, ', ')
                 ], ' ')
             else
@@ -273,7 +273,7 @@ returns text as $$
                     expand_office_description(office_sought),
                     rpt_tp_desc,
                     election_notes,
-                    'Report is Due Today'
+                    'Report is Due'
                 ], ' ')
         end;
     end
