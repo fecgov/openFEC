@@ -26,9 +26,14 @@ with totals as (
         cast(federal_funds_flag as boolean) as federal_funds_flag
     from ofec_totals_presidential_mv_tmp
 ),
+link as (
+    select distinct on (cand_id, cand_election_yr)
+    *
+    from ofec_cand_cmte_linkage_mv_tmp
+),
 -- Aggregated totals by candidate by cycle
 cycle_totals as (
-    select distinct on (link.cand_id, totals.cycle)
+    select distinct on (link.cand_id, election.cand_election_year, totals.cycle)
         link.cand_id as candidate_id,
         max(election.cand_election_year) as election_year,
         totals.cycle,
@@ -41,7 +46,7 @@ cycle_totals as (
         min(coverage_start_date) as coverage_start_date,
         max(coverage_end_date) as coverage_end_date,
         array_agg(federal_funds_flag)::boolean array @> array[true] as federal_funds_flag
-    from ofec_cand_cmte_linkage_mv_tmp link
+    from link
     join totals on
         link.cmte_id = totals.committee_id and
         link.fec_election_yr = totals.cycle
