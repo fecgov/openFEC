@@ -1,12 +1,10 @@
 import datetime
 
-import sqlalchemy as sa
-
 from tests import factories
 from tests.common import ApiBaseTest
 
 from webservices.rest import api
-from webservices.common.models import ScheduleA, ScheduleB, ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile, EFilings
+from webservices.common.models import ScheduleE, ScheduleAEfile, ScheduleBEfile, ScheduleEEfile
 from webservices.schemas import ScheduleASchema
 from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
@@ -371,37 +369,6 @@ class TestItemized(ApiBaseTest):
         results = self._results(api.url_for(ScheduleAView, min_image_number='2', max_image_number='3'))
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
 
-
-    def test_filter_individual_sched_a(self):
-        individuals = [
-            factories.ScheduleAFactory(receipt_type='15J'),
-            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150),
-        ]
-        earmarks = [
-            factories.ScheduleAFactory(),
-            factories.ScheduleAFactory(
-                line_number='12',
-                contribution_receipt_amount=150,
-                memo_text='earmark',
-                memo_code='X',
-            ),
-        ]
-
-        is_individual = sa.func.is_individual(
-            ScheduleA.contribution_receipt_amount,
-            ScheduleA.receipt_type,
-            ScheduleA.line_number,
-            ScheduleA.memo_code,
-            ScheduleA.memo_text,
-            ScheduleA.contributor_id,
-            ScheduleA.committee_id,
-        )
-
-        rows = ScheduleA.query.all()
-        self.assertEqual(rows, individuals + earmarks)
-
-        rows = ScheduleA.query.filter(is_individual).all()
-        self.assertEqual(rows, individuals)
 
     def test_amount_sched_a(self):
         [

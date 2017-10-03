@@ -18,10 +18,6 @@ TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
 
-def _setup_extensions():
-    rest.db.engine.execute('create extension if not exists btree_gin;')
-
-
 def _reset_schema():
     rest.db.engine.execute('drop schema if exists public cascade;')
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
@@ -55,7 +51,6 @@ class BaseTestCase(unittest.TestCase):
         cls.client = TestApp(rest.app)
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
-        _setup_extensions()
         _reset_schema()
 
     def setUp(self):
@@ -79,7 +74,6 @@ class ApiBaseTest(BaseTestCase):
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
         manage.load_districts()
-        manage.update_functions()
         whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
         rest.db.metadata.create_all(
             rest.db.engine,

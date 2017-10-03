@@ -216,12 +216,6 @@ def update_schemas(processes=1):
     logger.info("Finished DB refresh.")
 
 @manager.command
-def update_functions(processes=1):
-    """This command updates the helper functions. It is run on deploy.
-    """
-    execute_sql_folder('data/functions/', processes=processes)
-
-@manager.command
 def update_itemized(schedule):
     """These are the scripts that create the main schedule tables.
     Run this when you make a change to code in:
@@ -295,7 +289,6 @@ def update_all(processes=1):
     """Update all derived data. Warning: Extremely slow on production data.
     """
     processes = int(processes)
-    update_functions(processes=processes)
     load_districts()
     load_pacronyms()
     load_nicknames()
