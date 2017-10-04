@@ -8,7 +8,6 @@ import subprocess
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
-import manage
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
@@ -74,7 +73,11 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
-        manage.load_districts()
+        with open(os.devnull, 'w') as null:
+            subprocess.check_call(
+                ['psql', '-f', 'data/migrations/V02_states_and_zips_with_data.sql', TEST_CONN],
+                stdout=null
+            )
         whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
         rest.db.metadata.create_all(
             rest.db.engine,

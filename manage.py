@@ -129,26 +129,6 @@ def dump_districts(dest=None):
     subprocess.run(cmd, shell=True)
 
 @manager.command
-def load_districts(source=None):
-    """ Loads that districts that you made locally so that you can then add them as a
-    table to the databases
-    """
-
-    logger.info('Loading districts...')
-
-    if source is None:
-        source = './data/districts.dump'
-    else:
-        source = shlex.quote(source)
-
-    dest = db.engine.url
-    cmd = (
-        'pg_restore --dbname "{dest}" --no-acl --no-owner --clean {source}'
-    ).format(**locals())
-    subprocess.run(cmd, shell=True)
-    logger.info('Finished loading districts.')
-
-@manager.command
 def build_district_counts(outname='districts.json'):
     """ Compiles the districts for a state
     """
@@ -233,7 +213,6 @@ def update_all(processes=1):
     """Update all derived data. Warning: Extremely slow on production data.
     """
     processes = int(processes)
-    load_districts()
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
