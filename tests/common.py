@@ -1,3 +1,4 @@
+import glob
 import os
 import json
 import codecs
@@ -127,12 +128,13 @@ class IntegrationTestCase(BaseTestCase):
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
         _reset_schema_for_integration()
-        with open(os.devnull, 'w') as null:
+        run_migrations()
+
+def run_migrations():
+    with open(os.devnull, 'w') as null:
+        sql_files = sorted(glob.glob('./data/migrations/' + '*.sql'))
+        for sql_file in sql_files:
             subprocess.check_call(
-                ['psql', '-f', './data/migrations/V01_schema.sql', TEST_CONN],
-                stdout=null
-            )
-            subprocess.check_call(
-                ['psql', '-f', './data/migrations/V02_states_and_zips_with_data.sql', TEST_CONN],
+                ['psql', '-f', sql_file, TEST_CONN],
                 stdout=null
             )
