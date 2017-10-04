@@ -96,33 +96,6 @@ def execute_sql_folder(path, processes):
         for path in paths:
             execute_sql_file(path)
 
-@manager.command
-def load_nicknames():
-    """For improved search when candidates have a name that doesn't appear on their form.
-    Additional nicknames can be added to the csv for improved search.
-    """
-
-    logger.info('Loading nicknames...')
-
-    import pandas as pd
-
-    load_table(pd.read_csv('data/nicknames.csv'), 'ofec_nicknames')
-
-    logger.info('Finished loading nicknames.')
-
-@manager.command
-def load_pacronyms():
-    """For improved search of organizations that go by acronyms
-    """
-
-    logger.info('Loading pacronyms...')
-
-    import pandas as pd
-
-    load_table(pd.read_excel('data/pacronyms.xlsx'), 'ofec_pacronyms')
-
-    logger.info('Finished loading pacronyms.')
-
 def load_table(frame, tablename, if_exists='replace', indexes=()):
     import sqlalchemy as sa
     frame.to_sql(tablename, db.engine, if_exists=if_exists)
@@ -279,8 +252,6 @@ def update_all(processes=1):
     """
     processes = int(processes)
     load_districts()
-    load_pacronyms()
-    load_nicknames()
     load_election_dates()
     update_itemized('a')
     update_itemized('b')
