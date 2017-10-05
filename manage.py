@@ -112,24 +112,6 @@ def build_districts():
     load_table(pd.read_csv('data/natl_zccd_delim.csv'), 'ofec_zips_districts', indexes=('ZCTA', ))
 
 @manager.command
-def load_election_dates():
-    """ This is from before we had direct access to election data and needed it, we are still using the
-    data from a csv, to populate the ElectionClassDate model.
-    """
-
-    logger.info('Loading election dates...')
-
-    import pandas as pd
-    frame = pd.read_excel('data/election_dates.xlsx')
-    frame.columns = [column.lower() for column in frame.columns]
-    load_table(
-        frame, 'ofec_election_dates',
-        indexes=('office', 'state', 'district', 'election_yr', 'senate_class'),
-    )
-
-    logger.info('Finished loading election dates.')
-
-@manager.command
 def dump_districts(dest=None):
     """ Makes districts locally that you can then add as a table to the databases
     """
@@ -252,7 +234,6 @@ def update_all(processes=1):
     """
     processes = int(processes)
     load_districts()
-    load_election_dates()
     update_itemized('a')
     update_itemized('b')
     update_itemized('e')
