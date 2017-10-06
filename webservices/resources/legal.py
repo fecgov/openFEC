@@ -133,6 +133,7 @@ def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .extra(size=hits_returned, from_=from_hit) \
         .index(DOCS_SEARCH) \
         .sort("sort1", "sort2")
+    #LBTODO: Do we add anything here?
 
     return apply_mur_specific_query_params(query, **kwargs)
 
@@ -165,6 +166,26 @@ def apply_mur_specific_query_params(query, **kwargs):
     if kwargs.get('mur_document_category'):
         combined_query = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
         query = query.query("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
+    
+    #if the query contains min or max open date, add as a range clause ("Q(range)") 
+    #to the set of must_clauses
+    date_range = {}
+    if kwargs.get('mur_min_open_date'): 
+        date_range['gte'] = kwargs.get('mur_min_open_date')
+    if kwargs.get('mur_max_open_date'):
+        date_range['lte'] = kwargs.get('mur_max_open_date')
+    if date_range:
+        must_clauses.append(Q("range", open_date=date_range))
+
+    #in elasticsearch docs, it goes into more detail on gte (greater than or equal to)
+    #and lte (less than or equal to)
+    date_range = {}
+    if kwargs.get('mur_min_close_date'):
+        date_range['gte'] = kwargs.get('mur_min_close_date')
+    if kwargs.get('mur_max_close_date'):
+        date_range['lte'] = kwargs.get('mur_max_close_date')
+    if date_range:
+        must_clauses.append(Q("range", close_date=date_range))
 
     return query
 
