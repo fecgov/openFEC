@@ -161,15 +161,6 @@ def update_itemized(schedule):
     logger.info('Finished Schedule {0} update.'.format(schedule))
 
 @manager.command
-def partition_itemized(schedule):
-    """This command runs the partitioning against the specified itemized
-    schedule table.
-    """
-    logger.info('Partitioning Schedule %s...', schedule)
-    execute_sql_file('data/sql_partition/partition_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished partitioning Schedule %s.', schedule)
-
-@manager.command
 def rebuild_aggregates(processes=1):
     """These are the functions used to update the aggregates and schedules.
     Run this when you make a change to code in:
@@ -213,11 +204,7 @@ def update_all(processes=1):
     """Update all derived data. Warning: Extremely slow on production data.
     """
     processes = int(processes)
-    update_itemized('a')
-    update_itemized('b')
     update_itemized('e')
-    partition_itemized('a')
-    partition_itemized('b')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 

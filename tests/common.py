@@ -138,6 +138,6 @@ def run_migrations():
         sql_files = sorted(glob.glob('./data/migrations/' + '*.sql'))
         for sql_file in sql_files:
             subprocess.check_call(
-                ['psql', '-f', sql_file, TEST_CONN],
+                ['psql', '-f', sql_file, '-v', 'ON_ERROR_STOP=1', TEST_CONN],
                 stdout=null
             )
