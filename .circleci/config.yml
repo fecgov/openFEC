@@ -33,12 +33,6 @@ jobs:
             sudo apt-get update -qq && sudo apt-get install -y build-essential postgresql-client
             echo '/usr/lib/postgresql/9.6/bin/:$PATH' >> $BASH_ENV
 
-      - restore_cache:
-          keys:
-          - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - fec-api-dependencies-
-
       - run:
           name: Install node dependencies
           command: |
@@ -60,12 +54,6 @@ jobs:
             python3 -m venv env
             . env/bin/activate
             pip install -r requirements.txt -r requirements-dev.txt -r requirements-ci.txt
-
-      - save_cache:
-          paths:
-            - ./env
-            - ./node_modules
-          key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
 
       - run:
           name: Ensure database is available
