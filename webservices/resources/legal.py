@@ -153,6 +153,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     return apply_ao_specific_query_params(query, **kwargs)
 
 def apply_mur_specific_query_params(query, **kwargs):
+    must_clauses = []
     if kwargs.get('mur_no'):
         query = query.query('terms', no=kwargs.get('mur_no'))
     if kwargs.get('mur_respondents'):
@@ -186,6 +187,8 @@ def apply_mur_specific_query_params(query, **kwargs):
     if date_range:
         must_clauses.append(Q("range", close_date=date_range))
 
+    query = query.query('bool', must=must_clauses)
+        
     return query
 
 def get_ao_document_query(q, **kwargs):

@@ -181,9 +181,12 @@ query = {
     'mur_election_cycles': fields.Int(IStr, required=False, description='Filter MURs by election cycles'),
     'mur_document_category': fields.List(IStr, required=False,
         description='Filter MURs by category of associated documents'),
-    'mur_open_date': fields.Date(required=False, description='Filter MURs by date opened'),
-    'mur_close_date': fields.Date(required=False,
-        description='Filter MURs by date closed'),
+    'mur_min_open_date': fields.Date(required=False, description='Filter MURs by earliest date opened'),
+    'mur_max_open_date': fields.Date(required=False, description='Filter MURs by latest date opened'),
+    'mur_min_close_date': fields.Date(required=False,
+        description='Filter MURs by earliest date closed'),
+    'mur_max_close_date': fields.Date(required=False,
+        description='Filter MURs by latest date closed'),
 }
 
 candidate_detail = {
