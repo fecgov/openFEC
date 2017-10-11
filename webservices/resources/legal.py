@@ -155,17 +155,16 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 def apply_mur_specific_query_params(query, **kwargs):
     must_clauses = []
     if kwargs.get('mur_no'):
-        query = query.query('terms', no=kwargs.get('mur_no'))
+        must_clauses.append(Q('terms', no=kwargs.get('mur_no')))
     if kwargs.get('mur_respondents'):
-        query = query.query('match', respondents=kwargs.get('mur_respondents'))
+        must_clauses.append(Q('match', respondents=kwargs.get('mur_respondents')))
     if kwargs.get('mur_dispositions'):
-        query = query.query('terms', disposition__data__disposition=kwargs.get('mur_dispositions'))
+        must_clauses.append(Q('term', disposition__data__disposition=kwargs.get('mur_dispositions')))
     if kwargs.get('mur_election_cycles'):
-        query = query.query('term', election_cycles=kwargs.get('mur_election_cycles'))
+        must_clauses.append(Q('term', election_cycles=kwargs.get('mur_election_cycles')))
 
     if kwargs.get('mur_document_category'):
-        combined_query = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
-        query = query.query("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
+        must_clauses = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
     
     #if the query contains min or max open date, add as a range clause ("Q(range)") 
     #to the set of must_clauses
@@ -217,13 +216,13 @@ def apply_ao_specific_query_params(query, **kwargs):
         must_clauses.append(Q('terms', no=kwargs.get('ao_no')))
 
     if kwargs.get('ao_name'):
-        must_clauses.append(Q("match", name=' '.join(kwargs.get('ao_name'))))
+        must_clauses.append(Q('match', name=' '.join(kwargs.get('ao_name'))))
 
     if kwargs.get('ao_is_pending') is not None:
         must_clauses.append(Q('term', is_pending=kwargs.get('ao_is_pending')))
 
     if kwargs.get('ao_requestor'):
-        must_clauses.append(Q("match", requestor_names=kwargs.get('ao_requestor')))
+        must_clauses.append(Q('match', requestor_names=kwargs.get('ao_requestor')))
 
     citation_queries = []
     if kwargs.get('ao_regulatory_citation'):
