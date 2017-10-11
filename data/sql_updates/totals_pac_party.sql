@@ -15,14 +15,8 @@ select
     oft.disbursements,
     oft.fed_candidate_committee_contributions,
     oft.fed_candidate_contribution_refunds,
-    -- not sure about this one i think it might be fed_funds_per
-    --sum(pnp.ttl_fed_disb_per) as fed_disbursements,
     oft.fed_disbursements,
     oft.fed_election_activity,
-    -- MISSING--
-    -- sum(pnp.ttl_fed_op_exp_per) as fed_operating_expenditures, -- was in F3x can't find in detsum
-    null::numeric as fed_operating_expenditures,
-    --
     oft.fed_receipts,
     oft.independent_expenditures,
     oft.refunded_individual_contributions,
@@ -39,7 +33,9 @@ select
     oft.non_allocated_fed_election_activity,
     oft.total_transfers,
     oft.offsets_to_operating_expenditures,
+    -- I think this is a labeling issue, I am going to try this and see if it fixes the front end display, if it does, I think we will want to get rid of fed operating expenditures
     oft.operating_expenditures,
+    oft.operating_expenditures as fed_operating_expenditures,
     oft.other_disbursements,
     oft.other_fed_operating_expenditures,
     oft.other_fed_receipts,
