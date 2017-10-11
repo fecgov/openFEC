@@ -370,7 +370,12 @@ class ScheduleAByStateRecipientTotalsFactory(BaseFactory):
         model = models.ScheduleAByStateRecipientTotals
     idx = factory.Sequence(lambda n: n)
 
-class AuditSearchViewFactory(BaseFactory):
+# class AuditSearchViewFactory(BaseFactory):
+#     class Meta:
+#         model = models.AuditSearchView
+#     idx = factory.Sequence(lambda n: n)
+
+class AuditCaseFactory(BaseFactory):
     class Meta:
-        model = models.AuditSearchView
+        model = models.AuditCase
     idx = factory.Sequence(lambda n: n)

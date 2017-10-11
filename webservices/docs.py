@@ -990,8 +990,15 @@ AUDIT_ID = '''
 A unique identifier associated with an audit
 '''
 
+AUDIT_CASE_ID = '''
+A unique identifier associated with an audit case
+'''
+
 CATEGORY = '''
 The finding of an audit. Finding are a category of broader issues. Each category has an unique ID.
+'''
+CATEGORY_ID = '''
+The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
 '''
 
 SUBCATEGORY = '''
@@ -1035,4 +1042,15 @@ The search can be based on information about the audited committee (Name, FEC ID
 #audit finding
 AUDIT_CATEGORIES = '''
 This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
+'''
+COMMITTEE_DESCRIPTION = '''
+'''
+
+RELEASE_DATE = '''
+'''
+
+REPORT_LINK = '''
+'''
+
+CATEGORY_DESCRIPTION = '''
 '''
