@@ -49,7 +49,6 @@ from webservices.resources import costs
 from webservices.resources import legal
 from webservices.resources import load
 from webservices.resources import large_aggregates
-from webservices.resources import auditsearch
 from webservices.resources import audit
 from webservices.env import env
 
@@ -321,7 +320,7 @@ apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
 
-#Priya ::: AuditCase and AUditCategory
+# audit-case and audit-category
 apidoc.register(audit.AuditCaseView, blueprint='v1')
 apidoc.register(audit.Category, blueprint='v1')
 

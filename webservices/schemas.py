@@ -967,7 +967,7 @@ AuditSearchViewPageSchema = make_page_schema(AuditSearchViewSchema)
 register_schema(AuditSearchViewSchema)
 register_schema(AuditSearchViewPageSchema)
 
-# categories endpoint schemas
+# audit-category endpoint schemas
 CategoryRelationSchema = make_schema(
     models.CategoryRelation,
     fields={
@@ -984,7 +984,7 @@ CategoryRelationPageSchema = make_page_schema(CategoryRelationSchema)
 register_schema(CategoryRelationSchema)
 register_schema(CategoryRelationPageSchema)
 
-
+#audit-category endpoint schemas
 CategorySchema = make_schema(
     models.Category,
     fields={
@@ -1012,7 +1012,7 @@ register_schema(CategorySchema)
 register_schema(CategoryPageSchema)
 
 
-#Priya ::: Schema for AuditSubCategory
+##audit-case endpoint Schema for AuditSubCategory
 AuditCaseSubCategorySchema = make_schema(
     models.AuditCaseSubCategory,
     fields={
@@ -1029,7 +1029,8 @@ AuditCaseSubCategoryPageSchema = make_page_schema(AuditCaseSubCategorySchema)
 register_schema(AuditCaseSubCategorySchema)
 register_schema(AuditCaseSubCategoryPageSchema)
 
-#Priya ::: Schema for AuditCategory 
+
+#audit-case endpoint nested sub_category schema 
 AuditCategoryRelationSchema = make_schema(
     models.AuditCategoryRelation,
     fields={
@@ -1048,7 +1049,7 @@ AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
 register_schema(AuditCategoryRelationSchema)
 register_schema(AuditCategoryRelationPageSchema)
 
-#Priya ::: AuditCaseSchema
+#audit-case endpoint audit case with nested primary category schema
 AuditCaseSchema = make_schema(
     models.AuditCase,
     fields={
