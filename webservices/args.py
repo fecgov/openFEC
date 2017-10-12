@@ -761,3 +761,34 @@ schedule_a_by_state_recipient_totals = {
         description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
     ),
 }
+
+# Audit Category endpoint
+Category = {
+    'category_id': fields.List(fields.Int, description=docs.CATEGORY),
+    'category_name': fields.List(fields.Str, description=docs.CATEGORY),
+    'tier': fields.List(fields.Int, description=docs.CATEGORY),
+}
+
+# Audit Case endpoint
+AuditCase = {
+    'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
+    'cycle': fields.List(fields.Int(), description=docs.CYCLE),
+    'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
+    'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
+    'committee_designation': fields.List(fields.Str(), description=docs.DESIGNATION),
+    'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
+    'committee_description': fields.List(fields.Str(), description='Committee Description'),
+    'far_release_date': fields.List(fields.Int(), description=docs.CATEGORY),
+    'link_to_report': fields.List(fields.Str(), description=docs.SUBCATEGORY),
+    'audit_id': fields.List(fields.Int(), description=docs.SUBCATEGORY),  
+    'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
+    'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
+    # 'category': fields.List(fields.Str, description=docs.SUBCATEGORY),
+
+}
+
+AuditCategory = {
+    'category_id': fields.List(fields.Str, description=docs.CATEGORY_ID),
+    'category_name': fields.List(fields.Str, description=docs.CATEGORY_DESCRIPTION),
+    'audit_case_id': fields.List(fields.Str, description=docs.AUDIT_CASE_ID),
+}

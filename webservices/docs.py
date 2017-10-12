@@ -984,3 +984,73 @@ Provides cumulative disbursement totals by entity type, over a two year cycle. T
 
 This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
 '''
+
+#Audits
+AUDIT_ID = '''
+A unique identifier associated with an audit
+'''
+
+AUDIT_CASE_ID = '''
+A unique identifier associated with an audit case
+'''
+
+CATEGORY = '''
+The finding of an audit. Finding are a category of broader issues. Each category has an unique ID.
+'''
+CATEGORY_ID = '''
+The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
+'''
+
+SUBCATEGORY = '''
+The audit issue. Each subcategory has an unique ID.
+'''
+
+AUDIT_CASE_ID = '''
+A unique identifier associated with an audit case
+'''
+
+ISSUE_ID = '''
+Number associated with an audit issue
+'''
+
+ISSUE = '''
+Name of the audit finding issue
+'''
+AUDIT_TIER = '''
+1 specifies a category and 2 specifies a subcategory
+'''
+
+# content from https://www.fec.gov/legal-resources/enforcement/ and https://www.fec.gov/legal-resources/enforcement/audit-reports/
+AUDIT = '''
+The agency’s monitoring process may detect potential violations through a review of a committee’s reports or through a
+Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
+
+The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
+audits a committee when it appears not to have met the threshold requirements for substantial compliance with the Federal
+Election Campaign Act. The audit determines whether the committee complied with limitations, prohibitions and disclosure
+requirements.
+
+These endpoints contain Final Audit Reports approved by the Commission since inception.
+'''
+
+#audit search
+AUDIT_SEARCH = '''
+This endpoint contains Final Audit Reports approved by the Commission since inception.
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
+'''
+
+#audit finding
+AUDIT_CATEGORIES = '''
+This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
+'''
+COMMITTEE_DESCRIPTION = '''
+'''
+
+RELEASE_DATE = '''
+'''
+
+REPORT_LINK = '''
+'''
+
+CATEGORY_DESCRIPTION = '''
+'''
