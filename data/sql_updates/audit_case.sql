@@ -1,10 +1,8 @@
 -- View: public.ofec_audit_case_mv
 
 -- DROP MATERIALIZED VIEW public.ofec_audit_case_mv;
-
-CREATE MATERIALIZED VIEW public.ofec_audit_case_mv
-TABLESPACE pg_default
-AS
+DROP MATERIALIZED VIEW if exists ofec_audit_case_mv_tmp cascade;
+CREATE MATERIALIZED VIEW ofec_audit_case_mv_tmp AS
  WITH cmte_info AS (
          SELECT DISTINCT ON (cmte_audit_vw.cmte_id, cmte_audit_vw.fec_election_yr) cmte_audit_vw.cmte_id,
             cmte_audit_vw.fec_election_yr,
@@ -37,4 +35,6 @@ AS
      LEFT JOIN cand_info ON cand_info.cand_id::text = ac.cand_id::text AND cand_info.fec_election_yr = ac.election_cycle
   ORDER BY ac.election_cycle DESC
 WITH DATA;
+
+create unique index on ofec_audit_case_mv_tmp(idx);
 
