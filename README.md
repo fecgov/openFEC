@@ -72,10 +72,8 @@ pip install -r requirements-dev.txt
 Use `npm` to install JavaScript dependencies:
 
 ```
-nvm use --lts
 npm install -g swagger-tools
-npm install 
-npm run build
+npm install
 ```
 
 ##### Git hooks
