@@ -8,7 +8,7 @@ from sqlalchemy.ext.declarative import declared_attr
 class AuditBase(object):
     __table_args__ = {"schema": "auditsearch"}
 
-
+# audit-category endpoint
 class CategoryRelation(AuditBase, db.Model):
     __tablename__ = 'finding_rel_vw'
 
@@ -16,7 +16,7 @@ class CategoryRelation(AuditBase, db.Model):
     sub_category_id = db.Column(db.String, index=True, primary_key=True)
     sub_category_name = db.Column(db.String, index=True, primary_key=True)
 
-
+# audit-category endpoint
 class Category(AuditBase, db.Model):
     __tablename__ = 'finding'
 
@@ -42,6 +42,7 @@ class AuditCaseSubCategory(db.Model):
     sub_category_id = db.Column(db.String, primary_key=True, doc=docs.SUBCATEGORY)
     sub_category_name = db.Column(db.String, primary_key=True, doc=docs.SUBCATEGORY)
 
+# audit-case endpoint
 class AuditCategoryRelation(db.Model):
     __tablename__ = 'ofec_audit_case_category_rel_mv'
     # add the correction description of each field in the docs.py
@@ -54,10 +55,11 @@ class AuditCategoryRelation(db.Model):
             foreign(AuditCategoryRelation.audit_case_id) == AuditCaseSubCategory.audit_case_id,
             AuditCategoryRelation.category_id == AuditCaseSubCategory.category_id
         )''',
-        uselist=True
+        uselist=True,
+        lazy='joined'
     )
     
-
+# audit-case endpoint
 class AuditCase(db.Model):
     __tablename__ = 'ofec_audit_case_mv'
 
@@ -74,12 +76,11 @@ class AuditCase(db.Model):
     audit_id = db.Column(db.Integer, doc=docs.AUDIT_ID)
     candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
-
-    @declared_attr
-    def primary_category(self):
-        return sa.orm.relationship(
-            AuditCategoryRelation,
-            primaryjoin=sa.orm.foreign(AuditCategoryRelation.audit_case_id) == self.audit_case_id,
-            uselist=True,
-        )
-
+    primary_category = db.relationship(
+        AuditCategoryRelation,
+        primaryjoin='''and_(
+            foreign(AuditCategoryRelation.audit_case_id) == AuditCase.audit_case_id,
+        )''',
+        uselist=True,
+        lazy='joined'
+    )
