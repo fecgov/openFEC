@@ -14,5 +14,3 @@ from .costs import *  # noqa
 from .rad_analyst import *  # noqa
 from .large_aggregates import *  # noqa
 from .unverified_filers import *  # noqa
-from .auditsearch import *  # noqa
-from .audit import * # noqa
