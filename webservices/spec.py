@@ -85,10 +85,6 @@ spec = APISpec(
         {
             'name': 'efiling',
             'description': docs.EFILING_TAG,
-        },
-        {
-            'name': 'audit',
-            'description': docs.AUDIT,
-        },
+        }
     ]
 )
