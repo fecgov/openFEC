@@ -28,13 +28,11 @@ def _reset_schema():
     rest.db.engine.execute('drop schema if exists staging cascade;')
     rest.db.engine.execute('drop schema if exists fecapp cascade;')
     rest.db.engine.execute('drop schema if exists real_efile cascade;')
-    rest.db.engine.execute('drop schema if exists auditsearch cascade;')
     rest.db.engine.execute('create schema public;')
     rest.db.engine.execute('create schema disclosure;')
     rest.db.engine.execute('create schema staging;')
     rest.db.engine.execute('create schema fecapp;')
     rest.db.engine.execute('create schema real_efile;')
-    rest.db.engine.execute('create schema auditsearch;')
 
 
 def _reset_schema_for_integration():
