@@ -945,8 +945,8 @@ register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 CategoryRelationSchema = make_schema(
     models.CategoryRelation,
     fields={
-        'category_id': ma.fields.Str(),
-        'sub_category_id': ma.fields.Str(),
+        'category_id': ma.fields.Int(),
+        'sub_category_id': ma.fields.Int(),
         'sub_category_name': ma.fields.Str(),
     },
     options={
@@ -962,7 +962,7 @@ register_schema(CategoryRelationPageSchema)
 CategorySchema = make_schema(
     models.Category,
     fields={
-        'category_id': ma.fields.Str(),
+        'category_id': ma.fields.Int(),
         'category_name': ma.fields.Str(),
         'tier': ma.fields.Int(),
         'sub_category': ma.fields.Nested(CategoryRelationSchema, many=True),
