@@ -17,7 +17,7 @@ CREATE MATERIALIZED VIEW ofec_audit_case_mv_tmp AS
             cand_audit_vw.cand_name
            FROM auditsearch.cand_audit_vw
         )
- SELECT row_number() OVER () AS idx,
+ SELECT 
     ac.audit_case_id,
     ac.election_cycle::integer AS cycle,
     ac.cmte_id AS committee_id,
@@ -36,5 +36,5 @@ CREATE MATERIALIZED VIEW ofec_audit_case_mv_tmp AS
   ORDER BY ac.election_cycle DESC
 WITH DATA;
 
-create unique index on ofec_audit_case_mv_tmp(idx);
+create unique index on ofec_audit_case_mv_tmp(audit_case_id);
 

@@ -373,5 +373,5 @@ class ScheduleAByStateRecipientTotalsFactory(BaseFactory):
 class AuditCaseFactory(BaseFactory):
     class Meta:
         model = models.AuditCase
-    idx = factory.Sequence(lambda n: n)
+    # idx = factory.Sequence(lambda n: n)
     audit_case_id = factory.Sequence(lambda n: n)
