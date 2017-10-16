@@ -12,16 +12,18 @@ class AuditBase(object):
 class CategoryRelation(AuditBase, db.Model):
     __tablename__ = 'finding_rel_vw'
 
-    category_id = db.Column(db.String, index=True, primary_key=True)
-    sub_category_id = db.Column(db.String, index=True, primary_key=True)
+    category_id = db.Column(db.Integer, index=True, primary_key=True)
+    sub_category_id = db.Column(db.Integer, index=True, primary_key=True)
     sub_category_name = db.Column(db.String, index=True, primary_key=True)
 
 # audit-category endpoint
 class Category(AuditBase, db.Model):
-    __tablename__ = 'finding'
+    __tablename__ = 'finding_vw'
 
-    category_id = db.Column('finding_pk', db.String, index=True, primary_key=True)
-    category_name = db.Column('finding', db.String, doc=docs.CATEGORY)
+    # category_id = db.Column('finding_pk', db.Integer, index=True, primary_key=True)
+    # category_name = db.Column('finding', db.String, doc=docs.CATEGORY)
+    category_id = db.Column(db.Integer, index=True, primary_key=True)
+    category_name = db.Column(db.String, doc=docs.CATEGORY)
     tier = db.Column(db.Integer, doc=docs.CATEGORY)
 
     @declared_attr
