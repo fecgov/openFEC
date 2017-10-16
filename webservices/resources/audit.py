@@ -1,10 +1,11 @@
 from flask_apispec import doc
+
 import sqlalchemy as sa
 
 from webservices import args
 from webservices import docs
-from webservices import utils
 from webservices import schemas
+from webservices import utils
 from webservices.common import models
 from webservices.common.views import ApiResource
 
@@ -13,7 +14,6 @@ from webservices.common.views import ApiResource
     tags=['audit'],
     description=docs.AUDIT_SEARCH,
 )
-
 class Category(ApiResource):
     model = models.Category
     schema = schemas.CategorySchema
@@ -88,4 +88,4 @@ class AuditCaseView(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.idx
+        return self.model.audit_case_id

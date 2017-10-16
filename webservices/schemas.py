@@ -1039,8 +1039,9 @@ AuditCaseSchema = make_schema(
         'candidate_id': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
         'primary_category': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
-    },
-    options={'exclude': ('idx',)})
+    }
+    # options={'exclude': ('idx',)}
+)
 AuditCasePageSchema = make_page_schema(AuditCaseSchema)
 register_schema(AuditCaseSchema)
 register_schema(AuditCasePageSchema)
