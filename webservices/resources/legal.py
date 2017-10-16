@@ -165,13 +165,13 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     if kwargs.get('mur_document_category'):
         must_clauses = [Q('terms', documents__category=kwargs.get('mur_document_category'))]
-    
-    #if the query contains min or max open date, add as a range clause ("Q(range)") 
+
+    #if the query contains min or max open date, add as a range clause ("Q(range)")
     #to the set of must_clauses
 
     #gte = greater than or equal to and lte = less than or equal to (see elasticsearch docs)
     date_range = {}
-    if kwargs.get('mur_min_open_date'): 
+    if kwargs.get('mur_min_open_date'):
         date_range['gte'] = kwargs.get('mur_min_open_date')
     if kwargs.get('mur_max_open_date'):
         date_range['lte'] = kwargs.get('mur_max_open_date')
@@ -187,7 +187,7 @@ def apply_mur_specific_query_params(query, **kwargs):
         must_clauses.append(Q("range", close_date=date_range))
 
     query = query.query('bool', must=must_clauses)
-        
+
     return query
 
 def get_ao_document_query(q, **kwargs):
