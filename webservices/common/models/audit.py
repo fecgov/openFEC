@@ -66,7 +66,7 @@ class AuditCase(db.Model):
     __tablename__ = 'ofec_audit_case_mv'
 
     # idx = db.Column(db.Integer)
-    audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
+    audit_case_id = db.Column(db.String, index=True, primary_key=True, doc=docs.AUDIT_CASE_ID)
     cycle = db.Column(db.Integer, doc=docs.CYCLE)
     committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
     committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)

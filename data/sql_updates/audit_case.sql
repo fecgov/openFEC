@@ -18,7 +18,7 @@ CREATE MATERIALIZED VIEW ofec_audit_case_mv_tmp AS
            FROM auditsearch.cand_audit_vw
         )
  SELECT 
-    ac.audit_case_id,
+    ac.audit_case_id AS audit_case_id,
     ac.election_cycle::integer AS cycle,
     ac.cmte_id AS committee_id,
     cmte_info.cmte_nm AS committee_name,
