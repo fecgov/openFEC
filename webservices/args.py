@@ -9,7 +9,6 @@ from webservices import docs
 from webservices.config import SQL_CONFIG
 from webservices.common.models import db
 
-
 def _validate_natural(value):
     if value < 0:
         raise ValidationError('Must be a natural number')
@@ -20,6 +19,16 @@ per_page = Natural(
     missing=20,
     description='The number of results returned per page. Defaults to 20.',
 )
+
+# convert DB column from Str to Int
+class convertStr(fields.Str):
+
+    def _validate(self, value):
+        try:
+            result = int(value)
+        except (TypeError, ValueError):
+            result = float(value)
+        return result
 
 class Currency(fields.Decimal):
 
@@ -36,7 +45,6 @@ class IStr(fields.Str):
 
     def _deserialize(self, value, attr, data):
         return super()._deserialize(value, attr, data).upper()
-
 
 class District(fields.Str):
 
@@ -763,7 +771,7 @@ Category = {
 
 # Audit Case endpoint
 AuditCase = {
-    'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
+    'audit_case_id': fields.List(convertStr, description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
     'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
