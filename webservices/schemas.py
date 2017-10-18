@@ -129,7 +129,8 @@ class EFilingF3PSchema(BaseEfileSchema):
                     state_map[keys[int(row.line_number - 1)][0]] = row.column_a
                     state_map[keys[int(row.line_number - 1)][1]] = row.column_b
                 else:
-                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_', keys[int(row.line_number - 1)][0]).replace(' ', '_')
+                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
+                        keys[int(row.line_number - 1)][0]).replace(' ', '_')
                     replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
                                        str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
                     replace_a = make_period_string(replace_a)
@@ -308,7 +309,7 @@ register_schema(CommitteeSearchListSchema)
 
 make_efiling_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', 'total_disbursements', 'total_receipts' )},
+    options={'exclude': ('idx', 'total_disbursements', 'total_receipts')},
     fields={
         'pdf_url': ma.fields.Str(),
         'report_year': ma.fields.Int(),
@@ -360,7 +361,8 @@ augment_models(
     models.CandidateFlags
 
 )
-class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema'],schemas['CandidateFlagsSchema']):
+class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
+        schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
     pass
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
@@ -567,8 +569,8 @@ ScheduleDSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={'exclude': ('creditor_debtor_name_text',)
-
+    options={
+        'exclude': ('creditor_debtor_name_text',)
     },
 )
 ScheduleDPageSchema = make_page_schema(
@@ -729,7 +731,7 @@ ItemizedScheduleBfilingsSchema = make_schema(
         'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        'is_notice':ma.fields.Boolean(),
+        'is_notice': ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
@@ -755,7 +757,7 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        'is_notice':ma.fields.Boolean(),
+        'is_notice': ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
@@ -951,7 +953,7 @@ CategoryRelationSchema = make_schema(
     },
     options={
         'exclude': ('category_id',)
-    } 
+    }
 )
 
 CategoryRelationPageSchema = make_page_schema(CategoryRelationSchema)
@@ -967,9 +969,7 @@ CategorySchema = make_schema(
         'tier': ma.fields.Int(),
         'sub_category': ma.fields.Nested(CategoryRelationSchema, many=True),
     },
-    
     options={
-        # 'exclude': ('sub_category',),
         'relationships': [
             Relationship(
                 models.Category.sub_category,
@@ -978,7 +978,7 @@ CategorySchema = make_schema(
                 1
             ),
         ],
-    }    
+    }
 )
 
 CategoryPageSchema = make_page_schema(CategorySchema)
@@ -990,13 +990,13 @@ register_schema(CategoryPageSchema)
 AuditCaseSubCategorySchema = make_schema(
     models.AuditCaseSubCategory,
     fields={
-        'category_id': ma.fields.Str(),
-        'sub_category_id': ma.fields.Str(),
+        'category_id': ma.fields.Int(),
+        'sub_category_id': ma.fields.Int(),
         'sub_category_name': ma.fields.Str(),
     },
     options={
         'exclude': ('category_id', 'audit_case_id')
-    } 
+    }
 )
 
 AuditCaseSubCategoryPageSchema = make_page_schema(AuditCaseSubCategorySchema)
@@ -1004,19 +1004,19 @@ register_schema(AuditCaseSubCategorySchema)
 register_schema(AuditCaseSubCategoryPageSchema)
 
 
-#audit-case endpoint nested sub_category schema 
+#audit-case endpoint nested sub_category schema
 AuditCategoryRelationSchema = make_schema(
     models.AuditCategoryRelation,
     fields={
         # 'audit_case_id': ma.fields.Str(),
-        'category_id': ma.fields.Str(),
+        'category_id': ma.fields.Int(),
         'category_name': ma.fields.Str(),
         'sub_category': ma.fields.Nested(AuditCaseSubCategorySchema, many=True),
     },
     options={
         'exclude': (
             'audit_case_id',
-        )}   
+        )}
 )
 
 AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
@@ -1040,7 +1040,6 @@ AuditCaseSchema = make_schema(
         'candidate_name': ma.fields.Str(),
         'primary_category': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
     }
-    # options={'exclude': ('idx',)}
 )
 AuditCasePageSchema = make_page_schema(AuditCaseSchema)
 register_schema(AuditCaseSchema)
