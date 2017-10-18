@@ -21,16 +21,6 @@ per_page = Natural(
     description='The number of results returned per page. Defaults to 20.',
 )
 
-# convert DB column from Str to Int
-class ConvertStr(fields.Str):
-
-    def _validate(self, value):
-        try:
-            result = int(value)
-        except (TypeError, ValueError):
-            result = float(value)
-        return result
-
 class Currency(fields.Decimal):
 
     def __init__(self, places=2, **kwargs):
@@ -773,16 +763,18 @@ Category = {
 
 # Audit Case endpoint
 AuditCase = {
-    'audit_case_id': fields.List(ConvertStr, description=docs.AUDIT_CASE_ID),
+    'audit_case_id': fields.List(fields.Int(), description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
     'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
-    'committee_designation': fields.List(fields.Str(), description=docs.DESIGNATION),
     'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
-    'committee_description': fields.List(fields.Str(), description='Committee Description'),
-    'far_release_date': fields.List(fields.Int(), description=docs.CATEGORY),
-    'link_to_report': fields.List(fields.Str(), description=docs.SUBCATEGORY),
     'audit_id': fields.List(fields.Int(), description=docs.SUBCATEGORY),
     'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
     'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
+    'min_election_cycle': fields.Int(description=docs.CYCLE),
+    'max_election_cycle': fields.Int(description=docs.CYCLE),
+    # 'committee_designation': fields.List(fields.Str(), description=docs.DESIGNATION),
+    # 'committee_description': fields.List(fields.Str(), description='Committee Description'),
+    # 'far_release_date': fields.List(fields.Date(description=docs.CATEGORY)),
+    # 'link_to_report': fields.List(fields.Str(), description=docs.SUBCATEGORY),
 }
