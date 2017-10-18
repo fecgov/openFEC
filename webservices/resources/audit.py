@@ -36,7 +36,7 @@ class Category(ApiResource):
             args.paging,
             args.Category,
             args.make_sort_args(
-                default='category_id',
+                default='category_name',
                 # validator=args.IndexValidator(
                 #     models.FindingIssueCategory),
             ),
@@ -81,7 +81,7 @@ class AuditCaseView(ApiResource):
             args.paging,
             args.AuditCase,
             args.make_sort_args(
-                default='committee_name',
+                default='cycle',
                 # validator=args.IndexValidator(models.AuditCase),
             ),
         )

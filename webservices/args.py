@@ -1,13 +1,14 @@
 import functools
 
-import sqlalchemy as sa
-
-from webargs import fields, validate, ValidationError
 from marshmallow.compat import text_type
 
+import sqlalchemy as sa
+
+from webargs import ValidationError, fields, validate
+
 from webservices import docs
-from webservices.config import SQL_CONFIG
 from webservices.common.models import db
+from webservices.config import SQL_CONFIG
 
 def _validate_natural(value):
     if value < 0:
@@ -21,7 +22,7 @@ per_page = Natural(
 )
 
 # convert DB column from Str to Int
-class convertStr(fields.Str):
+class ConvertStr(fields.Str):
 
     def _validate(self, value):
         try:
@@ -123,7 +124,8 @@ class IndicesValidator(IndexValidator):
                     status_code=422
                 )
 
-def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
+def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
+        default_nulls_only=False):
     return {
         'sort': fields.Str(
             missing=default,
@@ -141,11 +143,11 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
     }
 
 
-def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
-    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only )
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
+        default_nulls_only=False):
+    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only)
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
-                               description='Provide a field to sort by. Use - for descending order.',
-        )
+        description='Provide a field to sort by. Use - for descending order.',)
     return args
 
 def make_seek_args(field=fields.Int, description=None):
@@ -771,7 +773,7 @@ Category = {
 
 # Audit Case endpoint
 AuditCase = {
-    'audit_case_id': fields.List(convertStr, description=docs.AUDIT_CASE_ID),
+    'audit_case_id': fields.List(ConvertStr, description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
     'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
@@ -780,15 +782,7 @@ AuditCase = {
     'committee_description': fields.List(fields.Str(), description='Committee Description'),
     'far_release_date': fields.List(fields.Int(), description=docs.CATEGORY),
     'link_to_report': fields.List(fields.Str(), description=docs.SUBCATEGORY),
-    'audit_id': fields.List(fields.Int(), description=docs.SUBCATEGORY),  
+    'audit_id': fields.List(fields.Int(), description=docs.SUBCATEGORY),
     'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
     'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
-    # 'category': fields.List(fields.Str, description=docs.SUBCATEGORY),
-
-}
-
-AuditCategory = {
-    'category_id': fields.List(fields.Str, description=docs.CATEGORY_ID),
-    'category_name': fields.List(fields.Str, description=docs.CATEGORY_DESCRIPTION),
-    'audit_case_id': fields.List(fields.Str, description=docs.AUDIT_CASE_ID),
 }
