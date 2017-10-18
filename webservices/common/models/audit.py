@@ -37,7 +37,7 @@ class Category(AuditBase, db.Model):
 class AuditCaseSubCategory(db.Model):
     __tablename__ = 'ofec_audit_case_sub_category_rel_mv'
     # add the correction description of each field in the docs.py
-    audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
+    audit_case_id = db.Column(db.Integer, primary_key=True, doc=docs.AUDIT_CASE_ID)
     category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
     sub_category_id = db.Column(db.Integer, primary_key=True, doc=docs.SUBCATEGORY)
     sub_category_name = db.Column(db.String, primary_key=True, doc=docs.SUBCATEGORY)
@@ -46,7 +46,7 @@ class AuditCaseSubCategory(db.Model):
 class AuditCategoryRelation(db.Model):
     __tablename__ = 'ofec_audit_case_category_rel_mv'
     # add the correction description of each field in the docs.py
-    audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
+    audit_case_id = db.Column(db.Integer, primary_key=True, doc=docs.AUDIT_CASE_ID)
     category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
     category_name = db.Column(db.String, primary_key=True, doc=docs.CATEGORY)
     sub_category = db.relationship(
@@ -62,7 +62,7 @@ class AuditCategoryRelation(db.Model):
 class AuditCase(db.Model):
     __tablename__ = 'ofec_audit_case_mv'
 
-    audit_case_id = db.Column(db.String, index=True, primary_key=True, doc=docs.AUDIT_CASE_ID)
+    audit_case_id = db.Column(db.Integer, index=True, primary_key=True, doc=docs.AUDIT_CASE_ID)
     cycle = db.Column(db.Integer, doc=docs.CYCLE)
     committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
     committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)

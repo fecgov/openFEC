@@ -51,7 +51,6 @@ class Category(ApiResource):
     description=docs.AUDIT_SEARCH,
 )
 class AuditCaseView(ApiResource):
-
     model = models.AuditCase
     schema = schemas.AuditCaseSchema
     page_schema = schemas.AuditCasePageSchema
@@ -60,7 +59,7 @@ class AuditCaseView(ApiResource):
         ('audit_case_id', model.audit_case_id),
         ('cycle', model.cycle),
         ('committee_id', model.committee_id),
-        ('committee_name', model.committee_name),
+        # ('committee_name', model.committee_name),
         ('committee_designation', model.committee_designation),
         ('committee_type', model.committee_type),
         ('committee_description', model.committee_description),
@@ -68,11 +67,16 @@ class AuditCaseView(ApiResource):
         ('link_to_report', model.link_to_report),
         ('audit_id', model.audit_id),
         ('candidate_id', model.candidate_id),
-        ('candidate_name', model.candidate_name),
+        # ('candidate_name', model.candidate_name),
     ]
 
     filter_range_fields = [
         (('min_election_cycle', 'max_election_cycle'), model.cycle),
+    ]
+
+    filter_fulltext_fields = [
+        ('committee_name', model.committee_name),
+        ('candidate_name', model.candidate_name),
     ]
 
     @property
@@ -81,7 +85,7 @@ class AuditCaseView(ApiResource):
             args.paging,
             args.AuditCase,
             args.make_sort_args(
-                default='cycle',
+                default='-cycle',
                 # validator=args.IndexValidator(models.AuditCase),
             ),
         )
