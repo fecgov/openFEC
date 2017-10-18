@@ -17,7 +17,7 @@ WITH cmte_info AS (
     FROM auditsearch.cand_audit_vw
 )
 SELECT 
-    ac.audit_case_id AS audit_case_id,
+    ac.audit_case_id::integer AS audit_case_id,
     ac.election_cycle::integer AS cycle,
     ac.cmte_id AS committee_id,
     cmte_info.cmte_nm AS committee_name,
@@ -43,7 +43,7 @@ create unique index on ofec_audit_case_mv_tmp(audit_case_id);
 DROP MATERIALIZED VIEW if exists ofec_audit_case_category_rel_mv_tmp cascade;
 CREATE MATERIALIZED VIEW ofec_audit_case_category_rel_mv_tmp AS
 SELECT 
-    DISTINCT acf.audit_case_id::text AS audit_case_id,
+    DISTINCT acf.audit_case_id::integer AS audit_case_id,
     acf.parent_finding_pk::integer AS category_id,
     btrim(f.finding) as category_name
 FROM auditsearch.audit_case_finding acf 
@@ -59,7 +59,7 @@ create unique index on ofec_audit_case_category_rel_mv_tmp(audit_case_id,categor
 -- DROP MATERIALIZED VIEW public.ofec_audit_case_sub_category_rel_mv;
 DROP MATERIALIZED VIEW if exists ofec_audit_case_sub_category_rel_mv_tmp cascade;
 CREATE MATERIALIZED VIEW ofec_audit_case_sub_category_rel_mv_tmp AS
-SELECT btrim(acf.audit_case_id::text) AS audit_case_id,
+SELECT acf.audit_case_id::integer AS audit_case_id,
     acf.parent_finding_pk::integer AS category_id,
     acf.child_finding_pk::integer AS sub_category_id,
     btrim(f.finding::text) AS sub_category_name
