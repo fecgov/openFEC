@@ -277,8 +277,20 @@ filings = {
         -C   consolidated\n\
         -M   multi-candidate\n\
         -S   secondary\n\
-
-        Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+        Null might be\n\
+        new or amendment.\n\
+        If amendment\n\
+        indicator is null\n\
+        and the filings\n\
+        is the first\n\
+        or first in a\n\
+        chain treat it\n\
+        as if it was a new.\n\
+        If it is not the\n\
+        first or first\n\
+        in a chain then\n\
+        treat the filing\n\
+        as an amendment.\n\
         '''
     ),
 }
@@ -329,8 +341,19 @@ reports = {
         -C   consolidated\n\
         -M   multi-candidate\n\
         -S   secondary\n\
-
-        Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+        Null might be new\n\
+        or amendment.\n\
+        If amendment indicator\n\
+        is null and\n\
+        the filings is\n\
+        the first or first\n\
+        in a chain treat\n\
+        it as if it was a new.\n\
+        If it is not the\n\
+        first or first in\n\
+        a chain then treat\n\
+        the filing as\n\
+        an amendment.\n\
         '''
     ),
 }
