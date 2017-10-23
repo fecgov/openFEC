@@ -486,7 +486,8 @@ AS
         name,
         case_type,
         pg_date
-    FROM fecmur.case;
+    FROM fecmur.case
+    WHERE case_type = 'MUR';
 --
 -- Data for Name: role; Type: TABLE DATA; Schema: fecmur; Owner: fec
 --
