@@ -199,7 +199,10 @@ class SearchTest(unittest.TestCase):
         response = self.app.get('/v1/legal/search/', query_string={
                                 'q': 'embezzle',
                                 'type': 'murs',
-                                'mur_min_open_date': '2017-01-12'})
+                                'mur_min_open_date': '2012-01-01',
+                                'mur_max_open_date': '2013-12-31',
+                                'mur_min_close_date': '2014-01-01',
+                                'mur_max_close_date': '2015-12-31'})
         assert response.status_code == 200
 
         expected_query = {
@@ -219,7 +222,16 @@ class SearchTest(unittest.TestCase):
                         {
                             "range": {
                                 "open_date": {
-                                    "gte": datetime.date(2017, 1, 12)
+                                    "gte": datetime.date(2012, 1, 1),
+                                    "lte": datetime.date(2013, 12, 31)
+                                }
+                            }
+                        },
+                        {
+                            "range": {
+                                "close_date": {
+                                    "gte": datetime.date(2014, 1, 1),
+                                    "lte": datetime.date(2015, 12, 31)
                                 }
                             }
                         }
