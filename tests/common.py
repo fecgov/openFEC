@@ -75,7 +75,7 @@ class ApiBaseTest(BaseTestCase):
         super(ApiBaseTest, cls).setUpClass()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
-                ['psql', '-f', 'data/migrations/V02_states_and_zips_with_data.sql', TEST_CONN],
+                ['psql', '-f', 'data/migrations/V02__states_and_zips_with_data.sql', TEST_CONN],
                 stdout=null
             )
         whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
