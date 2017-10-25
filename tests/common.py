@@ -1,4 +1,3 @@
-import glob
 import os
 import json
 import codecs
@@ -135,9 +134,8 @@ class IntegrationTestCase(BaseTestCase):
 
 def run_migrations():
     with open(os.devnull, 'w') as null:
-        sql_files = sorted(glob.glob('./data/migrations/' + '*.sql'))
-        for sql_file in sql_files:
-            subprocess.check_call(
-                ['psql', '-f', sql_file, '-v', 'ON_ERROR_STOP=1', TEST_CONN],
-                stdout=null
-            )
+        subprocess.check_call(
+            ['/Users/radhakrishnanvrajmohan/learn/flyway/flyway-4.2.0/flyway', 'migrate',
+                '-url=jdbc:postgresql://localhost:32768/cfdm_unit_test'],
+            #stdout=null
+        )
