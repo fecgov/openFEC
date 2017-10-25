@@ -13,7 +13,7 @@ class AuditBase(object):
 class CategoryRelation(AuditBase, db.Model):
     __tablename__ = 'finding_rel_vw'
 
-    category_id = db.Column(db.Integer, index=True, primary_key=True)
+    primary_category_id = db.Column(db.Integer, index=True, primary_key=True)
     sub_category_id = db.Column(db.Integer, index=True, primary_key=True)
     sub_category_name = db.Column(db.String, index=True, primary_key=True)
 
@@ -21,15 +21,15 @@ class CategoryRelation(AuditBase, db.Model):
 class Category(AuditBase, db.Model):
     __tablename__ = 'finding_vw'
 
-    category_id = db.Column(db.Integer, index=True, primary_key=True)
-    category_name = db.Column(db.String, doc=docs.CATEGORY)
+    primary_category_id = db.Column(db.Integer, index=True, primary_key=True)
+    primary_category_name = db.Column(db.String, doc=docs.CATEGORY)
     tier = db.Column(db.Integer, doc=docs.CATEGORY)
 
     @declared_attr
-    def sub_category(self):
+    def sub_category_list(self):
         return sa.orm.relationship(
             CategoryRelation,
-            primaryjoin=sa.orm.foreign(CategoryRelation.category_id) == self.category_id,
+            primaryjoin=sa.orm.foreign(CategoryRelation.primary_category_id) == self.primary_category_id,
             uselist=True,
         )
 
@@ -38,7 +38,7 @@ class AuditCaseSubCategory(db.Model):
     __tablename__ = 'ofec_audit_case_sub_category_rel_mv'
     # add the correction description of each field in the docs.py
     audit_case_id = db.Column(db.Integer, primary_key=True, doc=docs.AUDIT_CASE_ID)
-    category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
+    primary_category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
     sub_category_id = db.Column(db.Integer, primary_key=True, doc=docs.SUBCATEGORY)
     sub_category_name = db.Column(db.String, primary_key=True, doc=docs.SUBCATEGORY)
 
@@ -47,13 +47,13 @@ class AuditCategoryRelation(db.Model):
     __tablename__ = 'ofec_audit_case_category_rel_mv'
     # add the correction description of each field in the docs.py
     audit_case_id = db.Column(db.Integer, primary_key=True, doc=docs.AUDIT_CASE_ID)
-    category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
-    category_name = db.Column(db.String, primary_key=True, doc=docs.CATEGORY)
-    sub_category = db.relationship(
+    primary_category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
+    primary_category_name = db.Column(db.String, primary_key=True, doc=docs.CATEGORY)
+    sub_category_list = db.relationship(
         'AuditCaseSubCategory',
         primaryjoin='''and_(
             foreign(AuditCategoryRelation.audit_case_id) == AuditCaseSubCategory.audit_case_id,
-            AuditCategoryRelation.category_id == AuditCaseSubCategory.category_id
+            AuditCategoryRelation.primary_category_id == AuditCaseSubCategory.primary_category_id
         )''',
         uselist=True,
         lazy='joined'
@@ -74,7 +74,7 @@ class AuditCase(db.Model):
     audit_id = db.Column(db.Integer, doc=docs.AUDIT_ID)
     candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
-    primary_category = db.relationship(
+    primary_category_list = db.relationship(
         AuditCategoryRelation,
         primaryjoin='''and_(
             foreign(AuditCategoryRelation.audit_case_id) == AuditCase.audit_case_id,

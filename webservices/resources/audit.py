@@ -20,14 +20,14 @@ class Category(ApiResource):
     page_schema = schemas.CategoryPageSchema
 
     filter_multi_fields = [
-        ('category_id', model.category_id),
+        ('primary_category_id', model.primary_category_id),
         # ('tier', model.tier),
     ]
     filter_fulltext_fields = [
-        ('category_name', model.category_name),
+        ('primary_category_name', model.primary_category_name),
     ]
     query_options = [
-        sa.orm.joinedload(models.Category.sub_category),
+        sa.orm.joinedload(models.Category.sub_category_list),
     ]
 
     @property
@@ -36,7 +36,7 @@ class Category(ApiResource):
             args.paging,
             args.Category,
             args.make_sort_args(
-                default='category_name',
+                default='primary_category_name',
                 # validator=args.IndexValidator(
                 #     models.FindingIssueCategory),
             ),
@@ -44,7 +44,7 @@ class Category(ApiResource):
 
     @property
     def index_column(self):
-        return self.model.category_id
+        return self.model.primary_category_id
 
 @doc(
     tags=['audit'],

@@ -44,15 +44,15 @@ DROP MATERIALIZED VIEW if exists ofec_audit_case_category_rel_mv_tmp cascade;
 CREATE MATERIALIZED VIEW ofec_audit_case_category_rel_mv_tmp AS
 SELECT 
     DISTINCT acf.audit_case_id::integer AS audit_case_id,
-    acf.parent_finding_pk::integer AS category_id,
-    btrim(f.finding) as category_name
+    acf.parent_finding_pk::integer AS primary_category_id,
+    btrim(f.finding) as primary_category_name
 FROM auditsearch.audit_case_finding acf 
 LEFT JOIN auditsearch.finding f
 ON (acf.PARENT_FINDING_PK = f.FINDING_PK) 
-ORDER BY audit_case_id, category_id
+ORDER BY audit_case_id, (acf.parent_finding_pk::integer)
 WITH DATA;
 
-create unique index on ofec_audit_case_category_rel_mv_tmp(audit_case_id,category_id);
+create unique index on ofec_audit_case_category_rel_mv_tmp(audit_case_id,primary_category_id);
 
 
 --3)M_View: public.ofec_audit_case_sub_category_rel_mv
@@ -60,16 +60,16 @@ create unique index on ofec_audit_case_category_rel_mv_tmp(audit_case_id,categor
 DROP MATERIALIZED VIEW if exists ofec_audit_case_sub_category_rel_mv_tmp cascade;
 CREATE MATERIALIZED VIEW ofec_audit_case_sub_category_rel_mv_tmp AS
 SELECT acf.audit_case_id::integer AS audit_case_id,
-    acf.parent_finding_pk::integer AS category_id,
+    acf.parent_finding_pk::integer AS primary_category_id,
     acf.child_finding_pk::integer AS sub_category_id,
     btrim(f.finding::text) AS sub_category_name
 FROM auditsearch.audit_case_finding acf
 LEFT JOIN auditsearch.finding f 
 ON acf.child_finding_pk = f.finding_pk
-ORDER BY audit_case_id, category_id, sub_category_id
+ORDER BY (acf.audit_case_id::integer), (acf.parent_finding_pk::integer), (acf.child_finding_pk::integer)
 WITH DATA;
 
-create unique index on ofec_audit_case_sub_category_rel_mv_tmp(audit_case_id,category_id,sub_category_id);
+create unique index on ofec_audit_case_sub_category_rel_mv_tmp(audit_case_id,primary_category_id,sub_category_id);
 
 
 --4)View: auditsearch.cmte_audit_vw
@@ -120,22 +120,23 @@ ORDER BY dc.cand_name, dc.fec_election_yr;
 --DROP VIEW auditsearch.finding_vw;
 CREATE OR REPLACE VIEW auditsearch.finding_vw AS
 SELECT 
-    finding_pk::integer AS category_id,
-    btrim(finding::text) AS category_name,
+    finding_pk::integer AS primary_category_id,
+    btrim(finding::text) AS primary_category_name,
     tier::integer AS tier
 FROM auditsearch.finding
-ORDER BY category_id;
+WHERE tier::integer=1
+ORDER BY (btrim(finding::text));
 
 
 --7)View: auditsearch.finding_rel_vw
 --DROP VIEW auditsearch.finding_rel_vw;
 CREATE OR REPLACE VIEW auditsearch.finding_rel_vw AS
 SELECT 
-    fr.parent_finding_pk::integer AS category_id,
+    fr.parent_finding_pk::integer AS primary_category_id,
     fr.child_finding_pk::integer AS sub_category_id,
     btrim(f.finding) as sub_category_name
 FROM auditsearch.finding_rel fr LEFT JOIN  auditsearch.finding f
 ON (fr.PARENT_FINDING_PK = f.FINDING_PK) 
-ORDER BY category_id;
+ORDER BY (fr.parent_finding_pk::integer), (fr.child_finding_pk::integer);
 
 
