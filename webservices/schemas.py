@@ -947,12 +947,12 @@ register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 CategoryRelationSchema = make_schema(
     models.CategoryRelation,
     fields={
-        'category_id': ma.fields.Int(),
+        'primary_category_id': ma.fields.Int(),
         'sub_category_id': ma.fields.Int(),
         'sub_category_name': ma.fields.Str(),
     },
     options={
-        'exclude': ('category_id',)
+        'exclude': ('primary_category_id',)
     }
 )
 
@@ -964,20 +964,21 @@ register_schema(CategoryRelationPageSchema)
 CategorySchema = make_schema(
     models.Category,
     fields={
-        'category_id': ma.fields.Int(),
-        'category_name': ma.fields.Str(),
-        'tier': ma.fields.Int(),
-        'sub_category': ma.fields.Nested(CategoryRelationSchema, many=True),
+        'primary_category_id': ma.fields.Int(),
+        'primary_category_name': ma.fields.Str(),
+        # 'tier': ma.fields.Int(),
+        'sub_category_list': ma.fields.Nested(CategoryRelationSchema, many=True),
     },
     options={
-        'relationships': [
-            Relationship(
-                models.Category.sub_category,
-                models.CategoryRelation.category_id,
-                'category_id',
-                1
-            ),
-        ],
+        'exclude': ('tier',)
+        # 'relationships': [
+        #     Relationship(
+        #         models.Category.sub_category_list,
+        #         models.CategoryRelation.primary_category_id,
+        #         'primary_category_id',
+        #         1
+        #     ),
+        # ],
     }
 )
 
@@ -990,12 +991,12 @@ register_schema(CategoryPageSchema)
 AuditCaseSubCategorySchema = make_schema(
     models.AuditCaseSubCategory,
     fields={
-        'category_id': ma.fields.Int(),
+        'primary_category_id': ma.fields.Int(),
         'sub_category_id': ma.fields.Int(),
         'sub_category_name': ma.fields.Str(),
     },
     options={
-        'exclude': ('category_id', 'audit_case_id')
+        'exclude': ('primary_category_id', 'audit_case_id')
     }
 )
 
@@ -1009,9 +1010,9 @@ AuditCategoryRelationSchema = make_schema(
     models.AuditCategoryRelation,
     fields={
         # 'audit_case_id': ma.fields.Str(),
-        'category_id': ma.fields.Int(),
-        'category_name': ma.fields.Str(),
-        'sub_category': ma.fields.Nested(AuditCaseSubCategorySchema, many=True),
+        'primary_category_id': ma.fields.Int(),
+        'primary_category_name': ma.fields.Str(),
+        'sub_category_list': ma.fields.Nested(AuditCaseSubCategorySchema, many=True),
     },
     options={
         'exclude': (
@@ -1038,7 +1039,7 @@ AuditCaseSchema = make_schema(
         'audit_id': ma.fields.Integer(),
         'candidate_id': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
-        'primary_category': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
+        'primary_category_list': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
     }
 )
 AuditCasePageSchema = make_page_schema(AuditCaseSchema)
