@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import codecs
 import unittest
@@ -133,9 +134,18 @@ class IntegrationTestCase(BaseTestCase):
         run_migrations()
 
 def run_migrations():
-    with open(os.devnull, 'w') as null:
-        subprocess.check_call(
-            ['/Users/radhakrishnanvrajmohan/learn/flyway/flyway-4.2.0/flyway', 'migrate',
-                '-url=jdbc:postgresql://localhost:32768/cfdm_unit_test'],
-            #stdout=null
-        )
+    subprocess.check_call(
+        ['flyway', 'migrate', '-url=%s' % to_jdbc_url(TEST_CONN), '-locations=filesystem:data/migrations'],
+    )
+
+def to_jdbc_url(dbi_url):
+    DB_URL_REGEX = re.compile(r'postgresql://(?P<username>[^:]*):?(?P<password>\S*)@(?P<host_port>\S*)$')
+    match = DB_URL_REGEX.match(dbi_url)
+    if match:
+        jdbc_url = 'jdbc:postgresql://{}?user={}'.format(
+            match.group('host_port'), match.group('username'))
+        if match.group('password'):
+            jdbc_url += '&password={}'.format(match.group('password'))
+    else:
+        jdbc_url = 'jdbc:postgresql://localhost:5432/cfdm_unit_test'
+    return jdbc_url
