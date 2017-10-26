@@ -98,8 +98,8 @@ class AuditCaseView(ApiResource):
     tags=['audit'],
     description=docs.AUDIT_SEARCH,
     params={
-        'primary_category_id': {'primary_category_id': docs.CATEGORY_ID},
-        'sub_category_id': {'sub_category_id': docs.SUB_CATEGORY_ID},
+        'primary_category_id': {'description': docs.CATEGORY_ID},
+        'sub_category_id': {'description': docs.SUB_CATEGORY_ID},
     },
 )
 class AuditCaseSearchByCategoryId(ApiResource):
