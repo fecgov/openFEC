@@ -93,3 +93,40 @@ class AuditCaseView(ApiResource):
     @property
     def index_column(self):
         return self.model.audit_case_id
+
+@doc(
+    tags=['audit'],
+    description=docs.AUDIT_SEARCH,
+    params={
+        'primary_category_id': {'primary_category_id': docs.CATEGORY_ID},
+        'sub_category_id': {'sub_category_id': docs.SUB_CATEGORY_ID},
+    },
+)
+class AuditCaseSearchByCategoryId(ApiResource):
+    model = models.AuditCaseSearchByCategoryId
+    schema = schemas.AuditCaseSearchByCategoryIdSchema
+    page_schema = schemas.AuditCaseSearchByCategoryIdPageSchema
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.AuditCaseSearchByCategoryId,
+            args.make_sort_args(
+                default='-cycle',
+            ),
+        )
+
+    @property
+    def index_column(self):
+        return self.model.audit_case_id
+
+    def build_query(self, primary_category_id=None, sub_category_id=None, **kwargs):
+        query = super().build_query(**kwargs)
+
+        if primary_category_id:
+            query = query.filter(models.AuditCaseSearchByCategoryId.primary_category_id == primary_category_id)
+        if sub_category_id:
+            query = query.filter(models.AuditCaseSearchByCategoryId.sub_category_id == sub_category_id)
+
+        return query

@@ -72,7 +72,35 @@ WITH DATA;
 create unique index on ofec_audit_case_sub_category_rel_mv_tmp(audit_case_id,primary_category_id,sub_category_id);
 
 
---4)View: auditsearch.cmte_audit_vw
+--4)M_View: public.ofec_audit_case_arg_category_mv
+-- DROP MATERIALIZED VIEW public.ofec_audit_case_arg_category_mv;
+DROP MATERIALIZED VIEW if exists ofec_audit_case_arg_category_mv_tmp cascade;
+CREATE MATERIALIZED VIEW ofec_audit_case_arg_category_mv_tmp AS
+SELECT
+    acf.parent_finding_pk::integer AS primary_category_id,
+    acf.child_finding_pk::integer AS sub_category_id,   
+    poac.audit_case_id AS audit_case_id,
+    poac.cycle AS cycle,
+    poac.committee_id,
+    poac.committee_name,
+    poac.committee_designation,
+    poac.committee_type,
+    poac.committee_description,
+    poac.far_release_date,
+    poac.link_to_report,
+    poac.audit_id,
+    poac.candidate_id,
+    poac.candidate_name
+FROM auditsearch.audit_case_finding acf
+JOIN public.ofec_audit_case_mv_tmp poac
+ON(acf.audit_case_id::integer = poac.audit_case_id)
+ORDER BY cycle DESC
+WITH DATA;
+
+create unique index on ofec_audit_case_arg_category_mv_tmp(primary_category_id,sub_category_id,audit_case_id);
+
+
+--5)View: auditsearch.cmte_audit_vw
 --DROP VIEW auditsearch.cmte_audit_vw;
 CREATE OR REPLACE VIEW auditsearch.cmte_audit_vw AS
 SELECT dc.cmte_id,
@@ -99,7 +127,7 @@ WHERE dc.cmte_tp::text = ANY (ARRAY['H'::character varying, 'S'::character varyi
 ORDER BY dc.cmte_nm, dc.fec_election_yr;
 
 
---5)View: auditsearch.cand_audit_vw
+--6)View: auditsearch.cand_audit_vw
 --DROP VIEW auditsearch.cand_audit_vw;
 CREATE OR REPLACE VIEW auditsearch.cand_audit_vw AS
 SELECT dc.cand_id,
@@ -116,7 +144,7 @@ SELECT dc.cand_id,
 ORDER BY dc.cand_name, dc.fec_election_yr;
 
 
---6)View: auditsearch.finding_vw
+--7)View: auditsearch.finding_vw
 --DROP VIEW auditsearch.finding_vw;
 CREATE OR REPLACE VIEW auditsearch.finding_vw AS
 SELECT 
@@ -128,7 +156,7 @@ WHERE tier::integer=1
 ORDER BY (btrim(finding::text));
 
 
---7)View: auditsearch.finding_rel_vw
+--8)View: auditsearch.finding_rel_vw
 --DROP VIEW auditsearch.finding_rel_vw;
 CREATE OR REPLACE VIEW auditsearch.finding_rel_vw AS
 SELECT 

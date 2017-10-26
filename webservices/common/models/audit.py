@@ -82,3 +82,30 @@ class AuditCase(db.Model):
         uselist=True,
         lazy='joined'
     )
+
+#audit-case/search/<primary_category_id><sub_category_id> endpoint
+class AuditCaseSearchByCategoryId(db.Model):
+    __tablename__ = 'ofec_audit_case_arg_category_mv'
+
+    primary_category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
+    sub_category_id = db.Column(db.Integer, primary_key=True, doc=docs.SUB_CATEGORY_ID)
+    audit_case_id = db.Column(db.Integer, index=True, primary_key=True, doc=docs.AUDIT_CASE_ID)
+    cycle = db.Column(db.Integer, doc=docs.CYCLE)
+    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
+    committee_designation = db.Column(db.String, doc=docs.DESIGNATION)
+    committee_type = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
+    committee_description = db.Column(db.String, doc=docs.COMMITTEE_DESCRIPTION)
+    far_release_date = db.Column(db.Date, doc=docs.RELEASE_DATE)
+    link_to_report = db.Column(db.String, doc=docs.REPORT_LINK)
+    audit_id = db.Column(db.Integer, doc=docs.AUDIT_ID)
+    candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
+    candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
+    primary_category_list = db.relationship(
+        AuditCategoryRelation,
+        primaryjoin='''and_(
+            foreign(AuditCategoryRelation.audit_case_id) == AuditCaseSearchByCategoryId.audit_case_id,
+        )''',
+        uselist=True,
+        lazy='joined'
+    )
