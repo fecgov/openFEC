@@ -198,6 +198,8 @@ api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
 api.add_resource(audit.Category, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
+api.add_resource(audit.AuditCaseSearchByCategoryId,
+        '/audit-case/search/<int:primary_category_id>/<int:sub_category_id>')
 
 
 def add_aggregate_resource(api, view, schedule, label):
@@ -320,9 +322,11 @@ apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
 
-# audit-case and audit-category
+# audit-case, audit-category, audit-case/search/<primary_category_id><sub_category_id>
 apidoc.register(audit.AuditCaseView, blueprint='v1')
 apidoc.register(audit.Category, blueprint='v1')
+apidoc.register(audit.AuditCaseSearchByCategoryId, blueprint='v1')
+
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

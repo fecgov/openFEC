@@ -1094,6 +1094,10 @@ CATEGORY_ID = '''
 The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
 '''
 
+SUB_CATEGORY_ID = '''
+The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
+'''
+
 SUBCATEGORY = '''
 The audit issue. Each subcategory has an unique ID.
 '''

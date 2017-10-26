@@ -801,3 +801,7 @@ AuditCase = {
     # 'far_release_date': fields.List(fields.Date(description=docs.CATEGORY)),
     # 'link_to_report': fields.List(fields.Str(), description=docs.SUBCATEGORY),
 }
+
+#audit-case/search/<primary_category_id>/<sub_category_id> endpoint.
+AuditCaseSearchByCategoryId = {
+}
