@@ -85,7 +85,7 @@ def year_defaults(**kwargs):
     # We plan on rolling this back the 6 year restriction in the future
     # but wanted to confirm performance on 6 years first.
     if min_date and max_date:
-        if (max_date - min_date).days > 2190:
+        if (max_date - min_date).days > 2192:
             raise ValidationError(
                 'Cannot search for more that a 6 year period. Adjust max_date and min_date or pick a two_year_period.',
                 status_code=422
