@@ -59,8 +59,8 @@ def year_defaults(**kwargs):
     defaults.
 
     Here are the conditions:
-        - if no date supplied default to the current 2-year period
         - if a cycle is selected, that will provide sufficient date filtering
+        - if no date supplied default to the current 2-year period
         - if there is a min and max date check to make sure there isn't more than a 6 year period
         - if cycle and only one min date or max-date, it adds the restriction with in the 2-year period
     """
@@ -68,10 +68,10 @@ def year_defaults(**kwargs):
     max_date = kwargs.get('max_date')
     cycle = kwargs.get('two_year_transaction_period')
 
-    if min_date is None and max_date is None and cycle is None:
-        kwargs['two_year_transaction_period'] = CURRENT_CYCLE
-        return kwargs
     if cycle is not None:
+        return kwargs
+    if min_date is None and max_date is None:
+        kwargs['two_year_transaction_period'] = CURRENT_CYCLE
         return kwargs
     # this is for cases where only one date (min_date or max_date) is present
     if not min_date:
