@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import codecs
 import unittest
@@ -7,7 +8,6 @@ import subprocess
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
-import manage
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
@@ -17,10 +17,6 @@ TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
 
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
-
-def _setup_extensions():
-    rest.db.engine.execute('create extension if not exists btree_gin;')
-
 
 def _reset_schema():
     rest.db.engine.execute('drop schema if exists public cascade;')
@@ -40,6 +36,7 @@ def _reset_schema_for_integration():
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('drop schema if exists staging cascade;')
     rest.db.engine.execute('drop schema if exists fecapp cascade;')
+    rest.db.engine.execute('drop schema if exists real_efile cascade;')
     rest.db.engine.execute('create schema public;')
 
 
@@ -54,7 +51,6 @@ class BaseTestCase(unittest.TestCase):
         cls.client = TestApp(rest.app)
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
-        _setup_extensions()
         _reset_schema()
 
     def setUp(self):
@@ -77,8 +73,11 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
-        manage.load_districts()
-        manage.update_functions()
+        with open(os.devnull, 'w') as null:
+            subprocess.check_call(
+                ['psql', '-f', 'data/migrations/V02__states_and_zips_with_data.sql', TEST_CONN],
+                stdout=null
+            )
         whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
         rest.db.metadata.create_all(
             rest.db.engine,
@@ -132,11 +131,21 @@ class IntegrationTestCase(BaseTestCase):
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
         _reset_schema_for_integration()
-        try:
-            with open(os.devnull, 'w') as null:
-                subprocess.check_call(
-                    ['pg_restore', './data/subset.dump', '--dbname', TEST_CONN, '--no-acl', '--no-owner'],
-                    stdout=null,
-                )
-        except:
-            print('I am committing a try/ except crime')
+        run_migrations()
+
+def run_migrations():
+    subprocess.check_call(
+        ['flyway', 'migrate', '-url=%s' % to_jdbc_url(TEST_CONN), '-locations=filesystem:data/migrations'],
+    )
+
+def to_jdbc_url(dbi_url):
+    DB_URL_REGEX = re.compile(r'postgresql://(?P<username>[^:]*):?(?P<password>\S*)@(?P<host_port>\S*)$')
+    match = DB_URL_REGEX.match(dbi_url)
+    if match:
+        jdbc_url = 'jdbc:postgresql://{}?user={}'.format(
+            match.group('host_port'), match.group('username'))
+        if match.group('password'):
+            jdbc_url += '&password={}'.format(match.group('password'))
+    else:
+        jdbc_url = 'jdbc:postgresql://localhost:5432/cfdm_unit_test'
+    return jdbc_url

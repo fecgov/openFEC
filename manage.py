@@ -96,63 +96,6 @@ def execute_sql_folder(path, processes):
         for path in paths:
             execute_sql_file(path)
 
-@manager.command
-def load_nicknames():
-    """For improved search when candidates have a name that doesn't appear on their form.
-    Additional nicknames can be added to the csv for improved search.
-    """
-
-    logger.info('Loading nicknames...')
-
-    import pandas as pd
-    import sqlalchemy as sa
-
-    try:
-        table = sa.Table(
-            'ofec_nicknames',
-            db.metadata,
-            autoload_with=db.engine
-        )
-        db.engine.execute(table.delete())
-    except sa.exc.NoSuchTableError:
-        pass
-
-    load_table(
-        pd.read_csv('data/nicknames.csv'),
-        'ofec_nicknames',
-        if_exists='append'
-    )
-
-    logger.info('Finished loading nicknames.')
-
-@manager.command
-def load_pacronyms():
-    """For improved search of organizations that go by acronyms
-    """
-
-    logger.info('Loading pacronyms...')
-
-    import pandas as pd
-    import sqlalchemy as sa
-
-    try:
-        table = sa.Table(
-            'ofec_pacronyms',
-            db.metadata,
-            autoload_with=db.engine
-        )
-        db.engine.execute(table.delete())
-    except sa.exc.NoSuchTableError:
-        pass
-
-    load_table(
-        pd.read_excel('data/pacronyms.xlsx'),
-        'ofec_pacronyms',
-        if_exists='append'
-    )
-
-    logger.info('Finished loading pacronyms.')
-
 def load_table(frame, tablename, if_exists='replace', indexes=()):
     import sqlalchemy as sa
     frame.to_sql(tablename, db.engine, if_exists=if_exists)
@@ -167,24 +110,6 @@ def build_districts():
     import pandas as pd
     load_table(pd.read_csv('data/fips_states.csv'), 'ofec_fips_states')
     load_table(pd.read_csv('data/natl_zccd_delim.csv'), 'ofec_zips_districts', indexes=('ZCTA', ))
-
-@manager.command
-def load_election_dates():
-    """ This is from before we had direct access to election data and needed it, we are still using the
-    data from a csv, to populate the ElectionClassDate model.
-    """
-
-    logger.info('Loading election dates...')
-
-    import pandas as pd
-    frame = pd.read_excel('data/election_dates.xlsx')
-    frame.columns = [column.lower() for column in frame.columns]
-    load_table(
-        frame, 'ofec_election_dates',
-        indexes=('office', 'state', 'district', 'election_yr', 'senate_class'),
-    )
-
-    logger.info('Finished loading election dates.')
 
 @manager.command
 def dump_districts(dest=None):
@@ -202,26 +127,6 @@ def dump_districts(dest=None):
         '-t ofec_fips_states -t ofec_zips_districts'
     ).format(**locals())
     subprocess.run(cmd, shell=True)
-
-@manager.command
-def load_districts(source=None):
-    """ Loads that districts that you made locally so that you can then add them as a
-    table to the databases
-    """
-
-    logger.info('Loading districts...')
-
-    if source is None:
-        source = './data/districts.dump'
-    else:
-        source = shlex.quote(source)
-
-    dest = db.engine.url
-    cmd = (
-        'pg_restore --dbname "{dest}" --no-acl --no-owner --clean {source}'
-    ).format(**locals())
-    subprocess.run(cmd, shell=True)
-    logger.info('Finished loading districts.')
 
 @manager.command
 def build_district_counts(outname='districts.json'):
@@ -246,12 +151,6 @@ def update_schemas(processes=1):
     logger.info("Finished DB refresh.")
 
 @manager.command
-def update_functions(processes=1):
-    """This command updates the helper functions. It is run on deploy.
-    """
-    execute_sql_folder('data/functions/', processes=processes)
-
-@manager.command
 def update_itemized(schedule):
     """These are the scripts that create the main schedule tables.
     Run this when you make a change to code in:
@@ -260,26 +159,6 @@ def update_itemized(schedule):
     logger.info('Updating Schedule {0} tables...'.format(schedule))
     execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
     logger.info('Finished Schedule {0} update.'.format(schedule))
-
-@manager.command
-def partition_itemized(schedule):
-    """This command runs the partitioning against the specified itemized
-    schedule table.
-    """
-    logger.info('Partitioning Schedule %s...', schedule)
-    execute_sql_file('data/sql_partition/partition_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished partitioning Schedule %s.', schedule)
-
-@manager.command
-def index_itemized(schedule):
-    """This command (re-)creates the indexes for the itemized schedule table
-    partition and removes any old ones.
-    Run this when you make changes to the index definitions on the itemized
-    schedule A and B data but do not need to do a full repartition.
-    """
-    logger.info('(Re-)indexing Schedule %s...', schedule)
-    execute_sql_file('data/sql_partition/index_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished (re-)indexing Schedule %s.', schedule)
 
 @manager.command
 def rebuild_aggregates(processes=1):
@@ -325,16 +204,7 @@ def update_all(processes=1):
     """Update all derived data. Warning: Extremely slow on production data.
     """
     processes = int(processes)
-    update_functions(processes=processes)
-    load_districts()
-    load_pacronyms()
-    load_nicknames()
-    load_election_dates()
-    update_itemized('a')
-    update_itemized('b')
     update_itemized('e')
-    partition_itemized('a')
-    partition_itemized('b')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
@@ -343,7 +213,51 @@ def refresh_materialized():
     """Refresh materialized views nightly
     """
     logger.info('Refreshing materialized views...')
-    execute_sql_file('data/refresh_materialized_views.sql')
+    materialized_view_names = {
+        'filing_amendments_house_senate': ['ofec_house_senate_paper_amendments_mv'],  # Anomaly
+        'sched_f': ['ofec_sched_f_mv'],
+        'reports_ie': ['ofec_reports_ie_only_mv'],  # Anomale
+        'electioneering_by_candidate': ['ofec_electioneering_aggregate_candidate_mv'],  # Anomaly
+        'candidate_history': ['ofec_candidate_history_mv'],
+        'candidate_detail': ['ofec_candidate_detail_mv'],
+        'candidate_election': ['ofec_candidate_election_mv'],
+        'candidate_history_latest': ['ofec_candidate_history_latest_mv'],
+        'omnibus_dates': ['ofec_omnibus_dates_mv'],
+        'election_outcome': ['ofec_election_result_mv'],  # Anomaly
+        'sched_e_by_candidate': ['ofec_sched_e_aggregate_candidate_mv'],  # Anomaly
+        'filing_amendments_presidential': ['ofec_presidential_paper_amendments_mv'],  # Anomaly
+        'filing_amendments_pac_party': ['ofec_pac_party_paper_amendments_mv'],  # Anomaly
+        'cand_cmte_linkage': ['ofec_cand_cmte_linkage_mv'],
+        'communication_cost_by_candidate': ['ofec_communication_cost_aggregate_candidate_mv'],  # Anomaly
+        'electioneering': ['ofec_electioneering_mv'],
+        'filing_amendments_all': ['ofec_amendments_mv'],  # Anomaly
+        'reports_house_senate': ['ofec_reports_house_senate_mv'],
+        'reports_pac_party': ['ofec_reports_pacs_parties_mv'],  # Anomaly
+        'reports_presidential': ['ofec_reports_presidential_mv'],
+        'committee_history': ['ofec_committee_history_mv'],
+        'communication_cost': ['ofec_communication_cost_mv'],
+        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv'],  # Anomaly
+        'totals_combined': ['ofec_totals_combined_mv'],
+        'totals_ie': ['ofec_totals_ie_only_mv'],  # Anomaly
+        'totals_house_senate': ['ofec_totals_house_senate_mv'],
+        'totals_presidential': ['ofec_totals_presidential_mv'],
+        'candidate_aggregates': ['ofec_candidate_totals_mv'],
+        'candidate_flags': ['ofec_candidate_flag'],  # Anomaly
+        'sched_c': ['ofec_sched_c_mv'],
+        'rad_analyst': ['ofec_rad_mv'],  # Anomaly
+        'committee_detail': ['ofec_committee_detail_mv'],
+        'committee_fulltext': ['ofec_committee_fulltext_mv'],
+        'totals_pac_party': ['ofec_totals_pacs_parties_mv', 'ofec_totals_pacs_mv', 'ofec_totals_parties_mv'],  # Anomaly
+        'large_aggregates': ['ofec_entity_chart_mv'],  # Anomaly
+        'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
+        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv']
+    }
+    graph = flow.get_graph()
+    for node in nx.topological_sort(graph):
+        for mv in materialized_view_names[node]:
+            logger.info('Refreshing %s', mv)
+            db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
