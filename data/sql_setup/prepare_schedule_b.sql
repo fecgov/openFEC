@@ -307,7 +307,6 @@ begin
             WHERE
                 %I.sub_id = $1.sub_id',
                 child_table_name, child_table_name) USING view_row;
-            PERFORM increment_sched_b_aggregates(view_row);
         end if;
     end if;
 
@@ -342,7 +341,6 @@ begin
             IF tg_op = 'DELETE' THEN
                 DELETE FROM ofec_sched_b_master WHERE sub_id = view_row.sub_id;
             END IF;
-            PERFORM decrement_sched_b_aggregates(view_row);
         end if;
     end if;
     if tg_op = 'DELETE' then
@@ -372,43 +370,3 @@ create trigger f_item_sched_b_after_trigger after insert or update
 drop trigger if exists f_item_sched_b_before_trigger on disclosure.f_item_receipt_or_exp;
 create trigger f_item_sched_b_before_trigger before delete or update
     on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_b_delete_update_queues(:START_YEAR_AGGREGATE);
-
-CREATE OR REPLACE FUNCTION increment_sched_b_aggregates(view_row fec_fitem_sched_b_vw) RETURNS VOID AS $$
-BEGIN
-    IF view_row.disb_amt IS NOT NULL AND (view_row.memo_cd != 'X' OR view_row.memo_cd IS NULL) THEN
-        INSERT INTO ofec_sched_b_aggregate_purpose
-            (cmte_id, cycle, purpose, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, disbursement_purpose(view_row.disb_tp, view_row.disb_desc), view_row.disb_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_ofec_sched_b_aggregate_purpose_cmte_id_cycle_purpose DO UPDATE
-        SET
-            total = ofec_sched_b_aggregate_purpose.total + excluded.total,
-            count = ofec_sched_b_aggregate_purpose.count + excluded.count;
-        INSERT INTO ofec_sched_b_aggregate_recipient
-            (cmte_id, cycle, recipient_nm, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, view_row.recipient_nm, view_row.disb_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_ofec_sched_b_aggregate_recipient_cmte_id_cycle_recipient DO UPDATE
-        SET
-            total = ofec_sched_b_aggregate_recipient.total + excluded.total,
-            count = ofec_sched_b_aggregate_recipient.count + excluded.count;
-        INSERT INTO ofec_sched_b_aggregate_recipient_id
-            (cmte_id, cycle, recipient_cmte_id, recipient_nm, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, clean_repeated(view_row.recipient_cmte_id, view_row.cmte_id), view_row.recipient_nm, view_row.disb_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_sched_b_agg_recpnt_id_cmte_id_cycle_recipient_cmte_id DO UPDATE
-        SET
-            total = ofec_sched_b_aggregate_recipient_id.total + excluded.total,
-            count = ofec_sched_b_aggregate_recipient_id.count + excluded.count;
-    END IF;
-END
-$$ language plpgsql;
-
-drop function if exists ofec_sched_b_insert_update();
-drop function if exists ofec_sched_b_delete_update();
-drop function if exists increment_sched_b_aggregates(view_row fec_fitem_sched_b_vw);
-drop function if exists decrement_sched_b_aggregates(view_row fec_fitem_sched_b_vw);
-
--- Drop the old trigger functions if they still exist.
-drop function if exists ofec_sched_b_insert_update_queues();
-drop function if exists ofec_sched_b_delete_update_queues();
