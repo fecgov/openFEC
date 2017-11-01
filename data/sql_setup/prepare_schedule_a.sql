@@ -299,7 +299,6 @@ begin
             WHERE
                 %I.sub_id = $1.sub_id',
                 child_table_name, child_table_name) USING view_row;
-            PERFORM increment_sched_a_aggregates(view_row);
         end if;
     end if;
 
@@ -334,7 +333,6 @@ begin
                 IF tg_op = 'DELETE' THEN
                     DELETE FROM ofec_sched_a_master WHERE sub_id = view_row.sub_id;
                 END IF;
-                PERFORM decrement_sched_a_aggregates(view_row);
             end if;
         end if;
 
@@ -365,91 +363,3 @@ create trigger f_item_sched_a_after_trigger after insert or update
 drop trigger if exists f_item_sched_a_before_trigger on disclosure.f_item_receipt_or_exp;
 create trigger f_item_sched_a_before_trigger before delete or update
     on disclosure.f_item_receipt_or_exp for each row execute procedure ofec_sched_a_delete_update_queues(:START_YEAR_AGGREGATE);
-
-CREATE OR REPLACE FUNCTION increment_sched_a_aggregates(view_row fec_fitem_sched_a_vw) RETURNS VOID AS $$
-BEGIN
-    IF view_row.contb_receipt_amt IS NOT NULL AND is_individual(view_row.contb_receipt_amt, view_row.receipt_tp, view_row.line_num, view_row.memo_cd, view_row.memo_text, view_row.contbr_id, view_row.cmte_id) THEN
-        INSERT INTO ofec_sched_a_aggregate_employer
-            (cmte_id, cycle, employer, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, view_row.contbr_employer, view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_sched_a_aggregate_employer_cmte_id_cycle_employer DO UPDATE
-        SET
-            total = ofec_sched_a_aggregate_employer.total + excluded.total,
-            count = ofec_sched_a_aggregate_employer.count + excluded.count;
-        INSERT INTO ofec_sched_a_aggregate_occupation
-            (cmte_id, cycle, occupation, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, view_row.contbr_occupation, view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_sched_a_aggregate_occupation_cmte_id_cycle_occupation DO UPDATE
-        SET
-            total = ofec_sched_a_aggregate_occupation.total + excluded.total,
-            count = ofec_sched_a_aggregate_occupation.count + excluded.count;
-        INSERT INTO ofec_sched_a_aggregate_state
-            (cmte_id, cycle, state, state_full, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, view_row.contbr_st, expand_state(view_row.contbr_st), view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_ofec_sched_a_aggregate_state_cmte_id_cycle_state DO UPDATE
-        SET
-            total = ofec_sched_a_aggregate_state.total + excluded.total,
-            count = ofec_sched_a_aggregate_state.count + excluded.count;
-        INSERT INTO ofec_sched_a_aggregate_zip
-            (cmte_id, cycle, zip, state, state_full, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, view_row.contbr_zip, view_row.contbr_st, expand_state(view_row.contbr_st), view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_ofec_sched_a_aggregate_zip_cmte_id_cycle_zip DO UPDATE
-        SET
-            total = ofec_sched_a_aggregate_zip.total + excluded.total,
-            count = ofec_sched_a_aggregate_zip.count + excluded.count;
-        INSERT INTO ofec_sched_a_aggregate_size
-            (cmte_id, cycle, size, total, count)
-        VALUES
-            (view_row.cmte_id, view_row.election_cycle, contribution_size(view_row.contb_receipt_amt), view_row.contb_receipt_amt, 1)
-        ON CONFLICT ON CONSTRAINT uq_ofec_sched_a_aggregate_size_cmte_id_cycle_size DO UPDATE
-        SET
-            total = ofec_sched_a_aggregate_size.total + excluded.total,
-            count = ofec_sched_a_aggregate_size.count + excluded.count;
-    END IF;
-END
-$$ language plpgsql;
-
-CREATE OR REPLACE FUNCTION decrement_sched_a_aggregates(view_row fec_fitem_sched_a_vw) RETURNS VOID AS $$
-BEGIN
-    IF view_row.contb_receipt_amt IS NOT NULL AND is_individual(view_row.contb_receipt_amt, view_row.receipt_tp, view_row.line_num, view_row.memo_cd, view_row.memo_text, view_row.contbr_id, view_row.cmte_id) THEN
-        UPDATE ofec_sched_a_aggregate_employer
-        SET
-            total = ofec_sched_a_aggregate_employer.total - view_row.contb_receipt_amt,
-            count = ofec_sched_a_aggregate_employer.count - 1
-        WHERE
-            (cmte_id, cycle, employer) = (view_row.cmte_id, view_row.election_cycle, view_row.contbr_employer);
-        UPDATE ofec_sched_a_aggregate_occupation
-        SET
-            total = ofec_sched_a_aggregate_occupation.total - view_row.contb_receipt_amt,
-            count = ofec_sched_a_aggregate_occupation.count - 1
-        WHERE
-            (cmte_id, cycle, occupation) = (view_row.cmte_id, view_row.election_cycle, view_row.contbr_occupation);
-        UPDATE ofec_sched_a_aggregate_state
-        SET
-            total = ofec_sched_a_aggregate_state.total - view_row.contb_receipt_amt,
-            count = ofec_sched_a_aggregate_state.count - 1
-        WHERE
-            (cmte_id, cycle, state) = (view_row.cmte_id, view_row.election_cycle, view_row.contbr_st);
-        UPDATE ofec_sched_a_aggregate_zip
-        SET
-            total = ofec_sched_a_aggregate_zip.total - view_row.contb_receipt_amt,
-            count = ofec_sched_a_aggregate_zip.count - 1
-        WHERE
-            (cmte_id, cycle, zip) = (view_row.cmte_id, view_row.election_cycle, view_row.contbr_zip);
-        UPDATE ofec_sched_a_aggregate_size
-        SET
-            total = ofec_sched_a_aggregate_size.total - view_row.contb_receipt_amt,
-            count = ofec_sched_a_aggregate_size.count - 1
-        WHERE
-            (cmte_id, cycle, size) = (view_row.cmte_id, view_row.election_cycle, contribution_size(view_row.contb_receipt_amt));
-    END IF;
-END
-$$ language plpgsql;
-
--- Drop the old trigger functions if they still exist.
-drop function if exists ofec_sched_a_insert_update_queues();
-drop function if exists ofec_sched_a_delete_update_queues();

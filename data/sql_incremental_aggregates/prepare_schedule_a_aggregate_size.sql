@@ -29,7 +29,6 @@ and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, c
 group by cmte_id, cycle, size
 ;
 
-alter table ofec_sched_a_aggregate_size_tmp add constraint uq_ofec_sched_a_aggregate_size_tmp_cmte_id_cycle_size unique (cmte_id, cycle, size);
 -- Create indices on aggregate
 create index ofec_sched_a_aggregate_size_tmp_cmte_id on ofec_sched_a_aggregate_size_tmp(cmte_id);
 create index ofec_sched_a_aggregate_size_tmp_cycle on ofec_sched_a_aggregate_size_tmp(cycle);
@@ -41,3 +40,47 @@ create index ofec_sched_a_aggregate_size_tmp_cmte_id_cycle on ofec_sched_a_aggre
 drop table if exists ofec_sched_a_aggregate_size cascade;
 alter table ofec_sched_a_aggregate_size_tmp rename to ofec_sched_a_aggregate_size;
 select rename_indexes('ofec_sched_a_aggregate_size');
+
+-- Create update function
+create or replace function ofec_sched_a_update_aggregate_size() returns void as $$
+begin
+    with new as (
+        select 1 as multiplier, cmte_id, rpt_yr, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
+        from ofec_sched_a_queue_new
+    ),
+    old as (
+        select -1 as multiplier, cmte_id, rpt_yr, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
+        from ofec_sched_a_queue_old
+    ),
+    patch as (
+        select
+            cmte_id,
+            rpt_yr + rpt_yr % 2 as cycle,
+            contribution_size(contb_receipt_amt) as size,
+            sum(contb_receipt_amt * multiplier) as total,
+            sum(multiplier) as count
+        from (
+            select * from new
+            union all
+            select * from old
+        ) t
+        where contb_receipt_amt is not null
+        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
+        group by cmte_id, cycle, size
+    ),
+    inc as (
+        update ofec_sched_a_aggregate_size ag
+        set
+            total = ag.total + patch.total,
+            count = ag.count + patch.count
+        from patch
+        where (ag.cmte_id, ag.cycle, ag.size) = (patch.cmte_id, patch.cycle, patch.size)
+    )
+    insert into ofec_sched_a_aggregate_size (
+        select patch.* from patch
+        left join ofec_sched_a_aggregate_size ag using (cmte_id, cycle, size)
+        where ag.cmte_id is null
+    )
+    ;
+end
+$$ language plpgsql;
