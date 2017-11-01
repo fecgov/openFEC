@@ -79,6 +79,10 @@ def get_graph():
     ])
 
     graph.add_edges_from([
+        ('totals_combined', 'sched_a_by_size_merged'),
+    ])
+
+    graph.add_edges_from([
         ('totals_house_senate', 'candidate_aggregates'),
         ('totals_presidential', 'candidate_aggregates'),
         ('candidate_election', 'candidate_aggregates'),
@@ -102,5 +106,6 @@ def get_graph():
     ])
 
     graph.add_edge('committee_history', 'communication_cost')
+    graph.add_edge('committee_detail', 'sched_a_by_state_recipient_totals')
 
     return graph
