@@ -206,6 +206,11 @@ class TestViews(common.IntegrationTestCase):
             1,
         )
 
+    def _clear_sched_b_queues(self):
+        db.session.execute('delete from ofec_sched_b_queue_new')
+        db.session.execute('delete from ofec_sched_b_queue_old')
+        db.session.commit()
+
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.NmlSchedAFactory(**{
             'rpt_yr': 2015,
@@ -439,6 +444,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
+        self._clear_sched_b_queues()
         rows = models.ScheduleBByPurpose.query.filter_by(
             cycle=2016,
             committee_id='C12345',
@@ -450,12 +456,14 @@ class TestViews(common.IntegrationTestCase):
         filing.disbursement_description = 'BUMPER STICKERS'
         db.session.add(filing)
         db.session.commit()
+        self._clear_sched_b_queues()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 538)
         self.assertEqual(rows[0].count, 1)
         filing.disb_desc = 'HANGING OUT'
         db.session.add(filing)
         db.session.commit()
+        self._clear_sched_b_queues()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
