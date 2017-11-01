@@ -12,7 +12,6 @@ from factory.alchemy import SQLAlchemyModelFactory
 from apispec import utils, exceptions
 
 import manage
-from manage import execute_sql_file
 from tests import common
 from webservices.rest import db
 from webservices.spec import spec
@@ -445,8 +444,7 @@ class TestViews(common.IntegrationTestCase):
         manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_totals_combined_mv')
-        db.session.commit()
-        _rebuild_sched_a_by_size_merged()
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         refreshed = models.ScheduleABySize.query.filter_by(
             size=0,
             cycle=2016,
@@ -583,6 +581,3 @@ class TestViews(common.IntegrationTestCase):
         actual_tables = set(inspector.get_table_names())
         assert expected_tables.issubset(actual_tables)
         assert "ofec_sched_a_3005_3006" not in actual_tables
-
-def _rebuild_sched_a_by_size_merged():
-    execute_sql_file('./data/converted_mvs/sched_a_by_size_merged.sql')
