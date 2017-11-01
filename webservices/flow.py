@@ -102,5 +102,6 @@ def get_graph():
     ])
 
     graph.add_edge('committee_history', 'communication_cost')
+    graph.add_edge('committee_detail', 'sched_a_by_state_recipient_totals')
 
     return graph
