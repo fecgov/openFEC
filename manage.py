@@ -242,7 +242,6 @@ def update_schemas(processes=1):
         execute_sql_file(path)
     execute_sql_file('data/rename_temporary_views.sql')
     execute_sql_file('data/converted_mvs/sched_a_by_size_merged.sql')
-    execute_sql_file('data/converted_mvs/sched_a_by_state_recipient_totals.sql')
     logger.info("Finished DB refresh.")
 
 @manager.command
