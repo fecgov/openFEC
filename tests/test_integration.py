@@ -206,6 +206,21 @@ class TestViews(common.IntegrationTestCase):
 #            1,
 #        )
 
+    def _get_sched_a_queue_new_count(self):
+        return db.session.execute(
+            'select count(*) from ofec_sched_a_queue_new'
+        ).scalar()
+
+    def _get_sched_a_queue_old_count(self):
+        return db.session.execute(
+            'select count(*) from ofec_sched_a_queue_old'
+        ).scalar()
+
+    def _clear_sched_a_queues(self):
+        db.session.execute('delete from ofec_sched_a_queue_new')
+        db.session.execute('delete from ofec_sched_a_queue_old')
+        db.session.commit()
+
     def _clear_sched_b_queues(self):
         db.session.execute('delete from ofec_sched_b_queue_new')
         db.session.execute('delete from ofec_sched_b_queue_old')
@@ -263,6 +278,7 @@ class TestViews(common.IntegrationTestCase):
         ).first()
         total = existing.total
         count = existing.count
+        self._clear_sched_a_queues()
         filing = self.NmlSchedAFactory(**{
             'rpt_yr': 2015,
             'cmte_id': existing.committee_id,
@@ -371,6 +387,7 @@ class TestViews(common.IntegrationTestCase):
         db.session.commit()
         manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        self._clear_sched_a_queues()
         existing = get_existing()
         total = existing.total
         count = existing.count
