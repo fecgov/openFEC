@@ -307,7 +307,7 @@ def update_aggregates():
 def refresh_itemized():
     """These are run nightly to refresh the itemized schedule A and B data."""
 
-    # refresh_itemized_a()
+    refresh_itemized_a()
     refresh_itemized_b()
 
     logger.info('Finished updating incremental aggregates.')
