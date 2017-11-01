@@ -1,4 +1,3 @@
-DROP MATERIALIZED VIEW IF EXISTS ofec_sched_a_aggregate_size_merged_mv;
 -- Merge aggregated Schedule A receipts with committee totals views
 drop table if exists ofec_sched_a_aggregate_size_merged_tmp;
 

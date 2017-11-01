@@ -1,6 +1,5 @@
 -- Drop the old functions if they still exist.
 drop function if exists ofec_sched_a_update_aggregate_state();
-DROP MATERIALIZED VIEW IF EXISTS ofec_sched_a_aggregate_state_recipient_totals_mv;
 
 -- Create initial aggregate
 drop table if exists ofec_sched_a_aggregate_state_tmp;
