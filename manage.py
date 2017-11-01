@@ -292,6 +292,20 @@ def rebuild_aggregates(processes=1):
     logger.info('Finished rebuilding incremental aggregates.')
 
 @manager.command
+def update_aggregates():
+    """These are run nightly to recalculate the totals
+    """
+    logger.info('Updating incremental aggregates...')
+
+    with db.engine.begin() as connection:
+        connection.execute(
+            sa.text('select update_aggregates()').execution_options(
+                autocommit=True
+            )
+        )
+        logger.info('Finished updating Schedule E and support aggregates.')
+
+@manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
     """Adds a new itemized cycle child table.
     By default this will try to add just the current cycle to all partitioned

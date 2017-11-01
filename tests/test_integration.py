@@ -225,6 +225,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
+        manage.update_aggregates()
         rows = total_model.query.filter_by(**{
             'cycle': 2016,
             'committee_id': 'C12345',
@@ -236,6 +237,7 @@ class TestViews(common.IntegrationTestCase):
         filing.contb_receipt_amt = 53
         db.session.add(filing)
         db.session.commit()
+        manage.update_aggregates()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 53)
         self.assertEqual(rows[0].count, 1)
@@ -254,6 +256,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
+        manage.update_aggregates()
         existing = total_model.query.filter(
             total_model.cycle == 2016,
             getattr(total_model, total_key) == item_key_value,  # noqa
@@ -273,6 +276,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
+        manage.update_aggregates()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
@@ -307,6 +311,7 @@ class TestViews(common.IntegrationTestCase):
             receipt_tp='15J',
         )
         db.session.flush()
+        manage.update_aggregates()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total)
         self.assertEqual(existing.count, count)
@@ -324,7 +329,8 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        _rebuild_sched_a_by_size_merged()
+        manage.update_aggregates()
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         rows = models.ScheduleABySize.query.filter_by(
             cycle=2016,
             committee_id='C6789',
@@ -336,7 +342,8 @@ class TestViews(common.IntegrationTestCase):
         filing.contb_receipt_amt = 53
         db.session.add(filing)
         db.session.commit()
-        _rebuild_sched_a_by_size_merged()
+        manage.update_aggregates()
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
         self.assertEqual(rows[0].count, 0)
@@ -362,7 +369,8 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        _rebuild_sched_a_by_size_merged()
+        manage.update_aggregates()
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         existing = get_existing()
         total = existing.total
         count = existing.count
@@ -379,7 +387,8 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
-        _rebuild_sched_a_by_size_merged()
+        manage.update_aggregates()
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         existing = get_existing()
         self.assertEqual(existing.total, total + NEW_RECEIPT_AMOUNT)
         self.assertEqual(existing.count, count + 1)
@@ -416,6 +425,7 @@ class TestViews(common.IntegrationTestCase):
         )
         db.session.execute(ins)
         db.session.commit()
+        manage.update_aggregates()
         db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_totals_combined_mv')
         db.session.commit()
@@ -444,6 +454,7 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
+        manage.update_aggregates()
         self._clear_sched_b_queues()
         rows = models.ScheduleBByPurpose.query.filter_by(
             cycle=2016,
@@ -456,6 +467,7 @@ class TestViews(common.IntegrationTestCase):
         filing.disbursement_description = 'BUMPER STICKERS'
         db.session.add(filing)
         db.session.commit()
+        manage.update_aggregates()
         self._clear_sched_b_queues()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 538)
@@ -463,6 +475,7 @@ class TestViews(common.IntegrationTestCase):
         filing.disb_desc = 'HANGING OUT'
         db.session.add(filing)
         db.session.commit()
+        manage.update_aggregates()
         self._clear_sched_b_queues()
         db.session.refresh(rows[0])
         self.assertEqual(rows[0].total, 0)
@@ -482,24 +495,22 @@ class TestViews(common.IntegrationTestCase):
             rpt_yr=2015,
         )
         db.session.commit()
+        manage.update_aggregates()
         existing = models.ScheduleBByPurpose.query.filter_by(
             purpose='CONTRIBUTIONS',
             cycle=2016,
         ).first()
         total = existing.total
         count = existing.count
-        filing = self.NmlSchedBFactory(
+        self.NmlSchedBFactory(
             rpt_yr=2015,
             cmte_id=existing.committee_id,
             disb_amt=538,
             disb_dt=datetime.datetime(2015, 1, 1),
             disb_tp='24K',
         )
-        self.FItemReceiptOrExp(
-            sub_id=filing.sub_id,
-            rpt_yr=2015,
-        )
         db.session.commit()
+        manage.update_aggregates()
         db.session.refresh(existing)
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
