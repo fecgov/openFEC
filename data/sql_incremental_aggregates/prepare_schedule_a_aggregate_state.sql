@@ -37,3 +37,48 @@ create index ofec_sched_a_aggregate_state_tmp_cycle_cmte_id on ofec_sched_a_aggr
 drop table if exists ofec_sched_a_aggregate_state;
 alter table ofec_sched_a_aggregate_state_tmp rename to ofec_sched_a_aggregate_state;
 select rename_indexes('ofec_sched_a_aggregate_state');
+
+-- Create update function
+create or replace function ofec_sched_a_update_aggregate_state() returns void as $$
+begin
+    with new as (
+        select 1 as multiplier, cmte_id, rpt_yr, contbr_st, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
+        from ofec_sched_a_queue_new
+    ),
+    old as (
+        select -1 as multiplier, cmte_id, rpt_yr, contbr_st, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
+        from ofec_sched_a_queue_old
+    ),
+    patch as (
+        select
+            cmte_id,
+            rpt_yr + rpt_yr % 2 as cycle,
+            contbr_st as state,
+            expand_state(contbr_st) as state_full,
+            sum(contb_receipt_amt * multiplier) as total,
+            sum(multiplier) as count
+        from (
+            select * from new
+            union all
+            select * from old
+        ) t
+        where contb_receipt_amt is not null
+        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
+        group by cmte_id, cycle, state
+    ),
+    inc as (
+        update ofec_sched_a_aggregate_state ag
+        set
+            total = ag.total + patch.total,
+            count = ag.count + patch.count
+        from patch
+        where (ag.cmte_id, ag.cycle, ag.state) = (patch.cmte_id, patch.cycle, patch.state)
+    )
+    insert into ofec_sched_a_aggregate_state (
+        select patch.* from patch
+        left join ofec_sched_a_aggregate_state ag using (cmte_id, cycle, state)
+        where ag.cmte_id is null
+    )
+    ;
+end
+$$ language plpgsql;
