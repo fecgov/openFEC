@@ -282,7 +282,6 @@ begin
             WHERE
                 %I.sub_id = $1.sub_id',
                 child_table_name, child_table_name) USING view_row;
-            PERFORM increment_sched_b_aggregates(view_row);
         end if;
     end if;
 
@@ -315,7 +314,6 @@ begin
             IF tg_op = 'DELETE' THEN
                 DELETE FROM ofec_sched_b_master WHERE sub_id = view_row.sub_id;
             END IF;
-            PERFORM decrement_sched_b_aggregates(view_row);
         end if;
     end if;
     if tg_op = 'DELETE' then
