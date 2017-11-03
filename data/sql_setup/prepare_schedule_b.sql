@@ -20,8 +20,9 @@ drop trigger if exists f_item_sched_b_after_trigger on disclosure.f_item_receipt
 
 drop trigger if exists f_item_sched_b_before_trigger on disclosure.f_item_receipt_or_exp;
 
+drop function if exists ofec_sched_b_insert_update();
+drop function if exists ofec_sched_b_delete_update();
 drop function if exists increment_sched_b_aggregates(view_row fec_fitem_sched_b_vw);
-
 drop function if exists decrement_sched_b_aggregates(view_row fec_fitem_sched_b_vw);
 
 -- Drop the old trigger functions if they still exist.

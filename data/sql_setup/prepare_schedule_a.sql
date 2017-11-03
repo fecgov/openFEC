@@ -17,6 +17,8 @@ drop trigger if exists f_item_sched_a_after_trigger on disclosure.f_item_receipt
 
 drop trigger if exists f_item_sched_a_before_trigger on disclosure.f_item_receipt_or_exp;
 
+drop function if exists ofec_sched_a_insert_update();
+drop function if exists ofec_sched_a_delete_update();
 drop function if exists increment_sched_a_aggregates(view_row fec_fitem_sched_a_vw);
 drop function if exists decrement_sched_a_aggregates(view_row fec_fitem_sched_a_vw);
 
