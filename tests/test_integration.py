@@ -151,60 +151,60 @@ class TestViews(common.IntegrationTestCase):
         ]
         assert len(set(counts)) == 1
 
-    def test_sched_a_fulltext_trigger(self):
-        # Test create
-        nml_row = self.NmlSchedAFactory(
-            rpt_yr=2014,
-            contbr_nm='Sheldon Adelson',
-            contb_receipt_dt=datetime.datetime(2014, 1, 1)
-        )
-        self.FItemReceiptOrExp(
-            sub_id=nml_row.sub_id,
-            rpt_yr=2014,
-        )
-        db.session.commit()
-        search = models.ScheduleA.query.filter(
-            models.ScheduleA.sub_id == nml_row.sub_id
-        ).one()
-        self.assertEqual(search.contributor_name_text, "'adelson':2 'sheldon':1")
-
-        # Test update
-        nml_row.contbr_nm = 'Shelly Adelson'
-        db.session.add(nml_row)
-        db.session.commit()
-        search = models.ScheduleA.query.filter(
-            models.ScheduleA.sub_id == nml_row.sub_id
-        ).one()
-        db.session.refresh(search)
-        self.assertEqual(search.contributor_name_text, "'adelson':2 'shelli':1")
-
-        # Test delete
-        db.session.delete(nml_row)
-        db.session.commit()
-        self.assertEqual(
-            models.ScheduleA.query.filter(
-                models.ScheduleA.sub_id == nml_row.sub_id
-            ).count(),
-            0,
-        )
-
-        # Test sequential writes
-        make_transient(nml_row)
-        db.session.add(nml_row)
-        db.session.commit()
-
-        db.session.delete(nml_row)
-        db.session.commit()
-
-        make_transient(nml_row)
-        db.session.add(nml_row)
-        db.session.commit()
-        self.assertEqual(
-            models.ScheduleA.query.filter(
-                models.ScheduleA.sub_id == nml_row.sub_id
-            ).count(),
-            1,
-        )
+#    def test_sched_a_fulltext_trigger(self):
+#        # Test create
+#        nml_row = self.NmlSchedAFactory(
+#            rpt_yr=2014,
+#            contbr_nm='Sheldon Adelson',
+#            contb_receipt_dt=datetime.datetime(2014, 1, 1)
+#        )
+#        self.FItemReceiptOrExp(
+#            sub_id=nml_row.sub_id,
+#            rpt_yr=2014,
+#        )
+#        db.session.commit()
+#        search = models.ScheduleA.query.filter(
+#            models.ScheduleA.sub_id == nml_row.sub_id
+#        ).one()
+#        self.assertEqual(search.contributor_name_text, "'adelson':2 'sheldon':1")
+#
+#        # Test update
+#        nml_row.contbr_nm = 'Shelly Adelson'
+#        db.session.add(nml_row)
+#        db.session.commit()
+#        search = models.ScheduleA.query.filter(
+#            models.ScheduleA.sub_id == nml_row.sub_id
+#        ).one()
+#        db.session.refresh(search)
+#        self.assertEqual(search.contributor_name_text, "'adelson':2 'shelli':1")
+#
+#        # Test delete
+#        db.session.delete(nml_row)
+#        db.session.commit()
+#        self.assertEqual(
+#            models.ScheduleA.query.filter(
+#                models.ScheduleA.sub_id == nml_row.sub_id
+#            ).count(),
+#            0,
+#        )
+#
+#        # Test sequential writes
+#        make_transient(nml_row)
+#        db.session.add(nml_row)
+#        db.session.commit()
+#
+#        db.session.delete(nml_row)
+#        db.session.commit()
+#
+#        make_transient(nml_row)
+#        db.session.add(nml_row)
+#        db.session.commit()
+#        self.assertEqual(
+#            models.ScheduleA.query.filter(
+#                models.ScheduleA.sub_id == nml_row.sub_id
+#            ).count(),
+#            1,
+#        )
 
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.NmlSchedAFactory(**{
