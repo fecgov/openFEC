@@ -30,12 +30,12 @@ group by cmte_id, cycle, size
 ;
 
 -- Create indices on aggregate
-create index ofec_sched_a_aggregate_size_tmp_cmte_id on ofec_sched_a_aggregate_size_tmp(cmte_id);
-create index ofec_sched_a_aggregate_size_tmp_cycle on ofec_sched_a_aggregate_size_tmp(cycle);
-create index ofec_sched_a_aggregate_size_tmp_size on ofec_sched_a_aggregate_size_tmp(size);
-create index ofec_sched_a_aggregate_size_tmp_total on ofec_sched_a_aggregate_size_tmp(total);
-create index ofec_sched_a_aggregate_size_tmp_count on ofec_sched_a_aggregate_size_tmp(count);
-create index ofec_sched_a_aggregate_size_tmp_cmte_id_cycle on ofec_sched_a_aggregate_size_tmp(cmte_id, cycle);
+create index ofec_sched_a_size_tmp_cmte_id on ofec_sched_a_aggregate_size_tmp(cmte_id);
+create index ofec_sched_a_size_tmp_cycle on ofec_sched_a_aggregate_size_tmp(cycle);
+create index ofec_sched_a_size_tmp_size on ofec_sched_a_aggregate_size_tmp(size);
+create index ofec_sched_a_size_tmp_total on ofec_sched_a_aggregate_size_tmp(total);
+create index ofec_sched_a_size_tmp_count on ofec_sched_a_aggregate_size_tmp(count);
+create index ofec_sched_a_size_tmp_cmte_id_cycle on ofec_sched_a_aggregate_size_tmp(cmte_id, cycle);
 
 -- this drops totals during rebuild
 drop table if exists ofec_sched_a_aggregate_size_old cascade;
