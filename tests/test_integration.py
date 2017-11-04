@@ -150,7 +150,6 @@ class TestViews(common.IntegrationTestCase):
         ]
         assert len(set(counts)) == 1
 
-# let's see if we can get this working
     def test_sched_a_fulltext_trigger(self):
         # Test create
         nml_row = self.NmlSchedAFactory(
