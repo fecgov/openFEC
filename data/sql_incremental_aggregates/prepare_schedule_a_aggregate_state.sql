@@ -32,10 +32,15 @@ create index ofec_sched_a_aggregate_state_tmp_total on ofec_sched_a_aggregate_st
 create index ofec_sched_a_aggregate_state_tmp_count on ofec_sched_a_aggregate_state_tmp(count);
 create index ofec_sched_a_aggregate_state_tmp_cycle_cmte_id on ofec_sched_a_aggregate_state_tmp(cycle, cmte_id);
 
--- Remove previous aggregate and rename new aggregate
-drop table if exists ofec_sched_a_aggregate_state;
+-- Remove previous aggregate and
+-- rename current aggragate so the table doesn't drop while in use
+drop table if exists ofec_sched_a_aggregate_state_old;
+alter table if exists ofec_sched_a_aggregate_state rename to ofec_sched_a_aggregate_state_old;
+select add_index_suffix('ofec_sched_a_aggregate_state_old', '_old');
+-- rename temp table
 alter table ofec_sched_a_aggregate_state_tmp rename to ofec_sched_a_aggregate_state;
 select rename_indexes('ofec_sched_a_aggregate_state');
+
 
 -- Create update function
 create or replace function ofec_sched_a_update_aggregate_state() returns void as $$

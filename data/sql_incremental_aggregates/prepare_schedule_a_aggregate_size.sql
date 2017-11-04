@@ -30,21 +30,23 @@ group by cmte_id, cycle, size
 ;
 
 -- Create indices on aggregate
-create index ofec_sched_a_size_tmp_cmte_id on ofec_sched_a_aggregate_size_tmp(cmte_id);
-create index ofec_sched_a_size_tmp_cycle on ofec_sched_a_aggregate_size_tmp(cycle);
-create index ofec_sched_a_size_tmp_size on ofec_sched_a_aggregate_size_tmp(size);
-create index ofec_sched_a_size_tmp_total on ofec_sched_a_aggregate_size_tmp(total);
-create index ofec_sched_a_size_tmp_count on ofec_sched_a_aggregate_size_tmp(count);
-create index ofec_sched_a_size_tmp_cmte_id_cycle on ofec_sched_a_aggregate_size_tmp(cmte_id, cycle);
+create index ofec_sched_a_aggregate_size_tmp_cmte_id on ofec_sched_a_aggregate_size_tmp(cmte_id);
+create index ofec_sched_a_aggregate_size_tmp_cycle on ofec_sched_a_aggregate_size_tmp(cycle);
+create index ofec_sched_a_aggregate_size_tmp_size on ofec_sched_a_aggregate_size_tmp(size);
+create index ofec_sched_a_aggregate_size_tmp_total on ofec_sched_a_aggregate_size_tmp(total);
+create index ofec_sched_a_aggregate_size_tmp_count on ofec_sched_a_aggregate_size_tmp(count);
+create index ofec_sched_a_aggregate_size_tmp_cmte_id_cycle on ofec_sched_a_aggregate_size_tmp(cmte_id, cycle);
 
 -- this drops totals during rebuild
 drop table if exists ofec_sched_a_aggregate_size_old cascade;
 
 -- Remove previous aggregate and rename new aggregate
 -- ofec_sched_a_aggregate_size_old is removed when the dependent materialized
+-- Rename the indexes so there is not a name collision
 -- view (ofec_sched_a_aggregate_size_merged_mv) is recreated to prevent
 -- missing data impacting the API during a refresh/rebuild.
 alter table if exists ofec_sched_a_aggregate_size rename to ofec_sched_a_aggregate_size_old;
+select add_index_suffix('ofec_sched_a_aggregate_size_old', '_old');
 alter table ofec_sched_a_aggregate_size_tmp rename to ofec_sched_a_aggregate_size;
 select rename_indexes('ofec_sched_a_aggregate_size');
 
