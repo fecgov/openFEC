@@ -14,24 +14,22 @@ logger = logging.getLogger(__name__)
 
 ALL_AOS = """
     SELECT
-        ao_id,
-        ao_no,
-        name,
-        summary,
-        req_date,
-        issue_date,
-        CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
-    FROM aouser.aos_with_parsed_numbers ao
-    LEFT JOIN (SELECT DISTINCT ao_id AS finished
-               FROM aouser.document
-               WHERE category IN ('Final Opinion', 'Withdrawal of Request')) AS finished
-        ON ao.ao_id = finished.finished
+        ao_parsed.ao_id,
+        ao_parsed.ao_no,
+        ao_parsed.name,
+        ao_parsed.summary,
+        ao_parsed.req_date,
+        ao_parsed.issue_date,
+        CASE ao.stage WHEN 2 THEN 'Withdrawn' WHEN 1 THEN 'Final' ELSE 'Pending' END AS stage
+    FROM aouser.aos_with_parsed_numbers ao_parsed
+    INNER JOIN aouser.ao ao
+        ON ao_parsed.ao_id = ao.ao_id
     WHERE (
-        (ao_year = %s AND ao_serial >= %s)
+        (ao_parsed.ao_year = %s AND ao_parsed.ao_serial >= %s)
         OR
-        (ao_year > %s)
+        (ao_parsed.ao_year > %s)
     )
-    ORDER BY ao_year, ao_serial
+    ORDER BY ao_parsed.ao_year, ao_parsed.ao_serial
 """
 
 AO_ENTITIES = """
@@ -105,7 +103,7 @@ def get_advisory_opinions(from_ao_no):
                 "summary": row["summary"],
                 "request_date": row["req_date"],
                 "issue_date": row["issue_date"],
-                "is_pending": row["is_pending"],
+                "status": row["stage"],
                 "ao_citations": citations[row["ao_no"]]["ao"],
                 "aos_cited_by": citations[row["ao_no"]]["aos_cited_by"],
                 "statutory_citations": citations[row["ao_no"]]["statutes"],

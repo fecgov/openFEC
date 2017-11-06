@@ -236,8 +236,8 @@ MAPPINGS = {
                 "type": "date",
                 "format": "dateOptionalTime"
             },
-            "is_pending": {
-                "type": "boolean"
+            "status": {
+                "type": "string"
             },
             "ao_citations": {
                 "properties": {
