@@ -79,7 +79,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
-            "is_pending": True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],
@@ -147,14 +147,15 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
-            "is_pending": False,
+            "status": "Final",
             "documents": [expected_document],
         }
         self.create_ao(1, expected_ao)
         self.create_document(1, expected_document)
 
         actual_ao = next(get_advisory_opinions(None))
-        assert actual_ao["is_pending"] is False
+        print(actual_ao)
+        assert actual_ao["status"] == "Final"
 
         actual_document = actual_ao["documents"][0]
         for key in expected_document:
@@ -173,6 +174,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "1st AO name",
             "summary": "1st AO summary",
+            "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao1_document],
@@ -189,6 +191,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-02",
             "name": "2nd AO name",
             "summary": "2nd AO summary",
+            "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao2_document],
@@ -225,6 +228,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "status": "Pending",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao_document],
@@ -252,6 +256,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "status": "Pending",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao_document],
@@ -278,7 +283,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "AO summary1",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
-            "is_pending": True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],
@@ -298,7 +303,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary2",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
-            "is_pending": True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],
@@ -318,7 +323,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary3",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
-            "is_pending": True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],

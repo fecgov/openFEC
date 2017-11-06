@@ -218,8 +218,8 @@ def apply_ao_specific_query_params(query, **kwargs):
     if kwargs.get('ao_name'):
         must_clauses.append(Q('match', name=' '.join(kwargs.get('ao_name'))))
 
-    if kwargs.get('ao_is_pending') is not None:
-        must_clauses.append(Q('term', is_pending=kwargs.get('ao_is_pending')))
+    if kwargs.get('ao_status'):
+        must_clauses.append(Q('term', status=kwargs.get('ao_status')))
 
     if kwargs.get('ao_requestor'):
         must_clauses.append(Q('match', requestor_names=kwargs.get('ao_requestor')))
