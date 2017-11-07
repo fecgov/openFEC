@@ -20,6 +20,7 @@ ALL_AOS = """
         ao_parsed.summary,
         ao_parsed.req_date,
         ao_parsed.issue_date,
+        CASE ao.stage WHEN 0 THEN TRUE ELSE FALSE END AS is_pending,
         CASE ao.stage WHEN 2 THEN 'Withdrawn' WHEN 1 THEN 'Final' ELSE 'Pending' END AS stage
     FROM aouser.aos_with_parsed_numbers ao_parsed
     INNER JOIN aouser.ao ao
@@ -103,6 +104,7 @@ def get_advisory_opinions(from_ao_no):
                 "summary": row["summary"],
                 "request_date": row["req_date"],
                 "issue_date": row["issue_date"],
+                "is_pending": row["is_pending"],
                 "status": row["stage"],
                 "ao_citations": citations[row["ao_no"]]["ao"],
                 "aos_cited_by": citations[row["ao_no"]]["aos_cited_by"],
