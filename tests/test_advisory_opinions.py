@@ -79,6 +79,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "is_pending" : True,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
@@ -147,6 +148,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "is_pending": True,
             "status": "Final",
             "documents": [expected_document],
         }
@@ -155,6 +157,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         actual_ao = next(get_advisory_opinions(None))
 
+        assert actual_ao["is_pending"] is False
         assert actual_ao["status"] == "Final"
 
         actual_document = actual_ao["documents"][0]
@@ -288,6 +291,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "AO summary1",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "is_pending": True,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
@@ -308,6 +312,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary2",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "is_pending": True,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
@@ -328,6 +333,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary3",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
+            "is_pending": True,
             "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
