@@ -236,7 +236,7 @@ MAPPINGS = {
                 "type": "date",
                 "format": "dateOptionalTime"
             },
-            "is_Pending": {
+            "is_pending": {
                 "type": "boolean"
             },
             "status": {
