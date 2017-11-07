@@ -21,7 +21,10 @@ ALL_AOS = """
         ao_parsed.req_date,
         ao_parsed.issue_date,
         CASE ao.stage WHEN 0 THEN TRUE ELSE FALSE END AS is_pending,
-        CASE ao.stage WHEN 2 THEN 'Withdrawn' WHEN 1 THEN 'Final' ELSE 'Pending' END AS stage
+        CASE ao.stage WHEN 2 THEN 'Withdrawn'
+            --Hard-code one withdrawn AO that has improperly been marked Final
+            WHEN 1 THEN CASE ao.ao_no WHEN '2009-05' THEN 'Withdrawn' ELSE 'Final' END
+            ELSE 'Pending' END AS stage
     FROM aouser.aos_with_parsed_numbers ao_parsed
     INNER JOIN aouser.ao ao
         ON ao_parsed.ao_id = ao.ao_id
