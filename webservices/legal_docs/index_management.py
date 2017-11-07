@@ -236,6 +236,9 @@ MAPPINGS = {
                 "type": "date",
                 "format": "dateOptionalTime"
             },
+            "is_Pending": {
+                "type": "boolean"
+            },
             "status": {
                 "type": "string"
             },
