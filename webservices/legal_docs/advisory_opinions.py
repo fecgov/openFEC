@@ -20,7 +20,6 @@ ALL_AOS = """
         ao_parsed.summary,
         ao_parsed.req_date,
         ao_parsed.issue_date,
-        CASE ao.stage WHEN 0 THEN TRUE ELSE FALSE END AS is_pending,
         CASE ao.stage WHEN 2 THEN 'Withdrawn'
             --Hard-code one withdrawn AO that has improperly been marked Final
             WHEN 1 THEN CASE ao.ao_no WHEN '2009-05' THEN 'Withdrawn' ELSE 'Final' END
@@ -83,6 +82,14 @@ def load_advisory_opinions(from_ao_no=None):
         ao_count += 1
     logger.info("%d advisory opinions loaded", ao_count)
 
+def ao_stage_to_pending(stage):
+    if stage == 'Pending':
+        is_pending = True
+    else:
+        is_pending = False
+
+    return is_pending
+
 def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
 
@@ -107,7 +114,7 @@ def get_advisory_opinions(from_ao_no):
                 "summary": row["summary"],
                 "request_date": row["req_date"],
                 "issue_date": row["issue_date"],
-                "is_pending": row["is_pending"],
+                "is_pending": ao_stage_to_pending(row["stage"]),
                 "status": row["stage"],
                 "ao_citations": citations[row["ao_no"]]["ao"],
                 "aos_cited_by": citations[row["ao_no"]]["aos_cited_by"],
