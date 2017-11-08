@@ -420,11 +420,11 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         for table in tables:
             self.connection.execute("DELETE FROM aouser.{}".format(table))
 
+
 def ao_status_to_stage(status):
     if status == "Withdrawn":
-        stage = 2
+        return 2
     elif status == "Final":
-        stage = 1
+        return 1
     else:
-        stage = 0
-    return stage
+        return 0
