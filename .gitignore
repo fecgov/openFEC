@@ -62,3 +62,6 @@ celerybeat-schedule
 
 # Credientials
 *.env.json
+
+# Gradle
+.gradle

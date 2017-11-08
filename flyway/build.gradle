@@ -1,0 +1,74 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.flywaydb', name: 'flyway-gradle-plugin', version: '4.2.0'
+    compile(group: 'org.flywaydb', name: 'flyway-commandline', version: '4.2.0') {
+        // Remove JDBC jars that we don't need
+        exclude group: 'com.h2database', module: 'h2'
+        exclude group: 'com.pivotal.jdbc', module: 'greenplumdriver'
+        exclude group: 'net.sourceforge.jtds', module: 'jtds'
+        exclude group: 'org.apache.derby', module: 'derby'
+        exclude group: 'org.apache.derby', module: 'derbyclient'
+        exclude group: 'org.hsqldb', module: 'hsqldb'
+        exclude group: 'org.mariadb.jdbc', module: 'mariadb-java-client'
+        exclude group: 'org.xerial', module: 'sqlite-jdbc'
+    }
+}
+
+mainClassName = "org.flywaydb.commandline.Main"
+
+// Create nearly empty jars directory for Java migrations
+task createJarsDir {
+    def jars = file("$buildDir/jars")
+    outputs.dir jars
+    doLast {
+        jars.mkdirs()
+        new File(jars, "readme.txt").write("Empty file so that it gets copied")
+    }
+}
+
+// Copy postgres JDBC jar to drivers directory
+// TODO: replace with move
+task copyPostgresJar(type: Copy) {
+    into "$buildDir/drivers"
+    from configurations.runtime
+    include "postgres*.jar"
+}
+
+distZip.dependsOn(copyPostgresJar)
+
+// Copy SQL migrations into sql directory
+task sqlMigrations(type: Copy) {
+    into "$buildDir/sql"
+    from "../data/migrations"
+}
+
+// Copy scripts to bin directory
+task binScripts(type: Copy) {
+    into "$buildDir/bin"
+    from "bin"
+}
+
+distributions {
+    main {
+        contents {
+            from(createJarsDir) {
+                into "jars"
+            }
+            from(copyPostgresJar) {
+                into "drivers"
+            }
+            from(sqlMigrations) {
+                into "sql"
+            }
+            from(binScripts) {
+                into "bin"
+            }
+        }
+    }
+}

@@ -1,0 +1,11 @@
+---
+applications:
+- name: flyway
+  buildpack: java_buildpack
+  command: sleep infinity
+  health-check-type: process
+  memory: 64M
+  no-route: true
+  path: build/distributions/flyway.zip
+  services:
+      - PGDB
