@@ -59,10 +59,10 @@ AO_DOCUMENTS = """
 """
 
 STATUTE_CITATION_REGEX = re.compile(
-    r"(?P<title>\d+)\s+U.S.C.\s+§*\s*(?P<section>\d+).*\.?")
+    r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?")
 
 REGULATION_CITATION_REGEX = re.compile(
-    r"(?P<title>\d+)\s+C\.*F\.*R\.*\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)")
+    r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)")
 
 AO_CITATION_REGEX = re.compile(
     r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
