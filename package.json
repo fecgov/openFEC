@@ -6,7 +6,7 @@
     "build": "mkdir -p static/swagger-ui && cp -R node_modules/swagger-ui/dist static/swagger-ui/"
   },
   "engines": {
-    "node": "8.6.0",
-    "npm": "5.4.2"
+    "node": "8.9.1",
+    "npm": "5.5.1"
   }
 }
