@@ -37,6 +37,8 @@ def test_parse_ao_citations(text, ao_nos, expected):
     ("52 U.S.C. 30116a", set([("52 U.S.C. 30116a", 52, 30116, 52, 30116)])),
     ("2 U.S.C. 441b, 441c, 441e", set([("2 U.S.C. 441b, 441c, 441e", 2, 441, 2, 441)])),
     (" 2 U.S.C. §437f", set([("2 U.S.C. §437f", 52, 30105, 2, 437)])),
+    ("52 U.S.C. § 30101", set([("52 U.S.C. § 30101", 52, 30101, 52, 30101)])),
+    (" 2 USC §437f", set([("2 USC §437f", 52, 30105, 2, 437)])),
 ])
 def test_parse_statutory_citations(text, expected):
     assert parse_statutory_citations(text) == expected
@@ -46,6 +48,7 @@ def test_parse_statutory_citations(text, expected):
     ("11 CFR §9034.4(b)(4)", set([(11, 9034, 4)])),
     ("11 CFR 300.60 and 11 CFR 300.62", set([(11, 300, 60), (11, 300, 62)])),  # TODO: Ranges
     ("11 CFR 300.60 through 300.65", set([(11, 300, 60)])),
+    ("11 C.F.R. § 100.15", set([(11, 100, 15)])),
 ])
 def test_parse_regulatory_citations(text, expected):
     assert parse_regulatory_citations(text) == expected
