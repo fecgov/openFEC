@@ -239,6 +239,9 @@ MAPPINGS = {
             "is_pending": {
                 "type": "boolean"
             },
+            "status": {
+                "type": "string"
+            },
             "ao_citations": {
                 "properties": {
                     "name": {

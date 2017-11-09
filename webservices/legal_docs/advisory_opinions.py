@@ -14,24 +14,22 @@ logger = logging.getLogger(__name__)
 
 ALL_AOS = """
     SELECT
-        ao_id,
-        ao_no,
-        name,
-        summary,
-        req_date,
-        issue_date,
-        CASE WHEN finished IS NULL THEN TRUE ELSE FALSE END AS is_pending
-    FROM aouser.aos_with_parsed_numbers ao
-    LEFT JOIN (SELECT DISTINCT ao_id AS finished
-               FROM aouser.document
-               WHERE category IN ('Final Opinion', 'Withdrawal of Request')) AS finished
-        ON ao.ao_id = finished.finished
+        ao_parsed.ao_id,
+        ao_parsed.ao_no,
+        ao_parsed.name,
+        ao_parsed.summary,
+        ao_parsed.req_date,
+        ao_parsed.issue_date,
+        ao.stage
+    FROM aouser.aos_with_parsed_numbers ao_parsed
+    INNER JOIN aouser.ao ao
+        ON ao_parsed.ao_id = ao.ao_id
     WHERE (
-        (ao_year = %s AND ao_serial >= %s)
+        (ao_parsed.ao_year = %s AND ao_parsed.ao_serial >= %s)
         OR
-        (ao_year > %s)
+        (ao_parsed.ao_year > %s)
     )
-    ORDER BY ao_year, ao_serial
+    ORDER BY ao_parsed.ao_year, ao_parsed.ao_serial
 """
 
 AO_ENTITIES = """
@@ -62,6 +60,8 @@ STATUTE_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\
 REGULATION_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)\.(?P<section>\d+)")
 AO_CITATION_REGEX = re.compile(r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
 
+AOS_WITH_CORRECTED_STAGE = {"2009-05": "Withdrawn"}
+
 
 def load_advisory_opinions(from_ao_no=None):
     """
@@ -80,6 +80,24 @@ def load_advisory_opinions(from_ao_no=None):
         es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
         ao_count += 1
     logger.info("%d advisory opinions loaded", ao_count)
+
+
+def ao_stage_to_pending(stage):
+
+    return stage == 0
+
+
+def ao_stage_to_status(ao_no, stage):
+
+    if ao_no in AOS_WITH_CORRECTED_STAGE:
+        return AOS_WITH_CORRECTED_STAGE[ao_no]
+    if stage == 2:
+        return "Withdrawn"
+    elif stage == 1:
+        return "Final"
+    else:
+        return "Pending"
+
 
 def get_advisory_opinions(from_ao_no):
     bucket = get_bucket()
@@ -105,7 +123,8 @@ def get_advisory_opinions(from_ao_no):
                 "summary": row["summary"],
                 "request_date": row["req_date"],
                 "issue_date": row["issue_date"],
-                "is_pending": row["is_pending"],
+                "is_pending": ao_stage_to_pending(row["stage"]),
+                "status": ao_stage_to_status(row["ao_no"], row["stage"]),
                 "ao_citations": citations[row["ao_no"]]["ao"],
                 "aos_cited_by": citations[row["ao_no"]]["aos_cited_by"],
                 "statutory_citations": citations[row["ao_no"]]["statutes"],
@@ -142,6 +161,7 @@ def get_entities(ao_id):
     return requestor_names, list(requestor_types),\
             commenter_names, representative_names, entities
 
+
 def get_documents(ao_id, bucket):
     documents = []
     with db.engine.connect() as conn:
@@ -161,6 +181,7 @@ def get_documents(ao_id, bucket):
             document["url"] = '/files/' + pdf_key
             documents.append(document)
     return documents
+
 
 def get_ao_names():
     ao_names_results = db.engine.execute("""SELECT ao_no, name FROM aouser.ao""")

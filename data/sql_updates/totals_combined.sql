@@ -66,6 +66,17 @@ first as (
         cmte_id,
         get_cycle(rpt_yr),
         to_timestamp(cvg_end_dt) asc
+),
+-- issue #2631:Add additional fields and filters to /totals/{committee-type} endpoint
+committee_info as (
+    select distinct on (cmte_id, fec_election_yr)
+        cmte_id, 
+        fec_election_yr,
+        cmte_nm,
+        cmte_tp, 
+        cmte_dsgn,
+        cmte_pty_affiliation_desc
+    from disclosure.cmte_valid_fec_yr
 )
     select
         get_cycle(vsd.rpt_yr) as cycle,
@@ -149,7 +160,14 @@ first as (
         sum(vsd.ttl_loans) as loans, -- f3
         sum(vsd.ttl_nonfed_tranf_per) as total_transfers,
         sum(vsd.ttl_receipts) as receipts,
+        max(committee_info.cmte_tp) as committee_type, 
+        max(expand_committee_type(committee_info.cmte_tp)) as committee_type_full,
+        max(committee_info.cmte_dsgn) as committee_designation,
+        max(expand_committee_designation(committee_info.cmte_dsgn)) as committee_designation_full,
+        max(committee_info.cmte_pty_affiliation_desc) as party_full,
+        -- max(expand_committee_type(committee_info.cmte_pty_affiliation_desc)) as party_full,
         vsd.cmte_id as committee_id,
+
         -- double check this makes sense down stream
         -- form type can change if a committee changes this should create 2 records
         vsd.form_tp_cd as form_type,
@@ -166,6 +184,9 @@ first as (
         left join first on
             vsd.cmte_id = first.committee_id and
             get_cycle(vsd.rpt_yr) = first.cycle
+        -- issue #2631:Add additional fields and filters to /totals/{committee-type} endpoint
+        left join committee_info on vsd.cmte_id = committee_info.cmte_id and
+            get_cycle(vsd.rpt_yr) = committee_info.fec_election_yr
     where
         get_cycle(vsd.rpt_yr) >= :START_YEAR
         -- issue #2601: F5 has both regular and 24/48 notices data included in disclosure.v_sum_and_det_sum_report, need to exclude the 24/48 hours notice data
@@ -177,11 +198,12 @@ first as (
         get_cycle(vsd.rpt_yr)
 ;
 
-
 create unique index on ofec_totals_combined_mv_tmp (sub_id);
 
 create index on ofec_totals_combined_mv_tmp (committee_id, sub_id);
 create index on ofec_totals_combined_mv_tmp (cycle, sub_id);
 create index on ofec_totals_combined_mv_tmp (receipts, sub_id);
 create index on ofec_totals_combined_mv_tmp (disbursements, sub_id);
+create index on ofec_totals_combined_mv_tmp (committee_type_full, sub_id);
+create index on ofec_totals_combined_mv_tmp (committee_designation_full, sub_id);
 
