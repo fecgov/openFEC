@@ -1079,19 +1079,35 @@ This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/l
 
 #Audits
 AUDIT_ID = '''
-A unique identifier associated with an audit
+The audit issue. Each subcategory has an unique ID
 '''
 
 AUDIT_CASE_ID = '''
-A unique identifier associated with an audit case
+Primary/foreign key for audit tables
 '''
-
-CATEGORY = '''
-The finding of an audit. Finding are a category of broader issues. Each category has an unique ID.
-'''
-
+CATEGORY_NAME = 'Primary Audit Category\n\
+    - No Findings or\n\
+      Issues/Not a Committee\n\
+    - Net Outstanding Campaign\n\
+      /Convention Expenditures/\n\
+      Obligations\n\
+    - Payments/Disgorgements\n\
+    - Allocation Issues\n\
+    - Prohibited Contributions\n\
+    - Disclosure\n\
+    - Recordkeeping\n\
+    - Repayment to US Treasury\n\
+    - Other\n\
+    - Misstatement of \n\
+      Financial Activity\n\
+    - Excessive Contributions\n\
+    - Failure to File\n\
+      Reports/Schedules/Notices\n\
+    - Loans\n\
+    - Referred Findings Not Listed\n\
+'
 CATEGORY_ID = '''
-The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
+Audit category ID (table PK)
 '''
 
 SUB_CATEGORY_ID = '''
@@ -1102,9 +1118,8 @@ SUBCATEGORY = '''
 The audit issue. Each subcategory has an unique ID.
 '''
 
-AUDIT_CASE_ID = '''
-A unique identifier associated with an audit case
-'''
+AUDIT_CASE_ID = 'Primary/foreign key for audit tables'
+
 
 AUDIT_TIER = '''
 1 specifies a category and 2 specifies a subcategory
@@ -1126,7 +1141,8 @@ These endpoints contain Final Audit Reports approved by the Commission since inc
 #audit search
 AUDIT_SEARCH = '''
 This endpoint contains Final Audit Reports approved by the Commission since inception.
-The search can be based on information about the audited committee (Name, FEC ID Number, Type, Election Cycle) or the issues covered in the report.
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
+Election Cycle) or the issues covered in the report.
 '''
 
 #audit finding
@@ -1134,13 +1150,20 @@ AUDIT_CATEGORIES = '''
 This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
 '''
 
-COMMITTEE_DESCRIPTION = '''
-'''
-
+COMMITTEE_DESCRIPTION = 'Type of committee:\n\
+        - H or S - Congressional\n\
+        - P - Presidential\n\
+        - X or Y or Z - Party\n\
+        - N or Q - PAC\n\
+        - I - Independent expenditure\n\
+        - O - Super PAC \n\
+'
 RELEASE_DATE = '''
+Final audit report release date
 '''
 
 REPORT_LINK = '''
+URL for retrieving the PDF document
 '''
 
 CATEGORY_DESCRIPTION = '''

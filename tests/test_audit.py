@@ -43,4 +43,4 @@ class TestAudit(ApiBaseTest):
 
     def test_sort_bad_column(self):
         response = self.app.get(api.url_for(AuditCaseView, sort='request_type'))
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 422)
