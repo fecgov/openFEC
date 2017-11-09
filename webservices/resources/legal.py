@@ -227,7 +227,7 @@ def apply_ao_specific_query_params(query, **kwargs):
     citation_queries = []
     if kwargs.get('ao_regulatory_citation'):
         for citation in kwargs.get('ao_regulatory_citation'):
-            exact_match = re.match(r"(?P<title>\d+)\s+C.*F.*R.*\s+§*(?P<part>\d+)\.(?P<section>\d+)", citation)
+            exact_match = re.match(r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)", citation)
             if(exact_match):
                 citation_queries.append(Q("nested", path="regulatory_citations", query=Q("bool",
                     must=[Q("term", regulatory_citations__title=int(exact_match.group('title'))),
@@ -236,7 +236,7 @@ def apply_ao_specific_query_params(query, **kwargs):
 
     if kwargs.get('ao_statutory_citation'):
         for citation in kwargs.get('ao_statutory_citation'):
-            exact_match = re.match(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+).*\.?", citation)
+            exact_match = re.match(r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?)", citation)
             if(exact_match):
                 citation_queries.append(Q("nested", path="statutory_citations", query=Q("bool",
                     must=[Q("term", statutory_citations__title=int(exact_match.group('title'))),
