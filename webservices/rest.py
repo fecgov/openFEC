@@ -318,6 +318,9 @@ apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
+apidoc.register(legal.UniversalSearch, blueprint='v1')
+apidoc.register(legal.GetLegalCitation, blueprint='v1')
+apidoc.register(legal.GetLegalDocument, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

@@ -3,9 +3,11 @@ import re
 from elasticsearch_dsl import Search, Q
 from webargs import fields
 from flask import abort
+from flask_apispec import doc
 
 from webservices import args
 from webservices import utils
+from webservices import docs
 from webservices.utils import use_kwargs
 from webservices.legal_docs import DOCS_SEARCH
 from elasticsearch import RequestError
@@ -27,6 +29,11 @@ INNER_HITS = {
     }
 }
 
+
+@doc(
+    tags=['legal'],
+    description=docs.LEGAL_SEARCH,
+)
 
 class GetLegalCitation(utils.Resource):
     @property
@@ -50,6 +57,12 @@ class GetLegalCitation(utils.Resource):
         results = {"citations": [hit.to_dict() for hit in es_results]}
         return results
 
+
+@doc(
+    tags=['legal'],
+    description=docs.LEGAL_SEARCH,
+)
+
 class GetLegalDocument(utils.Resource):
     @property
     def args(self):
@@ -70,6 +83,12 @@ class GetLegalDocument(utils.Resource):
             return results
         else:
             return abort(404)
+
+
+@doc(
+    tags=['legal'],
+    description=docs.LEGAL_SEARCH,
+)
 
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
