@@ -1,9 +1,8 @@
 **Develop**
-[![Build Status](https://img.shields.io/travis/18F/openFEC/develop.svg)](https://travis-ci.org/18F/openFEC)
+[![CircleCI](https://circleci.com/gh/18F/openFEC.svg?style=svg)](https://circleci.com/gh/18F/openFEC)
 [![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/develop.svg)](https://codecov.io/github/18F/openFEC)
 
 **Master**
-[![Build Status](https://img.shields.io/travis/18F/openFEC/master.svg)](https://travis-ci.org/18F/openFEC)
 [![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
@@ -45,7 +44,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
 ### Project prerequisites
 1. Ensure you have the following requirements installed:
 
-    * Python 3.5.3 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
+    * Python (the latest 3.5 release, which includes `pip` and and a built-in version of `virtualenv` called `venv`).
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
     * PostgreSQL (the latest 9.6 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
@@ -73,8 +72,10 @@ pip install -r requirements-dev.txt
 Use `npm` to install JavaScript dependencies:
 
 ```
+nvm use --lts
 npm install -g swagger-tools
-npm install
+npm install 
+npm run build
 ```
 
 ##### Git hooks
