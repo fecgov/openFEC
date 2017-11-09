@@ -85,8 +85,8 @@ class AuditCaseView(ApiResource):
             args.paging,
             args.AuditCase,
             args.make_sort_args(
-                default='-cycle',
-                # validator=args.IndexValidator(models.AuditCase),
+                # default='-cycle',
+                validator=args.IndexValidator(models.AuditCase),
             ),
         )
 

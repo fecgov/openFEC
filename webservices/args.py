@@ -779,8 +779,8 @@ schedule_a_by_state_recipient_totals = {
 
 # Audit Category endpoint
 Category = {
-    'primary_category_id': fields.List(fields.Int(), description=docs.CATEGORY),
-    'primary_category_name': fields.List(fields.Str, description=docs.CATEGORY),
+    'primary_category_id': fields.List(fields.Int(), description=docs.CATEGORY_ID),
+    'primary_category_name': fields.List(fields.Str, description=docs.CATEGORY_NAME),
     # 'tier': fields.List(fields.Int, description=docs.CATEGORY),
 }
 

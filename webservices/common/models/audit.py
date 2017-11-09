@@ -21,8 +21,8 @@ class CategoryRelation(AuditBase, db.Model):
 class Category(AuditBase, db.Model):
     __tablename__ = 'finding_vw'
 
-    primary_category_id = db.Column(db.Integer, index=True, primary_key=True)
-    primary_category_name = db.Column(db.String, doc=docs.CATEGORY)
+    primary_category_id = db.Column(db.Integer, index=True, primary_key=True, doc=docs.CATEGORY_ID)
+    primary_category_name = db.Column(db.String, doc=docs.CATEGORY_NAME)
     tier = db.Column(db.Integer, doc=docs.CATEGORY)
 
     @declared_attr
@@ -48,7 +48,7 @@ class AuditCategoryRelation(db.Model):
     # add the correction description of each field in the docs.py
     audit_case_id = db.Column(db.Integer, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.Integer, primary_key=True, doc=docs.CATEGORY_ID)
-    primary_category_name = db.Column(db.String, primary_key=True, doc=docs.CATEGORY)
+    primary_category_name = db.Column(db.String, primary_key=True, doc=docs.CATEGORY_NAME)
     sub_category_list = db.relationship(
         'AuditCaseSubCategory',
         primaryjoin='''and_(
