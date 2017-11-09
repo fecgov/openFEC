@@ -43,7 +43,6 @@ CREATE TABLE ofec_election_dates (
 );
 
 
-ALTER TABLE ofec_election_dates OWNER TO postgres;
 
 --
 -- Data for Name: ofec_election_dates; Type: TABLE DATA; Schema: public; Owner: postgres

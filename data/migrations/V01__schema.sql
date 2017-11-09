@@ -1,41 +1,28 @@
+SET idle_in_transaction_session_timeout = 0;
+SET row_security = off;
 SET statement_timeout = 0;
 SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 CREATE EXTENSION IF NOT EXISTS btree_gin;
 
-CREATE SCHEMA disclosure;
-
-ALTER SCHEMA disclosure OWNER TO postgres;
-
-CREATE SCHEMA fecapp;
-
-ALTER SCHEMA fecapp OWNER TO postgres;
-
-CREATE SCHEMA real_efile;
-
-ALTER SCHEMA real_efile OWNER TO postgres;
-
-CREATE SCHEMA staging;
-
-ALTER SCHEMA staging OWNER TO postgres;
-
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 
-COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
-COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+CREATE SCHEMA disclosure;
+
+CREATE SCHEMA fecapp;
+
+CREATE SCHEMA real_efile;
+
+CREATE SCHEMA staging;
+
 
 SET search_path = disclosure, pg_catalog;
 
@@ -43,13 +30,9 @@ CREATE FUNCTION get_first_receipt_dt(pcand_cmte_id character varying, pfiler_tp 
     LANGUAGE plpgsql
     AS $$ declare my_date date := null; begin if  (pfiler_tp = 1) then select min(RECEIPT_DT) into my_date from DISCLOSURE.NML_FORM_1_1Z_VIEW where cmte_id=pcand_cmte_id; else select min(RECEIPT_DT) into my_date from DISCLOSURE.NML_FORM_2_2Z_VIEW where cand_id=pcand_cmte_id; end if; return my_date; end; $$;
 
-ALTER FUNCTION disclosure.get_first_receipt_dt(pcand_cmte_id character varying, pfiler_tp numeric) OWNER TO postgres;
-
 CREATE FUNCTION get_pcmte_nm(pcand_cmte_id character varying, pfiler_tp numeric) RETURNS character varying
     LANGUAGE plpgsql
     AS $$ declare pCMTE_NM  varchar := null; begin if (pfiler_tp = 1) then select CMTE_NM into pCMTE_NM from (select CMTE_NM, rank() over (partition by cmte_id order by FEC_ELECTION_YR desc) as rank_num from DISCLOSURE.CMTE_VALID_FEC_YR where cmte_id=pcand_cmte_id) as cmte_query where rank_num=1; else select CAND_NAME  into pCMTE_NM from (select CAND_NAME, rank() over (partition by cand_id order by FEC_ELECTION_YR desc) as rank_num from DISCLOSURE.CAND_VALID_FEC_YR where cand_id=pcand_cmte_id) as cand_query where rank_num=1; end if; return pCMTE_NM; end; $$;
-
-ALTER FUNCTION disclosure.get_pcmte_nm(pcand_cmte_id character varying, pfiler_tp numeric) OWNER TO postgres;
 
 SET search_path = public, pg_catalog;
 
@@ -67,23 +50,17 @@ CREATE FUNCTION add_reporting_states(election_state text[], report_type text) RE
     end
 $$;
 
-ALTER FUNCTION public.add_reporting_states(election_state text[], report_type text) OWNER TO postgres;
-
 CREATE FUNCTION array_distinct(anyarray) RETURNS anyarray
     LANGUAGE sql
     AS $_$
   SELECT ARRAY(SELECT DISTINCT unnest($1))
 $_$;
 
-ALTER FUNCTION public.array_distinct(anyarray) OWNER TO postgres;
-
 CREATE FUNCTION array_sort(anyarray) RETURNS anyarray
     LANGUAGE sql
     AS $_$
   SELECT ARRAY(SELECT unnest($1) ORDER BY 1)
 $_$;
-
-ALTER FUNCTION public.array_sort(anyarray) OWNER TO postgres;
 
 -- Handle typos and notes in party description:
 -- * "Commandments Party (Removed)" becomes "Commandments Party"
@@ -96,7 +73,6 @@ begin
 end
 $_$;
 
-ALTER FUNCTION public.clean_party(party text) OWNER TO postgres;
 
 -- Compare two values. If equal, return `NULL`, else return the first value.
 CREATE FUNCTION clean_repeated(first anyelement, second anyelement) RETURNS anyelement
@@ -110,7 +86,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.clean_repeated(first anyelement, second anyelement) OWNER TO postgres;
 
 -- These fields include additional descriptions in curly braces that we don't want to show in the dimreporttype table that appear in curly braces. Like: { one of 4 codes }
 CREATE FUNCTION clean_report(report text) RETURNS text
@@ -121,7 +96,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.clean_report(report text) OWNER TO postgres;
 
 CREATE FUNCTION contribution_size(value numeric) RETURNS integer
     LANGUAGE plpgsql
@@ -137,7 +111,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.contribution_size(value numeric) OWNER TO postgres;
 
 CREATE FUNCTION contributor_type(value text) RETURNS boolean
     LANGUAGE plpgsql
@@ -147,7 +120,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.contributor_type(value text) OWNER TO postgres;
 
 -- 24-Hour Report Period of Independent Expenditures begins for the xx. Ends on xx.
 CREATE FUNCTION create_24hr_text(rp_election_text text, ie_24hour_end date) RETURNS text
@@ -174,7 +146,6 @@ CREATE FUNCTION create_24hr_text(rp_election_text text, ie_24hour_end date) RETU
     end
 $$;
 
-ALTER FUNCTION public.create_24hr_text(rp_election_text text, ie_24hour_end date) OWNER TO postgres;
 
 -- 48-Hour Report Period of Independent Expenditures begins for the xx. Ends on xx.
 CREATE FUNCTION create_48hr_text(rp_election_text text, ie_48hour_end date) RETURNS text
@@ -201,7 +172,6 @@ CREATE FUNCTION create_48hr_text(rp_election_text text, ie_48hour_end date) RETU
     end
 $$;
 
-ALTER FUNCTION public.create_48hr_text(rp_election_text text, ie_48hour_end date) OWNER TO postgres;
 
 CREATE FUNCTION create_contest(election_state text, election_district numeric) RETURNS text
     LANGUAGE plpgsql
@@ -218,7 +188,6 @@ CREATE FUNCTION create_contest(election_state text, election_district numeric) R
     end
 $$;
 
-ALTER FUNCTION public.create_contest(election_state text, election_district numeric) OWNER TO postgres;
 
 -- To keep the titles concise states are abbreviated as multi state if there is more than one
 -- Like:
@@ -266,7 +235,6 @@ CREATE FUNCTION create_election_description(election_type text, office_sought te
     end
 $$;
 
-ALTER FUNCTION public.create_election_description(election_type text, office_sought text, contest text[], party text, election_notes text) OWNER TO postgres;
 
 CREATE FUNCTION create_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text) RETURNS text
     LANGUAGE plpgsql
@@ -309,7 +277,6 @@ CREATE FUNCTION create_election_summary(election_type text, office_sought text, 
     end
 $$;
 
-ALTER FUNCTION public.create_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text) OWNER TO postgres;
 
 -- Electioneering Communications Period begins for the xx. Ends on Election Day, xx.
 CREATE FUNCTION create_electioneering_text(rp_election_text text, ec_end date) RETURNS text
@@ -336,7 +303,6 @@ CREATE FUNCTION create_electioneering_text(rp_election_text text, ec_end date) R
     end
 $$;
 
-ALTER FUNCTION public.create_electioneering_text(rp_election_text text, ec_end date) OWNER TO postgres;
 
 CREATE FUNCTION create_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[], election_notes text) RETURNS text
     LANGUAGE plpgsql
@@ -395,7 +361,6 @@ CREATE FUNCTION create_report_description(office_sought text, report_type text, 
     end
 $$;
 
-ALTER FUNCTION public.create_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[], election_notes text) OWNER TO postgres;
 
 CREATE FUNCTION create_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[], election_notes text) RETURNS text
     LANGUAGE plpgsql
@@ -464,7 +429,6 @@ CREATE FUNCTION create_report_summary(office_sought text, report_type text, rpt_
     end
 $$;
 
-ALTER FUNCTION public.create_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[], election_notes text) OWNER TO postgres;
 
 CREATE FUNCTION create_reporting_link(due_date timestamp without time zone) RETURNS text
     LANGUAGE plpgsql
@@ -480,7 +444,6 @@ CREATE FUNCTION create_reporting_link(due_date timestamp without time zone) RETU
     end
 $$;
 
-ALTER FUNCTION public.create_reporting_link(due_date timestamp without time zone) OWNER TO postgres;
 
 CREATE FUNCTION date_or_null(value text, format text) RETURNS date
     LANGUAGE plpgsql IMMUTABLE
@@ -492,7 +455,6 @@ exception
 end
 $$;
 
-ALTER FUNCTION public.date_or_null(value text, format text) OWNER TO postgres;
 
 -- Descriptions and summaries are repetitive, so we are trying to only show the descriptions in some places, That works for most things except court cases, advisory opinions and conferences.
 CREATE FUNCTION describe_cal_event(event_name text, summary text, description text) RETURNS text
@@ -508,7 +470,6 @@ CREATE FUNCTION describe_cal_event(event_name text, summary text, description te
     end
 $$;
 
-ALTER FUNCTION public.describe_cal_event(event_name text, summary text, description text) OWNER TO postgres;
 
 CREATE FUNCTION disbursement_purpose(code text, description text) RETURNS character varying
     LANGUAGE plpgsql IMMUTABLE
@@ -534,7 +495,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.disbursement_purpose(code text, description text) OWNER TO postgres;
 
 CREATE FUNCTION disbursement_purpose(code character varying, description character varying) RETURNS character varying
     LANGUAGE plpgsql
@@ -560,7 +520,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.disbursement_purpose(code character varying, description character varying) OWNER TO postgres;
 
 CREATE FUNCTION election_duration(office text) RETURNS integer
     LANGUAGE plpgsql
@@ -574,7 +533,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.election_duration(office text) OWNER TO postgres;
 
 CREATE OR REPLACE FUNCTION expand_candidate_incumbent(acronym TEXT)
 RETURNS TEXT AS $$
@@ -588,7 +546,6 @@ RETURNS TEXT AS $$
     END
 $$ LANGUAGE plpgsql;
 
-ALTER FUNCTION public.expand_candidate_incumbent(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION expand_candidate_status(acronym text) RETURNS text
     LANGUAGE plpgsql
@@ -604,7 +561,6 @@ CREATE FUNCTION expand_candidate_status(acronym text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_candidate_status(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION expand_committee_designation(acronym text) RETURNS text
     LANGUAGE plpgsql
@@ -622,7 +578,6 @@ CREATE FUNCTION expand_committee_designation(acronym text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_committee_designation(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION expand_committee_type(acronym text) RETURNS text
     LANGUAGE plpgsql
@@ -650,7 +605,6 @@ CREATE FUNCTION expand_committee_type(acronym text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_committee_type(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION expand_document(acronym text) RETURNS text
     LANGUAGE plpgsql
@@ -686,7 +640,6 @@ CREATE FUNCTION expand_document(acronym text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_document(acronym text) OWNER TO postgres;
 
 CREATE OR REPLACE FUNCTION expand_election_type(acronym TEXT)
 RETURNS TEXT AS $$
@@ -714,7 +667,6 @@ RETURNS TEXT AS $$
     END
 $$ LANGUAGE plpgsql;
 
-ALTER FUNCTION public.expand_election_type(acronym text) OWNER TO postgres;
 
 -- this is a short term fix to correct a coding error where the code C was used for caucuses and conventions
 CREATE FUNCTION expand_election_type_caucus_convention_clean(trc_election_type_id text, trc_election_id numeric) RETURNS text
@@ -732,7 +684,6 @@ CREATE FUNCTION expand_election_type_caucus_convention_clean(trc_election_type_i
     end
 $$;
 
-ALTER FUNCTION public.expand_election_type_caucus_convention_clean(trc_election_type_id text, trc_election_id numeric) OWNER TO postgres;
 
 -- because we can't just add an s to pluralize caucus
 CREATE FUNCTION expand_election_type_plurals(acronym text) RETURNS text
@@ -761,7 +712,6 @@ CREATE FUNCTION expand_election_type_plurals(acronym text) RETURNS text
          end;
      end
  $$;
-ALTER FUNCTION public.expand_election_type_plurals(acronym text) OWNER TO postgres;
 CREATE FUNCTION expand_line_number(form_type text, line_number text) RETURNS text
     LANGUAGE plpgsql
     AS $$
@@ -775,7 +725,6 @@ CREATE FUNCTION expand_line_number(form_type text, line_number text) RETURNS tex
     END
 $$;
 
-ALTER FUNCTION public.expand_line_number(form_type text, line_number text) OWNER TO postgres;
 
 CREATE FUNCTION expand_line_number_f3(line_number text) RETURNS text
     LANGUAGE plpgsql
@@ -807,7 +756,6 @@ CREATE FUNCTION expand_line_number_f3(line_number text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_line_number_f3(line_number text) OWNER TO postgres;
 
 CREATE FUNCTION expand_line_number_f3p(line_number text) RETURNS text
     LANGUAGE plpgsql
@@ -841,7 +789,6 @@ CREATE FUNCTION expand_line_number_f3p(line_number text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_line_number_f3p(line_number text) OWNER TO postgres;
 
 CREATE FUNCTION expand_line_number_f3x(line_number text) RETURNS text
     LANGUAGE plpgsql
@@ -887,7 +834,6 @@ CREATE FUNCTION expand_line_number_f3x(line_number text) RETURNS text
     end
 $$;
 
-ALTER FUNCTION public.expand_line_number_f3x(line_number text) OWNER TO postgres;
 
 CREATE OR REPLACE FUNCTION expand_office(acronym TEXT)
 RETURNS TEXT AS $$
@@ -900,7 +846,6 @@ RETURNS TEXT AS $$
     END
 $$ LANGUAGE plpgsql;
 
-ALTER FUNCTION public.expand_office(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION expand_office_description(acronym text) RETURNS text
     LANGUAGE plpgsql
@@ -915,7 +860,6 @@ CREATE FUNCTION expand_office_description(acronym text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_office_description(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION expand_organization_type(acronym text) RETURNS text
     LANGUAGE plpgsql
@@ -933,7 +877,6 @@ CREATE FUNCTION expand_organization_type(acronym text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_organization_type(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION expand_state(acronym text) RETURNS text
     LANGUAGE plpgsql
@@ -1001,7 +944,6 @@ CREATE FUNCTION expand_state(acronym text) RETURNS text
     END
 $$;
 
-ALTER FUNCTION public.expand_state(acronym text) OWNER TO postgres;
 
 CREATE FUNCTION fec_fitem_f57_update_queues() RETURNS trigger
     LANGUAGE plpgsql
@@ -1025,7 +967,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.fec_fitem_f57_update_queues() OWNER TO postgres;
 
 CREATE FUNCTION fec_vsum_f57_update_queues() RETURNS trigger
     LANGUAGE plpgsql
@@ -1067,7 +1008,6 @@ end
 
 $$;
 
-ALTER FUNCTION public.fec_vsum_f57_update_queues() OWNER TO postgres;
 
 CREATE FUNCTION filings_year(report_year numeric, receipt_date date) RETURNS integer
     LANGUAGE plpgsql
@@ -1080,7 +1020,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.filings_year(report_year numeric, receipt_date date) OWNER TO postgres;
 
 CREATE FUNCTION first_agg(anyelement, anyelement) RETURNS anyelement
     LANGUAGE sql IMMUTABLE STRICT
@@ -1088,7 +1027,6 @@ CREATE FUNCTION first_agg(anyelement, anyelement) RETURNS anyelement
         SELECT $1;
 $_$;
 
-ALTER FUNCTION public.first_agg(anyelement, anyelement) OWNER TO postgres;
 
 CREATE FUNCTION fix_party_spelling(branch text) RETURNS text
     LANGUAGE plpgsql
@@ -1101,7 +1039,6 @@ CREATE FUNCTION fix_party_spelling(branch text) RETURNS text
     end
 $$;
 
-ALTER FUNCTION public.fix_party_spelling(branch text) OWNER TO postgres;
 
 CREATE FUNCTION format_start_date(start_date timestamp without time zone, end_date timestamp without time zone) RETURNS timestamp without time zone
     LANGUAGE plpgsql
@@ -1114,7 +1051,6 @@ CREATE FUNCTION format_start_date(start_date timestamp without time zone, end_da
     end
 $$;
 
-ALTER FUNCTION public.format_start_date(start_date timestamp without time zone, end_date timestamp without time zone) OWNER TO postgres;
 
 CREATE FUNCTION generate_24hr_text(rp_election_text text, ie_24hour_end date) RETURNS text
     LANGUAGE plpgsql
@@ -1140,7 +1076,6 @@ CREATE FUNCTION generate_24hr_text(rp_election_text text, ie_24hour_end date) RE
     end
 $$;
 
-ALTER FUNCTION public.generate_24hr_text(rp_election_text text, ie_24hour_end date) OWNER TO postgres;
 
 CREATE FUNCTION generate_48hr_text(rp_election_text text, ie_48hour_end date) RETURNS text
     LANGUAGE plpgsql
@@ -1166,7 +1101,6 @@ CREATE FUNCTION generate_48hr_text(rp_election_text text, ie_48hour_end date) RE
     end
 $$;
 
-ALTER FUNCTION public.generate_48hr_text(rp_election_text text, ie_48hour_end date) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_description(trc_election_type_id text, office_sought text, election_states text[]) RETURNS text
     LANGUAGE plpgsql
@@ -1180,7 +1114,6 @@ CREATE FUNCTION generate_election_description(trc_election_type_id text, office_
     end
 $$;
 
-ALTER FUNCTION public.generate_election_description(trc_election_type_id text, office_sought text, election_states text[]) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_description(election_type text, office_sought text, contest text[], party text) RETURNS text
     LANGUAGE plpgsql
@@ -1214,7 +1147,6 @@ CREATE FUNCTION generate_election_description(election_type text, office_sought 
     end
 $$;
 
-ALTER FUNCTION public.generate_election_description(election_type text, office_sought text, contest text[], party text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_description(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric) RETURNS text
     LANGUAGE plpgsql
@@ -1248,7 +1180,6 @@ CREATE FUNCTION generate_election_description(trc_election_type_id text, office_
     end
 $$;
 
-ALTER FUNCTION public.generate_election_description(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_description(election_type text, office_sought text, contest text[], party text, election_notes text) RETURNS text
     LANGUAGE plpgsql
@@ -1282,7 +1213,6 @@ CREATE FUNCTION generate_election_description(election_type text, office_sought 
     end
 $$;
 
-ALTER FUNCTION public.generate_election_description(election_type text, office_sought text, contest text[], party text, election_notes text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_discription(trc_election_type_id text, office_sought text, election_states text[]) RETURNS text
     LANGUAGE plpgsql
@@ -1296,7 +1226,6 @@ CREATE FUNCTION generate_election_discription(trc_election_type_id text, office_
     end
 $$;
 
-ALTER FUNCTION public.generate_election_discription(trc_election_type_id text, office_sought text, election_states text[]) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_summary(election_type text, office_sought text, contest text[], party text) RETURNS text
     LANGUAGE plpgsql
@@ -1331,7 +1260,6 @@ CREATE FUNCTION generate_election_summary(election_type text, office_sought text
     end
 $$;
 
-ALTER FUNCTION public.generate_election_summary(election_type text, office_sought text, contest text[], party text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_summary(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric) RETURNS text
     LANGUAGE plpgsql
@@ -1366,7 +1294,6 @@ CREATE FUNCTION generate_election_summary(trc_election_type_id text, office_soug
     end
 $$;
 
-ALTER FUNCTION public.generate_election_summary(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text) RETURNS text
     LANGUAGE plpgsql
@@ -1401,7 +1328,6 @@ CREATE FUNCTION generate_election_summary(election_type text, office_sought text
     end
 $$;
 
-ALTER FUNCTION public.generate_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought text, state integer) RETURNS text
     LANGUAGE plpgsql
@@ -1415,7 +1341,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id text, office_sought text, state integer) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought text, state bigint) RETURNS text
     LANGUAGE plpgsql
@@ -1429,7 +1354,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id text, office_sought text, state bigint) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought text, state text) RETURNS text
     LANGUAGE plpgsql
@@ -1444,7 +1368,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id text, office_sought text, state text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id numeric, office_sought text, contest text[], party text) RETURNS text
     LANGUAGE plpgsql
@@ -1469,7 +1392,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id numeric, office_sou
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id numeric, office_sought text, contest text[], party text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text) RETURNS text
     LANGUAGE plpgsql
@@ -1494,7 +1416,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought text, state bigint, election_states text[]) RETURNS text
     LANGUAGE plpgsql
@@ -1508,7 +1429,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id text, office_sought text, state bigint, election_states text[]) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought text, state bigint, election_state text) RETURNS text
     LANGUAGE plpgsql
@@ -1522,7 +1442,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id text, office_sought text, state bigint, election_state text) OWNER TO postgres;
 
 CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric) RETURNS text
     LANGUAGE plpgsql
@@ -1547,7 +1466,6 @@ CREATE FUNCTION generate_election_title(trc_election_type_id text, office_sought
     end
 $$;
 
-ALTER FUNCTION public.generate_election_title(trc_election_type_id text, office_sought text, contest text[], party text, trc_election_id numeric) OWNER TO postgres;
 
 CREATE FUNCTION generate_electioneering_text(rp_election_text text, ec_end date) RETURNS text
     LANGUAGE plpgsql
@@ -1573,7 +1491,6 @@ CREATE FUNCTION generate_electioneering_text(rp_election_text text, ec_end date)
     end
 $$;
 
-ALTER FUNCTION public.generate_electioneering_text(rp_election_text text, ec_end date) OWNER TO postgres;
 
 CREATE FUNCTION generate_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[]) RETURNS text
     LANGUAGE plpgsql
@@ -1626,7 +1543,6 @@ CREATE FUNCTION generate_report_description(office_sought text, report_type text
     end
 $$;
 
-ALTER FUNCTION public.generate_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[]) OWNER TO postgres;
 
 CREATE FUNCTION generate_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[], election_notes text) RETURNS text
     LANGUAGE plpgsql
@@ -1685,7 +1601,6 @@ CREATE FUNCTION generate_report_description(office_sought text, report_type text
     end
 $$;
 
-ALTER FUNCTION public.generate_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[], election_notes text) OWNER TO postgres;
 
 CREATE FUNCTION generate_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[]) RETURNS text
     LANGUAGE plpgsql
@@ -1747,7 +1662,6 @@ CREATE FUNCTION generate_report_summary(office_sought text, report_type text, rp
     end
 $$;
 
-ALTER FUNCTION public.generate_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[]) OWNER TO postgres;
 
 CREATE FUNCTION generate_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[], election_notes text) RETURNS text
     LANGUAGE plpgsql
@@ -1816,7 +1730,6 @@ CREATE FUNCTION generate_report_summary(office_sought text, report_type text, rp
     end
 $$;
 
-ALTER FUNCTION public.generate_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[], election_notes text) OWNER TO postgres;
 
 CREATE FUNCTION get_cycle(year numeric) RETURNS integer
     LANGUAGE plpgsql IMMUTABLE
@@ -1826,7 +1739,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.get_cycle(year numeric) OWNER TO postgres;
 
 CREATE FUNCTION get_report_category(report_type text) RETURNS text
     LANGUAGE plpgsql
@@ -1841,7 +1753,6 @@ CREATE FUNCTION get_report_category(report_type text) RETURNS text
     end
 $$;
 
-ALTER FUNCTION public.get_report_category(report_type text) OWNER TO postgres;
 
 CREATE FUNCTION get_transaction_year(transaction_date date, report_year numeric) RETURNS smallint
     LANGUAGE plpgsql IMMUTABLE
@@ -1853,7 +1764,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.get_transaction_year(transaction_date date, report_year numeric) OWNER TO postgres;
 
 CREATE FUNCTION get_transaction_year(transaction_date timestamp without time zone, report_year numeric) RETURNS smallint
     LANGUAGE plpgsql IMMUTABLE
@@ -1865,7 +1775,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.get_transaction_year(transaction_date timestamp without time zone, report_year numeric) OWNER TO postgres;
 
 CREATE FUNCTION image_pdf_url(image_number text) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
@@ -1875,7 +1784,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.image_pdf_url(image_number text) OWNER TO postgres;
 
 CREATE FUNCTION is_amended(most_recent_file_number integer, file_number integer) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -1885,7 +1793,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_amended(most_recent_file_number integer, file_number integer) OWNER TO postgres;
 
 CREATE FUNCTION is_amended(most_recent_file_number integer, file_number integer, form_type text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -1899,7 +1806,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_amended(most_recent_file_number integer, file_number integer, form_type text) OWNER TO postgres;
 
 -- checks line numbers to determine if a transactions is from an individual
 CREATE FUNCTION is_coded_individual(receipt_type text) RETURNS boolean
@@ -1910,7 +1816,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_coded_individual(receipt_type text) OWNER TO postgres;
 
 CREATE FUNCTION is_coded_individual_revised(receipt_type text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -1920,7 +1825,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_coded_individual_revised(receipt_type text) OWNER TO postgres;
 
 CREATE FUNCTION is_earmark(memo_code text, memo_text text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -1933,7 +1837,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_earmark(memo_code text, memo_text text) OWNER TO postgres;
 
 CREATE FUNCTION is_earmark_revised(memo_code text, memo_text text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -1946,7 +1849,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_earmark_revised(memo_code text, memo_text text) OWNER TO postgres;
 
 --If the image number string is of length 18, and the 9th character is a 9, then it is electronic
 --if the image number string is of length 11, and the 3rd character is a 9, then also electronic
@@ -1967,7 +1869,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_electronic(image_number text) OWNER TO postgres;
 
 CREATE FUNCTION is_individual(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -1980,7 +1881,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_individual(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text) OWNER TO postgres;
 
 -- This function gets used to sort unique, individual contributions for aggregates and filtering.
 -- It checks line numbers first to determine the transaction type,
@@ -2001,7 +1901,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_individual(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text, contbr_id text, cmte_id text) OWNER TO postgres;
 
 CREATE FUNCTION is_individual_revised(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -2014,7 +1913,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_individual_revised(amount numeric, receipt_type text, line_number text, memo_code text, memo_text text) OWNER TO postgres;
 
 -- looking for individual donations by line number, or if it is under $200 looking at memo text and memo code in is_earmark()
 CREATE FUNCTION is_inferred_individual(amount numeric, line_number text, memo_code text, memo_text text) RETURNS boolean
@@ -2029,7 +1927,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_inferred_individual(amount numeric, line_number text, memo_code text, memo_text text) OWNER TO postgres;
 
 CREATE FUNCTION is_inferred_individual(amount numeric, line_number text, memo_code text, memo_text text, contbr_id text, cmte_id text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -2043,7 +1940,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_inferred_individual(amount numeric, line_number text, memo_code text, memo_text text, contbr_id text, cmte_id text) OWNER TO postgres;
 
 CREATE FUNCTION is_inferred_individual_revised(amount numeric, line_number text, memo_code text, memo_text text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -2057,7 +1953,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_inferred_individual_revised(amount numeric, line_number text, memo_code text, memo_text text) OWNER TO postgres;
 
 CREATE FUNCTION is_most_recent(most_recent_file_number integer, file_number integer) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -2071,7 +1966,6 @@ end
 
 $$;
 
-ALTER FUNCTION public.is_most_recent(most_recent_file_number integer, file_number integer) OWNER TO postgres;
 
 CREATE FUNCTION is_most_recent(most_recent_file_number integer, file_number integer, form_type text) RETURNS boolean
     LANGUAGE plpgsql IMMUTABLE
@@ -2085,7 +1979,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_most_recent(most_recent_file_number integer, file_number integer, form_type text) OWNER TO postgres;
 
 -- There are a lot of data errors, this makes sure that we are not marking committees as individuals
 -- when there is an obvious error. For example, marking the DNC as an individual, or putting your own
@@ -2105,7 +1998,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_not_committee(contbr_id text, cmte_id text, line_number text) OWNER TO postgres;
 
 -- unitemized contributions should not be included in the state breakdowns
 CREATE FUNCTION is_unitemized(memo_text text) RETURNS boolean
@@ -2116,7 +2008,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.is_unitemized(memo_text text) OWNER TO postgres;
 
 CREATE FUNCTION last_agg(anyelement, anyelement) RETURNS anyelement
     LANGUAGE sql IMMUTABLE STRICT
@@ -2124,7 +2015,6 @@ CREATE FUNCTION last_agg(anyelement, anyelement) RETURNS anyelement
         SELECT $2;
 $_$;
 
-ALTER FUNCTION public.last_agg(anyelement, anyelement) OWNER TO postgres;
 
 -- Retrieves the last day of the month for a given timestamp.
 CREATE FUNCTION last_day_of_month(timestamp without time zone) RETURNS timestamp without time zone
@@ -2135,7 +2025,6 @@ CREATE FUNCTION last_day_of_month(timestamp without time zone) RETURNS timestamp
     end
 $_$;
 
-ALTER FUNCTION public.last_day_of_month(timestamp without time zone) OWNER TO postgres;
 
 CREATE FUNCTION means_filed(image_number text) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
@@ -2148,7 +2037,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.means_filed(image_number text) OWNER TO postgres;
 
 CREATE FUNCTION name_reports(report_type text, rpt_tp_desc text) RETURNS text
     LANGUAGE plpgsql
@@ -2161,7 +2049,6 @@ CREATE FUNCTION name_reports(report_type text, rpt_tp_desc text) RETURNS text
     end
 $$;
 
-ALTER FUNCTION public.name_reports(report_type text, rpt_tp_desc text) OWNER TO postgres;
 
 CREATE FUNCTION name_reports(office_sought text, report_type text, rpt_tp_desc text) RETURNS text
     LANGUAGE plpgsql
@@ -2185,7 +2072,6 @@ CREATE FUNCTION name_reports(office_sought text, report_type text, rpt_tp_desc t
     end
 $$;
 
-ALTER FUNCTION public.name_reports(office_sought text, report_type text, rpt_tp_desc text) OWNER TO postgres;
 
 CREATE FUNCTION name_reports(office_sought text, report_type text, rpt_tp_desc text, election_state text[]) RETURNS text
     LANGUAGE plpgsql
@@ -2223,7 +2109,6 @@ CREATE FUNCTION name_reports(office_sought text, report_type text, rpt_tp_desc t
     end
 $$;
 
-ALTER FUNCTION public.name_reports(office_sought text, report_type text, rpt_tp_desc text, election_state text[]) OWNER TO postgres;
 
 CREATE FUNCTION ofec_f57_update_notice_queues() RETURNS trigger
     LANGUAGE plpgsql
@@ -2247,7 +2132,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_f57_update_notice_queues() OWNER TO postgres;
 
 CREATE FUNCTION ofec_nml_24_update_queues_from_notice() RETURNS trigger
     LANGUAGE plpgsql
@@ -2272,7 +2156,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_nml_24_update_queues_from_notice() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_c_update() RETURNS trigger
     LANGUAGE plpgsql
@@ -2284,7 +2167,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_c_update() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_f57_notice_update() RETURNS void
     LANGUAGE plpgsql
@@ -2371,7 +2253,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_f57_notice_update() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_nml_update_queues_from_notice() RETURNS trigger
     LANGUAGE plpgsql
@@ -2395,7 +2276,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_nml_update_queues_from_notice() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_notice_update_from_f24() RETURNS void
     LANGUAGE plpgsql
@@ -2485,7 +2365,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_notice_update_from_f24() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_update() RETURNS void
     LANGUAGE plpgsql
@@ -2509,7 +2388,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_update() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_update_from_f57() RETURNS void
     LANGUAGE plpgsql
@@ -2586,7 +2464,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_update_from_f57() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_update_fulltext() RETURNS void
     LANGUAGE plpgsql
@@ -2605,7 +2482,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_update_fulltext() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_update_notice_queues() RETURNS trigger
     LANGUAGE plpgsql
@@ -2629,7 +2505,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_update_notice_queues() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_update_queues() RETURNS trigger
     LANGUAGE plpgsql
@@ -2655,7 +2530,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_update_queues() OWNER TO postgres;
 
 CREATE FUNCTION ofec_sched_e_update_queues_from_notice() RETURNS trigger
     LANGUAGE plpgsql
@@ -2679,7 +2553,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.ofec_sched_e_update_queues_from_notice() OWNER TO postgres;
 
 CREATE FUNCTION real_efile_sa7_update() RETURNS trigger
     LANGUAGE plpgsql
@@ -2690,7 +2563,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.real_efile_sa7_update() OWNER TO postgres;
 
 CREATE FUNCTION refresh_materialized(schema_arg text DEFAULT 'public'::text) RETURNS integer
     LANGUAGE plpgsql
@@ -2708,7 +2580,6 @@ CREATE FUNCTION refresh_materialized(schema_arg text DEFAULT 'public'::text) RET
   END
 $$;
 
-ALTER FUNCTION public.refresh_materialized(schema_arg text) OWNER TO postgres;
 
 CREATE FUNCTION rename_temporary_views(schema_arg text DEFAULT 'public'::text, suffix text DEFAULT '_tmp'::text) RETURNS integer
     LANGUAGE plpgsql
@@ -2729,7 +2600,6 @@ CREATE FUNCTION rename_temporary_views(schema_arg text DEFAULT 'public'::text, s
   END
 $$;
 
-ALTER FUNCTION public.rename_temporary_views(schema_arg text, suffix text) OWNER TO postgres;
 
 CREATE FUNCTION report_fec_url(image_number text, file_number integer) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
@@ -2748,7 +2618,6 @@ begin
     end;
 end
 $_$;
-ALTER FUNCTION public.report_fec_url(image_number text, file_number integer) OWNER TO postgres;
 CREATE FUNCTION report_html_url(means_filed text, cmte_id text, filing_id text) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
     AS $_$
@@ -2768,7 +2637,6 @@ BEGIN
     end;
 END
 $_$;
-ALTER FUNCTION public.report_html_url(means_filed text, cmte_id text, filing_id text) OWNER TO postgres;
 CREATE FUNCTION report_pdf_url(image_number text) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
     AS $_$
@@ -2783,7 +2651,6 @@ begin
     end;
 end
 $_$;
-ALTER FUNCTION public.report_pdf_url(image_number text) OWNER TO postgres;
 CREATE FUNCTION report_pdf_url_or_null(image_number text, report_year integer, committee_type text, form_type text) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
     AS $$
@@ -2798,7 +2665,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.report_pdf_url_or_null(image_number text, report_year integer, committee_type text, form_type text) OWNER TO postgres;
 
 CREATE FUNCTION report_pdf_url_or_null(image_number text, report_year numeric, committee_type text, form_type text) RETURNS text
     LANGUAGE plpgsql IMMUTABLE
@@ -2815,7 +2681,6 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.report_pdf_url_or_null(image_number text, report_year numeric, committee_type text, form_type text) OWNER TO postgres;
 
 CREATE FUNCTION rollback_real_time_filings(p_repid bigint) RETURNS text
     LANGUAGE plpgsql
@@ -2841,7 +2706,6 @@ return 'SUCCESS';
 end
 $$;
 
-ALTER FUNCTION public.rollback_real_time_filings(p_repid bigint) OWNER TO postgres;
 
 CREATE FUNCTION update_aggregates() RETURNS void
     LANGUAGE plpgsql
@@ -2874,21 +2738,18 @@ begin
 end
 $$;
 
-ALTER FUNCTION public.update_aggregates() OWNER TO postgres;
 
 CREATE AGGREGATE first(anyelement) (
     SFUNC = first_agg,
     STYPE = anyelement
 );
 
-ALTER AGGREGATE public.first(anyelement) OWNER TO postgres;
 
 CREATE AGGREGATE last(anyelement) (
     SFUNC = last_agg,
     STYPE = anyelement
 );
 
-ALTER AGGREGATE public.last(anyelement) OWNER TO postgres;
 
 SET search_path = disclosure, pg_catalog;
 
@@ -2914,7 +2775,6 @@ CREATE TABLE cand_cmte_linkage (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cand_cmte_linkage OWNER TO postgres;
 
 CREATE TABLE cand_inactive (
     cand_id character varying(9),
@@ -2922,7 +2782,6 @@ CREATE TABLE cand_inactive (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cand_inactive OWNER TO postgres;
 
 CREATE TABLE cand_valid_fec_yr (
     cand_valid_yr_id numeric(12,0),
@@ -2953,7 +2812,6 @@ CREATE TABLE cand_valid_fec_yr (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cand_valid_fec_yr OWNER TO postgres;
 
 CREATE TABLE cmte_valid_fec_yr (
     valid_fec_yr_id numeric(12,0),
@@ -2992,7 +2850,6 @@ CREATE TABLE cmte_valid_fec_yr (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cmte_valid_fec_yr OWNER TO postgres;
 
 CREATE TABLE f_item_receipt_or_exp (
     sub_id numeric(19,0) NOT NULL,
@@ -3116,7 +2973,6 @@ CREATE TABLE f_item_receipt_or_exp (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE f_item_receipt_or_exp OWNER TO postgres;
 
 CREATE TABLE f_rpt_or_form_sub (
     sub_id numeric(19,0),
@@ -3157,7 +3013,6 @@ CREATE TABLE f_rpt_or_form_sub (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE f_rpt_or_form_sub OWNER TO postgres;
 
 CREATE TABLE nml_form_1 (
     sub_id numeric(19,0) NOT NULL,
@@ -3314,7 +3169,6 @@ CREATE TABLE nml_form_1 (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_1 OWNER TO postgres;
 
 CREATE TABLE nml_form_1z (
     sub_id numeric(19,0) NOT NULL,
@@ -3471,7 +3325,6 @@ CREATE TABLE nml_form_1z (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_1z OWNER TO postgres;
 
 CREATE VIEW nml_form_1_1z_view AS
  SELECT a.sub_id,
@@ -3678,7 +3531,6 @@ UNION
     z.f3l_filing_freq
    FROM nml_form_1z z;
 
-ALTER TABLE nml_form_1_1z_view OWNER TO postgres;
 
 CREATE TABLE nml_form_2 (
     sub_id numeric(19,0) NOT NULL,
@@ -3750,7 +3602,6 @@ CREATE TABLE nml_form_2 (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_2 OWNER TO postgres;
 
 CREATE TABLE nml_form_24 (
     sub_id numeric(19,0) NOT NULL,
@@ -3788,7 +3639,6 @@ CREATE TABLE nml_form_24 (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_24 OWNER TO postgres;
 
 CREATE TABLE nml_form_2z (
     sub_id numeric(19,0) NOT NULL,
@@ -3856,7 +3706,6 @@ CREATE TABLE nml_form_2z (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_2z OWNER TO postgres;
 
 CREATE VIEW nml_form_2_2z_view AS
  SELECT a.sub_id,
@@ -3970,7 +3819,6 @@ UNION
   WHERE (a.delete_ind IS NULL)
   ORDER BY 6, 51;
 
-ALTER TABLE nml_form_2_2z_view OWNER TO postgres;
 
 CREATE TABLE nml_form_3 (
     sub_id numeric(19,0),
@@ -4103,7 +3951,6 @@ CREATE TABLE nml_form_3 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nml_form_3 OWNER TO postgres;
 
 CREATE TABLE nml_form_3p (
     cmte_id character varying(9),
@@ -4116,7 +3963,6 @@ CREATE TABLE nml_form_3p (
     mst_rct_file_num numeric(7,0)
 );
 
-ALTER TABLE nml_form_3p OWNER TO postgres;
 
 CREATE TABLE nml_form_3x (
     sub_id numeric(19,0),
@@ -4265,7 +4111,6 @@ CREATE TABLE nml_form_3x (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nml_form_3x OWNER TO postgres;
 
 CREATE TABLE nml_form_5 (
     sub_id numeric(19,0) NOT NULL,
@@ -4329,7 +4174,6 @@ CREATE TABLE nml_form_5 (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_5 OWNER TO postgres;
 
 CREATE TABLE nml_form_57 (
     sub_id numeric(19,0) NOT NULL,
@@ -4398,7 +4242,6 @@ CREATE TABLE nml_form_57 (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_57 OWNER TO postgres;
 
 CREATE TABLE nml_form_7 (
     sub_id numeric(19,0) NOT NULL,
@@ -4447,7 +4290,6 @@ CREATE TABLE nml_form_7 (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_7 OWNER TO postgres;
 
 CREATE TABLE nml_form_9 (
     form_tp character varying(8),
@@ -4520,7 +4362,6 @@ CREATE TABLE nml_form_9 (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_form_9 OWNER TO postgres;
 
 CREATE TABLE nml_form_rfai (
     sub_id numeric(19,0),
@@ -4549,7 +4390,6 @@ CREATE TABLE nml_form_rfai (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nml_form_rfai OWNER TO postgres;
 
 CREATE TABLE nml_sched_a (
     cmte_id character varying(9),
@@ -4626,7 +4466,6 @@ CREATE TABLE nml_sched_a (
     delete_ind numeric(1,0)
 );
 
-ALTER TABLE nml_sched_a OWNER TO postgres;
 
 CREATE TABLE nml_sched_b (
     cmte_id character varying(9),
@@ -4704,7 +4543,6 @@ CREATE TABLE nml_sched_b (
     delete_ind numeric(1,0)
 );
 
-ALTER TABLE nml_sched_b OWNER TO postgres;
 
 CREATE TABLE nml_sched_d (
     sub_id numeric(19,0),
@@ -4769,7 +4607,6 @@ CREATE TABLE nml_sched_d (
     creditor_debtor_name_text tsvector
 );
 
-ALTER TABLE nml_sched_d OWNER TO postgres;
 
 CREATE TABLE nml_sched_e (
     sub_id numeric(19,0) NOT NULL,
@@ -4861,7 +4698,6 @@ CREATE TABLE nml_sched_e (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_sched_e OWNER TO postgres;
 
 CREATE TABLE nml_sched_f (
     sub_id numeric(19,0) NOT NULL,
@@ -4950,7 +4786,6 @@ CREATE TABLE nml_sched_f (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE nml_sched_f OWNER TO postgres;
 
 CREATE TABLE rad_cmte_analyst_search_vw (
     cmte_id character varying(9),
@@ -4966,7 +4801,6 @@ CREATE TABLE rad_cmte_analyst_search_vw (
     anlyst_title character varying(255)
 );
 
-ALTER TABLE rad_cmte_analyst_search_vw OWNER TO postgres;
 
 CREATE TABLE trc_report_due_date (
     trc_report_due_date_id numeric(12,0),
@@ -4981,14 +4815,12 @@ CREATE TABLE trc_report_due_date (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE trc_report_due_date OWNER TO postgres;
 
 CREATE TABLE unverified_cand_cmte (
     cand_cmte_id character varying(9) NOT NULL,
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE unverified_cand_cmte OWNER TO postgres;
 
 SET search_path = public, pg_catalog;
 
@@ -5096,7 +4928,6 @@ CREATE TABLE detsum_sample (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE detsum_sample OWNER TO postgres;
 
 SET search_path = disclosure, pg_catalog;
 
@@ -5204,7 +5035,6 @@ CREATE VIEW v_sum_and_det_sum_report AS
     detsum_sample.pg_date
    FROM public.detsum_sample;
 
-ALTER TABLE v_sum_and_det_sum_report OWNER TO postgres;
 
 SET search_path = fecapp, pg_catalog;
 
@@ -5220,7 +5050,6 @@ CREATE TABLE cal_category (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cal_category OWNER TO postgres;
 
 CREATE TABLE cal_category_subcat (
     cal_category_id numeric,
@@ -5230,7 +5059,6 @@ CREATE TABLE cal_category_subcat (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cal_category_subcat OWNER TO postgres;
 
 CREATE TABLE cal_event (
     cal_event_id numeric,
@@ -5250,7 +5078,6 @@ CREATE TABLE cal_event (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cal_event OWNER TO postgres;
 
 CREATE TABLE cal_event_category (
     cal_event_id numeric,
@@ -5260,7 +5087,6 @@ CREATE TABLE cal_event_category (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cal_event_category OWNER TO postgres;
 
 CREATE TABLE cal_event_status (
     cal_event_status_id numeric,
@@ -5268,7 +5094,6 @@ CREATE TABLE cal_event_status (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cal_event_status OWNER TO postgres;
 
 CREATE TABLE trc_election (
     trc_election_id numeric,
@@ -5288,7 +5113,6 @@ CREATE TABLE trc_election (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE trc_election OWNER TO postgres;
 
 CREATE TABLE trc_election_dates (
     trc_election_id numeric,
@@ -5322,7 +5146,6 @@ CREATE TABLE trc_election_dates (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE trc_election_dates OWNER TO postgres;
 
 CREATE TABLE trc_report_due_date (
     trc_report_due_date_id numeric(12,0),
@@ -5337,7 +5160,6 @@ CREATE TABLE trc_report_due_date (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE trc_report_due_date OWNER TO postgres;
 
 SET search_path = public, pg_catalog;
 
@@ -5354,13 +5176,11 @@ CREATE TABLE ao (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ao OWNER TO postgres;
 
 CREATE TABLE blah (
     "?column?" integer
 );
 
-ALTER TABLE blah OWNER TO postgres;
 
 CREATE TABLE cal_user_category (
     sec_user_id numeric(12,0) NOT NULL,
@@ -5370,7 +5190,6 @@ CREATE TABLE cal_user_category (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cal_user_category OWNER TO postgres;
 
 CREATE TABLE cand_cmte_linkage (
     linkage_id numeric(12,0) NOT NULL,
@@ -5390,7 +5209,6 @@ CREATE TABLE cand_cmte_linkage (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cand_cmte_linkage OWNER TO postgres;
 
 CREATE TABLE cand_inactive (
     cand_id character varying(9) NOT NULL,
@@ -5398,7 +5216,6 @@ CREATE TABLE cand_inactive (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cand_inactive OWNER TO postgres;
 
 CREATE TABLE cand_valid_fec_yr (
     cand_valid_yr_id numeric(12,0) NOT NULL,
@@ -5429,7 +5246,6 @@ CREATE TABLE cand_valid_fec_yr (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cand_valid_fec_yr OWNER TO postgres;
 
 CREATE TABLE candidate_summary (
     fec_election_yr numeric(4,0) NOT NULL,
@@ -5492,7 +5308,6 @@ CREATE TABLE candidate_summary (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE candidate_summary OWNER TO postgres;
 
 CREATE TABLE cmte_cmte_linkage (
     linkage_id numeric(12,0) NOT NULL,
@@ -5506,7 +5321,6 @@ CREATE TABLE cmte_cmte_linkage (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE cmte_cmte_linkage OWNER TO postgres;
 
 CREATE TABLE committee_summary_exclude (
     sub_id numeric(19,0) NOT NULL,
@@ -5515,7 +5329,6 @@ CREATE TABLE committee_summary_exclude (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE committee_summary_exclude OWNER TO postgres;
 
 CREATE TABLE communication_costs_vw (
     cmte_id character varying(9),
@@ -5547,7 +5360,6 @@ CREATE TABLE communication_costs_vw (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE communication_costs_vw OWNER TO postgres;
 
 CREATE TABLE customers (
     custno numeric(3,0) NOT NULL,
@@ -5559,7 +5371,6 @@ CREATE TABLE customers (
     phone character varying(12)
 );
 
-ALTER TABLE customers OWNER TO postgres;
 
 CREATE TABLE dim_calendar_inf (
     calendar_pk numeric(8,0) NOT NULL,
@@ -5575,7 +5386,6 @@ CREATE TABLE dim_calendar_inf (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE dim_calendar_inf OWNER TO postgres;
 
 CREATE TABLE dim_cand_inf (
     cand_pk numeric(19,0) NOT NULL,
@@ -5612,7 +5422,6 @@ CREATE TABLE dim_cand_inf (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE dim_cand_inf OWNER TO postgres;
 
 CREATE TABLE dim_cmte_ie_inf (
     cmte_pk numeric(19,0) NOT NULL,
@@ -5664,7 +5473,6 @@ CREATE TABLE dim_cmte_ie_inf (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE dim_cmte_ie_inf OWNER TO postgres;
 
 CREATE TABLE dim_cmte_prsnl_inf (
     cmte_prsnl_id numeric(12,0) NOT NULL,
@@ -5684,7 +5492,6 @@ CREATE TABLE dim_cmte_prsnl_inf (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE dim_cmte_prsnl_inf OWNER TO postgres;
 
 CREATE TABLE dim_election_attrib_inf (
     election_attrib_pk numeric(3,0) NOT NULL,
@@ -5697,7 +5504,6 @@ CREATE TABLE dim_election_attrib_inf (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE dim_election_attrib_inf OWNER TO postgres;
 
 CREATE TABLE dim_race_inf (
     race_pk numeric(12,0) NOT NULL,
@@ -5716,7 +5522,6 @@ CREATE TABLE dim_race_inf (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE dim_race_inf OWNER TO postgres;
 
 CREATE TABLE dimyears (
     year_sk numeric(10,0) NOT NULL,
@@ -5725,7 +5530,6 @@ CREATE TABLE dimyears (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE dimyears OWNER TO postgres;
 
 CREATE TABLE doc_order (
     doc_order_id numeric NOT NULL,
@@ -5733,7 +5537,6 @@ CREATE TABLE doc_order (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE doc_order OWNER TO postgres;
 
 CREATE TABLE document (
     document_id numeric NOT NULL,
@@ -5748,7 +5551,6 @@ CREATE TABLE document (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE document OWNER TO postgres;
 
 CREATE TABLE real_efile_reps (
     repid numeric(12,0) NOT NULL,
@@ -5775,7 +5577,6 @@ CREATE TABLE real_efile_reps (
     notes character varying(100)
 );
 
-ALTER TABLE real_efile_reps OWNER TO postgres;
 
 CREATE VIEW efile_amendment_chain_vw AS
  WITH RECURSIVE oldest_filing AS (
@@ -5826,7 +5627,6 @@ CREATE VIEW efile_amendment_chain_vw AS
    FROM (oldest_filing of
      JOIN latest late ON ((of.last = late.last)));
 
-ALTER TABLE efile_amendment_chain_vw OWNER TO postgres;
 
 CREATE TABLE efile_guide_f3 (
     index bigint,
@@ -5838,7 +5638,6 @@ CREATE TABLE efile_guide_f3 (
     "Unnamed: 5" text
 );
 
-ALTER TABLE efile_guide_f3 OWNER TO postgres;
 
 CREATE TABLE efile_guide_f3p (
     index bigint,
@@ -5850,7 +5649,6 @@ CREATE TABLE efile_guide_f3p (
     "Unnamed: 5" text
 );
 
-ALTER TABLE efile_guide_f3p OWNER TO postgres;
 
 CREATE TABLE efile_guide_f3x (
     index bigint,
@@ -5862,7 +5660,6 @@ CREATE TABLE efile_guide_f3x (
     "Unnamed: 5" text
 );
 
-ALTER TABLE efile_guide_f3x OWNER TO postgres;
 
 CREATE VIEW efiling_amendment_chain_vw AS
  WITH RECURSIVE oldest_filing AS (
@@ -5913,7 +5710,6 @@ CREATE VIEW efiling_amendment_chain_vw AS
    FROM (oldest_filing of
      JOIN latest late ON ((of.last = late.last)));
 
-ALTER TABLE efiling_amendment_chain_vw OWNER TO postgres;
 
 CREATE TABLE electioneering_com_vw (
     cand_id character varying(9),
@@ -5947,7 +5743,6 @@ CREATE TABLE electioneering_com_vw (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE electioneering_com_vw OWNER TO postgres;
 
 CREATE TABLE entity (
     entity_id numeric NOT NULL,
@@ -5963,7 +5758,6 @@ CREATE TABLE entity (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE entity OWNER TO postgres;
 
 CREATE TABLE entity_disbursements_chart (
     idx bigint,
@@ -5975,7 +5769,6 @@ CREATE TABLE entity_disbursements_chart (
     sum numeric
 );
 
-ALTER TABLE entity_disbursements_chart OWNER TO postgres;
 
 CREATE TABLE entity_receipts_chart (
     idx bigint,
@@ -5987,7 +5780,6 @@ CREATE TABLE entity_receipts_chart (
     sum double precision
 );
 
-ALTER TABLE entity_receipts_chart OWNER TO postgres;
 
 CREATE TABLE entity_type (
     entity_type_id numeric NOT NULL,
@@ -5996,7 +5788,6 @@ CREATE TABLE entity_type (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE entity_type OWNER TO postgres;
 
 CREATE TABLE f1_filer_vw (
     cmte_id character varying(9),
@@ -6020,7 +5811,6 @@ CREATE TABLE f1_filer_vw (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE f1_filer_vw OWNER TO postgres;
 
 CREATE TABLE f2_filer_vw (
     cand_id character varying(9),
@@ -6042,7 +5832,6 @@ CREATE TABLE f2_filer_vw (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE f2_filer_vw OWNER TO postgres;
 
 CREATE TABLE f_campaign (
     cmte_pk numeric(19,0) NOT NULL,
@@ -6051,7 +5840,6 @@ CREATE TABLE f_campaign (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE f_campaign OWNER TO postgres;
 
 CREATE TABLE f_election_vote (
     race_pk numeric(12,0) NOT NULL,
@@ -6062,7 +5850,6 @@ CREATE TABLE f_election_vote (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE f_election_vote OWNER TO postgres;
 
 CREATE TABLE f_item_selected_list_trans (
     sub_id numeric(19,0) NOT NULL,
@@ -6097,7 +5884,6 @@ CREATE TABLE f_item_selected_list_trans (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE f_item_selected_list_trans OWNER TO postgres;
 
 CREATE TABLE f_item_selected_list_trans_cnt (
     cmte_id character varying(9),
@@ -6108,7 +5894,6 @@ CREATE TABLE f_item_selected_list_trans_cnt (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE f_item_selected_list_trans_cnt OWNER TO postgres;
 
 CREATE TABLE facthousesenate_f3 (
     facthousesenate_f3_sk numeric(10,0) NOT NULL,
@@ -6205,7 +5990,6 @@ CREATE TABLE facthousesenate_f3 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE facthousesenate_f3 OWNER TO postgres;
 
 CREATE TABLE factindpexpcontb_f5 (
     factindpexpcontb_f5_sk numeric(10,0) NOT NULL,
@@ -6231,7 +6015,6 @@ CREATE TABLE factindpexpcontb_f5 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE factindpexpcontb_f5 OWNER TO postgres;
 
 CREATE TABLE factpacsandparties_f3x (
     factpacsandparties_f3x_sk numeric(10,0) NOT NULL,
@@ -6353,7 +6136,6 @@ CREATE TABLE factpacsandparties_f3x (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE factpacsandparties_f3x OWNER TO postgres;
 
 CREATE TABLE factpresidential_f3p (
     factpresidential_f3p_sk numeric(10,0) NOT NULL,
@@ -6557,7 +6339,6 @@ CREATE TABLE factpresidential_f3p (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE factpresidential_f3p OWNER TO postgres;
 
 CREATE VIEW fec_f57_notice_vw AS
  SELECT f57.filer_cmte_id,
@@ -6628,7 +6409,6 @@ CREATE VIEW fec_f57_notice_vw AS
     disclosure.nml_form_5 f5
   WHERE ((f57.link_id = f5.sub_id) AND ((f5.rpt_tp)::text = ANY (ARRAY[('24'::character varying)::text, ('48'::character varying)::text])) AND ((f57.amndt_ind)::text <> 'D'::text) AND (f57.delete_ind IS NULL) AND (f5.delete_ind IS NULL));
 
-ALTER TABLE fec_f57_notice_vw OWNER TO postgres;
 
 CREATE TABLE fec_fitem_f57_queue_new (
     filer_cmte_id character varying(9),
@@ -6694,7 +6474,6 @@ CREATE TABLE fec_fitem_f57_queue_new (
     election_cycle numeric(4,0)
 );
 
-ALTER TABLE fec_fitem_f57_queue_new OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f57 (
     filer_cmte_id character varying(9),
@@ -6760,7 +6539,6 @@ CREATE TABLE fec_vsum_f57 (
     election_cycle numeric(4,0)
 );
 
-ALTER TABLE fec_vsum_f57 OWNER TO postgres;
 
 CREATE VIEW fec_fitem_f57_vw AS
  SELECT fec_vsum_f57.filer_cmte_id,
@@ -6826,7 +6604,6 @@ CREATE VIEW fec_fitem_f57_vw AS
     fec_vsum_f57.election_cycle
    FROM fec_vsum_f57;
 
-ALTER TABLE fec_fitem_f57_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f76 (
     org_id character varying(9),
@@ -6871,7 +6648,6 @@ CREATE TABLE fec_vsum_f76 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f76 OWNER TO postgres;
 
 CREATE VIEW fec_fitem_f76_vw AS
  SELECT fec_vsum_f76.org_id,
@@ -6916,7 +6692,6 @@ CREATE VIEW fec_fitem_f76_vw AS
     fec_vsum_f76.pg_date
    FROM fec_vsum_f76;
 
-ALTER TABLE fec_fitem_f76_vw OWNER TO postgres;
 
 CREATE VIEW fec_fitem_sched_a_vw AS
  SELECT sa.cmte_id,
@@ -6999,7 +6774,6 @@ CREATE VIEW fec_fitem_sched_a_vw AS
     disclosure.f_item_receipt_or_exp fi
   WHERE ((sa.sub_id = fi.sub_id) AND ((sa.amndt_ind)::text <> 'D'::text) AND (sa.delete_ind IS NULL));
 
-ALTER TABLE fec_fitem_sched_a_vw OWNER TO postgres;
 
 CREATE VIEW fec_fitem_sched_b_vw AS
  SELECT sb.cmte_id,
@@ -7086,7 +6860,6 @@ CREATE VIEW fec_fitem_sched_b_vw AS
     disclosure.f_item_receipt_or_exp fi
   WHERE ((sb.sub_id = fi.sub_id) AND ((sb.amndt_ind)::text <> 'D'::text) AND (sb.delete_ind IS NULL));
 
-ALTER TABLE fec_fitem_sched_b_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_c (
     cmte_id character varying(9),
@@ -7153,7 +6926,6 @@ CREATE TABLE fec_vsum_sched_c (
     loan_source_name_text tsvector
 );
 
-ALTER TABLE fec_vsum_sched_c OWNER TO postgres;
 
 CREATE VIEW fec_fitem_sched_c_vw AS
  SELECT fec_vsum_sched_c.cmte_id,
@@ -7217,7 +6989,6 @@ CREATE VIEW fec_fitem_sched_c_vw AS
     fec_vsum_sched_c.loan_name
    FROM fec_vsum_sched_c;
 
-ALTER TABLE fec_fitem_sched_c_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_d (
     cmte_id character varying(9),
@@ -7274,7 +7045,6 @@ CREATE TABLE fec_vsum_sched_d (
     creditor_debtor_name_text tsvector
 );
 
-ALTER TABLE fec_vsum_sched_d OWNER TO postgres;
 
 CREATE VIEW fec_fitem_sched_d_vw AS
  SELECT fec_vsum_sched_d.cmte_id,
@@ -7331,7 +7101,6 @@ CREATE VIEW fec_fitem_sched_d_vw AS
     fec_vsum_sched_d.pg_date
    FROM fec_vsum_sched_d;
 
-ALTER TABLE fec_fitem_sched_d_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_e (
     cmte_id character varying(9),
@@ -7413,7 +7182,6 @@ CREATE TABLE fec_vsum_sched_e (
     election_cycle numeric(4,0)
 );
 
-ALTER TABLE fec_vsum_sched_e OWNER TO postgres;
 
 CREATE VIEW fec_fitem_sched_e_vw AS
  SELECT fec_vsum_sched_e.cmte_id,
@@ -7495,7 +7263,6 @@ CREATE VIEW fec_fitem_sched_e_vw AS
     fec_vsum_sched_e.election_cycle
    FROM fec_vsum_sched_e;
 
-ALTER TABLE fec_fitem_sched_e_vw OWNER TO postgres;
 
 CREATE TABLE fec_fitem_sched_f_vw (
     cmte_id character varying(9),
@@ -7576,7 +7343,6 @@ CREATE TABLE fec_fitem_sched_f_vw (
     payee_name_text tsvector
 );
 
-ALTER TABLE fec_fitem_sched_f_vw OWNER TO postgres;
 
 CREATE VIEW fec_sched_e_notice_vw AS
  SELECT se.cmte_id,
@@ -7669,7 +7435,6 @@ CREATE VIEW fec_sched_e_notice_vw AS
     disclosure.nml_form_24 f24
   WHERE ((se.link_id = f24.sub_id) AND (f24.delete_ind IS NULL) AND (se.delete_ind IS NULL) AND ((se.amndt_ind)::text <> 'D'::text));
 
-ALTER TABLE fec_sched_e_notice_vw OWNER TO postgres;
 
 CREATE TABLE fec_viewer_disable_trans_link (
     cand_cmte_id character varying(9),
@@ -7678,7 +7443,6 @@ CREATE TABLE fec_viewer_disable_trans_link (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_viewer_disable_trans_link OWNER TO postgres;
 
 CREATE TABLE fec_viewer_independent_exp (
     sub_id numeric(19,0) NOT NULL,
@@ -7726,7 +7490,6 @@ CREATE TABLE fec_viewer_independent_exp (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_viewer_independent_exp OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f1 (
     cmte_id character varying(9),
@@ -7863,7 +7626,6 @@ CREATE TABLE fec_vsum_f1 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f1 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f105 (
     filer_cmte_id character varying(9),
@@ -7889,7 +7651,6 @@ CREATE TABLE fec_vsum_f105 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f105 OWNER TO postgres;
 
 CREATE VIEW fec_vsum_f1_vw AS
  SELECT fec_vsum_f1.cmte_id,
@@ -8026,7 +7787,6 @@ CREATE VIEW fec_vsum_f1_vw AS
     fec_vsum_f1.pg_date
    FROM fec_vsum_f1;
 
-ALTER TABLE fec_vsum_f1_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f2 (
     cand_id character varying(9),
@@ -8096,7 +7856,6 @@ CREATE TABLE fec_vsum_f2 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f2 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f3 (
     cmte_id character varying(9),
@@ -8226,7 +7985,6 @@ CREATE TABLE fec_vsum_f3 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f3 OWNER TO postgres;
 
 CREATE VIEW fec_vsum_f3_vw AS
  SELECT fec_vsum_f3.cmte_id,
@@ -8356,7 +8114,6 @@ CREATE VIEW fec_vsum_f3_vw AS
     fec_vsum_f3.pg_date
    FROM fec_vsum_f3;
 
-ALTER TABLE fec_vsum_f3_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f3p (
     cmte_id character varying(9),
@@ -8588,7 +8345,6 @@ CREATE TABLE fec_vsum_f3p (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f3p OWNER TO postgres;
 
 CREATE VIEW fec_vsum_f3p_vw AS
  SELECT fec_vsum_f3p.cmte_id,
@@ -8820,7 +8576,6 @@ CREATE VIEW fec_vsum_f3p_vw AS
     fec_vsum_f3p.pg_date
    FROM fec_vsum_f3p;
 
-ALTER TABLE fec_vsum_f3p_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f3ps (
     cmte_id character varying(9),
@@ -8929,7 +8684,6 @@ CREATE TABLE fec_vsum_f3ps (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f3ps OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f3s (
     cmte_id character varying(9),
@@ -8983,7 +8737,6 @@ CREATE TABLE fec_vsum_f3s (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f3s OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f3x (
     cmte_id character varying(9),
@@ -9134,7 +8887,6 @@ CREATE TABLE fec_vsum_f3x (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f3x OWNER TO postgres;
 
 CREATE VIEW fec_vsum_f3x_vw AS
  SELECT fec_vsum_f3x.cmte_id,
@@ -9285,7 +9037,6 @@ CREATE VIEW fec_vsum_f3x_vw AS
     fec_vsum_f3x.pg_date
    FROM fec_vsum_f3x;
 
-ALTER TABLE fec_vsum_f3x_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f3z (
     pcc_id character varying(9),
@@ -9337,7 +9088,6 @@ CREATE TABLE fec_vsum_f3z (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f3z OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f5 (
     indv_org_id character varying(9),
@@ -9394,7 +9144,6 @@ CREATE TABLE fec_vsum_f5 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f5 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f56 (
     filer_cmte_id character varying(9),
@@ -9446,7 +9195,6 @@ CREATE TABLE fec_vsum_f56 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f56 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f57_queue_new (
     filer_cmte_id character varying(9),
@@ -9512,7 +9260,6 @@ CREATE TABLE fec_vsum_f57_queue_new (
     election_cycle numeric(4,0)
 );
 
-ALTER TABLE fec_vsum_f57_queue_new OWNER TO postgres;
 
 CREATE VIEW fec_vsum_f5_vw AS
  SELECT fec_vsum_f5.indv_org_id,
@@ -9569,7 +9316,6 @@ CREATE VIEW fec_vsum_f5_vw AS
     fec_vsum_f5.pg_date
    FROM fec_vsum_f5;
 
-ALTER TABLE fec_vsum_f5_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f7 (
     org_id character varying(9),
@@ -9616,7 +9362,6 @@ CREATE TABLE fec_vsum_f7 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f7 OWNER TO postgres;
 
 CREATE VIEW fec_vsum_f7_vw AS
  SELECT f7.org_id,
@@ -9666,7 +9411,6 @@ CREATE VIEW fec_vsum_f7_vw AS
    FROM (disclosure.nml_form_7 f7
      LEFT JOIN disclosure.v_sum_and_det_sum_report vs ON ((f7.sub_id = vs.orig_sub_id)));
 
-ALTER TABLE fec_vsum_f7_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f9 (
     cmte_id character varying(9),
@@ -9737,7 +9481,6 @@ CREATE TABLE fec_vsum_f9 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f9 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f91 (
     filer_cmte_id character varying(9),
@@ -9772,7 +9515,6 @@ CREATE TABLE fec_vsum_f91 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f91 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_f94 (
     filer_cmte_id character varying(9),
@@ -9811,7 +9553,6 @@ CREATE TABLE fec_vsum_f94 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_f94 OWNER TO postgres;
 
 CREATE VIEW fec_vsum_f9_vw AS
  SELECT f9.cmte_id,
@@ -9885,7 +9626,6 @@ CREATE VIEW fec_vsum_f9_vw AS
    FROM (disclosure.nml_form_9 f9
      LEFT JOIN disclosure.v_sum_and_det_sum_report vs ON ((f9.sub_id = vs.orig_sub_id)));
 
-ALTER TABLE fec_vsum_f9_vw OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_a (
     cmte_id character varying(9),
@@ -9961,7 +9701,6 @@ CREATE TABLE fec_vsum_sched_a (
     election_cycle numeric(4,0)
 );
 
-ALTER TABLE fec_vsum_sched_a OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_b (
     cmte_id character varying(9),
@@ -10038,7 +9777,6 @@ CREATE TABLE fec_vsum_sched_b (
     election_cycle numeric(4,0)
 );
 
-ALTER TABLE fec_vsum_sched_b OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_c1 (
     cmte_id character varying(9),
@@ -10110,7 +9848,6 @@ CREATE TABLE fec_vsum_sched_c1 (
     election_cycle numeric(4,0)
 );
 
-ALTER TABLE fec_vsum_sched_c1 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_h1 (
     filer_cmte_id character varying(9),
@@ -10167,7 +9904,6 @@ CREATE TABLE fec_vsum_sched_h1 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_h1 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_h2 (
     filer_cmte_id character varying(9),
@@ -10197,7 +9933,6 @@ CREATE TABLE fec_vsum_sched_h2 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_h2 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_h3 (
     filer_cmte_id character varying(9),
@@ -10228,7 +9963,6 @@ CREATE TABLE fec_vsum_sched_h3 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_h3 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_h4 (
     filer_cmte_id character varying(9),
@@ -10306,7 +10040,6 @@ CREATE TABLE fec_vsum_sched_h4 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_h4 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_h5 (
     filer_cmte_id character varying(9),
@@ -10336,7 +10069,6 @@ CREATE TABLE fec_vsum_sched_h5 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_h5 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_h6 (
     filer_cmte_id character varying(9),
@@ -10409,7 +10141,6 @@ CREATE TABLE fec_vsum_sched_h6 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_h6 OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_i (
     filer_cmte_id character varying(9),
@@ -10459,7 +10190,6 @@ CREATE TABLE fec_vsum_sched_i (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_i OWNER TO postgres;
 
 CREATE TABLE fec_vsum_sched_l (
     filer_cmte_id character varying(9),
@@ -10520,7 +10250,6 @@ CREATE TABLE fec_vsum_sched_l (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE fec_vsum_sched_l OWNER TO postgres;
 
 CREATE VIEW fec_vsumcolumns_f3p_vw AS
  SELECT vs.cmte_id,
@@ -10569,7 +10298,6 @@ CREATE VIEW fec_vsumcolumns_f3p_vw AS
     vs.orig_sub_id AS sub_id
    FROM disclosure.v_sum_and_det_sum_report vs;
 
-ALTER TABLE fec_vsumcolumns_f3p_vw OWNER TO postgres;
 
 CREATE VIEW fec_vsumcolumns_f3x_vw AS
  SELECT vs.cmte_id,
@@ -10625,7 +10353,6 @@ CREATE VIEW fec_vsumcolumns_f3x_vw AS
     vs.orig_sub_id AS sub_id
    FROM disclosure.v_sum_and_det_sum_report vs;
 
-ALTER TABLE fec_vsumcolumns_f3x_vw OWNER TO postgres;
 
 CREATE VIEW fec_vsumcolumns_f5_vw AS
  SELECT vs.cmte_id AS indv_org_id,
@@ -10644,7 +10371,6 @@ CREATE VIEW fec_vsumcolumns_f5_vw AS
    FROM disclosure.v_sum_and_det_sum_report vs
   WHERE ((vs.rpt_tp)::text <> ALL (ARRAY[('24'::character varying)::text, ('48'::character varying)::text]));
 
-ALTER TABLE fec_vsumcolumns_f5_vw OWNER TO postgres;
 
 CREATE TABLE filtertab (
     query_id numeric,
@@ -10654,7 +10380,6 @@ CREATE TABLE filtertab (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE filtertab OWNER TO postgres;
 
 CREATE TABLE form_5 (
     form_5_sk numeric(10,0) NOT NULL,
@@ -10715,7 +10440,6 @@ CREATE TABLE form_5 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE form_5 OWNER TO postgres;
 
 CREATE TABLE form_57 (
     form_57_sk numeric(10,0) NOT NULL,
@@ -10776,7 +10500,6 @@ CREATE TABLE form_57 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE form_57 OWNER TO postgres;
 
 CREATE TABLE form_7 (
     form_7_sk numeric(10,0) NOT NULL,
@@ -10823,7 +10546,6 @@ CREATE TABLE form_7 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE form_7 OWNER TO postgres;
 
 CREATE TABLE form_76 (
     form_76_sk numeric(10,0) NOT NULL,
@@ -10863,7 +10585,6 @@ CREATE TABLE form_76 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE form_76 OWNER TO postgres;
 
 CREATE TABLE form_9 (
     form_9_sk numeric(10,0) NOT NULL,
@@ -10935,7 +10656,6 @@ CREATE TABLE form_9 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE form_9 OWNER TO postgres;
 
 CREATE TABLE form_91 (
     form_91_sk numeric(10,0) NOT NULL,
@@ -10970,7 +10690,6 @@ CREATE TABLE form_91 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE form_91 OWNER TO postgres;
 
 CREATE TABLE form_94 (
     form_94_sk numeric(10,0) NOT NULL,
@@ -11007,7 +10726,6 @@ CREATE TABLE form_94 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE form_94 OWNER TO postgres;
 
 CREATE TABLE jd_nml_form_76_test (
     sub_id numeric(19,0) NOT NULL,
@@ -11054,7 +10772,6 @@ CREATE TABLE jd_nml_form_76_test (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE jd_nml_form_76_test OWNER TO postgres;
 
 CREATE TABLE lobbyist_data_view (
     begin_image_num character varying(18),
@@ -11065,14 +10782,12 @@ CREATE TABLE lobbyist_data_view (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE lobbyist_data_view OWNER TO postgres;
 
 CREATE TABLE mahi_test (
     t1 date,
     t2 timestamp without time zone
 );
 
-ALTER TABLE mahi_test OWNER TO postgres;
 
 CREATE TABLE map_states (
     st_desc character varying(40),
@@ -11080,7 +10795,6 @@ CREATE TABLE map_states (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE map_states OWNER TO postgres;
 
 CREATE TABLE markuptab (
     query_id numeric,
@@ -11088,7 +10802,6 @@ CREATE TABLE markuptab (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE markuptab OWNER TO postgres;
 
 CREATE TABLE mv_portal_pac_graph (
     fec_election_yr numeric(4,0),
@@ -11109,7 +10822,6 @@ CREATE TABLE mv_portal_pac_graph (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE mv_portal_pac_graph OWNER TO postgres;
 
 CREATE TABLE mv_portal_pac_summary (
     fec_election_yr character varying(32),
@@ -11163,7 +10875,6 @@ CREATE TABLE mv_portal_pac_summary (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE mv_portal_pac_summary OWNER TO postgres;
 
 CREATE TABLE mv_portal_pty_summary (
     fec_election_yr numeric(4,0) NOT NULL,
@@ -11217,7 +10928,6 @@ CREATE TABLE mv_portal_pty_summary (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE mv_portal_pty_summary OWNER TO postgres;
 
 CREATE TABLE mv_pres_cand_cmte_sched_state (
     cand_id character varying(9),
@@ -11228,7 +10938,6 @@ CREATE TABLE mv_pres_cand_cmte_sched_state (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE mv_pres_cand_cmte_sched_state OWNER TO postgres;
 
 CREATE TABLE nightly_process_error_log (
     code numeric(9,0),
@@ -11239,7 +10948,6 @@ CREATE TABLE nightly_process_error_log (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nightly_process_error_log OWNER TO postgres;
 
 CREATE TABLE nml_form_13 (
     sub_id numeric(19,0) NOT NULL,
@@ -11282,7 +10990,6 @@ CREATE TABLE nml_form_13 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nml_form_13 OWNER TO postgres;
 
 CREATE TABLE nml_form_4 (
     sub_id numeric(19,0) NOT NULL,
@@ -11390,7 +11097,6 @@ CREATE TABLE nml_form_4 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nml_form_4 OWNER TO postgres;
 
 CREATE TABLE nml_form_76 (
     sub_id numeric(19,0) NOT NULL,
@@ -11437,7 +11143,6 @@ CREATE TABLE nml_form_76 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nml_form_76 OWNER TO postgres;
 
 CREATE TABLE nml_form_9 (
     form_tp character varying(8),
@@ -11510,7 +11215,6 @@ CREATE TABLE nml_form_9 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE nml_form_9 OWNER TO postgres;
 
 CREATE TABLE operations_log (
     sub_id numeric(19,0) NOT NULL,
@@ -11560,7 +11264,6 @@ CREATE TABLE operations_log (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE operations_log OWNER TO postgres;
 
 CREATE TABLE original_rfai (
     ref_sub_id numeric(19,0),
@@ -11568,7 +11271,6 @@ CREATE TABLE original_rfai (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE original_rfai OWNER TO postgres;
 
 CREATE TABLE players (
     player_id numeric NOT NULL,
@@ -11578,7 +11280,6 @@ CREATE TABLE players (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE players OWNER TO postgres;
 
 CREATE TABLE pres_ca_cm_sched_a_join_16 (
     cand_id character varying(9),
@@ -11589,7 +11290,6 @@ CREATE TABLE pres_ca_cm_sched_a_join_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_ca_cm_sched_a_join_16 OWNER TO postgres;
 
 CREATE TABLE pres_ca_cm_sched_a_join_arc (
     cand_id character varying(9),
@@ -11600,7 +11300,6 @@ CREATE TABLE pres_ca_cm_sched_a_join_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_ca_cm_sched_a_join_arc OWNER TO postgres;
 
 CREATE TABLE pres_ca_cm_sched_link_sum_16 (
     contb_range_id numeric(2,0),
@@ -11609,7 +11308,6 @@ CREATE TABLE pres_ca_cm_sched_link_sum_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_ca_cm_sched_link_sum_16 OWNER TO postgres;
 
 CREATE TABLE pres_ca_cm_sched_link_sum_arc (
     contb_range_id numeric(2,0),
@@ -11618,7 +11316,6 @@ CREATE TABLE pres_ca_cm_sched_link_sum_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_ca_cm_sched_link_sum_arc OWNER TO postgres;
 
 CREATE TABLE pres_ca_cm_sched_state_16 (
     cand_id character varying(9),
@@ -11629,7 +11326,6 @@ CREATE TABLE pres_ca_cm_sched_state_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_ca_cm_sched_state_16 OWNER TO postgres;
 
 CREATE TABLE pres_ca_cm_sched_state_arc (
     cand_id character varying(9),
@@ -11640,7 +11336,6 @@ CREATE TABLE pres_ca_cm_sched_state_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_ca_cm_sched_state_arc OWNER TO postgres;
 
 CREATE TABLE pres_cand_cmte_sched_a_join (
     cand_id character varying(9),
@@ -11651,7 +11346,6 @@ CREATE TABLE pres_cand_cmte_sched_a_join (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_cand_cmte_sched_a_join OWNER TO postgres;
 
 CREATE TABLE pres_cand_cmte_sched_link_sum (
     contb_range_id numeric(2,0),
@@ -11660,7 +11354,6 @@ CREATE TABLE pres_cand_cmte_sched_link_sum (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_cand_cmte_sched_link_sum OWNER TO postgres;
 
 CREATE TABLE pres_f3p_totals_ca_cm_link_16 (
     pr_link_id numeric(12,0) NOT NULL,
@@ -11723,7 +11416,6 @@ CREATE TABLE pres_f3p_totals_ca_cm_link_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_f3p_totals_ca_cm_link_16 OWNER TO postgres;
 
 CREATE TABLE pres_f3p_totals_ca_cm_link_arc (
     pr_link_id numeric(12,0) NOT NULL,
@@ -11786,7 +11478,6 @@ CREATE TABLE pres_f3p_totals_ca_cm_link_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_f3p_totals_ca_cm_link_arc OWNER TO postgres;
 
 CREATE TABLE pres_f3p_totals_cand_cmte_link (
     pr_link_id numeric(12,0) NOT NULL,
@@ -11849,7 +11540,6 @@ CREATE TABLE pres_f3p_totals_cand_cmte_link (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_f3p_totals_cand_cmte_link OWNER TO postgres;
 
 CREATE TABLE pres_nml_ca_cm_link_16 (
     pr_link_id numeric(12,0) NOT NULL,
@@ -11866,7 +11556,6 @@ CREATE TABLE pres_nml_ca_cm_link_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_ca_cm_link_16 OWNER TO postgres;
 
 CREATE TABLE pres_nml_ca_cm_link_arc (
     pr_link_id numeric(12,0) NOT NULL,
@@ -11883,7 +11572,6 @@ CREATE TABLE pres_nml_ca_cm_link_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_ca_cm_link_arc OWNER TO postgres;
 
 CREATE TABLE pres_nml_cand_cmte_link (
     pr_link_id numeric(12,0) NOT NULL,
@@ -11900,7 +11588,6 @@ CREATE TABLE pres_nml_cand_cmte_link (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_cand_cmte_link OWNER TO postgres;
 
 CREATE TABLE pres_nml_f3p_totals_16 (
     cand_id character varying(9) NOT NULL,
@@ -11955,7 +11642,6 @@ CREATE TABLE pres_nml_f3p_totals_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_f3p_totals_16 OWNER TO postgres;
 
 CREATE TABLE pres_nml_f3p_totals_arc (
     cand_id character varying(9) NOT NULL,
@@ -12010,7 +11696,6 @@ CREATE TABLE pres_nml_f3p_totals_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_f3p_totals_arc OWNER TO postgres;
 
 CREATE TABLE pres_nml_form_3p (
     file_num numeric(7,0),
@@ -12128,7 +11813,6 @@ CREATE TABLE pres_nml_form_3p (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_form_3p OWNER TO postgres;
 
 CREATE TABLE pres_nml_form_3p_16 (
     file_num numeric(7,0),
@@ -12246,7 +11930,6 @@ CREATE TABLE pres_nml_form_3p_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_form_3p_16 OWNER TO postgres;
 
 CREATE TABLE pres_nml_form_3p_arc (
     file_num numeric(7,0),
@@ -12364,7 +12047,6 @@ CREATE TABLE pres_nml_form_3p_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_form_3p_arc OWNER TO postgres;
 
 CREATE TABLE pres_nml_form_3p_totals (
     cand_id character varying(9) NOT NULL,
@@ -12419,7 +12101,6 @@ CREATE TABLE pres_nml_form_3p_totals (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_form_3p_totals OWNER TO postgres;
 
 CREATE TABLE pres_nml_sched_a (
     file_num numeric(7,0),
@@ -12456,7 +12137,6 @@ CREATE TABLE pres_nml_sched_a (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_sched_a OWNER TO postgres;
 
 CREATE TABLE pres_nml_sched_a_16 (
     file_num numeric(7,0),
@@ -12493,7 +12173,6 @@ CREATE TABLE pres_nml_sched_a_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_sched_a_16 OWNER TO postgres;
 
 CREATE TABLE pres_nml_sched_a_arc (
     file_num numeric(7,0),
@@ -12530,7 +12209,6 @@ CREATE TABLE pres_nml_sched_a_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_sched_a_arc OWNER TO postgres;
 
 CREATE TABLE pres_nml_sched_b (
     file_num numeric(7,0),
@@ -12564,7 +12242,6 @@ CREATE TABLE pres_nml_sched_b (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_sched_b OWNER TO postgres;
 
 CREATE TABLE pres_nml_sched_b_16 (
     file_num numeric(7,0),
@@ -12598,7 +12275,6 @@ CREATE TABLE pres_nml_sched_b_16 (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_sched_b_16 OWNER TO postgres;
 
 CREATE TABLE pres_nml_sched_b_arc (
     file_num numeric(7,0),
@@ -12632,7 +12308,6 @@ CREATE TABLE pres_nml_sched_b_arc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE pres_nml_sched_b_arc OWNER TO postgres;
 
 CREATE TABLE program_active_cycles (
     program_name character varying(30) NOT NULL,
@@ -12644,7 +12319,6 @@ CREATE TABLE program_active_cycles (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE program_active_cycles OWNER TO postgres;
 
 CREATE TABLE real_efile_f1 (
     repid numeric,
@@ -12751,7 +12425,6 @@ CREATE TABLE real_efile_f1 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f1 OWNER TO postgres;
 
 CREATE TABLE real_efile_f10 (
     repid numeric(12,0),
@@ -12787,7 +12460,6 @@ CREATE TABLE real_efile_f10 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f10 OWNER TO postgres;
 
 CREATE TABLE real_efile_f105 (
     repid numeric(12,0),
@@ -12804,7 +12476,6 @@ CREATE TABLE real_efile_f105 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f105 OWNER TO postgres;
 
 CREATE TABLE real_efile_f13 (
     repid numeric(12,0),
@@ -12833,7 +12504,6 @@ CREATE TABLE real_efile_f13 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f13 OWNER TO postgres;
 
 CREATE TABLE real_efile_f132 (
     repid numeric(12,0),
@@ -12864,7 +12534,6 @@ CREATE TABLE real_efile_f132 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f132 OWNER TO postgres;
 
 CREATE TABLE real_efile_f133 (
     repid numeric(12,0),
@@ -12894,7 +12563,6 @@ CREATE TABLE real_efile_f133 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f133 OWNER TO postgres;
 
 CREATE TABLE real_efile_f1m (
     repid numeric(12,0),
@@ -12972,7 +12640,6 @@ CREATE TABLE real_efile_f1m (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f1m OWNER TO postgres;
 
 CREATE TABLE real_efile_f1s (
     repid numeric(12,0),
@@ -13016,7 +12683,6 @@ CREATE TABLE real_efile_f1s (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f1s OWNER TO postgres;
 
 CREATE TABLE real_efile_f2 (
     repid numeric(12,0),
@@ -13063,7 +12729,6 @@ CREATE TABLE real_efile_f2 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f2 OWNER TO postgres;
 
 CREATE TABLE real_efile_f24 (
     repid numeric(12,0),
@@ -13085,7 +12750,6 @@ CREATE TABLE real_efile_f24 (
     imageno numeric(19,0)
 );
 
-ALTER TABLE real_efile_f24 OWNER TO postgres;
 
 CREATE TABLE real_efile_f2s (
     repid numeric(12,0),
@@ -13101,7 +12765,6 @@ CREATE TABLE real_efile_f2s (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f2s OWNER TO postgres;
 
 CREATE TABLE real_efile_f3 (
     repid numeric(12,0),
@@ -13143,7 +12806,6 @@ CREATE TABLE real_efile_f3 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f3 OWNER TO postgres;
 
 CREATE TABLE real_efile_f3l (
     repid numeric(12,0),
@@ -13177,7 +12839,6 @@ CREATE TABLE real_efile_f3l (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f3l OWNER TO postgres;
 
 CREATE TABLE real_efile_f3p (
     repid numeric(12,0) NOT NULL,
@@ -13217,7 +12878,6 @@ CREATE TABLE real_efile_f3p (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f3p OWNER TO postgres;
 
 CREATE TABLE real_efile_f3ps (
     repid numeric(12,0),
@@ -13228,7 +12888,6 @@ CREATE TABLE real_efile_f3ps (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f3ps OWNER TO postgres;
 
 CREATE TABLE real_efile_f3s (
     repid numeric(12,0),
@@ -13239,7 +12898,6 @@ CREATE TABLE real_efile_f3s (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f3s OWNER TO postgres;
 
 CREATE TABLE real_efile_f3x (
     repid numeric(12,0) NOT NULL,
@@ -13269,7 +12927,6 @@ CREATE TABLE real_efile_f3x (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f3x OWNER TO postgres;
 
 CREATE TABLE real_efile_f3z (
     repid numeric(12,0),
@@ -13313,7 +12970,6 @@ CREATE TABLE real_efile_f3z (
     imageno timestamp without time zone
 );
 
-ALTER TABLE real_efile_f3z OWNER TO postgres;
 
 CREATE TABLE real_efile_f4 (
     repid numeric(12,0),
@@ -13340,7 +12996,6 @@ CREATE TABLE real_efile_f4 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f4 OWNER TO postgres;
 
 CREATE TABLE real_efile_f5 (
     repid numeric(12,0),
@@ -13386,7 +13041,6 @@ CREATE TABLE real_efile_f5 (
     imageno timestamp without time zone
 );
 
-ALTER TABLE real_efile_f5 OWNER TO postgres;
 
 CREATE TABLE real_efile_f56 (
     repid numeric(12,0),
@@ -13425,7 +13079,6 @@ CREATE TABLE real_efile_f56 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f56 OWNER TO postgres;
 
 CREATE TABLE real_efile_f57 (
     repid numeric(12,0),
@@ -13478,7 +13131,6 @@ CREATE TABLE real_efile_f57 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f57 OWNER TO postgres;
 
 CREATE TABLE real_efile_f6 (
     repid numeric(12,0),
@@ -13508,7 +13160,6 @@ CREATE TABLE real_efile_f6 (
     imageno timestamp without time zone
 );
 
-ALTER TABLE real_efile_f6 OWNER TO postgres;
 
 CREATE TABLE real_efile_f65 (
     repid numeric(12,0),
@@ -13547,7 +13198,6 @@ CREATE TABLE real_efile_f65 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f65 OWNER TO postgres;
 
 CREATE TABLE real_efile_f7 (
     repid numeric(12,0),
@@ -13576,7 +13226,6 @@ CREATE TABLE real_efile_f7 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f7 OWNER TO postgres;
 
 CREATE TABLE real_efile_f76 (
     repid numeric(12,0),
@@ -13605,7 +13254,6 @@ CREATE TABLE real_efile_f76 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f76 OWNER TO postgres;
 
 CREATE TABLE real_efile_f8 (
     repid numeric(12,0),
@@ -13648,7 +13296,6 @@ CREATE TABLE real_efile_f8 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f8 OWNER TO postgres;
 
 CREATE TABLE real_efile_f8ii (
     repid numeric(12,0),
@@ -13698,7 +13345,6 @@ CREATE TABLE real_efile_f8ii (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f8ii OWNER TO postgres;
 
 CREATE TABLE real_efile_f8iii (
     repid numeric(12,0),
@@ -13736,7 +13382,6 @@ CREATE TABLE real_efile_f8iii (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f8iii OWNER TO postgres;
 
 CREATE TABLE real_efile_f9 (
     repid numeric(12,0),
@@ -13787,7 +13432,6 @@ CREATE TABLE real_efile_f9 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f9 OWNER TO postgres;
 
 CREATE TABLE real_efile_f91 (
     repid numeric(12,0),
@@ -13811,7 +13455,6 @@ CREATE TABLE real_efile_f91 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f91 OWNER TO postgres;
 
 CREATE TABLE real_efile_f92 (
     repid numeric(12,0),
@@ -13867,7 +13510,6 @@ CREATE TABLE real_efile_f92 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f92 OWNER TO postgres;
 
 CREATE TABLE real_efile_f93 (
     repid numeric(12,0),
@@ -13924,7 +13566,6 @@ CREATE TABLE real_efile_f93 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f93 OWNER TO postgres;
 
 CREATE TABLE real_efile_f94 (
     repid numeric(12,0),
@@ -13949,7 +13590,6 @@ CREATE TABLE real_efile_f94 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f94 OWNER TO postgres;
 
 CREATE TABLE real_efile_f99 (
     repid numeric(12,0),
@@ -13971,7 +13611,6 @@ CREATE TABLE real_efile_f99 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_f99 OWNER TO postgres;
 
 CREATE TABLE real_efile_guarantors (
     repid numeric(12,0),
@@ -13997,7 +13636,6 @@ CREATE TABLE real_efile_guarantors (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_guarantors OWNER TO postgres;
 
 CREATE TABLE real_efile_h1 (
     repid numeric(12,0),
@@ -14046,7 +13684,6 @@ CREATE TABLE real_efile_h1 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_h1 OWNER TO postgres;
 
 CREATE TABLE real_efile_h2 (
     repid numeric(12,0),
@@ -14067,7 +13704,6 @@ CREATE TABLE real_efile_h2 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_h2 OWNER TO postgres;
 
 CREATE TABLE real_efile_h3 (
     repid numeric(12,0),
@@ -14088,7 +13724,6 @@ CREATE TABLE real_efile_h3 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_h3 OWNER TO postgres;
 
 CREATE TABLE real_efile_h4_2 (
     repid numeric(12,0),
@@ -14132,7 +13767,6 @@ CREATE TABLE real_efile_h4_2 (
     upr_tran_id character varying(32)
 );
 
-ALTER TABLE real_efile_h4_2 OWNER TO postgres;
 
 CREATE TABLE real_efile_h5 (
     repid numeric(12,0),
@@ -14155,7 +13789,6 @@ CREATE TABLE real_efile_h5 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_h5 OWNER TO postgres;
 
 CREATE TABLE real_efile_h6 (
     repid numeric(12,0),
@@ -14211,7 +13844,6 @@ CREATE TABLE real_efile_h6 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_h6 OWNER TO postgres;
 
 CREATE TABLE real_efile_i_sum (
     repid numeric(12,0),
@@ -14222,7 +13854,6 @@ CREATE TABLE real_efile_i_sum (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_i_sum OWNER TO postgres;
 
 CREATE TABLE real_efile_sa7 (
     repid numeric(12,0),
@@ -14282,7 +13913,6 @@ CREATE TABLE real_efile_sa7 (
     contributor_occupation_text tsvector
 );
 
-ALTER TABLE real_efile_sa7 OWNER TO postgres;
 
 CREATE TABLE real_efile_sb4 (
     repid numeric(12,0),
@@ -14338,7 +13968,6 @@ CREATE TABLE real_efile_sb4 (
     used character(1)
 );
 
-ALTER TABLE real_efile_sb4 OWNER TO postgres;
 
 CREATE TABLE real_efile_sc (
     repid numeric(12,0),
@@ -14386,7 +14015,6 @@ CREATE TABLE real_efile_sc (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_sc OWNER TO postgres;
 
 CREATE TABLE real_efile_sc1 (
     repid numeric(12,0),
@@ -14445,7 +14073,6 @@ CREATE TABLE real_efile_sc1 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_sc1 OWNER TO postgres;
 
 CREATE TABLE real_efile_se (
     repid numeric(12,0),
@@ -14517,7 +14144,6 @@ CREATE TABLE real_efile_se (
     dissem_dt date
 );
 
-ALTER TABLE real_efile_se OWNER TO postgres;
 
 CREATE VIEW real_efile_schedule_e_reports AS
  SELECT se.repid,
@@ -14600,7 +14226,6 @@ CREATE VIEW real_efile_schedule_e_reports AS
    FROM (real_efile_se se
      JOIN real_efile_reps reps ON ((se.repid = reps.repid)));
 
-ALTER TABLE real_efile_schedule_e_reports OWNER TO postgres;
 
 CREATE TABLE real_efile_sd (
     repid numeric(12,0),
@@ -14641,7 +14266,6 @@ CREATE TABLE real_efile_sd (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_sd OWNER TO postgres;
 
 CREATE VIEW real_efile_se_f57_vw AS
  SELECT real_efile_f57.repid,
@@ -14782,7 +14406,6 @@ UNION ALL
     real_efile_se.dissem_dt
    FROM real_efile_se;
 
-ALTER TABLE real_efile_se_f57_vw OWNER TO postgres;
 
 CREATE TABLE real_efile_sf (
     repid numeric(12,0),
@@ -14843,7 +14466,6 @@ CREATE TABLE real_efile_sf (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_sf OWNER TO postgres;
 
 CREATE TABLE real_efile_si (
     repid numeric(12,0),
@@ -14860,7 +14482,6 @@ CREATE TABLE real_efile_si (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_si OWNER TO postgres;
 
 CREATE TABLE real_efile_sl (
     repid numeric(12,0),
@@ -14881,7 +14502,6 @@ CREATE TABLE real_efile_sl (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_sl OWNER TO postgres;
 
 CREATE TABLE real_efile_sl_sum (
     repid numeric(12,0),
@@ -14892,7 +14512,6 @@ CREATE TABLE real_efile_sl_sum (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_sl_sum OWNER TO postgres;
 
 CREATE TABLE real_efile_summary (
     repid numeric(12,0) NOT NULL,
@@ -14902,7 +14521,6 @@ CREATE TABLE real_efile_summary (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_summary OWNER TO postgres;
 
 CREATE TABLE real_efile_supsum (
     repid numeric(12,0),
@@ -14911,7 +14529,6 @@ CREATE TABLE real_efile_supsum (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_supsum OWNER TO postgres;
 
 CREATE TABLE real_efile_text (
     repid numeric(12,0),
@@ -14925,7 +14542,6 @@ CREATE TABLE real_efile_text (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE real_efile_text OWNER TO postgres;
 
 CREATE TABLE real_pfile_f1 (
     repid numeric(12,0),
@@ -15031,7 +14647,6 @@ CREATE TABLE real_pfile_f1 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f1 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f10 (
     repid numeric(12,0),
@@ -15067,7 +14682,6 @@ CREATE TABLE real_pfile_f10 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f10 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f105 (
     repid numeric(12,0),
@@ -15083,7 +14697,6 @@ CREATE TABLE real_pfile_f105 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f105 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f11 (
     repid numeric(12,0),
@@ -15130,7 +14743,6 @@ CREATE TABLE real_pfile_f11 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f11 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f12 (
     repid numeric(12,0),
@@ -15169,7 +14781,6 @@ CREATE TABLE real_pfile_f12 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f12 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f13 (
     repid numeric(12,0),
@@ -15200,7 +14811,6 @@ CREATE TABLE real_pfile_f13 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f13 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f132 (
     repid numeric(12,0),
@@ -15227,7 +14837,6 @@ CREATE TABLE real_pfile_f132 (
     memo_code character varying(1)
 );
 
-ALTER TABLE real_pfile_f132 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f133 (
     repid numeric(12,0),
@@ -15252,7 +14861,6 @@ CREATE TABLE real_pfile_f133 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f133 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f1m (
     repid numeric(12,0),
@@ -15327,7 +14935,6 @@ CREATE TABLE real_pfile_f1m (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f1m OWNER TO postgres;
 
 CREATE TABLE real_pfile_f1s (
     repid numeric(12,0),
@@ -15369,7 +14976,6 @@ CREATE TABLE real_pfile_f1s (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f1s OWNER TO postgres;
 
 CREATE TABLE real_pfile_f2 (
     repid numeric(12,0),
@@ -15416,7 +15022,6 @@ CREATE TABLE real_pfile_f2 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f2 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f24 (
     repid numeric(12,0),
@@ -15436,7 +15041,6 @@ CREATE TABLE real_pfile_f24 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f24 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f3 (
     repid numeric(12,0),
@@ -15479,7 +15083,6 @@ CREATE TABLE real_pfile_f3 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f3 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f3l (
     repid numeric(12,0),
@@ -15515,7 +15118,6 @@ CREATE TABLE real_pfile_f3l (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f3l OWNER TO postgres;
 
 CREATE TABLE real_pfile_f3p (
     repid numeric(12,0),
@@ -15557,7 +15159,6 @@ CREATE TABLE real_pfile_f3p (
     create_date date
 );
 
-ALTER TABLE real_pfile_f3p OWNER TO postgres;
 
 CREATE TABLE real_pfile_f3ps (
     repid numeric(12,0),
@@ -15567,7 +15168,6 @@ CREATE TABLE real_pfile_f3ps (
     imgno character varying(18)
 );
 
-ALTER TABLE real_pfile_f3ps OWNER TO postgres;
 
 CREATE TABLE real_pfile_f3s (
     repid numeric(12,0),
@@ -15578,7 +15178,6 @@ CREATE TABLE real_pfile_f3s (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f3s OWNER TO postgres;
 
 CREATE TABLE real_pfile_f3x (
     repid numeric(12,0),
@@ -15609,7 +15208,6 @@ CREATE TABLE real_pfile_f3x (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f3x OWNER TO postgres;
 
 CREATE TABLE real_pfile_f3z (
     repid numeric(12,0),
@@ -15653,7 +15251,6 @@ CREATE TABLE real_pfile_f3z (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f3z OWNER TO postgres;
 
 CREATE TABLE real_pfile_f4 (
     repid numeric(12,0),
@@ -15682,7 +15279,6 @@ CREATE TABLE real_pfile_f4 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f4 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f5 (
     repid numeric(12,0),
@@ -15724,7 +15320,6 @@ CREATE TABLE real_pfile_f5 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f5 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f56 (
     repid numeric(12,0),
@@ -15751,7 +15346,6 @@ CREATE TABLE real_pfile_f56 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f56 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f57 (
     repid numeric(12,0),
@@ -15789,7 +15383,6 @@ CREATE TABLE real_pfile_f57 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f57 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f6 (
     repid numeric(12,0),
@@ -15816,7 +15409,6 @@ CREATE TABLE real_pfile_f6 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f6 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f65 (
     repid numeric(12,0),
@@ -15842,7 +15434,6 @@ CREATE TABLE real_pfile_f65 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f65 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f7 (
     repid numeric(12,0),
@@ -15873,7 +15464,6 @@ CREATE TABLE real_pfile_f7 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f7 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f76 (
     repid numeric(12,0),
@@ -15899,7 +15489,6 @@ CREATE TABLE real_pfile_f76 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f76 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f8 (
     repid numeric(12,0),
@@ -15942,7 +15531,6 @@ CREATE TABLE real_pfile_f8 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f8 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f8ii (
     repid numeric(12,0),
@@ -15981,7 +15569,6 @@ CREATE TABLE real_pfile_f8ii (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f8ii OWNER TO postgres;
 
 CREATE TABLE real_pfile_f8iii (
     repid numeric(12,0),
@@ -16007,7 +15594,6 @@ CREATE TABLE real_pfile_f8iii (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f8iii OWNER TO postgres;
 
 CREATE TABLE real_pfile_f9 (
     repid numeric(12,0),
@@ -16060,7 +15646,6 @@ CREATE TABLE real_pfile_f9 (
     receipt_dt date
 );
 
-ALTER TABLE real_pfile_f9 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f91 (
     repid numeric(12,0),
@@ -16083,7 +15668,6 @@ CREATE TABLE real_pfile_f91 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f91 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f92 (
     repid numeric(12,0),
@@ -16108,7 +15692,6 @@ CREATE TABLE real_pfile_f92 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f92 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f93 (
     repid numeric(12,0),
@@ -16136,7 +15719,6 @@ CREATE TABLE real_pfile_f93 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f93 OWNER TO postgres;
 
 CREATE TABLE real_pfile_f94 (
     repid numeric(12,0),
@@ -16158,7 +15740,6 @@ CREATE TABLE real_pfile_f94 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_f94 OWNER TO postgres;
 
 CREATE TABLE real_pfile_h1 (
     repid numeric(12,0),
@@ -16179,7 +15760,6 @@ CREATE TABLE real_pfile_h1 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_h1 OWNER TO postgres;
 
 CREATE TABLE real_pfile_h2 (
     repid numeric(12,0),
@@ -16196,7 +15776,6 @@ CREATE TABLE real_pfile_h2 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_h2 OWNER TO postgres;
 
 CREATE TABLE real_pfile_h3 (
     repid numeric(12,0),
@@ -16213,7 +15792,6 @@ CREATE TABLE real_pfile_h3 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_h3 OWNER TO postgres;
 
 CREATE TABLE real_pfile_h4 (
     repid numeric(12,0),
@@ -16251,7 +15829,6 @@ CREATE TABLE real_pfile_h4 (
     memo_desc character varying(100)
 );
 
-ALTER TABLE real_pfile_h4 OWNER TO postgres;
 
 CREATE TABLE real_pfile_h5 (
     repid numeric(12,0),
@@ -16269,7 +15846,6 @@ CREATE TABLE real_pfile_h5 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_h5 OWNER TO postgres;
 
 CREATE TABLE real_pfile_h6 (
     repid numeric(12,0),
@@ -16304,7 +15880,6 @@ CREATE TABLE real_pfile_h6 (
     memo_desc character varying(100)
 );
 
-ALTER TABLE real_pfile_h6 OWNER TO postgres;
 
 CREATE TABLE real_pfile_reps (
     repid numeric(12,0),
@@ -16324,7 +15899,6 @@ CREATE TABLE real_pfile_reps (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_reps OWNER TO postgres;
 
 CREATE TABLE real_pfile_sa (
     repid numeric(12,0),
@@ -16358,7 +15932,6 @@ CREATE TABLE real_pfile_sa (
     memo_code character varying(1)
 );
 
-ALTER TABLE real_pfile_sa OWNER TO postgres;
 
 CREATE TABLE real_pfile_sb (
     repid numeric(12,0),
@@ -16400,7 +15973,6 @@ CREATE TABLE real_pfile_sb (
     memo_code character varying(1)
 );
 
-ALTER TABLE real_pfile_sb OWNER TO postgres;
 
 CREATE TABLE real_pfile_sc (
     repid numeric(12,0),
@@ -16436,7 +16008,6 @@ CREATE TABLE real_pfile_sc (
     memo_code character varying(1)
 );
 
-ALTER TABLE real_pfile_sc OWNER TO postgres;
 
 CREATE TABLE real_pfile_sc1 (
     repid numeric(12,0),
@@ -16496,7 +16067,6 @@ CREATE TABLE real_pfile_sc1 (
     dep_acc_ath_date date
 );
 
-ALTER TABLE real_pfile_sc1 OWNER TO postgres;
 
 CREATE TABLE real_pfile_sc2 (
     repid numeric(12,0),
@@ -16521,7 +16091,6 @@ CREATE TABLE real_pfile_sc2 (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_sc2 OWNER TO postgres;
 
 CREATE TABLE real_pfile_sd (
     repid numeric(12,0),
@@ -16549,7 +16118,6 @@ CREATE TABLE real_pfile_sd (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_sd OWNER TO postgres;
 
 CREATE TABLE real_pfile_se (
     repid numeric(12,0),
@@ -16596,7 +16164,6 @@ CREATE TABLE real_pfile_se (
     memo_desc character varying(100)
 );
 
-ALTER TABLE real_pfile_se OWNER TO postgres;
 
 CREATE TABLE real_pfile_sf (
     repid numeric(12,0),
@@ -16643,7 +16210,6 @@ CREATE TABLE real_pfile_sf (
     memo_desc character varying(100)
 );
 
-ALTER TABLE real_pfile_sf OWNER TO postgres;
 
 CREATE TABLE real_pfile_sl (
     repid numeric(12,0),
@@ -16655,7 +16221,6 @@ CREATE TABLE real_pfile_sl (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_sl OWNER TO postgres;
 
 CREATE TABLE real_pfile_summary (
     repid numeric(12,0),
@@ -16665,7 +16230,6 @@ CREATE TABLE real_pfile_summary (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_summary OWNER TO postgres;
 
 CREATE TABLE real_pfile_summary_sup (
     repid numeric(12,0),
@@ -16674,7 +16238,6 @@ CREATE TABLE real_pfile_summary_sup (
     create_date timestamp without time zone
 );
 
-ALTER TABLE real_pfile_summary_sup OWNER TO postgres;
 
 CREATE TABLE real_pfile_supsum (
     repid numeric(12,0),
@@ -16682,7 +16245,6 @@ CREATE TABLE real_pfile_supsum (
     colbs numeric
 );
 
-ALTER TABLE real_pfile_supsum OWNER TO postgres;
 
 CREATE TABLE ref_ai (
     ai character varying(1),
@@ -16691,7 +16253,6 @@ CREATE TABLE ref_ai (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_ai OWNER TO postgres;
 
 CREATE TABLE ref_cand_ici (
     cand_ici_cd character varying(1),
@@ -16699,7 +16260,6 @@ CREATE TABLE ref_cand_ici (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_cand_ici OWNER TO postgres;
 
 CREATE TABLE ref_cand_office (
     cand_office_cd character varying(1),
@@ -16707,7 +16267,6 @@ CREATE TABLE ref_cand_office (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_cand_office OWNER TO postgres;
 
 CREATE TABLE ref_filed_cmte_dsgn (
     filed_cmte_dsgn_cd character varying(1),
@@ -16715,7 +16274,6 @@ CREATE TABLE ref_filed_cmte_dsgn (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_filed_cmte_dsgn OWNER TO postgres;
 
 CREATE TABLE ref_filed_cmte_tp (
     filed_cmte_tp_cd character varying(1),
@@ -16723,7 +16281,6 @@ CREATE TABLE ref_filed_cmte_tp (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_filed_cmte_tp OWNER TO postgres;
 
 CREATE TABLE ref_filing_desc (
     filing_code character varying(10) NOT NULL,
@@ -16731,7 +16288,6 @@ CREATE TABLE ref_filing_desc (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_filing_desc OWNER TO postgres;
 
 CREATE TABLE ref_pty (
     pty_cd character varying(3),
@@ -16739,7 +16295,6 @@ CREATE TABLE ref_pty (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_pty OWNER TO postgres;
 
 CREATE TABLE ref_st (
     st_desc character varying(40),
@@ -16747,7 +16302,6 @@ CREATE TABLE ref_st (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE ref_st OWNER TO postgres;
 
 CREATE TABLE role (
     role_id numeric NOT NULL,
@@ -16755,7 +16309,6 @@ CREATE TABLE role (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE role OWNER TO postgres;
 
 CREATE TABLE sec_user (
     sec_user_id numeric(12,0) NOT NULL,
@@ -16773,7 +16326,6 @@ CREATE TABLE sec_user (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE sec_user OWNER TO postgres;
 
 CREATE TABLE summary_format_display (
     display character varying(100),
@@ -16795,7 +16347,6 @@ CREATE TABLE summary_format_display (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE summary_format_display OWNER TO postgres;
 
 CREATE TABLE temp_electronic_filer_chain (
     cmte_id character varying(9),
@@ -16809,7 +16360,6 @@ CREATE TABLE temp_electronic_filer_chain (
     amendment_chain numeric(7,0)[]
 );
 
-ALTER TABLE temp_electronic_filer_chain OWNER TO postgres;
 
 CREATE TABLE temp_electronic_filer_chain_house_senate (
     cmte_id character varying(9),
@@ -16823,7 +16373,6 @@ CREATE TABLE temp_electronic_filer_chain_house_senate (
     amendment_chain numeric(7,0)[]
 );
 
-ALTER TABLE temp_electronic_filer_chain_house_senate OWNER TO postgres;
 
 CREATE TABLE temp_electronic_filer_chain_pac_party (
     cmte_id character varying(9),
@@ -16837,7 +16386,6 @@ CREATE TABLE temp_electronic_filer_chain_pac_party (
     amendment_chain numeric(7,0)[]
 );
 
-ALTER TABLE temp_electronic_filer_chain_pac_party OWNER TO postgres;
 
 CREATE TABLE temp_electronic_filer_chain_presidential (
     cmte_id character varying(9),
@@ -16851,7 +16399,6 @@ CREATE TABLE temp_electronic_filer_chain_presidential (
     amendment_chain numeric(7,0)[]
 );
 
-ALTER TABLE temp_electronic_filer_chain_presidential OWNER TO postgres;
 
 CREATE TABLE temp_paper_filer_chain (
     cmte_id character varying(9),
@@ -16865,7 +16412,6 @@ CREATE TABLE temp_paper_filer_chain (
     amendment_chain numeric(7,0)[]
 );
 
-ALTER TABLE temp_paper_filer_chain OWNER TO postgres;
 
 CREATE TABLE temp_paper_filer_chain_house_senate (
     cmte_id character varying(9),
@@ -16882,7 +16428,6 @@ CREATE TABLE temp_paper_filer_chain_house_senate (
     last numeric(7,0)
 );
 
-ALTER TABLE temp_paper_filer_chain_house_senate OWNER TO postgres;
 
 CREATE TABLE temp_paper_filer_chain_pac_party (
     cmte_id character varying(9),
@@ -16896,7 +16441,6 @@ CREATE TABLE temp_paper_filer_chain_pac_party (
     amendment_chain numeric(7,0)[]
 );
 
-ALTER TABLE temp_paper_filer_chain_pac_party OWNER TO postgres;
 
 CREATE TABLE temp_paper_filer_chain_presidential (
     cmte_id character varying(9),
@@ -16910,7 +16454,6 @@ CREATE TABLE temp_paper_filer_chain_presidential (
     amendment_chain numeric(7,0)[]
 );
 
-ALTER TABLE temp_paper_filer_chain_presidential OWNER TO postgres;
 
 CREATE TABLE temp_search (
     idx bigint,
@@ -16920,21 +16463,18 @@ CREATE TABLE temp_search (
     receipts numeric
 );
 
-ALTER TABLE temp_search OWNER TO postgres;
 
 CREATE TABLE test (
     cand_id character varying(9),
     five_thousand_flag boolean
 );
 
-ALTER TABLE test OWNER TO postgres;
 
 CREATE TABLE test2 (
     cand_id character varying(9),
     five_thousand_flag boolean
 );
 
-ALTER TABLE test2 OWNER TO postgres;
 
 CREATE TABLE test_elections (
     title text,
@@ -16945,7 +16485,6 @@ CREATE TABLE test_elections (
     end_date timestamp without time zone
 );
 
-ALTER TABLE test_elections OWNER TO postgres;
 
 CREATE TABLE test_other (
     title character varying(150),
@@ -16956,14 +16495,12 @@ CREATE TABLE test_other (
     end_date timestamp without time zone
 );
 
-ALTER TABLE test_other OWNER TO postgres;
 
 CREATE TABLE test_purpose (
     sched_b_sk numeric(10,0),
     disbursement_purpose character varying
 );
 
-ALTER TABLE test_purpose OWNER TO postgres;
 
 CREATE TABLE test_reports (
     title text,
@@ -16974,7 +16511,6 @@ CREATE TABLE test_reports (
     end_date timestamp without time zone
 );
 
-ALTER TABLE test_reports OWNER TO postgres;
 
 CREATE TABLE testing2 (
     index bigint,
@@ -16983,7 +16519,6 @@ CREATE TABLE testing2 (
     "Congressional District" bigint
 );
 
-ALTER TABLE testing2 OWNER TO postgres;
 
 CREATE TABLE testing3 (
     index bigint,
@@ -16992,7 +16527,6 @@ CREATE TABLE testing3 (
     "Congressional District" bigint
 );
 
-ALTER TABLE testing3 OWNER TO postgres;
 
 CREATE TABLE testing4 (
     index bigint,
@@ -17001,7 +16535,6 @@ CREATE TABLE testing4 (
     "Congressional District" bigint
 );
 
-ALTER TABLE testing4 OWNER TO postgres;
 
 CREATE TABLE trc_election_status (
     name character varying(50) NOT NULL,
@@ -17009,7 +16542,6 @@ CREATE TABLE trc_election_status (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE trc_election_status OWNER TO postgres;
 
 CREATE TABLE trc_election_type (
     trc_election_type_id character varying(3) NOT NULL,
@@ -17017,7 +16549,6 @@ CREATE TABLE trc_election_type (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE trc_election_type OWNER TO postgres;
 
 CREATE VIEW unverified_filers_vw AS
  SELECT cmte_cand_query.cmte_id,
@@ -17065,7 +16596,6 @@ CREATE VIEW unverified_filers_vw AS
             disclosure.unverified_cand_cmte b
           WHERE ((cv.cand_id)::text = (b.cand_cmte_id)::text)) cmte_cand_query;
 
-ALTER TABLE unverified_filers_vw OWNER TO postgres;
 
 CREATE TABLE v_sum_and_det_sum_report (
     cvg_start_dt numeric(8,0),
@@ -17171,7 +16701,6 @@ CREATE TABLE v_sum_and_det_sum_report (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE v_sum_and_det_sum_report OWNER TO postgres;
 
 CREATE TABLE vw_filing_history (
     sub_id numeric(19,0) NOT NULL,
@@ -17210,7 +16739,6 @@ CREATE TABLE vw_filing_history (
     pg_date timestamp without time zone
 );
 
-ALTER TABLE vw_filing_history OWNER TO postgres;
 
 SET search_path = real_efile, pg_catalog;
 
@@ -17254,7 +16782,6 @@ CREATE TABLE f3 (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE f3 OWNER TO postgres;
 
 CREATE TABLE f3p (
     repid numeric(12,0),
@@ -17294,7 +16821,6 @@ CREATE TABLE f3p (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE f3p OWNER TO postgres;
 
 CREATE TABLE f3x (
     repid numeric(12,0),
@@ -17324,7 +16850,6 @@ CREATE TABLE f3x (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE f3x OWNER TO postgres;
 
 CREATE TABLE reps (
     repid numeric(12,0),
@@ -17351,7 +16876,6 @@ CREATE TABLE reps (
     notes character varying(100)
 );
 
-ALTER TABLE reps OWNER TO postgres;
 
 CREATE TABLE summary (
     repid numeric(12,0),
@@ -17361,7 +16885,6 @@ CREATE TABLE summary (
     create_dt timestamp without time zone
 );
 
-ALTER TABLE summary OWNER TO postgres;
 
 SET search_path = staging, pg_catalog;
 
@@ -17371,15 +16894,12 @@ CREATE TABLE ref_pty (
     pg_date timestamp without time zone DEFAULT now()
 );
 
-ALTER TABLE ref_pty OWNER TO postgres;
 
 CREATE TABLE ref_rpt_tp (
     rpt_tp_cd character varying(3),
     rpt_tp_desc character varying(30),
     pg_date timestamp without time zone DEFAULT now()
 );
-
-ALTER TABLE ref_rpt_tp OWNER TO postgres;
 
 SET search_path = disclosure, pg_catalog;
 
@@ -18071,4 +17591,3 @@ BEGIN
     END IF;
 END
 $$ LANGUAGE PLPGSQL IMMUTABLE;
-

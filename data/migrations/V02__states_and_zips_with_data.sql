@@ -7,7 +7,6 @@ CREATE TABLE ofec_fips_states (
 );
 
 
-ALTER TABLE ofec_fips_states OWNER TO postgres;
 
 CREATE TABLE ofec_zips_districts (
     index bigint,
@@ -16,7 +15,6 @@ CREATE TABLE ofec_zips_districts (
     "Congressional District" bigint
 );
 
-ALTER TABLE ofec_zips_districts OWNER TO postgres;
 
 COPY ofec_fips_states (index, "Name", "FIPS State Numeric Code", "Official USPS Code") FROM stdin;
 0	Alabama	1	AL

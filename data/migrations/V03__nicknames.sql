@@ -31,7 +31,6 @@ CREATE TABLE ofec_nicknames (
 );
 
 
-ALTER TABLE ofec_nicknames OWNER TO postgres;
 
 --
 -- Data for Name: ofec_nicknames; Type: TABLE DATA; Schema: public; Owner: postgres

@@ -37,7 +37,6 @@ CREATE TABLE ofec_pacronyms (
 );
 
 
-ALTER TABLE ofec_pacronyms OWNER TO postgres;
 
 --
 -- Data for Name: ofec_pacronyms; Type: TABLE DATA; Schema: public; Owner: postgres
