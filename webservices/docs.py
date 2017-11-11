@@ -1105,12 +1105,17 @@ Election Cycle) or the issues covered in the report.
 '''
 
 #endpoint: audit-primary-category
-AUDIT_PRIMARY_CATEGORIES = '''
+AUDIT_PRIMARY_CATEGORY = '''
+This lists the options for the primary categories available in the /audit-search/ endpoint.
+'''
+
+#endpoint: audit-category/search/{primary_category_id}
+AUDIT_CATEGORY_SEARCH = '''
 This lists the options for the primary categories available in the /audit-search/ endpoint.
 '''
 
 #endpoint: audit-category
-AUDIT_CATEGORIES = '''
+AUDIT_CATEGORY = '''
 This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
 '''
 

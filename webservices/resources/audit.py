@@ -12,7 +12,7 @@ from webservices.common.views import ApiResource
 # endpoint: audit-primary-category
 @doc(
     tags=['audit'],
-    description=docs.AUDIT_PRIMARY_CATEGORIES,
+    description=docs.AUDIT_PRIMARY_CATEGORY,
 )
 class PrimaryCategory(ApiResource):
     model = models.PrimaryCategory
@@ -41,11 +41,51 @@ class PrimaryCategory(ApiResource):
     def index_column(self):
         return self.model.primary_category_id
 
+# endpoint: audit-category/search/<primary_category_id>
+@doc(
+    tags=['audit'],
+    description=docs.AUDIT_CATEGORY_SEARCH,
+    params={
+        'primary_category_id': {'description': docs.PRIMARY_CATEGORY_ID},
+    },
+)
+class SubCategorySearchByPrimaryCategoryId(ApiResource):
+    model = models.CategoryRelation
+    schema = schemas.CategoryRelationSchema
+    page_schema = schemas.CategoryRelationPageSchema
+
+    filter_multi_fields = [
+        ('sub_category_id', model.sub_category_id),
+    ]
+    filter_fulltext_fields = [
+        ('sub_category_name', model.sub_category_name),
+        ('primary_category_name', model.primary_category_name),
+    ]
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.SubCategorySearchByPrimaryCategoryId,
+            args.make_sort_args(
+                default='sub_category_name',
+            ),
+        )
+
+    # @property
+    # def index_column(self):
+    #     return self.model.audit_case_id
+    def build_query(self, primary_category_id=None, **kwargs):
+        query = super().build_query(**kwargs)
+
+        if primary_category_id:
+            query = query.filter(models.CategoryRelation.primary_category_id == primary_category_id)
+
+        return query
 
 # endpoint: audit-category
 @doc(
     tags=['audit'],
-    description=docs.AUDIT_CATEGORIES,
+    description=docs.AUDIT_CATEGORY,
 )
 class Category(ApiResource):
     model = models.Category
@@ -93,7 +133,7 @@ class AuditCaseView(ApiResource):
     filter_multi_fields = [
         ('audit_case_id', model.audit_case_id),
         ('cycle', model.cycle),
-        ('committee_id', model.committee_id),
+        # ('committee_id', model.committee_id),
         # ('committee_name', model.committee_name),
         ('committee_designation', model.committee_designation),
         ('committee_type', model.committee_type),
@@ -101,7 +141,7 @@ class AuditCaseView(ApiResource):
         ('far_release_date', model.far_release_date),
         ('link_to_report', model.link_to_report),
         ('audit_id', model.audit_id),
-        ('candidate_id', model.candidate_id),
+        # ('candidate_id', model.candidate_id),
         # ('candidate_name', model.candidate_name),
     ]
 
@@ -111,7 +151,9 @@ class AuditCaseView(ApiResource):
 
     filter_fulltext_fields = [
         ('committee_name', model.committee_name),
+        ('committee_id', model.committee_id),
         ('candidate_name', model.candidate_name),
+        ('candidate_id', model.candidate_id),
     ]
 
     @property
@@ -143,6 +185,32 @@ class AuditCaseSearchByCategoryId(ApiResource):
     model = models.AuditCaseSearchByCategoryId
     schema = schemas.AuditCaseSearchByCategoryIdSchema
     page_schema = schemas.AuditCaseSearchByCategoryIdPageSchema
+
+    filter_multi_fields = [
+        ('audit_case_id', model.audit_case_id),
+        ('cycle', model.cycle),
+        # ('committee_id', model.committee_id),
+        # ('committee_name', model.committee_name),
+        ('committee_designation', model.committee_designation),
+        ('committee_type', model.committee_type),
+        ('committee_description', model.committee_description),
+        ('far_release_date', model.far_release_date),
+        ('link_to_report', model.link_to_report),
+        ('audit_id', model.audit_id),
+        # ('candidate_id', model.candidate_id),
+        # ('candidate_name', model.candidate_name),
+    ]
+
+    filter_range_fields = [
+        (('min_election_cycle', 'max_election_cycle'), model.cycle),
+    ]
+
+    filter_fulltext_fields = [
+        ('committee_name', model.committee_name),
+        ('committee_id', model.committee_id),
+        ('candidate_name', model.candidate_name),
+        ('candidate_id', model.candidate_id),
+    ]
 
     @property
     def args(self):

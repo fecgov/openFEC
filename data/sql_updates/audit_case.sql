@@ -28,7 +28,7 @@ SELECT
     ac.link_to_report,
     ac.audit_id::integer AS audit_id,
     ac.cand_id AS candidate_id,
-    cand_info.cand_name AS candidate_name
+    coalesce(cand_info.cand_name, 'No authorized candidate'::text) as candidate_name
 FROM auditsearch.audit_case ac
     LEFT JOIN cmte_info ON cmte_info.cmte_id::text = ac.cmte_id::text AND cmte_info.fec_election_yr = ac.election_cycle
     LEFT JOIN cand_info ON cand_info.cand_id::text = ac.cand_id::text AND cand_info.fec_election_yr = ac.election_cycle
@@ -162,9 +162,11 @@ CREATE OR REPLACE VIEW auditsearch.finding_rel_vw AS
 SELECT 
     fr.parent_finding_pk::integer AS primary_category_id,
     fr.child_finding_pk::integer AS sub_category_id,
-    btrim(f.finding) as sub_category_name
-FROM auditsearch.finding_rel fr LEFT JOIN  auditsearch.finding f
-ON (fr.PARENT_FINDING_PK = f.FINDING_PK) 
+    btrim(fs.finding) AS primary_category_name,
+    btrim(f.finding) AS sub_category_name
+FROM auditsearch.finding_rel fr
+LEFT JOIN auditsearch.finding f ON fr.child_finding_pk = f.finding_pk
+LEFT JOIN auditsearch.finding fs ON fr.parent_finding_pk = fs.finding_pk
 ORDER BY (fr.parent_finding_pk::integer), (fr.child_finding_pk::integer);
 
 

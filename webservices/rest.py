@@ -197,11 +197,12 @@ api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
 api.add_resource(audit.PrimaryCategory, '/audit-primary-category/')
+api.add_resource(audit.SubCategorySearchByPrimaryCategoryId,
+        '/audit-category/search/<int:primary_category_id>')
 api.add_resource(audit.Category, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
 api.add_resource(audit.AuditCaseSearchByCategoryId,
         '/audit-case/search/<int:primary_category_id>/<int:sub_category_id>')
-
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -328,6 +329,7 @@ apidoc.register(audit.PrimaryCategory, blueprint='v1')
 apidoc.register(audit.Category, blueprint='v1')
 apidoc.register(audit.AuditCaseView, blueprint='v1')
 apidoc.register(audit.AuditCaseSearchByCategoryId, blueprint='v1')
+apidoc.register(audit.SubCategorySearchByPrimaryCategoryId, blueprint='v1')
 
 
 # Adapted from https://github.com/noirbizarre/flask-restplus

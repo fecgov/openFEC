@@ -18,13 +18,15 @@ class PrimaryCategory(AuditBase, db.Model):
     tier = db.Column(db.Integer, doc=docs.AUDIT_TIER)
 
 
+# endpoint: audit-category/search/<primary_category_id>
 # endpoint: audit-category
 class CategoryRelation(AuditBase, db.Model):
     __tablename__ = 'finding_rel_vw'
 
     primary_category_id = db.Column(db.Integer, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
+    primary_category_name = db.Column(db.String, doc=docs.PRIMARY_CATEGORY_NAME)
     sub_category_id = db.Column(db.Integer, index=True, primary_key=True, doc=docs.SUB_CATEGORY_ID)
-    sub_category_name = db.Column(db.String, index=True, primary_key=True, doc=docs.SUB_CATEGORY_NAME)
+    sub_category_name = db.Column(db.String, index=True, doc=docs.SUB_CATEGORY_NAME)
 
 
 # endpoint: audit-category
@@ -64,7 +66,7 @@ class AuditCategoryRelation(db.Model):
         lazy='joined'
     )
 
-    
+
 # endpoint audit-case
 class AuditCase(db.Model):
     __tablename__ = 'ofec_audit_case_mv'
@@ -90,7 +92,7 @@ class AuditCase(db.Model):
         lazy='joined'
     )
 
-# endpoint audit-case/search/<primary_category_id><sub_category_id>
+# endpoint audit-case/search/<primary_category_id>/<sub_category_id>
 class AuditCaseSearchByCategoryId(db.Model):
     __tablename__ = 'ofec_audit_case_arg_category_mv'
 
