@@ -30,35 +30,42 @@ jobs:
           # Commands listed here are from the CircleCI PostgreSQL config docs:
           # https://circleci.com/docs/2.0/postgres-config/#postgresql-circleci-configuration-example
           command: |
-            sudo apt-get install postgresql-client
-            echo ‘/usr/lib/postgresql/9.6/bin/:$PATH’ >> $BASH_ENV
-
-      - run:
-          name: Install Node.js
-          command: |
-            sudo apt-get update && curl -sL https://deb.nodesource.com/setup_6.x | sudo bash - && sudo apt-get install -y nodejs
+            sudo apt-get update -qq && sudo apt-get install -y build-essential postgresql-client
+            echo 'export PATH=/usr/lib/postgresql/9.6/bin/:$PATH' >> $BASH_ENV
 
       - restore_cache:
           keys:
-          - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
+          - fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - fec-api-dependencies-
 
       - run:
-          name: Install project dependencies
+          name: Install node dependencies
+          command: |
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.6/install.sh | bash
+            echo ". ~/.nvm/nvm.sh" >> $BASH_ENV
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+            nvm install 8.9.1
+            nvm use 8.9.1
+            nvm alias default 8.9.1
+            npm install -g npm swagger-tools
+            npm install
+            npm run build
+
+      - run:
+          name: Install Python dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt -r requirements-dev.txt -r requirements-ci.txt
-            sudo npm install -g swagger-tools
-            npm install
-            npm run build
 
       - save_cache:
           paths:
             - ./venv
             - ./node_modules
-          key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "package.json" }}
+          key: fec-api-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements-ci.txt" }}-{{ checksum "package.json" }}
 
       - run:
           name: Ensure database is available
@@ -85,13 +92,16 @@ jobs:
           command: |
             mkdir -p $HOME/bin
             export PATH=$HOME/bin:$PATH
-            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.23.0" | tar xzv -C $HOME/bin
+            curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&version=6.32.0" | tar xzv -C $HOME/bin
             cf install-plugin autopilot -f -r CF-Community
 
       - deploy:
           name: Deploy API
           command: |
             export PATH=$HOME/bin:$PATH
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
             . venv/bin/activate
-            pip install -r requirements.txt
-            invoke deploy --branch $TRAVIS_BRANCH --login True --yes
+            nvm use default
+            invoke deploy --branch $CIRCLE_BRANCH --login True --yes
