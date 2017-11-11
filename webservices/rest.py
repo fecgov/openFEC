@@ -196,6 +196,7 @@ api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
+api.add_resource(audit.PrimaryCategory, '/audit-primary-category/')
 api.add_resource(audit.Category, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
 api.add_resource(audit.AuditCaseSearchByCategoryId,
@@ -322,9 +323,10 @@ apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
 
-# audit-case, audit-category, audit-case/search/<primary_category_id><sub_category_id>
-apidoc.register(audit.AuditCaseView, blueprint='v1')
+# audit-case, audit-primary-category,audit-category, audit-case/search/<primary_category_id><sub_category_id>
+apidoc.register(audit.PrimaryCategory, blueprint='v1')
 apidoc.register(audit.Category, blueprint='v1')
+apidoc.register(audit.AuditCaseView, blueprint='v1')
 apidoc.register(audit.AuditCaseSearchByCategoryId, blueprint='v1')
 
 

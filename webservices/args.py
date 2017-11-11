@@ -777,21 +777,27 @@ schedule_a_by_state_recipient_totals = {
     ),
 }
 
-# Audit Category endpoint
-Category = {
-    'primary_category_id': fields.List(fields.Int(), description=docs.CATEGORY_ID),
-    'primary_category_name': fields.List(fields.Str, description=docs.CATEGORY_NAME),
-    # 'tier': fields.List(fields.Int, description=docs.CATEGORY),
+# endpoint audit-primary-category
+PrimaryCategory = {
+    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
+    # 'tier': fields.List(fields.Int, description=docs.AUDIT_TIER),
 }
 
-# Audit Case endpoint
+# endpoint audit-category
+Category = {
+    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
+}
+
+# endpoint audit-case
 AuditCase = {
     'audit_case_id': fields.List(fields.Int(), description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
     'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
     'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
-    'audit_id': fields.List(fields.Int(), description=docs.SUBCATEGORY),
+    'audit_id': fields.List(fields.Int(), description=docs.AUDIT_ID),
     'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
     'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
     'min_election_cycle': fields.Int(description=docs.CYCLE),
@@ -802,6 +808,16 @@ AuditCase = {
     # 'link_to_report': fields.List(fields.Str(), description=docs.SUBCATEGORY),
 }
 
-#audit-case/search/<primary_category_id>/<sub_category_id> endpoint.
+# endpoint audit-case/search/<primary_category_id><sub_category_id>
 AuditCaseSearchByCategoryId = {
+    # 'audit_case_id': fields.List(fields.Int(), description=docs.AUDIT_CASE_ID),
+    # 'cycle': fields.List(fields.Int(), description=docs.CYCLE),
+    # 'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
+    # 'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
+    # 'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
+    # 'audit_id': fields.List(fields.Int(), description=docs.AUDIT_ID),
+    # 'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
+    # 'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
+    # 'min_election_cycle': fields.Int(description=docs.CYCLE),
+    # 'max_election_cycle': fields.Int(description=docs.CYCLE),
 }
