@@ -961,17 +961,18 @@ PrimaryCategoryPageSchema = make_page_schema(PrimaryCategorySchema)
 register_schema(PrimaryCategorySchema)
 register_schema(PrimaryCategoryPageSchema)
 
-
-# endpoint audit-category with nested sub category
+# endpoint audit-category(with nested sub category)
+# endpoint audit-category/search/<primary_category_id>
 CategoryRelationSchema = make_schema(
     models.CategoryRelation,
     fields={
         'primary_category_id': ma.fields.Int(),
         'sub_category_id': ma.fields.Int(),
         'sub_category_name': ma.fields.Str(),
+        'primary_category_name': ma.fields.Str(),
     },
     options={
-        'exclude': ('primary_category_id',)
+        'exclude': ('primary_category_id', 'primary_category_name')
     }
 )
 
@@ -989,7 +990,7 @@ CategorySchema = make_schema(
         'sub_category_list': ma.fields.Nested(CategoryRelationSchema, many=True),
     },
     options={
-        # 'exclude': ('tier',)
+        'exclude': ('tier',)
         # 'relationships': [
         #     Relationship(
         #         models.Category.sub_category_list,
@@ -1024,7 +1025,7 @@ register_schema(AuditCaseSubCategorySchema)
 register_schema(AuditCaseSubCategoryPageSchema)
 
 
-# endpoint audit-case with nested sub_category
+# endpoint audit-case(with nested sub_category)
 AuditCategoryRelationSchema = make_schema(
     models.AuditCategoryRelation,
     fields={
@@ -1043,7 +1044,7 @@ AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
 register_schema(AuditCategoryRelationSchema)
 register_schema(AuditCategoryRelationPageSchema)
 
-# endpoint audit-case, with nested primary category
+# endpoint audit-case(with nested primary category)
 AuditCaseSchema = make_schema(
     models.AuditCase,
     fields={
@@ -1066,7 +1067,7 @@ register_schema(AuditCaseSchema)
 register_schema(AuditCasePageSchema)
 
 # endpoint audit-case/search/<primary_category_id>/<sub_category_id>
-# audit case search by primary_category_id and sub_category_id
+# (audit case search by primary_category_id and sub_category_id)
 AuditCaseSearchByCategoryIdSchema = make_schema(
     models.AuditCaseSearchByCategoryId,
     fields={
