@@ -9,10 +9,43 @@ from webservices import utils
 from webservices.common import models
 from webservices.common.views import ApiResource
 
-
+# endpoint: audit-primary-category
 @doc(
     tags=['audit'],
-    description=docs.AUDIT_SEARCH,
+    description=docs.AUDIT_PRIMARY_CATEGORIES,
+)
+class PrimaryCategory(ApiResource):
+    model = models.PrimaryCategory
+    schema = schemas.PrimaryCategorySchema
+    page_schema = schemas.PrimaryCategoryPageSchema
+
+    filter_multi_fields = [
+        ('primary_category_id', model.primary_category_id),
+        ('tier', model.tier),
+    ]
+    filter_fulltext_fields = [
+        ('primary_category_name', model.primary_category_name),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.PrimaryCategory,
+            args.make_sort_args(
+                default='primary_category_name',
+            ),
+        )
+
+    @property
+    def index_column(self):
+        return self.model.primary_category_id
+
+
+# endpoint: audit-category
+@doc(
+    tags=['audit'],
+    description=docs.AUDIT_CATEGORIES,
 )
 class Category(ApiResource):
     model = models.Category
@@ -21,7 +54,7 @@ class Category(ApiResource):
 
     filter_multi_fields = [
         ('primary_category_id', model.primary_category_id),
-        # ('tier', model.tier),
+        ('tier', model.tier),
     ]
     filter_fulltext_fields = [
         ('primary_category_name', model.primary_category_name),
@@ -46,9 +79,11 @@ class Category(ApiResource):
     def index_column(self):
         return self.model.primary_category_id
 
+
+# endpoint: audit-case
 @doc(
     tags=['audit'],
-    description=docs.AUDIT_SEARCH,
+    description=docs.AUDIT_CASE,
 )
 class AuditCaseView(ApiResource):
     model = models.AuditCase
@@ -85,8 +120,8 @@ class AuditCaseView(ApiResource):
             args.paging,
             args.AuditCase,
             args.make_sort_args(
-                # default='-cycle',
-                validator=args.IndexValidator(models.AuditCase),
+                default='-cycle',
+                # validator=args.IndexValidator(models.AuditCase),
             ),
         )
 
@@ -94,11 +129,13 @@ class AuditCaseView(ApiResource):
     def index_column(self):
         return self.model.audit_case_id
 
+
+# endpoint: audit-case/search/<primary_category_id>/<sub_category_id>
 @doc(
     tags=['audit'],
-    description=docs.AUDIT_SEARCH,
+    description=docs.AUDIT_CASE_SEARCH,
     params={
-        'primary_category_id': {'description': docs.CATEGORY_ID},
+        'primary_category_id': {'description': docs.PRIMARY_CATEGORY_ID},
         'sub_category_id': {'description': docs.SUB_CATEGORY_ID},
     },
 )

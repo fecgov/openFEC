@@ -943,7 +943,26 @@ ScheduleAByStateRecipientTotalsPageSchema = make_page_schema(
 register_schema(ScheduleAByStateRecipientTotalsSchema)
 register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 
-# audit-category endpoint schemas
+
+# endpoint audit-primary-category
+PrimaryCategorySchema = make_schema(
+    models.PrimaryCategory,
+    fields={
+        'primary_category_id': ma.fields.Int(),
+        'primary_category_name': ma.fields.Str(),
+        'tier': ma.fields.Int(),
+    },
+    options={
+        'exclude': ('tier',)
+    }
+)
+
+PrimaryCategoryPageSchema = make_page_schema(PrimaryCategorySchema)
+register_schema(PrimaryCategorySchema)
+register_schema(PrimaryCategoryPageSchema)
+
+
+# endpoint audit-category with nested sub category
 CategoryRelationSchema = make_schema(
     models.CategoryRelation,
     fields={
@@ -960,17 +979,17 @@ CategoryRelationPageSchema = make_page_schema(CategoryRelationSchema)
 register_schema(CategoryRelationSchema)
 register_schema(CategoryRelationPageSchema)
 
-#audit-category endpoint schemas
+# endpoint audit-category
 CategorySchema = make_schema(
     models.Category,
     fields={
         'primary_category_id': ma.fields.Int(),
         'primary_category_name': ma.fields.Str(),
-        # 'tier': ma.fields.Int(),
+        'tier': ma.fields.Int(),
         'sub_category_list': ma.fields.Nested(CategoryRelationSchema, many=True),
     },
     options={
-        'exclude': ('tier',)
+        # 'exclude': ('tier',)
         # 'relationships': [
         #     Relationship(
         #         models.Category.sub_category_list,
@@ -987,7 +1006,7 @@ register_schema(CategorySchema)
 register_schema(CategoryPageSchema)
 
 
-##audit-case endpoint Schema for AuditSubCategory
+# endpoint audit-case
 AuditCaseSubCategorySchema = make_schema(
     models.AuditCaseSubCategory,
     fields={
@@ -1005,7 +1024,7 @@ register_schema(AuditCaseSubCategorySchema)
 register_schema(AuditCaseSubCategoryPageSchema)
 
 
-#audit-case endpoint nested sub_category schema
+# endpoint audit-case with nested sub_category
 AuditCategoryRelationSchema = make_schema(
     models.AuditCategoryRelation,
     fields={
@@ -1024,7 +1043,7 @@ AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
 register_schema(AuditCategoryRelationSchema)
 register_schema(AuditCategoryRelationPageSchema)
 
-#audit-case endpoint audit case with nested primary category schema
+# endpoint audit-case, with nested primary category
 AuditCaseSchema = make_schema(
     models.AuditCase,
     fields={
@@ -1046,13 +1065,11 @@ AuditCasePageSchema = make_page_schema(AuditCaseSchema)
 register_schema(AuditCaseSchema)
 register_schema(AuditCasePageSchema)
 
-#audit-case/search/<primary_category_id>/<sub_category_id> endpoint.
-#audit case search by primary_category_id and sub_category_id
+# endpoint audit-case/search/<primary_category_id>/<sub_category_id>
+# audit case search by primary_category_id and sub_category_id
 AuditCaseSearchByCategoryIdSchema = make_schema(
     models.AuditCaseSearchByCategoryId,
     fields={
-        # 'primary_category_id': ma.fields.Int(),
-        # 'sub_category_id': ma.fields.Int(),
         'audit_case_id': ma.fields.Str(),
         'cycle': ma.fields.Int(),
         'committee_id': ma.fields.Str(),

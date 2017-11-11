@@ -1077,7 +1077,43 @@ Provides cumulative disbursement totals by entity type, over a two year cycle. T
 This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
 '''
 
-#Audits
+# Audit api
+AUDIT = '''
+The agency’s monitoring process may detect potential violations through a review of a committee’s reports or through a
+Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
+
+The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
+audits a committee when it appears not to have met the threshold requirements for substantial compliance with the Federal
+Election Campaign Act. The audit determines whether the committee complied with limitations, prohibitions and disclosure
+requirements.
+
+These endpoints contain Final Audit Reports approved by the Commission since inception.
+'''
+
+#endpoint: audit-case
+AUDIT_CASE = '''
+This endpoint contains Final Audit Reports approved by the Commission since inception.
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
+Election Cycle) or the issues covered in the report.
+'''
+
+#endpoint: audit-case/search/{primary_category_id}/{sub_category_id}
+AUDIT_CASE_SEARCH = '''
+This endpoint contains Final Audit Reports approved by the Commission since inception.
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
+Election Cycle) or the issues covered in the report.
+'''
+
+#endpoint: audit-primary-category
+AUDIT_PRIMARY_CATEGORIES = '''
+This lists the options for the primary categories available in the /audit-search/ endpoint.
+'''
+
+#endpoint: audit-category
+AUDIT_CATEGORIES = '''
+This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
+'''
+
 AUDIT_ID = '''
 The audit issue. Each subcategory has an unique ID
 '''
@@ -1085,7 +1121,12 @@ The audit issue. Each subcategory has an unique ID
 AUDIT_CASE_ID = '''
 Primary/foreign key for audit tables
 '''
-CATEGORY_NAME = 'Primary Audit Category\n\
+
+PRIMARY_CATEGORY_ID = '''
+Audit category ID (table PK)
+'''
+
+PRIMARY_CATEGORY_NAME = 'Primary Audit Category\n\
     - No Findings or\n\
       Issues/Not a Committee\n\
     - Net Outstanding Campaign\n\
@@ -1106,48 +1147,17 @@ CATEGORY_NAME = 'Primary Audit Category\n\
     - Loans\n\
     - Referred Findings Not Listed\n\
 '
-CATEGORY_ID = '''
-Audit category ID (table PK)
-'''
 
 SUB_CATEGORY_ID = '''
 The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
 '''
 
-SUBCATEGORY = '''
+SUB_CATEGORY_NAME = '''
 The audit issue. Each subcategory has an unique ID.
 '''
 
-AUDIT_CASE_ID = 'Primary/foreign key for audit tables'
-
-
 AUDIT_TIER = '''
-1 specifies a category and 2 specifies a subcategory
-'''
-
-# content from https://www.fec.gov/legal-resources/enforcement/ and https://www.fec.gov/legal-resources/enforcement/audit-reports/
-AUDIT = '''
-The agency’s monitoring process may detect potential violations through a review of a committee’s reports or through a
-Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
-
-The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
-audits a committee when it appears not to have met the threshold requirements for substantial compliance with the Federal
-Election Campaign Act. The audit determines whether the committee complied with limitations, prohibitions and disclosure
-requirements.
-
-These endpoints contain Final Audit Reports approved by the Commission since inception.
-'''
-
-#audit search
-AUDIT_SEARCH = '''
-This endpoint contains Final Audit Reports approved by the Commission since inception.
-The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
-Election Cycle) or the issues covered in the report.
-'''
-
-#audit finding
-AUDIT_CATEGORIES = '''
-This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
+1 specifies a primary category and 2 specifies a subcategory
 '''
 
 COMMITTEE_DESCRIPTION = 'Type of committee:\n\
@@ -1158,13 +1168,11 @@ COMMITTEE_DESCRIPTION = 'Type of committee:\n\
         - I - Independent expenditure\n\
         - O - Super PAC \n\
 '
-RELEASE_DATE = '''
+
+FAR_RELEASE_DATE = '''
 Final audit report release date
 '''
 
-REPORT_LINK = '''
+LINK_TO_REPORT = '''
 URL for retrieving the PDF document
-'''
-
-CATEGORY_DESCRIPTION = '''
 '''
