@@ -1,4 +1,4 @@
-from flask_apispec import doc
+from flask_apispec import doc, marshal_with
 
 import sqlalchemy as sa
 
@@ -8,6 +8,9 @@ from webservices import schemas
 from webservices import utils
 from webservices.common import models
 from webservices.common.views import ApiResource
+from webservices import filters
+from webservices.utils import use_kwargs
+
 
 # endpoint: audit-primary-category
 @doc(
@@ -235,3 +238,43 @@ class AuditCaseSearchByCategoryId(ApiResource):
             query = query.filter(models.AuditCaseSearchByCategoryId.sub_category_id == sub_category_id)
 
         return query
+
+# endpoint audit/search/name/candidates
+@doc(
+    tags=['audit'],
+    description=docs.NAME_SEARCH,
+)
+class AuditCandidateNameSearch(utils.Resource):
+
+    filter_fulltext_fields = [
+        ('q', models.AuditCandidateSearch.fulltxt),
+    ]
+
+    @use_kwargs(args.names)
+    @marshal_with(schemas.AuditCandidateSearchListSchema())
+    def get(self, **kwargs):
+        query = filters.filter_fulltext(models.AuditCandidateSearch.query, kwargs, self.filter_fulltext_fields)
+        query = query.order_by(
+            sa.desc(models.AuditCandidateSearch.id)
+        ).limit(20)
+        return {'results': query.all()}
+
+# endpoint audit/search/name/committees
+@doc(
+    tags=['audit'],
+    description=docs.NAME_SEARCH,
+)
+class AuditCommitteeNameSearch(utils.Resource):
+
+    filter_fulltext_fields = [
+        ('q', models.AuditCommitteeSearch.fulltxt),
+    ]
+
+    @use_kwargs(args.names)
+    @marshal_with(schemas.AuditCommitteeSearchListSchema())
+    def get(self, **kwargs):
+        query = filters.filter_fulltext(models.AuditCommitteeSearch.query, kwargs, self.filter_fulltext_fields)
+        query = query.order_by(
+            sa.desc(models.AuditCommitteeSearch.id)
+        ).limit(20)
+        return {'results': query.all()}

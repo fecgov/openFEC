@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import docs
@@ -118,3 +119,22 @@ class AuditCaseSearchByCategoryId(db.Model):
         uselist=True,
         lazy='joined'
     )
+
+# endpoint audit/search/name/candidates
+class AuditCandidateSearch(db.Model):
+    __tablename__ = 'ofec_candidate_fulltext_audit_mv'
+
+    idx = db.Column(db.String, primary_key=True)
+    id = db.Column(db.String)
+    name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
+    fulltxt = db.Column(TSVECTOR)
+
+
+# endpoint audit/search/name/committees
+class AuditCommitteeSearch(db.Model):
+    __tablename__ = 'ofec_committee_fulltext_audit_mv'
+
+    idx = db.Column(db.String, primary_key=True)
+    id = db.Column(db.String)
+    name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
+    fulltxt = db.Column(TSVECTOR)
