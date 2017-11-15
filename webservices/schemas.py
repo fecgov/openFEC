@@ -286,7 +286,6 @@ class CandidateSearchSchema(BaseSearchSchema):
 class CommitteeSearchSchema(BaseSearchSchema):
     pass
 
-
 class CandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         CandidateSearchSchema,
@@ -306,6 +305,33 @@ register_schema(CandidateSearchSchema)
 register_schema(CandidateSearchListSchema)
 register_schema(CommitteeSearchSchema)
 register_schema(CommitteeSearchListSchema)
+
+
+class AuditCandidateSearchSchema(BaseSearchSchema):
+    pass
+
+class AuditCommitteeSearchSchema(BaseSearchSchema):
+    pass
+
+class AuditCandidateSearchListSchema(ApiSchema):
+    results = ma.fields.Nested(
+        AuditCandidateSearchSchema,
+        ref='#/definitions/AuditCandidateSearch',
+        many=True,
+    )
+
+class AuditCommitteeSearchListSchema(ApiSchema):
+    results = ma.fields.Nested(
+        AuditCommitteeSearchSchema,
+        ref='#/definitions/AuditCommitteeSearch',
+        many=True,
+    )
+
+register_schema(AuditCandidateSearchSchema)
+register_schema(AuditCandidateSearchListSchema)
+register_schema(AuditCommitteeSearchSchema)
+register_schema(AuditCommitteeSearchListSchema)
+
 
 make_efiling_schema = functools.partial(
     make_schema,
