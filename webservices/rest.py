@@ -73,7 +73,7 @@ def sqla_conn_string():
 
 
 app = Flask(__name__)
-app.debug = True
+# app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
