@@ -4,4 +4,4 @@ env:
   NEW_RELIC_APP_NAME: fec | api | prod
 applications:
   - name: api
-    instances: 4
+    instances: 8
