@@ -7,14 +7,14 @@
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
 
-![Swagger validation badge](http://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
+![Swagger validation badge](https://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
 
 ## About this project
 The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US President, Senate, and House of Representatives.
 
 Are you interested in seeing how much money a candidate raised? Or spent? How much debt they took on? Who contributed to their campaign? The FEC is the authoritative source for that information.
 
-The new FEC.gov is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
+The new FEC.gov is a collaboration between [18F](https://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
 
 
 ## This repository, [openFEC](https://github.com/18F/openfec), is home to the FEC’s API
@@ -49,7 +49,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
     * PostgreSQL (the latest 9.6 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
-         * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
+         * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
@@ -194,7 +194,7 @@ cd bin
 3. View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 #### Task queue
-We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](http://redis.io/) as the Celery message broker.
+We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](https://redis.io/) as the Celery message broker.
 
 To work with Celery and Redis locally, install Redis and start a Redis server. By default,
 we connect to Redis at `redis://localhost:6379`; if Redis is running at a different URL,
@@ -210,7 +210,7 @@ celery worker --app webservices.tasks
 ```
 
 ## Testing
-This repo uses [pytest](http://pytest.org/latest/).
+This repo uses [pytest](https://docs.pytest.org/en/latest/).
 
 If the test database server is *not* the default local Postgres instance, indicate it using:
 
