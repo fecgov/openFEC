@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 
-from webservices import flow
+from webservices import flow, partition
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
@@ -241,8 +241,6 @@ def update_schemas(processes=1):
         path = os.path.join('data', 'sql_updates', '{}.sql'.format(task))
         execute_sql_file(path)
     execute_sql_file('data/rename_temporary_views.sql')
-    execute_sql_file('data/converted_mvs/sched_a_by_size_merged.sql')
-    execute_sql_file('data/converted_mvs/sched_a_by_state_recipient_totals.sql')
     logger.info("Finished DB refresh.")
 
 @manager.command
@@ -290,6 +288,56 @@ def rebuild_aggregates(processes=1):
     logger.info('Rebuilding incremental aggregates...')
     execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
     logger.info('Finished rebuilding incremental aggregates.')
+
+@manager.command
+def update_aggregates():
+    """These are run nightly to recalculate the totals
+    """
+    logger.info('Updating incremental aggregates...')
+
+    with db.engine.begin() as connection:
+        connection.execute(
+            sa.text('select update_aggregates()').execution_options(
+                autocommit=True
+            )
+        )
+        logger.info('Finished updating Schedule E and support aggregates.')
+
+@manager.command
+def refresh_itemized():
+    """These are run nightly to refresh the itemized schedule A and B data."""
+
+    refresh_itemized_a()
+    refresh_itemized_b()
+
+    logger.info('Finished updating incremental aggregates.')
+
+@manager.command
+def refresh_itemized_a():
+    """Used to refresh the itemized Schedule A data."""
+
+    logger.info('Updating Schedule A...')
+    message = partition.SchedAGroup.process_queues()
+
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
+
+    logger.info('Finished updating Schedule A.')
+
+@manager.command
+def refresh_itemized_b():
+    """Used to refresh the itemized Schedule B data."""
+    logger.info('Updating Schedule B...')
+    message = partition.SchedBGroup.process_queues()
+
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
+
+    logger.info('Finished updating Schedule B.')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
