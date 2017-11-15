@@ -2,6 +2,18 @@
 A RESTful web service supporting fulltext and field-specific searches on FEC data. For
 full documentation visit: https://api.open.fec.gov/developers.
 """
+from webservices.env import env
+
+def initialize_newrelic():
+    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
+    if license_key:
+        import newrelic.agent
+        settings = newrelic.agent.global_settings()
+        settings.license_key = license_key
+        newrelic.agent.initialize()
+
+initialize_newrelic()
+
 import os
 import http
 
@@ -357,15 +369,5 @@ def api_ui():
 
 
 app.register_blueprint(docs)
-
-def initialize_newrelic():
-    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
-    if license_key:
-        import newrelic.agent
-        settings = newrelic.agent.global_settings()
-        settings.license_key = license_key
-        newrelic.agent.initialize()
-
-initialize_newrelic()
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
