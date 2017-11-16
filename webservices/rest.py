@@ -16,6 +16,7 @@ initialize_newrelic()
 
 import os
 import http
+import logging
 
 from flask import abort
 from flask import request
@@ -92,6 +93,12 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     if follower.strip()
 ]
 # app.config['SQLALCHEMY_ECHO'] = True
+
+# Modify app configuration and logging level for production
+if not app.debug:
+    app.logger.addHandler(logging.StreamHandler())
+    app.logger.setLevel(logging.INFO)
+
 db.init_app(app)
 cors.CORS(app)
 
