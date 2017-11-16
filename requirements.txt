@@ -10,7 +10,7 @@ Flask-SQLAlchemy==2.1
 python-dateutil==2.4.2
 sqlalchemy-postgres-copy==0.3.0
 networkx==1.11
-newrelic==2.82.0.62
+newrelic==2.96.0.80
 SQLAlchemy==1.0.17
 mandrill==1.0.57
 icalendar==3.9.1
@@ -20,7 +20,7 @@ gevent==1.2.2
 webargs==0.18.0
 slacker==0.8.6
 ujson==1.33
-requests==2.13.0
+requests==2.18.4
 elasticsearch==2.4.0
 elasticsearch-dsl==2.1.0
 bandit==1.4.0
