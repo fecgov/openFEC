@@ -203,8 +203,10 @@ api.add_resource(audit.Category, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
 api.add_resource(audit.AuditCaseSearchByCategoryId,
         '/audit-case/search/<int:primary_category_id>/<int:sub_category_id>')
-api.add_resource(audit.AuditCandidateNameSearch, '/audit/search/name/candidates/')
-api.add_resource(audit.AuditCommitteeNameSearch, '/audit/search/name/committees/')
+# api.add_resource(audit.AuditCandidateNameSearch, '/audit/search/name/candidates/')
+# api.add_resource(audit.AuditCommitteeNameSearch, '/audit/search/name/committees/')
+api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
+api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
