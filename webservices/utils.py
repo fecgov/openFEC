@@ -342,12 +342,11 @@ def create_eregs_link(part, section):
     return '/regulations/{}/CURRENT'.format(url_part_section)
 
 def post_to_slack(message, channel):
-
     response = requests.post(
         env.get_credential('SLACK_HOOK'),
         data=json.dumps({
             'text': message, 'channel': channel, 'link_names': 1,
-            'username': 'Mr. Robot', 'icon_emoji': ':robot_face:',
+            'username': 'Ms. Robot', 'icon_emoji': ':robot_face:',
         }),
         headers={'Content-Type': 'application/json'},
     )
