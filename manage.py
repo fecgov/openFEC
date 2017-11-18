@@ -18,6 +18,7 @@ from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 import webservices.legal_docs as legal_docs
+from webservices.utils import post_to_slack
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -385,6 +386,13 @@ def refresh_calendar():
     """
     with db.engine.begin() as connection:
         connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY ofec_omnibus_dates_mv')
+
+
+@manager.command
+def slack_message(message):
+    """ Sends a message to the bots channel. you can add this command to ping you when a task is done, etc.
+    """
+    post_to_slack(message, '#bots')
 
 
 if __name__ == '__main__':
