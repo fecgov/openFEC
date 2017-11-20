@@ -14,6 +14,12 @@ from webservices import __API_VERSION__
 
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
+SCHEMAS = [
+    "disclosure",
+    "fecapp",
+    "real_efile",
+    "staging",
+]
 
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
@@ -21,27 +27,23 @@ NPlusOne(rest.app)
 def _setup_extensions():
     rest.db.engine.execute('create extension if not exists btree_gin;')
 
-
 def _reset_schema():
-    rest.db.engine.execute('drop schema if exists public cascade;')
-    rest.db.engine.execute('drop schema if exists disclosure cascade;')
-    rest.db.engine.execute('drop schema if exists staging cascade;')
-    rest.db.engine.execute('drop schema if exists fecapp cascade;')
-    rest.db.engine.execute('drop schema if exists real_efile cascade;')
+    _drop_schema()
     rest.db.engine.execute('create schema public;')
-    rest.db.engine.execute('create schema disclosure;')
-    rest.db.engine.execute('create schema staging;')
-    rest.db.engine.execute('create schema fecapp;')
-    rest.db.engine.execute('create schema real_efile;')
-
+    _create_schema()
 
 def _reset_schema_for_integration():
-    rest.db.engine.execute('drop schema if exists public cascade;')
-    rest.db.engine.execute('drop schema if exists disclosure cascade;')
-    rest.db.engine.execute('drop schema if exists staging cascade;')
-    rest.db.engine.execute('drop schema if exists fecapp cascade;')
+    _drop_schema()
     rest.db.engine.execute('create schema public;')
 
+def _drop_schema():
+    rest.db.engine.execute('drop schema if exists public cascade;')
+    for schema in SCHEMAS:
+        rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
+
+def _create_schema():
+    for schema in SCHEMAS:
+        rest.db.engine.execute('create schema %s;' % schema)
 
 class BaseTestCase(unittest.TestCase):
 
