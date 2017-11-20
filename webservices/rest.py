@@ -60,7 +60,6 @@ from webservices.resources import search
 from webservices.resources import dates
 from webservices.resources import costs
 from webservices.resources import legal
-from webservices.resources import load
 from webservices.resources import large_aggregates
 from webservices.env import env
 
@@ -273,7 +272,6 @@ api.add_resource(download.DownloadView, '/download/<path:path>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
-api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
