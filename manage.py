@@ -391,7 +391,51 @@ def refresh_materialized():
     """Refresh materialized views nightly
     """
     logger.info('Refreshing materialized views...')
-    execute_sql_file('data/refresh_materialized_views.sql')
+    materialized_view_names = {
+        'filing_amendments_house_senate': ['ofec_house_senate_paper_amendments_mv'],  # Anomaly
+        'sched_f': ['ofec_sched_f_mv'],
+        'reports_ie': ['ofec_reports_ie_only_mv'],  # Anomale
+        'electioneering_by_candidate': ['ofec_electioneering_aggregate_candidate_mv'],  # Anomaly
+        'candidate_history': ['ofec_candidate_history_mv'],
+        'candidate_detail': ['ofec_candidate_detail_mv'],
+        'candidate_election': ['ofec_candidate_election_mv'],
+        'candidate_history_latest': ['ofec_candidate_history_latest_mv'],
+        'omnibus_dates': ['ofec_omnibus_dates_mv'],
+        'election_outcome': ['ofec_election_result_mv'],  # Anomaly
+        'sched_e_by_candidate': ['ofec_sched_e_aggregate_candidate_mv'],  # Anomaly
+        'filing_amendments_presidential': ['ofec_presidential_paper_amendments_mv'],  # Anomaly
+        'filing_amendments_pac_party': ['ofec_pac_party_paper_amendments_mv'],  # Anomaly
+        'cand_cmte_linkage': ['ofec_cand_cmte_linkage_mv'],
+        'communication_cost_by_candidate': ['ofec_communication_cost_aggregate_candidate_mv'],  # Anomaly
+        'electioneering': ['ofec_electioneering_mv'],
+        'filing_amendments_all': ['ofec_amendments_mv'],  # Anomaly
+        'reports_house_senate': ['ofec_reports_house_senate_mv'],
+        'reports_pac_party': ['ofec_reports_pacs_parties_mv'],  # Anomaly
+        'reports_presidential': ['ofec_reports_presidential_mv'],
+        'committee_history': ['ofec_committee_history_mv'],
+        'communication_cost': ['ofec_communication_cost_mv'],
+        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv'],  # Anomaly
+        'totals_combined': ['ofec_totals_combined_mv'],
+        'totals_ie': ['ofec_totals_ie_only_mv'],  # Anomaly
+        'totals_house_senate': ['ofec_totals_house_senate_mv'],
+        'totals_presidential': ['ofec_totals_presidential_mv'],
+        'candidate_aggregates': ['ofec_candidate_totals_mv'],
+        'candidate_flags': ['ofec_candidate_flag'],  # Anomaly
+        'sched_c': ['ofec_sched_c_mv'],
+        'rad_analyst': ['ofec_rad_mv'],  # Anomaly
+        'committee_detail': ['ofec_committee_detail_mv'],
+        'committee_fulltext': ['ofec_committee_fulltext_mv'],
+        'totals_pac_party': ['ofec_totals_pacs_parties_mv', 'ofec_totals_pacs_mv', 'ofec_totals_parties_mv'],  # Anomaly
+        'large_aggregates': ['ofec_entity_chart_mv'],  # Anomaly
+        'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
+        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv']
+    }
+    graph = flow.get_graph()
+    for node in nx.topological_sort(graph):
+        for mv in materialized_view_names[node]:
+            logger.info('Refreshing %s', mv)
+            db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
