@@ -2,8 +2,21 @@
 A RESTful web service supporting fulltext and field-specific searches on FEC data. For
 full documentation visit: https://api.open.fec.gov/developers.
 """
+from webservices.env import env
+
+def initialize_newrelic():
+    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
+    if license_key:
+        import newrelic.agent
+        settings = newrelic.agent.global_settings()
+        settings.license_key = license_key
+        newrelic.agent.initialize()
+
+initialize_newrelic()
+
 import os
 import http
+import logging
 
 from flask import abort
 from flask import request
@@ -61,7 +74,7 @@ def sqla_conn_string():
 
 
 app = Flask(__name__)
-app.debug = True
+# app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -80,6 +93,12 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     if follower.strip()
 ]
 # app.config['SQLALCHEMY_ECHO'] = True
+
+# Modify app configuration and logging level for production
+if not app.debug:
+    app.logger.addHandler(logging.StreamHandler())
+    app.logger.setLevel(logging.INFO)
+
 db.init_app(app)
 cors.CORS(app)
 
@@ -165,7 +184,8 @@ api.add_resource(
     '/candidate/<candidate_id>/committees/history/',
     '/candidate/<candidate_id>/committees/history/<int:cycle>/',
 )
-api.add_resource(totals.TotalsView, '/committee/<string:committee_id>/totals/', '/totals/<string:committee_type>/')
+api.add_resource(totals.TotalsView, '/totals/<string:committee_type>/')
+api.add_resource(totals.TotalsCommitteeView, '/committee/<string:committee_id>/totals/')
 api.add_resource(totals.CandidateTotalsView, '/candidate/<string:candidate_id>/totals/')
 api.add_resource(reports.ReportsView, '/reports/<string:committee_type>/')
 api.add_resource(reports.CommitteeReportsView, '/committee/<string:committee_id>/reports/')
@@ -356,15 +376,5 @@ def api_ui():
 
 
 app.register_blueprint(docs)
-
-def initialize_newrelic():
-    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
-    if license_key:
-        import newrelic.agent
-        settings = newrelic.agent.global_settings()
-        settings.license_key = license_key
-        newrelic.agent.initialize()
-
-initialize_newrelic()
 
 app.wsgi_app = ProxyFix(app.wsgi_app)

@@ -54,7 +54,13 @@ select
     last_cash_on_hand_end_period,
     last_debts_owed_by_committee,
     last_debts_owed_to_committee,
-    last_report_year
+    last_report_year,
+    committee_name,
+    committee_type,
+    committee_designation,
+    committee_type_full,
+    committee_designation_full,
+    party_full
 from
     ofec_totals_combined_mv_tmp f3
     left join hs_cycle using (committee_id, cycle)
@@ -69,3 +75,5 @@ create index on ofec_totals_house_senate_mv_tmp(candidate_id, idx);
 create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
 create index on ofec_totals_house_senate_mv_tmp(committee_id, idx);
 create index on ofec_totals_house_senate_mv_tmp(cycle, committee_id);
+create index on ofec_totals_house_senate_mv_tmp(committee_type_full, idx);
+create index on ofec_totals_house_senate_mv_tmp(committee_designation_full, idx);
