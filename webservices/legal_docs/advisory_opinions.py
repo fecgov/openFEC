@@ -56,20 +56,26 @@ AO_DOCUMENTS = """
     WHERE ao_id = %s
 """
 
-STATUTE_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+U.S.C.\s+§*(?P<section>\d+).*\.?")
-REGULATION_CITATION_REGEX = re.compile(r"(?P<title>\d+)\s+CFR\s+§*(?P<part>\d+)\.(?P<section>\d+)")
-AO_CITATION_REGEX = re.compile(r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
+STATUTE_CITATION_REGEX = re.compile(
+    r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?")
+
+REGULATION_CITATION_REGEX = re.compile(
+    r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)")
+
+AO_CITATION_REGEX = re.compile(
+    r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
 
 AOS_WITH_CORRECTED_STAGE = {"2009-05": "Withdrawn"}
 
 
 def load_advisory_opinions(from_ao_no=None):
     """
-    Reads data for advisory opinions from a Postgres database, assembles a JSON document
-    corresponding to the advisory opinion and indexes this document in Elasticsearch in
-    the index `docs_index` with a doc_type of `advisory_opinions`. In addition, all documents
-    attached to the advisory opinion are uploaded to an S3 bucket under the _directory_
-    `legal/aos/`.
+    Reads data for advisory opinions from a Postgres database,
+    assembles a JSON document corresponding to the advisory opinion
+    and indexes this document in Elasticsearch in the index `docs_index`
+    with a doc_type of `advisory_opinions`.
+    In addition, all documents attached to the advisory opinion
+    are uploaded to an S3 bucket under the _directory_`legal/aos/`.
     """
     es = get_elasticsearch_connection()
 
@@ -255,6 +261,7 @@ def get_citations(ao_names):
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
     return citations
 
+
 def parse_ao_citations(text, ao_component_to_name_map):
     matches = set()
 
@@ -264,6 +271,7 @@ def parse_ao_citations(text, ao_component_to_name_map):
             if (year, serial_no) in ao_component_to_name_map:
                 matches.add(ao_component_to_name_map[(year, serial_no)])
     return matches
+
 
 def parse_statutory_citations(text):
     matches = set()
@@ -279,6 +287,7 @@ def parse_statutory_citations(text):
                 int(citation.group('section'))
             ))
     return matches
+
 
 def parse_regulatory_citations(text):
     matches = set()
