@@ -72,7 +72,7 @@ with elections_raw as(
     where
         coalesce(trc_election_status_id, 1) = 1 and
         -- hard coding this for now
-        fecapp.trc_report_due_date < to_date('2018-01-01','YYYY-MM-DD')
+        reports.due_date < to_date('2018-01-01','YYYY-MM-DD')
 ), reports as (
     select
         'report-' || report_type as category,
