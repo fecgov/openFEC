@@ -578,7 +578,7 @@ Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
 reports. All reporting deadlines are available at /reporting-dates/ for reference.
 
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
 that creates the calendar.
 '''
 
@@ -594,7 +594,7 @@ Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
 reports. All reporting deadlines are available at /reporting-dates/ for reference.
 
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
 that creates the calendar.
 
 '''
@@ -977,10 +977,10 @@ MAX_FILTER = 'Filter for all amounts less than a value.'
 ENTITY_RECEIPTS_TOTLAS = '''
 Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
 ENTITY_DISBURSEMENTS_TOTLAS ='''
 Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
