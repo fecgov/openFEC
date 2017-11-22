@@ -211,26 +211,6 @@ def build_district_counts(outname='districts.json'):
     utils.write_district_counts(outname)
 
 @manager.command
-def partition_itemized(schedule):
-    """This command runs the partitioning against the specified itemized
-    schedule table.
-    """
-    logger.info('Partitioning Schedule %s...', schedule)
-    execute_sql_file('data/sql_partition/partition_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished partitioning Schedule %s.', schedule)
-
-@manager.command
-def index_itemized(schedule):
-    """This command (re-)creates the indexes for the itemized schedule table
-    partition and removes any old ones.
-    Run this when you make changes to the index definitions on the itemized
-    schedule A and B data but do not need to do a full repartition.
-    """
-    logger.info('(Re-)indexing Schedule %s...', schedule)
-    execute_sql_file('data/sql_partition/index_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished (re-)indexing Schedule %s.', schedule)
-
-@manager.command
 def rebuild_aggregates(processes=1):
     """These are the functions used to update the aggregates and schedules.
     Run this when you make a change to code in:
@@ -327,8 +307,6 @@ def update_all(processes=1):
     load_pacronyms()
     load_nicknames()
     load_election_dates()
-    partition_itemized('a')
-    partition_itemized('b')
     rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
