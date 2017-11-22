@@ -86,8 +86,6 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
-        manage.load_districts()
-        manage.update_functions()
         whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
         rest.db.metadata.create_all(
             rest.db.engine,
@@ -142,6 +140,7 @@ class IntegrationTestCase(BaseTestCase):
         cls.app_context.push()
         _reset_schema_for_integration()
         run_migrations()
+        manage.refresh_materialized()
 
 def run_migrations():
     subprocess.check_call(
