@@ -519,10 +519,31 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(existing.count, count + 1)
 
     def test_update_aggregate_size_existing_merged(self):
-        existing = models.ScheduleABySize.query.filter_by(
-            size=0,
-            cycle=2016,
-        ).first()
+        def get_existing():
+            return models.ScheduleABySize.query.filter_by(
+                size=0,
+                cycle=2016,
+            ).order_by(
+                models.ScheduleABySize.committee_id,
+            ).first()
+        EXISTING_RECEIPT_AMOUNT = 24
+        filing = self.NmlSchedAFactory(
+            rpt_yr=2015,
+            cmte_id='X1235',
+            contb_receipt_amt=EXISTING_RECEIPT_AMOUNT,
+            contb_receipt_dt=datetime.datetime(2015, 1, 1),
+            receipt_tp='15J',
+        )
+        self.FItemReceiptOrExp(
+            sub_id=filing.sub_id,
+            rpt_yr=2015,
+        )
+        db.session.commit()
+        manage.update_aggregates()
+        db.session.execute('refresh materialized view ofec_totals_combined_mv')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        self._clear_sched_a_queues()
+        existing = get_existing()
         total = existing.total
         committee_id = existing.committee_id
         filing = self.NmlSchedAFactory(
@@ -540,7 +561,7 @@ class TestViews(common.IntegrationTestCase):
         # Create a committee and committee report
         # Changed to point to sampled data, may be problematic in the future if det sum table
         # changes a lot and hence the tests need to test new behavior, believe it's fine for now though. -jcc
-        rep = sa.Table('detsum_sample', db.metadata, autoload=True, autoload_with=db.engine)
+        rep = sa.Table('v_sum_and_det_sum_report', db.metadata, schema='disclosure', autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
             indv_unitem_contb=20,
             cmte_id=committee_id,
@@ -551,7 +572,6 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute(ins)
         db.session.commit()
         manage.update_aggregates()
-        db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_totals_combined_mv')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         refreshed = models.ScheduleABySize.query.filter_by(

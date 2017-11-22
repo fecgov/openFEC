@@ -204,26 +204,6 @@ def dump_districts(dest=None):
     subprocess.run(cmd, shell=True)
 
 @manager.command
-def load_districts(source=None):
-    """ Loads that districts that you made locally so that you can then add them as a
-    table to the databases
-    """
-
-    logger.info('Loading districts...')
-
-    if source is None:
-        source = './data/districts.dump'
-    else:
-        source = shlex.quote(source)
-
-    dest = db.engine.url
-    cmd = (
-        'pg_restore --dbname "{dest}" --no-acl --no-owner --clean {source}'
-    ).format(**locals())
-    subprocess.run(cmd, shell=True)
-    logger.info('Finished loading districts.')
-
-@manager.command
 def build_district_counts(outname='districts.json'):
     """ Compiles the districts for a state
     """
@@ -242,12 +222,6 @@ def update_schemas(processes=1):
         execute_sql_file(path)
     execute_sql_file('data/rename_temporary_views.sql')
     logger.info("Finished DB refresh.")
-
-@manager.command
-def update_functions(processes=1):
-    """This command updates the helper functions. It is run on deploy.
-    """
-    execute_sql_folder('data/functions/', processes=processes)
 
 @manager.command
 def update_itemized(schedule):
@@ -373,8 +347,6 @@ def update_all(processes=1):
     """Update all derived data. Warning: Extremely slow on production data.
     """
     processes = int(processes)
-    update_functions(processes=processes)
-    load_districts()
     load_pacronyms()
     load_nicknames()
     load_election_dates()
@@ -422,9 +394,11 @@ def refresh_materialized():
         'candidate_aggregates': ['ofec_candidate_totals_mv'],
         'candidate_flags': ['ofec_candidate_flag'],  # Anomaly
         'sched_c': ['ofec_sched_c_mv'],
+        'sched_a_by_state_recipient_totals': ['ofec_sched_a_aggregate_state_recipient_totals_mv'],
         'rad_analyst': ['ofec_rad_mv'],  # Anomaly
         'committee_detail': ['ofec_committee_detail_mv'],
         'committee_fulltext': ['ofec_committee_fulltext_mv'],
+        'sched_a_by_size_merged': ['ofec_sched_a_aggregate_size_merged_mv'],
         'totals_pac_party': ['ofec_totals_pacs_parties_mv', 'ofec_totals_pacs_mv', 'ofec_totals_parties_mv'],  # Anomaly
         'large_aggregates': ['ofec_entity_chart_mv'],  # Anomaly
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
@@ -435,6 +409,8 @@ def refresh_materialized():
         for mv in materialized_view_names[node]:
             logger.info('Refreshing %s', mv)
             db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+
+    db.session.commit()
 
     logger.info('Finished refreshing materialized views.')
 
