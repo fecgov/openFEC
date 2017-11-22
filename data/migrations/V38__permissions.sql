@@ -2568,13 +2568,6 @@ GRANT SELECT ON TABLE ofec_totals_parties_mv TO fec_read;
 
 
 --
--- Name: ofec_entity_chart_mv; Type: ACL; Schema: public; Owner: fec
---
-
-GRANT SELECT ON TABLE ofec_entity_chart_mv TO fec_read;
-
-
---
 -- Name: ofec_f57_queue_new; Type: ACL; Schema: public; Owner: fec
 --
 
@@ -2614,13 +2607,6 @@ GRANT SELECT ON TABLE ofec_nml_24_queue_new TO fec_read;
 --
 
 GRANT SELECT ON TABLE ofec_nml_24_queue_old TO fec_read;
-
-
---
--- Name: ofec_omnibus_dates_mv; Type: ACL; Schema: public; Owner: fec
---
-
-GRANT SELECT ON TABLE ofec_omnibus_dates_mv TO fec_read;
 
 
 --

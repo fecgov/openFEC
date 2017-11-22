@@ -10092,20 +10092,6 @@ CREATE INDEX ofec_electioneering_mv_tmp_sb_image_num_idx ON ofec_electioneering_
 
 
 --
--- Name: ofec_entity_chart_mv_tmp_cycle_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_entity_chart_mv_tmp_cycle_idx1 ON ofec_entity_chart_mv USING btree (cycle);
-
-
---
--- Name: ofec_entity_chart_mv_tmp_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE UNIQUE INDEX ofec_entity_chart_mv_tmp_idx_idx1 ON ofec_entity_chart_mv USING btree (idx);
-
-
---
 -- Name: ofec_filings_amendments_all_mv_tmp_file_num_idx1; Type: INDEX; Schema: public; Owner: fec
 --
 
@@ -10286,61 +10272,6 @@ CREATE UNIQUE INDEX ofec_house_senate_electronic_amendments_mv_tmp_idx_idx ON of
 
 CREATE UNIQUE INDEX ofec_house_senate_paper_amendments_mv_tmp_idx_idx ON ofec_house_senate_paper_amendments_mv USING btree (idx);
 
-
---
--- Name: ofec_omnibus_dates_mv_tmp_category_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_omnibus_dates_mv_tmp_category_idx ON ofec_omnibus_dates_mv USING btree (category);
-
-
---
--- Name: ofec_omnibus_dates_mv_tmp_description_text_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_omnibus_dates_mv_tmp_description_text_idx ON ofec_omnibus_dates_mv USING gin (description_text);
-
-
---
--- Name: ofec_omnibus_dates_mv_tmp_end_date_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_omnibus_dates_mv_tmp_end_date_idx ON ofec_omnibus_dates_mv USING btree (end_date);
-
-
---
--- Name: ofec_omnibus_dates_mv_tmp_idx_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE UNIQUE INDEX ofec_omnibus_dates_mv_tmp_idx_idx ON ofec_omnibus_dates_mv USING btree (idx);
-
-
---
--- Name: ofec_omnibus_dates_mv_tmp_location_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_omnibus_dates_mv_tmp_location_idx ON ofec_omnibus_dates_mv USING btree (location);
-
-
---
--- Name: ofec_omnibus_dates_mv_tmp_start_date_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_omnibus_dates_mv_tmp_start_date_idx ON ofec_omnibus_dates_mv USING btree (start_date);
-
-
---
--- Name: ofec_omnibus_dates_mv_tmp_states_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_omnibus_dates_mv_tmp_states_idx ON ofec_omnibus_dates_mv USING gin (states);
-
-
---
--- Name: ofec_omnibus_dates_mv_tmp_summary_text_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_omnibus_dates_mv_tmp_summary_text_idx ON ofec_omnibus_dates_mv USING gin (summary_text);
 
 
 --
