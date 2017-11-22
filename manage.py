@@ -211,16 +211,6 @@ def build_district_counts(outname='districts.json'):
     utils.write_district_counts(outname)
 
 @manager.command
-def rebuild_aggregates(processes=1):
-    """These are the functions used to update the aggregates and schedules.
-    Run this when you make a change to code in:
-        data/sql_incremental_aggregates
-    """
-    logger.info('Rebuilding incremental aggregates...')
-    execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
-    logger.info('Finished rebuilding incremental aggregates.')
-
-@manager.command
 def update_aggregates():
     """These are run nightly to recalculate the totals
     """
@@ -307,7 +297,6 @@ def update_all(processes=1):
     load_pacronyms()
     load_nicknames()
     load_election_dates()
-    rebuild_aggregates(processes=processes)
     update_schemas(processes=processes)
 
 @manager.command
