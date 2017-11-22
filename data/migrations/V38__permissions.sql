@@ -2582,13 +2582,6 @@ GRANT SELECT ON TABLE ofec_f57_queue_old TO fec_read;
 
 
 --
--- Name: ofec_fips_states; Type: ACL; Schema: public; Owner: fec
---
-
-GRANT SELECT ON TABLE ofec_fips_states TO fec_read;
-
-
---
 -- Name: ofec_house_senate_electronic_amendments_mv; Type: ACL; Schema: public; Owner: fec
 --
 
@@ -2883,13 +2876,6 @@ GRANT SELECT ON TABLE ofec_sched_a_aggregate_state_recipient_totals TO fec_read;
 
 
 --
--- Name: ofec_sched_a_aggregate_state_recipient_totals_mv; Type: ACL; Schema: public; Owner: fec
---
-
-GRANT SELECT ON TABLE ofec_sched_a_aggregate_state_recipient_totals_mv TO fec_read;
-
-
---
 -- Name: ofec_sched_a_aggregate_zip; Type: ACL; Schema: public; Owner: fec
 --
 
@@ -3174,13 +3160,6 @@ GRANT SELECT ON TABLE ofec_totals_ie_only_mv TO fec_read;
 --
 
 GRANT SELECT ON TABLE ofec_two_year_periods TO fec_read;
-
-
---
--- Name: ofec_zips_districts; Type: ACL; Schema: public; Owner: fec
---
-
-GRANT SELECT ON TABLE ofec_zips_districts TO fec_read;
 
 
 --

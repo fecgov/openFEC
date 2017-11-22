@@ -9119,13 +9119,6 @@ CREATE INDEX ix_ofec_election_dates_index ON ofec_election_dates USING btree (in
 
 
 --
--- Name: ix_ofec_fips_states_index; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ix_ofec_fips_states_index ON ofec_fips_states USING btree (index);
-
-
---
 -- Name: ix_ofec_nicknames_index; Type: INDEX; Schema: public; Owner: fec
 --
 
@@ -9137,13 +9130,6 @@ CREATE INDEX ix_ofec_nicknames_index ON ofec_nicknames USING btree (index);
 --
 
 CREATE INDEX ix_ofec_pacronyms_index ON ofec_pacronyms USING btree (index);
-
-
---
--- Name: ix_ofec_zips_districts_index; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ix_ofec_zips_districts_index ON ofec_zips_districts USING btree (index);
 
 
 --
@@ -11115,62 +11101,6 @@ CREATE INDEX ofec_sched_a_aggregate_state_cycle_old ON ofec_sched_a_aggregate_st
 
 
 --
--- Name: ofec_sched_a_aggregate_state_recip_committee_type_full_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_sched_a_aggregate_state_recip_committee_type_full_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (committee_type_full, idx);
-
-
---
--- Name: ofec_sched_a_aggregate_state_recipient__committee_type_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_sched_a_aggregate_state_recipient__committee_type_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (committee_type, idx);
-
-
---
--- Name: ofec_sched_a_aggregate_state_recipient_tota_state_full_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_sched_a_aggregate_state_recipient_tota_state_full_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (state_full, idx);
-
-
---
--- Name: ofec_sched_a_aggregate_state_recipient_totals_mv_count_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_sched_a_aggregate_state_recipient_totals_mv_count_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (count, idx);
-
-
---
--- Name: ofec_sched_a_aggregate_state_recipient_totals_mv_cycle_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_sched_a_aggregate_state_recipient_totals_mv_cycle_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (cycle, idx);
-
-
---
--- Name: ofec_sched_a_aggregate_state_recipient_totals_mv_state_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_sched_a_aggregate_state_recipient_totals_mv_state_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (state, idx);
-
-
---
--- Name: ofec_sched_a_aggregate_state_recipient_totals_mv_tmp_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE UNIQUE INDEX ofec_sched_a_aggregate_state_recipient_totals_mv_tmp_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (idx);
-
-
---
--- Name: ofec_sched_a_aggregate_state_recipient_totals_mv_total_idx_idx1; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX ofec_sched_a_aggregate_state_recipient_totals_mv_total_idx_idx1 ON ofec_sched_a_aggregate_state_recipient_totals_mv USING btree (total, idx);
-
-
---
 -- Name: ofec_sched_a_aggregate_state_state; Type: INDEX; Schema: public; Owner: fec
 --
 
@@ -12176,13 +12106,6 @@ CREATE INDEX ofec_totals_presidential_mv_tmp_cycle_idx_idx1 ON ofec_totals_presi
 --
 
 CREATE UNIQUE INDEX ofec_totals_presidential_mv_tmp_idx_idx1 ON ofec_totals_presidential_mv USING btree (idx);
-
-
---
--- Name: ofec_zips_districts_ZCTA_idx; Type: INDEX; Schema: public; Owner: fec
---
-
-CREATE INDEX "ofec_zips_districts_ZCTA_idx" ON ofec_zips_districts USING btree ("ZCTA");
 
 
 SET search_path = real_efile, pg_catalog;
