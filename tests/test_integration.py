@@ -12,10 +12,11 @@ from factory.alchemy import SQLAlchemyModelFactory
 from apispec import utils, exceptions
 
 import manage
-from tests import common
+from tests import common, factories
 from webservices.rest import db
 from webservices.spec import spec
 from webservices.common import models
+from webservices.common.models import ScheduleA
 
 
 def make_factory():
@@ -710,3 +711,35 @@ class TestViews(common.IntegrationTestCase):
         actual_tables = set(inspector.get_table_names())
         assert expected_tables.issubset(actual_tables)
         assert "ofec_sched_a_3005_3006" not in actual_tables
+
+    def test_filter_individual_sched_a(self):
+        individuals = [
+            factories.ScheduleAFactory(receipt_type='15J', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, filing_form='F3X'),
+        ]
+        earmarks = [
+            factories.ScheduleAFactory(filing_form='F3X'),
+            factories.ScheduleAFactory(
+                line_number='12',
+                contribution_receipt_amount=150,
+                memo_text='earmark',
+                memo_code='X',
+                filing_form='F3X'
+            ),
+        ]
+
+        is_individual = sa.func.is_individual(
+            ScheduleA.contribution_receipt_amount,
+            ScheduleA.receipt_type,
+            ScheduleA.line_number,
+            ScheduleA.memo_code,
+            ScheduleA.memo_text,
+            ScheduleA.contributor_id,
+            ScheduleA.committee_id,
+        )
+
+        rows = ScheduleA.query.all()
+        self.assertEqual(rows, individuals + earmarks)
+
+        rows = ScheduleA.query.filter(is_individual).all()
+        self.assertEqual(rows, individuals)
