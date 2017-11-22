@@ -211,16 +211,6 @@ def build_district_counts(outname='districts.json'):
     utils.write_district_counts(outname)
 
 @manager.command
-def update_itemized(schedule):
-    """These are the scripts that create the main schedule tables.
-    Run this when you make a change to code in:
-        data/sql_setup/
-    """
-    logger.info('Updating Schedule {0} tables...'.format(schedule))
-    execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished Schedule {0} update.'.format(schedule))
-
-@manager.command
 def partition_itemized(schedule):
     """This command runs the partitioning against the specified itemized
     schedule table.
@@ -337,9 +327,6 @@ def update_all(processes=1):
     load_pacronyms()
     load_nicknames()
     load_election_dates()
-    update_itemized('a')
-    update_itemized('b')
-    update_itemized('e')
     partition_itemized('a')
     partition_itemized('b')
     rebuild_aggregates(processes=processes)
