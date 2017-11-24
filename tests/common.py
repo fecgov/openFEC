@@ -12,6 +12,7 @@ import manage
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
+from jdbc_utils import to_jdbc_url
 
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
@@ -151,15 +152,3 @@ class IntegrationTestCase(BaseTestCase):
 def run_migrations():
     subprocess.check_call(
         ['flyway', 'migrate', '-url=%s' % to_jdbc_url(TEST_CONN), '-locations=filesystem:data/migrations'],)
-
-def to_jdbc_url(dbi_url):
-    DB_URL_REGEX = re.compile(r'postgresql://(?P<username>[^:]*):?(?P<password>\S*)@(?P<host_port>\S*)$')
-    match = DB_URL_REGEX.match(dbi_url)
-    if match:
-        jdbc_url = 'jdbc:postgresql://{}?user={}'.format(
-            match.group('host_port'), match.group('username'))
-        if match.group('password'):
-            jdbc_url += '&password={}'.format(match.group('password'))
-    else:
-        jdbc_url = 'jdbc:postgresql://localhost:5432/cfdm_unit_test'
-    return jdbc_url
