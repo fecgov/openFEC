@@ -46,7 +46,8 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-    * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
+    * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html))
+    * Flyway 4.2 ([download](https://flywaydb.org/getstarted/download))
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
@@ -564,3 +565,20 @@ Sorting fields include a compound index on on the filed to sort and a unique fie
 Database mirrors/replicas are supported by the API if the `SQLA_FOLLOWERS` is set to one or more valid connection strings.  By default, setting this environment variable will shift all `read` operations to any mirrors/replicas that are available (and randomly choose one to target per request if there are more than one).
 
 You can optionally choose to restrict traffic that goes to the mirrors/replicas to be the asynchronous tasks only by setting the `SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS` environment variable to something that will evaluate to `True` in Python (simply using `True` as the value is fine).  If you do this, you can also restrict which tasks are supported on the mirrors/replicas.  Supported tasks are configured by adding their fully qualified names to the `app.config['SQLALCHEMY_FOLLOWER_TASKS']` list in order to whitelist them.  By default, only the `download` task is enabled.
+
+### Database migration
+`flyway` is the tool used for database migration.
+
+#### Installing `flyway`
+Download the version without JRE, e.g. `flyway-commandline-4.2.0.tar.gz` and expand the archive. Add `<target_directory>/flyway/flyway-4.2.0` to your `PATH`.
+
+#### How `flyway` works
+All database schema modification code is checked into version control in the directory `data/migrations` in the form of SQL files that follow a strict naming convention - `V<version_number>__<descriptive_name>.sql`. `flyway` also maintains a table in the target database called `schema_version` which tracks the migration versions that have already been applied.
+
+`flyway` supports the following commands:
+- `info` compares the migration SQL files and the table `schema_version` and reports on migrations that have been applied and those that are pending.
+- `migrate` compares the migration SQL files and the table `schema_version` and runs those migrations that are pending.
+- `baseline` modifies the `schema_version` table to indicate that the database has already been migrated to a baseline version.
+
+#### Deployment from CircleCI
+flyway is installed in `CircleCI`. During the deployment step, `CircleCI` invokes `flyway` to migrate the target database (depending on the target space). For this to work correctly, connection URLs for the target databases have to be stored as environment variables in CircleCI under the names `FEC_SQLA_CONN_DEV`, `FEC_SQLA_CONN_STAGE` and `FEC_SQLA_CONN_PROD`. The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
