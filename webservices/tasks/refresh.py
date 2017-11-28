@@ -16,10 +16,9 @@ def refresh():
     buffer = io.StringIO()
     with mail.CaptureLogs(manage.logger, buffer):
         try:
-            manage.update_functions()
             manage.update_aggregates()
             manage.refresh_itemized()
-            manage.update_schemas()
+            manage.refresh_materialized()
             download.clear_bucket()
         except Exception as error:
             manage.logger.exception(error)
