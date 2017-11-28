@@ -290,16 +290,6 @@ def add_itemized_partition_cycle(cycle=None, amount=1):
         logger.exception("Failed to add partition cycles")
 
 @manager.command
-def update_all(processes=1):
-    """Update all derived data. Warning: Extremely slow on production data.
-    """
-    processes = int(processes)
-    load_pacronyms()
-    load_nicknames()
-    load_election_dates()
-    update_schemas(processes=processes)
-
-@manager.command
 def refresh_materialized():
     """Refresh materialized views nightly
     """

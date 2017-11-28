@@ -104,7 +104,7 @@ Load our sample data into the development database (`cfdm_test`) by running:
 
 ```
 pg_restore --dbname cfdm_test --no-acl --no-owner data/subset.dump
-./manage.py update_all
+./manage.py refresh_materialized
 ```
 
 Ignore `user does not exist` error messages. Everything will still work!
@@ -354,7 +354,7 @@ To accomplish this, follow these steps:
 
    ```
    name: one-off-app-name
-   command: "<your command here, e.g., python manage.py update_all> && sleep infinity"
+   command: "<your command here, e.g., python manage.py refresh_materialized> && sleep infinity"
    no-route: true
    ```
 
