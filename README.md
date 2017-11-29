@@ -570,7 +570,11 @@ You can optionally choose to restrict traffic that goes to the mirrors/replicas 
 `flyway` is the tool used for database migration.
 
 #### Installing `flyway`
-Download the version without JRE, e.g. `flyway-commandline-4.2.0.tar.gz` and expand the archive. Add `<target_directory>/flyway/flyway-4.2.0` to your `PATH`.
+`Flyway` is a Java application and requires a Java runtime environment (JRE) for execution.
+
+It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-4.2.0.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. Alternatively, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-4.2.0-macosx-x64.tar.gz`, `flyway-commandline-4.2.0-linux-x64.tar.gz`, etc.
+
+Expand the downloaded archive. Add `<target_directory>/flyway/flyway-4.2.0` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
 
 #### How `flyway` works
 All database schema modification code is checked into version control in the directory `data/migrations` in the form of SQL files that follow a strict naming convention - `V<version_number>__<descriptive_name>.sql`. `flyway` also maintains a table in the target database called `schema_version` which tracks the migration versions that have already been applied.
@@ -579,6 +583,8 @@ All database schema modification code is checked into version control in the dir
 - `info` compares the migration SQL files and the table `schema_version` and reports on migrations that have been applied and those that are pending.
 - `migrate` compares the migration SQL files and the table `schema_version` and runs those migrations that are pending.
 - `baseline` modifies the `schema_version` table to indicate that the database has already been migrated to a baseline version.
+
+For more information, see [Flyway documentation](https://flywaydb.org/documentation/).
 
 #### Deployment from CircleCI
 flyway is installed in `CircleCI`. During the deployment step, `CircleCI` invokes `flyway` to migrate the target database (depending on the target space). For this to work correctly, connection URLs for the target databases have to be stored as environment variables in CircleCI under the names `FEC_SQLA_CONN_DEV`, `FEC_SQLA_CONN_STAGE` and `FEC_SQLA_CONN_PROD`. The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
