@@ -8,4 +8,4 @@ applications:
     memory: 256M
     no-route: true
     health-check-type: process
-    command: celery beat --app webservices.tasks
+    command: celery beat --app webservices.tasks --loglevel INFO
