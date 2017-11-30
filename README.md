@@ -22,8 +22,6 @@ All FEC repositories:
 - [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from the FEC.gov feedback widget here, and this is the best place to submit general feedback.
 - [openFEC](https://github.com/18F/openfec): the first RESTful API for the Federal Election Commission
 - [swagger-ui](https://github.com/18F/swagger-ui): forked repo that generates our interactive API documentation
-- [openFEC-web-app](https://github.com/18f/openfec-web-app): the web app for exploring campaign finance data
-- [fec-style](https://github.com/18F/fec-style): shared styles and user interface components, including this project's glossary and feedback tools
 - [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS)
 - [fec-proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
 
@@ -33,7 +31,6 @@ We welcome you to explore, make suggestions, and contribute to our code.
 - Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
 - If you'd rather send us an email, [we're thrilled to hear from you](mailto:betafeedback@fec.gov)!
 - Follow our Set up instructions to run the apps on your computer.
-- Check out our StoriesonBoard [FEC story map](https://18f.storiesonboard.com/m/fec) to get a sense of the user needs we'll be addressing in the future.
 
 ---
 
@@ -74,7 +71,7 @@ Use `npm` to install JavaScript dependencies:
 ```
 nvm use --lts
 npm install -g swagger-tools
-npm install 
+npm install
 npm run build
 ```
 
@@ -148,12 +145,11 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 2. Run:
 
    ```
-   export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
    export FEC_WEB_API_URL=http://localhost:5000
    export FEC_CMS_URL=http://localhost:8000
    ```
 
-   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
+   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.md).
 
    *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.*
 
