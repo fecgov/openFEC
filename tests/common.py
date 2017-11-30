@@ -147,7 +147,7 @@ class IntegrationTestCase(BaseTestCase):
         cls.app_context.push()
         _reset_schema_for_integration()
         run_migrations()
-        manage.refresh_materialized()
+        manage.refresh_materialized(concurrent=False)
 
 def run_migrations():
     subprocess.check_call(

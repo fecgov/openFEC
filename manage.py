@@ -290,8 +290,11 @@ def add_itemized_partition_cycle(cycle=None, amount=1):
         logger.exception("Failed to add partition cycles")
 
 @manager.command
-def refresh_materialized():
-    """Refresh materialized views nightly
+def refresh_materialized(concurrent=True):
+    """Refresh materialized views in dependency order
+       We usually want to refresh them concurrently so that we don't block other
+       connections that use the DB. In the case of tests, we cannot refresh concurrently as the
+       tables are not initially populated.
     """
     logger.info('Refreshing materialized views...')
     materialized_view_names = {
@@ -339,7 +342,10 @@ def refresh_materialized():
     for node in nx.topological_sort(graph):
         for mv in materialized_view_names[node]:
             logger.info('Refreshing %s', mv)
-            db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+            if concurrent:
+                db.session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY %s" % mv)
+            else:
+                db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
 
     db.session.commit()
 

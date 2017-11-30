@@ -87,7 +87,7 @@ class TestViews(common.IntegrationTestCase):
     def setUpClass(cls):
         super(TestViews, cls).setUpClass()
         cls.NmlSchedAFactory, cls.NmlSchedBFactory, cls.FItemReceiptOrExp = make_factory()
-        manage.refresh_materialized()
+        manage.refresh_materialized(concurrent=False)
 
     def test_committee_year_filter(self):
         self._check_entity_model(models.Committee, 'committee_id')
