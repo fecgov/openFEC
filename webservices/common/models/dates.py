@@ -87,7 +87,7 @@ class ElectionClassDate(db.Model):
 
 
 class CalendarDate(db.Model):
-    __tablename__ = 'ofec_dates_v'
+    __tablename__ = 'ofec_dates_vw'
 
     event_id = db.Column('cal_event_id', db.Integer, primary_key=True, doc=docs.EVENT_ID)
     summary = db.Column(db.String, doc=docs.SUMMARY)
