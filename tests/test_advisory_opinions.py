@@ -40,8 +40,8 @@ def test_parse_ao_citations(text, ao_nos, expected):
     ("2 U.S.C. 441b, 441c, 441e", set([(2, 441)])),
     (" 2 U.S.C. §437f", set([(52, 30105)])),
     ("52 U.S.C. § 30101", set([(52, 30101)])),
-    (" 2 USC §437f", set([(52, 30105)])),
-    ("52 U.S.C. § 30101, 52 U.S.C. § 30101", set([(52, 30101)])),
+    (" 2 USC §437f **test with no . in USC**", set([(52, 30105)])),
+
 ])
 def test_parse_statutory_citations(text, expected):
     assert parse_statutory_citations(text) == expected
