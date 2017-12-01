@@ -914,10 +914,10 @@ FED_DISBURSEMENTS = 'Total federal disbursements'
 
 # calendar
 CATEGORY = '''
-Type of date reporting date, Options are: Open Meetings, Executive Sessions, Public Hearings, Conferences,
-Roundtables, Election Dates, Federal Holidays, FEA Periods, Commission Meetings,
-Reporting Deadlines, Conferences and Outreach, AOs and Rules, Other, Quarterly, Monthly, Pre and Post-Elections,
-EC Periods, and IE Periods.
+Type of date reporting date, Options are: Open Meetings, Executive Sessions, Public Hearings,
+Conferences, Roundtables, Election Dates, Federal Holidays, FEA Periods, Commission Meetings,
+Reporting Deadlines, Conferences and Outreach, AOs and Rules, Other, Quarterly, Monthly,
+Pre and Post-Elections, EC Periods, and IE Periods.
 '''
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
