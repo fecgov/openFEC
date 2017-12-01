@@ -5,6 +5,7 @@ create or replace view ofec_dates_v as
  (
     -- most data comes from cal_event and is imported as is, it does not have state filtering.
     select distinct on (category_name, event_name, description, location, start_date, end_date)
+        cal_event_id,
         category_name::text as category,
         event_name::text as summary,
         describe_cal_event(category_name::text, event_name::text, description::text) as description,
