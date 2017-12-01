@@ -919,6 +919,7 @@ Conferences, Roundtables, Election Dates, Federal Holidays, FEA Periods, Commiss
 Reporting Deadlines, Conferences and Outreach, AOs and Rules, Other, Quarterly, Monthly,
 Pre and Post-Elections, EC Periods, and IE Periods.
 '''
+CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
 EVENT_ID = 'An unique ID for an event. Useful for downloading a single event to your calendar. This ID is not a permanent, persistent ID.'
