@@ -78,7 +78,8 @@ class TestCalendarDates(ApiBaseTest):
         factories.CalendarDateFactory(start_date=datetime.datetime(2016, 1, 2))
         factories.CalendarDateFactory(location='Mississippi, CA')
         factories.CalendarDateFactory(event_id=123)
-        factories.CalendarDateFactory(state=['CA'])
+        # deprecated while we figure out a better way to generate the data
+        # factories.CalendarDateFactory(state=['CA'])
         factories.CalendarDateFactory(category='Public Hearings')
         factories.CalendarDateFactory(description='a really interesting event')
         factories.CalendarDateFactory(summary='Meeting that will solve all the problems')

@@ -446,18 +446,9 @@ calendar_dates = {
     'category': MappedList(
         fields.Str,
         description=docs.CATEGORY,
-        mapping={
-            'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)] + ['report-YE'],
-            'report-M': ['report-M{}'.format(each) for each in range(2, 13)] + ['report-YE'],
-            'report-E': [
-                'report-{}'.format(each)
-                for each in ['12C', '12G', '12GR', '12P', '12PR', '12R', '12S', '12SC', '12SG', '12SGR', '12SP', '12SPR', '30D', '30G', '30GR', '30P', '30R', '30S', '30SC', '30SG', '30SGR', '60D']
-            ],
-        },
     ),
     'description': fields.Str(description=docs.CAL_DESCRIPTION),
     'summary': fields.Str(description=docs.SUMMARY),
-    'state': fields.List(fields.Str, description=docs.CAL_STATE),
     'min_start_date': fields.DateTime(description='The minimum start date and time'),
     'min_end_date': fields.DateTime(description='The minimum end date and time'),
     'max_start_date': fields.DateTime(description='The maximum start date and time'),
