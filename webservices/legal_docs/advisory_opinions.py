@@ -237,8 +237,7 @@ def get_citations(ao_names):
             {"no": c, "name": ao_names[c]}
             for c in raw_citations[ao]["aos_cited_by"]], key=lambda d: d["no"])
         citations[ao]["statutes"] = sorted([
-            # Comment for testing: {"text": c[0], "title": c[1], "section": c[2], "former_title": c[3], "former_section": c[4]}
-            {"title": c[0], "section": c[1]}#, "former_title": c[2], "former_section": c[3]}
+            {"title": c[0], "section": c[1]}
             for c in raw_citations[ao]["statutes"]], key=lambda d: (d["title"], d["section"]))
         citations[ao]["regulations"] = sorted([
             {"title": c[0], "part": c[1], "section": c[2]}
@@ -247,17 +246,11 @@ def get_citations(ao_names):
     es = get_elasticsearch_connection()
 
     for citation in all_regulatory_citations:
-        entry = {
-            'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
-            'citation_type': 'regulation'}
+        entry = {'citation_text': '%d CFR §%d.%d'
+                 % (citation[0], citation[1], citation[2]),'citation_type': 'regulation'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
-        # if citation[3] != citation[1]:
-        #     entry = {'citation_text': '%s U.S.C. §%s' %
-        #              (citation[1], citation[2]),
-        #              'formerly': '%d U.S.C. §%d' % (citation[3], citation[4])}
-        # else:
         entry = {'citation_text': '%d U.S.C. §%d'
                  % (citation[0], citation[1]), 'citation_type': 'statute'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
@@ -282,11 +275,8 @@ def parse_statutory_citations(text):
             new_title, new_section = reclassify_archived_mur_statutory_citation(
                 citation.group('title'), citation.group('section'))
             matches.add((
-                # citation.group(0), #remove full text
                 int(new_title),
-                int(new_section),
-                # int(citation.group('title')), # take these out too?
-                # int(citation.group('section')) # take these out too?
+                int(new_section)
             ))
     return matches
 
