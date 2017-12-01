@@ -429,24 +429,8 @@ election_dates = {
     'max_primary_general_date': fields.Date(description='Date of primary or general election'),
 }
 
-class MappedList(fields.List):
-
-    def __init__(self, cls_or_instance, mapping=None, **kwargs):
-        super().__init__(cls_or_instance, **kwargs)
-        self.mapping = mapping or {}
-
-    def _deserialize(self, value, attr, data):
-        ret = super()._deserialize(value, attr, data)
-        return sum(
-            [self.mapping.get(each, [each]) for each in ret],
-            [],
-        )
-
 calendar_dates = {
-    'category': MappedList(
-        fields.Str,
-        description=docs.CATEGORY,
-    ),
+    'category': fields.Str(description=docs.CATEGORY),
     'description': fields.Str(description=docs.CAL_DESCRIPTION),
     'summary': fields.Str(description=docs.SUMMARY),
     'min_start_date': fields.DateTime(description='The minimum start date and time'),
