@@ -427,13 +427,6 @@ def load_efile_sheets():
         df.drop(columns_to_drop, axis=1, inplace=True)
         df.to_json(path_or_buf="data/" + table + ".json", orient='values')
 
-@manager.command
-def refresh_calendar():
-    """ Refreshes calendar data
-    """
-    with db.engine.begin() as connection:
-        connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY ofec_omnibus_dates_mv')
-
 
 if __name__ == '__main__':
     manager.run()

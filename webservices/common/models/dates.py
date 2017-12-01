@@ -87,9 +87,9 @@ class ElectionClassDate(db.Model):
 
 
 class CalendarDate(db.Model):
-    __tablename__ = 'ofec_omnibus_dates_mv'
+    __tablename__ = 'ofec_dates_v'
 
-    event_id = db.Column('idx', db.Integer, primary_key=True, doc=docs.EVENT_ID)
+    event_id = db.Column('cal_event_id', db.Integer, primary_key=True, doc=docs.EVENT_ID)
     summary = db.Column(db.String, doc=docs.SUMMARY)
     description = db.Column(db.Text, doc=docs.CAL_DESCRIPTION)
     category = db.Column(db.String, index=True, doc=docs.CATEGORY)
