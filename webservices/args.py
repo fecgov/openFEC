@@ -430,7 +430,7 @@ election_dates = {
 }
 
 calendar_dates = {
-    'category': fields.Str(description=docs.CATEGORY),
+    'category': fields.List(fields.Str(description=docs.CATEGORY)),
     'description': fields.Str(description=docs.CAL_DESCRIPTION),
     'summary': fields.Str(description=docs.SUMMARY),
     'min_start_date': fields.DateTime(description='The minimum start date and time'),

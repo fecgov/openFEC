@@ -94,16 +94,6 @@ class CalendarDatesView(ApiResource):
     page_schema = schemas.CalendarDatePageSchema
     cap = 500
 
-    @property
-    def args(self):
-        return utils.extend(
-            args.paging,
-            args.calendar_dates,
-            args.make_sort_args(
-                default='-start_date',
-            ),
-        )
-
     filter_match_fields = [
         ('event_id', models.CalendarDate.event_id),
     ]
@@ -119,16 +109,19 @@ class CalendarDatesView(ApiResource):
         (('min_end_date', 'max_end_date'), models.CalendarDate.end_date),
     ]
 
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.calendar_dates,
+            args.make_sort_args(
+                default='-start_date',
+            ),
+        )
+
     def build_query(self, *args, **kwargs):
-        # TODO: Generalize if reused
         query = super().build_query(*args, **kwargs)
-        if kwargs.get('state'):
-            query = query.filter(
-                sa.or_(
-                    self.model.state.overlap(kwargs['state']),
-                    self.model.state == None  # noqa
-                )
-            )
+        print(query)
         return query
 
 
