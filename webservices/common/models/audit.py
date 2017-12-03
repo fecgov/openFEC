@@ -19,7 +19,6 @@ class PrimaryCategory(AuditBase, db.Model):
     tier = db.Column(db.Integer, doc=docs.AUDIT_TIER)
 
 
-# endpoint: audit-category/search/<primary_category_id>
 # endpoint: audit-category
 class CategoryRelation(AuditBase, db.Model):
     __tablename__ = 'finding_rel_vw'

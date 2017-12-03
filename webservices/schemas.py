@@ -988,7 +988,6 @@ register_schema(PrimaryCategorySchema)
 register_schema(PrimaryCategoryPageSchema)
 
 # endpoint audit-category(with nested sub category)
-# endpoint audit-category/search/<primary_category_id>
 CategoryRelationSchema = make_schema(
     models.CategoryRelation,
     fields={
