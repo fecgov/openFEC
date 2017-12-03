@@ -167,6 +167,6 @@ SELECT
 FROM auditsearch.finding_rel fr
 LEFT JOIN auditsearch.finding f ON fr.child_finding_pk = f.finding_pk
 LEFT JOIN auditsearch.finding fs ON fr.parent_finding_pk = fs.finding_pk
-ORDER BY (fr.parent_finding_pk::integer), (fr.child_finding_pk::integer);
+ORDER BY (fr.parent_finding_pk::integer), sub_category_name;
 
 

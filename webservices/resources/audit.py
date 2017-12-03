@@ -44,46 +44,6 @@ class PrimaryCategory(ApiResource):
     def index_column(self):
         return self.model.primary_category_id
 
-# endpoint: audit-category/search/<primary_category_id>
-@doc(
-    tags=['audit'],
-    description=docs.AUDIT_CATEGORY_SEARCH,
-    params={
-        'primary_category_id': {'description': docs.PRIMARY_CATEGORY_ID},
-    },
-)
-class SubCategorySearchByPrimaryCategoryId(ApiResource):
-    model = models.CategoryRelation
-    schema = schemas.CategoryRelationSchema
-    page_schema = schemas.CategoryRelationPageSchema
-
-    filter_multi_fields = [
-        ('sub_category_id', model.sub_category_id),
-    ]
-    filter_fulltext_fields = [
-        ('sub_category_name', model.sub_category_name),
-        ('primary_category_name', model.primary_category_name),
-    ]
-    @property
-    def args(self):
-        return utils.extend(
-            args.paging,
-            args.SubCategorySearchByPrimaryCategoryId,
-            args.make_sort_args(
-                default='sub_category_name',
-            ),
-        )
-
-    # @property
-    # def index_column(self):
-    #     return self.model.audit_case_id
-    def build_query(self, primary_category_id=None, **kwargs):
-        query = super().build_query(**kwargs)
-
-        if primary_category_id:
-            query = query.filter(models.CategoryRelation.primary_category_id == primary_category_id)
-
-        return query
 
 # endpoint: audit-category
 @doc(

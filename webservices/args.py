@@ -784,12 +784,6 @@ PrimaryCategory = {
     # 'tier': fields.List(fields.Int, description=docs.AUDIT_TIER),
 }
 
-# endpoint audit-category/search/<primary_category_id>
-SubCategorySearchByPrimaryCategoryId = {
-    'sub_category_id': fields.List(fields.Int(), description=docs.SUB_CATEGORY_ID),
-    'sub_category_name': fields.List(fields.Str, description=docs.SUB_CATEGORY_NAME),
-    # 'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
-}
 
 # endpoint audit-category
 Category = {
