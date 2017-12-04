@@ -90,14 +90,28 @@ To disable, run:
 invoke remove_hooks
 ```
 
-#### Create local databases
-Before you can run this project locally, you'll need a development database and a test database.
+#### Create a test database
+In order to run tests locally, you'll need a test database.
 
-To create these databases, run:
+To create the test database, run:
+
+```
+createdb cfdm_unit_test
+```
+
+Create the required roles in the test database by running:
+
+```
+psql <<db-connection-parameters>> -f data/create_roles.sql
+```
+
+#### Create a development database
+Before you can run this project locally, you'll need a development database.
+
+To create the development database, run:
 
 ```
 createdb cfdm_test
-createdb cfdm_unit_test
 ```
 
 Load our sample data into the development database (`cfdm_test`) by running:
@@ -585,6 +599,9 @@ All database schema modification code is checked into version control in the dir
 - `baseline` modifies the `schema_version` table to indicate that the database has already been migrated to a baseline version.
 
 For more information, see [Flyway documentation](https://flywaydb.org/documentation/).
+
+#### Running tests
+Tests that require the database will automatically run `flyway` migrations as long as `flyway` is in `PATH`.
 
 #### Deployment from CircleCI
 flyway is installed in `CircleCI`. During the deployment step, `CircleCI` invokes `flyway` to migrate the target database (depending on the target space). For this to work correctly, connection URLs for the target databases have to be stored as environment variables in CircleCI under the names `FEC_SQLA_CONN_DEV`, `FEC_SQLA_CONN_STAGE` and `FEC_SQLA_CONN_PROD`. The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
