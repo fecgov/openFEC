@@ -125,8 +125,7 @@ python manage.py index_statutes
 export SQLA_CONN=<psql:address-to-box>
 ```
 
-Warning: never perform 'update all' when pointing to an RDS box via the SQLA_CON
-N env var
+Warning: never perform 'update all' when pointing to an RDS box via the SQLA_CONN env var
 
 *Note: An additional setting for connecting to and utilizing mirrors/replica boxes can also be set with:*
 
