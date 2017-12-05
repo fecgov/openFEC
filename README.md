@@ -117,11 +117,15 @@ To load statutes into elasticsearch, run:
 python manage.py index_statutes
 ```
 
+#### Connecting to a RDS DB instance instead of local DB
+
 *Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
 
 ```
 export SQLA_CONN=<psql:address-to-box>
 ```
+
+Warning: never perform 'update all' when pointing to an RDS box via the SQLA_CONN env var
 
 *Note: An additional setting for connecting to and utilizing mirrors/replica boxes can also be set with:*
 
@@ -145,7 +149,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 2. Run:
 
    ```
-   export FEC_WEB_API_URL=http://localhost:5000
+   export FEC_API_URL=http://localhost:5000
    export FEC_CMS_URL=http://localhost:8000
    ```
 
