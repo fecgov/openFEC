@@ -32,3 +32,47 @@ create index ofec_sched_a_aggregate_occupation_tmp_cycle_cmte_id on ofec_sched_a
 drop table if exists ofec_sched_a_aggregate_occupation;
 alter table ofec_sched_a_aggregate_occupation_tmp rename to ofec_sched_a_aggregate_occupation;
 select rename_indexes('ofec_sched_a_aggregate_occupation');
+
+-- Create update function
+create or replace function ofec_sched_a_update_aggregate_occupation() returns void as $$
+begin
+    with new as (
+        select 1 as multiplier, cmte_id, rpt_yr, contbr_occupation, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
+        from ofec_sched_a_queue_new
+    ),
+    old as (
+        select -1 as multiplier, cmte_id, rpt_yr, contbr_occupation, contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id
+        from ofec_sched_a_queue_old
+    ),
+    patch as (
+        select
+            cmte_id,
+            rpt_yr + rpt_yr % 2 as cycle,
+            contbr_occupation as occupation,
+            sum(contb_receipt_amt * multiplier) as total,
+            sum(multiplier) as count
+        from (
+            select * from new
+            union all
+            select * from old
+        ) t
+        where contb_receipt_amt is not null
+        and is_individual(contb_receipt_amt, receipt_tp, line_num, memo_cd, memo_text, contbr_id, cmte_id)
+        group by cmte_id, cycle, occupation
+    ),
+    inc as (
+        update ofec_sched_a_aggregate_occupation ag
+        set
+            total = ag.total + patch.total,
+            count = ag.count + patch.count
+        from patch
+        where (ag.cmte_id, ag.cycle, ag.occupation) = (patch.cmte_id, patch.cycle, patch.occupation)
+    )
+    insert into ofec_sched_a_aggregate_occupation (
+        select patch.* from patch
+        left join ofec_sched_a_aggregate_occupation ag using (cmte_id, cycle, occupation)
+        where ag.cmte_id is null
+    )
+    ;
+end
+$$ language plpgsql;

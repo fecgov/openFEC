@@ -952,7 +952,7 @@ register_schema(RadAnalystPageSchema)
 
 EntityReceiptDisbursementTotalsSchema = make_schema(
     models.EntityReceiptDisbursementTotals,
-    options={'exclude': ('idx', 'month', 'year')},
+    options={'exclude': ('idx','month', 'year')},
     fields={'date': ma.fields.DateTime(doc='The cumulative total for this month.')},
 )
 EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)

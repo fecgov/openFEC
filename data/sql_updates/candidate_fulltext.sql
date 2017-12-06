@@ -17,7 +17,7 @@ with nicknames as (
     where
         cmte_dsgn in ('P', 'A') and (
             substr(cand_id, 1, 1) = cmte_tp or
-            cmte_tp not in ('P', 'S', 'H')
+        cmte_tp not in ('P', 'S', 'H')
         )
     group by cand_id
 )
