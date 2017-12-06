@@ -1,0 +1,57 @@
+<header class="site-header">
+  <div class="container">
+    <span class="site-title">api.open.fec.gov/developers</span>
+    <nav class="site-nav">
+      <ul>
+        <li><a href="https://github.com/18f/openfec">Contribute on GitHub</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class='info' id='api_info'>
+  <div class="container">
+    {{#if info}}
+    <h1 class="info_title">{{info.title}} API Documentation</h1>
+    <div class="info_description markdown">{{{info.description}}}</div>
+    <div class="basic-info">
+      <table>
+        <tbody>
+          <tr>
+            <td>Base URI</td>
+            <td>https://api.open.fec.gov{{basePath}}</td>
+          </tr>
+          <tr>
+            <td>HTTP Method</td>
+            <td>GET</td>
+          </tr>
+          <tr>
+            <td>Response format</td>
+            <td>.json</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    {{#if externalDocs}}
+    <h5>More documentations</h5>
+    <p>{{externalDocs.description}}</p>
+    <a href="{{externalDocs.url}}" target="_blank">{{externalDocs.url}}</a>
+    {{/if}}
+    {{#if info.termsOfServiceUrl}}<div class="info_tos"><a href="{{info.termsOfServiceUrl}}">Terms of service</a></div>{{/if}}
+    {{#if info.contact.name}}<div class='info_name'>Created by {{info.contact.name}}</div>{{/if}}
+    {{#if info.contact.url}}<div class='info_url'>See more at <a href="{{info.contact.url}}">{{info.contact.url}}</a></div>{{/if}}
+    {{#if info.contact.email}}<div class='info_email'><a href="mailto:{{info.contact.email}}?subject={{info.title}}">Contact the developer</a></div>{{/if}}
+    {{#if info.license}}<div class='info_license'><a href='{{info.license.url}}'>{{info.license.name}}</a></div>{{/if}}
+    {{/if}}
+  </div>
+</div>
+
+<div id='resources_container'>
+  <ul id='resources'></ul>
+</div>
+
+<div class="footer">
+  <div class="container">
+    <p>API Documentation for <a href="https://www.fec.gov">FEC.gov</a></p>
+  </div>
+</div>
