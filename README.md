@@ -1,21 +1,20 @@
 **Develop**
-[![Build Status](https://img.shields.io/travis/18F/openFEC/develop.svg)](https://travis-ci.org/18F/openFEC)
+[![CircleCI](https://circleci.com/gh/18F/openFEC.svg?style=svg)](https://circleci.com/gh/18F/openFEC)
 [![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/develop.svg)](https://codecov.io/github/18F/openFEC)
 
 **Master**
-[![Build Status](https://img.shields.io/travis/18F/openFEC/master.svg)](https://travis-ci.org/18F/openFEC)
 [![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
 
-![Swagger validation badge](http://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
+![Swagger validation badge](https://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
 
 ## About this project
 The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US President, Senate, and House of Representatives.
 
 Are you interested in seeing how much money a candidate raised? Or spent? How much debt they took on? Who contributed to their campaign? The FEC is the authoritative source for that information.
 
-The new FEC.gov is a collaboration between [18F](http://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
+The new FEC.gov is a collaboration between [18F](https://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
 
 
 ## This repository, [openFEC](https://github.com/18F/openfec), is home to the FEC’s API
@@ -23,8 +22,6 @@ All FEC repositories:
 - [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from the FEC.gov feedback widget here, and this is the best place to submit general feedback.
 - [openFEC](https://github.com/18F/openfec): the first RESTful API for the Federal Election Commission
 - [swagger-ui](https://github.com/18F/swagger-ui): forked repo that generates our interactive API documentation
-- [openFEC-web-app](https://github.com/18f/openfec-web-app): the web app for exploring campaign finance data
-- [fec-style](https://github.com/18F/fec-style): shared styles and user interface components, including this project's glossary and feedback tools
 - [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS)
 - [fec-proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
 
@@ -34,7 +31,6 @@ We welcome you to explore, make suggestions, and contribute to our code.
 - Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
 - If you'd rather send us an email, [we're thrilled to hear from you](mailto:betafeedback@fec.gov)!
 - Follow our Set up instructions to run the apps on your computer.
-- Check out our StoriesonBoard [FEC story map](https://18f.storiesonboard.com/m/fec) to get a sense of the user needs we'll be addressing in the future.
 
 ---
 
@@ -45,12 +41,12 @@ We are always trying to improve our documentation. If you have suggestions or ru
 ### Project prerequisites
 1. Ensure you have the following requirements installed:
 
-    * Python 3.5.3 (which includes pip and and a built-in version of virtualenv called `pyvenv`)
+    * Python (the latest 3.5 release, which includes `pip` and and a built-in version of `virtualenv` called `venv`).
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
     * PostgreSQL (the latest 9.6 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
-         * Read a [Linux tutorial](http://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
+         * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
@@ -73,8 +69,10 @@ pip install -r requirements-dev.txt
 Use `npm` to install JavaScript dependencies:
 
 ```
+nvm use --lts
 npm install -g swagger-tools
 npm install
+npm run build
 ```
 
 ##### Git hooks
@@ -119,11 +117,15 @@ To load statutes into elasticsearch, run:
 python manage.py index_statutes
 ```
 
+#### Connecting to a RDS DB instance instead of local DB
+
 *Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
 
 ```
 export SQLA_CONN=<psql:address-to-box>
 ```
+
+Warning: never perform 'update all' when pointing to an RDS box via the SQLA_CONN env var
 
 *Note: An additional setting for connecting to and utilizing mirrors/replica boxes can also be set with:*
 
@@ -147,12 +149,11 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 2. Run:
 
    ```
-   export FEC_WEB_STYLE_URL=http://localhost:8080/css/styles.css
-   export FEC_WEB_API_URL=http://localhost:5000
+   export FEC_API_URL=http://localhost:5000
    export FEC_CMS_URL=http://localhost:8000
    ```
 
-   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-style](https://github.com/18F/fec-style/blob/master/README.md), [openFEC-webb-app](https://github.com/18F/openFEC-web-app/blob/develop/README.md), and [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.rst).
+   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.md).
 
    *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.*
 
@@ -193,7 +194,7 @@ cd bin
 3. View your local version of the site at [http://localhost:5000](http://localhost:5000).
 
 #### Task queue
-We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](http://redis.io/) as the Celery message broker.
+We use [Celery](http://www.celeryproject.org/) to schedule periodic tasks— for example, refreshing materialized views and updating incremental aggregates. We use [Redis](https://redis.io/) as the Celery message broker.
 
 To work with Celery and Redis locally, install Redis and start a Redis server. By default,
 we connect to Redis at `redis://localhost:6379`; if Redis is running at a different URL,
@@ -209,7 +210,7 @@ celery worker --app webservices.tasks
 ```
 
 ## Testing
-This repo uses [pytest](http://pytest.org/latest/).
+This repo uses [pytest](https://docs.pytest.org/en/latest/).
 
 If the test database server is *not* the default local Postgres instance, indicate it using:
 

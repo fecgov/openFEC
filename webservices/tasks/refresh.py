@@ -17,6 +17,8 @@ def refresh():
     with mail.CaptureLogs(manage.logger, buffer):
         try:
             manage.update_functions()
+            manage.update_aggregates()
+            manage.refresh_itemized()
             manage.update_itemized('e')
             manage.update_schemas()
             download.clear_bucket()
