@@ -7,7 +7,6 @@
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
 
-![Swagger validation badge](https://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
 
 ## About this project
 The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US President, Senate, and House of Representatives.
@@ -70,7 +69,6 @@ Use `npm` to install JavaScript dependencies:
 
 ```
 nvm use --lts
-npm install -g swagger-tools
 npm install
 npm run build
 ```
@@ -208,6 +206,17 @@ Running Redis and Celery locally:
 redis-server
 celery worker --app webservices.tasks
 ```
+
+## Editing Swagger
+We are using a customized 2.x version of swagger-ui to display our API developer documentation.
+
+### Template and Swagger spec file
+The base template for swagger-ui is located at `webservices/templates/swagger-ui.html`. The `{{ specs_url }}` template variable points to `http://localhost:5000/swagger` that is the swagger spec file for FEC specific model definitions and schema. Compiled and vendor assets are served from `static/swagger-ui/`.
+
+### Custom Swagger setup and build
+The swagger-ui package is within the `swagger-ui` directory. The `hbs` folder contains handlebars templates with 18F customizations, as do the files contained in the `js` and `less` folders. However, the `js/swagger-client.js` is the base v2.1.32 swager-ui file.
+
+All these files are then built and compiled via the `npm run build` command that runs Gulp tasks. Any modification should be done in the files in `swagger-ui` that will then be compiled and served in the `static/swagger-ui/` folder.
 
 ## Testing
 This repo uses [pytest](https://docs.pytest.org/en/latest/).

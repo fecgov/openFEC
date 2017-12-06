@@ -62,3 +62,7 @@ celerybeat-schedule
 
 # Credientials
 *.env.json
+
+# Compiled swagger files
+static/swagger-ui/css
+static/swagger-ui/js
