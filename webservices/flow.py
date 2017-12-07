@@ -108,8 +108,8 @@ def get_graph():
     graph.add_edge('committee_history', 'communication_cost')
     graph.add_edge('committee_detail', 'sched_a_by_state_recipient_totals')
 
-    graph.add_edges_from([
-        ('candidate_fulltext_audit', 'audit_case'),
-        ('committee_fulltext_audit', 'audit_case'),
-    ])
+    # graph.add_edges_from([
+    #     ('candidate_fulltext_audit', 'audit_case'),
+    #     ('committee_fulltext_audit', 'audit_case'),
+    # ])
     return graph
