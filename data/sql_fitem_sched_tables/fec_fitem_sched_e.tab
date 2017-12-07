@@ -1,0 +1,126 @@
+CREATE TABLE disclosure.fec_fitem_sched_e
+(
+ cmte_id	varchar(9)	
+ ,cmte_nm	varchar(200)	
+ ,pye_nm	varchar(200)	
+ ,payee_l_nm	varchar(30)	
+ ,payee_f_nm	varchar(20)	
+ ,payee_m_nm	varchar(20)	
+ ,payee_prefix	varchar(10)	
+ ,payee_suffix	varchar(10)	
+ ,pye_st1	varchar(34)	
+ ,pye_st2	varchar(34)	
+ ,pye_city	varchar(30)	
+ ,pye_st	varchar(2)	
+ ,pye_zip	varchar(9)	
+ ,entity_tp	varchar(3)	
+ ,entity_tp_desc	varchar(50)	
+ ,exp_desc	varchar(100)	
+ ,catg_cd	varchar(3)	
+ ,catg_cd_desc	varchar(40)	
+ ,s_o_cand_id	varchar(9)	
+ ,s_o_cand_nm	varchar(90)	
+ ,s_o_cand_nm_first	varchar(38)	
+ ,s_o_cand_nm_last	varchar(38)	
+ ,s_o_cand_m_nm	varchar(20)	
+ ,s_o_cand_prefix	varchar(10)	
+ ,s_o_cand_suffix	varchar(10)	
+ ,s_o_cand_office	varchar(1)	
+ ,s_o_cand_office_desc	varchar(20)	
+ ,s_o_cand_office_st	varchar(2)	
+ ,s_o_cand_office_st_desc	varchar(20)	
+ ,s_o_cand_office_district	varchar(2)	
+ ,s_o_ind	varchar(3)	
+ ,s_o_ind_desc	varchar(50)	
+ ,election_tp	varchar(5)	
+ ,fec_election_tp_desc	varchar(20)	
+ ,cal_ytd_ofc_sought	numeric(14,2)	
+ ,dissem_dt	timestamp	
+ ,exp_amt	numeric(14,2)	
+ ,exp_dt	timestamp	
+ ,exp_tp	varchar(3)	
+ ,exp_tp_desc	varchar(90)	
+ ,memo_cd	varchar(1)	
+ ,memo_cd_desc	varchar(50)	
+ ,memo_text	varchar(100)	
+ ,conduit_cmte_id	varchar(9)	
+ ,conduit_cmte_nm	varchar(200)	
+ ,conduit_cmte_st1	varchar(34)	
+ ,conduit_cmte_st2	varchar(34)	
+ ,conduit_cmte_city	varchar(30)	
+ ,conduit_cmte_st	varchar(2)	
+ ,conduit_cmte_zip	varchar(9)	
+ ,indt_sign_nm	varchar(90)	
+ ,indt_sign_dt	timestamp	
+ ,notary_sign_nm	varchar(90)	
+ ,notary_sign_dt	timestamp	
+ ,notary_commission_exprtn_dt	timestamp	
+ ,filer_l_nm	varchar(30)	
+ ,filer_f_nm	varchar(20)	
+ ,filer_m_nm	varchar(20)	
+ ,filer_prefix	varchar(10)	
+ ,filer_suffix	varchar(10)	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,back_ref_tran_id	varchar(32)	
+ ,back_ref_sched_nm	varchar(8)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,line_num	varchar(12)	
+ ,image_num	varchar(18)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_tp	varchar(3)
+ ,rpt_yr	numeric(4)
+ ,election_cycle numeric (4)
+ ,pdf_url		text
+-- ,is_notice		boolean
+ ,payee_name_text	tsvector 
+ ,pg_date		timestamp	default now()
+ ,CONSTRAINT fec_fitem_sched_e_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_e OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_e TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_e TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_e TO openfec_read;
+
+/*
+
+ALTER TABLE disclosure.fec_fitem_sched_e drop column pg_date;
+
+ALTER TABLE disclosure.fec_fitem_sched_e add column pdf_url text;
+--
+-- data in f_item (or vsum) for sched_e should not include notice record??
+-- ALTER TABLE disclosure.fec_fitem_sched_e add column is_notice		boolean;
+--
+ALTER TABLE disclosure.fec_fitem_sched_e add column payee_name_text	tsvector; 
+
+ALTER TABLE disclosure.fec_fitem_sched_e add column pg_date timestamp	default now();
+*/
+
+
+CREATE OR REPLACE FUNCTION disclosure.fec_fitem_sched_e_insert()
+  RETURNS trigger AS
+$BODY$
+begin
+  new.pdf_url := image_pdf_url(new.image_num);
+  new.payee_name_text := to_tsvector(new.pye_nm);
+  return new;
+end
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION disclosure.fec_fitem_sched_e_insert()
+  OWNER TO fec;
+  
+  
+CREATE TRIGGER TRI_fec_fitem_sched_e
+  BEFORE INSERT
+  ON disclosure.fec_fitem_sched_e
+  FOR EACH ROW
+  EXECUTE PROCEDURE disclosure.fec_fitem_sched_e_insert();

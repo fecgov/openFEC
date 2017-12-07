@@ -1,0 +1,82 @@
+CREATE SEQUENCE public.ofec_sched_b_aggregate_purpose_idx_seq1
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.ofec_sched_b_aggregate_purpose_idx_seq1
+  OWNER TO fec;
+
+
+CREATE TABLE disclosure.dsc_sched_b_aggregate_purpose
+(
+  cmte_id character varying(9),
+  cycle numeric,
+  purpose character varying,
+  total numeric,
+  count bigint,
+  idx integer NOT NULL DEFAULT nextval('ofec_sched_b_aggregate_purpose_idx_seq1'::regclass),
+  CONSTRAINT uq_ofec_sched_b_aggregate_purpose_cmte_id_cycle_purpose UNIQUE (cmte_id, cycle, purpose)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE disclosure.dsc_sched_b_aggregate_purpose
+  OWNER TO fec;
+GRANT ALL ON TABLE disclosure.dsc_sched_b_aggregate_purpose TO fec;
+GRANT SELECT ON TABLE disclosure.dsc_sched_b_aggregate_purpose TO fec_read;
+
+-- Index: disclosure.dsc_sched_b_aggregate_purpose_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_purpose_cmte_id;
+
+CREATE INDEX ofec_sched_b_aggregate_purpose_cmte_id
+  ON disclosure.dsc_sched_b_aggregate_purpose
+  USING btree
+  (cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_b_aggregate_purpose_count
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_purpose_count;
+
+CREATE INDEX ofec_sched_b_aggregate_purpose_count
+  ON disclosure.dsc_sched_b_aggregate_purpose
+  USING btree
+  (count);
+
+-- Index: disclosure.dsc_sched_b_aggregate_purpose_cycle
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_purpose_cycle;
+
+CREATE INDEX ofec_sched_b_aggregate_purpose_cycle
+  ON disclosure.dsc_sched_b_aggregate_purpose
+  USING btree
+  (cycle);
+
+-- Index: disclosure.dsc_sched_b_aggregate_purpose_cycle_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_purpose_cycle_cmte_id;
+
+CREATE INDEX ofec_sched_b_aggregate_purpose_cycle_cmte_id
+  ON disclosure.dsc_sched_b_aggregate_purpose
+  USING btree
+  (cycle, cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_b_aggregate_purpose_purpose
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_purpose_purpose;
+
+CREATE INDEX ofec_sched_b_aggregate_purpose_purpose
+  ON disclosure.dsc_sched_b_aggregate_purpose
+  USING btree
+  (purpose COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_b_aggregate_purpose_total
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_purpose_total;
+
+CREATE INDEX ofec_sched_b_aggregate_purpose_total
+  ON disclosure.dsc_sched_b_aggregate_purpose
+  USING btree
+  (total);
+

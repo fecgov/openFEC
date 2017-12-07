@@ -1,0 +1,98 @@
+CREATE SEQUENCE public.ofec_sched_a_aggregate_zip_idx_seq1
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.ofec_sched_a_aggregate_zip_idx_seq1
+  OWNER TO fec;
+
+
+
+-- Table: disclosure.dsc_sched_a_aggregate_zip
+
+-- DROP TABLE disclosure.dsc_sched_a_aggregate_zip;
+
+CREATE TABLE disclosure.dsc_sched_a_aggregate_zip
+(
+  cmte_id character varying(9),
+  cycle numeric,
+  zip character varying(9),
+  state text,
+  state_full text,
+  total numeric,
+  count bigint,
+  idx integer NOT NULL DEFAULT nextval('ofec_sched_a_aggregate_zip_idx_seq1'::regclass),
+  CONSTRAINT uq_ofec_sched_a_aggregate_zip_cmte_id_cycle_zip UNIQUE (cmte_id, cycle, zip)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE disclosure.dsc_sched_a_aggregate_zip
+  OWNER TO fec;
+GRANT ALL ON TABLE disclosure.dsc_sched_a_aggregate_zip TO fec;
+GRANT SELECT ON TABLE disclosure.dsc_sched_a_aggregate_zip TO fec_read;
+
+-- Index: disclosure.dsc_sched_a_aggregate_zip_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_zip_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_zip_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_zip
+  USING btree
+  (cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_zip_count
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_zip_count;
+
+CREATE INDEX ofec_sched_a_aggregate_zip_count
+  ON disclosure.dsc_sched_a_aggregate_zip
+  USING btree
+  (count);
+
+-- Index: disclosure.dsc_sched_a_aggregate_zip_cycle
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_zip_cycle;
+
+CREATE INDEX ofec_sched_a_aggregate_zip_cycle
+  ON disclosure.dsc_sched_a_aggregate_zip
+  USING btree
+  (cycle);
+
+-- Index: disclosure.dsc_sched_a_aggregate_zip_state
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_zip_state;
+
+CREATE INDEX ofec_sched_a_aggregate_zip_state
+  ON disclosure.dsc_sched_a_aggregate_zip
+  USING btree
+  (state COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_zip_state_full
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_zip_state_full;
+
+CREATE INDEX ofec_sched_a_aggregate_zip_state_full
+  ON disclosure.dsc_sched_a_aggregate_zip
+  USING btree
+  (state_full COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_zip_total
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_zip_total;
+
+CREATE INDEX ofec_sched_a_aggregate_zip_total
+  ON disclosure.dsc_sched_a_aggregate_zip
+  USING btree
+  (total);
+
+-- Index: disclosure.dsc_sched_a_aggregate_zip_zip
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_zip_zip;
+
+CREATE INDEX ofec_sched_a_aggregate_zip_zip
+  ON disclosure.dsc_sched_a_aggregate_zip
+  USING btree
+  (zip COLLATE pg_catalog."default");
+

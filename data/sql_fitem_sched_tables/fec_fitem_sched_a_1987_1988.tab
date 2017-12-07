@@ -1,0 +1,13 @@
+CREATE TABLE disclosure.fec_fitem_sched_a_1987_1988
+(
+ CONSTRAINT fec_fitem_sched_a_1987_1988_pkey PRIMARY KEY (sub_id)
+ ,CONSTRAINT check_election_cycle CHECK (election_cycle = ANY (ARRAY[1987, 1988]))
+)
+INHERITS (disclosure.fec_fitem_sched_a)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_a_1987_1988 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_a_1987_1988 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_a_1987_1988 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_a_1987_1988 TO openfec_read;
+
+

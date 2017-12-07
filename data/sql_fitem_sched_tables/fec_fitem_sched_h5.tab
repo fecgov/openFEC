@@ -1,0 +1,34 @@
+CREATE TABLE disclosure.fec_fitem_sched_h5
+(
+ filer_cmte_id	varchar(9)	
+ ,filer_cmte_nm	varchar(200)	
+ ,acct_nm	varchar(90)	
+ ,tranf_dt	timestamp	
+ ,ttl_tranf_amt_voter_reg	numeric(14,2)	
+ ,ttl_tranf_voter_id	numeric(14,2)	
+ ,ttl_tranf_gotv	numeric(14,2)	
+ ,ttl_tranf_gen_campgn_actvy	numeric(14,2)	
+ ,ttl_tranf_amt	numeric(14,2)	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,line_num	varchar(12)	
+ ,image_num	varchar(18)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_tp	varchar(3)	
+ ,rpt_yr	numeric(4,0)	
+ ,election_cycle	numeric(4,0)	
+ ,pg_date	timestamp	default now()
+ ,CONSTRAINT fec_fitem_sh5_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_h5 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_h5 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_h5 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_h5 TO openfec_read;

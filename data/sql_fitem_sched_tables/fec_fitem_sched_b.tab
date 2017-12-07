@@ -1,0 +1,104 @@
+CREATE TABLE disclosure.fec_fitem_sched_b
+(
+ cmte_id	varchar(9)	
+ ,recipient_cmte_id	varchar(9)	
+ ,recipient_nm	varchar(200)	
+ ,payee_l_nm	varchar(30)	
+ ,payee_f_nm	varchar(20)	
+ ,payee_m_nm	varchar(20)	
+ ,payee_prefix	varchar(10)	
+ ,payee_suffix	varchar(10)	
+ ,payee_employer	varchar(38)	
+ ,payee_occupation	varchar(38)	
+ ,recipient_st1	varchar(34)	
+ ,recipient_st2	varchar(34)	
+ ,recipient_city	varchar(30)	
+ ,recipient_st	varchar(2)	
+ ,recipient_zip	varchar(9)	
+ ,disb_desc	varchar(100)	
+ ,catg_cd	varchar(3)	
+ ,catg_cd_desc	varchar(40)	
+ ,entity_tp	varchar(3)	
+ ,entity_tp_desc	varchar(50)	
+ ,election_tp	varchar(5)	
+ ,fec_election_tp_desc	varchar(20)	
+ ,fec_election_tp_year	varchar(4)	
+ ,election_tp_desc	varchar(20)	
+ ,cand_id	varchar(9)	
+ ,cand_nm	varchar(90)	
+ ,cand_nm_first	varchar(38)	
+ ,cand_nm_last	varchar(38)	
+ ,cand_m_nm	varchar(20)	
+ ,cand_prefix	varchar(10)	
+ ,cand_suffix	varchar(10)	
+ ,cand_office	varchar(1)	
+ ,cand_office_desc	varchar(20)	
+ ,cand_office_st	varchar(2)	
+ ,cand_office_st_desc	varchar(20)	
+ ,cand_office_district	varchar(2)	
+ ,disb_dt	timestamp	
+ ,disb_amt	numeric(14,2)	
+ ,memo_cd	varchar(1)	
+ ,memo_cd_desc	varchar(50)	
+ ,memo_text	varchar(100)	
+ ,disb_tp	varchar(3)	
+ ,disb_tp_desc	varchar(90)	
+ ,conduit_cmte_nm	varchar(200)	
+ ,conduit_cmte_st1	varchar(34)	
+ ,conduit_cmte_st2	varchar(34)	
+ ,conduit_cmte_city	varchar(30)	
+ ,conduit_cmte_st	varchar(2)	
+ ,conduit_cmte_zip	varchar(9)	
+ ,national_cmte_nonfed_acct	varchar(9)	
+ ,ref_disp_excess_flg	varchar(1)	
+ ,comm_dt	timestamp	
+ ,benef_cmte_nm	varchar(200)	
+ ,semi_an_bundled_refund	numeric(14,2)	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,back_ref_tran_id	varchar(32)	
+ ,back_ref_sched_id	varchar(8)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,line_num	varchar(12)	
+ ,image_num	varchar(18)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_tp	varchar(3)
+ ,rpt_yr	numeric(4)
+ ,election_cycle numeric (4)
+ ,pdf_url	text
+ ,recipient_name_text	tsvector
+ ,disbursement_description_text	tsvector
+ ,disbursement_purpose_category	varchar
+ ,clean_recipient_cmte_id	varchar(9)
+ ,pg_date	timestamp	default now()
+ ,line_number_label text
+ ,CONSTRAINT fec_fitem_sched_b_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_b OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_b TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_b TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_b TO openfec_read;
+
+
+/*
+ALTER TABLE disclosure.fec_fitem_sched_b drop column pg_date;
+
+ALTER TABLE disclosure.fec_fitem_sched_b add column pdf_url 				text;
+ALTER TABLE disclosure.fec_fitem_sched_b add column recipient_name_text			tsvector;
+ALTER TABLE disclosure.fec_fitem_sched_b add column disbursement_description_text	tsvector;
+ALTER TABLE disclosure.fec_fitem_sched_b add column disbursement_purpose_category	varchar;
+ALTER TABLE disclosure.fec_fitem_sched_b add column clean_recipient_cmte_id		varchar(9);
+
+ALTER TABLE disclosure.fec_fitem_sched_b add column pg_date timestamp	default now();
+
+*/
+
+
+  

@@ -1,0 +1,83 @@
+CREATE SEQUENCE public.ofec_sched_a_aggregate_employer_idx_seq1
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.ofec_sched_a_aggregate_employer_idx_seq1
+  OWNER TO fec;
+  
+  
+  
+CREATE TABLE disclosure.dsc_sched_a_aggregate_employer
+(
+  cmte_id character varying(9),
+  cycle numeric,
+  employer character varying(38),
+  total numeric,
+  count bigint,
+  idx integer NOT NULL DEFAULT nextval('ofec_sched_a_aggregate_employer_idx_seq1'::regclass),
+  CONSTRAINT uq_sched_a_aggregate_employer_cmte_id_cycle_employer UNIQUE (cmte_id, cycle, employer)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE disclosure.dsc_sched_a_aggregate_employer
+  OWNER TO fec;
+GRANT ALL ON TABLE disclosure.dsc_sched_a_aggregate_employer TO fec;
+GRANT SELECT ON TABLE disclosure.dsc_sched_a_aggregate_employer TO fec_read;
+
+-- Index: disclosure.dsc_sched_a_aggregate_employer_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_employer_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_employer_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_employer
+  USING btree
+  (cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_employer_count
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_employer_count;
+
+CREATE INDEX ofec_sched_a_aggregate_employer_count
+  ON disclosure.dsc_sched_a_aggregate_employer
+  USING btree
+  (count);
+
+-- Index: disclosure.dsc_sched_a_aggregate_employer_cycle
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_employer_cycle;
+
+CREATE INDEX ofec_sched_a_aggregate_employer_cycle
+  ON disclosure.dsc_sched_a_aggregate_employer
+  USING btree
+  (cycle);
+
+-- Index: disclosure.dsc_sched_a_aggregate_employer_cycle_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_employer_cycle_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_employer_cycle_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_employer
+  USING btree
+  (cycle, cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_employer_employer
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_employer_employer;
+
+CREATE INDEX ofec_sched_a_aggregate_employer_employer
+  ON disclosure.dsc_sched_a_aggregate_employer
+  USING btree
+  (employer COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_employer_total
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_employer_total;
+
+CREATE INDEX ofec_sched_a_aggregate_employer_total
+  ON disclosure.dsc_sched_a_aggregate_employer
+  USING btree
+  (total);
+

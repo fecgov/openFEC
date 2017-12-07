@@ -1,0 +1,42 @@
+CREATE TABLE disclosure.fec_fitem_sched_c2
+(
+ cmte_id	varchar(9)	
+ ,back_ref_tran_id	varchar(32)	
+ ,guar_endr_nm	varchar(90)	
+ ,guar_endr_l_nm	varchar(30)	
+ ,guar_endr_f_nm	varchar(20)	
+ ,guar_endr_m_nm	varchar(20)	
+ ,guar_endr_prefix	varchar(10)	
+ ,guar_endr_suffix	varchar(10)	
+ ,guar_endr_st1	varchar(34)	
+ ,guar_endr_st2	varchar(34)	
+ ,guar_endr_city	varchar(30)	
+ ,guar_endr_st	varchar(2)	
+ ,guar_endr_zip	varchar(9)	
+ ,guar_endr_employer	varchar(38)	
+ ,guar_endr_occupation	varchar(38)	
+ ,amt_guaranteed_outstg	numeric(14,2)	
+ ,receipt_dt	timestamp	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,file_num	numeric(7,0)	
+ ,tran_id	varchar(32)	
+ ,schedule_type	char(3)	
+ ,schedule_type_desc	varchar(90)	
+ ,line_num	varchar(12)	
+ ,image_num	varchar(18)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,filing_form	varchar(8)	
+ ,rpt_tp	varchar(3)	
+ ,rpt_yr	numeric(4,0)	
+ ,election_cycle	numeric	(4)
+ ,pg_date	timestamp without time zone DEFAULT now()
+,CONSTRAINT fec_fitem_sched_c2_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_c2 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_c2 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_c2 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_c2 TO openfec_read;

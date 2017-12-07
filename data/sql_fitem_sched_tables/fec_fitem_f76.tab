@@ -1,0 +1,49 @@
+CREATE TABLE disclosure.fec_fitem_f76
+(
+ org_id	varchar(9)	
+ ,communication_tp	varchar(2)	
+ ,communication_tp_desc	varchar(40)	
+ ,communication_class	varchar(1)	
+ ,communication_class_desc	varchar(90)	
+ ,communication_dt	timestamp	
+ ,s_o_ind	varchar(3)	
+ ,s_o_ind_desc	varchar(90)	
+ ,s_o_cand_id	varchar(9)	
+ ,s_o_cand_nm	varchar(90)	
+ ,s_o_cand_l_nm	varchar(30)	
+ ,s_o_cand_f_nm	varchar(20)	
+ ,s_o_cand_m_nm	varchar(20)	
+ ,s_o_cand_prefix	varchar(10)	
+ ,s_o_cand_suffix	varchar(10)	
+ ,s_o_cand_office	varchar(1)	
+ ,s_o_cand_office_desc	varchar(20)	
+ ,s_o_cand_office_st	varchar(2)	
+ ,s_o_cand_office_st_desc	varchar(20)	
+ ,s_o_cand_office_district	varchar(2)	
+ ,s_o_rpt_pgi	varchar(5)	
+ ,s_o_rpt_pgi_desc	varchar(10)	
+ ,communication_cost	numeric(14,2)	
+ ,election_other_desc	varchar(20)	
+ ,transaction_tp	varchar(3)	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,image_num	varchar(18)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_tp	varchar(3)	
+ ,rpt_yr	numeric(4,0)	
+ ,election_cycle	numeric(4,0)	
+ ,pg_date	timestamp	default now()
+ ,CONSTRAINT fec_fitem_f76_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_f76 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_f76 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f76 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f76 TO openfec_read;
