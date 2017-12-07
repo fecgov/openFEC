@@ -37,6 +37,8 @@ def test_parse_ao_citations(text, ao_nos, expected):
     ("52 U.S.C. 30116a", set([("52 U.S.C. 30116a", 52, 30116, 52, 30116)])),
     ("2 U.S.C. 441b, 441c, 441e", set([("2 U.S.C. 441b, 441c, 441e", 2, 441, 2, 441)])),
     (" 2 U.S.C. §437f", set([("2 U.S.C. §437f", 52, 30105, 2, 437)])),
+    ("52 U.S.C. § 30101", set([("52 U.S.C. § 30101", 52, 30101, 52, 30101)])),
+    (" 2 USC §437f", set([("2 USC §437f", 52, 30105, 2, 437)])),
 ])
 def test_parse_statutory_citations(text, expected):
     assert parse_statutory_citations(text) == expected
@@ -46,6 +48,7 @@ def test_parse_statutory_citations(text, expected):
     ("11 CFR §9034.4(b)(4)", set([(11, 9034, 4)])),
     ("11 CFR 300.60 and 11 CFR 300.62", set([(11, 300, 60), (11, 300, 62)])),  # TODO: Ranges
     ("11 CFR 300.60 through 300.65", set([(11, 300, 60)])),
+    ("11 C.F.R. § 100.15", set([(11, 100, 15)])),
 ])
 def test_parse_regulatory_citations(text, expected):
     assert parse_regulatory_citations(text) == expected
@@ -79,7 +82,8 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
-            "is_pending": True,
+            "is_pending" : True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],
@@ -147,14 +151,17 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
-            "is_pending": False,
+            "is_pending": True,
+            "status": "Final",
             "documents": [expected_document],
         }
         self.create_ao(1, expected_ao)
         self.create_document(1, expected_document)
 
         actual_ao = next(get_advisory_opinions(None))
+
         assert actual_ao["is_pending"] is False
+        assert actual_ao["status"] == "Final"
 
         actual_document = actual_ao["documents"][0]
         for key in expected_document:
@@ -173,6 +180,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "1st AO name",
             "summary": "1st AO summary",
+            "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao1_document],
@@ -189,6 +197,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-02",
             "name": "2nd AO name",
             "summary": "2nd AO summary",
+            "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao2_document],
@@ -225,6 +234,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao_document],
@@ -252,6 +262,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "no": "2017-01",
             "name": "An AO name",
             "summary": "An AO summary",
+            "status": "Final",
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "documents": [ao_document],
@@ -264,11 +275,16 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         assert actual_ao["regulatory_citations"] == [{"title": 11, "part": 9034, "section": 4}]
 
+
     def create_ao(self, ao_id, ao):
+
+        if "status" not in ao:
+            ao["status"] = "Pending"
+
         self.connection.execute(
-            "INSERT INTO aouser.ao (ao_id, ao_no, name, summary, req_date, issue_date) "
-            "VALUES (%s, %s, %s, %s, %s, %s)",
-            ao_id, ao["no"], ao["name"], ao["summary"], ao["request_date"], ao["issue_date"])
+            "INSERT INTO aouser.ao (ao_id, ao_no, name, summary, req_date, issue_date, stage)"
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            ao_id, ao["no"], ao["name"], ao["summary"], ao["request_date"], ao["issue_date"], ao_status_to_stage(ao["status"]))
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_ao_offsets(self, get_bucket):
@@ -279,6 +295,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],
@@ -299,6 +316,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],
@@ -319,6 +337,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "request_date": datetime.date(2016, 6, 10),
             "issue_date": datetime.date(2016, 12, 15),
             "is_pending": True,
+            "status": "Pending",
             "ao_citations": [],
             "statutory_citations": [],
             "regulatory_citations": [],
@@ -403,3 +422,12 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         ]
         for table in tables:
             self.connection.execute("DELETE FROM aouser.{}".format(table))
+
+
+def ao_status_to_stage(status):
+    if status == "Withdrawn":
+        return 2
+    elif status == "Final":
+        return 1
+    else:
+        return 0

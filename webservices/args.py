@@ -166,7 +166,8 @@ query = {
     'ao_max_request_date': fields.Date(description="Latest request date of advisory opinion"),
     'ao_category': fields.List(IStr(validate=validate.OneOf(['F', 'V', 'D', 'R', 'W', 'C', 'S'])),
                                     description="Category of the document"),
-    'ao_is_pending': fields.Bool(description="Status of AO (pending or completed)"),
+    'ao_is_pending': fields.Bool(description="AO is pending"),
+    'ao_status': fields.Str(description="Status of AO (pending, withdrawn, or final)"),
     'ao_requestor': fields.Str(description="The requestor of the advisory opinion"),
     'ao_requestor_type': fields.List(fields.Integer(validate=validate.OneOf(range(1, 17))),
                                             description="Code of the advisory opinion requestor type."),
@@ -181,6 +182,12 @@ query = {
     'mur_election_cycles': fields.Int(IStr, required=False, description='Filter MURs by election cycles'),
     'mur_document_category': fields.List(IStr, required=False,
         description='Filter MURs by category of associated documents'),
+    'mur_min_open_date': fields.Date(required=False, description='Filter MURs by earliest date opened'),
+    'mur_max_open_date': fields.Date(required=False, description='Filter MURs by latest date opened'),
+    'mur_min_close_date': fields.Date(required=False,
+        description='Filter MURs by earliest date closed'),
+    'mur_max_close_date': fields.Date(required=False,
+        description='Filter MURs by latest date closed'),
 }
 
 candidate_detail = {
@@ -382,9 +389,17 @@ committee_reports = {
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
 }
 
-
 totals = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'type': fields.Str(description=docs.COMMITTEE_TYPE),
+    'designation': fields.Str(description=docs.DESIGNATION),
+}
+
+totals_all = {
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'committee_type_full': fields.Str(description=docs.COMMITTEE_TYPE),
+    'committee_designation_full': fields.Str(description=docs.DESIGNATION),
+    'committee_id': fields.Str(description=docs.COMMITTEE_ID),
 }
 
 candidate_committee_totals = {

@@ -21,7 +21,9 @@ with elections_raw as(
     --- switch this table
     left join staging.ref_pty rp on fecapp.trc_election.election_party = rp.pty_cd
     where
-        trc_election_status_id = 1
+        trc_election_status_id = 1 and
+        -- hard coding for now
+        election_date < to_date('2018-01-01','YYYY-MM-DD')
 ), elections as (
     select
         'election'::text as category,
@@ -68,7 +70,9 @@ with elections_raw as(
     left join staging.ref_rpt_tp on reports.report_type = ref_rpt_tp.rpt_tp_cd
     left join elections_raw using (trc_election_id)
     where
-        coalesce(trc_election_status_id, 1) = 1
+        coalesce(trc_election_status_id, 1) = 1 and
+        -- hard coding this for now
+        reports.due_date < to_date('2018-01-01','YYYY-MM-DD')
 ), reports as (
     select
         'report-' || report_type as category,

@@ -2,11 +2,10 @@ from .base import db, BaseModel
 
 from webservices import docs
 
-
 class CommitteeTotals(BaseModel):
     __abstract__ = True
 
-    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
+    committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     cycle = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CYCLE)
     offsets_to_operating_expenditures = db.Column(db.Numeric(30, 2))
     political_party_committee_contributions = db.Column(db.Numeric(30, 2))
@@ -35,6 +34,14 @@ class CommitteeTotals(BaseModel):
     last_debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     last_debts_owed_to_committee = db.Column(db.Numeric(30, 2))
 
+    #Add additional fields and filters to /totals/{committee-type} endpoint#2631
+    committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
+    committee_type = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
+    committee_designation = db.Column(db.String, doc=docs.DESIGNATION)
+    committee_type_full = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
+    committee_designation_full = db.Column(db.String, doc=docs.DESIGNATION)
+    party_full = db.Column(db.String, doc=docs.PARTY_FULL)
+
 class CandidateCommitteeTotals(db.Model):
     __abstract__ = True
     #making this it's own model hieararchy until can figure out
@@ -59,6 +66,7 @@ class CandidateCommitteeTotals(db.Model):
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
     operating_expenditures = db.Column(db.Numeric(30, 2))
+
 
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
@@ -85,7 +93,7 @@ class CommitteeTotalsPacPartyBase(CommitteeTotals):
     loan_repayments_received = db.Column(db.Numeric(30, 2))
     loans_made = db.Column(db.Numeric(30, 2))
     non_allocated_fed_election_activity = db.Column(db.Numeric(30, 2))
-    total_transfers = db.Column(db.Numeric(30, 2))
+    total_transfers = db.Column(db.Numeric(30,2))
     other_fed_operating_expenditures = db.Column(db.Numeric(30, 2))
     other_fed_receipts = db.Column(db.Numeric(30, 2))
     shared_fed_activity = db.Column(db.Numeric(30, 2))
@@ -158,7 +166,7 @@ class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
     loan_repayments = db.Column('loan_repayments_made', db.Numeric(30, 2))
     loan_repayments_candidate_loans = db.Column('repayments_loans_made_by_candidate', db.Numeric(30, 2))
     loan_repayments_other_loans = db.Column('repayments_other_loans', db.Numeric(30, 2))
-    loans = db.Column('loans_received', db.Numeric(30, 2))
+    loans = db.Column('loans_received', db.Numeric(30,2))
     loans_made_by_candidate = db.Column('loans_received_from_candidate', db.Numeric(30, 2))
     other_receipts = db.Column(db.Numeric(30, 2))
     transfers_from_other_authorized_committee = db.Column('transfers_from_affiliated_committee', db.Numeric(30, 2))
@@ -215,7 +223,7 @@ class CommitteeTotalsIEOnly(BaseModel):
 
 
 class ScheduleAByStateRecipientTotals(BaseModel):
-    __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals'
+    __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals_mv'
 
     total = db.Column(db.Numeric(30, 2), index=True, doc='The calculated total.')
     count = db.Column(db.Integer, index=True, doc='Number of records making up the total.')
@@ -224,3 +232,5 @@ class ScheduleAByStateRecipientTotals(BaseModel):
     state_full = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
     committee_type = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
+
+

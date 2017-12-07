@@ -64,3 +64,17 @@ BEGIN
     END LOOP;
 END
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION add_index_suffix(p_table_name TEXT, suffix TEXT) RETURNS VOID AS $$
+DECLARE
+    indexes_cursor CURSOR FOR
+        SELECT indexname AS name
+        FROM pg_indexes
+        WHERE tablename = p_table_name;
+BEGIN
+
+    FOR index_name IN indexes_cursor LOOP
+        EXECUTE format('ALTER INDEX %1$I RENAME TO %2$I', index_name.name,  index_name.name || suffix);
+    END LOOP;
+END
+$$ LANGUAGE plpgsql;
