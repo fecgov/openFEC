@@ -242,6 +242,8 @@ If the test database server is *not* the default local Postgres instance, indica
 export SQLA_TEST_CONN=<psql:address-to-box>
 ```
 
+The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
+
 Running the tests:
 
 ```
