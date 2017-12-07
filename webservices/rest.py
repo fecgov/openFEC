@@ -359,7 +359,7 @@ here, _ = os.path.split(__file__)
 docs = Blueprint(
     'docs',
     __name__,
-    static_folder=os.path.join(here, os.pardir, 'static', 'swagger-ui', 'dist'),
+    static_folder=os.path.join(here, os.pardir, 'static', 'swagger-ui'),
     static_url_path='/docs/static',
 )
 
