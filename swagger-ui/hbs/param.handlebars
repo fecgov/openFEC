@@ -1,0 +1,34 @@
+<td class='code'>{{name}}</td>
+<td>
+
+	{{#if isBody}}
+		{{#if isFile}}
+			<input type="file" name='{{name}}'/>
+			<div class="parameter-content-type" />
+		{{else}}
+			{{#if default}}
+				<textarea aria-label={{name}} class='body-textarea' name='{{name}}'>{{default}}</textarea>
+        <br />
+        <div class="parameter-content-type" />
+			{{else}}
+				<textarea aria-label={{name}} class='body-textarea' name='{{name}}'></textarea>
+				<br />
+				<div class="parameter-content-type" />
+			{{/if}}
+		{{/if}}
+	{{else}}
+		{{#if isFile}}
+			<input aria-label={{name}} type="file" name='{{name}}'/>
+			<div class="parameter-content-type" />
+		{{else}}
+			{{#renderTextParam this}}
+			{{/renderTextParam}}
+		{{/if}}
+	{{/if}}
+
+</td>
+<td class="markdown">{{{description}}}</td>
+<td>{{{paramType}}}</td>
+<td>
+	<span class="model-signature"></span>
+</td>
