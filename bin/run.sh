@@ -1,3 +1,2 @@
-# invoke notify || echo 'failed to start slack'
 python manage.py cf_startup
-gunicorn -k gevent -w 2 webservices.rest:app
+gunicorn --access-logfile - --error-logfile - --log-level info -k gevent -w 4 webservices.rest:app
