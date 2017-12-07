@@ -151,4 +151,14 @@ class IntegrationTestCase(BaseTestCase):
 
 def run_migrations():
     subprocess.check_call(
-        ['flyway', 'migrate', '-url=%s' % to_jdbc_url(TEST_CONN), '-locations=filesystem:data/migrations'],)
+        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
+
+def get_test_jdbc_url():
+    """
+    Return the JDBC URL for TEST_CONN. If TEST_CONN cannot be successfully converted,
+    it is probably the default Postgres instance with trust authentication
+    """
+    jdbc_url = to_jdbc_url(TEST_CONN)
+    if jdbc_url is None:
+        jdbc_url = "jdbc:" + TEST_CONN
+    return jdbc_url

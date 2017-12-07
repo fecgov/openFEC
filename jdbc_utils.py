@@ -8,3 +8,4 @@ def to_jdbc_url(dbi_url):
         if match.group('password'):
             jdbc_url += '&password={}'.format(match.group('password'))
         return jdbc_url
+    return None
