@@ -4,7 +4,9 @@ from webservices.common.models import AuditCase
 from webservices.resources.audit import AuditCaseView
 from webservices.schemas import AuditCaseSchema
 from webservices.rest import api
+
 class TestAudit(ApiBaseTest):
+
     def test_filters_audit_case_id(self):
         filters = [
             ('audit_case_id', AuditCase.audit_case_id, '1'),
