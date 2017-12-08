@@ -2,7 +2,7 @@
 path: ../
 memory: 1G
 stack: cflinuxfs2
-buildpack: https://github.com/cloudfoundry/python-buildpack/releases/download/v1.5.26/python-buildpack-v1.5.26.zip
+buildpack: python_buildpack
 env:
   NEW_RELIC_CONFIG_FILE: /home/vcap/app/newrelic.ini
   NEW_RELIC_LOG: stdout
