@@ -606,7 +606,7 @@ For more information, see [Flyway documentation](https://flywaydb.org/documentat
 Tests that require the database will automatically run `flyway` migrations as long as `flyway` is in `PATH`.
 
 #### Deployment from CircleCI
-flyway is installed in `CircleCI`. During the deployment step, `CircleCI` invokes `flyway` to migrate the target database (depending on the target space). For this to work correctly, connection URLs for the target databases have to be stored as environment variables in CircleCI under the names `FEC_SQLA_CONN_DEV`, `FEC_SQLA_CONN_STAGE` and `FEC_SQLA_CONN_PROD`. The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
+flyway is installed in `CircleCI`. During the deployment step, `CircleCI` invokes `flyway` to migrate the target database (depending on the target space). For this to work correctly, connection URLs for the target databases have to be stored as environment variables in CircleCI under the names `FEC_MIGRATOR_SQLA_CONN_DEV`, `FEC_MIGRATOR_SQLA_CONN_STAGE` and `FEC_MIGRATOR_SQLA_CONN_PROD`. The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
 
 #### Running `flyway` manually
 You may need to run `flyway` manually in order to test migrations locally, or to troubleshoot migrations in production. There are 2 required parameters:
