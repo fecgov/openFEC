@@ -28,17 +28,3 @@ class TestEntityReceiptDisbursementTotals(ApiBaseTest):
             # returns one result
             results = self._results(page)
             self.assertEqual(len(results), 1)
-
-
-    def test_date_is_correctly_generated(self):
-        totals = factories.EntityReceiptDisbursementTotalsFactory(
-            cycle=2000,
-            cumulative_candidate_receipts=50000,
-            month=3,
-            year=1999,
-            date=sa.func.last_day_of_month(sa.func.make_timestamp(1999, 3, 1, 0, 0, 0.0))
-        )
-
-        db.session.commit()
-
-        assert totals.date == datetime.datetime(1999, 3, 31, 0, 0)
