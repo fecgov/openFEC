@@ -12,10 +12,11 @@ from factory.alchemy import SQLAlchemyModelFactory
 from apispec import utils, exceptions
 
 import manage
-from tests import common
+from tests import common, factories
 from webservices.rest import db
 from webservices.spec import spec
 from webservices.common import models
+from webservices.common.models import ScheduleA
 
 
 def make_factory():
@@ -59,11 +60,6 @@ def make_factory():
     return NmlSchedAFactory, NmlSchedBFactory, FItemReceiptOrExp
 
 
-CANDIDATE_MODELS = [
-    models.Candidate,
-    models.CandidateDetail,
-    models.CandidateHistory,
-]
 REPORTS_MODELS = [
     models.CommitteeReportsPacParty,
     models.CommitteeReportsPresidential,
@@ -91,10 +87,7 @@ class TestViews(common.IntegrationTestCase):
     def setUpClass(cls):
         super(TestViews, cls).setUpClass()
         cls.NmlSchedAFactory, cls.NmlSchedBFactory, cls.FItemReceiptOrExp = make_factory()
-        manage.update_all(processes=1)
-
-    def test_refresh_materialized(self):
-        db.session.execute('select refresh_materialized()')
+        manage.refresh_materialized(concurrent=False)
 
     def test_committee_year_filter(self):
         self._check_entity_model(models.Committee, 'committee_id')
@@ -527,10 +520,31 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(existing.count, count + 1)
 
     def test_update_aggregate_size_existing_merged(self):
-        existing = models.ScheduleABySize.query.filter_by(
-            size=0,
-            cycle=2016,
-        ).first()
+        def get_existing():
+            return models.ScheduleABySize.query.filter_by(
+                size=0,
+                cycle=2016,
+            ).order_by(
+                models.ScheduleABySize.committee_id,
+            ).first()
+        EXISTING_RECEIPT_AMOUNT = 24
+        filing = self.NmlSchedAFactory(
+            rpt_yr=2015,
+            cmte_id='X1235',
+            contb_receipt_amt=EXISTING_RECEIPT_AMOUNT,
+            contb_receipt_dt=datetime.datetime(2015, 1, 1),
+            receipt_tp='15J',
+        )
+        self.FItemReceiptOrExp(
+            sub_id=filing.sub_id,
+            rpt_yr=2015,
+        )
+        db.session.commit()
+        manage.update_aggregates()
+        db.session.execute('refresh materialized view ofec_totals_combined_mv')
+        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+        self._clear_sched_a_queues()
+        existing = get_existing()
         total = existing.total
         committee_id = existing.committee_id
         filing = self.NmlSchedAFactory(
@@ -548,7 +562,7 @@ class TestViews(common.IntegrationTestCase):
         # Create a committee and committee report
         # Changed to point to sampled data, may be problematic in the future if det sum table
         # changes a lot and hence the tests need to test new behavior, believe it's fine for now though. -jcc
-        rep = sa.Table('detsum_sample', db.metadata, autoload=True, autoload_with=db.engine)
+        rep = sa.Table('v_sum_and_det_sum_report', db.metadata, schema='disclosure', autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
             indv_unitem_contb=20,
             cmte_id=committee_id,
@@ -559,7 +573,6 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute(ins)
         db.session.commit()
         manage.update_aggregates()
-        db.session.execute('refresh materialized view ofec_totals_house_senate_mv')
         db.session.execute('refresh materialized view ofec_totals_combined_mv')
         db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
         refreshed = models.ScheduleABySize.query.filter_by(
@@ -698,3 +711,48 @@ class TestViews(common.IntegrationTestCase):
         actual_tables = set(inspector.get_table_names())
         assert expected_tables.issubset(actual_tables)
         assert "ofec_sched_a_3005_3006" not in actual_tables
+
+    def test_last_day_of_month(self):
+        connection = db.engine.connect()
+        fixtures = [
+            (datetime.datetime(1999, 3, 21, 10, 20, 30), datetime.datetime(1999, 3, 31, 0, 0, 0)),
+            (datetime.datetime(2007, 4, 21, 10, 20, 30), datetime.datetime(2007, 4, 30, 0, 0, 0)),
+            (datetime.datetime(2017, 2, 21, 10, 20, 30), datetime.datetime(2017, 2, 28, 0, 0, 0)),
+        ]
+        for fixture in fixtures:
+            test_value, expected = fixture
+            returned_date = connection.execute("SELECT last_day_of_month(%s)", test_value).scalar()
+
+            assert returned_date == expected
+
+    def test_filter_individual_sched_a(self):
+        individuals = [
+            factories.ScheduleAFactory(receipt_type='15J', filing_form='F3X'),
+            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150, filing_form='F3X'),
+        ]
+        earmarks = [
+            factories.ScheduleAFactory(filing_form='F3X'),
+            factories.ScheduleAFactory(
+                line_number='12',
+                contribution_receipt_amount=150,
+                memo_text='earmark',
+                memo_code='X',
+                filing_form='F3X'
+            ),
+        ]
+
+        is_individual = sa.func.is_individual(
+            ScheduleA.contribution_receipt_amount,
+            ScheduleA.receipt_type,
+            ScheduleA.line_number,
+            ScheduleA.memo_code,
+            ScheduleA.memo_text,
+            ScheduleA.contributor_id,
+            ScheduleA.committee_id,
+        )
+
+        rows = ScheduleA.query.all()
+        self.assertEqual(rows, individuals + earmarks)
+
+        rows = ScheduleA.query.filter(is_individual).all()
+        self.assertEqual(rows, individuals)
