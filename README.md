@@ -70,9 +70,12 @@ Use `npm` to install JavaScript dependencies:
 
 ```
 nvm use --lts
+npm install -g swagger-tools
 npm install
 npm run build
 ```
+
+*Note: `swagger-tools` is required for testing the API documentation via the automated tests and must be installed globally as shown above.*
 
 ##### Git hooks
 This repo includes optional post-merge and post-checkout hooks to ensure that
