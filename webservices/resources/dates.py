@@ -86,7 +86,10 @@ class ElectionDatesView(ApiResource):
         return query.filter_by(election_status_id=1)
 
 
-@doc(tags=['dates'], description=docs.CALENDAR_DATES)
+@doc(
+    tags=['dates'],
+    description=docs.CALENDAR_DATES,
+)
 class CalendarDatesView(ApiResource):
 
     model = models.CalendarDate
@@ -98,7 +101,7 @@ class CalendarDatesView(ApiResource):
         ('event_id', models.CalendarDate.event_id),
     ]
     filter_multi_fields = [
-        ('category', models.CalendarDate.category),
+        ('calendar_category_id', models.CalendarDate.calendar_category_id),
     ]
     filter_fulltext_fields = [
         ('description', models.CalendarDate.description_text),
@@ -121,8 +124,11 @@ class CalendarDatesView(ApiResource):
 
     def build_query(self, *args, **kwargs):
         query = super().build_query(*args, **kwargs)
-        print(query)
         return query
+
+    @property
+    def index_column(self):
+        return self.model.event_id
 
 
 @doc(tags=['dates'], description=docs.CALENDAR_EXPORT)

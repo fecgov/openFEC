@@ -16,7 +16,8 @@ create or replace view ofec_dates_vw as
         use_time = 'N' as all_day,
         url,
         to_tsvector(event_name) as summary_text,
-        to_tsvector(describe_cal_event(category_name::text, event_name::text, description::text)) as description_text
+        to_tsvector(describe_cal_event(category_name::text, event_name::text, description::text)) as description_text,
+        cal_category_id as calendar_category_id
     from fecapp.cal_event
     join fecapp.cal_event_category using (cal_event_id)
     join fecapp.cal_category using (cal_category_id)
