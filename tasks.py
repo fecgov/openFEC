@@ -6,6 +6,7 @@ from invoke import task
 # from slacker import Slacker
 
 from webservices.env import env
+from jdbc_utils import to_jdbc_url
 
 
 DEFAULT_FRACTION = 0.5
@@ -179,6 +180,8 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     # Target space
     ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
 
+    run_migrations(ctx, space)
+
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
         json.dump({'user': os.getenv('USER'), 'branch': branch}, fp)
@@ -212,3 +215,9 @@ def notify(ctx):
         ),
         username=env.get_credential('FEC_SLACK_BOT', 'fec-bot'),
     )
+
+def run_migrations(ctx, space):
+    print("\nMigrating database...")
+    jdbc_url = to_jdbc_url(os.getenv('FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())))
+    ctx.run('flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url))
+    print("Database migrated\n")
