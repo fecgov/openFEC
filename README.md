@@ -611,4 +611,4 @@ flyway is installed in `CircleCI`. During the deployment step, `CircleCI` invoke
 #### Running `flyway` manually
 You may need to run `flyway` manually in order to test migrations locally, or to troubleshoot migrations in production. There are 2 required parameters:
 - `-url` specifies the database URL. This is a JDBC URL of the form `jdbc:postgresql://<hostname>:<port>/<database>?user=<username>&password=<password>`.
-- `locations` specifies the directory where the migrations are stored. This is a value of the form `filesystem:<directory-path>`. In our case, if run from the project root, it would be `-locations=filesystem:data/migration`.
+- `-locations` specifies the directory where the migrations are stored. This is a value of the form `filesystem:<directory-path>`. In our case, if run from the project root, it would be `-locations=filesystem:data/migration`.
