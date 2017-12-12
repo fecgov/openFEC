@@ -602,6 +602,7 @@ All database schema modification code is checked into version control in the dir
 - `info` compares the migration SQL files and the table `flyway_schema_history` and reports on migrations that have been applied and those that are pending.
 - `migrate` compares the migration SQL files and the table `flyway_schema_history` and runs those migrations that are pending.
 - `baseline` modifies the `flyway_schema_history` table to indicate that the database has already been migrated to a baseline version.
+- `repair` repairs the `flyway_schema_history` table. Removes any failed migrations on databases.
 
 For more information, see [Flyway documentation](https://flywaydb.org/documentation/).
 
