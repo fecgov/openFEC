@@ -17,6 +17,8 @@ initialize_newrelic()
 import os
 import http
 import logging
+import json
+import boto
 
 from flask import abort
 from flask import request
@@ -62,7 +64,10 @@ from webservices.resources import costs
 from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.env import env
+from webservices.tasks import utils
 
+app = Flask(__name__)
+# logger = logging.getLogger('rest.py')
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
@@ -71,8 +76,6 @@ def sqla_conn_string():
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     return sqla_conn_string
 
-
-app = Flask(__name__)
 # app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
@@ -147,14 +150,61 @@ def limit_remote_addr():
             if api_data_route not in trusted_proxies:
                 abort(403)
 
+# - Extend the after request to print the results of the request. (remove later)
 
+# - use json.dumps if the request is not already in json 
+
+# - save that file locally- make a tmp folder (remove later)
+
+# - replace save function with a boto3 function that you can write as webservices/util
+
+# You will want all the values to be environment variables (they should already exist so look at the existing code )
+
+#    import boto3
+#     from botocore.client import Config
+
+
+#    # arguements are s3, region, secret_key_id, secret_access_key
+#     s3 = boto3.client('s3', 'us-gov-west-1', aws_access_key_id='', aws_secret_access_key='')
+
+#    # make this into a function you call instead of writing to local disk
+#     # name the file with a folder prefix cached-calls/
+#     s3.upload_file("example.txt", BUCKET_NAME, "example-cn.txt")
+
+# - try that out locally with the dev s3 bucket, look up the vars and see if you can post.
+
+# - name files something deterministic (should be an example in downloads)
+
+# - when that is successful add it to the files that don't get deleted.
+# that is webservices/tasks/download.py in the clear_bucket() function
+
+# - we will want to think about how long to keep the files- "experation date in AWS"
 @app.after_request
 def add_caching_headers(response):
     max_age = env.get_credential('FEC_CACHE_AGE')
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
-    return response
 
+    app.logger.info("******** The requested URL is ::: ", request.url)
+    app.logger.info("******** Before converting the requested contents to JSON :::")
+
+    json_data = json.dumps(response.data.decode('utf-8'))
+    app.logger.info("********* succesfully created JSON dump for the reuqested URL:::")
+
+    f = open("/Users/pkasireddy/Documents/web_request_calls/request_content.json", "w")
+    f.write(json_data)
+    f.close()
+
+    # get all s3 bucket env variables
+    s3_bucket = utils.get_bucket()
+
+    #upload the request_content.json file to s3 bucket
+    file_name = "/Users/pkasireddy/Documents/web_request_calls/request_content.json"
+    app.logger.info("********* Before uploading to s3:::")
+    s3_bucket.upload_file(file_name, "web-request_content.json")
+
+    app.logger.info("********* succesfully uploaded to s3:::")
+    return response
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
