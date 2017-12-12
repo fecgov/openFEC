@@ -42,9 +42,9 @@ class Category(PrimaryCategory):
 # endpoint audit-case
 class AuditCaseSubCategory(db.Model):
     __tablename__ = 'ofec_audit_case_sub_category_rel_mv'
-    # add the correction description of each field in the docs.py
     audit_case_id = db.Column(db.Integer, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.Integer, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
+    primary_category_name = db.Column(db.String, doc=docs.PRIMARY_CATEGORY_NAME)
     sub_category_id = db.Column(db.Integer, primary_key=True, doc=docs.SUB_CATEGORY_ID)
     sub_category_name = db.Column(db.String, primary_key=True, doc=docs.SUB_CATEGORY_NAME)
 
@@ -52,16 +52,15 @@ class AuditCaseSubCategory(db.Model):
 # endpoint audit-case
 class AuditCategoryRelation(db.Model):
     __tablename__ = 'ofec_audit_case_category_rel_mv'
-    # add the correction description of each field in the docs.py
     audit_case_id = db.Column(db.Integer, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.Integer, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
-    primary_category_name = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_NAME)
+    primary_category_name = db.Column(db.String, doc=docs.PRIMARY_CATEGORY_NAME)
     sub_category_list = db.relationship(
         'AuditCaseSubCategory',
         primaryjoin='''and_(
             foreign(AuditCategoryRelation.audit_case_id) == AuditCaseSubCategory.audit_case_id,
-            AuditCategoryRelation.primary_category_id == AuditCaseSubCategory.primary_category_id
-        )''',
+            foreign(AuditCategoryRelation.primary_category_id) == AuditCaseSubCategory.primary_category_id
+       )''',
         uselist=True,
         lazy='joined'
     )
@@ -70,35 +69,10 @@ class AuditCategoryRelation(db.Model):
 # endpoint audit-case
 class AuditCase(db.Model):
     __tablename__ = 'ofec_audit_case_mv'
-
-    audit_case_id = db.Column(db.Integer, index=True, primary_key=True, doc=docs.AUDIT_CASE_ID)
-    cycle = db.Column(db.Integer, doc=docs.CYCLE)
-    committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
-    committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
-    committee_designation = db.Column(db.String, doc=docs.DESIGNATION)
-    committee_type = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
-    committee_description = db.Column(db.String, doc=docs.COMMITTEE_DESCRIPTION)
-    far_release_date = db.Column(db.Date, doc=docs.FAR_RELEASE_DATE)
-    link_to_report = db.Column(db.String, doc=docs.LINK_TO_REPORT)
-    audit_id = db.Column(db.Integer, doc=docs.AUDIT_ID)
-    candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
-    candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
-    primary_category_list = db.relationship(
-        AuditCategoryRelation,
-        primaryjoin='''and_(
-            foreign(AuditCategoryRelation.audit_case_id) == AuditCase.audit_case_id,
-        )''',
-        uselist=True,
-        lazy='joined'
-    )
-
-# endpoint audit-case/search/<primary_category_id>/<sub_category_id>
-class AuditCaseSearchByCategoryId(db.Model):
-    __tablename__ = 'ofec_audit_case_arg_category_mv'
-
-    primary_category_id = db.Column(db.Integer, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
+    idx = db.Column(db.Integer, primary_key=True, index=True)
+    primary_category_id = db.Column(db.Integer, primary_key=True, index=True, doc=docs.PRIMARY_CATEGORY_ID)
     sub_category_id = db.Column(db.Integer, primary_key=True, doc=docs.SUB_CATEGORY_ID)
-    audit_case_id = db.Column(db.Integer, index=True, primary_key=True, doc=docs.AUDIT_CASE_ID)
+    audit_case_id = db.Column(db.Integer, primary_key=True, index=True, doc=docs.AUDIT_CASE_ID)
     cycle = db.Column(db.Integer, doc=docs.CYCLE)
     committee_id = db.Column(db.String, doc=docs.COMMITTEE_ID)
     committee_name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
@@ -113,11 +87,12 @@ class AuditCaseSearchByCategoryId(db.Model):
     primary_category_list = db.relationship(
         AuditCategoryRelation,
         primaryjoin='''and_(
-            foreign(AuditCategoryRelation.audit_case_id) == AuditCaseSearchByCategoryId.audit_case_id,
+            foreign(AuditCategoryRelation.audit_case_id) == AuditCase.audit_case_id
         )''',
         uselist=True,
         lazy='joined'
     )
+
 
 # endpoint audit/search/name/candidates
 class AuditCandidateSearch(db.Model):

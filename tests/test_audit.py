@@ -23,13 +23,13 @@ class TestAudit(ApiBaseTest):
 
     def test_fields(self):
         factories.AuditCaseFactory()
-        results = self._results(api.url_for(AuditCaseView))
+        results = self._results(api.url_for(AuditCaseView, {'primary_category_id': -1, 'sub_category_Id': -2}))
         print('results :::', results)
         assert len(results) == 1
         assert results[0].keys() == AuditCaseSchema().fields.keys()
 
     def test_sort(self):
-        [   
+        [
             factories.AuditCaseFactory(audit_case_id=4),
             factories.AuditCaseFactory(audit_case_id=3),
             factories.AuditCaseFactory(audit_case_id=2),

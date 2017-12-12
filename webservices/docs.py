@@ -1097,12 +1097,6 @@ The search can be based on information about the audited committee (Name, FEC ID
 Election Cycle) or the issues covered in the report.
 '''
 
-#endpoint: audit-case/search/{primary_category_id}/{sub_category_id}
-AUDIT_CASE_SEARCH = '''
-This endpoint contains Final Audit Reports approved by the Commission since inception.
-The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
-Election Cycle) or the issues covered in the report.
-'''
 
 #endpoint: audit-primary-category
 AUDIT_PRIMARY_CATEGORY = '''
