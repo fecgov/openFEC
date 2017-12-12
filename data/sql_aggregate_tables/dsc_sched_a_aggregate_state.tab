@@ -1,0 +1,97 @@
+CREATE SEQUENCE public.ofec_sched_a_aggregate_state_idx_seq1
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.ofec_sched_a_aggregate_state_idx_seq1
+  OWNER TO fec;
+
+
+
+-- Table: disclosure.dsc_sched_a_aggregate_state
+
+-- DROP TABLE disclosure.dsc_sched_a_aggregate_state;
+
+CREATE TABLE disclosure.dsc_sched_a_aggregate_state
+(
+  cmte_id character varying(9),
+  cycle numeric,
+  state character varying(2),
+  state_full text,
+  total numeric,
+  count bigint,
+  idx integer NOT NULL DEFAULT nextval('ofec_sched_a_aggregate_state_idx_seq1'::regclass),
+  CONSTRAINT uq_ofec_sched_a_aggregate_state_cmte_id_cycle_state UNIQUE (cmte_id, cycle, state)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE disclosure.dsc_sched_a_aggregate_state
+  OWNER TO fec;
+GRANT ALL ON TABLE disclosure.dsc_sched_a_aggregate_state TO fec;
+GRANT SELECT ON TABLE disclosure.dsc_sched_a_aggregate_state TO fec_read;
+
+-- Index: disclosure.dsc_sched_a_aggregate_state_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_state_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_state_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_state
+  USING btree
+  (cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_state_count
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_state_count;
+
+CREATE INDEX ofec_sched_a_aggregate_state_count
+  ON disclosure.dsc_sched_a_aggregate_state
+  USING btree
+  (count);
+
+-- Index: disclosure.dsc_sched_a_aggregate_state_cycle
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_state_cycle;
+
+CREATE INDEX ofec_sched_a_aggregate_state_cycle
+  ON disclosure.dsc_sched_a_aggregate_state
+  USING btree
+  (cycle);
+
+-- Index: disclosure.dsc_sched_a_aggregate_state_cycle_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_state_cycle_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_state_cycle_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_state
+  USING btree
+  (cycle, cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_state_state
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_state_state;
+
+CREATE INDEX ofec_sched_a_aggregate_state_state
+  ON disclosure.dsc_sched_a_aggregate_state
+  USING btree
+  (state COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_state_state_full
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_state_state_full;
+
+CREATE INDEX ofec_sched_a_aggregate_state_state_full
+  ON disclosure.dsc_sched_a_aggregate_state
+  USING btree
+  (state_full COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_state_total
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_state_total;
+
+CREATE INDEX ofec_sched_a_aggregate_state_total
+  ON disclosure.dsc_sched_a_aggregate_state
+  USING btree
+  (total);
+

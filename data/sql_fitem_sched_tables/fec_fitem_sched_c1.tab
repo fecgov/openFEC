@@ -1,0 +1,79 @@
+CREATE TABLE disclosure.fec_fitem_sched_c1
+(
+ cmte_id	varchar(9)	
+ ,cmte_nm	varchar(200)	
+ ,entity_tp_desc	varchar(50)	
+ ,loan_src_nm	varchar(200)	
+ ,loan_src_st1	varchar(34)	
+ ,loan_src_st2	varchar(34)	
+ ,loan_src_city	varchar(30)	
+ ,loan_src_st	varchar(2)	
+ ,loan_src_zip	varchar(9)	
+ ,entity_tp	varchar(3)	
+ ,loan_amt	numeric(14,2)	
+ ,interest_rate_pct	varchar(15)	
+ ,incurred_dt	timestamp	
+ ,due_dt	varchar(15)	
+ ,loan_restructured_flg	varchar(1)	
+ ,orig_loan_dt	timestamp	
+ ,credit_amt_this_draw	numeric(14,2)	
+ ,ttl_bal	numeric(14,2)	
+ ,other_liable_pty_flg	varchar(1)	
+ ,collateral_flg	varchar(1)	
+ ,collateral_desc	varchar(100)	
+ ,collateral_value	numeric(14,2)	
+ ,perfected_interest_flg	varchar(1)	
+ ,future_income_flg	varchar(1)	
+ ,future_income_desc	varchar(100)	
+ ,future_income_est_value	numeric(14,2)	
+ ,depository_acct_est_dt	timestamp	
+ ,acct_loc_nm	varchar(90)	
+ ,acct_loc_st1	varchar(34)	
+ ,acct_loc_st2	varchar(34)	
+ ,acct_loc_city	varchar(30)	
+ ,acct_loc_st	varchar(2)	
+ ,acct_loc_zip	varchar(9)	
+ ,depository_acct_auth_dt	timestamp	
+ ,loan_basis_desc	varchar(100)	
+ ,tres_sign_nm	varchar(90)	
+ ,tres_l_nm	varchar(30)	
+ ,tres_f_nm	varchar(20)	
+ ,tres_m_nm	varchar(20)	
+ ,tres_prefix	varchar(10)	
+ ,tres_suffix	varchar(10)	
+ ,tres_sign_dt	timestamp	
+ ,auth_sign_nm	varchar(90)	
+ ,auth_sign_l_nm	varchar(30)	
+ ,auth_sign_f_nm	varchar(20)	
+ ,auth_sign_m_nm	varchar(20)	
+ ,auth_sign_prefix	varchar(10)	
+ ,auth_sign_suffix	varchar(10)	
+ ,auth_rep_title	varchar(20)	
+ ,auth_sign_dt	timestamp	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,back_ref_tran_id	varchar(32)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,line_num	varchar(12)	
+ ,image_num	varchar(18)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_tp	varchar(3)
+ ,rpt_yr	numeric(4)
+ ,election_cycle numeric (4)
+ ,pg_date	timestamp	default now()
+,CONSTRAINT fec_fitem_sched_c1_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_c1 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_c1 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_c1 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_c1 TO openfec_read;
+
+
+

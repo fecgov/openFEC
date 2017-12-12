@@ -1,0 +1,82 @@
+CREATE SEQUENCE public.ofec_sched_a_aggregate_occupation_idx_seq1
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.ofec_sched_a_aggregate_occupation_idx_seq1
+  OWNER TO fec;
+
+
+CREATE TABLE disclosure.dsc_sched_a_aggregate_occupation
+(
+  cmte_id character varying(9),
+  cycle numeric,
+  occupation character varying(38),
+  total numeric,
+  count bigint,
+  idx integer NOT NULL DEFAULT nextval('ofec_sched_a_aggregate_occupation_idx_seq1'::regclass),
+  CONSTRAINT uq_sched_a_aggregate_occupation_cmte_id_cycle_occupation UNIQUE (cmte_id, cycle, occupation)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE disclosure.dsc_sched_a_aggregate_occupation
+  OWNER TO fec;
+GRANT ALL ON TABLE disclosure.dsc_sched_a_aggregate_occupation TO fec;
+GRANT SELECT ON TABLE disclosure.dsc_sched_a_aggregate_occupation TO fec_read;
+
+-- Index: disclosure.dsc_sched_a_aggregate_occupation_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_occupation_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_occupation_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_occupation
+  USING btree
+  (cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_occupation_count
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_occupation_count;
+
+CREATE INDEX ofec_sched_a_aggregate_occupation_count
+  ON disclosure.dsc_sched_a_aggregate_occupation
+  USING btree
+  (count);
+
+-- Index: disclosure.dsc_sched_a_aggregate_occupation_cycle
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_occupation_cycle;
+
+CREATE INDEX ofec_sched_a_aggregate_occupation_cycle
+  ON disclosure.dsc_sched_a_aggregate_occupation
+  USING btree
+  (cycle);
+
+-- Index: disclosure.dsc_sched_a_aggregate_occupation_cycle_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_occupation_cycle_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_occupation_cycle_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_occupation
+  USING btree
+  (cycle, cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_occupation_occupation
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_occupation_occupation;
+
+CREATE INDEX ofec_sched_a_aggregate_occupation_occupation
+  ON disclosure.dsc_sched_a_aggregate_occupation
+  USING btree
+  (occupation COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_occupation_total
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_occupation_total;
+
+CREATE INDEX ofec_sched_a_aggregate_occupation_total
+  ON disclosure.dsc_sched_a_aggregate_occupation
+  USING btree
+  (total);
+

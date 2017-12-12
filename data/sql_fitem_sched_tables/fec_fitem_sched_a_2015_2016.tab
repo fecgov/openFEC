@@ -1,0 +1,74 @@
+CREATE TABLE disclosure.fec_fitem_sched_a_2015_2016
+(
+ CONSTRAINT fec_fitem_sched_a_2015_2016_pkey PRIMARY KEY (sub_id)
+ ,CONSTRAINT check_election_cycle CHECK (election_cycle = ANY (ARRAY[2015, 2016]))
+)
+INHERITS (disclosure.fec_fitem_sched_a)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_a_2015_2016 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_a_2015_2016 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_a_2015_2016 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_a_2015_2016 TO openfec_read;
+
+
+CREATE TRIGGER TRI_fec_fitem_sched_a_2015_2016
+  BEFORE INSERT
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  FOR EACH ROW
+  EXECUTE PROCEDURE disclosure.fec_fitem_sched_a_insert();
+  
+
+
+CREATE INDEX idx_sched_a_2015_2016_cmte_id
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (cmte_id);
+
+CREATE INDEX idx_sched_a_2015_2016_contb_receipt_dt
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (contb_receipt_dt);
+
+CREATE INDEX idx_sched_a_2015_2016_contb_receipt_amt
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (contb_receipt_amt);
+
+CREATE INDEX idx_sched_a_2015_2016_clean_contbr_id
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (clean_contbr_id);
+
+CREATE INDEX idx_sched_a_2015_2016_contbr_city
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (contbr_city);
+
+CREATE INDEX idx_sched_a_2015_2016_contbr_st
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (contbr_st);
+
+CREATE INDEX idx_sched_a_2015_2016_entity_tp
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (entity_tp);
+
+CREATE INDEX idx_sched_a_2015_2016_image_num
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (image_num);
+
+CREATE INDEX idx_sched_a_2015_2016_is_individual
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (is_individual);
+
+CREATE INDEX idx_sched_a_2015_2016_rpt_yr
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING btree (rpt_yr);
+  
+
+CREATE INDEX idx_sched_a_2015_2016_contributor_employer_text
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING gin (contributor_employer_text);
+
+CREATE INDEX idx_sched_a_2015_2016_contributor_name_text
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING gin (contributor_name_text);
+
+CREATE INDEX idx_sched_a_2015_2016_contributor_occupation_text
+  ON disclosure.fec_fitem_sched_a_2015_2016
+  USING gin (contributor_occupation_text);
+  

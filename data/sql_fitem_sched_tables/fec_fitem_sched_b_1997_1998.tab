@@ -1,0 +1,22 @@
+CREATE TABLE disclosure.fec_fitem_sched_b_1997_1998
+(
+ CONSTRAINT fec_fitem_sched_b_1997_1998_pkey PRIMARY KEY (sub_id)
+ ,CONSTRAINT check_election_cycle CHECK (election_cycle = ANY (ARRAY[1997, 1998]))
+)
+INHERITS (disclosure.fec_fitem_sched_b)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_sched_b_1997_1998 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_sched_b_1997_1998 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_b_1997_1998 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_sched_b_1997_1998 TO openfec_read;
+
+
+CREATE TRIGGER TRI_fec_fitem_sched_b_1997_1998
+  BEFORE INSERT
+  ON disclosure.fec_fitem_sched_b_1997_1998
+  FOR EACH ROW
+  EXECUTE PROCEDURE disclosure.fec_fitem_sched_b_insert();
+  
+
+
+

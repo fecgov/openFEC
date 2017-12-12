@@ -1,0 +1,43 @@
+CREATE TABLE disclosure.fec_fitem_f94
+(
+ filer_cmte_id	varchar(9)	
+ ,cand_id	varchar(9)	
+ ,cand_nm	varchar(90)	
+ ,cand_l_nm	varchar(30)	
+ ,cand_f_nm	varchar(20)	
+ ,cand_m_nm	varchar(20)	
+ ,cand_prefix	varchar(10)	
+ ,cand_suffix	varchar(10)	
+ ,cand_office	varchar(1)	
+ ,cand_office_desc	varchar(20)	
+ ,cand_office_st	varchar(2)	
+ ,cand_office_st_desc	varchar(20)	
+ ,cand_office_district	varchar(2)	
+ ,election_tp	varchar(5)	
+ ,election_tp_desc	varchar(20)	
+ ,fec_election_tp_desc	varchar(20)	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,back_ref_tran_id	varchar(32)	
+ ,back_ref_sched_nm	varchar(8)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,begin_image_num	varchar(18)	
+ ,sb_link_id	numeric(19,0)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_tp	varchar(3)	
+ ,rpt_yr	numeric(4,0)	
+ ,election_cycle	numeric(4,0)	
+ ,pg_date	timestamp	default now()
+ ,CONSTRAINT fec_fitem_f94_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_f94 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_f94 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f94 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f94 TO openfec_read;

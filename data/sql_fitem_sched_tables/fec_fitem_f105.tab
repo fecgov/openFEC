@@ -1,0 +1,30 @@
+CREATE TABLE disclosure.fec_fitem_f105
+(
+ filer_cmte_id	varchar(9)	
+ ,exp_dt	timestamp	
+ ,election_tp	varchar(5)	
+ ,election_tp_desc	varchar(20)	
+ ,fec_election_tp_desc	varchar(20)	
+ ,exp_amt	numeric(14,2)	
+ ,loan_chk_flg	varchar(1)	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,image_num	varchar(18)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_yr	numeric(4,0)	
+ ,election_cycle	numeric(4,0)	
+ ,pg_date	timestamp	default now()
+ ,CONSTRAINT fec_fitem_f105_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_f105 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_f105 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f105 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f105 TO openfec_read;

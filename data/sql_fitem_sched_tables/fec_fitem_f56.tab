@@ -1,0 +1,56 @@
+CREATE TABLE disclosure.fec_fitem_f56
+(
+ filer_cmte_id	varchar(9)	
+ ,entity_tp	varchar(3)	
+ ,entity_tp_desc	varchar(90)	
+ ,contbr_nm	varchar(200)	
+ ,contbr_l_nm	varchar(30)	
+ ,contbr_f_nm	varchar(20)	
+ ,contbr_m_nm	varchar(20)	
+ ,contbr_prefix	varchar(10)	
+ ,contbr_suffix	varchar(10)	
+ ,contbr_st1	varchar(34)	
+ ,contbr_st2	varchar(34)	
+ ,conbtr_city	varchar(30)	
+ ,contbr_st	varchar(2)	
+ ,contbr_zip	varchar(9)	
+ ,contbr_employer	varchar(38)	
+ ,contbr_occupation	varchar(38)	
+ ,contb_dt	timestamp	
+ ,contb_amt	numeric(14,2)	
+ ,cand_id	varchar(9)	
+ ,cand_nm	varchar(38)	
+ ,cand_office	varchar(1)	
+ ,cand_office_desc	varchar(20)	
+ ,cand_office_st	varchar(2)	
+ ,cand_office_st_desc	varchar(20)	
+ ,cand_office_district	varchar(2)	
+ ,conduit_cmte_id	varchar(9)	
+ ,conduit_nm	varchar(200)	
+ ,conduit_st1	varchar(34)	
+ ,conduit_st2	varchar(34)	
+ ,conduit_city	varchar(30)	
+ ,conduit_st	varchar(2)	
+ ,conduit_zip	varchar(9)	
+ ,action_cd	varchar(1)	
+ ,action_cd_desc	varchar(15)	
+ ,tran_id	varchar(32)	
+ ,schedule_type	varchar(8)	
+ ,schedule_type_desc	varchar(90)	
+ ,image_num	varchar(18)	
+ ,file_num	numeric(7,0)	
+ ,link_id	numeric(19,0)	
+ ,orig_sub_id	numeric(19,0)	
+ ,sub_id	numeric(19,0)	NOT NULL
+ ,filing_form	varchar(8)	NOT NULL
+ ,rpt_tp	varchar(3)	
+ ,rpt_yr	numeric(4,0)	
+ ,election_cycle	numeric(4,0)	
+ ,pg_date	timestamp	default now()
+ ,CONSTRAINT fec_fitem_f56_pkey PRIMARY KEY (sub_id)
+)
+WITH (OIDS=FALSE);
+ALTER TABLE disclosure.fec_fitem_f56 OWNER TO fec;
+GRANT ALL ON TABLE disclosure.fec_fitem_f56 TO fec;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f56 TO fec_read;
+GRANT SELECT ON TABLE disclosure.fec_fitem_f56 TO openfec_read;

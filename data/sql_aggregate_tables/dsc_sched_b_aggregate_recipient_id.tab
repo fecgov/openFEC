@@ -1,0 +1,84 @@
+CREATE SEQUENCE public.ofec_sched_b_aggregate_recipient_id_idx_seq1
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE public.ofec_sched_b_aggregate_recipient_id_idx_seq1
+  OWNER TO fec;
+
+
+
+CREATE TABLE disclosure.dsc_sched_b_aggregate_recipient_id
+(
+  cmte_id character varying(9),
+  cycle numeric,
+  recipient_cmte_id character varying,
+  recipient_nm text,
+  total numeric,
+  count bigint,
+  idx integer NOT NULL DEFAULT nextval('ofec_sched_b_aggregate_recipient_id_idx_seq1'::regclass),
+  CONSTRAINT uq_sched_b_agg_recpnt_id_cmte_id_cycle_recipient_cmte_id UNIQUE (cmte_id, cycle, recipient_cmte_id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE disclosure.dsc_sched_b_aggregate_recipient_id
+  OWNER TO fec;
+GRANT ALL ON TABLE disclosure.dsc_sched_b_aggregate_recipient_id TO fec;
+GRANT SELECT ON TABLE disclosure.dsc_sched_b_aggregate_recipient_id TO fec_read;
+
+-- Index: disclosure.dsc_sched_b_aggregate_recipient_id_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_recipient_id_cmte_id;
+
+CREATE INDEX ofec_sched_b_aggregate_recipient_id_cmte_id
+  ON disclosure.dsc_sched_b_aggregate_recipient_id
+  USING btree
+  (cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_b_aggregate_recipient_id_cmte_id_cycle
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_recipient_id_cmte_id_cycle;
+
+CREATE INDEX ofec_sched_b_aggregate_recipient_id_cmte_id_cycle
+  ON disclosure.dsc_sched_b_aggregate_recipient_id
+  USING btree
+  (cmte_id COLLATE pg_catalog."default", cycle);
+
+-- Index: disclosure.dsc_sched_b_aggregate_recipient_id_count
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_recipient_id_count;
+
+CREATE INDEX ofec_sched_b_aggregate_recipient_id_count
+  ON disclosure.dsc_sched_b_aggregate_recipient_id
+  USING btree
+  (count);
+
+-- Index: disclosure.dsc_sched_b_aggregate_recipient_id_cycle
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_recipient_id_cycle;
+
+CREATE INDEX ofec_sched_b_aggregate_recipient_id_cycle
+  ON disclosure.dsc_sched_b_aggregate_recipient_id
+  USING btree
+  (cycle);
+
+-- Index: disclosure.dsc_sched_b_aggregate_recipient_id_recipient_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_recipient_id_recipient_cmte_id;
+
+CREATE INDEX ofec_sched_b_aggregate_recipient_id_recipient_cmte_id
+  ON disclosure.dsc_sched_b_aggregate_recipient_id
+  USING btree
+  (recipient_cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_b_aggregate_recipient_id_total
+
+-- DROP INDEX disclosure.dsc_sched_b_aggregate_recipient_id_total;
+
+CREATE INDEX ofec_sched_b_aggregate_recipient_id_total
+  ON disclosure.dsc_sched_b_aggregate_recipient_id
+  USING btree
+  (total);
+

@@ -1,0 +1,71 @@
+CREATE TABLE disclosure.dsc_sched_a_aggregate_size
+(
+  cmte_id character varying(9),
+  cycle numeric,
+  size integer,
+  total numeric,
+  count bigint,
+  CONSTRAINT uq_ofec_sched_a_aggregate_size_cmte_id_cycle_size UNIQUE (cmte_id, cycle, size)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE disclosure.dsc_sched_a_aggregate_size
+  OWNER TO fec;
+GRANT ALL ON TABLE disclosure.dsc_sched_a_aggregate_size TO fec;
+GRANT SELECT ON TABLE disclosure.dsc_sched_a_aggregate_size TO fec_read;
+
+-- Index: disclosure.dsc_sched_a_aggregate_size_cmte_id
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_size_cmte_id;
+
+CREATE INDEX ofec_sched_a_aggregate_size_cmte_id
+  ON disclosure.dsc_sched_a_aggregate_size
+  USING btree
+  (cmte_id COLLATE pg_catalog."default");
+
+-- Index: disclosure.dsc_sched_a_aggregate_size_cmte_id_cycle
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_size_cmte_id_cycle;
+
+CREATE INDEX ofec_sched_a_aggregate_size_cmte_id_cycle
+  ON disclosure.dsc_sched_a_aggregate_size
+  USING btree
+  (cmte_id COLLATE pg_catalog."default", cycle);
+
+-- Index: disclosure.dsc_sched_a_aggregate_size_count
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_size_count;
+
+CREATE INDEX ofec_sched_a_aggregate_size_count
+  ON disclosure.dsc_sched_a_aggregate_size
+  USING btree
+  (count);
+
+-- Index: disclosure.dsc_sched_a_aggregate_size_cycle
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_size_cycle;
+
+CREATE INDEX ofec_sched_a_aggregate_size_cycle
+  ON disclosure.dsc_sched_a_aggregate_size
+  USING btree
+  (cycle);
+
+-- Index: disclosure.dsc_sched_a_aggregate_size_size
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_size_size;
+
+CREATE INDEX ofec_sched_a_aggregate_size_size
+  ON disclosure.dsc_sched_a_aggregate_size
+  USING btree
+  (size);
+
+-- Index: disclosure.dsc_sched_a_aggregate_size_total
+
+-- DROP INDEX disclosure.dsc_sched_a_aggregate_size_total;
+
+CREATE INDEX ofec_sched_a_aggregate_size_total
+  ON disclosure.dsc_sched_a_aggregate_size
+  USING btree
+  (total);
+
