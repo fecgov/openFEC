@@ -31,7 +31,7 @@ class ApiResource(utils.Resource):
     @marshal_with(Ref('page_schema'))
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
+        count = counts.count_estimate(query, models.db.session, threshold=500000)
         return utils.fetch_page(
             query, kwargs,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,

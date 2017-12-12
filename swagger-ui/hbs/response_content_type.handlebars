@@ -1,0 +1,10 @@
+<label class="responseContentType" for="responseContentType{{ new_unique_id  }}"></label>
+<select name="responseContentType" id="responseContentType{{get_unique_id}}">
+{{#if produces}}
+  {{#each produces}}
+  <option value="{{{this}}}">{{{this}}}</option>
+  {{/each}}
+{{else}}
+  <option value="application/json">application/json</option>
+{{/if}}
+</select>
