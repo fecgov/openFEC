@@ -1,16 +1,4 @@
-# All files in the `data/sql_updates` folder are automatically added to the
-# graph as nodes.
-
-# If you need to add a dependency, note that the dependency must be listed on
-# the left first.
-
-import os
-
 import networkx as nx
-
-here, _ = os.path.split(__file__)
-home = os.path.join(here, os.pardir)
-script_path = os.path.join(home, 'data', 'sql_updates')
 
 def get_graph():
     """Build a `DiGraph` that captures dependencies between database migration
@@ -18,10 +6,49 @@ def get_graph():
     a dependency between tasks. Tasks can be ordered using topological sort.
     """
     graph = nx.DiGraph()
-    for path in os.listdir(script_path):
-        name, ext = os.path.splitext(path)
-        if ext == '.sql':
-            graph.add_node(name)
+
+    MATERIALIZED_VIEWS = [
+        'cand_cmte_linkage',
+        'candidate_aggregates',
+        'candidate_detail',
+        'candidate_election',
+        'candidate_flags',
+        'candidate_fulltext',
+        'candidate_history',
+        'candidate_history_latest',
+        'committee_detail',
+        'committee_fulltext',
+        'committee_history',
+        'communication_cost',
+        'communication_cost_by_candidate',
+        'election_outcome',
+        'electioneering',
+        'electioneering_by_candidate',
+        'filing_amendments_all',
+        'filing_amendments_house_senate',
+        'filing_amendments_pac_party',
+        'filing_amendments_presidential',
+        'filings',
+        'large_aggregates',
+        'omnibus_dates',
+        'rad_analyst',
+        'reports_house_senate',
+        'reports_ie',
+        'reports_pac_party',
+        'reports_presidential',
+        'sched_a_by_size_merged',
+        'sched_a_by_state_recipient_totals',
+        'sched_c',
+        'sched_e_by_candidate',
+        'sched_f',
+        'totals_candidate_committee',
+        'totals_combined',
+        'totals_house_senate',
+        'totals_ie',
+        'totals_pac_party',
+        'totals_presidential',
+    ]
+    graph.add_nodes_from(MATERIALIZED_VIEWS)
 
     graph.add_edge('candidate_history', 'candidate_detail')
     graph.add_edge('candidate_detail', 'candidate_election')
@@ -41,7 +68,7 @@ def get_graph():
     graph.add_edges_from([
         ('filing_amendments_presidential', 'filings'),
         ('filing_amendments_house_senate', 'filings'),
-        ('filing_amendments_pac_party','filings'),
+        ('filing_amendments_pac_party', 'filings'),
         ('filing_amendments_all', 'filings'),
     ])
 

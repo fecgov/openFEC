@@ -7,7 +7,6 @@
 [![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
 [![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
 
-![Swagger validation badge](https://online.swagger.io/validator?url=https://api.open.fec.gov/swagger)
 
 ## About this project
 The Federal Election Commission (FEC) releases information to the public about money that's raised and spent in federal elections — that's elections for US President, Senate, and House of Representatives.
@@ -47,7 +46,8 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-    * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html)
+    * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html))
+    * Flyway 4.2 ([download](https://flywaydb.org/getstarted/download))
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
@@ -75,6 +75,8 @@ npm install
 npm run build
 ```
 
+*Note: `swagger-tools` is required for testing the API documentation via the automated tests and must be installed globally as shown above.*
+
 ##### Git hooks
 This repo includes optional post-merge and post-checkout hooks to ensure that
 dependencies are up to date. If enabled, these hooks will update Python
@@ -91,21 +93,35 @@ To disable, run:
 invoke remove_hooks
 ```
 
-#### Create local databases
-Before you can run this project locally, you'll need a development database and a test database.
+#### Create a test database
+In order to run tests locally, you'll need a test database.
 
-To create these databases, run:
+To create the test database, run:
+
+```
+createdb cfdm_unit_test
+```
+
+Create the required roles in the test database by running:
+
+```
+psql <<db-connection-parameters>> -f data/create_roles.sql
+```
+
+#### Create a development database
+Before you can run this project locally, you'll need a development database.
+
+To create the development database, run:
 
 ```
 createdb cfdm_test
-createdb cfdm_unit_test
 ```
 
 Load our sample data into the development database (`cfdm_test`) by running:
 
 ```
 pg_restore --dbname cfdm_test --no-acl --no-owner data/subset.dump
-./manage.py update_all
+./manage.py refresh_materialized
 ```
 
 Ignore `user does not exist` error messages. Everything will still work!
@@ -117,11 +133,15 @@ To load statutes into elasticsearch, run:
 python manage.py index_statutes
 ```
 
+#### Connecting to a RDS DB instance instead of local DB
+
 *Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
 
 ```
 export SQLA_CONN=<psql:address-to-box>
 ```
+
+Warning: never perform 'update all' when pointing to an RDS box via the SQLA_CONN env var
 
 *Note: An additional setting for connecting to and utilizing mirrors/replica boxes can also be set with:*
 
@@ -145,7 +165,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 2. Run:
 
    ```
-   export FEC_WEB_API_URL=http://localhost:5000
+   export FEC_API_URL=http://localhost:5000
    export FEC_CMS_URL=http://localhost:8000
    ```
 
@@ -205,6 +225,17 @@ redis-server
 celery worker --app webservices.tasks
 ```
 
+## Editing Swagger
+We are using a customized 2.x version of swagger-ui to display our API developer documentation.
+
+### Template and Swagger spec file
+The base template for swagger-ui is located at `webservices/templates/swagger-ui.html`. The `{{ specs_url }}` template variable points to `http://localhost:5000/swagger` that is the swagger spec file for FEC specific model definitions and schema. Compiled and vendor assets are served from `static/swagger-ui/`.
+
+### Custom Swagger setup and build
+The swagger-ui package is within the `swagger-ui` directory. The `hbs` folder contains handlebars templates with 18F customizations, as do the files contained in the `js` and `less` folders. However, the `js/swagger-client.js` is the base v2.1.32 swager-ui file.
+
+All these files are then built and compiled via the `npm run build` command that runs Gulp tasks. Any modification should be done in the files in `swagger-ui` that will then be compiled and served in the `static/swagger-ui/` folder.
+
 ## Testing
 This repo uses [pytest](https://docs.pytest.org/en/latest/).
 
@@ -213,6 +244,8 @@ If the test database server is *not* the default local Postgres instance, indica
 ```
 export SQLA_TEST_CONN=<psql:address-to-box>
 ```
+
+The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
 
 Running the tests:
 
@@ -340,7 +373,7 @@ To accomplish this, follow these steps:
 
    ```
    name: one-off-app-name
-   command: "<your command here, e.g., python manage.py update_all> && sleep infinity"
+   command: "<your command here, e.g., python manage.py refresh_materialized> && sleep infinity"
    no-route: true
    ```
 
@@ -441,9 +474,11 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
     ```
 
 * [auto] `release/my-release` is deployed to `stage`
+* Issue a pull request to master, tag reviewer(s)
 * Review of staging
-* Issue a pull request to master
 * Check if there are any SQL files changed. Depending on where the changes are, you may need to run migrations. Ask the person who made the change what, if anything, you need to run.
+* Make sure your pull request has been approved
+* Make sure local laptop copies of `master`, `develop`, and `release/[release name]` github branches are up-to-date by checking them out and using `git pull` for each branch.
 * Developer merges release branch into `master` (and backmerges into `develop`) and pushes to origin:
 
     ```
@@ -549,3 +584,34 @@ Sorting fields include a compound index on on the filed to sort and a unique fie
 Database mirrors/replicas are supported by the API if the `SQLA_FOLLOWERS` is set to one or more valid connection strings.  By default, setting this environment variable will shift all `read` operations to any mirrors/replicas that are available (and randomly choose one to target per request if there are more than one).
 
 You can optionally choose to restrict traffic that goes to the mirrors/replicas to be the asynchronous tasks only by setting the `SQLA_RESTRICT_FOLLOWER_TRAFFIC_TO_TASKS` environment variable to something that will evaluate to `True` in Python (simply using `True` as the value is fine).  If you do this, you can also restrict which tasks are supported on the mirrors/replicas.  Supported tasks are configured by adding their fully qualified names to the `app.config['SQLALCHEMY_FOLLOWER_TASKS']` list in order to whitelist them.  By default, only the `download` task is enabled.
+
+### Database migration
+`flyway` is the tool used for database migration.
+
+#### Installing `flyway`
+`Flyway` is a Java application and requires a Java runtime environment (JRE) for execution.
+
+It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-5.0.2.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. If you have trouble with a separate JRE or are not comfortable with managing a separate JRE, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-5.0.2-macosx-x64.tar.gz`, `flyway-commandline-5.0.2-linux-x64.tar.gz`, etc.
+
+Expand the downloaded archive. Add `<target_directory>/flyway/flyway-5.0.2` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
+
+#### How `flyway` works
+All database schema modification code is checked into version control in the directory `data/migrations` in the form of SQL files that follow a strict naming convention - `V<version_number>__<descriptive_name>.sql`. `flyway` also maintains a table in the target database called `flyway_schema_history` which tracks the migration versions that have already been applied.
+
+`flyway` supports the following commands:
+- `info` compares the migration SQL files and the table `flyway_schema_history` and reports on migrations that have been applied and those that are pending.
+- `migrate` compares the migration SQL files and the table `flyway_schema_history` and runs those migrations that are pending.
+- `baseline` modifies the `flyway_schema_history` table to indicate that the database has already been migrated to a baseline version.
+
+For more information, see [Flyway documentation](https://flywaydb.org/documentation/).
+
+#### Running tests
+Tests that require the database will automatically run `flyway` migrations as long as `flyway` is in `PATH`.
+
+#### Deployment from CircleCI
+flyway is installed in `CircleCI`. During the deployment step, `CircleCI` invokes `flyway` to migrate the target database (depending on the target space). For this to work correctly, connection URLs for the target databases have to be stored as environment variables in CircleCI under the names `FEC_MIGRATOR_SQLA_CONN_DEV`, `FEC_MIGRATOR_SQLA_CONN_STAGE` and `FEC_MIGRATOR_SQLA_CONN_PROD`. The connection URL has to strictly adhere to the structure `postgresql://<username>:<password>@<hostname>:<port>/<database_name>`. Note that the database_name should be specified explicitly, unlike URLs for SQLAlchemy connections.
+
+#### Running `flyway` manually
+You may need to run `flyway` manually in order to test migrations locally, or to troubleshoot migrations in production. There are 2 required parameters:
+- `-url` specifies the database URL. This is a JDBC URL of the form `jdbc:postgresql://<hostname>:<port>/<database>?user=<username>&password=<password>`.
+- `-locations` specifies the directory where the migrations are stored. This is a value of the form `filesystem:<directory-path>`. In our case, if run from the project root, it would be `-locations=filesystem:data/migration`.
