@@ -251,7 +251,8 @@ with elections_raw as(
     where
         -- when successful add 'IE Periods' and 'EC Periods'
         category_name not in ('Election Dates', 'Reporting Deadlines', 'Quarterly', 'Monthly', 'Pre and Post-Elections', 'IE Periods', 'EC Periods') and
-        active = 'Y'
+        active = 'Y' and
+        cal_event_status_id = 3
 ), combined as (
     select * from elections
     union all
