@@ -27,7 +27,7 @@ create or replace view ofec_dates_vw as
         active = 'Y'
 );
 
-drop function if exists expand_election_type_caucus_convention_clean(trc_election_type_id text, trc_election_id numeric);
+drop function if exists expand_election_type_caucus_convention_clean(trc_election_type_id text, trc_election_id numeric) cascade;
 drop function if exists expand_election_type_plurals(acronym text);
 drop function if exists create_election_description(election_type text, office_sought text, contest text[], party text, election_notes text);
 drop function if exists create_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text);
