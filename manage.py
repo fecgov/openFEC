@@ -230,6 +230,7 @@ def refresh_itemized():
 
     refresh_itemized_a()
     refresh_itemized_b()
+    rebuild_itemized_e()
 
     logger.info('Finished updating incremental aggregates.')
 
@@ -259,6 +260,13 @@ def refresh_itemized_b():
         logger.error(message[1])
 
     logger.info('Finished updating Schedule B.')
+
+@manager.command
+def rebuild_itemized_e():
+    """Used to rebuild the itemized Schedule E data."""
+    logger.info('Rebuilding Schedule E...')
+    execute_sql_file('data/refresh/rebuild_schedule_e.sql')
+    logger.info('Finished rebuilding Schedule E.')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
