@@ -19,6 +19,7 @@ import http
 import logging
 import json
 import boto
+import re
 
 from flask import abort
 from flask import request
@@ -152,7 +153,7 @@ def limit_remote_addr():
 
 # - Extend the after request to print the results of the request. (remove later)
 
-# - use json.dumps if the request is not already in json 
+# - use json.dumps if the request is not already in json
 
 # - save that file locally- make a tmp folder (remove later)
 
@@ -200,8 +201,17 @@ def add_caching_headers(response):
 
     #upload the request_content.json file to s3 bucket
     file_name = "/Users/pkasireddy/Documents/web_request_calls/request_content.json"
+    parts = request.url.split('/v1/')
+    app.logger.info("********* PARTS :::", parts)
+
+    path = parts[1]
+    path = path.replace("?", "/")
+    path = path.replace("&", "/")
+    app.logger.info("********* PATH :::", path)
+    web_request_url = "cached-calls/{0}.json".format(path)
+    app.logger.info("********* web_request_url:::", web_request_url)
     app.logger.info("********* Before uploading to s3:::")
-    s3_bucket.upload_file(file_name, "web-request_content.json")
+    s3_bucket.upload_file(file_name, web_request_url)
 
     app.logger.info("********* succesfully uploaded to s3:::")
     return response
