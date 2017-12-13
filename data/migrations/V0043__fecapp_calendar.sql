@@ -22,7 +22,7 @@ create or replace view ofec_dates_vw as
     join fecapp.cal_event_category using (cal_event_id)
     join fecapp.cal_category using (cal_category_id)
     where
-        # the status of 3 narrows down the events to those that a published
+        -- the status of 3 narrows down the events to those that a published
         cal_event_status_id = 3
         active = 'Y'
 );
