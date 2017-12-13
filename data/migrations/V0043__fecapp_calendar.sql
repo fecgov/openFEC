@@ -1,6 +1,6 @@
 -- Makes a master calendar form several FEC tables getting as much metadata as possible
 -- See helper and cleaning functions in data/functions/calendar.sql
-drop materialized view if exists ofec_omnibus_dates_mv_tmp;
+drop materialized view if exists ofec_omnibus_dates_mv;
 create or replace view ofec_dates_vw as
  (
     -- most data comes from cal_event and is imported as is, it does not have state filtering.
