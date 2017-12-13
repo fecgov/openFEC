@@ -26,3 +26,15 @@ create or replace view ofec_dates_vw as
         cal_event_status_id = 3
         active = 'Y'
 );
+
+drop function if exists expand_election_type_caucus_convention_clean(trc_election_type_id text, trc_election_id numeric);
+drop function if exists expand_election_type_plurals(acronym text);
+drop function if exists create_election_description(election_type text, office_sought text, contest text[], party text, election_notes text);
+drop function if exists create_election_summary(election_type text, office_sought text, contest text[], party text, election_notes text);
+drop function if exists create_report_description(office_sought text, report_type text, rpt_tp_desc text, contest text[], election_notes text);
+drop function if exists create_report_summary(office_sought text, report_type text, rpt_tp_desc text, report_contest text[], election_notes text);
+drop function if exists create_24hr_text(rp_election_text text, ie_24hour_end date);
+drop function if exists create_48hr_text(rp_election_text text, ie_48hour_end date);
+drop function if exists create_electioneering_text(rp_election_text text, ec_end date);
+drop function if exists add_reporting_states(election_state text[], report_type text);
+drop function if exists create_reporting_link(due_date timestamp);
