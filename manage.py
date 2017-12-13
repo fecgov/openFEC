@@ -306,7 +306,6 @@ def refresh_materialized(concurrent=True):
         'candidate_detail': ['ofec_candidate_detail_mv'],
         'candidate_election': ['ofec_candidate_election_mv'],
         'candidate_history_latest': ['ofec_candidate_history_latest_mv'],
-        'omnibus_dates': ['ofec_omnibus_dates_mv'],
         'election_outcome': ['ofec_election_result_mv'],
         'sched_e_by_candidate': ['ofec_sched_e_aggregate_candidate_mv'],
         'filing_amendments_presidential': ['ofec_presidential_paper_amendments_mv'],
