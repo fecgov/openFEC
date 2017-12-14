@@ -78,15 +78,16 @@ class TestCalendarDates(ApiBaseTest):
         factories.CalendarDateFactory(start_date=datetime.datetime(2016, 1, 2))
         factories.CalendarDateFactory(location='Mississippi, CA')
         factories.CalendarDateFactory(event_id=123)
-        factories.CalendarDateFactory(state=['CA'])
-        factories.CalendarDateFactory(category='Public Hearings')
+        # deprecated while we figure out a better way to generate the data
+        # factories.CalendarDateFactory(state=['CA'])
+        factories.CalendarDateFactory(calendar_category_id=7)
         factories.CalendarDateFactory(description='a really interesting event')
         factories.CalendarDateFactory(summary='Meeting that will solve all the problems')
         factories.CalendarDateFactory(end_date=datetime.datetime(2015, 1, 2))
 
         filter_fields = [
             ('min_start_date', '2015-01-01'),
-            ('category', 'Public Hearings'),
+            ('calendar_category_id', 7),
             ('min_end_date', '2014-01-01'),
             # this is not passing or working :/
             #('state', 'CA'),

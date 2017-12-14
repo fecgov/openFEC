@@ -572,14 +572,7 @@ CALENDAR_DATES = '''
 Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
 events into one calendar.
 
-State filtering now applies to elections, reports and reporting periods.
-
-Presidential pre-primary report due dates are not shown on even years.
-Filers generally opt to file monthly rather than submit over 50 pre-primary election
-reports. All reporting deadlines are available at /reporting-dates/ for reference.
-
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
-that creates the calendar.
+State and report type filtering is no longer available.
 '''
 
 CALENDAR_EXPORT = '''
@@ -920,7 +913,12 @@ FED_ELECTION_ACTIVITY = 'Total federal election activity'
 FED_DISBURSEMENTS = 'Total federal disbursements'
 
 # calendar
-CATEGORY = 'Type of date reporting date, live event, etc.'
+CATEGORY = '''
+Each type of event has a calendar category with an integer id. Options are: Open Meetings: 32, Executive Sessions: 39, Public Hearings: 40,
+Conferences: 33, Roundtables: 34, Election Dates: 36, Federal Holidays: 37, FEA Periods: 38, Commission Meetings: 20,
+Reporting Deadlines: 21, Conferences and Outreach: 22, AOs and Rules: 23, Other: 24, Quarterly: 25, Monthly: 26,
+Pre and Post-Elections: 27, EC Periods:28, and IE Periods: 29
+'''
 CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
