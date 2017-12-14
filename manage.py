@@ -297,6 +297,7 @@ def refresh_materialized(concurrent=True):
        tables are not initially populated.
     """
     logger.info('Refreshing materialized views...')
+
     materialized_view_names = {
         'filing_amendments_house_senate': ['ofec_house_senate_paper_amendments_mv'],
         'sched_f': ['ofec_sched_f_mv'],
@@ -337,17 +338,24 @@ def refresh_materialized(concurrent=True):
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
         'totals_candidate_committee': ['ofec_totals_candidate_committees_mv']
     }
+
     graph = flow.get_graph()
+
     for node in nx.topological_sort(graph):
-        for mv in materialized_view_names[node]:
-            logger.info('Refreshing %s', mv)
-            if concurrent:
-                db.session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY %s" % mv)
-            else:
-                db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+        materialized_views = materialized_view_names.get(node, None)
+
+        if materialized_views:
+            for mv in materialized_views:
+                logger.info('Refreshing %s', mv)
+
+                if concurrent:
+                    db.session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY %s" % mv)
+                else:
+                    db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+        else:
+            logger.error('Error refreshing node %s: not found.'.format(node))
 
     db.session.commit()
-
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
