@@ -313,7 +313,6 @@ class TestCandidateAggregates(ApiBaseTest):
         assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
 
     def test_totals_full(self):
-        print(self.candidate.candidate_id)
         results = self._results(
             api.url_for(
                 TotalsCandidateView,
