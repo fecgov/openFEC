@@ -1,5 +1,6 @@
-import os
 import json
+import os
+import subprocess
 
 import git
 from invoke import task
@@ -180,7 +181,10 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     # Target space
     ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
 
-    run_migrations(ctx, space)
+    print("\nMigrating database...")
+    jdbc_url = to_jdbc_url(os.getenv('FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())))
+    run_migrations(ctx, jdbc_url)
+    print("Database migrated\n")
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
@@ -216,8 +220,22 @@ def notify(ctx):
         username=env.get_credential('FEC_SLACK_BOT', 'fec-bot'),
     )
 
-def run_migrations(ctx, space):
-    print("\nMigrating database...")
-    jdbc_url = to_jdbc_url(os.getenv('FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())))
+@task
+def create_sample_db(ctx):
+    """
+    Load schema and data into the empty database pointed to by $SQLA_SAMPLE_DB_CONN
+    """
+
+    print("Loading schema...")
+    db_conn = os.getenv('SQLA_SAMPLE_DB_CONN')
+    jdbc_url = to_jdbc_url(db_conn)
+    run_migrations(ctx, jdbc_url)
+    print("Schema loaded")
+    print("Loading sample data...")
+    subprocess.check_call(
+        ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn],
+    )
+    print("Sample data loaded")
+
+def run_migrations(ctx, jdbc_url):
     ctx.run('flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url))
-    print("Database migrated\n")
