@@ -2177,18 +2177,18 @@ CREATE FUNCTION ofec_f57_update_notice_queues() RETURNS trigger
     AS $$
 begin
     if tg_op = 'INSERT' then
-        delete from ofec_f57_queue_new where sub_id = new.sub_id;
-        insert into ofec_f57_queue_new values (new.*);
+        delete from public.ofec_f57_queue_new where sub_id = new.sub_id;
+        insert into public.ofec_f57_queue_new values (new.*);
         return new;
     elsif tg_op = 'UPDATE' then
-        delete from ofec_f57_queue_new where sub_id = new.sub_id;
-        delete from ofec_f57_queue_old where sub_id = old.sub_id;
-        insert into ofec_f57_queue_new values (new.*);
-        insert into ofec_f57_queue_old values (old.*);
+        delete from public.ofec_f57_queue_new where sub_id = new.sub_id;
+        delete from public.ofec_f57_queue_old where sub_id = old.sub_id;
+        insert into public.ofec_f57_queue_new values (new.*);
+        insert into public.ofec_f57_queue_old values (old.*);
         return new;
     elsif tg_op = 'DELETE' then
-        delete from ofec_f57_queue_old where sub_id = old.sub_id;
-        insert into ofec_f57_queue_old values (old.*);
+        delete from public.ofec_f57_queue_old where sub_id = old.sub_id;
+        insert into public.ofec_f57_queue_old values (old.*);
         return old;
     end if;
 end
@@ -2206,9 +2206,9 @@ CREATE FUNCTION ofec_sched_a_delete_update_queues() RETURNS trigger
     AS $$
 declare
     start_year int = TG_ARGV[0]::int;
-    view_row fec_fitem_sched_a_vw%ROWTYPE;
+    view_row public.fec_fitem_sched_a_vw%ROWTYPE;
 begin
-        select into view_row * from fec_fitem_sched_a_vw where sub_id = old.sub_id;
+        select into view_row * from public.fec_fitem_sched_a_vw where sub_id = old.sub_id;
         if FOUND then
             if view_row.election_cycle >= start_year then
                 delete from ofec_sched_a_queue_old where sub_id = view_row.sub_id;
@@ -2235,9 +2235,9 @@ CREATE FUNCTION ofec_sched_a_insert_update_queues() RETURNS trigger
     AS $$
 declare
     start_year int = TG_ARGV[0]::int;
-    view_row fec_fitem_sched_a_vw%ROWTYPE;
+    view_row public.fec_fitem_sched_a_vw%ROWTYPE;
 begin
-    select into view_row * from fec_fitem_sched_a_vw where sub_id = new.sub_id;
+    select into view_row * from public.fec_fitem_sched_a_vw where sub_id = new.sub_id;
     if FOUND then
         if view_row.election_cycle >= start_year then
             delete from ofec_sched_a_queue_new where sub_id = view_row.sub_id;
@@ -2732,9 +2732,9 @@ CREATE FUNCTION ofec_sched_b_delete_update_queues() RETURNS trigger
     AS $$
 declare
     start_year int = TG_ARGV[0]::int;
-    view_row fec_fitem_sched_b_vw%ROWTYPE;
+    view_row public.fec_fitem_sched_b_vw%ROWTYPE;
 begin
-    select into view_row * from fec_fitem_sched_b_vw where sub_id = old.sub_id;
+    select into view_row * from public.fec_fitem_sched_b_vw where sub_id = old.sub_id;
     if FOUND then
         if view_row.election_cycle >= start_year then
             delete from ofec_sched_b_queue_old where sub_id = view_row.sub_id;
@@ -2761,9 +2761,9 @@ CREATE FUNCTION ofec_sched_b_insert_update_queues() RETURNS trigger
     AS $$
 declare
     start_year int = TG_ARGV[0]::int;
-    view_row fec_fitem_sched_b_vw%ROWTYPE;
+    view_row public.fec_fitem_sched_b_vw%ROWTYPE;
 begin
-    select into view_row * from fec_fitem_sched_b_vw where sub_id = new.sub_id;
+    select into view_row * from public.fec_fitem_sched_b_vw where sub_id = new.sub_id;
     if FOUND then
         if view_row.election_cycle >= start_year then
             delete from ofec_sched_b_queue_new where sub_id = view_row.sub_id;
@@ -3169,7 +3169,7 @@ CREATE FUNCTION ofec_sched_e_notice_update_from_f24() RETURNS void
     AS $$
 begin
     delete from ofec_sched_e
-    where sub_id = any(select sub_id from ofec_nml_24_queue_old)
+    where sub_id = any(select sub_id from public.ofec_nml_24_queue_old)
     ;
     insert into ofec_sched_e (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_nm, payee_prefix, payee_suffix,pye_st1, pye_st2, pye_city, pye_st,
         pye_zip, entity_tp, entity_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_nm_first,
@@ -3247,7 +3247,7 @@ begin
         image_pdf_url(se.image_num) as pdf_url,
         True,
         to_tsvector(se.pye_nm)
-    from disclosure.nml_form_24 f24, ofec_nml_24_queue_new se
+    from disclosure.nml_form_24 f24, public.ofec_nml_24_queue_new se
     where se.link_id = f24.sub_id and f24.delete_ind is null and se.delete_ind is null and se.amndt_ind::text <> 'D'::text;
 end
 $$;
@@ -3399,18 +3399,18 @@ CREATE FUNCTION ofec_sched_e_update_notice_queues() RETURNS trigger
     AS $$
 begin
     if tg_op = 'INSERT' then
-        delete from ofec_nml_24_queue_new where sub_id = new.sub_id;
-        insert into ofec_nml_24_queue_new values (new.*);
+        delete from public.ofec_nml_24_queue_new where sub_id = new.sub_id;
+        insert into public.ofec_nml_24_queue_new values (new.*);
         return new;
     elsif tg_op = 'UPDATE' then
-        delete from ofec_nml_24_queue_new where sub_id = new.sub_id;
-        delete from ofec_nml_24_queue_old where sub_id = old.sub_id;
-        insert into ofec_nml_24_queue_new values (new.*);
-        insert into ofec_nml_24_queue_old values (old.*);
+        delete from public.ofec_nml_24_queue_new where sub_id = new.sub_id;
+        delete from public.ofec_nml_24_queue_old where sub_id = old.sub_id;
+        insert into public.ofec_nml_24_queue_new values (new.*);
+        insert into public.ofec_nml_24_queue_old values (old.*);
         return new;
     elsif tg_op = 'DELETE' then
-        delete from ofec_nml_24_queue_old where sub_id = old.sub_id;
-        insert into ofec_nml_24_queue_old values (old.*);
+        delete from public.ofec_nml_24_queue_old where sub_id = old.sub_id;
+        insert into public.ofec_nml_24_queue_old values (old.*);
         return old;
     end if;
 end
