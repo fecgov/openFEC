@@ -1,7 +1,9 @@
 SET search_path = auditsearch, pg_catalog;
+
 --
 -- 1)Name: cmte_audit_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
+
 CREATE OR REPLACE VIEW cmte_audit_vw AS
 SELECT dc.cmte_id,
     dc.cmte_nm,
@@ -23,13 +25,26 @@ SELECT dc.cmte_id,
         END AS cmte_desc
     FROM audit_case aa JOIN disclosure.cmte_valid_fec_yr dc 
     ON(aa.cmte_id = dc.cmte_id)
-WHERE dc.cmte_tp::text = ANY (ARRAY['H'::character varying, 'S'::character varying, 'P'::character varying, 'X'::character varying, 'Y'::character varying, 'Z'::character varying, 'N'::character varying, 'Q'::character varying, 'I'::character varying, 'O'::character varying]::text[])
+WHERE dc.cmte_tp::text = ANY (
+    ARRAY['H'::character varying, 
+    'S'::character varying, 
+    'P'::character varying, 
+    'X'::character varying, 
+    'Y'::character varying, 
+    'Z'::character varying, 
+    'N'::character varying, 
+    'Q'::character varying, 
+    'I'::character varying, 
+    'O'::character varying]::text[]
+)
 ORDER BY dc.cmte_nm, dc.fec_election_yr;
+
 ALTER TABLE cmte_audit_vw OWNER TO fec;
 
 --
 --2) Name: cand_audit_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
+
 CREATE OR REPLACE VIEW cand_audit_vw AS
 SELECT dc.cand_id,
     dc.cand_name,
@@ -49,8 +64,9 @@ ALTER TABLE cand_audit_vw OWNER TO fec;
 --
 --3) Name: finding_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
+
 CREATE OR REPLACE VIEW finding_vw AS
-SELECT 
+SELECT
     finding_pk::integer AS primary_category_id,
     btrim(finding::text) AS primary_category_name,
     tier::integer AS tier
@@ -64,8 +80,9 @@ ALTER TABLE finding_vw OWNER TO fec;
 --
 -- 4)Name: finding_rel_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
+
 CREATE OR REPLACE VIEW finding_rel_vw AS
-SELECT 
+SELECT
     fr.parent_finding_pk::integer AS primary_category_id,
     fr.child_finding_pk::integer AS sub_category_id,
     btrim(fs.finding) AS primary_category_name,
