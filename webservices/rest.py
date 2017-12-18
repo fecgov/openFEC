@@ -218,8 +218,6 @@ api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/
 api.add_resource(audit.PrimaryCategory, '/audit-primary-category/')
 api.add_resource(audit.Category, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
-# api.add_resource(audit.AuditCaseSearchByCategoryId, '/audit-case/search/<int:primary_category_id>/<int:sub_category_id>')
-# api.add_resource(audit.AuditCaseSearchByCategoryId, '/audit-case/search/')
 api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
 api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
 
@@ -344,7 +342,6 @@ apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
 apidoc.register(audit.PrimaryCategory, blueprint='v1')
 apidoc.register(audit.Category, blueprint='v1')
 apidoc.register(audit.AuditCaseView, blueprint='v1')
-# apidoc.register(audit.AuditCaseSearchByCategoryId, blueprint='v1')
 apidoc.register(audit.AuditCandidateNameSearch, blueprint='v1')
 apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
 

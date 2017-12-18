@@ -374,6 +374,3 @@ class AuditCaseFactory(BaseFactory):
     class Meta:
         model = models.AuditCase
     idx = factory.Sequence(lambda n: n)
-    # audit_case_id = factory.Sequence(lambda n: n)
-    # primary_category_id = -1
-    # sub_category_id = -2

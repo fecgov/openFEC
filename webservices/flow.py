@@ -8,6 +8,7 @@ def get_graph():
     graph = nx.DiGraph()
 
     MATERIALIZED_VIEWS = [
+        'audit_case',
         'cand_cmte_linkage',
         'candidate_aggregates',
         'candidate_detail',
