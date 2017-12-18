@@ -336,7 +336,8 @@ def refresh_materialized(concurrent=True):
         'totals_pac_party': ['ofec_totals_pacs_parties_mv', 'ofec_totals_pacs_mv', 'ofec_totals_parties_mv'],
         'large_aggregates': ['ofec_entity_chart_mv'],
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
-        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv']
+        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv'],
+        'audit_case': ['ofec_audit_case_mv', 'ofec_audit_case_category_rel_mv', 'ofec_audit_case_sub_category_rel_mv', 'ofec_committee_fulltext_audit_mv', 'ofec_candidate_fulltext_audit_mv']
     }
     graph = flow.get_graph()
     for node in nx.topological_sort(graph):
