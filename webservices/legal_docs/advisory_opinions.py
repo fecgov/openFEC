@@ -180,12 +180,27 @@ def get_documents(ao_id, bucket):
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
+            # should we instead save the pdf_key in document['pdf_key']??
             pdf_key = "legal/aos/%s.pdf" % row["document_id"]
             logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
             document["url"] = '/files/' + pdf_key
             documents.append(document)
+
+    # delete PDF's not being linked to (old ID's)
+    # will this be super slow? should we really do this each time we reload?
+    for obj in bucket.objects.filter(Prefix="legal/aos"):
+        # we don't save pdf_key in documents so you need a better way to access it
+        # strip it from obj['key']?
+
+        # key = 'legal/aos/%s.pdf' % row["document_id"]
+        # document['document_id'] = 232435
+        obj_id = int(re.findall('//d+', obj['key']))
+        print(obj_id)
+        if obj != documents['document_id']:
+            obj.delete()
+
     return documents
 
 
