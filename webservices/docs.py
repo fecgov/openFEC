@@ -63,17 +63,18 @@ interesting candidates and committees. Then, you can use their IDs to find repor
 item details with the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
-Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 120 requests per minute. Each call is limited to 100 results per page. You can email questions or comments to
-[18f-fec@gsa.gov](18f-fec@gsa.gov). You can also ask questions and discuss the data in the
-[FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). API changes will also
-be added to this group in advance of the change.
+Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000 
+calls an hour. Each call is limited to 100 results per page. You can email questions, comments or 
+a request to get a key for 120 calls per minute to[18f-fec@gsa.gov](18f-fec@gsa.gov). You can also 
+ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). 
+API changes will also be added to this group in advance of the change.
 
 The model definitions and schema are available at [/swagger](/swagger/). This is useful for
 making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
-[Learn more here](http://www.fec.gov/pages/brochures/saleuse.shtml).
+[Learn more here](https://transition.fec.gov/pages/brochures/saleuse.shtml).
 
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
 '''
