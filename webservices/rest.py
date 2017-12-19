@@ -164,7 +164,7 @@ def add_caching_headers(response):
     json_data = utils.get_json_data(response)
 
     app.logger.info("Succesfully created JSON dump for the requested URL")
-    #write the file to you local folder
+    #write the file to tmp folder
     f = open("/Users/pkasireddy/Documents/web_request_calls/request_content.json", "w")
     f.write(json_data)
     f.close()
