@@ -109,7 +109,7 @@ class ApiBaseTest(BaseTestCase):
         super(ApiBaseTest, cls).setUpClass()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
-                ['psql', '-f', 'data/migrations/V39__states_and_zips_data.sql', TEST_CONN],
+                ['psql', '-f', 'data/migrations/V0039__states_and_zips_data.sql', TEST_CONN],
                 stdout=null
             )
 
