@@ -47,6 +47,7 @@ AO_ENTITIES = """
 AO_DOCUMENTS = """
     SELECT
         document_id,
+        filename,
         ocrtext,
         fileimage,
         description,
@@ -175,13 +176,14 @@ def get_documents(ao_id, bucket):
         for row in rs:
             document = {
                 "document_id": row["document_id"],
+                "filename": row["filename"],
                 "category": row["category"],
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
             pdf_key = "legal/aos/%s.pdf" % row["document_id"]
-            logger.debug("S3: Uploading {}".format(pdf_key))
+            logger.info("S3: Uploading {} Orig filename: {}".format(pdf_key, document['filename']))
             bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
             document["url"] = '/files/' + pdf_key
@@ -201,7 +203,7 @@ def get_ao_names():
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
 
-    logger.debug("Getting citations...")
+    logger.info("Getting citations...")
 
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
@@ -254,6 +256,9 @@ def get_citations(ao_names):
         entry = {'citation_text': '%d U.S.C. §%d'
                  % (citation[0], citation[1]), 'citation_type': 'statute'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
+
+    logger.info("Citations loaded.")
+
     return citations
 
 
