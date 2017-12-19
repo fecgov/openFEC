@@ -237,5 +237,6 @@ def create_sample_db(ctx):
     )
     print("Sample data loaded")
 
+@task
 def run_migrations(ctx, jdbc_url):
     ctx.run('flyway migrate -q -url="{0}" -locations=filesystem:data/migrations'.format(jdbc_url))
