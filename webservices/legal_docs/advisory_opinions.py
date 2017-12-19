@@ -47,6 +47,7 @@ AO_ENTITIES = """
 AO_DOCUMENTS = """
     SELECT
         document_id,
+        filename,
         ocrtext,
         fileimage,
         description,
@@ -175,17 +176,29 @@ def get_documents(ao_id, bucket):
         for row in rs:
             document = {
                 "document_id": row["document_id"],
+                "filename": row["filename"],
                 "category": row["category"],
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
-            pdf_key = "legal/aos/%s.pdf" % row["document_id"]
-            logger.debug("S3: Uploading {}".format(pdf_key))
-            bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
+            document['pdf_key'] = "legal/aos/%s" % row["filename"]
+            logger.info("S3: Uploading {}".format(document['pdf_key']))
+            bucket.put_object(Key=document['pdf_key'], Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
-            document["url"] = '/files/' + pdf_key
+            document["url"] = '/files/' + document['pdf_key']
             documents.append(document)
+
+    # !NOTE! this isn't working yet. Problem with matching logic.
+    # I think we need a list of all the document pdf_key's and then "obj.key not in"
+    # delete old AO PDF's no longer linked to AOs
+    for obj in bucket.objects.filter(Prefix="legal/aos"):
+        for document in documents:
+            if obj.key != document['pdf_key']:
+                logger.info("S3: Deleting {} - no longer linked.".format(obj.key))
+                # obj.delete()
+                logger.info("Not really, yet")
+
     return documents
 
 
