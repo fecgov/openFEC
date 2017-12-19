@@ -102,12 +102,6 @@ To create the test database, run:
 createdb cfdm_unit_test
 ```
 
-Create the required roles in the test database by running:
-
-```
-psql <<db-connection-parameters>> -f data/create_roles.sql
-```
-
 #### Create a development database
 Before you can run this project locally, you'll need a development database.
 
