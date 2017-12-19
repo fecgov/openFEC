@@ -68,7 +68,7 @@ from webservices.env import env
 from webservices.tasks import utils
 
 app = Flask(__name__)
-# logger = logging.getLogger('rest.py')
+logger = logging.getLogger('rest.py')
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
@@ -158,22 +158,23 @@ def add_caching_headers(response):
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
-    app.logger.info("The requested URL is ::: ", request.url)
+    logger.info("The requested URL is ::: ", request.url)
 
     # check if the request content is a JSON. if not convert the results to JSON
     json_data = utils.get_json_data(response)
 
-    app.logger.info("Succesfully created JSON dump for the requested URL")
+    logger.info("Succesfully created JSON dump for the requested URL")
     #write the file to tmp folder
-    f = open("/Users/pkasireddy/Documents/web_request_calls/request_content.json", "w")
+    # f = open("/Users/pkasireddy/Documents/web_request_calls/request_content.json", "w")
+    f = open("request_content.json", "w")
     f.write(json_data)
     f.close()
 
     # get s3 bucket env variables
     s3_bucket = utils.get_bucket()
 
-    #upload the request_content.json file to s3 bucket
-    file_name = "/Users/pkasireddy/Documents/web_request_calls/request_content.json"
+    #get the file name which has the request in json format
+    file_name = "request_content.json"
 
     #split the url  into parts and get only the url  after /v1/
     parts = request.url.split('/v1/')
@@ -187,12 +188,13 @@ def add_caching_headers(response):
     """
     formatted_url = st_format.replace("&", "/")
 
-    app.logger.info("Formated URL before uploading to s3 ", formatted_url)
+    logger.info("Formated URL before uploading to s3 ", formatted_url)
     web_request_url = "cached-calls/{0}.json".format(formatted_url)
 
+    #upload the request_content.json file to s3 bucket
     s3_bucket.upload_file(file_name, web_request_url)
 
-    app.logger.info(" Succesfully uploaded the requested URL contents to s3 ", web_request_url)
+    logger.info(" Succesfully uploaded the requested URL contents to s3 ", web_request_url)
     return response
 
 api.add_resource(candidates.CandidateList, '/candidates/')
