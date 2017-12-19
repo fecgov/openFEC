@@ -47,6 +47,7 @@ AO_ENTITIES = """
 AO_DOCUMENTS = """
     SELECT
         document_id,
+        filename,
         ocrtext,
         fileimage,
         description,
@@ -175,30 +176,23 @@ def get_documents(ao_id, bucket):
         for row in rs:
             document = {
                 "document_id": row["document_id"],
+                "filename": row["filename"],
                 "category": row["category"],
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
-            # should we instead save the pdf_key in document['pdf_key']??
-            pdf_key = "legal/aos/%s.pdf" % row["document_id"]
-            logger.debug("S3: Uploading {}".format(pdf_key))
-            bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
+            document['pdf_key'] = "legal/aos/%s.pdf" % row["document_id"]
+            logger.info("S3: Uploading {}".format(document['pdf_key']))
+            bucket.put_object(Key=document['pdf_key'], Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
-            document["url"] = '/files/' + pdf_key
+            document["url"] = '/files/' + document['pdf_key']
             documents.append(document)
 
-    # delete PDF's not being linked to (old ID's)
-    # will this be super slow? should we really do this each time we reload?
+    # delete old AO PDF's no longer linked to AOs
     for obj in bucket.objects.filter(Prefix="legal/aos"):
-        # we don't save pdf_key in documents so you need a better way to access it
-        # strip it from obj['key']?
-
-        # key = 'legal/aos/%s.pdf' % row["document_id"]
-        # document['document_id'] = 232435
-        obj_id = int(re.findall('//d+', obj['key']))
-        print(obj_id)
-        if obj != documents['document_id']:
+        if obj['key'] != documents['pdf_key']:
+            logger.info("S3: Deleting {}".format(obj['key']))
             obj.delete()
 
     return documents
