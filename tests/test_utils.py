@@ -1,4 +1,5 @@
 import unittest
+import re
 
 from flask import request
 from webargs import flaskparser
@@ -12,6 +13,7 @@ from webservices import sorting
 from webservices.resources import candidate_aggregates
 from webservices.resources import elections
 from webservices.rest import db
+from webservices.tasks import utils
 
 from sqlalchemy.dialects import postgresql
 
@@ -130,14 +132,29 @@ class TestSort(ApiBaseTest):
         self.assertEqual(query.all()[0].total_disbursements, 0.0)
 
 
-
-
-
-
-
 class TestArgs(unittest.TestCase):
 
     def test_currency(self):
         with rest.app.test_request_context('?dollars=$24.50'):
             parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request)
             self.assertEqual(parsed, {'dollars': 24.50})
+
+    def test_format_url(self):
+        """
+        remove the api_key=5yyI90SU3Xb73TVlv4wrEhQxYcCwMWCywQiGdYbJ
+        from the url
+        """
+        url_before_format = "https://api.open.fec.gov/v1//schedules/schedule_e/by_candidate//?api_key=5yyI90SU3Xb73TVlv4wrEhQxYcCwMWCywQiGdYbJ&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
+        url_after_format = utils.format_url(url_before_format)
+        expected_st = "https://api.open.fec.gov/v1//schedules/schedule_e/by_candidate//&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
+
+        self.assertEqual(url_after_format, expected_st)
+
+    def test_replace_special_chars_from_url(self):
+        """
+        remove the special characters ? and & from the URL
+        """
+        url_with_special_char = "https://api.open.fec.gov/v1//schedules/schedule_e/by_candidate//&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
+        url_after_format = url_with_special_char.replace("&", "/")
+        expected_url = "https://api.open.fec.gov/v1//schedules/schedule_e/by_candidate///candidate_id=S0AL00156/cycle=2018/election_full=false/per_page=100"
+        self.assertEqual(url_after_format, expected_url)
