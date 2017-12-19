@@ -158,12 +158,12 @@ def add_caching_headers(response):
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
-    logger.info("The requested URL is ::: ", request.url)
+    logger.info('The requested URL is : %s ', request.url)
 
     # check if the request content is a JSON. if not convert the results to JSON
     json_data = utils.get_json_data(response)
 
-    logger.info("Succesfully created JSON dump for the requested URL")
+    logger.info('Succesfully created JSON dump for the requested URL : %s')
     #write the file to tmp folder
     # f = open("/Users/pkasireddy/Documents/web_request_calls/request_content.json", "w")
     f = open("request_content.json", "w")
@@ -188,13 +188,13 @@ def add_caching_headers(response):
     """
     formatted_url = st_format.replace("&", "/")
 
-    logger.info("Formated URL before uploading to s3 ", formatted_url)
+    logger.info('Formated URL before uploading the request contents to s3: %s', formatted_url)
     web_request_url = "cached-calls/{0}.json".format(formatted_url)
 
     #upload the request_content.json file to s3 bucket
     s3_bucket.upload_file(file_name, web_request_url)
 
-    logger.info(" Succesfully uploaded the requested URL contents to s3 ", web_request_url)
+    logger.info('Succesfully uploaded the requested URL contents to s3 :%s', web_request_url)
     return response
 
 api.add_resource(candidates.CandidateList, '/candidates/')
