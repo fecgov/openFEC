@@ -87,14 +87,15 @@ class ElectionClassDate(db.Model):
 
 
 class CalendarDate(db.Model):
-    __tablename__ = 'ofec_omnibus_dates_mv'
+    __tablename__ = 'ofec_dates_vw'
 
-    event_id = db.Column('idx', db.Integer, primary_key=True, doc=docs.EVENT_ID)
+    event_id = db.Column('cal_event_id', db.Integer, primary_key=True, doc=docs.EVENT_ID)
     summary = db.Column(db.String, doc=docs.SUMMARY)
     description = db.Column(db.Text, doc=docs.CAL_DESCRIPTION)
     category = db.Column(db.String, index=True, doc=docs.CATEGORY)
+    calendar_category_id = db.Column(db.Integer, doc=docs.CATEGORY)
     state = db.Column('states', ARRAY(db.String), index=True, doc=docs.CAL_STATE)
-    location = db.Column(db.String, index=True, doc='Can be state address or room. No entries for reporting and election dates')
+    location = db.Column(db.String, index=True, doc='Can be state address or room.')
     start_date = db.Column(db.DateTime, index=True, doc='Date the event starts')
     end_date = db.Column(db.DateTime, index=True, doc='Date the event ends')
     all_day = db.Column(db.Boolean)
