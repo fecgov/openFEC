@@ -17,10 +17,6 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'task': 'webservices.tasks.refresh.refresh',
             'schedule': crontab(minute=0, hour=9),
         },
-        'calendar': {
-            'task': 'webservices.tasks.refresh.refresh_calendar',
-            'schedule': timedelta(minutes=15),
-        },
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
             'schedule': crontab(minute=[5, 20, 35, 50]),

@@ -47,6 +47,7 @@ AO_ENTITIES = """
 AO_DOCUMENTS = """
     SELECT
         document_id,
+        filename,
         ocrtext,
         fileimage,
         description,
@@ -175,13 +176,14 @@ def get_documents(ao_id, bucket):
         for row in rs:
             document = {
                 "document_id": row["document_id"],
+                "filename": row["filename"],
                 "category": row["category"],
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
             pdf_key = "legal/aos/%s.pdf" % row["document_id"]
-            logger.debug("S3: Uploading {}".format(pdf_key))
+            logger.info("S3: Uploading {} Orig filename: {}".format(pdf_key, document['filename']))
             bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
             document["url"] = '/files/' + pdf_key
@@ -201,7 +203,7 @@ def get_ao_names():
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
 
-    logger.debug("Getting citations...")
+    logger.info("Getting citations...")
 
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
@@ -237,7 +239,7 @@ def get_citations(ao_names):
             {"no": c, "name": ao_names[c]}
             for c in raw_citations[ao]["aos_cited_by"]], key=lambda d: d["no"])
         citations[ao]["statutes"] = sorted([
-            {"text": c[0], "title": c[1], "section": c[2], "former_title": c[3], "former_section": c[4]}
+            {"title": c[0], "section": c[1]}
             for c in raw_citations[ao]["statutes"]], key=lambda d: (d["title"], d["section"]))
         citations[ao]["regulations"] = sorted([
             {"title": c[0], "part": c[1], "section": c[2]}
@@ -246,19 +248,17 @@ def get_citations(ao_names):
     es = get_elasticsearch_connection()
 
     for citation in all_regulatory_citations:
-        entry = {
-            'citation_text': '%d CFR §%d.%d' % (citation[0], citation[1], citation[2]),
-            'citation_type': 'regulation'}
+        entry = {'citation_text': '%d CFR §%d.%d'
+                 % (citation[0], citation[1], citation[2]),'citation_type': 'regulation'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
-        if citation[3] != citation[1]:
-            entry = {'citation_text': '%s U.S.C. §%s' % (citation[1], citation[2]),
-                'formerly': '%d U.S.C. §%d' % (citation[3], citation[4]),
-                'citation_type': 'statute'}
-        else:
-            entry = {'citation_text': '%d U.S.C. §%d' % (citation[1], citation[2]), 'citation_type': 'statute'}
+        entry = {'citation_text': '%d U.S.C. §%d'
+                 % (citation[0], citation[1]), 'citation_type': 'statute'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
+
+    logger.info("Citations loaded.")
+
     return citations
 
 
@@ -280,11 +280,8 @@ def parse_statutory_citations(text):
             new_title, new_section = reclassify_archived_mur_statutory_citation(
                 citation.group('title'), citation.group('section'))
             matches.add((
-                citation.group(0),
                 int(new_title),
-                int(new_section),
-                int(citation.group('title')),
-                int(citation.group('section'))
+                int(new_section)
             ))
     return matches
 
