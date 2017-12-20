@@ -160,8 +160,7 @@ def add_caching_headers(response):
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
-    falses = (False, 'False', 'false', 'f')
-    if cache_all_requests not in falses:
+    if cache_all_requests:
         logger.info('Cache the request contents for URL: %s ', request.url)
 
         # check if the request content is a JSON. if not convert the results to JSON
