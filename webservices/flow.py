@@ -30,7 +30,6 @@ def get_graph():
         'filing_amendments_presidential',
         'filings',
         'large_aggregates',
-        'omnibus_dates',
         'rad_analyst',
         'reports_house_senate',
         'reports_ie',
