@@ -40,10 +40,16 @@ def get_json_data(response):
     json_data = json.dumps(response.data.decode('utf-8'))
     return json_data
 
-def format_url(st):
+def format_url(parts):
     """
-    remove the api_key from the URL by using a regex
+    remove the api_key and its value from the URL by using a regex
+    (-i:[a-zA-Z]) [a-zA-Z]
+    r'(?<![a-zA-Z0-9])[uU](?![a-zA-Z0-9])'
     """
-    st_format = re.sub(".api_key=.*?&", '', st)
+    url_path = parts[1]
+    url_without_api_key = re.sub(".api_key=.*?&", '', url_path)
+    #remove special characters from the URL
+    replace_special_char1 = url_without_api_key.replace("&", "/")
+    replace_special_char2 = replace_special_char1.replace("?", "")
 
-    return st_format
+    return replace_special_char2
