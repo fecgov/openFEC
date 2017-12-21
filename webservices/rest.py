@@ -173,9 +173,10 @@ def add_caching_headers(response):
         url_without_api_key = utils.format_url(url_path)
 
         #remove special characters from the URL
-        formatted_url = url_without_api_key.replace("&", "/")
+        replace_special_char1 = url_without_api_key.replace("&", "/")
+        replace_special_char2 = replace_special_char1.replace("?", "")
 
-        cached_url = "cached-calls/{0}.json".format(formatted_url)
+        cached_url = "cached-calls/{0}.json".format(replace_special_char2)
 
         #file name which has the request in json format
         file_name = "request_content.txt"
