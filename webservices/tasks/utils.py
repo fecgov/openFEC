@@ -42,11 +42,11 @@ def get_json_data(response):
 
 def format_url(st):
     """
-    find the index of the string from 0 till the first special character ?
+    find the index of the string from beginning till the first special character ?
     and then find the index of & till end of string.
     finally concatinate both string, to get the URL without the api_key
 
     """
-    st_format = st[0:st.find('?')] + st[st.find('&'):len(st)]
+    st_format = st[0:st.find('?')] + st[(st.find('&') + 1):len(st)]
 
     return st_format
