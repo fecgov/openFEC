@@ -161,43 +161,29 @@ def add_caching_headers(response):
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
     if cache_all_requests:
-        logger.info('Cache the request contents for URL: %s ', request.url)
-
-        # check if the request content is a JSON. if not convert the results to JSON
-        json_data = utils.get_json_data(response)
-
-        logger.info('Succesfully created JSON dump for the requested URL : %s')
-        #write the file to tmp folder
-        # f = open("/Users/pkasireddy/Documents/web_request_calls/request_content.json", "w")
-        f = open("request_content.json", "w")
-        f.write(json_data)
-        f.close()
 
         # get s3 bucket env variables
         s3_bucket = utils.get_bucket()
 
-        #get the file name which has the request in json format
-        file_name = "request_content.json"
-
-        #split the url  into parts and get only the url  after /v1/
+        #split the url  into parts and get only url  after /v1/
         parts = request.url.split('/v1/')
         url_path = parts[1]
 
         #remove the api_key for the URL
-        st_format = utils.format_url(url_path)
-        """
-        since ? and & are special characters, they should be replaced in the URL
-        before uploading to s3 bucket.
-        """
-        formatted_url = st_format.replace("&", "/")
+        url_without_api_key = utils.format_url(url_path)
 
-        logger.info('Formated URL before uploading the request contents to s3: %s', formatted_url)
-        web_request_url = "cached-calls/{0}.json".format(formatted_url)
+        #remove special characters from the URL
+        formatted_url = url_without_api_key.replace("&", "/")
+
+        cached_url = "cached-calls/{0}.json".format(formatted_url)
+
+        #file name which has the request in json format
+        file_name = "request_content.txt"
 
         #upload the request_content.json file to s3 bucket
-        s3_bucket.upload_file(file_name, web_request_url)
+        s3_bucket.upload_file(file_name, cached_url)
 
-        logger.info('Succesfully uploaded the requested URL contents to s3 :%s', web_request_url)
+        logger.info('The following request has been cached and uploaded successfully to s3 :%s ', cached_url)
     return response
 
 
