@@ -44,11 +44,13 @@ MUR_PARTICIPANTS = """
 """
 
 MUR_DOCUMENTS = """
-    SELECT document_id, category, description, ocrtext,
+    SELECT document_id, mur.case_no, filename, category, description, ocrtext,
         fileimage, length(fileimage) AS length,
         doc_order_id, document_date
     FROM fecmur.document
-    WHERE case_id = %s
+    INNER JOIN fecmur.cases_with_parsed_case_serial_numbers mur
+        ON mur.case_id = document.case_id
+    WHERE document.case_id = %s
     ORDER BY doc_order_id, document_date desc, document_id DESC;
 """
 # TODO: Check if document order matters
@@ -109,6 +111,7 @@ def load_current_murs(from_mur_no=None):
         mur_count += 1
     logger.info("%d current MURs loaded", mur_count)
 
+
 def get_murs(from_mur_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
@@ -144,6 +147,7 @@ def get_murs(from_mur_no):
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
             yield mur
 
+
 def get_election_cycles(case_id):
     election_cycles = []
     with db.engine.connect() as conn:
@@ -152,11 +156,13 @@ def get_election_cycles(case_id):
             election_cycles.append(row['election_cycle'])
     return election_cycles
 
+
 def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
         open_date, close_date = rs.fetchone()
     return open_date, close_date
+
 
 def get_dispositions(case_id):
     with db.engine.connect() as conn:
@@ -170,6 +176,7 @@ def get_dispositions(case_id):
 
         return disposition_data
 
+
 def get_commission_votes(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(COMMISSION_VOTES, case_id)
@@ -177,6 +184,7 @@ def get_commission_votes(case_id):
         for row in rs:
             commission_votes.append({'vote_date': row['vote_date'], 'action': row['action']})
         return commission_votes
+
 
 def get_participants(case_id):
     participants = {}
@@ -189,6 +197,7 @@ def get_participants(case_id):
                 'citations': defaultdict(list)
             }
     return participants
+
 
 def get_sorted_respondents(participants):
     """
@@ -212,6 +221,7 @@ def get_subjects(case_id):
             subjects.append(subject_str)
     return subjects
 
+
 def assign_citations(participants, case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_VIOLATIONS, case_id)
@@ -224,6 +234,7 @@ def assign_citations(participants, case_id):
                 parse_statutory_citations(row['statutory_citation'], case_id, entity_id))
             participants[entity_id]['citations'][row['stage']].extend(
                 parse_regulatory_citations(row['regulatory_citation'], case_id, entity_id))
+
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id):
     citations = []
@@ -252,6 +263,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
                     statutory_citation, entity_id, case_id)
     return citations
 
+
 def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
@@ -271,6 +283,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
                     regulatory_citation, entity_id, case_id)
     return citations
 
+
 def get_documents(case_id, bucket, bucket_name):
     documents = []
     with db.engine.connect() as conn:
@@ -284,13 +297,14 @@ def get_documents(case_id, bucket, bucket_name):
                 'text': row['ocrtext'],
                 'document_date': row['document_date'],
             }
-            pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
+            pdf_key = 'legal/murs/current/{0}/{1}.pdf'.format(row['case_no'], row['filename'])
             logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
             document['url'] = '/files/' + pdf_key
             documents.append(document)
     return documents
+
 
 def remove_reclassification_notes(statutory_citation):
     """ Statutory citations include notes on reclassification of the form
