@@ -7,6 +7,7 @@ env:
   NEW_RELIC_CONFIG_FILE: /home/vcap/app/newrelic.ini
   NEW_RELIC_LOG: stdout
   WEB_CONCURRENCY: 4
+  CACHE_ALL_REQUESTS: True
 services:
   - fec-api-search
   - fec-redis

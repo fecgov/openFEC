@@ -8,4 +8,3 @@ env:
   PRODUCTION: True
   NEW_RELIC_ENV: production
   FEC_API_WHITELIST_IPS: true
-  FEC_CACHE_AGE: 3600
