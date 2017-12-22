@@ -1,4 +1,3 @@
-import re
 import subprocess
 from unittest.mock import patch
 from datetime import datetime
