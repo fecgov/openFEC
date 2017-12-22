@@ -208,7 +208,7 @@ def get_ao_names():
 def get_citations(ao_names):
     ao_component_to_name_map = {tuple(map(int, a.split('-'))): a for a in ao_names}
 
-    logger.debug("Getting citations...")
+    logger.info("Getting citations...")
 
     rs = db.engine.execute("""SELECT ao_no, ocrtext FROM aouser.document
                                 INNER JOIN aouser.ao USING (ao_id)
@@ -261,6 +261,9 @@ def get_citations(ao_names):
         entry = {'citation_text': '%d U.S.C. §%d'
                  % (citation[0], citation[1]), 'citation_type': 'statute'}
         es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
+
+    logger.info("Citations loaded.")
+
     return citations
 
 
