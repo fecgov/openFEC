@@ -5,7 +5,6 @@ import re
 import json
 from webservices.env import env
 from boto.s3.key import Key
-from flask import request
 
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
 logging.getLogger('smart_open').setLevel(logging.CRITICAL)
@@ -40,14 +39,14 @@ def get_json_data(response):
     json_data = json.dumps(response.data.decode('utf-8'))
     return json_data
 
-def format_url(parts):
+def format_url(url):
     """
     remove the api_key and its value from the URL by using a regex
-    (-i:[a-zA-Z]) [a-zA-Z]
-    r'(?<![a-zA-Z0-9])[uU](?![a-zA-Z0-9])'
     """
+    #split the url  into parts and get only url  after /v1/
+    parts = url.split('/v1/')
     url_path = parts[1]
-    url_without_api_key = re.sub(".api_key=.*?&", '', url_path)
+    url_without_api_key = re.sub(".api_key=.*?&", '', url_path.lower())
     #remove special characters from the URL
     replace_special_char1 = url_without_api_key.replace("&", "/")
     replace_special_char2 = replace_special_char1.replace("?", "")

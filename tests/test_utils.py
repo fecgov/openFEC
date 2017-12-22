@@ -1,5 +1,4 @@
 import unittest
-import re
 
 from flask import request
 from webargs import flaskparser
@@ -145,9 +144,8 @@ class TestArgs(unittest.TestCase):
         from the url with regex 
         """
         url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?api_key=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
-        url_part = url_before_format.split('/v1/')
-        url_after_format = utils.format_url(url_part)
-        expected_url = "schedules/schedule_e/by_candidate/candidate_id=S0AL00156/cycle=2018/election_full=false/per_page=100"
+        url_after_format = utils.format_url(url_before_format)
+        expected_url = "schedules/schedule_e/by_candidate/candidate_id=s0al00156/cycle=2018/election_full=false/per_page=100"
 
         self.assertEqual(url_after_format, expected_url)
 
@@ -156,17 +154,15 @@ class TestArgs(unittest.TestCase):
         remove the special characters ? and & from the URL
         """
         url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?api_key=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
-        url_part = url_before_format.split('/v1/')
-        url_after_format = utils.format_url(url_part)
-        expected_url = "schedules/schedule_e/by_candidate/candidate_id=S0AL00156/cycle=2018/election_full=false/per_page=100"
+        url_after_format = utils.format_url(url_before_format)
+        expected_url = "schedules/schedule_e/by_candidate/candidate_id=s0al00156/cycle=2018/election_full=false/per_page=100"
         self.assertEqual(url_after_format, expected_url)
 
     def test_ignore_case(self):
         """
         format the URL when the API_KEY is all uppecase
         """
-        url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?API_KEY=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
-        url_part = url_before_format.split('/v1/')
-        url_after_format = utils.format_url(url_part)
-        expected_url = "schedules/schedule_e/by_candidate/candidate_id=S0AL00156/cycle=2018/election_full=false/per_page=100"
-        self.assertNotEqual(url_after_format, expected_url)
+        url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?API_KEY=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100" 
+        url_after_format = utils.format_url(url_before_format)
+        expected_url = "schedules/schedule_e/by_candidate/candidate_id=s0al00156/cycle=2018/election_full=false/per_page=100"
+        self.assertEqual(url_after_format, expected_url)
