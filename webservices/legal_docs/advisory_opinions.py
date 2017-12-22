@@ -185,12 +185,12 @@ def get_documents(ao_id, bucket):
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
-            # TODO: Test this in dev - do spaces automatically get swapped with %?
-            pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'], row["filename"])
+            pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'],
+                    str.replace(row["filename"], ' ', '-'))
+            document["url"] = '/files/' + pdf_key
             logger.info("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                     ContentType="application/pdf", ACL="public-read")
-            document["url"] = '/files/' + pdf_key
             documents.append(document)
 
     return documents

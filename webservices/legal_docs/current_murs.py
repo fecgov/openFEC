@@ -297,11 +297,12 @@ def get_documents(case_id, bucket, bucket_name):
                 'text': row['ocrtext'],
                 'document_date': row['document_date'],
             }
-            pdf_key = 'legal/murs/current/{0}/{1}.pdf'.format(row['case_no'], row['filename'])
+            pdf_key = 'legal/murs/current/{0}/{1}.pdf'.format(row['case_no'],
+                    str.replace(row['filename'], ' ', '-'))
+            document['url'] = '/files/' + pdf_key
             logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
-            document['url'] = '/files/' + pdf_key
             documents.append(document)
     return documents
 
