@@ -70,6 +70,8 @@ from webservices.tasks import utils
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
 
+from smart_open import smart_open
+
 app = Flask(__name__)
 logger = logging.getLogger('rest.py')
 
@@ -165,19 +167,21 @@ def add_caching_headers(response):
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
     if (cache_all_requests and status_code == 200):
-
         try:
+            # convert the results to JSON
+            json_data = utils.get_json_data(response)
+            # format the URL by removing the api_key and special characters
+            formatted_url = utils.format_url(request.url)
             # get s3 bucket env variables
             s3_bucket = utils.get_bucket()
+            cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
+            s3_key = utils.get_s3_key(cached_url)
 
-            #remove the api_key for the URL
-            formatted_url = utils.format_url(request.url)
-            cached_url = "cached-calls/{0}.json".format(formatted_url)
+            # upload the request_content.json file to s3 bucket
+            with smart_open(s3_key, 'wb') as cached_file:
+                cached_file.write(json_data)
 
-            #upload the request_content.json file to s3 bucket
-            s3_bucket.upload_file("request_content.txt", cached_url)
-
-            logger.info('The following request has been cached and uploaded successfully to s3 :%s ', cached_url)
+            logger.info('The following request has been cached and uploaded successfully :%s ', cached_url)
         except:
             logger.error('Cache Upload failed')
     return response
