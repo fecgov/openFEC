@@ -10,14 +10,11 @@ SELECT dc.cmte_id,
     dc.fec_election_yr,
     dc.cmte_dsgn,
     dc.cmte_tp,
-    (
-        SELECT DISTINCT FILED_CMTE_TP_DESC::text
-        FROM STAGING.REF_FILED_CMTE_TP
-        WHERE FILED_CMTE_TP_CD = dc.cmte_tp
-    ) AS cmte_desc
-FROM auditsearch.audit_case aa, disclosure.cmte_valid_fec_yr dc
+    b.FILED_CMTE_TP_DESC::text AS cmte_desc
+FROM audit_case aa, disclosure.cmte_valid_fec_yr dc, staging.ref_filed_cmte_tp b
 WHERE aa.cmte_id = dc.cmte_id
-    AND dc.cmte_tp IN ('H', 'S', 'P', 'X', 'Y', 'Z', 'N', 'Q', 'I', 'O')
+  AND dc.cmte_tp IN ('H','S', 'P', 'X', 'Y', 'Z', 'N', 'Q', 'I', 'O')
+  and dc.cmte_tp = b.filed_cmte_tp_cd
 ORDER BY dc.cmte_nm, dc.fec_election_yr;
 
 SELECT dc.cmte_id,
