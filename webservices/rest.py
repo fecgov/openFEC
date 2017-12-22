@@ -17,6 +17,8 @@ initialize_newrelic()
 import os
 import http
 import logging
+import json
+import boto
 
 from flask import abort
 from flask import request
@@ -63,10 +65,13 @@ from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.resources import audit
 from webservices.env import env
+from webservices.tasks import utils
 
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.error_code import ErrorCode
 
+app = Flask(__name__)
+logger = logging.getLogger('rest.py')
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
@@ -75,8 +80,6 @@ def sqla_conn_string():
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     return sqla_conn_string
 
-
-app = Flask(__name__)
 # app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
@@ -155,14 +158,35 @@ def limit_remote_addr():
 @app.after_request
 def add_caching_headers(response):
     max_age = env.get_credential('FEC_CACHE_AGE')
+    cache_all_requests = env.get_credential('CACHE_ALL_REQUESTS', False)
+    status_code = response.status_code
+
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
+
+    if (cache_all_requests and status_code == 200):
+
+        try:
+            # get s3 bucket env variables
+            s3_bucket = utils.get_bucket()
+
+            #remove the api_key for the URL
+            formatted_url = utils.format_url(request.url)
+            cached_url = "cached-calls/{0}.json".format(formatted_url)
+
+            #upload the request_content.json file to s3 bucket
+            s3_bucket.upload_file("request_content.txt", cached_url)
+
+            logger.info('The following request has been cached and uploaded successfully to s3 :%s ', cached_url)
+        except:
+            logger.error('Cache Upload failed')
     return response
 
 
 @app.errorhandler(Exception)
 def handle_exception(exception):
     # error_codes = [500, 502, 503, 504]
+    print("In handle_exception*****************", request.url)
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
     print("***********************", wrapped)
     if wrapped.status in [500, 502, 503, 504]:
