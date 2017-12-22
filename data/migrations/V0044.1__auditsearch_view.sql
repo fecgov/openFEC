@@ -22,6 +22,10 @@ ORDER BY dc.cmte_nm, dc.fec_election_yr;
 
 ALTER TABLE cmte_audit_vw OWNER TO fec;
 
+GRANT ALL ON TABLE cmte_audit_vw TO fec;
+GRANT SELECT ON TABLE cmte_audit_vw TO fec_read;
+GRANT SELECT ON TABLE cmte_audit_vw TO openfec_read;
+
 --
 --2) Name: cand_audit_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
@@ -42,6 +46,10 @@ ORDER BY dc.cand_name, dc.fec_election_yr;
 
 ALTER TABLE cand_audit_vw OWNER TO fec;
 
+GRANT ALL ON TABLE cand_audit_vw TO fec;
+GRANT SELECT ON TABLE cand_audit_vw TO fec_read;
+GRANT SELECT ON TABLE cand_audit_vw TO openfec_read;
+
 --
 --3) Name: finding_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
@@ -56,6 +64,10 @@ WHERE tier::integer=1
 ORDER BY (btrim(finding::text));
 
 ALTER TABLE finding_vw OWNER TO fec;
+
+GRANT ALL ON TABLE finding_vw TO fec;
+GRANT SELECT ON TABLE finding_vw TO fec_read;
+GRANT SELECT ON TABLE finding_vw TO openfec_read;
 
 
 --
@@ -74,4 +86,8 @@ LEFT JOIN finding fs ON fr.parent_finding_pk = fs.finding_pk
 ORDER BY (fr.parent_finding_pk::integer), sub_category_name;
 
 ALTER TABLE finding_rel_vw OWNER TO fec;
+
+GRANT ALL ON TABLE finding_rel_vw TO fec;
+GRANT SELECT ON TABLE finding_rel_vw TO fec_read;
+GRANT SELECT ON TABLE finding_rel_vw TO openfec_read;
 
