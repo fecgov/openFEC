@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from flask_script import Server
 from flask_script import Manager
 
-from webservices import flow
+from webservices import flow, partition
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
@@ -205,26 +205,6 @@ def dump_districts(dest=None):
     subprocess.run(cmd, shell=True)
 
 @manager.command
-def load_districts(source=None):
-    """ Loads that districts that you made locally so that you can then add them as a
-    table to the databases
-    """
-
-    logger.info('Loading districts...')
-
-    if source is None:
-        source = './data/districts.dump'
-    else:
-        source = shlex.quote(source)
-
-    dest = db.engine.url
-    cmd = (
-        'pg_restore --dbname "{dest}" --no-acl --no-owner --clean {source}'
-    ).format(**locals())
-    subprocess.run(cmd, shell=True)
-    logger.info('Finished loading districts.')
-
-@manager.command
 def build_district_counts(outname='districts.json'):
     """ Compiles the districts for a state
     """
@@ -232,65 +212,62 @@ def build_district_counts(outname='districts.json'):
     utils.write_district_counts(outname)
 
 @manager.command
-def update_schemas(processes=1):
-    """This updates the smaller tables and views. It is run on deploy.
+def update_aggregates():
+    """These are run nightly to recalculate the totals
     """
-    logger.info("Starting DB refresh...")
-    processes = int(processes)
-    graph = flow.get_graph()
-    for task in nx.topological_sort(graph):
-        path = os.path.join('data', 'sql_updates', '{}.sql'.format(task))
-        execute_sql_file(path)
-    execute_sql_file('data/rename_temporary_views.sql')
-    execute_sql_file('data/converted_mvs/sched_a_by_size_merged.sql')
-    execute_sql_file('data/converted_mvs/sched_a_by_state_recipient_totals.sql')
-    logger.info("Finished DB refresh.")
+    logger.info('Updating incremental aggregates...')
+
+    with db.engine.begin() as connection:
+        connection.execute(
+            sa.text('select update_aggregates()').execution_options(
+                autocommit=True
+            )
+        )
+        logger.info('Finished updating Schedule E and support aggregates.')
 
 @manager.command
-def update_functions(processes=1):
-    """This command updates the helper functions. It is run on deploy.
-    """
-    execute_sql_folder('data/functions/', processes=processes)
+def refresh_itemized():
+    """These are run nightly to refresh the itemized schedule A and B data."""
+
+    refresh_itemized_a()
+    refresh_itemized_b()
+    rebuild_itemized_e()
+
+    logger.info('Finished updating incremental aggregates.')
 
 @manager.command
-def update_itemized(schedule):
-    """These are the scripts that create the main schedule tables.
-    Run this when you make a change to code in:
-        data/sql_setup/
-    """
-    logger.info('Updating Schedule {0} tables...'.format(schedule))
-    execute_sql_file('data/sql_setup/prepare_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished Schedule {0} update.'.format(schedule))
+def refresh_itemized_a():
+    """Used to refresh the itemized Schedule A data."""
+
+    logger.info('Updating Schedule A...')
+    message = partition.SchedAGroup.process_queues()
+
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
+
+    logger.info('Finished updating Schedule A.')
 
 @manager.command
-def partition_itemized(schedule):
-    """This command runs the partitioning against the specified itemized
-    schedule table.
-    """
-    logger.info('Partitioning Schedule %s...', schedule)
-    execute_sql_file('data/sql_partition/partition_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished partitioning Schedule %s.', schedule)
+def refresh_itemized_b():
+    """Used to refresh the itemized Schedule B data."""
+    logger.info('Updating Schedule B...')
+    message = partition.SchedBGroup.process_queues()
+
+    if message[0] == 0:
+        logger.info(message[1])
+    else:
+        logger.error(message[1])
+
+    logger.info('Finished updating Schedule B.')
 
 @manager.command
-def index_itemized(schedule):
-    """This command (re-)creates the indexes for the itemized schedule table
-    partition and removes any old ones.
-    Run this when you make changes to the index definitions on the itemized
-    schedule A and B data but do not need to do a full repartition.
-    """
-    logger.info('(Re-)indexing Schedule %s...', schedule)
-    execute_sql_file('data/sql_partition/index_schedule_{0}.sql'.format(schedule))
-    logger.info('Finished (re-)indexing Schedule %s.', schedule)
-
-@manager.command
-def rebuild_aggregates(processes=1):
-    """These are the functions used to update the aggregates and schedules.
-    Run this when you make a change to code in:
-        data/sql_incremental_aggregates
-    """
-    logger.info('Rebuilding incremental aggregates...')
-    execute_sql_folder('data/sql_incremental_aggregates/', processes=processes)
-    logger.info('Finished rebuilding incremental aggregates.')
+def rebuild_itemized_e():
+    """Used to rebuild the itemized Schedule E data."""
+    logger.info('Rebuilding Schedule E...')
+    execute_sql_file('data/refresh/rebuild_schedule_e.sql')
+    logger.info('Finished rebuilding Schedule E.')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
@@ -322,29 +299,79 @@ def add_itemized_partition_cycle(cycle=None, amount=1):
         logger.exception("Failed to add partition cycles")
 
 @manager.command
-def update_all(processes=1):
-    """Update all derived data. Warning: Extremely slow on production data.
-    """
-    processes = int(processes)
-    update_functions(processes=processes)
-    load_districts()
-    load_pacronyms()
-    load_nicknames()
-    load_election_dates()
-    update_itemized('a')
-    update_itemized('b')
-    update_itemized('e')
-    partition_itemized('a')
-    partition_itemized('b')
-    rebuild_aggregates(processes=processes)
-    update_schemas(processes=processes)
-
-@manager.command
-def refresh_materialized():
-    """Refresh materialized views nightly
+def refresh_materialized(concurrent=True):
+    """Refresh materialized views in dependency order
+       We usually want to refresh them concurrently so that we don't block other
+       connections that use the DB. In the case of tests, we cannot refresh concurrently as the
+       tables are not initially populated.
     """
     logger.info('Refreshing materialized views...')
-    execute_sql_file('data/refresh_materialized_views.sql')
+
+    materialized_view_names = {
+        'filing_amendments_house_senate': ['ofec_house_senate_paper_amendments_mv'],
+        'sched_f': ['ofec_sched_f_mv'],
+        'reports_ie': ['ofec_reports_ie_only_mv'],  # Anomale
+        'electioneering_by_candidate': ['ofec_electioneering_aggregate_candidate_mv'],
+        'candidate_history': ['ofec_candidate_history_mv'],
+        'candidate_detail': ['ofec_candidate_detail_mv'],
+        'candidate_election': ['ofec_candidate_election_mv'],
+        'candidate_history_latest': ['ofec_candidate_history_latest_mv'],
+        'election_outcome': ['ofec_election_result_mv'],
+        'sched_e_by_candidate': ['ofec_sched_e_aggregate_candidate_mv'],
+        'filing_amendments_presidential': ['ofec_presidential_paper_amendments_mv'],
+        'filing_amendments_pac_party': ['ofec_pac_party_paper_amendments_mv'],
+        'cand_cmte_linkage': ['ofec_cand_cmte_linkage_mv'],
+        'communication_cost_by_candidate': ['ofec_communication_cost_aggregate_candidate_mv'],
+        'electioneering': ['ofec_electioneering_mv'],
+        'filing_amendments_all': ['ofec_amendments_mv'],
+        'reports_house_senate': ['ofec_reports_house_senate_mv'],
+        'reports_pac_party': ['ofec_reports_pacs_parties_mv'],
+        'reports_presidential': ['ofec_reports_presidential_mv'],
+        'committee_history': ['ofec_committee_history_mv'],
+        'communication_cost': ['ofec_communication_cost_mv'],
+        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv'],
+        'totals_combined': ['ofec_totals_combined_mv'],
+        'totals_ie': ['ofec_totals_ie_only_mv'],
+        'totals_house_senate': ['ofec_totals_house_senate_mv'],
+        'totals_presidential': ['ofec_totals_presidential_mv'],
+        'candidate_aggregates': ['ofec_candidate_totals_mv'],
+        'candidate_flags': ['ofec_candidate_flag'],
+        'sched_c': ['ofec_sched_c_mv'],
+        'sched_a_by_state_recipient_totals': ['ofec_sched_a_aggregate_state_recipient_totals_mv'],
+        'rad_analyst': ['ofec_rad_mv'],
+        'committee_detail': ['ofec_committee_detail_mv'],
+        'committee_fulltext': ['ofec_committee_fulltext_mv'],
+        'sched_a_by_size_merged': ['ofec_sched_a_aggregate_size_merged_mv'],
+        'totals_pac_party': ['ofec_totals_pacs_parties_mv', 'ofec_totals_pacs_mv', 'ofec_totals_parties_mv'],
+        'large_aggregates': ['ofec_entity_chart_mv'],
+        'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
+        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv'],
+        'audit_case': ['ofec_audit_case_mv', 'ofec_audit_case_category_rel_mv', 'ofec_audit_case_sub_category_rel_mv', 'ofec_committee_fulltext_audit_mv', 'ofec_candidate_fulltext_audit_mv']
+    }
+
+    graph = flow.get_graph()
+
+    with db.engine.begin() as connection:
+        for node in nx.topological_sort(graph):
+            materialized_views = materialized_view_names.get(node, None)
+
+            if materialized_views:
+                for mv in materialized_views:
+                    logger.info('Refreshing %s', mv)
+
+                    if concurrent:
+                        refresh_command = 'REFRESH MATERIALIZED VIEW CONCURRENTLY {}'.format(mv)
+                    else:
+                        refresh_command = 'REFRESH MATERIALIZED VIEW {}'.format(mv)
+
+                    connection.execute(
+                        sa.text(refresh_command).execution_options(
+                            autocommit=True
+                        )
+                    )
+            else:
+                logger.error('Error refreshing node %s: not found.'.format(node))
+
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
@@ -352,7 +379,7 @@ def cf_startup():
     """Migrate schemas on `cf push`."""
     check_config()
     if env.index == '0':
-        subprocess.Popen(['python', 'manage.py', 'update_schemas'])
+        subprocess.Popen(['python', 'manage.py', 'refresh_materialized'])
 
 @manager.command
 def load_efile_sheets():
@@ -379,13 +406,6 @@ def load_efile_sheets():
         columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
         df.drop(columns_to_drop, axis=1, inplace=True)
         df.to_json(path_or_buf="data/" + table + ".json", orient='values')
-
-@manager.command
-def refresh_calendar():
-    """ Refreshes calendar data
-    """
-    with db.engine.begin() as connection:
-        connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY ofec_omnibus_dates_mv')
 
 
 @manager.command

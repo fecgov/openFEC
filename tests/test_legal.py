@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from webservices.resources.legal import es
 from elasticsearch import RequestError
+import datetime
 
 # TODO: integrate more with API Schema so that __API_VERSION__ is returned
 # self.assertEqual(result['api_version'], __API_VERSION__)
@@ -188,6 +189,81 @@ class SearchTest(unittest.TestCase):
                 'name': {}, 'documents.description': {}, 'no': {}}},
             'from': 0, 'size': 20,
             '_source': {'exclude': ['text', 'documents.text', 'sort1', 'sort2']}, 'sort': ['sort1', 'sort2']}
+
+        es_search.assert_called_with(body=expected_query,
+                                     index=mock.ANY,
+                                     doc_type=mock.ANY)
+
+    @patch.object(es, 'search')
+    def test_query_dsl_with_mur_filters(self, es_search):
+        response = self.app.get('/v1/legal/search/', query_string={
+                                'q': 'embezzle',
+                                'type': 'murs',
+                                'mur_min_open_date': '2012-01-01',
+                                'mur_max_open_date': '2013-12-31',
+                                'mur_min_close_date': '2014-01-01',
+                                'mur_max_close_date': '2015-12-31'})
+        assert response.status_code == 200
+
+        expected_query = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "_type": "murs"
+                            }
+                        },
+                        {
+                            "query_string": {
+                                "query": "embezzle"
+                            }
+                        },
+                        {
+                            "range": {
+                                "open_date": {
+                                    "gte": datetime.date(2012, 1, 1),
+                                    "lte": datetime.date(2013, 12, 31)
+                                }
+                            }
+                        },
+                        {
+                            "range": {
+                                "close_date": {
+                                    "gte": datetime.date(2014, 1, 1),
+                                    "lte": datetime.date(2015, 12, 31)
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "sort": [
+                "sort1",
+                "sort2"
+            ],
+            "from": 0,
+            "_source": {
+                "exclude": [
+                    "text",
+                    "documents.text",
+                    "sort1",
+                    "sort2"
+                ]
+            },
+            "highlight": {
+                "fields": {
+                    "text": {},
+                    "no": {},
+                    "documents.description": {},
+                    "documents.text": {},
+                    "summary": {},
+                    "name": {}
+                },
+                "require_field_match": False
+            },
+            "size": 20
+        }
 
         es_search.assert_called_with(body=expected_query,
                                      index=mock.ANY,

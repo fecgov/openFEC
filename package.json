@@ -1,12 +1,22 @@
 {
-  "dependencies": {
-    "swagger-ui": "git+https://github.com/18F/swagger-ui.git"
+  "devDependencies": {
+    "event-stream": "^3.3.4",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-declare": "^0.3.0",
+    "gulp-handlebars": "^4.0.0",
+    "gulp-less": "^3.3.2",
+    "gulp-order": "^1.1.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-uglify": "^3.0.0",
+    "gulp-wrap": "^0.13.0",
+    "handlebars": "^4.0.11"
   },
   "scripts": {
-    "build": "mkdir -p static/swagger-ui && cp -R node_modules/swagger-ui/dist static/swagger-ui/"
+    "build": "gulp"
   },
   "engines": {
-    "node": "8.6.0",
-    "npm": "5.4.2"
+    "node": "8.9.1",
+    "npm": "5.5.1"
   }
 }

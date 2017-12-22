@@ -1,8 +1,9 @@
-import os
-import json
 import codecs
-import unittest
+import json
+import os
+import re
 import subprocess
+import unittest
 
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
@@ -11,9 +12,22 @@ import manage
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
+from jdbc_utils import to_jdbc_url
 
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
+SCHEMAS = [
+    "aouser",
+    "auditsearch",
+    "disclosure",
+    "fecapp",
+    "fecmur",
+    "rad_pri_user",
+    "real_efile",
+    "real_pfile",
+    "rohan",
+    "staging",
+]
 
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
@@ -21,18 +35,19 @@ NPlusOne(rest.app)
 def _setup_extensions():
     rest.db.engine.execute('create extension if not exists btree_gin;')
 
-
 def _reset_schema():
     rest.db.engine.execute('drop schema if exists public cascade;')
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('drop schema if exists staging cascade;')
     rest.db.engine.execute('drop schema if exists fecapp cascade;')
     rest.db.engine.execute('drop schema if exists real_efile cascade;')
+    rest.db.engine.execute('drop schema if exists auditsearch cascade;')
     rest.db.engine.execute('create schema public;')
     rest.db.engine.execute('create schema disclosure;')
     rest.db.engine.execute('create schema staging;')
     rest.db.engine.execute('create schema fecapp;')
     rest.db.engine.execute('create schema real_efile;')
+    rest.db.engine.execute('create schema auditsearch;')
 
 
 def _reset_schema_for_integration():
@@ -40,8 +55,23 @@ def _reset_schema_for_integration():
     rest.db.engine.execute('drop schema if exists disclosure cascade;')
     rest.db.engine.execute('drop schema if exists staging cascade;')
     rest.db.engine.execute('drop schema if exists fecapp cascade;')
+    rest.db.engine.execute('drop schema if exists auditsearch cascade;')
+    _drop_schema()
+    rest.db.engine.execute('create schema public;')
+    _create_schema()
+
+def _reset_schema_for_integration():
+    _drop_schema()
     rest.db.engine.execute('create schema public;')
 
+def _drop_schema():
+    rest.db.engine.execute('drop schema if exists public cascade;')
+    for schema in SCHEMAS:
+        rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
+
+def _create_schema():
+    for schema in SCHEMAS:
+        rest.db.engine.execute('create schema %s;' % schema)
 
 class BaseTestCase(unittest.TestCase):
 
@@ -77,8 +107,12 @@ class ApiBaseTest(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(ApiBaseTest, cls).setUpClass()
-        manage.load_districts()
-        manage.update_functions()
+        with open(os.devnull, 'w') as null:
+            subprocess.check_call(
+                ['psql', '-f', 'data/migrations/V0039__states_and_zips_data.sql', TEST_CONN],
+                stdout=null
+            )
+
         whitelist = [models.CandidateCommitteeTotalsPresidential, models.CandidateCommitteeTotalsHouseSenate]
         rest.db.metadata.create_all(
             rest.db.engine,
@@ -132,11 +166,19 @@ class IntegrationTestCase(BaseTestCase):
         cls.app_context = rest.app.app_context()
         cls.app_context.push()
         _reset_schema_for_integration()
-        try:
-            with open(os.devnull, 'w') as null:
-                subprocess.check_call(
-                    ['pg_restore', './data/subset.dump', '--dbname', TEST_CONN, '--no-acl', '--no-owner'],
-                    stdout=null,
-                )
-        except:
-            print('I am committing a try/ except crime')
+        run_migrations()
+        manage.refresh_materialized(concurrent=False)
+
+def run_migrations():
+    subprocess.check_call(
+        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
+
+def get_test_jdbc_url():
+    """
+    Return the JDBC URL for TEST_CONN. If TEST_CONN cannot be successfully converted,
+    it is probably the default Postgres instance with trust authentication
+    """
+    jdbc_url = to_jdbc_url(TEST_CONN)
+    if jdbc_url is None:
+        jdbc_url = "jdbc:" + TEST_CONN
+    return jdbc_url
