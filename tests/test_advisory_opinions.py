@@ -1,3 +1,4 @@
+import re
 import datetime
 import subprocess
 from unittest.mock import patch
@@ -173,6 +174,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         actual_document = actual_ao["documents"][0]
         for key in expected_document:
             assert actual_document[key] == expected_document[key]
+            assert re.match(r'/files/legal/aos/', actual_document['url'])
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_ao_citations(self, get_bucket):
