@@ -179,7 +179,6 @@ def get_documents(ao_id, bucket):
         for row in rs:
             document = {
                 "document_id": row["document_id"],
-                "filename": row["filename"],
                 "category": row["category"],
                 "description": row["description"],
                 "text": row["ocrtext"],
