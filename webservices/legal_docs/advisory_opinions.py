@@ -189,7 +189,7 @@ def get_documents(ao_id, bucket):
                 logger.error('Error uploading document ID {0} for AO no {1}: No file image'.format(row['document_id'], row['ao_no']))
             else:
                 pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'],
-                str.replace(row["filename"], ' ', '-'))
+                    row["filename"].replace(' ', '-'))
                 document["url"] = '/files/' + pdf_key
                 logger.info("S3: Uploading {}".format(pdf_key))
                 bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
