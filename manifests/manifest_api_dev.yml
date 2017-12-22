@@ -2,7 +2,6 @@
 inherit: manifest_dev.yml
 env:
   NEW_RELIC_APP_NAME: fec | api | dev
-  CACHE_ALL_REQUESTS: false
 applications:
   - name: api
     instances: 1

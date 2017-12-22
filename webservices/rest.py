@@ -19,7 +19,6 @@ import http
 import logging
 import json
 import boto
-import re
 
 from flask import abort
 from flask import request
@@ -167,12 +166,8 @@ def add_caching_headers(response):
             # get s3 bucket env variables
             s3_bucket = utils.get_bucket()
 
-            #split the url  into parts and get only url  after /v1/
-            parts = request.url.split('/v1/')
-
             #remove the api_key for the URL
-            formatted_url = utils.format_url(parts)
-
+            formatted_url = utils.format_url(request.url)
             cached_url = "cached-calls/{0}.json".format(formatted_url)
 
             #upload the request_content.json file to s3 bucket
