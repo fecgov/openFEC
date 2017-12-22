@@ -350,21 +350,27 @@ def refresh_materialized(concurrent=True):
 
     graph = flow.get_graph()
 
-    for node in nx.topological_sort(graph):
-        materialized_views = materialized_view_names.get(node, None)
+    with db.engine.begin() as connection:
+        for node in nx.topological_sort(graph):
+            materialized_views = materialized_view_names.get(node, None)
 
-        if materialized_views:
-            for mv in materialized_views:
-                logger.info('Refreshing %s', mv)
+            if materialized_views:
+                for mv in materialized_views:
+                    logger.info('Refreshing %s', mv)
 
-                if concurrent:
-                    db.session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY %s" % mv)
-                else:
-                    db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
-        else:
-            logger.error('Error refreshing node %s: not found.'.format(node))
+                    if concurrent:
+                        refresh_command = 'REFRESH MATERIALIZED VIEW CONCURRENTLY {}'.format(mv)
+                    else:
+                        refresh_command = 'REFRESH MATERIALIZED VIEW {}'.format(mv)
 
-    db.session.commit()
+                    connection.execute(
+                        sa.text(refresh_command).execution_options(
+                            autocommit=True
+                        )
+                    )
+            else:
+                logger.error('Error refreshing node %s: not found.'.format(node))
+
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
@@ -372,7 +378,7 @@ def cf_startup():
     """Migrate schemas on `cf push`."""
     check_config()
     if env.index == '0':
-        subprocess.Popen(['python', 'manage.py', 'update_schemas'])
+        subprocess.Popen(['python', 'manage.py', 'refresh_materialized'])
 
 @manager.command
 def load_efile_sheets():
