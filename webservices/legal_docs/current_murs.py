@@ -298,7 +298,7 @@ def get_documents(case_id, bucket, bucket_name):
                 'document_date': row['document_date'],
             }
             pdf_key = 'legal/murs/current/{0}/{1}.pdf'.format(row['case_no'],
-                    str.replace(row['filename'], ' ', '-'))
+                    str.replace(row['filename'] or '', ' ', '-'))
             document['url'] = '/files/' + pdf_key
             logger.debug("S3: Uploading {}".format(pdf_key))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
