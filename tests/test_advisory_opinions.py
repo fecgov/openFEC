@@ -146,6 +146,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     def test_completed_ao_with_docs(self, get_bucket):
         expected_document = {
             "document_id": 1,
+            "filename": "Some File.pdf",
             "category": "Final Opinion",
             "text": "Some Text",
             "description": "Some Description",
@@ -177,6 +178,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     def test_ao_citations(self, get_bucket):
         ao1_document = {
             "document_id": 1,
+            "filename": "2020C_F.pdf",
             "category": "Final Opinion",
             "text": "Not an AO reference 1776-01",
             "description": "Some Description",
@@ -194,6 +196,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         ao2_document = {
             "document_id": 2,
+            "filename": "201701.pdf",
             "category": "Final Opinion",
             "text": "Reference to AO 2017-01",
             "description": "Some Description",
@@ -231,6 +234,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     def test_statutory_citations(self, get_bucket, get_elasticsearch_connection):
         ao_document = {
             "document_id": 1,
+            "filename": "A File Name (Final).pdf",
             "category": "Final Opinion",
             "text": "A statutory citation 2 U.S.C. 431 and some text",
             "description": "Some Description",
@@ -258,6 +262,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
     def test_regulatory_citations(self, get_bucket, get_elasticsearch_connection):
         ao_document = {
             "document_id": 1,
+            "filename": "Filename.pdf",
             "category": "Final Opinion",
             "text": "A regulatory citation 11 CFR §9034.4(b)(4) and some text",
             "description": "Some Description",
@@ -373,10 +378,11 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         self.connection.execute(
             """
             INSERT INTO aouser.document
-            (document_id, ao_id, category, ocrtext, fileimage, description, document_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+            (document_id, ao_id, filename, category, ocrtext, fileimage, description, document_date)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
             document["document_id"],
             ao_id,
+            document["filename"],
             document["category"],
             document["text"],
             document["text"],

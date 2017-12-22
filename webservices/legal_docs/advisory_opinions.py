@@ -185,13 +185,16 @@ def get_documents(ao_id, bucket):
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
-            pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'],
-                    str.replace(row["filename"] or '', ' ', '-'))
-            document["url"] = '/files/' + pdf_key
-            logger.info("S3: Uploading {}".format(pdf_key))
-            bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
-                    ContentType="application/pdf", ACL="public-read")
-            documents.append(document)
+            if not row['fileimage']:
+                logger.error('Error uploading document ID {0} for AO no {1}: No file image'.format(row['document_id'], row['ao_no']))
+            else:
+                pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'],
+                str.replace(row["filename"], ' ', '-'))
+                document["url"] = '/files/' + pdf_key
+                logger.info("S3: Uploading {}".format(pdf_key))
+                bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
+                        ContentType="application/pdf", ACL="public-read")
+                documents.append(document)
 
     return documents
 

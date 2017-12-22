@@ -158,8 +158,8 @@ class TestLoadCurrentMURs(BaseTestCase):
             ("Respondent", "Thorin Oakenshield")
         ]
         documents = [
-            ('A Category', 'Some text'),
-            ('Another Category', 'Different text'),
+            ('A Category', 'Some text', '123124123.pdf'),
+            ('Another Category', 'Different text', '1231 24123.pdf'),
         ]
 
         self.create_mur(case_id, expected_mur['no'], expected_mur['name'], mur_subject)
@@ -167,8 +167,8 @@ class TestLoadCurrentMURs(BaseTestCase):
             role, name = participant
             self.create_participant(case_id, entity_id, role, name)
         for document_id, document in enumerate(documents):
-            category, ocrtext = document
-            self.create_document(case_id, document_id, category, ocrtext)
+            category, ocrtext, filename = document
+            self.create_document(case_id, document_id, category, ocrtext, filename)
 
         actual_mur = next(get_murs(None))
 
@@ -181,7 +181,7 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert [(d[0], d[1], len(d[1])) for d in documents] == [
             (d['category'], d['text'], d['length']) for d in actual_mur['documents']]
         for d in actual_mur['documents']:
-            assert re.match(r'/files/legal/murs/current', d['url'])
+            assert re.match(r'/files/legal/murs/', d['url'])
 
     @patch('webservices.env.env.get_credential', return_value='BUCKET_NAME')
     @patch('webservices.legal_docs.current_murs.get_bucket')
@@ -374,10 +374,10 @@ class TestLoadCurrentMURs(BaseTestCase):
             "INSERT INTO fecmur.violations (case_id, entity_id, stage, statutory_citation, regulatory_citation) "
             "VALUES (%s, %s, %s, %s, %s)", case_id, entity_id, stage, statutory_citation, regulatory_citation)
 
-    def create_document(self, case_id, document_id, category, ocrtext):
+    def create_document(self, case_id, document_id, category, ocrtext, filename):
         self.connection.execute(
-            "INSERT INTO fecmur.document (document_id, doc_order_id, case_id, category, ocrtext, fileimage) "
-            "VALUES (%s, %s, %s, %s, %s, %s)", document_id, document_id, case_id, category, ocrtext, ocrtext)
+            "INSERT INTO fecmur.document (document_id, doc_order_id, case_id, category, ocrtext, fileimage, filename) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s)", document_id, document_id, case_id, category, ocrtext, ocrtext, filename)
 
     def create_calendar_event(self, entity_id, event_date, event_id, case_id):
         self.connection.execute(
