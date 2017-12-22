@@ -308,7 +308,6 @@ def get_documents(case_id, bucket, bucket_name):
         for row in rs:
             document = {
                 'document_id': row['document_id'],
-                'filename': row['filename'],
                 'category': row['category'],
                 'description': row['description'],
                 'length': row['length'],
@@ -319,7 +318,7 @@ def get_documents(case_id, bucket, bucket_name):
                 logger.error('Error uploading document ID {0} for MUR Case {1}: No file image'.format(row['document_id'], row['case_no']))
             else:
                 pdf_key = 'legal/murs/{0}/{1}'.format(row['case_no'],
-                    row["filename"].replace(' ', '-'))
+                    row['filename'].replace(' ', '-'))
                 document['url'] = '/files/' + pdf_key
                 logger.info("S3: Uploading {}".format(pdf_key))
                 bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
