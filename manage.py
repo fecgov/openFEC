@@ -230,6 +230,7 @@ def refresh_itemized():
 
     refresh_itemized_a()
     refresh_itemized_b()
+    rebuild_itemized_e()
 
     logger.info('Finished updating incremental aggregates.')
 
@@ -259,6 +260,13 @@ def refresh_itemized_b():
         logger.error(message[1])
 
     logger.info('Finished updating Schedule B.')
+
+@manager.command
+def rebuild_itemized_e():
+    """Used to rebuild the itemized Schedule E data."""
+    logger.info('Rebuilding Schedule E...')
+    execute_sql_file('data/refresh/rebuild_schedule_e.sql')
+    logger.info('Finished rebuilding Schedule E.')
 
 @manager.command
 def add_itemized_partition_cycle(cycle=None, amount=1):
@@ -297,6 +305,7 @@ def refresh_materialized(concurrent=True):
        tables are not initially populated.
     """
     logger.info('Refreshing materialized views...')
+
     materialized_view_names = {
         'filing_amendments_house_senate': ['ofec_house_senate_paper_amendments_mv'],
         'sched_f': ['ofec_sched_f_mv'],
@@ -306,7 +315,6 @@ def refresh_materialized(concurrent=True):
         'candidate_detail': ['ofec_candidate_detail_mv'],
         'candidate_election': ['ofec_candidate_election_mv'],
         'candidate_history_latest': ['ofec_candidate_history_latest_mv'],
-        'omnibus_dates': ['ofec_omnibus_dates_mv'],
         'election_outcome': ['ofec_election_result_mv'],
         'sched_e_by_candidate': ['ofec_sched_e_aggregate_candidate_mv'],
         'filing_amendments_presidential': ['ofec_presidential_paper_amendments_mv'],
@@ -336,19 +344,27 @@ def refresh_materialized(concurrent=True):
         'totals_pac_party': ['ofec_totals_pacs_parties_mv', 'ofec_totals_pacs_mv', 'ofec_totals_parties_mv'],
         'large_aggregates': ['ofec_entity_chart_mv'],
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
-        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv']
+        'totals_candidate_committee': ['ofec_totals_candidate_committees_mv'],
+        'audit_case': ['ofec_audit_case_mv', 'ofec_audit_case_category_rel_mv', 'ofec_audit_case_sub_category_rel_mv', 'ofec_committee_fulltext_audit_mv', 'ofec_candidate_fulltext_audit_mv']
     }
+
     graph = flow.get_graph()
+
     for node in nx.topological_sort(graph):
-        for mv in materialized_view_names[node]:
-            logger.info('Refreshing %s', mv)
-            if concurrent:
-                db.session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY %s" % mv)
-            else:
-                db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+        materialized_views = materialized_view_names.get(node, None)
+
+        if materialized_views:
+            for mv in materialized_views:
+                logger.info('Refreshing %s', mv)
+
+                if concurrent:
+                    db.session.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY %s" % mv)
+                else:
+                    db.session.execute("REFRESH MATERIALIZED VIEW %s" % mv)
+        else:
+            logger.error('Error refreshing node %s: not found.'.format(node))
 
     db.session.commit()
-
     logger.info('Finished refreshing materialized views.')
 
 @manager.command
@@ -383,13 +399,6 @@ def load_efile_sheets():
         columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
         df.drop(columns_to_drop, axis=1, inplace=True)
         df.to_json(path_or_buf="data/" + table + ".json", orient='values')
-
-@manager.command
-def refresh_calendar():
-    """ Refreshes calendar data
-    """
-    with db.engine.begin() as connection:
-        connection.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY ofec_omnibus_dates_mv')
 
 
 if __name__ == '__main__':

@@ -63,17 +63,19 @@ interesting candidates and committees. Then, you can use their IDs to find repor
 item details with the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
-Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 120 requests per minute. Each call is limited to 100 results per page. You can email questions or comments to
-[APIinfo@fec.gov](apiinfo@fec.gov). You can also ask questions and discuss the data in the
-[FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). API changes will also
-be added to this group in advance of the change.
+Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000 
+calls an hour. Each call is limited to 100 results per page. You can email questions, comments or 
+a request to get a key for 120 calls per minute to[APIinfo@fec.gov](apiinfo@fec.gov). You can also 
+ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). 
+API changes will also be added to this group in advance of the change.
+
 
 The model definitions and schema are available at [/swagger](/swagger/). This is useful for
 making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
-[Learn more here](http://www.fec.gov/pages/brochures/saleuse.shtml).
+[Learn more here](https://transition.fec.gov/pages/brochures/saleuse.shtml).
 
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
 '''
@@ -298,23 +300,35 @@ For receipts over $200 use FEC code line_number to identify individuals.
 The line numbers that specify individuals that are automatically included:
 
 Line number with description
-    - 10 Contribution to Independent Expenditure-Only Committees (Super PACs), Political Committees with non-contribution accounts (Hybrid PACs) and nonfederal party "soft money" accounts (1991-2002) from a person (individual, partnership, limited liability company, corporation, labor organization, or any other organization or group of persons)
-    - 15 Contribution to political committees (other than Super PACs and Hybrid PACs) from an individual, partnership or limited liability company
-    - 15E Earmarked contributions to political committees (other than Super PACs and Hybrid PACs) from an individual, partnership or limited liability company
-    - 15J Memo - Recipient committee's percentage of contribution from an individual, partnership or limited liability company given to joint fundraising committee
-    - 18J | Memo - Recipient committee's percentage of contribution from a registered committee given to joint fundraising committee
-    - 30, 30T, 31, 31T, 32 Individual party codes
+    - 10 Contribution to Independent Expenditure-Only Committees (Super PACs),\n\
+         Political Committees with non-contribution accounts (Hybrid PACs)\n\
+         and nonfederal party "soft money" accounts (1991-2002)\n\
+         from a person (individual, partnership, limited liability company,\n\
+         corporation, labor organization, or any other organization or\n\
+         group of persons)
+    - 15 Contribution to political committees (other than Super PACs\n\
+         and Hybrid PACs) from an individual, partnership or\n\
+         limited liability company
+    - 15E Earmarked contributions to political committees\n\
+          (other than Super PACs and Hybrid PACs) from an individual,\n\
+          partnership or limited liability company
+    - 15J Memo - Recipient committee's percentage of contribution\n\
+          from an individual, partnership or limited liability\n\
+          company given to joint fundraising committee
+    - 18J | Memo - Recipient committee's percentage of contribution\n\
+          from a registered committee given to joint fundraising committee\n\
+    - 30, 30T, 31, 31T, 32 Individual party codes\n\
 
 For receipts under $200:
 We check the following codes and see if there is "earmark" (or a variation) in the `memo_text`
 description of the contribution.
 
 Line number with description
-    -11AI The itemized individual contributions from F3 schedule A
-    -12 Nonfederal other receipt - Levin Account (Line 2)
-    -17 Itemized individual contributions from Form 3P
-    -17A Itemized individual contributions from Form 3P
-    -18 Itemized individual contributions from Form 3P
+    -11AI The itemized individual contributions from F3 schedule A\n\
+    -12 Nonfederal other receipt - Levin Account (Line 2)\n\
+    -17 Itemized individual contributions from Form 3P\n\
+    -17A Itemized individual contributions from Form 3P\n\
+    -18 Itemized individual contributions from Form 3P\n\
 
 Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
@@ -334,15 +348,15 @@ example, when sorting by `contribution_receipt_date`, you might receive a page o
 results with the following pagination information:
 
 ```
-pagination: {
-    pages: 2152643,
-    per_page: 20,
-    count: 43052850,
-    last_indexes: {
-        last_index: "230880619",
-        last_contribution_receipt_date: "2014-01-01"
-    }
-}
+pagination: {\n\
+    pages: 2152643,\n\
+    per_page: 20,\n\
+    count: 43052850,\n\
+    last_indexes: {\n\
+        last_index: "230880619",\n\
+        last_contribution_receipt_date: "2014-01-01"\n\
+    }\n\
+}\n\
 ```
 
 To fetch the next page of sorted results, append `last_index=230880619` and
@@ -378,15 +392,15 @@ example, when sorting by `disbursement_date`, you might receive a page of
 results with the following pagination information:
 
 ```
-pagination: {
-    pages: 965191,
-    per_page: 20,
-    count: 19303814,
-    last_indexes: {
-        last_index: "230906248",
-        last_disbursement_date: "2014-07-04"
-    }
-}
+pagination: {\n\
+    pages: 965191,\n\
+    per_page: 20,\n\
+    count: 19303814,\n\
+    last_indexes: {\n\
+        last_index: "230906248",\n\
+        last_disbursement_date: "2014-07-04"\n\
+    }\n\
+}\n\
 ```
 
 To fetch the next page of sorted results, append `last_index=230906248` and
@@ -438,7 +452,6 @@ and the totals are more accurate. You can still find the information from 24 and
 '''
 
 SCHEDULE_E = SCHEDULE_E_TAG + '''
-
 Due to the large quantity of Schedule E filings, this endpoint is not paginated by
 page number. Instead, you can request the next page of results by adding the values in
 the `last_indexes` object from `pagination` to the URL of your last request. For
@@ -446,16 +459,16 @@ example, when sorting by `expenditure_amount`, you might receive a page of
 results with the following pagination information:
 
 ```
- "pagination": {
-    "count": 152623,
-    "last_indexes": {
-      "last_index": "3023037",
-      "last_expenditure_amount": -17348.5
-    },
-    "per_page": 20,
-    "pages": 7632
-  }
-}
+ "pagination": {\n\
+    "count": 152623,\n\
+    "last_indexes": {\n\
+      "last_index": "3023037",\n\
+      "last_expenditure_amount": -17348.5\n\
+    },\n\
+    "per_page": 20,\n\
+    "pages": 7632\n\
+  }\n\
+}\n\
 ```
 
 To fetch the next page of sorted results, append `last_index=3023037` and
@@ -480,11 +493,11 @@ these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political P
 SIZE_DESCRIPTION = '''
 This endpoint aggregates Schedule A donations based on size:
 
- - $200 and under
- - $200.01 - $499.99
- - $500 - $999.99
- - $1000 - $1999.99
- - $2000 +
+ - $200 and under\n\
+ - $200.01 - $499.99\n\
+ - $500 - $999.99\n\
+ - $1000 - $1999.99\n\
+ - $2000 +\n\
 
 In cases where the donations are $200 or less, the results include small donations
 that are reported on Schedule A, but filers are not required to itemize those small
@@ -496,11 +509,11 @@ donors that are not reported on Schedule A and have given $200 or less.
 SIZE = '''
 The total all contributions in the following ranges:
 ```
-  -0    $200 and under
-  -200  $200.01 - $499.99
-  -500  $500 - $999.99
-  -1000 $1000 - $1999.99
-  -2000 $2000 +
+  -0    $200 and under\n\
+  -200  $200.01 - $499.99\n\
+  -500  $500 - $999.99\n\
+  -1000 $1000 - $1999.99\n\
+  -2000 $2000 +\n\
 ```
 Unitemized contributions are included in the `0` category.
 '''
@@ -538,31 +551,62 @@ result sets are approximate; you will want to page through the records until no 
 '''
 
 DOC_TYPE = '''
-The type of document, for documents other than reports:
-    - 2 24 Hour Contribution Notice
-    - 4 48 Hour Contribution Notice
-    - A Debt Settlement Statement
-    - B Acknowledgment of Receipt of Debt Settlement Statement
-    - C RFAI: Debt Settlement First Notice
-    - D Commission Debt Settlement Review
-    - E Commission Response TO Debt Settlement Request
-    - F Administrative Termination
-    - G Debt Settlement Plan Amendment
-    - H Disavowal Notice
-    - I Disavowal Response
-    - J Conduit Report
-    - K Termination Approval
-    - L Repeat Non-Filer Notice
-    - M Filing Frequency Change Notice
-    - N Paper Amendment to Electronic Report
-    - O Acknowledgment of Filing Frequency Change
-    - S RFAI: Debt Settlement Second
-    - T Miscellaneous Report TO FEC
-    - V Repeat Violation Notice (441A OR 441B)
-    - P Notice of Paper Filing
-    - R F3L Filing Frequency Change Notice
-    - Q Acknowledgment of F3L Filing Frequency Change
-    - U Unregistered Committee Notice
+The type of document,\n\
+    for documents other\n\
+    than reports:\n\
+    - 2 24 Hour\n\
+        Contribution Notice\n\
+    - 4 48 Hour\n\
+        Contribution Notice\n\
+    - A Debt Settlement\n\
+        Statement\n\
+    - B Acknowledgment of\n\
+        Receipt of Debt\n\
+        Settlement\n\
+        Statement\n\
+    - C RFAI: Debt\n\
+        Settlement\n\
+        First Notice\n\
+    - D Commission Debt\n\
+        Settlement Review\n\
+    - E Commission Response\n\
+        TO Debt\n\
+        Settlement Request\n\
+    - F Administrative\n\
+        Termination\n\
+    - G Debt Settlement\n\
+        Plan Amendment\n\
+    - H Disavowal Notice\n\
+    - I Disavowal Response\n\
+    - J Conduit Report\n\
+    - K Termination\n\
+        Approval\n\
+    - L Repeat Non-Filer\n\
+        Notice\n\
+    - M Filing Frequency\n\
+        Change Notice\n\
+    - N Paper Amendment to\n\
+        Electronic Report\n\
+    - O Acknowledgment of\n\
+        Filing Frequency\n\
+        Change\n\
+    - S RFAI: Debt\n\
+        Settlement Second\n\
+    - T Miscellaneous\n\
+        Report TO FEC\n\
+    - V Repeat Violation\n\
+        Notice\n\
+        (441A OR 441B)\n\
+    - P Notice of\n\
+        Paper Filing\n\
+    - R F3L Filing\n\
+        Frequency\n\
+        Change Notice\n\
+    - Q Acknowledgment of\n\
+        F3L Filing \n\
+        Frequency Change\n\
+    - U Unregistered\n\
+        Committee Notice\n\
 '''
 DATES_TAG = '''
 Reporting deadlines, election dates FEC meetings, events etc.
@@ -572,14 +616,7 @@ CALENDAR_DATES = '''
 Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
 events into one calendar.
 
-State filtering now applies to elections, reports and reporting periods.
-
-Presidential pre-primary report due dates are not shown on even years.
-Filers generally opt to file monthly rather than submit over 50 pre-primary election
-reports. All reporting deadlines are available at /reporting-dates/ for reference.
-
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
-that creates the calendar.
+State and report type filtering is no longer available.
 '''
 
 CALENDAR_EXPORT = '''
@@ -606,9 +643,11 @@ from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
 ELECTIONEERING = '''
 An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
 
-- The communication refers to a clearly identified federal candidate;
-- The communication is publicly distributed by a television station, radio station, cable television system or satellite system for a fee; and
-- The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office.
+- The communication refers to a clearly identified federal candidate;\n\
+- The communication is publicly distributed by a television station,\n\
+  radio station, cable television system or satellite system for a fee; and\n\
+- The communication is distributed within 60 days prior\n\
+  to a general election or 30 days prior to a primary election to federal office.\n\
 '''
 
 COMMUNICATION_COST = '''
@@ -684,53 +723,98 @@ COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
     for looking up records.'
 COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
-DESIGNATION = 'The one-letter designation code of the organization:\n\
-         - A authorized by a candidate\n\
-         - J joint fundraising committee\n\
-         - P principal campaign committee of a candidate\n\
+DESIGNATION = 'The one-letter designation\n\
+    code of the organization:\n\
+         - A authorized by\n\
+             a candidate\n\
+         - J joint fundraising\n\
+             committee\n\
+         - P principal campaign\n\
+             committee of a\n\
+             candidate\n\
          - U unauthorized\n\
-         - B lobbyist/registrant PAC\n\
+         - B lobbyist/registrant\n\
+             PAC\n\
          - D leadership PAC\n\
 '
-ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
+ORGANIZATION_TYPE = 'The one-letter\n\
+            code for the kind\n\
+            for organization:\n\
         - C corporation\n\
-        - L labor organization\n\
-        - M membership organization\n\
+        - L labor\n\
+            organization\n\
+        - M membership\n\
+            organization\n\
         - T trade association\n\
         - V cooperative\n\
-        - W corporation without capital stock\n\
+        - W corporation without\n\
+            capital stock\n\
 '
-COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
-        - C communication cost\n\
+COMMITTEE_TYPE = 'The one-letter type\n\
+            code of the\n\
+            organization:\n\
+        - C communication\n\
+            cost\n\
         - D delegate\n\
-        - E electioneering communication\n\
+        - E electioneering\n\
+            communication\n\
         - H House\n\
-        - I independent expenditor (person or group)\n\
-        - N PAC - nonqualified\n\
-        - O independent expenditure-only (super PACs)\n\
+        - I independent\n\
+            expenditor\n\
+            (person or group)\n\
+        - N PAC -\n\
+            nonqualified\n\
+        - O independent\n\
+            expenditure-only\n\
+            (super PACs)\n\
         - P presidential\n\
         - Q PAC - qualified\n\
         - S Senate\n\
-        - U single candidate independent expenditure\n\
-        - V PAC with non-contribution account, nonqualified\n\
-        - W PAC with non-contribution account, qualified\n\
-        - X party, nonqualified\n\
+        - U single candidate\n\
+            independent\n\
+            expenditure\n\
+        - V PAC with\n\
+            non-contribution\n\
+            account,\n\
+            nonqualified\n\
+        - W PAC with\n\
+            non-contribution\n\
+            account,\n\
+            qualified\n\
+        - X party,\n\
+            nonqualified\n\
         - Y party, qualified\n\
-        - Z national party non-federal account\n\
+        - Z national party\n\
+            non-federal\n\
+            account\n\
 '
 COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
         - all All Committee Types\n\
-        - all_candidates All Candidate Committee Types (H, S, P)\n\
-        - all_pacs All PAC Committee Types (N, O, Q, V, W)\n\
+        - all_candidates\n\
+          All Candidate Committee\n\
+          Types (H, S, P)\n\
+        - all_pacs All PAC\n\
+          Committee Types\n\
+          (N, O, Q, V, W)\n\
 '
-PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
+PAC_PARTY_TYPE = 'The one-letter type\n\
+            code of a PAC/Party\n\
+            organization:\n\
         - N PAC - nonqualified\n\
-        - O independent expenditure-only (super PACs)\n\
+        - O independent\n\
+            expenditure-only\n\
+            (super PACs)\n\
         - Q PAC - qualified\n\
-        - V PAC with non-contribution account, nonqualified\n\
-        - W PAC with non-contribution account, qualified\n\
-        - X party, nonqualified\n\
-        - Y party, qualified\n\
+        - V PAC with\n\
+            non-contribution\n\
+            account,\n\
+            nonqualified\n\
+            account,\n\
+            qualified\n\
+        - X party,\n\
+            nonqualified\n\
+        - Y party,\n\
+            qualified\n\
 '
 
 TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
@@ -785,7 +869,11 @@ ELECTION_DATE = 'Date of election'
 ELECTION_YEAR = 'Year of election'
 #? TODO: add more categories
 ELECTION_TYPE = 'Election type \n\
-Convention, Primary, General, Special, Runoff etc.'
+Convention, Primary,\n\
+General, Special,\n\
+Runoff etc.\n\
+'
+
 SENATE_CLASS = 'Senators run every six years and each state has two senators. General elections \
 are held every 2 years. The Senate elections are staggered so there are three classes of Senators \
 In a given state, only one Senate seat is up for election at a time and every six years, there is \
@@ -796,7 +884,8 @@ fill a vacancy in the Senate. In those cases class refers to the seat groupings 
 of the election.'
 
 # filings
-DOCUMENT_TYPE = 'Type of form, report or documents'
+DOCUMENT_TYPE = 'Type of form,\n\
+    report or documents'
 ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the electronic or paper \
 report. The last image number corresponds to the image number for the last page of the document.'
 IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
@@ -829,9 +918,7 @@ INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_PERIOD = 'Individual itemized contributions ar
 INDIVIDUAL_ITEMIZED_CONTRIBUTIONS_YTD = 'Individual itemized contributions are from individuals whose aggregate contributions total over $200 per individual per year. This amount represents the total of these receipts for the year to date.'
 INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS = 'Unitemized contributions are made individuals whose aggregate contributions total $200 or less per individual per year. Be aware, some filers choose to itemize donations $200 or less and in that case those donations will appear in the itemized total.'
 INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_PERIOD = 'Unitemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the reporting period.'
-INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_YTD =  'Itemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the year to date.'
-
-
+INDIVIDUAL_UNITEMIZED_CONTRIBUTIONS_YTD = 'Itemized contributions are from individuals whose aggregate contributions total $200 or less per individual per year. This amount represents the total of these receipts for the year to date.'
 
 
 POLITICAL_PARTY_COMMITTEE_CONTRIBUTIONS = 'Party committees contributions'
@@ -920,7 +1007,12 @@ FED_ELECTION_ACTIVITY = 'Total federal election activity'
 FED_DISBURSEMENTS = 'Total federal disbursements'
 
 # calendar
-CATEGORY = 'Type of date reporting date, live event, etc.'
+CATEGORY = '''
+Each type of event has a calendar category with an integer id. Options are: Open Meetings: 32, Executive Sessions: 39, Public Hearings: 40,
+Conferences: 33, Roundtables: 34, Election Dates: 36, Federal Holidays: 37, FEA Periods: 38, Commission Meetings: 20,
+Reporting Deadlines: 21, Conferences and Outreach: 22, AOs and Rules: 23, Other: 24, Quarterly: 25, Monthly: 26,
+Pre and Post-Elections: 27, EC Periods:28, and IE Periods: 29
+'''
 CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
@@ -979,8 +1071,102 @@ Provides cumulative receipt totals by entity type, over a two year cycle. Totals
 
 This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
-ENTITY_DISBURSEMENTS_TOTLAS ='''
+ENTITY_DISBURSEMENTS_TOTLAS = '''
 Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
 This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
+'''
+
+# Audit api
+AUDIT = '''
+The agency’s monitoring process may detect potential violations through a review of a committee’s reports or through a
+Commission audit. By law, all enforcement cases must remain confidential until they’re closed.
+
+The Commission is required by law to audit Presidential campaigns that accept public funds. In addition, the Commission
+audits a committee when it appears not to have met the threshold requirements for substantial compliance with the Federal
+Election Campaign Act. The audit determines whether the committee complied with limitations, prohibitions and disclosure
+requirements.
+
+These endpoints contain Final Audit Reports approved by the Commission since inception.
+'''
+
+#endpoint: audit-case
+AUDIT_CASE = '''
+This endpoint contains Final Audit Reports approved by the Commission since inception.
+The search can be based on information about the audited committee (Name, FEC ID Number, Type, \n\
+Election Cycle) or the issues covered in the report.
+'''
+
+
+#endpoint: audit-primary-category
+AUDIT_PRIMARY_CATEGORY = '''
+This lists the options for the primary categories available in the /audit-search/ endpoint.
+'''
+
+#endpoint: audit-category
+AUDIT_CATEGORY = '''
+This lists the options for the categories and subcategories available in the /audit-search/ endpoint.
+'''
+
+AUDIT_ID = '''
+The audit issue. Each subcategory has an unique ID
+'''
+
+AUDIT_CASE_ID = '''
+Primary/foreign key for audit tables
+'''
+
+PRIMARY_CATEGORY_ID = '''
+Audit category ID (table PK)
+'''
+
+PRIMARY_CATEGORY_NAME = 'Primary Audit Category\n\
+    - No Findings or\n\
+      Issues/Not a Committee\n\
+    - Net Outstanding Campaign\n\
+      /Convention Expenditures/\n\
+      Obligations\n\
+    - Payments/Disgorgements\n\
+    - Allocation Issues\n\
+    - Prohibited Contributions\n\
+    - Disclosure\n\
+    - Recordkeeping\n\
+    - Repayment to US Treasury\n\
+    - Other\n\
+    - Misstatement of \n\
+      Financial Activity\n\
+    - Excessive Contributions\n\
+    - Failure to File\n\
+      Reports/Schedules/Notices\n\
+    - Loans\n\
+    - Referred Findings Not Listed\n\
+'
+
+SUB_CATEGORY_ID = '''
+The finding id of an audit. Finding are a category of broader issues. Each category has an unique ID.
+'''
+
+SUB_CATEGORY_NAME = '''
+The audit issue. Each subcategory has an unique ID.
+'''
+
+AUDIT_TIER = '''
+1 specifies a primary category and 2 specifies a subcategory
+'''
+
+COMMITTEE_DESCRIPTION = 'Type of committee:\n\
+        - H or S - Congressional\n\
+        - P - Presidential\n\
+        - X or Y or Z - Party\n\
+        - N or Q - PAC\n\
+        - I - Independent expenditure\n\
+        - O - Super PAC \n\
+'
+
+FAR_RELEASE_DATE = '''
+Final audit report release date
+'''
+
+LINK_TO_REPORT = '''
+URL for retrieving the PDF document
 '''
