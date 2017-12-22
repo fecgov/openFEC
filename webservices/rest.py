@@ -64,6 +64,9 @@ from webservices.resources import large_aggregates
 from webservices.resources import audit
 from webservices.env import env
 
+from webservices.tasks.response_exception import ResponseException
+from webservices.tasks.error_code import ErrorCode
+
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
@@ -156,6 +159,18 @@ def add_caching_headers(response):
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
     return response
 
+
+@app.errorhandler(Exception)
+def handle_exception(exception):
+    # error_codes = [500, 502, 503, 504]
+    wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
+    print("***********************", wrapped)
+    if wrapped.status in [500, 502, 503, 504]:
+        # create the URL to check if it already cached (call the format_utils)
+        # return cache response if exists
+        # trigger an error and log the errors
+        print("In If, wrapped.status", wrapped.status)
+    # return JsonResponse.error(wrapped, wrapped.status)
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
