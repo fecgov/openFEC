@@ -14,15 +14,20 @@ from .reclassify_statutory_citation import reclassify_current_mur_statutory_cita
 logger = logging.getLogger(__name__)
 
 ALL_MURS = """
-    SELECT case_id, case_no, name
+    SELECT
+        case_id,
+        case_no,
+        name
     FROM fecmur.cases_with_parsed_case_serial_numbers
     WHERE case_type = 'MUR'
-    AND case_serial >= %s
+        AND case_serial >= %s
     ORDER BY case_serial
 """
 
 MUR_SUBJECTS = """
-    SELECT subject.description AS subj, relatedsubject.description AS rel
+    SELECT
+        subject.description AS subj,
+        relatedsubject.description AS rel
     FROM fecmur.case_subject
     JOIN fecmur.subject USING (subject_id)
     LEFT OUTER JOIN fecmur.relatedsubject USING (subject_id, relatedsubject_id)
@@ -30,13 +35,17 @@ MUR_SUBJECTS = """
 """
 
 MUR_ELECTION_CYCLES = """
-    SELECT election_cycle::INT
+    SELECT
+        election_cycle::INT
     FROM fecmur.electioncycle
     WHERE case_id = %s
 """
 
 MUR_PARTICIPANTS = """
-    SELECT entity_id, name, role.description AS role
+    SELECT
+        entity_id,
+        name,
+        role.description AS role
     FROM fecmur.players
     JOIN fecmur.role USING (role_id)
     JOIN fecmur.entity USING (entity_id)
@@ -44,14 +53,22 @@ MUR_PARTICIPANTS = """
 """
 
 MUR_DOCUMENTS = """
-    SELECT document_id, mur.case_no, filename, category, description, ocrtext,
-        fileimage, length(fileimage) AS length,
-        doc_order_id, document_date
-    FROM fecmur.document
+    SELECT
+        doc.document_id,
+        mur.case_no,
+        doc.filename,
+        doc.category,
+        doc.description,
+        doc.ocrtext,
+        doc.fileimage,
+        length(fileimage) AS length,
+        doc.doc_order_id,
+        doc.document_date
+    FROM fecmur.document doc
     INNER JOIN fecmur.cases_with_parsed_case_serial_numbers mur
-        ON mur.case_id = document.case_id
-    WHERE document.case_id = %s
-    ORDER BY doc_order_id, document_date desc, document_id DESC;
+        ON mur.case_id = doc.case_id
+    WHERE doc.case_id = %s
+    ORDER BY doc.doc_order_id, doc.document_date desc, doc.document_id DESC;
 """
 # TODO: Check if document order matters
 
@@ -298,13 +315,17 @@ def get_documents(case_id, bucket, bucket_name):
                 'text': row['ocrtext'],
                 'document_date': row['document_date'],
             }
-            pdf_key = 'legal/murs/current/{0}/{1}'.format(row['case_no'],
-                    str.replace(row['filename'] or '', ' ', '-'))
-            document['url'] = '/files/' + pdf_key
-            logger.debug("S3: Uploading {}".format(pdf_key))
-            bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                    ContentType='application/pdf', ACL='public-read')
-            documents.append(document)
+            if not row['fileimage']:
+                logger.error('Error uploading document ID {0} for MUR Case {1}: No file image'.format(row['document_id'], row['case_no']))
+            else:
+                pdf_key = 'legal/murs/{0}/{1}'.format(row['case_no'],
+                str.replace(row['filename'], ' ', '-'))
+                document['url'] = '/files/' + pdf_key
+                logger.info("S3: Uploading {}".format(pdf_key))
+                bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
+                        ContentType='application/pdf', ACL='public-read')
+                documents.append(document)
+
     return documents
 
 
