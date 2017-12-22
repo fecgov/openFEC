@@ -26,7 +26,10 @@ class RoutingSession(SignallingSession):
     @property
     def use_follower(self):
         # Check for read operations and configured followers.
-        use_follower = (not self._flushing and self.followers)
+        use_follower = (
+            not self._flushing and
+            len(self.followers) > 0
+        )
 
         # Optionally restrict traffic to followers for only supported tasks.
         if use_follower and self.restrict_follower_traffic_to_tasks:
