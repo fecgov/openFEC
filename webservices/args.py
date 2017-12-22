@@ -1,14 +1,14 @@
 import functools
 
-import sqlalchemy as sa
-
-from webargs import fields, validate, ValidationError
 from marshmallow.compat import text_type
 
-from webservices import docs
-from webservices.config import SQL_CONFIG
-from webservices.common.models import db
+import sqlalchemy as sa
 
+from webargs import ValidationError, fields, validate
+
+from webservices import docs
+from webservices.common.models import db
+from webservices.config import SQL_CONFIG
 
 def _validate_natural(value):
     if value < 0:
@@ -36,7 +36,6 @@ class IStr(fields.Str):
 
     def _deserialize(self, value, attr, data):
         return super()._deserialize(value, attr, data).upper()
-
 
 class District(fields.Str):
 
@@ -115,7 +114,8 @@ class IndicesValidator(IndexValidator):
                     status_code=422
                 )
 
-def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
+def make_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
+        default_nulls_only=False):
     return {
         'sort': fields.Str(
             missing=default,
@@ -133,11 +133,11 @@ def make_sort_args(default=None, validator=None, default_hide_null=False, defaul
     }
 
 
-def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True, default_nulls_only=False):
-    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only )
+def make_multi_sort_args(default=None, validator=None, default_hide_null=False, default_reverse_nulls=True,
+        default_nulls_only=False):
+    args = make_sort_args(default, validator, default_hide_null, default_reverse_nulls, default_nulls_only)
     args['sort'] = fields.List(fields.Str, missing=default, validate=validator, required=False, allow_none=True,
-                               description='Provide a field to sort by. Use - for descending order.',
-        )
+        description='Provide a field to sort by. Use - for descending order.',)
     return args
 
 def make_seek_args(field=fields.Int, description=None):
@@ -284,8 +284,20 @@ filings = {
         -C   consolidated\n\
         -M   multi-candidate\n\
         -S   secondary\n\
-
-        Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+        Null might be\n\
+        new or amendment.\n\
+        If amendment\n\
+        indicator is null\n\
+        and the filings\n\
+        is the first\n\
+        or first in a\n\
+        chain treat it\n\
+        as if it was a new.\n\
+        If it is not the\n\
+        first or first\n\
+        in a chain then\n\
+        treat the filing\n\
+        as an amendment.\n\
         '''
     ),
 }
@@ -336,8 +348,19 @@ reports = {
         -C   consolidated\n\
         -M   multi-candidate\n\
         -S   secondary\n\
-
-        Null might be new or amendment.   If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new.  If it is not the first or first in a chain then treat the filing as an amendment.
+        Null might be new\n\
+        or amendment.\n\
+        If amendment indicator\n\
+        is null and\n\
+        the filings is\n\
+        the first or first\n\
+        in a chain treat\n\
+        it as if it was a new.\n\
+        If it is not the\n\
+        first or first in\n\
+        a chain then treat\n\
+        the filing as\n\
+        an amendment.\n\
         '''
     ),
 }
@@ -429,35 +452,10 @@ election_dates = {
     'max_primary_general_date': fields.Date(description='Date of primary or general election'),
 }
 
-class MappedList(fields.List):
-
-    def __init__(self, cls_or_instance, mapping=None, **kwargs):
-        super().__init__(cls_or_instance, **kwargs)
-        self.mapping = mapping or {}
-
-    def _deserialize(self, value, attr, data):
-        ret = super()._deserialize(value, attr, data)
-        return sum(
-            [self.mapping.get(each, [each]) for each in ret],
-            [],
-        )
-
 calendar_dates = {
-    'category': MappedList(
-        fields.Str,
-        description=docs.CATEGORY,
-        mapping={
-            'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)] + ['report-YE'],
-            'report-M': ['report-M{}'.format(each) for each in range(2, 13)] + ['report-YE'],
-            'report-E': [
-                'report-{}'.format(each)
-                for each in ['12C', '12G', '12GR', '12P', '12PR', '12R', '12S', '12SC', '12SG', '12SGR', '12SP', '12SPR', '30D', '30G', '30GR', '30P', '30R', '30S', '30SC', '30SG', '30SGR', '60D']
-            ],
-        },
-    ),
-    'description': fields.Str(description=docs.CAL_DESCRIPTION),
-    'summary': fields.Str(description=docs.SUMMARY),
-    'state': fields.List(fields.Str, description=docs.CAL_STATE),
+    'calendar_category_id': fields.List(fields.Int, description=docs.CATEGORY),
+    'description': fields.List(IStr, description=docs.CAL_DESCRIPTION),
+    'summary': fields.List(IStr, description=docs.SUMMARY),
     'min_start_date': fields.DateTime(description='The minimum start date and time'),
     'min_end_date': fields.DateTime(description='The minimum end date and time'),
     'max_start_date': fields.DateTime(description='The maximum start date and time'),
@@ -767,4 +765,35 @@ schedule_a_by_state_recipient_totals = {
         IStr,
         description=docs.COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS
     ),
+}
+
+
+# endpoint audit-primary-category
+PrimaryCategory = {
+    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
+    # 'tier': fields.List(fields.Int, description=docs.AUDIT_TIER),
+}
+
+
+# endpoint audit-category
+Category = {
+    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
+}
+
+# endpoint audit-case
+AuditCase = {
+    'primary_category_id': fields.List(fields.Int(), missing=[-1], description=docs.PRIMARY_CATEGORY_ID),
+    'sub_category_id': fields.List(fields.Int(), missing=[-2], description=docs.SUB_CATEGORY_ID),
+    'audit_case_id': fields.List(fields.Int(), description=docs.AUDIT_CASE_ID),
+    'cycle': fields.List(fields.Int(), description=docs.CYCLE),
+    'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
+    'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
+    'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
+    'audit_id': fields.List(fields.Int(), description=docs.AUDIT_ID),
+    'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
+    'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
+    'min_election_cycle': fields.Int(description=docs.CYCLE),
+    'max_election_cycle': fields.Int(description=docs.CYCLE),
 }

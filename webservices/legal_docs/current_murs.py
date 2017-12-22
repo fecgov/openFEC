@@ -291,6 +291,7 @@ def get_documents(case_id, bucket, bucket_name):
         for row in rs:
             document = {
                 'document_id': row['document_id'],
+                'filename': row['filename'],
                 'category': row['category'],
                 'description': row['description'],
                 'length': row['length'],

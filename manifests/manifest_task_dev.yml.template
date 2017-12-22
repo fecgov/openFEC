@@ -7,7 +7,6 @@ applications:
   buildpack: python_buildpack
   env:
     FEC_API_WHITELIST_IPS: true
-    FEC_CACHE_AGE: 3600
     NEW_RELIC_APP_NAME: fec | api | dev
     NEW_RELIC_CONFIG_FILE: newrelic.ini
     NEW_RELIC_ENV: development
