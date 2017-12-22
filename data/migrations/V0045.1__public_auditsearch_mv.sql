@@ -135,7 +135,7 @@ ALTER TABLE ofec_audit_case_mv OWNER TO fec;
 
 GRANT ALL ON TABLE ofec_audit_case_mv TO fec;
 GRANT SELECT ON TABLE ofec_audit_case_mv TO fec_read;
--- GRANT SELECT ON TABLE ofec_audit_case_mv TO openfec_read;
+GRANT SELECT ON TABLE ofec_audit_case_mv TO openfec_read;
 
 create unique index on ofec_audit_case_mv(idx);
 create index on ofec_audit_case_mv(audit_case_id);
@@ -162,7 +162,7 @@ ALTER TABLE ofec_audit_case_category_rel_mv OWNER TO fec;
 
 GRANT ALL ON TABLE ofec_audit_case_category_rel_mv TO fec;
 GRANT SELECT ON TABLE ofec_audit_case_category_rel_mv TO fec_read;
--- GRANT SELECT ON TABLE ofec_audit_case_category_rel_mv TO openfec_read;
+GRANT SELECT ON TABLE ofec_audit_case_category_rel_mv TO openfec_read;
 
 create unique index on ofec_audit_case_category_rel_mv(audit_case_id,primary_category_id);
 
@@ -189,7 +189,7 @@ ALTER TABLE ofec_audit_case_sub_category_rel_mv OWNER TO fec;
 
 GRANT ALL ON TABLE ofec_audit_case_sub_category_rel_mv TO fec;
 GRANT SELECT ON TABLE ofec_audit_case_sub_category_rel_mv TO fec_read;
--- GRANT SELECT ON TABLE ofec_audit_case_sub_category_rel_mv TO openfec_read;
+GRANT SELECT ON TABLE ofec_audit_case_sub_category_rel_mv TO openfec_read;
 
 create unique index on ofec_audit_case_sub_category_rel_mv(audit_case_id,primary_category_id,sub_category_id);
 
@@ -216,7 +216,7 @@ ALTER TABLE ofec_committee_fulltext_audit_mv OWNER TO fec;
 
 GRANT ALL ON TABLE ofec_committee_fulltext_audit_mv TO fec;
 GRANT SELECT ON TABLE ofec_committee_fulltext_audit_mv TO fec_read;
--- GRANT SELECT ON TABLE ofec_committee_fulltext_audit_mv TO openfec_read;
+GRANT SELECT ON TABLE ofec_committee_fulltext_audit_mv TO openfec_read;
 
 create unique index on ofec_committee_fulltext_audit_mv(idx);
 create index on ofec_committee_fulltext_audit_mv using gin(fulltxt);
@@ -244,7 +244,7 @@ ALTER TABLE ofec_candidate_fulltext_audit_mv OWNER TO fec;
 
 GRANT ALL ON TABLE ofec_candidate_fulltext_audit_mv TO fec;
 GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO fec_read;
--- GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO openfec_read;
+GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO openfec_read;
 
 create unique index on ofec_candidate_fulltext_audit_mv(idx);
 create index on ofec_candidate_fulltext_audit_mv using gin(fulltxt);

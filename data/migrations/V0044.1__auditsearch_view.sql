@@ -10,6 +10,21 @@ SELECT dc.cmte_id,
     dc.fec_election_yr,
     dc.cmte_dsgn,
     dc.cmte_tp,
+    (
+        SELECT DISTINCT FILED_CMTE_TP_DESC::text
+        FROM STAGING.REF_FILED_CMTE_TP
+        WHERE FILED_CMTE_TP_CD = dc.cmte_tp
+    ) AS cmte_desc
+FROM auditsearch.audit_case aa, disclosure.cmte_valid_fec_yr dc
+WHERE aa.cmte_id = dc.cmte_id
+    AND dc.cmte_tp IN ('H', 'S', 'P', 'X', 'Y', 'Z', 'N', 'Q', 'I', 'O')
+ORDER BY dc.cmte_nm, dc.fec_election_yr;
+
+SELECT dc.cmte_id,
+    dc.cmte_nm,
+    dc.fec_election_yr,
+    dc.cmte_dsgn,
+    dc.cmte_tp,
     b.FILED_CMTE_TP_DESC::text AS cmte_desc
 FROM audit_case aa, disclosure.cmte_valid_fec_yr dc, STAGING.REF_FILED_CMTE_TP b
 WHERE aa.cmte_id = dc.cmte_id
@@ -21,7 +36,7 @@ ALTER TABLE cmte_audit_vw OWNER TO fec;
 
 GRANT ALL ON TABLE cmte_audit_vw TO fec;
 GRANT SELECT ON TABLE cmte_audit_vw TO fec_read;
--- GRANT SELECT ON TABLE cmte_audit_vw TO openfec_read;
+GRANT SELECT ON TABLE cmte_audit_vw TO openfec_read;
 
 --
 --2) Name: cand_audit_vw; Type: VIEW; Schema: auditsearch; Owner: fec
@@ -45,7 +60,7 @@ ALTER TABLE cand_audit_vw OWNER TO fec;
 
 GRANT ALL ON TABLE cand_audit_vw TO fec;
 GRANT SELECT ON TABLE cand_audit_vw TO fec_read;
--- GRANT SELECT ON TABLE cand_audit_vw TO openfec_read;
+GRANT SELECT ON TABLE cand_audit_vw TO openfec_read;
 
 --
 --3) Name: finding_vw; Type: VIEW; Schema: auditsearch; Owner: fec
@@ -64,7 +79,7 @@ ALTER TABLE finding_vw OWNER TO fec;
 
 GRANT ALL ON TABLE finding_vw TO fec;
 GRANT SELECT ON TABLE finding_vw TO fec_read;
--- GRANT SELECT ON TABLE finding_vw TO openfec_read;
+GRANT SELECT ON TABLE finding_vw TO openfec_read;
 
 
 --
@@ -86,5 +101,5 @@ ALTER TABLE finding_rel_vw OWNER TO fec;
 
 GRANT ALL ON TABLE finding_rel_vw TO fec;
 GRANT SELECT ON TABLE finding_rel_vw TO fec_read;
--- GRANT SELECT ON TABLE finding_rel_vw TO openfec_read;
+GRANT SELECT ON TABLE finding_rel_vw TO openfec_read;
 
