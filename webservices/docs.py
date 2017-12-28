@@ -63,17 +63,18 @@ interesting candidates and committees. Then, you can use their IDs to find repor
 item details with the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
-Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 120 requests per minute. Each call is limited to 100 results per page. You can email questions or comments to
-[18f-fec@gsa.gov](18f-fec@gsa.gov). You can also ask questions and discuss the data in the
-[FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). API changes will also
-be added to this group in advance of the change.
+Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000 
+calls an hour. Each call is limited to 100 results per page. You can email questions, comments or 
+a request to get a key for 120 calls per minute to[18f-fec@gsa.gov](18f-fec@gsa.gov). You can also 
+ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). 
+API changes will also be added to this group in advance of the change.
 
 The model definitions and schema are available at [/swagger](/swagger/). This is useful for
 making wrappers and exploring the data.
 
 A few restrictions limit the way you can use FEC data. For example, you can’t use contributor
 lists for commercial purposes or to solicit donations.
-[Learn more here](http://www.fec.gov/pages/brochures/saleuse.shtml).
+[Learn more here](https://transition.fec.gov/pages/brochures/saleuse.shtml).
 
 [View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
 '''
@@ -572,14 +573,7 @@ CALENDAR_DATES = '''
 Combines the election and reporting dates with Commission meetings, conferences, outreach, Advisory Opinions, rules, litigation dates and other
 events into one calendar.
 
-State filtering now applies to elections, reports and reporting periods.
-
-Presidential pre-primary report due dates are not shown on even years.
-Filers generally opt to file monthly rather than submit over 50 pre-primary election
-reports. All reporting deadlines are available at /reporting-dates/ for reference.
-
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
-that creates the calendar.
+State and report type filtering is no longer available.
 '''
 
 CALENDAR_EXPORT = '''
@@ -594,7 +588,7 @@ Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
 reports. All reporting deadlines are available at /reporting-dates/ for reference.
 
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/sql_updates/omnibus_dates.sql)
+This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
 that creates the calendar.
 
 '''
@@ -920,7 +914,12 @@ FED_ELECTION_ACTIVITY = 'Total federal election activity'
 FED_DISBURSEMENTS = 'Total federal disbursements'
 
 # calendar
-CATEGORY = 'Type of date reporting date, live event, etc.'
+CATEGORY = '''
+Each type of event has a calendar category with an integer id. Options are: Open Meetings: 32, Executive Sessions: 39, Public Hearings: 40,
+Conferences: 33, Roundtables: 34, Election Dates: 36, Federal Holidays: 37, FEA Periods: 38, Commission Meetings: 20,
+Reporting Deadlines: 21, Conferences and Outreach: 22, AOs and Rules: 23, Other: 24, Quarterly: 25, Monthly: 26,
+Pre and Post-Elections: 27, EC Periods:28, and IE Periods: 29
+'''
 CAL_STATE = 'The state field only applies to election dates and reporting deadlines, reporting periods and all other dates do not have the array of states to filter on'
 CAL_DESCRIPTION = 'Brief description of event'
 SUMMARY = 'Longer description of event'
@@ -977,10 +976,10 @@ MAX_FILTER = 'Filter for all amounts less than a value.'
 ENTITY_RECEIPTS_TOTLAS = '''
 Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
 ENTITY_DISBURSEMENTS_TOTLAS ='''
 Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/sql_updates/large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''

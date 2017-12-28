@@ -429,35 +429,10 @@ election_dates = {
     'max_primary_general_date': fields.Date(description='Date of primary or general election'),
 }
 
-class MappedList(fields.List):
-
-    def __init__(self, cls_or_instance, mapping=None, **kwargs):
-        super().__init__(cls_or_instance, **kwargs)
-        self.mapping = mapping or {}
-
-    def _deserialize(self, value, attr, data):
-        ret = super()._deserialize(value, attr, data)
-        return sum(
-            [self.mapping.get(each, [each]) for each in ret],
-            [],
-        )
-
 calendar_dates = {
-    'category': MappedList(
-        fields.Str,
-        description=docs.CATEGORY,
-        mapping={
-            'report-Q': ['report-Q{}'.format(each) for each in range(1, 4)] + ['report-YE'],
-            'report-M': ['report-M{}'.format(each) for each in range(2, 13)] + ['report-YE'],
-            'report-E': [
-                'report-{}'.format(each)
-                for each in ['12C', '12G', '12GR', '12P', '12PR', '12R', '12S', '12SC', '12SG', '12SGR', '12SP', '12SPR', '30D', '30G', '30GR', '30P', '30R', '30S', '30SC', '30SG', '30SGR', '60D']
-            ],
-        },
-    ),
-    'description': fields.Str(description=docs.CAL_DESCRIPTION),
-    'summary': fields.Str(description=docs.SUMMARY),
-    'state': fields.List(fields.Str, description=docs.CAL_STATE),
+    'calendar_category_id': fields.List(fields.Int, description=docs.CATEGORY),
+    'description': fields.List(IStr, description=docs.CAL_DESCRIPTION),
+    'summary': fields.List(IStr, description=docs.SUMMARY),
     'min_start_date': fields.DateTime(description='The minimum start date and time'),
     'min_end_date': fields.DateTime(description='The minimum end date and time'),
     'max_start_date': fields.DateTime(description='The maximum start date and time'),
