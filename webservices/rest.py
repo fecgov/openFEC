@@ -68,6 +68,7 @@ from webservices.env import env
 from webservices.tasks import utils
 
 from webservices.tasks.response_exception import ResponseException
+from webservices.tasks.json_response import JsonResponse
 from webservices.tasks.error_code import ErrorCode
 
 from smart_open import smart_open
@@ -189,16 +190,22 @@ def add_caching_headers(response):
 
 @app.errorhandler(Exception)
 def handle_exception(exception):
-    # error_codes = [500, 502, 503, 504]
-    print("In handle_exception*****************", request.url)
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
-    print("***********************", wrapped)
+    # TODO : add a log statement using JsonResponse.error(wrapped, wrapped.status)
+    logger.info("In handle_exception(), received error_code : %s , ", wrapped.status)
     if wrapped.status in [500, 502, 503, 504]:
-        # create the URL to check if it already cached (call the format_utils)
+        formatted_url = utils.format_url(request.url)
+        # get s3 bucket env variables
+        s3_bucket = utils.get_bucket()
+        # TODO : create a variable and assing the region to it
+        # create the URL to check if it already cached and saved on s3(call the format_utils)
         # return cache response if exists
-        # trigger an error and log the errors
-        print("In If, wrapped.status", wrapped.status)
-    # return JsonResponse.error(wrapped, wrapped.status)
+        cached_url = "http://s3-us-gov-west-1.amazonaws.com/{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
+        cached_data = utils.get_cached_request(s3_bucket, cached_url)
+        if cached_data is not None:
+            return cached_data
+        return ErrorCode.INTERNAL_ERROR
+    return ErrorCode.INTERNAL_ERROR
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')

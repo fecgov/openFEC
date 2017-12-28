@@ -4,8 +4,7 @@ import traceback
 
 import flask
 
-from dataactcore.utils.responseException import ResponseException
-
+from webservices.tasks.response_exception import ResponseException
 
 logger = logging.getLogger(__name__)
 

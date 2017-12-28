@@ -3,8 +3,11 @@ import boto3
 import logging
 import re
 import json
+import requests
 from webservices.env import env
 from boto.s3.key import Key
+
+from webservices.resources import download
 
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
 logging.getLogger('smart_open').setLevel(logging.CRITICAL)
@@ -52,3 +55,10 @@ def format_url(url):
     replace_special_char2 = replace_special_char1.replace("?", "")
 
     return replace_special_char2
+
+def get_cached_request(s3_bucket, cached_url):
+
+    response = requests.get(cached_url)
+    if response.status_code == 200:
+        return response.json().encode('utf-8')
+    return None
