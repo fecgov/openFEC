@@ -46,15 +46,17 @@ def format_url(url):
     """
     remove the api_key and its value from the URL by using a regex
     """
-    #split the url  into parts and get only url  after /v1/
+    # Split the url into parts and get only url after /v1/
     parts = url.split('/v1/')
     url_path = parts[1]
-    url_without_api_key = re.sub(".api_key=.*?&", '', url_path.lower())
-    #remove special characters from the URL
-    replace_special_char1 = url_without_api_key.replace("&", "/")
-    replace_special_char2 = replace_special_char1.replace("?", "")
+    cleaned_url = re.sub('.api_key=.*?&', '', url_path)
 
-    return replace_special_char2
+    # Remove other special characters from the URL
+    cleaned_url = cleaned_url.replace('&', '/')
+    cleaned_url = cleaned_url.replace('=', '/')
+    cleaned_url = cleaned_url.replace('?', '')
+
+    return cleaned_url
 
 def get_cached_request(s3_bucket, cached_url):
 

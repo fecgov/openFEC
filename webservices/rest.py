@@ -179,12 +179,20 @@ def add_caching_headers(response):
             s3_key = utils.get_s3_key(cached_url)
 
             # upload the request_content.json file to s3 bucket
-            with smart_open(s3_key, 'wb') as cached_file:
+            # TODO:  Figure out why the s3_key object is not working with the
+            #        smart_open call, when it does for downloads (and verify
+            #        that downloads are indeed still working too).
+            with smart_open(cached_url, 'w') as cached_file:
                 cached_file.write(json_data)
 
-            logger.info('The following request has been cached and uploaded successfully :%s ', cached_url)
+            logger.info(
+                'The following request has been cached and uploaded successfully: {}'.format(
+                    cached_url
+                )
+            )
         except:
-            logger.error('Cache Upload failed')
+            logger.error('Cache Upload failed.')
+
     return response
 
 

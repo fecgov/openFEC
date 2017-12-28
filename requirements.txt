@@ -34,7 +34,7 @@ git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data export
 boto3==1.4.4
-smart_open==1.5.3
+smart_open==1.5.6
 
 # Task queue
 celery==4.1.0
