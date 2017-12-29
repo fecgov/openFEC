@@ -174,6 +174,8 @@ def add_caching_headers(response):
             # format the URL by removing the api_key and special characters
             formatted_url = utils.format_url(request.url)
             # get s3 bucket env variables
+            # import pdb
+            # pdb.set_trace()
             s3_bucket = utils.get_bucket()
             cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
             s3_key = utils.get_s3_key(cached_url)
@@ -190,8 +192,8 @@ def add_caching_headers(response):
                     cached_url
                 )
             )
-        except:
-            logger.error('Cache Upload failed.')
+        except Exception as e:
+            logger.error('Exception occured while uploading the cache request to S3. %s', e)
 
     return response
 
@@ -200,20 +202,26 @@ def add_caching_headers(response):
 def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
     # TODO : add a log statement using JsonResponse.error(wrapped, wrapped.status)
-    logger.info("In handle_exception(), received error_code : %s , ", wrapped.status)
+    logger.info("In handle_exception(), following error occured %s , ", wrapped.status)
+
     if wrapped.status in [500, 502, 503, 504]:
-        formatted_url = utils.format_url(request.url)
-        # get s3 bucket env variables
-        s3_bucket = utils.get_bucket()
-        # TODO : create a variable and assing the region to it
-        # create the URL to check if it already cached and saved on s3(call the format_utils)
-        # return cache response if exists
-        cached_url = "http://s3-us-gov-west-1.amazonaws.com/{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
-        cached_data = utils.get_cached_request(s3_bucket, cached_url)
-        if cached_data is not None:
-            return cached_data
-        return ErrorCode.INTERNAL_ERROR
-    return ErrorCode.INTERNAL_ERROR
+        try:
+            formatted_url = utils.format_url(request.url)
+            # get s3 bucket env variables
+            s3_bucket = utils.get_bucket()
+            # TODO : create a variable and assing the region to it
+            # create the URL to check if it already cached and saved on s3(call the format_utils)
+            # return cache response if exists
+            cached_url = "http://s3-us-gov-west-1.amazonaws.com/{0}/cached-calls/{1}.json".format(
+                s3_bucket.name, formatted_url)
+            cached_data = utils.get_cached_request(s3_bucket, cached_url)
+            if cached_data is not None:
+                return cached_data
+            return None
+        except Exception as e:
+            logger.error("Exception occured while retrieving the cached file from s3 %s", e)
+            raise e
+    return None
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
