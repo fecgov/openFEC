@@ -151,7 +151,7 @@ class TestArgs(unittest.TestCase):
 
     def test_replace_special_chars_from_url(self):
         """
-        remove the special characters ? and & from the URL
+        remove the special characters ?, & and = from the URL
         """
         url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?api_key=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
         url_after_format = utils.format_url(url_before_format)
