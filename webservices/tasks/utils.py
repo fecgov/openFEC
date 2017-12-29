@@ -58,7 +58,7 @@ def format_url(url):
 
     return cleaned_url
 
-def get_cached_request(s3_bucket, cached_url):
+def get_cached_request(cached_url):
     response = requests.get(cached_url)
     if response.status_code == 200:
         return response.json().encode('utf-8')

@@ -202,25 +202,30 @@ def handle_exception(exception):
     logger.info("In handle_exception(), wrapped status is %s", wrapped.status)
 
     if wrapped.status in [500, 502, 503, 504]:
-        try:
-            formatted_url = utils.format_url(request.url)
-            # get s3 bucket env variables
-            s3_bucket = utils.get_bucket()
-            # TODO : create a variable and assing the region to it
-            # create the URL to check if it already cached and saved on s3(call the format_utils)
-            # return cache response if exists
-            cached_url = "http://s3-us-gov-west-1.amazonaws.com/{0}/cached-calls/{1}.json".format(
-                s3_bucket.name, formatted_url)
-            cached_data = utils.get_cached_request(s3_bucket, cached_url)
-            if cached_data is not None:
-                return cached_data
-            else:
-                logger.error("The requested URL is not cached before and do not exist on S3 :{}"
-                    .format(cached_url))
-            # return None
-        except Exception as e:
-            logger.error("Exception occured while retrieving the cached file from s3 %s", e)
-    return JsonResponse.error(wrapped, wrapped.status)
+        formatted_url = utils.format_url(request.url)
+        # get s3 bucket env variables
+        s3_bucket = utils.get_bucket()
+        # TODO : create a variable and assing the region to it
+        # create the URL to check if it already cached and saved on s3(call the format_utils)
+        # return cache response if exists
+        cached_url = "http://s3-us-gov-west-1.amazonaws.com/{0}/cached-calls/{1}.json".format(
+            s3_bucket.name, formatted_url)
+
+        cached_data = utils.get_cached_request(cached_url)
+
+        if cached_data is not None:
+            return cached_data
+        else:
+            logger.error("Exception occured while retrieving the cached file from S3")
+            raise exceptions.ApiError(
+                'The requested URL is not found'.format(cached_url),
+                status_code=http.client.NOT_FOUND
+            )
+    else:
+        raise exceptions.ApiError(
+            'Could not process the request %s'.format(cached_url),
+            status_code=http.client.NOT_FOUND
+        )
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
