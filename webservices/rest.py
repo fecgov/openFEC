@@ -220,8 +220,7 @@ def handle_exception(exception):
             # return None
         except Exception as e:
             logger.error("Exception occured while retrieving the cached file from s3 %s", e)
-    return JsonResponse.error(wrapped, 404)
-
+    return JsonResponse.error(wrapped, wrapped.status)
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
