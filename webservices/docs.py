@@ -63,10 +63,10 @@ interesting candidates and committees. Then, you can use their IDs to find repor
 item details with the other endpoints. If you are interested in individual donors, check
 out contributor information in schedule_a.
 
-Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000 
-calls an hour. Each call is limited to 100 results per page. You can email questions, comments or 
-a request to get a key for 120 calls per minute to[APIinfo@fec.gov](apiinfo@fec.gov). You can also 
-ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data). 
+Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
+calls an hour. Each call is limited to 100 results per page. You can email questions, comments or
+a request to get a key for 120 calls per minute to[APIinfo@fec.gov](apiinfo@fec.gov). You can also
+ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data).
 API changes will also be added to this group in advance of the change.
 
 
@@ -686,8 +686,96 @@ and there can be a lag between load_date and receipt_date. This field can be hel
 identify paper records that have been processed recently.'
 PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
 PARTY_FULL = 'Party affiliated with a candidate or committee'
-FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1'
-REPORT_TYPE = 'Name of report where the underlying data comes from'
+FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1:\n\
+    - F1  Statement of\n\
+          organization\n\
+    - F1M Notification of\n\
+          multicandidate\n\
+          status\n\
+    - F2  Statement of \n\
+          candidacy\n\
+    - F9  24-hour notice of \n\
+          disbursements for\n\
+          electioneering\n\
+          communications\n\
+    - F10 24-hour notice\n\
+          of expenditure\n\
+          of personal funds\n\
+    - F11 24-hour notice of\n\
+          opposition personal\n\
+          funds amount\n\
+    - F12 24-hour notice\n\
+          of suspension of\n\
+          increased limits\n\
+    - F99 Miscellaneous\n\
+          document\n\
+    - F6  48-hour notice of\n\
+          contribution/loans\n\
+          received\n\
+'
+REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
+    - 10D Pre-Election\n\
+    - 10G Pre-General\n\
+    - 10P Pre-Primary\n\
+    - 10R Pre-Run-Off\n\
+    - 10S Pre-Special\n\
+    - 12C Pre-Convention\n\
+    - 12G Pre-General\n\
+    - 12P Pre-Primary\n\
+    - 12R Pre-Run-Off\n\
+    - 12S Pre-Special\n\
+    - 30D Post-Election\n\
+    - 30G Post-General\n\
+    - 30P Post-Primary\n\
+    - 30R Post-Run-Off\n\
+    - 30S Post-Special\n\
+    - 60D Post-Convention\n\
+    - ADJ Comp Adjust Amend\n\
+    - CA  Comprehensive Amend\n\
+    - M1  January Monthly\n\
+    - M10 October Monthly\n\
+    - M11 November Monthly\n\
+    - M12 December Monthly\n\
+    - M2  February Monthly\n\
+    - M3  March Monthly\n\
+    - M4  April Monthly\n\
+    - M5  May Monthly\n\
+    - M6  June Monthly\n\
+    - M7  July Monthly\n\
+    - M8  August Monthly\n\
+    - M9  September Monthly\n\
+    - MY  Mid-Year Report\n\
+    - Q1  April Quarterly\n\
+    - Q2  July Quarterly\n\
+    - Q3  October Quarterly\n\
+    - TER Termination Report\n\
+    - YE  Year-End\n\
+    - 90S Post Inaugural\n\
+          Supplement\n\
+    - 90D Post Inaugural\n\
+    - 48  48 Hour Notification\n\
+    - 24  24 Hour Notification\n\
+    - M7S July Monthly/\n\
+          Semi-Annual\n\
+    - MSA Monthly Semi-Annual\n\
+          (MY)\n\
+    - MYS Monthly Year End/\n\
+          Semi-Annual\n\
+    - Q2S July Quarterly/\n\
+          Semi-Annual\n\
+    - QSA Quarterly Semi-Annual\n\
+          (MY)\n\
+    - QYS Quarterly Year End/\n\
+          Semi-Annual\n\
+    - QYE Quarterly Semi-Annual\n\
+          (YE)\n\
+    - QMS Quarterly Mid-Year/\n\
+          Semi-Annual\n\
+    - MSY Monthly Semi-Annual\n\
+         (YE)\n\
+'
+REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
+
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
 STATE_GENERIC = 'US state or territory'
 ZIP_CODE = 'Zip code'
@@ -884,8 +972,6 @@ fill a vacancy in the Senate. In those cases class refers to the seat groupings 
 of the election.'
 
 # filings
-DOCUMENT_TYPE = 'Type of form,\n\
-    report or documents'
 ENDING_IMAGE_NUMBER = 'Image number is an unique identifier for each page the electronic or paper \
 report. The last image number corresponds to the image number for the last page of the document.'
 IMAGE_NUMBER = 'An unique identifier for each page the electronic or paper \
@@ -1037,6 +1123,29 @@ FILE_NUMBER = 'Filing ID number'
 AMENDMENT_CHAIN = '''
 The first value in the chain is the original filing.  The ordering in the chain reflects the order the
 amendments were filed up to the amendment being viewed.
+'''
+
+AMENDMENT_INDICATOR = '''
+    -N   new\n\
+    -A   amendment\n\
+    -T   terminated\n\
+    -C   consolidated\n\
+    -M   multi-candidate\n\
+    -S   secondary\n\n\
+    Null might be\n\
+    new or amendment.\n\
+    If amendment\n\
+    indicator is null\n\
+    and the filings\n\
+    is the first\n\
+    or first in a\n\
+    chain treat it\n\
+    as if it was a new.\n\
+    If it is not the\n\
+    first or first\n\
+    in a chain then\n\
+    treat the filing\n\
+    as an amendment.\n\
 '''
 
 AMENDED_BY = '''
