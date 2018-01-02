@@ -687,31 +687,39 @@ identify paper records that have been processed recently.'
 PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
 PARTY_FULL = 'Party affiliated with a candidate or committee'
 FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1:\n\
-    - F1  Statement of\n\
-          organization\n\
-    - F1M Notification of\n\
-          multicandidate\n\
-          status\n\
-    - F2  Statement of \n\
-          candidacy\n\
-    - F9  24-hour notice of \n\
-          disbursements for\n\
-          electioneering\n\
-          communications\n\
-    - F10 24-hour notice\n\
-          of expenditure\n\
-          of personal funds\n\
-    - F11 24-hour notice of\n\
-          opposition personal\n\
-          funds amount\n\
-    - F12 24-hour notice\n\
-          of suspension of\n\
-          increased limits\n\
-    - F99 Miscellaneous\n\
-          document\n\
-    - F6  48-hour notice of\n\
-          contribution/loans\n\
-          received\n\
+    - F1M  Notification of\n\
+           Multicandidate Status\n\
+    - F2   Statement Of Candidacy\n\
+    - F24  24 Hour Notice\n\
+    - F3   Report Of Receipts and\n\
+           Disbursements for an \n\
+           Authorized Committee\n\
+    - F3P  Report Of Receipts and\n\
+           Disbursements by an\n\
+           Authorized Committee\n\
+           of a Candidate for\n\
+           The Office Of President\n\
+           or Vice President\n\
+    - F3X  Report Of Receipts And\n\
+           Disbursements For Other \n\
+           Than An Authorized Committee\n\
+    - F4   Report Of Receipts And \n\
+           Disbursements For A Comm \n\
+           Or Org Supporting A \n\
+           Nomination Convention\n\
+    - F5   Report Of Independent \n\
+           Expenditures Made And \n\
+           Contributions Received\n\
+    - F6   48 Hour Notice\n\
+    - F7   Communication Costs\n\
+    - F8   Debt Settlement Plan\n\
+    - F99  Miscellaneous Text\n\
+    - FRQ  Request For Additional\n\
+           Information\n\
+    - F13  Report Of Donations \n\
+           Accepted For Inaugural Committee\n\
+    - F9   24 Hour Notice Of Disbursements\n\
+           For Electioneering Communications\n\
 '
 REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - 10D Pre-Election\n\

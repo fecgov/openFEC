@@ -264,7 +264,7 @@ filings = {
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
-    'form_type': fields.List(IStr(validate=validate.OneOf(['', 'F1', 'F1M', 'F2', 'F9' , 'F10', 'F11', 'F12', 'F99', 'F6'])), description=docs.FORM_TYPE),
+    'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(IStr, description=docs.DISTRICT),
     'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
