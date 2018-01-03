@@ -2,6 +2,7 @@
 inherit: manifest_stage.yml
 env:
   NEW_RELIC_APP_NAME: fec | api | stage
+  CACHE_ALL_REQUESTS: True
 applications:
   - name: api
     instances: 1
