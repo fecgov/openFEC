@@ -35,12 +35,13 @@ manager.command(legal_docs.index_statutes)
 manager.command(legal_docs.load_archived_murs)
 manager.command(legal_docs.load_advisory_opinions)
 manager.command(legal_docs.load_current_murs)
-manager.command(legal_docs.initialize_legal_docs)
+manager.command(legal_docs.initialize_current_legal_docs)
+manager.command(legal_docs.initialize_archived_murs)
 manager.command(legal_docs.create_staging_index)
 manager.command(legal_docs.restore_from_staging_index)
 manager.command(legal_docs.delete_index)
-manager.command(legal_docs.reinitialize_all_legal_docs)
-manager.command(legal_docs.refresh_legal_docs_zero_downtime)
+manager.command(legal_docs.reinitialize_all_current_legal_docs)
+manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
 
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been

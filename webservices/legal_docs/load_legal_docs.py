@@ -18,7 +18,7 @@ from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
-from webservices.legal_docs import DOCS_INDEX
+from webservices.legal_docs import DOCS_INDEX, ARCHIVED_MURS_INDEX
 
 from . import reclassify_statutory_citation
 
@@ -426,7 +426,7 @@ def process_mur(mur):
         'citations': citations,
         'url': pdf_url
     }
-    es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
+    es.index(ARCHIVED_MURS_INDEX, 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, tasks_per_child=None):
     """
