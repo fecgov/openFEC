@@ -36,6 +36,26 @@ def _setup_extensions():
     rest.db.engine.execute('create extension if not exists btree_gin;')
 
 def _reset_schema():
+    rest.db.engine.execute('drop schema if exists public cascade;')
+    rest.db.engine.execute('drop schema if exists disclosure cascade;')
+    rest.db.engine.execute('drop schema if exists staging cascade;')
+    rest.db.engine.execute('drop schema if exists fecapp cascade;')
+    rest.db.engine.execute('drop schema if exists real_efile cascade;')
+    rest.db.engine.execute('drop schema if exists auditsearch cascade;')
+    rest.db.engine.execute('create schema public;')
+    rest.db.engine.execute('create schema disclosure;')
+    rest.db.engine.execute('create schema staging;')
+    rest.db.engine.execute('create schema fecapp;')
+    rest.db.engine.execute('create schema real_efile;')
+    rest.db.engine.execute('create schema auditsearch;')
+
+
+def _reset_schema_for_integration():
+    rest.db.engine.execute('drop schema if exists public cascade;')
+    rest.db.engine.execute('drop schema if exists disclosure cascade;')
+    rest.db.engine.execute('drop schema if exists staging cascade;')
+    rest.db.engine.execute('drop schema if exists fecapp cascade;')
+    rest.db.engine.execute('drop schema if exists auditsearch cascade;')
     _drop_schema()
     rest.db.engine.execute('create schema public;')
     _create_schema()
@@ -89,7 +109,7 @@ class ApiBaseTest(BaseTestCase):
         super(ApiBaseTest, cls).setUpClass()
         with open(os.devnull, 'w') as null:
             subprocess.check_call(
-                ['psql', '-f', 'data/migrations/V39__states_and_zips_data.sql', TEST_CONN],
+                ['psql', '-f', 'data/migrations/V0039__states_and_zips_data.sql', TEST_CONN],
                 stdout=null
             )
 
