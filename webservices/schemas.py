@@ -129,7 +129,8 @@ class EFilingF3PSchema(BaseEfileSchema):
                     state_map[keys[int(row.line_number - 1)][0]] = row.column_a
                     state_map[keys[int(row.line_number - 1)][1]] = row.column_b
                 else:
-                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_', keys[int(row.line_number - 1)][0]).replace(' ', '_')
+                    replace_a = re.sub(per, descriptions[int(row.line_number - 1)] + '_',
+                        keys[int(row.line_number - 1)][0]).replace(' ', '_')
                     replace_b = re.sub(ytd, descriptions[int(row.line_number - 1)] + '_',
                                        str(keys[int(row.line_number - 1)][1])).replace(' ', '_')
                     replace_a = make_period_string(replace_a)
@@ -285,7 +286,6 @@ class CandidateSearchSchema(BaseSearchSchema):
 class CommitteeSearchSchema(BaseSearchSchema):
     pass
 
-
 class CandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
         CandidateSearchSchema,
@@ -306,9 +306,36 @@ register_schema(CandidateSearchListSchema)
 register_schema(CommitteeSearchSchema)
 register_schema(CommitteeSearchListSchema)
 
+
+class AuditCandidateSearchSchema(BaseSearchSchema):
+    pass
+
+class AuditCommitteeSearchSchema(BaseSearchSchema):
+    pass
+
+class AuditCandidateSearchListSchema(ApiSchema):
+    results = ma.fields.Nested(
+        AuditCandidateSearchSchema,
+        ref='#/definitions/AuditCandidateSearch',
+        many=True,
+    )
+
+class AuditCommitteeSearchListSchema(ApiSchema):
+    results = ma.fields.Nested(
+        AuditCommitteeSearchSchema,
+        ref='#/definitions/AuditCommitteeSearch',
+        many=True,
+    )
+
+register_schema(AuditCandidateSearchSchema)
+register_schema(AuditCandidateSearchListSchema)
+register_schema(AuditCommitteeSearchSchema)
+register_schema(AuditCommitteeSearchListSchema)
+
+
 make_efiling_schema = functools.partial(
     make_schema,
-    options={'exclude': ('idx', 'total_disbursements', 'total_receipts' )},
+    options={'exclude': ('idx', 'total_disbursements', 'total_receipts')},
     fields={
         'pdf_url': ma.fields.Str(),
         'report_year': ma.fields.Int(),
@@ -360,7 +387,8 @@ augment_models(
     models.CandidateFlags
 
 )
-class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'], schemas['CandidateTotalSchema'],schemas['CandidateFlagsSchema']):
+class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
+        schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
     pass
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
@@ -567,8 +595,8 @@ ScheduleDSchema = make_schema(
         'pdf_url': ma.fields.Str(),
         'sub_id': ma.fields.Str(),
     },
-    options={'exclude': ('creditor_debtor_name_text',)
-
+    options={
+        'exclude': ('creditor_debtor_name_text',)
     },
 )
 ScheduleDPageSchema = make_page_schema(
@@ -729,7 +757,7 @@ ItemizedScheduleBfilingsSchema = make_schema(
         'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        'is_notice':ma.fields.Boolean(),
+        'is_notice': ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
@@ -755,7 +783,7 @@ ItemizedScheduleEfilingsSchema = make_schema(
         'filing': ma.fields.Nested(schemas['EFilingsSchema']),
         'pdf_url': ma.fields.Str(),
         'fec_url': ma.fields.Str(),
-        'is_notice':ma.fields.Boolean(),
+        'is_notice': ma.fields.Boolean(),
         'payee_name': ma.fields.Str(),
         'report_type': ma.fields.Str(),
         'csv_url': ma.fields.Str(),
@@ -940,6 +968,141 @@ ScheduleAByStateRecipientTotalsPageSchema = make_page_schema(
 )
 register_schema(ScheduleAByStateRecipientTotalsSchema)
 register_schema(ScheduleAByStateRecipientTotalsPageSchema)
+
+
+# endpoint audit-primary-category
+PrimaryCategorySchema = make_schema(
+    models.PrimaryCategory,
+    fields={
+        'primary_category_id': ma.fields.Int(),
+        'primary_category_name': ma.fields.Str(),
+        'tier': ma.fields.Int(),
+    },
+    options={
+        'exclude': ('tier',)
+    }
+)
+
+PrimaryCategoryPageSchema = make_page_schema(PrimaryCategorySchema)
+register_schema(PrimaryCategorySchema)
+register_schema(PrimaryCategoryPageSchema)
+
+# endpoint audit-category(with nested sub category)
+CategoryRelationSchema = make_schema(
+    models.CategoryRelation,
+    fields={
+        'primary_category_id': ma.fields.Int(),
+        'sub_category_id': ma.fields.Int(),
+        'sub_category_name': ma.fields.Str(),
+        'primary_category_name': ma.fields.Str(),
+    },
+    options={
+        'exclude': ('primary_category_id', 'primary_category_name')
+    }
+)
+
+CategoryRelationPageSchema = make_page_schema(CategoryRelationSchema)
+register_schema(CategoryRelationSchema)
+register_schema(CategoryRelationPageSchema)
+
+# endpoint audit-category
+CategorySchema = make_schema(
+    models.Category,
+    fields={
+        'primary_category_id': ma.fields.Int(),
+        'primary_category_name': ma.fields.Str(),
+        'tier': ma.fields.Int(),
+        'sub_category_list': ma.fields.Nested(CategoryRelationSchema, many=True),
+    },
+    options={
+        'exclude': ('tier',)
+        # 'relationships': [
+        #     Relationship(
+        #         models.Category.sub_category_list,
+        #         models.CategoryRelation.primary_category_id,
+        #         'primary_category_id',
+        #         1
+        #     ),
+        # ],
+    }
+)
+
+CategoryPageSchema = make_page_schema(CategorySchema)
+register_schema(CategorySchema)
+register_schema(CategoryPageSchema)
+
+
+# endpoint audit-case
+AuditCaseSubCategorySchema = make_schema(
+    models.AuditCaseSubCategory,
+    fields={
+        'primary_category_id': ma.fields.Int(),
+        'audit_case_id': ma.fields.Int(),
+        'sub_category_id': ma.fields.Int(),
+        'sub_category_name': ma.fields.Str(),
+    },
+    options={
+        'exclude': (
+            'primary_category_id',
+            'audit_case_id',
+            'primary_category_name',
+        )
+    }
+)
+
+AuditCaseSubCategoryPageSchema = make_page_schema(AuditCaseSubCategorySchema)
+register_schema(AuditCaseSubCategorySchema)
+register_schema(AuditCaseSubCategoryPageSchema)
+
+
+# endpoint audit-case(with nested sub_category)
+AuditCategoryRelationSchema = make_schema(
+    models.AuditCategoryRelation,
+    fields={
+        'audit_case_id': ma.fields.Str(),
+        'primary_category_id': ma.fields.Int(),
+        'primary_category_name': ma.fields.Str(),
+        'sub_category_list': ma.fields.Nested(AuditCaseSubCategorySchema, many=True),
+    },
+    options={
+        'exclude': (
+            'audit_case_id',
+        )}
+)
+
+AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
+register_schema(AuditCategoryRelationSchema)
+register_schema(AuditCategoryRelationPageSchema)
+
+# endpoint audit-case(with nested primary category)
+AuditCaseSchema = make_schema(
+    models.AuditCase,
+    fields={
+        'idx': ma.fields.Int(),
+        'audit_case_id': ma.fields.Str(),
+        'cycle': ma.fields.Int(),
+        'committee_id': ma.fields.Str(),
+        'committee_name': ma.fields.Str(),
+        'committee_designation': ma.fields.Str(),
+        'committee_type': ma.fields.Str(),
+        'committee_description': ma.fields.Str(),
+        'far_release_date': ma.fields.Date(),
+        'audit_id': ma.fields.Integer(),
+        'candidate_id': ma.fields.Str(),
+        'candidate_name': ma.fields.Str(),
+        'primary_category_list': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
+    },
+    options={
+        'exclude': (
+            'primary_category_id',
+            'sub_category_id',
+            'idx',
+        )}
+)
+AuditCasePageSchema = make_page_schema(AuditCaseSchema)
+register_schema(AuditCaseSchema)
+register_schema(AuditCasePageSchema)
+
 
 # Copy schemas generated by helper methods to module namespace
 globals().update(schemas)

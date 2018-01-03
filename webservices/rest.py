@@ -17,6 +17,8 @@ initialize_newrelic()
 import os
 import http
 import logging
+import json
+import boto
 
 from flask import abort
 from flask import request
@@ -61,8 +63,14 @@ from webservices.resources import dates
 from webservices.resources import costs
 from webservices.resources import legal
 from webservices.resources import large_aggregates
+from webservices.resources import audit
 from webservices.env import env
+from webservices.tasks import utils
 
+from smart_open import smart_open
+
+app = Flask(__name__)
+logger = logging.getLogger('rest.py')
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
@@ -71,8 +79,6 @@ def sqla_conn_string():
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     return sqla_conn_string
 
-
-app = Flask(__name__)
 # app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
@@ -151,8 +157,30 @@ def limit_remote_addr():
 @app.after_request
 def add_caching_headers(response):
     max_age = env.get_credential('FEC_CACHE_AGE')
+    cache_all_requests = env.get_credential('CACHE_ALL_REQUESTS', False)
+    status_code = response.status_code
+
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
+
+    if (cache_all_requests and status_code == 200):
+        try:
+            # convert the results to JSON
+            json_data = utils.get_json_data(response)
+            # format the URL by removing the api_key and special characters
+            formatted_url = utils.format_url(request.url)
+            # get s3 bucket env variables
+            s3_bucket = utils.get_bucket()
+            cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
+            s3_key = utils.get_s3_key(cached_url)
+
+            # upload the request_content.json file to s3 bucket
+            with smart_open(s3_key, 'wb') as cached_file:
+                cached_file.write(json_data)
+
+            logger.info('The following request has been cached and uploaded successfully :%s ', cached_url)
+        except:
+            logger.error('Cache Upload failed')
     return response
 
 
@@ -214,8 +242,11 @@ api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
-
-
+api.add_resource(audit.PrimaryCategory, '/audit-primary-category/')
+api.add_resource(audit.Category, '/audit-category/')
+api.add_resource(audit.AuditCaseView, '/audit-case/')
+api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
+api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -335,6 +366,11 @@ apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
+apidoc.register(audit.PrimaryCategory, blueprint='v1')
+apidoc.register(audit.Category, blueprint='v1')
+apidoc.register(audit.AuditCaseView, blueprint='v1')
+apidoc.register(audit.AuditCandidateNameSearch, blueprint='v1')
+apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)

@@ -102,14 +102,9 @@ To create the test database, run:
 createdb cfdm_unit_test
 ```
 
-Create the required roles in the test database by running:
-
-```
-psql <<db-connection-parameters>> -f data/create_roles.sql
-```
-
 #### Create a development database
 Before you can run this project locally, you'll need a development database.
+
 
 To create the development database, run:
 
@@ -117,16 +112,20 @@ To create the development database, run:
 createdb cfdm_test
 ```
 
+Set the environment variable SQLA_SAMPLE_DB_CONN to point to this database, using:
+
+```
+export SQLA_SAMPLE_DB_CONN=<psql:address-to-box>
+```
+
 Load our sample data into the development database (`cfdm_test`) by running:
 
 ```
-pg_restore --dbname cfdm_test --no-acl --no-owner data/subset.dump
-./manage.py refresh_materialized
+invoke create_sample_db
 ```
+This will run `flyway` migrations on the empty database to create the schema, and then load sample data into this database from `data/sample_db.sql`.
 
-Ignore `user does not exist` error messages. Everything will still work!
-
-Next you'll need to load some documents into elastic search in order to create the search index.
+Next you'll need to load some documents into elasticsearch in order to create the search index.
 To load statutes into elasticsearch, run:
 
 ```
