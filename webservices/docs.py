@@ -687,39 +687,55 @@ identify paper records that have been processed recently.'
 PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
 PARTY_FULL = 'Party affiliated with a candidate or committee'
 FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1:\n\
+    - F1   Statement of\n\
+           Organization\n\
     - F1M  Notification of\n\
-           Multicandidate Status\n\
-    - F2   Statement Of Candidacy\n\
-    - F24  24 Hour Notice\n\
-    - F3   Report Of Receipts and\n\
+           Multicandidate\n\
+           Status\n\
+    - F2   Statement of Candidacy\n\
+    - F3   Report of Receipts and\n\
            Disbursements for an \n\
            Authorized Committee\n\
-    - F3P  Report Of Receipts and\n\
+    - F3P  Report of Receipts and\n\
            Disbursements by an\n\
            Authorized Committee\n\
            of a Candidate for\n\
-           The Office Of President\n\
+           The Office of President\n\
            or Vice President\n\
-    - F3X  Report Of Receipts And\n\
-           Disbursements For Other \n\
-           Than An Authorized Committee\n\
-    - F4   Report Of Receipts And \n\
-           Disbursements For A Comm \n\
-           Or Org Supporting A \n\
-           Nomination Convention\n\
-    - F5   Report Of Independent \n\
-           Expenditures Made And \n\
+    - F3L  Report of Contributions\n\
+           Bundled by Lobbyists/\n\
+           Registrants and Lobbyist/\n\
+           Registrant PACs\n\
+    - F3X  Report of Receipts and\n\
+           Disbursements for other \n\
+           than an Authorized \n\
+           Committee\n\
+    - F4   Report of Receipts and \n\
+           Disbursements for a \n\
+           Committee or Organization\n\
+           Supporting a Nomination\n\
+           Convention\n\
+    - F5   Report of Independent \n\
+           Expenditures Made and \n\
            Contributions Received\n\
-    - F6   48 Hour Notice\n\
-    - F7   Communication Costs\n\
+    - F6   48 Hour Notice of \n\
+           Contributions/Loans\n\
+           Received\n\
+    - F7   Report of Communication\n\
+           Costs by Corporations \n\
+           and Membership \n\
+           Organizations\n\
     - F8   Debt Settlement Plan\n\
+    - F9   24 Hour Notice of \n\
+           Disbursements for \n\
+           Electioneering \n\
+           Communications\n\
+    - F13  Report of Donations \n\
+           Accepted for Inaugural\n\
+           Committee\n\
     - F99  Miscellaneous Text\n\
-    - FRQ  Request For Additional\n\
+    - FRQ  Request for Additional\n\
            Information\n\
-    - F13  Report Of Donations \n\
-           Accepted For Inaugural Committee\n\
-    - F9   24 Hour Notice Of Disbursements\n\
-           For Electioneering Communications\n\
 '
 REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - 10D Pre-Election\n\
@@ -738,8 +754,6 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - 30R Post-Run-Off\n\
     - 30S Post-Special\n\
     - 60D Post-Convention\n\
-    - ADJ Comp Adjust Amend\n\
-    - CA  Comprehensive Amend\n\
     - M1  January Monthly\n\
     - M10 October Monthly\n\
     - M11 November Monthly\n\
