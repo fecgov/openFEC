@@ -40,7 +40,12 @@ def get_s3_key(name):
 
 def get_json_data(response):
     json_data = json.dumps(response.data.decode('utf-8'))
-    return json_data
+    python_obj = json.loads(json_data)
+    print("IIIIIIIIIIIIIIIIIIIIIIIII %s", json.dumps(python_obj, indent=None, separators=(', ', ': ')))
+    return python_obj
+    # json_data = json.dumps(response.data.decode('utf-8'))
+    # print("*********************** %s ", json_data)
+    # return json_data
 
 def format_url(url):
     """
@@ -60,6 +65,9 @@ def format_url(url):
 
 def get_cached_request(cached_url):
     response = requests.get(cached_url)
+    python_str = json.dumps(response.json(), indent=4)
+    print("OOOOOOOOOOOOOOOOOOOOOO %s", json.dumps(response.json(), indent=4))
     if response.status_code == 200:
-        return response.json().encode('utf-8')
+        print("YYYYYYYYYYYYYYYYYYYYYYYYYY %s", python_str)
+        return python_str
     return None
