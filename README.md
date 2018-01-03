@@ -556,14 +556,18 @@ python manage.py load_advisory_opinions [-f FROM_AO_NO]
 python manage.py load_current_murs [-f FROM_MUR_NO]
 ```
 
-#### Loading all legal documents for the 1st time
+#### Loading all current legal documents for the 1st time (excludes archived MURs)
 ```
-python manage.py reinitialize_all_legal_docs
+python manage.py reinitialize_all_current_legal_docs
+```
+#### Loading all archived MURs for the 1st time
+```
+python manage.py initialize_archived_murs
 ```
 
 #### Loading all legal documents with no downtime
 ```
-python manage.py refresh_legal_docs_zero_downtime
+python manage.py refresh_current_legal_docs_zero_downtime
 ```
 This command is typically used when there is a schema change. A staging index is built
 and populated in the background. When ready, the staging index is moved to the production index with no downtime.

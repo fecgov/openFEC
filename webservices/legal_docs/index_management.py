@@ -5,6 +5,7 @@ import elasticsearch.helpers
 
 from . import (
     DOCS_INDEX,
+    ARCHIVED_MURS_INDEX,
     DOCS_SEARCH
 )
 from webservices import utils
@@ -330,10 +331,10 @@ ANALYZER_SETTINGS = {
 }
 
 
-def initialize_legal_docs():
+def initialize_current_legal_docs():
     """
     Initialize Elasticsearch for storing legal documents.
-    Create the `docs` index, and set up the aliases `docs_index` and `docs_search`
+    Create the `docs` index, and set up the aliases `DOCS_INDEX` and `DOCS_SEARCH`
     to point to the `docs` index. If the `doc` index already exists, delete it.
     """
 
@@ -359,6 +360,36 @@ def initialize_legal_docs():
             DOCS_SEARCH: {}
         }
     })
+
+
+def initialize_archived_murs():
+    """
+    Initialize Elasticsearch for storing archived MURs.
+    If the `archived_murs` index already exists, delete it.
+    Create the `archived_murs` index.
+    Set up the alias `ARCHIVED_MURS_INDEX` to point to the `archived_murs` index.
+    Set up the alias `DOCS_SEARCH` to point `archived_murs` index, allowing the
+    legal search to work across current and archived MURs
+    """
+
+    es = utils.get_elasticsearch_connection()
+
+    try:
+        logger.info("Delete index 'archived_murs'")
+        es.indices.delete('archived_murs')
+    except elasticsearch.exceptions.NotFoundError:
+        pass
+
+    logger.info("Create index 'archived_murs', point to alias 'DOCS_SEARCH'")
+    es.indices.create('archived_murs', {
+        "mappings": MAPPINGS,
+        "settings": ANALYZER_SETTINGS,
+        "aliases": {
+            ARCHIVED_MURS_INDEX: {},
+            DOCS_SEARCH: {}
+        }
+    })
+
 
 def delete_index():
     """
@@ -396,6 +427,8 @@ def create_staging_index():
         {"remove": {"index": 'docs', "alias": DOCS_INDEX}},
         {"add": {"index": 'docs_staging', "alias": DOCS_INDEX}}
     ]})
+
+
 
 def restore_from_staging_index():
     """

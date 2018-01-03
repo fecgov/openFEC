@@ -6,7 +6,7 @@ from webservices.legal_docs import (
     index_regulations,
     index_statutes,
     load_archived_murs,
-    initialize_legal_docs
+    initialize_current_legal_docs
 )
 
 from webservices.legal_docs.load_legal_docs import (
@@ -31,11 +31,14 @@ def test_get_subject_tree():
 class ElasticSearchMock:
     class ElasticSearchIndicesMock:
         def delete(self, index):
-            assert index in ['docs', 'docs_index']
+            assert index in ['docs', 'archived_murs', 'docs_index']
 
         def create(self, index, mappings):
-            assert index == 'docs'
+            assert index in ['docs', 'archived_murs']
             assert mappings
+
+        def update_aliases(self, body):
+            pass
 
     def __init__(self, dictToIndex):
         self.dictToIndex = dictToIndex
@@ -246,8 +249,8 @@ class IndexRegulationsTest(unittest.TestCase):
 class InitializeLegalDocsTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
     get_es_with_doc({}))
-    def test_initialize_legal_docs(self):
-        initialize_legal_docs()
+    def test_initialize_current_legal_docs(self):
+        initialize_current_legal_docs()
 
 def raise_pdf_exception(PDF):
     raise Exception('Could not parse PDF')
