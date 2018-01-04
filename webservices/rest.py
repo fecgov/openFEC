@@ -176,7 +176,7 @@ def add_caching_headers(response):
             # get s3 bucket env variables
             s3_bucket = utils.get_bucket()
             cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
-            s3_key = utils.get_s3_key(cached_url)
+            # s3_key = utils.get_s3_key(cached_url)
 
             # upload the request_content.json file to s3 bucket
             # TODO:  Figure out why the s3_key object is not working with the
@@ -198,14 +198,13 @@ def add_caching_headers(response):
 @app.errorhandler(Exception)
 def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
-    # TODO : add a log statement using JsonResponse.error(wrapped, wrapped.status)
+
     logger.info("In handle_exception(), wrapped status is %s", wrapped.status)
 
     if wrapped.status in [500, 502, 503, 504]:
         formatted_url = utils.format_url(request.url)
         # get s3 bucket env variables
         s3_bucket = utils.get_bucket()
-        # TODO : create a variable and assing the region to it
         bucket_region = env.get_credential('region')
         # create the URL to check if it already cached and saved on s3(call the format_utils)
         # return cache response if exists
