@@ -7,8 +7,6 @@ import requests
 from webservices.env import env
 from boto.s3.key import Key
 
-from webservices.resources import download
-
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
 logging.getLogger('smart_open').setLevel(logging.CRITICAL)
 
@@ -39,13 +37,11 @@ def get_s3_key(name):
     return key
 
 def get_json_data(response):
-    json_data = json.dumps(response.data.decode('utf-8'))
-    python_obj = json.loads(json_data)
-    print("IIIIIIIIIIIIIIIIIIIIIIIII %s", json.dumps(python_obj, indent=None, separators=(', ', ': ')))
+    # create a python string from reponse.data
+    python_str = json.dumps(response.data.decode('utf-8'))
+    # create a python object(dictionary) from python_str
+    python_obj = json.dumps(python_str, indent=None, separators=(', ', ': '))
     return python_obj
-    # json_data = json.dumps(response.data.decode('utf-8'))
-    # print("*********************** %s ", json_data)
-    # return json_data
 
 def format_url(url):
     """
@@ -66,8 +62,6 @@ def format_url(url):
 def get_cached_request(cached_url):
     response = requests.get(cached_url)
     python_str = json.dumps(response.json(), indent=4)
-    print("OOOOOOOOOOOOOOOOOOOOOO %s", json.dumps(response.json(), indent=4))
     if response.status_code == 200:
-        print("YYYYYYYYYYYYYYYYYYYYYYYYYY %s", python_str)
         return python_str
     return None
