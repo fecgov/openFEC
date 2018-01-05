@@ -4,7 +4,6 @@ from collections import defaultdict
 from urllib.parse import urlencode
 
 from webservices.env import env
-from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -124,7 +123,7 @@ def load_current_murs(from_mur_no=None):
     mur_count = 0
     for mur in get_murs(from_mur_no):
         logger.info("Loading current MUR: %s", mur['no'])
-        es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+        es.index('docs_index', 'murs', mur, id=mur['doc_id'])
         mur_count += 1
     logger.info("%d current MURs loaded", mur_count)
 
