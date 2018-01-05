@@ -27,6 +27,7 @@ from .index_management import (
     delete_index,
     create_staging_index,
     restore_from_staging_index,
+    move_archived_murs
 )
 
 def load_all_current_legal_docs():
