@@ -3,7 +3,6 @@ import logging
 import re
 
 from webservices.env import env
-from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -87,7 +86,7 @@ def load_advisory_opinions(from_ao_no=None):
     ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
         logger.info("Loading AO: %s", ao['no'])
-        es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
+        es.index('docs_index', 'advisory_opinions', ao, id=ao['no'])
         ao_count += 1
     logger.info("%d advisory opinions loaded", ao_count)
 
@@ -257,12 +256,12 @@ def get_citations(ao_names):
     for citation in all_regulatory_citations:
         entry = {'citation_text': '%d CFR §%d.%d'
                  % (citation[0], citation[1], citation[2]),'citation_type': 'regulation'}
-        es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
+        es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
         entry = {'citation_text': '%d U.S.C. §%d'
                  % (citation[0], citation[1]), 'citation_type': 'statute'}
-        es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
+        es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     logger.info("Citations loaded.")
 

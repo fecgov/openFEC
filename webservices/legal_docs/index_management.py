@@ -3,11 +3,6 @@ import logging
 import elasticsearch
 import elasticsearch.helpers
 
-from . import (
-    DOCS_INDEX,
-    ARCHIVED_MURS_INDEX,
-    DOCS_SEARCH
-)
 from webservices import utils
 
 logger = logging.getLogger(__name__)
@@ -334,7 +329,7 @@ ANALYZER_SETTINGS = {
 def initialize_current_legal_docs():
     """
     Initialize Elasticsearch for storing legal documents.
-    Create the `docs` index, and set up the aliases `DOCS_INDEX` and `DOCS_SEARCH`
+    Create the `docs` index, and set up the aliases `docs_index` and `docs_search`
     to point to the `docs` index. If the `doc` index already exists, delete it.
     """
 
@@ -356,8 +351,8 @@ def initialize_current_legal_docs():
         "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
         "aliases": {
-            DOCS_INDEX: {},
-            DOCS_SEARCH: {}
+            'docs_index': {},
+            'docs_search': {}
         }
     })
 
@@ -367,8 +362,8 @@ def initialize_archived_murs():
     Initialize Elasticsearch for storing archived MURs.
     If the `archived_murs` index already exists, delete it.
     Create the `archived_murs` index.
-    Set up the alias `ARCHIVED_MURS_INDEX` to point to the `archived_murs` index.
-    Set up the alias `DOCS_SEARCH` to point `archived_murs` index, allowing the
+    Set up the alias `archived_murs_index` to point to the `archived_murs` index.
+    Set up the alias `docs_search` to point `archived_murs` index, allowing the
     legal search to work across current and archived MURs
     """
 
@@ -380,13 +375,13 @@ def initialize_archived_murs():
     except elasticsearch.exceptions.NotFoundError:
         pass
 
-    logger.info("Create index 'archived_murs', point to alias 'DOCS_SEARCH'")
+    logger.info("Create index 'archived_murs', point to alias 'docs_search'")
     es.indices.create('archived_murs', {
         "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
         "aliases": {
-            ARCHIVED_MURS_INDEX: {},
-            DOCS_SEARCH: {}
+            'archived_murs_index': {},
+            'docs_search': {}
         }
     })
 
@@ -422,10 +417,10 @@ def create_staging_index():
         "settings": ANALYZER_SETTINGS,
     })
 
-    logger.info("Move alias '%s' to point to 'docs_staging'", DOCS_INDEX)
+    logger.info("Move alias 'docs_index' to point to 'docs_staging'")
     es.indices.update_aliases(body={"actions": [
-        {"remove": {"index": 'docs', "alias": DOCS_INDEX}},
-        {"add": {"index": 'docs_staging', "alias": DOCS_INDEX}}
+        {"remove": {"index": 'docs', "alias": 'docs_index'}},
+        {"add": {"index": 'docs_staging', "alias": 'docs_index'}}
     ]})
 
 
@@ -441,10 +436,10 @@ def restore_from_staging_index():
     """
     es = utils.get_elasticsearch_connection()
 
-    logger.info("Move alias '%s' to point to 'docs_staging'", DOCS_SEARCH)
+    logger.info("Move alias 'docs_search' to point to 'docs_staging'")
     es.indices.update_aliases(body={"actions": [
-        {"remove": {"index": 'docs', "alias": DOCS_SEARCH}},
-        {"add": {"index": 'docs_staging', "alias": DOCS_SEARCH}}
+        {"remove": {"index": 'docs', "alias": 'docs_search'}},
+        {"add": {"index": 'docs_staging', "alias": 'docs_search'}}
     ]})
 
     logger.info("Delete and re-create index 'docs'")
@@ -457,12 +452,12 @@ def restore_from_staging_index():
     logger.info("Reindex all documents from index 'docs_staging' to index 'docs'")
     elasticsearch.helpers.reindex(es, 'docs_staging', 'docs', chunk_size=50)
 
-    logger.info("Move aliases '%s' and '%s' to point to 'docs'", DOCS_INDEX, DOCS_SEARCH)
+    logger.info("Move aliases 'docs_index' and 'docs_search' to point to 'docs'")
     es.indices.update_aliases(body={"actions": [
-        {"remove": {"index": 'docs_staging', "alias": DOCS_INDEX}},
-        {"remove": {"index": 'docs_staging', "alias": DOCS_SEARCH}},
-        {"add": {"index": 'docs', "alias": DOCS_INDEX}},
-        {"add": {"index": 'docs', "alias": DOCS_SEARCH}}
+        {"remove": {"index": 'docs_staging', "alias": 'docs_index'}},
+        {"remove": {"index": 'docs_staging', "alias": 'docs_search'}},
+        {"add": {"index": 'docs', "alias": 'docs_index'}},
+        {"add": {"index": 'docs', "alias": 'docs_search'}}
     ]})
     logger.info("Delete index 'docs_staging'")
     es.indices.delete('docs_staging')

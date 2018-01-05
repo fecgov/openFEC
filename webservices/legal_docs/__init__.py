@@ -1,7 +1,3 @@
-DOCS_INDEX = 'docs_index'
-ARCHIVED_MURS_INDEX = 'archived_murs_index'
-DOCS_SEARCH = 'docs_search'
-
 import logging
 import sys
 
