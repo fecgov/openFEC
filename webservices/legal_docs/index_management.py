@@ -424,7 +424,6 @@ def create_staging_index():
     ]})
 
 
-
 def restore_from_staging_index():
     """
     A 4-step process:
@@ -461,3 +460,18 @@ def restore_from_staging_index():
     ]})
     logger.info("Delete index 'docs_staging'")
     es.indices.delete('docs_staging')
+
+
+def move_archived_murs(source_index='docs_index', destination_index='archived_murs'):
+    '''
+    Move archived MURs from `source_index` to `destination_index`
+    This would typically be used to move archived MURs
+    from `docs_index` to `archived_murs_index
+    '''
+    es = utils.get_elasticsearch_connection()
+
+    body = {"query": {"match": {"mur_type": "archived"}}}
+
+    logger.info("Copy archived MURs from {0} index to {1} index".format(source_index, destination_index))
+
+    elasticsearch.helpers.reindex(es, source_index, destination_index, query=body, chunk_size=50)
