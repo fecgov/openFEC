@@ -151,7 +151,7 @@ class Tasks(locust.TaskSet):
         params = {
             'api_key': API_KEY,
         }
-        self.client.get('legal/docs/murs/7074', name='legal_get', params=params)
+        self.client.get('/legal/matter-under-review/7074/', name='legal_get', params=params)
 
 class Swarm(locust.HttpLocust):
     task_set = Tasks

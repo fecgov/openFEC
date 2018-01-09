@@ -375,7 +375,7 @@ def initialize_archived_murs():
     except elasticsearch.exceptions.NotFoundError:
         pass
 
-    logger.info("Create index 'archived_murs', point to alias 'docs_search'")
+    logger.info("Create index 'archived_murs' with alias 'docs_search'")
     es.indices.create('archived_murs', {
         "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
@@ -398,6 +398,7 @@ def delete_index():
         es.indices.delete('docs')
     except elasticsearch.exceptions.NotFoundError:
         pass
+
 
 def create_staging_index():
     """
@@ -462,7 +463,7 @@ def restore_from_staging_index():
     es.indices.delete('docs_staging')
 
 
-def move_archived_murs(source_index='docs_index', destination_index='archived_murs'):
+def move_archived_murs():
     '''
     Move archived MURs from `source_index` to `destination_index`
     This would typically be used to move archived MURs
@@ -472,6 +473,6 @@ def move_archived_murs(source_index='docs_index', destination_index='archived_mu
 
     body = {"query": {"match": {"mur_type": "archived"}}}
 
-    logger.info("Copy archived MURs from {0} index to {1} index".format(source_index, destination_index))
+    logger.info("Copy archived MURs from 'docs' index to `archived_murs` index")
 
-    elasticsearch.helpers.reindex(es, source_index, destination_index, query=body, chunk_size=50)
+    elasticsearch.helpers.reindex(es, 'docs', 'archived_murs', query=body)
