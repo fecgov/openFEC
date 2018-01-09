@@ -468,11 +468,13 @@ def move_archived_murs():
     Move archived MURs from `source_index` to `destination_index`
     This would typically be used to move archived MURs
     from `docs_index` to `archived_murs_index
+    Increased `chunk_size` to 5000 because there are 4445 archived MURS
+    and it was timing out after 500 (the default `chunk_size`)
     '''
     es = utils.get_elasticsearch_connection()
 
     body = {"query": {"match": {"mur_type": "archived"}}}
 
-    logger.info("Copy archived MURs from 'docs' index to `archived_murs` index")
+    logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
 
-    elasticsearch.helpers.reindex(es, 'docs', 'archived_murs', query=body)
+    elasticsearch.helpers.reindex(es, 'docs', 'archived_murs', query=body, chunk_size=5000, scroll=u'5m')
