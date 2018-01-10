@@ -6,7 +6,7 @@ from webservices.legal_docs import (
     index_regulations,
     index_statutes,
     load_archived_murs,
-    initialize_current_legal_docs
+    create_docs_index
 )
 
 from webservices.legal_docs.load_legal_docs import (
@@ -248,8 +248,8 @@ class IndexRegulationsTest(unittest.TestCase):
 class InitializeLegalDocsTest(unittest.TestCase):
     @patch('webservices.utils.get_elasticsearch_connection',
     get_es_with_doc({}))
-    def test_initialize_current_legal_docs(self):
-        initialize_current_legal_docs()
+    def test_create_docs_index(self):
+        create_docs_index()
 
 def raise_pdf_exception(PDF):
     raise Exception('Could not parse PDF')
