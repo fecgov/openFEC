@@ -1,7 +1,6 @@
 import logging
 
 import elasticsearch
-import elasticsearch.helpers
 
 from webservices import utils
 
@@ -450,7 +449,16 @@ def restore_from_staging_index():
     })
 
     logger.info("Reindex all documents from index 'docs_staging' to index 'docs'")
-    elasticsearch.helpers.reindex(es, 'docs_staging', 'docs', chunk_size=50)
+
+    body = {
+      "source": {
+        "index": "docs_staging",
+      },
+      "dest": {
+        "index": "docs"
+      }
+    }
+    es.reindex(body=body, wait_for_completion=True)
 
     logger.info("Move aliases 'docs_index' and 'docs_search' to point to 'docs'")
     es.indices.update_aliases(body={"actions": [
