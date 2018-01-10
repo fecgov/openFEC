@@ -189,7 +189,7 @@ def get_documents(ao_id, bucket):
                 pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'],
                     row["filename"].replace(' ', '-'))
                 document["url"] = '/files/' + pdf_key
-                logger.info("S3: Uploading {}".format(pdf_key))
+                logger.debug("S3: Uploading {}".format(pdf_key))
                 bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
                         ContentType="application/pdf", ACL="public-read")
                 documents.append(document)
