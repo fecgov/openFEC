@@ -386,7 +386,7 @@ def initialize_archived_murs():
     })
 
 
-def delete_index():
+def delete_docs_index():
     """
     Delete index `docs`.
     This is usually done in preparation for restoring indexes from a snapshot backup.
@@ -473,8 +473,20 @@ def move_archived_murs():
     '''
     es = utils.get_elasticsearch_connection()
 
-    body = {"query": {"match": {"mur_type": "archived"}}}
+    body = {
+          "source": {
+            "index": "docs",
+            "type": "murs",
+            "query": {
+              "match": {
+                "mur_type": "archived"
+              }
+            }
+          },
+          "dest": {
+            "index": "archived_murs"
+          }
+        }
 
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
-
-    elasticsearch.helpers.reindex(es, 'docs', 'archived_murs', query=body, chunk_size=5000, scroll=u'5m')
+    es.reindex(body=body, wait_for_completion=True)
