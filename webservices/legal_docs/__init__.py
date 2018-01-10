@@ -24,7 +24,7 @@ from .load_legal_docs import (
 from .index_management import (
     initialize_current_legal_docs,
     initialize_archived_murs,
-    delete_index,
+    delete_docs_index,
     create_staging_index,
     restore_from_staging_index,
     move_archived_murs
