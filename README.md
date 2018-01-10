@@ -558,11 +558,11 @@ python manage.py load_current_murs [-f FROM_MUR_NO]
 
 #### Loading all current legal documents for the 1st time (excludes archived MURs)
 ```
-python manage.py reinitialize_all_current_legal_docs
+python manage.py initialize_current_legal_docs
 ```
 #### Loading all archived MURs for the 1st time
 ```
-python manage.py initialize_archived_murs
+python manage.py create_archived_murs_index
 ```
 
 #### Loading all legal documents with no downtime

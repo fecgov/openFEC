@@ -22,27 +22,27 @@ from .load_legal_docs import (
 )
 
 from .index_management import (
-    initialize_current_legal_docs,
-    initialize_archived_murs,
+    create_docs_index,
+    create_archived_murs_index,
     delete_docs_index,
     create_staging_index,
     restore_from_staging_index,
     move_archived_murs
 )
 
-def load_all_current_legal_docs():
+def load_current_legal_docs():
     index_statutes()
     index_regulations()
     load_advisory_opinions()
     load_current_murs()
 
-def reinitialize_all_current_legal_docs():
+def initialize_current_legal_docs():
     """
     Creates the Elasticsearch index and loads all the different types of legal documents.
     This would lead to a brief outage while the docs are reloaded.
     """
-    initialize_current_legal_docs()
-    load_all_current_legal_docs()
+    create_docs_index()
+    load_current_legal_docs()
 
 def refresh_current_legal_docs_zero_downtime():
     """
@@ -51,5 +51,5 @@ def refresh_current_legal_docs_zero_downtime():
     This is typically used when there is a schema change.
     """
     create_staging_index()
-    load_all_current_legal_docs()
+    load_current_legal_docs()
     restore_from_staging_index()

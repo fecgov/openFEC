@@ -326,7 +326,7 @@ ANALYZER_SETTINGS = {
 }
 
 
-def initialize_current_legal_docs():
+def create_docs_index():
     """
     Initialize Elasticsearch for storing legal documents.
     Create the `docs` index, and set up the aliases `docs_index` and `docs_search`
@@ -357,7 +357,7 @@ def initialize_current_legal_docs():
     })
 
 
-def initialize_archived_murs():
+def create_archived_murs_index():
     """
     Initialize Elasticsearch for storing archived MURs.
     If the `archived_murs` index already exists, delete it.
