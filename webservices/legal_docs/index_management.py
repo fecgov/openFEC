@@ -458,7 +458,7 @@ def restore_from_staging_index():
         "index": "docs"
       }
     }
-    es.reindex(body=body, wait_for_completion=True)
+    es.reindex(body=body, wait_for_completion=True, timeout='5m')
 
     logger.info("Move aliases 'docs_index' and 'docs_search' to point to 'docs'")
     es.indices.update_aliases(body={"actions": [
@@ -497,4 +497,4 @@ def move_archived_murs():
         }
 
     logger.info("Copy archived MURs from 'docs' index to 'archived_murs' index")
-    es.reindex(body=body, wait_for_completion=True)
+    es.reindex(body=body, wait_for_completion=True, timeout='5m')
