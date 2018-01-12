@@ -796,6 +796,9 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - MSY Monthly Semi-Annual\n\
          (YE)\n\
 '
+
+REQUEST_TYPE = 'RFAI types. For example, form 1 RFAI is equal to 1. Ex: request_type=1'
+
 REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
