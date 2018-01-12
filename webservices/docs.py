@@ -796,6 +796,28 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - MSY Monthly Semi-Annual\n\
          (YE)\n\
 '
+
+REQUEST_TYPE = 'Requests for additional information (RFAIs)\n\
+sent to filers.\n\
+The request type is based on\n\
+the type of document filed:\n\
+    - 1 Statement of \n\
+        Organization\n\
+    - 2 Report of Receipts\n\
+        and Expenditures\n\
+        (Form 3 and 3X)\n\
+    - 3 Second Notice - Reports\n\
+    - 4 Request for\n\
+        Additional Information\n\
+    - 5 Informational - Reports\n\
+    - 6 Second Notice -\n\
+        Statement of Organization\n\
+    - 7 Failure to File\n\
+    - 8 From Public Disclosure\n\
+    - 9 From Multi\n\
+        Candidate Status\n\
+'
+
 REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
