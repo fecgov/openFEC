@@ -259,6 +259,7 @@ filings = {
     'is_amended': fields.Bool(description='Filing has been amended'),
     'most_recent': fields.Bool(description='Filing is either new or is the most-recently filed amendment'),
     'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
+    'request_type': fields.List(IStr, description=docs.REQUEST_TYPE),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
