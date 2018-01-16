@@ -28,7 +28,12 @@ class AggregateResource(ApiResource):
 
     @property
     def sort_args(self):
-        return args.make_sort_args(validator=args.IndexValidator(self.model))
+        schema = None
+        if self.model and hasattr(self.model,'__table_args__') and 'schema' in self.model.__table_args__.keys():
+            schema = self.model.__table_args__.get('schema')
+        return args.make_sort_args(validator=args.IndexValidator(self.model, schema=schema))
+
+        
 
     @property
     def index_column(self):
@@ -116,9 +121,6 @@ class ScheduleAByEmployerView(AggregateResource):
         ('employer', models.ScheduleAByEmployer.employer),
     ]
 
-    @property
-    def sort_args(self):
-        return args.make_sort_args(validator=args.IndexValidator(self.model, schema=models.ScheduleAByEmployer.__table_args__.get('schema')))
     
 
     def get(self, committee_id=None, **kwargs):
@@ -144,6 +146,8 @@ class ScheduleAByOccupationView(AggregateResource):
         ('cycle', models.ScheduleAByOccupation.cycle),
         ('occupation', models.ScheduleAByOccupation.occupation),
     ]
+
+
 
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
