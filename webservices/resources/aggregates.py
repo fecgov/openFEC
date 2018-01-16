@@ -116,6 +116,11 @@ class ScheduleAByEmployerView(AggregateResource):
         ('employer', models.ScheduleAByEmployer.employer),
     ]
 
+    @property
+    def sort_args(self):
+        return args.make_sort_args(validator=args.IndexValidator(self.model, schema=models.ScheduleAByEmployer.__table_args__.get('schema')))
+    
+
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
