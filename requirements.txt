@@ -39,4 +39,4 @@ smart_open==1.5.3
 # Task queue
 celery==4.1.0
 celery-once==1.2.0
-redis==2.10.5
+redis==2.10.6
