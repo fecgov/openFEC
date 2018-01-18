@@ -441,123 +441,123 @@ class TestViews(common.IntegrationTestCase):
     #     self.assertEqual(existing.total, total)
     #     self.assertEqual(existing.count, count)
 
-    def test_update_aggregate_asize_create(self):
-        filing = self.NmlSchedAFactory(
-            rpt_yr=2015,
-            cmte_id='C6789',
-            contb_receipt_amt=538,
-            contb_receipt_dt=datetime.datetime(2015, 1, 1),
-            receipt_tp='15J',
-        )
-        self.FItemReceiptOrExp(
-            sub_id=filing.sub_id,
-            rpt_yr=2015,
-        )
-        db.session.commit()
-        manage.update_aggregates()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        rows = models.ScheduleABySize.query.filter_by(
-            cycle=2016,
-            committee_id='C6789',
-            size=500,
-        ).all()
-        self.assertEqual(len(rows), 1)
-        self.assertEqual(rows[0].total, 538)
-        self.assertEqual(rows[0].count, 1)
-        filing.contb_receipt_amt = 53
-        db.session.add(filing)
-        db.session.commit()
-        manage.update_aggregates()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        db.session.refresh(rows[0])
-        self.assertEqual(rows[0].total, 0)
-        self.assertEqual(rows[0].count, 0)
+    # def test_update_aggregate_asize_create(self):
+    #     filing = self.NmlSchedAFactory(
+    #         rpt_yr=2015,
+    #         cmte_id='C6789',
+    #         contb_receipt_amt=538,
+    #         contb_receipt_dt=datetime.datetime(2015, 1, 1),
+    #         receipt_tp='15J',
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=filing.sub_id,
+    #         rpt_yr=2015,
+    #     )
+    #     db.session.commit()
+    #     manage.update_aggregates()
+    #     db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+    #     rows = models.ScheduleABySize.query.filter_by(
+    #         cycle=2016,
+    #         committee_id='C6789',
+    #         size=500,
+    #     ).all()
+    #     self.assertEqual(len(rows), 1)
+    #     self.assertEqual(rows[0].total, 538)
+    #     self.assertEqual(rows[0].count, 1)
+    #     filing.contb_receipt_amt = 53
+    #     db.session.add(filing)
+    #     db.session.commit()
+    #     manage.update_aggregates()
+    #     db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+    #     db.session.refresh(rows[0])
+    #     self.assertEqual(rows[0].total, 0)
+    #     self.assertEqual(rows[0].count, 0)
 
-    def test_update_aggregate_asize_existing(self):
-        def get_existing():
-            return models.ScheduleABySize.query.filter_by(
-                size=500,
-                cycle=2016,
-            ).order_by(
-                models.ScheduleABySize.committee_id,
-            ).first()
-        EXISTING_RECEIPT_AMOUNT = 504
-        filing = self.NmlSchedAFactory(
-            rpt_yr=2015,
-            cmte_id='X1234',
-            contb_receipt_amt=EXISTING_RECEIPT_AMOUNT,
-            contb_receipt_dt=datetime.datetime(2015, 1, 1),
-            receipt_tp='15J',
-        )
-        self.FItemReceiptOrExp(
-            sub_id=filing.sub_id,
-            rpt_yr=2015,
-        )
-        db.session.commit()
-        manage.update_aggregates()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        self._clear_sched_a_queues()
-        existing = get_existing()
-        total = existing.total
-        count = existing.count
-        NEW_RECEIPT_AMOUNT = 538
-        filing = self.NmlSchedAFactory(
-            rpt_yr=2015,
-            cmte_id=existing.committee_id,
-            contb_receipt_amt=NEW_RECEIPT_AMOUNT,
-            contb_receipt_dt=datetime.datetime(2015, 1, 1),
-            receipt_tp='15J',
-        )
-        self.FItemReceiptOrExp(
-            sub_id=filing.sub_id,
-            rpt_yr=2015,
-        )
-        db.session.commit()
-        manage.update_aggregates()
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        existing = get_existing()
-        self.assertEqual(existing.total, total + NEW_RECEIPT_AMOUNT)
-        self.assertEqual(existing.count, count + 1)
+    # def test_update_aggregate_asize_existing(self):
+    #     def get_existing():
+    #         return models.ScheduleABySize.query.filter_by(
+    #             size=500,
+    #             cycle=2016,
+    #         ).order_by(
+    #             models.ScheduleABySize.committee_id,
+    #         ).first()
+    #     EXISTING_RECEIPT_AMOUNT = 504
+    #     filing = self.NmlSchedAFactory(
+    #         rpt_yr=2015,
+    #         cmte_id='X1234',
+    #         contb_receipt_amt=EXISTING_RECEIPT_AMOUNT,
+    #         contb_receipt_dt=datetime.datetime(2015, 1, 1),
+    #         receipt_tp='15J',
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=filing.sub_id,
+    #         rpt_yr=2015,
+    #     )
+    #     db.session.commit()
+    #     manage.update_aggregates()
+    #     db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+    #     self._clear_sched_a_queues()
+    #     existing = get_existing()
+    #     total = existing.total
+    #     count = existing.count
+    #     NEW_RECEIPT_AMOUNT = 538
+    #     filing = self.NmlSchedAFactory(
+    #         rpt_yr=2015,
+    #         cmte_id=existing.committee_id,
+    #         contb_receipt_amt=NEW_RECEIPT_AMOUNT,
+    #         contb_receipt_dt=datetime.datetime(2015, 1, 1),
+    #         receipt_tp='15J',
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=filing.sub_id,
+    #         rpt_yr=2015,
+    #     )
+    #     db.session.commit()
+    #     manage.update_aggregates()
+    #     db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+    #     existing = get_existing()
+    #     self.assertEqual(existing.total, total + NEW_RECEIPT_AMOUNT)
+    #     self.assertEqual(existing.count, count + 1)
 
-    def test_update_aggregate_size_existing_merged(self):
-        def get_existing():
-            return models.ScheduleABySize.query.filter_by(
-                size=0,
-                cycle=2016,
-            ).order_by(
-                models.ScheduleABySize.committee_id,
-            ).first()
-        EXISTING_RECEIPT_AMOUNT = 24
-        filing = self.NmlSchedAFactory(
-            rpt_yr=2015,
-            cmte_id='X1235',
-            contb_receipt_amt=EXISTING_RECEIPT_AMOUNT,
-            contb_receipt_dt=datetime.datetime(2015, 1, 1),
-            receipt_tp='15J',
-        )
-        self.FItemReceiptOrExp(
-            sub_id=filing.sub_id,
-            rpt_yr=2015,
-        )
-        db.session.commit()
-        manage.update_aggregates()
-        db.session.execute('refresh materialized view ofec_totals_combined_mv')
-        db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
-        self._clear_sched_a_queues()
-        existing = get_existing()
-        total = existing.total
-        committee_id = existing.committee_id
-        filing = self.NmlSchedAFactory(
-            rpt_yr=2015,
-            cmte_id=committee_id,
-            contb_receipt_amt=75,
-            contb_receipt_dt=datetime.datetime(2015, 1, 1),
-            receipt_tp='15J',
-        )
-        self.FItemReceiptOrExp(
-            sub_id=filing.sub_id,
-            rpt_yr=2015,
-        )
+    # def test_update_aggregate_size_existing_merged(self):
+    #     def get_existing():
+    #         return models.ScheduleABySize.query.filter_by(
+    #             size=0,
+    #             cycle=2016,
+    #         ).order_by(
+    #             models.ScheduleABySize.committee_id,
+    #         ).first()
+    #     EXISTING_RECEIPT_AMOUNT = 24
+    #     filing = self.NmlSchedAFactory(
+    #         rpt_yr=2015,
+    #         cmte_id='X1235',
+    #         contb_receipt_amt=EXISTING_RECEIPT_AMOUNT,
+    #         contb_receipt_dt=datetime.datetime(2015, 1, 1),
+    #         receipt_tp='15J',
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=filing.sub_id,
+    #         rpt_yr=2015,
+    #     )
+    #     db.session.commit()
+    #     manage.update_aggregates()
+    #     db.session.execute('refresh materialized view ofec_totals_combined_mv')
+    #     db.session.execute('refresh materialized view ofec_sched_a_aggregate_size_merged_mv')
+    #     self._clear_sched_a_queues()
+    #     existing = get_existing()
+    #     total = existing.total
+    #     committee_id = existing.committee_id
+    #     filing = self.NmlSchedAFactory(
+    #         rpt_yr=2015,
+    #         cmte_id=committee_id,
+    #         contb_receipt_amt=75,
+    #         contb_receipt_dt=datetime.datetime(2015, 1, 1),
+    #         receipt_tp='15J',
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=filing.sub_id,
+    #         rpt_yr=2015,
+    #     )
 
         # Create a committee and committee report
         # Changed to point to sampled data, may be problematic in the future if det sum table
