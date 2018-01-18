@@ -534,6 +534,14 @@ The progress of these tasks can be monitored using, e.g.,
 cf logs api | grep reinit-legal
 ```
 
+#### Create index for current legal documents (excludes archived MURs)
+```
+python manage.py initialize_current_legal_docs
+```
+#### Create index for archived MURs
+```
+python manage.py create_archived_murs_index
+```
 
 #### Loading statutes
 ```
@@ -556,16 +564,13 @@ python manage.py load_advisory_opinions [-f FROM_AO_NO]
 python manage.py load_current_murs [-f FROM_MUR_NO]
 ```
 
-#### Loading all current legal documents for the 1st time (excludes archived MURs)
+#### Loading archived MURs (This takes a very long time)
 ```
-python manage.py initialize_current_legal_docs
-```
-#### Loading all archived MURs for the 1st time
-```
-python manage.py create_archived_murs_index
+python manage.py load_archived_murs
 ```
 
-#### Loading all legal documents with no downtime
+
+#### Reloading all current legal documents with no downtime (excludes archived MURs)
 ```
 python manage.py refresh_current_legal_docs_zero_downtime
 ```
