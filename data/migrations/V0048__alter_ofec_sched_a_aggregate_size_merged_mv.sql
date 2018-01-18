@@ -1,5 +1,15 @@
 -- redefine MATERIALIZED VIEW public.ofec_sched_a_aggregate_size_merged_mv to use disclosure.dsc_sched_a_aggregate_size instead of public ofec_sched_a_aggregate_size
 
+REFRESH MATERIALIZED VIEW public.ofec_candidate_history_mv;
+REFRESH MATERIALIZED VIEW public.ofec_committee_history_mv;
+REFRESH MATERIALIZED VIEW public.ofec_pac_party_paper_amendments_mv;
+REFRESH MATERIALIZED VIEW public.ofec_house_senate_paper_amendments_mv;
+REFRESH MATERIALIZED VIEW public.ofec_presidential_paper_amendments_mv;
+REFRESH MATERIALIZED VIEW public.ofec_amendments_mv;
+REFRESH MATERIALIZED VIEW public.ofec_filings_amendments_all_mv;
+REFRESH MATERIALIZED VIEW public.ofec_filings_mv;
+REFRESH MATERIALIZED VIEW public.ofec_totals_combined_mv;
+
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_a_aggregate_size_merged_mv_TMP;
 
 CREATE MATERIALIZED VIEW public.ofec_sched_a_aggregate_size_merged_mv_TMP AS 
@@ -30,7 +40,7 @@ CREATE MATERIALIZED VIEW public.ofec_sched_a_aggregate_size_merged_mv_TMP AS
         END AS count
    FROM grouped
   GROUP BY grouped.cmte_id, grouped.cycle, grouped.size
-WITH NO DATA;
+WITH DATA;
 
 ALTER TABLE public.ofec_sched_a_aggregate_size_merged_mv_TMP
   OWNER TO fec;

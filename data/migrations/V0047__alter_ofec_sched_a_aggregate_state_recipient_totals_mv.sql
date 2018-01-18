@@ -1,5 +1,8 @@
 -- redefine MATERIALIZED VIEW public.ofec_sched_a_aggregate_state_recipient_totals_mv to use disclosure.dsc_sched_a_aggregate_state instead of public ofec_sched_a_aggregate_state
 
+REFRESH MATERIALIZED VIEW public.ofec_committee_history_mv;
+REFRESH MATERIALIZED VIEW public.ofec_committee_detail_mv;
+
 DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_a_aggregate_state_recipient_totals_mv_TMP;
 
 CREATE MATERIALIZED VIEW public.ofec_sched_a_aggregate_state_recipient_totals_mv_TMP AS 
@@ -95,7 +98,7 @@ CREATE MATERIALIZED VIEW public.ofec_sched_a_aggregate_state_recipient_totals_mv
     combined.committee_type,
     combined.committee_type_full
    FROM combined
-WITH NO DATA;
+WITH DATA;
 
 ALTER TABLE public.ofec_sched_a_aggregate_state_recipient_totals_mv_TMP
   OWNER TO fec;
