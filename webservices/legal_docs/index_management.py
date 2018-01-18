@@ -374,7 +374,7 @@ def create_archived_murs_index():
     except elasticsearch.exceptions.NotFoundError:
         pass
 
-    logger.info("Create index 'archived_murs' with alias 'docs_search'")
+    logger.info("Create index 'archived_murs' with aliases 'docs_search' and 'archived_murs_index'")
     es.indices.create('archived_murs', {
         "mappings": MAPPINGS,
         "settings": ANALYZER_SETTINGS,
@@ -473,11 +473,10 @@ def restore_from_staging_index():
 
 def move_archived_murs():
     '''
-    Move archived MURs from `source_index` to `destination_index`
-    This would typically be used to move archived MURs
-    from `docs_index` to `archived_murs_index
-    Increased `chunk_size` to 5000 because there are 4445 archived MURS
-    and it was timing out after 500 (the default `chunk_size`)
+    Move archived MURs from `docs` index to `archived_murs_index`
+    This should only need to be run once.
+    Once archived MURs are on their own index, we will be able to
+    re-index current legal docs after a schema change much more quickly.
     '''
     es = utils.get_elasticsearch_connection()
 
