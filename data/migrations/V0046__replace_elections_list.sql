@@ -1,3 +1,5 @@
+--SET search_path = disclosure, pg_catalog;
+
 CREATE MATERIALIZED VIEW elections_list_mv AS
 
 WITH incumbents AS (
@@ -37,4 +39,22 @@ SELECT
 FROM filtered_race
 LEFT JOIN incumbents
     ON filtered_race.race_pk = incumbents.race_pk
+--LEFT JOIN --TODO: Bring in zips once Paul adds the table
 ;
+
+GRANT ALL ON TABLE elections_list_mv TO fec;
+GRANT SELECT ON TABLE elections_list_mv TO fec_read;
+GRANT SELECT ON TABLE elections_list_mv TO openfec_read;
+
+
+
+--TODO: Do we need this? Looks like audit does both
+--ALTER TABLE elections_list_mv OWNER TO fec;
+
+CREATE INDEX ON elections_list_mv(election_yr);
+CREATE INDEX ON elections_list_mv(cand_office);
+CREATE INDEX ON elections_list_mv(cand_office_st);
+CREATE INDEX ON elections_list_mv(cand_office_district);
+CREATE INDEX ON elections_list_mv(fec_election_yr);
+CREATE INDEX ON elections_list_mv(cand_id);
+CREATE INDEX ON elections_list_mv(cand_name);

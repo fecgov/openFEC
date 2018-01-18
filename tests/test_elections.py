@@ -5,7 +5,7 @@ from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
 from webservices.rest import db, api
-from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
+from webservices.resources.elections import ElectionsListView, ElectionView, ElectionSummary
 
 
 class TestElectionSearch(ApiBaseTest):
@@ -39,25 +39,25 @@ class TestElectionSearch(ApiBaseTest):
         ]
 
     def test_search_district(self):
-        results = self._results(api.url_for(ElectionList, state='NJ', district='09'))
+        results = self._results(api.url_for(ElectionsListView, state='NJ', district='09'))
         self.assertEqual(len(results), 3)
         assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
         assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'})
         assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
     def test_search_district_padding(self):
-        results_padded = self._results(api.url_for(ElectionList, district='09'))
-        results_unpadded = self._results(api.url_for(ElectionList, district=9))
+        results_padded = self._results(api.url_for(ElectionsListView, district='09'))
+        results_unpadded = self._results(api.url_for(ElectionsListView, district=9))
         self.assertEqual(len(results_padded), 4)
         self.assertEqual(len(results_unpadded), 4)
 
     def test_search_office(self):
-        results = self._results(api.url_for(ElectionList, office='senate'))
+        results = self._results(api.url_for(ElectionsListView, office='senate'))
         self.assertEqual(len(results), 2)
         self.assertTrue(all([each['office'] == 'S' for each in results]))
 
     def test_search_zip(self):
-        results = self._results(api.url_for(ElectionList, zip='22902'))
+        results = self._results(api.url_for(ElectionsListView, zip='22902'))
         assert len(results) == 3
         assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
         assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'})
@@ -77,7 +77,7 @@ class TestElectionSearch(ApiBaseTest):
                 fec_election_yr=2006,
             )
         ]
-        results = self._results(api.url_for(ElectionList, office='senate', state='GA'))
+        results = self._results(api.url_for(ElectionsListView, office='senate', state='GA'))
         assert len(results) == 1
         assert_dicts_subset(results[0], {'incumbent_id': 'SGA123', 'incumbent_name': 'George P. Burdell'})
 
