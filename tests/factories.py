@@ -336,6 +336,13 @@ class ElectionResultFactory(BaseFactory):
     fec_election_yr = 2016
 
 
+class ElectionsListFactory(BaseFactory):
+    class Meta:
+        model = models.ElectionsList
+    cycle = 2012
+    candidate_status = 'I'
+
+
 class CommunicationCostFactory(BaseFactory):
     class Meta:
         model = models.CommunicationCost
