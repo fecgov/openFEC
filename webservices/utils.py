@@ -322,9 +322,11 @@ def get_election_duration(column):
 def get_elasticsearch_connection():
     es_conn = env.get_service(name='fec-api-search')
     if es_conn:
-        es = Elasticsearch([es_conn.get_url(url='uri')])
+        url = es_conn.get_url(url='uri')
     else:
-        es = Elasticsearch(['http://localhost:9200'])
+        url = 'http://localhost:9200'
+    es = Elasticsearch(url, timeout=30, max_retries=10, retry_on_timeout=True)
+
     return es
 
 def print_literal_query_string(query):
