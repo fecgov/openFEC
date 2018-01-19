@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy import cast, Integer
 from flask_apispec import doc, marshal_with
 
 from webservices import args
@@ -45,22 +46,8 @@ class ElectionsListView(utils.Resource):
     page_schema = schemas.ElectionsListPageSchema
 
     filter_multi_fields = [
-        ('cycle', ElectionsList.fec_election_yr),
+        ('cycle', ElectionsList.cycle),
     ]
-
-    # @property
-    # def args(self):
-    #     return utils.extend(
-    #         args.paging,
-    #         args.elections_list,
-    #         args.make_sort_args(
-    #             validator=args.IndexValidator(ElectionsList),
-    #         ),
-    #     )
-
-    # @property
-    # def index_column(self):
-    #     return self.model.idx
 
     @use_kwargs(args.paging)
     @use_kwargs(args.elections_list)
@@ -75,22 +62,22 @@ class ElectionsListView(utils.Resource):
         """Get elections from ElectionsList model."""
         query = db.session.query(ElectionsList)
         if kwargs.get('cycle'):
-            query = query.filter(ElectionsList.fec_election_yr.contains(kwargs['cycle']))
+            query = query.filter(ElectionsList.cycle.contains(kwargs['cycle']))
         if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
-            query = query.filter(ElectionsList.cand_office.in_(values))
+            query = query.filter(ElectionsList.office.in_(values))
         if kwargs.get('state'):
             query = query.filter(
                 sa.or_(
-                    ElectionsList.cand_office_st.in_(kwargs['state']),
-                    ElectionsList.cand_office == 'P',
+                    ElectionsList.state.in_(kwargs['state']),
+                    ElectionsList.office == 'P',
                 )
             )
         if kwargs.get('district'):
             query = query.filter(
                 sa.or_(
-                    ElectionsList.cand_office_district.in_(kwargs['district']),
-                    ElectionsList.cand_office.in_(['P', 'S']),
+                    ElectionsList.district.in_(kwargs['district']),
+                    ElectionsList.office.in_(['P', 'S']),
                 ),
             )
         if kwargs.get('zip'):
@@ -116,8 +103,8 @@ class ElectionsListView(utils.Resource):
             sa.or_(
                 # House races from matching states and districts
                 sa.and_(
-                    ElectionsList.cand_office_district == districts.c['Congressional District'],
-                    ElectionsList.cand_office_st == districts.c['Official USPS Code'],
+                    cast(ElectionsList.district, Integer) == districts.c['Congressional District'],
+                    ElectionsList.state == districts.c['Official USPS Code'],
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
@@ -125,10 +112,9 @@ class ElectionsListView(utils.Resource):
                     # For now, handle both values; going forward, we should choose
                     # a consistent representation.
                     sa.or_(
-                        ElectionsList.cand_office_district == 0,
-                        ElectionsList.cand_office_district == None,  # noqa
+                        ElectionsList.district == '00'
                     ),
-                    ElectionsList.cand_office_st.in_([districts.c['Official USPS Code'], 'US'])
+                    ElectionsList.state.in_([districts.c['Official USPS Code'], 'US'])
                 ),
             )
         )

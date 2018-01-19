@@ -1,3 +1,5 @@
+SET search_path = public, pg_catalog;
+
 CREATE MATERIALIZED VIEW elections_list_mv AS
 
 WITH incumbents AS (
@@ -5,10 +7,11 @@ WITH incumbents AS (
     SELECT
         cand_id,
         cand_name,
-        race_pk
+        race_pk,
+        cand_ici
     FROM disclosure.cand_valid_fec_yr
     WHERE cand_ici = 'I'
-    GROUP BY cand_id, cand_name, race_pk
+    GROUP BY cand_id, cand_name, race_pk, cand_ici
 ), filtered_race AS (
 -- Only one row per office/district/cycle
     SELECT DISTINCT ON (
@@ -20,7 +23,7 @@ WITH incumbents AS (
         state,
         district,
         election_yr,
-        get_cycle(election_yr) as cycle,
+        get_cycle(election_yr) AS cycle,
         race_pk
     FROM disclosure.dim_race_inf
         --to break a tie, show most recent?
@@ -28,31 +31,26 @@ WITH incumbents AS (
 )
 SELECT
     CAST (election_yr AS INTEGER),
-    office AS cand_office,
-    state AS cand_office_st,
-    district AS cand_office_district,
-    cycle AS fec_election_yr,
-    cand_id,
-    cand_name
+    office,
+    state,
+    district,
+    cycle,
+    cand_id AS incumbent_id,
+    cand_name AS incumbent_name,
+    cand_ici AS candidate_status
 FROM filtered_race
 LEFT JOIN incumbents
     ON filtered_race.race_pk = incumbents.race_pk
---LEFT JOIN --TODO: Bring in zips once Paul adds the table
 ;
 
-GRANT ALL ON TABLE elections_list_mv TO fec;
-GRANT SELECT ON TABLE elections_list_mv TO fec_read;
-GRANT SELECT ON TABLE elections_list_mv TO openfec_read;
 
-
-
---TODO: Do we need this? Looks like audit does both
---ALTER TABLE elections_list_mv OWNER TO fec;
+ALTER TABLE elections_list_mv OWNER TO fec;
 
 CREATE INDEX ON elections_list_mv(election_yr);
-CREATE INDEX ON elections_list_mv(cand_office);
-CREATE INDEX ON elections_list_mv(cand_office_st);
-CREATE INDEX ON elections_list_mv(cand_office_district);
-CREATE INDEX ON elections_list_mv(fec_election_yr);
-CREATE INDEX ON elections_list_mv(cand_id);
-CREATE INDEX ON elections_list_mv(cand_name);
+CREATE INDEX ON elections_list_mv(office);
+CREATE INDEX ON elections_list_mv(state);
+CREATE INDEX ON elections_list_mv(district);
+CREATE INDEX ON elections_list_mv(cycle);
+CREATE INDEX ON elections_list_mv(incumbent_id);
+CREATE INDEX ON elections_list_mv(incumbent_name);
+CREATE INDEX ON elections_list_mv(candidate_status);
