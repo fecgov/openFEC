@@ -8,7 +8,6 @@ applications:
   health-check-type: process
   env:
     FEC_API_WHITELIST_IPS: true
-    FEC_CACHE_AGE: 3600
     NEW_RELIC_APP_NAME: fec | api | prod
     NEW_RELIC_CONFIG_FILE: newrelic.ini
     NEW_RELIC_ENV: production

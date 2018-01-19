@@ -44,7 +44,7 @@ MUR_PARTICIPANTS = """
 """
 
 MUR_DOCUMENTS = """
-    SELECT document_id, category, description, ocrtext,
+    SELECT document_id, filename, category, description, ocrtext,
         fileimage, length(fileimage) AS length,
         doc_order_id, document_date
     FROM fecmur.document
@@ -278,6 +278,7 @@ def get_documents(case_id, bucket, bucket_name):
         for row in rs:
             document = {
                 'document_id': row['document_id'],
+                'filename': row['filename'],
                 'category': row['category'],
                 'description': row['description'],
                 'length': row['length'],
@@ -285,7 +286,7 @@ def get_documents(case_id, bucket, bucket_name):
                 'document_date': row['document_date'],
             }
             pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
-            logger.debug("S3: Uploading {}".format(pdf_key))
+            logger.info("S3: Uploading {} Orig filename: {}".format(pdf_key, document['filename']))
             bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
                     ContentType='application/pdf', ACL='public-read')
             document['url'] = '/files/' + pdf_key

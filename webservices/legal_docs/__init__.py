@@ -41,6 +41,7 @@ def load_all_legal_docs():
 def reinitialize_all_legal_docs():
     """
     Creates the Elasticsearch index and loads all the different types of legal documents.
+    This would lead to a brief outage while the docs are reloaded.
     """
     initialize_legal_docs()
     load_all_legal_docs()

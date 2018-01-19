@@ -15,20 +15,17 @@ def refresh():
     """Update incremental aggregates, itemized schedules, materialized views,
     then slack a notification to the development team.
     """
-    try:
-        manage.update_functions()
-        manage.update_itemized('e')
-        manage.update_schemas()
-        download.clear_bucket()
-        message = '*Success* nightly updates for {0} completed'.format(env.get_credential(NEW_RELIC_APP_NAME))
-        utils.post_to_slack(message, '#bots')
-    except Exception as error:
-        message = '*ERROR* nightly update failed for {0}. Check logs.'.format(env.get_credential(NEW_RELIC_APP_NAME))
-        utils.post_to_slack(message, '#bots')
-        manage.logger.exception(error)
-
-
-@app.task
-def refresh_calendar():
-    """Update calendar, called every 15 minutes."""
-    manage.refresh_calendar()
+    buffer = io.StringIO()
+    with mail.CaptureLogs(manage.logger, buffer):
+        try:
+            manage.update_aggregates()
+            manage.refresh_itemized()
+            manage.refresh_materialized()
+            download.clear_bucket()
+            slack_message = '*Success* nightly updates for {0} completed'.format(env.get_credential(NEW_RELIC_APP_NAME))
+            utils.post_to_slack(slack_message, '#bots')
+        except Exception as error:
+            manage.logger.exception(error)
+            slack_message = '*ERROR* nightly update failed for {0}. Check logs.'.format(env.get_credential(NEW_RELIC_APP_NAME))
+            utils.post_to_slack(slack_message, '#bots')
+            manage.logger.exception(error)
