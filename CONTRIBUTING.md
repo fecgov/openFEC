@@ -24,14 +24,14 @@ By submitting a pull request, you agree to comply with the policies on our
 ## Issues
 We use GitHub issues to track user issues and team tasks. Whenever possible,
 we follow this outline:
- 
+
 1. Goal: a quick blurb explaining the bug or what the issue should accomplish.
    Optional: What is the user need?
 2. Completion criteria: how we’ll know that this issue has been completed
 3. Tasks to completion:
-    - [ ] Use 
+    - [ ] Use
     - [ ] Markdown
-    - [ ] Checklists 
+    - [ ] Checklists
 4. Dependencies (optional): What other issues out there need to be completed
    before you can do this one? Include links to tickets with the dependency.
 5. For development issues, include unknown tasks or dependencies that need
@@ -128,7 +128,7 @@ We currently have automatic deployments take place whenever code is
 merged/pushed to the `develop` (to our `dev` space) or `release/*` (to our
 `stage` space) branches.
 
-We have also created a separate `feature` space in Cloud Foundry, which we 
+We have also created a separate `feature` space in Cloud Foundry, which we
 manually deploy to as needed. This will enable us to work on and test features
 that may require a long lead time before merging into `develop`. It will also
 enable us to test this work without being clobbered by the frequent
@@ -160,8 +160,8 @@ development tools:
 We currently have several monitoring tools in place:
 
 - New Relic, mainly for basic pings
-- A custom script powered by Mandrill to e-mail us nightly status reports in
-  the `dev`, `stage`, and `prod` environments.
+- We receive nightly status reports about
+  the `dev`, `stage`, and `prod` environments via slack.
 
 
 ### 18F specific team workflow
