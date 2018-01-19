@@ -1,5 +1,3 @@
---SET search_path = disclosure, pg_catalog;
-
 CREATE MATERIALIZED VIEW elections_list_mv AS
 
 WITH incumbents AS (
@@ -29,7 +27,7 @@ WITH incumbents AS (
         --ORDER BY get_cycle(election_yr) DESC
 )
 SELECT
-    election_yr,
+    CAST (election_yr AS INTEGER),
     office AS cand_office,
     state AS cand_office_st,
     district AS cand_office_district,
