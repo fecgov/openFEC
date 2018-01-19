@@ -18,7 +18,6 @@ from webservices.rest import db
 from webservices.env import env
 from webservices import utils
 from webservices.tasks.utils import get_bucket
-from webservices.legal_docs import DOCS_INDEX
 
 from . import reclassify_statutory_citation
 
@@ -89,7 +88,7 @@ def index_regulations():
                 "sort2": int(section_label[1])
             }
 
-            es.index(DOCS_INDEX, 'regulations', doc, id=doc['doc_id'])
+            es.index('docs_index', 'regulations', doc, id=doc['doc_id'])
         reg_count += 1
     logger.info("%d regulation parts indexed", reg_count)
 
@@ -184,7 +183,7 @@ def get_title_52_statutes():
                         "sort1": 52,
                         "sort2": int(section_no)
                     }
-                    es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
+                    es.index('docs_index', 'statutes', doc, id=doc['doc_id'])
                     section_count += 1
     return section_count
 
@@ -223,7 +222,7 @@ def get_title_26_statutes():
                         "sort1": 26,
                         "sort2": int(section_no)
                     }
-                    es.index(DOCS_INDEX, 'statutes', doc, id=doc['doc_id'])
+                    es.index('docs_index', 'statutes', doc, id=doc['doc_id'])
                     section_count += 1
     return section_count
 
@@ -352,13 +351,13 @@ def delete_murs_from_es():
     """
     Deletes all MURs from Elasticsearch
     """
-    delete_from_es(DOCS_INDEX, 'murs')
+    delete_from_es('docs_index', 'murs')
 
 def delete_advisory_opinions_from_es():
     """
     Deletes all advisory opinions from Elasticsearch
     """
-    delete_from_es(DOCS_INDEX, 'advisory_opinions')
+    delete_from_es('docs_index', 'advisory_opinions')
 
 def delete_from_es(index, doc_type):
     """
@@ -426,7 +425,7 @@ def process_mur(mur):
         'citations': citations,
         'url': pdf_url
     }
-    es.index(DOCS_INDEX, 'murs', doc, id=doc['doc_id'])
+    es.index('archived_murs_index', 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, tasks_per_child=None):
     """
