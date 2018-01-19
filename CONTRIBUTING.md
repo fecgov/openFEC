@@ -160,8 +160,8 @@ development tools:
 We currently have several monitoring tools in place:
 
 - New Relic, mainly for basic pings
-- A custom script powered by slacks us nightly status reports about
-  the `dev`, `stage`, and `prod` environments.
+- We receive nightly status reports about
+  the `dev`, `stage`, and `prod` environments via slack.
 
 
 ### 18F specific team workflow
