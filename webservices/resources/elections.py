@@ -25,6 +25,7 @@ office_args_map = {
     'senate': ['state'],
 }
 
+
 def cycle_length(elections):
     return sa.case(
         [
