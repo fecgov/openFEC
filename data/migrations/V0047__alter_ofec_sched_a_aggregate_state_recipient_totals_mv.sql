@@ -158,8 +158,6 @@ DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_a_aggregate_state_recipient_t
 
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_sched_a_aggregate_state_recipient_totals_mv_TMP RENAME TO ofec_sched_a_aggregate_state_recipient_totals_mv;
 
---SELECT public.rename_indexes ('ofec_sched_a_aggregate_state_recipient_totals_mv');
-
 ALTER INDEX ofec_sched_a_aggregate_state_recip_committee_type_full_idx_tmp RENAME TO ofec_sched_a_aggregate_state_recip_committee_type_full_idx;
 
 ALTER INDEX ofec_sched_a_aggregate_state_recipient__committee_type_idx_tmp RENAME TO ofec_sched_a_aggregate_state_recipient__committee_type_idx;
