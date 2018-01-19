@@ -95,8 +95,6 @@ DROP MATERIALIZED VIEW IF EXISTS public.ofec_sched_a_aggregate_size_merged_mv;
 
 ALTER MATERIALIZED VIEW IF EXISTS public.ofec_sched_a_aggregate_size_merged_mv_TMP RENAME TO ofec_sched_a_aggregate_size_merged_mv;
 
---SELECT public.rename_indexes ('ofec_sched_a_aggregate_size_merged_mv');
-
 ALTER INDEX ofec_sched_a_aggregate_size_merged_mv_tmp_total_idx_tmp RENAME TO ofec_sched_a_aggregate_size_merged_mv_total_idx;
 
 ALTER INDEX ofec_sched_a_aggregate_size_merged_mv_tmp_size_idx_tmp RENAME TO ofec_sched_a_aggregate_size_merged_mv_size_idx;
