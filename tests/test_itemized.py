@@ -372,37 +372,6 @@ class TestItemized(ApiBaseTest):
         self.assertTrue(all('2' <= each['image_number'] <= '3' for each in results))
 
 
-    def test_filter_individual_sched_a(self):
-        individuals = [
-            factories.ScheduleAFactory(receipt_type='15J'),
-            factories.ScheduleAFactory(line_number='12', contribution_receipt_amount=150),
-        ]
-        earmarks = [
-            factories.ScheduleAFactory(),
-            factories.ScheduleAFactory(
-                line_number='12',
-                contribution_receipt_amount=150,
-                memo_text='earmark',
-                memo_code='X',
-            ),
-        ]
-
-        is_individual = sa.func.is_individual(
-            ScheduleA.contribution_receipt_amount,
-            ScheduleA.receipt_type,
-            ScheduleA.line_number,
-            ScheduleA.memo_code,
-            ScheduleA.memo_text,
-            ScheduleA.contributor_id,
-            ScheduleA.committee_id,
-        )
-
-        rows = ScheduleA.query.all()
-        self.assertEqual(rows, individuals + earmarks)
-
-        rows = ScheduleA.query.filter(is_individual).all()
-        self.assertEqual(rows, individuals)
-
     def test_amount_sched_a(self):
         [
             factories.ScheduleAFactory(contribution_receipt_amount=50),

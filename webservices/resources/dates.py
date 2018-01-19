@@ -86,13 +86,31 @@ class ElectionDatesView(ApiResource):
         return query.filter_by(election_status_id=1)
 
 
-@doc(tags=['dates'], description=docs.CALENDAR_DATES)
+@doc(
+    tags=['dates'],
+    description=docs.CALENDAR_DATES,
+)
 class CalendarDatesView(ApiResource):
 
     model = models.CalendarDate
     schema = schemas.CalendarDateSchema
     page_schema = schemas.CalendarDatePageSchema
     cap = 500
+
+    filter_match_fields = [
+        ('event_id', models.CalendarDate.event_id),
+    ]
+    filter_multi_fields = [
+        ('calendar_category_id', models.CalendarDate.calendar_category_id),
+    ]
+    filter_fulltext_fields = [
+        ('description', models.CalendarDate.description_text),
+        ('summary', models.CalendarDate.summary_text),
+    ]
+    filter_range_fields = [
+        (('min_start_date', 'max_start_date'), models.CalendarDate.start_date),
+        (('min_end_date', 'max_end_date'), models.CalendarDate.end_date),
+    ]
 
     @property
     def args(self):
@@ -104,32 +122,13 @@ class CalendarDatesView(ApiResource):
             ),
         )
 
-    filter_match_fields = [
-        ('event_id', models.CalendarDate.event_id),
-    ]
-    filter_multi_fields = [
-        ('category', models.CalendarDate.category),
-    ]
-    filter_fulltext_fields = [
-        ('description', models.CalendarDate.description_text),
-        ('summary', models.CalendarDate.summary_text),
-    ]
-    filter_range_fields = [
-        (('min_start_date', 'max_start_date'), models.CalendarDate.start_date),
-        (('min_end_date', 'max_end_date'), models.CalendarDate.end_date),
-    ]
-
     def build_query(self, *args, **kwargs):
-        # TODO: Generalize if reused
         query = super().build_query(*args, **kwargs)
-        if kwargs.get('state'):
-            query = query.filter(
-                sa.or_(
-                    self.model.state.overlap(kwargs['state']),
-                    self.model.state == None  # noqa
-                )
-            )
         return query
+
+    @property
+    def index_column(self):
+        return self.model.event_id
 
 
 @doc(tags=['dates'], description=docs.CALENDAR_EXPORT)

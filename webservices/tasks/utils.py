@@ -1,6 +1,8 @@
 import boto
 import boto3
 import logging
+import re
+import json
 from webservices.env import env
 from boto.s3.key import Key
 
@@ -32,3 +34,21 @@ def get_s3_key(name):
     bucket = connection.get_bucket(env.get_credential('bucket'))
     key = Key(bucket=bucket, name=name)
     return key
+
+def get_json_data(response):
+    json_data = json.dumps(response.data.decode('utf-8'))
+    return json_data
+
+def format_url(url):
+    """
+    remove the api_key and its value from the URL by using a regex
+    """
+    #split the url  into parts and get only url  after /v1/
+    parts = url.split('/v1/')
+    url_path = parts[1]
+    url_without_api_key = re.sub(".api_key=.*?&", '', url_path.lower())
+    #remove special characters from the URL
+    replace_special_char1 = url_without_api_key.replace("&", "/")
+    replace_special_char2 = replace_special_char1.replace("?", "")
+
+    return replace_special_char2

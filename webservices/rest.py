@@ -2,8 +2,23 @@
 A RESTful web service supporting fulltext and field-specific searches on FEC data. For
 full documentation visit: https://api.open.fec.gov/developers.
 """
+from webservices.env import env
+
+def initialize_newrelic():
+    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
+    if license_key:
+        import newrelic.agent
+        settings = newrelic.agent.global_settings()
+        settings.license_key = license_key
+        newrelic.agent.initialize()
+
+initialize_newrelic()
+
 import os
 import http
+import logging
+import json
+import boto
 
 from flask import abort
 from flask import request
@@ -47,10 +62,13 @@ from webservices.resources import search
 from webservices.resources import dates
 from webservices.resources import costs
 from webservices.resources import legal
-from webservices.resources import load
 from webservices.resources import large_aggregates
+from webservices.resources import audit
 from webservices.env import env
+from webservices.tasks import utils
 
+app = Flask(__name__)
+logger = logging.getLogger('rest.py')
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
@@ -59,9 +77,7 @@ def sqla_conn_string():
         sqla_conn_string = 'postgresql://:@/cfdm_test'
     return sqla_conn_string
 
-
-app = Flask(__name__)
-app.debug = True
+# app.debug = True
 app.config['SQLALCHEMY_DATABASE_URI'] = sqla_conn_string()
 app.config['APISPEC_FORMAT_RESPONSE'] = None
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -80,6 +96,12 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     if follower.strip()
 ]
 # app.config['SQLALCHEMY_ECHO'] = True
+
+# Modify app configuration and logging level for production
+if not app.debug:
+    app.logger.addHandler(logging.StreamHandler())
+    app.logger.setLevel(logging.INFO)
+
 db.init_app(app)
 cors.CORS(app)
 
@@ -133,8 +155,28 @@ def limit_remote_addr():
 @app.after_request
 def add_caching_headers(response):
     max_age = env.get_credential('FEC_CACHE_AGE')
+    cache_all_requests = env.get_credential('CACHE_ALL_REQUESTS', False)
+    status_code = response.status_code
+
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
+
+    if (cache_all_requests and status_code == 200):
+
+        try:
+            # get s3 bucket env variables
+            s3_bucket = utils.get_bucket()
+
+            #remove the api_key for the URL
+            formatted_url = utils.format_url(request.url)
+            cached_url = "cached-calls/{0}.json".format(formatted_url)
+
+            #upload the request_content.json file to s3 bucket
+            s3_bucket.upload_file("request_content.txt", cached_url)
+
+            logger.info('The following request has been cached and uploaded successfully to s3 :%s ', cached_url)
+        except:
+            logger.error('Cache Upload failed')
     return response
 
 
@@ -196,8 +238,11 @@ api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
-
-
+api.add_resource(audit.PrimaryCategory, '/audit-primary-category/')
+api.add_resource(audit.Category, '/audit-category/')
+api.add_resource(audit.AuditCaseView, '/audit-case/')
+api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
+api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(
@@ -254,7 +299,6 @@ api.add_resource(download.DownloadView, '/download/<path:path>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
-api.add_resource(load.Legal, '/load/legal/')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
@@ -318,13 +362,18 @@ apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
+apidoc.register(audit.PrimaryCategory, blueprint='v1')
+apidoc.register(audit.Category, blueprint='v1')
+apidoc.register(audit.AuditCaseView, blueprint='v1')
+apidoc.register(audit.AuditCandidateNameSearch, blueprint='v1')
+apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
 docs = Blueprint(
     'docs',
     __name__,
-    static_folder=os.path.join(here, os.pardir, 'static', 'swagger-ui', 'dist'),
+    static_folder=os.path.join(here, os.pardir, 'static', 'swagger-ui'),
     static_url_path='/docs/static',
 )
 
@@ -357,15 +406,5 @@ def api_ui():
 
 
 app.register_blueprint(docs)
-
-def initialize_newrelic():
-    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
-    if license_key:
-        import newrelic.agent
-        settings = newrelic.agent.global_settings()
-        settings.license_key = license_key
-        newrelic.agent.initialize()
-
-initialize_newrelic()
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
