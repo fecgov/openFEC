@@ -56,14 +56,11 @@ class ElectionsListView(utils.Resource):
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
-
         return utils.fetch_page(query, kwargs)
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
-        query = db.session.query(ElectionsList)
-        if kwargs.get('cycle'):
-            query = query.filter(ElectionsList.cycle.contains(kwargs['cycle']))
+        query = db.session.query(ElectionsList).order_by(ElectionsList.district)
         if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(ElectionsList.office.in_(values))
@@ -109,9 +106,6 @@ class ElectionsListView(utils.Resource):
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
-                    # Note: Missing districts may be represented as "00" or `None`.
-                    # For now, handle both values; going forward, we should choose
-                    # a consistent representation.
                     sa.or_(
                         ElectionsList.district == '00'
                     ),

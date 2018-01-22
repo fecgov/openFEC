@@ -340,7 +340,6 @@ class ElectionsListFactory(BaseFactory):
     class Meta:
         model = models.ElectionsList
     cycle = 2012
-    candidate_status = 'I'
 
 
 class CommunicationCostFactory(BaseFactory):

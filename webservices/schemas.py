@@ -1104,7 +1104,10 @@ register_schema(AuditCaseSchema)
 register_schema(AuditCasePageSchema)
 
 ElectionsListSchema = make_schema(
-    models.ElectionsList
+    models.ElectionsList,
+    options={
+        'exclude': ('idx',)
+    }
 )
 
 ElectionsListPageSchema = make_page_schema(ElectionsListSchema)

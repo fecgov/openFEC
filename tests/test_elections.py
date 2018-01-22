@@ -22,9 +22,9 @@ class TestElectionSearch(ApiBaseTest):
     def test_search_district(self):
         results = self._results(api.url_for(ElectionsListView, state='NJ', district='09'))
         self.assertEqual(len(results), 3)
-        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00', 'candidate_status': 'I'})
-        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00', 'candidate_status': 'I'})
-        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09', 'candidate_status': 'I'})
+        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'})
+        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
     def test_search_district_padding(self):
         results_padded = self._results(api.url_for(ElectionsListView, district='09'))
@@ -40,9 +40,15 @@ class TestElectionSearch(ApiBaseTest):
     def test_search_zip(self):
         results = self._results(api.url_for(ElectionsListView, zip='22902'))
         assert len(results) == 3
-        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00', 'candidate_status': 'I'})
-        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00', 'candidate_status': 'I'})
-        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05', 'candidate_status': 'I'})
+        assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
+        assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'})
+        assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
+
+    def test_counts(self):
+        response = self._response(api.url_for(ElectionsListView))
+        footer_count = response['pagination']['count']
+        results_count = len(response['results'])
+        self.assertEqual(footer_count, results_count)
 
 
 class TestElections(ApiBaseTest):
