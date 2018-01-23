@@ -52,7 +52,7 @@ class ElectionsListView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.elections_list)
-    @use_kwargs(args.make_sort_args())
+    @use_kwargs(args.make_sort_args('sort_order, district'))
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
@@ -60,7 +60,7 @@ class ElectionsListView(utils.Resource):
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
-        query = db.session.query(ElectionsList).order_by(ElectionsList.sort_order, ElectionsList.district)
+        query = db.session.query(ElectionsList)
         if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(ElectionsList.office.in_(values))
