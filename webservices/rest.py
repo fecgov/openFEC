@@ -199,7 +199,7 @@ def add_caching_headers(response):
 def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
 
-    logger.info("In handle_exception(), wrapped status is %s", wrapped.status)
+    logger.info("In handle_exception(), received status code %s", wrapped.status)
 
     if wrapped.status in [500, 502, 503, 504]:
         formatted_url = utils.format_url(request.url)
