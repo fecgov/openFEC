@@ -20,6 +20,7 @@ class ElectionsList(db.Model):
     __tablename__ = 'ofec_elections_list_mv'
 
     idx = db.Column(db.Integer, primary_key=True)
+    sort_order = db.Column(db.Integer)
     office = db.Column(db.String, doc=docs.OFFICE)
     state = db.Column(db.String, doc=docs.STATE_GENERIC)
     district = db.Column(db.String, doc=docs.DISTRICT)

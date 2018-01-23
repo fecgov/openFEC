@@ -35,6 +35,7 @@ WITH incumbents AS (
 SELECT
     row_number() OVER () AS idx,
     CAST (election_yr AS INTEGER),
+    CASE office WHEN 'P' THEN 0 WHEN 'S' THEN 1 ELSE 2 END AS sort_order,
     office,
     state,
     district,
