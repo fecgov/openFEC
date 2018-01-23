@@ -1,6 +1,6 @@
 SET search_path = public, pg_catalog;
 
-CREATE MATERIALIZED VIEW elections_list_mv AS
+CREATE MATERIALIZED VIEW ofec_elections_list_mv AS
 
 WITH incumbents AS (
 --So we don't show duplicate elections
@@ -48,13 +48,13 @@ ORDER BY district ASC
 ;
 
 
-ALTER TABLE elections_list_mv OWNER TO fec;
+ALTER TABLE ofec_elections_list_mv OWNER TO fec;
 
-CREATE INDEX ON elections_list_mv(idx);
-CREATE INDEX ON elections_list_mv(election_yr);
-CREATE INDEX ON elections_list_mv(office);
-CREATE INDEX ON elections_list_mv(state);
-CREATE INDEX ON elections_list_mv(district);
-CREATE INDEX ON elections_list_mv(cycle);
-CREATE INDEX ON elections_list_mv(incumbent_id);
-CREATE INDEX ON elections_list_mv(incumbent_name);
+CREATE INDEX ON ofec_elections_list_mv(idx);
+CREATE INDEX ON ofec_elections_list_mv(election_yr);
+CREATE INDEX ON ofec_elections_list_mv(office);
+CREATE INDEX ON ofec_elections_list_mv(state);
+CREATE INDEX ON ofec_elections_list_mv(district);
+CREATE INDEX ON ofec_elections_list_mv(cycle);
+CREATE INDEX ON ofec_elections_list_mv(incumbent_id);
+CREATE INDEX ON ofec_elections_list_mv(incumbent_name);

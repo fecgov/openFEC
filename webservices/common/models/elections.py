@@ -17,7 +17,7 @@ class ElectionResult(db.Model):
 
 
 class ElectionsList(db.Model):
-    __tablename__ = 'elections_list_mv'
+    __tablename__ = 'ofec_elections_list_mv'
 
     idx = db.Column(db.Integer, primary_key=True)
     office = db.Column(db.String, doc=docs.OFFICE)
