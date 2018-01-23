@@ -1106,7 +1106,10 @@ register_schema(AuditCasePageSchema)
 ElectionsListSchema = make_schema(
     models.ElectionsList,
     options={
-        'exclude': ('idx',)
+        'exclude': (
+            'idx',
+            'sort_order',
+        )
     }
 )
 

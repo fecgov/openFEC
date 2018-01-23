@@ -60,7 +60,7 @@ class ElectionsListView(utils.Resource):
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
-        query = db.session.query(ElectionsList).order_by(ElectionsList.district)
+        query = db.session.query(ElectionsList).order_by(ElectionsList.sort_order, ElectionsList.district)
         if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
             query = query.filter(ElectionsList.office.in_(values))
