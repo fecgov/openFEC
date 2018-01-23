@@ -37,11 +37,8 @@ def get_s3_key(name):
     return key
 
 def get_json_data(response):
-    # create a python string from reponse.data
     python_str = json.dumps(response.data.decode('utf-8'))
-    # create a python object(dictionary) from python_str
-    python_obj = json.dumps(python_str, indent=None, separators=(', ', ': '))
-    return python_obj
+    return python_str
 
 def format_url(url):
     """
@@ -61,7 +58,9 @@ def format_url(url):
 
 def get_cached_request(cached_url):
     response = requests.get(cached_url)
-    python_str = json.dumps(response.json(), indent=4)
+    python_obj = json.loads(response.json())
+    python_str = json.dumps(python_obj, sort_keys=True, indent=4)
+
     if response.status_code == 200:
         return python_str
     return None
