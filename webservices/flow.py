@@ -39,6 +39,7 @@ def get_graph():
         'reports_presidential',
         'sched_a_by_size_merged',
         'sched_a_by_state_recipient_totals',
+        'sched_a_by_state_recipient_totals_2',
         'sched_c',
         'sched_e_by_candidate',
         'sched_f',

@@ -9,6 +9,7 @@ from webservices.rest import db
 fips_states = sa.Table('ofec_fips_states', db.metadata, autoload_with=db.engine)
 zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
 
+# TODO: Do we still need this?
 def get_district_counts():
     aggregates = db.session.query(
         zips_districts.c['State'],

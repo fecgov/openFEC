@@ -163,6 +163,7 @@ def load_table(frame, tablename, if_exists='replace', indexes=()):
     for index in indexes:
         sa.Index('{}_{}_idx'.format(tablename, index), table.c[index]).create(db.engine)
 
+#TODO: Do we still need this?
 @manager.command
 def build_districts():
     """This creats the zipcode mapping for Congress based on data that is save as csvs.
@@ -189,6 +190,7 @@ def load_election_dates():
 
     logger.info('Finished loading election dates.')
 
+#TODO: Do we still need this? Should we change this to the new table?
 @manager.command
 def dump_districts(dest=None):
     """ Makes districts locally that you can then add as a table to the databases
@@ -206,6 +208,7 @@ def dump_districts(dest=None):
     ).format(**locals())
     subprocess.run(cmd, shell=True)
 
+#TODO: Do we still need this?
 @manager.command
 def build_district_counts(outname='districts.json'):
     """ Compiles the districts for a state
@@ -340,6 +343,7 @@ def refresh_materialized(concurrent=True):
         'candidate_flags': ['ofec_candidate_flag'],
         'sched_c': ['ofec_sched_c_mv'],
         'sched_a_by_state_recipient_totals': ['ofec_sched_a_aggregate_state_recipient_totals_mv'],
+        'sched_a_by_state_recipient_totals_2': ['ofec_sched_a_aggregate_state_recipient_totals_2_mv'],
         'rad_analyst': ['ofec_rad_mv'],
         'committee_detail': ['ofec_committee_detail_mv'],
         'committee_fulltext': ['ofec_committee_fulltext_mv'],
