@@ -170,6 +170,7 @@ class TotalsCandidateView(ApiResource):
             sa.and_(
                 history.candidate_id == models.CandidateTotal.candidate_id,
                 year_column == models.CandidateTotal.cycle,
+                history.candidate_election_year == models.CandidateTotal.cycle,
             )
         ).join(
             models.Candidate,

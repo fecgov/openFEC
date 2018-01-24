@@ -55,8 +55,8 @@ class TestSort(ApiBaseTest):
 
         ]
         candidateHistory = [
-            factories.CandidateHistoryFactory(candidate_id='C1234', two_year_period=2016, election_years=[2016], cycles=[2016]),
-            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, election_years=[2016], cycles=[2016])
+            factories.CandidateHistoryFactory(candidate_id='C1234', two_year_period=2016, election_years=[2016], cycles=[2016],candidate_election_year=2016),
+            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, election_years=[2016], cycles=[2016],candidate_election_year=2016)
         ]
         candidateTotals = [
             factories.CandidateTotalFactory(candidate_id='C1234', is_election=False, cycle=2016),
