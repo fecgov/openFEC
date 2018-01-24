@@ -171,6 +171,7 @@ class TestCandidateAggregates(ApiBaseTest):
         self.candidate = factories.CandidateHistoryFactory(
             candidate_id='S123',
             two_year_period=2012,
+            candidate_election_year=2012,
         )
         self.committees = [
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
