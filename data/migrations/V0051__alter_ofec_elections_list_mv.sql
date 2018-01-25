@@ -63,7 +63,10 @@ CREATE INDEX ON ofec_elections_list_mv_TMP(cycle);
 CREATE INDEX ON ofec_elections_list_mv_TMP(incumbent_id);
 CREATE INDEX ON ofec_elections_list_mv_TMP(incumbent_name);
 
--- ------------------------------------------------------
+--------------------------------------------------------
+
 DROP MATERIALIZED VIEW IF EXISTS ofec_elections_list_mv;
 
 ALTER MATERIALIZED VIEW IF EXISTS ofec_elections_list_mv_TMP RENAME TO ofec_elections_list_mv;
+
+SELECT rename_indexes('ofec_elections_list_mv');
