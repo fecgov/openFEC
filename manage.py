@@ -18,6 +18,7 @@ from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 import webservices.legal_docs as legal_docs
+from webservices.utils import post_to_slack
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -35,12 +36,14 @@ manager.command(legal_docs.index_statutes)
 manager.command(legal_docs.load_archived_murs)
 manager.command(legal_docs.load_advisory_opinions)
 manager.command(legal_docs.load_current_murs)
-manager.command(legal_docs.initialize_legal_docs)
+manager.command(legal_docs.create_docs_index)
+manager.command(legal_docs.create_archived_murs_index)
 manager.command(legal_docs.create_staging_index)
 manager.command(legal_docs.restore_from_staging_index)
-manager.command(legal_docs.delete_index)
-manager.command(legal_docs.reinitialize_all_legal_docs)
-manager.command(legal_docs.refresh_legal_docs_zero_downtime)
+manager.command(legal_docs.delete_docs_index)
+manager.command(legal_docs.move_archived_murs)
+manager.command(legal_docs.initialize_current_legal_docs)
+manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
 
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
@@ -345,7 +348,8 @@ def refresh_materialized(concurrent=True):
         'large_aggregates': ['ofec_entity_chart_mv'],
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
         'totals_candidate_committee': ['ofec_totals_candidate_committees_mv'],
-        'audit_case': ['ofec_audit_case_mv', 'ofec_audit_case_category_rel_mv', 'ofec_audit_case_sub_category_rel_mv', 'ofec_committee_fulltext_audit_mv', 'ofec_candidate_fulltext_audit_mv']
+        'audit_case': ['ofec_audit_case_mv', 'ofec_audit_case_category_rel_mv', 'ofec_audit_case_sub_category_rel_mv', 'ofec_committee_fulltext_audit_mv', 'ofec_candidate_fulltext_audit_mv'],
+        'elections_list': ['ofec_elections_list_mv']
     }
 
     graph = flow.get_graph()
@@ -405,6 +409,14 @@ def load_efile_sheets():
         columns_to_drop = ['summary line number', form_column, 'Unnamed: 5']
         df.drop(columns_to_drop, axis=1, inplace=True)
         df.to_json(path_or_buf="data/" + table + ".json", orient='values')
+
+
+@manager.command
+def slack_message(message):
+    """ Sends a message to the bots channel. you can add this command to ping you when a task is done, etc.
+    run ./manage.py slack_message 'The message you want to post'
+    """
+    post_to_slack(message, '#bots')
 
 
 if __name__ == '__main__':

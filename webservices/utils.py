@@ -1,6 +1,9 @@
 import re
 import functools
+import json
+import logging
 
+import requests
 import six
 import sqlalchemy as sa
 
@@ -29,6 +32,8 @@ from webservices import sorting
 from webservices import decoders
 from webservices import exceptions
 
+
+logger = logging.getLogger(__name__)
 
 use_kwargs = functools.partial(use_kwargs_original, locations=('query', ))
 
@@ -322,9 +327,11 @@ def get_election_duration(column):
 def get_elasticsearch_connection():
     es_conn = env.get_service(name='fec-api-search')
     if es_conn:
-        es = Elasticsearch([es_conn.get_url(url='uri')])
+        url = es_conn.get_url(url='uri')
     else:
-        es = Elasticsearch(['http://localhost:9200'])
+        url = 'http://localhost:9200'
+    es = Elasticsearch(url, timeout=30, max_retries=10, retry_on_timeout=True)
+
     return es
 
 def print_literal_query_string(query):
@@ -335,3 +342,15 @@ def create_eregs_link(part, section):
     if section:
         url_part_section += '-' + section
     return '/regulations/{}/CURRENT'.format(url_part_section)
+
+def post_to_slack(message, channel):
+    response = requests.post(
+        env.get_credential('SLACK_HOOK'),
+        data=json.dumps({
+            'text': message, 'channel': channel, 'link_names': 1,
+            'username': 'Ms. Robot', 'icon_emoji': ':robot_face:',
+        }),
+        headers={'Content-Type': 'application/json'},
+    )
+    if response.status_code != 200:
+        logger.error('SLACK ERROR- Message failed to send:{0}'.format(message))
