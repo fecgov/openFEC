@@ -25,6 +25,7 @@ def get_graph():
         'election_outcome',
         'electioneering',
         'electioneering_by_candidate',
+        'elections_list',
         'filing_amendments_all',
         'filing_amendments_house_senate',
         'filing_amendments_pac_party',
