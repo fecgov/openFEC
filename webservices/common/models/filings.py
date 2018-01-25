@@ -1,20 +1,13 @@
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.hybrid import hybrid_property
-
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
-
-
-
-
-
 from .base import db
 
-
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
-    __tablename__ = 'ofec_filings_mv'
+    __tablename__ = 'ofec_filings_all_mv'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')
@@ -66,7 +59,7 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     state = db.Column(db.String, doc=docs.STATE)
     office = db.Column(db.String, doc=docs.OFFICE)
     party = db.Column(db.String, doc=docs.PARTY)
-
+    cmte_tp = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)
     most_recent_file_number = db.Column(db.BigInteger)
