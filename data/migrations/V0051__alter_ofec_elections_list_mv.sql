@@ -1,8 +1,8 @@
 SET search_path = public, pg_catalog;
 
-DROP MATERIALIZED VIEW IF EXISTS ofec_elections_list_mv_TMP;
+DROP MATERIALIZED VIEW IF EXISTS ofec_elections_list_mv_tmp;
 
-CREATE MATERIALIZED VIEW ofec_elections_list_mv_TMP AS
+CREATE MATERIALIZED VIEW ofec_elections_list_mv_tmp AS
 
 WITH incumbents AS (
 --So we don't show duplicate elections
@@ -49,24 +49,24 @@ LEFT JOIN incumbents
 ORDER BY district ASC
 ;
 
-ALTER TABLE ofec_elections_list_mv_TMP OWNER TO fec;
-GRANT ALL ON TABLE ofec_elections_list_mv_TMP TO fec;
-GRANT SELECT ON TABLE ofec_elections_list_mv_TMP TO fec_read;
-GRANT SELECT ON TABLE ofec_elections_list_mv_TMP TO openfec_read;
+ALTER TABLE ofec_elections_list_mv_tmp OWNER TO fec;
+GRANT ALL ON TABLE ofec_elections_list_mv_tmp TO fec;
+GRANT SELECT ON TABLE ofec_elections_list_mv_tmp TO fec_read;
+GRANT SELECT ON TABLE ofec_elections_list_mv_tmp TO openfec_read;
 
-CREATE INDEX ON ofec_elections_list_mv_TMP(idx);
-CREATE INDEX ON ofec_elections_list_mv_TMP(election_yr);
-CREATE INDEX ON ofec_elections_list_mv_TMP(office);
-CREATE INDEX ON ofec_elections_list_mv_TMP(state);
-CREATE INDEX ON ofec_elections_list_mv_TMP(district);
-CREATE INDEX ON ofec_elections_list_mv_TMP(cycle);
-CREATE INDEX ON ofec_elections_list_mv_TMP(incumbent_id);
-CREATE INDEX ON ofec_elections_list_mv_TMP(incumbent_name);
+CREATE INDEX ON ofec_elections_list_mv_tmp(idx);
+CREATE INDEX ON ofec_elections_list_mv_tmp(election_yr);
+CREATE INDEX ON ofec_elections_list_mv_tmp(office);
+CREATE INDEX ON ofec_elections_list_mv_tmp(state);
+CREATE INDEX ON ofec_elections_list_mv_tmp(district);
+CREATE INDEX ON ofec_elections_list_mv_tmp(cycle);
+CREATE INDEX ON ofec_elections_list_mv_tmp(incumbent_id);
+CREATE INDEX ON ofec_elections_list_mv_tmp(incumbent_name);
 
 --------------------------------------------------------
 
 DROP MATERIALIZED VIEW IF EXISTS ofec_elections_list_mv;
 
-ALTER MATERIALIZED VIEW IF EXISTS ofec_elections_list_mv_TMP RENAME TO ofec_elections_list_mv;
+ALTER MATERIALIZED VIEW IF EXISTS ofec_elections_list_mv_tmp RENAME TO ofec_elections_list_mv;
 
 SELECT rename_indexes('ofec_elections_list_mv');
