@@ -1,4 +1,25 @@
 
+CREATE OR REPLACE FUNCTION public.get_office_cmte_tp (p_office varchar, p_cmte_tp varchar)
+  RETURNS varchar AS
+$BODY$
+    begin
+
+        return coalesce(p_office, p_cmte_tp);
+
+    end
+
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+  
+ALTER FUNCTION public.get_office_cmte_tp(varchar, varchar)
+  OWNER TO fec;
+GRANT EXECUTE ON FUNCTION public.get_office_cmte_tp(varchar, varchar) TO public;
+GRANT EXECUTE ON FUNCTION public.get_office_cmte_tp(varchar, varchar) TO fec;
+
+
+
+
 -- This MATERIALIZED VIEW is used to replace public.ofec_filings_mv
 --   During update of ofec_filings_mv to address issue #2723, we realized that 15 other MVs are depending on ofec_filings_mv 
 --    	and it is difficult to recreate ofec_filings_mv to include the modification needed using the current process
@@ -75,7 +96,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_filings_all_mv AS
             cand.office,
             cand.district,
             cand.party,
-            cmte_valid_fec_yr.cmte_tp
+            cmte_valid_fec_yr.cmte_tp,
+            get_office_cmte_tp(cand.office,cmte_valid_fec_yr.cmte_tp) as office_cmte_tp
            FROM disclosure.f_rpt_or_form_sub filing_history
              LEFT JOIN disclosure.cmte_valid_fec_yr cmte_valid_fec_yr ON filing_history.cand_cmte_id = cmte_valid_fec_yr.cmte_id AND get_cycle(filing_history.rpt_yr)::numeric = cmte_valid_fec_yr.fec_election_yr
              LEFT JOIN ofec_committee_history_mv com ON filing_history.cand_cmte_id::text = com.committee_id::text AND get_cycle(filing_history.rpt_yr)::numeric = com.cycle
@@ -136,7 +158,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_filings_all_mv AS
             cand.office,
             cand.district,
             cand.party,
-            cmte_valid_fec_yr.cmte_tp
+            cmte_valid_fec_yr.cmte_tp,
+            get_office_cmte_tp(cand.office,cmte_valid_fec_yr.cmte_tp) as office_cmte_tp            
            FROM disclosure.nml_form_rfai filing_history
              LEFT JOIN disclosure.cmte_valid_fec_yr cmte_valid_fec_yr ON filing_history.id = cmte_valid_fec_yr.cmte_id AND get_cycle(filing_history.rpt_yr)::numeric = cmte_valid_fec_yr.fec_election_yr
              LEFT JOIN ofec_committee_history_mv com ON filing_history.id::text = com.committee_id::text AND get_cycle(filing_history.rpt_yr)::numeric = com.cycle
@@ -196,7 +219,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_filings_all_mv AS
             filings.office,
             filings.district,
             filings.party,
-            filings.cmte_tp
+            filings.cmte_tp,
+            filings.office_cmte_tp
            FROM filings
         UNION ALL
          SELECT rfai_filings.candidate_id,
@@ -251,7 +275,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_filings_all_mv AS
             rfai_filings.office,
             rfai_filings.district,
             rfai_filings.party,
-            rfai_filings.cmte_tp
+            rfai_filings.cmte_tp,
+            rfai_filings.office_cmte_tp
            FROM rfai_filings
         )
  SELECT row_number() OVER () AS idx,
@@ -307,7 +332,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS public.ofec_filings_all_mv AS
     combined.office,
     combined.district,
     combined.party,
-    combined.cmte_tp
+    combined.cmte_tp,
+    combined.office_cmte_tp
    FROM combined
 WITH DATA;
 
@@ -448,3 +474,8 @@ CREATE INDEX ofec_filings_all_mv_total_receipts_idx_idx1
   USING btree
   (total_receipts, idx);
 
+
+CREATE INDEX ofec_filings_all_mv_office_cmte_tp_idx_idx1
+  ON public.ofec_filings_all_mv
+  USING btree
+  (office_cmte_tp, idx);

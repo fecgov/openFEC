@@ -58,6 +58,8 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     #If f2 filing, the state of the candidate, else the state of the committee
     state = db.Column(db.String, doc=docs.STATE)
     office = db.Column(db.String, doc=docs.OFFICE)
+    #missing filings 2723
+    office = db.Column('office_cmte_tp', db.String, index=True, doc=docs.OFFICE)
     party = db.Column(db.String, doc=docs.PARTY)
     cmte_tp = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
     amendment_chain = db.Column(ARRAY(db.Numeric))
