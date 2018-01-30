@@ -129,6 +129,7 @@ class CommitteeTotalsPresidential(CommitteeTotals):
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
+    coverage_end_date = db.Column(db.DateTime, doc=docs.COVERAGE_END_DATE)
 
 
 class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
@@ -209,6 +210,7 @@ class CommitteeTotalsHouseSenate(CommitteeTotals):
     transfers_from_other_authorized_committee = db.Column(db.Numeric(30, 2))
     transfers_to_other_authorized_committee = db.Column(db.Numeric(30, 2))
     cash_on_hand_beginning_period = db.Column(db.Numeric(30, 2))
+    coverage_end_date = db.Column(db.DateTime, doc=docs.COVERAGE_END_DATE)
 
 
 class CommitteeTotalsIEOnly(BaseModel):
