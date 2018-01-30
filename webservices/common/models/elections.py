@@ -37,3 +37,4 @@ class ZipsDistricts(db.Model):
     district = db.Column(db.String, doc=docs.DISTRICT)
     zip_code = db.Column(db.String)
     state_abbrevation = db.Column(db.String)
+    active = db.Column(db.String)

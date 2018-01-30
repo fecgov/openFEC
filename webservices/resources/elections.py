@@ -86,8 +86,8 @@ class ElectionsListView(utils.Resource):
     def _filter_zip(self, query, kwargs):
         """Filter query by zip codes."""
         districts = db.session.query(ZipsDistricts).filter(
-            cast(ZipsDistricts.zip_code, Integer).in_(kwargs['zip'])
-            # TODO: ZipsDistricts.active.in_('Y')
+            cast(ZipsDistricts.zip_code, Integer).in_(kwargs['zip']),
+            ZipsDistricts.active == 'Y'
         ).subquery()
         return query.join(
             districts,
