@@ -534,6 +534,14 @@ The progress of these tasks can be monitored using, e.g.,
 cf logs api | grep reinit-legal
 ```
 
+#### Create index for current legal documents (excludes archived MURs)
+```
+python manage.py initialize_current_legal_docs
+```
+#### Create index for archived MURs
+```
+python manage.py create_archived_murs_index
+```
 
 #### Loading statutes
 ```
@@ -556,14 +564,15 @@ python manage.py load_advisory_opinions [-f FROM_AO_NO]
 python manage.py load_current_murs [-f FROM_MUR_NO]
 ```
 
-#### Loading all legal documents for the 1st time
+#### Loading archived MURs (This takes a very long time)
 ```
-python manage.py reinitialize_all_legal_docs
+python manage.py load_archived_murs
 ```
 
-#### Loading all legal documents with no downtime
+
+#### Reloading all current legal documents with no downtime (excludes archived MURs)
 ```
-python manage.py refresh_legal_docs_zero_downtime
+python manage.py refresh_current_legal_docs_zero_downtime
 ```
 This command is typically used when there is a schema change. A staging index is built
 and populated in the background. When ready, the staging index is moved to the production index with no downtime.

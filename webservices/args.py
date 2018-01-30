@@ -597,7 +597,7 @@ electioneering_by_candidate = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
 }
 
-election_search = {
+elections_list = {
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(District, description=docs.DISTRICT),
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
