@@ -342,6 +342,11 @@ class ElectionsListFactory(BaseFactory):
     cycle = 2012
 
 
+class ZipsDistrictsFactory(BaseFactory):
+    class Meta:
+        model = models.ZipsDistricts
+
+
 class CommunicationCostFactory(BaseFactory):
     class Meta:
         model = models.CommunicationCost
