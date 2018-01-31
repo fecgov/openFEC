@@ -93,7 +93,7 @@ app.config['SQLALCHEMY_FOLLOWER_TASKS'] = [
     'webservices.tasks.download.export_query',
 ]
 app.config['SQLALCHEMY_FOLLOWERS'] = [
-    sa.create_engine(follower.strip())
+    sa.create_engine(follower.strip(), pool_size=50, max_overflow=50)
     for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
     if follower.strip()
 ]
