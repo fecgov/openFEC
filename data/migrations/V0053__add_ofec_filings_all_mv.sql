@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION public.get_office_cmte_tp (p_office varchar, p_cmte_t
 $BODY$
     begin
 
-        return coalesce(p_office, p_cmte_tp);
+        return coalesce(p_office, (case when upper(p_cmte_tp) in ('S','H', 'P') then upper(p_cmte_tp) else null end));
 
     end
 
@@ -14,10 +14,8 @@ $BODY$
   
 ALTER FUNCTION public.get_office_cmte_tp(varchar, varchar)
   OWNER TO fec;
-GRANT EXECUTE ON FUNCTION public.get_office_cmte_tp(varchar, varchar) TO public;
-GRANT EXECUTE ON FUNCTION public.get_office_cmte_tp(varchar, varchar) TO fec;
-
-
+  
+  
 
 
 -- This MATERIALIZED VIEW is used to replace public.ofec_filings_mv
