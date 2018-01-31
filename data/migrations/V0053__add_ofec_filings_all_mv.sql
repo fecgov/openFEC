@@ -344,37 +344,37 @@ GRANT SELECT ON TABLE public.ofec_filings_all_mv TO fec_read;
 CREATE INDEX ofec_filings_all_mv_amendment_indicator_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (amendment_indicator COLLATE pg_catalog."default", idx);
+  (amendment_indicator COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_beginning_image_number_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (beginning_image_number, idx);
+  (beginning_image_number);
 
 
 CREATE INDEX ofec_filings_all_mv_candidate_id_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (candidate_id COLLATE pg_catalog."default", idx);
+  (candidate_id COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_committee_id_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (committee_id COLLATE pg_catalog."default", idx);
+  (committee_id COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_coverage_end_date_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (coverage_end_date, idx);
+  (coverage_end_date);
 
 
 CREATE INDEX ofec_filings_all_mv_coverage_start_date_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (coverage_start_date, idx);
+  (coverage_start_date);
 
 
 CREATE INDEX ofec_filings_all_mv_cycle_committee_id_idx1
@@ -386,19 +386,19 @@ CREATE INDEX ofec_filings_all_mv_cycle_committee_id_idx1
 CREATE INDEX ofec_filings_all_mv_cycle_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (cycle, idx);
+  (cycle);
 
 
 CREATE INDEX ofec_filings_all_mv_district_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (district COLLATE pg_catalog."default", idx);
+  (district COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_form_type_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (form_type COLLATE pg_catalog."default", idx);
+  (form_type COLLATE pg_catalog."default");
 
 
 CREATE UNIQUE INDEX ofec_filings_all_mv_idx_idx1
@@ -410,70 +410,70 @@ CREATE UNIQUE INDEX ofec_filings_all_mv_idx_idx1
 CREATE INDEX ofec_filings_all_mv_office_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (office COLLATE pg_catalog."default", idx);
+  (office COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_party_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (party COLLATE pg_catalog."default", idx);
+  (party COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_primary_general_indicator_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (primary_general_indicator COLLATE pg_catalog."default", idx);
+  (primary_general_indicator COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_receipt_date_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (receipt_date, idx);
+  (receipt_date);
 
 
 CREATE INDEX ofec_filings_all_mv_report_type_full_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (report_type_full COLLATE pg_catalog."default", idx);
+  (report_type_full COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_report_type_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (report_type COLLATE pg_catalog."default", idx);
+  (report_type COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_report_year_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (report_year, idx);
+  (report_year);
 
 
 CREATE INDEX ofec_filings_all_mv_state_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (state COLLATE pg_catalog."default", idx);
+  (state COLLATE pg_catalog."default");
 
 
 CREATE INDEX ofec_filings_all_mv_total_disbursements_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (total_disbursements, idx);
+  (total_disbursements);
 
 
 CREATE INDEX ofec_filings_all_mv_total_independent_expenditures_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (total_independent_expenditures, idx);
+  (total_independent_expenditures);
 
 
 CREATE INDEX ofec_filings_all_mv_total_receipts_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (total_receipts, idx);
+  (total_receipts);
 
 
 CREATE INDEX ofec_filings_all_mv_office_cmte_tp_idx_idx1
   ON public.ofec_filings_all_mv
   USING btree
-  (office_cmte_tp, idx);
+  (office_cmte_tp);
