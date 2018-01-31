@@ -164,6 +164,7 @@ class ElectionView(utils.Resource):
             totals_model.receipts,
             totals_model.disbursements,
             totals_model.last_cash_on_hand_end_period.label('cash_on_hand_end_period'),
+            totals_model.coverage_end_date,
         )
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)
@@ -199,6 +200,7 @@ class ElectionView(utils.Resource):
             sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('total_disbursements'),
             sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
+            sa.func.max(pairs.c.coverage_end_date).label('coverage_end_date'),
         ).group_by(
             pairs.c.candidate_id,
             pairs.c.candidate_election_year
@@ -213,6 +215,7 @@ class ElectionView(utils.Resource):
             ElectionResult.cand_office_st == (kwargs.get('state', 'US')),
             ElectionResult.cand_office_district == (kwargs.get('district', '00')),
         )
+
 
 @doc(
     description=docs.ELECTION_SEARCH,
@@ -259,12 +262,12 @@ class ElectionSummary(utils.Resource):
         expenditures = filter_candidates(expenditures, kwargs)
         return expenditures
 
-
 election_durations = {
     'senate': 6,
     'president': 4,
     'house': 2,
 }
+
 
 def join_candidate_totals(query, kwargs, totals_model):
     return query.outerjoin(
@@ -291,7 +294,7 @@ def filter_candidates(query, kwargs):
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
-        #CandidateHistory.cycles.any(kwargs['cycle']),
+        # CandidateHistory.cycles.any(kwargs['cycle']),
         CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year % 2) == kwargs['cycle'],
         CandidateHistory.office == kwargs['office'][0].upper(),
 
@@ -307,6 +310,6 @@ def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
         CandidateHistory.candidate_inactive == False,  # noqa
-        #CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
+        # CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     ).distinct()
     return query
