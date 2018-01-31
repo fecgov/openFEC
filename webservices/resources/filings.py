@@ -36,6 +36,7 @@ class BaseFilings(views.ApiResource):
         ('state', models.Filings.state),
         ('party', models.Filings.party),
         ('office', models.Filings.office),
+        ('committe_type', models.Filings.cmte_tp),
     ]
 
     filter_range_fields = [
