@@ -58,7 +58,10 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     #If f2 filing, the state of the candidate, else the state of the committee
     state = db.Column(db.String, doc=docs.STATE)
     office = db.Column(db.String, doc=docs.OFFICE)
-    #missing filings 2723
+    # Filter filings based off candidate office or committee type H, S and P only. all other 
+    # committee types are ignored. Because from the fron-end we only filter
+    # filings by candidate office only.
+    # mapped office_cmte_tp db column with office
     office = db.Column('office_cmte_tp', db.String, index=True, doc=docs.OFFICE)
     party = db.Column(db.String, doc=docs.PARTY)
     cmte_tp = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
