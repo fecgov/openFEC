@@ -189,29 +189,6 @@ def load_election_dates():
 
     logger.info('Finished loading election dates.')
 
-@manager.command
-def dump_districts(dest=None):
-    """ Makes districts locally that you can then add as a table to the databases
-    """
-    source = db.engine.url
-
-    if dest is None:
-        dest = './data/districts.dump'
-    else:
-        dest = shlex.quote(dest)
-
-    cmd = (
-        'pg_dump "{source}" --format c --no-acl --no-owner -f {dest} '
-        '-t ofec_fips_states -t ofec_zips_districts'
-    ).format(**locals())
-    subprocess.run(cmd, shell=True)
-
-@manager.command
-def build_district_counts(outname='districts.json'):
-    """ Compiles the districts for a state
-    """
-    import utils
-    utils.write_district_counts(outname)
 
 @manager.command
 def update_aggregates():
