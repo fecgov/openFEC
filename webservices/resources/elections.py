@@ -11,7 +11,7 @@ from webservices.utils import use_kwargs
 from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
-    ElectionResult, ElectionsList, ScheduleEByCandidate,
+    ElectionResult, ElectionsList, ZipsDistricts, ScheduleEByCandidate,
 )
 
 
@@ -52,7 +52,7 @@ class ElectionsListView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.elections_list)
-    @use_kwargs(args.make_sort_args('sort_order, district'))
+    @use_kwargs(args.make_sort_args('sort_order'))
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
@@ -85,31 +85,24 @@ class ElectionsListView(utils.Resource):
 
     def _filter_zip(self, query, kwargs):
         """Filter query by zip codes."""
-        fips_states = sa.Table('ofec_fips_states', db.metadata, autoload_with=db.engine)
-        zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
-        districts = db.session.query(
-            zips_districts,
-            fips_states,
-        ).join(
-            fips_states,
-            zips_districts.c['State'] == fips_states.c['FIPS State Numeric Code'],
-        ).filter(
-            zips_districts.c['ZCTA'].in_(kwargs['zip'])
+        districts = db.session.query(ZipsDistricts).filter(
+            cast(ZipsDistricts.zip_code, Integer).in_(kwargs['zip']),
+            ZipsDistricts.active == 'Y'
         ).subquery()
         return query.join(
             districts,
             sa.or_(
                 # House races from matching states and districts
                 sa.and_(
-                    cast(ElectionsList.district, Integer) == districts.c['Congressional District'],
-                    ElectionsList.state == districts.c['Official USPS Code'],
+                    ElectionsList.district == districts.c['district'],
+                    ElectionsList.state == districts.c['state_abbrevation'],
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
                     sa.or_(
                         ElectionsList.district == '00'
                     ),
-                    ElectionsList.state.in_([districts.c['Official USPS Code'], 'US'])
+                    ElectionsList.state.in_([districts.c['state_abbrevation'], 'US'])
                 ),
             )
         )

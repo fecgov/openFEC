@@ -27,3 +27,14 @@ class ElectionsList(db.Model):
     cycle = db.Column(db.Integer)
     incumbent_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
     incumbent_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
+
+
+class ZipsDistricts(db.Model):
+    __table_args__ = {'schema': 'staging'}
+    __tablename__ = 'ref_zip_to_district'
+
+    zip_district_id = db.Column(db.Integer, primary_key=True)
+    district = db.Column(db.String, doc=docs.DISTRICT)
+    zip_code = db.Column(db.String)
+    state_abbrevation = db.Column(db.String)
+    active = db.Column(db.String)
