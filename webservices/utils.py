@@ -330,7 +330,7 @@ def get_elasticsearch_connection():
         url = es_conn.get_url(url='uri')
     else:
         url = 'http://localhost:9200'
-    es = Elasticsearch(url, timeout=30, max_retries=10, retry_on_timeout=True)
+    es = Elasticsearch(url)
 
     return es
 
