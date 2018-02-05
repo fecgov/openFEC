@@ -92,7 +92,9 @@ class TestDownloadTask(ApiBaseTest):
             filings.FilingsView,
             reports.ReportsView,
             reports.CommitteeReportsView,
-            reports.EFilingSummaryView,
+            reports.EFilingHouseSenateSummaryView,
+            reports.EFilingPresidentialSummaryView,
+            reports.EFilingPacPartySummaryView,
             sched_a.ScheduleAView,
             sched_a.ScheduleAEfileView,
             sched_b.ScheduleBView,
@@ -104,7 +106,7 @@ class TestDownloadTask(ApiBaseTest):
         }
 
         for view in RESOURCE_WHITELIST:
-            if view.endpoint in ['reportsview', 'efilingsummaryview',]:
+            if view.endpoint in ['reportsview']:
                 url = api.url_for(
                     view,
                     committee_type=committee.committee_type
