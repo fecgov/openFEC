@@ -108,7 +108,6 @@ class ReportsView(utils.Resource):
     @marshal_with(schemas.CommitteeReportsPageSchema(), apply=False)
     def get(self, committee_type=None, **kwargs):
         committee_id = kwargs.get('committee_id')
-        print(kwargs)
         query, reports_class, reports_schema = self.build_query(
             committee_type=committee_type,
             **kwargs
@@ -252,9 +251,9 @@ class EFilingSummaryView(views.ApiResource):
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
     ]
-    filter_multi_fields = [
-        ('committee_id',  models.BaseFiling.committee_id),
-    ]
+    # Filters need to be set dynamically at runtime
+    # Later, they will be file_number and committee_id
+    filter_multi_fields = []
 
     @property
     def args(self):
@@ -272,14 +271,15 @@ class EFilingSummaryView(views.ApiResource):
         if committee_type:
             self.model, self.schema, self.page_schema = \
                 efile_reports_schema_map.get(form_type_map.get(committee_type))
-            #Filters need to be set dynamically at runtime (otherwise sql alchemy couldn't
-            #determine proper table repid for the join operation)
-            self.filter_multi_fields[0] = ('file_number', self.model.file_number)
+            # Filters need to be set dynamically at runtime (otherwise sql alchemy couldn't
+            # determine proper table repid for the join operation)
+            self.filter_multi_fields.append(('file_number', self.model.file_number))
+        if kwargs.get('committee_id'):
+            self.filter_multi_fields.append(('committee_id', self.model.committee_id))
         query = self.build_query(**kwargs)
 
         count = counts.count_estimate(query, models.db.session, threshold=5000)
         return utils.fetch_page(query, kwargs, model=self.model, count=count)
-
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
