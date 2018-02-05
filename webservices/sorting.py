@@ -82,15 +82,18 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
 
     # Store the text representation (name) of the sorting column in case we
     # swap it for an expression instead.
-    label = column.key
+    if hasattr(column, 'key'):
+        column_name = column.key
+    else:
+        column_name = column
 
     if model:
         # Check to see if the model has a sort_expressions attribute on it,
         # which contains a dictionary of column mappings to SQL expressions.
         # If the model has this and there is a matching expression for the
         # column, use the expression instead.
-        if hasattr(model, 'sort_expressions') and column.key in model.sort_expressions:
-            column = model.sort_expressions[column.key]
+        if hasattr(model, 'sort_expressions') and column_name in model.sort_expressions:
+            column = model.sort_expressions[column_name]
 
     sort_column = order(column)
     query = query.order_by(sort_column)
@@ -100,4 +103,4 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     if hide_null:
         query = query.filter(column != None)  # noqa
 
-    return query, (column, order, label)
+    return query, (column, order, column_name)
