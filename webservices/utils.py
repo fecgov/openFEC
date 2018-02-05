@@ -122,7 +122,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         """
         ret = {'last_index': str(paginators.convert_value(result, self.index_column))}
         if self.sort_column:
-            key = 'last_{0}'.format(self.sort_column[0].key)
+            key = 'last_{0}'.format(self.sort_column[2])
             ret[key] = paginators.convert_value(result, self.sort_column[0])
             if ret[key] is None:
                 ret.pop(key)
@@ -133,7 +133,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
     if paginator.sort_column is not None:
-        sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
+        sort_index = kwargs['last_{0}'.format(paginator.sort_column[2])]
         if not sort_index and kwargs['sort_null_only'] and paginator.sort_column[1] == sa.asc:
             sort_index = None
             query = query.filter(paginator.sort_column[0] == None)
