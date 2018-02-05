@@ -3,12 +3,6 @@ import sqlalchemy as sa
 from webservices.exceptions import ApiError
 from webservices.common.util import get_class_by_tablename
 
-ITEMIZED_MODELS = (
-    'ScheduleA',
-    'ScheduleB',
-    'ScheduleE',
-)
-
 
 def parse_option(option, model=None, aliases=None, join_columns=None, query=None):
     """Parse sort option to SQLAlchemy order expression.
@@ -85,15 +79,25 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         join_columns=join_columns,
         query=query
     )
+
+    # Store the text representation (name) of the sorting column in case we
+    # swap it for an expression instead.
+    label = column.key
+
+    if model:
+        # Check to see if the model has a sort_expressions attribute on it,
+        # which contains a dictionary of column mappings to SQL expressions.
+        # If the model has this and there is a matching expression for the
+        # column, use the expression instead.
+        if hasattr(model, 'sort_expressions') and column.key in model.sort_expressions:
+            column = model.sort_expressions[column.key]
+
     sort_column = order(column)
-    if model and model.__name__ in ITEMIZED_MODELS:
-        query = query.order_by(sort_column)
-    else:
-        query = query.order_by(sort_column)
+    query = query.order_by(sort_column)
 
     if relationship:
         query = query.join(relationship)
     if hide_null:
         query = query.filter(column != None)  # noqa
 
-    return query, (column, order)
+    return query, (column, order, label)

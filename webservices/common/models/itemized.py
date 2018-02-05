@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
@@ -335,6 +337,16 @@ class ScheduleB(BaseItemized):
     comm_dt = db.Column('comm_dt', db.Date)
     cycle = db.Column('election_cycle', db.Integer)
     timestamp = db.Column('timestamp', db.DateTime)
+
+    @hybrid_property
+    def sort_expressions(self):
+        return {
+            'disbursement_date': sa.func.coalesce(
+                self.disbursement_date,
+                sa.cast('9999-12-31', sa.Date)
+            )
+        }
+
 
 class ScheduleBEfile(BaseRawItemized):
     __tablename__ = 'real_efile_sb4'
