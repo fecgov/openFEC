@@ -234,26 +234,20 @@ class CommitteeReportsView(utils.Resource):
 @doc(
     tags=['efiling'],
     description=docs.EFILE_REPORTS,
-    params={
-        'committee_type': {
-            'description': 'presidential, pac-party, or house-senate',
-            # we don't have IE only going y
-            'enum': ['presidential', 'pac-party', 'house-senate'],
-        }
-    }
 )
-class EFilingSummaryView(views.ApiResource):
+class EFilingHouseSenateSummaryView(views.ApiResource):
 
     model = models.BaseF3Filing
     schema = schemas.BaseF3FilingSchema
-    page_schema = schemas.BaseF3FilingSchema
+    page_schema = schemas.BaseF3FilingPageSchema
 
     filter_range_fields = [
         (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
     ]
-    # Filters need to be set dynamically at runtime
-    # Later, they will be file_number and committee_id
-    filter_multi_fields = []
+    filter_multi_fields = [
+        ('file_number', model.file_number),
+        ('committee_id', model.committee_id)
+    ]
 
     @property
     def args(self):
@@ -264,23 +258,76 @@ class EFilingSummaryView(views.ApiResource):
                 default='-receipt_date',
                 # validator=args.IndexValidator(self.model),
             ),
-
         )
 
-    def get(self, committee_type=None, **kwargs):
-        if committee_type:
-            self.model, self.schema, self.page_schema = \
-                efile_reports_schema_map.get(form_type_map.get(committee_type))
-            # Filters need to be set dynamically at runtime (otherwise sql alchemy couldn't
-            # determine proper table repid for the join operation)
-            self.filter_multi_fields.append(('file_number', self.model.file_number))
-        if kwargs.get('committee_id'):
-            self.filter_multi_fields.append(('committee_id', self.model.committee_id))
-        query = self.build_query(**kwargs)
+    @property
+    def index_column(self):
+        return self.model.file_number
 
-        count = counts.count_estimate(query, models.db.session, threshold=5000)
-        return utils.fetch_page(query, kwargs, model=self.model, count=count)
 
-    def build_query(self, **kwargs):
-        query = super().build_query(**kwargs)
-        return query
+@doc(
+    tags=['efiling'],
+    description=docs.EFILE_REPORTS,
+)
+class EFilingPresidentialSummaryView(views.ApiResource):
+
+    model = models.BaseF3PFiling
+    schema = schemas.BaseF3PFilingSchema
+    page_schema = schemas.BaseF3PFilingPageSchema
+
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
+    ]
+    filter_multi_fields = [
+        ('file_number', model.file_number),
+        ('committee_id', model.committee_id)
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.efilings,
+            args.make_sort_args(
+                default='-receipt_date',
+                # validator=args.IndexValidator(self.model),
+            ),
+        )
+
+    @property
+    def index_column(self):
+        return self.model.file_number
+
+
+@doc(
+    tags=['efiling'],
+    description=docs.EFILE_REPORTS,
+)
+class EFilingPacPartySummaryView(views.ApiResource):
+
+    model = models.BaseF3XFiling
+    schema = schemas.BaseF3XFilingSchema
+    page_schema = schemas.BaseF3XFilingPageSchema
+
+    filter_range_fields = [
+        (('min_receipt_date', 'max_receipt_date'), models.BaseFiling.receipt_date),
+    ]
+    filter_multi_fields = [
+        ('file_number', model.file_number),
+        ('committee_id', model.committee_id)
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.efilings,
+            args.make_sort_args(
+                default='-receipt_date',
+                # validator=args.IndexValidator(self.model),
+            ),
+        )
+
+    @property
+    def index_column(self):
+        return self.model.file_number
