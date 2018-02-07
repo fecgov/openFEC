@@ -308,7 +308,7 @@ def refresh_materialized(concurrent=True):
         'reports_presidential': ['ofec_reports_presidential_mv'],
         'committee_history': ['ofec_committee_history_mv'],
         'communication_cost': ['ofec_communication_cost_mv'],
-        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv'],
+        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv', 'ofec_filings_all_mv'],
         'totals_combined': ['ofec_totals_combined_mv'],
         'totals_ie': ['ofec_totals_ie_only_mv'],
         'totals_house_senate': ['ofec_totals_house_senate_mv'],
