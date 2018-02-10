@@ -32,10 +32,14 @@ class ApiResource(utils.Resource):
     def get(self, *args, **kwargs):
         query = self.build_query(*args, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=500000)
+        multi = False
+        if isinstance(kwargs['sort'], (list, tuple)):
+            multi = True
+
         return utils.fetch_page(
             query, kwargs,
             count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
-            index_column=self.index_column, cap=self.cap,
+            index_column=self.index_column, cap=self.cap, multi=multi,
         )
 
     def build_query(self, *args, _apply_options=True, **kwargs):
