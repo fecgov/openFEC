@@ -1,3 +1,4 @@
+import marshmallow as ma
 import sqlalchemy as sa
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -341,10 +342,14 @@ class ScheduleB(BaseItemized):
     @hybrid_property
     def sort_expressions(self):
         return {
-            'disbursement_date': sa.func.coalesce(
-                self.disbursement_date,
-                sa.cast('9999-12-31', sa.Date)
-            )
+            'disbursement_date': {
+                'expression': sa.func.coalesce(
+                    self.disbursement_date,
+                    sa.cast('9999-12-31', sa.Date)
+                ),
+                'field': ma.fields.Date,
+                'type': 'date',
+            },
         }
 
 
