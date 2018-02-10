@@ -62,6 +62,13 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     :param reverse_nulls: Swap order of null values on sorted column(s) in results;
         Ignored if hide_null is True
     """
+
+    # Start off assuming we are dealing with a sort column, not a sort
+    # expression.
+    is_expression = False
+    expression_field = None
+    expression_type = None
+
     if clear:
         query = query.order_by(False)
     # If the query contains multiple entities (i.e., isn't a simple query on a
@@ -93,7 +100,10 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         # If the model has this and there is a matching expression for the
         # column, use the expression instead.
         if hasattr(model, 'sort_expressions') and column_name in model.sort_expressions:
-            column = model.sort_expressions[column_name]
+            column = model.sort_expressions[column_name]['expression']
+            expression_field = model.sort_expressions[column_name]['field']
+            expression_type = model.sort_expressions[column_name]['type']
+            is_expression = True
 
     sort_column = order(column)
     query = query.order_by(sort_column)
@@ -103,4 +113,11 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     if hide_null:
         query = query.filter(column != None)  # noqa
 
-    return query, (column, order, column_name)
+    return query, (
+        column,
+        order,
+        column_name,
+        is_expression,
+        expression_field,
+        expression_type,
+    )
