@@ -292,8 +292,18 @@ api.add_resource(
 )
 
 api.add_resource(
-    reports.EFilingSummaryView,
-    '/efile/reports/<string:committee_type>/',
+    reports.EFilingHouseSenateSummaryView,
+    '/efile/reports/house-senate/',
+)
+
+api.add_resource(
+    reports.EFilingPresidentialSummaryView,
+    '/efile/reports/presidential/',
+)
+
+api.add_resource(
+    reports.EFilingPacPartySummaryView,
+    '/efile/reports/pac-party/',
 )
 
 api.add_resource(filings.FilingsList, '/filings/')
@@ -322,7 +332,9 @@ apidoc.register(committees.CommitteeList, blueprint='v1')
 apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
 apidoc.register(reports.CommitteeReportsView, blueprint='v1')
-apidoc.register(reports.EFilingSummaryView, blueprint='v1')
+apidoc.register(reports.EFilingHouseSenateSummaryView, blueprint='v1')
+apidoc.register(reports.EFilingPresidentialSummaryView, blueprint='v1')
+apidoc.register(reports.EFilingPacPartySummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(totals.CandidateTotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
