@@ -269,5 +269,24 @@ CREATE UNIQUE INDEX ON ofec_candidate_fulltext_audit_mv(idx);
 CREATE INDEX ON ofec_candidate_fulltext_audit_mv using gin(fulltxt);
 
 
+GRANT ALL ON TABLE ofec_audit_case_mv TO fec;
+GRANT SELECT ON TABLE ofec_audit_case_mv TO fec_read;
+
+
+GRANT ALL ON TABLE ofec_audit_case_category_rel_mv TO fec;
+GRANT SELECT ON TABLE ofec_audit_case_category_rel_mv TO fec_read;
+
+
+GRANT ALL ON TABLE ofec_audit_case_sub_category_rel_mv TO fec;
+GRANT SELECT ON TABLE ofec_audit_case_sub_category_rel_mv TO fec_read;
+
+
+GRANT ALL ON TABLE ofec_committee_fulltext_audit_mv TO fec;
+GRANT SELECT ON TABLE ofec_committee_fulltext_audit_mv TO fec_read;
+
+
+GRANT ALL ON TABLE ofec_candidate_fulltext_audit_mv TO fec;
+GRANT SELECT ON TABLE ofec_candidate_fulltext_audit_mv TO fec_read;
+
 DROP VIEW auditsearch.cmte_audit_vw;
 DROP VIEW auditsearch.cand_audit_vw;
