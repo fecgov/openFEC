@@ -17,7 +17,6 @@ def refresh():
     """
     manage.logger.info('Starting nightly refresh...')
     try:
-        manage.update_aggregates()
         manage.refresh_itemized()
         manage.refresh_materialized()
         download.clear_bucket()
