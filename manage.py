@@ -190,19 +190,7 @@ def load_election_dates():
     logger.info('Finished loading election dates.')
 
 
-@manager.command
-def update_aggregates():
-    """These are run nightly to recalculate the totals
-    """
-    logger.info('Updating incremental aggregates...')
 
-    with db.engine.begin() as connection:
-        connection.execute(
-            sa.text('select update_aggregates()').execution_options(
-                autocommit=True
-            )
-        )
-        logger.info('Finished updating Schedule E and support aggregates.')
 
 @manager.command
 def refresh_itemized():
