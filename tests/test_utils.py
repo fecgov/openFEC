@@ -10,6 +10,7 @@ from webservices import args
 from webservices import rest
 from webservices import sorting
 from webservices.resources import candidate_aggregates
+from webservices.resources import audit
 from webservices.resources import elections
 from webservices.rest import db
 from webservices.tasks import utils
@@ -36,6 +37,32 @@ class TestSort(ApiBaseTest):
         ]
         query, columns = sorting.sort(models.Candidate.query, '-district', model=models.Candidate)
         self.assertEqual(query.all(), candidates[::-1])
+
+    def test_multi_column(self):
+        audit = [
+            factories.AuditCaseFactory(cycle=2012, committee_name='Boy', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2012, committee_name='Girl', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2012, committee_name='Ted', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2012, committee_name='Zoo', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2014, committee_name='Abc', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2014, committee_name='John', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2014, committee_name='Ted', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+        ]
+        query, columns = sorting.multi_sort(models.AuditCase.query, ['cycle', 'committee_name', ], model=models.AuditCase)
+        self.assertEqual(query.all(), audit)
+
+    def test_multi_column_reverse_first_column(self):
+        audit = [
+            factories.AuditCaseFactory(cycle=2012, committee_name='Zoo', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2012, committee_name='Ted', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2012, committee_name='Girl', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2012, committee_name='Abc', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2014, committee_name='Ted', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2014, committee_name='John', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+            factories.AuditCaseFactory(cycle=2014, committee_name='Abc', primary_category_id=-1, sub_category_id=-2, audit_case_id=1000),
+        ]
+        query, columns = sorting.multi_sort(models.AuditCase.query, ['-cycle', 'committee_name', ], model=models.AuditCase)
+        self.assertEqual(query.all(), audit[::-1])
 
     def test_hide_null(self):
         candidates = [
