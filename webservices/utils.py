@@ -191,12 +191,21 @@ def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=10
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
     if paginator.sort_column is not None:
         sort_index = kwargs['last_{0}'.format(paginator.sort_column[2])]
+        null_sort_by = paginator.sort_column[0]
+
+        # Check to see if we are sorting by an expression.  If we are, we need
+        # to account for an alternative way to sort and page by null values.
+        if paginator.sort_column[3]:
+            null_sort_by = paginator.sort_column[6]
+
         if not sort_index and kwargs['sort_null_only'] and paginator.sort_column[1] == sa.asc:
+            print('In fetch_seek_page method')
             sort_index = None
-            query = query.filter(paginator.sort_column[0] == None)
+            query = query.filter(null_sort_by == None)
             paginator.cursor = query
     else:
         sort_index = None
+
     return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
 
 

@@ -349,6 +349,7 @@ class ScheduleB(BaseItemized):
                 ),
                 'field': ma.fields.Date,
                 'type': 'date',
+                'null_sort': self.disbursement_date,
             },
         }
 
