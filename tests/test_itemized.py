@@ -346,8 +346,8 @@ class TestItemized(ApiBaseTest):
     def test_pagination_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default, so we must account for that with the results and slice
-        # the baseline list of objects accordingly!
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
         filings = [
             factories.ScheduleBFactory()
             for _ in range(30)
@@ -368,8 +368,8 @@ class TestItemized(ApiBaseTest):
     def test_pagination_with_null_sort_column_values_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default, so we must account for that with the results and slice
-        # the baseline list of objects accordingly!
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
         filings = [
             factories.ScheduleBFactory(disbursement_date=None)
             for _ in range(5)
@@ -414,8 +414,8 @@ class TestItemized(ApiBaseTest):
     def test_null_pagination_with_null_sort_column_values_descending_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default, so we must account for that with the results and slice
-        # the baseline list of objects accordingly!
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
         filings = [
             factories.ScheduleBFactory(disbursement_date=None)
             #this range should ensure the page has a null transition
@@ -468,8 +468,8 @@ class TestItemized(ApiBaseTest):
     def test_null_pagination_with_null_sort_column_values_ascending_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default, so we must account for that with the results and slice
-        # the baseline list of objects accordingly!
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
         filings = [
             factories.ScheduleBFactory(disbursement_date=None)
             # this range should ensure the page has a null transition
@@ -524,8 +524,8 @@ class TestItemized(ApiBaseTest):
     def test_pagination_with_null_sort_column_parameter_with_sort_expression(self):
         # NOTE:  Schedule B is sorted by disbursement date with the expression
         # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
-        # by default, so we must account for that with the results and slice
-        # the baseline list of objects accordingly!
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
         response = self.app.get(
             api.url_for(
                 ScheduleBView,
