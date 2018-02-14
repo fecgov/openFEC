@@ -68,6 +68,7 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     is_expression = False
     expression_field = None
     expression_type = None
+    null_sort = None
 
     if clear:
         query = query.order_by(False)
@@ -103,6 +104,10 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
             column = model.sort_expressions[column_name]['expression']
             expression_field = model.sort_expressions[column_name]['field']
             expression_type = model.sort_expressions[column_name]['type']
+            null_sort = model.sort_expressions[column_name].get(
+                'null_sort',
+                model.sort_expressions[column_name]['expression']
+            )
             is_expression = True
 
     sort_column = order(column)
@@ -120,4 +125,5 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         is_expression,
         expression_field,
         expression_type,
+        null_sort,
     )
