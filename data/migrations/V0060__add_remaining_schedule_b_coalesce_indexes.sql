@@ -45,7 +45,8 @@ CREATE INDEX idx_ofec_sched_b_1977_1978_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1977_1978_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1977_1978
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1977_1978_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1977_1978
@@ -101,7 +102,8 @@ CREATE INDEX idx_ofec_sched_b_1979_1980_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1979_1980_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1979_1980
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1979_1980_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1979_1980
@@ -157,7 +159,8 @@ CREATE INDEX idx_ofec_sched_b_1981_1982_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1981_1982_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1981_1982
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1981_1982_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1981_1982
@@ -213,7 +216,8 @@ CREATE INDEX idx_ofec_sched_b_1983_1984_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1983_1984_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1983_1984
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1983_1984_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1983_1984
@@ -269,7 +273,8 @@ CREATE INDEX idx_ofec_sched_b_1985_1986_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1985_1986_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1985_1986
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1985_1986_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1985_1986
@@ -280,6 +285,7 @@ CREATE INDEX idx_ofec_sched_b_1985_1986_sub_id_line_num_coalesce_dt
   ON public.ofec_sched_b_1985_1986
   USING btree
   (line_num, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+
 
 -- 1987 - 1988
 CREATE INDEX idx_ofec_sched_b_1987_1988_clean_recipient_cmte_id_coalesce_dt
@@ -324,7 +330,8 @@ CREATE INDEX idx_ofec_sched_b_1987_1988_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1987_1988_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1987_1988
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1987_1988_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1987_1988
@@ -380,7 +387,8 @@ CREATE INDEX idx_ofec_sched_b_1989_1990_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1989_1990_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1989_1990
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1989_1990_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1989_1990
@@ -436,7 +444,8 @@ CREATE INDEX idx_ofec_sched_b_1991_1992_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1991_1992_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1991_1992
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1991_1992_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1991_1992
@@ -492,7 +501,8 @@ CREATE INDEX idx_ofec_sched_b_1993_1994_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1993_1994_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1993_1994
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1993_1994_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1993_1994
@@ -548,7 +558,8 @@ CREATE INDEX idx_ofec_sched_b_1995_1996_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1995_1996_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1995_1996
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1995_1996_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1995_1996
@@ -604,7 +615,8 @@ CREATE INDEX idx_ofec_sched_b_1997_1998_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1997_1998_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1997_1998
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1997_1998_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1997_1998
@@ -660,7 +672,8 @@ CREATE INDEX idx_ofec_sched_b_1999_2000_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1999_2000_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1999_2000
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1999_2000_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1999_2000
@@ -716,7 +729,8 @@ CREATE INDEX idx_ofec_sched_b_2001_2002_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2001_2002_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2001_2002
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2001_2002_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2001_2002
@@ -772,7 +786,8 @@ CREATE INDEX idx_ofec_sched_b_2003_2004_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2003_2004_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2003_2004
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2003_2004_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2003_2004
@@ -828,7 +843,8 @@ CREATE INDEX idx_ofec_sched_b_2005_2006_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2005_2006_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2005_2006
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2005_2006_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2005_2006
@@ -884,7 +900,8 @@ CREATE INDEX idx_ofec_sched_b_2007_2008_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2007_2008_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2007_2008
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2007_2008_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2007_2008
@@ -940,7 +957,8 @@ CREATE INDEX idx_ofec_sched_b_2009_2010_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2009_2010_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2009_2010
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2009_2010_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2009_2010
@@ -996,7 +1014,8 @@ CREATE INDEX idx_ofec_sched_b_2011_2012_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2011_2012_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2011_2012
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2011_2012_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2011_2012
@@ -1052,7 +1071,8 @@ CREATE INDEX idx_ofec_sched_b_2013_2014_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2013_2014_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2013_2014
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2013_2014_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2013_2014
@@ -1108,7 +1128,8 @@ CREATE INDEX idx_ofec_sched_b_2015_2016_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_2015_2016_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_2015_2016
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_2015_2016_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_2015_2016
@@ -1164,7 +1185,8 @@ CREATE INDEX idx_ofec_sched_b_1983_1984_recipient_st_coalesce_dt
 
 CREATE INDEX idx_ofec_sched_b_1983_1984_rpt_yr_coalesce_dt
   ON public.ofec_sched_b_1983_1984
-  USING btree (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
+  USING btree
+  (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
 CREATE INDEX idx_ofec_sched_b_1983_1984_sub_id_amount_coalesce_dt
   ON public.ofec_sched_b_1983_1984
