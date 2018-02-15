@@ -1143,57 +1143,57 @@ CREATE INDEX idx_ofec_sched_b_2015_2016_sub_id_line_num_coalesce_dt
 
 
 -- 2017 - 2018
-CREATE INDEX idx_ofec_sched_b_1983_1984_clean_recipient_cmte_id_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_clean_recipient_cmte_id_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (clean_recipient_cmte_id, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_cmte_id_coalesce_disb_dt_sub_id
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_cmte_id_coalesce_disb_dt_sub_id
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (cmte_id, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_cmte_id_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_cmte_id_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (cmte_id, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_disb_desc_text_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_disb_desc_text_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING gin
   (disbursement_description_text, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_image_num_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_image_num_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (image_num, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_recip_name_text_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_recip_name_text_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING gin
   (recipient_name_text, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_recipient_city_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_recipient_city_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (recipient_city, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_recipient_st_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_recipient_st_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (recipient_st, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_rpt_yr_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_rpt_yr_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (rpt_yr, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_sub_id_amount_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_sub_id_amount_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (disb_amt, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
 
-CREATE INDEX idx_ofec_sched_b_1983_1984_sub_id_line_num_coalesce_dt
-  ON public.ofec_sched_b_1983_1984
+CREATE INDEX idx_ofec_sched_b_2017_2018_sub_id_line_num_coalesce_dt
+  ON public.ofec_sched_b_2017_2018
   USING btree
   (line_num, COALESCE (disb_dt, '9999-12-31'::date), sub_id);
