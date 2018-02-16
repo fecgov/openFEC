@@ -18,7 +18,7 @@ class CandidateSearch(BaseModel):
 
 
 class CandidateFlags(db.Model):
-    __tablename__ = 'ofec_candidate_flag'
+    __tablename__ = 'ofec_candidate_flag_mv'
 
     candidate_id = db.Column(db.String, index=True, primary_key=True, doc=docs.CANDIDATE_ID)
     federal_funds_flag = db.Column(db.Boolean, index=True, doc=docs.FEDERAL_FUNDS_FLAG)
