@@ -62,7 +62,7 @@ audit_case_init AS (
     LEFT JOIN cand_info ON cand_info.cand_id::text = ac.cand_id::text 
     AND cand_info.fec_election_yr = ac.election_cycle
 ),
-audit_case_sebset AS (
+audit_case_subset AS (
     SELECT 
         audit_case_finding_info.primary_category_id,
         audit_case_finding_info.sub_category_id,
@@ -470,7 +470,7 @@ audit_case_all AS (
         audit_id,
         candidate_id,
         candidate_name
-    FROM audit_case_sebset
+    FROM audit_case_subset
     UNION ALL
     SELECT         
         10000+row_number() over () AS idx,
