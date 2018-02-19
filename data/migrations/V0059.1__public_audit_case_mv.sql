@@ -86,7 +86,7 @@ audit_case_sebset AS (
     AND cand_info.fec_election_yr = auditsearch.audit_case.election_cycle)
 ),
 audit_case_1 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -111,7 +111,7 @@ audit_case_1 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_2 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -136,7 +136,7 @@ audit_case_2 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_3 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -161,7 +161,7 @@ audit_case_3 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_4 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -186,7 +186,7 @@ audit_case_4 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_5 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -211,7 +211,7 @@ audit_case_5 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_6 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -236,7 +236,7 @@ audit_case_6 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_7 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -261,7 +261,7 @@ audit_case_7 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_8 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -286,7 +286,7 @@ audit_case_8 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_9 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -311,7 +311,7 @@ audit_case_9 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_13 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -336,7 +336,7 @@ audit_case_13 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_14 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -361,7 +361,7 @@ audit_case_14 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_15 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -386,7 +386,7 @@ audit_case_15 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_16 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
@@ -411,7 +411,7 @@ audit_case_16 AS (
     ORDER BY cycle DESC, committee_name
 ),
 audit_case_17 AS (
-    SELECT 
+    SELECT DISTINCT
         audit_case_finding_info.primary_category_id,
         '-2'::integer AS sub_category_id,
         audit_case_finding_info.audit_case_id,
