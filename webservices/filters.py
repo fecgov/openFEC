@@ -5,17 +5,47 @@ from webservices import exceptions
 from webservices.common import models
 
 
+def is_exclude_arg(arg):
+    # Handle string and int excludes
+    return str(arg).startswith('-')
+
+
+def parse_exclude_arg(arg):
+    # Integers will come in as negative and strings will start with -
+    if type(arg) is int:
+        return abs(arg)
+    else:
+        return arg[1:]
+
+
 def filter_match(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key) is not None:
-            query = query.filter(column == kwargs[key])
+            # Handle string and int excludes
+            if is_exclude_arg(kwargs[key]):
+                query = query.filter(column != parse_exclude_arg(kwargs[key]))
+            else:
+                query = query.filter(column == kwargs[key])
     return query
+
 
 def filter_multi(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key):
-            query = query.filter(column.in_(kwargs[key]))
+            #loop through list and exclude or include
+            exclude_list = []
+            include_list = []
+            for value in kwargs[key]:
+                if is_exclude_arg(value):
+                    exclude_list.append(parse_exclude_arg(value))
+                else:
+                    include_list.append(value)
+            if len(exclude_list) > 0:
+                query = query.filter(column.notin_(exclude_list))
+            if len(include_list) > 0:
+                query = query.filter(column.in_(include_list))
     return query
+
 
 def filter_range(query, kwargs, fields):
     for (min_key, max_key), column in fields:
@@ -24,6 +54,7 @@ def filter_range(query, kwargs, fields):
         if kwargs.get(max_key) is not None:
             query = query.filter(column <= kwargs[max_key])
     return query
+
 
 def filter_fulltext(query, kwargs, fields):
     for key, column in fields:
@@ -35,12 +66,14 @@ def filter_fulltext(query, kwargs, fields):
             query = query.filter(sa.or_(*filters))
     return query
 
+
 def filter_contributor_type(query, column, kwargs):
     if kwargs.get('contributor_type') == ['individual']:
         return query.filter(column == 'IND')
     if kwargs.get('contributor_type') == ['committee']:
         return query.filter(sa.or_(column != 'IND', column == None))  # noqa
     return query
+
 
 def filter_election(query, kwargs, candidate_column, cycle_column=None, year_column=None):
     if not kwargs.get('office'):
@@ -59,6 +92,7 @@ def filter_election(query, kwargs, candidate_column, cycle_column=None, year_col
     if kwargs.get('district'):
         query = query.filter(models.CandidateHistory.district == kwargs['district'])
     return query
+
 
 def get_cycle(kwargs):
     if isinstance(kwargs['cycle'], list):
