@@ -16,7 +16,9 @@ class TestElectionSearch(ApiBaseTest):
         factories.ElectionsListFactory(office='S', state='NJ', district='00', incumbent_id='SNJ123')
         factories.ElectionsListFactory(office='H', state='NJ', district='09', incumbent_id='HNJ123')
         factories.ElectionsListFactory(office='S', state='VA', district='00', incumbent_id='SVA123')
+        factories.ElectionsListFactory(office='H', state='VA', district='04', incumbent_id='HVA121')
         factories.ElectionsListFactory(office='H', state='VA', district='05', incumbent_id='HVA123')
+        factories.ElectionsListFactory(office='H', state='VA', district='06', incumbent_id='HVA124')
         factories.ElectionsListFactory(office='S', state='GA', district='00', incumbent_id='SGA123')
 
     def test_search_district(self):
@@ -38,7 +40,6 @@ class TestElectionSearch(ApiBaseTest):
         self.assertTrue(all([each['office'] == 'S' for each in results]))
 
     def test_search_zip(self):
-
         factories.ZipsDistrictsFactory(district='05', zip_code='22902', state_abbrevation='VA')
 
         results = self._results(api.url_for(ElectionsListView, zip='22902'))
@@ -52,6 +53,21 @@ class TestElectionSearch(ApiBaseTest):
         footer_count = response['pagination']['count']
         results_count = len(response['results'])
         self.assertEqual(footer_count, results_count)
+
+    def test_search_sort_default(self):
+        results = self._results(api.url_for(ElectionsListView, state='VA'))
+        self.assertEqual(results[0]['office'], 'P')
+        self.assertEqual(results[1]['office'], 'S')
+        self.assertEqual(results[2]['district'], '04')
+        self.assertEqual(results[3]['district'], '05')
+        self.assertEqual(results[4]['district'], '06')
+
+    def test_search_sort_state(self):
+        results = self._results(api.url_for(ElectionsListView))
+        self.assertTrue(
+            [each['state'] for each in results],
+            ['GA', 'NJ', 'NJ', 'US', 'VA', 'VA', 'VA', 'VA']
+        )
 
 
 class TestElections(ApiBaseTest):
