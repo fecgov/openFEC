@@ -31,6 +31,7 @@ from webservices import docs
 from webservices import sorting
 from webservices import decoders
 from webservices import exceptions
+from webservices.common.models import db
 
 
 logger = logging.getLogger(__name__)
@@ -99,20 +100,34 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         cursor = self.cursor
         direction = self.sort_column[1] if self.sort_column else sa.asc
         lhs, rhs = (), ()
+
         if sort_index is not None:
             left_index = self.sort_column[0]
-            comparator = self.max_column_map.get(str(left_index.property.columns[0].type).lower())
+
+            # Check if we're using a sort expression and if so, use the type
+            # associated with it instead of deriving it from the column.
+            if not self.sort_column[3]:
+                comparator = self.max_column_map.get(
+                    str(left_index.property.columns[0].type).lower()
+                )
+            else:
+                comparator = self.max_column_map.get(self.sort_column[5])
+
             left_index = sa.func.coalesce(left_index, comparator)
             lhs += (left_index,)
             rhs += (sort_index,)
+
         if last_index is not None:
             lhs += (self.index_column,)
             rhs += (last_index,)
+
         lhs = sa.tuple_(*lhs)
         rhs = sa.tuple_(*rhs)
+
         if rhs.clauses:
             filter = lhs > rhs if direction == sa.asc else lhs < rhs
             cursor = cursor.filter(filter)
+
         query = cursor.order_by(direction(self.index_column)).limit(limit)
         return query.all() if eager else query
 
@@ -120,26 +135,77 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         """Get index values from last result, to be used in seeking to the next
         page. Optionally include sort values, if any.
         """
-        ret = {'last_index': str(paginators.convert_value(result, self.index_column))}
+        ret = {
+            'last_index': str(paginators.convert_value(
+                result,
+                self.index_column
+            ))
+        }
+
         if self.sort_column:
-            key = 'last_{0}'.format(self.sort_column[0].key)
-            ret[key] = paginators.convert_value(result, self.sort_column[0])
+            key = 'last_{0}'.format(self.sort_column[2])
+
+            # Check to see if we are dealing with a sort column or sort
+            # expression.  If we're dealing with a sort expression, we need to
+            # override the value serialization with the sort expression
+            # information.
+            if not self.sort_column[3]:
+                ret[key] = paginators.convert_value(
+                    result,
+                    self.sort_column[0]
+                )
+            else:
+                # Create a new query based on the result returned and replace
+                # the SELECT portion with just the sort expression criteria.
+                # Also augment the WHERE clause with a match for the value of
+                # the index column found in the result so we only retrieve the
+                # single row matching the result.
+                # NOTE:  This ensures we maintain existing clauses such as the
+                # check constraint needed for partitioned tables.
+                sort_column_query = self.cursor.with_entities(self.sort_column[0]).filter(
+                    getattr(result.__class__, self.index_column.key) == getattr(result, self.index_column.key)
+                )
+
+                # Execute the new query to retrieve the value of the sort
+                # expression.
+                expression_value = db.engine.execute(
+                    sort_column_query.statement
+                ).scalar()
+
+                # Serialize the value using the mapped marshmallow field
+                # defined with the sort expression.
+                ret[key] = self.sort_column[4]()._serialize(
+                    expression_value,
+                    None,
+                    None
+                )
+
             if ret[key] is None:
                 ret.pop(key)
                 ret['sort_null_only'] = True
+
         return ret
 
 
 def fetch_seek_page(query, kwargs, index_column, clear=False, count=None, cap=100, eager=True):
     paginator = fetch_seek_paginator(query, kwargs, index_column, clear=clear, count=count, cap=cap)
     if paginator.sort_column is not None:
-        sort_index = kwargs['last_{0}'.format(paginator.sort_column[0].key)]
+        sort_index = kwargs['last_{0}'.format(paginator.sort_column[2])]
+        null_sort_by = paginator.sort_column[0]
+
+        # Check to see if we are sorting by an expression.  If we are, we need
+        # to account for an alternative way to sort and page by null values.
+        if paginator.sort_column[3]:
+            null_sort_by = paginator.sort_column[6]
+
         if not sort_index and kwargs['sort_null_only'] and paginator.sort_column[1] == sa.asc:
+            print('In fetch_seek_page method')
             sort_index = None
-            query = query.filter(paginator.sort_column[0] == None)
+            query = query.filter(null_sort_by == None)
             paginator.cursor = query
     else:
         sort_index = None
+
     return paginator.get_page(last_index=kwargs['last_index'], sort_index=sort_index, eager=eager)
 
 
@@ -330,7 +396,7 @@ def get_elasticsearch_connection():
         url = es_conn.get_url(url='uri')
     else:
         url = 'http://localhost:9200'
-    es = Elasticsearch(url, timeout=30, max_retries=10, retry_on_timeout=True)
+    es = Elasticsearch(url)
 
     return es
 

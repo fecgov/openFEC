@@ -641,6 +641,7 @@ ScheduleBSchema = make_schema(
             'disbursement_description_text',
             'recipient_street_1',
             'recipient_street_2',
+            'sort_expressions',
         ),
         'relationships': [
             Relationship(
@@ -908,6 +909,7 @@ class ElectionSchema(ma.Schema):
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
     won = ma.fields.Boolean()
     candidate_election_year = ma.fields.Int()
+    coverage_end_date = ma.fields.Date()
 augment_schemas(ElectionSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):

@@ -11,7 +11,7 @@ from webservices.utils import use_kwargs
 from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
-    ElectionResult, ElectionsList, ScheduleEByCandidate,
+    ElectionResult, ElectionsList, ZipsDistricts, ScheduleEByCandidate,
 )
 
 
@@ -52,7 +52,7 @@ class ElectionsListView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.elections_list)
-    @use_kwargs(args.make_sort_args('sort_order, district'))
+    @use_kwargs(args.make_sort_args('sort_order'))
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
@@ -85,31 +85,24 @@ class ElectionsListView(utils.Resource):
 
     def _filter_zip(self, query, kwargs):
         """Filter query by zip codes."""
-        fips_states = sa.Table('ofec_fips_states', db.metadata, autoload_with=db.engine)
-        zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
-        districts = db.session.query(
-            zips_districts,
-            fips_states,
-        ).join(
-            fips_states,
-            zips_districts.c['State'] == fips_states.c['FIPS State Numeric Code'],
-        ).filter(
-            zips_districts.c['ZCTA'].in_(kwargs['zip'])
+        districts = db.session.query(ZipsDistricts).filter(
+            cast(ZipsDistricts.zip_code, Integer).in_(kwargs['zip']),
+            ZipsDistricts.active == 'Y'
         ).subquery()
         return query.join(
             districts,
             sa.or_(
                 # House races from matching states and districts
                 sa.and_(
-                    cast(ElectionsList.district, Integer) == districts.c['Congressional District'],
-                    ElectionsList.state == districts.c['Official USPS Code'],
+                    ElectionsList.district == districts.c['district'],
+                    ElectionsList.state == districts.c['state_abbrevation'],
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
                     sa.or_(
                         ElectionsList.district == '00'
                     ),
-                    ElectionsList.state.in_([districts.c['Official USPS Code'], 'US'])
+                    ElectionsList.state.in_([districts.c['state_abbrevation'], 'US'])
                 ),
             )
         )
@@ -164,6 +157,7 @@ class ElectionView(utils.Resource):
             totals_model.receipts,
             totals_model.disbursements,
             totals_model.last_cash_on_hand_end_period.label('cash_on_hand_end_period'),
+            totals_model.coverage_end_date,
         )
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)
@@ -199,6 +193,7 @@ class ElectionView(utils.Resource):
             sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('total_disbursements'),
             sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
+            sa.func.max(pairs.c.coverage_end_date).label('coverage_end_date'),
         ).group_by(
             pairs.c.candidate_id,
             pairs.c.candidate_election_year
@@ -213,6 +208,7 @@ class ElectionView(utils.Resource):
             ElectionResult.cand_office_st == (kwargs.get('state', 'US')),
             ElectionResult.cand_office_district == (kwargs.get('district', '00')),
         )
+
 
 @doc(
     description=docs.ELECTION_SEARCH,
@@ -259,12 +255,12 @@ class ElectionSummary(utils.Resource):
         expenditures = filter_candidates(expenditures, kwargs)
         return expenditures
 
-
 election_durations = {
     'senate': 6,
     'president': 4,
     'house': 2,
 }
+
 
 def join_candidate_totals(query, kwargs, totals_model):
     return query.outerjoin(
@@ -291,7 +287,7 @@ def filter_candidates(query, kwargs):
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
-        #CandidateHistory.cycles.any(kwargs['cycle']),
+        # CandidateHistory.cycles.any(kwargs['cycle']),
         CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year % 2) == kwargs['cycle'],
         CandidateHistory.office == kwargs['office'][0].upper(),
 
@@ -307,6 +303,6 @@ def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
         CandidateHistory.candidate_inactive == False,  # noqa
-        #CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
+        # CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     ).distinct()
     return query

@@ -255,6 +255,7 @@ committee_history = {
 }
 
 filings = {
+    'committee_type': fields.Str(description=docs.COMMITTEE_TYPE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'is_amended': fields.Bool(description='Filing has been amended'),
     'most_recent': fields.Bool(description='Filing is either new or is the most-recently filed amendment'),
