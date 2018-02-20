@@ -20,11 +20,11 @@ class TestFilter(ApiBaseTest):
             factories.ScheduleAFactory(entity_type='PAC'),
         ]
         self.dates = [
-            factories.CalendarDateFactory(event_id=123, calendar_category_id=1),
-            factories.CalendarDateFactory(event_id=321, calendar_category_id=1),
-            factories.CalendarDateFactory(event_id=111, calendar_category_id=2),
-            factories.CalendarDateFactory(event_id=222, calendar_category_id=2),
-            factories.CalendarDateFactory(event_id=333, calendar_category_id=3),
+            factories.CalendarDateFactory(event_id=123, calendar_category_id=1, summary='July Quarterly Report Due'),
+            factories.CalendarDateFactory(event_id=321, calendar_category_id=1, summary='TX Primary Runoff'),
+            factories.CalendarDateFactory(event_id=111, calendar_category_id=2, summary='EC Reporting Period'),
+            factories.CalendarDateFactory(event_id=222, calendar_category_id=2, summary='IE Reporting Period'),
+            factories.CalendarDateFactory(event_id=333, calendar_category_id=3, summary='Executive Session'),
         ]
         self.reports = [
             factories.ReportsHouseSenateFactory(means_filed='e-file'),
@@ -146,9 +146,15 @@ class TestFilter(ApiBaseTest):
         self.assertEqual(
             set(query_committees.all()),
             set(each for each in self.committees if each.designation not in ['P','U']))
-    '''
-    TODO:
-    test_filter_fulltext_exclude
 
-    # note: filter_fulltext is tested in test_itemized
-    '''
+    # Note: filter_fulltext is tested in test_itemized
+
+    def test_filter_fulltext_exclude(self):
+        query_dates = filters.filter_fulltext(
+            models.CalendarDate.query,
+            {'summary': ['Report', '-IE']},
+            CalendarDatesView.filter_fulltext_fields
+        )
+        self.assertEqual(
+            set(query_dates.all()),
+            set(each for each in self.dates if 'Report' in each.summary and 'IE' not in each.summary))
