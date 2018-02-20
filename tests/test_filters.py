@@ -120,7 +120,7 @@ class TestFilter(ApiBaseTest):
         # Filter for multiple string values
         query_committees = filters.filter_multi(
             models.Committee.query,
-            {'designation': ['P','U']},
+            {'designation': ['P', 'U']},
             CommitteeList.filter_multi_fields
         )
         self.assertEqual(
@@ -140,12 +140,32 @@ class TestFilter(ApiBaseTest):
         # Exclude multiple string values
         query_committees = filters.filter_multi(
             models.Committee.query,
-            {'designation': ['-P','-U']},
+            {'designation': ['-P', '-U']},
             CommitteeList.filter_multi_fields
         )
         self.assertEqual(
             set(query_committees.all()),
             set(each for each in self.committees if each.designation not in ['P','U']))
+
+    def test_filter_multi_combo(self):
+        # Exclude/include multiple integer values
+        query_dates = filters.filter_multi(
+            models.CalendarDate.query,
+            {'calendar_category_id': [-1, 3]},
+            CalendarDatesView.filter_multi_fields
+        )
+        self.assertEqual(
+            set(query_dates.all()),
+            set(each for each in self.dates if each.calendar_category_id not in [1] and each.calendar_category_id in [3]))
+        # Exclude/include multiple string values
+        query_committees = filters.filter_multi(
+            models.Committee.query,
+            {'designation': ['-P', 'U']},
+            CommitteeList.filter_multi_fields
+        )
+        self.assertEqual(
+            set(query_committees.all()),
+            set(each for each in self.committees if each.designation not in ['P'] and each.designation in ['U']))
 
     # Note: filter_fulltext is tested in test_itemized
 
