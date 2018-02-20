@@ -12,7 +12,7 @@ def is_exclude_arg(arg):
 
 def parse_exclude_arg(arg):
     # Integers will come in as negative and strings will start with -
-    if type(arg) is int:
+    if isinstance(arg, int):
         return abs(arg)
     else:
         return arg[1:]
@@ -53,11 +53,20 @@ def filter_range(query, kwargs, fields):
 def filter_fulltext(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key):
-            filters = [
-                column.match(utils.parse_fulltext(value))
-                for value in kwargs[key]
-            ]
-            query = query.filter(sa.or_(*filters))
+            exclude_list = [parse_exclude_arg(value) for value in kwargs[key] if is_exclude_arg(value)]
+            include_list = [value for value in kwargs[key] if not is_exclude_arg(value)]
+            if exclude_list:
+                filters = [
+                    sa.not_(column.match(utils.parse_fulltext(value)))
+                    for value in exclude_list
+                ]
+                query = query.filter(sa.and_(*filters))
+            if include_list:
+                filters = [
+                    column.match(utils.parse_fulltext(value))
+                    for value in include_list
+                ]
+                query = query.filter(sa.or_(*filters))
     return query
 
 
