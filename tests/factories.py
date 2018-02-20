@@ -38,15 +38,18 @@ class CandidateDetailFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateDetail
 
+
 class CandidateCommitteeTotalsPresidentialFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateCommitteeTotalsPresidential
     cycle = 2016
 
+
 class CandidateCommitteeTotalsHouseSenateFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateCommitteeTotalsHouseSenate
     cycle = 2016
+
 
 class CandidateHistoryFactory(BaseCandidateFactory):
     class Meta:
@@ -70,12 +73,14 @@ class CandidateTotalFactory(BaseCandidateFactory):
         model = models.CandidateTotal
     cycle = 2016
 
+
 class CandidateFlagsFactory(BaseFactory):
     class Meta:
         model = models.CandidateFlags
 
     federal_funds_flag = False
     has_raised_funds = True
+
 
 class BaseCommitteeFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: 'ID{0}'.format(n))
@@ -95,6 +100,7 @@ class CommitteeHistoryFactory(BaseCommitteeFactory):
     class Meta:
         model = models.CommitteeHistory
     cycle = 2016
+
 
 class CommitteeTotalsHouseSenateFactory(BaseCommitteeFactory):
     class Meta:
@@ -134,6 +140,7 @@ class TotalsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeTotalsPacParty
 
+
 class TotalsIEOnlyFactory(BaseFactory):
     class Meta:
         model = models.CommitteeTotalsIEOnly
@@ -157,13 +164,16 @@ class ReportsPacPartyFactory(BaseTotalsFactory):
     class Meta:
         model = models.CommitteeReportsPacParty
 
+
 class EfileReportsPresidentialFactory(BaseFactory):
     class Meta:
         model = models.BaseF3PFiling
 
+
 class EfileReportsPacPartyFactory(BaseFactory):
     class Meta:
         model = models.BaseF3XFiling
+
 
 class EfileReportsHouseSenateFactory(BaseFactory):
     class Meta:
@@ -251,9 +261,11 @@ class EFilingsFactory(BaseFactory):
 class BaseFilingFactory(BaseFactory):
     file_number = factory.Sequence(lambda n: n)
 
+
 class BaseF3PFilingFactory(BaseFilingFactory):
     class Meta:
         model = models.BaseF3PFiling
+
 
 class BaseAggregateFactory(BaseFactory):
     committee_id = factory.Sequence(lambda n: str(n))
@@ -381,6 +393,7 @@ class ScheduleAByStateRecipientTotalsFactory(BaseFactory):
     class Meta:
         model = models.ScheduleAByStateRecipientTotals
     idx = factory.Sequence(lambda n: n)
+
 
 class AuditCaseFactory(BaseFactory):
     class Meta:
