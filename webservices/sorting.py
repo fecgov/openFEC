@@ -3,12 +3,6 @@ import sqlalchemy as sa
 from webservices.exceptions import ApiError
 from webservices.common.util import get_class_by_tablename
 
-ITEMIZED_MODELS = (
-    'ScheduleA',
-    'ScheduleB',
-    'ScheduleE',
-)
-
 
 def parse_option(option, model=None, aliases=None, join_columns=None, query=None):
     """Parse sort option to SQLAlchemy order expression.
@@ -68,6 +62,14 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
     :param reverse_nulls: Swap order of null values on sorted column(s) in results;
         Ignored if hide_null is True
     """
+
+    # Start off assuming we are dealing with a sort column, not a sort
+    # expression.
+    is_expression = False
+    expression_field = None
+    expression_type = None
+    null_sort = None
+
     if clear:
         query = query.order_by(False)
     # If the query contains multiple entities (i.e., isn't a simple query on a
@@ -85,15 +87,43 @@ def sort(query, key, model, aliases=None, join_columns=None, clear=False,
         join_columns=join_columns,
         query=query
     )
-    sort_column = order(column)
-    if model and model.__name__ in ITEMIZED_MODELS:
-        query = query.order_by(sort_column)
+
+    # Store the text representation (name) of the sorting column in case we
+    # swap it for an expression instead.
+    if hasattr(column, 'key'):
+        column_name = column.key
     else:
-        query = query.order_by(sort_column)
+        column_name = column
+
+    if model:
+        # Check to see if the model has a sort_expressions attribute on it,
+        # which contains a dictionary of column mappings to SQL expressions.
+        # If the model has this and there is a matching expression for the
+        # column, use the expression instead.
+        if hasattr(model, 'sort_expressions') and column_name in model.sort_expressions:
+            column = model.sort_expressions[column_name]['expression']
+            expression_field = model.sort_expressions[column_name]['field']
+            expression_type = model.sort_expressions[column_name]['type']
+            null_sort = model.sort_expressions[column_name].get(
+                'null_sort',
+                model.sort_expressions[column_name]['expression']
+            )
+            is_expression = True
+
+    sort_column = order(column)
+    query = query.order_by(sort_column)
 
     if relationship:
         query = query.join(relationship)
     if hide_null:
         query = query.filter(column != None)  # noqa
 
-    return query, (column, order)
+    return query, (
+        column,
+        order,
+        column_name,
+        is_expression,
+        expression_field,
+        expression_type,
+        null_sort,
+    )

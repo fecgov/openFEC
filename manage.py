@@ -189,43 +189,8 @@ def load_election_dates():
 
     logger.info('Finished loading election dates.')
 
-@manager.command
-def dump_districts(dest=None):
-    """ Makes districts locally that you can then add as a table to the databases
-    """
-    source = db.engine.url
 
-    if dest is None:
-        dest = './data/districts.dump'
-    else:
-        dest = shlex.quote(dest)
 
-    cmd = (
-        'pg_dump "{source}" --format c --no-acl --no-owner -f {dest} '
-        '-t ofec_fips_states -t ofec_zips_districts'
-    ).format(**locals())
-    subprocess.run(cmd, shell=True)
-
-@manager.command
-def build_district_counts(outname='districts.json'):
-    """ Compiles the districts for a state
-    """
-    import utils
-    utils.write_district_counts(outname)
-
-@manager.command
-def update_aggregates():
-    """These are run nightly to recalculate the totals
-    """
-    logger.info('Updating incremental aggregates...')
-
-    with db.engine.begin() as connection:
-        connection.execute(
-            sa.text('select update_aggregates()').execution_options(
-                autocommit=True
-            )
-        )
-        logger.info('Finished updating Schedule E and support aggregates.')
 
 @manager.command
 def refresh_itemized():
@@ -331,7 +296,7 @@ def refresh_materialized(concurrent=True):
         'reports_presidential': ['ofec_reports_presidential_mv'],
         'committee_history': ['ofec_committee_history_mv'],
         'communication_cost': ['ofec_communication_cost_mv'],
-        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv'],
+        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv', 'ofec_filings_all_mv'],
         'totals_combined': ['ofec_totals_combined_mv'],
         'totals_ie': ['ofec_totals_ie_only_mv'],
         'totals_house_senate': ['ofec_totals_house_senate_mv'],
