@@ -522,7 +522,7 @@ The production and staging environments use relational database service (RDS) in
 
 ### Nightly updates
 Incrementally-updated aggregates and materialized views are updated nightly; see
-`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
+`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are slacked to the team.
 
 ### Loading legal documents
 There are individual management commands for loading individual legal documents. More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
