@@ -32,8 +32,6 @@ SQL_CONFIG = {
 REQUIRED_CREDS = (
     'SQLA_CONN',
     'FEC_SLACK_TOKEN',
-    'FEC_EMAIL_SENDER',
-    'FEC_EMAIL_RECIPIENTS',
 )
 
 REQUIRED_SERVICES = ('redis32', 's3', 'elasticsearch24')
