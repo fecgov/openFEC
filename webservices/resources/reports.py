@@ -28,7 +28,6 @@ efile_reports_schema_map = {
 # We don't have report data for C and E yet
 default_schemas = (models.CommitteeReportsPacParty, schemas.CommitteeReportsPacPartyPageSchema)
 
-
 reports_type_map = {
     'house-senate': 'H',
     'presidential': 'P',
@@ -38,23 +37,12 @@ reports_type_map = {
     'party': 'XY'
 }
 
-
 form_type_map = {
     'presidential': 'P',
     'pac-party': 'X',
     'house-senate': 'H',
 }
 
-
-def parse_types(types):
-    include, exclude = [], []
-    for each in types:
-        target = exclude if each.startswith('-') else include
-        each = each.lstrip('-')
-        target.append(each)
-    if include and exclude:
-        include = [each for each in include if each not in exclude]
-    return include, exclude
 
 def get_range_filters():
     filter_range_fields = [
@@ -73,6 +61,7 @@ def get_range_filters():
     ]
     return filter_range_fields
 
+
 def get_match_filters():
     filter_match_fields = [
         ('filer_type', models.CommitteeReports.means_filed),
@@ -81,11 +70,6 @@ def get_match_filters():
     ]
     return filter_match_fields
 
-def get_multi_filters():
-    filter_multi_fields = [
-        ('amendment_indicator', models.CommitteeReports.amendment_indicator),
-    ]
-    return filter_multi_fields
 
 @doc(
     tags=['financial'],
@@ -98,7 +82,6 @@ def get_multi_filters():
     },
 )
 class ReportsView(utils.Resource):
-
 
     @use_kwargs(args.paging)
     @use_kwargs(args.reports)
@@ -125,6 +108,12 @@ class ReportsView(utils.Resource):
             default_schemas,
         )
         query = reports_class.query
+
+        filter_multi_fields = [
+            ('amendment_indicator', models.CommitteeReports.amendment_indicator),
+            ('report_type', reports_class.report_type),
+        ]
+
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.outerjoin(reports_class.committee).options(sa.orm.contains_eager(reports_class.committee))
 
@@ -140,18 +129,12 @@ class ReportsView(utils.Resource):
             query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
         if kwargs.get('beginning_image_number'):
             query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-        if kwargs.get('report_type'):
-            include, exclude = parse_types(kwargs['report_type'])
-            if include:
-                query = query.filter(reports_class.report_type.in_(include))
-            elif exclude:
-                query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
-        query = filters.filter_multi(query, kwargs, get_multi_filters())
+        query = filters.filter_multi(query, kwargs, filter_multi_fields)
         return query, reports_class, reports_schema
 
 
@@ -163,7 +146,6 @@ class ReportsView(utils.Resource):
     },
 )
 class CommitteeReportsView(utils.Resource):
-
 
     @use_kwargs(args.paging)
     @use_kwargs(args.committee_reports)
@@ -191,8 +173,12 @@ class CommitteeReportsView(utils.Resource):
             default_schemas,
         )
         query = reports_class.query
-        # Eagerly load committees if applicable
 
+        filter_multi_fields = [
+            ('amendment_indicator', models.CommitteeReports.amendment_indicator),
+            ('report_type', reports_class.report_type),
+        ]
+        # Eagerly load committees if applicable
         if hasattr(reports_class, 'committee'):
             query = reports_class.query.options(sa.orm.joinedload(reports_class.committee))
 
@@ -204,19 +190,12 @@ class CommitteeReportsView(utils.Resource):
             query = query.filter(reports_class.cycle.in_(kwargs['cycle']))
         if kwargs.get('beginning_image_number'):
             query = query.filter(reports_class.beginning_image_number.in_(kwargs['beginning_image_number']))
-        if kwargs.get('report_type'):
-            include, exclude = parse_types(kwargs['report_type'])
-            if include:
-                query = query.filter(reports_class.report_type.in_(include))
-            elif exclude:
-                query = query.filter(sa.not_(reports_class.report_type.in_(exclude)))
-
         if kwargs.get('is_amended') is not None:
             query = query.filter(reports_class.is_amended == kwargs['is_amended'])
 
         query = filters.filter_range(query, kwargs, get_range_filters())
         query = filters.filter_match(query, kwargs, get_match_filters())
-        query = filters.filter_multi(query, kwargs, get_multi_filters())
+        query = filters.filter_multi(query, kwargs, filter_multi_fields)
         return query, reports_class, reports_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
