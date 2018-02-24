@@ -115,9 +115,6 @@ class AuditCaseView(ApiResource):
         ('candidate_id', model.candidate_id),
     ]
 
-    # @use_kwargs(
-    #     args.make_multi_sort_args(default=['-cycle', 'committee_name'])
-    # )
     @property
     def args(self):
         return utils.extend(
