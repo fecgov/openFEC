@@ -728,7 +728,7 @@ schedule_a_by_state_recipient_totals = {
 
 # endpoint audit-primary-category
 PrimaryCategory = {
-    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
     # 'tier': fields.List(fields.Int, description=docs.AUDIT_TIER),
 }
@@ -736,15 +736,15 @@ PrimaryCategory = {
 
 # endpoint audit-category
 Category = {
-    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
 }
 
 # endpoint audit-case
 AuditCase = {
-    'primary_category_id': fields.List(fields.Int(), missing=[-1], description=docs.PRIMARY_CATEGORY_ID),
-    'sub_category_id': fields.List(fields.Int(), missing=[-2], description=docs.SUB_CATEGORY_ID),
-    'audit_case_id': fields.List(fields.Int(), description=docs.AUDIT_CASE_ID),
+    'primary_category_id': fields.List(fields.Str(), missing='all', description=docs.PRIMARY_CATEGORY_ID),
+    'sub_category_id': fields.List(fields.Str(), missing='all', description=docs.SUB_CATEGORY_ID),
+    'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
     'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
