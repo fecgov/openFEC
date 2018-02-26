@@ -9,7 +9,7 @@ from tests.common import ApiBaseTest
 from webservices import schemas
 from webservices.rest import db
 from webservices.rest import api
-from webservices.resources.reports import ReportsView, CommitteeReportsView, EFilingSummaryView
+from webservices.resources.reports import ReportsView, CommitteeReportsView, EFilingHouseSenateSummaryView, EFilingPresidentialSummaryView, EFilingPacPartySummaryView
 
 
 class TestReports(ApiBaseTest):
@@ -330,42 +330,68 @@ class TestReports(ApiBaseTest):
 
 class TestEFileReports(ApiBaseTest):
 
+    def _check_committee_ids(self, results, positives=None, negatives=None):
+        ids = [each['committee_id'] for each in results]
+        for positive in (positives or []):
+            self.assertIn(positive.committee_id, ids)
+        for negative in (negatives or []):
+            self.assertNotIn(negative.committee_id, ids)
+
     def test_efile_presidential_reports(self):
-        factories.EfileReportsPresidentialFactory(committee_id='C8675309', cash_on_hand_end_period=20)
+        committee_id = 'C86753090'
+        other_id = 'C2222222'
+
+        committee_efile = factories.EfileReportsPresidentialFactory(committee_id=committee_id, cash_on_hand_end_period=20)
+        other_efile = factories.EfileReportsPresidentialFactory(committee_id=other_id, cash_on_hand_end_period=40)
 
         results = self._results(
             api.url_for(
-                EFilingSummaryView,
+                EFilingPresidentialSummaryView,
                 committee_type='presidential',
+                committee_id=committee_id
             )
         )
 
-        self.assertEqual(results[0]['committee_id'], 'C8675309')
+        self.assertEqual(results[0]['committee_id'], committee_id)
         self.assertEqual(results[0]['cash_on_hand_end_period'], 20)
 
+        self._check_committee_ids(results, [committee_efile], [other_efile])
+
     def test_efile_pac_party_reports(self):
-        factories.EfileReportsPacPartyFactory(committee_id='C8675310')
+        committee_id = 'C8675310'
+        other_id = 'C3333333'
+
+        committee_efile = factories.EfileReportsPacPartyFactory(committee_id=committee_id)
+        other_efile = factories.EfileReportsPacPartyFactory(committee_id=other_id)
 
         results = self._results(
             api.url_for(
-                EFilingSummaryView,
-                committee_type='pac-party',
+                EFilingPacPartySummaryView,
+                committee_id=committee_id
             )
         )
 
-        self.assertEqual(results[0]['committee_id'], 'C8675310')
+        self.assertEqual(results[0]['committee_id'], committee_id)
+        self._check_committee_ids(results, [committee_efile], [other_efile])
 
     def test_efile_house_senate_reports(self):
-        factories.EfileReportsHouseSenateFactory(committee_id='C8675311')
+        committee_id = 'C8675311'
+        other_id = 'C1111111'
+
+        committee_efile = factories.EfileReportsHouseSenateFactory(committee_id=committee_id)
+        other_efile = factories.EfileReportsHouseSenateFactory(committee_id=other_id)
 
         results = self._results(
             api.url_for(
-                EFilingSummaryView,
+                EFilingHouseSenateSummaryView,
                 committee_type='house-senate',
+                committee_id=committee_id
             )
         )
 
-        self.assertEqual(results[0]['committee_id'], 'C8675311')
+        self.assertEqual(results[0]['committee_id'], committee_id)
+
+        self._check_committee_ids(results, [committee_efile], [other_efile])
 
     def test_filter_date_efile_reports(self):
         [
@@ -376,12 +402,12 @@ class TestEFileReports(ApiBaseTest):
         ]
 
         min_date = datetime.date(2013, 1, 1)
-        results = self._results(api.url_for(EFilingSummaryView, min_receipt_date=min_date, committee_type='pac-party'))
+        results = self._results(api.url_for(EFilingPacPartySummaryView, min_receipt_date=min_date))
         self.assertTrue(all(each for each in results if each['receipt_date'] >= min_date.isoformat()))
         max_date = datetime.date(2014, 1, 1)
-        results = self._results(api.url_for(EFilingSummaryView, max_receipt_date=max_date, committee_type='pac-party'))
+        results = self._results(api.url_for(EFilingPacPartySummaryView, max_receipt_date=max_date))
         self.assertTrue(all(each for each in results if each['receipt_date'] <= max_date.isoformat()))
-        results = self._results(api.url_for(EFilingSummaryView, min_receipt_date=min_date, max_receipt_date=max_date, committee_type='pac-party'))
+        results = self._results(api.url_for(EFilingPacPartySummaryView, min_receipt_date=min_date, max_receipt_date=max_date))
         self.assertTrue(
             all(
                 each for each in results

@@ -144,15 +144,18 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     def test_completed_ao_with_docs(self, get_bucket):
+        ao_no = "2017-01"
+        filename = "Some File.pdf"
         expected_document = {
             "document_id": 1,
             "category": "Final Opinion",
             "text": "Some Text",
             "description": "Some Description",
-            "date": datetime.datetime(2017, 2, 9, 0, 0)
+            "date": datetime.datetime(2017, 2, 9, 0, 0),
+            "url": "/files/legal/aos/{0}/{1}".format(ao_no, filename.replace(' ', '-'))
         }
         expected_ao = {
-            "no": "2017-01",
+            "no": ao_no,
             "name": "An AO name",
             "summary": "An AO summary",
             "request_date": datetime.date(2016, 6, 10),
@@ -162,7 +165,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
             "documents": [expected_document],
         }
         self.create_ao(1, expected_ao)
-        self.create_document(1, expected_document)
+        self.create_document(1, expected_document, filename)
 
         actual_ao = next(get_advisory_opinions(None))
 
@@ -369,19 +372,20 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
         assert(next(gen)) == expected_ao2
         assert(next(gen)) == expected_ao3
 
-    def create_document(self, ao_id, document):
+    def create_document(self, ao_id, document, filename='201801_C.pdf'):
         self.connection.execute(
             """
             INSERT INTO aouser.document
-            (document_id, ao_id, category, ocrtext, fileimage, description, document_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+            (document_id, ao_id, category, ocrtext, fileimage, description, document_date, filename)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
             document["document_id"],
             ao_id,
             document["category"],
             document["text"],
             document["text"],
             document["description"],
-            document["date"]
+            document["date"],
+            filename
         )
 
     def create_requestor(self, ao_id, entity_id, requestor_name, requestor_type):

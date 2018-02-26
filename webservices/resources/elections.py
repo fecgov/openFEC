@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from sqlalchemy import cast, Integer
 from flask_apispec import doc, marshal_with
 
 from webservices import args
@@ -10,7 +11,7 @@ from webservices.utils import use_kwargs
 from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
-    ElectionResult, ScheduleEByCandidate,
+    ElectionResult, ElectionsList, ZipsDistricts, ScheduleEByCandidate,
 )
 
 
@@ -24,6 +25,7 @@ office_args_map = {
     'senate': ['state'],
 }
 
+
 def cycle_length(elections):
     return sa.case(
         [
@@ -33,165 +35,74 @@ def cycle_length(elections):
         ]
     )
 
+
 @doc(
     description=docs.ELECTION_SEARCH,
     tags=['financial']
 )
-class ElectionList(utils.Resource):
+class ElectionsListView(utils.Resource):
+
+    model = ElectionsList
+    schema = schemas.ElectionsListSchema
+    page_schema = schemas.ElectionsListPageSchema
 
     filter_multi_fields = [
-        ('cycle', CandidateHistory.two_year_period),
+        ('cycle', ElectionsList.cycle),
     ]
 
     @use_kwargs(args.paging)
-    @use_kwargs(args.election_search)
-    @use_kwargs(args.make_sort_args(default='-_office_status'))
-    @marshal_with(schemas.ElectionSearchPageSchema())
+    @use_kwargs(args.elections_list)
+    @use_kwargs(args.make_multi_sort_args(default=['sort_order', 'district',]))
+    @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
-        query = self._get_records(kwargs)
-        return utils.fetch_page(query, kwargs)
-
-    def _get_records(self, kwargs):
-        """Get election records, sorted by status of office (P > S > H).
-        """
-        elections = self._get_elections(kwargs).subquery()
-        regular_elections = db.session.query(
-            elections,
-            ElectionResult.cand_id,
-            ElectionResult.cand_name,
-            ElectionResult.election_yr,
-            ElectionResult.election_type,
-            ElectionResult.cand_office_district,
-            sa.case(
-                [
-                    (elections.c.office == 'P', 1),
-                    (elections.c.office == 'S', 2),
-                    (elections.c.office == 'H', 3),
-                ],
-                else_=4,
-            ).label('_office_status'),
-        ).join(
-            ElectionResult,
-            sa.and_(
-                elections.c.state == ElectionResult.cand_office_st,
-                elections.c.office == ElectionResult.cand_office,
-                sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
-                elections.c.two_year_period == ElectionResult.election_yr + cycle_length(elections),
-                #There are some bad results in candidate_history that were causing results to appear
-                #for Senate that had no valid election
-                sa.func.coalesce(elections.c.candidate_id) == ElectionResult.cand_id,
-            )
-        ).distinct(
-            elections.c.candidate_id,
-        )
-        # union with special elections
-
-        special_elections = db.session.query(
-            elections,
-            ElectionResult.cand_id,
-            ElectionResult.cand_name,
-            ElectionResult.election_yr,
-            ElectionResult.election_type,
-            ElectionResult.cand_office_district,
-            sa.case(
-                [
-                    (elections.c.office == 'P', 1),
-                    (elections.c.office == 'S', 2),
-                    (elections.c.office == 'H', 3),
-                ],
-                else_=4,
-            ).label('_office_status'),
-        ).join(
-            ElectionResult,
-            sa.and_(
-                elections.c.state == ElectionResult.cand_office_st,
-                elections.c.office == ElectionResult.cand_office,
-                sa.func.coalesce(elections.c.district, '00') == ElectionResult.cand_office_district,
-                ElectionResult.election_type == 'SP',
-                elections.c.two_year_period == ElectionResult.fec_election_yr,
-            )
-        ).distinct(
-            elections.c.state,
-            elections.c.office,
-        )
-
-        all_elections = regular_elections.union_all(special_elections).order_by(
-            '_office_status',
-            ElectionResult.cand_office_district,
-        )
-
-
-        return all_elections
+        query = self._get_elections(kwargs)
+        return utils.fetch_page(query, kwargs, model=ElectionsList, multi=True)
 
     def _get_elections(self, kwargs):
-        """Get elections from candidate history records."""
-        query = CandidateHistory.query.distinct(
-            CandidateHistory.state,
-            CandidateHistory.office,
-            CandidateHistory.district,
-            CandidateHistory.two_year_period,
-            CandidateHistory.candidate_id,#was causing some weird stuff without this distinct condition
-        ).filter(
-            CandidateHistory.candidate_inactive == False,   #noqa
-        )
-        #Adding candidate_inactive back in, after consulting with FEC this is deemed as a needed column, but
-        #strong note that this filter does remove valid candidates
-        #e.g. CA - 34 (Xavier Becerra) for every cycle before 2018.  There may be other cases but this was one found
-        #empirically
-        if kwargs.get('cycle'):
-            query = query.filter(CandidateHistory.cycles.contains(kwargs['cycle']))
+        """Get elections from ElectionsList model."""
+        query = db.session.query(ElectionsList)
         if kwargs.get('office'):
             values = [each[0].upper() for each in kwargs['office']]
-            query = query.filter(CandidateHistory.office.in_(values))
+            query = query.filter(ElectionsList.office.in_(values))
         if kwargs.get('state'):
             query = query.filter(
                 sa.or_(
-                    CandidateHistory.state.in_(kwargs['state']),
-                    CandidateHistory.office == 'P',
+                    ElectionsList.state.in_(kwargs['state']),
+                    ElectionsList.office == 'P',
                 )
             )
         if kwargs.get('district'):
             query = query.filter(
                 sa.or_(
-                    CandidateHistory.district.in_(kwargs['district']),
-                    CandidateHistory.office.in_(['P', 'S']),
+                    ElectionsList.district.in_(kwargs['district']),
+                    ElectionsList.office.in_(['P', 'S']),
                 ),
             )
         if kwargs.get('zip'):
             query = self._filter_zip(query, kwargs)
+
         return filters.filter_multi(query, kwargs, self.filter_multi_fields)
 
     def _filter_zip(self, query, kwargs):
         """Filter query by zip codes."""
-        fips_states = sa.Table('ofec_fips_states', db.metadata, autoload_with=db.engine)
-        zips_districts = sa.Table('ofec_zips_districts', db.metadata, autoload_with=db.engine)
-        districts = db.session.query(
-            zips_districts,
-            fips_states,
-        ).join(
-            fips_states,
-            zips_districts.c['State'] == fips_states.c['FIPS State Numeric Code'],
-        ).filter(
-            zips_districts.c['ZCTA'].in_(kwargs['zip'])
+        districts = db.session.query(ZipsDistricts).filter(
+            cast(ZipsDistricts.zip_code, Integer).in_(kwargs['zip']),
+            ZipsDistricts.active == 'Y'
         ).subquery()
         return query.join(
             districts,
             sa.or_(
                 # House races from matching states and districts
                 sa.and_(
-                    CandidateHistory.district_number == districts.c['Congressional District'],
-                    CandidateHistory.state == districts.c['Official USPS Code'],
+                    ElectionsList.district == districts.c['district'],
+                    ElectionsList.state == districts.c['state_abbrevation'],
                 ),
                 # Senate and presidential races from matching states
                 sa.and_(
-                    # Note: Missing districts may be represented as "00" or `None`.
-                    # For now, handle both values; going forward, we should choose
-                    # a consistent representation.
                     sa.or_(
-                        CandidateHistory.district_number == 0,
-                        CandidateHistory.district_number == None,  # noqa
+                        ElectionsList.district == '00'
                     ),
-                    CandidateHistory.state.in_([districts.c['Official USPS Code'], 'US'])
+                    ElectionsList.state.in_([districts.c['state_abbrevation'], 'US'])
                 ),
             )
         )
@@ -246,6 +157,7 @@ class ElectionView(utils.Resource):
             totals_model.receipts,
             totals_model.disbursements,
             totals_model.last_cash_on_hand_end_period.label('cash_on_hand_end_period'),
+            totals_model.coverage_end_date,
         )
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)
@@ -281,6 +193,7 @@ class ElectionView(utils.Resource):
             sa.func.sum(sa.func.coalesce(pairs.c.disbursements, 0.0)).label('total_disbursements'),
             sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
+            sa.func.max(pairs.c.coverage_end_date).label('coverage_end_date'),
         ).group_by(
             pairs.c.candidate_id,
             pairs.c.candidate_election_year
@@ -295,6 +208,7 @@ class ElectionView(utils.Resource):
             ElectionResult.cand_office_st == (kwargs.get('state', 'US')),
             ElectionResult.cand_office_district == (kwargs.get('district', '00')),
         )
+
 
 @doc(
     description=docs.ELECTION_SEARCH,
@@ -341,12 +255,12 @@ class ElectionSummary(utils.Resource):
         expenditures = filter_candidates(expenditures, kwargs)
         return expenditures
 
-
 election_durations = {
     'senate': 6,
     'president': 4,
     'house': 2,
 }
+
 
 def join_candidate_totals(query, kwargs, totals_model):
     return query.outerjoin(
@@ -373,7 +287,7 @@ def filter_candidates(query, kwargs):
     query = query.filter(
         CandidateHistory.two_year_period <= kwargs['cycle'],
         CandidateHistory.two_year_period > (kwargs['cycle'] - duration),
-        #CandidateHistory.cycles.any(kwargs['cycle']),
+        # CandidateHistory.cycles.any(kwargs['cycle']),
         CandidateHistory.candidate_election_year + (CandidateHistory.candidate_election_year % 2) == kwargs['cycle'],
         CandidateHistory.office == kwargs['office'][0].upper(),
 
@@ -389,6 +303,6 @@ def filter_candidate_totals(query, kwargs, totals_model):
     query = filter_candidates(query, kwargs)
     query = query.filter(
         CandidateHistory.candidate_inactive == False,  # noqa
-        #CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
+        # CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     ).distinct()
     return query

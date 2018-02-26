@@ -1,20 +1,13 @@
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.hybrid import hybrid_property
-
 from webservices import docs, utils
 from webservices.common.models.dates import ReportType
 from webservices.common.models.dates import clean_report_type
 from webservices.common.models.reports import CsvMixin, FecMixin, AmendmentChainMixin, FecFileNumberMixin
-
-
-
-
-
 from .base import db
 
-
 class Filings(FecFileNumberMixin, CsvMixin, db.Model):
-    __tablename__ = 'ofec_filings_mv'
+    __tablename__ = 'ofec_filings_all_mv'
 
     committee_id = db.Column(db.String, index=True, doc=docs.COMMITTEE_ID)
     committee = utils.related_committee_history('committee_id', cycle_label='report_year')
@@ -30,8 +23,8 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     form_type = db.Column(db.String, index=True, doc=docs.FORM_TYPE)
     report_year = db.Column(db.Integer, index=True, doc=docs.REPORT_YEAR)
     report_type = db.Column(db.String, index=True, doc=docs.REPORT_TYPE)
-    document_type = db.Column(db.String, index=True, doc=docs.DOCUMENT_TYPE)
-    document_type_full = db.Column(db.String, doc=docs.DOCUMENT_TYPE)
+    document_type = db.Column(db.String, index=True, doc=docs.DOC_TYPE)
+    document_type_full = db.Column(db.String, doc=docs.DOC_TYPE)
     report_type_full = db.Column(db.String, doc=docs.REPORT_TYPE)
     beginning_image_number = db.Column(db.BigInteger, index=True, doc=docs.BEGINNING_IMAGE_NUMBER)
     ending_image_number = db.Column(db.BigInteger, doc=docs.ENDING_IMAGE_NUMBER)
@@ -65,8 +58,13 @@ class Filings(FecFileNumberMixin, CsvMixin, db.Model):
     #If f2 filing, the state of the candidate, else the state of the committee
     state = db.Column(db.String, doc=docs.STATE)
     office = db.Column(db.String, doc=docs.OFFICE)
+    # Filter filings based off candidate office or committee type H, S and P only. all other 
+    # committee types are ignored. Because from the fron-end we only filter
+    # filings by candidate office only.
+    # mapped office_cmte_tp db column with office
+    office = db.Column('office_cmte_tp', db.String, index=True, doc=docs.OFFICE)
     party = db.Column(db.String, doc=docs.PARTY)
-
+    cmte_tp = db.Column(db.String, doc=docs.COMMITTEE_TYPE)
     amendment_chain = db.Column(ARRAY(db.Numeric))
     previous_file_number = db.Column(db.BigInteger)
     most_recent_file_number = db.Column(db.BigInteger)

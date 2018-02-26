@@ -255,19 +255,20 @@ committee_history = {
 }
 
 filings = {
+    'committee_type': fields.Str(description=docs.COMMITTEE_TYPE),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'is_amended': fields.Bool(description='Filing has been amended'),
     'most_recent': fields.Bool(description='Filing is either new or is the most-recently filed amendment'),
-    'report_type': fields.List(IStr, description='Report type'),
+    'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'min_receipt_date': fields.Date(description='Selects all items received by FEC after this date'),
     'max_receipt_date': fields.Date(description='Selects all items received by FEC before this date'),
-    'form_type': fields.List(IStr, description='Form type'),
+    'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(IStr, description=docs.DISTRICT),
-    'office': fields.List(IStr, description=docs.OFFICE),
+    'office': fields.List(fields.Str(validate=validate.OneOf(['', 'H', 'S', 'P'])), description=docs.OFFICE),
     'party': fields.List(IStr, description=docs.PARTY),
     'filer_type': fields.Str(
         validate=validate.OneOf(['e-file', 'paper']),
@@ -276,30 +277,8 @@ filings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'primary_general_indicator': fields.List(IStr, description='Primary, general or special election indicator'),
     'amendment_indicator': fields.List(
-        IStr,
-        description='''
-        -N   new\n\
-        -A   amendment\n\
-        -T   terminated\n\
-        -C   consolidated\n\
-        -M   multi-candidate\n\
-        -S   secondary\n\
-        Null might be\n\
-        new or amendment.\n\
-        If amendment\n\
-        indicator is null\n\
-        and the filings\n\
-        is the first\n\
-        or first in a\n\
-        chain treat it\n\
-        as if it was a new.\n\
-        If it is not the\n\
-        first or first\n\
-        in a chain then\n\
-        treat the filing\n\
-        as an amendment.\n\
-        '''
-    ),
+        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C' , 'M', 'S'])),
+        description=docs.AMENDMENT_INDICATOR),
 }
 
 efilings = {
@@ -313,7 +292,7 @@ reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
-    'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
+    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE_W_EXCLUDE),
     'is_amended': fields.Bool(description='Report has been amended'),
     'most_recent': fields.Bool(description='Report is either new or is the most-recently filed amendment'),
     'filer_type': fields.Str(
@@ -340,36 +319,15 @@ reports = {
     'candidate_id': fields.Str(description=docs.CANDIDATE_ID),
     'committee_id': fields.List(fields.Str, description=docs.COMMITTEE_ID),
     'amendment_indicator': fields.List(
-        IStr,
-        description='''
-        -N   new\n\
-        -A   amendment\n\
-        -T   terminated\n\
-        -C   consolidated\n\
-        -M   multi-candidate\n\
-        -S   secondary\n\
-        Null might be new\n\
-        or amendment.\n\
-        If amendment indicator\n\
-        is null and\n\
-        the filings is\n\
-        the first or first\n\
-        in a chain treat\n\
-        it as if it was a new.\n\
-        If it is not the\n\
-        first or first in\n\
-        a chain then treat\n\
-        the filing as\n\
-        an amendment.\n\
-        '''
-    ),
+        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C' , 'M', 'S'])),
+        description=docs.AMENDMENT_INDICATOR),
 }
 
 committee_reports = {
     'year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
-    'report_type': fields.List(fields.Str, description='Report type; prefix with "-" to exclude'),
+    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE_W_EXCLUDE),
     'is_amended': fields.Bool(description='Report has been amended'),
     'min_disbursements_amount': Currency(description=docs.MIN_FILTER),
     'max_disbursements_amount': Currency(description=docs.MAX_FILTER),
@@ -428,7 +386,7 @@ reporting_dates = {
     'min_due_date': fields.Date(description='Date the report is due'),
     'max_due_date': fields.Date(description='Date the report is due'),
     'report_year': fields.List(fields.Int, description='Year of report'),
-    'report_type': fields.List(fields.Str, description='Type of report'),
+    'report_type': fields.List(fields.Str, description=docs.REPORT_TYPE),
     'min_create_date': fields.Date(description='Date this record was added to the system'),
     'max_create_date': fields.Date(description='Date this record was added to the system'),
     'min_update_date': fields.Date(description='Date this record was last updated'),
@@ -640,7 +598,7 @@ electioneering_by_candidate = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
 }
 
-election_search = {
+elections_list = {
     'state': fields.List(IStr, description=docs.STATE),
     'district': fields.List(District, description=docs.DISTRICT),
     'cycle': fields.List(fields.Int, description=docs.CANDIDATE_CYCLE),
@@ -770,7 +728,7 @@ schedule_a_by_state_recipient_totals = {
 
 # endpoint audit-primary-category
 PrimaryCategory = {
-    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
     # 'tier': fields.List(fields.Int, description=docs.AUDIT_TIER),
 }
@@ -778,15 +736,15 @@ PrimaryCategory = {
 
 # endpoint audit-category
 Category = {
-    'primary_category_id': fields.List(fields.Int(), description=docs.PRIMARY_CATEGORY_ID),
+    'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
 }
 
 # endpoint audit-case
 AuditCase = {
-    'primary_category_id': fields.List(fields.Int(), missing=[-1], description=docs.PRIMARY_CATEGORY_ID),
-    'sub_category_id': fields.List(fields.Int(), missing=[-2], description=docs.SUB_CATEGORY_ID),
-    'audit_case_id': fields.List(fields.Int(), description=docs.AUDIT_CASE_ID),
+    'primary_category_id': fields.List(fields.Str(), missing='all', description=docs.PRIMARY_CATEGORY_ID),
+    'sub_category_id': fields.List(fields.Str(), missing='all', description=docs.SUB_CATEGORY_ID),
+    'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
     'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),

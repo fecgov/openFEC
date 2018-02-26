@@ -126,6 +126,10 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
 
     def test_filter_fulltext(self):
+        '''
+        Note: this is the only test for filter_fulltext.
+        If this is removed, please add a test to test_filters.py
+        '''
         names = ['David Koch', 'George Soros']
         filings = [
             factories.ScheduleAFactory(contributor_name=name)
@@ -339,6 +343,198 @@ class TestItemized(ApiBaseTest):
                 ScheduleAView,
                 sort='contribution_receipt_date',
                 last_contribution_receipt_date='null'
+            )
+        )
+        self.assertEqual(response.status_code, 422)
+
+    def test_pagination_with_sort_expression(self):
+        # NOTE:  Schedule B is sorted by disbursement date with the expression
+        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
+        filings = [
+            factories.ScheduleBFactory()
+            for _ in range(30)
+        ]
+        page1 = self._results(api.url_for(ScheduleBView, **self.kwargs))
+        self.assertEqual(len(page1), 20)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in filings[:-21:-1]],
+        )
+        page2 = self._results(api.url_for(ScheduleBView, last_index=page1[-1]['sub_id'], **self.kwargs))
+        self.assertEqual(len(page2), 10)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[9::-1]],
+        )
+
+    def test_pagination_with_null_sort_column_values_with_sort_expression(self):
+        # NOTE:  Schedule B is sorted by disbursement date with the expression
+        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
+        filings = [
+            factories.ScheduleBFactory(disbursement_date=None)
+            for _ in range(5)
+        ]
+        filings = filings + [
+            factories.ScheduleBFactory(
+                disbursement_date=datetime.date(2016, 1, 1)
+            )
+            for _ in range(25)
+        ]
+        page1 = self._results(api.url_for(
+            ScheduleBView,
+            sort='disbursement_date',
+            **self.kwargs
+        ))
+        self.assertEqual(len(page1), 20)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in filings[5:25]],
+        )
+        self.assertEqual(
+            [each['disbursement_date'] for each in page1],
+            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in filings[5:25]]
+        )
+        page2 = self._results(
+            api.url_for(
+                ScheduleBView,
+                last_index=page1[-1]['sub_id'],
+                sort='disbursement_date',
+                **self.kwargs
+        ))
+        self.assertEqual(len(page2), 5)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[25:]],
+        )
+        self.assertEqual(
+            [each['disbursement_date'] for each in page2],
+            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in filings[25:]]
+        )
+
+    def test_null_pagination_with_null_sort_column_values_descending_with_sort_expression(self):
+        # NOTE:  Schedule B is sorted by disbursement date with the expression
+        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
+        filings = [
+            factories.ScheduleBFactory(disbursement_date=None)
+            #this range should ensure the page has a null transition
+            for _ in range(10)
+        ]
+        filings = filings + [
+            factories.ScheduleBFactory(
+                disbursement_date=datetime.date(2016, 1, 1)
+            )
+            for _ in range(15)
+        ]
+
+        page1 = self._results(api.url_for(
+            ScheduleBView,
+            sort='-disbursement_date',
+            sort_reverse_nulls='true',
+            **self.kwargs
+        ))
+
+        self.assertEqual(len(page1), 20)
+
+        top_reversed_from_middle = filings[9::-1]
+        reversed_from_bottom_to_middle = filings[-1:14:-1]
+        top_reversed_from_middle.extend(reversed_from_bottom_to_middle)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in top_reversed_from_middle],
+        )
+        self.assertEqual(
+            [each['disbursement_date'] for each in page1],
+            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in top_reversed_from_middle]
+        )
+        page2 = self._results(api.url_for(
+            ScheduleBView,
+            last_index=page1[-1]['sub_id'],
+            last_disbursement_date=page1[-1]['disbursement_date'],
+            sort='-disbursement_date',
+            **self.kwargs
+        ))
+        self.assertEqual(len(page2), 5)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[14:9:-1]],
+        )
+        self.assertEqual(
+            [each['disbursement_date'] for each in page2],
+            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in filings[14:9:-1]]
+        )
+
+    def test_null_pagination_with_null_sort_column_values_ascending_with_sort_expression(self):
+        # NOTE:  Schedule B is sorted by disbursement date with the expression
+        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
+        filings = [
+            factories.ScheduleBFactory(disbursement_date=None)
+            # this range should ensure the page has a null transition
+            for _ in range(10)
+            ]
+        filings = filings + [
+            factories.ScheduleBFactory(
+                disbursement_date=datetime.date(2016, 1, 1)
+            )
+            for _ in range(15)
+            ]
+
+        page1 = self._results(api.url_for(
+            ScheduleBView,
+            sort='disbursement_date',
+            sort_reverse_nulls='true',
+            **self.kwargs
+        ))
+
+        self.assertEqual(len(page1), 20)
+
+        top_reversed_from_middle = filings[10::]
+        reversed_from_bottom_to_middle = filings[0:5:]
+        top_reversed_from_middle.extend(reversed_from_bottom_to_middle)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page1],
+            [each.sub_id for each in top_reversed_from_middle],
+        )
+        self.assertEqual(
+            [each['disbursement_date'] for each in page1],
+            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in
+             top_reversed_from_middle]
+        )
+        page2 = self._results(api.url_for(
+            ScheduleBView,
+            last_index=page1[-1]['sub_id'],
+            sort_null_only=True,
+            sort='disbursement_date',
+            **self.kwargs
+        ))
+        self.assertEqual(len(page2), 5)
+        self.assertEqual(
+            [int(each['sub_id']) for each in page2],
+            [each.sub_id for each in filings[5:10:]],
+        )
+        self.assertEqual(
+            [each['disbursement_date'] for each in page2],
+            [each.disbursement_date.strftime('%Y-%m-%d') if each.disbursement_date else None for each in
+             filings[5:10:]]
+        )
+
+    def test_pagination_with_null_sort_column_parameter_with_sort_expression(self):
+        # NOTE:  Schedule B is sorted by disbursement date with the expression
+        # sa.func.coalesce(self.disbursement_date, sa.cast('9999-12-31', sa.Date))
+        # by default (in descending order), so we must account for that with the
+        # results and slice the baseline list of objects accordingly!
+        response = self.app.get(
+            api.url_for(
+                ScheduleBView,
+                sort='disbursement_date',
+                last_disbursement_date='null'
             )
         )
         self.assertEqual(response.status_code, 422)

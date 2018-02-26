@@ -4,7 +4,6 @@ from collections import defaultdict
 from urllib.parse import urlencode
 
 from webservices.env import env
-from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import create_eregs_link, get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -14,15 +13,20 @@ from .reclassify_statutory_citation import reclassify_current_mur_statutory_cita
 logger = logging.getLogger(__name__)
 
 ALL_MURS = """
-    SELECT case_id, case_no, name
+    SELECT
+        case_id,
+        case_no,
+        name
     FROM fecmur.cases_with_parsed_case_serial_numbers
     WHERE case_type = 'MUR'
-    AND case_serial >= %s
+        AND case_serial >= %s
     ORDER BY case_serial
 """
 
 MUR_SUBJECTS = """
-    SELECT subject.description AS subj, relatedsubject.description AS rel
+    SELECT
+        subject.description AS subj,
+        relatedsubject.description AS rel
     FROM fecmur.case_subject
     JOIN fecmur.subject USING (subject_id)
     LEFT OUTER JOIN fecmur.relatedsubject USING (subject_id, relatedsubject_id)
@@ -30,13 +34,17 @@ MUR_SUBJECTS = """
 """
 
 MUR_ELECTION_CYCLES = """
-    SELECT election_cycle::INT
+    SELECT
+        election_cycle::INT
     FROM fecmur.electioncycle
     WHERE case_id = %s
 """
 
 MUR_PARTICIPANTS = """
-    SELECT entity_id, name, role.description AS role
+    SELECT
+        entity_id,
+        name,
+        role.description AS role
     FROM fecmur.players
     JOIN fecmur.role USING (role_id)
     JOIN fecmur.entity USING (entity_id)
@@ -44,12 +52,22 @@ MUR_PARTICIPANTS = """
 """
 
 MUR_DOCUMENTS = """
-    SELECT document_id, filename, category, description, ocrtext,
-        fileimage, length(fileimage) AS length,
-        doc_order_id, document_date
-    FROM fecmur.document
-    WHERE case_id = %s
-    ORDER BY doc_order_id, document_date desc, document_id DESC;
+    SELECT
+        doc.document_id,
+        mur.case_no,
+        doc.filename,
+        doc.category,
+        doc.description,
+        doc.ocrtext,
+        doc.fileimage,
+        length(fileimage) AS length,
+        doc.doc_order_id,
+        doc.document_date
+    FROM fecmur.document doc
+    INNER JOIN fecmur.cases_with_parsed_case_serial_numbers mur
+        ON mur.case_id = doc.case_id
+    WHERE doc.case_id = %s
+    ORDER BY doc.doc_order_id, doc.document_date desc, doc.document_id DESC;
 """
 # TODO: Check if document order matters
 
@@ -105,9 +123,10 @@ def load_current_murs(from_mur_no=None):
     mur_count = 0
     for mur in get_murs(from_mur_no):
         logger.info("Loading current MUR: %s", mur['no'])
-        es.index(DOCS_INDEX, 'murs', mur, id=mur['doc_id'])
+        es.index('docs_index', 'murs', mur, id=mur['doc_id'])
         mur_count += 1
     logger.info("%d current MURs loaded", mur_count)
+
 
 def get_murs(from_mur_no):
     bucket = get_bucket()
@@ -144,6 +163,7 @@ def get_murs(from_mur_no):
             mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
             yield mur
 
+
 def get_election_cycles(case_id):
     election_cycles = []
     with db.engine.connect() as conn:
@@ -152,11 +172,13 @@ def get_election_cycles(case_id):
             election_cycles.append(row['election_cycle'])
     return election_cycles
 
+
 def get_open_and_close_dates(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(OPEN_AND_CLOSE_DATES, case_id)
         open_date, close_date = rs.fetchone()
     return open_date, close_date
+
 
 def get_dispositions(case_id):
     with db.engine.connect() as conn:
@@ -170,6 +192,7 @@ def get_dispositions(case_id):
 
         return disposition_data
 
+
 def get_commission_votes(case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(COMMISSION_VOTES, case_id)
@@ -177,6 +200,7 @@ def get_commission_votes(case_id):
         for row in rs:
             commission_votes.append({'vote_date': row['vote_date'], 'action': row['action']})
         return commission_votes
+
 
 def get_participants(case_id):
     participants = {}
@@ -189,6 +213,7 @@ def get_participants(case_id):
                 'citations': defaultdict(list)
             }
     return participants
+
 
 def get_sorted_respondents(participants):
     """
@@ -212,6 +237,7 @@ def get_subjects(case_id):
             subjects.append(subject_str)
     return subjects
 
+
 def assign_citations(participants, case_id):
     with db.engine.connect() as conn:
         rs = conn.execute(MUR_VIOLATIONS, case_id)
@@ -224,6 +250,7 @@ def assign_citations(participants, case_id):
                 parse_statutory_citations(row['statutory_citation'], case_id, entity_id))
             participants[entity_id]['citations'][row['stage']].extend(
                 parse_regulatory_citations(row['regulatory_citation'], case_id, entity_id))
+
 
 def parse_statutory_citations(statutory_citation, case_id, entity_id):
     citations = []
@@ -252,6 +279,7 @@ def parse_statutory_citations(statutory_citation, case_id, entity_id):
                     statutory_citation, entity_id, case_id)
     return citations
 
+
 def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
     citations = []
     if regulatory_citation:
@@ -271,6 +299,7 @@ def parse_regulatory_citations(regulatory_citation, case_id, entity_id):
                     regulatory_citation, entity_id, case_id)
     return citations
 
+
 def get_documents(case_id, bucket, bucket_name):
     documents = []
     with db.engine.connect() as conn:
@@ -278,20 +307,25 @@ def get_documents(case_id, bucket, bucket_name):
         for row in rs:
             document = {
                 'document_id': row['document_id'],
-                'filename': row['filename'],
                 'category': row['category'],
                 'description': row['description'],
                 'length': row['length'],
                 'text': row['ocrtext'],
                 'document_date': row['document_date'],
             }
-            pdf_key = 'legal/murs/current/%s.pdf' % row['document_id']
-            logger.info("S3: Uploading {} Orig filename: {}".format(pdf_key, document['filename']))
-            bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
-                    ContentType='application/pdf', ACL='public-read')
-            document['url'] = '/files/' + pdf_key
-            documents.append(document)
+            if not row['fileimage']:
+                logger.error('Error uploading document ID {0} for MUR Case {1}: No file image'.format(row['document_id'], row['case_no']))
+            else:
+                pdf_key = 'legal/murs/{0}/{1}'.format(row['case_no'],
+                    row['filename'].replace(' ', '-'))
+                document['url'] = '/files/' + pdf_key
+                logger.debug("S3: Uploading {}".format(pdf_key))
+                bucket.put_object(Key=pdf_key, Body=bytes(row['fileimage']),
+                        ContentType='application/pdf', ACL='public-read')
+                documents.append(document)
+
     return documents
+
 
 def remove_reclassification_notes(statutory_citation):
     """ Statutory citations include notes on reclassification of the form

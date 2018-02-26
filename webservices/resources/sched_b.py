@@ -57,7 +57,7 @@ class ScheduleBView(ItemizedResource):
             args.make_sort_args(
                 default='-disbursement_date',
                 validator=args.OptionValidator(['disbursement_date', 'disbursement_amount']),
-            ),
+            )
         )
 
     def build_query(self, **kwargs):
@@ -77,7 +77,7 @@ class ScheduleBView(ItemizedResource):
 
 @doc(
     tags=['disbursements'],
-    description=docs.EFILING_TAG,
+    description=docs.EFILING_TAG
 )
 class ScheduleBEfileView(views.ApiResource):
     model = models.ScheduleBEfile
