@@ -7,7 +7,6 @@ from flask import abort
 from webservices import args
 from webservices import utils
 from webservices.utils import use_kwargs
-from webservices.legal_docs import DOCS_SEARCH
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
 import logging
@@ -43,7 +42,7 @@ class GetLegalCitation(utils.Resource):
             Q('wildcard', formerly=citation)],
             minimum_should_match=1) \
             .extra(size=10) \
-            .index(DOCS_SEARCH)
+            .index('docs_search')
 
         es_results = query.execute()
 
@@ -61,7 +60,7 @@ class GetLegalDocument(utils.Resource):
             .query('bool', must=[Q('term', no=no), Q('term', _type=doc_type)]) \
             .source(exclude='documents.text') \
             .extra(size=200) \
-            .index(DOCS_SEARCH) \
+            .index('docs_search') \
             .execute()
 
         results = {"docs": [hit.to_dict() for hit in es_results]}
@@ -114,7 +113,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .highlight_options(require_field_match=False) \
         .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
         .extra(size=hits_returned, from_=from_hit) \
-        .index(DOCS_SEARCH) \
+        .index('docs_search') \
         .sort("sort1", "sort2")
 
     return query
@@ -131,7 +130,7 @@ def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .highlight_options(require_field_match=False) \
         .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
         .extra(size=hits_returned, from_=from_hit) \
-        .index(DOCS_SEARCH) \
+        .index('docs_search') \
         .sort("sort1", "sort2")
 
     return apply_mur_specific_query_params(query, **kwargs)
@@ -147,7 +146,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .highlight_options(require_field_match=False) \
         .source(exclude=['text', 'documents.text', 'sort1', 'sort2']) \
         .extra(size=hits_returned, from_=from_hit) \
-        .index(DOCS_SEARCH) \
+        .index('docs_search') \
         .sort("sort1", "sort2")
 
     return apply_ao_specific_query_params(query, **kwargs)

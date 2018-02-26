@@ -120,8 +120,8 @@ class AuditCaseView(ApiResource):
         return utils.extend(
             args.paging,
             args.AuditCase,
-            args.make_sort_args(
-                default='-cycle',
+            args.make_multi_sort_args(
+                default=['-cycle', 'committee_name', ]
             ),
         )
 

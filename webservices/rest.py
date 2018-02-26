@@ -276,7 +276,7 @@ api.add_resource(sched_f.ScheduleFViewBySubId, '/schedules/schedule_f/<string:su
 api.add_resource(costs.CommunicationCostView, '/communication-costs/')
 api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
-api.add_resource(elections.ElectionList, '/elections/search/')
+api.add_resource(elections.ElectionsListView, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
@@ -335,8 +335,18 @@ api.add_resource(
 )
 
 api.add_resource(
-    reports.EFilingSummaryView,
-    '/efile/reports/<string:committee_type>/',
+    reports.EFilingHouseSenateSummaryView,
+    '/efile/reports/house-senate/',
+)
+
+api.add_resource(
+    reports.EFilingPresidentialSummaryView,
+    '/efile/reports/presidential/',
+)
+
+api.add_resource(
+    reports.EFilingPacPartySummaryView,
+    '/efile/reports/pac-party/',
 )
 
 api.add_resource(filings.FilingsList, '/filings/')
@@ -365,7 +375,9 @@ apidoc.register(committees.CommitteeList, blueprint='v1')
 apidoc.register(committees.CommitteeHistoryView, blueprint='v1')
 apidoc.register(reports.ReportsView, blueprint='v1')
 apidoc.register(reports.CommitteeReportsView, blueprint='v1')
-apidoc.register(reports.EFilingSummaryView, blueprint='v1')
+apidoc.register(reports.EFilingHouseSenateSummaryView, blueprint='v1')
+apidoc.register(reports.EFilingPresidentialSummaryView, blueprint='v1')
+apidoc.register(reports.EFilingPacPartySummaryView, blueprint='v1')
 apidoc.register(totals.TotalsView, blueprint='v1')
 apidoc.register(totals.CandidateTotalsView, blueprint='v1')
 apidoc.register(sched_a.ScheduleAView, blueprint='v1')
@@ -398,7 +410,7 @@ apidoc.register(candidate_aggregates.ScheduleAByStateCandidateView, blueprint='v
 apidoc.register(candidate_aggregates.TotalsCandidateView, blueprint='v1')
 apidoc.register(filings.FilingsView, blueprint='v1')
 apidoc.register(filings.FilingsList, blueprint='v1')
-apidoc.register(elections.ElectionList, blueprint='v1')
+apidoc.register(elections.ElectionsListView, blueprint='v1')
 apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')

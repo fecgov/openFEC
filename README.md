@@ -522,7 +522,7 @@ The production and staging environments use relational database service (RDS) in
 
 ### Nightly updates
 Incrementally-updated aggregates and materialized views are updated nightly; see
-`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are emailed to the development team--specifically, to email addresses specified in `FEC_EMAIL_RECIPIENTS`.
+`webservices/tasks/refresh.py` for details. When the nightly update finishes, logs and error reports are slacked to the team.
 
 ### Loading legal documents
 There are individual management commands for loading individual legal documents. More information is available by invoking each of these commands with a `--help` option. These commands can be run as [tasks](https://docs.cloudfoundry.org/devguide/using-tasks.html) on `cloud.gov`, e.g.,
@@ -534,6 +534,14 @@ The progress of these tasks can be monitored using, e.g.,
 cf logs api | grep reinit-legal
 ```
 
+#### Create index for current legal documents (excludes archived MURs)
+```
+python manage.py initialize_current_legal_docs
+```
+#### Create index for archived MURs
+```
+python manage.py create_archived_murs_index
+```
 
 #### Loading statutes
 ```
@@ -556,14 +564,15 @@ python manage.py load_advisory_opinions [-f FROM_AO_NO]
 python manage.py load_current_murs [-f FROM_MUR_NO]
 ```
 
-#### Loading all legal documents for the 1st time
+#### Loading archived MURs (This takes a very long time)
 ```
-python manage.py reinitialize_all_legal_docs
+python manage.py load_archived_murs
 ```
 
-#### Loading all legal documents with no downtime
+
+#### Reloading all current legal documents with no downtime (excludes archived MURs)
 ```
-python manage.py refresh_legal_docs_zero_downtime
+python manage.py refresh_current_legal_docs_zero_downtime
 ```
 This command is typically used when there is a schema change. A staging index is built
 and populated in the background. When ready, the staging index is moved to the production index with no downtime.

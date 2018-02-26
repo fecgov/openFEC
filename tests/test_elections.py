@@ -5,81 +5,69 @@ from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
 from webservices.rest import db, api
-from webservices.resources.elections import ElectionList, ElectionView, ElectionSummary
+from webservices.resources.elections import ElectionsListView, ElectionView, ElectionSummary
 
 
 class TestElectionSearch(ApiBaseTest):
 
     def setUp(self):
         super().setUp()
-        factory = functools.partial(
-            factories.CandidateHistoryFactory,
-            two_year_period=2012,
-            election_years=[2012],
-            cycles=[2012],
-            candidate_status='C',
-        )
-        self.candidates = [
-            factory(office='P', state='US', district='00', candidate_id='P12345'),
-            factory(office='S', state='NJ', district='00', candidate_id='SNJ123'),
-            factory(office='H', state='NJ', district='09', candidate_id='HNJ123'),
-            factory(office='S', state='VA', district='00', candidate_id='SVA123'),
-            factory(office='H', state='VA', district='05', candidate_id='HVA123'),
-            factory(office='S', state='GA', district='00', candidate_id='SGA123'),
-        ]
-        factory = functools.partial(
-            factories.ElectionResultFactory
-        )
-        self.elections = [
-            factory(election_yr=2008, cand_office='P', cand_office_st='US', cand_office_district='00', cand_id='P12345'),
-            factory(election_yr=2006, cand_office='S', cand_office_st='NJ', cand_office_district='00', cand_id='SNJ123'),
-            factory(election_yr=2010, cand_office='H', cand_office_st='NJ', cand_office_district='09', cand_id='HNJ123'),
-            factory(election_yr=2006, cand_office='S', cand_office_st='VA', cand_office_district='00', cand_id='SVA123'),
-            factory(election_yr=2010, cand_office='H', cand_office_st='VA', cand_office_district='05', cand_id='HVA123'),
-        ]
+        factories.ElectionsListFactory(office='P', state='US', district='00', incumbent_id='P12345')
+        factories.ElectionsListFactory(office='S', state='NJ', district='00', incumbent_id='SNJ123')
+        factories.ElectionsListFactory(office='H', state='NJ', district='09', incumbent_id='HNJ123')
+        factories.ElectionsListFactory(office='S', state='VA', district='00', incumbent_id='SVA123')
+        factories.ElectionsListFactory(office='H', state='VA', district='04', incumbent_id='HVA121')
+        factories.ElectionsListFactory(office='H', state='VA', district='05', incumbent_id='HVA123')
+        factories.ElectionsListFactory(office='H', state='VA', district='06', incumbent_id='HVA124')
+        factories.ElectionsListFactory(office='S', state='GA', district='00', incumbent_id='SGA123')
 
     def test_search_district(self):
-        results = self._results(api.url_for(ElectionList, state='NJ', district='09'))
+        results = self._results(api.url_for(ElectionsListView, state='NJ', district='09'))
         self.assertEqual(len(results), 3)
         assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
         assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'NJ', 'district': '00'})
         assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'NJ', 'district': '09'})
 
     def test_search_district_padding(self):
-        results_padded = self._results(api.url_for(ElectionList, district='09'))
-        results_unpadded = self._results(api.url_for(ElectionList, district=9))
-        self.assertEqual(len(results_padded), 4)
-        self.assertEqual(len(results_unpadded), 4)
+        results_padded = self._results(api.url_for(ElectionsListView, district='09'))
+        results_unpadded = self._results(api.url_for(ElectionsListView, district=9))
+        self.assertEqual(len(results_padded), len(results_unpadded))
+        self.assertEqual(len(results_unpadded), 5)
 
     def test_search_office(self):
-        results = self._results(api.url_for(ElectionList, office='senate'))
-        self.assertEqual(len(results), 2)
+        results = self._results(api.url_for(ElectionsListView, office='senate'))
+        self.assertEqual(len(results), 3)
         self.assertTrue(all([each['office'] == 'S' for each in results]))
 
     def test_search_zip(self):
-        results = self._results(api.url_for(ElectionList, zip='22902'))
+        factories.ZipsDistrictsFactory(district='05', zip_code='22902', state_abbrevation='VA')
+
+        results = self._results(api.url_for(ElectionsListView, zip='22902'))
         assert len(results) == 3
         assert_dicts_subset(results[0], {'cycle': 2012, 'office': 'P', 'state': 'US', 'district': '00'})
         assert_dicts_subset(results[1], {'cycle': 2012, 'office': 'S', 'state': 'VA', 'district': '00'})
         assert_dicts_subset(results[2], {'cycle': 2012, 'office': 'H', 'state': 'VA', 'district': '05'})
 
-    def test_search_incumbent(self):
+    def test_counts(self):
+        response = self._response(api.url_for(ElectionsListView))
+        footer_count = response['pagination']['count']
+        results_count = len(response['results'])
+        self.assertEqual(footer_count, results_count)
 
-        [
-            factories.ElectionResultFactory(
-                cand_office='S',
-                election_yr=2006,
-                cand_office_st='GA',
-                cand_office_district='00',
-                cand_id='SGA123',
-                cand_name='George P. Burdell',
-                election_type='G',
-                fec_election_yr=2006,
-            )
-        ]
-        results = self._results(api.url_for(ElectionList, office='senate', state='GA'))
-        assert len(results) == 1
-        assert_dicts_subset(results[0], {'incumbent_id': 'SGA123', 'incumbent_name': 'George P. Burdell'})
+    def test_search_sort_default(self):
+        results = self._results(api.url_for(ElectionsListView, state='VA'))
+        self.assertEqual(results[0]['office'], 'P')
+        self.assertEqual(results[1]['office'], 'S')
+        self.assertEqual(results[2]['district'], '04')
+        self.assertEqual(results[3]['district'], '05')
+        self.assertEqual(results[4]['district'], '06')
+
+    def test_search_sort_state(self):
+        results = self._results(api.url_for(ElectionsListView))
+        self.assertTrue(
+            [each['state'] for each in results],
+            ['GA', 'NJ', 'NJ', 'US', 'VA', 'VA', 'VA', 'VA']
+        )
 
 
 class TestElections(ApiBaseTest):

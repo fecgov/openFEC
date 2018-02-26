@@ -3,7 +3,6 @@ import logging
 import re
 
 from webservices.env import env
-from webservices.legal_docs import DOCS_INDEX
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -46,15 +45,18 @@ AO_ENTITIES = """
 
 AO_DOCUMENTS = """
     SELECT
-        document_id,
-        filename,
-        ocrtext,
-        fileimage,
-        description,
-        category,
-        document_date
-    FROM aouser.document
-    WHERE ao_id = %s
+        ao.ao_no,
+        doc.document_id,
+        doc.filename,
+        doc.ocrtext,
+        doc.fileimage,
+        doc.description,
+        doc.category,
+        doc.document_date
+    FROM aouser.document doc
+    INNER JOIN aouser.ao ao
+        ON ao.ao_id = doc.ao_id
+    WHERE doc.ao_id = %s
 """
 
 STATUTE_CITATION_REGEX = re.compile(
@@ -84,7 +86,7 @@ def load_advisory_opinions(from_ao_no=None):
     ao_count = 0
     for ao in get_advisory_opinions(from_ao_no):
         logger.info("Loading AO: %s", ao['no'])
-        es.index(DOCS_INDEX, 'advisory_opinions', ao, id=ao['no'])
+        es.index('docs_index', 'advisory_opinions', ao, id=ao['no'])
         ao_count += 1
     logger.info("%d advisory opinions loaded", ao_count)
 
@@ -176,18 +178,22 @@ def get_documents(ao_id, bucket):
         for row in rs:
             document = {
                 "document_id": row["document_id"],
-                "filename": row["filename"],
                 "category": row["category"],
                 "description": row["description"],
                 "text": row["ocrtext"],
                 "date": row["document_date"],
             }
-            pdf_key = "legal/aos/%s.pdf" % row["document_id"]
-            logger.info("S3: Uploading {} Orig filename: {}".format(pdf_key, document['filename']))
-            bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
-                    ContentType="application/pdf", ACL="public-read")
-            document["url"] = '/files/' + pdf_key
-            documents.append(document)
+            if not row['fileimage']:
+                logger.error('Error uploading document ID {0} for AO no {1}: No file image'.format(row['document_id'], row['ao_no']))
+            else:
+                pdf_key = "legal/aos/{0}/{1}".format(row['ao_no'],
+                    row["filename"].replace(' ', '-'))
+                document["url"] = '/files/' + pdf_key
+                logger.debug("S3: Uploading {}".format(pdf_key))
+                bucket.put_object(Key=pdf_key, Body=bytes(row["fileimage"]),
+                        ContentType="application/pdf", ACL="public-read")
+                documents.append(document)
+
     return documents
 
 
@@ -250,12 +256,12 @@ def get_citations(ao_names):
     for citation in all_regulatory_citations:
         entry = {'citation_text': '%d CFR §%d.%d'
                  % (citation[0], citation[1], citation[2]),'citation_type': 'regulation'}
-        es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
+        es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
         entry = {'citation_text': '%d U.S.C. §%d'
                  % (citation[0], citation[1]), 'citation_type': 'statute'}
-        es.index(DOCS_INDEX, 'citations', entry, id=entry['citation_text'])
+        es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     logger.info("Citations loaded.")
 
