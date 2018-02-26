@@ -52,12 +52,6 @@ class ApiResource(utils.Resource):
             query = query.options(*self.query_options)
         return query
 
-    def filter_fulltext(self, query, kwargs):
-        for key, column in self.filter_fulltext_fields:
-            if kwargs.get(key):
-                query = utils.search_text(query, column, kwargs[key])
-        return query
-
 
 class ItemizedResource(ApiResource):
 
