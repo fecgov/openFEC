@@ -1,0 +1,13 @@
+---
+applications:
+- name: flyway-independent-migration-kill-by-date
+  buildpack: java_buildpack
+  health-check-type: process
+  no-route: true
+  command: /home/vcap/app/flyway/bin/run.sh && echo SUCCESS && sleep infinity
+  path: build/distributions/flyway.zip
+  env:
+      CLASSPATH: app/gradle/lib/flyway-commandline-5.0.2.jar:app/gradle/lib/flyway-core-5.0.2.jar
+      JAVA_HOME: /home/vcap/app/.java-buildpack/open_jdk_jre
+  services:
+      - fec-flyway-creds
