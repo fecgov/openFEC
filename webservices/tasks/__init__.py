@@ -19,7 +19,7 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
         },
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
-            'schedule': crontab(minute=[5, 20, 35, 50]),
+            'schedule': crontab(minute=[1, 2, 3, 4, 5, 7, 11, 13, 15, 17, 20, 23, 35, 40, 45, 50, 52, 53, 55, 57]),
         },
     }
 
@@ -37,6 +37,7 @@ app.conf.update(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
         'webservices.tasks.legal_docs',
+        'webservices.tasks.cache_request',
     ),
     beat_schedule=schedule,
     task_acks_late=False
