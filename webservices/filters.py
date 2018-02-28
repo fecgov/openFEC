@@ -11,7 +11,7 @@ def is_exclude_arg(arg):
 
 
 def parse_exclude_arg(arg):
-    # Integers will come in as negative and strings will start with -
+    # Integers will come in as negative and strings will start with "-""
     if isinstance(arg, int):
         return abs(arg)
     else:
@@ -22,7 +22,8 @@ def filter_match(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key) is not None:
             if is_exclude_arg(kwargs[key]):
-                query = query.filter(column != parse_exclude_arg(kwargs[key]))
+                query = query.filter(sa.or_(column != parse_exclude_arg(kwargs[key]),
+                                            column == None))
             else:
                 query = query.filter(column == kwargs[key])
     return query
@@ -35,7 +36,8 @@ def filter_multi(query, kwargs, fields):
             exclude_list = [parse_exclude_arg(value) for value in kwargs[key] if is_exclude_arg(value)]
             include_list = [value for value in kwargs[key] if not is_exclude_arg(value)]
             if exclude_list:
-                query = query.filter(column.notin_(exclude_list))
+                query = query.filter(sa.or_(column.notin_(exclude_list),
+                                            column == None))
             if include_list:
                 query = query.filter(column.in_(include_list))
     return query
