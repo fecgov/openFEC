@@ -1,6 +1,6 @@
 ---
 applications:
-- name: flyway-independent-migration-kill-by-date
+- name: flyway-independent-migration-kill-2018-03-15
   buildpack: java_buildpack
   health-check-type: process
   no-route: true
