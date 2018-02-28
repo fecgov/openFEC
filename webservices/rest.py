@@ -70,7 +70,7 @@ from webservices.tasks import utils
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.json_response import JsonResponse
 from webservices.tasks.error_code import ErrorCode
-
+from webservices.tasks import cache_request 
 from smart_open import smart_open
 
 app = Flask(__name__)
@@ -166,32 +166,33 @@ def add_caching_headers(response):
 
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
-
     if (cache_all_requests and status_code == 200):
-        try:
-            # convert the results to JSON
-            json_data = utils.get_json_data(response)
-            # format the URL by removing the api_key and special characters
-            formatted_url = utils.format_url(request.url)
-            # get s3 bucket env variables
-            s3_bucket = utils.get_bucket()
-            cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
-            # s3_key = utils.get_s3_key(cached_url)
+        cache_request.cache_all_requests.delay(response)
+    # if (cache_all_requests and status_code == 200):
+    #     try:
+    #         # convert the results to JSON
+    #         json_data = utils.get_json_data(response)
+    #         # format the URL by removing the api_key and special characters
+    #         formatted_url = utils.format_url(request.url)
+    #         # get s3 bucket env variables
+    #         s3_bucket = utils.get_bucket()
+    #         cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
+    #         # s3_key = utils.get_s3_key(cached_url)
 
-            # upload the request_content.json file to s3 bucket
-            # TODO:  Figure out why the s3_key object is not working with the
-            #        smart_open call, when it does for downloads (and verify
-            #        that downloads are indeed still working too).
-            with smart_open(cached_url, 'w') as cached_file:
-                cached_file.write(json_data)
+    #         # upload the request_content.json file to s3 bucket
+    #         # TODO:  Figure out why the s3_key object is not working with the
+    #         #        smart_open call, when it does for downloads (and verify
+    #         #        that downloads are indeed still working too).
+    #         with smart_open(cached_url, 'w') as cached_file:
+    #             cached_file.write(json_data)
 
-            logger.info(
-                'The following request has been uploaded to S3 successfully: {}'.format(
-                    cached_url
-                )
-            )
-        except Exception as e:
-            logger.error('Exception occured while uploading the cache request to S3.%s', e)
+    #         logger.info(
+    #             'The following request has been uploaded to S3 successfully: {}'.format(
+    #                 cached_url
+    #             )
+    #         )
+    #     except Exception as e:
+    #         logger.error('Exception occured while uploading the cache request to S3.%s', e)
     return response
 
 
