@@ -3,11 +3,12 @@ from datetime import timedelta
 import celery
 from celery import signals
 from celery.schedules import crontab
-
+import logging
 
 from webservices.env import env
 from webservices.tasks import utils
 
+logger = logging.getLogger(__name__)
 
 # Feature and dev are sharing the same RDS box so we only want dev to update
 schedule = {}
@@ -24,8 +25,12 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     }
 
 def redis_url():
-    redis = env.get_service(label='redis32')
-    if redis:
+    app_space = env.get_credential('space_name')
+    if app_space:
+        redis = env.get_service(label='redis32')
+        while redis is None:
+            redis = env.get_service(label='redis32')
+            logger.error('Connecting to Redis.....')
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
     return env.get_credential('FEC_REDIS_URL', 'redis://localhost:6379/0')
