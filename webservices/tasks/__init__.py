@@ -28,7 +28,9 @@ def redis_url():
     app_space = env.get_credential('space_name')
 
     if app_space is not None:
-        logger.info('Running in a cloud.gov space.')
+        logger.info(
+            'Running in the {0} space in cloud.gov.'.format(app_space)
+        )
 
         while True:
             logger.info('Attempting to connect to Redis...')
