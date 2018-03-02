@@ -26,13 +26,27 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
 
 def redis_url():
     app_space = env.get_credential('space_name')
-    if app_space:
-        redis = env.get_service(label='redis32')
-        while redis is None:
+
+    if app_space is not None:
+        logger.info('Running in a cloud.gov space.')
+
+        while True:
+            logger.info('Attempting to connect to Redis...')
             redis = env.get_service(label='redis32')
-            logger.error('Connecting to Redis.....')
+
+            if redis is not None:
+                logger.info('Successfully connected to Redis.')
+                break
+            else:
+                logger.error('Could not connect to Redis, retrying...')
+
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
+    else:
+        logger.debug(
+            'Not running in a cloud.gov space, attempting to connect locally.'
+        )
+
     return env.get_credential('FEC_REDIS_URL', 'redis://localhost:6379/0')
 
 app = celery.Celery('openfec')
