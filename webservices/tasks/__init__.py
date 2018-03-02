@@ -25,13 +25,22 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     }
 
 def redis_url():
-    app_space = env.get_credential('space_name')
+    """
+    Retrieves the URL needed to connect to a Redis instance.
+    """
 
-    if app_space is not None:
+    # Attempt to retrieve the space name the application is running in; this
+    # will return the space if the app is running in a cloud.gov environment or
+    # None if it is running locally.
+    if env.space is not None:
         logger.info(
-            'Running in the {0} space in cloud.gov.'.format(app_space)
+            'Running in the {0} space in cloud.gov.'.format(env.space)
         )
 
+        # While we are not able to connect to Redis, retry as many times as
+        # necessary.  This is usually due to a brief 1 - 3 second downtime as
+        # a service instance is rebooted in the cloud.gov environment.
+        # TODO:  Make this more robust in the case of extended outages.
         while True:
             logger.info('Attempting to connect to Redis...')
             redis = env.get_service(label='redis32')
@@ -42,6 +51,8 @@ def redis_url():
             else:
                 logger.error('Could not connect to Redis, retrying...')
 
+        # Construct the Redis instance URL based on the service information
+        # returned.
         url = redis.get_url(host='hostname', password='password', port='port')
         return 'redis://{}'.format(url)
     else:
@@ -49,6 +60,8 @@ def redis_url():
             'Not running in a cloud.gov space, attempting to connect locally.'
         )
 
+    # Fall back to attempting to read whatever is set in the FEC_REDIS_URL
+    # environment variable, otherwise a localhost connection.
     return env.get_credential('FEC_REDIS_URL', 'redis://localhost:6379/0')
 
 app = celery.Celery('openfec')
