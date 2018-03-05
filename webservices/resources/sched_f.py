@@ -26,6 +26,7 @@ class ScheduleFView(ApiResource):
         ('image_number', models.ScheduleF.image_number),
         ('committee_id', models.ScheduleF.committee_id),
         ('candidate_id', models.ScheduleF.candidate_id),
+        ('cycle', models.ScheduleF.election_cycle),
     ]
 
     filter_range_fields = [
