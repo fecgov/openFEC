@@ -191,7 +191,7 @@ def handle_exception(exception):
         bucket_region = env.get_credential('region')
         # create the URL to check if it already cached and saved on s3(call the format_utils)
         # return cache response if exists
-        cached_url = "http://s3-{0}.amazonaws.com/{1}/cached-calls/{2}.json".format(
+        cached_url = "http://s3-{0}.amazonaws.com/{1}/cached-calls/{2}".format(
             bucket_region, s3_bucket.name, formatted_url)
 
         cached_data = utils.get_cached_request(cached_url)
