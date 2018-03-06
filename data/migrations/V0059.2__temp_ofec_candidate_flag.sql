@@ -10,6 +10,8 @@ SET search_path = public, pg_catalog;
 
 -- Materialized View: ofec_candidate_flag
 
+REFRESH MATERIALIZED VIEW ofec_candidate_history_mv;
+
 DROP MATERIALIZED VIEW IF EXISTS ofec_candidate_flag;
  
 CREATE MATERIALIZED VIEW ofec_candidate_flag AS 
