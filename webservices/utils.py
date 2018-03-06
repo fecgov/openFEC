@@ -113,7 +113,12 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             else:
                 comparator = self.max_column_map.get(self.sort_column[5])
 
-            left_index = sa.func.coalesce(left_index, comparator)
+            if ( self.sort_column[3] and hasattr(left_index,'coalesce')) or ( not self.sort_column[3]) :
+                left_index = sa.func.coalesce(left_index, comparator)
+        
+            if hasattr(left_index,'coalesce'):
+                print('it is coalesce expression')
+
             lhs += (left_index,)
             rhs += (sort_index,)
 
@@ -129,6 +134,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             cursor = cursor.filter(filter)
 
         query = cursor.order_by(direction(self.index_column)).limit(limit)
+        print(query)
         return query.all() if eager else query
 
     def _get_index_values(self, result):
