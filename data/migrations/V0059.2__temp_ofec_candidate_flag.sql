@@ -10,7 +10,13 @@ SET search_path = public, pg_catalog;
 
 -- Materialized View: ofec_candidate_flag
 
-REFRESH MATERIALIZED VIEW ofec_candidate_history_mv;
+REFRESH MATERIALIZED VIEW ofec_candidate_detail_mv;
+REFRESH MATERIALIZED VIEW ofec_totals_house_senate_mv;
+REFRESH MATERIALIZED VIEW ofec_totals_combined_mv;
+REFRESH MATERIALIZED VIEW ofec_cand_cmte_linkage_mv;
+REFRESH MATERIALIZED VIEW ofec_totals_presidential_mv;
+REFRESH MATERIALIZED VIEW ofec_candidate_election_mv;
+REFRESH MATERIALIZED VIEW ofec_candidate_totals_mv;
 
 DROP MATERIALIZED VIEW IF EXISTS ofec_candidate_flag;
  
