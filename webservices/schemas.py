@@ -976,7 +976,7 @@ register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 PrimaryCategorySchema = make_schema(
     models.PrimaryCategory,
     fields={
-        'primary_category_id': ma.fields.Int(),
+        'primary_category_id': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
         'tier': ma.fields.Int(),
     },
@@ -993,8 +993,8 @@ register_schema(PrimaryCategoryPageSchema)
 CategoryRelationSchema = make_schema(
     models.CategoryRelation,
     fields={
-        'primary_category_id': ma.fields.Int(),
-        'sub_category_id': ma.fields.Int(),
+        'primary_category_id': ma.fields.Str(),
+        'sub_category_id': ma.fields.Str(),
         'sub_category_name': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
     },
@@ -1011,7 +1011,7 @@ register_schema(CategoryRelationPageSchema)
 CategorySchema = make_schema(
     models.Category,
     fields={
-        'primary_category_id': ma.fields.Int(),
+        'primary_category_id': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
         'tier': ma.fields.Int(),
         'sub_category_list': ma.fields.Nested(CategoryRelationSchema, many=True),
@@ -1038,9 +1038,9 @@ register_schema(CategoryPageSchema)
 AuditCaseSubCategorySchema = make_schema(
     models.AuditCaseSubCategory,
     fields={
-        'primary_category_id': ma.fields.Int(),
-        'audit_case_id': ma.fields.Int(),
-        'sub_category_id': ma.fields.Int(),
+        'primary_category_id': ma.fields.Str(),
+        'audit_case_id': ma.fields.Str(),
+        'sub_category_id': ma.fields.Str(),
         'sub_category_name': ma.fields.Str(),
     },
     options={
@@ -1062,7 +1062,7 @@ AuditCategoryRelationSchema = make_schema(
     models.AuditCategoryRelation,
     fields={
         'audit_case_id': ma.fields.Str(),
-        'primary_category_id': ma.fields.Int(),
+        'primary_category_id': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
         'sub_category_list': ma.fields.Nested(AuditCaseSubCategorySchema, many=True),
     },

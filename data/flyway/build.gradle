@@ -1,0 +1,83 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.flywaydb', name: 'flyway-gradle-plugin', version: '5.0.2'
+    compile(group: 'org.flywaydb', name: 'flyway-commandline', version: '5.0.2') {
+        exclude group: 'com.microsoft.sqlserver', module: 'msql-jdbc'
+        exclude group: 'com.h2database', module: 'h2'
+        exclude group: 'com.pivotal.jdbc', module: 'greenplumdriver'
+        exclude group: 'net.sourceforge.jtds', module: 'jtds'
+        exclude group: 'org.apache.derby', module: 'derby'
+        exclude group: 'org.apache.derby', module: 'derbyclient'
+        exclude group: 'org.hsqldb', module: 'hsqldb'
+        exclude group: 'org.mariadb.jdbc', module: 'mariadb-java-client'
+        exclude group: 'org.xerial', module: 'sqlite-jdbc'
+    }
+}
+
+mainClassName = "org.flywaydb.commandline.Main"
+
+task createJarsDir {
+    def jars = file("$buildDir/jars")
+    outputs.dir jars
+    doLast {
+        jars.mkdirs()
+        new File(jars, "readme.txt").write("Empty file so that it gets copied")
+    }
+}
+
+task createMigrationsDir {
+    def migrations = file("$buildDir/migrations")
+    outputs.dir migrations
+    doLast {
+        migrations.mkdirs()
+        copy {
+            from "../migrations"
+            into migrations
+        }
+    }
+}
+
+task createRunScript {
+    def run_scrip = file("$buildDir/bin")
+    outputs.dir run_scrip
+    doLast {
+        run_scrip.mkdirs()
+        copy {
+            from "run.sh"
+            into run_scrip
+        }
+    }
+}
+
+task copyPostgresJar(type: Copy) {
+    into "$buildDir/drivers"
+    from configurations.runtime
+    include "postgres*.jar"
+}
+
+distZip.dependsOn(copyPostgresJar)
+
+distributions {
+    main {
+        contents {
+            from(createJarsDir) {
+                into "jars"
+            }
+            from(copyPostgresJar) {
+                into "drivers"
+            }
+            from(createMigrationsDir) {
+                into "migrations"
+            }
+            from(createRunScript) {
+                into "bin"
+            }
+        }
+    }
+}
