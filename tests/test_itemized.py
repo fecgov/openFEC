@@ -126,6 +126,10 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
 
     def test_filter_fulltext(self):
+        '''
+        Note: this is the only test for filter_fulltext.
+        If this is removed, please add a test to test_filters.py
+        '''
         names = ['David Koch', 'George Soros']
         filings = [
             factories.ScheduleAFactory(contributor_name=name)

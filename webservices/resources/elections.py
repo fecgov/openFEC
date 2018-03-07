@@ -52,11 +52,11 @@ class ElectionsListView(utils.Resource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.elections_list)
-    @use_kwargs(args.make_sort_args('sort_order'))
+    @use_kwargs(args.make_multi_sort_args(default=['sort_order', 'district',]))
     @marshal_with(schemas.ElectionsListPageSchema())
     def get(self, **kwargs):
         query = self._get_elections(kwargs)
-        return utils.fetch_page(query, kwargs)
+        return utils.fetch_page(query, kwargs, model=ElectionsList, multi=True)
 
     def _get_elections(self, kwargs):
         """Get elections from ElectionsList model."""
