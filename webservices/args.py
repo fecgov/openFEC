@@ -572,6 +572,7 @@ schedule_f = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(fields.Str),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
 }
 
 communication_cost = {
