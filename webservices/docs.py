@@ -77,7 +77,7 @@ A few restrictions limit the way you can use FEC data. For example, you can’t 
 lists for commercial purposes or to solicit donations.
 [Learn more here](https://transition.fec.gov/pages/brochures/saleuse.shtml).
 
-[View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
+[View our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
 '''
 
 CANDIDATE_TAG = '''
@@ -332,7 +332,7 @@ Line number with description
 
 Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
+This is [the sql function](https://github.com/fecgov/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
@@ -415,7 +415,7 @@ large result sets are approximate; you will want to page through the records unt
 
 SCHEDULE_B_BY_PURPOSE = '''
 Schedule B receipts aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
-Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/18F/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
+Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/fecgov/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
 '''
 
 SCHEDULE_C_TAG = '''
@@ -631,7 +631,7 @@ Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
 reports. All reporting deadlines are available at /reporting-dates/ for reference.
 
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
+This is [the sql function](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
 that creates the calendar.
 
 '''
@@ -1200,12 +1200,12 @@ MAX_FILTER = 'Filter for all amounts less than a value.'
 ENTITY_RECEIPTS_TOTLAS = '''
 Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
 ENTITY_DISBURSEMENTS_TOTLAS = '''
 Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
 
 # Audit api
