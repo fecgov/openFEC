@@ -1,5 +1,5 @@
 ## Welcome
-We're glad you're thinking about contributing to an 18F open source project!
+We're glad you're thinking about contributing to an FEC open source project!
 If you're unsure about anything, ask us. Or submit the issue or pull request
 anyway; the worst that can happen is that we’ll politely ask you to change
 something.
@@ -77,23 +77,9 @@ database performance and tuning activities.
 - When a pull request is ready for review, label it `plz-review!`.
 - Anyone may informally review a pull request and make comments or
   suggestions.
-- Only 18F staff may merge pull requests (don't merge your own pull
+- Only FEC staff may merge pull requests (don't merge your own pull
   requests; ask for someone else to review and do so).
 
-
-## 18F team information and practices
-There are currently two teams at 18F working in the FEC repositories: the data
-team and the legal team. Both teams have agreed to sync their sprint schedules
-and align their development efforts to coincide with combined biweekly
-releases that ship to production on the Wednesday after a two-week sprint. We
-also share a calendar to keep track of important sprint dates
-and events.
-
-In addition, we've committed to setting aside some time during each sprint
-when we all work on code reviews of open pull requests together. This will
-help bring new developers up to speed on the various code bases and ensure
-folks are comfortable reviewing code across the teams. As everyone's comfort
-increases we can consider making this activity less structured.
 
 
 ### Demos
@@ -107,17 +93,12 @@ conduct full reviews of the work slated for a release on our staging site.
 
 
 ### Deployment and release information
-The betaFEC project requires a steady release schedule that is
-planned ahead of time, due to project requirements. Since both teams
-have agreed to synchronize their sprint schedules, this will make it easier
-for us to plan for each release after a sprint is completed.
+The fec.gov project requires a steady release schedule that is
+planned ahead of time, due to project requirements.
 
 In general, we are committed to creating and deploying a release branch on the
-Monday after a sprint is completed. This will require us to have everything
-intended to be ready for the release merged to the `develop` branch by the
-second Thursday in a sprint. We are allowing ourselves an extra day at the end
-to provide us with the bandwidth needed to address any issues, merge
-conflicts, etc.
+every sprint. This will require us to have everything
+intended to be ready for the release merged to the `develop` branch before the release is cut.
 
 This release branch will be deployed to our `stage` environment for FEC folks
 to review until we are ready to do a production deployment, which we have
@@ -135,11 +116,11 @@ enable us to test this work without being clobbered by the frequent
 deployments made when work is merged into `develop`.
 
 When working in the `feature` space, we've agreed to ask in advance to make
-sure no one else is currently utilizing the space for their work.
+sure no one else is currently using the space for their work.
 
 
 ### Development tools
-Both teams have agreed to the following tenents around the use of our
+Both teams have agreed to the following tenets around the use of our
 development tools:
 
 - Folks should feel free to branch or fork the code as they see fit; neither
@@ -151,7 +132,7 @@ development tools:
   work in git, mainly because our deployment hooks are tied to its workflow.
   We are leaving ourselves the option to investigate other tools or git
   workflows in the future.
-- Our current setup with Travis-CI, hound, and Codecov are working fine for
+- Our current setup with Circle CI, hound, and Codecov are working fine for
   both teams; we will continue to use them as is until we find they no
   longer meet our needs.
 
@@ -162,18 +143,16 @@ We currently have several monitoring tools in place:
 - New Relic, mainly for basic pings
 - We receive nightly status reports about
   the `dev`, `stage`, and `prod` environments via slack.
+- We have extensive logs via cloud.gov
 
 
-### 18F specific team workflow
+### Team workflow
 1. Please pull an issue from the current sprint only (unless there is an
-   *URGENT* issue). Take an unassigned issue or re-assign an issue with the
-   label "[stealable](https://github.com/18F/openFEC/labels/stealable)." If a
-   non *URGENT* issue comes up, but you want to prioritize it, coordinate with
-   the PM or tech lead on Slack.
+   *URGENT* issue). If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PMs or tech lead on Slack.
 2. Before starting,
-   [write the dev issue checklist](https://github.com/18f/openFEC/blob/develop/CONTRIBUTING.md#development-issues-should-include).
+   [write the dev issue checklist](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#development-issues-should-include).
 3. While working, submit `[WIP]`
-   [pull requests](https://github.com/18f/openFEC/blob/develop/CONTRIBUTING.md#pull-requests)
+   [pull requests](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#pull-requests)
    liberally.
 4. Time boxing! If you have spent half the time of the estimated size of the
    issue and you're not sure that you're halfway finished, notify the tech
@@ -183,3 +162,12 @@ We currently have several monitoring tools in place:
 6. Once you're done with your pull request, notify the team in Slack that your pull request is
    ready for review, and don't merge your own pull request.
 7. Do a review of someone else's pull request and merge when it is deemed ready.
+
+# Pull request review
+
+- Read the code changes to see if they make sense to you. Any questions you might also be good things to document in a doc string or comment.
+- Check for test coverage- the tests should be proportional to the change you are making. A minor text change won't need a test a large feature will need many tests to cover all of its core functionality.
+- Check for style, you should be using a linter for each language you write or review. Let that help you find style pointers. Politely suggest any changes that might make the style more consistent. Generally, we have been ignoring line length. Also, function and readability more important than style so test out any major style changes.
+- Check with consistency with the rest of the code base. We want the code to follow the same patterns everywhere.
+- Make sure everything is documented for outside users.
+- Run the code locally! Pull down the code to test the code out on your computer. (Keep this in mind when you are submitting pull requests to be reviewed. It makes it easier if you explain exactly how to test your PR.) Think of additional edge cases that might cause errors and test them out.
