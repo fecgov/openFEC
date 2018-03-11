@@ -1,3 +1,4 @@
+
 import datetime
 
 import sqlalchemy as sa
@@ -106,15 +107,21 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
-    def test_filter_zip(self):
+    def test_filter_sa_zip(self):
         [
             factories.ScheduleAFactory(contributor_zip=96789),
-            factories.ScheduleAFactory(contributor_zip=66111)
+            factories.ScheduleAFactory(contributor_zip=9678912),
+            factories.ScheduleAFactory(contributor_zip=967891234)
         ]
 
         results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['contributor_zip'], '96789')
+        self.assertEqual(len(results), 3)
+        
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=9678912, **self.kwargs))
+        self.assertEqual(len(results), 3)
+        
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=967891234, **self.kwargs))
+        self.assertEqual(len(results), 3)
 
     def test_filter_case_insensitive(self):
         [
