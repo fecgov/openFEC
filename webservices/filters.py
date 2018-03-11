@@ -71,6 +71,27 @@ def filter_fulltext(query, kwargs, fields):
                 query = query.filter(sa.or_(*filters))
     return query
 
+def filter_multi_start_with(query, kwargs, fields):
+    for key, column in fields:
+        if kwargs.get('contributor_zip'):
+            exclude_list = [parse_exclude_arg(value)[:5]+'%' for value in kwargs[key] if is_exclude_arg(value)]
+            include_list = [value[:5]+'%' for value in kwargs[key] if not is_exclude_arg(value)]
+            if exclude_list:
+                filters = [
+                    sa.not_(column.like(value))
+                    for value in exclude_list
+                ]
+                query = query.filter(sa.and_(*filters))
+                print(query)
+            if include_list:
+                filters = [
+                    column.like(value)
+                    for value in include_list
+                ]
+                query = query.filter(sa.or_(*filters))
+                print(query)
+    return query
+
 
 def filter_contributor_type(query, column, kwargs):
     if kwargs.get('contributor_type') == ['individual']:

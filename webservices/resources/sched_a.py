@@ -36,7 +36,7 @@ class ScheduleAView(ItemizedResource):
         ('contributor_id', models.ScheduleA.contributor_id),
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
-        ('contributor_zip', models.ScheduleA.contributor_zip)
+        # ('contributor_zip', models.ScheduleA.contributor_zip)
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
@@ -51,6 +51,9 @@ class ScheduleAView(ItemizedResource):
         ('contributor_name', models.ScheduleA.contributor_name_text),
         ('contributor_employer', models.ScheduleA.contributor_employer_text),
         ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
+    ]
+    filter_multi_start_with_fields = [
+        ('contributor_zip', models.ScheduleA.contributor_zip)
     ]
     query_options = [
         sa.orm.joinedload(models.ScheduleA.committee),
@@ -76,6 +79,8 @@ class ScheduleAView(ItemizedResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
+        query = filters.filter_multi_start_with(query, kwargs, self.filter_multi_start_with_fields)
+        
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
