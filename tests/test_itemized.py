@@ -107,7 +107,7 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
-    def test_filter_sa_zip(self):
+    def test_filter_sched_a_zip(self):
         [
             factories.ScheduleAFactory(contributor_zip=96789),
             factories.ScheduleAFactory(contributor_zip=9678912),
@@ -122,6 +122,14 @@ class TestItemized(ApiBaseTest):
         
         results = self._results(api.url_for(ScheduleAView, contributor_zip=967891234, **self.kwargs))
         self.assertEqual(len(results), 3)
+
+    def test_filter_multi_start_with(self):
+        [
+            factories.ScheduleAFactory(contributor_zip=1296789)
+        ]
+
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
+        self.assertEqual(len(results), 0)
 
     def test_filter_case_insensitive(self):
         [
