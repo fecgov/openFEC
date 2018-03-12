@@ -1,4 +1,5 @@
 import logging
+import re
 
 import sqlalchemy as sa
 
@@ -114,17 +115,54 @@ class TableGroup:
                 'Successfully refreshed {name}.'.format(name=name),
             )
             logger.info(output_message[1])
-        except Exception as e:
+        except Exception as error:
             transaction.rollback()
 
             output_message = (
                 1,
                 'Refreshing {name} failed: {error}'.format(
                     name=name,
-                    error=e
+                    error=error
                 ),
             )
-            logger.error(output_message[1])
+            logger.warning(output_message[1])
+
+            try:
+                error_details = error.args[0].split('\n')[1]
+                result = re.findall('\((\d+)\)', error_details)
+                sub_id = int(result[0])
+
+                transaction = connection.begin()
+
+                insert_select = sa.select(queue_old.columns).select_from(
+                    master_table
+                ).where(master_table.c.get(cls.primary) == sub_id)
+
+                insert = sa.insert(queue_old).from_select(
+                    insert_select.columns,
+                    insert_select
+                )
+
+                connection.execute(insert)
+                transaction.commit()
+
+                output_message = (
+                    1,
+                    'Successfully recovered from record violation of {sub_id} in {name}; trying again.'.format(
+                        sub_id=sub_id,
+                        name=name
+                    ),
+                )
+                logger.warning(output_message[1])
+            except Exception as fatal_error:
+                output_message = (
+                    2,
+                    'Aborting - Refreshing {name} failed: {error}'.format(
+                        name=name,
+                        error=fatal_error
+                    ),
+                )
+                logger.error(output_message[1])
 
         connection.close()
         return output_message

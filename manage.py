@@ -207,12 +207,18 @@ def refresh_itemized_a():
     """Used to refresh the itemized Schedule A data."""
 
     logger.info('Updating Schedule A...')
-    message = partition.SchedAGroup.process_queues()
 
-    if message[0] == 0:
-        logger.info(message[1])
-    else:
-        logger.error(message[1])
+    while True:
+        message = partition.SchedAGroup.process_queues()
+
+        if message[0] == 0:
+            logger.info(message[1])
+            break
+        elif message[0] == 1:
+            logger.warning(message[1])
+        elif message[0] >= 2:
+            logger.error(message[1])
+            break
 
     logger.info('Finished updating Schedule A.')
 
@@ -220,12 +226,18 @@ def refresh_itemized_a():
 def refresh_itemized_b():
     """Used to refresh the itemized Schedule B data."""
     logger.info('Updating Schedule B...')
-    message = partition.SchedBGroup.process_queues()
 
-    if message[0] == 0:
-        logger.info(message[1])
-    else:
-        logger.error(message[1])
+    while True:
+        message = partition.SchedBGroup.process_queues()
+
+        if message[0] == 0:
+            logger.info(message[1])
+            break
+        elif message[0] == 1:
+            logger.warning(message[1])
+        elif message[0] >= 2:
+            logger.error(message[1])
+            break
 
     logger.info('Finished updating Schedule B.')
 
