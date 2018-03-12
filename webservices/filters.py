@@ -73,18 +73,18 @@ def filter_fulltext(query, kwargs, fields):
 
 def filter_multi_start_with(query, kwargs, fields):
     for key, column in fields:
-        if kwargs.get('contributor_zip'):
-            exclude_list = [parse_exclude_arg(value)[:5]+'%' for value in kwargs[key] if is_exclude_arg(value)]
-            include_list = [value[:5]+'%' for value in kwargs[key] if not is_exclude_arg(value)]
+        if kwargs.get(key):
+            exclude_list = [parse_exclude_arg(value) for value in kwargs[key] if is_exclude_arg(value)]
+            include_list = [value for value in kwargs[key] if not is_exclude_arg(value)]
             if exclude_list:
                 filters = [
-                    sa.not_(column.like(value))
+                    sa.not_(column.startswith(value))
                     for value in exclude_list
                 ]
                 query = query.filter(sa.and_(*filters))
             if include_list:
                 filters = [
-                    column.like(value)
+                    column.startswith(value)
                     for value in include_list
                 ]
                 query = query.filter(sa.or_(*filters))
