@@ -85,18 +85,29 @@ class UniversalSearch(utils.Resource):
         else:
             doc_types = [kwargs.get('type')]
 
+            # if doc_types is not in one of these 4 doc types :'statutes', 'regulations', 'advisory_opinions', 'murs'
+            # then reset type = all (= four default search types)
+            if doc_types[0] not in ('statutes', 'regulations', 'advisory_opinions', 'murs'):
+                doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
+
         hits_returned = min([200, hits_returned])
 
         results = {}
         total_count = 0
 
         for type_ in doc_types:
-            query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
             try:
+                query = query_builders.get(type_)(q, type_, from_hit, hits_returned, **kwargs)
                 formatted_hits, count = execute_query(query)
+            except TypeError as te:
+                logger.info(te.args)
+                raise ApiError("Not a valid search type", 400)
             except RequestError as e:
                 logger.info(e.args)
-                raise ApiError("Could not parse query", 400)
+                raise ApiError("Elasticsearch failed to execute query", 400)
+            except:
+                logger.info("Unexpected Error")
+                raise ApiError("Unexpected Error", 400)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
             total_count += count
