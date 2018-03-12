@@ -26,6 +26,7 @@ INNER_HITS = {
     }
 }
 
+ALL_DOCUMENT_TYPES = ['statutes', 'regulations', 'advisory_opinions', 'murs']
 
 class GetLegalCitation(utils.Resource):
     @property
@@ -81,14 +82,14 @@ class UniversalSearch(utils.Resource):
         }
 
         if kwargs.get('type', 'all') == 'all':
-            doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
+            doc_types = ALL_DOCUMENT_TYPES
         else:
             doc_types = [kwargs.get('type')]
 
-            # if doc_types is not in one of these 4 doc types :'statutes', 'regulations', 'advisory_opinions', 'murs'
-            # then reset type = all (= four default search types)
-            if doc_types[0] not in ('statutes', 'regulations', 'advisory_opinions', 'murs'):
-                doc_types = ['statutes', 'regulations', 'advisory_opinions', 'murs']
+            # if doc_types is not in one of ALL_DOCUMENT_TYPES
+            # then reset type = all (= ALL_DOCUMENT_TYPES)
+            if doc_types[0] not in ALL_DOCUMENT_TYPES:
+                doc_types = ALL_DOCUMENT_TYPES
 
         hits_returned = min([200, hits_returned])
 
