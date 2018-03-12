@@ -82,14 +82,12 @@ def filter_multi_start_with(query, kwargs, fields):
                     for value in exclude_list
                 ]
                 query = query.filter(sa.and_(*filters))
-                print(query)
             if include_list:
                 filters = [
                     column.like(value)
                     for value in include_list
                 ]
                 query = query.filter(sa.or_(*filters))
-                print(query)
     return query
 
 
