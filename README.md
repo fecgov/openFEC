@@ -456,13 +456,17 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 
     ```
     git flow hotfix finish my-hotfix
-    git checkout master
-    git push origin master --follow-tags
     git checkout develop
     git push origin develop
     ```
 
-* `develop` is deployed to `dev`
+* `develop` is deployed to `dev`. Make sure the build passes before deploying to `master`.
+
+    ```
+    git checkout master
+    git push origin master --follow-tags
+    ```
+
 * `master` is deployed to `prod`
 
 ### Creating a release
