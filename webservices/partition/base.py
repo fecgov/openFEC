@@ -155,6 +155,8 @@ class TableGroup:
                 )
                 logger.warning(output_message[1])
             except Exception as fatal_error:
+                transaction.rollback()
+
                 output_message = (
                     2,
                     'Aborting - Refreshing {name} failed: {error}'.format(
