@@ -970,7 +970,7 @@ CONTRIBUTOR_CITY = 'City of contributor'
 CONTRIBUTOR_STATE = 'State of contributor'
 CONTRIBUTOR_EMPLOYER = 'Employer of contributor, filers need to make an effort to gather this information'
 CONTRIBUTOR_OCCUPATION = 'Occupation of contributor, filers need to make an effort to gather this information'
-CONTRIBUTOR_ZIP = 'Zip code of contributor. All contributions match on first 5-digit will be retuned'
+CONTRIBUTOR_ZIP = 'Zip code of contributor. All contributions that have zipcode matchs on first 5-digit will be returned'
 IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo code is true. \
 Filtering individuals is useful to make sure contributions are not double reported and in creating \
 breakdowns of the amount of money coming from individuals.'
