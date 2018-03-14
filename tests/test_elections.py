@@ -242,20 +242,12 @@ class TestElections(ApiBaseTest):
 
 class TestStateElectionOffices(ApiBaseTest):
 
-    def setUp(self):
-        super().setUp()
-        self.state_election_offices = [
+    def test_filter_match(self):
+        # Filter for a single string value
+        [
             factories.StateElectionOfficesFactory(state='TX', office_type='STATE CAMPAIGN FINANCE'),
             factories.StateElectionOfficesFactory(state='AK', office_type='STATE CAMPAIGN FINANCE'),
             factories.StateElectionOfficesFactory(state='WA', office_type='STATE CAMPAIGN FINANCE'),
         ]
-
-    def test_filter_match(self):
-        # Filter for a single string value
-        query_state_election_offices = filters.filter_match(
-            models.StateElectionOfficeInfo,
-            {'filer_type': 'state'},
-        )
-        self.assertEqual(
-            set(query_state_election_offices.all()),
-            set(each for each in self.state_election_offices if each.state == 'VA'))
+        results = self._results(api.url_for(StateElectionOfficeInfo, state='TX'))
+        self.assertEqual(results['count'], 1)
