@@ -311,7 +311,7 @@ def filter_candidate_totals(query, kwargs, totals_model):
 
 
 @doc(
-    tags=['financial'],
+    tags=['filer resources'],
     description=docs.STATE_ELECTION_OFFICES,
 )
 class StateElectionOfficeInfoView(ApiResource):
