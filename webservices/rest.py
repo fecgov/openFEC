@@ -163,24 +163,24 @@ def add_caching_headers(response):
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
-    if (cache_all_requests and status_code == 200):
-        try:
-            # convert the results to JSON
-            json_data = utils.get_json_data(response)
-            # format the URL by removing the api_key and special characters
-            formatted_url = utils.format_url(request.url)
-            # get s3 bucket env variables
-            s3_bucket = utils.get_bucket()
-            cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
-            s3_key = utils.get_s3_key(cached_url)
+    # if (cache_all_requests and status_code == 200):
+    #     try:
+    #         # convert the results to JSON
+    #         json_data = utils.get_json_data(response)
+    #         # format the URL by removing the api_key and special characters
+    #         formatted_url = utils.format_url(request.url)
+    #         # get s3 bucket env variables
+    #         s3_bucket = utils.get_bucket()
+    #         cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
+    #         s3_key = utils.get_s3_key(cached_url)
 
-            # upload the request_content.json file to s3 bucket
-            with smart_open(s3_key, 'wb') as cached_file:
-                cached_file.write(json_data)
+    #         # upload the request_content.json file to s3 bucket
+    #         with smart_open(s3_key, 'wb') as cached_file:
+    #             cached_file.write(json_data)
 
-            logger.info('The following request has been cached and uploaded successfully :%s ', cached_url)
-        except:
-            logger.error('Cache Upload failed')
+    #         logger.info('The following request has been cached and uploaded successfully :%s ', cached_url)
+    #     except:
+    #         logger.error('Cache Upload failed')
     return response
 
 
@@ -235,6 +235,7 @@ api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionsListView, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
+api.add_resource(elections.StateElectionOfficeInfoView, '/state-election-office/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
@@ -370,6 +371,7 @@ apidoc.register(filings.FilingsList, blueprint='v1')
 apidoc.register(elections.ElectionsListView, blueprint='v1')
 apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
+apidoc.register(elections.StateElectionOfficeInfoView, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
