@@ -346,9 +346,10 @@ class StateElectionOfficeInfoView(ApiResource):
         return utils.extend(
             args.paging,
             args.state_election_office_info,
-            args.make_multi_sort_args(
-                default=['-state']
+            args.make_sort_args(
+                validator=args.IndexValidator(self.model, schema=models.StateElectionOfficeInfo.__table_args__.get('schema')),
             ),
+
         )
 
     # @property
