@@ -14,6 +14,7 @@ from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
     ElectionResult, ElectionsList, ZipsDistricts, ScheduleEByCandidate,
+    StateElectionOfficeInfo,
 )
 
 
