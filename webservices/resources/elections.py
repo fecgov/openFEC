@@ -8,6 +8,8 @@ from webservices import utils
 from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
+from webservices.common import models
+from webservices.common.views import ApiResource
 from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
@@ -306,3 +308,49 @@ def filter_candidate_totals(query, kwargs, totals_model):
         # CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     ).distinct()
     return query
+
+
+@doc(
+    tags=['financial'],
+    description=docs.STATE_ELECTION_OFFICES,
+)
+class StateElectionOfficeInfoView(ApiResource):
+    model = models.StateElectionOfficeInfo
+    schema = schemas.StateElectionOfficeInfoSchema
+    page_schema = schemas.StateElectionOfficeInfoPageSchema
+
+    filter_multi_fields = [
+        ('office_type', model.office_type),
+        ('office_name', model.office_name),
+        ('address_line1', model.address_line1),
+        ('address_line2', model.address_line2),
+        ('city', model.city),
+        ('state', model.state),
+        ('state_full_name', model.state_full_name),
+        ('zip_code', model.zip_code),
+        ('website_url1', model.website_url1),
+        ('website_url2', model.website_url2),
+        ('email', model.email),
+        ('primary_phone_number', model.primary_phone_number),
+        ('secondary_phone_number', model.secondary_phone_number),
+        ('fax_number', model.fax_number),
+        ('mailing_address1', model.mailing_address1),
+        ('mailing_address2', model.mailing_address2),
+        ('mailing_city', model.mailing_city),
+        ('mailing_state', model.mailing_state),
+        ('mailing_zipcode', model.mailing_zipcode),
+    ]
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.state_election_office_info,
+            args.make_multi_sort_args(
+                default=['-state']
+            ),
+        )
+
+    # @property
+    # def index_column(self):
+    #     return self.model.idx

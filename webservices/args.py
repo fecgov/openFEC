@@ -621,6 +621,10 @@ elections = {
     'election_full': election_full,
 }
 
+state_election_office_info = {
+    'state': IStr(description=docs.STATE),
+}
+
 schedule_a_candidate_aggregate = {
     'candidate_id': fields.List(IStr, required=True, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, required=True, description=docs.RECORD_CYCLE),
