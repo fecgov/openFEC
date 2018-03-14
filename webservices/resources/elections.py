@@ -317,29 +317,7 @@ def filter_candidate_totals(query, kwargs, totals_model):
 class StateElectionOfficeInfoView(ApiResource):
     model = models.StateElectionOfficeInfo
     schema = schemas.StateElectionOfficeInfoSchema
-    page_schema = schemas.StateElectionOfficeInfoPageSchema
-
-    filter_multi_fields = [
-        ('office_type', model.office_type),
-        ('office_name', model.office_name),
-        ('address_line1', model.address_line1),
-        ('address_line2', model.address_line2),
-        ('city', model.city),
-        ('state', model.state),
-        ('state_full_name', model.state_full_name),
-        ('zip_code', model.zip_code),
-        ('website_url1', model.website_url1),
-        ('website_url2', model.website_url2),
-        ('email', model.email),
-        ('primary_phone_number', model.primary_phone_number),
-        ('secondary_phone_number', model.secondary_phone_number),
-        ('fax_number', model.fax_number),
-        ('mailing_address1', model.mailing_address1),
-        ('mailing_address2', model.mailing_address2),
-        ('mailing_city', model.mailing_city),
-        ('mailing_state', model.mailing_state),
-        ('mailing_zipcode', model.mailing_zipcode),
-    ]
+    page_schema = schemas.StateElectionOfficeInfoPageSchema 
 
     @property
     def args(self):
@@ -349,9 +327,13 @@ class StateElectionOfficeInfoView(ApiResource):
             args.make_sort_args(
                 validator=args.IndexValidator(self.model, schema=models.StateElectionOfficeInfo.__table_args__.get('schema')),
             ),
-
         )
 
-    # @property
-    # def index_column(self):
-    #     return self.model.idx
+    @property
+    def index_column(self):
+        return self.model.state
+
+    filter_match_fields = [
+        ('state', models.StateElectionOfficeInfo.state),
+
+    ]

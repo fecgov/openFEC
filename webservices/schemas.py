@@ -1121,9 +1121,6 @@ register_schema(ElectionsListPageSchema)
 
 StateElectionOfficeInfoSchema = make_schema(
     models.StateElectionOfficeInfo,
-    fields={
-        'state': ma.fields.Str(),
-    },
 )
 
 StateElectionOfficeInfoPageSchema = make_page_schema(StateElectionOfficeInfoSchema)
