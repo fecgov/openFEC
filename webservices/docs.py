@@ -65,7 +65,7 @@ out contributor information in schedule_a.
 
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
 calls an hour. Each call is limited to 100 results per page. You can email questions, comments or
-a request to get a key for 120 calls per minute to[APIinfo@fec.gov](apiinfo@fec.gov). You can also
+a request to get a key for 120 calls per minute to[APIinfo@fec.gov](mailto:apiinfo@fec.gov). You can also
 ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data).
 API changes will also be added to this group in advance of the change.
 
