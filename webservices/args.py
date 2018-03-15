@@ -622,7 +622,7 @@ elections = {
 }
 
 state_election_office_info = {
-    'state': IStr(required=True, description=docs.STATE),
+    'state': IStr(required=True, description=docs.STATE_ELECTION_OFFICES_ADDRESS),
 }
 
 schedule_a_candidate_aggregate = {

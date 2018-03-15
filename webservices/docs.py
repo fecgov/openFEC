@@ -210,6 +210,11 @@ State laws and procedures govern elections for state or local offices as well as
 how candidates appear on election ballots.
 Contact the appropriate state election office for more information.
 '''
+STATE_ELECTION_OFFICES_ADDRESS = '''
+Enter a state (Ex: AK, TX, VA etc..) to find the local election offices contact
+information.
+
+'''
 
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
