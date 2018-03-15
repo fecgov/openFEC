@@ -50,15 +50,12 @@ def format_url(url):
     cleaned_url = re.sub('.api_key=.*?&', '', url_path)
 
     # Remove other special characters from the URL
-
     special_characters = [('&', '-'), ('=', '-'), ('?', ''),
         (':', ''), ('<', ''), ('>', ''), ('\\', ''), (',', ''),
         ('|', ''), ('*', '')]
-    cleaned_url = [cleaned_url.replace(x, y) for (x, y) in special_characters]
 
-    # for x, y in special_characters:
-    #     cleaned_url = cleaned_url.replace(x, y)
-
+    for x, y in special_characters:
+        cleaned_url = cleaned_url.replace(x, y)
     return cleaned_url
 
 def get_cached_request(cached_url):
