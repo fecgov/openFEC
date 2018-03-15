@@ -3,6 +3,7 @@ import boto3
 import logging
 import re
 import json
+import requests
 from webservices.env import env
 from boto.s3.key import Key
 
@@ -36,19 +37,32 @@ def get_s3_key(name):
     return key
 
 def get_json_data(response):
-    json_data = json.dumps(response.data.decode('utf-8'))
-    return json_data
+    python_str = json.dumps(response.data.decode('utf-8'))
+    return python_str
 
 def format_url(url):
     """
     remove the api_key and its value from the URL by using a regex
     """
-    #split the url  into parts and get only url  after /v1/
+    # Split the url into parts and get only url after /v1/
     parts = url.split('/v1/')
     url_path = parts[1]
-    url_without_api_key = re.sub(".api_key=.*?&", '', url_path.lower())
-    #remove special characters from the URL
-    replace_special_char1 = url_without_api_key.replace("&", "/")
-    replace_special_char2 = replace_special_char1.replace("?", "")
+    cleaned_url = re.sub('.api_key=.*?&', '', url_path)
 
-    return replace_special_char2
+    # Remove other special characters from the URL
+    special_characters = [('&', '-'), ('=', '-'), ('?', ''),
+        (':', ''), ('<', ''), ('>', ''), ('\\', ''), (',', ''),
+        ('|', ''), ('*', '')]
+
+    for x, y in special_characters:
+        cleaned_url = cleaned_url.replace(x, y)
+    return cleaned_url
+
+def get_cached_request(cached_url):
+    response = requests.get(cached_url)
+    python_obj = json.loads(response.json())
+    python_str = json.dumps(python_obj, sort_keys=True, indent=4)
+
+    if response.status_code == 200:
+        return python_str
+    return None
