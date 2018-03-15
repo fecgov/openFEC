@@ -249,5 +249,7 @@ class TestStateElectionOffices(ApiBaseTest):
             factories.StateElectionOfficesFactory(state='AK', office_type='STATE CAMPAIGN FINANCE'),
             factories.StateElectionOfficesFactory(state='WA', office_type='STATE CAMPAIGN FINANCE'),
         ]
-        results = self._results(api.url_for(StateElectionOfficeInfo, state='TX'))
-        self.assertEqual(results['count'], 1)
+        results = self._results(api.url_for(StateElectionOfficeInfoView, state='TX'))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['state'], 'TX')
