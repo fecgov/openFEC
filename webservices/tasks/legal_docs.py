@@ -21,7 +21,6 @@ RECENTLY_MODIFIED_MURS = """
     SELECT case_no, pg_date
     FROM fecmur.cases_with_parsed_case_serial_numbers
     WHERE pg_date >= NOW() - '1 day'::INTERVAL
-    AND case_type = 'MUR'
     ORDER BY case_serial
 """
 
