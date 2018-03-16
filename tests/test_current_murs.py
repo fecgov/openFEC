@@ -90,6 +90,7 @@ def test_parse_regulatory_citations(test_input, case_id, entity_id, expected):
 def test_parse_statutory_citations(test_input, case_id, entity_id, expected):
     assert parse_statutory_citations(test_input, case_id, entity_id) == expected
 
+
 class TestLoadCurrentMURs(BaseTestCase):
     @classmethod
     def setUpClass(cls):
@@ -339,7 +340,10 @@ class TestLoadCurrentMURs(BaseTestCase):
 
         gen = get_murs('2')
         assert(next(gen)) == expected_mur2
-        assert(next(gen)) == expected_mur3
+
+        # Make sure there are no more MURs generated
+        with self.assertRaises(StopIteration):
+            next(gen)
 
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(

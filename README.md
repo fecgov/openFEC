@@ -559,14 +559,14 @@ python manage.py index_regulations
 ```
 This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
 
-#### Loading advisory opinions
+#### Loading advisory opinions [beginning with FROM_AO_NO through newest AO]
 ```
 python manage.py load_advisory_opinions [-f FROM_AO_NO]
 ```
 
-#### Loading current MURs
+#### Loading current MURs [only one MUR_NO]]
 ```
-python manage.py load_current_murs [-f FROM_MUR_NO]
+python manage.py load_current_murs [-m MUR_NO]
 ```
 
 #### Loading archived MURs (This takes a very long time)
