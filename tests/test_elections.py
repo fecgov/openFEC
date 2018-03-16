@@ -1,13 +1,14 @@
 import datetime
 import functools
-
+from webservices import filters
 from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
 from webservices.rest import db, api
-from webservices.resources.elections import ElectionsListView, ElectionView, ElectionSummary
-
-
+from webservices.common import models
+from webservices.resources.elections import ElectionsListView, ElectionView, ElectionSummary, StateElectionOfficeInfoView
+from webservices.common.models.elections import StateElectionOfficeInfo
+from webservices.schemas import StateElectionOfficeInfoSchema
 class TestElectionSearch(ApiBaseTest):
 
     def setUp(self):
@@ -238,3 +239,17 @@ class TestElections(ApiBaseTest):
         self.assertEqual(results['count'], 1)
         self.assertEqual(results['receipts'], sum(each.receipts for each in totals))
         self.assertEqual(results['disbursements'], sum(each.disbursements for each in totals))
+
+class TestStateElectionOffices(ApiBaseTest):
+
+    def test_filter_match(self):
+        # Filter for a single string value
+        [
+            factories.StateElectionOfficesFactory(state='TX', office_type='STATE CAMPAIGN FINANCE'),
+            factories.StateElectionOfficesFactory(state='AK', office_type='STATE CAMPAIGN FINANCE'),
+            factories.StateElectionOfficesFactory(state='WA', office_type='STATE CAMPAIGN FINANCE'),
+        ]
+        results = self._results(api.url_for(StateElectionOfficeInfoView, state='TX'))
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['state'], 'TX')
