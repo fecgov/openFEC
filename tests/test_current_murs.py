@@ -338,12 +338,8 @@ class TestLoadCurrentMURs(BaseTestCase):
         assert(next(gen)) == expected_mur2
         assert(next(gen)) == expected_mur3
 
-        gen = get_murs('2')
-        assert(next(gen)) == expected_mur2
-
-        # Make sure there are no more MURs generated
-        with self.assertRaises(StopIteration):
-            next(gen)
+        actual_murs = [mur for mur in get_murs('2')]
+        assert actual_murs == [expected_mur2]
 
     def create_mur(self, case_id, case_no, name, subject_description):
         subject_id = self.connection.execute(
