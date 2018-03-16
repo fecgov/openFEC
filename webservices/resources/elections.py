@@ -326,7 +326,6 @@ class StateElectionOfficeInfoView(ApiResource):
             args.paging,
             args.state_election_office_info,
             args.make_sort_args(
-                validator=args.IndexValidator(self.model, schema=models.StateElectionOfficeInfo.__table_args__.get('schema')),
             ),
         )
 
