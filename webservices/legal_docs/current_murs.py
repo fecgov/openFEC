@@ -19,8 +19,17 @@ ALL_MURS = """
         name
     FROM fecmur.cases_with_parsed_case_serial_numbers
     WHERE case_type = 'MUR'
-        AND case_serial >= %s
     ORDER BY case_serial
+"""
+
+SINGLE_MUR = """
+    SELECT DISTINCT
+        case_id,
+        case_no,
+        name
+    FROM fecmur.cases_with_parsed_case_serial_numbers
+    WHERE case_type = 'MUR'
+        AND case_no = %s
 """
 
 MUR_SUBJECTS = """
@@ -102,16 +111,17 @@ DISPOSITION_DATA = """
 """
 
 COMMISSION_VOTES = """
-SELECT vote_date, action from fecmur.commission
-WHERE case_id = %s
-ORDER BY vote_date desc;
+    SELECT vote_date, action from fecmur.commission
+    WHERE case_id = %s
+    ORDER BY vote_date desc;
 """
 
 STATUTE_REGEX = re.compile(r'(?<!\(|\d)(?P<section>\d+([a-z](-1)?)?)')
 REGULATION_REGEX = re.compile(r'(?<!\()(?P<part>\d+)(\.(?P<section>\d+))?')
 MUR_NO_REGEX = re.compile(r'(?P<serial>\d+)')
 
-def load_current_murs(from_mur_no=None):
+
+def load_current_murs(mur_no=None):
     """
     Reads data for current MURs from a Postgres database, assembles a JSON document
     corresponding to the MUR and indexes this document in Elasticsearch in the index
@@ -119,49 +129,59 @@ def load_current_murs(from_mur_no=None):
     the MUR are uploaded to an S3 bucket under the _directory_ `legal/murs/current/`.
     """
     es = get_elasticsearch_connection()
-    logger.info("Loading current MURs")
+    logger.info("Loading current MUR(s)")
     mur_count = 0
-    for mur in get_murs(from_mur_no):
+    for mur in get_murs(mur_no):
         logger.info("Loading current MUR: %s", mur['no'])
         es.index('docs_index', 'murs', mur, id=mur['doc_id'])
         mur_count += 1
-    logger.info("%d current MURs loaded", mur_count)
+    logger.info("%d current MUR(s) loaded", mur_count)
 
 
-def get_murs(from_mur_no):
+def get_murs(mur_no=None):
+    """
+    Takes a specific MUR to load.
+    If none are specified, all MURs are reloaded
+    Unlike AOs, MURs are not published in sequential order.
+    """
+    if mur_no is None:
+        with db.engine.connect() as conn:
+            rs = conn.execute(ALL_MURS)
+            for row in rs:
+                yield get_single_mur(row['case_no'])
+    else:
+        yield get_single_mur(mur_no)
+
+
+def get_single_mur(mur_no):
     bucket = get_bucket()
     bucket_name = env.get_credential('bucket')
 
-    if from_mur_no is None:
-        start_mur_serial = 0
-    else:
-        start_mur_serial = int(MUR_NO_REGEX.match(from_mur_no).group('serial'))
-
     with db.engine.connect() as conn:
-        rs = conn.execute(ALL_MURS, start_mur_serial)
-        for row in rs:
-            case_id = row['case_id']
-            sort1, sort2 = get_sort_fields(row['case_no'])
-            mur = {
-                'doc_id': 'mur_%s' % row['case_no'],
-                'no': row['case_no'],
-                'name': row['name'],
-                'mur_type': 'current',
-                'sort1': sort1,
-                'sort2': sort2,
-            }
-            mur['subjects'] = get_subjects(case_id)
-            mur['election_cycles'] = get_election_cycles(case_id)
+        rs = conn.execute(SINGLE_MUR, mur_no)
+        row = rs.fetchone()
+        case_id = row['case_id']
+        sort1, sort2 = get_sort_fields(row['case_no'])
+        mur = {
+            'doc_id': 'mur_%s' % row['case_no'],
+            'no': row['case_no'],
+            'name': row['name'],
+            'mur_type': 'current',
+            'sort1': sort1,
+            'sort2': sort2,
+        }
+        mur['subjects'] = get_subjects(case_id)
+        mur['election_cycles'] = get_election_cycles(case_id)
 
-            participants = get_participants(case_id)
-            mur['participants'] = list(participants.values())
-            mur['respondents'] = get_sorted_respondents(mur['participants'])
-            mur['commission_votes'] = get_commission_votes(case_id)
-            mur['dispositions'] = get_dispositions(case_id)
-            mur['documents'] = get_documents(case_id, bucket, bucket_name)
-            mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
-            mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-            yield mur
+        participants = get_participants(case_id)
+        mur['participants'] = list(participants.values())
+        mur['respondents'] = get_sorted_respondents(mur['participants'])
+        mur['commission_votes'] = get_commission_votes(case_id)
+        mur['dispositions'] = get_dispositions(case_id)
+        mur['documents'] = get_documents(case_id, bucket, bucket_name)
+        mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
+        mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
+        return mur
 
 
 def get_election_cycles(case_id):
@@ -224,6 +244,7 @@ def get_sorted_respondents(participants):
     for role in SORTED_RESPONDENT_ROLES:
         respondents.extend(sorted([p['name'] for p in participants if p['role'] == role]))
     return respondents
+
 
 def get_subjects(case_id):
     subjects = []
@@ -358,6 +379,7 @@ def remove_reclassification_notes(statutory_citation):
     while PARENTHESIZED_FORMERLY_REGEX.search(cleaned_citation):
         cleaned_citation = remove_to_matching_parens(cleaned_citation)
     return cleaned_citation
+
 
 def get_sort_fields(case_no):
     match = MUR_NO_REGEX.match(case_no)
