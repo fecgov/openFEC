@@ -8,10 +8,13 @@ from webservices import utils
 from webservices import filters
 from webservices import schemas
 from webservices.utils import use_kwargs
+from webservices.common import models
+from webservices.common.views import ApiResource
 from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
     ElectionResult, ElectionsList, ZipsDistricts, ScheduleEByCandidate,
+    StateElectionOfficeInfo,
 )
 
 
@@ -306,3 +309,31 @@ def filter_candidate_totals(query, kwargs, totals_model):
         # CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
     ).distinct()
     return query
+
+
+@doc(
+    tags=['filer resources'],
+    description=docs.STATE_ELECTION_OFFICES,
+)
+class StateElectionOfficeInfoView(ApiResource):
+    model = models.StateElectionOfficeInfo
+    schema = schemas.StateElectionOfficeInfoSchema
+    page_schema = schemas.StateElectionOfficeInfoPageSchema 
+
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.state_election_office_info,
+            args.make_sort_args(
+            ),
+        )
+
+    @property
+    def index_column(self):
+        return self.model.state
+
+    filter_match_fields = [
+        ('state', models.StateElectionOfficeInfo.state),
+
+    ]

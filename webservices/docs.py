@@ -205,7 +205,16 @@ Since this endpoint reflects financial information, it will only have candidates
 financial reporting forms. Query the `/candidates` endpoint to see an up to date list of all the
 candidates that filed to run for a particular seat.
 '''
+STATE_ELECTION_OFFICES = '''
+State laws and procedures govern elections for state or local offices as well as
+how candidates appear on election ballots.
+Contact the appropriate state election office for more information.
+'''
+STATE_ELECTION_OFFICES_ADDRESS = '''
+Enter a state (Ex: AK, TX, VA etc..) to find the local election offices contact
+information.
 
+'''
 
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
