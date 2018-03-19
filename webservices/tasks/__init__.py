@@ -71,6 +71,7 @@ app.conf.update(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
         'webservices.tasks.legal_docs',
+        'webservices.tasks.cache_request',
     ),
     beat_schedule=schedule,
     task_acks_late=False

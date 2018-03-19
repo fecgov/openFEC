@@ -65,7 +65,7 @@ out contributor information in schedule_a.
 
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
 calls an hour. Each call is limited to 100 results per page. You can email questions, comments or
-a request to get a key for 120 calls per minute to[APIinfo@fec.gov](apiinfo@fec.gov). You can also
+a request to get a key for 120 calls per minute to[APIinfo@fec.gov](mailto:apiinfo@fec.gov). You can also
 ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data).
 API changes will also be added to this group in advance of the change.
 
@@ -77,7 +77,7 @@ A few restrictions limit the way you can use FEC data. For example, you can’t 
 lists for commercial purposes or to solicit donations.
 [Learn more here](https://transition.fec.gov/pages/brochures/saleuse.shtml).
 
-[View our source code](https://github.com/18F/openFEC). We welcome issues and pull requests!
+[View our source code](https://github.com/fecgov/openFEC). We welcome issues and pull requests!
 '''
 
 CANDIDATE_TAG = '''
@@ -205,7 +205,16 @@ Since this endpoint reflects financial information, it will only have candidates
 financial reporting forms. Query the `/candidates` endpoint to see an up to date list of all the
 candidates that filed to run for a particular seat.
 '''
+STATE_ELECTION_OFFICES = '''
+State laws and procedures govern elections for state or local offices as well as
+how candidates appear on election ballots.
+Contact the appropriate state election office for more information.
+'''
+STATE_ELECTION_OFFICES_ADDRESS = '''
+Enter a state (Ex: AK, TX, VA etc..) to find the local election offices contact
+information.
 
+'''
 
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
@@ -332,7 +341,7 @@ Line number with description
 
 Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
+This is [the sql function](https://github.com/fecgov/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
@@ -415,7 +424,7 @@ large result sets are approximate; you will want to page through the records unt
 
 SCHEDULE_B_BY_PURPOSE = '''
 Schedule B receipts aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
-Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/18F/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
+Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/fecgov/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
 '''
 
 SCHEDULE_C_TAG = '''
@@ -631,7 +640,7 @@ Presidential pre-primary report due dates are not shown on even years.
 Filers generally opt to file monthly rather than submit over 50 pre-primary election
 reports. All reporting deadlines are available at /reporting-dates/ for reference.
 
-This is [the sql function](https://github.com/18F/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
+This is [the sql function](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V40__omnibus_dates.sql)
 that creates the calendar.
 
 '''
@@ -1222,12 +1231,12 @@ MAX_FILTER = 'Filter for all amounts less than a value.'
 ENTITY_RECEIPTS_TOTLAS = '''
 Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
 ENTITY_DISBURSEMENTS_TOTLAS = '''
 Provides cumulative disbursement totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
-This is [the sql](https://github.com/18F/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
+This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.
 '''
 
 # Audit api
