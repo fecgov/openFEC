@@ -41,10 +41,14 @@ def refresh_aos(conn):
 
 
 def refresh_murs(conn):
+    logger.info('Checking for modified MURs')
     rs = conn.execute(RECENTLY_MODIFIED_MURS)
-    if rs:
+    if rs.returns_rows:
+        load_count = 0
         for row in rs:
-            logger.info("Current MUR found %s modified at %s", row["case_no"], row["pg_date"])
+            logger.info("Current MUR %s found modified at %s", row["case_no"], row["pg_date"])
             load_current_murs(row["case_no"])
+            load_count += 1
+        logger.info("Total of %d current MUR(s) loaded", load_count)
     else:
         logger.info("No modified current MURs found")
