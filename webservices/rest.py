@@ -167,7 +167,7 @@ def add_caching_headers(response):
     if max_age is not None:
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
-    if (cache_all_requests and status_code == 200):
+    if (cache_all_requests and status_code == 200 and '/v1/' in request.url):
         # convert the response content into a JSON object
         json_data = utils.get_json_data(response)
         # format the URL by removing the api_key and special characters
