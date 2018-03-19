@@ -20,9 +20,10 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
         },
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
-            'schedule': crontab(minute=[5, 20, 35, 50]),
+            'schedule': crontab(minute='*/5'),
         },
     }
+
 
 def redis_url():
     """
