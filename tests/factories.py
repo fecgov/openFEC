@@ -399,3 +399,9 @@ class AuditCaseFactory(BaseFactory):
     class Meta:
         model = models.AuditCase
     idx = factory.Sequence(lambda n: n)
+
+class StateElectionOfficesFactory(BaseFactory):
+    class Meta:
+        model = models.StateElectionOfficeInfo
+    state = 'VA'
+    office_type = 'STATE CAMPAIGN FINANCE'

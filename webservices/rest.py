@@ -67,6 +67,10 @@ from webservices.resources import audit
 from webservices.env import env
 from webservices.tasks import utils
 
+from webservices.tasks.response_exception import ResponseException
+from webservices.tasks.json_response import JsonResponse
+from webservices.tasks.error_code import ErrorCode
+from webservices.tasks import cache_request 
 from smart_open import smart_open
 
 app = Flask(__name__)
@@ -164,25 +168,47 @@ def add_caching_headers(response):
         response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
 
     if (cache_all_requests and status_code == 200):
-        try:
-            # convert the results to JSON
-            json_data = utils.get_json_data(response)
-            # format the URL by removing the api_key and special characters
-            formatted_url = utils.format_url(request.url)
-            # get s3 bucket env variables
-            s3_bucket = utils.get_bucket()
-            cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
-            s3_key = utils.get_s3_key(cached_url)
+        # convert the response content into a JSON object
+        json_data = utils.get_json_data(response)
+        # format the URL by removing the api_key and special characters
+        formatted_url = utils.format_url(request.url)
+        # call the celery task
+        cache_request.cache_all_requests.delay(json_data, formatted_url)
 
-            # upload the request_content.json file to s3 bucket
-            with smart_open(s3_key, 'wb') as cached_file:
-                cached_file.write(json_data)
-
-            logger.info('The following request has been cached and uploaded successfully :%s ', cached_url)
-        except:
-            logger.error('Cache Upload failed')
     return response
 
+
+@app.errorhandler(Exception)
+def handle_exception(exception):
+    wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
+
+    logger.info("In handle_exception(), received status code %s", wrapped.status)
+
+    if wrapped.status in [500, 502, 503, 504]:
+        formatted_url = utils.format_url(request.url)
+        # get s3 bucket env variables
+        s3_bucket = utils.get_bucket()
+        bucket_region = env.get_credential('region')
+        # create the URL to check if it already cached and saved on s3(call the format_utils)
+        # return cache response if exists
+        cached_url = "http://s3-{0}.amazonaws.com/{1}/cached-calls/{2}".format(
+            bucket_region, s3_bucket.name, formatted_url)
+
+        cached_data = utils.get_cached_request(cached_url)
+
+        if cached_data is not None:
+            return cached_data
+        else:
+            logger.error("Exception occured while retrieving the cached file from S3")
+            raise exceptions.ApiError(
+                'The requested URL is not found'.format(cached_url),
+                status_code=http.client.NOT_FOUND
+            )
+    else:
+        raise exceptions.ApiError(
+            'Could not process the request %s'.format(cached_url),
+            status_code=http.client.NOT_FOUND
+        )
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
@@ -235,6 +261,7 @@ api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionsListView, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
+api.add_resource(elections.StateElectionOfficeInfoView, '/state-election-office/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
@@ -370,6 +397,7 @@ apidoc.register(filings.FilingsList, blueprint='v1')
 apidoc.register(elections.ElectionsListView, blueprint='v1')
 apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
+apidoc.register(elections.StateElectionOfficeInfoView, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
