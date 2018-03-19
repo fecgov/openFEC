@@ -18,7 +18,6 @@ ALL_MURS = """
         case_no,
         name
     FROM fecmur.cases_with_parsed_case_serial_numbers
-    WHERE case_type = 'MUR'
     ORDER BY case_serial
 """
 
@@ -28,8 +27,7 @@ SINGLE_MUR = """
         case_no,
         name
     FROM fecmur.cases_with_parsed_case_serial_numbers
-    WHERE case_type = 'MUR'
-        AND case_no = %s
+    WHERE case_no = %s
 """
 
 MUR_SUBJECTS = """
