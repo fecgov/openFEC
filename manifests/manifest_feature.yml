@@ -1,9 +1,0 @@
----
-inherit: manifest_base.yml
-host: fec-feature-api
-services:
-  - fec-creds-feature
-  - fec-redis-feature
-  - fec-s3-feature
-env:
-  NEW_RELIC_ENV: feature
