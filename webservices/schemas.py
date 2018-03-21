@@ -390,6 +390,7 @@ augment_models(
 class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
         schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
     pass
+augment_schemas(CandidateHistoryTotalSchema)
 
 CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
 
