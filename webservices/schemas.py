@@ -372,14 +372,13 @@ make_candidate_schema = functools.partial(
     }
 )
 
-
 augment_models(
     make_candidate_schema,
     models.Candidate,
     models.CandidateDetail,
 
 )
-#built these schemas without make_candidate_schema, as it was filtering out the flags
+# built these schemas without make_candidate_schema, as it was filtering out the flags
 augment_models(
     make_schema,
     models.CandidateHistory,
@@ -387,13 +386,12 @@ augment_models(
     models.CandidateFlags
 
 )
+
+
 class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
         schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
     pass
 augment_schemas(CandidateHistoryTotalSchema)
-
-CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
-
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
