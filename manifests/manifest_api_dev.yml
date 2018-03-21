@@ -1,8 +1,22 @@
 ---
-inherit: manifest_dev.yml
+path: ../
+memory: 1G
+stack: cflinuxfs2
+buildpack: python_buildpack
 env:
-  NEW_RELIC_APP_NAME: fec | api | dev
   CACHE_ALL_REQUESTS: True
+  NEW_RELIC_APP_NAME: fec | api | dev
+  NEW_RELIC_CONFIG_FILE: /home/vcap/app/newrelic.ini
+  NEW_RELIC_ENV: development
+  NEW_RELIC_LOG: stdout
+  WEB_CONCURRENCY: 4
+services:
+  - fec-api-search
+  - fec-redis
+  - fec-creds-dev
+  - fec-s3-dev
+routes:
+  - route: fec-dev-api.app.cloud.gov
 applications:
   - name: api
     instances: 1
