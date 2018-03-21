@@ -107,8 +107,8 @@ class UniversalSearch(utils.Resource):
                 logger.info(e.args)
                 raise ApiError("Elasticsearch failed to execute query", 400)
             except:
-                logger.info("Unexpected Error")
-                raise ApiError("Unexpected Error", 400)
+                logger.info("Unexpected Server Error")
+                raise ApiError("Unexpected Server Error", 500)
             results[type_] = formatted_hits
             results['total_%s' % type_] = count
             total_count += count
