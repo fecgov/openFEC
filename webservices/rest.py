@@ -101,6 +101,8 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
     if follower.strip()
 ]
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
 # app.config['SQLALCHEMY_ECHO'] = True
 
 # Modify app configuration and logging level for production
