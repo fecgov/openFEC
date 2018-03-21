@@ -17,15 +17,16 @@ def parse_exclude_arg(arg):
     else:
         return arg[1:]
 
+
 def build_exclude_list(value_list):
-    if value_list:
-        exclude_list = [parse_exclude_arg(value) for value in value_list if is_exclude_arg(value)]
-        return exclude_list
+    exclude_list = [parse_exclude_arg(value) for value in value_list if is_exclude_arg(value)]
+    return exclude_list
+
 
 def build_include_list(value_list):
-    if value_list:
-        include_list = [value for value in value_list if not is_exclude_arg(value)]
-        return include_list
+    include_list = [value for value in value_list if not is_exclude_arg(value)]
+    return include_list
+
 
 def filter_match(query, kwargs, fields):
     for key, column in fields:
@@ -40,8 +41,8 @@ def filter_match(query, kwargs, fields):
 
 def filter_multi(query, kwargs, fields):
     for key, column in fields:
-        # if kwargs.get(key):
-        #     # handle combination exclude/include lists
+        if kwargs.get(key):
+            # handle combination exclude/include lists
             exclude_list = build_exclude_list(kwargs.get(key))
             include_list = build_include_list(kwargs.get(key))
             if exclude_list:
@@ -63,6 +64,7 @@ def filter_range(query, kwargs, fields):
 
 def filter_fulltext(query, kwargs, fields):
     for key, column in fields:
+        if kwargs.get(key):
             exclude_list = build_exclude_list(kwargs.get(key))
             include_list = build_include_list(kwargs.get(key))
             if exclude_list:
@@ -79,8 +81,10 @@ def filter_fulltext(query, kwargs, fields):
                 query = query.filter(sa.or_(*filters))
     return query
 
+
 def filter_multi_start_with(query, kwargs, fields):
     for key, column in fields:
+        if kwargs.get(key):
             exclude_list = build_exclude_list(kwargs.get(key))
             include_list = build_include_list(kwargs.get(key))
             if exclude_list:
@@ -96,6 +100,7 @@ def filter_multi_start_with(query, kwargs, fields):
                 ]
                 query = query.filter(sa.or_(*filters))
     return query
+
 
 def filter_contributor_type(query, column, kwargs):
     if kwargs.get('contributor_type') == ['individual']:
