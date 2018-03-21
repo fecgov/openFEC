@@ -85,7 +85,7 @@ class ScheduleAView(ItemizedResource):
             for value in kwargs['contributor_zip']:
                 if re.search('^\d{5}$', value ) is None:
                     raise exceptions.ApiError(
-                        'Zip code must be 5 digits ',
+                        'Invalid Zip code. It must be 5 digits',
                         status_code=400,
                     )
             query = filters.filter_multi_start_with(query, kwargs, self.filter_multi_start_with_fields)
