@@ -13,7 +13,6 @@ from webservices.schemas import ScheduleBSchema
 from webservices.resources.sched_a import ScheduleAView, ScheduleAEfileView
 from webservices.resources.sched_b import ScheduleBView, ScheduleBEfileView
 from webservices.resources.sched_e import ScheduleEView, ScheduleEEfileView
-from webservices import exceptions
 
 
 class TestItemized(ApiBaseTest):
@@ -120,6 +119,9 @@ class TestItemized(ApiBaseTest):
     
     def test_invalid_sched_a_zip(self): 
         response = self.app.get(api.url_for(ScheduleAView,contributor_zip=9678912,cycle=2018))
+        self.assertEqual(response.status_code,400)
+
+        response = self.app.get(api.url_for(ScheduleAView,contributor_zip='9678-',cycle=2018))
         self.assertEqual(response.status_code,400)
 
     def test_filter_multi_start_with(self):
