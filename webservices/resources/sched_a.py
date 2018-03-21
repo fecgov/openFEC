@@ -83,7 +83,7 @@ class ScheduleAView(ItemizedResource):
 
         if kwargs.get('contributor_zip'):
             for value in kwargs['contributor_zip']:
-                if re.search('^\d{5}$',value) is None AND re.search('^[-]\d{5}$',value) is None:
+                if re.search('^\d{5}$',value) is None and re.search('^[-]\d{5}$',value) is None:
                     raise exceptions.ApiError(
                         'Invalid Zip code. It must be 5 digits',
                         status_code=400,
