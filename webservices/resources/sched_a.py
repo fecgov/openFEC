@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 from flask_apispec import doc
+import re
 
 from webservices import args
 from webservices import docs
@@ -82,11 +83,11 @@ class ScheduleAView(ItemizedResource):
 
         if kwargs.get('contributor_zip'):
             for value in kwargs['contributor_zip']:
-                if len(value)!= 5:
+                if re.match('^\d{5}$', value ) is None:
                     raise exceptions.ApiError(
-                        'Zip code can only be 5 digits ',
+                        'Zip code must be 5 digits ',
                         status_code=400,
-            )
+                    )
             query = filters.filter_multi_start_with(query, kwargs, self.filter_multi_start_with_fields)
         
         if kwargs.get('sub_id'):
