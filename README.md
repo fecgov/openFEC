@@ -1,11 +1,11 @@
 **Develop**
-[![CircleCI](https://circleci.com/gh/18F/openFEC.svg?style=svg)](https://circleci.com/gh/18F/openFEC)
-[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/develop.svg)](https://codecov.io/github/18F/openFEC)
+[![CircleCI](https://circleci.com/gh/fecgov/openFEC.svg?style=svg)](https://circleci.com/gh/fecgov/openFEC)
+[![Test Coverage](https://img.shields.io/codecov/c/github/fecgov/openFEC/develop.svg)](https://codecov.io/github/fecgov/openFEC)
 
 **Master**
-[![Test Coverage](https://img.shields.io/codecov/c/github/18F/openFEC/master.svg)](https://codecov.io/github/18F/openFEC)
-[![Code Climate](https://img.shields.io/codeclimate/github/18F/openFEC.svg)](https://codeclimate.com/github/18F/openFEC)
-[![Dependencies](https://img.shields.io/gemnasium/18F/openFEC.svg)](https://gemnasium.com/18F/openFEC)
+[![Test Coverage](https://img.shields.io/codecov/c/github/fecgov/openFEC/master.svg)](https://codecov.io/github/fecgov/openFEC)
+[![Code Climate](https://img.shields.io/codeclimate/github/fecgov/openFEC.svg)](https://codeclimate.com/github/fecgov/openFEC)
+[![Dependencies](https://img.shields.io/gemnasium/fecgov/openFEC.svg)](https://gemnasium.com/fecgov/openFEC)
 
 
 ## About this project
@@ -13,29 +13,28 @@ The Federal Election Commission (FEC) releases information to the public about m
 
 Are you interested in seeing how much money a candidate raised? Or spent? How much debt they took on? Who contributed to their campaign? The FEC is the authoritative source for that information.
 
-The new FEC.gov is a collaboration between [18F](https://18f.gsa.gov) and the FEC. It aims to make campaign finance information more accessible (and understandable) to all users.
+The new FEC.gov aims to make campaign finance information more accessible (and understandable) to all users.
 
 
-## This repository, [openFEC](https://github.com/18F/openfec), is home to the FEC’s API
+## This repository, [openFEC](https://github.com/fecgov/openfec), is home to the FEC’s API
 All FEC repositories:
-- [FEC](https://github.com/18F/fec): a general discussion forum. We [compile feedback](https://github.com/18F/fec/issues) from the FEC.gov feedback widget here, and this is the best place to submit general feedback.
-- [openFEC](https://github.com/18F/openfec): the first RESTful API for the Federal Election Commission
-- [swagger-ui](https://github.com/18F/swagger-ui): forked repo that generates our interactive API documentation
-- [fec-cms](https://github.com/18F/fec-cms): this project's content management system (CMS)
-- [fec-proxy](https://github.com/18F/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
+- [FEC](https://github.com/fecgov/fec): a general discussion forum. We [compile feedback](https://github.com/fecgiv/fec/issues) from the FEC.gov feedback widget here, and this is the best place to submit general feedback.
+- [openFEC](https://github.com/fecgov/openfec): the first RESTful API for the Federal Election Commission
+- [fec-cms](https://github.com/fecgov/fec-cms): this project's content management system (CMS)
+- [fec-proxy](https://github.com/fecgov/fec-proxy): this is a lightweight app that coordinates the paths between the web app and CMS
 
 
 ## Get involved
 We welcome you to explore, make suggestions, and contribute to our code.
-- Read our [contributing guidelines](https://github.com/18F/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/18F/fec/issues) or submit a pull request.
-- If you'd rather send us an email, [we're thrilled to hear from you](mailto:betafeedback@fec.gov)!
+- Read our [contributing guidelines](https://github.com/fecgov/openfec/blob/master/CONTRIBUTING.md). Then, [file an issue](https://github.com/fecgov/fec/issues) or submit a pull request.
+- If you'd rather send us an email, [we're thrilled to hear from you](mailto:apiinfo@fec.gov)!
 - Follow our Set up instructions to run the apps on your computer.
 
 ---
 
 
 ## Set up
-We are always trying to improve our documentation. If you have suggestions or run into problems please [file an issue](https://github.com/18F/openFEC/issues)!
+We are always trying to improve our documentation. If you have suggestions or run into problems please [file an issue](https://github.com/fecgov/openFEC/issues)!
 
 ### Project prerequisites
 1. Ensure you have the following requirements installed:
@@ -134,7 +133,7 @@ python manage.py index_statutes
 
 #### Connecting to a RDS DB instance instead of local DB
 
-*Note: FEC and 18F members can set the SQL connection to one of the RDS boxes with:*
+*Note: FEC members can set the SQL connection to one of the RDS boxes with:*
 
 ```
 export SQLA_CONN=<psql:address-to-box>
@@ -168,7 +167,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
    export FEC_CMS_URL=http://localhost:8000
    ```
 
-   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-cms](https://github.com/18F/fec-cms/blob/develop/README.md).
+   These are the default URLs to the other local FEC applications. For complete set-up instructions, explore our documentation for [fec-cms](https://github.com/fecgov/fec-cms/blob/develop/README.md).
 
    *Note: If you modify your local environment to run these applications at a different address, be sure to update these environment variables to match.*
 
@@ -181,7 +180,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 
    Create these account credentials to gain full access to the application. You can set them to any username and password of your choosing.
 
-   *Note: 18F team members should not set these environment variables. 18F and FEC team members will also have additional environment variables to set up. Please reach out to a team member for detailed information.*
+   *Note: FEC team members will also have additional environment variables to set up. Please reach out to a team member for detailed information.*
 
 4. If you are using database replicas/mirrors you can also restrict connections to them to be asynchronous tasks only by running:
 
@@ -231,7 +230,7 @@ We are using a customized 2.x version of swagger-ui to display our API developer
 The base template for swagger-ui is located at `webservices/templates/swagger-ui.html`. The `{{ specs_url }}` template variable points to `http://localhost:5000/swagger` that is the swagger spec file for FEC specific model definitions and schema. Compiled and vendor assets are served from `static/swagger-ui/`.
 
 ### Custom Swagger setup and build
-The swagger-ui package is within the `swagger-ui` directory. The `hbs` folder contains handlebars templates with 18F customizations, as do the files contained in the `js` and `less` folders. However, the `js/swagger-client.js` is the base v2.1.32 swager-ui file.
+The swagger-ui package is within the `swagger-ui` directory. The `hbs` folder contains handlebars templates with customizations, as do the files contained in the `js` and `less` folders. However, the `js/swagger-client.js` is the base v2.1.32 swager-ui file.
 
 All these files are then built and compiled via the `npm run build` command that runs Gulp tasks. Any modification should be done in the files in `swagger-ui` that will then be compiled and served in the `static/swagger-ui/` folder.
 
@@ -253,7 +252,9 @@ py.test
 ```
 
 #### The test data subset
-If you add new tables to the data, you'll need to generate a new subset for testing. We use this nifty subsetting tool: [rdbms-subsetter](https://github.com/18F/rdbms-subsetter).
+If you add new tables to the data, you'll need to generate a new subset for testing.
+
+We have used this nifty subsetting tool: [rdbms-subsetter](https://github.com/18F/rdbms-subsetter). Though it may be easier to add some sample data manually.
 
 To build a new test subset, first delete and recreate the test database:
 
@@ -275,7 +276,7 @@ To update the version-controlled test subset after rebuilding, run:
 invoke dump postgresql://:@/cfdm_test data/subset.dump
 ```
 
-## Deployment (18F and FEC team only)
+## Deployment (FEC team only)
 
 ### Deployment prerequisites
 If you haven't used Cloud Foundry in other projects, you'll need to install the Cloud Foundry CLI and the autopilot plugin.
@@ -402,7 +403,7 @@ One other thing you may want to consider doing is adding explicit log statements
 *Note: We hope to have a better way of accomplishing this in the future.*
 
 ### SSH
-*Likely only useful for 18F FEC team members*
+*Likely only useful for FEC team members*
 
 You can SSH directly into the running app container to help troubleshoot or inspect things with the instance(s).  Run the following command:
 
@@ -455,13 +456,17 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 
     ```
     git flow hotfix finish my-hotfix
-    git checkout master
-    git push origin master --follow-tags
     git checkout develop
     git push origin develop
     ```
 
-* `develop` is deployed to `dev`
+* `develop` is deployed to `dev`. Make sure the build passes before deploying to `master`.
+
+    ```
+    git checkout master
+    git push origin master --follow-tags
+    ```
+
 * `master` is deployed to `prod`
 
 ### Creating a release
@@ -554,14 +559,14 @@ python manage.py index_regulations
 ```
 This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
 
-#### Loading advisory opinions
+#### Loading advisory opinions [beginning with FROM_AO_NO through newest AO]
 ```
 python manage.py load_advisory_opinions [-f FROM_AO_NO]
 ```
 
-#### Loading current MURs
+#### Loading current MURs [only one MUR_NO]]
 ```
-python manage.py load_current_murs [-f FROM_MUR_NO]
+python manage.py load_current_murs [-m MUR_NO]
 ```
 
 #### Loading archived MURs (This takes a very long time)
