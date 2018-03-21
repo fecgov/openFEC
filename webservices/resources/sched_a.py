@@ -9,6 +9,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+from webservices import exceptions
 
 
 @doc(
@@ -80,7 +81,12 @@ class ScheduleAView(ItemizedResource):
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
 
         if kwargs.get('contributor_zip'):
-            kwargs['contributor_zip'] = [value[:5] for value in kwargs['contributor_zip']]
+            for value in kwargs['contributor_zip']:
+                if len(value)!= 5:
+                    raise exceptions.ApiError(
+                        'Zip code can only be 5 digits ',
+                        status_code=400,
+            )
             query = filters.filter_multi_start_with(query, kwargs, self.filter_multi_start_with_fields)
         
         if kwargs.get('sub_id'):
