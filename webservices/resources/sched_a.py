@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 from flask_apispec import doc
+import re
 
 from webservices import args
 from webservices import docs
@@ -9,6 +10,7 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+from webservices import exceptions
 
 
 @doc(
@@ -36,7 +38,6 @@ class ScheduleAView(ItemizedResource):
         ('contributor_id', models.ScheduleA.contributor_id),
         ('contributor_city', models.ScheduleA.contributor_city),
         ('contributor_state', models.ScheduleA.contributor_state),
-        ('contributor_zip', models.ScheduleA.contributor_zip)
     ]
     filter_match_fields = [
         ('is_individual', models.ScheduleA.is_individual),
@@ -51,6 +52,9 @@ class ScheduleAView(ItemizedResource):
         ('contributor_name', models.ScheduleA.contributor_name_text),
         ('contributor_employer', models.ScheduleA.contributor_employer_text),
         ('contributor_occupation', models.ScheduleA.contributor_occupation_text),
+    ]
+    filter_multi_start_with_fields = [
+        ('contributor_zip', models.ScheduleA.contributor_zip),
     ]
     query_options = [
         sa.orm.joinedload(models.ScheduleA.committee),
@@ -76,6 +80,16 @@ class ScheduleAView(ItemizedResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
+
+        if kwargs.get('contributor_zip'):
+            for value in kwargs['contributor_zip']:
+                if re.search('^-?\d{5}$',value) is None:
+                    raise exceptions.ApiError(
+                        'Invalid Zip code. It must be 5 digits',
+                        status_code=400,
+                    )
+            query = filters.filter_multi_start_with(query, kwargs, self.filter_multi_start_with_fields)
+        
         if kwargs.get('sub_id'):
             query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):

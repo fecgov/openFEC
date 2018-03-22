@@ -1,3 +1,4 @@
+
 import datetime
 
 import sqlalchemy as sa
@@ -106,15 +107,30 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['contributor_state'], 'CA')
 
-    def test_filter_zip(self):
+    def test_filter_sched_a_zip(self):
         [
             factories.ScheduleAFactory(contributor_zip=96789),
-            factories.ScheduleAFactory(contributor_zip=66111)
+            factories.ScheduleAFactory(contributor_zip=9678912),
+            factories.ScheduleAFactory(contributor_zip=967891234)
         ]
 
         results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]['contributor_zip'], '96789')
+        self.assertEqual(len(results), 3)
+    
+    def test_invalid_sched_a_zip(self): 
+        response = self.app.get(api.url_for(ScheduleAView,contributor_zip=9678912,cycle=2018))
+        self.assertEqual(response.status_code,400)
+
+        response = self.app.get(api.url_for(ScheduleAView,contributor_zip='9678-',cycle=2018))
+        self.assertEqual(response.status_code,400)
+
+    def test_filter_multi_start_with(self):
+        [
+            factories.ScheduleAFactory(contributor_zip=1296789)
+        ]
+
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
+        self.assertEqual(len(results), 0)
 
     def test_filter_case_insensitive(self):
         [
