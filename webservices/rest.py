@@ -260,7 +260,7 @@ def handle_exception(exception):
             )
     else:
         raise exceptions.ApiError(
-            'Could not process the request %s'.format(cached_url),
+            'Could not process the request.',
             status_code=http.client.NOT_FOUND
         )
 
