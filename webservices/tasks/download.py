@@ -147,5 +147,5 @@ def export_query(path, qs):
 def clear_bucket():
     permanent_dir = ('legal', 'bulk-downloads', 'cached-calls')
     for obj in task_utils.get_bucket().objects.all():
-        if obj.key.startswith(permanent_dir):
+        if not obj.key.startswith(permanent_dir):
             obj.delete()
