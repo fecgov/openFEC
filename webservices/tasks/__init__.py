@@ -22,6 +22,10 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'task': 'webservices.tasks.legal_docs.refresh',
             'schedule': crontab(minute='*/5'),
         },
+        'delete_cached_call_folder': {
+            'task': 'webservices.tasks.cache_request.delete_cached_calls_folder',
+            'schedule': crontab(minute=0, hour=10),
+        },
     }
 
 

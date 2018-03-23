@@ -185,6 +185,7 @@ def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
 
     logger.info("In handle_exception(), received status code %s", wrapped.status)
+    logger.info("Retrieving the cached request from S3... %s")
 
     if wrapped.status in [500, 502, 503, 504]:
         formatted_url = utils.format_url(request.url)
@@ -199,6 +200,7 @@ def handle_exception(exception):
         cached_data = utils.get_cached_request(cached_url)
 
         if cached_data is not None:
+            logger.info("Successfully retrieved cached request from S3 %s")
             return cached_data
         else:
             logger.error("Exception occured while retrieving the cached file from S3")
