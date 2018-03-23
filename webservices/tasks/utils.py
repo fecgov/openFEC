@@ -37,6 +37,7 @@ def get_s3_key(name):
     return key
 
 def get_json_data(response):
+    # convert the response bytes data to a string 
     python_str = json.dumps(response.data.decode('utf-8'))
     return python_str
 
