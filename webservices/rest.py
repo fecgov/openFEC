@@ -105,6 +105,8 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
     if follower.strip()
 ]
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
 # app.config['SQLALCHEMY_ECHO'] = True
 
 # Modify app configuration and logging level for production
@@ -164,7 +166,8 @@ FEC_API_ENDPOINT_ERROR_STATUS_CODES = [500, 502, 503, 504]
 
 
 def is_cacheable_endpoint(status_code, url_path):
-    """Checks to see if a request path is one that we allow caching of.
+    """
+    Checks to see if a request path is one that we allow caching of.
     """
     # Check to see if the URL path matches any of the patterns in the blacklist
     # and if it does, immediately return False as it is not an endpoint we want
@@ -225,13 +228,18 @@ def handle_exception(exception):
     )
 
     if app.config['CACHE_ALL_REQUESTS'] and wrapped.status in FEC_API_ENDPOINT_ERROR_STATUS_CODES:
+        logger.info('Attempting to retrieving the cached request from S3...')
+
         # Retrieve the information needed to construct a URL for the S3 bucket
         # where the cached API responses live.
         formatted_url = utils.format_url(request.url)
         s3_bucket = utils.get_bucket()
         bucket_region = env.get_credential('region')
         cached_url = "http://s3-{0}.amazonaws.com/{1}/cached-calls/{2}".format(
-            bucket_region, s3_bucket.name, formatted_url)
+            bucket_region,
+            s3_bucket.name,
+            formatted_url
+        )
 
         # Attempt to retrieve the cached data from S3.
         cached_data = utils.get_cached_request(cached_url)
@@ -239,6 +247,7 @@ def handle_exception(exception):
         # If the cached data was returned, we can return that to the client.
         # Otherwise, log the error and raise an API error.
         if cached_data is not None:
+            logger.info('Successfully retrieved cached request from S3.')
             return cached_data
         else:
             logger.error(
