@@ -214,6 +214,7 @@ def add_caching_headers(response):
         json_data = utils.get_json_data(response)
         formatted_url = utils.format_url(request.url)
 
+        logger.info('Attempting to cache request at: {}'.format(request.url))
         cache_request.cache_all_requests.delay(json_data, formatted_url)
 
     return response
