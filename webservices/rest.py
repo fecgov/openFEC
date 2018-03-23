@@ -14,11 +14,14 @@ def initialize_newrelic():
 
 initialize_newrelic()
 
-import os
 import http
-import logging
 import json
+import logging
+import os
+import re
+
 import boto
+import sqlalchemy as sa
 
 from flask import abort
 from flask import request
@@ -33,10 +36,11 @@ import flask_cors as cors
 import flask_restful as restful
 
 from werkzeug.contrib.fixers import ProxyFix
-import sqlalchemy as sa
 
 from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
+
+from smart_open import smart_open
 
 from webservices import spec
 from webservices import exceptions
@@ -70,8 +74,8 @@ from webservices.tasks import utils
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.json_response import JsonResponse
 from webservices.tasks.error_code import ErrorCode
-from webservices.tasks import cache_request 
-from smart_open import smart_open
+from webservices.tasks import cache_request
+
 
 app = Flask(__name__)
 logger = logging.getLogger('rest.py')
@@ -120,6 +124,11 @@ class FlaskRestParser(FlaskParser):
 
 parser = FlaskRestParser()
 app.config['APISPEC_WEBARGS_PARSER'] = parser
+app.config['CACHE_ALL_REQUESTS'] = env.get_credential(
+    'CACHE_ALL_REQUESTS',
+    False
+)
+app.config['MAX_CACHE_AGE'] = env.get_credential('FEC_CACHE_AGE')
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)
@@ -141,6 +150,36 @@ def handle_error(error):
 trusted_proxies = ('54.208.160.112', '54.208.160.151')
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 
+# A blacklist of endpoint patterns to match against to see if an API URL should
+# be cached or not by saving a successful response to S3 for later use in the
+# event of an error or system outage.
+FEC_API_ENDPOINT_CACHE_BLACKLIST = [
+    re.compile('^(?!/v1/).*$'),       # Checks for any non-endpoint URL
+    re.compile('^/v1/downloads/.*$')  # Checks for any download endpoint
+]
+
+# A list of status codes that we should explicitly account for in any custom
+# error handling, e.g., returning a cached response.
+FEC_API_ENDPOINT_ERROR_STATUS_CODES = [500, 502, 503, 504]
+
+
+def is_cacheable_endpoint(status_code, url_path):
+    """Checks to see if a request path is one that we allow caching of.
+    """
+    # Check to see if the URL path matches any of the patterns in the blacklist
+    # and if it does, immediately return False as it is not an endpoint we want
+    # to cache.
+    url_path_not_cacheable = any([
+        x.match(url_path) is not None for x in FEC_API_ENDPOINT_CACHE_BLACKLIST
+    ])
+
+    if url_path_not_cacheable:
+        return False
+
+    # If the URL path is cacheable, check to make sure the caching is enabled
+    # and that the status code is 200.
+    return app.config['CACHE_ALL_REQUESTS'] and status_code == 200
+
 
 @app.before_request
 def limit_remote_addr():
@@ -160,19 +199,18 @@ def limit_remote_addr():
 
 @app.after_request
 def add_caching_headers(response):
-    max_age = env.get_credential('FEC_CACHE_AGE')
-    cache_all_requests = env.get_credential('CACHE_ALL_REQUESTS', False)
-    status_code = response.status_code
+    if app.config['MAX_CACHE_AGE'] is not None:
+        response.headers.add(
+            'Cache-Control',
+            'public, max-age={}'.format(app.config['MAX_CACHE_AGE'])
+        )
 
-    if max_age is not None:
-        response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
-
-    if (cache_all_requests and status_code == 200 and '/v1/' in request.url):
-        # convert the response content into a JSON object
+    if (is_cacheable_endpoint(response.status_code, request.path)):
+        # Convert the response content into a JSON object and format the URL by
+        # removing the api_key parameter and other special characters.
         json_data = utils.get_json_data(response)
-        # format the URL by removing the api_key and special characters
         formatted_url = utils.format_url(request.url)
-        # call the celery task
+
         cache_request.cache_all_requests.delay(json_data, formatted_url)
 
     return response
@@ -182,24 +220,30 @@ def add_caching_headers(response):
 def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
 
-    logger.info("In handle_exception(), received status code %s", wrapped.status)
+    logger.info(
+        'An API error occurred with the status code of {}.'.format(wrapped.status)
+    )
 
-    if wrapped.status in [500, 502, 503, 504]:
+    if app.config['CACHE_ALL_REQUESTS'] and wrapped.status in FEC_API_ENDPOINT_ERROR_STATUS_CODES:
+        # Retrieve the information needed to construct a URL for the S3 bucket
+        # where the cached API responses live.
         formatted_url = utils.format_url(request.url)
-        # get s3 bucket env variables
         s3_bucket = utils.get_bucket()
         bucket_region = env.get_credential('region')
-        # create the URL to check if it already cached and saved on s3(call the format_utils)
-        # return cache response if exists
         cached_url = "http://s3-{0}.amazonaws.com/{1}/cached-calls/{2}".format(
             bucket_region, s3_bucket.name, formatted_url)
 
+        # Attempt to retrieve the cached data from S3.
         cached_data = utils.get_cached_request(cached_url)
 
+        # If the cached data was returned, we can return that to the client.
+        # Otherwise, log the error and raise an API error.
         if cached_data is not None:
             return cached_data
         else:
-            logger.error("Exception occured while retrieving the cached file from S3")
+            logger.error(
+                'An error occured while retrieving the cached file from S3.'
+            )
             raise exceptions.ApiError(
                 'The requested URL is not found'.format(cached_url),
                 status_code=http.client.NOT_FOUND
