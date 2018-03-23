@@ -45,7 +45,7 @@ manager.command(legal_docs.delete_docs_index)
 manager.command(legal_docs.move_archived_murs)
 manager.command(legal_docs.initialize_current_legal_docs)
 manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
-manager.command(cache_request.delete_cache_calls_from_s3)
+manager.command(cache_request.delete_cached_calls_from_s3)
 
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
