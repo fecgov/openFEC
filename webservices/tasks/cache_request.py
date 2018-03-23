@@ -23,4 +23,6 @@ def cache_all_requests(json_data, formatted_url):
             )
         )
     except Exception as e:
-        logger.error('Exception occured while uploading the cache request to S3.%s', e)
+        logger.error(
+            'An exception occured while uploading the cached request to S3: {}'.format(e)
+        )
