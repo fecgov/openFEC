@@ -28,6 +28,7 @@ def cache_all_requests(json_data, formatted_url):
     except Exception as e:
         logger.error('Exception occured while uploading the cache request to S3.%s', e)
 
+@app.task
 def delete_cached_calls_from_s3():
     """
     Deletes all files and folders under cached-calls from S3
