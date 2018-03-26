@@ -155,7 +155,7 @@ FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 # be cached or not by saving a successful response to S3 for later use in the
 # event of an error or system outage.
 FEC_API_ENDPOINT_CACHE_BLACKLIST = [
-    re.compile('^(?!/v1/).*$'),       # Checks for any non-endpoint URL
+    re.compile('^(?!/v1/).*$'),      # Checks for any non-endpoint URL
     re.compile('^/v1/download/.*$')  # Checks for any download endpoint
 ]
 
