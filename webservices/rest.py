@@ -156,7 +156,7 @@ FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 # event of an error or system outage.
 FEC_API_ENDPOINT_CACHE_BLACKLIST = [
     re.compile('^(?!/v1/).*$'),       # Checks for any non-endpoint URL
-    re.compile('^/v1/downloads/.*$')  # Checks for any download endpoint
+    re.compile('^/v1/download/.*$')  # Checks for any download endpoint
 ]
 
 # A list of status codes that we should explicitly account for in any custom
