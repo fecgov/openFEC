@@ -998,8 +998,8 @@ register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 
 
 # endpoint audit-primary-category
-PrimaryCategorySchema = make_schema(
-    models.PrimaryCategory,
+AuditPrimaryCategorySchema = make_schema(
+    models.AuditPrimaryCategory,
     fields={
         'primary_category_id': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
@@ -1010,13 +1010,13 @@ PrimaryCategorySchema = make_schema(
     }
 )
 
-PrimaryCategoryPageSchema = make_page_schema(PrimaryCategorySchema)
-register_schema(PrimaryCategorySchema)
-register_schema(PrimaryCategoryPageSchema)
+AuditPrimaryCategoryPageSchema = make_page_schema(AuditPrimaryCategorySchema)
+register_schema(AuditPrimaryCategorySchema)
+register_schema(AuditPrimaryCategoryPageSchema)
 
 # endpoint audit-category(with nested sub category)
-CategoryRelationSchema = make_schema(
-    models.CategoryRelation,
+AuditCategoryRelationSchema = make_schema(
+    models.AuditCategoryRelation,
     fields={
         'primary_category_id': ma.fields.Str(),
         'sub_category_id': ma.fields.Str(),
@@ -1028,25 +1028,25 @@ CategoryRelationSchema = make_schema(
     }
 )
 
-CategoryRelationPageSchema = make_page_schema(CategoryRelationSchema)
-register_schema(CategoryRelationSchema)
-register_schema(CategoryRelationPageSchema)
+AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
+register_schema(AuditCategoryRelationSchema)
+register_schema(AuditCategoryRelationPageSchema)
 
 # endpoint audit-category
-CategorySchema = make_schema(
-    models.Category,
+AuditCategorySchema = make_schema(
+    models.AuditCategory,
     fields={
         'primary_category_id': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
         'tier': ma.fields.Int(),
-        'sub_category_list': ma.fields.Nested(CategoryRelationSchema, many=True),
+        'sub_category_list': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
     },
     options={
         'exclude': ('tier',)
         # 'relationships': [
         #     Relationship(
-        #         models.Category.sub_category_list,
-        #         models.CategoryRelation.primary_category_id,
+        #         models.AuditCategory.sub_category_list,
+        #         models.AuditCategoryRelation.primary_category_id,
         #         'primary_category_id',
         #         1
         #     ),
@@ -1054,9 +1054,9 @@ CategorySchema = make_schema(
     }
 )
 
-CategoryPageSchema = make_page_schema(CategorySchema)
-register_schema(CategorySchema)
-register_schema(CategoryPageSchema)
+AuditCategoryPageSchema = make_page_schema(AuditCategorySchema)
+register_schema(AuditCategorySchema)
+register_schema(AuditCategoryPageSchema)
 
 
 # endpoint audit-case
@@ -1083,8 +1083,8 @@ register_schema(AuditCaseSubCategoryPageSchema)
 
 
 # endpoint audit-case(with nested sub_category)
-AuditCategoryRelationSchema = make_schema(
-    models.AuditCategoryRelation,
+AuditCaseCategoryRelationSchema = make_schema(
+    models.AuditCaseCategoryRelation,
     fields={
         'audit_case_id': ma.fields.Str(),
         'primary_category_id': ma.fields.Str(),
@@ -1097,9 +1097,9 @@ AuditCategoryRelationSchema = make_schema(
         )}
 )
 
-AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
-register_schema(AuditCategoryRelationSchema)
-register_schema(AuditCategoryRelationPageSchema)
+AuditCaseCategoryRelationPageSchema = make_page_schema(AuditCaseCategoryRelationSchema)
+register_schema(AuditCaseCategoryRelationSchema)
+register_schema(AuditCaseCategoryRelationPageSchema)
 
 # endpoint audit-case(with nested primary category)
 AuditCaseSchema = make_schema(
@@ -1117,7 +1117,7 @@ AuditCaseSchema = make_schema(
         'audit_id': ma.fields.Integer(),
         'candidate_id': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
-        'primary_category_list': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
+        'primary_category_list': ma.fields.Nested(AuditCaseCategoryRelationSchema, many=True),
     },
     options={
         'exclude': (
