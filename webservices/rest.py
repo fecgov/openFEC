@@ -126,9 +126,8 @@ class FlaskRestParser(FlaskParser):
 
 parser = FlaskRestParser()
 app.config['APISPEC_WEBARGS_PARSER'] = parser
-app.config['CACHE_ALL_REQUESTS'] = env.get_credential(
-    'CACHE_ALL_REQUESTS',
-    False
+app.config['CACHE_ALL_REQUESTS'] = bool(
+    env.get_credential('CACHE_ALL_REQUESTS', False)
 )
 app.config['MAX_CACHE_AGE'] = env.get_credential('FEC_CACHE_AGE')
 
@@ -165,23 +164,35 @@ FEC_API_ENDPOINT_CACHE_BLACKLIST = [
 FEC_API_ENDPOINT_ERROR_STATUS_CODES = [500, 502, 503, 504]
 
 
+# Anonymous function to check to see if a URL path matches any of the patterns
+# in the API endpoint blacklist; if there's a match, return False, else return
+# True.
+is_url_path_cacheable = lambda url_path: not any([
+    x.match(url_path) is not None for x in FEC_API_ENDPOINT_CACHE_BLACKLIST
+])
+
+
 def is_cacheable_endpoint(status_code, url_path):
     """
-    Checks to see if a request path is one that we allow caching of.
+    Checks to see if a URL path is one that we allow caching of.
     """
-    # Check to see if the URL path matches any of the patterns in the blacklist
-    # and if it does, immediately return False as it is not an endpoint we want
-    # to cache.
-    url_path_not_cacheable = any([
-        x.match(url_path) is not None for x in FEC_API_ENDPOINT_CACHE_BLACKLIST
-    ])
+    if is_url_path_cacheable(url_path):
+        # If the URL path is cacheable, check to make sure the caching is
+        # enabled and that the status code is 200.
+        return app.config['CACHE_ALL_REQUESTS'] and status_code == 200
 
-    if url_path_not_cacheable:
-        return False
+    return False
 
-    # If the URL path is cacheable, check to make sure the caching is enabled
-    # and that the status code is 200.
-    return app.config['CACHE_ALL_REQUESTS'] and status_code == 200
+
+def is_retrievable_from_cache(status_code, url_path):
+    """
+    Checks to see if a URL path is one that we can retrieve from the cache in
+    the event of an error or service disruption.
+    """
+    if is_url_path_cacheable(url_path):
+        return app.config['CACHE_ALL_REQUESTS'] and status_code in FEC_API_ENDPOINT_ERROR_STATUS_CODES
+
+    return False
 
 
 @app.before_request
@@ -228,7 +239,7 @@ def handle_exception(exception):
         'An API error occurred with the status code of {}.'.format(wrapped.status)
     )
 
-    if app.config['CACHE_ALL_REQUESTS'] and wrapped.status in FEC_API_ENDPOINT_ERROR_STATUS_CODES:
+    if is_retrievable_from_cache(wrapped.status, request.path):
         logger.info('Attempting to retrieving the cached request from S3...')
 
         # Retrieve the information needed to construct a URL for the S3 bucket
@@ -255,12 +266,12 @@ def handle_exception(exception):
                 'An error occured while retrieving the cached file from S3.'
             )
             raise exceptions.ApiError(
-                'The requested URL is not found'.format(cached_url),
+                'The requested URL could not be found.'.format(request.url),
                 status_code=http.client.NOT_FOUND
             )
     else:
         raise exceptions.ApiError(
-            'Could not process the request.',
+            'The requested URL could not be found.'.format(request.url),
             status_code=http.client.NOT_FOUND
         )
 
