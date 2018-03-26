@@ -733,21 +733,20 @@ schedule_a_by_state_recipient_totals = {
 
 
 # endpoint audit-primary-category
-PrimaryCategory = {
+auditPrimaryCategory = {
     'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
-    # 'tier': fields.List(fields.Int, description=docs.AUDIT_TIER),
 }
 
 
 # endpoint audit-category
-Category = {
+auditCategory = {
     'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
 }
 
 # endpoint audit-case
-AuditCase = {
+auditCase = {
     'primary_category_id': fields.List(fields.Str(), missing='all', description=docs.PRIMARY_CATEGORY_ID),
     'sub_category_id': fields.List(fields.Str(), missing='all', description=docs.SUB_CATEGORY_ID),
     'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
