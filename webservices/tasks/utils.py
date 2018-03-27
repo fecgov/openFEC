@@ -15,11 +15,7 @@ def get_app():
     return app
 
 def get_bucket():
-    session = boto3.Session(
-        aws_access_key_id=env.get_credential('access_key_id'),
-        aws_secret_access_key=env.get_credential('secret_access_key'),
-        region_name=env.get_credential('region')
-    )
+    session = boto3.Session()
     s3 = session.resource('s3')
     return s3.Bucket(env.get_credential('bucket'))
 
@@ -29,8 +25,6 @@ def get_object(key):
 def get_s3_key(name):
     connection = boto.s3.connect_to_region(
         env.get_credential('region'),
-        aws_access_key_id=env.get_credential('access_key_id'),
-        aws_secret_access_key=env.get_credential('secret_access_key'),
     )
     bucket = connection.get_bucket(env.get_credential('bucket'))
     key = Key(bucket=bucket, name=name)
