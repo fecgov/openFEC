@@ -10,6 +10,10 @@ select
     now() as pg_date
 from fec_fitem_sched_e_vw;
 
+ALTER TABLE public.ofec_sched_e_tmp
+  OWNER TO fec;
+GRANT SELECT ON TABLE public.ofec_sched_e_tmp TO fec_read;
+
 -- Add in records from the Schedule E notices view
 insert into ofec_sched_e_tmp
 select *,
