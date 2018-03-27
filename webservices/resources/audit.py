@@ -17,10 +17,10 @@ from webservices.utils import use_kwargs
     tags=['audit'],
     description=docs.AUDIT_PRIMARY_CATEGORY,
 )
-class PrimaryCategory(ApiResource):
-    model = models.PrimaryCategory
-    schema = schemas.PrimaryCategorySchema
-    page_schema = schemas.PrimaryCategoryPageSchema
+class AuditPrimaryCategoryView(ApiResource):
+    model = models.AuditPrimaryCategory
+    schema = schemas.AuditPrimaryCategorySchema
+    page_schema = schemas.AuditPrimaryCategoryPageSchema
 
     filter_multi_fields = [
         ('primary_category_id', model.primary_category_id),
@@ -34,7 +34,7 @@ class PrimaryCategory(ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            args.PrimaryCategory,
+            args.auditPrimaryCategory,
             args.make_sort_args(
                 default='primary_category_name',
             ),
@@ -50,10 +50,10 @@ class PrimaryCategory(ApiResource):
     tags=['audit'],
     description=docs.AUDIT_CATEGORY,
 )
-class Category(ApiResource):
-    model = models.Category
-    schema = schemas.CategorySchema
-    page_schema = schemas.CategoryPageSchema
+class AuditCategoryView(ApiResource):
+    model = models.AuditCategory
+    schema = schemas.AuditCategorySchema
+    page_schema = schemas.AuditCategoryPageSchema
 
     filter_multi_fields = [
         ('primary_category_id', model.primary_category_id),
@@ -63,14 +63,14 @@ class Category(ApiResource):
         ('primary_category_name', model.primary_category_name),
     ]
     query_options = [
-        sa.orm.joinedload(models.Category.sub_category_list),
+        sa.orm.joinedload(models.AuditCategory.sub_category_list),
     ]
 
     @property
     def args(self):
         return utils.extend(
             args.paging,
-            args.Category,
+            args.auditCategory,
             args.make_sort_args(
                 default='primary_category_name',
             ),
@@ -119,7 +119,7 @@ class AuditCaseView(ApiResource):
     def args(self):
         return utils.extend(
             args.paging,
-            args.AuditCase,
+            args.auditCase,
             args.make_multi_sort_args(
                 default=['-cycle', 'committee_name', ]
             ),

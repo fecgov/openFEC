@@ -11,7 +11,7 @@ class AuditBase(object):
 
 
 # endpoint: audit-primary-category
-class PrimaryCategory(AuditBase, db.Model):
+class AuditPrimaryCategory(AuditBase, db.Model):
     __tablename__ = 'finding_vw'
 
     primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -20,7 +20,7 @@ class PrimaryCategory(AuditBase, db.Model):
 
 
 # endpoint: audit-category
-class CategoryRelation(AuditBase, db.Model):
+class AuditCategoryRelation(AuditBase, db.Model):
     __tablename__ = 'finding_rel_vw'
 
     primary_category_id = db.Column(db.String, index=True, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -30,12 +30,12 @@ class CategoryRelation(AuditBase, db.Model):
 
 
 # endpoint: audit-category
-class Category(PrimaryCategory):
+class AuditCategory(AuditPrimaryCategory):
     @declared_attr
     def sub_category_list(self):
         return sa.orm.relationship(
-            CategoryRelation,
-            primaryjoin=sa.orm.foreign(CategoryRelation.primary_category_id) == self.primary_category_id,
+            AuditCategoryRelation,
+            primaryjoin=sa.orm.foreign(AuditCategoryRelation.primary_category_id) == self.primary_category_id,
             uselist=True,
         )
 
@@ -50,7 +50,7 @@ class AuditCaseSubCategory(db.Model):
 
 
 # endpoint audit-case
-class AuditCategoryRelation(db.Model):
+class AuditCaseCategoryRelation(db.Model):
     __tablename__ = 'ofec_audit_case_category_rel_mv'
     audit_case_id = db.Column(db.String, primary_key=True, doc=docs.AUDIT_CASE_ID)
     primary_category_id = db.Column(db.String, primary_key=True, doc=docs.PRIMARY_CATEGORY_ID)
@@ -58,8 +58,8 @@ class AuditCategoryRelation(db.Model):
     sub_category_list = db.relationship(
         'AuditCaseSubCategory',
         primaryjoin='''and_(
-            foreign(AuditCategoryRelation.audit_case_id) == AuditCaseSubCategory.audit_case_id,
-            foreign(AuditCategoryRelation.primary_category_id) == AuditCaseSubCategory.primary_category_id
+            foreign(AuditCaseCategoryRelation.audit_case_id) == AuditCaseSubCategory.audit_case_id,
+            foreign(AuditCaseCategoryRelation.primary_category_id) == AuditCaseSubCategory.primary_category_id
        )''',
         uselist=True,
         lazy='joined'
@@ -87,9 +87,9 @@ class AuditCase(db.Model):
     candidate_id = db.Column(db.String, doc=docs.CANDIDATE_ID)
     candidate_name = db.Column(db.String, doc=docs.CANDIDATE_NAME)
     primary_category_list = db.relationship(
-        AuditCategoryRelation,
+        AuditCaseCategoryRelation,
         primaryjoin='''and_(
-            foreign(AuditCategoryRelation.audit_case_id) == AuditCase.audit_case_id
+            foreign(AuditCaseCategoryRelation.audit_case_id) == AuditCase.audit_case_id
         )''',
         uselist=True,
         lazy='joined'
