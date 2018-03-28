@@ -12,7 +12,7 @@ from webservices.env import env
 logger = logging.getLogger(__name__)
 
 def get_cache_expiration():
-    return datetime.datetime.now() + datetime.timedelta(days=3)
+    return datetime.datetime.now() + datetime.timedelta(minutes=60)
 
 @app.task(base=QueueOnce, once={'graceful': True})
 def cache_all_requests(json_str, formatted_url):
