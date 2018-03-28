@@ -8,5 +8,5 @@ public.ofec_candidate_flag was temporarily added back.
 It should be dropped to finish the work.
 */
 
-DROP MATERIALIZED VIEW IF EXISTS ofec_candidate_flag;
+DROP MATERIALIZED VIEW IF EXISTS public.ofec_candidate_flag;
     
