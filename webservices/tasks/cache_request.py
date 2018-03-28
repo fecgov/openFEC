@@ -1,4 +1,5 @@
 import logging
+import datetime
 
 from celery_once import QueueOnce
 from smart_open import smart_open
@@ -10,16 +11,19 @@ from webservices.env import env
 
 logger = logging.getLogger(__name__)
 
+def get_cache_expiration():
+    return datetime.datetime.now() + datetime.timedelta(minutes=60)
+
 @app.task(base=QueueOnce, once={'graceful': True})
-def cache_all_requests(json_data, formatted_url):
+def cache_all_requests(json_str, formatted_url):
 
     try:
         cached_url = 'cached-calls/{}'.format(formatted_url)
-        s3_key = utils.get_s3_key(cached_url)
 
+        bucket = utils.get_bucket()
         # upload the json_data to s3 bucket
-        with smart_open(s3_key, 'wb') as cached_file:
-            cached_file.write(json_data)
+        bucket.put_object(Key=cached_url, Body=json_str,
+                        ContentType="application/json", Expires=get_cache_expiration())
         logger.info(
             'The following request has been uploaded to S3 successfully: {}'.format(
                 cached_url
