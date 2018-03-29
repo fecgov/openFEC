@@ -19,27 +19,37 @@ def cache_all_requests(json_str, formatted_url):
 
     try:
         cached_url = 'cached-calls/{}'.format(formatted_url)
-
         bucket = utils.get_bucket()
-        # upload the json_data to s3 bucket
-        bucket.put_object(Key=cached_url, Body=json_str,
-                        ContentType="application/json", Expires=get_cache_expiration())
+
+        bucket.put_object(
+            Key=cached_url,
+            Body=json_str,
+            ContentType='application/json',
+            Expires=get_cache_expiration()
+        )
         logger.info(
             'The following request has been uploaded to S3 successfully: {}'.format(
                 cached_url
             )
         )
     except Exception as e:
-        logger.error('Exception occured while uploading the cache request to S3.%s', e)
+        logger.error(
+            'An exception occured while uploading the cached request to S3: {}'.format(e)
+        )
+
 
 @app.task
 def delete_cached_calls_from_s3():
     """
-    Deletes all files and folders under cached-calls from S3
+    Deletes all files and folders under the cached-calls folder from S3.
     """
     bucket = utils.get_bucket()
-    for obj in bucket.objects.filter(Prefix="cached-calls/"):
+
+    for obj in bucket.objects.filter(Prefix='cached-calls/'):
         obj.delete()
-    slack_message = 'Successfully deleted the cached-calls folder in {0} from S3'.format(env.get_credential('NEW_RELIC_APP_NAME'))
+
+    slack_message = 'Successfully deleted the contents of the `cached-calls` folder in {0} from S3'.format(
+        env.space
+    )
     web_utils.post_to_slack(slack_message, '#bots')
     logger.info(slack_message)
