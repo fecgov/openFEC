@@ -39,14 +39,14 @@ We are always trying to improve our documentation. If you have suggestions or ru
 ### Project prerequisites
 1. Ensure you have the following requirements installed:
 
-    * Python (the latest 3.5 release, which includes `pip` and and a built-in version of `virtualenv` called `venv`).
+    * Python (the latest 3.6 release, which includes `pip` and and a built-in version of `virtualenv` called `venv`).
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
     * PostgreSQL (the latest 9.6 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html))
-    * Flyway 4.2 ([download](https://flywaydb.org/getstarted/download))
+    * Flyway 5.0.x ([download](https://flywaydb.org/getstarted/download))
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
