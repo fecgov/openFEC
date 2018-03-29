@@ -9,13 +9,13 @@ jobs:
       # use `-browsers` prefix for selenium tests, e.g. `<image_name>-browsers`
 
       # Python
-      - image: circleci/python:3.5.3
+      - image: circleci/python:3.6.4-jessie-browsers
         environment:
           TZ: America/New_York
           SQLA_TEST_CONN: postgresql://postgres@0.0.0.0/cfdm_unit_test
 
       # PostgreSQL
-      - image: circleci/postgres:9.6.2
+      - image: circleci/postgres:9.6.8
         environment:
           POSTGRES_USER: postgres
           POSTGRES_DB: cfdm_unit_test
