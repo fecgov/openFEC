@@ -336,8 +336,7 @@ UNION ALL
     election_totals_with_ending_aggregates.last_report_year,
     election_totals_with_ending_aggregates.last_net_operating_expenditures,
     election_totals_with_ending_aggregates.last_net_contributions
-   FROM election_totals_with_ending_aggregates
-  WITH NO DATA;
+   FROM election_totals_with_ending_aggregates;
 
 ----Permissions------
 
