@@ -35,13 +35,14 @@ def test_parse_ao_citations(text, ao_nos, expected):
 
 
 @pytest.mark.parametrize("text,expected", [
-    ("2 U.S.C. 432h", set([(52, 30102)])),
-    ("52 U.S.C. 30116a", set([(52, 30116)])),
-    ("2 U.S.C. 441b, 441c, 441e", set([(2, 441)])),
-    (" 2 U.S.C. §437f", set([(52, 30105)])),
-    ("52 U.S.C. § 30101", set([(52, 30101)])),
-    (" 2 USC §437f **test with no . in USC**", set([(52, 30105)])),
-    ("52 U.S.C. § 30101 **newline needed to ensure two entries**,\n 52 USC. § 30101 other words", set([(52, 30101)])),
+    ("2 U.S.C. 432", set([(52, '30102')])),
+    ("52 U.S.C. 30116(a", set([(52, '30116')])),
+    ("2 U.S.C. 441b, 441c, 441e", set([(52, '30118')])),
+    ("2 U.S.C. 441a-1", set([(52, '30117')])),
+    (" 2 U.S.C. §437f", set([(52, '30108')])),
+    ("52 U.S.C. § 30101", set([(52, '30101')])),
+    (" 2 USC §437f **test with no . in USC**", set([(52, '30108')])),
+    ("52 U.S.C. § 30101 **newline needed to ensure two entries**,\n 52 USC. § 30101 other words", set([(52, '30101')])),
 ])
 def test_parse_statutory_citations(text, expected):
     assert parse_statutory_citations(text) == expected
@@ -254,7 +255,7 @@ class TestLoadAdvisoryOpinions(BaseTestCase):
 
         actual_ao = next(get_advisory_opinions(None))
 
-        assert actual_ao["statutory_citations"] == [{'title': 52, 'section': 30101}]
+        assert actual_ao["statutory_citations"] == [{'title': 52, 'section': '30101'}]
 
     @patch("webservices.legal_docs.advisory_opinions.get_bucket")
     @patch("webservices.legal_docs.advisory_opinions.get_elasticsearch_connection")
