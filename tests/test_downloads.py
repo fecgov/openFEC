@@ -6,6 +6,7 @@ import unittest.mock as mock
 import pytest
 from botocore.exceptions import ClientError
 
+from webservices.exceptions import ApiError
 from webservices.rest import db, api
 from webservices.tasks import download as tasks
 from webservices.resources import download as resource
@@ -83,6 +84,7 @@ class TestDownloadTask(ApiBaseTest):
             aggregates.ScheduleBByRecipientView,
             aggregates.ScheduleBByRecipientIDView,
             aggregates.ScheduleBByPurposeView,
+            candidate_aggregates.TotalsCandidateView,
             candidates.CandidateList,
             committees.CommitteeList,
             costs.CommunicationCostView,
@@ -141,7 +143,7 @@ class TestDownloadResource(ApiBaseTest):
         assert not export.delay.called
 
     def test_download_forbidden(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ApiError):
             self.client.post_json(api.url_for(resource.DownloadView, path='elections'))
 
     @mock.patch('webservices.resources.download.MAX_RECORDS', 2)

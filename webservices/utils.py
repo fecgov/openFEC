@@ -113,7 +113,11 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             else:
                 comparator = self.max_column_map.get(self.sort_column[5])
 
-            left_index = sa.func.coalesce(left_index, comparator)
+            
+            if 'coalesce' not in str(left_index):
+                left_index = sa.func.coalesce(left_index, comparator)
+        
+
             lhs += (left_index,)
             rhs += (sort_index,)
 

@@ -65,7 +65,7 @@ out contributor information in schedule_a.
 
 Get an [API key here](https://api.data.gov/signup/). That will enable you to place up to 1,000
 calls an hour. Each call is limited to 100 results per page. You can email questions, comments or
-a request to get a key for 120 calls per minute to[APIinfo@fec.gov](apiinfo@fec.gov). You can also
+a request to get a key for 120 calls per minute to[APIinfo@fec.gov](mailto:apiinfo@fec.gov). You can also
 ask questions and discuss the data in the [FEC data Google Group](https://groups.google.com/forum/#!forum/fec-data).
 API changes will also be added to this group in advance of the change.
 
@@ -205,7 +205,16 @@ Since this endpoint reflects financial information, it will only have candidates
 financial reporting forms. Query the `/candidates` endpoint to see an up to date list of all the
 candidates that filed to run for a particular seat.
 '''
+STATE_ELECTION_OFFICES = '''
+State laws and procedures govern elections for state or local offices as well as
+how candidates appear on election ballots.
+Contact the appropriate state election office for more information.
+'''
+STATE_ELECTION_OFFICES_ADDRESS = '''
+Enter a state (Ex: AK, TX, VA etc..) to find the local election offices contact
+information.
 
+'''
 
 FINANCIAL_TAG = '''
 Fetch key information about a committee's Form 3, Form 3X, or Form 3P financial reports.
@@ -258,7 +267,7 @@ This is a two-year period that is derived from the year a transaction took place
 Itemized Schedule A and Schedule B tables. In cases where we have the date of the transaction
 (contribution_receipt_date in schedules/schedule_a, disbursement_date in schedules/schedule_b)
 the two_year_transaction_period is named after the ending, even-numbered year. If we do not
-have the date  of the transation, we fall back to using the report year (report_year in both
+have the date  of the transaction, we fall back to using the report year (report_year in both
 tables) instead,  making the same cycle adjustment as necessary. If no transaction year is
 specified, the results default to the most current cycle.
 '''
@@ -796,6 +805,28 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - MSY Monthly Semi-Annual\n\
          (YE)\n\
 '
+
+REQUEST_TYPE = 'Requests for additional information (RFAIs)\n\
+sent to filers.\n\
+The request type is based on\n\
+the type of document filed:\n\
+    - 1 Statement of \n\
+        Organization\n\
+    - 2 Report of Receipts\n\
+        and Expenditures\n\
+        (Form 3 and 3X)\n\
+    - 3 Second Notice - Reports\n\
+    - 4 Request for\n\
+        Additional Information\n\
+    - 5 Informational - Reports\n\
+    - 6 Second Notice -\n\
+        Statement of Organization\n\
+    - 7 Failure to File\n\
+    - 8 From Public Disclosure\n\
+    - 9 From Multi\n\
+        Candidate Status\n\
+'
+
 REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
 
 RECEIPT_DATE = 'Date the FEC received the electronic or paper record'
@@ -948,7 +979,7 @@ CONTRIBUTOR_CITY = 'City of contributor'
 CONTRIBUTOR_STATE = 'State of contributor'
 CONTRIBUTOR_EMPLOYER = 'Employer of contributor, filers need to make an effort to gather this information'
 CONTRIBUTOR_OCCUPATION = 'Occupation of contributor, filers need to make an effort to gather this information'
-CONTRIBUTOR_ZIP = 'Zip code of contributor'
+CONTRIBUTOR_ZIP = 'Zip code of contributor. Only 5-digit zip code is allowed'
 IS_INDIVIDUAL = 'Restrict to non-earmarked individual contributions where memo code is true. \
 Filtering individuals is useful to make sure contributions are not double reported and in creating \
 breakdowns of the amount of money coming from individuals.'
