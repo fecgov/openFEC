@@ -11,6 +11,13 @@ from .reclassify_statutory_citation import reclassify_archived_mur_statutory_cit
 
 logger = logging.getLogger(__name__)
 
+"""Uncomment this for additional local logging:
+We've kept some logs at DEBUG to avoid cluttering production logs.
+"""
+
+# logger.setLevel(logging.DEBUG)
+
+
 ALL_AOS = """
     SELECT
         ao_parsed.ao_id,
