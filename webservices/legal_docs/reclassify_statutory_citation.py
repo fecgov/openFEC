@@ -60,6 +60,7 @@ def reclassify_archived_mur_statutory_citation(title, section):
             logger.debug('Mapping archived MUR statute citation %s -> %s',
                         (title, section), (MAPPED_TITLE, mapped_section))
             return MAPPED_TITLE, mapped_section
+        logger.debug('Unmapped 2 U.S.C citation: %s', (title, section))
     return title, section
 
 def reclassify_current_mur_statutory_citation(section):
