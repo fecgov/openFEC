@@ -67,7 +67,7 @@ AO_DOCUMENTS = """
 """
 
 STATUTE_CITATION_REGEX = re.compile(
-    r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+).*\.?")
+    r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+\d+[-0-9a-z]*).*\.?")
 
 REGULATION_CITATION_REGEX = re.compile(
     r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)")
@@ -266,7 +266,7 @@ def get_citations(ao_names):
         es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
-        entry = {'citation_text': '%d U.S.C. §%d'
+        entry = {'citation_text': '%d U.S.C. §%s'
                  % (citation[0], citation[1]), 'citation_type': 'statute'}
         es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
@@ -294,7 +294,7 @@ def parse_statutory_citations(text):
                 citation.group('title'), citation.group('section'))
             matches.add((
                 int(new_title),
-                int(new_section)
+                str(new_section)
             ))
     return matches
 
