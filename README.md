@@ -39,14 +39,14 @@ We are always trying to improve our documentation. If you have suggestions or ru
 ### Project prerequisites
 1. Ensure you have the following requirements installed:
 
-    * Python (the latest 3.5 release, which includes `pip` and and a built-in version of `virtualenv` called `venv`).
+    * Python (the latest 3.6 release, which includes `pip` and and a built-in version of `virtualenv` called `venv`).
     * The latest long term support (LTS) or stable release of Node.js (which includes npm)
     * PostgreSQL (the latest 9.6 release).
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
     * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html))
-    * Flyway 4.2 ([download](https://flywaydb.org/getstarted/download))
+    * Flyway 5.0.x ([download](https://flywaydb.org/getstarted/download))
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
 
@@ -456,13 +456,17 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 
     ```
     git flow hotfix finish my-hotfix
-    git checkout master
-    git push origin master --follow-tags
     git checkout develop
     git push origin develop
     ```
 
-* `develop` is deployed to `dev`
+* `develop` is deployed to `dev`. Make sure the build passes before deploying to `master`.
+
+    ```
+    git checkout master
+    git push origin master --follow-tags
+    ```
+
 * `master` is deployed to `prod`
 
 ### Creating a release
@@ -555,14 +559,14 @@ python manage.py index_regulations
 ```
 This command requires that the environment variable `FEC_EREGS_API` is set to the API endpoint of a valid `eregs` instance.
 
-#### Loading advisory opinions
+#### Loading advisory opinions [beginning with FROM_AO_NO through newest AO]
 ```
 python manage.py load_advisory_opinions [-f FROM_AO_NO]
 ```
 
-#### Loading current MURs
+#### Loading current MURs [only one MUR_NO]]
 ```
-python manage.py load_current_murs [-f FROM_MUR_NO]
+python manage.py load_current_murs [-m MUR_NO]
 ```
 
 #### Loading archived MURs (This takes a very long time)

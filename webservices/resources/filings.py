@@ -29,6 +29,7 @@ class BaseFilings(views.ApiResource):
         ('document_type', models.Filings.document_type),
         ('report_year', models.Filings.report_year),
         ('form_type', models.Filings.form_type),
+        ('request_type', models.Filings.request_type),
         ('file_number', models.Filings.file_number),
         ('primary_general_indicator', models.Filings.primary_general_indicator),
         ('amendment_indicator', models.Filings.amendment_indicator),

@@ -11,18 +11,29 @@ def is_exclude_arg(arg):
 
 
 def parse_exclude_arg(arg):
-    # Integers will come in as negative and strings will start with -
+    # Integers will come in as negative and strings will start with "-""
     if isinstance(arg, int):
         return abs(arg)
     else:
         return arg[1:]
 
 
+def build_exclude_list(value_list):
+    exclude_list = [parse_exclude_arg(value) for value in value_list if is_exclude_arg(value)]
+    return exclude_list
+
+
+def build_include_list(value_list):
+    include_list = [value for value in value_list if not is_exclude_arg(value)]
+    return include_list
+
+
 def filter_match(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key) is not None:
             if is_exclude_arg(kwargs[key]):
-                query = query.filter(column != parse_exclude_arg(kwargs[key]))
+                query = query.filter(sa.or_(column != parse_exclude_arg(kwargs[key]),
+                                            column == None))
             else:
                 query = query.filter(column == kwargs[key])
     return query
@@ -32,10 +43,11 @@ def filter_multi(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key):
             # handle combination exclude/include lists
-            exclude_list = [parse_exclude_arg(value) for value in kwargs[key] if is_exclude_arg(value)]
-            include_list = [value for value in kwargs[key] if not is_exclude_arg(value)]
+            exclude_list = build_exclude_list(kwargs.get(key))
+            include_list = build_include_list(kwargs.get(key))
             if exclude_list:
-                query = query.filter(column.notin_(exclude_list))
+                query = query.filter(sa.or_(column.notin_(exclude_list),
+                                            column == None))
             if include_list:
                 query = query.filter(column.in_(include_list))
     return query
@@ -53,8 +65,8 @@ def filter_range(query, kwargs, fields):
 def filter_fulltext(query, kwargs, fields):
     for key, column in fields:
         if kwargs.get(key):
-            exclude_list = [parse_exclude_arg(value) for value in kwargs[key] if is_exclude_arg(value)]
-            include_list = [value for value in kwargs[key] if not is_exclude_arg(value)]
+            exclude_list = build_exclude_list(kwargs.get(key))
+            include_list = build_include_list(kwargs.get(key))
             if exclude_list:
                 filters = [
                     sa.not_(column.match(utils.parse_fulltext(value)))
@@ -64,6 +76,26 @@ def filter_fulltext(query, kwargs, fields):
             if include_list:
                 filters = [
                     column.match(utils.parse_fulltext(value))
+                    for value in include_list
+                ]
+                query = query.filter(sa.or_(*filters))
+    return query
+
+
+def filter_multi_start_with(query, kwargs, fields):
+    for key, column in fields:
+        if kwargs.get(key):
+            exclude_list = build_exclude_list(kwargs.get(key))
+            include_list = build_include_list(kwargs.get(key))
+            if exclude_list:
+                filters = [
+                    sa.not_(column.startswith(value))
+                    for value in exclude_list
+                ]
+                query = query.filter(sa.and_(*filters))
+            if include_list:
+                filters = [
+                    column.startswith(value)
                     for value in include_list
                 ]
                 query = query.filter(sa.or_(*filters))

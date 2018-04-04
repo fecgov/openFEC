@@ -260,6 +260,7 @@ filings = {
     'is_amended': fields.Bool(description='Filing has been amended'),
     'most_recent': fields.Bool(description='Filing is either new or is the most-recently filed amendment'),
     'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
+    'request_type': fields.List(IStr, description=docs.REQUEST_TYPE),
     'document_type': fields.List(IStr, description=docs.DOC_TYPE),
     'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
@@ -571,6 +572,7 @@ schedule_f = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'payee_name': fields.List(fields.Str),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
 }
 
 communication_cost = {
@@ -617,6 +619,10 @@ elections = {
         description=docs.OFFICE,
     ),
     'election_full': election_full,
+}
+
+state_election_office_info = {
+    'state': IStr(required=True, description=docs.STATE_ELECTION_OFFICES_ADDRESS),
 }
 
 schedule_a_candidate_aggregate = {
@@ -727,21 +733,20 @@ schedule_a_by_state_recipient_totals = {
 
 
 # endpoint audit-primary-category
-PrimaryCategory = {
+auditPrimaryCategory = {
     'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
-    # 'tier': fields.List(fields.Int, description=docs.AUDIT_TIER),
 }
 
 
 # endpoint audit-category
-Category = {
+auditCategory = {
     'primary_category_id': fields.List(fields.Str(), description=docs.PRIMARY_CATEGORY_ID),
     'primary_category_name': fields.List(fields.Str, description=docs.PRIMARY_CATEGORY_NAME),
 }
 
 # endpoint audit-case
-AuditCase = {
+auditCase = {
     'primary_category_id': fields.List(fields.Str(), missing='all', description=docs.PRIMARY_CATEGORY_ID),
     'sub_category_id': fields.List(fields.Str(), missing='all', description=docs.SUB_CATEGORY_ID),
     'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),

@@ -41,6 +41,8 @@ spec.definition('SeekInfo', schema=paging_schemas.SeekInfoSchema)
 # Note:  There is no clean way to provide default values for a namedtuple at
 # the moment. This wrapper is modeled after the following post:
 # https://ceasarjames.wordpress.com/2012/03/19/how-to-use-default-arguments-with-namedtuple/
+
+
 class Relationship(namedtuple('Relationship', 'field column label position')):
     def __new__(cls, field, column, label, position=-1):
         return super(Relationship, cls).__new__(
@@ -51,12 +53,14 @@ class Relationship(namedtuple('Relationship', 'field column label position')):
             position
         )
 
+
 class BaseSchema(ModelSchema):
 
     def get_attribute(self, attr, obj, default):
         if '.' in attr:
             return super().get_attribute(attr, obj, default)
         return getattr(obj, attr, default)
+
 
 class BaseEfileSchema(BaseSchema):
     summary_lines = ma.fields.Method("parse_summary_rows")
@@ -103,6 +107,7 @@ def extract_columns(obj, column_a, column_b, descriptions):
             line_list[replace_b] = row.column_b
         return line_list
 
+
 def make_period_string(per_string=None):
     if per_string[-4:] == '_per':
         per_string += 'iod'
@@ -148,6 +153,7 @@ class EFilingF3PSchema(BaseEfileSchema):
             line_list['total_receipts_per'] = cash
             return line_list
 
+
 class EFilingF3Schema(BaseEfileSchema):
     candidate_name = ma.fields.Str()
     treasurer_name = ma.fields.Str()
@@ -173,6 +179,7 @@ class EFilingF3Schema(BaseEfileSchema):
         line_list.pop('total_receipts_per_i')
         line_list.pop('ttl_receipts_ii')
         return line_list
+
 
 class EFilingF3XSchema(BaseEfileSchema):
     def parse_summary_rows(self, obj):
@@ -236,6 +243,7 @@ def make_page_schema(schema, page_type=paging_schemas.OffsetPageSchema, class_na
 
 schemas = {}
 
+
 def augment_schemas(*schemas, namespace=schemas):
     for schema in schemas:
         page_schema = make_page_schema(schema)
@@ -246,10 +254,12 @@ def augment_schemas(*schemas, namespace=schemas):
             page_schema.__name__: page_schema,
         })
 
+
 def augment_models(factory, *models, namespace=schemas):
     for model in models:
         schema = factory(model)
         augment_schemas(schema, namespace=namespace)
+
 
 def augment_itemized_aggregate_models(factory, committee_model, *models, namespace=schemas):
     for model in models:
@@ -269,15 +279,18 @@ def augment_itemized_aggregate_models(factory, committee_model, *models, namespa
         )
         augment_schemas(schema, namespace=namespace)
 
+
 class ApiSchema(ma.Schema):
     def _postprocess(self, data, many, obj):
         ret = {'api_version': __API_VERSION__}
         ret.update(data)
         return ret
 
+
 class BaseSearchSchema(ma.Schema):
     id = ma.fields.Str()
     name = ma.fields.Str()
+
 
 class CandidateSearchSchema(BaseSearchSchema):
     office_sought = ma.fields.Str()
@@ -285,6 +298,7 @@ class CandidateSearchSchema(BaseSearchSchema):
 
 class CommitteeSearchSchema(BaseSearchSchema):
     pass
+
 
 class CandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
@@ -310,8 +324,10 @@ register_schema(CommitteeSearchListSchema)
 class AuditCandidateSearchSchema(BaseSearchSchema):
     pass
 
+
 class AuditCommitteeSearchSchema(BaseSearchSchema):
     pass
+
 
 class AuditCandidateSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
@@ -319,6 +335,7 @@ class AuditCandidateSearchListSchema(ApiSchema):
         ref='#/definitions/AuditCandidateSearch',
         many=True,
     )
+
 
 class AuditCommitteeSearchListSchema(ApiSchema):
     results = ma.fields.Nested(
@@ -372,14 +389,13 @@ make_candidate_schema = functools.partial(
     }
 )
 
-
 augment_models(
     make_candidate_schema,
     models.Candidate,
     models.CandidateDetail,
 
 )
-#built these schemas without make_candidate_schema, as it was filtering out the flags
+# built these schemas without make_candidate_schema, as it was filtering out the flags
 augment_models(
     make_schema,
     models.CandidateHistory,
@@ -387,12 +403,13 @@ augment_models(
     models.CandidateFlags
 
 )
+
+
 class CandidateHistoryTotalSchema(schemas['CandidateHistorySchema'],
         schemas['CandidateTotalSchema'], schemas['CandidateFlagsSchema']):
     pass
 
-CandidateHistoryTotalPageSchema = make_page_schema(CandidateHistoryTotalSchema)
-
+augment_schemas(CandidateHistoryTotalSchema)
 
 CandidateSearchSchema = make_schema(
     models.Candidate,
@@ -715,6 +732,8 @@ BaseFilingsSchema = make_schema(
     },
     options={'exclude': ('committee', )},
 )
+
+
 class FilingsSchema(BaseFilingsSchema):
     @post_dump
     def remove_fec_url(self, obj):
@@ -891,12 +910,14 @@ class ElectionSearchSchema(ma.Schema):
     incumbent_name = ma.fields.Str(attribute='cand_name')
 augment_schemas(ElectionSearchSchema)
 
+
 class ElectionSummarySchema(ApiSchema):
     count = ma.fields.Int()
     receipts = ma.fields.Decimal(places=2)
     disbursements = ma.fields.Decimal(places=2)
     independent_expenditures = ma.fields.Decimal(places=2)
 register_schema(ElectionSummarySchema)
+
 
 class ElectionSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -912,11 +933,13 @@ class ElectionSchema(ma.Schema):
     coverage_end_date = ma.fields.Date()
 augment_schemas(ElectionSchema)
 
+
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
     total = ma.fields.Decimal(places=2)
     size = ma.fields.Int()
+
 
 class ScheduleAByStateCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -925,11 +948,13 @@ class ScheduleAByStateCandidateSchema(ma.Schema):
     state = ma.fields.Str()
     state_full = ma.fields.Str()
 
+
 class ScheduleAByContributorTypeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
     cycle = ma.fields.Int()
     total = ma.fields.Decimal(places=2)
     individual = ma.fields.Bool()
+
 
 class TotalsCommitteeSchema(schemas['CommitteeHistorySchema']):
     receipts = ma.fields.Decimal(places=2)
@@ -973,8 +998,8 @@ register_schema(ScheduleAByStateRecipientTotalsPageSchema)
 
 
 # endpoint audit-primary-category
-PrimaryCategorySchema = make_schema(
-    models.PrimaryCategory,
+AuditPrimaryCategorySchema = make_schema(
+    models.AuditPrimaryCategory,
     fields={
         'primary_category_id': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
@@ -985,13 +1010,13 @@ PrimaryCategorySchema = make_schema(
     }
 )
 
-PrimaryCategoryPageSchema = make_page_schema(PrimaryCategorySchema)
-register_schema(PrimaryCategorySchema)
-register_schema(PrimaryCategoryPageSchema)
+AuditPrimaryCategoryPageSchema = make_page_schema(AuditPrimaryCategorySchema)
+register_schema(AuditPrimaryCategorySchema)
+register_schema(AuditPrimaryCategoryPageSchema)
 
 # endpoint audit-category(with nested sub category)
-CategoryRelationSchema = make_schema(
-    models.CategoryRelation,
+AuditCategoryRelationSchema = make_schema(
+    models.AuditCategoryRelation,
     fields={
         'primary_category_id': ma.fields.Str(),
         'sub_category_id': ma.fields.Str(),
@@ -1003,25 +1028,25 @@ CategoryRelationSchema = make_schema(
     }
 )
 
-CategoryRelationPageSchema = make_page_schema(CategoryRelationSchema)
-register_schema(CategoryRelationSchema)
-register_schema(CategoryRelationPageSchema)
+AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
+register_schema(AuditCategoryRelationSchema)
+register_schema(AuditCategoryRelationPageSchema)
 
 # endpoint audit-category
-CategorySchema = make_schema(
-    models.Category,
+AuditCategorySchema = make_schema(
+    models.AuditCategory,
     fields={
         'primary_category_id': ma.fields.Str(),
         'primary_category_name': ma.fields.Str(),
         'tier': ma.fields.Int(),
-        'sub_category_list': ma.fields.Nested(CategoryRelationSchema, many=True),
+        'sub_category_list': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
     },
     options={
         'exclude': ('tier',)
         # 'relationships': [
         #     Relationship(
-        #         models.Category.sub_category_list,
-        #         models.CategoryRelation.primary_category_id,
+        #         models.AuditCategory.sub_category_list,
+        #         models.AuditCategoryRelation.primary_category_id,
         #         'primary_category_id',
         #         1
         #     ),
@@ -1029,9 +1054,9 @@ CategorySchema = make_schema(
     }
 )
 
-CategoryPageSchema = make_page_schema(CategorySchema)
-register_schema(CategorySchema)
-register_schema(CategoryPageSchema)
+AuditCategoryPageSchema = make_page_schema(AuditCategorySchema)
+register_schema(AuditCategorySchema)
+register_schema(AuditCategoryPageSchema)
 
 
 # endpoint audit-case
@@ -1058,8 +1083,8 @@ register_schema(AuditCaseSubCategoryPageSchema)
 
 
 # endpoint audit-case(with nested sub_category)
-AuditCategoryRelationSchema = make_schema(
-    models.AuditCategoryRelation,
+AuditCaseCategoryRelationSchema = make_schema(
+    models.AuditCaseCategoryRelation,
     fields={
         'audit_case_id': ma.fields.Str(),
         'primary_category_id': ma.fields.Str(),
@@ -1072,9 +1097,9 @@ AuditCategoryRelationSchema = make_schema(
         )}
 )
 
-AuditCategoryRelationPageSchema = make_page_schema(AuditCategoryRelationSchema)
-register_schema(AuditCategoryRelationSchema)
-register_schema(AuditCategoryRelationPageSchema)
+AuditCaseCategoryRelationPageSchema = make_page_schema(AuditCaseCategoryRelationSchema)
+register_schema(AuditCaseCategoryRelationSchema)
+register_schema(AuditCaseCategoryRelationPageSchema)
 
 # endpoint audit-case(with nested primary category)
 AuditCaseSchema = make_schema(
@@ -1092,7 +1117,7 @@ AuditCaseSchema = make_schema(
         'audit_id': ma.fields.Integer(),
         'candidate_id': ma.fields.Str(),
         'candidate_name': ma.fields.Str(),
-        'primary_category_list': ma.fields.Nested(AuditCategoryRelationSchema, many=True),
+        'primary_category_list': ma.fields.Nested(AuditCaseCategoryRelationSchema, many=True),
     },
     options={
         'exclude': (
@@ -1118,6 +1143,14 @@ ElectionsListSchema = make_schema(
 ElectionsListPageSchema = make_page_schema(ElectionsListSchema)
 register_schema(ElectionsListSchema)
 register_schema(ElectionsListPageSchema)
+
+StateElectionOfficeInfoSchema = make_schema(
+    models.StateElectionOfficeInfo,
+)
+
+StateElectionOfficeInfoPageSchema = make_page_schema(StateElectionOfficeInfoSchema)
+register_schema(StateElectionOfficeInfoSchema)
+register_schema(StateElectionOfficeInfoPageSchema)
 
 # Copy schemas generated by helper methods to module namespace
 globals().update(schemas)

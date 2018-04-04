@@ -14,11 +14,14 @@ def initialize_newrelic():
 
 initialize_newrelic()
 
-import os
 import http
-import logging
 import json
+import logging
+import os
+import re
+
 import boto
+import sqlalchemy as sa
 
 from flask import abort
 from flask import request
@@ -33,10 +36,11 @@ import flask_cors as cors
 import flask_restful as restful
 
 from werkzeug.contrib.fixers import ProxyFix
-import sqlalchemy as sa
 
 from webargs.flaskparser import FlaskParser
 from flask_apispec import FlaskApiSpec
+
+from smart_open import smart_open
 
 from webservices import spec
 from webservices import exceptions
@@ -67,7 +71,11 @@ from webservices.resources import audit
 from webservices.env import env
 from webservices.tasks import utils
 
-from smart_open import smart_open
+from webservices.tasks.response_exception import ResponseException
+from webservices.tasks.json_response import JsonResponse
+from webservices.tasks.error_code import ErrorCode
+from webservices.tasks import cache_request
+
 
 app = Flask(__name__)
 logger = logging.getLogger('rest.py')
@@ -97,6 +105,8 @@ app.config['SQLALCHEMY_FOLLOWERS'] = [
     for follower in env.get_credential('SQLA_FOLLOWERS', '').split(',')
     if follower.strip()
 ]
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
 # app.config['SQLALCHEMY_ECHO'] = True
 
 # Modify app configuration and logging level for production
@@ -116,6 +126,10 @@ class FlaskRestParser(FlaskParser):
 
 parser = FlaskRestParser()
 app.config['APISPEC_WEBARGS_PARSER'] = parser
+app.config['CACHE_ALL_REQUESTS'] = bool(
+    env.get_credential('CACHE_ALL_REQUESTS', False)
+)
+app.config['MAX_CACHE_AGE'] = env.get_credential('FEC_CACHE_AGE')
 
 v1 = Blueprint('v1', __name__, url_prefix='/v1')
 api = restful.Api(v1)
@@ -137,6 +151,49 @@ def handle_error(error):
 trusted_proxies = ('54.208.160.112', '54.208.160.151')
 FEC_API_WHITELIST_IPS = env.get_credential('FEC_API_WHITELIST_IPS', False)
 
+# A blacklist of endpoint patterns to match against to see if an API URL should
+# be cached or not by saving a successful response to S3 for later use in the
+# event of an error or system outage.
+FEC_API_ENDPOINT_CACHE_BLACKLIST = [
+    re.compile('^(?!/v1/).*$'),      # Checks for any non-endpoint URL
+    re.compile('^/v1/download/.*$')  # Checks for any download endpoint
+]
+
+# A list of status codes that we should explicitly account for in any custom
+# error handling, e.g., returning a cached response.
+FEC_API_ENDPOINT_ERROR_STATUS_CODES = [500, 502, 503, 504]
+
+
+# Anonymous function to check to see if a URL path matches any of the patterns
+# in the API endpoint blacklist; if there's a match, return False, else return
+# True.
+is_url_path_cacheable = lambda url_path: not any([
+    x.match(url_path) is not None for x in FEC_API_ENDPOINT_CACHE_BLACKLIST
+])
+
+
+def is_cacheable_endpoint(status_code, url_path):
+    """
+    Checks to see if a URL path is one that we allow caching of.
+    """
+    if is_url_path_cacheable(url_path):
+        # If the URL path is cacheable, check to make sure the caching is
+        # enabled and that the status code is 200.
+        return app.config['CACHE_ALL_REQUESTS'] and status_code == 200
+
+    return False
+
+
+def is_retrievable_from_cache(status_code, url_path):
+    """
+    Checks to see if a URL path is one that we can retrieve from the cache in
+    the event of an error or service disruption.
+    """
+    if is_url_path_cacheable(url_path):
+        return app.config['CACHE_ALL_REQUESTS'] and status_code in FEC_API_ENDPOINT_ERROR_STATUS_CODES
+
+    return False
+
 
 @app.before_request
 def limit_remote_addr():
@@ -156,33 +213,67 @@ def limit_remote_addr():
 
 @app.after_request
 def add_caching_headers(response):
-    max_age = env.get_credential('FEC_CACHE_AGE')
-    cache_all_requests = env.get_credential('CACHE_ALL_REQUESTS', False)
-    status_code = response.status_code
+    if app.config['MAX_CACHE_AGE'] is not None:
+        response.headers.add(
+            'Cache-Control',
+            'public, max-age={}'.format(app.config['MAX_CACHE_AGE'])
+        )
 
-    if max_age is not None:
-        response.headers.add('Cache-Control', 'public, max-age={}'.format(max_age))
+    if (is_cacheable_endpoint(response.status_code, request.path)):
+        # Convert the response content into a JSON object and format the URL by
+        # removing the api_key parameter and other special characters.
+        json_data = utils.get_json_data(response)
+        formatted_url = utils.format_url(request.url)
 
-    if (cache_all_requests and status_code == 200):
-        try:
-            # convert the results to JSON
-            json_data = utils.get_json_data(response)
-            # format the URL by removing the api_key and special characters
-            formatted_url = utils.format_url(request.url)
-            # get s3 bucket env variables
-            s3_bucket = utils.get_bucket()
-            cached_url = "s3://{0}/cached-calls/{1}.json".format(s3_bucket.name, formatted_url)
-            s3_key = utils.get_s3_key(cached_url)
+        logger.info('Attempting to cache request at: {}'.format(request.url))
+        cache_request.cache_all_requests.delay(json_data, formatted_url)
 
-            # upload the request_content.json file to s3 bucket
-            with smart_open(s3_key, 'wb') as cached_file:
-                cached_file.write(json_data)
-
-            logger.info('The following request has been cached and uploaded successfully :%s ', cached_url)
-        except:
-            logger.error('Cache Upload failed')
     return response
 
+
+@app.errorhandler(Exception)
+def handle_exception(exception):
+    wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
+
+    logger.info(
+        'An API error occurred with the status code of {}.'.format(wrapped.status)
+    )
+
+    if is_retrievable_from_cache(wrapped.status, request.path):
+        logger.info('Attempting to retrieving the cached request from S3...')
+
+        # Retrieve the information needed to construct a URL for the S3 bucket
+        # where the cached API responses live.
+        formatted_url = utils.format_url(request.url)
+        s3_bucket = utils.get_bucket()
+        bucket_region = env.get_credential('region')
+        cached_url = "http://s3-{0}.amazonaws.com/{1}/cached-calls/{2}".format(
+            bucket_region,
+            s3_bucket.name,
+            formatted_url
+        )
+
+        # Attempt to retrieve the cached data from S3.
+        cached_data = utils.get_cached_request(cached_url)
+
+        # If the cached data was returned, we can return that to the client.
+        # Otherwise, log the error and raise an API error.
+        if cached_data is not None:
+            logger.info('Successfully retrieved cached request from S3.')
+            return cached_data
+        else:
+            logger.error(
+                'An error occured while retrieving the cached file from S3.'
+            )
+            raise exceptions.ApiError(
+                'The requested URL could not be found.'.format(request.url),
+                status_code=http.client.NOT_FOUND
+            )
+    else:
+        raise exceptions.ApiError(
+            'The requested URL could not be found.'.format(request.url),
+            status_code=http.client.NOT_FOUND
+        )
 
 api.add_resource(candidates.CandidateList, '/candidates/')
 api.add_resource(candidates.CandidateSearch, '/candidates/search/')
@@ -235,6 +326,7 @@ api.add_resource(costs.ElectioneeringView, '/electioneering/')
 api.add_resource(elections.ElectionView, '/elections/')
 api.add_resource(elections.ElectionsListView, '/elections/search/')
 api.add_resource(elections.ElectionSummary, '/elections/summary/')
+api.add_resource(elections.StateElectionOfficeInfoView, '/state-election-office/')
 api.add_resource(dates.ElectionDatesView, '/election-dates/')
 api.add_resource(dates.ReportingDatesView, '/reporting-dates/')
 api.add_resource(dates.CalendarDatesView, '/calendar-dates/')
@@ -242,8 +334,8 @@ api.add_resource(dates.CalendarDatesExport, '/calendar-dates/export/')
 api.add_resource(rad_analyst.RadAnalystView, '/rad-analyst/')
 api.add_resource(filings.EFilingsView, '/efile/filings/')
 api.add_resource(large_aggregates.EntityReceiptDisbursementTotalsView, '/totals/by_entity/')
-api.add_resource(audit.PrimaryCategory, '/audit-primary-category/')
-api.add_resource(audit.Category, '/audit-category/')
+api.add_resource(audit.AuditPrimaryCategoryView, '/audit-primary-category/')
+api.add_resource(audit.AuditCategoryView, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
 api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
 api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
@@ -370,6 +462,7 @@ apidoc.register(filings.FilingsList, blueprint='v1')
 apidoc.register(elections.ElectionsListView, blueprint='v1')
 apidoc.register(elections.ElectionView, blueprint='v1')
 apidoc.register(elections.ElectionSummary, blueprint='v1')
+apidoc.register(elections.StateElectionOfficeInfoView, blueprint='v1')
 apidoc.register(dates.ReportingDatesView, blueprint='v1')
 apidoc.register(dates.ElectionDatesView, blueprint='v1')
 apidoc.register(dates.CalendarDatesView, blueprint='v1')
@@ -378,8 +471,8 @@ apidoc.register(rad_analyst.RadAnalystView, blueprint='v1')
 apidoc.register(filings.EFilingsView, blueprint='v1')
 apidoc.register(large_aggregates.EntityReceiptDisbursementTotalsView, blueprint='v1')
 apidoc.register(totals.ScheduleAByStateRecipientTotalsView, blueprint='v1')
-apidoc.register(audit.PrimaryCategory, blueprint='v1')
-apidoc.register(audit.Category, blueprint='v1')
+apidoc.register(audit.AuditPrimaryCategoryView, blueprint='v1')
+apidoc.register(audit.AuditCategoryView, blueprint='v1')
 apidoc.register(audit.AuditCaseView, blueprint='v1')
 apidoc.register(audit.AuditCandidateNameSearch, blueprint='v1')
 apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')

@@ -398,4 +398,37 @@ class ScheduleAByStateRecipientTotalsFactory(BaseFactory):
 class AuditCaseFactory(BaseFactory):
     class Meta:
         model = models.AuditCase
+    audit_case_id = '2219'
+    primary_category_id = '3'
+    sub_category_id = '227'
+
+
+class AuditCategoryFactory(BaseFactory):
+    class Meta:
+        model = models.AuditCategory
+    primary_category_id = '3'
+
+
+class AuditPrimaryCategoryFactory(BaseFactory):
+    class Meta:
+        model = models.AuditPrimaryCategory
+    primary_category_id = '3'
+
+
+class AuditCandidateSearchFactory(BaseFactory):
+    class Meta:
+        model = models.AuditCandidateSearch
     idx = factory.Sequence(lambda n: n)
+
+
+class AuditCommitteeSearchFactory(BaseFactory):
+    class Meta:
+        model = models.AuditCommitteeSearch
+    idx = factory.Sequence(lambda n: n)
+
+
+class StateElectionOfficesFactory(BaseFactory):
+    class Meta:
+        model = models.StateElectionOfficeInfo
+    state = 'VA'
+    office_type = 'STATE CAMPAIGN FINANCE'
