@@ -261,7 +261,7 @@ MAPPINGS = {
                 "type": "nested",
                 "properties": {
                     "section": {
-                        "type": "long"
+                        "type": "string"
                     },
                     "title": {
                         "type": "long"
