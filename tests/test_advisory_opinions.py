@@ -37,6 +37,7 @@ def test_parse_ao_citations(text, ao_nos, expected):
 @pytest.mark.parametrize("text,expected", [
     ("2 U.S.C. 432", set([(52, '30102')])),
     ("52 U.S.C. 30116(a", set([(52, '30116')])),
+    ("52 USC § 30116a", set([(52, '30116a')])),
     ("2 U.S.C. 441b, 441c, 441e", set([(52, '30118')])),
     ("2 U.S.C. 441a-1", set([(52, '30117')])),
     (" 2 U.S.C. §437f", set([(52, '30108')])),
