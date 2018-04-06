@@ -79,7 +79,6 @@ create table ofec_sched_e_tmp
   rpt_tp varchar(3),
   rpt_yr numeric(4,0),
   election_cycle numeric,
-  "timestamp" timestamp without time zone,
   pdf_url text,
   is_notice boolean,
   payee_name_text tsvector,
@@ -171,7 +170,6 @@ insert into public.ofec_sched_e_tmp
  rpt_tp,
  rpt_yr,
  election_cycle,
- timestamp,
  pdf_url,
  is_notice,
  payee_name_text,
@@ -215,7 +213,7 @@ select
  cal_ytd_ofc_sought,
  dissem_dt,
  exp_amt,
- exp_dt,
+ coalesce(exp_dt, dissem_dt) as exp_dt,
  exp_tp,
  exp_tp_desc,
  memo_cd,
@@ -255,7 +253,6 @@ select
  rpt_tp,
  rpt_yr,
  election_cycle,
- cast(null as timestamp) as timestamp,
  image_pdf_url(image_num) as pdf_url,
  coalesce(rpt_tp, '') in ('24', '48') as is_notice,
  to_tsvector(pye_nm) as payee_name_text,
@@ -342,7 +339,6 @@ insert into ofec_sched_e_tmp
  rpt_tp,
  rpt_yr,
  election_cycle,
- timestamp,
  pdf_url,
  is_notice,
  payee_name_text,
@@ -385,7 +381,7 @@ select cmte_id,
  cal_ytd_ofc_sought,
  dissem_dt,
  exp_amt,
- exp_dt,
+ coalesce(exp_dt, dissem_dt) as exp_dt,
  exp_tp,
  exp_tp_desc,
  memo_cd,
@@ -425,7 +421,6 @@ select cmte_id,
  rpt_tp,
  rpt_yr,
  cycle,
- cast(null as timestamp) as timestamp,
  image_pdf_url(image_num) as pdf_url,
  coalesce(rpt_tp, '') in ('24', '48') as is_notice,
  to_tsvector(pye_nm) as payee_name_text,
@@ -443,7 +438,7 @@ insert into ofec_sched_e_tmp (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_n
                               exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm, conduit_cmte_st1,
                               conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd,
                               action_cd_desc, tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id,
-                              orig_sub_id, sub_id, filing_form, rpt_tp, rpt_yr, election_cycle, timestamp,
+                              orig_sub_id, sub_id, filing_form, rpt_tp, rpt_yr, election_cycle, 
                               pdf_url, is_notice, payee_name_text, pg_date)
 select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suffix, pye_st1, pye_st2, pye_city, pye_st,
     pye_zip, entity_tp, entity_tp_desc, exp_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_f_nm,
@@ -452,7 +447,7 @@ select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suff
     fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
     conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd, action_cd_desc,
     tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id, filing_form,
-    rpt_tp, rpt_yr, election_cycle, cast(null as timestamp) as timestamp, image_pdf_url(image_num) as pdf_url,
+    rpt_tp, rpt_yr, election_cycle, image_pdf_url(image_num) as pdf_url,
     coalesce(rpt_tp, '') in ('24', '48') as is_notice, to_tsvector(pye_nm), now()
 from fec_fitem_f57_vw;
 
@@ -466,7 +461,7 @@ insert into ofec_sched_e_tmp (cmte_id, pye_nm, payee_l_nm, payee_f_nm, payee_m_n
                               exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm, conduit_cmte_st1,
                               conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd,
                               action_cd_desc, tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id,
-                              orig_sub_id, sub_id, filing_form, rpt_tp, rpt_yr, election_cycle, timestamp,
+                              orig_sub_id, sub_id, filing_form, rpt_tp, rpt_yr, election_cycle, 
                               pdf_url, is_notice, payee_name_text, pg_date)
 select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suffix, pye_st1, pye_st2, pye_city, pye_st,
     pye_zip, entity_tp, entity_tp_desc, exp_tp_desc, catg_cd, catg_cd_desc, s_o_cand_id, s_o_cand_nm, s_o_cand_f_nm,
@@ -475,12 +470,9 @@ select filer_cmte_id, pye_nm, pye_l_nm, pye_f_nm, pye_m_nm, pye_prefix, pye_suff
     fec_election_tp_desc, cal_ytd_ofc_sought, exp_amt, exp_dt, exp_tp, exp_tp_desc, conduit_cmte_id, conduit_cmte_nm,
     conduit_cmte_st1, conduit_cmte_st2, conduit_cmte_city, conduit_cmte_st, conduit_cmte_zip, action_cd,
     action_cd_desc, tran_id, schedule_type, schedule_type_desc, image_num, file_num, link_id, orig_sub_id, sub_id,
-    filing_form, rpt_tp, rpt_yr, cycle, cast(null as timestamp) as timestamp, image_pdf_url(image_num) as pdf_url,
+    filing_form, rpt_tp, rpt_yr, cycle, image_pdf_url(image_num) as pdf_url,
     coalesce(rpt_tp, '') in ('24', '48') as is_notice, to_tsvector(pye_nm), now()
 from fec_f57_notice_vw;
-
--- Reset the exp_dt column based on actual dates available in the data.
-update ofec_sched_e_tmp set exp_dt = coalesce(exp_dt, dissem_dt);
 
 -- Set up the primary key
 create unique index idx_ofec_sched_e_sub_id_tmp on ofec_sched_e_tmp (sub_id);
