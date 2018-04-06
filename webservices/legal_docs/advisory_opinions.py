@@ -6,7 +6,7 @@ from webservices.env import env
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
-from .reclassify_statutory_citation import reclassify_archived_mur_statutory_citation
+from .reclassify_statutory_citation import reclassify_statutory_citation
 
 
 logger = logging.getLogger(__name__)
@@ -290,7 +290,7 @@ def parse_statutory_citations(text):
     matches = set()
     if text:
         for citation in STATUTE_CITATION_REGEX.finditer(text):
-            new_title, new_section = reclassify_archived_mur_statutory_citation(
+            new_title, new_section = reclassify_statutory_citation(
                 citation.group('title'), citation.group('section'))
             matches.add((
                 int(new_title),
