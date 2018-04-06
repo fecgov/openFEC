@@ -67,7 +67,7 @@ AO_DOCUMENTS = """
 """
 
 STATUTE_CITATION_REGEX = re.compile(
-    r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+\d+[-0-9a-z]*).*\.?")
+    r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+[a-z]?(-1)?).*\.?")
 
 REGULATION_CITATION_REGEX = re.compile(
     r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)")
