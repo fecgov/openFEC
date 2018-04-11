@@ -240,7 +240,8 @@ class ScheduleAEfile(BaseRawItemized):
 
 
 class ScheduleB(BaseItemized):
-    __tablename__ = 'ofec_sched_b_master'
+    __table_args__ = {'schema' : 'disclosure'}
+    __tablename__ = 'fec_fitem_sched_b'
 
     # Recipient info
     entity_type = db.Column('entity_tp', db.String)
@@ -336,8 +337,6 @@ class ScheduleB(BaseItemized):
 
     ref_disp_excess_flg = db.Column('ref_disp_excess_flg', db.String)
     comm_dt = db.Column('comm_dt', db.Date)
-    cycle = db.Column('election_cycle', db.Integer)
-    timestamp = db.Column('timestamp', db.DateTime)
 
     @hybrid_property
     def sort_expressions(self):
