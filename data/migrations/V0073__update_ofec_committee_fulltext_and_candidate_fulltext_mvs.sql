@@ -60,6 +60,8 @@ CREATE INDEX ofec_committee_fulltext_mv_disbursements_idx1_tmp ON ofec_committee
 
 CREATE INDEX ofec_committee_fulltext_mv_independent_expenditures_idx1_tmp ON ofec_committee_fulltext_mv_tmp USING btree (independent_expenditures);
 
+CREATE INDEX ofec_committee_fulltext_mv_total_activity_idx1_tmp ON ofec_committee_fulltext_mv_tmp USING btree (total_activity);
+
 ----Rename view & indexes-------
 
 DROP MATERIALIZED VIEW IF EXISTS ofec_committee_fulltext_mv;
@@ -121,6 +123,8 @@ CREATE INDEX ofec_candidate_fulltext_mv_fulltxt_idx1_tmp ON ofec_candidate_fullt
 CREATE INDEX ofec_candidate_fulltext_mv_receipts_idx1_tmp ON ofec_candidate_fulltext_mv_tmp USING btree (receipts);
 
 CREATE INDEX ofec_candidate_fulltext_mv_disbursements_idx1_tmp ON ofec_candidate_fulltext_mv_tmp USING btree (disbursements);
+
+CREATE INDEX ofec_candidate_fulltext_mv_total_activity_idx1_tmp ON ofec_candidate_fulltext_mv_tmp USING btree (total_activity);
 
 ----Rename view & indexes-------
 
