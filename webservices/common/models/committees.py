@@ -12,6 +12,9 @@ class CommitteeSearch(BaseModel):
     name = db.Column(db.String, doc=docs.COMMITTEE_NAME)
     fulltxt = db.Column(TSVECTOR)
     receipts = db.Column(db.Numeric(30, 2))
+    disbursements = db.Column(db.Numeric(30, 2))
+    independent_expenditures = db.Column(db.Numeric(30, 2))
+    total_activity = db.Column(db.Numeric(30, 2))
 
 
 class BaseCommittee(BaseModel):
