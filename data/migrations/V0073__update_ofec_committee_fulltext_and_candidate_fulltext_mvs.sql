@@ -37,7 +37,7 @@ CREATE MATERIALIZED VIEW ofec_committee_fulltext_mv_tmp AS
     COALESCE(totals.receipts, (0)::numeric) AS receipts,
     COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
     COALESCE(totals.independent_expenditures, (0)::numeric) AS independent_expenditures,
-    COALESCE(totals.receipts+totals.disbursements+totals.independent_expenditures, (0)::numeric) AS total_activity
+    COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric) + COALESCE(totals.independent_expenditures, (0)::numeric) AS total_activity
    FROM ((ofec_committee_detail_mv cd
      LEFT JOIN pacronyms pac USING (committee_id))
      LEFT JOIN totals USING (committee_id));
@@ -103,7 +103,7 @@ CREATE MATERIALIZED VIEW ofec_candidate_fulltext_mv_tmp AS
         END AS fulltxt,
     COALESCE(totals.receipts, (0)::numeric) AS receipts,
     COALESCE(totals.disbursements, (0)::numeric) AS disbursements,
-    COALESCE(totals.receipts+totals.disbursements, (0)::numeric) AS total_activity
+    COALESCE(totals.receipts, (0)::numeric) + COALESCE(totals.disbursements, (0)::numeric) AS total_activity
    FROM ((ofec_candidate_detail_mv
      LEFT JOIN nicknames USING (candidate_id))
      LEFT JOIN totals USING (candidate_id));
