@@ -236,7 +236,10 @@ def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
 
     logger.info(
-        'An API error occurred with the status code of {}.'.format(wrapped.status)
+        'An API error occurred with the status code of {status} ({exception}).'.format(
+            status=wrapped.status,
+            exception=wrapped.wrappedException
+        )
     )
 
     if is_retrievable_from_cache(wrapped.status, request.path):

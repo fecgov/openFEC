@@ -1,22 +1,15 @@
 {
   "devDependencies": {
-    "event-stream": "^3.3.4",
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.1",
-    "gulp-declare": "^0.3.0",
-    "gulp-handlebars": "^4.0.0",
-    "gulp-less": "^3.3.2",
-    "gulp-order": "^1.1.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^3.0.0",
-    "gulp-wrap": "^0.13.0",
-    "handlebars": "^4.0.11"
+    "swagger-ui-dist": "^3.13.4"
   },
   "scripts": {
-    "build": "gulp"
+    "build": "npm run remove-old-version && npm run copy-swagger-ui && npm run clean-files",
+    "copy-swagger-ui": "mkdir -p ./static/swagger-ui/ && cp -R ./node_modules/swagger-ui-dist/ ./static/swagger-ui/",
+    "clean-files": "rm -f ./static/swagger-ui/.npmignore ./static/swagger-ui/README.md ./static/swagger-ui/index.html ./static/swagger-ui/index.js ./static/swagger-ui/oauth2-redirect.html ./static/swagger-ui/package.json",
+    "remove-old-version": "rm -rf ./static/swagger-ui/"
   },
   "engines": {
-    "node": "8.9.1",
-    "npm": "5.5.1"
+    "node": "8.11.1",
+    "npm": "5.6.0"
   }
 }
