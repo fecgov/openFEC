@@ -7,19 +7,19 @@ from webservices.legal_docs import load_legal_docs, reclassify_statutory_citatio
 
 class TestGetCitations(unittest.TestCase):
 
-    def test_reclassify_archived_mur_statutory_citation(self):
+    def test_reclassify_statutory_citation(self):
         # spot check a few cases from the csv
-        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('2', '431') == ('52', '30101')
-        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('2', '437g') == ('52', '30109')
-        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('2', '441a-1') == ('52', '30117')
+        assert reclassify_statutory_citation.reclassify_statutory_citation('2', '431') == ('52', '30101')
+        assert reclassify_statutory_citation.reclassify_statutory_citation('2', '437g') == ('52', '30109')
+        assert reclassify_statutory_citation.reclassify_statutory_citation('2', '441a-1') == ('52', '30117')
 
         # and a fallback
-        assert reclassify_statutory_citation.reclassify_archived_mur_statutory_citation('99', '12345') == ('99', '12345')
+        assert reclassify_statutory_citation.reclassify_statutory_citation('99', '12345') == ('99', '12345')
 
 
-    @mock.patch.object(reclassify_statutory_citation, 'reclassify_archived_mur_statutory_citation')
-    def test_get_citations_statute(self, reclassify_archived_mur_statutory_citation):
-        reclassify_archived_mur_statutory_citation.return_value = ('99', '31999')
+    @mock.patch.object(reclassify_statutory_citation, 'reclassify_statutory_citation')
+    def test_get_citations_statute(self, reclassify_statutory_citation):
+        reclassify_statutory_citation.return_value = ('99', '31999')
         citation_text = [
             '2 U.S.C. 23',
             '2 U.S.C. 23a',
@@ -40,7 +40,7 @@ class TestGetCitations(unittest.TestCase):
         us_code = citations['us_code']
 
         assert len(us_code) == len(expected_calls)
-        assert reclassify_archived_mur_statutory_citation.call_args_list == expected_calls
+        assert reclassify_statutory_citation.call_args_list == expected_calls
 
         assert us_code[0]['text'] == '99 U.S.C. 31999'
         assert us_code[1]['text'] == '99 U.S.C. 31999'
