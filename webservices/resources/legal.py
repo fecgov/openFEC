@@ -3,9 +3,11 @@ import re
 from elasticsearch_dsl import Search, Q
 from webargs import fields
 from flask import abort
+from flask_apispec import doc
 
 from webservices import args
 from webservices import utils
+from webservices import docs
 from webservices.utils import use_kwargs
 from elasticsearch import RequestError
 from webservices.exceptions import ApiError
@@ -28,6 +30,11 @@ INNER_HITS = {
 
 ALL_DOCUMENT_TYPES = ['statutes', 'regulations', 'advisory_opinions', 'murs']
 
+
+@doc(
+    tags=['legal'],
+    description=docs.LEGAL_SEARCH,
+)
 class GetLegalCitation(utils.Resource):
     @property
     def args(self):
@@ -50,6 +57,11 @@ class GetLegalCitation(utils.Resource):
         results = {"citations": [hit.to_dict() for hit in es_results]}
         return results
 
+
+@doc(
+    tags=['legal'],
+    description=docs.LEGAL_SEARCH,
+)
 class GetLegalDocument(utils.Resource):
     @property
     def args(self):
@@ -71,6 +83,10 @@ class GetLegalDocument(utils.Resource):
         else:
             return abort(404)
 
+@doc(
+    tags=['legal'],
+    description=docs.LEGAL_SEARCH,
+)
 class UniversalSearch(utils.Resource):
     @use_kwargs(args.query)
     def get(self, q='', from_hit=0, hits_returned=20, **kwargs):
@@ -116,6 +132,7 @@ class UniversalSearch(utils.Resource):
         results['total_all'] = total_count
         return results
 
+
 def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_), Q('query_string', query=q)]
 
@@ -129,6 +146,7 @@ def generic_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .sort("sort1", "sort2")
 
     return query
+
 
 def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
@@ -147,6 +165,7 @@ def mur_query_builder(q, type_, from_hit, hits_returned, **kwargs):
 
     return apply_mur_specific_query_params(query, **kwargs)
 
+
 def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
     must_query = [Q('term', _type=type_)]
     should_query = [get_ao_document_query(q, **kwargs),
@@ -162,6 +181,7 @@ def ao_query_builder(q, type_, from_hit, hits_returned, **kwargs):
         .sort("sort1", "sort2")
 
     return apply_ao_specific_query_params(query, **kwargs)
+
 
 def apply_mur_specific_query_params(query, **kwargs):
     must_clauses = []
@@ -201,6 +221,7 @@ def apply_mur_specific_query_params(query, **kwargs):
 
     return query
 
+
 def get_ao_document_query(q, **kwargs):
     categories = {'F': 'Final Opinion',
                   'V': 'Votes',
@@ -220,6 +241,7 @@ def get_ao_document_query(q, **kwargs):
         combined_query.append(Q('query_string', query=q, fields=['documents.text']))
 
     return Q("nested", path="documents", inner_hits=INNER_HITS, query=Q('bool', must=combined_query))
+
 
 def apply_ao_specific_query_params(query, **kwargs):
     must_clauses = []
@@ -304,6 +326,7 @@ def apply_ao_specific_query_params(query, **kwargs):
     query = query.query('bool', must=must_clauses)
 
     return query
+
 
 def execute_query(query):
     es_results = query.execute()

@@ -89,6 +89,10 @@ spec = APISpec(
         {
             'name': 'audit',
             'description': docs.AUDIT,
+        },
+        {
+            'name': 'legal',
+            'description': docs.LEGAL_SEARCH,
         }
     ]
 )
