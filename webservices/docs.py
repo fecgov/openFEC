@@ -1228,7 +1228,7 @@ EFILE_REPORTS += WIP_TAG
 MIN_FILTER = 'Filter for all amounts greater than a value.'
 MAX_FILTER = 'Filter for all amounts less than a value.'
 
-ENTITY_RECEIPTS_TOTLAS = '''
+ENTITY_RECEIPTS_TOTALS = '''
 Provides cumulative receipt totals by entity type, over a two year cycle. Totals are adjusted to avoid double counting.
 
 This is [the sql](https://github.com/fecgov/openFEC/blob/develop/data/migrations/V41__large_aggregates.sql) that creates these calculations.

@@ -10,7 +10,7 @@ from webservices.common.views import ApiResource
 
 @doc(
     tags=['financial'],
-    description=docs.ENTITY_RECEIPTS_TOTLAS,
+    description=docs.ENTITY_RECEIPTS_TOTALS,
 )
 class EntityReceiptDisbursementTotalsView(ApiResource):
 
