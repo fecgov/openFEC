@@ -323,7 +323,7 @@ def get_citations(citation_texts):
             "(?P<title>[0-9]+) C\.F\.R\. (?P<part>[0-9]+)(?:\.(?P<section>[0-9]+))?", citation_text)
 
         if us_code_match:
-            title, section = reclassify_statutory_citation.reclassify_archived_mur_statutory_citation(
+            title, section = reclassify_statutory_citation.reclassify_statutory_citation(
                 us_code_match.group('title'), us_code_match.group('section'))
             citation_text = '%s U.S.C. %s%s' % (title, section, us_code_match.group('paragraphs'))
             url = 'http://api.fdsys.gov/link?' +\
