@@ -210,7 +210,7 @@ class TestCandidateAggregates(ApiBaseTest):
             receipts=75,
         )
         factories.CandidateFlagsFactory(
-            candidate_id = self.candidate.candidate_id
+            candidate_id=self.candidate.candidate_id
         )
         db.session.flush()
         # Create two-year totals for both the target period (2011-2012) and the
@@ -235,6 +235,22 @@ class TestCandidateAggregates(ApiBaseTest):
             committee_designation='A',
             committee_type='S',
             fec_election_year=2010,
+        )
+        # Create a candidate_zero without a committee and $0 in CandidateTotal
+        self.candidate_zero = factories.CandidateHistoryFactory(
+            candidate_id='H321',
+            two_year_period=2018,
+            candidate_election_year=2018,
+        )
+        factories.CandidateDetailFactory(
+            candidate_id=self.candidate_zero.candidate_id,
+            election_years=[2018],
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_zero.candidate_id,
+            cycle=2018,
+            is_election=False,
+            receipts=0,
         )
 
     def test_by_size(self):
@@ -312,6 +328,17 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 75})
+
+        # candidate_zero
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_zero.candidate_id,
+                cycle=2018,
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 0})
 
     def test_totals_full(self):
         results = self._results(
