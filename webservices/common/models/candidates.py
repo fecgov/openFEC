@@ -15,6 +15,8 @@ class CandidateSearch(BaseModel):
     office_sought = db.Column(db.String, doc=docs.OFFICE)
     fulltxt = db.Column(TSVECTOR)
     receipts = db.Column(db.Numeric(30, 2))
+    disbursements = db.Column(db.Numeric(30, 2))
+    total_activity = db.Column(db.Numeric(30, 2))
 
 
 class CandidateFlags(db.Model):

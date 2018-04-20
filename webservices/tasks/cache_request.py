@@ -44,10 +44,16 @@ def delete_cached_calls_from_s3():
     Deletes all files and folders under the cached-calls folder from S3.
     """
     bucket = utils.get_bucket()
-
+    
+    slack_message = 'Starting to delete the contents of the `cached-calls` folder in {0} from S3'.format(
+        env.space
+    )
+    web_utils.post_to_slack(slack_message, '#bots')
+    logger.info(slack_message)
+    
     for obj in bucket.objects.filter(Prefix='cached-calls/'):
         obj.delete()
-
+    
     slack_message = 'Successfully deleted the contents of the `cached-calls` folder in {0} from S3'.format(
         env.space
     )
