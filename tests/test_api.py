@@ -89,7 +89,7 @@ class OverallTest(ApiBaseTest):
                 name='Bartlet {0}'.format(idx),
                 fulltxt=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
                 office_sought='P',
-                receipts=idx,
+                total_activity=idx,
             )
             for idx in range(30)
         ]
@@ -117,7 +117,7 @@ class OverallTest(ApiBaseTest):
             factories.CommitteeSearchFactory(
                 name='Bartlet {0}'.format(idx),
                 fulltxt=sa.func.to_tsvector('Bartlet for America {0}'.format(idx)),
-                receipts=idx,
+                total_activity=idx,
             )
             for idx in range(30)
         ]
