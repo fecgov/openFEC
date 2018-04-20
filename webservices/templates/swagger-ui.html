@@ -4,9 +4,8 @@
   <title>OpenFEC API Documentation</title>
 
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{{ swagger_static('swagger-ui.css') }}" >
-    <link rel="icon" type="image/png" href="{{ swagger_static('favicon-32x32.png') }}" sizes="32x32" />
-    <link rel="icon" type="image/png" href="{{ swagger_static('favicon-16x16.png') }}" sizes="16x16" />
+    <link rel="stylesheet" type="text/css" href="{{ swagger_static('dist/main.css') }}" >
+    <link rel="icon" type="image/png" href="{{ swagger_static('favicon.ico') }}" />
     <style>
       html
       {
@@ -32,32 +31,14 @@
 
 <body>
     <div id="swagger-ui"></div>
-
-    <script src="{{ swagger_static('swagger-ui-bundle.js') }}"> </script>
-    <script src="{{ swagger_static('swagger-ui-standalone-preset.js') }}"> </script>
+    <script src="{{ swagger_static('dist/swagger-layout.js') }}"> </script>
     <script>
-        window.onload = function() {
-
-          // Build a system
-          const ui = SwaggerUIBundle({
-            url: "{{ specs_url }}",
-            validatorUrl: "{{ config.SWAGGER_VALIDATOR_URL }}" || null,
-            dom_id: '#swagger-ui',
-            deepLinking: true,
-            docExpansion: "none",
-            supportedSubmitMethods: ['get'],
-            presets: [
-              SwaggerUIBundle.presets.apis,
-              SwaggerUIStandalonePreset
-            ],
-            plugins: [
-              SwaggerUIBundle.plugins.DownloadUrl
-            ],
-            layout: "StandaloneLayout"
-          })
-
-          window.ui = ui
-        };
+      window.onload = function() {
+        SwaggerLayout(
+          "{{ specs_url }}",
+          document.getElementById("swagger-ui")
+        );
+      };
     </script>
 
   {% if PRODUCTION %}

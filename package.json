@@ -1,15 +1,32 @@
 {
   "devDependencies": {
-    "swagger-ui-dist": "^3.13.4"
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^0.28.11",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "prettier": "^1.12.1",
+    "react-hot-loader": "^4.1.0",
+    "style-loader": "^0.21.0",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack": "^4.6.0",
+    "webpack-cli": "^2.0.14",
+    "webpack-dev-server": "^3.1.3"
   },
   "scripts": {
-    "build": "npm run remove-old-version && npm run copy-swagger-ui && npm run clean-files",
-    "copy-swagger-ui": "mkdir -p ./static/swagger-ui/ && cp -R ./node_modules/swagger-ui-dist/ ./static/swagger-ui/",
-    "clean-files": "rm -f ./static/swagger-ui/.npmignore ./static/swagger-ui/README.md ./static/swagger-ui/index.html ./static/swagger-ui/index.js ./static/swagger-ui/oauth2-redirect.html ./static/swagger-ui/package.json",
-    "remove-old-version": "rm -rf ./static/swagger-ui/"
+    "build": "npm run format && webpack --config webpack.production.config.js --colors",
+    "develop": "webpack-dev-server --config webpack.config.js --mode development",
+    "format": "prettier --write 'src/**/*.js'"
   },
   "engines": {
     "node": "8.11.1",
     "npm": "5.6.0"
+  },
+  "dependencies": {
+    "prop-types": "^15.6.1",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "swagger-ui": "^3.13.4"
   }
 }
