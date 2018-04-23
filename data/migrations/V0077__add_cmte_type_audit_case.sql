@@ -231,8 +231,7 @@ CREATE INDEX ON ofec_committee_fulltext_audit_mv using gin(fulltxt);
 --1) View Name: finding_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
 
-CREATE OR REPLACE VIEW auditsearch.finding_vw;
-CREATE VIEW auditsearch.finding_vw AS
+CREATE OR REPLACE VIEW auditsearch.finding_vw AS
 SELECT
     btrim(finding_pk::text) AS primary_category_id,
     btrim(finding::text) AS primary_category_name,
@@ -250,8 +249,7 @@ GRANT SELECT ON TABLE finding_vw TO fec_read;
 -- 2) View Name: finding_rel_vw; Type: VIEW; Schema: auditsearch; Owner: fec
 --
 
-CREATE OR REPLACE VIEW auditsearch.finding_rel_vw;
-CREATE VIEW auditsearch.finding_rel_vw AS
+CREATE OR REPLACE VIEW auditsearch.finding_rel_vw AS
 SELECT
     btrim(fr.parent_finding_pk::text) AS primary_category_id,
     btrim(fr.child_finding_pk::text) AS sub_category_id,
