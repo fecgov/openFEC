@@ -155,6 +155,12 @@ class TotalsCandidateView(ApiResource):
 
     filter_fulltext_fields = [('q', models.CandidateSearch.fulltxt)]
 
+    filter_match_fields = [
+        ('has_raised_funds', models.CandidateTotal.has_raised_funds),
+        ('federal_funds_flag', models.CandidateTotal.federal_funds_flag),
+        ('election_full', models.CandidateTotal.is_election),
+    ]
+
     def build_query(self, **kwargs):
         if kwargs['election_full']:
             history = models.CandidateHistoryLatest
@@ -164,8 +170,7 @@ class TotalsCandidateView(ApiResource):
             year_column = history.two_year_period
         query = db.session.query(
             history.__table__,
-            models.CandidateTotal.__table__,
-            models.CandidateFlags.__table__
+            models.CandidateTotal.__table__
         ).join(
             models.CandidateTotal,
             sa.and_(
@@ -176,28 +181,14 @@ class TotalsCandidateView(ApiResource):
         ).join(
             models.Candidate,
             history.candidate_id == models.Candidate.candidate_id,
-        ).join(
-            models.CandidateFlags,
-            history.candidate_id == models.CandidateFlags.candidate_id,
-        ).filter(
-            models.CandidateTotal.is_election == kwargs['election_full'],
         )
         if kwargs.get('q'):
             query = query.join(
                 models.CandidateSearch,
                 history.candidate_id == models.CandidateSearch.id,
             )
-        #The .filter methods may be able to moved to the filters methods, will investigate
-        if kwargs.get('has_raised_funds'):
-            query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.has_raised_funds == kwargs['has_raised_funds'])
-            )
-        if kwargs.get('federal_funds_flag'):
-            query = query.filter(
-                models.Candidate.flags.has(models.CandidateFlags.federal_funds_flag == kwargs['federal_funds_flag'])
-            )
         query = filters.filter_multi(query, kwargs, self.filter_multi_fields(history, models.CandidateTotal))
         query = filters.filter_range(query, kwargs, self.filter_range_fields(models.CandidateTotal))
         query = filters.filter_fulltext(query, kwargs, self.filter_fulltext_fields)
+        query = filters.filter_match(query, kwargs, self.filter_match_fields)
         return query
-
