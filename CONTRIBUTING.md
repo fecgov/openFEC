@@ -96,7 +96,7 @@ conduct full reviews of the work slated for a release on our staging site.
 1. Please pull an issue from the current sprint only (unless there is an
    *URGENT* issue). If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PMs or tech lead on Slack.
 2. Before starting,
-   [write the dev issue checklist](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#development-issues-should-include).
+   [write the dev issue checklist](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#issues).
 3. While working, submit `[WIP]`
    [pull requests](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#pull-requests)
    liberally.
@@ -117,7 +117,7 @@ These pipelines include:
 1. **Backlog:** Tickets that are ready to be worked on and assigned in sprint planning
 2. **In progress:** Tickets that are actively being worked on by a member of the team who is assigned to the ticket
 3. **Blocked:** This signifies an issue with the ticket that is blocking any kind of further work until a certain dependency is met. These are critical especially because it would prevent a ticket from being completed within the sprint iteration.
-4. **Ready:** The ticket has been completed and is ready for code, design, content review, and merge into our repositories. Add “plz-review” label here to signify that the ticket is ready to be reviewed. After the PR is merged, DO NOT close the ticket, leave it in Ready. Closing the ticket may jeopardize testing it in staging. 
+4. **Ready:** The ticket has been completed and is ready for code, design, content review, and merge into our repositories. Add “plz-review” label here to signify that the ticket is ready to be reviewed. After the PR is merged, close it and write a new testing ticket that links to the issue that was closed. Add it to the backlog with the title `Stage testing: [subject]`. That testing ticket will be assigned during sprint planning to test before deploy. 
 
     - If applicable, be sure to connect the PR with a particular issue so that it will show up on the board as connected.
         - A. It is important for the product team to refresh requirements in the original issue if something has changed. This way it will not be confusing during testing.
