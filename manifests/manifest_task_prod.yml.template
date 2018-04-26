@@ -17,6 +17,6 @@ applications:
   no-route: true
   services:
   - fec-s3-prod
-  - fec-api-search
+  - fec-api-search56
   - fec-creds-prod
   stack: cflinuxfs2
