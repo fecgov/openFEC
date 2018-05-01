@@ -130,9 +130,10 @@ def load_current_murs(mur_no=None):
     logger.info("Loading current MUR(s)")
     mur_count = 0
     for mur in get_murs(mur_no):
-        logger.info("Loading current MUR: %s", mur['no'])
-        es.index('docs_index', 'murs', mur, id=mur['doc_id'])
-        mur_count += 1
+        if mur is not None:
+            logger.info("Loading current MUR: %s", mur['no'])
+            es.index('docs_index', 'murs', mur, id=mur['doc_id'])
+            mur_count += 1
     logger.info("%d current MUR(s) loaded", mur_count)
 
 
@@ -157,29 +158,33 @@ def get_single_mur(mur_no):
 
     with db.engine.connect() as conn:
         rs = conn.execute(SINGLE_MUR, mur_no)
-        row = rs.fetchone()
-        case_id = row['case_id']
-        sort1, sort2 = get_sort_fields(row['case_no'])
-        mur = {
-            'doc_id': 'mur_%s' % row['case_no'],
-            'no': row['case_no'],
-            'name': row['name'],
-            'mur_type': 'current',
-            'sort1': sort1,
-            'sort2': sort2,
-        }
-        mur['subjects'] = get_subjects(case_id)
-        mur['election_cycles'] = get_election_cycles(case_id)
+        row = rs.first()
+        if row is not None:
+            case_id = row['case_id']
+            sort1, sort2 = get_sort_fields(row['case_no'])
+            mur = {
+                'doc_id': 'mur_%s' % row['case_no'],
+                'no': row['case_no'],
+                'name': row['name'],
+                'mur_type': 'current',
+                'sort1': sort1,
+                'sort2': sort2,
+            }
+            mur['subjects'] = get_subjects(case_id)
+            mur['election_cycles'] = get_election_cycles(case_id)
 
-        participants = get_participants(case_id)
-        mur['participants'] = list(participants.values())
-        mur['respondents'] = get_sorted_respondents(mur['participants'])
-        mur['commission_votes'] = get_commission_votes(case_id)
-        mur['dispositions'] = get_dispositions(case_id)
-        mur['documents'] = get_documents(case_id, bucket, bucket_name)
-        mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
-        mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
-        return mur
+            participants = get_participants(case_id)
+            mur['participants'] = list(participants.values())
+            mur['respondents'] = get_sorted_respondents(mur['participants'])
+            mur['commission_votes'] = get_commission_votes(case_id)
+            mur['dispositions'] = get_dispositions(case_id)
+            mur['documents'] = get_documents(case_id, bucket, bucket_name)
+            mur['open_date'], mur['close_date'] = get_open_and_close_dates(case_id)
+            mur['url'] = '/legal/matter-under-review/%s/' % row['case_no']
+            return mur
+        else:
+            logger.info("Not a valid current MUR number. This may be an archived MUR.")
+            return None
 
 
 def get_election_cycles(case_id):
