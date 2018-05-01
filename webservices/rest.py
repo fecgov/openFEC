@@ -165,12 +165,16 @@ FEC_API_ENDPOINT_CACHE_BLACKLIST = [
 FEC_API_ENDPOINT_ERROR_STATUS_CODES = [500, 502, 503, 504]
 
 
-# Anonymous function to check to see if a URL path matches any of the patterns
-# in the API endpoint blacklist; if there's a match, return False, else return
-# True.
-is_url_path_cacheable = lambda url_path: not any([
-    x.match(url_path) is not None for x in FEC_API_ENDPOINT_CACHE_BLACKLIST
-])
+def is_url_path_cacheable(url_path):
+    """
+    Check to see if a URL path matches any of the patterns
+    in the API endpoint blacklist
+    """
+    for blacklist_url in FEC_API_ENDPOINT_CACHE_BLACKLIST:
+        if blacklist_url.match(url_path):
+            return False
+
+    return True
 
 
 def is_cacheable_endpoint(status_code, url_path):
