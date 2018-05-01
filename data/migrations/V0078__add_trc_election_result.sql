@@ -1,7 +1,7 @@
 SET search_path = fecapp, pg_catalog;
 
 CREATE TABLE trc_election_result (
-  trc_election_result_id  integer NOT NULL,
+  trc_election_result_id  bigint NOT NULL,
   cand_id                 character varying(9) NOT NULL,
   cand_nm                 character varying(90),
   cand_votes              numeric(12,0),
@@ -10,7 +10,7 @@ CREATE TABLE trc_election_result (
   source                  character varying(1),
   entry_date              timestamp without time zone,
   results_notes           character varying(250),
-  trc_election_id         integer NOT NULL,
+  trc_election_id         bigint NOT NULL,
   create_date             timestamp without time zone,
   update_date             timestamp without time zone,
   sec_user_id_create      numeric(12,0) NOT NULL,
