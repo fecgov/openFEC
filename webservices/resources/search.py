@@ -26,7 +26,7 @@ class CandidateNameSearch(utils.Resource):
     def get(self, **kwargs):
         query = filters.filter_fulltext(models.CandidateSearch.query, kwargs, self.filter_fulltext_fields)
         query = query.order_by(
-            sa.desc(models.CandidateSearch.receipts)
+            sa.desc(models.CandidateSearch.total_activity)
         ).limit(20)
         return {'results': query.all()}
 
@@ -46,6 +46,6 @@ class CommitteeNameSearch(utils.Resource):
     def get(self, **kwargs):
         query = filters.filter_fulltext(models.CommitteeSearch.query, kwargs, self.filter_fulltext_fields)
         query = query.order_by(
-            sa.desc(models.CommitteeSearch.receipts)
+            sa.desc(models.CommitteeSearch.total_activity)
         ).limit(20)
         return {'results': query.all()}
