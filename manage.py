@@ -303,7 +303,7 @@ def refresh_materialized(concurrent=True):
         'totals_ie': ['ofec_totals_ie_only_mv'],
         'totals_house_senate': ['ofec_totals_house_senate_mv'],
         'totals_presidential': ['ofec_totals_presidential_mv'],
-        'candidate_aggregates': ['ofec_candidate_totals_mv'],
+        'candidate_aggregates': ['ofec_candidate_totals_mv', 'ofec_candidate_totals_with_0s_mv'],
         'candidate_flags': ['ofec_candidate_flag_mv'],
         'sched_c': ['ofec_sched_c_mv'],
         'sched_a_by_state_recipient_totals': ['ofec_sched_a_aggregate_state_recipient_totals_mv'],
