@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21px" height="21px" viewBox="0 0 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>reaction-not-interested</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Data-landing" transform="translate(-812.000000, -1020.000000)">
+            <g id="reaction-not-interested" transform="translate(813.000000, 1021.000000)">
+                <g id="Group-2-Copy">
+                    <path d="M5.88095238,14.0238095 L14.9285714,10.4047619" id="Line-Copy-33" stroke="#022C53" stroke-linecap="square"></path>
+                    <circle id="Oval-183-Copy-2" stroke="#112E51" cx="9.5" cy="9.5" r="9.5"></circle>
+                    <g id="Group-Copy-8" transform="translate(9.476190, 7.142857) rotate(-180.000000) translate(-9.476190, -7.142857) translate(4.476190, 6.142857)" stroke="#112E51">
+                        <path d="M-2.14939178e-13,4.26325641e-14 C-2.14939178e-13,0.999372404 0.810151405,1.80952381 1.80952381,1.80952381 L1.80952381,1.80952381 C2.80889621,1.80952381 3.61904762,0.999372404 3.61904762,4.26325641e-14" id="Oval-183-Copy-4"></path>
+                        <path d="M6.33333333,4.26325641e-14 C6.33333333,0.999372404 7.14348474,1.80952381 8.14285714,1.80952381 L8.14285714,1.80952381 C9.14222955,1.80952381 9.95238095,0.999372404 9.95238095,4.26325641e-14" id="Oval-183-Copy-5"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

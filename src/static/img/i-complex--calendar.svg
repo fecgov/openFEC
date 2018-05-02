@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="104px" height="104px" viewBox="0 0 104 104" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 3.8.3 (29802) - http://www.bohemiancoding.com/sketch -->
+    <title>i-complex--calendar</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="CMS-Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Beta-Home-2-Copy-11" transform="translate(-580.000000, -524.000000)">
+            <g id="i-complex--calendar" transform="translate(580.000000, 524.000000)">
+                <ellipse id="Mask-Copy" fill="#FFFFFF" cx="52" cy="52" rx="52" ry="52"></ellipse>
+                <path d="M18,23.0008506 C18,21.8958113 18.9004377,21 19.9968022,21 L85.2174017,21 C86.3202051,21 87.2142039,21.8878114 87.2142039,23.0008506 L87.2142039,81.8027476 C87.2142039,82.9077869 86.3137662,83.8035982 85.2174017,83.8035982 L19.9968022,83.8035982 C18.8939988,83.8035982 18,82.9157868 18,81.8027476 L18,23.0008506 Z" id="Rectangle-125-Copy" fill="#D6D7D9"></path>
+                <ellipse id="Oval-34-Copy-8" fill="#F1F1F1" cx="28.4368079" cy="37.4859713" rx="4.43680794" ry="4.4859713"></ellipse>
+                <ellipse id="Oval-34-Copy-13" fill="#F1F1F1" cx="28.4368079" cy="49.4859713" rx="4.43680794" ry="4.4859713"></ellipse>
+                <ellipse id="Oval-34-Copy-22" fill="#F1F1F1" cx="28.4368079" cy="61.4859713" rx="4.43680794" ry="4.4859713"></ellipse>
+                <ellipse id="Oval-34-Copy-27" fill="#F1F1F1" cx="28.4368079" cy="77.4859713" rx="4.43680794" ry="4.4859713"></ellipse>
+                <rect id="Rectangle-128-Copy-6" fill="#112E51" x="20" y="29" width="63.8900344" height="2"></rect>
+                <rect id="Rectangle-128-Copy-7" fill="#AEB0B5" x="35" y="36" width="46" height="4" rx="1"></rect>
+                <rect id="Rectangle-128-Copy-8" fill="#AEB0B5" x="35" y="47" width="46" height="4" rx="1"></rect>
+                <rect id="Rectangle-128-Copy-9" fill="#AEB0B5" x="35" y="59" width="46" height="4" rx="1"></rect>
+                <rect id="Rectangle-128-Copy-10" fill="#AEB0B5" x="35" y="75" width="46" height="4" rx="1"></rect>
+                <rect id="Rectangle-128-Copy-11" fill="#112E51" x="20" y="69" width="63.8900344" height="2"></rect>
+                <rect id="Rectangle-126-Copy-2" fill="#F77B42" x="29" y="15" width="5.32416953" height="10.7663311" rx="1"></rect>
+                <rect id="Rectangle-126-Copy-3" fill="#F77B42" x="70" y="15" width="5.32000017" height="10.7663311" rx="1"></rect>
+            </g>
+        </g>
+    </g>
+</svg>
