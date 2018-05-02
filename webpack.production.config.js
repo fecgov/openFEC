@@ -44,6 +44,26 @@ module.exports = {
           fallback: "style-loader",
           use: "css-loader"
         })
+      },
+      {
+        test: /\.(png|jpg|gif|svg)$/,
+        use: [{
+          loader: 'file-loader',
+          options: {
+            emitFile: true,
+            name: '[name].[ext]',
+            publicPath: '/docs/static/dist'
+          }
+        }]
+      },
+      {
+        test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/,
+        use: {
+          loader: "url-loader",
+          options: {
+            limit: 50000
+          }
+        }
       }
     ]
   },
