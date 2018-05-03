@@ -159,13 +159,11 @@ The committee endpoints include all FEC filers, even if they aren't registered a
 Officially, committees include the committees and organizations that file with the FEC.
 Several different types of organizations file financial reports with the FEC:
 
-* Campaign committees authorized by particular candidates to raise and spend funds in
-their campaigns
-* Non-party committees (e.g., PACs), some of which may be sponsored by corporations,
-unions, trade or membership groups, etc.
-* Political party committees at the national, state, and local levels
-* Groups and individuals making only independent expenditures
-* Corporations, unions, and other organizations making internal communications
+*Campaign committees authorized by particular candidates to raise and spend funds in
+their campaigns. Non-party committees (e.g., PACs), some of which may be sponsored by corporations,
+unions, trade or membership groups, etc. Political party committees at the national, state, and local levels.
+Groups and individuals making only independent expenditures
+Corporations, unions, and other organizations making internal communications*
 
 The committee endpoints primarily use data from FEC registration Form 1 and Form 2.
 '''
@@ -302,7 +300,7 @@ multiple ways to explain the way it may move though different committees as an e
 For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
 contributions. See below for full methodology.
 
-### Methodology for determining unique, individual contributions
+__Methodology for determining unique, individual contributions__
 
 For receipts over $200 use FEC code line_number to identify individuals.
 
@@ -437,7 +435,7 @@ The committee continues to report the loan until it is repaid.
 '''
 
 SCHEDULE_D_TAG = '''
-Schedule D shows debts and obligations owed to or by the committee that are
+Schedule D, it shows debts and obligations owed to or by the committee that are
 required to be disclosed.
 '''
 
@@ -491,9 +489,10 @@ large result sets are approximate; you will want to page through the records unt
 '''
 
 SCHEDULE_F_TAG = '''
-Schedule F shows all special expenditures a national or state party committee makes in connection with
-the general election campaigns of federal candidates
+Schedule F, it shows all special expenditures a national or state party committee
+makes in connection with the general election campaigns of federal candidates.
 '''
+
 SCHEDULE_F = SCHEDULE_F_TAG + '''
 These coordinated party expenditures do not count against the contribution limits but are subject to other limits,
 these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political Party Committees.
@@ -543,8 +542,9 @@ of each type, grouped by state and cycle.
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at https://api.data.gov/signup.
 '''
+
 SEARCH_TAG = '''
-Search for candidates or committees by name.
+Search for candidates, committees by name.
 '''
 
 
@@ -652,11 +652,11 @@ from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
 ELECTIONEERING = '''
 An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
 
-- The communication refers to a clearly identified federal candidate;\n\
-- The communication is publicly distributed by a television station,\n\
-  radio station, cable television system or satellite system for a fee; and\n\
-- The communication is distributed within 60 days prior\n\
-  to a general election or 30 days prior to a primary election to federal office.\n\
+_The communication refers to a clearly identified federal candidate._
+
+_The communication is publicly distributed by a television station, radio station, cable television system or satellite system for a fee._
+
+_The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office._
 '''
 
 COMMUNICATION_COST = '''
