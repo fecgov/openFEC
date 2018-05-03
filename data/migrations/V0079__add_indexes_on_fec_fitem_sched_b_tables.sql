@@ -7,6 +7,7 @@
 
 -- fec_fitem_sched_b tables prior to election cycle 2002 do not have as many data and also are less queried.  No need for indexes except primary key
 -- but for consistency, and also for possible future feature of multiple-cycle queries, indexes still added for election cycle 1976 to 2002
+
 -- -------------------------------
 -- -------------------------------
 --   fec_fitem_sched_b_1975_1976
@@ -34,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1975_1976_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1975_1976_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1975_1976 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1975_1976_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1975_1976 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1975_1976_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1975_1976 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1975_1976_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1975_1976 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1975_1976_disb_dt ON disclosure.fec_fitem_sched_b_1975_1976 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1975_1976;
@@ -64,6 +66,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1977_1978_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1977_1978_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1977_1978 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1977_1978_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1977_1978 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1977_1978_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1977_1978 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1977_1978_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1977_1978 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1977_1978_disb_dt ON disclosure.fec_fitem_sched_b_1977_1978 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1977_1978;
@@ -94,6 +97,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1979_1980_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1979_1980_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1979_1980 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1979_1980_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1979_1980 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1979_1980_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1979_1980 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1979_1980_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1979_1980 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1979_1980_disb_dt ON disclosure.fec_fitem_sched_b_1979_1980 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1979_1980;
@@ -124,6 +128,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1981_1982_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1981_1982_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1981_1982 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1981_1982_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1981_1982 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1981_1982_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1981_1982 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1981_1982_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1981_1982 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1981_1982_disb_dt ON disclosure.fec_fitem_sched_b_1981_1982 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1981_1982;
@@ -154,6 +159,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1983_1984_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1983_1984_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1983_1984 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1983_1984_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1983_1984 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1983_1984_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1983_1984 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1983_1984_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1983_1984 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1983_1984_disb_dt ON disclosure.fec_fitem_sched_b_1983_1984 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1983_1984;
@@ -184,6 +190,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1985_1986_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1985_1986_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1985_1986 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1985_1986_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1985_1986 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1985_1986_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1985_1986 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1985_1986_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1985_1986 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1985_1986_disb_dt ON disclosure.fec_fitem_sched_b_1985_1986 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1985_1986;
@@ -214,6 +221,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1987_1988_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1987_1988_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1987_1988 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1987_1988_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1987_1988 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1987_1988_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1987_1988 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1987_1988_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1987_1988 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1987_1988_disb_dt ON disclosure.fec_fitem_sched_b_1987_1988 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1987_1988;
@@ -244,6 +252,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1989_1990_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1989_1990_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1989_1990 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1989_1990_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1989_1990 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1989_1990_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1989_1990 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1989_1990_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1989_1990 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1989_1990_disb_dt ON disclosure.fec_fitem_sched_b_1989_1990 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1989_1990;
@@ -274,6 +283,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1991_1992_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1991_1992_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1991_1992 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1991_1992_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1991_1992 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1991_1992_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1991_1992 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1991_1992_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1991_1992 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1991_1992_disb_dt ON disclosure.fec_fitem_sched_b_1991_1992 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1991_1992;
@@ -304,6 +314,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1993_1994_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1993_1994_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1993_1994 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1993_1994_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1993_1994 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1993_1994_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1993_1994 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1993_1994_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1993_1994 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1993_1994_disb_dt ON disclosure.fec_fitem_sched_b_1993_1994 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1993_1994;
@@ -334,6 +345,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1995_1996_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1995_1996_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1995_1996 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1995_1996_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1995_1996 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1995_1996_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1995_1996 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1995_1996_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1995_1996 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1995_1996_disb_dt ON disclosure.fec_fitem_sched_b_1995_1996 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1995_1996;
@@ -364,6 +376,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1997_1998_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1997_1998_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1997_1998 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1997_1998_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1997_1998 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1997_1998_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1997_1998 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1997_1998_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1997_1998 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1997_1998_disb_dt ON disclosure.fec_fitem_sched_b_1997_1998 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1997_1998;
@@ -394,6 +407,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_1999_2000_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_1999_2000_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1999_2000 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1999_2000_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1999_2000 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_1999_2000_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1999_2000 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_1999_2000_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_1999_2000 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_1999_2000_disb_dt ON disclosure.fec_fitem_sched_b_1999_2000 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_1999_2000;
@@ -424,6 +438,7 @@ CREATE INDEX IF NOT EXISTS idx_sched_b_2001_2002_image_num_disb_amt_sub_id ON di
 CREATE INDEX IF NOT EXISTS idx_sched_b_2001_2002_rcpt_name_text_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2001_2002 USING gin (recipient_name_text, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_2001_2002_rpt_yr_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2001_2002 USING btree (rpt_yr, disb_amt, sub_id);
 CREATE INDEX IF NOT EXISTS idx_sched_b_2001_2002_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2001_2002 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);
+CREATE INDEX IF NOT EXISTS idx_sched_b_2001_2002_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2001_2002 USING btree (disb_amt, sub_id);
 -- disb_dt
 CREATE INDEX IF NOT EXISTS idx_sched_b_2001_2002_disb_dt ON disclosure.fec_fitem_sched_b_2001_2002 USING btree (disb_dt);
 ANALYZE disclosure.fec_fitem_sched_b_2001_2002;
@@ -651,6 +666,18 @@ END$$;
 DO $$
 BEGIN
     EXECUTE format('CREATE INDEX idx_sched_b_2003_2004_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2003_2004 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2003_2004_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2003_2004 USING btree (disb_amt, sub_id);');
 
   
     EXCEPTION 
@@ -909,6 +936,18 @@ BEGIN
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
 
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2005_2006_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2005_2006 USING btree (disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
 -- -----------------
 -- disb_dt
 -- -----------------
@@ -1149,6 +1188,18 @@ END$$;
 DO $$
 BEGIN
     EXECUTE format('CREATE INDEX idx_sched_b_2007_2008_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2007_2008 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2007_2008_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2007_2008 USING btree (disb_amt, sub_id);');
 
   
     EXCEPTION 
@@ -1408,6 +1459,18 @@ BEGIN
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
 
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2009_2010_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2009_2010 USING btree (disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
 -- -----------------
 -- disb_dt
 -- -----------------
@@ -1648,6 +1711,18 @@ END$$;
 DO $$
 BEGIN
     EXECUTE format('CREATE INDEX idx_sched_b_2011_2012_line_num_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2011_2012 USING btree (line_num COLLATE pg_catalog."default", disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2011_2012_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2011_2012 USING btree (disb_amt, sub_id);');
 
   
     EXCEPTION 
@@ -1906,6 +1981,18 @@ BEGIN
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
 
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2013_2014_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2013_2014 USING btree (disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
 -- -----------------
 -- disb_dt
 -- -----------------
@@ -2155,6 +2242,18 @@ BEGIN
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
 
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2015_2016_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2015_2016 USING btree (disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
 -- -----------------
 -- disb_dt
 -- -----------------
@@ -2302,6 +2401,8 @@ BEGIN
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
 
+
+
 -- -----------------
 -- disb_amt
 -- -----------------
@@ -2405,6 +2506,18 @@ BEGIN
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
 
+DO $$
+BEGIN
+    EXECUTE format('CREATE INDEX idx_sched_b_2017_2018_disb_amt_sub_id ON disclosure.fec_fitem_sched_b_2017_2018 USING btree (disb_amt, sub_id);');
+
+  
+    EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
 
 -- -----------------
 -- disb_dt
@@ -2419,6 +2532,7 @@ BEGIN
              WHEN others THEN 
                 RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
 END$$;
+
 
 
 ANALYZE disclosure.fec_fitem_sched_b_2017_2018;
