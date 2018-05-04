@@ -41,13 +41,9 @@ const Footer = () => (
           1050 First Street, NE<br /> Washington, DC 20463
         </p>
 
-        <a
-          href="https://public.govdelivery.com/accounts/USFEC/subscriber/topics?qsp=CODE_RED"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href="mailto:apiinfo@fec.gov">
           <button className="button--standard button--envelope">
-            Sign up for FECMail
+            Email FEC API Info
           </button>
         </a>
       </div>
