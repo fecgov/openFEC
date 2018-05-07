@@ -83,7 +83,7 @@ CREATE MATERIALIZED VIEW ofec_entity_chart_mv AS
     combined.party_disbursements
    FROM combined
   WHERE (combined.cycle >= (2008)::numeric)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_entity_chart_mv OWNER TO fec;
