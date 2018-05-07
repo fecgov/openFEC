@@ -13,7 +13,7 @@ env:
   PRODUCTION: True
   WEB_CONCURRENCY: 4
 services:
-  - fec-api-search56
+  - fec-api-search
   - fec-redis
   - fec-creds-prod
   - fec-s3-prod
