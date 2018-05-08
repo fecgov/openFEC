@@ -231,11 +231,19 @@ def create_sample_db(ctx):
     jdbc_url = to_jdbc_url(db_conn)
     run_migrations(ctx, jdbc_url)
     print("Schema loaded")
+
     print("Loading sample data...")
     subprocess.check_call(
         ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn],
     )
     print("Sample data loaded")
+
+    print("Refreshing materialized views...")
+    os.environ["SQLA_CONN"] = db_conn # SQLA_CONN is used by manage.py tasks
+    subprocess.check_call(
+        ['python', 'manage.py', 'refresh_materialized'],
+    )
+    print("Materialized views refreshed")
 
 @task
 def run_migrations(ctx, jdbc_url):
