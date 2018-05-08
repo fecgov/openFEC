@@ -167,11 +167,12 @@ class ScheduleA(BaseItemized):
 
 
 class ScheduleAEfile(BaseRawItemized):
-    __tablename__ = 'real_efile_sa7'
+    __table_args__ = {'schema': 'real_efile'}
+    __tablename__ = 'sa7'
 
     file_number = db.Column("repid", db.Integer, index=True, primary_key=True)
     related_line_number = db.Column("rel_lineno", db.Integer, primary_key=True)
-    committee_id = db.Column("comid", db.String, doc=docs.COMMITTEE_ID)
+    committee_id = db.Column("comid", db.String, index=True, doc=docs.COMMITTEE_ID)
     contributor_prefix = db.Column('prefix', db.String)
     contributor_name_text = db.Column(TSVECTOR)
     contributor_first_name = db.Column('fname', db.String)
@@ -182,7 +183,7 @@ class ScheduleAEfile(BaseRawItemized):
     # contributor_street_1 = db.Column('contbr_st1', db.String)
     # contributor_street_2 = db.Column('contbr_st2', db.String)
     contributor_city = db.Column('city', db.String, doc=docs.CONTRIBUTOR_CITY)
-    contributor_state = db.Column('state', db.String, doc=docs.CONTRIBUTOR_STATE)
+    contributor_state = db.Column('state', db.String, index=True, doc=docs.CONTRIBUTOR_STATE)
     contributor_zip = db.Column('zip', db.String, doc=docs.CONTRIBUTOR_ZIP)
     contributor_employer = db.Column('indemp', db.String, doc=docs.CONTRIBUTOR_EMPLOYER)
     contributor_employer_text = db.Column(TSVECTOR)
@@ -240,7 +241,8 @@ class ScheduleAEfile(BaseRawItemized):
 
 
 class ScheduleB(BaseItemized):
-    __tablename__ = 'ofec_sched_b_master'
+    __table_args__ = {'schema' : 'disclosure'}
+    __tablename__ = 'fec_fitem_sched_b'
 
     # Recipient info
     entity_type = db.Column('entity_tp', db.String)
@@ -336,8 +338,6 @@ class ScheduleB(BaseItemized):
 
     ref_disp_excess_flg = db.Column('ref_disp_excess_flg', db.String)
     comm_dt = db.Column('comm_dt', db.Date)
-    cycle = db.Column('election_cycle', db.Integer)
-    timestamp = db.Column('timestamp', db.DateTime)
 
     @hybrid_property
     def sort_expressions(self):

@@ -2,17 +2,6 @@
 A RESTful web service supporting fulltext and field-specific searches on FEC data. For
 full documentation visit: https://api.open.fec.gov/developers.
 """
-from webservices.env import env
-
-def initialize_newrelic():
-    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
-    if license_key:
-        import newrelic.agent
-        settings = newrelic.agent.global_settings()
-        settings.license_key = license_key
-        newrelic.agent.initialize()
-
-initialize_newrelic()
 
 import http
 import json
@@ -68,17 +57,28 @@ from webservices.resources import costs
 from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.resources import audit
+
 from webservices.env import env
 from webservices.tasks import utils
-
 from webservices.tasks.response_exception import ResponseException
 from webservices.tasks.json_response import JsonResponse
 from webservices.tasks.error_code import ErrorCode
 from webservices.tasks import cache_request
 
 
+def initialize_newrelic():
+    license_key = env.get_credential('NEW_RELIC_LICENSE_KEY')
+    if license_key:
+        import newrelic.agent
+        settings = newrelic.agent.global_settings()
+        settings.license_key = license_key
+        newrelic.agent.initialize()
+
+initialize_newrelic()
+
 app = Flask(__name__)
 logger = logging.getLogger('rest.py')
+
 
 def sqla_conn_string():
     sqla_conn_string = env.get_credential('SQLA_CONN')
@@ -116,6 +116,7 @@ if not app.debug:
 
 db.init_app(app)
 cors.CORS(app)
+
 
 class FlaskRestParser(FlaskParser):
 
@@ -164,12 +165,16 @@ FEC_API_ENDPOINT_CACHE_BLACKLIST = [
 FEC_API_ENDPOINT_ERROR_STATUS_CODES = [500, 502, 503, 504]
 
 
-# Anonymous function to check to see if a URL path matches any of the patterns
-# in the API endpoint blacklist; if there's a match, return False, else return
-# True.
-is_url_path_cacheable = lambda url_path: not any([
-    x.match(url_path) is not None for x in FEC_API_ENDPOINT_CACHE_BLACKLIST
-])
+def is_url_path_cacheable(url_path):
+    """
+    Check to see if a URL path matches any of the patterns
+    in the API endpoint blacklist
+    """
+    for blacklist_url in FEC_API_ENDPOINT_CACHE_BLACKLIST:
+        if blacklist_url.match(url_path):
+            return False
+
+    return True
 
 
 def is_cacheable_endpoint(status_code, url_path):
@@ -236,7 +241,8 @@ def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
 
     logger.info(
-        'An API error occurred with the status code of {status} ({exception}).'.format(
+        'An API error occurred with the status code of {status} ({exception}).'
+        .format(
             status=wrapped.status,
             exception=wrapped.wrappedException
         )
@@ -342,6 +348,7 @@ api.add_resource(audit.AuditCategoryView, '/audit-category/')
 api.add_resource(audit.AuditCaseView, '/audit-case/')
 api.add_resource(audit.AuditCandidateNameSearch, '/names/audit_candidates/')
 api.add_resource(audit.AuditCommitteeNameSearch, '/names/audit_committees/')
+
 
 def add_aggregate_resource(api, view, schedule, label):
     api.add_resource(

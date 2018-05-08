@@ -130,7 +130,7 @@ class CandidateHistoryLatest(BaseCandidate):
 
 
 class CandidateTotal(db.Model):
-    __tablename__ = 'ofec_candidate_totals_mv'
+    __tablename__ = 'ofec_candidate_totals_with_0s_mv'
     candidate_id = db.Column(db.String, index=True, primary_key=True)
     election_year = db.Column(db.Integer, index=True, primary_key=True)
     cycle = db.Column(db.Integer, index=True, primary_key=True)
@@ -141,6 +141,8 @@ class CandidateTotal(db.Model):
     debts_owed_by_committee = db.Column(db.Numeric(30, 2))
     coverage_start_date = db.Column(db.Date, doc=docs.COVERAGE_START_DATE)
     coverage_end_date = db.Column(db.Date, doc=docs.COVERAGE_END_DATE)
+    federal_funds_flag = db.Column(db.Boolean, index=True, doc=docs.FEDERAL_FUNDS_FLAG)
+    has_raised_funds = db.Column(db.Boolean, index=True, doc=docs.HAS_RAISED_FUNDS)
 
 
 class CandidateElection(db.Model):
