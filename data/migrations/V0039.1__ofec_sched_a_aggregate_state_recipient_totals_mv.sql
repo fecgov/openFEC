@@ -96,7 +96,7 @@ CREATE MATERIALIZED VIEW ofec_sched_a_aggregate_state_recipient_totals_mv AS
     combined.committee_type,
     combined.committee_type_full
    FROM combined
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_sched_a_aggregate_state_recipient_totals_mv OWNER TO fec;
