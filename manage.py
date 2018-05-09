@@ -277,9 +277,14 @@ def refresh_materialized(concurrent=True):
     logger.info('Refreshing materialized views...')
 
     materialized_view_names = {
-        'audit_case': ['ofec_audit_case_mv', 'ofec_audit_case_category_rel_mv', 'ofec_audit_case_sub_category_rel_mv', 'ofec_committee_fulltext_audit_mv', 'ofec_candidate_fulltext_audit_mv'],
+        'audit_case': ['ofec_audit_case_mv',
+                       'ofec_audit_case_category_rel_mv',
+                       'ofec_audit_case_sub_category_rel_mv',
+                       'ofec_committee_fulltext_audit_mv',
+                       'ofec_candidate_fulltext_audit_mv'],
         'cand_cmte_linkage': ['ofec_cand_cmte_linkage_mv'],
-        'candidate_aggregates': ['ofec_candidate_totals_mv', 'ofec_candidate_totals_with_0s_mv'],
+        'candidate_aggregates': ['ofec_candidate_totals_mv',
+                                 'ofec_candidate_totals_with_0s_mv'],
         'candidate_detail': ['ofec_candidate_detail_mv'],
         'candidate_election': ['ofec_candidate_election_mv'],
         'candidate_flags': ['ofec_candidate_flag_mv'],
@@ -299,11 +304,13 @@ def refresh_materialized(concurrent=True):
         'filing_amendments_house_senate': ['ofec_house_senate_paper_amendments_mv'],
         'filing_amendments_pac_party': ['ofec_pac_party_paper_amendments_mv'],
         'filing_amendments_presidential': ['ofec_presidential_paper_amendments_mv'],
-        'filings': ['ofec_filings_amendments_all_mv', 'ofec_filings_mv', 'ofec_filings_all_mv'],
+        'filings': ['ofec_filings_amendments_all_mv',
+                    'ofec_filings_mv',
+                    'ofec_filings_all_mv'],
         'large_aggregates': ['ofec_entity_chart_mv'],
         'rad_analyst': ['ofec_rad_mv'],
         'reports_house_senate': ['ofec_reports_house_senate_mv'],
-        'reports_ie': ['ofec_reports_ie_only_mv'],  # Anomale
+        'reports_ie': ['ofec_reports_ie_only_mv'],
         'reports_pac_party': ['ofec_reports_pacs_parties_mv'],
         'reports_presidential': ['ofec_reports_presidential_mv'],
         'sched_a_by_size_merged': ['ofec_sched_a_aggregate_size_merged_mv'],
@@ -315,7 +322,8 @@ def refresh_materialized(concurrent=True):
         'totals_combined': ['ofec_totals_combined_mv'],
         'totals_house_senate': ['ofec_totals_house_senate_mv'],
         'totals_ie': ['ofec_totals_ie_only_mv'],
-        'totals_pac_party': ['ofec_totals_pacs_parties_mv', 'ofec_totals_pacs_mv',
+        'totals_pac_party': ['ofec_totals_pacs_parties_mv',
+                             'ofec_totals_pacs_mv',
                              'ofec_totals_parties_mv'],
         'totals_presidential': ['ofec_totals_presidential_mv'],
     }
