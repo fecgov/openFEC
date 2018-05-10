@@ -1,11 +1,9 @@
 import json
 import os
 import subprocess
-
 import git
-from invoke import task
-# from slacker import Slacker
 
+from invoke import task
 from webservices.env import env
 from jdbc_utils import to_jdbc_url
 
