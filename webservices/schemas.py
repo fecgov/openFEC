@@ -925,6 +925,7 @@ class ElectionSchema(ma.Schema):
     incumbent_challenge_full = ma.fields.Str()
     party_full = ma.fields.Str()
     committee_ids = ma.fields.List(ma.fields.Str)
+    candidate_pcc = ma.fields.Str(doc="The candidate's primary campaign committee")
     total_receipts = ma.fields.Decimal(places=2)
     total_disbursements = ma.fields.Decimal(places=2)
     cash_on_hand_end_period = ma.fields.Decimal(places=2)

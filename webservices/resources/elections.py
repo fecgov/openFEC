@@ -161,6 +161,9 @@ class ElectionView(utils.Resource):
             totals_model.disbursements,
             totals_model.last_cash_on_hand_end_period.label('cash_on_hand_end_period'),
             totals_model.coverage_end_date,
+            sa.case(
+                [(CandidateCommitteeLink.committee_designation == 'P', CandidateCommitteeLink.committee_id)]  # noqa
+            ).label('candidate_pcc'),
         )
         pairs = join_candidate_totals(pairs, kwargs, totals_model)
         pairs = filter_candidate_totals(pairs, kwargs, totals_model)
@@ -197,6 +200,7 @@ class ElectionView(utils.Resource):
             sa.func.sum(sa.func.coalesce(pairs.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
             sa.func.array_agg(sa.distinct(pairs.c.cmte_id)).label('committee_ids'),
             sa.func.max(pairs.c.coverage_end_date).label('coverage_end_date'),
+            sa.func.max(pairs.c.candidate_pcc).label('candidate_pcc')
         ).group_by(
             pairs.c.candidate_id,
             pairs.c.candidate_election_year
@@ -318,7 +322,7 @@ def filter_candidate_totals(query, kwargs, totals_model):
 class StateElectionOfficeInfoView(ApiResource):
     model = models.StateElectionOfficeInfo
     schema = schemas.StateElectionOfficeInfoSchema
-    page_schema = schemas.StateElectionOfficeInfoPageSchema 
+    page_schema = schemas.StateElectionOfficeInfoPageSchema
 
     @property
     def args(self):
