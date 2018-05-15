@@ -864,6 +864,15 @@ COMMITTEE_NAME = 'The name of the committee. If a committee changes its name, \
     for looking up records.'
 COMMITTEE_YEAR = 'A year that the committee was active— (after original registration date \
     or filing but before expiration date)'
+FILING_FREQUENCY = 'The one-letter \n\
+    code of the filing frequency:\n\
+         - A Administratively terminated\n\
+         - D Debt\n\
+         - M Monthly filer\n\
+         - Q Quarterly filer\n\
+         - T Terminated\n\
+         - W Waived\n\
+'
 DESIGNATION = 'The one-letter designation\n\
     code of the organization:\n\
          - A authorized by\n\
