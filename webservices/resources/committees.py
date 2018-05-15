@@ -40,6 +40,7 @@ class CommitteeList(ApiResource):
 
     filter_multi_fields = [
         ('committee_id', models.Committee.committee_id),
+        ('filing_frequency', models.Committee.filing_frequency),
         ('designation', models.Committee.designation),
         ('organization_type', models.Committee.organization_type),
         ('state', models.Committee.state),
