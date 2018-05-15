@@ -110,6 +110,8 @@ class AuditCaseView(ApiResource):
         (('min_election_cycle', 'max_election_cycle'), model.cycle),
     ]
 
+# q---committee name typeahead
+# qq---candidate name typeadead
     filter_fulltext_fields = [
         ('q', models.AuditCommitteeSearch.fulltxt),
         ('qq', models.AuditCandidateSearch.fulltxt),
