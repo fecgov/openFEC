@@ -747,16 +747,16 @@ auditCategory = {
 
 # endpoint audit-case
 auditCase = {
+    'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
+    'qq': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'primary_category_id': fields.List(fields.Str(), missing='all', description=docs.PRIMARY_CATEGORY_ID),
     'sub_category_id': fields.List(fields.Str(), missing='all', description=docs.SUB_CATEGORY_ID),
     'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
-    'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
     'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
     'audit_id': fields.List(fields.Int(), description=docs.AUDIT_ID),
     'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
-    'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
     'min_election_cycle': fields.Int(description=docs.CYCLE),
     'max_election_cycle': fields.Int(description=docs.CYCLE),
 }
