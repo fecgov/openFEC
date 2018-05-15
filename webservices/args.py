@@ -225,6 +225,10 @@ candidate_history = {
 committee = {
     'year': fields.List(fields.Int, description=docs.COMMITTEE_YEAR),
     'cycle': fields.List(fields.Int, description=docs.COMMITTEE_CYCLE),
+    'filing_frequency': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'M', 'N', 'Q', 'T', 'W', '-A', '-T'])),
+        description=docs.FILING_FREQUENCY,
+    ),
     'designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
