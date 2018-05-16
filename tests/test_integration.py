@@ -4,11 +4,8 @@ import unittest
 import sqlalchemy as sa
 import factory
 import manage
-
-from webservices.env import env
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm.session import make_transient
-from faker import Faker
 from factory.alchemy import SQLAlchemyModelFactory
 from apispec import utils, exceptions
 from tests import common, factories
@@ -75,7 +72,7 @@ class TestSwagger(unittest.TestCase):
     def test_swagger_without_cache(self):
         # Test if Swagger API documentation loads
         # when cache all requests is disabled
-        os.environ['CACHE_ALL_REQUESTS'] = 'False'
+        os.environ['CACHE_ALL_REQUESTS'] is False
         try:
             utils.validate_swagger(spec)
         except exceptions.SwaggerError as error:
@@ -84,7 +81,7 @@ class TestSwagger(unittest.TestCase):
     def test_swagger_with_cache(self):
         # Test if Swagger API documentation loads
         # when cache all request is enabled
-        os.environ['CACHE_ALL_REQUESTS'] = 'True'
+        os.environ['CACHE_ALL_REQUESTS'] is True
         try:
             utils.validate_swagger(spec)
         except exceptions.SwaggerError as error:
