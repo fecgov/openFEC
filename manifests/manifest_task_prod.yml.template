@@ -19,4 +19,5 @@ applications:
   - fec-s3-prod
   - fec-api-search
   - fec-creds-prod
+  - fec-redis
   stack: cflinuxfs2
