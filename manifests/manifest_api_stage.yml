@@ -12,7 +12,7 @@ env:
   NEW_RELIC_ENV: stage
   WEB_CONCURRENCY: 4
 services:
-  - fec-api-search
+  - fec-api-search56
   - fec-redis
   - fec-creds-stage
   - fec-s3-stage
