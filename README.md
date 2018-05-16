@@ -45,7 +45,7 @@ We are always trying to improve our documentation. If you have suggestions or ru
          * Read a [Mac OSX tutorial](https://www.moncefbelyamani.com/how-to-install-postgresql-on-a-mac-with-homebrew-and-lunchy/)
          * Read a [Windows tutorial](http://www.postgresqltutorial.com/install-postgresql/)
          * Read a [Linux tutorial](https://www.postgresql.org/docs/9.4/static/installation.html) (or follow your OS package manager)
-    * Elastic Search 2.4 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/2.4/_installation.html))
+    * Elastic Search 5.6 (instructions [here](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/_installation.html))
     * Flyway 5.0.x ([download](https://flywaydb.org/getstarted/download))
 
 2. Set up your Node environment—  learn how to do this with our [Javascript Ecosystem Guide](https://github.com/18F/dev-environment-standardization/blob/18f-pages/pages/languages/javascript.md).
@@ -192,7 +192,7 @@ export SQLA_FOLLOWERS=<psql:address-to-replica-box-1>[,<psql:address-to-replica-
 Follow these steps every time you want to work on this project locally.
 
 1. If you are using the legal search portion of the site, you will need Elastic Search running.
-Navigate to the installation folder (eg., `elasticsearch-1.7.5`) and run:
+Navigate to the installation folder (eg., `elasticsearch-5.6.8`) and run:
 
 ```
 cd bin
