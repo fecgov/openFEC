@@ -68,7 +68,8 @@ class BaseRawItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __tablename__ = 'ofec_sched_a_master'
+    __table_args__ = {'schema' : 'disclosure'}
+    __tablename__ = 'fec_fitem_sched_a'
 
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
 
