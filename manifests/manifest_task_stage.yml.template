@@ -18,5 +18,6 @@ applications:
   - fec-s3-stage
   - fec-api-search
   - fec-creds-stage
+  - fec-redis
   stack: cflinuxfs2
   health-check-type: process
