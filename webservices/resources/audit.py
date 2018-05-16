@@ -102,17 +102,19 @@ class AuditCaseView(ApiResource):
         ('far_release_date', model.far_release_date),
         ('link_to_report', model.link_to_report),
         ('audit_id', model.audit_id),
+        ('committee_id', model.committee_id),
+        ('candidate_id', model.candidate_id),
     ]
 
     filter_range_fields = [
         (('min_election_cycle', 'max_election_cycle'), model.cycle),
     ]
 
+# q---committee name typeahead
+# qq---candidate name typeadead
     filter_fulltext_fields = [
-        ('committee_name', model.committee_name),
-        ('committee_id', model.committee_id),
-        ('candidate_name', model.candidate_name),
-        ('candidate_id', model.candidate_id),
+        ('q', models.AuditCommitteeSearch.fulltxt),
+        ('qq', models.AuditCandidateSearch.fulltxt),
     ]
 
     @property
@@ -124,6 +126,22 @@ class AuditCaseView(ApiResource):
                 default=['-cycle', 'committee_name', ]
             ),
         )
+
+    def build_query(self, **kwargs):
+        query = super().build_query(**kwargs)
+        if kwargs.get('q'):
+            query = query.join(
+                models.AuditCommitteeSearch,
+                models.AuditCase.committee_id == models.AuditCommitteeSearch.id,
+            ).distinct()
+
+        if kwargs.get('qq'):
+            query = query.join(
+                models.AuditCandidateSearch,
+                models.AuditCase.candidate_id == models.AuditCandidateSearch.id,
+            ).distinct()
+
+        return query
 
     @property
     def index_column(self):
