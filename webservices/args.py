@@ -617,8 +617,9 @@ elections_list = {
 elections = {
     'state': IStr(description=docs.STATE),
     'district': District(description=docs.DISTRICT),
-    'cycle': fields.Int(description=docs.CANDIDATE_CYCLE),
+    'cycle': fields.Int(required=True, description=docs.CANDIDATE_CYCLE),
     'office': fields.Str(
+        required=True,
         validate=validate.OneOf(['house', 'senate', 'president']),
         description=docs.OFFICE,
     ),
