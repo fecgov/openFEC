@@ -1,7 +1,7 @@
 
 --
 -- Generally, pac and party submit form_3x, but sometimes they submit form_3. This view will include 
--- form_3 submitted by pac_party
+-- form_3 submitted by pac and party
 --
 
 SET search_path = public, pg_catalog;
@@ -23,7 +23,7 @@ WITH f3_by_non_house_senate AS (SELECT r.sub_id,
             r.amndt_ind,
             (CASE WHEN r.amndt_ind='N' THEN 'NEW'
                  WHEN r.amndt_ind='A' THEN 'AMENDMENT'
-                 ELSE null
+                 ELSE NULL
             END)  amendment_indicator_full,
             r.request_tp,
             r.begin_image_num,
@@ -46,7 +46,7 @@ WITH f3_by_non_house_senate AS (SELECT r.sub_id,
              JOIN disclosure.cmte_valid_fec_yr c ON c.cmte_id::text = r.cand_cmte_id::text AND c.fec_election_yr = (r.rpt_yr + (r.rpt_yr % (2)::numeric))
              LEFT JOIN disclosure.v_sum_and_det_sum_report vs ON r.sub_id = vs.orig_sub_id
              LEFT JOIN staging.ref_rpt_tp ref_rpt_tp ON ref_rpt_tp.rpt_tp_cd = r.rpt_tp
-          WHERE r.rpt_yr >= 1979 AND (c.cmte_tp not IN ('H','S','P','I')) AND r.form_tp::text = 'F3'::text
+           WHERE r.rpt_yr >= 1979 AND (c.cmte_tp not IN ('H','S','P','I')) AND r.form_tp::text = 'F3'::text
     ),
     pac_party_report AS (
     SELECT  f3x.cmte_id AS committee_id,
@@ -99,7 +99,7 @@ WITH f3_by_non_house_senate AS (SELECT r.sub_id,
             f3x.other_fed_op_exp_per AS other_fed_operating_expenditures_period,
             f3x.other_fed_op_exp_ytd AS other_fed_operating_expenditures_ytd,
             f3x.other_fed_receipts_per AS other_fed_receipts_period,
-            f3x.other_fed_receipts_ytd,
+            f3x.other_fed_receipts_ytd AS other_fed_receipts_ytd,
             f3x.other_pol_cmte_refund AS refunded_other_political_committee_contributions_period,
             f3x.other_pol_cmte_refund_ytd AS refunded_other_political_committee_contributions_ytd,
             f3x.other_pol_cmte_contb_per_i AS other_political_committee_contributions_period,
