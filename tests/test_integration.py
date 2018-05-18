@@ -69,19 +69,16 @@ TOTALS_MODELS = [
 
 class TestSwagger(unittest.TestCase):
 
-    def test_swagger_without_cache(self):
-        # Test if Swagger API documentation loads
-        # when cache all requests is disabled
-        os.environ['CACHE_ALL_REQUESTS'] is False
+    def test_swagger(self):
         try:
             utils.validate_swagger(spec)
         except exceptions.SwaggerError as error:
             self.fail(str(error))
 
     def test_swagger_with_cache(self):
-        # Test if Swagger API documentation loads
-        # when cache all request is enabled
-        os.environ['CACHE_ALL_REQUESTS'] is True
+        # Test if Swagger API documentation loads OK
+        # when cache all requests is enabled
+        os.environ['CACHE_ALL_REQUESTS'] = 'True'
         try:
             utils.validate_swagger(spec)
         except exceptions.SwaggerError as error:
