@@ -554,6 +554,10 @@ schedule_c = {
 schedule_e_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
     'support_oppose': IStr(
         missing=None,
         validate=validate.OneOf(['S', 'O']),
@@ -602,6 +606,10 @@ electioneering = {
 electioneering_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
 }
 
 elections_list = {
@@ -617,8 +625,9 @@ elections_list = {
 elections = {
     'state': IStr(description=docs.STATE),
     'district': District(description=docs.DISTRICT),
-    'cycle': fields.Int(description=docs.CANDIDATE_CYCLE),
+    'cycle': fields.Int(required=True, description=docs.CANDIDATE_CYCLE),
     'office': fields.Str(
+        required=True,
         validate=validate.OneOf(['house', 'senate', 'president']),
         description=docs.OFFICE,
     ),
@@ -667,6 +676,10 @@ totals_committee_aggregate = {
 communication_cost_by_candidate = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
     'support_oppose': IStr(
         missing=None,
         validate=validate.OneOf(['S', 'O']),
