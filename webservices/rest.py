@@ -77,7 +77,6 @@ def initialize_newrelic():
 initialize_newrelic()
 
 app = Flask(__name__)
-logger = logging.getLogger('rest.py')
 
 
 def sqla_conn_string():
@@ -230,7 +229,7 @@ def add_caching_headers(response):
         json_data = utils.get_json_data(response)
         formatted_url = utils.format_url(request.url)
 
-        logger.info('Attempting to cache request at: {}'.format(request.url))
+        app.logger.info('Attempting to cache request at: {}'.format(request.url))
         cache_request.cache_all_requests.delay(json_data, formatted_url)
 
     return response
@@ -240,7 +239,7 @@ def add_caching_headers(response):
 def handle_exception(exception):
     wrapped = ResponseException(str(exception), ErrorCode.INTERNAL_ERROR, type(exception))
 
-    logger.info(
+    app.logger.info(
         'An API error occurred with the status code of {status} ({exception}).'
         .format(
             status=wrapped.status,
@@ -249,7 +248,7 @@ def handle_exception(exception):
     )
 
     if is_retrievable_from_cache(wrapped.status, request.path):
-        logger.info('Attempting to retrieving the cached request from S3...')
+        app.logger.info('Attempting to retrieving the cached request from S3...')
 
         # Retrieve the information needed to construct a URL for the S3 bucket
         # where the cached API responses live.
@@ -268,10 +267,10 @@ def handle_exception(exception):
         # If the cached data was returned, we can return that to the client.
         # Otherwise, log the error and raise an API error.
         if cached_data is not None:
-            logger.info('Successfully retrieved cached request from S3.')
+            app.logger.info('Successfully retrieved cached request from S3.')
             return cached_data
         else:
-            logger.error(
+            app.logger.error(
                 'An error occured while retrieving the cached file from S3.'
             )
             raise exceptions.ApiError(
