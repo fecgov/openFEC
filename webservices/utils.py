@@ -31,7 +31,6 @@ from webservices import docs
 from webservices import sorting
 from webservices import decoders
 from webservices import exceptions
-from webservices.common.models import db
 
 
 logger = logging.getLogger(__name__)
@@ -139,6 +138,7 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
         """Get index values from last result, to be used in seeking to the next
         page. Optionally include sort values, if any.
         """
+        from webservices.common.models import db
         ret = {
             'last_index': str(paginators.convert_value(
                 result,
