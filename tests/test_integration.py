@@ -1,23 +1,18 @@
+import os
 import datetime
 import unittest
-
 import sqlalchemy as sa
+import factory
+import manage
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm.session import make_transient
-
-from faker import Faker
-import factory
 from factory.alchemy import SQLAlchemyModelFactory
-
 from apispec import utils, exceptions
-
-import manage
 from tests import common, factories
 from webservices.rest import db
 from webservices.spec import spec
 from webservices.common import models
 from webservices.common.models import ScheduleA
-
 
 def make_factory():
     # NOTE: Due to the changes made in the production database and the switch
@@ -74,12 +69,20 @@ TOTALS_MODELS = [
 
 class TestSwagger(unittest.TestCase):
 
-    def test_swagger_valid(self):
+    def test_swagger(self):
         try:
             utils.validate_swagger(spec)
         except exceptions.SwaggerError as error:
             self.fail(str(error))
 
+    def test_swagger_with_cache(self):
+        # Test if Swagger API documentation loads OK
+        # when cache all requests is enabled
+        os.environ['CACHE_ALL_REQUESTS'] = 'True'
+        try:
+            utils.validate_swagger(spec)
+        except exceptions.SwaggerError as error:
+            self.fail(str(error))
 
 class TestViews(common.IntegrationTestCase):
 
