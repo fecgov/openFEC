@@ -16,7 +16,7 @@ WITH f3_by_non_house_senate AS (SELECT r.sub_id,
             (r.rpt_yr + (r.rpt_yr % (2)::numeric)) AS cycle,
             r.cand_cmte_id AS committee_id,
             c.cmte_tp,
-            r.form_tp,
+            'Form 3'::text AS form_tp,
             r.rpt_yr,
             r.rpt_tp,
             ref_rpt_tp.rpt_tp_desc AS report_type_full,
@@ -148,7 +148,7 @@ WITH f3_by_non_house_senate AS (SELECT r.sub_id,
             f3x.tranf_from_nonfed_levin_ytd AS transfers_from_nonfed_levin_ytd,
             f3x.tranf_to_affliliated_cmte_per AS transfers_to_affiliated_committee_period,
             f3x.tranf_to_affilitated_cmte_ytd AS transfers_to_affilitated_committees_ytd,
-            'Form 3X' AS form_tp,
+            'Form 3X'::text AS form_tp,
             f3x.rpt_tp AS report_type,
             f3x.rpt_tp_desc AS report_type_full,
             (f3x.most_recent_filing_flag ~~ 'N'::text) AS is_amended,
@@ -400,19 +400,19 @@ GRANT ALL ON TABLE public.ofec_report_pac_party_all_mv TO fec;
 GRANT SELECT ON TABLE public.ofec_report_pac_party_all_mv TO fec_read;
  
 
-CREATE INDEX ofec_report_pac_party_all_mv_independent_expenditures_per_idx_idx
+CREATE INDEX ofec_report_pac_party_all_mv_ie_period_idx_idx
   ON public.ofec_report_pac_party_all_mv
   USING btree
   (independent_expenditures_period, idx);
  
  
-CREATE INDEX ofec_report_pac_party_all_mv_total_disbursements_period_idx_idx
+CREATE INDEX ofec_report_pac_party_all_mv_total_disb_period_idx_idx
   ON public.ofec_report_pac_party_all_mv
   USING btree
   (total_disbursements_period, idx);
 
  
-CREATE INDEX ofec_report_pac_party_all_mv_beginning_image_number_idx_idx
+CREATE INDEX ofec_report_pac_party_all_mv_begin_image_number_idx_idx
   ON public.ofec_report_pac_party_all_mv
   USING btree
   (beginning_image_number COLLATE pg_catalog."default", idx);
@@ -424,13 +424,13 @@ CREATE INDEX ofec_report_pac_party_all_mv_committee_id_idx_idx
   (committee_id COLLATE pg_catalog."default", idx);
 
  
-CREATE INDEX ofec_report_pac_party_all_mv_coverage_end_date_idx_idx
+CREATE INDEX ofec_report_pac_party_all_mv_cvg_end_date_idx_idx
   ON public.ofec_report_pac_party_all_mv
   USING btree
   (coverage_end_date, idx);
  
  
-CREATE INDEX ofec_report_pac_party_all_mv_coverage_start_date_idx_idx
+CREATE INDEX ofec_report_pac_party_all_mv_cvg_start_date_idx_idx
   ON public.ofec_report_pac_party_all_mv
   USING btree
   (coverage_start_date, idx);
