@@ -176,6 +176,7 @@ class ElectionView(utils.Resource):
     def _get_latest(self, pairs):
         latest = db.session.query(
             pairs.c.cash_on_hand_end_period,
+            pairs.c.candidate_id,
         ).distinct(
             pairs.c.candidate_id,
             pairs.c.cmte_id,
