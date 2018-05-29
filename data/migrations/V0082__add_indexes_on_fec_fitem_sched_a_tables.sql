@@ -422,33 +422,282 @@ ANALYZE disclosure.fec_fitem_sched_a_1997_1998;
 -- -------------------------------
 -- -------------------------------
 -- contb_receipt_amt
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_clean_contbr_id_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (clean_contbr_id COLLATE pg_catalog."default", contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_city_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_city COLLATE pg_catalog."default", contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_st_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_st COLLATE pg_catalog."default", contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_image_num_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (image_num COLLATE pg_catalog."default", contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_cmte_id_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (cmte_id COLLATE pg_catalog."default", contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_line_num_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (line_num COLLATE pg_catalog."default", contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_occ_text_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_occupation_text, contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_dt_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contb_receipt_dt, contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_two_year_period_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (two_year_transaction_period, contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_emp_text_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_employer_text, contb_receipt_amt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_name_text_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_name_text, contb_receipt_amt, sub_id);
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_clean_contbr_id_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (clean_contbr_id COLLATE pg_catalog."default", contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_city_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_city COLLATE pg_catalog."default", contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_st_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_st COLLATE pg_catalog."default", contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_image_num_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (image_num COLLATE pg_catalog."default", contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_cmte_id_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (cmte_id COLLATE pg_catalog."default", contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_line_num_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (line_num COLLATE pg_catalog."default", contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_occ_text_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_occupation_text, contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_dt_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contb_receipt_dt, contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_two_year_period_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (two_year_transaction_period, contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_emp_text_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_employer_text, contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_name_text_amt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_name_text, contb_receipt_amt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
 -- contb_receipt_dt
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_clean_contbr_id_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (clean_contbr_id COLLATE pg_catalog."default", contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_city_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_city COLLATE pg_catalog."default", contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_st_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_st COLLATE pg_catalog."default", contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_image_num_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (image_num COLLATE pg_catalog."default", contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_cmte_id_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (cmte_id COLLATE pg_catalog."default", contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_line_num_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (line_num COLLATE pg_catalog."default", contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_amt_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contb_receipt_amt, contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_two_year_period_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (two_year_transaction_period, contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_occ_text_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_occupation_text, contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_emp_text_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_employer_text, contb_receipt_dt, sub_id);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_name_text_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_name_text, contb_receipt_dt, sub_id);
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_clean_contbr_id_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (clean_contbr_id COLLATE pg_catalog."default", contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_city_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_city COLLATE pg_catalog."default", contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_st_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contbr_st COLLATE pg_catalog."default", contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_image_num_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (image_num COLLATE pg_catalog."default", contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_cmte_id_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (cmte_id COLLATE pg_catalog."default", contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_line_num_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (line_num COLLATE pg_catalog."default", contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_amt_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (contb_receipt_amt, contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_two_year_period_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (two_year_transaction_period, contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_occ_text_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_occupation_text, contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_emp_text_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_employer_text, contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contrib_name_text_dt_sub_id ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contributor_name_text, contb_receipt_dt, sub_id);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
 --
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_zip ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contbr_zip COLLATE pg_catalog."default" gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_entity_tp ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (entity_tp COLLATE pg_catalog."default");
-CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_rpt_yr ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (rpt_yr);
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_contbr_zip ON disclosure.fec_fitem_sched_a_1999_2000 USING gin (contbr_zip COLLATE pg_catalog."default" gin_trgm_ops);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_entity_tp ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (entity_tp COLLATE pg_catalog."default");');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
+DO $$
+BEGIN
+	EXECUTE format('CREATE INDEX IF NOT EXISTS idx_sched_a_1999_2000_rpt_yr ON disclosure.fec_fitem_sched_a_1999_2000 USING btree (rpt_yr);');
+
+      	EXCEPTION 
+             WHEN duplicate_table THEN 
+				null;
+             WHEN others THEN 
+                RAISE NOTICE 'some other error: %, %',  sqlstate, sqlerrm;  
+END$$;
+
 ANALYZE disclosure.fec_fitem_sched_a_1999_2000;
 
 -- -------------------------------
