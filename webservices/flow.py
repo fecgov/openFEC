@@ -119,6 +119,7 @@ def get_graph():
 
     graph.add_edges_from([
         ('filings', 'totals_combined'),
+        ('filings', 'report_pac_party_all'),
     ])
 
     graph.add_edges_from([
