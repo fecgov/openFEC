@@ -16,7 +16,7 @@ applications:
   no-route: true
   services:
   - fec-s3-stage
-  - fec-api-search
+  - fec-api-search56
   - fec-creds-stage
   - fec-redis
   stack: cflinuxfs2

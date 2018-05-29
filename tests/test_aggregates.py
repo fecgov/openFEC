@@ -104,6 +104,7 @@ class TestAggregates(ApiBaseTest):
                     resource,
                     committee_id=self.committee.committee_id,
                     cycle=2012,
+                    office='president',
                 )
             )
             assert len(results) == 1
@@ -128,6 +129,7 @@ class TestAggregates(ApiBaseTest):
                     candidate_id=self.candidate.candidate_id,
                     committee_id=self.committee.committee_id,
                     cycle=2012,
+                    office='president',
                     election_full='true',
                 )
             )
