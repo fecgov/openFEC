@@ -10,7 +10,7 @@ env:
   NEW_RELIC_LOG: stdout
   WEB_CONCURRENCY: 4
 services:
-  - fec-api-search
+  - fec-api-search56
   - fec-redis
   - fec-creds-dev
   - fec-s3-dev

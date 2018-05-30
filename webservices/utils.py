@@ -113,10 +113,10 @@ class SeekCoalescePaginator(paginators.SeekPaginator):
             else:
                 comparator = self.max_column_map.get(self.sort_column[5])
 
-            
+
             if 'coalesce' not in str(left_index):
                 left_index = sa.func.coalesce(left_index, comparator)
-        
+
 
             lhs += (left_index,)
             rhs += (sort_index,)
@@ -395,7 +395,7 @@ def get_election_duration(column):
     )
 
 def get_elasticsearch_connection():
-    es_conn = env.get_service(name='fec-api-search')
+    es_conn = env.get_service(name='fec-api-search56')
     if es_conn:
         url = es_conn.get_url(url='uri')
     else:

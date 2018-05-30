@@ -225,6 +225,10 @@ candidate_history = {
 committee = {
     'year': fields.List(fields.Int, description=docs.COMMITTEE_YEAR),
     'cycle': fields.List(fields.Int, description=docs.COMMITTEE_CYCLE),
+    'filing_frequency': fields.List(
+        IStr(validate=validate.OneOf(['', 'A', 'M', 'N', 'Q', 'T', 'W', '-A', '-T'])),
+        description=docs.FILING_FREQUENCY,
+    ),
     'designation': fields.List(
         IStr(validate=validate.OneOf(['', 'A', 'J', 'P', 'U', 'B', 'D'])),
         description=docs.DESIGNATION,
@@ -550,6 +554,10 @@ schedule_c = {
 schedule_e_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
     'support_oppose': IStr(
         missing=None,
         validate=validate.OneOf(['S', 'O']),
@@ -598,6 +606,10 @@ electioneering = {
 electioneering_by_candidate = {
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
 }
 
 elections_list = {
@@ -613,8 +625,9 @@ elections_list = {
 elections = {
     'state': IStr(description=docs.STATE),
     'district': District(description=docs.DISTRICT),
-    'cycle': fields.Int(description=docs.CANDIDATE_CYCLE),
+    'cycle': fields.Int(required=True, description=docs.CANDIDATE_CYCLE),
     'office': fields.Str(
+        required=True,
         validate=validate.OneOf(['house', 'senate', 'president']),
         description=docs.OFFICE,
     ),
@@ -663,6 +676,10 @@ totals_committee_aggregate = {
 communication_cost_by_candidate = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
+    'office': fields.Str(
+        validate=validate.OneOf(['house', 'senate', 'president']),
+        description=docs.OFFICE,
+    ),
     'support_oppose': IStr(
         missing=None,
         validate=validate.OneOf(['S', 'O']),
@@ -747,16 +764,16 @@ auditCategory = {
 
 # endpoint audit-case
 auditCase = {
+    'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
+    'qq': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
     'primary_category_id': fields.List(fields.Str(), missing='all', description=docs.PRIMARY_CATEGORY_ID),
     'sub_category_id': fields.List(fields.Str(), missing='all', description=docs.SUB_CATEGORY_ID),
     'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
-    'committee_name': fields.List(fields.Str(), description=docs.COMMITTEE_NAME),
     'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
     'audit_id': fields.List(fields.Int(), description=docs.AUDIT_ID),
     'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
-    'candidate_name': fields.List(fields.Str(), description=docs.CANDIDATE_NAME),
     'min_election_cycle': fields.Int(description=docs.CYCLE),
     'max_election_cycle': fields.Int(description=docs.CYCLE),
 }
