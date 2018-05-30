@@ -288,7 +288,7 @@ CREATE MATERIALIZED VIEW ofec_omnibus_dates_mv AS
     to_tsvector(combined.summary) AS summary_text,
     to_tsvector(combined.description) AS description_text
    FROM combined
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_omnibus_dates_mv OWNER TO fec;

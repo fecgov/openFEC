@@ -1,11 +1,9 @@
 import json
 import os
 import subprocess
-
 import git
-from invoke import task
-# from slacker import Slacker
 
+from invoke import task
 from webservices.env import env
 from jdbc_utils import to_jdbc_url
 
@@ -201,25 +199,6 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
             space=space
         ), echo=True)
 
-
-@task
-def notify(ctx):
-    try:
-        meta = json.load(open('.cfmeta'))
-    except OSError:
-        meta = {}
-    slack = Slacker(env.get_credential('FEC_SLACK_TOKEN'))
-    slack.chat.post_message(
-        env.get_credential('FEC_SLACK_CHANNEL', '#fec'),
-        'deploying branch {branch} of app {name} to space {space} by {user}'.format(
-            name=env.name,
-            space=env.space,
-            user=meta.get('user'),
-            branch=meta.get('branch'),
-        ),
-        username=env.get_credential('FEC_SLACK_BOT', 'fec-bot'),
-    )
-
 @task
 def create_sample_db(ctx):
     """
@@ -231,11 +210,19 @@ def create_sample_db(ctx):
     jdbc_url = to_jdbc_url(db_conn)
     run_migrations(ctx, jdbc_url)
     print("Schema loaded")
+
     print("Loading sample data...")
     subprocess.check_call(
         ['psql', '-v', 'ON_ERROR_STOP=1', '-f', 'data/sample_db.sql', db_conn],
     )
     print("Sample data loaded")
+
+    print("Refreshing materialized views...")
+    os.environ["SQLA_CONN"] = db_conn # SQLA_CONN is used by manage.py tasks
+    subprocess.check_call(
+        ['python', 'manage.py', 'refresh_materialized'],
+    )
+    print("Materialized views refreshed")
 
 @task
 def run_migrations(ctx, jdbc_url):

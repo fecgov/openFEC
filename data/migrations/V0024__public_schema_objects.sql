@@ -5924,7 +5924,7 @@ CREATE MATERIALIZED VIEW ofec_amendments_mv AS
     electronic_filer_chain.mst_rct_file_num,
     electronic_filer_chain.amendment_chain
    FROM electronic_filer_chain
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_amendments_mv OWNER TO fec;
@@ -5952,7 +5952,7 @@ CREATE MATERIALIZED VIEW ofec_cand_cmte_linkage_mv AS
     cand_cmte_linkage.pg_date
    FROM disclosure.cand_cmte_linkage
   WHERE ((substr((cand_cmte_linkage.cand_id)::text, 1, 1) = (cand_cmte_linkage.cmte_tp)::text) OR ((cand_cmte_linkage.cmte_tp)::text <> ALL ((ARRAY['P'::character varying, 'S'::character varying, 'H'::character varying])::text[])))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_cand_cmte_linkage_mv OWNER TO fec;
