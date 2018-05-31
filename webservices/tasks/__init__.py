@@ -59,7 +59,7 @@ def redis_url():
         # Construct the Redis instance URL based on the service information
         # returned.
         url = redis.get_url(host='hostname', password='password', port='port')
-        return 'redis://{}'.format(url)
+        return 'redis:{}'.format(url)
     else:
         logger.debug(
             'Not running in a cloud.gov space, attempting to connect locally.'
