@@ -211,7 +211,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
     transfers_from_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))#mapped
     transfers_to_other_authorized_committee_period = db.Column(db.Numeric(30, 2))#mapped
     transfers_to_other_authorized_committee_ytd = db.Column(db.Numeric(30, 2))#mapped
-    report_form = 'Form3'
+    report_form = 'Form 3'
 
     @property
     def has_pdf(self):
