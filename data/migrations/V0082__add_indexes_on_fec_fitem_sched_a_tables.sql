@@ -5,7 +5,7 @@
 -- suppress a particular error reporting (error: 42P07 creating indexes if they already exist without error out)
 -- Using create index if not exists will also generate a LOT of warning message.
 
--- fec_fitem_sched_a tables prior to election cycle 2000 do not have as many data and also are less queried.  No need for indexes except primary key
+-- fec_fitem_sched_a tables prior to election cycle 1998 do not have as many data and also are less queried.  No need for indexes except primary key
 -- but for consistency, and also for possible future feature of multiple-cycle queries, indexes still added for election cycle 1976 to 2000
 
 -- -------------------------------
