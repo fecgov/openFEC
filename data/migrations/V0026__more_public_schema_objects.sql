@@ -120,7 +120,7 @@ CREATE MATERIALIZED VIEW ofec_candidate_history_mv AS
   WHERE ((cycles.max_cycle >= (1979)::numeric) AND (NOT ((fec_yr.cand_id)::text IN ( SELECT DISTINCT unverified_filers_vw.cmte_id
            FROM unverified_filers_vw
           WHERE ((unverified_filers_vw.cmte_id)::text ~ similar_escape('(P|S|H)%'::text, NULL::text))))))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_candidate_history_mv OWNER TO fec;
@@ -161,7 +161,7 @@ CREATE MATERIALIZED VIEW ofec_candidate_detail_mv AS
     ofec_candidate_history_mv.active_through
    FROM ofec_candidate_history_mv
   ORDER BY ofec_candidate_history_mv.candidate_id, ofec_candidate_history_mv.two_year_period DESC
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_candidate_detail_mv OWNER TO fec;
@@ -182,7 +182,7 @@ CREATE MATERIALIZED VIEW ofec_candidate_election_mv AS
    FROM (years
      LEFT JOIN years prev ON ((((years.candidate_id)::text = (prev.candidate_id)::text) AND (prev.cand_election_year < years.cand_election_year))))
   ORDER BY years.candidate_id, years.cand_election_year, prev.cand_election_year DESC
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_candidate_election_mv OWNER TO fec;
@@ -280,7 +280,7 @@ CREATE MATERIALIZED VIEW ofec_committee_history_mv AS
            FROM unverified_filers_vw
           WHERE ((unverified_filers_vw.cmte_id)::text ~~ 'C%'::text)))))
   ORDER BY fec_yr.cmte_id, fec_yr.fec_election_yr DESC, f1.rpt_yr DESC
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_committee_history_mv OWNER TO fec;
@@ -396,7 +396,7 @@ CREATE MATERIALIZED VIEW ofec_house_senate_paper_amendments_mv AS
     filtered_longest_path.mst_rct_file_num,
     filtered_longest_path.amendment_chain
    FROM filtered_longest_path
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_house_senate_paper_amendments_mv OWNER TO fec;
@@ -510,7 +510,7 @@ CREATE MATERIALIZED VIEW ofec_pac_party_paper_amendments_mv AS
     paper_filer_chain.mst_rct_file_num,
     paper_filer_chain.amendment_chain
    FROM paper_filer_chain
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_pac_party_paper_amendments_mv OWNER TO fec;
@@ -624,7 +624,7 @@ CREATE MATERIALIZED VIEW ofec_presidential_paper_amendments_mv AS
     paper_filer_chain.mst_rct_file_num,
     paper_filer_chain.amendment_chain
    FROM paper_filer_chain
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_presidential_paper_amendments_mv OWNER TO fec;
@@ -695,7 +695,7 @@ CREATE MATERIALIZED VIEW ofec_filings_amendments_all_mv AS
     combined.mst_rct_file_num,
     combined.amendment_chain
    FROM combined
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_filings_amendments_all_mv OWNER TO fec;
@@ -989,7 +989,7 @@ CREATE MATERIALIZED VIEW ofec_filings_mv AS
     combined.district,
     combined.party
    FROM combined
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_filings_mv OWNER TO fec;
@@ -1149,7 +1149,7 @@ CREATE MATERIALIZED VIEW ofec_totals_combined_mv AS
      LEFT JOIN committee_info ON ((((vsd.cmte_id)::text = (committee_info.cmte_id)::text) AND ((get_cycle(vsd.rpt_yr))::numeric = committee_info.fec_election_yr))))
   WHERE ((get_cycle(vsd.rpt_yr) >= 1979) AND (((vsd.form_tp_cd)::text <> 'F5'::text) OR (((vsd.form_tp_cd)::text = 'F5'::text) AND ((vsd.rpt_tp)::text <> ALL ((ARRAY['24'::character varying, '48'::character varying])::text[])))) AND ((vsd.form_tp_cd)::text <> 'F6'::text))
   GROUP BY vsd.cmte_id, vsd.form_tp_cd, (get_cycle(vsd.rpt_yr))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_combined_mv OWNER TO fec;
@@ -1216,7 +1216,7 @@ CREATE MATERIALIZED VIEW ofec_totals_house_senate_mv AS
    FROM (ofec_totals_combined_mv f3
      LEFT JOIN hs_cycle USING (committee_id, cycle))
   WHERE ((f3.form_type)::text = 'F3'::text)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_house_senate_mv OWNER TO fec;
@@ -1286,7 +1286,7 @@ CREATE MATERIALIZED VIEW ofec_totals_presidential_mv AS
     ofec_totals_combined_mv.party_full
    FROM ofec_totals_combined_mv
   WHERE ((ofec_totals_combined_mv.form_type)::text = 'F3P'::text)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_presidential_mv OWNER TO fec;
@@ -1398,7 +1398,7 @@ UNION ALL
     election_totals.coverage_end_date,
     election_totals.federal_funds_flag
    FROM election_totals
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_candidate_totals_mv OWNER TO fec;
@@ -1415,7 +1415,7 @@ CREATE MATERIALIZED VIEW ofec_candidate_flag AS
    FROM (ofec_candidate_history_mv
      LEFT JOIN ofec_candidate_totals_mv oct USING (candidate_id))
   GROUP BY ofec_candidate_history_mv.candidate_id
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_candidate_flag OWNER TO fec;
@@ -1463,7 +1463,7 @@ CREATE MATERIALIZED VIEW ofec_candidate_fulltext_mv AS
    FROM ((ofec_candidate_detail_mv
      LEFT JOIN nicknames USING (candidate_id))
      LEFT JOIN totals USING (candidate_id))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_candidate_fulltext_mv OWNER TO fec;
@@ -1506,7 +1506,7 @@ CREATE MATERIALIZED VIEW ofec_candidate_history_latest_mv AS
    FROM (ofec_candidate_history_mv cand
      JOIN ofec_candidate_election_mv election ON ((((cand.candidate_id)::text = (election.candidate_id)::text) AND (cand.two_year_period <= (election.cand_election_year)::numeric) AND (cand.two_year_period > (election.prev_election_year)::numeric))))
   ORDER BY cand.candidate_id, election.cand_election_year, cand.two_year_period DESC
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_candidate_history_latest_mv OWNER TO fec;
@@ -1578,7 +1578,7 @@ CREATE MATERIALIZED VIEW ofec_committee_detail_mv AS
     ofec_committee_history_mv.candidate_ids
    FROM ofec_committee_history_mv
   ORDER BY ofec_committee_history_mv.committee_id, ofec_committee_history_mv.cycle DESC
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_committee_detail_mv OWNER TO fec;
@@ -1629,7 +1629,7 @@ CREATE MATERIALIZED VIEW ofec_committee_fulltext_mv AS
    FROM ((ofec_committee_detail_mv cd
      LEFT JOIN pacronyms pac USING (committee_id))
      LEFT JOIN totals USING (committee_id))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_committee_fulltext_mv OWNER TO fec;
@@ -1662,7 +1662,7 @@ CREATE MATERIALIZED VIEW ofec_communication_cost_aggregate_candidate_mv AS
    FROM fec_fitem_f76_vw
   WHERE ((date_part('year'::text, fec_fitem_f76_vw.communication_dt) >= (1979)::double precision) AND (fec_fitem_f76_vw.s_o_cand_id IS NOT NULL))
   GROUP BY fec_fitem_f76_vw.org_id, fec_fitem_f76_vw.s_o_cand_id, fec_fitem_f76_vw.s_o_ind, ((date_part('year'::text, fec_fitem_f76_vw.communication_dt))::integer + ((date_part('year'::text, fec_fitem_f76_vw.communication_dt))::integer % 2))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_communication_cost_aggregate_candidate_mv OWNER TO fec;
@@ -1724,7 +1724,7 @@ CREATE MATERIALIZED VIEW ofec_communication_cost_mv AS
    FROM (fec_fitem_f76_vw f76
      LEFT JOIN com_names ON (((f76.org_id)::text = (com_names.committee_id)::text)))
   WHERE ((date_part('year'::text, f76.communication_dt))::integer >= 1979)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_communication_cost_mv OWNER TO fec;
@@ -1929,7 +1929,7 @@ CREATE MATERIALIZED VIEW ofec_election_result_mv AS
     combined.election_type,
     row_number() OVER () AS idx
    FROM combined
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_election_result_mv OWNER TO fec;
@@ -1948,7 +1948,7 @@ CREATE MATERIALIZED VIEW ofec_electioneering_aggregate_candidate_mv AS
    FROM electioneering_com_vw
   WHERE (electioneering_com_vw.rpt_yr >= (1979)::numeric)
   GROUP BY electioneering_com_vw.cmte_id, electioneering_com_vw.cand_id, (electioneering_com_vw.rpt_yr + (electioneering_com_vw.rpt_yr % (2)::numeric))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_electioneering_aggregate_candidate_mv OWNER TO fec;
@@ -1991,7 +1991,7 @@ CREATE MATERIALIZED VIEW ofec_electioneering_mv AS
     to_tsvector((electioneering_com_vw.disb_desc)::text) AS purpose_description_text
    FROM electioneering_com_vw
   WHERE (electioneering_com_vw.rpt_yr >= (1979)::numeric)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_electioneering_mv OWNER TO fec;
@@ -2067,7 +2067,7 @@ CREATE MATERIALIZED VIEW ofec_totals_pacs_parties_mv AS
    FROM (ofec_totals_combined_mv oft
      JOIN ofec_committee_detail_mv comm_dets USING (committee_id))
   WHERE ((oft.form_type)::text = 'F3X'::text)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_pacs_parties_mv OWNER TO fec;
@@ -2142,7 +2142,7 @@ CREATE MATERIALIZED VIEW ofec_totals_pacs_mv AS
     ofec_totals_pacs_parties_mv.designation
    FROM ofec_totals_pacs_parties_mv
   WHERE ((ofec_totals_pacs_parties_mv.committee_type = 'N'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'Q'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'O'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'V'::text) OR (ofec_totals_pacs_parties_mv.committee_type = 'W'::text))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_pacs_mv OWNER TO fec;
@@ -2217,7 +2217,7 @@ CREATE MATERIALIZED VIEW ofec_totals_parties_mv AS
     pp.designation
    FROM ofec_totals_pacs_parties_mv pp
   WHERE ((pp.committee_type = 'X'::text) OR (pp.committee_type = 'Y'::text))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_parties_mv OWNER TO fec;
@@ -2443,7 +2443,7 @@ CREATE MATERIALIZED VIEW ofec_house_senate_electronic_amendments_mv AS
     electronic_filer_chain.mst_rct_file_num,
     electronic_filer_chain.amendment_chain
    FROM electronic_filer_chain
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_house_senate_electronic_amendments_mv OWNER TO fec;
@@ -2715,7 +2715,7 @@ CREATE MATERIALIZED VIEW ofec_pac_party_electronic_amendments_mv AS
     electronic_filer_chain.mst_rct_file_num,
     electronic_filer_chain.amendment_chain
    FROM electronic_filer_chain
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_pac_party_electronic_amendments_mv OWNER TO fec;
@@ -2793,7 +2793,7 @@ CREATE MATERIALIZED VIEW ofec_presidential_electronic_amendments_mv AS
     electronic_filer_chain.mst_rct_file_num,
     electronic_filer_chain.amendment_chain
    FROM electronic_filer_chain
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_presidential_electronic_amendments_mv OWNER TO fec;
@@ -2816,7 +2816,7 @@ CREATE MATERIALIZED VIEW ofec_rad_mv AS
     to_tsvector((((rad_cmte_analyst_search_vw.firstname)::text || ' '::text) || (rad_cmte_analyst_search_vw.lastname)::text)) AS name_txt,
     rad_cmte_analyst_search_vw.telephone_ext
    FROM disclosure.rad_cmte_analyst_search_vw
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_rad_mv OWNER TO fec;
@@ -2945,7 +2945,7 @@ CREATE MATERIALIZED VIEW ofec_reports_house_senate_mv AS
             ofec_house_senate_paper_amendments_mv.amendment_chain
            FROM ofec_house_senate_paper_amendments_mv) amendments ON ((f3.file_num = amendments.file_num)))
   WHERE (f3.election_cycle >= (1979)::numeric)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_reports_house_senate_mv OWNER TO fec;
@@ -2980,7 +2980,7 @@ CREATE MATERIALIZED VIEW ofec_reports_ie_only_mv AS
     report_fec_url((fec_vsum_f5_vw.begin_image_num)::text, (fec_vsum_f5_vw.file_num)::integer) AS fec_url
    FROM fec_vsum_f5_vw
   WHERE (fec_vsum_f5_vw.election_cycle >= (1979)::numeric)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_reports_ie_only_mv OWNER TO fec;
@@ -3129,7 +3129,7 @@ CREATE MATERIALIZED VIEW ofec_reports_pacs_parties_mv AS
             ofec_pac_party_paper_amendments_mv.amendment_chain
            FROM ofec_pac_party_paper_amendments_mv) amendments ON ((f3x.file_num = amendments.file_num)))
   WHERE (f3x.election_cycle >= (1979)::numeric)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_reports_pacs_parties_mv OWNER TO fec;
@@ -3260,7 +3260,7 @@ CREATE MATERIALIZED VIEW ofec_reports_presidential_mv AS
             ofec_presidential_paper_amendments_mv.amendment_chain
            FROM ofec_presidential_paper_amendments_mv) amendments ON ((f3p.file_num = amendments.file_num)))
   WHERE (f3p.election_cycle >= (1979)::numeric)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_reports_presidential_mv OWNER TO fec;
@@ -3818,7 +3818,7 @@ CREATE MATERIALIZED VIEW ofec_sched_a_aggregate_size_merged_mv AS
         END AS count
    FROM grouped
   GROUP BY grouped.cmte_id, grouped.cycle, grouped.size
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_sched_a_aggregate_size_merged_mv OWNER TO fec;
@@ -4855,7 +4855,7 @@ CREATE MATERIALIZED VIEW ofec_sched_c_mv AS
     to_tsvector((fec_fitem_sched_c_vw.loan_src_nm)::text) AS loan_source_name_text,
     now() AS pg_date
    FROM fec_fitem_sched_c_vw
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_sched_c_mv OWNER TO fec;
@@ -4987,7 +4987,7 @@ CREATE MATERIALIZED VIEW ofec_sched_e_aggregate_candidate_mv AS
    FROM records
   WHERE ((records.exp_amt IS NOT NULL) AND ((records.rpt_tp)::text <> ALL ((ARRAY['24'::character varying, '48'::character varying])::text[])) AND (((records.memo_cd)::text <> 'X'::text) OR (records.memo_cd IS NULL)))
   GROUP BY records.cmte_id, records.cand_id, records.support_oppose_indicator, (records.rpt_yr + (records.rpt_yr % (2)::numeric))
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_sched_e_aggregate_candidate_mv OWNER TO fec;
@@ -5250,7 +5250,7 @@ CREATE MATERIALIZED VIEW ofec_sched_f_mv AS
     fec_fitem_sched_f_vw.rpt_yr,
     fec_fitem_sched_f_vw.election_cycle
    FROM fec_fitem_sched_f_vw
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_sched_f_mv OWNER TO fec;
@@ -5590,7 +5590,7 @@ UNION ALL
     election_totals_with_ending_aggregates.last_net_operating_expenditures,
     election_totals_with_ending_aggregates.last_net_contributions
    FROM election_totals_with_ending_aggregates
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_candidate_committees_mv OWNER TO fec;
@@ -5616,7 +5616,7 @@ CREATE MATERIALIZED VIEW ofec_totals_ie_only_mv AS
     ofec_totals_combined_mv.party_full
    FROM ofec_totals_combined_mv
   WHERE ((ofec_totals_combined_mv.form_type)::text = 'F5'::text)
-  WITH NO DATA;
+  WITH DATA;
 
 
 ALTER TABLE ofec_totals_ie_only_mv OWNER TO fec;

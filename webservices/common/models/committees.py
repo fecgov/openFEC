@@ -27,6 +27,7 @@ class BaseCommittee(BaseModel):
     treasurer_text = db.Column(TSVECTOR)
     committee_type = db.Column(db.String(1), index=True, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String(50), index=True, doc=docs.COMMITTEE_TYPE)
+    filing_frequency = db.Column(db.String(1), doc=docs.FILING_FREQUENCY)
     designation = db.Column(db.String(1), index=True, doc=docs.DESIGNATION)
     designation_full = db.Column(db.String(25), index=True, doc=docs.DESIGNATION)
     organization_type = db.Column(db.String(1), index=True, doc=docs.ORGANIZATION_TYPE)
@@ -70,7 +71,6 @@ class CommitteeDetail(BaseConcreteCommittee):
 
     first_file_date = db.Column(db.Date, doc=docs.FIRST_FILE_DATE)
     last_file_date = db.Column(db.Date, doc=docs.LAST_FILE_DATE)
-    filing_frequency = db.Column(db.String(1))
     email = db.Column(db.String(50), doc='Email as reported on the Form 1')
     fax = db.Column(db.String(10), doc='Fax as reported on the Form 1')
     website = db.Column(db.String(50), doc='Website url as reported on the Form 1')
