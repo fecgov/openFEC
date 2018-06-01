@@ -1,6 +1,8 @@
 import datetime
 import unittest
 
+import pytest
+
 import sqlalchemy as sa
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm.session import make_transient
@@ -477,6 +479,7 @@ class TestViews(common.IntegrationTestCase):
 
         self.assertEqual(committee_history_count, committee_history_verified_count)
 
+    @pytest.mark.filterwarnings("ignore:Skipped unsupported reflection")
     def test_add_itemized_partition_cycle(self):
         manage.add_itemized_partition_cycle(3002, 2)
         expected_tables = {
