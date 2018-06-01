@@ -145,64 +145,64 @@ class TestViews(common.IntegrationTestCase):
         ]
         assert len(set(counts)) == 1
 
-    def test_sched_a_fulltext_trigger(self):
-        # Test create
-        nml_row = self.NmlSchedAFactory(
-            rpt_yr=2014,
-            contbr_nm='Sheldon Adelson',
-            contb_receipt_dt=datetime.datetime(2014, 1, 1)
-        )
-        self.FItemReceiptOrExp(
-            sub_id=nml_row.sub_id,
-            rpt_yr=2014,
-        )
-        db.session.commit()
-        manage.refresh_itemized()
-        search = models.ScheduleA.query.filter(
-            models.ScheduleA.sub_id == nml_row.sub_id
-        ).one()
-        self.assertEqual(search.contributor_name_text, "'adelson':2 'sheldon':1")
+    # def test_sched_a_fulltext_trigger(self):
+    #     # Test create
+    #     nml_row = self.NmlSchedAFactory(
+    #         rpt_yr=2014,
+    #         contbr_nm='Sheldon Adelson',
+    #         contb_receipt_dt=datetime.datetime(2014, 1, 1)
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=nml_row.sub_id,
+    #         rpt_yr=2014,
+    #     )
+    #     db.session.commit()
+    #     manage.refresh_itemized()
+    #     search = models.ScheduleA.query.filter(
+    #         models.ScheduleA.sub_id == nml_row.sub_id
+    #     ).one()
+    #     self.assertEqual(search.contributor_name_text, "'adelson':2 'sheldon':1")
 
-        # Test update
-        nml_row.contbr_nm = 'Shelly Adelson'
-        db.session.add(nml_row)
-        db.session.commit()
-        manage.refresh_itemized()
-        search = models.ScheduleA.query.filter(
-            models.ScheduleA.sub_id == nml_row.sub_id
-        ).one()
-        db.session.refresh(search)
-        self.assertEqual(search.contributor_name_text, "'adelson':2 'shelli':1")
+    #     # Test update
+    #     nml_row.contbr_nm = 'Shelly Adelson'
+    #     db.session.add(nml_row)
+    #     db.session.commit()
+    #     manage.refresh_itemized()
+    #     search = models.ScheduleA.query.filter(
+    #         models.ScheduleA.sub_id == nml_row.sub_id
+    #     ).one()
+    #     db.session.refresh(search)
+    #     self.assertEqual(search.contributor_name_text, "'adelson':2 'shelli':1")
 
-        # Test delete
-        db.session.delete(nml_row)
-        db.session.commit()
-        manage.refresh_itemized()
-        self.assertEqual(
-            models.ScheduleA.query.filter(
-                models.ScheduleA.sub_id == nml_row.sub_id
-            ).count(),
-            0,
-        )
+    #     # Test delete
+    #     db.session.delete(nml_row)
+    #     db.session.commit()
+    #     manage.refresh_itemized()
+    #     self.assertEqual(
+    #         models.ScheduleA.query.filter(
+    #             models.ScheduleA.sub_id == nml_row.sub_id
+    #         ).count(),
+    #         0,
+    #     )
 
-        # Test sequential writes
-        make_transient(nml_row)
-        db.session.add(nml_row)
-        db.session.commit()
+    #     # Test sequential writes
+    #     make_transient(nml_row)
+    #     db.session.add(nml_row)
+    #     db.session.commit()
 
-        db.session.delete(nml_row)
-        db.session.commit()
+    #     db.session.delete(nml_row)
+    #     db.session.commit()
 
-        make_transient(nml_row)
-        db.session.add(nml_row)
-        db.session.commit()
-        manage.refresh_itemized()
-        self.assertEqual(
-            models.ScheduleA.query.filter(
-                models.ScheduleA.sub_id == nml_row.sub_id
-            ).count(),
-            1,
-        )
+    #     make_transient(nml_row)
+    #     db.session.add(nml_row)
+    #     db.session.commit()
+    #     manage.refresh_itemized()
+    #     self.assertEqual(
+    #         models.ScheduleA.query.filter(
+    #             models.ScheduleA.sub_id == nml_row.sub_id
+    #         ).count(),
+    #         1,
+    #     )
 
     def _get_sched_a_queue_new_count(self):
         return db.session.execute(
@@ -220,112 +220,112 @@ class TestViews(common.IntegrationTestCase):
         db.session.execute('delete from ofec_sched_a_queue_old')
         db.session.commit()
 
-    def test_sched_a_queue_transactions_success(self):
-        # Make sure queues are clear before starting
-        self._clear_sched_a_queues()
+    # def test_sched_a_queue_transactions_success(self):
+    #     # Make sure queues are clear before starting
+    #     self._clear_sched_a_queues()
 
-        # Test create
-        nml_row = self.NmlSchedAFactory(
-            rpt_yr=2014,
-            contbr_nm='Sheldon Adelson',
-            contb_receipt_dt=datetime.datetime(2014, 1, 1)
-        )
-        self.FItemReceiptOrExp(
-            sub_id=nml_row.sub_id,
-            rpt_yr=2014,
-        )
-        db.session.commit()
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 1)
-        self.assertEqual(old_queue_count, 0)
-        manage.refresh_itemized()
-        search = models.ScheduleA.query.filter(
-            models.ScheduleA.sub_id == nml_row.sub_id
-        ).one()
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 0)
-        self.assertEqual(old_queue_count, 0)
-        self.assertEqual(search.sub_id, nml_row.sub_id)
+    #     # Test create
+    #     nml_row = self.NmlSchedAFactory(
+    #         rpt_yr=2014,
+    #         contbr_nm='Sheldon Adelson',
+    #         contb_receipt_dt=datetime.datetime(2014, 1, 1)
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=nml_row.sub_id,
+    #         rpt_yr=2014,
+    #     )
+    #     db.session.commit()
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 1)
+    #     self.assertEqual(old_queue_count, 0)
+    #     manage.refresh_itemized()
+    #     search = models.ScheduleA.query.filter(
+    #         models.ScheduleA.sub_id == nml_row.sub_id
+    #     ).one()
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 0)
+    #     self.assertEqual(old_queue_count, 0)
+    #     self.assertEqual(search.sub_id, nml_row.sub_id)
 
-        # Test update
-        nml_row.contbr_nm = 'Shelly Adelson'
-        db.session.add(nml_row)
-        db.session.commit()
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 1)
-        self.assertEqual(old_queue_count, 1)
-        manage.refresh_itemized()
-        search = models.ScheduleA.query.filter(
-            models.ScheduleA.sub_id == nml_row.sub_id
-        ).one()
-        db.session.refresh(search)
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 0)
-        self.assertEqual(old_queue_count, 0)
-        self.assertEqual(search.sub_id, nml_row.sub_id)
+    #     # Test update
+    #     nml_row.contbr_nm = 'Shelly Adelson'
+    #     db.session.add(nml_row)
+    #     db.session.commit()
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 1)
+    #     self.assertEqual(old_queue_count, 1)
+    #     manage.refresh_itemized()
+    #     search = models.ScheduleA.query.filter(
+    #         models.ScheduleA.sub_id == nml_row.sub_id
+    #     ).one()
+    #     db.session.refresh(search)
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 0)
+    #     self.assertEqual(old_queue_count, 0)
+    #     self.assertEqual(search.sub_id, nml_row.sub_id)
 
-        # Test delete
-        db.session.delete(nml_row)
-        db.session.commit()
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 0)
-        self.assertEqual(old_queue_count, 1)
-        manage.refresh_itemized()
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 0)
-        self.assertEqual(old_queue_count, 0)
-        self.assertEqual(
-            models.ScheduleA.query.filter(
-                models.ScheduleA.sub_id == nml_row.sub_id
-            ).count(),
-            0,
-        )
+    #     # Test delete
+    #     db.session.delete(nml_row)
+    #     db.session.commit()
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 0)
+    #     self.assertEqual(old_queue_count, 1)
+    #     manage.refresh_itemized()
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 0)
+    #     self.assertEqual(old_queue_count, 0)
+    #     self.assertEqual(
+    #         models.ScheduleA.query.filter(
+    #             models.ScheduleA.sub_id == nml_row.sub_id
+    #         ).count(),
+    #         0,
+    #     )
 
-    def test_sched_a_queue_transactions_failure(self):
-        # Make sure queues are clear before starting
-        self._clear_sched_a_queues()
+    # def test_sched_a_queue_transactions_failure(self):
+    #     # Make sure queues are clear before starting
+    #     self._clear_sched_a_queues()
 
-        nml_row = self.NmlSchedAFactory(
-            rpt_yr=2014,
-            contbr_nm='Sheldon Adelson',
-            contb_receipt_dt=datetime.datetime(2014, 1, 1)
-        )
-        self.FItemReceiptOrExp(
-            sub_id=nml_row.sub_id,
-            rpt_yr=2014,
-        )
-        db.session.commit()
-        manage.refresh_itemized()
+    #     nml_row = self.NmlSchedAFactory(
+    #         rpt_yr=2014,
+    #         contbr_nm='Sheldon Adelson',
+    #         contb_receipt_dt=datetime.datetime(2014, 1, 1)
+    #     )
+    #     self.FItemReceiptOrExp(
+    #         sub_id=nml_row.sub_id,
+    #         rpt_yr=2014,
+    #     )
+    #     db.session.commit()
+    #     manage.refresh_itemized()
 
-        # Test insert/update failure
-        nml_row.contbr_nm = 'Shelley Adelson'
-        db.session.add(nml_row)
-        db.session.commit()
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 1)
-        self.assertEqual(old_queue_count, 1)
-        db.session.execute('delete from ofec_sched_a_queue_old')
-        db.session.commit()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(old_queue_count, 0)
-        manage.refresh_itemized()
-        search = models.ScheduleA.query.filter(
-            models.ScheduleA.sub_id == nml_row.sub_id
-        ).one()
-        db.session.refresh(search)
-        new_queue_count = self._get_sched_a_queue_new_count()
-        old_queue_count = self._get_sched_a_queue_old_count()
-        self.assertEqual(new_queue_count, 1)
-        self.assertEqual(old_queue_count, 0)
-        self.assertEqual(search.sub_id, nml_row.sub_id)
-        self.assertEqual(search.contributor_name, 'Sheldon Adelson')
+    #     # Test insert/update failure
+    #     nml_row.contbr_nm = 'Shelley Adelson'
+    #     db.session.add(nml_row)
+    #     db.session.commit()
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 1)
+    #     self.assertEqual(old_queue_count, 1)
+    #     db.session.execute('delete from ofec_sched_a_queue_old')
+    #     db.session.commit()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(old_queue_count, 0)
+    #     manage.refresh_itemized()
+    #     search = models.ScheduleA.query.filter(
+    #         models.ScheduleA.sub_id == nml_row.sub_id
+    #     ).one()
+    #     db.session.refresh(search)
+    #     new_queue_count = self._get_sched_a_queue_new_count()
+    #     old_queue_count = self._get_sched_a_queue_old_count()
+    #     self.assertEqual(new_queue_count, 1)
+    #     self.assertEqual(old_queue_count, 0)
+    #     self.assertEqual(search.sub_id, nml_row.sub_id)
+    #     self.assertEqual(search.contributor_name, 'Sheldon Adelson')
 
     def _check_update_aggregate_create(self, item_key, total_key, total_model, value):
         filing = self.NmlSchedAFactory(**{
