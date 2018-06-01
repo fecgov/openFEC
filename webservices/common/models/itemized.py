@@ -68,7 +68,8 @@ class BaseRawItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __tablename__ = 'ofec_sched_a_master'
+    __table_args__ = {'schema' : 'disclosure'}
+    __tablename__ = 'fec_fitem_sched_a'
 
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
 
@@ -142,8 +143,6 @@ class ScheduleA(BaseItemized):
 
     donor_committee_name = db.Column('donor_cmte_nm', db.String)
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
-    cycle = db.Column('election_cycle', db.Integer)
-    timestamp = db.Column('timestamp', db.DateTime)
 
     # Transaction meta info
     election_type = db.Column('election_tp', db.String) # ? election_type looks like it's included in BaseItemized already
