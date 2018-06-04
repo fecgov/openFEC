@@ -226,7 +226,7 @@ class CommitteeReportsHouseSenate(CommitteeReports):
 
 
 class CommitteeReportsPacParty(CommitteeReports):
-    __tablename__ = 'ofec_reports_pacs_parties_mv'
+    __tablename__ = 'ofec_report_pac_party_all_mv'
 
     all_loans_received_period = db.Column(db.Numeric(30, 2))#mapped
     all_loans_received_ytd = db.Column(db.Numeric(30, 2))#mapped
