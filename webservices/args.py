@@ -777,3 +777,9 @@ auditCase = {
     'min_election_cycle': fields.Int(description=docs.CYCLE),
     'max_election_cycle': fields.Int(description=docs.CYCLE),
 }
+
+operations_log = {
+    'cand_cmte_id': IStr(required=True, description=docs.CAND_CMTE_ID),
+    # 'rpt_yr': IStr(description=docs.REPORT_YEAR),
+    # 'form_tp': IStr(description=docs.FORM_TYPE),
+}

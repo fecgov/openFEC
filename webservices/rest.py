@@ -57,6 +57,7 @@ from webservices.resources import costs
 from webservices.resources import legal
 from webservices.resources import large_aggregates
 from webservices.resources import audit
+from webservices.resources import operations_log
 
 from webservices.env import env
 from webservices.tasks import utils
@@ -414,6 +415,7 @@ api.add_resource(download.DownloadView, '/download/<path:path>/')
 api.add_resource(legal.UniversalSearch, '/legal/search/')
 api.add_resource(legal.GetLegalCitation, '/legal/citation/<citation_type>/<citation>')
 api.add_resource(legal.GetLegalDocument, '/legal/docs/<doc_type>/<no>')
+api.add_resource(operations_log.OperationsLogView, '/operations-log/search')
 
 app.config.update({
     'APISPEC_SWAGGER_URL': None,
@@ -485,6 +487,7 @@ apidoc.register(audit.AuditCategoryView, blueprint='v1')
 apidoc.register(audit.AuditCaseView, blueprint='v1')
 apidoc.register(audit.AuditCandidateNameSearch, blueprint='v1')
 apidoc.register(audit.AuditCommitteeNameSearch, blueprint='v1')
+apidoc.register(operations_log.OperationsLogView, blueprint='v1')
 
 # Adapted from https://github.com/noirbizarre/flask-restplus
 here, _ = os.path.split(__file__)
