@@ -288,7 +288,7 @@ class CommitteeReportsPacParty(CommitteeReports):
     transfers_from_nonfed_levin_ytd = db.Column(db.Numeric(30, 2))#mapped
     transfers_to_affiliated_committee_period = db.Column(db.Numeric(30, 2))#mapped
     transfers_to_affilitated_committees_ytd = db.Column(db.Numeric(30, 2))#mapped
-    report_form = 'Form 3X'
+    report_form = db.Column('form_tp', db.String)#mapped
 
 
 class CommitteeReportsPresidential(CommitteeReports):
