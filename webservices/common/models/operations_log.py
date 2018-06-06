@@ -16,7 +16,7 @@ class OperationsLog(db.Model):
     rpt_tp = db.Column(db.String, doc="")
     pass_1_entry_dt = db.Column(db.DateTime, doc="")
     pass_1_verified_dt = db.Column(db.DateTime, doc="")
-    pass_3_entry_done_dt = db.Column(db.DateTime, doc="")
+    pass_3_entry_done_dt = db.Column(db.Date, doc="")
     receipt_dt = db.Column(db.DateTime, doc="")
     beginning_coverage_dt = db.Column(db.DateTime, doc="")
     ending_coverage_dt = db.Column(db.DateTime, doc="")
