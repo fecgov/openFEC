@@ -144,7 +144,7 @@ class TestDownloadResource(ApiBaseTest):
 
     def test_download_forbidden(self):
         with pytest.raises(ApiError):
-            self.client.post_json(api.url_for(resource.DownloadView, path='elections'))
+            self.client.post_json(api.url_for(resource.DownloadView, path='elections', office='house', cycle=2018))
 
     @mock.patch('webservices.resources.download.MAX_RECORDS', 2)
     @mock.patch('webservices.resources.download.get_cached_file')
