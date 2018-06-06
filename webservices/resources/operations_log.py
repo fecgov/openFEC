@@ -22,26 +22,9 @@ class OperationsLogView(ApiResource):
     schema = schemas.OperationsLogSchema
     page_schema = schemas.OperationsLogPageSchema
 
-    # @property
-    # def args(self):
-    #     return utils.extend(
-    #         args.paging,
-    #         args.operations_log,
-    #         args.make_sort_args(
-    #         ),
-    #     )
-
-    # @property
-    # def index_column(self):
-    #     return self.model.cand_cmte_id
-
-    # filter_match_fields = [
-    #     ('cand_cmte_id', models.OperationsLog.cand_cmte_id),
-    # ]
-
     @use_kwargs(args.paging)
     @use_kwargs(args.operations_log)
-    # @use_kwargs(args.make_multi_sort_args(default=['sort_order', 'rpt_yr']))
+    @use_kwargs(args.make_multi_sort_args(default='-rpt_yr'))
     @marshal_with(schemas.OperationsLogPageSchema())
     def get(self, **kwargs):
         query = self._get_results(kwargs)
@@ -49,11 +32,21 @@ class OperationsLogView(ApiResource):
 
     def _get_results(self, kwargs):
         query = db.session.query(models.OperationsLog)
+        # query the operations_log table and get the transaction records 
+        # whose status is verified (i.e status_num == 1)
         if kwargs.get('cand_cmte_id'):
             query = query.filter(
                 sa.and_(
-                    # OperationsLog.cand_cmte_id.in_(kwargs['cand_cmte_id']),
-                    OperationsLog.cand_cmte_id == kwargs['cand_cmte_id'],
+                    OperationsLog.cand_cmte_id.in_([kwargs['cand_cmte_id']]),
+                    OperationsLog.status_num == '1',
+                )
+            )
+
+        if kwargs.get('cand_cmte_id') and kwargs.get('rpt_yr'):
+            query = query.filter(
+                sa.and_(
+                    OperationsLog.cand_cmte_id.in_([kwargs['cand_cmte_id']]),
+                    OperationsLog.rpt_yr == kwargs['rpt_yr'],
                     OperationsLog.status_num == '1',
                 )
             )

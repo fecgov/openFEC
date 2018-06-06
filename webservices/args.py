@@ -780,6 +780,5 @@ auditCase = {
 
 operations_log = {
     'cand_cmte_id': IStr(required=True, description=docs.CAND_CMTE_ID),
-    # 'rpt_yr': IStr(description=docs.REPORT_YEAR),
-    # 'form_tp': IStr(description=docs.FORM_TYPE),
+    'rpt_yr': IStr(description=docs.REPORT_YEAR),
 }
