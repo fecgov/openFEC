@@ -1370,4 +1370,8 @@ FORM_TYPE = '''
 Indicates the type of form that was filed.\n\
 ex: F1, F2, F3P, F3X etc...
 '''
-
+OPERATIONS_LOG = '''
+The Operations log contains details of each report loaded into the database. It is primarily
+used as status check to determine when all of the data processes, from initial entry through
+review are complete.
+'''
