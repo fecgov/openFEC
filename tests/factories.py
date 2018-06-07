@@ -432,3 +432,8 @@ class StateElectionOfficesFactory(BaseFactory):
         model = models.StateElectionOfficeInfo
     state = 'VA'
     office_type = 'STATE CAMPAIGN FINANCE'
+
+class OperationsLogFactory(BaseFactory):
+    class Meta:
+        model = models.OperationsLog
+    candidate_committee_id = '01'
