@@ -202,10 +202,9 @@ class CommitteeReportsView(utils.Resource):
         if committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
             
-            if  kwargs.get('cycle'):
+            if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
-            if kwargs.get('year') :
-                cycle_list = []
+            if kwargs.get('year'):
                 cycle_list = [(year + year % 2) for year in kwargs['year']]
                 query = query.filter(models.CommitteeHistory.cycle.in_(cycle_list))
 
