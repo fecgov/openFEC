@@ -201,8 +201,13 @@ class CommitteeReportsView(utils.Resource):
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
+            
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
+            if kwargs.get('year'):
+                cycle_list = [(year + year % 2) for year in kwargs['year']]
+                query = query.filter(models.CommitteeHistory.cycle.in_(cycle_list))
+
             query = query.order_by(sa.desc(models.CommitteeHistory.cycle))
             committee = query.first_or_404()
             return committee.committee_type
