@@ -26,7 +26,7 @@ class OperationsLogView(ApiResource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.operations_log)
-    @use_kwargs(args.make_multi_sort_args(default='-report_year'))
+    @use_kwargs(args.make_multi_sort_args(default=['-report_year']))
     @marshal_with(schemas.OperationsLogPageSchema())
     def get(self, **kwargs):
         query = self._get_results(kwargs)
@@ -42,26 +42,26 @@ class OperationsLogView(ApiResource):
         print('Year:::', rpt_yr)
         # query the operations_log table and get the transaction records 
         # whose status is verified (i.e status_num == 1)
-        # try:
-        # cand_cmte_id = kwargs.get('candidate_committee_id')
-        if kwargs.get('candidate_committee_id'):
-            query = query.filter(
-                sa.and_(
-                    OperationsLog.candidate_committee_id.in_([kwargs['candidate_committee_id']]),
-                    OperationsLog.status_num == '1',
+        try:
+            # cand_cmte_id = kwargs.get('candidate_committee_id')
+            if kwargs.get('candidate_committee_id'):
+                query = query.filter(
+                    sa.and_(
+                        OperationsLog.candidate_committee_id.in_([kwargs['candidate_committee_id']]),
+                        OperationsLog.status_num == '1',
+                    )
+                    # logger.info('Got the count  records from the operations_log for cand_cmte_id {0}'.format(ccid))
                 )
-                # logger.info('Got the count  records from the operations_log for cand_cmte_id {0}'.format(ccid))
-            )
-        if kwargs.get('candidate_committee_id') and kwargs.get('report_year'):
-            query = query.filter(
-                sa.and_(
-                    OperationsLog.candidate_committee_id.in_([kwargs['candidate_committee_id']]),
-                    OperationsLog.report_year == kwargs['report_year'],
-                    OperationsLog.status_num == '1',
+            if kwargs.get('candidate_committee_id') and kwargs.get('report_year'):
+                query = query.filter(
+                    sa.and_(
+                        OperationsLog.candidate_committee_id.in_([kwargs['candidate_committee_id']]),
+                        OperationsLog.report_year == kwargs['report_year'],
+                        OperationsLog.status_num == '1',
+                    )
+                    # logger.info('Got the  records from the operations_log for cand_cmte_id {0} and report year {1}'.format(ccid, rpt_yr))
                 )
-                # logger.info('Got the  records from the operations_log for cand_cmte_id {0} and report year {1}'.format(ccid, rpt_yr))
-            )
-        # except:
-        #     logger.info("Unexpected Server Error")
-        #     raise ApiError("Unexpected Server Error", 500)
+        except:
+            logger.error("Unexpected Server Error")
+            raise ApiError("Unexpected Server Error", 500)
         return query

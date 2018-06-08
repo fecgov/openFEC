@@ -3,7 +3,7 @@ from webservices import docs
 
 class OperationsLog(db.Model):
     __table_args__ = {"schema": "staging"}
-    __tablename__ = 'operations_log'
+    __tablename__ = 'operations_logs'
 
     sub_id = db.Column(db.Integer, primary_key=True, doc=docs.SUB_ID)
     status_num = db.Column(db.Integer, doc=docs.STATUS_NUM)
