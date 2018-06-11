@@ -16,7 +16,7 @@ from webservices.common.views import ApiResource
 logger = logging.getLogger(__name__)
 
 @doc(
-    tags=['filer resources'],
+    tags=['filings'],
     description=docs.OPERATIONS_LOG,
 )
 class OperationsLogView(ApiResource):
