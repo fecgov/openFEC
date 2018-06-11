@@ -14,10 +14,10 @@ class TestOperationsLog(ApiBaseTest):
 
     def test_empty_query(self):
 
-        results = self._results(api.url_for(OperationsLogView, candidate_committee_id='abcd', report_year=2010))
+        results = self._results(api.url_for(OperationsLogView, candidate_committee_id='04', report_year=1999))
         self.assertEqual(len(results), 0)
 
-    def test_search_no_match_cand_cmte_id(self):
+    def test_search_cand_cmte_id(self):
 
         response = self.app.get(api.url_for(OperationsLogView, candidate_committee_id='01', report_year=2000))
         self.assertEquals(response.status_code, 200)
