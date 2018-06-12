@@ -360,12 +360,11 @@ class TestCommitteeHistory(ApiBaseTest):
             api.url_for(
                 CommitteeHistoryView,
                 candidate_id=self.candidate.candidate_id,
-                cycle=2012,
-                election_full='true'
             )
         )
         assert len(results) == 2
-        assert results[0]['cycle'] == 2010
-        assert results[0]['committee_id'] == self.committees[0].committee_id
-        assert results[1]['cycle'] == 2012
-        assert results[1]['committee_id'] == self.committees[1].committee_id
+        # Default sort for /committee/[ID]/history is cycle desc
+        assert results[0]['cycle'] == 2012
+        assert results[0]['committee_id'] == self.committees[1].committee_id
+        assert results[1]['cycle'] == 2010
+        assert results[1]['committee_id'] == self.committees[0].committee_id
