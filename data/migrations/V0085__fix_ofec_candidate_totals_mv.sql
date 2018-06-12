@@ -290,5 +290,7 @@ CREATE INDEX ofec_candidate_totals_with_0s_mv_is_election_idx
 CREATE INDEX ofec_candidate_totals_with_0s_mv_receipts_idx
     ON ofec_candidate_totals_with_0s_mv USING btree (receipts);
 
+--MV no longer needed
 
+DROP MATERIALIZED VIEW IF EXISTS ofec_candidate_history_latest_mv
 
