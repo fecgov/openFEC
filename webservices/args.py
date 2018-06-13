@@ -779,6 +779,9 @@ auditCase = {
 }
 
 operations_log = {
-    'candidate_committee_id': IStr(required=True, description=docs.CAND_CMTE_ID),
-    'report_year': IStr(description=docs.REPORT_YEAR),
+    'candidate_committee_id': fields.List(IStr, description=docs.CAND_CMTE_ID),
+    'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
+    'ending_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'form_type': fields.List(IStr, description=docs.FORM_TYPE),
 }
