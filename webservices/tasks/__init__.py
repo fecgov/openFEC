@@ -12,11 +12,19 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     schedule = {
         'refresh': {
             'task': 'webservices.tasks.refresh.refresh',
-            'schedule': crontab(minute=0, hour=9),
+            'schedule': crontab(minute=0, hour=0), #9
         },
+        'reload_all_aos': {
+            'task': 'webservices.tasks.legal_docs.reload_all_aos',
+            'schedule': crontab(minute=26, hour=1),
+        },
+
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
-            'schedule': crontab(minute='*/5'),
+            #'schedule': crontab(minute='*/5'),
+            #'schedule': crontab(minute='*/5', hour='6-15'),
+            #'schedule': crontab(minute=[0,10,20,30,40,50], hour=[6,7]),
+            'schedule': crontab(minute=[20,25,30], hour=[6,7,8,9,10,11,12,13,14,15]), #works
         },
         'delete_cached_call_folder': {
             'task': 'webservices.tasks.cache_request.delete_cached_calls_from_s3',
