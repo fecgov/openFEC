@@ -28,4 +28,9 @@ class TestOperationsLog(ApiBaseTest):
     def test_search_cand_cmte_id_with_status_verified(self):
 
         results = self._results(api.url_for(OperationsLogView, status_num=1))
+        # test data has 4 records with status_num=1
         self.assertEqual(len(results), 4)
+        # loop thru the results and make sure only records
+        # with status_num=1 are returned.
+        for result in results:
+            self.assertEqual(1, result['status_num'])
