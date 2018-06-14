@@ -30,6 +30,12 @@ def refresh():
         refresh_aos(conn)
         refresh_murs(conn)
 
+@app.task(once={'graceful': True}, base=QueueOnce)
+def reload_all_aos():
+    logger.info("Daily reload of all AOs starting")
+    load_advisory_opinions()
+    logger.info("Daily reload of all AOs completed")
+
 
 def refresh_aos(conn):
     row = conn.execute(RECENTLY_MODIFIED_STARTING_AO).first()
@@ -38,7 +44,6 @@ def refresh_aos(conn):
         load_advisory_opinions(row["ao_no"])
     else:
         logger.info("No modified AOs found")
-
 
 def refresh_murs(conn):
     logger.info('Checking for modified MURs')
