@@ -1,5 +1,8 @@
 import logging
 
+import time
+import datetime
+
 from celery_once import QueueOnce
 
 from webservices.tasks import app
@@ -8,6 +11,14 @@ from webservices.legal_docs.advisory_opinions import load_advisory_opinions
 from webservices.legal_docs.current_murs import load_current_murs
 
 logger = logging.getLogger(__name__)
+
+DAILY_MODIFIED_STARTING_AO = """
+    SELECT ao_no, pg_date
+    FROM aouser.aos_with_parsed_numbers
+    WHERE pg_date >= NOW() - '24 hour'::INTERVAL
+    ORDER BY ao_year, ao_serial
+    LIMIT 1;
+"""
 
 RECENTLY_MODIFIED_STARTING_AO = """
     SELECT ao_no, pg_date
@@ -32,9 +43,25 @@ def refresh():
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def reload_all_aos():
-    logger.info("Daily reload of all AOs starting")
-    load_advisory_opinions()
-    logger.info("Daily reload of all AOs completed")
+    """
+    Reload all AOs daily (except Sunday) if there were any new or modified AOs found for the past 24 hour period
+    But on Sundays reload all AOs whether there were changes to AOs or not
+    """
+    if (datetime.date.today().strftime("%A") == 'Sunday'):
+        logger.info("Weekly (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
+        load_advisory_opinions()
+        logger.info("Weekly (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
+        slack_message = 'Weekly reload of all AOs completed in {0} space'.format(env.space)
+        web_utils.post_to_slack(slack_message, '#bots')
+    else:
+        with db.engine.connect() as conn:
+            row = conn.execute(DAILY_MODIFIED_STARTING_AO).first()
+            if row:
+                logger.info("Daily (%s) reload of all AOs starting", datetime.date.today().strftime("%A"))
+                load_advisory_opinions()
+                logger.info("Daily (%s) reload of all AOs completed", datetime.date.today().strftime("%A"))
+            else:
+                logger.info("No daily (%s) modified AOs found", datetime.date.today().strftime("%A"))  
 
 
 def refresh_aos(conn):
