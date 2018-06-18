@@ -114,9 +114,23 @@ class CandidateHistory(BaseCandidate):
     candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
+class CandidateHistoryWithFuture(BaseCandidate):
+    __tablename__ = 'ofec_candidate_history_with_future_elections_mv'
+
+    candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
+    two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)
+    candidate_election_year = db.Column(db.Integer, doc="The last year of the cycle for this election.")
+    address_city = db.Column(db.String(100), doc='City of candidate\'s address, as reported on their Form 2.')
+    address_state = db.Column(db.String(2), doc='State of candidate\'s address, as reported on their Form 2.')
+    address_street_1 = db.Column(db.String(200), doc='Street of candidate\'s address, as reported on their Form 2.')
+    address_street_2 = db.Column(db.String(200), doc='Additional street information of candidate\'s address, as reported on their Form 2.')
+    address_zip = db.Column(db.String(10), doc='Zip code of candidate\'s address, as reported on their Form 2.')
+    candidate_inactive = db.Column(db.Boolean, doc='True indicates that a candidate is inactive.')
+    active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
+
 
 class CandidateTotal(db.Model):
-    __tablename__ = 'ofec_candidate_totals_with_0s_mv'
+    __tablename__ = 'ofec_candidate_totals_mv'
     candidate_id = db.Column(db.String, index=True, primary_key=True)
     election_year = db.Column(db.Integer, index=True, primary_key=True, autoincrement=True)
     cycle = db.Column(db.Integer, index=True, primary_key=True)

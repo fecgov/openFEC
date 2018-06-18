@@ -170,7 +170,7 @@ class TestCandidateAggregates(ApiBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.candidate = factories.CandidateHistoryFactory(
+        self.candidate = factories.CandidateHistoryFutureFactory(
             candidate_id='S123',
             two_year_period=2012,
             candidate_election_year=2012,
@@ -234,7 +234,7 @@ class TestCandidateAggregates(ApiBaseTest):
             fec_election_year=2010,
         )
         # Create a candidate_zero without a committee and $0 in CandidateTotal
-        self.candidate_zero = factories.CandidateHistoryFactory(
+        self.candidate_zero = factories.CandidateHistoryFutureFactory(
             candidate_id='H321',
             two_year_period=2018,
             candidate_election_year=2018,
@@ -251,7 +251,7 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         # Create data for a candidate who ran in 2017 and 2018
 
-        self.candidate_17_18 = factories.CandidateHistoryFactory(
+        self.candidate_17_18 = factories.CandidateHistoryFutureFactory(
             candidate_id='S456',
             two_year_period=2018,
             candidate_election_year=2018,
@@ -308,7 +308,7 @@ class TestCandidateAggregates(ApiBaseTest):
             fec_election_year=2018,
         )
         # Create data for a candidate who ran just in 2017
-        self.candidate_17_only = factories.CandidateHistoryFactory(
+        self.candidate_17_only = factories.CandidateHistoryFutureFactory(
             candidate_id='H456',
             two_year_period=2018,
             candidate_election_year=2017,
@@ -355,6 +355,76 @@ class TestCandidateAggregates(ApiBaseTest):
             committee_type='S',
             cand_election_year=2017,
             fec_election_year=2018,
+        )
+
+        # Create data for future presidential - 2020. Use formula for future
+
+        # Test full 2020 and 2018 totals
+
+        self.candidate_20 = factories.CandidateHistoryFutureFactory(
+            candidate_id='P456',
+            two_year_period=2018,
+            candidate_election_year=2020,
+        )
+        self.candidate_20 = factories.CandidateHistoryFutureFactory(
+            candidate_id='P456',
+            two_year_period=2020,
+            candidate_election_year=2020,
+        )
+        #Candidate history won't have 2020 yet
+        self.committees_20 = [
+            factories.CommitteeHistoryFactory(cycle=2018, designation='P'),
+        ]
+        factories.CandidateDetailFactory(
+            candidate_id=self.candidate_20.candidate_id,
+            election_years=[2020],
+        )
+        [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate_20.candidate_id,
+                cand_election_year=election_year
+            )
+            for election_year in [2016, 2020]
+        ]
+        [
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
+            for each in self.committees_20
+        ]
+        #Full 2020
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_20.candidate_id,
+            cycle=2020,
+            is_election=True,
+            receipts=55000,
+        )
+        #2018 2-year
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_20.candidate_id,
+            cycle=2018,
+            is_election=False,
+            receipts=25000,
+        )
+        factories.CandidateFlagsFactory(
+            candidate_id=self.candidate_20.candidate_id
+        )
+        db.session.flush()
+
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=self.candidate_20.candidate_id,
+            committee_id=self.committees_20[0].committee_id,
+            committee_designation='P',
+            committee_type='P',
+            cand_election_year=2020,
+            fec_election_year=2018,
+        )
+
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=self.candidate_20.candidate_id,
+            committee_id=self.committees_20[0].committee_id,
+            committee_designation='P',
+            committee_type='P',
+            cand_election_year=2020,
+            fec_election_year=2020,
         )
 
     def test_by_size(self):
@@ -466,6 +536,17 @@ class TestCandidateAggregates(ApiBaseTest):
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 150})
 
+        # candidate_20
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_20.candidate_id,
+                cycle=2018,
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 25000})
+
     def test_totals_full(self):
         results = self._results(
             api.url_for(
@@ -477,3 +558,15 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2012, 'receipts': 100})
+
+        # candidate_20
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_20.candidate_id,
+                cycle=2020,
+                election_full='true',
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2020, 'receipts': 55000})
