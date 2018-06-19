@@ -58,11 +58,6 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     candidate_inactive = False
 
 
-class CandidateHistoryLatestFactory(CandidateHistoryFactory):
-    class Meta:
-        model = models.CandidateHistoryLatest
-
-
 class CandidateElectionFactory(BaseCandidateFactory):
     class Meta:
         model = models.CandidateElection

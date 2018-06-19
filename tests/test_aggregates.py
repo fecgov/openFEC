@@ -179,11 +179,6 @@ class TestCandidateAggregates(ApiBaseTest):
             factories.CommitteeHistoryFactory(cycle=2012, designation='P'),
             factories.CommitteeHistoryFactory(cycle=2012, designation='A'),
         ]
-        factories.CandidateHistoryLatestFactory(
-            candidate_id=self.candidate.candidate_id,
-            candidate_election_year=2012,
-            two_year_period=2012,
-        )
         factories.CandidateDetailFactory(
             candidate_id=self.candidate.candidate_id,
             election_years=[2008, 2012],
@@ -253,6 +248,113 @@ class TestCandidateAggregates(ApiBaseTest):
             cycle=2018,
             is_election=False,
             receipts=0,
+        )
+        # Create data for a candidate who ran in 2017 and 2018
+
+        self.candidate_17_18 = factories.CandidateHistoryFactory(
+            candidate_id='S456',
+            two_year_period=2018,
+            candidate_election_year=2018,
+        )
+        self.committees_17_18 = [
+            factories.CommitteeHistoryFactory(cycle=2018, designation='P'),
+        ]
+        factories.CandidateDetailFactory(
+            candidate_id=self.candidate_17_18.candidate_id,
+            election_years=[2018],
+        )
+        [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate_17_18.candidate_id,
+                cand_election_year=election_year
+            )
+            for election_year in [2017, 2018]
+        ]
+        [
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
+            for each in self.committees_17_18
+        ]
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_17_18.candidate_id,
+            cycle=2018,
+            is_election=True,
+            receipts=100,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_17_18.candidate_id,
+            cycle=2018,
+            is_election=False,
+            receipts=100,
+        )
+        factories.CandidateFlagsFactory(
+            candidate_id=self.candidate_17_18.candidate_id
+        )
+        db.session.flush()
+
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=self.candidate_17_18.candidate_id,
+            committee_id=self.committees_17_18[0].committee_id,
+            committee_designation='P',
+            committee_type='S',
+            cand_election_year=2017,
+            fec_election_year=2018,
+        )
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=self.candidate_17_18.candidate_id,
+            committee_id=self.committees_17_18[0].committee_id,
+            committee_designation='P',
+            committee_type='S',
+            cand_election_year=2018,
+            fec_election_year=2018,
+        )
+        # Create data for a candidate who ran just in 2017
+        self.candidate_17_only = factories.CandidateHistoryFactory(
+            candidate_id='H456',
+            two_year_period=2018,
+            candidate_election_year=2017,
+        )
+        self.committees_17_only = [
+            factories.CommitteeHistoryFactory(cycle=2018, designation='P'),
+        ]
+        factories.CandidateDetailFactory(
+            candidate_id=self.candidate_17_only.candidate_id,
+            election_years=[2017],
+        )
+        [
+            factories.CandidateElectionFactory(
+                candidate_id=self.candidate_17_only.candidate_id,
+                cand_election_year=election_year
+            )
+            for election_year in [2017]
+        ]
+        [
+            factories.CommitteeDetailFactory(committee_id=each.committee_id)
+            for each in self.committees_17_only
+        ]
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_17_only.candidate_id,
+            cycle=2018,
+            is_election=True,
+            receipts=150,
+        )
+        factories.CandidateTotalFactory(
+            candidate_id=self.candidate_17_only.candidate_id,
+            cycle=2018,
+            is_election=False,
+            receipts=150,
+        )
+        factories.CandidateFlagsFactory(
+            candidate_id=self.candidate_17_only.candidate_id
+        )
+        db.session.flush()
+
+        factories.CandidateCommitteeLinkFactory(
+            candidate_id=self.candidate_17_only.candidate_id,
+            committee_id=self.committees_17_only[0].committee_id,
+            committee_designation='P',
+            committee_type='S',
+            cand_election_year=2017,
+            fec_election_year=2018,
         )
 
     def test_by_size(self):
@@ -341,6 +443,28 @@ class TestCandidateAggregates(ApiBaseTest):
         )
         assert len(results) == 1
         assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 0})
+
+        # candidate_17_18
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_17_18.candidate_id,
+                cycle=2018,
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 100})
+
+        # candidate_17_only
+        results = self._results(
+            api.url_for(
+                TotalsCandidateView,
+                candidate_id=self.candidate_17_only.candidate_id,
+                cycle=2018,
+            )
+        )
+        assert len(results) == 1
+        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 150})
 
     def test_totals_full(self):
         results = self._results(
