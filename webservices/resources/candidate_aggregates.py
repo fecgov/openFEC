@@ -162,12 +162,7 @@ class TotalsCandidateView(ApiResource):
     ]
 
     def build_query(self, **kwargs):
-        if kwargs['election_full']:
-            history = models.CandidateHistoryLatest
-            year_column = history.candidate_election_year
-        else:
-            history = models.CandidateHistory
-            year_column = history.two_year_period
+        history = models.CandidateHistory
         query = db.session.query(
             history.__table__,
             models.CandidateTotal.__table__
@@ -175,8 +170,7 @@ class TotalsCandidateView(ApiResource):
             models.CandidateTotal,
             sa.and_(
                 history.candidate_id == models.CandidateTotal.candidate_id,
-                year_column == models.CandidateTotal.cycle,
-                history.candidate_election_year == models.CandidateTotal.cycle,
+                history.two_year_period == models.CandidateTotal.cycle,
             )
         ).join(
             models.Candidate,
