@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task
-def refresh():
+def refresh_materialized_views():
     """Update incremental aggregates, itemized schedules, materialized views,
     then slack a notification to the development team.
     """
