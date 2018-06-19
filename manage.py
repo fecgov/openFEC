@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import os
 import glob
 import logging
-import shlex
 import subprocess
 import multiprocessing
 
@@ -190,8 +188,6 @@ def load_election_dates():
     )
 
     logger.info('Finished loading election dates.')
-
-
 
 
 @manager.command
