@@ -54,7 +54,7 @@ API_DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
-FEC data. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
+FEC data. [Bulk downloads](https://www.fec.gov/data/advanced/?tab=bulk-data) are available on the current
 site. Information is tied to the underlying forms by file ID and image ID. Data is updated
 nightly.
 
