@@ -766,8 +766,8 @@ auditCategory = {
 auditCase = {
     'q': fields.List(fields.Str, description=docs.COMMITTEE_NAME),
     'qq': fields.List(fields.Str, description=docs.CANDIDATE_NAME),
-    'primary_category_id': fields.List(fields.Str(), missing='all', description=docs.PRIMARY_CATEGORY_ID),
-    'sub_category_id': fields.List(fields.Str(), missing='all', description=docs.SUB_CATEGORY_ID),
+    'primary_category_id': fields.Str(missing='all', description=docs.PRIMARY_CATEGORY_ID),
+    'sub_category_id': fields.Str(missing='all', description=docs.SUB_CATEGORY_ID),
     'audit_case_id': fields.List(fields.Str(), description=docs.AUDIT_CASE_ID),
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),

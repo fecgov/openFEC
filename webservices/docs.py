@@ -54,7 +54,7 @@ API_DESCRIPTION = '''
 This API allows you to explore the way candidates and committees fund their campaigns.
 
 The FEC API is a RESTful web service supporting full-text and field-specific searches on
-FEC data. [Bulk downloads](http://fec.gov/data/DataCatalog.do) are available on the current
+FEC data. [Bulk downloads](https://www.fec.gov/data/advanced/?tab=bulk-data) are available on the current
 site. Information is tied to the underlying forms by file ID and image ID. Data is updated
 nightly.
 
@@ -159,13 +159,11 @@ The committee endpoints include all FEC filers, even if they aren't registered a
 Officially, committees include the committees and organizations that file with the FEC.
 Several different types of organizations file financial reports with the FEC:
 
-* Campaign committees authorized by particular candidates to raise and spend funds in
-their campaigns
-* Non-party committees (e.g., PACs), some of which may be sponsored by corporations,
-unions, trade or membership groups, etc.
-* Political party committees at the national, state, and local levels
-* Groups and individuals making only independent expenditures
-* Corporations, unions, and other organizations making internal communications
+*Campaign committees authorized by particular candidates to raise and spend funds in
+their campaigns. Non-party committees (e.g., PACs), some of which may be sponsored by corporations,
+unions, trade or membership groups, etc. Political party committees at the national, state, and local levels.
+Groups and individuals making only independent expenditures
+Corporations, unions, and other organizations making internal communications*
 
 The committee endpoints primarily use data from FEC registration Form 1 and Form 2.
 '''
@@ -302,7 +300,7 @@ multiple ways to explain the way it may move though different committees as an e
 For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
 contributions. See below for full methodology.
 
-### Methodology for determining unique, individual contributions
+__Methodology for determining unique, individual contributions__
 
 For receipts over $200 use FEC code line_number to identify individuals.
 
@@ -437,7 +435,7 @@ The committee continues to report the loan until it is repaid.
 '''
 
 SCHEDULE_D_TAG = '''
-Schedule D shows debts and obligations owed to or by the committee that are
+Schedule D, it shows debts and obligations owed to or by the committee that are
 required to be disclosed.
 '''
 
@@ -491,9 +489,10 @@ large result sets are approximate; you will want to page through the records unt
 '''
 
 SCHEDULE_F_TAG = '''
-Schedule F shows all special expenditures a national or state party committee makes in connection with
-the general election campaigns of federal candidates
+Schedule F, it shows all special expenditures a national or state party committee
+makes in connection with the general election campaigns of federal candidates.
 '''
+
 SCHEDULE_F = SCHEDULE_F_TAG + '''
 These coordinated party expenditures do not count against the contribution limits but are subject to other limits,
 these limits are detailed in Chapter 7 of the FEC Campaign Guide for Political Party Committees.
@@ -543,8 +542,9 @@ of each type, grouped by state and cycle.
 API_KEY_DESCRIPTION = '''
 API key for https://api.data.gov. Get one at https://api.data.gov/signup.
 '''
+
 SEARCH_TAG = '''
-Search for candidates or committees by name.
+Search for candidates, committees by name.
 '''
 
 
@@ -560,62 +560,31 @@ result sets are approximate; you will want to page through the records until no 
 '''
 
 DOC_TYPE = '''
-The type of document,\n\
-    for documents other\n\
-    than reports:\n\
-    - 2 24 Hour\n\
-        Contribution Notice\n\
-    - 4 48 Hour\n\
-        Contribution Notice\n\
-    - A Debt Settlement\n\
-        Statement\n\
-    - B Acknowledgment of\n\
-        Receipt of Debt\n\
-        Settlement\n\
-        Statement\n\
-    - C RFAI: Debt\n\
-        Settlement\n\
-        First Notice\n\
-    - D Commission Debt\n\
-        Settlement Review\n\
-    - E Commission Response\n\
-        TO Debt\n\
-        Settlement Request\n\
-    - F Administrative\n\
-        Termination\n\
-    - G Debt Settlement\n\
-        Plan Amendment\n\
+The type of document for documents other than reports:\n\
+    - 2 24 Hour Contribution Notice\n\
+    - 4 48 Hour Contribution Notice\n\
+    - A Debt Settlement Statement\n\
+    - B Acknowledgment of Receipt of Debt Settlement Statement\n\
+    - C RFAI: Debt Settlement First Notice\n\
+    - D Commission Debt Settlement Review\n\
+    - E Commission Response TO Debt Settlement Request\n\
+    - F Administrative Termination\n\
+    - G Debt Settlement Plan Amendment\n\
     - H Disavowal Notice\n\
     - I Disavowal Response\n\
     - J Conduit Report\n\
-    - K Termination\n\
-        Approval\n\
-    - L Repeat Non-Filer\n\
-        Notice\n\
-    - M Filing Frequency\n\
-        Change Notice\n\
-    - N Paper Amendment to\n\
-        Electronic Report\n\
-    - O Acknowledgment of\n\
-        Filing Frequency\n\
-        Change\n\
-    - S RFAI: Debt\n\
-        Settlement Second\n\
-    - T Miscellaneous\n\
-        Report TO FEC\n\
-    - V Repeat Violation\n\
-        Notice\n\
-        (441A OR 441B)\n\
-    - P Notice of\n\
-        Paper Filing\n\
-    - R F3L Filing\n\
-        Frequency\n\
-        Change Notice\n\
-    - Q Acknowledgment of\n\
-        F3L Filing \n\
-        Frequency Change\n\
-    - U Unregistered\n\
-        Committee Notice\n\
+    - K Termination Approval\n\
+    - L Repeat Non-Filer Notice\n\
+    - M Filing Frequency Change Notice\n\
+    - N Paper Amendment to Electronic Report\n\
+    - O Acknowledgment of Filing Frequency Change\n\
+    - S RFAI: Debt Settlement Second\n\
+    - T Miscellaneous Report TO FEC\n\
+    - V Repeat Violation Notice (441A OR 441B)\n\
+    - P Notice of Paper Filing\n\
+    - R F3L Filing Frequency Change Notice\n\
+    - Q Acknowledgment of F3L Filing Frequency Change\n\
+    - U Unregistered Committee Notice\n\
 '''
 DATES_TAG = '''
 Reporting deadlines, election dates FEC meetings, events etc.
@@ -652,11 +621,11 @@ from the FEC [F7 forms](http://www.fec.gov/pdf/forms/fecform7.pdf).
 ELECTIONEERING = '''
 An electioneering communication is any broadcast, cable or satellite communication that fulfills each of the following conditions:
 
-- The communication refers to a clearly identified federal candidate;\n\
-- The communication is publicly distributed by a television station,\n\
-  radio station, cable television system or satellite system for a fee; and\n\
-- The communication is distributed within 60 days prior\n\
-  to a general election or 30 days prior to a primary election to federal office.\n\
+_The communication refers to a clearly identified federal candidate._
+
+_The communication is publicly distributed by a television station, radio station, cable television system or satellite system for a fee._
+
+_The communication is distributed within 60 days prior to a general election or 30 days prior to a primary election to federal office._
 '''
 
 COMMUNICATION_COST = '''
@@ -696,55 +665,22 @@ identify paper records that have been processed recently.'
 PARTY = 'Three-letter code for the party affiliated with a candidate or committee. For example, DEM for Democratic Party and REP for Republican Party.'
 PARTY_FULL = 'Party affiliated with a candidate or committee'
 FORM_TYPE = 'The form where the underlying data comes from, for example, Form 1 would appear as F1:\n\
-    - F1   Statement of\n\
-           Organization\n\
-    - F1M  Notification of\n\
-           Multicandidate\n\
-           Status\n\
+    - F1   Statement of Organization\n\
+    - F1M  Notification of Multicandidate Status\n\
     - F2   Statement of Candidacy\n\
-    - F3   Report of Receipts and\n\
-           Disbursements for an \n\
-           Authorized Committee\n\
-    - F3P  Report of Receipts and\n\
-           Disbursements by an\n\
-           Authorized Committee\n\
-           of a Candidate for\n\
-           The Office of President\n\
-           or Vice President\n\
-    - F3L  Report of Contributions\n\
-           Bundled by Lobbyists/\n\
-           Registrants and Lobbyist/\n\
-           Registrant PACs\n\
-    - F3X  Report of Receipts and\n\
-           Disbursements for other \n\
-           than an Authorized \n\
-           Committee\n\
-    - F4   Report of Receipts and \n\
-           Disbursements for a \n\
-           Committee or Organization\n\
-           Supporting a Nomination\n\
-           Convention\n\
-    - F5   Report of Independent \n\
-           Expenditures Made and \n\
-           Contributions Received\n\
-    - F6   48 Hour Notice of \n\
-           Contributions/Loans\n\
-           Received\n\
-    - F7   Report of Communication\n\
-           Costs by Corporations \n\
-           and Membership \n\
-           Organizations\n\
+    - F3   Report of Receipts and Disbursements for an Authorized Committee\n\
+    - F3P  Report of Receipts and Disbursements by an Authorized Committee of a Candidate for The Office of President or Vice President\n\
+    - F3L  Report of Contributions Bundled by Lobbyists/Registrants and Lobbyist/Registrant PACs\n\
+    - F3X  Report of Receipts and Disbursements for other than an Authorized Committee\n\
+    - F4   Report of Receipts and Disbursements for a Committee or Organization Supporting a Nomination Convention\n\
+    - F5   Report of Independent Expenditures Made and Contributions Received\n\
+    - F6   48 Hour Notice of Contributions/Loans Received\n\
+    - F7   Report of Communication Costs by Corporations and Membership Organizations\n\
     - F8   Debt Settlement Plan\n\
-    - F9   24 Hour Notice of \n\
-           Disbursements for \n\
-           Electioneering \n\
-           Communications\n\
-    - F13  Report of Donations \n\
-           Accepted for Inaugural\n\
-           Committee\n\
+    - F9   24 Hour Notice of Disbursements for Electioneering Communications\n\
+    - F13  Report of Donations Accepted for Inaugural Committee\n\
     - F99  Miscellaneous Text\n\
-    - FRQ  Request for Additional\n\
-           Information\n\
+    - FRQ  Request for Additional Information\n\
 '
 REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - 10D Pre-Election\n\
@@ -781,50 +717,31 @@ REPORT_TYPE = 'Name of report where the underlying data comes from:\n\
     - Q3  October Quarterly\n\
     - TER Termination Report\n\
     - YE  Year-End\n\
-    - 90S Post Inaugural\n\
-          Supplement\n\
+    - 90S Post Inaugural Supplement\n\
     - 90D Post Inaugural\n\
     - 48  48 Hour Notification\n\
     - 24  24 Hour Notification\n\
-    - M7S July Monthly/\n\
-          Semi-Annual\n\
-    - MSA Monthly Semi-Annual\n\
-          (MY)\n\
-    - MYS Monthly Year End/\n\
-          Semi-Annual\n\
-    - Q2S July Quarterly/\n\
-          Semi-Annual\n\
-    - QSA Quarterly Semi-Annual\n\
-          (MY)\n\
-    - QYS Quarterly Year End/\n\
-          Semi-Annual\n\
-    - QYE Quarterly Semi-Annual\n\
-          (YE)\n\
-    - QMS Quarterly Mid-Year/\n\
-          Semi-Annual\n\
-    - MSY Monthly Semi-Annual\n\
-         (YE)\n\
+    - M7S July Monthly/Semi-Annual\n\
+    - MSA Monthly Semi-Annual (MY)\n\
+    - MYS Monthly Year End/Semi-Annual\n\
+    - Q2S July Quarterly/Semi-Annual\n\
+    - QSA Quarterly Semi-Annual (MY)\n\
+    - QYS Quarterly Year End/Semi-Annual\n\
+    - QYE Quarterly Semi-Annual (YE)\n\
+    - QMS Quarterly Mid-Year/ Semi-Annual\n\
+    - MSY Monthly Semi-Annual (YE)\n\
 '
 
-REQUEST_TYPE = 'Requests for additional information (RFAIs)\n\
-sent to filers.\n\
-The request type is based on\n\
-the type of document filed:\n\
-    - 1 Statement of \n\
-        Organization\n\
-    - 2 Report of Receipts\n\
-        and Expenditures\n\
-        (Form 3 and 3X)\n\
+REQUEST_TYPE = 'Requests for additional information (RFAIs) sent to filers. The request type is based on the type of document filed:\n\
+    - 1 Statement of Organization\n\
+    - 2 Report of Receipts and Expenditures (Form 3 and 3X)\n\
     - 3 Second Notice - Reports\n\
-    - 4 Request for\n\
-        Additional Information\n\
+    - 4 Request for Additional Information\n\
     - 5 Informational - Reports\n\
-    - 6 Second Notice -\n\
-        Statement of Organization\n\
+    - 6 Second Notice - Statement of Organization\n\
     - 7 Failure to File\n\
     - 8 From Public Disclosure\n\
-    - 9 From Multi\n\
-        Candidate Status\n\
+    - 9 From Multi Candidate Status\n\
 '
 
 REPORT_TYPE_W_EXCLUDE = 'Report type; prefix with "-" to exclude. '+REPORT_TYPE
@@ -873,98 +790,52 @@ FILING_FREQUENCY = 'The one-letter \n\
          - T Terminated\n\
          - W Waived\n\
 '
-DESIGNATION = 'The one-letter designation\n\
-    code of the organization:\n\
-         - A authorized by\n\
-             a candidate\n\
-         - J joint fundraising\n\
-             committee\n\
-         - P principal campaign\n\
-             committee of a\n\
-             candidate\n\
+DESIGNATION = 'The one-letter designation code of the organization:\n\
+         - A authorized by a candidate\n\
+         - J joint fundraising committee\n\
+         - P principal campaign committee of a candidate\n\
          - U unauthorized\n\
-         - B lobbyist/registrant\n\
-             PAC\n\
+         - B lobbyist/registrant PAC\n\
          - D leadership PAC\n\
 '
-ORGANIZATION_TYPE = 'The one-letter\n\
-            code for the kind\n\
-            for organization:\n\
+ORGANIZATION_TYPE = 'The one-letter code for the kind for organization:\n\
         - C corporation\n\
-        - L labor\n\
-            organization\n\
-        - M membership\n\
-            organization\n\
+        - L labor organization\n\
+        - M membership organization\n\
         - T trade association\n\
         - V cooperative\n\
-        - W corporation without\n\
-            capital stock\n\
+        - W corporation without capital stock\n\
 '
-COMMITTEE_TYPE = 'The one-letter type\n\
-            code of the\n\
-            organization:\n\
-        - C communication\n\
-            cost\n\
+COMMITTEE_TYPE = 'The one-letter type code of the organization:\n\
+        - C communication cost\n\
         - D delegate\n\
-        - E electioneering\n\
-            communication\n\
+        - E electioneering communication\n\
         - H House\n\
-        - I independent\n\
-            expenditor\n\
-            (person or group)\n\
-        - N PAC -\n\
-            nonqualified\n\
-        - O independent\n\
-            expenditure-only\n\
-            (super PACs)\n\
+        - I independent expenditor (person or group)\n\
+        - N PAC - nonqualified\n\
+        - O independent expenditure-only (super PACs)\n\
         - P presidential\n\
         - Q PAC - qualified\n\
         - S Senate\n\
-        - U single candidate\n\
-            independent\n\
-            expenditure\n\
-        - V PAC with\n\
-            non-contribution\n\
-            account,\n\
-            nonqualified\n\
-        - W PAC with\n\
-            non-contribution\n\
-            account,\n\
-            qualified\n\
-        - X party,\n\
-            nonqualified\n\
+        - U single candidate independent expenditure\n\
+        - V PAC with non-contribution account, nonqualified\n\
+        - W PAC with non-contribution account, qualified\n\
+        - X party, nonqualified\n\
         - Y party, qualified\n\
-        - Z national party\n\
-            non-federal\n\
-            account\n\
+        - Z national party non-federal account\n\
 '
 COMMITTEE_TYPE_STATE_AGGREGATE_TOTALS = COMMITTEE_TYPE + '\
         - all All Committee Types\n\
-        - all_candidates\n\
-          All Candidate Committee\n\
-          Types (H, S, P)\n\
-        - all_pacs All PAC\n\
-          Committee Types\n\
-          (N, O, Q, V, W)\n\
+        - all_candidates All Candidate Committee Types (H, S, P)\n\
+        - all_pacs All PAC Committee Types (N, O, Q, V, W)\n\
 '
-PAC_PARTY_TYPE = 'The one-letter type\n\
-            code of a PAC/Party\n\
-            organization:\n\
+PAC_PARTY_TYPE = 'The one-letter type code of a PAC/Party organization:\n\
         - N PAC - nonqualified\n\
-        - O independent\n\
-            expenditure-only\n\
-            (super PACs)\n\
+        - O independent expenditure-only (super PACs)\n\
         - Q PAC - qualified\n\
-        - V PAC with\n\
-            non-contribution\n\
-            account,\n\
-            nonqualified\n\
-            account,\n\
-            qualified\n\
-        - X party,\n\
-            nonqualified\n\
-        - Y party,\n\
-            qualified\n\
+        - V PAC with non-contribution account, nonqualified account, qualified\n\
+        - X party, nonqualified\n\
+        - Y party, qualified\n\
 '
 
 TREASURER_NAME = 'Name of the Committee\'s treasurer. If multiple treasurers for the \
@@ -1194,20 +1065,7 @@ AMENDMENT_INDICATOR = '''
     -C   consolidated\n\
     -M   multi-candidate\n\
     -S   secondary\n\n\
-    Null might be\n\
-    new or amendment.\n\
-    If amendment\n\
-    indicator is null\n\
-    and the filings\n\
-    is the first\n\
-    or first in a\n\
-    chain treat it\n\
-    as if it was a new.\n\
-    If it is not the\n\
-    first or first\n\
-    in a chain then\n\
-    treat the filing\n\
-    as an amendment.\n\
+    Null might be new or amendment. If amendment indicator is null and the filings is the first or first in a chain treat it as if it was a new. If it is not the first or first in a chain then treat the filing as an amendment.\n\
 '''
 
 AMENDED_BY = '''
@@ -1292,11 +1150,8 @@ Audit category ID (table PK)
 '''
 
 PRIMARY_CATEGORY_NAME = 'Primary Audit Category\n\
-    - No Findings or\n\
-      Issues/Not a Committee\n\
-    - Net Outstanding Campaign\n\
-      /Convention Expenditures/\n\
-      Obligations\n\
+    - No Findings or Issues/Not a Committee\n\
+    - Net Outstanding Campaign/Convention Expenditures/Obligations\n\
     - Payments/Disgorgements\n\
     - Allocation Issues\n\
     - Prohibited Contributions\n\
@@ -1304,11 +1159,9 @@ PRIMARY_CATEGORY_NAME = 'Primary Audit Category\n\
     - Recordkeeping\n\
     - Repayment to US Treasury\n\
     - Other\n\
-    - Misstatement of \n\
-      Financial Activity\n\
+    - Misstatement of Financial Activity\n\
     - Excessive Contributions\n\
-    - Failure to File\n\
-      Reports/Schedules/Notices\n\
+    - Failure to File Reports/Schedules/Notices\n\
     - Loans\n\
     - Referred Findings Not Listed\n\
 '
