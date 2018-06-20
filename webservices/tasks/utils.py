@@ -61,3 +61,7 @@ def get_cached_request(cached_url):
     if response.status_code == 200:
         return python_str
     return None
+
+def get_app_name():
+    return env.get_credential('NEW_RELIC_APP_NAME')
+
