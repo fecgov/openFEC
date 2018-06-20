@@ -1,6 +1,8 @@
 from tests import factories
 from tests.common import ApiBaseTest, assert_dicts_subset
 
+from webservices.utils import get_current_cycle
+
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
@@ -167,6 +169,9 @@ class TestAggregates(ApiBaseTest):
 
 
 class TestCandidateAggregates(ApiBaseTest):
+
+    current_cycle = get_current_cycle()
+    next_cycle = current_cycle + 2
 
     def setUp(self):
         super().setUp()
@@ -357,50 +362,50 @@ class TestCandidateAggregates(ApiBaseTest):
             fec_election_year=2018,
         )
 
-        # Create data for future presidential - 2020. Use formula for future
+        # Create data for future presidential - next_cycle. Use formula for future
 
-        # Test full 2020 and 2018 totals
+        # Test full next_cycle and current_cycle 2-year totals
 
         self.candidate_20 = factories.CandidateHistoryFutureFactory(
             candidate_id='P456',
-            two_year_period=2018,
-            candidate_election_year=2020,
+            two_year_period=self.current_cycle,
+            candidate_election_year=self.next_cycle,
         )
         self.candidate_20 = factories.CandidateHistoryFutureFactory(
             candidate_id='P456',
-            two_year_period=2020,
-            candidate_election_year=2020,
+            two_year_period=self.next_cycle,
+            candidate_election_year=self.next_cycle,
         )
-        #Candidate history won't have 2020 yet
+        #Candidate history won't have next_cycle yet
         self.committees_20 = [
-            factories.CommitteeHistoryFactory(cycle=2018, designation='P'),
+            factories.CommitteeHistoryFactory(cycle=self.current_cycle, designation='P'),
         ]
         factories.CandidateDetailFactory(
             candidate_id=self.candidate_20.candidate_id,
-            election_years=[2020],
+            election_years=[self.next_cycle],
         )
         [
             factories.CandidateElectionFactory(
                 candidate_id=self.candidate_20.candidate_id,
                 cand_election_year=election_year
             )
-            for election_year in [2016, 2020]
+            for election_year in [self.next_cycle - 4, self.next_cycle]
         ]
         [
             factories.CommitteeDetailFactory(committee_id=each.committee_id)
             for each in self.committees_20
         ]
-        #Full 2020
+        #Full next_cycle
         factories.CandidateTotalFactory(
             candidate_id=self.candidate_20.candidate_id,
-            cycle=2020,
+            cycle=self.next_cycle,
             is_election=True,
             receipts=55000,
         )
-        #2018 2-year
+        #current_cycle 2-year
         factories.CandidateTotalFactory(
             candidate_id=self.candidate_20.candidate_id,
-            cycle=2018,
+            cycle=self.current_cycle,
             is_election=False,
             receipts=25000,
         )
@@ -414,8 +419,8 @@ class TestCandidateAggregates(ApiBaseTest):
             committee_id=self.committees_20[0].committee_id,
             committee_designation='P',
             committee_type='P',
-            cand_election_year=2020,
-            fec_election_year=2018,
+            cand_election_year=self.next_cycle,
+            fec_election_year=self.current_cycle,
         )
 
         factories.CandidateCommitteeLinkFactory(
@@ -423,8 +428,8 @@ class TestCandidateAggregates(ApiBaseTest):
             committee_id=self.committees_20[0].committee_id,
             committee_designation='P',
             committee_type='P',
-            cand_election_year=2020,
-            fec_election_year=2020,
+            cand_election_year=self.next_cycle,
+            fec_election_year=self.next_cycle,
         )
 
     def test_by_size(self):
@@ -541,11 +546,11 @@ class TestCandidateAggregates(ApiBaseTest):
             api.url_for(
                 TotalsCandidateView,
                 candidate_id=self.candidate_20.candidate_id,
-                cycle=2018,
+                cycle=self.current_cycle,
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2018, 'receipts': 25000})
+        assert_dicts_subset(results[0], {'cycle': self.current_cycle, 'receipts': 25000})
 
     def test_totals_full(self):
         results = self._results(
@@ -564,9 +569,9 @@ class TestCandidateAggregates(ApiBaseTest):
             api.url_for(
                 TotalsCandidateView,
                 candidate_id=self.candidate_20.candidate_id,
-                cycle=2020,
+                cycle=self.next_cycle,
                 election_full='true',
             )
         )
         assert len(results) == 1
-        assert_dicts_subset(results[0], {'cycle': 2020, 'receipts': 55000})
+        assert_dicts_subset(results[0], {'cycle': self.next_cycle, 'receipts': 55000})
