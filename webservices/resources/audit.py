@@ -92,8 +92,6 @@ class AuditCaseView(ApiResource):
     page_schema = schemas.AuditCasePageSchema
 
     filter_multi_fields = [
-        ('primary_category_id', model.primary_category_id),
-        ('sub_category_id', model.sub_category_id),
         ('audit_case_id', model.audit_case_id),
         ('cycle', model.cycle),
         ('committee_designation', model.committee_designation),
@@ -104,6 +102,11 @@ class AuditCaseView(ApiResource):
         ('audit_id', model.audit_id),
         ('committee_id', model.committee_id),
         ('candidate_id', model.candidate_id),
+    ]
+
+    filter_match_fields = [
+        ('primary_category_id', model.primary_category_id),
+        ('sub_category_id', model.sub_category_id),
     ]
 
     filter_range_fields = [
