@@ -13,14 +13,14 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
     schedule = {
         'refresh_materialized_views': {
             'task': 'webservices.tasks.refresh.refresh_materialized_views',
-            'schedule': crontab(minute=0, hour=9), 
+            'schedule': crontab(minute=0, hour=9),
         },
-        
+
         'refresh_all_aos_daily_except_sunday': {
             'task': 'webservices.tasks.legal_docs.reload_all_aos_when_change',
             'schedule': crontab(minute=0, hour=1, day_of_week='mon,tue,wed,thu,fri,sat'),
         },
-        
+
         'reload_all_aos_every_sunday': {
             'task': 'webservices.tasks.legal_docs.refresh_all_aos',
             'schedule': crontab(minute=0, hour=1, day_of_week='sun'),
@@ -28,12 +28,12 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
 
         'refresh_legal_docs': {
             'task': 'webservices.tasks.legal_docs.refresh',
-            'schedule': crontab(minute='*/5', hour='10-23'), 
+            'schedule': crontab(minute='*/5', hour='10-23'),
         },
 
         'delete_cached_call_folder': {
             'task': 'webservices.tasks.cache_request.delete_cached_calls_from_s3',
-            'schedule': crontab(minute=0, hour=2), 
+            'schedule': crontab(minute=0, hour=2),
         },
     }
 
@@ -52,6 +52,7 @@ def redis_url():
         return redis_url
 
     return env.get_credential('FEC_REDIS_URL', 'redis://localhost:6379/0')
+
 
 app = celery.Celery('openfec')
 app.conf.update(
