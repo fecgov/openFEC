@@ -1,16 +1,18 @@
-import logging
 
-import time
+
 import datetime
+
+import logging
 
 from celery_once import QueueOnce
 
 from webservices import utils
-from webservices.tasks import app
-from webservices.tasks.utils import get_app_name
-from webservices.rest import db
 from webservices.legal_docs.advisory_opinions import load_advisory_opinions
 from webservices.legal_docs.current_murs import load_current_murs
+from webservices.rest import db
+from webservices.tasks import app
+from webservices.tasks.utils import get_app_name
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +60,10 @@ def reload_all_aos_when_change():
             slack_message = 'Daily reload of all AOs completed in {0} space'.format(get_app_name())
             utils.post_to_slack(slack_message, '#bots')
         else:
-            logger.info("No daily (%s) modified AOs found", datetime.date.today().strftime("%A")) 
-            slack_message = 'No modified AOs found for the day - Reload of all AOs skipped in {0} space'.format(get_app_name())
-            utils.post_to_slack(slack_message, '#bots') 
+            logger.info("No daily (%s) modified AOs found", datetime.date.today().strftime("%A"))
+            slack_message = \
+                'No modified AOs found for the day - Reload of all AOs skipped in {0} space'.format(get_app_name())
+            utils.post_to_slack(slack_message, '#bots')
 
 @app.task(once={'graceful': True}, base=QueueOnce)
 def reload_all_aos():
