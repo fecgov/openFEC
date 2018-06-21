@@ -1,11 +1,19 @@
-import boto
-import boto3
+
+
+import json
 import logging
 import re
-import json
-import requests
-from webservices.env import env
+
+import boto
+
 from boto.s3.key import Key
+
+import boto3
+
+import requests
+
+from webservices.env import env
+
 
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
 logging.getLogger('smart_open').setLevel(logging.CRITICAL)
@@ -31,7 +39,7 @@ def get_s3_key(name):
     return key
 
 def get_json_data(response):
-    # convert the response bytes data to a string 
+    # convert the response bytes data to a string
     python_str = json.dumps(response.data.decode('utf-8'))
     return python_str
 
@@ -61,3 +69,6 @@ def get_cached_request(cached_url):
     if response.status_code == 200:
         return python_str
     return None
+
+def get_app_name():
+    return env.get_credential('NEW_RELIC_APP_NAME')
