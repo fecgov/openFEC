@@ -131,12 +131,6 @@ class TestSort(ApiBaseTest):
             factories.CommitteeTotalsHouseSenateFactory(committee_id='H5678', cycle=2016)
 
         ]
-        electionResults = [
-            factories.ElectionResultFactory(cand_id='C1234', election_yr=2016, cand_office='S', cand_office_st='MO', cand_office_district='01' ),
-            factories.ElectionResultFactory(cand_id='C5678', election_yr=2016, cand_office='S', cand_office_st='MO',
-                                            cand_office_district='02')
-
-        ]
         db.session.flush()
         arg_map = {}
         arg_map['office'] = 'senate'
