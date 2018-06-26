@@ -290,7 +290,6 @@ def refresh_materialized(concurrent=True):
         'candidate_flags': ['ofec_candidate_flag_mv'],
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
         'candidate_history': ['ofec_candidate_history_mv'],
-        'candidate_history_latest': ['ofec_candidate_history_latest_mv'],
         'committee_detail': ['ofec_committee_detail_mv'],
         'committee_fulltext': ['ofec_committee_fulltext_mv'],
         'committee_history': ['ofec_committee_history_mv'],

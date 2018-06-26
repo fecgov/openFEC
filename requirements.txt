@@ -25,13 +25,13 @@ bandit==1.4.0
 git+https://github.com/18F/slate.git
 
 # Marshalling
-flask-apispec==0.2.0
+flask-apispec==0.6.0.post0
 marshmallow==2.6.0
 marshmallow-sqlalchemy==0.8.0
 git+https://github.com/jmcarp/marshmallow-pagination@master
 
 # Data export
-boto3==1.4.4
+boto3==1.7.21
 smart_open==1.5.6
 
 # Task queue

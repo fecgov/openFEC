@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="35px" height="35px" viewBox="0 0 35 35" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+    <!-- Generator: Sketch 3.3.3 (12081) - http://www.bohemiancoding.com/sketch -->
+    <title>i-email--primary</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Alpha-Wireframes-Styled" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" sketch:type="MSPage">
+        <g id="Contact-Copy-5" sketch:type="MSArtboardGroup" transform="translate(-41.000000, -1105.000000)">
+            <g id="i-email--primary" sketch:type="MSLayerGroup" transform="translate(41.000000, 1105.000000)">
+                <ellipse id="Oval-275-Copy-4" fill="#022C53" sketch:type="MSShapeGroup" cx="17.5" cy="17.577" rx="17.5" ry="17"></ellipse>
+                <g id="Group-Copy-3" transform="translate(7.661695, 9.297242)" sketch:type="MSShapeGroup">
+                    <rect id="Rectangle-153" fill="#FFFFF9" x="1.30501689" y="1.58814772" width="21.2118639" height="12.8505077"></rect>
+                    <path d="M22.3406698,0.784990989 L1.2270552,0.784990989 C0.810720385,0.784990989 0.47317909,1.11360926 0.47317909,1.51949121 L0.47317909,14.4586808 C0.47317909,14.8643151 0.810974557,15.1926858 1.2270552,15.1926858 L22.3406698,15.1926858 C22.7570047,15.1926858 23.094546,14.8640675 23.094546,14.4586808 L23.094546,1.51949121 C23.094546,1.11336162 22.7567505,0.784990989 22.3406698,0.784990989 L22.3406698,0.784990989 Z M8.26153778,8.79168724 C9.15037958,9.52321578 9.75988562,10.0192387 9.91340591,10.1309243 C10.7681886,10.7539865 11.4333584,10.8379365 11.9714419,10.8379365 C12.9683071,10.8379365 13.6472023,10.3845077 13.9623764,10.1143324 L15.4945292,8.80778384 L21.9904199,13.9294742 L21.9873698,14.1823146 L1.58111772,14.1823146 L1.57705096,13.9294742 L8.26153778,8.79168724 L8.26153778,8.79168724 Z M1.51096607,12.4312522 L1.51096607,3.19601396 C1.83859463,3.46817031 2.23815405,3.80025554 2.67660189,4.16428633 C4.40751772,5.60183649 6.12648743,7.02849049 7.45835217,8.1294979 L1.51096607,12.4312522 L1.51096607,12.4312522 Z M16.3373658,8.09012314 L22.0565048,3.21582516 L22.0565048,12.4020307 L16.3373658,8.09012314 L16.3373658,8.09012314 Z M22.056759,1.7956098 L22.056759,1.85974856 L13.1604617,9.12055315 C12.7766609,9.40855846 12.3882851,9.54822742 11.9734753,9.54822742 C11.5540904,9.54822742 11.1146259,9.39741466 10.6815157,9.11238103 C10.178508,8.744388 3.09446175,3.08036608 1.51096607,1.81319224 L1.51096607,1.79536216 L22.056759,1.79536216 L22.056759,1.7956098 L22.056759,1.7956098 Z" id="Imported-Layers-Copy-2" fill="#022C53"></path>
+                </g>
+                <path d="M6.57132701,13.5 L3.89096076,13.5" id="Line-Copy-2" stroke="#F7EEE3" stroke-linecap="round" sketch:type="MSShapeGroup"></path>
+                <path d="M6.57132701,16.5 L1.85946134,16.5" id="Line-Copy-4" stroke="#F7EEE3" stroke-linecap="round" sketch:type="MSShapeGroup"></path>
+                <path d="M6.57132701,19.5 L3.89096076,19.5" id="Line-Copy-13" stroke="#F7EEE3" stroke-linecap="round" sketch:type="MSShapeGroup"></path>
+            </g>
+        </g>
+    </g>
+</svg>
