@@ -3,11 +3,27 @@ from apispec import APISpec
 from webservices import docs
 from webservices import __API_VERSION__
 
+def format_docstring(docstring):
+    if not docstring or not docstring.strip():
+        return ''
+
+    formatted = []
+    lines = docstring.expandtabs().splitlines()
+    indent = min(len(line) - len(line.strip()) for line in lines if line.strip())
+    trimmed = [lines[0].lstrip()] + [line[indent:].rstrip() for line in lines[1:]]
+
+    for line in lines:
+        if line == '':
+            formatted.append('\n\n')
+        else:
+            formatted.append(line.strip())
+
+    return ' '.join(formatted).strip()
 
 spec = APISpec(
     title='OpenFEC',
     version=__API_VERSION__,
-    info={'description': docs.API_DESCRIPTION},
+    info={'description': format_docstring(docs.API_DESCRIPTION)},
     basePath='/v1',
     produces=['application/json'],
     plugins=['apispec.ext.marshmallow'],
@@ -22,73 +38,73 @@ spec = APISpec(
     tags=[
         {
             'name': 'candidate',
-            'description': docs.CANDIDATE_TAG,
+            'description': format_docstring(docs.CANDIDATE_TAG),
         },
         {
             'name': 'committee',
-            'description': docs.COMMITTEE_TAG,
+            'description': format_docstring(docs.COMMITTEE_TAG),
         },
         {
             'name': 'dates',
-            'description': docs.DATES_TAG,
+            'description': format_docstring(docs.DATES_TAG),
         },
         {
             'name': 'financial',
-            'description': docs.FINANCIAL_TAG,
+            'description': format_docstring(docs.FINANCIAL_TAG),
         },
         {
             'name': 'search',
-            'description': docs.SEARCH_TAG,
+            'description': format_docstring(docs.SEARCH_TAG),
         },
         {
             'name': 'filings',
-            'description': docs.FILINGS,
+            'description': format_docstring(docs.FILINGS),
         },
         {
             'name': 'receipts',
-            'description': docs.SCHEDULE_A_TAG,
+            'description': format_docstring(docs.SCHEDULE_A_TAG),
         },
         {
             'name': 'disbursements',
-            'description': docs.SCHEDULE_B_TAG,
+            'description': format_docstring(docs.SCHEDULE_B_TAG),
         },
         {
             'name': 'loans',
-            'description': docs.SCHEDULE_C_TAG,
+            'description': format_docstring(docs.SCHEDULE_C_TAG),
 
         },
         {
             'name': 'debts',
-            'description': docs.SCHEDULE_D_TAG,
+            'description': format_docstring(docs.SCHEDULE_D_TAG),
 
         },
         {
             'name': 'independent expenditures',
-            'description': docs.SCHEDULE_E_TAG,
+            'description': format_docstring(docs.SCHEDULE_E_TAG),
         },
         {
             'name': 'party-coordinated expenditures',
-            'description': docs.SCHEDULE_F_TAG,
+            'description': format_docstring(docs.SCHEDULE_F_TAG),
         },
         {
             'name': 'communication cost',
-            'description': docs.COMMUNICATION_TAG,
+            'description': format_docstring(docs.COMMUNICATION_TAG),
         },
         {
             'name': 'electioneering',
-            'description': docs.ELECTIONEERING,
+            'description': format_docstring(docs.ELECTIONEERING),
         },
         {
             'name': 'filer resources',
-            'description': docs.FILER_RESOURCES,
+            'description': format_docstring(docs.FILER_RESOURCES),
         },
         {
             'name': 'efiling',
-            'description': docs.EFILING_TAG,
+            'description': format_docstring(docs.EFILING_TAG),
         },
         {
             'name': 'audit',
-            'description': docs.AUDIT,
+            'description': format_docstring(docs.AUDIT),
         }
     ]
 )

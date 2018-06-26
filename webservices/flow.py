@@ -16,7 +16,6 @@ def get_graph():
         'candidate_flags',
         'candidate_fulltext',
         'candidate_history',
-        'candidate_history_latest',
         'committee_detail',
         'committee_fulltext',
         'committee_history',
@@ -53,11 +52,6 @@ def get_graph():
 
     graph.add_edge('candidate_history', 'candidate_detail')
     graph.add_edge('candidate_detail', 'candidate_election')
-
-    graph.add_edges_from([
-        ('candidate_history', 'candidate_history_latest'),
-        ('candidate_election', 'candidate_history_latest')
-    ])
 
     graph.add_edge('committee_history', 'committee_detail')
 

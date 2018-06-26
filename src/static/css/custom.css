@@ -1,0 +1,17 @@
+.swagger-ui .opblock-tag > small h1,
+.swagger-ui .opblock-tag > small h2,
+.swagger-ui .opblock-tag > small h3,
+.swagger-ui .opblock-tag > small div,
+.swagger-ui .opblock-tag > small li,
+.swagger-ui .opblock-tag > small ul,
+.swagger-ui .opblock-tag > small p {
+	float: right;
+}
+
+.swagger-ui select[multiple] {
+    margin: 5px 0;
+    padding: 5px;
+    min-height: 100px;
+    background: #f7f7f7;
+    overflow-y: scroll;
+}

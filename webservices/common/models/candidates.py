@@ -115,20 +115,6 @@ class CandidateHistory(BaseCandidate):
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
 
-class CandidateHistoryLatest(BaseCandidate):
-    __tablename__ = 'ofec_candidate_history_latest_mv'
-    #Is there any good reason to have this as a separate model?
-    candidate_id = db.Column(db.String, primary_key=True, index=True)
-    two_year_period = db.Column(db.Integer, primary_key=True, index=True)
-    candidate_election_year = db.Column(db.Integer, doc="The last year of the cycle for this election.")
-    address_city = db.Column(db.String(100))
-    address_state = db.Column(db.String(2))
-    address_street_1 = db.Column(db.String(200))
-    address_street_2 = db.Column(db.String(200))
-    address_zip = db.Column(db.String(10))
-    candidate_inactive = db.Column(db.Boolean)
-
-
 class CandidateTotal(db.Model):
     __tablename__ = 'ofec_candidate_totals_with_0s_mv'
     candidate_id = db.Column(db.String, index=True, primary_key=True)
