@@ -115,7 +115,7 @@ class CandidateHistory(BaseCandidate):
     active_through = db.Column(db.Integer, doc=docs.ACTIVE_THROUGH)
 
 class CandidateHistoryWithFuture(BaseCandidate):
-    __tablename__ = 'ofec_candidate_history_with_future_elections_mv'
+    __tablename__ = 'ofec_candidate_history_with_future_election_mv'
 
     candidate_id = db.Column(db.String, primary_key=True, index=True, doc=docs.CANDIDATE_ID)
     two_year_period = db.Column(db.Integer, primary_key=True, index=True, doc=docs.CANDIDATE_CYCLE)

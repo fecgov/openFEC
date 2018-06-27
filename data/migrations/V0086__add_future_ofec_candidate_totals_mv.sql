@@ -1,7 +1,7 @@
 /*
 Addresses #3214: Fixes missing 2020 presidential data (and other future elections)
 
-- Add ofec_candidate_history_with_future_elections_mv which builds off
+- Add ofec_candidate_history_with_future_election_mv which builds off
    ofec_candidate_history but adds a row for future cycle candidates
 - Recreate ofec_candidate_totals_mv to include future cycle totals
 
@@ -9,7 +9,7 @@ Addresses #3214: Fixes missing 2020 presidential data (and other future election
 
 SET search_path = public;
 
-CREATE MATERIALIZED VIEW ofec_candidate_history_with_future_elections_mv AS
+CREATE MATERIALIZED VIEW ofec_candidate_history_with_future_election_mv AS
 
 WITH combined AS (
   SELECT
@@ -43,7 +43,8 @@ WITH combined AS (
       active_through
       from ofec_candidate_history_mv
   UNION --Add a row for current office sought (adds future elections)
-  SELECT load_date,
+  SELECT DISTINCT ON (ofec_candidate_history_mv.candidate_id)
+      load_date,
       candidate_election_year + candidate_election_year % 2 as two_year_period,
       candidate_election_year + candidate_election_year % 2 as candidate_election_year,
       candidate_id,
@@ -71,10 +72,10 @@ WITH combined AS (
       election_years,
       election_districts,
       active_through
-      from ofec_candidate_detail_mv
+      FROM ofec_candidate_history_mv
       --Only bring in an extra row for elections two years away or more
-      --keeps past elections from doubling
-      where candidate_election_year - date_part('year', CURRENT_DATE) >= 2)
+      --(keeps past elections from doubling)
+      WHERE candidate_election_year - date_part('year', CURRENT_DATE) >= 2)
 SELECT row_number() OVER () AS idx,
       load_date,
       two_year_period,
@@ -108,41 +109,41 @@ FROM combined;
 
 --Add permissions
 
-ALTER TABLE ofec_candidate_history_with_future_elections_mv OWNER TO fec;
-GRANT SELECT ON TABLE ofec_candidate_history_with_future_elections_mv TO fec_read;
+ALTER TABLE ofec_candidate_history_with_future_election_mv OWNER TO fec;
+GRANT SELECT ON TABLE ofec_candidate_history_with_future_election_mv TO fec_read;
 
 --Indexes: Should this be a unique index on ID, two year period?
 
-CREATE UNIQUE INDEX ofec_candidate_history_with_future_elections_mv_idx_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (idx);
+CREATE UNIQUE INDEX ofec_candidate_history_with_future_election_mv_idx_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (idx);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_candidate_id_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (candidate_id);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_candidate_id_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (candidate_id);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_district_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (district);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_district_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (district);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_district_number_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (district_number);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_district_number_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (district_number);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_first_file_date_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (first_file_date);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_first_file_date_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (first_file_date);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_load_date_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (load_date);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_load_date_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (load_date);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_office_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (office);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_office_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (office);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_state_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (state);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_state_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (state);
 
-CREATE INDEX ofec_candidate_history_with_future_elections_mv_two_year_period_candidate_id_idx
- ON ofec_candidate_history_with_future_elections_mv USING btree (two_year_period, candidate_id);
+CREATE INDEX ofec_candidate_history_with_future_election_mv_two_year_period_candidate_id_idx
+ ON ofec_candidate_history_with_future_election_mv USING btree (two_year_period, candidate_id);
 
 /*
 
-Recreate ofec_candidate_totals_mv to use ofec_candidate_history_with_future_elections_mv
+Recreate ofec_candidate_totals_mv to use ofec_candidate_history_with_future_election_mv
 instead of ofec_candidate_history_mv as base table - this will include future election cycles
 
 */
@@ -274,7 +275,7 @@ SELECT cand.candidate_id AS candidate_id,
     totals.coverage_start_date,
     totals.coverage_end_date,
     COALESCE (totals.federal_funds_flag, false) AS federal_funds_flag
-  FROM ofec_candidate_history_with_future_elections_mv cand
+  FROM ofec_candidate_history_with_future_election_mv cand
    LEFT JOIN combined_totals totals
    ON cand.candidate_id = totals.candidate_id
     AND cand.two_year_period = totals.cycle;
