@@ -57,6 +57,11 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     two_year_period = 2016
     candidate_inactive = False
 
+class CandidateHistoryFutureFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateHistoryWithFuture
+    two_year_period = 2016
+    candidate_inactive = False
 
 class CandidateElectionFactory(BaseCandidateFactory):
     class Meta:
