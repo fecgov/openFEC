@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import os
 import glob
 import logging
-import shlex
 import subprocess
 import multiprocessing
 
@@ -192,8 +190,6 @@ def load_election_dates():
     logger.info('Finished loading election dates.')
 
 
-
-
 @manager.command
 def refresh_itemized():
     """These are run nightly to refresh the itemized schedule A and B data."""
@@ -283,13 +279,13 @@ def refresh_materialized(concurrent=True):
                        'ofec_committee_fulltext_audit_mv',
                        'ofec_candidate_fulltext_audit_mv'],
         'cand_cmte_linkage': ['ofec_cand_cmte_linkage_mv'],
-        'candidate_aggregates': ['ofec_candidate_totals_mv',
-                                 'ofec_candidate_totals_with_0s_mv'],
+        'candidate_aggregates': ['ofec_candidate_totals_mv'],
         'candidate_detail': ['ofec_candidate_detail_mv'],
         'candidate_election': ['ofec_candidate_election_mv'],
         'candidate_flags': ['ofec_candidate_flag_mv'],
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
         'candidate_history': ['ofec_candidate_history_mv'],
+        'candidate_history_future': ['ofec_candidate_history_with_future_election_mv'],
         'committee_detail': ['ofec_committee_detail_mv'],
         'committee_fulltext': ['ofec_committee_fulltext_mv'],
         'committee_history': ['ofec_committee_history_mv'],
