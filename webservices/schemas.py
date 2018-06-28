@@ -1138,6 +1138,8 @@ ElectionsListSchema = make_schema(
         'exclude': (
             'idx',
             'sort_order',
+            'incumbent_id',
+            'incumbent_name',
         )
     }
 )
