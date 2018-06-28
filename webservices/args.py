@@ -778,3 +778,13 @@ auditCase = {
     'min_election_cycle': fields.Int(description=docs.CYCLE),
     'max_election_cycle': fields.Int(description=docs.CYCLE),
 }
+
+operations_log = {
+    'candidate_committee_id': fields.List(IStr, description=docs.CAND_CMTE_ID),
+    'report_type': fields.List(IStr, description=docs.REPORT_TYPE),
+    'beginning_image_number': fields.List(fields.Str, description=docs.BEGINNING_IMAGE_NUMBER),
+    'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
+    'form_type': fields.List(IStr, description=docs.FORM_TYPE),
+    'amendment_indicator': fields.List(IStr, description=docs.AMENDMENT_INDICATOR),
+    'status_num': fields.Str(validate=validate.OneOf(['0', '1']), description=docs.STATUS_NUM),
+}
