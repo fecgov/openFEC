@@ -286,6 +286,7 @@ def join_candidate_totals(query, kwargs, totals_model):
         sa.and_(
             CandidateCommitteeLink.committee_id == totals_model.committee_id,
             CandidateCommitteeLink.fec_election_year == totals_model.cycle,
+            CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
         )
     )
 
