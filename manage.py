@@ -329,6 +329,7 @@ def refresh_materialized(concurrent=True):
                              'ofec_totals_pacs_mv',
                              'ofec_totals_parties_mv'],
         'totals_presidential': ['ofec_totals_presidential_mv'],
+        'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
     }
 
     graph = flow.get_graph()
