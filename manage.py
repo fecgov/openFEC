@@ -17,7 +17,6 @@ from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 import webservices.legal_docs as legal_docs
 from webservices.utils import post_to_slack
-from webservices.tasks import cache_request
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -43,7 +42,6 @@ manager.command(legal_docs.delete_docs_index)
 manager.command(legal_docs.move_archived_murs)
 manager.command(legal_docs.initialize_current_legal_docs)
 manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
-manager.command(cache_request.delete_cached_calls_from_s3)
 
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
