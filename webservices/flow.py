@@ -47,6 +47,7 @@ def get_graph():
         'totals_ie',
         'totals_pac_party',
         'totals_presidential',
+        'ofec_agg_coverage_date',
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
