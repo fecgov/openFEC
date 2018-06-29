@@ -115,15 +115,23 @@ class ElectionsListView(utils.Resource):
     description=docs.ELECTIONS,
     tags=['financial']
 )
-class ElectionView(utils.Resource):
+class ElectionView(ApiResource):
+    schema = schemas.ElectionSchema
+    page_schema = schemas.ElectionPageSchema
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.elections)
-    @use_kwargs(args.make_sort_args(default='-total_receipts'))
-    @marshal_with(schemas.ElectionPageSchema())
-    def get(self, **kwargs):
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.elections,
+            args.make_sort_args(
+                default='-total_receipts',
+            ),
+        )
+
+    def build_query(self, *args, **kwargs):
         query = self._get_records(kwargs)
-        return utils.fetch_page(query, kwargs, cap=0)
+        return query
 
     def _get_records(self, kwargs):
         utils.check_election_arguments(kwargs)
@@ -280,6 +288,7 @@ def join_candidate_totals(query, kwargs, totals_model):
         sa.and_(
             CandidateHistory.candidate_id == CandidateCommitteeLink.candidate_id,
             CandidateHistory.two_year_period == CandidateCommitteeLink.fec_election_year,
+            CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
         )
     ).outerjoin(
         totals_model,
