@@ -273,8 +273,16 @@ election_durations = {
     'house': 2,
 }
 
-
 def join_candidate_totals(query, kwargs, totals_model):
+    """
+    Joint Fundraising Committees raise money for multiple
+    candidate committees and transfer that money to those committees.
+    By limiting the committee designations to A and P
+    you eliminate J (joint) and thus do not inflate
+    the candidate's money by including it twice and
+    by including money that was raised and transferred
+    to the other committees in the joint fundraiser.
+    """
     return query.outerjoin(
         CandidateCommitteeLink,
         sa.and_(
