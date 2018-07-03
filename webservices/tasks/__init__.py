@@ -31,10 +31,6 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'schedule': crontab(minute='*/5', hour='10-23'),
         },
 
-        'delete_cached_call_folder': {
-            'task': 'webservices.tasks.cache_request.delete_cached_calls_from_s3',
-            'schedule': crontab(minute=0, hour=2),
-        },
     }
 
 def redis_url():
@@ -61,7 +57,6 @@ app.conf.update(
         'webservices.tasks.refresh',
         'webservices.tasks.download',
         'webservices.tasks.legal_docs',
-        'webservices.tasks.cache_request',
     ),
     beat_schedule=schedule,
     broker_connection_timeout=30,  # in seconds
