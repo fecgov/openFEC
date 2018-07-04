@@ -111,24 +111,27 @@ class TestItemized(ApiBaseTest):
         [
             factories.ScheduleAFactory(contributor_zip=96789),
             factories.ScheduleAFactory(contributor_zip=9678912),
-            factories.ScheduleAFactory(contributor_zip=967891234)
+            factories.ScheduleAFactory(contributor_zip=967891234),
+            factories.ScheduleAFactory(contributor_zip='M4C 1M7')
         ]
-
-        results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=967893405, **self.kwargs))
         self.assertEqual(len(results), 3)
     
-    def test_invalid_sched_a_zip(self): 
-        response = self.app.get(api.url_for(ScheduleAView,contributor_zip=9678912,cycle=2018))
-        self.assertEqual(response.status_code,400)
+        results = self._results(api.url_for(ScheduleAView, contributor_zip='M4C 1M55', **self.kwargs))
+        self.assertEqual(len(results), 1)
 
-        response = self.app.get(api.url_for(ScheduleAView,contributor_zip='9678-',cycle=2018))
+        contributor_zips = ['M4C 1M5555',96789]
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=contributor_zips,**self.kwargs))
+        self.assertEqual(len(results), 4)
+
+    def test_invalid_sched_a_zip(self): 
+        response = self.app.get(api.url_for(ScheduleAView,contributor_zip='96%',cycle=2018))
         self.assertEqual(response.status_code,400)
 
     def test_filter_multi_start_with(self):
         [
             factories.ScheduleAFactory(contributor_zip=1296789)
         ]
-
         results = self._results(api.url_for(ScheduleAView, contributor_zip=96789, **self.kwargs))
         self.assertEqual(len(results), 0)
 
