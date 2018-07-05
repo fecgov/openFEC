@@ -109,24 +109,26 @@ class TestElections(ApiBaseTest):
             for each in self.committees
         ]
         db.session.flush()
-        factories.CandidateCommitteeLinkFactory(
-            candidate_id=self.candidate.candidate_id,
-            committee_id=self.committees[0].committee_id,
-            committee_designation='A',
-            fec_election_year=2012,
-        )
-        factories.CandidateCommitteeLinkFactory(
-            candidate_id=self.candidate.candidate_id,
-            committee_id=self.committees[1].committee_id,
-            committee_designation='P',
-            fec_election_year=2012,
-        )
-        factories.CandidateCommitteeLinkFactory(
-            candidate_id=self.candidate.candidate_id,
-            committee_id=self.committees[1].committee_id,
-            committee_designation='P',
-            fec_election_year=2010,
-        )
+        self.candidate_committee_links = [
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[0].committee_id,
+                committee_designation='A',
+                fec_election_year=2012,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[1].committee_id,
+                committee_designation='P',
+                fec_election_year=2012,
+            ),
+            factories.CandidateCommitteeLinkFactory(
+                candidate_id=self.candidate.candidate_id,
+                committee_id=self.committees[1].committee_id,
+                committee_designation='P',
+                fec_election_year=2010,
+            )
+        ]
         self.totals = [
             factories.TotalsHouseSenateFactory(
                 receipts=50,
@@ -199,7 +201,7 @@ class TestElections(ApiBaseTest):
             )
         )
         totals = self.totals
-        last_totals = self.totals[:2]
+        cash_on_hand_totals = self.totals[:2]
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'candidate_name': self.candidate.name,
@@ -207,7 +209,39 @@ class TestElections(ApiBaseTest):
             'party_full': self.candidate.party_full,
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
-            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in last_totals),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
+            'won': False,
+        }
+        assert len(results) == 1
+        assert_dicts_subset(results[0], expected)
+        assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees)
+
+    def test_electionview_excludes_jfc(self):
+        self.candidate_committee_links[0].committee_designation = 'J'
+
+        results = self._results(
+            api.url_for(
+                ElectionView,
+                office='senate', cycle=2012, state='NY', election_full='true',
+            )
+        )
+# Joint Fundraising Committees raise money for multiple
+# candidate committees and transfer that money to those committees.
+# By limiting the committee designations to A and P
+# you eliminate J (joint) and thus do not inflate
+# the candidate's money by including it twice and
+# by including money that was raised and transferred
+# to the other committees in the joint fundraiser.
+        totals_without_jfc = self.totals[1:]
+        cash_on_hand_without_jfc = self.totals[1:2]
+        expected = {
+            'candidate_id': self.candidate.candidate_id,
+            'candidate_name': self.candidate.name,
+            'incumbent_challenge_full': self.candidate.incumbent_challenge_full,
+            'party_full': self.candidate.party_full,
+            'total_receipts': sum(each.receipts for each in totals_without_jfc),
+            'total_disbursements': sum(each.disbursements for each in totals_without_jfc),
+            'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_without_jfc),
             'won': False,
         }
         assert len(results) == 1
