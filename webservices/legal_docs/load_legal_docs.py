@@ -436,13 +436,21 @@ def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, 
     """
     logger.info("Loading archived MURs")
     table_text = requests.get('http://classic.fec.gov/MUR/MURData.do').text
-    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+    # Following line will retrieve data from the above link and find all occurrences of MUR
+    # numbers found within <tr> tags.
+    rows_with_mur_numbers = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+
+    # If starting from MUR number is passed in (-f <mur_no>) then the Regex will find all the PDFs starting with
+    # passed in MUR number and create an list in descending order (since classic.fec.gov/MUR display them in descending order)
+    # ie.drop all the MURs that are not >= to from MUR number
     if from_mur_no is not None:
         rows = list(itertools.dropwhile(
-            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) != from_mur_no, rows))
+            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) != from_mur_no, rows_with_mur_numbers))
+    # If specific MUR number is passed in then the Regex find that spaecific *.pdf file and stop at the first occurrence of it    
     elif specific_mur_no is not None:
         rows = list(filter(
-            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) == specific_mur_no, rows))
+            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) == specific_mur_no, rows_with_mur_numbers))
+    # Following is used for multi-processing purposes.    
     murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
     processes = int(num_processes)
     maxtasksperchild = int(tasks_per_child) if tasks_per_child else None
