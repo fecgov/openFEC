@@ -609,9 +609,9 @@ You can optionally choose to restrict traffic that goes to the mirrors/replicas 
 #### Installing `flyway`
 `Flyway` is a Java application and requires a Java runtime environment (JRE) for execution.
 
-It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-5.0.2.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. If you have trouble with a separate JRE or are not comfortable with managing a separate JRE, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-5.0.2-macosx-x64.tar.gz`, `flyway-commandline-5.0.2-linux-x64.tar.gz`, etc.
+It is recommended that you install the JRE separately using your package manager of choice, e.g., `Homebrew`, `apt`, etc, and download the version without the JRE e.g. `flyway-commandline-5.1.3.tar.gz` from [Flyway downloads](https://flywaydb.org/getstarted/download). This way, you have complete control over your Java version and can use the JRE for other applications like `Elasticsearch`. If you have trouble with a separate JRE or are not comfortable with managing a separate JRE, you can download the `flyway` archive that bundles the JRE, e.g., `flyway-commandline-5.1.3-macosx-x64.tar.gz`, `flyway-commandline-5.1.3-linux-x64.tar.gz`, etc.
 
-Expand the downloaded archive. Add `<target_directory>/flyway/flyway-5.0.2` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
+Expand the downloaded archive. Add `<target_directory>/flyway/flyway-5.1.3` to your `PATH` where `target_directory` is the directory in which the archive has been expanded.
 
 #### How `flyway` works
 All database schema modification code is checked into version control in the directory `data/migrations` in the form of SQL files that follow a strict naming convention - `V<version_number>__<descriptive_name>.sql`. `flyway` also maintains a table in the target database called `flyway_schema_history` which tracks the migration versions that have already been applied.
