@@ -238,9 +238,9 @@ def index_statutes():
     logger.info("%d statute sections indexed", title_26_section_count + title_52_section_count)
 
 
-def process_mur_pdf(mur_no, pdf_key, bucket):
+def process_mur_pdf(file_name, pdf_key, bucket):
     response = requests.get('http://classic.fec.gov/disclosure_data/mur/%s.pdf'
-                            % mur_no, stream=True)
+                            % file_name, stream=True)
 
     with NamedTemporaryFile('wb+') as pdf:
         for chunk in response:
@@ -385,13 +385,13 @@ def process_murs(raw_mur_tr_element_list):
     for raw_mur_tr_element in raw_mur_tr_element_list:
         (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
             = re.findall("<td[^>]*>(.*?)</td>", raw_mur_tr_element, re.S)
-        mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-        logger.info("Loading archived MUR %s", mur_no[:4])
+        mur_no = re.search("/disclosure_data/mur/([0-9]+)(?:_[A-H])*\.pdf", mur_no_td).group(1)
+        logger.info("Loading archived MUR %s", mur_no)
 
-        for pdf_key in re.findall("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td):
-            logger.info("Loading file %s.pdf", pdf_key)
-            pdf_key = 'legal/murs/%s.pdf' % mur_no
-            text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
+        for file_name in re.findall("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td):
+            logger.info("Loading file %s.pdf", file_name)
+            pdf_key = 'legal/murs/%s.pdf' % file_name
+            text, pdf_size, pdf_pages = process_mur_pdf(file_name, pdf_key, bucket)
             pdf_url = '/files/' + pdf_key
 
         open_date, close_date = (None, None)
