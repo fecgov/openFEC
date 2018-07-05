@@ -16,13 +16,13 @@ if env.app.get('space_name', 'unknown-space').lower() != 'feature':
             'schedule': crontab(minute=0, hour=9),
         },
 
-        'refresh_all_aos_daily_except_sunday': {
+        'reload_all_aos_daily_except_sunday': {
             'task': 'webservices.tasks.legal_docs.reload_all_aos_when_change',
             'schedule': crontab(minute=0, hour=1, day_of_week='mon,tue,wed,thu,fri,sat'),
         },
 
         'reload_all_aos_every_sunday': {
-            'task': 'webservices.tasks.legal_docs.refresh_all_aos',
+            'task': 'webservices.tasks.legal_docs.reload_all_aos',
             'schedule': crontab(minute=0, hour=1, day_of_week='sun'),
         },
 

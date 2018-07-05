@@ -772,6 +772,7 @@ auditCase = {
     'cycle': fields.List(fields.Int(), description=docs.CYCLE),
     'committee_id': fields.List(fields.Str(), description=docs.COMMITTEE_ID),
     'committee_type': fields.List(fields.Str(), description=docs.COMMITTEE_TYPE),
+    'committee_designation': fields.Str(description=docs.COMMITTEE_DESCRIPTION),
     'audit_id': fields.List(fields.Int(), description=docs.AUDIT_ID),
     'candidate_id': fields.List(fields.Str(), description=docs.CANDIDATE_ID),
     'min_election_cycle': fields.Int(description=docs.CYCLE),
