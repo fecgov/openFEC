@@ -484,9 +484,7 @@ class TestViews(common.IntegrationTestCase):
         manage.add_itemized_partition_cycle(3002, 2)
         expected_tables = {
             "ofec_sched_a_3001_3002",
-            "ofec_sched_b_3003_3004",
-            "ofec_sched_a_3001_3002",
-            "ofec_sched_b_3003_3004",
+            "ofec_sched_a_3003_3004",
         }
         inspector = sa.inspect(db.engine)
         actual_tables = set(inspector.get_table_names())
