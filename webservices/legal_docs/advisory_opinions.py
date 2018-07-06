@@ -228,6 +228,9 @@ def get_citations(ao_names):
     for row in rs:
         logger.debug("Getting citations for AO %s" % row["ao_no"])
 
+        if not row["ocrtext"]:
+            logger.error("Missing OCR text for AO no {0}: unable to get citations".format(row['ao_no']))
+
         ao_citations_in_doc = parse_ao_citations(row["ocrtext"], ao_component_to_name_map)
         ao_citations_in_doc.discard(row["ao_no"])  # Remove self
 
