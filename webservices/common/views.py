@@ -65,11 +65,6 @@ class ItemizedResource(ApiResource):
         records.
         """
         committee_ids = kwargs.get('committee_id', [])
-        if len(committee_ids) > 5:
-            raise exceptions.ApiError(
-                'Can only specify up to five values for "committee_id".',
-                status_code=422,
-            )
         if len(committee_ids) > 1:
             query, count = self.join_committee_queries(kwargs)
             return utils.fetch_seek_page(query, kwargs, self.index_column, count=count)

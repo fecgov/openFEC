@@ -77,6 +77,16 @@ large_records_sched_a = [
     }
 ]
 
+large_records_sched_b = [
+    {'committee_id': 'C00401224'},
+    {'committee_id': ['C00401224', 'C00003418', 'C00010603', 'C00027466', 'C00005561', 'C00484642']},
+    {'recipient_state': 'NY'},
+    {'recipient_state': 'TX'},
+    # some common last names in the US
+    {'recipient_name': 'Smith'},
+    {'recipient_name': 'Staples'},
+
+]
 
 # took the worst performing queries from the log https://logs.fr.cloud.gov/goto/be56820fc05ef241c62c5641f16dcd3e
 poor_performance_a = [
@@ -223,6 +233,12 @@ class Tasks(locust.TaskSet):
         params = random.choice(poor_performance_a)
         params['api_key'] = API_KEY
         self.client.get('schedules/schedule_a/', name='load_schedule_a_problematic', params=params)
+
+    @locust.task
+    def load_schedule_b_large(self):
+        params = random.choice(large_records_sched_b)
+        params['api_key'] = API_KEY
+        self.client.get('schedules/schedule_b/', name='load_schedule_b_large', params=params)
 
     @locust.task
     def load_schedule_b_problematic(self):
