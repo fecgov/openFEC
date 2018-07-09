@@ -125,7 +125,7 @@ These pipelines include:
 
 #### Release cut
 
-The release is typically cut the Wednesday after sprint planning. By this time, all PR reviews that are part of the past sprint should be done and merged into the develop branch. The release branch is cut from our develop branch. Therefore, when the release branch is cut, those changes that were due in sprint that just closed, will be merged in. Ideally, this would give us about 1 week to complete testing before production release deployment the following wednesday.
+The release is typically cut the Tuesday after sprint planning. By this time, all PR reviews that are part of the past sprint should be done and merged into the develop branch. The release branch is cut from our develop branch. Therefore, when the release branch is cut, those changes that were due in sprint that just closed, will be merged in. Ideally, this would give us about 1 week to complete testing before production release deployment the following tuesday.
 
 5. **Ready for testing:** After release is cut, move all of the previous sprint’s tickets from the “Ready” pipeline to “Ready for testing”. Add the assignee to the PR to test the PR before deployment.
 6. **Testing in progress:** An individual, who is NOT the original person who created the PR, should test. Tester has to verify that business requirements and implementation is correct.
