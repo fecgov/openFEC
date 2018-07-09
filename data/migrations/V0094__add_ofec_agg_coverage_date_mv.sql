@@ -8,7 +8,7 @@ CREATE MATERIALIZED VIEW public.ofec_agg_coverage_date_mv AS
   SELECT row_number() OVER () AS idx,
          f.cmte_id AS cand_cmte_id,
          f.rpt_yr + f.rpt_yr % 2::numeric AS fec_election_yr,
-         max(f.cvg_end_dt) AS cvg_end_date
+         max(f.cvg_end_dt)::text::date AS coverage_end_date
    FROM   disclosure.v_sum_and_det_sum_report f
   WHERE f.orig_sub_id IN ( SELECT o.sub_id
                              FROM staging.operations_log o
