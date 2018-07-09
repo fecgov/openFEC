@@ -338,16 +338,6 @@ class ElectionDateFactory(BaseFactory):
         model = models.ElectionDate
 
 
-class ElectionResultFactory(BaseFactory):
-    class Meta:
-        model = models.ElectionResult
-    election_yr = 2016
-    cand_office_st = 'US'
-    cand_office_district = '00'
-    election_type = 'P'
-    fec_election_yr = 2016
-
-
 class ElectionsListFactory(BaseFactory):
     class Meta:
         model = models.ElectionsList
