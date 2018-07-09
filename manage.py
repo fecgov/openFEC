@@ -275,7 +275,6 @@ def refresh_materialized(concurrent=True):
         'committee_history': ['ofec_committee_history_mv'],
         'communication_cost': ['ofec_communication_cost_mv'],
         'communication_cost_by_candidate': ['ofec_communication_cost_aggregate_candidate_mv'],
-        'election_outcome': ['ofec_election_result_mv'],
         'electioneering': ['ofec_electioneering_mv'],
         'electioneering_by_candidate': ['ofec_electioneering_aggregate_candidate_mv'],
         'elections_list': ['ofec_elections_list_mv'],
