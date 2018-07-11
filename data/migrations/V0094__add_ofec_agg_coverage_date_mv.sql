@@ -27,5 +27,10 @@ GRANT SELECT ON TABLE public.ofec_agg_coverage_date_mv TO fec_read;
  
 
 CREATE INDEX IF NOT EXISTS ofec_agg_coverage_date_mv_idx ON public.ofec_agg_coverage_date_mv
-   USING btree
+  USING btree
   (cand_cmte_id COLLATE pg_catalog."default", fec_election_yr);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ofec_agg_coverage_date_mv_idx_idx 
+  ON public.ofec_agg_coverage_date_mv
+  USING btree
+  (idx);
