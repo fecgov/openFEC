@@ -238,9 +238,9 @@ def index_statutes():
     logger.info("%d statute sections indexed", title_26_section_count + title_52_section_count)
 
 
-def process_mur_pdf(mur_no, pdf_key, bucket):
+def process_mur_pdf(file_name, pdf_key, bucket):
     response = requests.get('http://classic.fec.gov/disclosure_data/mur/%s.pdf'
-                            % mur_no, stream=True)
+                            % file_name, stream=True)
 
     with NamedTemporaryFile('wb+') as pdf:
         for chunk in response:
@@ -377,55 +377,61 @@ def get_mur_names(mur_names={}):
                 mur_names[row[1]] = row[2]
     return mur_names
 
-def process_mur(mur):
+def process_murs(raw_mur_tr_element_list):
     es = utils.get_elasticsearch_connection()
     bucket = get_bucket()
     mur_names = get_mur_names()
-    (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
-        = re.findall("<td[^>]*>(.*?)</td>", mur[2], re.S)
-    mur_no = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-    logger.info("Loading archived MUR %s: %s of %s", mur_no, mur[0] + 1, mur[1])
-    pdf_key = 'legal/murs/%s.pdf' % mur_no
-    text, pdf_size, pdf_pages = process_mur_pdf(mur_no, pdf_key, bucket)
-    pdf_url = '/files/' + pdf_key
-    open_date, close_date = (None, None)
-    if open_date_td:
-        open_date = datetime.strptime(open_date_td, '%m/%d/%Y').isoformat()
-    if close_date_td:
-        close_date = datetime.strptime(close_date_td, '%m/%d/%Y').isoformat()
-    parties = re.findall("(.*?)<br>", parties_td)
-    complainants = []
-    respondents = []
-    for party in parties:
-        match = re.match("\(([RC])\) - (.*)", party)
-        name = match.group(2).strip().title()
-        if match.group(1) == 'C':
-            complainants.append(name)
-        if match.group(1) == 'R':
-            respondents.append(name)
 
-    subject = get_subject_tree(subject_td)
-    citations = get_citations(re.findall("(.*?)<br>", citations_td))
+    for raw_mur_tr_element in raw_mur_tr_element_list:
+        (mur_no_td, open_date_td, close_date_td, parties_td, subject_td, citations_td)\
+            = re.findall("<td[^>]*>(.*?)</td>", raw_mur_tr_element, re.S)
+        mur_no = re.search("/disclosure_data/mur/([0-9]+)(?:_[A-H])*\.pdf", mur_no_td).group(1)
+        logger.info("Loading archived MUR %s", mur_no)
 
-    mur_digits = re.match("([0-9]+)", mur_no).group(1)
-    name = mur_names[mur_digits] if mur_digits in mur_names else ''
-    doc = {
-        'doc_id': 'mur_%s' % mur_no,
-        'no': mur_no,
-        'name': name,
-        'text': text,
-        'mur_type': 'archived',
-        'pdf_size': pdf_size,
-        'pdf_pages': pdf_pages,
-        'open_date': open_date,
-        'close_date': close_date,
-        'complainants': complainants,
-        'respondents': respondents,
-        'subject': subject,
-        'citations': citations,
-        'url': pdf_url
-    }
-    es.index('archived_murs_index', 'murs', doc, id=doc['doc_id'])
+        for file_name in re.findall("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td):
+            logger.info("Loading file %s.pdf", file_name)
+            pdf_key = 'legal/murs/%s.pdf' % file_name
+            text, pdf_size, pdf_pages = process_mur_pdf(file_name, pdf_key, bucket)
+            pdf_url = '/files/' + pdf_key
+
+        open_date, close_date = (None, None)
+        if open_date_td:
+            open_date = datetime.strptime(open_date_td, '%m/%d/%Y').isoformat()
+        if close_date_td:
+            close_date = datetime.strptime(close_date_td, '%m/%d/%Y').isoformat()
+        parties = re.findall("(.*?)<br>", parties_td)
+        complainants = []
+        respondents = []
+        for party in parties:
+            match = re.match("\(([RC])\) - (.*)", party)
+            name = match.group(2).strip().title()
+            if match.group(1) == 'C':
+                complainants.append(name)
+            if match.group(1) == 'R':
+                respondents.append(name)
+
+        subject = get_subject_tree(subject_td)
+        citations = get_citations(re.findall("(.*?)<br>", citations_td))
+
+        mur_digits = re.match("([0-9]+)", mur_no).group(1)
+        name = mur_names[mur_digits] if mur_digits in mur_names else ''
+        doc = {
+            'doc_id': 'mur_%s' % mur_no,
+            'no': mur_no,
+            'name': name,
+            'text': text,
+            'mur_type': 'archived',
+            'pdf_size': pdf_size,
+            'pdf_pages': pdf_pages,
+            'open_date': open_date,
+            'close_date': close_date,
+            'complainants': complainants,
+            'respondents': respondents,
+            'subject': subject,
+            'citations': citations,
+            'url': pdf_url
+        }
+        es.index('archived_murs_index', 'murs', doc, id=doc['doc_id'])
 
 def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, tasks_per_child=None):
     """
@@ -436,16 +442,14 @@ def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, 
     """
     logger.info("Loading archived MURs")
     table_text = requests.get('http://classic.fec.gov/MUR/MURData.do').text
-    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+    raw_mur_tr_element_list = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+
     if from_mur_no is not None:
-        rows = list(itertools.dropwhile(
-            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) != from_mur_no, rows))
+        raw_mur_tr_element_list = list(itertools.dropwhile(
+            lambda x: re.search('/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M).group(1) != from_mur_no, raw_mur_tr_element_list))
     elif specific_mur_no is not None:
-        rows = list(filter(
-            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) == specific_mur_no, rows))
-    murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
-    processes = int(num_processes)
-    maxtasksperchild = int(tasks_per_child) if tasks_per_child else None
-    with Pool(processes=processes, maxtasksperchild=maxtasksperchild) as pool:
-        pool.map(process_mur, murs, chunksize=1)
-    logger.info("%d archived MURs loaded", len(rows))
+        raw_mur_tr_element_list = list(filter(
+            lambda x: re.search('/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M).group(1) == specific_mur_no, raw_mur_tr_element_list))    
+    
+    process_murs(raw_mur_tr_element_list)
+    logger.info("%d archived MURs loaded", len(raw_mur_tr_element_list))
