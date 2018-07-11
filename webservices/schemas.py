@@ -930,7 +930,6 @@ class ElectionSchema(ma.Schema):
     total_receipts = ma.fields.Decimal(places=2)
     total_disbursements = ma.fields.Decimal(places=2)
     cash_on_hand_end_period = ma.fields.Decimal(places=2)
-    won = ma.fields.Boolean()
     candidate_election_year = ma.fields.Int()
     coverage_end_date = ma.fields.Date()
 augment_schemas(ElectionSchema)
@@ -1138,6 +1137,8 @@ ElectionsListSchema = make_schema(
         'exclude': (
             'idx',
             'sort_order',
+            'incumbent_id',
+            'incumbent_name',
         )
     }
 )
