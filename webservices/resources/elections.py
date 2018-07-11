@@ -13,7 +13,7 @@ from webservices.common.views import ApiResource
 from webservices.common.models import (
     db, CandidateHistory, CandidateCommitteeLink,
     CommitteeTotalsPresidential, CommitteeTotalsHouseSenate,
-    ElectionResult, ElectionsList, ZipsDistricts, ScheduleEByCandidate,
+    ElectionsList, ZipsDistricts, ScheduleEByCandidate,
     StateElectionOfficeInfo, BaseConcreteCommittee
 )
 
@@ -130,22 +130,14 @@ class ElectionView(utils.Resource):
         totals_model = office_totals_map[kwargs['office']]
         pairs = self._get_pairs(totals_model, kwargs).subquery()
         aggregates = self._get_aggregates(pairs).subquery()
-        outcomes = self._get_outcomes(kwargs).subquery()
         latest = self._get_latest(pairs).subquery()
         return db.session.query(
             aggregates,
             latest,
-            sa.case(
-                [(outcomes.c.cand_id != None, True)],  # noqa
-                else_=False,
-            ).label('won'),
             BaseConcreteCommittee.name.label('candidate_pcc_name')
         ).outerjoin(
             latest,
             aggregates.c.candidate_id == latest.c.candidate_id,
-        ).outerjoin(
-            outcomes,
-            aggregates.c.candidate_id == outcomes.c.cand_id,
         ).outerjoin(
             BaseConcreteCommittee,
             aggregates.c.candidate_pcc_id == BaseConcreteCommittee.committee_id
@@ -211,16 +203,6 @@ class ElectionView(utils.Resource):
             pairs.c.candidate_election_year
         )
 
-    def _get_outcomes(self, kwargs):
-        return db.session.query(
-            ElectionResult.cand_id
-        ).filter(
-            ElectionResult.election_yr == kwargs['cycle'],
-            ElectionResult.cand_office == kwargs['office'][0].upper(),
-            ElectionResult.cand_office_st == (kwargs.get('state', 'US')),
-            ElectionResult.cand_office_district == (kwargs.get('district', '00')),
-        )
-
 
 @doc(
     description=docs.ELECTION_SEARCH,
@@ -273,8 +255,16 @@ election_durations = {
     'house': 2,
 }
 
-
 def join_candidate_totals(query, kwargs, totals_model):
+    """
+    Joint Fundraising Committees raise money for multiple
+    candidate committees and transfer that money to those committees.
+    By limiting the committee designations to A and P
+    you eliminate J (joint) and thus do not inflate
+    the candidate's money by including it twice and
+    by including money that was raised and transferred
+    to the other committees in the joint fundraiser.
+    """
     return query.outerjoin(
         CandidateCommitteeLink,
         sa.and_(
@@ -286,6 +276,7 @@ def join_candidate_totals(query, kwargs, totals_model):
         sa.and_(
             CandidateCommitteeLink.committee_id == totals_model.committee_id,
             CandidateCommitteeLink.fec_election_year == totals_model.cycle,
+            CandidateCommitteeLink.committee_designation.in_(['P', 'A']),
         )
     )
 

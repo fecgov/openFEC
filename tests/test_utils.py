@@ -82,8 +82,8 @@ class TestSort(ApiBaseTest):
 
         ]
         candidateHistory = [
-            factories.CandidateHistoryFactory(candidate_id='C1234', two_year_period=2016, election_years=[2016], cycles=[2016],candidate_election_year=2016),
-            factories.CandidateHistoryFactory(candidate_id='C5678', two_year_period=2016, election_years=[2016], cycles=[2016],candidate_election_year=2016)
+            factories.CandidateHistoryFutureFactory(candidate_id='C1234', two_year_period=2016, election_years=[2016], cycles=[2016],candidate_election_year=2016),
+            factories.CandidateHistoryFutureFactory(candidate_id='C5678', two_year_period=2016, election_years=[2016], cycles=[2016],candidate_election_year=2016)
         ]
         candidateTotals = [
             factories.CandidateTotalFactory(candidate_id='C1234', is_election=False, cycle=2016),
@@ -131,12 +131,6 @@ class TestSort(ApiBaseTest):
             factories.CommitteeTotalsHouseSenateFactory(committee_id='H5678', cycle=2016)
 
         ]
-        electionResults = [
-            factories.ElectionResultFactory(cand_id='C1234', election_yr=2016, cand_office='S', cand_office_st='MO', cand_office_district='01' ),
-            factories.ElectionResultFactory(cand_id='C5678', election_yr=2016, cand_office='S', cand_office_st='MO',
-                                            cand_office_district='02')
-
-        ]
         db.session.flush()
         arg_map = {}
         arg_map['office'] = 'senate'
@@ -164,32 +158,3 @@ class TestArgs(unittest.TestCase):
         with rest.app.test_request_context('?dollars=$24.50'):
             parsed = flaskparser.parser.parse({'dollars': args.Currency()}, request)
             self.assertEqual(parsed, {'dollars': 24.50})
-
-    def test_format_url(self):
-        """
-        remove the api_key=DEMO_KEY
-        from the url with regex
-        """
-        url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?api_key=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
-        url_after_format = utils.format_url(url_before_format)
-        expected_url = "schedules/schedule_e/by_candidate/candidate_id-S0AL00156-cycle-2018-election_full-false-per_page-100"
-        self.assertEqual(url_after_format, expected_url)
-
-    def test_replace_special_chars_from_url(self):
-        """
-        remove the special characters ?, & and = from the URL
-        """
-        url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?api_key=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100"
-        url_after_format = utils.format_url(url_before_format)
-        expected_url = "schedules/schedule_e/by_candidate/candidate_id-S0AL00156-cycle-2018-election_full-false-per_page-100"
-        self.assertEqual(url_after_format, expected_url)
-
-    def test_ignore_case(self):
-        """
-        format the URL when the API_KEY is all uppecase
-        """
-        url_before_format = "https://api.open.fec.gov/v1/schedules/schedule_e/by_candidate/?API_KEY=DEMO_KEY&candidate_id=S0AL00156&cycle=2018&election_full=false&per_page=100" 
-        url_after_format = utils.format_url(url_before_format)
-        print('Formatted URL::', url_after_format)
-        expected_url = "schedules/schedule_e/by_candidate/API_KEY-DEMO_KEY-candidate_id-S0AL00156-cycle-2018-election_full-false-per_page-100"
-        self.assertEqual(url_after_format, expected_url)

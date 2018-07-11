@@ -57,6 +57,11 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     two_year_period = 2016
     candidate_inactive = False
 
+class CandidateHistoryFutureFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateHistoryWithFuture
+    two_year_period = 2016
+    candidate_inactive = False
 
 class CandidateElectionFactory(BaseCandidateFactory):
     class Meta:
@@ -331,16 +336,6 @@ class CalendarDateFactory(BaseFactory):
 class ElectionDateFactory(BaseFactory):
     class Meta:
         model = models.ElectionDate
-
-
-class ElectionResultFactory(BaseFactory):
-    class Meta:
-        model = models.ElectionResult
-    election_yr = 2016
-    cand_office_st = 'US'
-    cand_office_district = '00'
-    election_type = 'P'
-    fec_election_yr = 2016
 
 
 class ElectionsListFactory(BaseFactory):
