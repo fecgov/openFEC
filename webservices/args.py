@@ -786,5 +786,5 @@ operations_log = {
     'report_year': fields.List(fields.Int, description=docs.REPORT_YEAR),
     'form_type': fields.List(IStr, description=docs.FORM_TYPE),
     'amendment_indicator': fields.List(IStr, description=docs.AMENDMENT_INDICATOR),
-    'status_num': fields.Str(validate=validate.OneOf(['0', '1']), description=docs.STATUS_NUM),
+    'status_num': fields.List(fields.Str(validate=validate.OneOf(['0', '1'])), description=docs.STATUS_NUM),
 }
