@@ -15,3 +15,4 @@ from .rad_analyst import *  # noqa
 from .large_aggregates import *  # noqa
 from .unverified_filers import *  # noqa
 from .audit import * # noqa
+from .operations_log import * # noqa
