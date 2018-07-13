@@ -8,21 +8,25 @@ DROP TRIGGER IF EXISTS nml_sched_a_before_trigger ON disclosure.nml_sched_a;
 DROP TRIGGER IF EXISTS f_item_sched_a_before_trigger ON disclosure.f_item_receipt_or_exp;
 DROP TRIGGER IF EXISTS f_item_sched_a_after_trigger ON disclosure.f_item_receipt_or_exp;
 
+DROP TRIGGER IF EXISTS insert_sched_a_trigger_tmp ON public.ofec_sched_a_master;
+
 -- trigger functions
 drop function IF EXISTS public.ofec_sched_a_delete_update_queues();
 drop function IF EXISTS public.ofec_sched_a_insert_update_queues();
 drop function IF EXISTS public.ofec_sched_a_update_queues();
+drop function IF EXISTS public.insert_sched_master();
 
 -- functions
 drop function IF EXISTS public.add_partition_cycles(numeric, numeric);
+drop function IF EXISTS public.create_itemized_schedule_partition(text, numeric, numeric);
+drop function IF EXISTS public.get_projected_weekly_itemized_total(text);
+
 drop function IF EXISTS public.drop_old_itemized_schedule_a_indexes(numeric, numeric);
 drop function IF EXISTS public.ofec_sched_a_update();
 drop function IF EXISTS public.ofec_sched_a_update_fulltext();
 
 drop function IF EXISTS public.ofec_sched_a_update_aggregate_contributor();
 drop function IF EXISTS public.ofec_sched_a_update_aggregate_contributor_type();
-
-drop function IF EXISTS public.get_projected_weekly_itemized_total(text);
 
 drop function IF EXISTS public.finalize_itemized_schedule_a_tables(numeric, numeric, boolean, boolean);
 
