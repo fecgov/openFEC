@@ -480,16 +480,6 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(committee_history_count, committee_history_verified_count)
 
     @pytest.mark.filterwarnings("ignore:Skipped unsupported reflection")
-    def test_add_itemized_partition_cycle(self):
-        manage.add_itemized_partition_cycle(3002, 2)
-        expected_tables = {
-            "ofec_sched_a_3001_3002",
-            "ofec_sched_a_3003_3004",
-        }
-        inspector = sa.inspect(db.engine)
-        actual_tables = set(inspector.get_table_names())
-        assert expected_tables.issubset(actual_tables)
-        assert "ofec_sched_a_3005_3006" not in actual_tables
 
     def test_last_day_of_month(self):
         connection = db.engine.connect()
