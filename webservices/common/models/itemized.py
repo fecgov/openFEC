@@ -521,7 +521,7 @@ class ScheduleD(PdfMixin,BaseItemized):
 
 
 class ScheduleE(PdfMixin, BaseItemized):
-    __tablename__ = 'ofec_sched_e'
+    __tablename__ = 'ofec_sched_e_mv_2'
 
     sub_id = db.Column(db.String, primary_key=True)
 
@@ -563,9 +563,10 @@ class ScheduleE(PdfMixin, BaseItemized):
     candidate_middle_name = db.Column('s_o_cand_m_nm', db.String)
     candidate_last_name = db.Column('s_o_cand_nm_last', db.String)
     candidate_suffix = db.Column('s_o_cand_suffix', db.String)
-    candidate_office = db.Column('s_o_cand_office', db.String, doc=docs.OFFICE)
-    cand_office_state = db.Column('s_o_cand_office_st', db.String, doc=docs.STATE_GENERIC)
-    cand_office_district = db.Column('s_o_cand_office_district', db.String, doc=docs.DISTRICT)
+    candidate_office = db.Column('cand_office', db.String, doc=docs.OFFICE)
+    candidate_office_state = db.Column('cand_office_st', db.String, doc=docs.STATE_GENERIC)
+    candidate_office_district = db.Column('cand_office_district', db.String, doc=docs.DISTRICT)
+    candidate_party = db.Column('cand_pty_affiliation', db.String, doc=docs.PARTY)
     #Conduit info
     conduit_committee_id = db.Column('conduit_cmte_id', db.String)
     conduit_committee_name = db.Column('conduit_cmte_nm', db.String)
