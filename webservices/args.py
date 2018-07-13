@@ -698,6 +698,9 @@ entities = {
 }
 
 schedule_e = {
+    'candidate_party': fields.List(IStr, description=docs.PARTY),
+    'candidate_office_state': fields.List(IStr, description=docs.STATE_GENERIC),
+    'candidate_office_district': fields.List(District, description=docs.DISTRICT),
     'cycle': fields.List(fields.Int, description=docs.RECORD_CYCLE),
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),

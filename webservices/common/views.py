@@ -9,6 +9,8 @@ from webservices.common import counts
 from webservices.common import models
 from webservices.utils import use_kwargs
 
+from sqlalchemy.dialects import postgresql
+
 
 class ApiResource(utils.Resource):
 
