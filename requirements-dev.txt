@@ -1,6 +1,7 @@
 # Development
 # TODO(jmcarp) Install from PyPI after 0.2.4 release
 git+https://github.com/18F/rdbms-subsetter
+ipython==6.4.0
 
 # Testing
 pytest==3.6.0
