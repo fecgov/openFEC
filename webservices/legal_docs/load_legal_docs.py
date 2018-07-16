@@ -436,16 +436,16 @@ def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, 
     """
     logger.info("Loading archived MURs")
     table_text = requests.get('http://classic.fec.gov/MUR/MURData.do').text
-    rows = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
+    raw_mur_tr_element_list = re.findall("<tr [^>]*>(.*?)</tr>", table_text, re.S)[1:]
     if from_mur_no is not None:
-        rows = list(itertools.dropwhile(
-            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) != from_mur_no, rows))
+        raw_mur_tr_element_list = list(itertools.dropwhile(
+            lambda x: re.search('/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M).group(1) != from_mur_no, raw_mur_tr_element_list))
     elif specific_mur_no is not None:
-        rows = list(filter(
-            lambda x: re.search('/disclosure_data/mur/([0-9_A-Z]+)\.pdf', x, re.M).group(1) == specific_mur_no, rows))
-    murs = zip(range(len(rows)), [len(rows)] * len(rows), rows)
+        raw_mur_tr_element_list = list(filter(
+            lambda x: re.search('/disclosure_data/mur/([0-9]+)(?:_[A-Z])*\.pdf', x, re.M).group(1) == specific_mur_no, raw_mur_tr_element_list))
+    murs = zip(range(len(raw_mur_tr_element_list)), [len(raw_mur_tr_element_list)] * len(raw_mur_tr_element_list), raw_mur_tr_element_list)
     processes = int(num_processes)
     maxtasksperchild = int(tasks_per_child) if tasks_per_child else None
     with Pool(processes=processes, maxtasksperchild=maxtasksperchild) as pool:
         pool.map(process_mur, murs, chunksize=1)
-    logger.info("%d archived MURs loaded", len(rows))
+    logger.info("%d archived MURs loaded", len(raw_mur_tr_element_list))
