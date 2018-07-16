@@ -238,9 +238,9 @@ def index_statutes():
     logger.info("%d statute sections indexed", title_26_section_count + title_52_section_count)
 
 
-def process_mur_pdf(mur_no, pdf_key, bucket):
+def process_mur_pdf(file_name, pdf_key, bucket):
     response = requests.get('http://classic.fec.gov/disclosure_data/mur/%s.pdf'
-                            % mur_no, stream=True)
+                            % file_name, stream=True)
 
     with NamedTemporaryFile('wb+') as pdf:
         for chunk in response:
@@ -378,9 +378,29 @@ def get_mur_names(mur_names={}):
                 mur_names[row[1]] = row[2]
     return mur_names
 
+
+def get_documents(td_text):
+    bucket = get_bucket()
+    documents = []
+
+    for index, file_name in enumerate(re.findall(r"/disclosure_data/mur/([0-9_A-Z]+)\.pdf", td_text)):
+        logger.info("Loading file %s.pdf", file_name)
+        pdf_key = 'legal/murs/%s.pdf' % file_name
+        pdf_text, pdf_size, pdf_pages = process_mur_pdf(file_name, pdf_key, bucket)
+        pdf_url = '/files/' + pdf_key
+        document = {
+            "document_id": index + 1,
+            "size": pdf_size,
+            "pages": pdf_pages,
+            "text": pdf_text,
+            "url": pdf_url,
+        }
+        documents.append(document)
+
+    return documents
+
 def process_murs(raw_mur_tr_element_list):
     es = utils.get_elasticsearch_connection()
-    bucket = get_bucket()
     mur_names = get_mur_names()
 
     for index, raw_mur_tr_element in enumerate(raw_mur_tr_element_list):
@@ -389,16 +409,13 @@ def process_murs(raw_mur_tr_element_list):
         mur_no = re.search("/disclosure_data/mur/([0-9]+)(?:_[A-H])*\.pdf", mur_no_td).group(1)
 
         logger.info("Loading archived MUR %s: %s of %s", mur_no, index + 1, len(raw_mur_tr_element_list))
-        file_name = re.search("/disclosure_data/mur/([0-9_A-Z]+)\.pdf", mur_no_td).group(1)
-        pdf_key = 'legal/murs/%s.pdf' % file_name
-        text, pdf_size, pdf_pages = process_mur_pdf(file_name, pdf_key, bucket)
-        pdf_url = '/files/' + pdf_key
 
         open_date, close_date = (None, None)
         if open_date_td:
             open_date = datetime.strptime(open_date_td, '%m/%d/%Y').isoformat()
         if close_date_td:
             close_date = datetime.strptime(close_date_td, '%m/%d/%Y').isoformat()
+
         parties = re.findall("(.*?)<br>", parties_td)
         complainants = []
         respondents = []
@@ -410,28 +427,31 @@ def process_murs(raw_mur_tr_element_list):
             if match.group(1) == 'R':
                 respondents.append(name)
 
-        subject = get_subject_tree(subject_td)
-        citations = get_citations(re.findall("(.*?)<br>", citations_td))
-
-        mur_digits = re.match("([0-9]+)", mur_no).group(1)
-        name = mur_names[mur_digits] if mur_digits in mur_names else ''
-        doc = {
+        mur_name = mur_names.get(mur_no, '')
+        mur = {
             'doc_id': 'mur_%s' % mur_no,
             'no': mur_no,
-            'name': name,
-            'text': text,
+            'name': mur_name,
             'mur_type': 'archived',
-            'pdf_size': pdf_size,
-            'pdf_pages': pdf_pages,
             'open_date': open_date,
             'close_date': close_date,
             'complainants': complainants,
             'respondents': respondents,
-            'subject': subject,
-            'citations': citations,
-            'url': pdf_url
         }
-        es.index('archived_murs_index', 'murs', doc, id=doc['doc_id'])
+        mur['subject'] = get_subject_tree(subject_td)
+        mur['citations'] = get_citations(re.findall("(.*?)<br>", citations_td))
+        mur['documents'] = get_documents(mur_no_td)
+
+        # Match the original format for MURs with 1 PDF
+        if len(mur.get('documents')) == 1:
+            single_document = mur['documents'][0]
+            mur['text'] = single_document.get('text')
+            mur['url'] = single_document.get('url')
+            mur['pdf_size'] = single_document.get('size')
+            mur['pdf_pages'] = single_document.get('pages')
+
+        es.index('archived_murs_index', 'murs', mur, id=mur['doc_id'])
+
 
 def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, tasks_per_child=None):
     """

@@ -8,4 +8,9 @@
   "url": "/files/legal/murs/1.pdf",
   "name": "GRADISON FOR CONGRESS COMMITTEE",
    "pdf_size": 6, "respondents": [], "complainants": [],
+   "documents": [{"document_id": 1,
+                         "pages": 2,
+                         "size": 6,
+                         "text": "page1 page2",
+                         "url": "/files/legal/murs/1.pdf"}],
    "no": "1", "subject": [], "close_date": null}
