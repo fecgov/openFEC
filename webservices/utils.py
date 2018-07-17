@@ -394,6 +394,11 @@ def get_election_duration(column):
         else_=2,
     )
 
+def get_current_cycle():
+    year = date.today().year
+    return year + year % 2
+
+
 def get_elasticsearch_connection():
     es_conn = env.get_service(name='fec-api-search56')
     if es_conn:

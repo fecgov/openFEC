@@ -43,32 +43,5 @@ def get_json_data(response):
     python_str = json.dumps(response.data.decode('utf-8'))
     return python_str
 
-def format_url(url):
-    """
-    remove the api_key and its value from the URL by using a regex
-    """
-    # Split the url into parts and get only url after /v1/
-    parts = url.split('/v1/')
-    url_path = parts[1]
-    cleaned_url = re.sub('.api_key=.*?&', '', url_path)
-
-    # Remove other special characters from the URL
-    special_characters = [('&', '-'), ('=', '-'), ('?', ''),
-        (':', ''), ('<', ''), ('>', ''), ('\\', ''), (',', ''),
-        ('|', ''), ('*', '')]
-
-    for x, y in special_characters:
-        cleaned_url = cleaned_url.replace(x, y)
-    return cleaned_url
-
-def get_cached_request(cached_url):
-    response = requests.get(cached_url)
-    python_obj = json.loads(response.json())
-    python_str = json.dumps(python_obj, sort_keys=True, indent=4)
-
-    if response.status_code == 200:
-        return python_str
-    return None
-
 def get_app_name():
     return env.get_credential('NEW_RELIC_APP_NAME')

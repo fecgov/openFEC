@@ -57,6 +57,11 @@ class CandidateHistoryFactory(BaseCandidateFactory):
     two_year_period = 2016
     candidate_inactive = False
 
+class CandidateHistoryFutureFactory(BaseCandidateFactory):
+    class Meta:
+        model = models.CandidateHistoryWithFuture
+    two_year_period = 2016
+    candidate_inactive = False
 
 class CandidateElectionFactory(BaseCandidateFactory):
     class Meta:
@@ -333,16 +338,6 @@ class ElectionDateFactory(BaseFactory):
         model = models.ElectionDate
 
 
-class ElectionResultFactory(BaseFactory):
-    class Meta:
-        model = models.ElectionResult
-    election_yr = 2016
-    cand_office_st = 'US'
-    cand_office_district = '00'
-    election_type = 'P'
-    fec_election_yr = 2016
-
-
 class ElectionsListFactory(BaseFactory):
     class Meta:
         model = models.ElectionsList
@@ -427,3 +422,7 @@ class StateElectionOfficesFactory(BaseFactory):
         model = models.StateElectionOfficeInfo
     state = 'VA'
     office_type = 'STATE CAMPAIGN FINANCE'
+
+class OperationsLogFactory(BaseFactory):
+    class Meta:
+        model = models.OperationsLog

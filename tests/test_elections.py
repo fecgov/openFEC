@@ -188,7 +188,6 @@ class TestElections(ApiBaseTest):
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in totals),
-            'won': False,
         }
         assert_dicts_subset(results[0], expected)
         assert set(each.committee_id for each in self.committees) == set(results[0]['committee_ids'])
@@ -210,7 +209,6 @@ class TestElections(ApiBaseTest):
             'total_receipts': sum(each.receipts for each in totals),
             'total_disbursements': sum(each.disbursements for each in totals),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_totals),
-            'won': False,
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
@@ -242,30 +240,11 @@ class TestElections(ApiBaseTest):
             'total_receipts': sum(each.receipts for each in totals_without_jfc),
             'total_disbursements': sum(each.disbursements for each in totals_without_jfc),
             'cash_on_hand_end_period': sum(each.last_cash_on_hand_end_period for each in cash_on_hand_without_jfc),
-            'won': False,
         }
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
         assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees)
 
-    def test_elections_winner(self):
-        [
-            factories.ElectionResultFactory(
-                cand_office='S',
-                election_yr=2012,
-                cand_office_st='NY',
-                cand_id=self.candidate.candidate_id,
-                cand_name=self.candidate.name,
-            )
-        ]
-        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY'))
-        self.assertEqual(len(results), 1)
-        expected = {
-            'candidate_id': self.candidate.candidate_id,
-            'candidate_name': self.candidate.name,
-            'won': True,
-        }
-        assert_dicts_subset(results[0], expected)
 
     def test_election_summary(self):
         results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY'))
