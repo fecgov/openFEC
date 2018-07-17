@@ -165,16 +165,16 @@ class S3Objects:
         return [o for o in self.objects if o.key.startswith(Prefix)]
 
 class BucketMock:
-    def __init__(self, key):
+    def __init__(self, keys):
         self.objects = S3Objects()
-        self.key = key
+        self.keys = keys
 
     def put_object(self, Key, Body, ContentType, ACL):
-        assert Key == self.key
+        assert Key in self.keys
 
-def get_bucket_mock(key):
+def get_bucket_mock(keys):
     def get_bucket():
-        return BucketMock(key)
+        return BucketMock(keys)
     return get_bucket
 
 class IndexStatutesTest(unittest.TestCase):
@@ -264,7 +264,20 @@ class LoadArchivedMursTest(unittest.TestCase):
     @patch('webservices.legal_docs.load_legal_docs.requests.get',
         mock_archived_murs_get_request(open('tests/data/archived_mur_data.html').read()))
     def test_base_case(self):
-        load_archived_murs(specific_mur_no=1)
+        # Management command brings this in as a string
+        load_archived_murs(specific_mur_no='1')
+
+    @patch('webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_multi_part_doc.json'))))
+    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock(['legal/murs/3_A.pdf', 'legal/murs/3_B.pdf', 'legal/murs/3_C.pdf']))
+    @patch('webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
+    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
+    @patch('webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(open('tests/data/archived_mur_multi_part_data.html').read()))
+    def test_multi_file(self):
+        # Management command brings this in as a string
+        load_archived_murs(specific_mur_no='3')
 
     @patch('webservices.utils.get_elasticsearch_connection',
         get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))))
@@ -310,7 +323,7 @@ class LoadArchivedMursTest(unittest.TestCase):
         mock_archived_murs_get_request(open('tests/data/archived_mur_data.html').read()))
     @patch('webservices.legal_docs.load_legal_docs.slate.PDF', raise_pdf_exception)
     def test_with_bad_pdf(self):
-        load_archived_murs(specific_mur_no=1)
+        load_archived_murs(specific_mur_no='1')
 
     @patch('webservices.legal_docs.load_legal_docs.get_bucket',
         get_bucket_mock('legal/murs/1.pdf'))

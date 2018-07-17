@@ -257,7 +257,6 @@ def process_mur_pdf(file_name, pdf_key, bucket):
         pdf_size = getsize(pdf.name)
 
         pdf.seek(0)
-        logger.info('S3: Uploading file %s' % pdf_key)
         bucket.put_object(Key=pdf_key, Body=pdf,
                           ContentType='application/pdf', ACL='public-read')
         return pdf_text, pdf_size, pdf_pages
@@ -379,10 +378,9 @@ def get_mur_names(mur_names={}):
     return mur_names
 
 
-def get_documents(td_text):
-    bucket = get_bucket()
-    documents = []
+def get_documents(td_text, bucket):
 
+    documents = []
     for index, file_name in enumerate(re.findall(r"/disclosure_data/mur/([0-9_A-Z]+)\.pdf", td_text)):
         logger.info("Loading file %s.pdf", file_name)
         pdf_key = 'legal/murs/%s.pdf' % file_name
@@ -401,6 +399,7 @@ def get_documents(td_text):
 
 def process_murs(raw_mur_tr_element_list):
     es = utils.get_elasticsearch_connection()
+    bucket = get_bucket()
     mur_names = get_mur_names()
 
     for index, raw_mur_tr_element in enumerate(raw_mur_tr_element_list):
@@ -440,7 +439,7 @@ def process_murs(raw_mur_tr_element_list):
         }
         mur['subject'] = get_subject_tree(subject_td)
         mur['citations'] = get_citations(re.findall("(.*?)<br>", citations_td))
-        mur['documents'] = get_documents(mur_no_td)
+        mur['documents'] = get_documents(mur_no_td, bucket)
 
         # Match the original format for MURs with 1 PDF
         if len(mur.get('documents')) == 1:
