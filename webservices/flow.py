@@ -16,6 +16,7 @@ def get_graph():
         'candidate_flags',
         'candidate_fulltext',
         'candidate_history',
+        'candidate_history_future',
         'committee_detail',
         'committee_fulltext',
         'committee_history',
@@ -51,7 +52,12 @@ def get_graph():
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
     graph.add_edge('candidate_history', 'candidate_detail')
+    graph.add_edge('candidate_history', 'candidate_history_future')
+
     graph.add_edge('candidate_detail', 'candidate_election')
+    graph.add_edge('candidate_detail', 'candidate_history_future')
+
+    graph.add_edge('candidate_aggregates', 'candidate_history_future')
 
     graph.add_edge('committee_history', 'committee_detail')
 

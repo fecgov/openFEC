@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import os
 import glob
 import logging
-import shlex
 import subprocess
 import multiprocessing
 
@@ -19,7 +17,6 @@ from webservices.config import SQL_CONFIG, check_config
 from webservices.common.util import get_full_path
 import webservices.legal_docs as legal_docs
 from webservices.utils import post_to_slack
-from webservices.tasks import cache_request
 
 manager = Manager(app)
 logger = logging.getLogger('manager')
@@ -45,7 +42,6 @@ manager.command(legal_docs.delete_docs_index)
 manager.command(legal_docs.move_archived_murs)
 manager.command(legal_docs.initialize_current_legal_docs)
 manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
-manager.command(cache_request.delete_cached_calls_from_s3)
 
 def get_projected_weekly_itemized_totals(schedules):
     """Calculates the weekly total of itemized records that should have been
@@ -192,14 +188,11 @@ def load_election_dates():
     logger.info('Finished loading election dates.')
 
 
-
-
 @manager.command
 def refresh_itemized():
     """These are run nightly to refresh the itemized schedule A and B data."""
 
     refresh_itemized_a()
-    refresh_itemized_b()
     rebuild_itemized_e()
 
     logger.info('Finished updating incremental aggregates.')
@@ -217,19 +210,6 @@ def refresh_itemized_a():
         logger.error(message[1])
 
     logger.info('Finished updating Schedule A.')
-
-@manager.command
-def refresh_itemized_b():
-    """Used to refresh the itemized Schedule B data."""
-    logger.info('Updating Schedule B...')
-    message = partition.SchedBGroup.process_queues()
-
-    if message[0] == 0:
-        logger.info(message[1])
-    else:
-        logger.error(message[1])
-
-    logger.info('Finished updating Schedule B.')
 
 @manager.command
 def rebuild_itemized_e():
@@ -253,7 +233,7 @@ def add_itemized_partition_cycle(cycle=None, amount=1):
     else:
         cycle = int(cycle)
 
-    logger.info('Adding Schedule A and B cycles...')
+    logger.info('Adding Schedule A cycles...')
     try:
         with db.engine.begin() as connection:
             connection.execute(
@@ -263,7 +243,7 @@ def add_itemized_partition_cycle(cycle=None, amount=1):
                 start_year=cycle,
                 count=amount
             )
-        logger.info('Finished adding Schedule A and B cycles.')
+        logger.info('Finished adding Schedule A cycles.')
     except Exception:
         logger.exception("Failed to add partition cycles")
 
@@ -283,19 +263,18 @@ def refresh_materialized(concurrent=True):
                        'ofec_committee_fulltext_audit_mv',
                        'ofec_candidate_fulltext_audit_mv'],
         'cand_cmte_linkage': ['ofec_cand_cmte_linkage_mv'],
-        'candidate_aggregates': ['ofec_candidate_totals_mv',
-                                 'ofec_candidate_totals_with_0s_mv'],
+        'candidate_aggregates': ['ofec_candidate_totals_mv'],
         'candidate_detail': ['ofec_candidate_detail_mv'],
         'candidate_election': ['ofec_candidate_election_mv'],
         'candidate_flags': ['ofec_candidate_flag_mv'],
         'candidate_fulltext': ['ofec_candidate_fulltext_mv'],
         'candidate_history': ['ofec_candidate_history_mv'],
+        'candidate_history_future': ['ofec_candidate_history_with_future_election_mv'],
         'committee_detail': ['ofec_committee_detail_mv'],
         'committee_fulltext': ['ofec_committee_fulltext_mv'],
         'committee_history': ['ofec_committee_history_mv'],
         'communication_cost': ['ofec_communication_cost_mv'],
         'communication_cost_by_candidate': ['ofec_communication_cost_aggregate_candidate_mv'],
-        'election_outcome': ['ofec_election_result_mv'],
         'electioneering': ['ofec_electioneering_mv'],
         'electioneering_by_candidate': ['ofec_electioneering_aggregate_candidate_mv'],
         'elections_list': ['ofec_elections_list_mv'],
