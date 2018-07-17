@@ -1194,3 +1194,35 @@ Final audit report release date
 LINK_TO_REPORT = '''
 URL for retrieving the PDF document
 '''
+
+SUB_ID = '''
+A unique identifier of the transactional report.
+'''
+
+STATUS_NUM = '''
+Status of the transactional report.\n\
+    -0- Transaction is entered \n\
+          into the system.\n\
+          But not verified.\n\
+    -1- Transaction is verified.\n\
+'''
+
+CAND_CMTE_ID = '''
+A unique identifier of the registered filer.
+'''
+
+REPORT_YEAR = '''
+Forms with coverage date - \n\
+    year from the coverage ending date.\n\
+Forms without coverage date - \n\
+    year from the receipt date.\n\
+'''
+FORM_TYPE = '''
+Indicates the type of form that was filed.\n\
+ex: F1, F2, F3P, F3X etc...
+'''
+OPERATIONS_LOG = '''
+The Operations log contains details of each report loaded into the database. It is primarily
+used as status check to determine when all of the data processes, from initial entry through
+review are complete.
+'''
