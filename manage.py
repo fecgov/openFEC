@@ -11,6 +11,7 @@ from flask_script import Server
 from flask_script import Manager
 
 from webservices import flow, partition
+from webservices.common import models
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
@@ -304,6 +305,10 @@ def slack_message(message):
     run ./manage.py slack_message 'The message you want to post'
     """
     post_to_slack(message, '#bots')
+
+@manager.shell
+def make_shell_context():
+    return dict(app=app, db=db, models=models)
 
 
 if __name__ == '__main__':
