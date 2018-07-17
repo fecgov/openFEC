@@ -33,7 +33,9 @@ drop function IF EXISTS public.finalize_itemized_schedule_a_tables(numeric, nume
 -- Originally extension pg_trgm had been created with schema "public"
 -- Need to be with schema pg_catalog 
 -- otherwise the execution of disclosure.finalize_itemized_schedule_a_tables will have error
-alter extension pg_trgm set schema pg_catalog;
+
+-- migrator does not have permission to make the following change
+-- alter extension pg_trgm set schema pg_catalog;
 
 -- ------------------
 -- FUNCTION disclosure.finalize_itemized_schedule_a_tables
@@ -98,7 +100,7 @@ BEGIN
         EXECUTE format('CREATE INDEX IF NOT EXISTS %s_contrib_emp_text_dt_sub_id %s ON %I USING gin (contributor_employer_text, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS %s_contrib_name_text_dt_sub_id %s ON %I USING gin (contributor_name_text, contb_receipt_dt, sub_id)', child_index_root, index_name_suffix, child_table_name);
     --
-        EXECUTE format('CREATE INDEX IF NOT EXISTS %s_contbr_zip %s ON %I USING gin (contbr_zip COLLATE pg_catalog."default" gin_trgm_ops)', child_index_root, index_name_suffix, child_table_name);
+        --EXECUTE format('CREATE INDEX IF NOT EXISTS %s_contbr_zip %s ON %I USING gin (contbr_zip COLLATE pg_catalog."default" gin_trgm_ops)', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS %s_entity_tp %s ON %I USING btree (entity_tp COLLATE pg_catalog."default")', child_index_root, index_name_suffix, child_table_name);
         EXECUTE format('CREATE INDEX IF NOT EXISTS %s_rpt_yr %s ON %I USING btree (rpt_yr)', child_index_root, index_name_suffix, child_table_name);
 
