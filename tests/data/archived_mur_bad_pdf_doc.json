@@ -19,7 +19,7 @@
   "complainants": ["Carl Complainer"],
   "doc_id": "mur_1",
   "documents": [{"document_id": 1,
-                         "size": 6,
+                         "length": 6,
                          "text": "",
                          "url": "/files/legal/murs/1.pdf"}],
   "name": "GRADISON FOR CONGRESS COMMITTEE"}

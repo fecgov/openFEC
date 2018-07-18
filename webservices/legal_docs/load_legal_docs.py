@@ -388,7 +388,7 @@ def get_documents(td_text, bucket):
         pdf_url = '/files/' + pdf_key
         document = {
             "document_id": index + 1,
-            "size": pdf_size,
+            "length": pdf_size,
             "text": pdf_text,
             "url": pdf_url,
         }
