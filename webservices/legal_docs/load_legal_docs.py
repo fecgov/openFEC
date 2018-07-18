@@ -436,6 +436,7 @@ def process_murs(raw_mur_tr_element_list):
             'close_date': close_date,
             'complainants': complainants,
             'respondents': respondents,
+            'url': '/legal/matter-under-review/{0}/'.format(mur_no)
         }
         mur['subject'] = get_subject_tree(subject_td)
         mur['citations'] = get_citations(re.findall("(.*?)<br>", citations_td))
@@ -445,7 +446,6 @@ def process_murs(raw_mur_tr_element_list):
         if len(mur.get('documents')) == 1:
             single_document = mur['documents'][0]
             mur['text'] = single_document.get('text')
-            mur['url'] = single_document.get('url')
             mur['pdf_size'] = single_document.get('size')
             mur['pdf_pages'] = single_document.get('pages')
 
