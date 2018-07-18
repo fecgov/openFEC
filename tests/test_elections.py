@@ -173,7 +173,7 @@ class TestElections(ApiBaseTest):
         self.assertEquals(response.status_code, 200)
 
     def test_empty_query(self):
-        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='ZZ', per_page=0))
+        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='ZZ', per_page=1))
         self.assertEqual(len(results), 0)
 
     def test_elections(self):

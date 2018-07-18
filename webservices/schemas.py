@@ -934,6 +934,9 @@ class ElectionSchema(ma.Schema):
     coverage_end_date = ma.fields.Date()
 augment_schemas(ElectionSchema)
 
+ElectionPageSchema = make_page_schema(ElectionSchema)
+register_schema(ElectionPageSchema)
+
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
