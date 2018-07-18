@@ -1,4 +1,3 @@
-
 import datetime
 
 import sqlalchemy as sa
@@ -116,17 +115,17 @@ class TestItemized(ApiBaseTest):
         ]
         results = self._results(api.url_for(ScheduleAView, contributor_zip=967893405, **self.kwargs))
         self.assertEqual(len(results), 3)
-    
+
         results = self._results(api.url_for(ScheduleAView, contributor_zip='M4C 1M55', **self.kwargs))
         self.assertEqual(len(results), 1)
 
-        contributor_zips = ['M4C 1M5555',96789]
-        results = self._results(api.url_for(ScheduleAView, contributor_zip=contributor_zips,**self.kwargs))
+        contributor_zips = ['M4C 1M5555', 96789]
+        results = self._results(api.url_for(ScheduleAView, contributor_zip=contributor_zips, **self.kwargs))
         self.assertEqual(len(results), 4)
 
-    def test_invalid_sched_a_zip(self): 
-        response = self.app.get(api.url_for(ScheduleAView,contributor_zip='96%',cycle=2018))
-        self.assertEqual(response.status_code,400)
+    def test_invalid_sched_a_zip(self):
+        response = self.app.get(api.url_for(ScheduleAView, contributor_zip='96%', cycle=2018))
+        self.assertEqual(response.status_code, 400)
 
     def test_filter_multi_start_with(self):
         [
@@ -145,10 +144,10 @@ class TestItemized(ApiBaseTest):
         self.assertEqual(results[0]['contributor_city'], 'NEW YORK')
 
     def test_filter_fulltext(self):
-        '''
+        """
         Note: this is the only test for filter_fulltext.
         If this is removed, please add a test to test_filters.py
-        '''
+        """
         names = ['David Koch', 'George Soros']
         filings = [
             factories.ScheduleAFactory(contributor_name=name)
