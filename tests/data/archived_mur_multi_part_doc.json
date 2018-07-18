@@ -2,6 +2,7 @@
   "open_date": "1980-05-21T00:00:00",
   "no": "3", "close_date": "1983-11-03T00:00:00",
   "mur_type": "archived",
+  "url": "/legal/matter-under-review/3/",
   "citations":
     {"us_code": [{"text": "2 U.S.C. 104",
                   "url": "http://api.fdsys.gov/link?collection=uscode&link-type=html&title=2&year=mostrecent&section=104"}],
