@@ -1,6 +1,6 @@
-import sqlalchemy as sa
 from flask_apispec import doc
 import re
+from sqlalchemy.orm import aliased, contains_eager
 
 from webservices import args
 from webservices import docs
@@ -56,10 +56,6 @@ class ScheduleAView(ItemizedResource):
     filter_multi_start_with_fields = [
         ('contributor_zip', models.ScheduleA.contributor_zip),
     ]
-    query_options = [
-        sa.orm.joinedload(models.ScheduleA.committee),
-        sa.orm.joinedload(models.ScheduleA.contributor),
-    ]
 
     @property
     def args(self):
@@ -79,24 +75,35 @@ class ScheduleAView(ItemizedResource):
 
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
+
+        committee_committee_history_alias = aliased(models.CommitteeHistory)
+        contributor_committee_history_alias = aliased(models.CommitteeHistory)
+        query = query.outerjoin(committee_committee_history_alias, self.model.committee)
+        query = query.options(contains_eager(self.model.committee, alias=committee_committee_history_alias))
+        query = query.outerjoin(contributor_committee_history_alias, self.model.contributor)
+        query = query.options(contains_eager(self.model.contributor, alias=contributor_committee_history_alias))
+
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
 
         if kwargs.get('contributor_zip'):
             for value in kwargs['contributor_zip']:
-                if re.search('^-?\d{5}$',value) is None:
+                if re.search('^-?\d{5}$', value) is None:
                     raise exceptions.ApiError(
                         'Invalid Zip code. It must be 5 digits',
                         status_code=400,
                     )
             query = filters.filter_multi_start_with(query, kwargs, self.filter_multi_start_with_fields)
-        
+
+        if kwargs.get('committee_type'):
+            query = query.filter(committee_committee_history_alias.committee_type == kwargs.get('committee_type'))
+
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
-                query = query.filter_by(filing_form=form.upper())
-                query = query.filter_by(line_number=line_no)
+                query = query.filter(self.model.filing_form == form.upper())
+                query = query.filter(self.model.line_number == line_no)
         return query
 
 @doc(
@@ -143,4 +150,3 @@ class ScheduleAEfileView(views.ApiResource):
                 ]),
             ),
         )
-

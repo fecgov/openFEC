@@ -428,6 +428,7 @@ calendar_dates = {
 
 schedule_a = {
     'committee_id': fields.List(IStr, description=docs.COMMITTEE_ID),
+    'committee_type': fields.Str(description=docs.COMMITTEE_TYPE),
     'contributor_id': fields.List(IStr, description=docs.CONTRIBUTOR_ID),
     'contributor_name': fields.List(fields.Str, description=docs.CONTRIBUTOR_NAME),
     'contributor_city': fields.List(IStr, description=docs.CONTRIBUTOR_CITY),
