@@ -8,7 +8,6 @@ from xml.etree import ElementTree as ET
 from datetime import datetime
 from os.path import getsize
 import csv
-from multiprocessing import Pool
 import logging
 from urllib.parse import urlencode
 
@@ -239,6 +238,7 @@ def index_statutes():
 
 
 def process_mur_pdf(file_name, pdf_key, bucket):
+    """Get Archived MUR PDFs from classic site, OCR them, and upload them to S3."""
     response = requests.get('http://classic.fec.gov/disclosure_data/mur/%s.pdf'
                             % file_name, stream=True)
 
@@ -389,7 +389,6 @@ def get_documents(td_text, bucket):
         document = {
             "document_id": index + 1,
             "size": pdf_size,
-            "pages": pdf_pages,
             "text": pdf_text,
             "url": pdf_url,
         }
@@ -441,13 +440,6 @@ def process_murs(raw_mur_tr_element_list):
         mur['subject'] = get_subject_tree(subject_td)
         mur['citations'] = get_citations(re.findall("(.*?)<br>", citations_td))
         mur['documents'] = get_documents(mur_no_td, bucket)
-
-        # Match the original format for MURs with 1 PDF
-        if len(mur.get('documents')) == 1:
-            single_document = mur['documents'][0]
-            mur['text'] = single_document.get('text')
-            mur['pdf_size'] = single_document.get('size')
-            mur['pdf_pages'] = single_document.get('pages')
 
         es.index('archived_murs_index', 'murs', mur, id=mur['doc_id'])
 
