@@ -128,11 +128,7 @@ class ElectionView(ApiResource):
             ),
         )
 
-    def build_query(self, *args, **kwargs):
-        query = self._get_records(kwargs)
-        return query
-
-    def _get_records(self, kwargs):
+    def build_query(self, **kwargs):
         utils.check_election_arguments(kwargs)
         totals_model = office_totals_map[kwargs['office']]
         pairs = self._get_pairs(totals_model, kwargs).subquery()
@@ -186,7 +182,7 @@ class ElectionView(ApiResource):
         ).subquery()
         return db.session.query(
             latest.c.candidate_id,
-            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period,0.0)).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
         ).group_by(
             latest.c.candidate_id,
         )

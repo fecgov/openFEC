@@ -132,18 +132,13 @@ class TestSort(ApiBaseTest):
 
         ]
         db.session.flush()
-        arg_map = {}
-        arg_map['office'] = 'senate'
-        arg_map['cycle'] = 2016
-        arg_map['state'] = 'MO'
-        #arg_map['district'] = '00'
 
         electionView = elections.ElectionView()
-        query, columns = sorting.sort(electionView._get_records(arg_map), 'total_disbursements', model=None)
+        query, columns = sorting.sort(electionView.build_query(office='senate', cycle=2016, state='MO'), 'total_disbursements', model=None)
 
         #print(str(query.statement.compile(dialect=postgresql.dialect())))
         self.assertEqual(len(query.all()), len(candidates))
-        query, columns = sorting.sort(electionView._get_records(arg_map), 'total_disbursements', model=None, hide_null=True)
+        query, columns = sorting.sort(electionView.build_query(office='senate', cycle=2016, state='MO'), 'total_disbursements', model=None, hide_null=True)
         #Taking this assert statement out because I believe, at least how the FEC interprets null (i.e. none) primary
         #committees for a candidate is that they have in fact raised/spent 0.0 dollars, this can be shown as true
         #using the Alabama special election as an example

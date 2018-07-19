@@ -143,8 +143,8 @@ class TestDownloadResource(ApiBaseTest):
         assert not export.delay.called
 
     def test_download_forbidden(self):
-        with pytest.raises(ApiError):
-            self.client.post_json(api.url_for(resource.DownloadView, path='elections', office='house', cycle=2018))
+        response = self.app.get(api.url_for(resource.DownloadView, path='elections', office='house', cycle=2018))
+        self.assertEqual(response.status_code, 405)
 
     @mock.patch('webservices.resources.download.MAX_RECORDS', 2)
     @mock.patch('webservices.resources.download.get_cached_file')
