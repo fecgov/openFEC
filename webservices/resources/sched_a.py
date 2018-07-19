@@ -97,8 +97,6 @@ class ScheduleAView(ItemizedResource):
         if kwargs.get('committee_type'):
             query = query.filter(committee_committee_history_alias.committee_type == kwargs.get('committee_type'))
 
-        if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
