@@ -115,17 +115,20 @@ class ElectionsListView(utils.Resource):
     description=docs.ELECTIONS,
     tags=['financial']
 )
-class ElectionView(utils.Resource):
+class ElectionView(ApiResource):
+    schema = schemas.ElectionSchema
+    page_schema = schemas.ElectionPageSchema
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.elections,
+            args.make_sort_args(
+                default='-total_receipts',
+            ),
+        )
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.elections)
-    @use_kwargs(args.make_sort_args(default='-total_receipts'))
-    @marshal_with(schemas.ElectionPageSchema())
-    def get(self, **kwargs):
-        query = self._get_records(kwargs)
-        return utils.fetch_page(query, kwargs, cap=0)
-
-    def _get_records(self, kwargs):
+    def build_query(self, **kwargs):
         utils.check_election_arguments(kwargs)
         totals_model = office_totals_map[kwargs['office']]
         pairs = self._get_pairs(totals_model, kwargs).subquery()
@@ -179,7 +182,7 @@ class ElectionView(utils.Resource):
         ).subquery()
         return db.session.query(
             latest.c.candidate_id,
-            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period,0.0)).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
         ).group_by(
             latest.c.candidate_id,
         )
