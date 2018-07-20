@@ -173,8 +173,8 @@ class TestElections(ApiBaseTest):
         self.assertEquals(response.status_code, 200)
 
     def test_empty_query(self):
-        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='ZZ', per_page=0))
-        self.assertEqual(len(results), 0)
+        results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='ZZ'))
+        assert len(results) == 0
 
     def test_elections(self):
         results = self._results(api.url_for(ElectionView, office='senate', cycle=2012, state='NY'))
@@ -244,7 +244,6 @@ class TestElections(ApiBaseTest):
         assert len(results) == 1
         assert_dicts_subset(results[0], expected)
         assert set(results[0]['committee_ids']) == set(each.committee_id for each in self.committees)
-
 
     def test_election_summary(self):
         results = self._response(api.url_for(ElectionSummary, office='senate', cycle=2012, state='NY'))
