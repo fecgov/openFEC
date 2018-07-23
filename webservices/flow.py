@@ -32,6 +32,8 @@ def get_graph():
         'filing_amendments_presidential',
         'filings',
         'large_aggregates',
+        'ofec_agg_coverage_date',
+        'ofec_sched_e_mv',
         'rad_analyst',
         'reports_house_senate',
         'reports_ie',
@@ -48,7 +50,6 @@ def get_graph():
         'totals_ie',
         'totals_pac_party',
         'totals_presidential',
-        'ofec_agg_coverage_date',
     ]
     graph.add_nodes_from(MATERIALIZED_VIEWS)
 
