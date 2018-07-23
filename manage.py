@@ -218,6 +218,8 @@ def refresh_materialized(concurrent=True):
                     'ofec_filings_mv',
                     'ofec_filings_all_mv'],
         'large_aggregates': ['ofec_entity_chart_mv'],
+        'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
+        'ofec_sched_e_mv': ['ofec_sched_e_mv'],        
         'rad_analyst': ['ofec_rad_mv'],
         'reports_house_senate': ['ofec_reports_house_senate_mv'],
         'reports_ie': ['ofec_reports_ie_only_mv'],
@@ -237,7 +239,6 @@ def refresh_materialized(concurrent=True):
                              'ofec_totals_pacs_mv',
                              'ofec_totals_parties_mv'],
         'totals_presidential': ['ofec_totals_presidential_mv'],
-        'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
     }
 
     graph = flow.get_graph()
