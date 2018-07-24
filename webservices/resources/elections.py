@@ -7,6 +7,7 @@ from webservices import docs
 from webservices import utils
 from webservices import filters
 from webservices import schemas
+from webservices.common import counts
 from webservices.utils import use_kwargs
 from webservices.common import models
 from webservices.common.views import ApiResource
@@ -126,6 +127,19 @@ class ElectionView(ApiResource):
             args.make_sort_args(
                 default='-total_receipts',
             ),
+        )
+
+    def get(self, *args, **kwargs):
+        query = self.build_query(*args, **kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        multi = False
+        if isinstance(kwargs['sort'], (list, tuple)):
+            multi = True
+
+        return utils.fetch_page(
+            query, kwargs,
+            count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+            index_column=self.index_column, cap=0, multi=multi,
         )
 
     def build_query(self, **kwargs):
