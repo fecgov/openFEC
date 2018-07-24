@@ -1,11 +1,13 @@
-{"pdf_pages": 2,
-  "open_date": null,
+{ "open_date": null,
   "mur_type": "archived",
   "citations": {"us_code": [], "regulations": []},
   "doc_id":
   "mur_1",
-  "text": "page1 page2",
-  "url": "/files/legal/murs/1.pdf",
+  "url": "/legal/matter-under-review/1/",
   "name": "GRADISON FOR CONGRESS COMMITTEE",
-   "pdf_size": 6, "respondents": [], "complainants": [],
-   "no": "1", "subject": [], "close_date": null}
+  "respondents": [], "complainants": [],
+  "documents": [{"document_id": 1,
+                         "length": 6,
+                         "text": "page1 page2",
+                         "url": "/files/legal/murs/1.pdf"}],
+  "no": "1", "subject": [], "close_date": null}
