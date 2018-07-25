@@ -451,10 +451,20 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 * [auto] `develop` is deployed to `dev`
 
 ### Creating a hotfix
-* Developer creates a hotfix branch:
+* Developer makes sure their local master and develop branches are up to date:
+
+   ```
+   git checkout develop
+   git pull
+   git checkout master
+   git pull
+   ```
+
+* Developer creates a hotfix branch, commits changes, and **makes a PR to the `master` branch**:
 
     ```
     git flow hotfix start my-hotfix
+    git push origin hotfix/my-hotfix
     ```
 
 * Reviewer merges hotfix branch into `develop` and `master` and pushes to `origin`:
