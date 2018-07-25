@@ -194,11 +194,17 @@ class Tasks(locust.TaskSet):
         self.client.get('legal/search', name='legal_search', params=params)
 
     @locust.task
-    def get_document(self, term=None):
+    def get_mur(self, term=None):
         params = {
             'api_key': API_KEY,
         }
-        self.client.get('legal/docs/murs/7074', name='legal_get', params=params)
+        self.client.get('legal/docs/murs/7074', name='legal_get_mur', params=params)
+    @locust.task
+    def get_ao(self, term=None):
+        params = {
+            'api_key': API_KEY,
+        }
+        self.client.get('legal/docs/advisory_opinions/2018-07', name='legal_get_ao', params=params)
 
     @locust.task
     def load_schedule_a_small(self):
