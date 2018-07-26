@@ -80,18 +80,20 @@ class ScheduleAView(ItemizedResource):
     def build_query(self, **kwargs):
         query = super().build_query(**kwargs)
         query = filters.filter_contributor_type(query, self.model.entity_type, kwargs)
-
+        zip_list = []
         if kwargs.get('contributor_zip'):
             for value in kwargs['contributor_zip']:
-                if re.search('^-?\d{5}$',value) is None:
+                if re.search('[^a-zA-Z0-9-\s]', value):
                     raise exceptions.ApiError(
-                        'Invalid Zip code. It must be 5 digits',
+                        'Invalid zip code. It can not have special character',
                         status_code=400,
                     )
-            query = filters.filter_multi_start_with(query, kwargs, self.filter_multi_start_with_fields)
-        
+                else:
+                    zip_list.append(value[:5])
+            contributor_zip_list = {'contributor_zip': zip_list}
+            query = filters.filter_multi_start_with(query, contributor_zip_list, self.filter_multi_start_with_fields)
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter_by(sub_id=int(kwargs.get('sub_id')))
         if kwargs.get('line_number'):
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
@@ -143,4 +145,3 @@ class ScheduleAEfileView(views.ApiResource):
                 ]),
             ),
         )
-
