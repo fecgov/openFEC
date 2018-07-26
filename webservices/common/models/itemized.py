@@ -82,7 +82,14 @@ class ScheduleA(BaseItemized):
         'CommitteeHistory',
         primaryjoin='''and_(
             foreign(ScheduleA.contributor_id) == CommitteeHistory.committee_id,
-            ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
+            ScheduleA.two_year_transaction_period  == CommitteeHistory.cycle, 
+        )'''
+    )
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleA.committee_id) == CommitteeHistory.committee_id,
+            ScheduleA.two_year_transaction_period  == CommitteeHistory.cycle, 
         )'''
     )
 

@@ -12,6 +12,7 @@ from webservices.common import views
 from webservices.common.views import ItemizedResource
 from webservices import exceptions
 
+from sqlalchemy.dialects import postgresql #RJ
 
 @doc(
     tags=['receipts'],
