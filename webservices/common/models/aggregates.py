@@ -20,8 +20,7 @@ class ScheduleABySize(BaseAggregate):
 
 
 class ScheduleAByState(BaseAggregate):
-    __table_args__ = {'schema' : 'disclosure'}
-    __tablename__ = 'dsc_sched_a_aggregate_state'
+    __tablename__ = 'ofec_sched_a_agg_state_vw'
     state = db.Column(db.String, primary_key=True, doc=docs.STATE_GENERIC)
     state_full = db.Column(db.String, primary_key=True, doc=docs.STATE_GENERIC)
 
