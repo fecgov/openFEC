@@ -249,8 +249,10 @@ committee_list = {
     'candidate_id': fields.List(IStr, description=docs.CANDIDATE_ID),
     'state': fields.List(IStr, description=docs.STATE_GENERIC),
     'party': fields.List(IStr, description=docs.PARTY),
-    'min_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC after this date'),
-    'max_first_file_date': fields.Date(description='Selects all committees whose first filing was received by the FEC before this date'),
+    'min_first_file_date': fields.Date(description='Filter for committees whose first filing was received on or after this date'),
+    'max_first_file_date': fields.Date(description='Filter for committees whose first filing was received on or before this date'),
+    'min_last_f1_date': fields.Date(description='Filter for committees whose latest Form 1 was received on or after this date'),
+    'max_last_f1_date': fields.Date(description='Filter for committees whose latest Form 1 was received on or before this date'),
     'treasurer_name': fields.List(fields.Str, description=docs.TREASURER_NAME),
 }
 
@@ -282,7 +284,7 @@ filings = {
     'file_number': fields.List(fields.Int, description=docs.FILE_NUMBER),
     'primary_general_indicator': fields.List(IStr, description='Primary, general or special election indicator'),
     'amendment_indicator': fields.List(
-        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C' , 'M', 'S'])),
+        IStr(validate=validate.OneOf(['', 'N', 'A', 'T', 'C', 'M', 'S'])),
         description=docs.AMENDMENT_INDICATOR),
 }
 
