@@ -11,6 +11,7 @@ from flask_script import Server
 from flask_script import Manager
 
 from webservices import flow, partition
+from webservices.common import models
 from webservices.env import env
 from webservices.rest import app, db
 from webservices.config import SQL_CONFIG, check_config
@@ -42,35 +43,6 @@ manager.command(legal_docs.delete_docs_index)
 manager.command(legal_docs.move_archived_murs)
 manager.command(legal_docs.initialize_current_legal_docs)
 manager.command(legal_docs.refresh_current_legal_docs_zero_downtime)
-
-def get_projected_weekly_itemized_totals(schedules):
-    """Calculates the weekly total of itemized records that should have been
-    processed at the point when the weekly aggregate rebuild takes place.
-    """
-
-    projected_weekly_totals = {}
-
-    for schedule in schedules:
-        cmd = 'select get_projected_weekly_itemized_total(\'{0}\');'.format(schedule)
-        result = db.engine.execute(cmd)
-        projected_weekly_totals[schedule] = result.scalar()
-
-    return projected_weekly_totals
-
-def get_actual_weekly_itemized_totals(schedules):
-    """Retrieves the actual weekly total of itemized records that have been
-    processed at the time of the weekly aggregate rebuild.
-    """
-
-    actual_weekly_totals = {}
-
-    for schedule in schedules:
-        cmd = 'select count(*) from ofec_sched_{0}_master where pg_date > current_date - interval \'7 days\';'.format(
-            schedule)
-        result = db.engine.execute(cmd)
-        actual_weekly_totals[schedule] = result.scalar()
-
-    return actual_weekly_totals
 
 def execute_sql_file(path):
     """This helper is typically used within a multiprocessing pool; create a new database
@@ -190,26 +162,11 @@ def load_election_dates():
 
 @manager.command
 def refresh_itemized():
-    """These are run nightly to refresh the itemized schedule A and B data."""
+    """This run nightly to refresh the itemized schedule E data."""
 
-    refresh_itemized_a()
     rebuild_itemized_e()
 
-    logger.info('Finished updating incremental aggregates.')
-
-@manager.command
-def refresh_itemized_a():
-    """Used to refresh the itemized Schedule A data."""
-
-    logger.info('Updating Schedule A...')
-    message = partition.SchedAGroup.process_queues()
-
-    if message[0] == 0:
-        logger.info(message[1])
-    else:
-        logger.error(message[1])
-
-    logger.info('Finished updating Schedule A.')
+    logger.info('Finished rebuilding schedule data.')
 
 @manager.command
 def rebuild_itemized_e():
@@ -218,34 +175,6 @@ def rebuild_itemized_e():
     execute_sql_file('data/refresh/rebuild_schedule_e.sql')
     logger.info('Finished rebuilding Schedule E.')
 
-@manager.command
-def add_itemized_partition_cycle(cycle=None, amount=1):
-    """Adds a new itemized cycle child table.
-    By default this will try to add just the current cycle to all partitioned
-    itemized schedule tables if it doesn't already exist.
-    If the child table already exists, skip over it.
-    """
-
-    amount = int(amount)
-
-    if not cycle:
-        cycle = SQL_CONFIG['CYCLE_END_YEAR_ITEMIZED']
-    else:
-        cycle = int(cycle)
-
-    logger.info('Adding Schedule A cycles...')
-    try:
-        with db.engine.begin() as connection:
-            connection.execute(
-                sa.text('SELECT add_partition_cycles(:start_year, :count)').execution_options(
-                    autocommit=True
-                ),
-                start_year=cycle,
-                count=amount
-            )
-        logger.info('Finished adding Schedule A cycles.')
-    except Exception:
-        logger.exception("Failed to add partition cycles")
 
 @manager.command
 def refresh_materialized(concurrent=True):
@@ -289,6 +218,8 @@ def refresh_materialized(concurrent=True):
                     'ofec_filings_mv',
                     'ofec_filings_all_mv'],
         'large_aggregates': ['ofec_entity_chart_mv'],
+        'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
+        'ofec_sched_e_mv': ['ofec_sched_e_mv'],        
         'rad_analyst': ['ofec_rad_mv'],
         'reports_house_senate': ['ofec_reports_house_senate_mv'],
         'reports_ie': ['ofec_reports_ie_only_mv'],
@@ -375,6 +306,10 @@ def slack_message(message):
     run ./manage.py slack_message 'The message you want to post'
     """
     post_to_slack(message, '#bots')
+
+@manager.shell
+def make_shell_context():
+    return dict(app=app, db=db, models=models)
 
 
 if __name__ == '__main__':

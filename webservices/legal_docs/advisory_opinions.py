@@ -2,7 +2,6 @@ from collections import defaultdict
 import logging
 import re
 
-from webservices.env import env
 from webservices.rest import db
 from webservices.utils import get_elasticsearch_connection
 from webservices.tasks.utils import get_bucket
@@ -66,11 +65,37 @@ AO_DOCUMENTS = """
     WHERE doc.ao_id = %s
 """
 
-STATUTE_CITATION_REGEX = re.compile(
-    r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*(?P<section>\d+[a-z]?(-1)?).*\.?")
+TO_END_OF_SENTENCE = r"(?P<possible_sections>\d+[a-z]?(-1)?[^.;]*)[.;]"
 
-REGULATION_CITATION_REGEX = re.compile(
-    r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*(?P<part>\d+)\.(?P<section>\d+)")
+# Statute REGEX
+
+STATUTE_TITLE = r"(?P<title>\d+)\s+U\.?S\.?C\.?\s+§*\s*"
+STATUTE_SECTION = r"(?P<section>\d+[a-z]?(-1)?)(?:\S*)"
+
+SINGLE_STATUTE_CITATION_REGEX = re.compile(
+    STATUTE_TITLE + STATUTE_SECTION + r".*\.?")
+
+MULTIPLE_STATUTE_CITATION_REGEX = re.compile(
+    STATUTE_TITLE + TO_END_OF_SENTENCE)
+
+STATUTE_SECTION_ONLY_REGEX = re.compile(STATUTE_SECTION)
+
+# Regulation REGEX
+
+MAX_MULTIPLE_REGULATION_CITATION_LENGTH = r"(?P<possible_parts_and_sections>.{,70})"
+
+REGULATION_TITLE = r"(?P<title>\d+)\s+C\.?F\.?R\.?\s+§*\s*"
+REGULATION_SECTION = r"(?P<part>\d+)\.(?P<section>\d+)+"
+
+SINGLE_REGULATION_CITATION_REGEX = re.compile(
+    REGULATION_TITLE + REGULATION_SECTION)
+
+MULTIPLE_REGULATION_CITATION_REGEX = re.compile(
+    REGULATION_TITLE + MAX_MULTIPLE_REGULATION_CITATION_LENGTH)
+
+REGULATION_SECTION_ONLY_REGEX = re.compile(REGULATION_SECTION)
+
+# AO REGEX
 
 AO_CITATION_REGEX = re.compile(
     r"\b(?P<year>\d{4,4})-(?P<serial_no>\d+)\b")
@@ -228,6 +253,9 @@ def get_citations(ao_names):
     for row in rs:
         logger.debug("Getting citations for AO %s" % row["ao_no"])
 
+        if not row["ocrtext"]:
+            logger.error("Missing OCR text for AO no {0}: unable to get citations".format(row['ao_no']))
+
         ao_citations_in_doc = parse_ao_citations(row["ocrtext"], ao_component_to_name_map)
         ao_citations_in_doc.discard(row["ao_no"])  # Remove self
 
@@ -238,6 +266,7 @@ def get_citations(ao_names):
 
         statutory_citations = parse_statutory_citations(row["ocrtext"])
         regulatory_citations = parse_regulatory_citations(row["ocrtext"])
+
         all_statutory_citations.update(statutory_citations)
         all_regulatory_citations.update(regulatory_citations)
         raw_citations[row["ao_no"]]["statutes"].update(statutory_citations)
@@ -262,7 +291,7 @@ def get_citations(ao_names):
 
     for citation in all_regulatory_citations:
         entry = {'citation_text': '%d CFR §%d.%d'
-                 % (citation[0], citation[1], citation[2]),'citation_type': 'regulation'}
+                 % (citation[0], citation[1], citation[2]), 'citation_type': 'regulation'}
         es.index('docs_index', 'citations', entry, id=entry['citation_text'])
 
     for citation in all_statutory_citations:
@@ -286,26 +315,118 @@ def parse_ao_citations(text, ao_component_to_name_map):
     return matches
 
 
+def validate_statute_citation(title, section):
+    """
+    Check to see if the statute (USC) citation is in the expected range.
+
+    Convert the first 3 digits to an integer - the smallest number is 3 digits.
+    - Title 2 between 431a and 457b
+    - Title 18 between 590 and 619, and  1001
+    - Title 26 between 9001 and 9042, 501 (IRS)
+    - Title 52 between 30101 and 30146
+
+    If title isn't in this list, fall back to True and add unknown citations
+    """
+    try:
+        section_lookup = int(section[:3])
+    except:
+        return False
+
+    if title == '2':
+        return 431 <= section_lookup <= 457
+    elif title == '18':
+        return (590 <= section_lookup <= 619 or
+               section_lookup == 100)
+    elif title == '26':
+        return (900 <= section_lookup <= 904 or
+               section_lookup in (501, 527))
+    elif title == '52':
+        return section_lookup == 301
+
+    return True
+
+
 def parse_statutory_citations(text):
     matches = set()
     if text:
-        for citation in STATUTE_CITATION_REGEX.finditer(text):
+        for citation in SINGLE_STATUTE_CITATION_REGEX.finditer(text):
             new_title, new_section = reclassify_statutory_citation(
                 citation.group('title'), citation.group('section'))
             matches.add((
                 int(new_title),
                 str(new_section)
             ))
+        for possible_multiple_citation in MULTIPLE_STATUTE_CITATION_REGEX.finditer(text):
+            citations_title = possible_multiple_citation.group('title')
+            possible_sections = possible_multiple_citation.group('possible_sections')
+
+            for section in STATUTE_SECTION_ONLY_REGEX.finditer(possible_sections):
+                new_title, new_section = reclassify_statutory_citation(
+                    citations_title, section.group('section'))
+
+                if validate_statute_citation(new_title, new_section):
+                    matches.add((
+                        int(new_title),
+                        str(new_section)
+                    ))
+                else:
+                    logger.debug("Citation out of range - excluding {} USC {} from multiples.".format(new_title, new_section))
     return matches
+
+
+def validate_regulation_citation(title, part):
+    """
+    Check to see if the regulation (CFR) is in the expected range. Add padding for future regs.
+
+    Source: https://www.gpo.gov/fdsys/pkg/CFR-2018-title11-vol1/pdf/CFR-2018-title11-vol1-chapI.pdf
+
+    11 CFR: 1-8, 100-120, 200-205, 300-305, 400 (historical), 9001-9099
+
+    Other CFR's can appear, so fall back to True
+    12 CFR 544 (1984-55)
+
+    """
+    try:
+        part = int(part)
+    except:
+        return False
+
+    if title == '11':
+        return (1 <= part <= 8 or
+        100 <= part <= 120 or
+        200 <= part <= 205 or
+        300 <= part <= 305 or
+        part == 400 or
+        9001 <= part <= 9099)
+
+    return True
 
 
 def parse_regulatory_citations(text):
     matches = set()
     if text:
-        for citation in REGULATION_CITATION_REGEX.finditer(text):
+        for citation in SINGLE_REGULATION_CITATION_REGEX.finditer(text):
             matches.add((
                 int(citation.group('title')),
                 int(citation.group('part')),
                 int(citation.group('section'))
             ))
+
+        for possible_multiple_citation in MULTIPLE_REGULATION_CITATION_REGEX.finditer(text):
+            citations_title = possible_multiple_citation.group('title')
+            possible_parts_and_sections = possible_multiple_citation.group('possible_parts_and_sections')
+
+            for part_and_section in REGULATION_SECTION_ONLY_REGEX.finditer(possible_parts_and_sections):
+
+                if validate_regulation_citation(citations_title, part_and_section.group('part')):
+                    matches.add((
+                        int(citations_title),
+                        int(part_and_section.group('part')),
+                        int(part_and_section.group('section'))
+                    ))
+                else:
+                    logger.debug("Citation out of range - excluding {} CFR {}.{} from multiples.".
+                        format(citations_title,
+                            part_and_section.group('part'),
+                            int(part_and_section.group('section'))))
     return matches

@@ -28,8 +28,8 @@ class EntityReceiptDisbursementTotalsView(ApiResource):
             args.paging,
             args.large_aggregates,
             args.make_sort_args(
-                default='date',
-                validator=args.OptionValidator(['date',]),
+                default='end_date',
+                validator=args.OptionValidator(['end_date',]),
             )
         )
 
