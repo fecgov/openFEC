@@ -75,59 +75,6 @@ def mock_archived_murs_get_request(html):
             return RequestResult(html)
     return request_murs_data
 
-class Engine:
-    def __init__(self, legal_loaded):
-        self.legal_loaded = legal_loaded
-
-    def __iter__(self):
-        return self.result.__iter__()
-
-    def __next__(self):
-        return self.result.__next__()
-
-    def fetchone(self):
-        return self.result[0]
-
-    def fetchall(self):
-        return self.result
-
-    def connect(self):
-        return self
-
-    def execution_options(self, stream_results):
-        return self
-
-    def execute(self, sql):
-        if sql == 'select document_id from document':
-            self.result = [(1,), (2,)]
-        if 'fileimage' in sql:
-            return [(1, 'ABC'.encode('utf8'))]
-        if 'EXISTS' in sql:
-            self.result = [(self.legal_loaded,)]
-        if 'COUNT' in sql:
-            self.result = [(5,)]
-        if 'aouser.players' in sql:
-            self.result = [{'name': 'Charles Babbage', 'description': 'Individual'},
-                            {'name': 'Ada Lovelace', 'description': 'Individual'}]
-        if 'SELECT ao_no, category, ocrtext' in sql:
-            self.result = [
-                {'ao_no': '1993-01', 'category': 'Votes', 'ocrtext': 'test 1993-01 test 2015-105 and 2014-1'},
-                {'ao_no': '2007-05', 'category': 'Final Opinion', 'ocrtext': 'test2 1993-01 test2'}]
-        if 'SELECT ao_no, name FROM' in sql:
-            self.result = [{'ao_no': '1993-01', 'name': 'RNC'}, {'ao_no': '2007-05', 'name': 'Church'},
-                            {'ao_no': '2014-01', 'name': 'DNC'}, {'ao_no': '2015-105', 'name': 'Outkast'}]
-        if 'document_id' in sql:
-            self.result = [{'document_id': 123, 'ocrtext': 'textAB', 'description': 'description123',
-                           'category': 'Votes', 'ao_id': 'id123',
-                           'name': 'name4U', 'summary': 'summaryABC', 'tags': 'tags123',
-                           'ao_no': '1993-01', 'document_date': 'date123', 'is_pending': True}]
-        return self
-
-
-class Db:
-    def __init__(self, legal_loaded=True):
-        self.engine = Engine(legal_loaded)
-
 def get_credential_mock(var, default):
     return 'https://eregs.api.com/'
 
@@ -150,13 +97,6 @@ def mock_get_regulations(url):
                                'children': [{'text': 'sectionContentB',
                                'children': []}]}]}]})
 
-class obj:
-    def __init__(self, key):
-        self.key = key
-
-    def delete(self):
-        pass
-
 class S3Objects:
     def __init__(self):
         self.objects = []
@@ -165,16 +105,16 @@ class S3Objects:
         return [o for o in self.objects if o.key.startswith(Prefix)]
 
 class BucketMock:
-    def __init__(self, key):
+    def __init__(self, keys):
         self.objects = S3Objects()
-        self.key = key
+        self.keys = keys
 
     def put_object(self, Key, Body, ContentType, ACL):
-        assert Key == self.key
+        assert Key in self.keys
 
-def get_bucket_mock(key):
+def get_bucket_mock(keys):
     def get_bucket():
-        return BucketMock(key)
+        return BucketMock(keys)
     return get_bucket
 
 class IndexStatutesTest(unittest.TestCase):
@@ -264,7 +204,20 @@ class LoadArchivedMursTest(unittest.TestCase):
     @patch('webservices.legal_docs.load_legal_docs.requests.get',
         mock_archived_murs_get_request(open('tests/data/archived_mur_data.html').read()))
     def test_base_case(self):
-        load_archived_murs(specific_mur_no=1)
+        # Management command brings this in as a string
+        load_archived_murs(specific_mur_no='1')
+
+    @patch('webservices.utils.get_elasticsearch_connection',
+        get_es_with_doc(json.load(open('tests/data/archived_mur_multi_part_doc.json'))))
+    @patch('webservices.legal_docs.load_legal_docs.get_bucket',
+        get_bucket_mock(['legal/murs/3_A.pdf', 'legal/murs/3_B.pdf', 'legal/murs/3_C.pdf']))
+    @patch('webservices.legal_docs.load_legal_docs.slate.PDF', lambda t: ['page1', 'page2'])
+    @patch('webservices.legal_docs.load_legal_docs.env.get_credential', lambda e: 'bucket123')
+    @patch('webservices.legal_docs.load_legal_docs.requests.get',
+        mock_archived_murs_get_request(open('tests/data/archived_mur_multi_part_data.html').read()))
+    def test_multi_file(self):
+        # Management command brings this in as a string
+        load_archived_murs(specific_mur_no='3')
 
     @patch('webservices.utils.get_elasticsearch_connection',
         get_es_with_doc(json.load(open('tests/data/archived_mur_empty_doc.json'))))
@@ -310,7 +263,7 @@ class LoadArchivedMursTest(unittest.TestCase):
         mock_archived_murs_get_request(open('tests/data/archived_mur_data.html').read()))
     @patch('webservices.legal_docs.load_legal_docs.slate.PDF', raise_pdf_exception)
     def test_with_bad_pdf(self):
-        load_archived_murs(specific_mur_no=1)
+        load_archived_murs(specific_mur_no='1')
 
     @patch('webservices.legal_docs.load_legal_docs.get_bucket',
         get_bucket_mock('legal/murs/1.pdf'))

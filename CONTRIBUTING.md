@@ -91,6 +91,45 @@ a new space — which isn't auto-deployed to — for testing and demoing specifi
 While we routinely demo our work on the development site, the FEC folks will
 conduct full reviews of the work slated for a release on our staging site.
 
+## Team's workflow
+### Issue and PR management
+1. Please pull an issue from the current sprint only (unless there is an
+   *URGENT* issue). If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PMs or tech lead on Slack.
+2. Before starting,
+   [write the dev issue checklist](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#issues).
+3. While working, submit `[WIP]`
+   [pull requests](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#pull-requests)
+   liberally.
+4. Time boxing! If you have spent half the time of the estimated size of the
+   issue and you're not sure that you're halfway finished, notify the tech
+   lead or PM in Slack. This isn't bad; we just like knowing what's up. :)
+5. Make sure your pull request includes significant test coverage. (Follow the above pull request
+   guidelines.)
+6. Once you're done with your pull request, notify the team in Slack that your pull request is
+   ready for review, and don't merge your own pull request.
+7. Do a review of someone else's pull request and merge when it is deemed ready.
+
+### Pipelines and pre-release testing procedures
+Our team’s workflow consists of separate pipelines that determine where a ticket is in the process of our workflow.
+
+These pipelines include:
+
+1. **Backlog:** Tickets that are ready to be worked on and assigned in sprint planning
+2. **In progress:** Tickets that are actively being worked on by a member of the team who is assigned to the ticket
+3. **Blocked:** This signifies an issue with the ticket that is blocking any kind of further work until a certain dependency is met. These are critical especially because it would prevent a ticket from being completed within the sprint iteration.
+4. **Ready:** The ticket has been completed and is ready for code, design, content review, and merge into our repositories. Add “plz-review” label here to signify that the ticket is ready to be reviewed. After the PR is merged, close it and write a new testing ticket that links to the issue that was closed. Add it to the backlog with the title `Stage testing: [subject]`. That testing ticket will be assigned during sprint planning to test before deploy. 
+
+    - If applicable, be sure to connect the PR with a particular issue so that it will show up on the board as connected.
+        - A. It is important for the product team to refresh requirements in the original issue if something has changed. This way it will not be confusing during testing.
+         - B. Dev team should include plain language for what to test in their PR with reproducible steps for testers to follow to check business requirements
+
+#### Release cut
+
+The release is typically cut the Tuesday after sprint planning. By this time, all PR reviews that are part of the past sprint should be done and merged into the develop branch. The release branch is cut from our develop branch. Therefore, when the release branch is cut, those changes that were due in sprint that just closed, will be merged in. Ideally, this would give us about 1 week to complete testing before production release deployment the following tuesday.
+
+5. **Ready for testing:** After release is cut, move all of the previous sprint’s tickets from the “Ready” pipeline to “Ready for testing”. Add the assignee to the PR to test the PR before deployment.
+6. **Testing in progress:** An individual, who is NOT the original person who created the PR, should test. Tester has to verify that business requirements and implementation is correct.
+7. **Closed:** After testing is complete, the ticket is complete, close the ticket! 
 
 ### Deployment and release information
 The fec.gov project requires a steady release schedule that is
@@ -145,23 +184,6 @@ We currently have several monitoring tools in place:
   the `dev`, `stage`, and `prod` environments via slack.
 - We have extensive logs via cloud.gov
 
-
-### Team workflow
-1. Please pull an issue from the current sprint only (unless there is an
-   *URGENT* issue). If a non *URGENT* issue comes up, but you want to prioritize it, coordinate with the PMs or tech lead on Slack.
-2. Before starting,
-   [write the dev issue checklist](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#development-issues-should-include).
-3. While working, submit `[WIP]`
-   [pull requests](https://github.com/fecgov/openFEC/blob/develop/CONTRIBUTING.md#pull-requests)
-   liberally.
-4. Time boxing! If you have spent half the time of the estimated size of the
-   issue and you're not sure that you're halfway finished, notify the tech
-   lead or PM in Slack. This isn't bad; we just like knowing what's up. :)
-5. Make sure your pull request includes significant test coverage. (Follow the above pull request
-   guidelines.)
-6. Once you're done with your pull request, notify the team in Slack that your pull request is
-   ready for review, and don't merge your own pull request.
-7. Do a review of someone else's pull request and merge when it is deemed ready.
 
 # Pull request review
 

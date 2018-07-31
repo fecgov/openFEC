@@ -934,6 +934,8 @@ class ElectionSchema(ma.Schema):
     coverage_end_date = ma.fields.Date()
 augment_schemas(ElectionSchema)
 
+ElectionPageSchema = make_page_schema(ElectionSchema)
+register_schema(ElectionPageSchema)
 
 class ScheduleABySizeCandidateSchema(ma.Schema):
     candidate_id = ma.fields.Str()
@@ -981,7 +983,7 @@ register_schema(RadAnalystPageSchema)
 EntityReceiptDisbursementTotalsSchema = make_schema(
     models.EntityReceiptDisbursementTotals,
     options={'exclude': ('idx', 'month', 'year')},
-    fields={'date': ma.fields.DateTime(doc='The cumulative total for this month.')},
+    fields={'end_date': ma.fields.Date(doc='The cumulative total for this month.')},
 )
 EntityReceiptDisbursementTotalsPageSchema = make_page_schema(EntityReceiptDisbursementTotalsSchema)
 register_schema(EntityReceiptDisbursementTotalsSchema)

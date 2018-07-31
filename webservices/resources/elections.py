@@ -7,6 +7,7 @@ from webservices import docs
 from webservices import utils
 from webservices import filters
 from webservices import schemas
+from webservices.common import counts
 from webservices.utils import use_kwargs
 from webservices.common import models
 from webservices.common.views import ApiResource
@@ -115,17 +116,33 @@ class ElectionsListView(utils.Resource):
     description=docs.ELECTIONS,
     tags=['financial']
 )
-class ElectionView(utils.Resource):
+class ElectionView(ApiResource):
+    schema = schemas.ElectionSchema
+    page_schema = schemas.ElectionPageSchema
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.elections,
+            args.make_sort_args(
+                default='-total_receipts',
+            ),
+        )
 
-    @use_kwargs(args.paging)
-    @use_kwargs(args.elections)
-    @use_kwargs(args.make_sort_args(default='-total_receipts'))
-    @marshal_with(schemas.ElectionPageSchema())
-    def get(self, **kwargs):
-        query = self._get_records(kwargs)
-        return utils.fetch_page(query, kwargs, cap=0)
+    def get(self, *args, **kwargs):
+        query = self.build_query(*args, **kwargs)
+        count = counts.count_estimate(query, models.db.session, threshold=500000)
+        multi = False
+        if isinstance(kwargs['sort'], (list, tuple)):
+            multi = True
 
-    def _get_records(self, kwargs):
+        return utils.fetch_page(
+            query, kwargs,
+            count=count, model=self.model, join_columns=self.join_columns, aliases=self.aliases,
+            index_column=self.index_column, cap=0, multi=multi,
+        )
+
+    def build_query(self, **kwargs):
         utils.check_election_arguments(kwargs)
         totals_model = office_totals_map[kwargs['office']]
         pairs = self._get_pairs(totals_model, kwargs).subquery()
@@ -179,7 +196,7 @@ class ElectionView(utils.Resource):
         ).subquery()
         return db.session.query(
             latest.c.candidate_id,
-            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period,0.0)).label('cash_on_hand_end_period'),
+            sa.func.sum(sa.func.coalesce(latest.c.cash_on_hand_end_period, 0.0)).label('cash_on_hand_end_period'),
         ).group_by(
             latest.c.candidate_id,
         )
