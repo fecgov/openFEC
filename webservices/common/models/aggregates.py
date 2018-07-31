@@ -26,7 +26,7 @@ class ScheduleAByState(BaseAggregate):
 
 
 class ScheduleAByZip(BaseAggregate):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'dsc_sched_a_aggregate_zip'
     zip = db.Column(db.String, primary_key=True)
     state = db.Column(db.String, doc=docs.STATE_GENERIC)
@@ -34,25 +34,25 @@ class ScheduleAByZip(BaseAggregate):
 
 
 class ScheduleAByEmployer(BaseAggregate):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'dsc_sched_a_aggregate_employer'
     employer = db.Column(db.String, primary_key=True, doc=docs.EMPLOYER)
 
 
 class ScheduleAByOccupation(BaseAggregate):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'dsc_sched_a_aggregate_occupation'
     occupation = db.Column(db.String, primary_key=True, doc=docs.OCCUPATION)
 
 
 class ScheduleBByRecipient(BaseAggregate):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'dsc_sched_b_aggregate_recipient'
     recipient_name = db.Column('recipient_nm', db.String, primary_key=True, doc=docs.RECIPIENT_NAME)
 
 
 class ScheduleBByRecipientID(BaseAggregate):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'dsc_sched_b_aggregate_recipient_id'
     recipient_id = db.Column('recipient_cmte_id', db.String, primary_key=True, doc=docs.RECIPIENT_ID)
     committee = utils.related_committee('committee_id')
@@ -68,7 +68,7 @@ class ScheduleBByRecipientID(BaseAggregate):
 
 
 class ScheduleBByPurpose(BaseAggregate):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'dsc_sched_b_aggregate_purpose'
     purpose = db.Column(db.String, primary_key=True, doc=docs.PURPOSE)
 
