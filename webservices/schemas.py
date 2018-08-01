@@ -467,6 +467,12 @@ make_totals_schema = functools.partial(
         #'committee_type': ma.fields.Str(attribute='committee.committee_type'),
         'last_cash_on_hand_end_period': ma.fields.Decimal(places=2),
         'last_beginning_image_number': ma.fields.Str(),
+        'transaction_coverage_date': ma.fields.Date(
+            attribute='transaction_coverage.transaction_coverage_date',
+            default=None),
+    },
+    options={
+        'exclude': ('transaction_coverage', 'idx')
     },
 )
 augment_models(
