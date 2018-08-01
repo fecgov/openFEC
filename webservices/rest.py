@@ -152,14 +152,31 @@ def limit_remote_addr():
                 abort(403)
 
 
+def get_cache_duration(url):
+
+    EFILING_CACHE = 0
+    LEGAL_CACHE = 60 * 5
+    CALENDAR_CACHE = 60 * 5
+    DEFAULT_CACHE = 60 * 60
+
+    if '/efile/' in url:
+        return EFILING_CACHE
+    elif '/calendar-dates/' in url:
+        return CALENDAR_CACHE
+    elif '/legal/' in url:
+        return LEGAL_CACHE
+
+    return DEFAULT_CACHE
+
+
 @app.after_request
 def add_caching_headers(response):
-    if app.config['MAX_CACHE_AGE'] is not None:
-        response.headers.add(
-            'Cache-Control',
-            'public, max-age={}'.format(app.config['MAX_CACHE_AGE'])
-        )
 
+    cache_duration = get_cache_duration(request.path)
+    response.headers.add(
+        'Cache-Control',
+        'public, max-age={}'.format(cache_duration)
+    )
     return response
 
 
