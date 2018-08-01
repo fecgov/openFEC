@@ -155,6 +155,7 @@ class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
     full_election = db.Column(db.Boolean, primary_key=True)
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
+    transaction_coverage_date = db.Column(db.DateTime())
 
 
 class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
