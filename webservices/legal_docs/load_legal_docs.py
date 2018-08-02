@@ -347,9 +347,9 @@ def delete_murs_from_s3():
     for obj in bucket.objects.filter(Prefix="legal/murs"):
         obj.delete()
 
-def delete_murs_from_es():
+def delete_current_murs_from_es():
     """
-    Deletes all MURs from Elasticsearch
+    Deletes all current MURs from Elasticsearch
     """
     delete_from_es('docs_index', 'murs')
 
@@ -446,9 +446,9 @@ def process_murs(raw_mur_tr_element_list):
 
 def load_archived_murs(from_mur_no=None, specific_mur_no=None, num_processes=1, tasks_per_child=None):
     """
-    Reads data for archived MURs from http://classic.fec.gov/MUR, assembles a JSON
+    Reads data for archived MURs from http://classic.fec.gov/MUR/, assembles a JSON
     document corresponding to the MUR and indexes this document in Elasticsearch
-    in the index `docs_index` with a doc_type of `murs`. In addition, the MUR
+    in the index `archived_murs` with a doc_type of `murs`. In addition, the MUR
     document is uploaded to an S3 bucket under the _directory_ `legal/murs/`.
     """
     logger.info("Loading archived MURs")

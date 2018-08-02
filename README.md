@@ -586,7 +586,7 @@ python manage.py load_current_murs [-m MUR_NO]
 
 #### Loading archived MURs (This takes a very long time)
 ```
-python manage.py load_archived_murs
+python manage.py load_archived_murs [-s MUR_NO] or [-f FROM_MUR_NO]
 ```
 
 
