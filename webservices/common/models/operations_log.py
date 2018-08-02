@@ -31,3 +31,12 @@ class OperationsLog(db.Model):
             doc="Same day or a day after the report is loaded in the database")
     transaction_data_complete_date = db.Column('pass_3_entry_done_dt', db.Date,
             doc="Date when the report is processed completely")
+
+class TransactionCoverage(db.Model):
+
+    __tablename__ = 'ofec_agg_coverage_date_mv'
+
+    idx = db.Column(db.Integer, primary_key=True)
+    committee_id = db.Column('committee_id', db.String, doc=docs.COMMITTEE_ID)
+    fec_election_year = db.Column('fec_election_yr', db.Integer)
+    transaction_coverage_date = db.Column(db.Date, doc="Date through which transaction-level data is available")

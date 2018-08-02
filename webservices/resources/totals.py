@@ -6,6 +6,7 @@ from webservices import docs
 from webservices import utils
 from webservices import schemas
 from webservices.common import models
+from webservices.common.models import db, TransactionCoverage
 from webservices.common.views import ApiResource
 from webservices.utils import use_kwargs
 from webservices.resources.reports import reports_type_map
@@ -68,7 +69,7 @@ class TotalsView(utils.Resource):
         )
         query = totals_class.query
         if committee_id is not None:
-            query = totals_class.query.filter_by(committee_id=committee_id)
+            query = query.filter(totals_class.committee_id == committee_id)
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
         return query, totals_class, totals_schema
@@ -84,7 +85,6 @@ class TotalsView(utils.Resource):
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
 
-# 2631 changes
 @doc(
     tags=['financial'],
     description=docs.TOTALS,
@@ -96,7 +96,7 @@ class TotalsView(utils.Resource):
         },
     },
 )
-class TotalsCommitteeView(utils.Resource):
+class TotalsCommitteeView(ApiResource):
 
     @use_kwargs(args.paging)
     @use_kwargs(args.totals)
@@ -125,9 +125,10 @@ class TotalsCommitteeView(utils.Resource):
         )
         query = totals_class.query
         if committee_id is not None:
-            query = totals_class.query.filter_by(committee_id=committee_id)
+            query = query.filter(totals_class.committee_id == committee_id)
         if kwargs.get('cycle'):
             query = query.filter(totals_class.cycle.in_(kwargs['cycle']))
+
         return query, totals_class, totals_schema
 
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
@@ -140,7 +141,6 @@ class TotalsCommitteeView(utils.Resource):
             return committee.committee_type
         elif committee_type is not None:
             return reports_type_map.get(committee_type)
-
 
 @doc(
     tags=['candidate'],
