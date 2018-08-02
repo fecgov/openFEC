@@ -426,3 +426,7 @@ class StateElectionOfficesFactory(BaseFactory):
 class OperationsLogFactory(BaseFactory):
     class Meta:
         model = models.OperationsLog
+
+class TransactionCoverageFactory(BaseFactory):
+    class Meta:
+        model = models.TransactionCoverage

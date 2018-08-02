@@ -43,10 +43,15 @@ shared_fields = {
     'party_full': ""
 }
 
+transaction_coverage_fields = {'transaction_coverage_date': None}
+
 class TestTotals(ApiBaseTest):
 
     def test_Presidential_totals(self):
         committee_id = 'C8675309'
+        transaction_coverage = factories.TransactionCoverageFactory(
+            committee_id=committee_id,
+            fec_election_year=2016)
         history = factories.CommitteeHistoryFactory(
             committee_id=committee_id,
             committee_type='P',
@@ -74,18 +79,18 @@ class TestTotals(ApiBaseTest):
         }
 
         fields = utils.extend(shared_fields, presidential_fields)
-
         committee_total = factories.TotalsPresidentialFactory(**fields)
 
+        fields = utils.extend(fields, transaction_coverage_fields)
+
         results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
-        for key, value in results[0].items():
-            if key not in fields:
-                print(key)
-        print(results[0] == fields)
         self.assertEqual(results[0], fields)
 
     def test_House_Senate_totals(self):
         committee_id = 'C8675310'
+        transaction_coverage = factories.TransactionCoverageFactory(
+            committee_id=committee_id,
+            fec_election_year=2016)
         history = factories.CommitteeHistoryFactory(
             committee_id=committee_id,
             committee_type='S',
@@ -108,14 +113,18 @@ class TestTotals(ApiBaseTest):
             'net_operating_expenditures': 128,
         }
         fields = utils.extend(house_senate_fields, shared_fields)
-
         committee_total = factories.TotalsHouseSenateFactory(**fields)
-        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
 
+        fields = utils.extend(fields, transaction_coverage_fields)
+
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
         self.assertEqual(results[0], fields)
 
     def test_Pac_Party_totals(self):
         committee_id = 'C8675311'
+        transaction_coverage = factories.TransactionCoverageFactory(
+            committee_id=committee_id,
+            fec_election_year=2016)
         history = factories.CommitteeHistoryFactory(
             committee_id=committee_id,
             committee_type='Q',
@@ -152,10 +161,11 @@ class TestTotals(ApiBaseTest):
             'net_operating_expenditures': 128,
         }
         fields = utils.extend(pac_party_fields, shared_fields)
-
         committee_total = factories.TotalsPacPartyFactory(**fields)
-        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
 
+        fields = utils.extend(fields, transaction_coverage_fields)
+
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
         self.assertEqual(results[0], fields)
 
     def test_ie_totals(self):
@@ -172,15 +182,24 @@ class TestTotals(ApiBaseTest):
             'total_independent_contributions': 1,
             'total_independent_expenditures': 2,
         }
-
         committee_total = factories.TotalsIEOnlyFactory(**ie_fields)
-        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
 
-        self.assertEqual(results[0], ie_fields)
+        fields = utils.extend(ie_fields, transaction_coverage_fields)
+
+        results = self._results(api.url_for(TotalsCommitteeView, committee_id=committee_id))
+        self.assertEqual(results[0], fields)
 
     def test_totals_house_senate(self):
         committee = factories.CommitteeFactory(committee_type='H')
         committee_id = committee.committee_id
+        [
+            factories.TransactionCoverageFactory(
+                committee_id=committee_id,
+                fec_election_year=2008),
+            factories.TransactionCoverageFactory(
+                committee_id=committee_id,
+                fec_election_year=2012),
+        ]
         factories.CommitteeHistoryFactory(committee_id=committee_id, committee_type='H')
         [
             factories.TotalsHouseSenateFactory(committee_id=committee_id, cycle=2008),
