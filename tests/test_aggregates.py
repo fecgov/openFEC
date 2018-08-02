@@ -18,7 +18,6 @@ from webservices.resources.candidate_aggregates import (
     TotalsCandidateView,
 )
 
-
 class TestCommitteeAggregates(ApiBaseTest):
     def test_stable_sort(self):
         rows = [
@@ -34,6 +33,7 @@ class TestCommitteeAggregates(ApiBaseTest):
             results = self._results(api.url_for(ScheduleAByEmployerView, sort='-total', per_page=50, page=page + 1))
             employers.extend(result['employer'] for result in results)
         assert len(set(employers)) == len(rows)
+
     def test_by_state(self):
         [
             factories.ScheduleAByStateFactory(
@@ -87,7 +87,6 @@ class TestCommitteeAggregates(ApiBaseTest):
         assert len(results) == 1
 
 class TestAggregates(ApiBaseTest):
-
     cases = [
         (
             factories.ScheduleEByCandidateFactory,
@@ -216,8 +215,8 @@ class TestAggregates(ApiBaseTest):
             )
             assert len(results) == 1
             assert results[0]['candidate_id'] == self.candidate.candidate_id
-class TestCandidateAggregates(ApiBaseTest):
 
+class TestCandidateAggregates(ApiBaseTest):
     current_cycle = get_current_cycle()
     next_cycle = current_cycle + 2
 
