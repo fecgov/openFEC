@@ -77,12 +77,21 @@ class ScheduleAByStateView(AggregateResource):
         ('state', models.ScheduleAByState.state),
     ]
 
+    @property
+    def args(self):
+        return utils.extend(
+            args.paging,
+            args.schedule_a_by_state,
+            args.make_sort_args(
+                default='-total',
+            ),
+        )
+   
     def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         if kwargs['hide_null']:
             query = query.filter(self.model.state_full != None)  # noqa
         return query
-
 
 @doc(
     tags=['receipts'],

@@ -6,10 +6,11 @@ from webservices.utils import get_current_cycle
 from webservices import schemas
 from webservices.rest import db, api
 from webservices.resources.aggregates import (
-    ScheduleAByEmployerView,
-    ScheduleEByCandidateView,
     CommunicationCostByCandidateView,
     ElectioneeringByCandidateView,
+    ScheduleAByEmployerView,
+    ScheduleAByStateView,
+    ScheduleEByCandidateView,
 )
 from webservices.resources.candidate_aggregates import (
     ScheduleABySizeCandidateView,
@@ -17,9 +18,7 @@ from webservices.resources.candidate_aggregates import (
     TotalsCandidateView,
 )
 
-
 class TestCommitteeAggregates(ApiBaseTest):
-
     def test_stable_sort(self):
         rows = [
             factories.ScheduleAByEmployerFactory(
@@ -35,9 +34,59 @@ class TestCommitteeAggregates(ApiBaseTest):
             employers.extend(result['employer'] for result in results)
         assert len(set(employers)) == len(rows)
 
+    def test_by_state(self):
+        [
+            factories.ScheduleAByStateFactory(
+                committee_id='C0001',
+                cycle=2012,
+                total=50,
+                state='NY',
+                state_full='New York',
+                count=5,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id='C0002',
+                cycle=2012,
+                total=150,
+                state='NY',
+                state_full='New York',
+                count=6,
+            ),
+            factories.ScheduleAByStateFactory(
+                committee_id='C0003',
+                cycle=2018,
+                total=100,
+                state='OT',
+                state_full='Other',
+            ),
+        ]
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateView,
+                committee_id='C0001',
+                cycle=2012
+            )
+        )
+        assert len(results) == 1
+
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateView,
+                state='NY',
+            )
+        )
+        assert len(results) == 2
+
+        results = self._results(
+            api.url_for(
+                ScheduleAByStateView,
+                cycle=2018,
+                state='OT',
+            )
+        )
+        assert len(results) == 1
 
 class TestAggregates(ApiBaseTest):
-
     cases = [
         (
             factories.ScheduleEByCandidateFactory,
@@ -167,9 +216,7 @@ class TestAggregates(ApiBaseTest):
             assert len(results) == 1
             assert results[0]['candidate_id'] == self.candidate.candidate_id
 
-
 class TestCandidateAggregates(ApiBaseTest):
-
     current_cycle = get_current_cycle()
     next_cycle = current_cycle + 2
 
@@ -454,14 +501,14 @@ class TestCandidateAggregates(ApiBaseTest):
                 cycle=2012,
             )
         )
-        self.assertEqual(len(results), 1)
+        assert len(results) == 1
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'cycle': 2012,
             'total': 200,
             'size': 200,
         }
-        self.assertEqual(results[0], expected)
+        assert results[0] == expected
 
     def test_by_state(self):
         [
@@ -487,7 +534,7 @@ class TestCandidateAggregates(ApiBaseTest):
                 cycle=2012,
             )
         )
-        self.assertEqual(len(results), 1)
+        assert len(results) == 1
         expected = {
             'candidate_id': self.candidate.candidate_id,
             'cycle': 2012,
@@ -495,7 +542,7 @@ class TestCandidateAggregates(ApiBaseTest):
             'state': 'NY',
             'state_full': 'New York',
         }
-        self.assertEqual(results[0], expected)
+        assert results[0] == expected
 
     def test_totals(self):
         results = self._results(
