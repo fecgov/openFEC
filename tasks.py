@@ -154,11 +154,12 @@ SPACE_URLS = {
 
 
 @task
-def deploy(ctx, space=None, branch=None, login=None, yes=False):
+def deploy(ctx, space=None, branch=None, login=None, yes=False, skip_migrations=False):
     """Deploy app to Cloud Foundry. Log in using credentials stored per environment
     like `FEC_CF_USERNAME_DEV` and `FEC_CF_PASSWORD_DEV`; push to either `space` or t
     he space detected from the name and tags of the current branch. Note: Must pass `space`
-    or `branch` if repo is in detached HEAD mode, e.g. when running on Travis.
+    or `branch` if repo is in detached HEAD mode, e.g. when running on Circle.
+    To skip migrations, pass the flag `--skip-migrations`.
     """
     # Detect space
     repo = git.Repo('.')
@@ -179,10 +180,13 @@ def deploy(ctx, space=None, branch=None, login=None, yes=False):
     # Target space
     ctx.run('cf target -o fec-beta-fec -s {0}'.format(space), echo=True)
 
-    print("\nMigrating database...")
-    jdbc_url = to_jdbc_url(os.getenv('FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())))
-    run_migrations(ctx, jdbc_url)
-    print("Database migrated\n")
+    if skip_migrations:
+        print("\nSkipping migrations. Database not migrated.\n")
+    else:
+        print("\nMigrating database...")
+        jdbc_url = to_jdbc_url(os.getenv('FEC_MIGRATOR_SQLA_CONN_{0}'.format(space.upper())))
+        run_migrations(ctx, jdbc_url)
+        print("Database migrated\n")
 
     # Set deploy variables
     with open('.cfmeta', 'w') as fp:
