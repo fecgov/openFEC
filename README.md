@@ -325,6 +325,13 @@ invoke deploy --space dev
 
 This command will explicitly target the `dev` space.
 
+To skip migrations with a manual deploy, run:
+
+```
+invoke deploy --space dev --skip-migrations
+```
+
+
 #### Setting up a service
 On Cloud Foundry, we use the redis32
 service. The Redis service can be created as follows:
