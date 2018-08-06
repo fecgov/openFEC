@@ -296,6 +296,7 @@ or `/totals` endpoints.
 When comparing the totals from reports to line items. the totals will not match unless you
 only look at items where `"is_individual":true` since the same transaction is in the data
 multiple ways to explain the way it may move though different committees as an earmark.
+See the `is_individual` sql function within the migrations for more details.
 
 For the Schedule A aggregates, such as by_occupation and by_state, include only unique individual
 contributions. See below for full methodology.
@@ -339,12 +340,11 @@ Line number with description
 
 Of those transactions,[under $200, and having "earmark" in the memo text OR transactions having the codes 11A, 12, 17, 17A, or 18], we then want to exclude earmarks.
 
-This is [the sql function](https://github.com/fecgov/openFEC/blob/develop/data/functions/individual.sql) that defines individual contributions:
 '''
 
 SCHEDULE_A = SCHEDULE_A_TAG + '''
-The data is divided in two-year periods, called `two_year_transaction_period`, which
-is derived from the `contribution_receipt_date`. If no value is supplied, the results
+All receipt data is divided in two-year periods, called `two_year_transaction_period`, which
+is derived from the `report_year` submitted of the corresponding form. If no value is supplied, the results
 will default to the most recent two-year period that is named after the ending,
 even-numbered year.
 
@@ -388,7 +388,7 @@ reported as part of forms F3, F3X and F3P.
 
 SCHEDULE_B = SCHEDULE_B_TAG + '''
 The data is divided in two-year periods, called `two_year_transaction_period`, which
-is derived from the `disbursement_date`. If no value is supplied, the results will
+is derived from the `report_year` submitted of the corresponding form. If no value is supplied, the results will
 default to the most recent two-year period that is named after the ending,
 even-numbered year.
 
@@ -421,8 +421,8 @@ large result sets are approximate; you will want to page through the records unt
 '''
 
 SCHEDULE_B_BY_PURPOSE = '''
-Schedule B receipts aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
-Purpose is a combination of transaction codes, category codes and disbursement description.  See [the sql function](https://github.com/fecgov/openFEC/blob/7d2c058706f1b385b2cc18d75eb3ad0a1fba9d52/data/functions/purpose.sql)
+Schedule B disbursements aggregated by disbursement purpose category. To avoid double counting, memoed items are not included.
+Purpose is a combination of transaction codes, category codes and disbursement description. See the `disbursement_purpose` sql function within the migrations for more details.
 '''
 
 SCHEDULE_C_TAG = '''
