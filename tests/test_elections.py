@@ -77,7 +77,7 @@ class TestElections(ApiBaseTest):
         super().setUp()
         self.candidate = factories.CandidateDetailFactory()
         self.candidates = [
-            factories.CandidateHistoryFactory(
+            factories.CandidateHistoryFutureFactory(
                 candidate_id=self.candidate.candidate_id,
                 state='NY',
                 two_year_period=2012,
@@ -86,7 +86,7 @@ class TestElections(ApiBaseTest):
                 office='S',
                 candidate_election_year=2012,
             ),
-            factories.CandidateHistoryFactory(
+            factories.CandidateHistoryFutureFactory(
                 candidate_id=self.candidate.candidate_id,
                 state='NY',
                 two_year_period=2010,
