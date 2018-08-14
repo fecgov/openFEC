@@ -220,7 +220,6 @@ def refresh_materialized(concurrent=True):
         'large_aggregates': ['ofec_entity_chart_mv'],
         'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
         'ofec_sched_e_mv': ['ofec_sched_e_mv'],
-        'rad_analyst': ['ofec_rad_mv'],
         'reports_house_senate': ['ofec_reports_house_senate_mv'],
         'reports_ie': ['ofec_reports_ie_only_mv'],
         'reports_pac_party': ['ofec_reports_pacs_parties_mv'],
