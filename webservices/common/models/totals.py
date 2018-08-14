@@ -1,4 +1,5 @@
 from .base import db, BaseModel
+from sqlalchemy.ext.declarative import declared_attr
 
 from webservices import docs
 
@@ -42,6 +43,19 @@ class CommitteeTotals(BaseModel):
     committee_designation_full = db.Column(db.String, doc=docs.DESIGNATION)
     party_full = db.Column(db.String, doc=docs.PARTY_FULL)
 
+    @declared_attr
+    def transaction_coverage(self):
+        return db.relationship(
+            'TransactionCoverage',
+            primaryjoin='''and_(
+                foreign({0}.committee_id) == TransactionCoverage.committee_id,
+                {0}.cycle  == TransactionCoverage.fec_election_year,
+            )'''.format(self.__name__),
+            viewonly=True,
+            lazy='joined',
+        )
+
+
 class CandidateCommitteeTotals(db.Model):
     __abstract__ = True
     #making this it's own model hieararchy until can figure out
@@ -65,8 +79,8 @@ class CandidateCommitteeTotals(db.Model):
     receipts = db.Column(db.Numeric(30, 2))
     coverage_start_date = db.Column(db.DateTime(), index=True)
     coverage_end_date = db.Column(db.DateTime(), index=True)
+    transaction_coverage_date = db.Column(db.DateTime())
     operating_expenditures = db.Column(db.Numeric(30, 2))
-
 
     last_report_year = db.Column(db.Integer)
     last_report_type_full = db.Column(db.String)
@@ -155,6 +169,7 @@ class CandidateCommitteeTotalsPresidential(CandidateCommitteeTotals):
     full_election = db.Column(db.Boolean, primary_key=True)
     net_operating_expenditures = db.Column('last_net_operating_expenditures', db.Numeric(30, 2))
     net_contributions = db.Column('last_net_contributions', db.Numeric(30, 2))
+    transaction_coverage_date = db.Column(db.DateTime())
 
 
 class CandidateCommitteeTotalsHouseSenate(CandidateCommitteeTotals):
@@ -221,6 +236,15 @@ class CommitteeTotalsIEOnly(BaseModel):
     total_independent_contributions = db.Column(db.Numeric(30, 2))
     total_independent_expenditures = db.Column(db.Numeric(30, 2))
 
+    transaction_coverage = db.relationship(
+        'TransactionCoverage',
+        primaryjoin='''and_(
+            foreign(CommitteeTotalsIEOnly.committee_id) == TransactionCoverage.committee_id,
+            CommitteeTotalsIEOnly.cycle  == TransactionCoverage.fec_election_year,
+        )''',
+        viewonly=True,
+        lazy='joined',
+    )
 
 class ScheduleAByStateRecipientTotals(BaseModel):
     __tablename__ = 'ofec_sched_a_aggregate_state_recipient_totals_mv'
@@ -232,5 +256,3 @@ class ScheduleAByStateRecipientTotals(BaseModel):
     state_full = db.Column(db.String, index=True, doc=docs.STATE_GENERIC)
     committee_type = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
     committee_type_full = db.Column(db.String, index=True, doc=docs.COMMITTEE_TYPE)
-
-

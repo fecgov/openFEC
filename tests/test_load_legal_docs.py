@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 from webservices.legal_docs import (
-    delete_murs_from_es,
+    delete_current_murs_from_es,
     delete_murs_from_s3,
     index_regulations,
     index_statutes,
@@ -271,5 +271,5 @@ class LoadArchivedMursTest(unittest.TestCase):
         delete_murs_from_s3()
 
     @patch('webservices.utils.get_elasticsearch_connection', get_es_with_doc({}))
-    def test_delete_murs_from_es(self):
-        delete_murs_from_es()
+    def test_delete_current_murs_from_es(self):
+        delete_current_murs_from_es()
