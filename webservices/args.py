@@ -737,6 +737,8 @@ rad_analyst = {
     'name': fields.List(fields.Str, description='Name of RAD analyst'),
     'email': fields.List(fields.Str, description='Email of RAD analyst'),
     'title': fields.List(fields.Str, description='Title of RAD analyst'),
+    'min_assignment_update_date': fields.Date(description='Filter results for assignment updates made after this date'),
+    'max_assignment_update_date': fields.Date(description='Filter results for assignment updates made before this date')
 }
 
 large_aggregates = {'cycle': fields.Int(required=True, description=docs.RECORD_CYCLE)}

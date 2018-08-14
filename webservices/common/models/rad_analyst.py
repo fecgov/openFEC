@@ -20,4 +20,4 @@ class RadAnalyst(db.Model):
     telephone_ext = db.Column(db.Numeric(4, 0), index=True, doc='Telephone extension of RAD analyst')
     rad_branch = db.Column(db.String(100), index=True, doc='Branch of RAD analyst')
     name_txt = db.Column(TSVECTOR)
-    assignment_update = db.Column(db.DateTime, doc="WIP")
+    assignment_update_date = db.Column(db.Date, doc="Date of most recent RAD analyst assignment change")

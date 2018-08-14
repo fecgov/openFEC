@@ -62,3 +62,32 @@ class TestFilerResources(ApiBaseTest):
             [each['last_name'] for each in results],
             ['Old', 'Someone-Else', 'Young']
         )
+
+    def test_assignment_date_filters(self):
+        [
+            factories.RadAnalystFactory(assignment_update_date='2015-01-01', committee_id='C0007'),
+            factories.RadAnalystFactory(assignment_update_date='2015-02-01', committee_id='C0008'),
+            factories.RadAnalystFactory(assignment_update_date='2015-03-01', committee_id='C0009'),
+            factories.RadAnalystFactory(assignment_update_date='2015-04-01', committee_id='C0010'),
+        ]
+        results = self._results(
+            api.url_for(RadAnalystView, min_assignment_update_date='2015-02-01'))
+        self.assertTrue(
+            all(each['assignment_update_date'] >= '2015-02-01' for each in results))
+        results = self._results(
+            api.url_for(RadAnalystView, max_assignment_update_date='2015-02-03'))
+        self.assertTrue(
+            all(each['assignment_update_date'] <= '2015-02-03' for each in results))
+        results = self._results(
+            api.url_for(
+                RadAnalystView,
+                min_assignment_update_date='2015-02-01',
+                max_assignment_update_date='2015-03-01',
+            )
+        )
+        self.assertTrue(
+            all(
+                '2015-02-01' <= each['assignment_update_date'] <= '2015-03-01'
+                for each in results
+            )
+        )
