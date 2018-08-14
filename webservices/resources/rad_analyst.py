@@ -36,9 +36,7 @@ class RadAnalystView(ApiResource):
         return utils.extend(
             args.paging,
             args.rad_analyst,
-            args.make_sort_args(
-                validator=args.IndexValidator(models.RadAnalyst),
-            ),
+            args.make_sort_args(),
         )
 
     @property

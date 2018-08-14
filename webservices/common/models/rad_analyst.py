@@ -5,7 +5,8 @@ from webservices import docs
 
 
 class RadAnalyst(db.Model):
-    __tablename__ = 'ofec_rad_mv'
+    __table_args__ = {'schema': 'public'}
+    __tablename__ = 'ofec_rad_analyst_vw'
 
     idx = db.Column(db.Integer, primary_key=True)
     committee_id = db.Column(db.String, primary_key=True, index=True, doc=docs.COMMITTEE_ID)
@@ -19,3 +20,4 @@ class RadAnalyst(db.Model):
     telephone_ext = db.Column(db.Numeric(4, 0), index=True, doc='Telephone extension of RAD analyst')
     rad_branch = db.Column(db.String(100), index=True, doc='Branch of RAD analyst')
     name_txt = db.Column(TSVECTOR)
+    assignment_update = db.Column(db.DateTime, doc="WIP")
