@@ -14,7 +14,7 @@ logger.setLevel('WARN')
 
 from .load_legal_docs import (
     delete_advisory_opinions_from_es,
-    delete_murs_from_es,
+    delete_current_murs_from_es,
     delete_murs_from_s3,
     index_regulations,
     index_statutes,

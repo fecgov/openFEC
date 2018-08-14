@@ -28,7 +28,7 @@ logger = logging.getLogger('manager')
 manager.add_command('runserver', Server(use_debugger=True, use_reloader=True))
 
 manager.command(legal_docs.delete_advisory_opinions_from_es)
-manager.command(legal_docs.delete_murs_from_es)
+manager.command(legal_docs.delete_current_murs_from_es)
 manager.command(legal_docs.delete_murs_from_s3)
 manager.command(legal_docs.index_regulations)
 manager.command(legal_docs.index_statutes)
@@ -219,7 +219,7 @@ def refresh_materialized(concurrent=True):
                     'ofec_filings_all_mv'],
         'large_aggregates': ['ofec_entity_chart_mv'],
         'ofec_agg_coverage_date': ['ofec_agg_coverage_date_mv'],
-        'ofec_sched_e_mv': ['ofec_sched_e_mv'],        
+        'ofec_sched_e_mv': ['ofec_sched_e_mv'],
         'rad_analyst': ['ofec_rad_mv'],
         'reports_house_senate': ['ofec_reports_house_senate_mv'],
         'reports_ie': ['ofec_reports_ie_only_mv'],

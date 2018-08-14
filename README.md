@@ -325,6 +325,13 @@ invoke deploy --space dev
 
 This command will explicitly target the `dev` space.
 
+To skip migrations with a manual deploy, run:
+
+```
+invoke deploy --space dev --skip-migrations
+```
+
+
 #### Setting up a service
 On Cloud Foundry, we use the redis32
 service. The Redis service can be created as follows:
@@ -437,7 +444,7 @@ When this finishes, commit the log to the release.
 
 
 ## Git-flow and continuous deployment
-We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Travis CI accordingly.
+We use git-flow for naming and versioning conventions. Both the API and web app are continuously deployed through Circle CI accordingly.
 
 ### Creating a new feature
 * Developer creates a feature branch and pushes to `origin`:
@@ -451,10 +458,20 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
 * [auto] `develop` is deployed to `dev`
 
 ### Creating a hotfix
-* Developer creates a hotfix branch:
+* Developer makes sure their local master and develop branches are up to date:
+
+   ```
+   git checkout develop
+   git pull
+   git checkout master
+   git pull
+   ```
+
+* Developer creates a hotfix branch, commits changes, and **makes a PR to the `master` branch**:
 
     ```
     git flow hotfix start my-hotfix
+    git push origin hotfix/my-hotfix
     ```
 
 * Reviewer merges hotfix branch into `develop` and `master` and pushes to `origin`:
@@ -499,13 +516,13 @@ We use git-flow for naming and versioning conventions. Both the API and web app 
     git checkout develop
     git push origin develop
     ```
-    Watch the develop build on travis and make sure it passes. Now you are ready to push to prod (:tada:).
+    Watch the develop build on Circle and make sure it passes. Now you are ready to push to prod (:tada:).
 
     ```
     git checkout master
     git push origin master --follow-tags
     ```
-   Watch travis to make sure it passes, then test the production site manually to make sure everything looks ok.
+   Watch Circle to make sure it passes, then test the production site manually to make sure everything looks ok.
 
 * `master` is deployed to `prod`
 * `develop` is deployed to `dev`
@@ -576,7 +593,7 @@ python manage.py load_current_murs [-m MUR_NO]
 
 #### Loading archived MURs (This takes a very long time)
 ```
-python manage.py load_archived_murs
+python manage.py load_archived_murs [-s MUR_NO] or [-f FROM_MUR_NO]
 ```
 
 
