@@ -4,7 +4,6 @@
 
 **Master**
 [![Test Coverage](https://img.shields.io/codecov/c/github/fecgov/openFEC/master.svg)](https://codecov.io/github/fecgov/openFEC)
-[![Code Climate](https://img.shields.io/codeclimate/github/fecgov/openFEC.svg)](https://codeclimate.com/github/fecgov/openFEC)
 
 **API**
 [![Known Vulnerabilities](https://snyk.io/test/github/fecgov/openFEC/badge.svg)](https://snyk.io/test/github/fecgov/openFEC)
