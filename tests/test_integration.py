@@ -1,33 +1,39 @@
 import datetime
+import subprocess
 
 import pytest
 
 import sqlalchemy as sa
 
+from jdbc_utils import to_jdbc_url
 import manage
 from tests import common, factories
+from webservices import rest
 from webservices.rest import db
 from webservices.common import models
 from webservices.common.models import ScheduleA
-
 
 REPORTS_MODELS = [
     models.CommitteeReportsPacParty,
     models.CommitteeReportsPresidential,
     models.CommitteeReportsHouseSenate,
 ]
+
 TOTALS_MODELS = [
     models.CommitteeTotalsPacParty,
     models.CommitteeTotalsPresidential,
     models.CommitteeTotalsHouseSenate,
 ]
 
-
-class TestViews(common.IntegrationTestCase):
+class IntegrationTestCase(common.BaseTestCase):
+    """Base test case for tests that depend on the test data subset.
+    """
 
     @classmethod
     def setUpClass(cls):
-        super(TestViews, cls).setUpClass()
+        super(IntegrationTestCase, cls).setUpClass()
+        reset_schema()
+        run_migrations()
         manage.refresh_materialized(concurrent=False)
 
     def test_committee_year_filter(self):
@@ -168,3 +174,34 @@ class TestViews(common.IntegrationTestCase):
 
         rows = ScheduleA.query.filter(is_individual).all()
         self.assertEqual(rows, individuals)
+
+def run_migrations():
+    subprocess.check_call(
+        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
+
+def reset_schema():
+    for schema in [
+        "aouser",
+        "auditsearch",
+        "disclosure",
+        "fecapp",
+        "fecmur",
+        "public",
+        "rad_pri_user",
+        "real_efile",
+        "real_pfile",
+        "rohan",
+        "staging",
+    ]:
+        rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
+    rest.db.engine.execute('create schema public;')
+
+def get_test_jdbc_url():
+    """
+    Return the JDBC URL for TEST_CONN. If TEST_CONN cannot be successfully converted,
+    it is probably the default Postgres instance with trust authentication
+    """
+    jdbc_url = to_jdbc_url(common.TEST_CONN)
+    if jdbc_url is None:
+        jdbc_url = "jdbc:" + common.TEST_CONN
+    return jdbc_url

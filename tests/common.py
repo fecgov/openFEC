@@ -1,34 +1,18 @@
 import codecs
 import json
 import os
-import re
 import subprocess
 import unittest
 
 from webtest import TestApp
 from nplusone.ext.flask_sqlalchemy import NPlusOne
 
-import manage
 from webservices import rest
 from webservices.common import models
 from webservices import __API_VERSION__
-from jdbc_utils import to_jdbc_url
 
 
 TEST_CONN = os.getenv('SQLA_TEST_CONN', 'postgresql:///cfdm_unit_test')
-SCHEMAS = [
-    "aouser",
-    "auditsearch",
-    "disclosure",
-    "fecapp",
-    "fecmur",
-    "rad_pri_user",
-    "real_efile",
-    "real_pfile",
-    "rohan",
-    "staging",
-]
-
 rest.app.config['NPLUSONE_RAISE'] = True
 NPlusOne(rest.app)
 
@@ -49,29 +33,6 @@ def _reset_schema():
     rest.db.engine.execute('create schema real_efile;')
     rest.db.engine.execute('create schema auditsearch;')
 
-
-def _reset_schema_for_integration():
-    rest.db.engine.execute('drop schema if exists public cascade;')
-    rest.db.engine.execute('drop schema if exists disclosure cascade;')
-    rest.db.engine.execute('drop schema if exists staging cascade;')
-    rest.db.engine.execute('drop schema if exists fecapp cascade;')
-    rest.db.engine.execute('drop schema if exists auditsearch cascade;')
-    _drop_schema()
-    rest.db.engine.execute('create schema public;')
-    _create_schema()
-
-def _reset_schema_for_integration():
-    _drop_schema()
-    rest.db.engine.execute('create schema public;')
-
-def _drop_schema():
-    rest.db.engine.execute('drop schema if exists public cascade;')
-    for schema in SCHEMAS:
-        rest.db.engine.execute('drop schema if exists %s cascade;' % schema)
-
-def _create_schema():
-    for schema in SCHEMAS:
-        rest.db.engine.execute('create schema %s;' % schema)
 
 class BaseTestCase(unittest.TestCase):
 
@@ -150,35 +111,3 @@ class ApiBaseTest(BaseTestCase):
 def assert_dicts_subset(first, second):
     expected = {key: first.get(key) for key in second}
     assert expected == second
-
-
-class IntegrationTestCase(BaseTestCase):
-    """Base test case for tests that depend on the test data subset.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        rest.app.config['TESTING'] = True
-        rest.app.config['SQLALCHEMY_DATABASE_URI'] = TEST_CONN
-        rest.app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = False
-        cls.app = rest.app.test_client()
-        cls.client = TestApp(rest.app)
-        cls.app_context = rest.app.app_context()
-        cls.app_context.push()
-        _reset_schema_for_integration()
-        run_migrations()
-        manage.refresh_materialized(concurrent=False)
-
-def run_migrations():
-    subprocess.check_call(
-        ['flyway', 'migrate', '-n', '-url=%s' % get_test_jdbc_url(), '-locations=filesystem:data/migrations'],)
-
-def get_test_jdbc_url():
-    """
-    Return the JDBC URL for TEST_CONN. If TEST_CONN cannot be successfully converted,
-    it is probably the default Postgres instance with trust authentication
-    """
-    jdbc_url = to_jdbc_url(TEST_CONN)
-    if jdbc_url is None:
-        jdbc_url = "jdbc:" + TEST_CONN
-    return jdbc_url
