@@ -1,22 +1,16 @@
 import datetime
-import unittest
 
 import pytest
 
 import sqlalchemy as sa
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm.session import make_transient
 
-from faker import Faker
 import factory
 from factory.alchemy import SQLAlchemyModelFactory
-
-from apispec import utils, exceptions
 
 import manage
 from tests import common, factories
 from webservices.rest import db
-from webservices.spec import spec, format_docstring
 from webservices.common import models
 from webservices.common.models import ScheduleA
 
@@ -72,32 +66,6 @@ TOTALS_MODELS = [
     models.CommitteeTotalsPresidential,
     models.CommitteeTotalsHouseSenate,
 ]
-
-
-class TestSwagger(unittest.TestCase):
-
-    def test_swagger_valid(self):
-        try:
-            utils.validate_swagger(spec)
-        except exceptions.SwaggerError as error:
-            self.fail(str(error))
-
-    def test_format_docstring(self):
-        DOCSTRING = '''
-        a
-        b
-
-        c
-        '''
-
-        after_format = format_docstring(DOCSTRING)
-        expected_format = 'a b \n\n c'
-        self.assertEqual(after_format, expected_format)
-
-    def test_format_not_docstring(self):
-        after_format = format_docstring(None)
-        expected_format = ''
-        self.assertEqual(after_format, expected_format)
 
 
 class TestViews(common.IntegrationTestCase):
@@ -411,15 +379,14 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(existing.total, total + 538)
         self.assertEqual(existing.count, count + 1)
 
-
-
         # Create a committee and committee report
         # Changed to point to sampled data, may be problematic in the future if det sum table
         # changes a lot and hence the tests need to test new behavior, believe it's fine for now though. -jcc
-        rep = sa.Table('v_sum_and_det_sum_report', db.metadata, schema='disclosure', autoload=True, autoload_with=db.engine)
+        rep = sa.Table('v_sum_and_det_sum_report', db.metadata, schema='disclosure',
+                autoload=True, autoload_with=db.engine)
         ins = rep.insert().values(
             indv_unitem_contb=20,
-            cmte_id=committee_id,
+            cmte_id=existing.committee_id,
             rpt_yr=2016,
             orig_sub_id=9,
             form_tp_cd='F3',
@@ -432,13 +399,11 @@ class TestViews(common.IntegrationTestCase):
         refreshed = models.ScheduleABySize.query.filter_by(
             size=0,
             cycle=2016,
-            committee_id=committee_id,
+            committee_id=existing.committee_id,
         ).first()
         # Updated total includes new Schedule A filing and new report
         self.assertAlmostEqual(refreshed.total, total + 75 + 20)
         self.assertEqual(refreshed.count, None)
-
-
 
     def test_unverified_filers_excluded_in_candidates(self):
         candidate_history_count = models.CandidateHistory.query.count()
@@ -480,7 +445,6 @@ class TestViews(common.IntegrationTestCase):
         self.assertEqual(committee_history_count, committee_history_verified_count)
 
     @pytest.mark.filterwarnings("ignore:Skipped unsupported reflection")
-
     def test_last_day_of_month(self):
         connection = db.engine.connect()
         fixtures = [
