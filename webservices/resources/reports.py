@@ -201,7 +201,7 @@ class CommitteeReportsView(utils.Resource):
     def _resolve_committee_type(self, committee_id=None, committee_type=None, **kwargs):
         if committee_id is not None:
             query = models.CommitteeHistory.query.filter_by(committee_id=committee_id)
-            
+
             if kwargs.get('cycle'):
                 query = query.filter(models.CommitteeHistory.cycle.in_(kwargs['cycle']))
             if kwargs.get('year'):
@@ -240,7 +240,7 @@ class EFilingHouseSenateSummaryView(views.ApiResource):
             args.efilings,
             args.make_sort_args(
                 default='-receipt_date',
-                # validator=args.IndexValidator(self.model),
+                validator=args.IndexValidator(self.model),
             ),
         )
 
@@ -274,7 +274,7 @@ class EFilingPresidentialSummaryView(views.ApiResource):
             args.efilings,
             args.make_sort_args(
                 default='-receipt_date',
-                # validator=args.IndexValidator(self.model),
+                validator=args.IndexValidator(self.model),
             ),
         )
 
@@ -308,7 +308,7 @@ class EFilingPacPartySummaryView(views.ApiResource):
             args.efilings,
             args.make_sort_args(
                 default='-receipt_date',
-                # validator=args.IndexValidator(self.model),
+                validator=args.IndexValidator(self.model),
             ),
         )
 
