@@ -55,13 +55,39 @@ class TestFilerResources(ApiBaseTest):
         [
             factories.RadAnalystFactory(last_name='Young', committee_id='C0005'),
             factories.RadAnalystFactory(last_name='Old', committee_id='C0006'),
+            factories.RadAnalystFactory(last_name='Someone-Else', committee_id='C0007'),
         ]
         results = self._results(api.url_for(RadAnalystView, sort='last_name'))
-        self.assertTrue(
+        self.assertEqual(
             [each['last_name'] for each in results],
-            ['Old', 'Young']
+            ['Old', 'Someone-Else', 'Young']
         )
 
-    def test_sort_bad_column(self):
-        response = self.app.get(api.url_for(RadAnalystView, sort='request_type'))
-        self.assertEqual(response.status_code, 422)
+    def test_assignment_date_filters(self):
+        [
+            factories.RadAnalystFactory(assignment_update_date='2015-01-01', committee_id='C0007'),
+            factories.RadAnalystFactory(assignment_update_date='2015-02-01', committee_id='C0008'),
+            factories.RadAnalystFactory(assignment_update_date='2015-03-01', committee_id='C0009'),
+            factories.RadAnalystFactory(assignment_update_date='2015-04-01', committee_id='C0010'),
+        ]
+        results = self._results(
+            api.url_for(RadAnalystView, min_assignment_update_date='2015-02-01'))
+        self.assertTrue(
+            all(each['assignment_update_date'] >= '2015-02-01' for each in results))
+        results = self._results(
+            api.url_for(RadAnalystView, max_assignment_update_date='2015-02-03'))
+        self.assertTrue(
+            all(each['assignment_update_date'] <= '2015-02-03' for each in results))
+        results = self._results(
+            api.url_for(
+                RadAnalystView,
+                min_assignment_update_date='2015-02-01',
+                max_assignment_update_date='2015-03-01',
+            )
+        )
+        self.assertTrue(
+            all(
+                '2015-02-01' <= each['assignment_update_date'] <= '2015-03-01'
+                for each in results
+            )
+        )

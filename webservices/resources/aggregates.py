@@ -28,12 +28,9 @@ class AggregateResource(ApiResource):
 
     @property
     def sort_args(self):
-        schema = None
-        if self.model and hasattr(self.model,'__table_args__') and 'schema' in self.model.__table_args__.keys():
-            schema = self.model.__table_args__.get('schema')
-        return args.make_sort_args(validator=args.IndexValidator(self.model, schema=schema))
-
-        
+        return args.make_sort_args(
+            validator=args.IndexValidator(self.model)
+        )
 
     @property
     def index_column(self):
@@ -86,7 +83,7 @@ class ScheduleAByStateView(AggregateResource):
                 default='-total',
             ),
         )
-   
+
     def build_query(self, committee_id=None, **kwargs):
         query = super().build_query(committee_id, **kwargs)
         if kwargs['hide_null']:
@@ -130,8 +127,6 @@ class ScheduleAByEmployerView(AggregateResource):
         ('employer', models.ScheduleAByEmployer.employer),
     ]
 
-    
-
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
         count = counts.count_estimate(query, models.db.session, threshold=5000)
@@ -155,8 +150,6 @@ class ScheduleAByOccupationView(AggregateResource):
         ('cycle', models.ScheduleAByOccupation.cycle),
         ('occupation', models.ScheduleAByOccupation.occupation),
     ]
-
-
 
     def get(self, committee_id=None, **kwargs):
         query = self.build_query(committee_id=committee_id, **kwargs)
