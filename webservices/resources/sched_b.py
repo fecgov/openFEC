@@ -1,6 +1,6 @@
-import sqlalchemy as sa
-from flask_apispec import doc
 
+from flask_apispec import doc
+from sqlalchemy.orm import aliased, contains_eager
 from webservices import args
 from webservices import docs
 from webservices import utils
@@ -8,7 +8,33 @@ from webservices import schemas
 from webservices.common import models
 from webservices.common import views
 from webservices.common.views import ItemizedResource
+from webservices import exceptions
 
+# maybe refractor to use database table later.
+FILER_COMMITTEE_TYPES = {
+    2018: ['D', 'E', 'H', 'I', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y'],
+    2016: ['D', 'E', 'H', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y'],
+    2014: ['D', 'E', 'H', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y'],
+    2012: ['D', 'E', 'H', 'N', 'O', 'P', 'Q', 'S', 'U', 'V', 'W', 'X', 'Y'],
+    2010: ['E', 'H', 'N', 'O', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    2008: ['D', 'E', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    2006: ['C', 'E', 'H', 'I', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    2004: ['C', 'D', 'E', 'H', 'I', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y', 'Z'],
+    2002: ['C', 'D', 'H', 'I', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y', 'Z'],
+    2000: ['D', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y', 'Z'],
+    1998: ['H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y', 'Z'],
+    1996: ['D', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y', 'Z'],
+    1994: ['H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y', 'Z'],
+    1992: ['H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y', 'Z'],
+    1990: ['H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    1988: ['D', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    1986: ['D', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    1984: ['D', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    1982: ['C', 'D', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    1980: ['C', 'D', 'H', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    1978: ['H', 'I', 'N', 'P', 'Q', 'S', 'U', 'X', 'Y'],
+    1976: ['H', 'N', 'P', 'Q', 'S', 'X', 'Y']
+}
 
 @doc(
     tags=['disbursements'],
@@ -61,17 +87,38 @@ class ScheduleBView(ItemizedResource):
         )
 
     def build_query(self, **kwargs):
-        query = super(ScheduleBView, self).build_query(**kwargs)
-        query = query.options(sa.orm.joinedload(models.ScheduleB.committee))
-        query = query.options(sa.orm.joinedload(models.ScheduleB.recipient_committee))
+        query = super().build_query(**kwargs)
+
+        filer_committee_history_alias = aliased(models.CommitteeHistory)
+        recipient_committee_history_alias = aliased(models.CommitteeHistory)
+
+        query = query.outerjoin(filer_committee_history_alias, self.model.committee)
+        query = query.options(contains_eager(self.model.committee, alias=filer_committee_history_alias))
+
+        query = query.outerjoin(recipient_committee_history_alias, self.model.recipient_committee)
+        query = query.options(contains_eager(self.model.recipient_committee, alias=recipient_committee_history_alias))
+
+        if kwargs.get('committee_type') and kwargs.get('committee_type') != 'null':
+            committee_type_list = []
+            committee_type_list = FILER_COMMITTEE_TYPES.get(kwargs.get('two_year_transaction_period'))
+            if kwargs.get('committee_type') in committee_type_list:
+                query = query.filter(filer_committee_history_alias.committee_type == kwargs.get('committee_type'))
+            else:
+                raise exceptions.ApiError(
+                    'No result for this committee type.',
+                    status_code=400,
+                )
+
         #might be worth looking to factoring these out into the filter script
         if kwargs.get('sub_id'):
-            query = query.filter_by(sub_id= int(kwargs.get('sub_id')))
+            query = query.filter(self.model.sub_id == int(kwargs.get('sub_id')))
+
         if kwargs.get('line_number'):
             if len(kwargs.get('line_number').split('-')) == 2:
                 form, line_no = kwargs.get('line_number').split('-')
-                query = query.filter_by(filing_form=form.upper())
-                query = query.filter_by(line_number=line_no)
+                query = query.filter(self.model.filing_form == form.upper())
+                query = query.filter(self.model.line_number == line_no)
+
         return query
 
 

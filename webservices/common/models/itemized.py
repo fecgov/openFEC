@@ -1,6 +1,6 @@
 import marshmallow as ma
 import sqlalchemy as sa
-
+import datetime
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.postgresql import TSVECTOR
 
@@ -68,7 +68,7 @@ class BaseRawItemized(db.Model):
 
 
 class ScheduleA(BaseItemized):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_a'
 
     committee_name = db.Column('cmte_nm', db.String, doc=docs.COMMITTEE_NAME)
@@ -85,7 +85,6 @@ class ScheduleA(BaseItemized):
             ScheduleA.report_year + ScheduleA.report_year % 2 == CommitteeHistory.cycle,
         )'''
     )
-
 
     contributor_name = db.Column('contbr_nm', db.String, doc=docs.CONTRIBUTOR_NAME)
 
@@ -145,7 +144,8 @@ class ScheduleA(BaseItemized):
     national_committee_nonfederal_account = db.Column('national_cmte_nonfed_acct', db.String)
 
     # Transaction meta info
-    election_type = db.Column('election_tp', db.String) # ? election_type looks like it's included in BaseItemized already
+    election_type = db.Column('election_tp', db.String)
+    # ? election_type looks like it's included in BaseItemized already
     election_type_full = db.Column('election_tp_desc', db.String)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_yr', db.String)
@@ -240,8 +240,16 @@ class ScheduleAEfile(BaseRawItemized):
 
 
 class ScheduleB(BaseItemized):
-    __table_args__ = {'schema' : 'disclosure'}
+    __table_args__ = {'schema': 'disclosure'}
     __tablename__ = 'fec_fitem_sched_b'
+
+    committee = db.relationship(
+        'CommitteeHistory',
+        primaryjoin='''and_(
+            foreign(ScheduleB.committee_id) == CommitteeHistory.committee_id,
+            ScheduleB.two_year_transaction_period  == CommitteeHistory.cycle,
+        )'''
+    )
 
     # Recipient info
     entity_type = db.Column('entity_tp', db.String)
@@ -252,7 +260,7 @@ class ScheduleB(BaseItemized):
         'CommitteeHistory',
         primaryjoin='''and_(
             foreign(ScheduleB.recipient_committee_id) == CommitteeHistory.committee_id,
-            ScheduleB.report_year + ScheduleB.report_year % 2 == CommitteeHistory.cycle,
+            ScheduleB.two_year_transaction_period == CommitteeHistory.cycle,
         )'''
     )
     recipient_name = db.Column('recipient_nm', db.String)
@@ -292,7 +300,8 @@ class ScheduleB(BaseItemized):
     candidate_office_state_full = db.Column('cand_office_st_desc', db.String)
 
     # Transaction meta info
-    election_type = db.Column('election_tp', db.String) # ? election_type looks like it's included in BaseItemized already
+    election_type = db.Column('election_tp', db.String)
+    # ? election_type looks like it's included in BaseItemized already
     election_type_full = db.Column('election_tp_desc', db.String)
     fec_election_type_desc = db.Column('fec_election_tp_desc', db.String)
     fec_election_year = db.Column('fec_election_tp_year', db.String)
@@ -404,8 +413,7 @@ class ScheduleBEfile(BaseRawItemized):
     )
 
 
-
-class ScheduleC(PdfMixin,BaseItemized):
+class ScheduleC(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_c_mv'
     sub_id = db.Column(db.Integer, primary_key=True)
     original_sub_id = db.Column('orig_sub_id', db.Integer)
@@ -467,7 +475,7 @@ class ScheduleC(PdfMixin,BaseItemized):
         return None
 
 
-class ScheduleD(PdfMixin,BaseItemized):
+class ScheduleD(PdfMixin, BaseItemized):
     __tablename__ = 'fec_fitem_sched_d_vw'
 
     sub_id = db.Column(db.Integer, primary_key=True)
@@ -608,7 +616,6 @@ class ScheduleE(PdfMixin, BaseItemized):
     pdf_url = db.Column(db.String)
 
 
-
 class ScheduleEEfile(BaseRawItemized):
     __tablename__ = 'real_efile_se_f57_vw'
 
@@ -669,7 +676,6 @@ class ScheduleEEfile(BaseRawItemized):
         innerjoin='True',
     )
 
-
     committee = db.relationship(
         'CommitteeHistory',
         primaryjoin='''and_(
@@ -698,7 +704,7 @@ class ScheduleEEfile(BaseRawItemized):
         return name
 
 
-class ScheduleF(PdfMixin,BaseItemized):
+class ScheduleF(PdfMixin, BaseItemized):
     __tablename__ = 'ofec_sched_f_mv'
 
     sub_id = db.Column(db.Integer, primary_key=True)
@@ -774,7 +780,6 @@ class ScheduleF(PdfMixin,BaseItemized):
     schedule_type_full = db.Column('schedule_type_desc', db.String)
     load_date = db.Column('pg_date', db.DateTime)
     election_cycle = db.Column(db.Integer)
-
 
     @property
     def pdf_url(self):
