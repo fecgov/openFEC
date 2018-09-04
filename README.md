@@ -252,7 +252,7 @@ The connection URL has to strictly adhere to the structure `postgresql://<userna
 Running the tests:
 
 ```
-py.test
+pytest
 ```
 
 #### The test data subset
